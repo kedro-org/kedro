@@ -70,6 +70,7 @@ def _convert_addon_names_to_numbers(selected_addons: str):
         "docs": "4",
         "data": "5",
         "pyspark": "6",
+        "viz": "7",
     }
 
     addons = selected_addons.split(",")
@@ -89,6 +90,7 @@ def _get_expected_files(add_ons: str):
         "4": 2,
         "5": 8,
         "6": 2,
+        "7": 2,
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
 
@@ -286,7 +288,10 @@ def test_parse_add_ons_valid(input, expected):
     assert result == expected
 
 
-@pytest.mark.parametrize("input", ["5-2", "3-1", "9"])  # Option that doesn't exist
+@pytest.mark.parametrize(
+    "input",
+    ["5-2", "3-1"],
+)
 def test_parse_add_ons_invalid_range(input, capsys):
     with pytest.raises(SystemExit):
         _parse_add_ons_input(input)
@@ -296,12 +301,12 @@ def test_parse_add_ons_invalid_range(input, capsys):
 
 @pytest.mark.parametrize(
     "input,first_invalid",
-    [("0,3,5", "0"), ("1,3,7", "7"), ("0-4", "0"), ("3-7", "7")],
+    [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-8", "8")],
 )
 def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
     with pytest.raises(SystemExit):
         _parse_add_ons_input(input)
-    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
+    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
     assert message in capsys.readouterr().err
 
 
@@ -886,7 +891,7 @@ class TestFlagsNotAllowed:
 class TestAddOnsFromUserPrompts:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all"],
+        ["1", "2", "3", "4", "5", "6", "7", "none", "2,3,4", "3-5", "all"],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
@@ -918,7 +923,7 @@ class TestAddOnsFromUserPrompts:
 class TestAddOnsFromConfigFile:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all"],
+        ["1", "2", "3", "4", "5", "6", "7", "none", "2,3,4", "3-5", "all"],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         """Test project created from config."""
@@ -969,6 +974,7 @@ class TestAddOnsFromCLI:
             "docs",
             "data",
             "pyspark",
+            "viz",
             "none",
             "test,log,docs",
             "test,data,lint",
@@ -998,7 +1004,7 @@ class TestAddOnsFromCLI:
 
         assert result.exit_code != 0
         assert (
-            "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none"
+            "Please select from the available add-ons: lint, test, log, docs, data, pyspark, viz, all, none"
             in result.output
         )
 

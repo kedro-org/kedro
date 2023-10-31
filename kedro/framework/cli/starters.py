@@ -427,7 +427,7 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
-                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark,viz, all, none",
+                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, viz, all, none",
                     fg="red",
                     err=True,
                 )

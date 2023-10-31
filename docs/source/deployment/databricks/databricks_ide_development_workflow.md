@@ -12,6 +12,10 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 If you prefer to develop a projects in notebooks rather than an in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
 
+``` {note}
+[Databricks now recommends](https://docs.databricks.com/en/archive/dev-tools/dbx/index.html) that you use now use Databricks asset bundles instead of dbx. This Kedro deployment documentation has not yet been updated but you may wish to consult [What are Databricks Asset Bundles?](https://docs.databricks.com/en/dev-tools/bundles/index.html) and [Migrate from dbx to bundles](https://docs.databricks.com/en/archive/dev-tools/dbx/dbx-migrate.html) for further information.
+```
+
 ## What this page covers
 
 The main steps in this tutorial are as follows:

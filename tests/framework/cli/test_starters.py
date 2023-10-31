@@ -63,7 +63,14 @@ def _make_cli_prompt_input_without_addons(
 
 
 def _convert_addon_names_to_numbers(selected_addons: str):
-    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5"}
+    string_to_number = {
+        "lint": "1",
+        "test": "2",
+        "log": "3",
+        "docs": "4",
+        "data": "5",
+        "pyspark": "6",
+    }
 
     addons = selected_addons.split(",")
     for i in range(len(addons)):
@@ -81,6 +88,7 @@ def _get_expected_files(add_ons: str):
         "3": 1,
         "4": 2,
         "5": 8,
+        "6": 2,
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
 
@@ -269,7 +277,7 @@ def test_starter_list_with_invalid_starter_plugin(
         ("1,2,3", ["1", "2", "3"]),
         ("2-4", ["2", "3", "4"]),
         ("3-3", ["3"]),
-        ("all", ["1", "2", "3", "4", "5"]),
+        ("all", ["1", "2", "3", "4", "5", "6"]),
         ("none", []),
     ],
 )
@@ -291,12 +299,12 @@ def test_parse_add_ons_invalid_range(input, capsys):
 
 @pytest.mark.parametrize(
     "input,first_invalid",
-    [("0,3,5", "0"), ("1,3,6", "6"), ("0-4", "0"), ("3-6", "6")],
+    [("0,3,5", "0"), ("1,3,7", "7"), ("0-4", "0"), ("3-7", "7")],
 )
 def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
     with pytest.raises(SystemExit):
         _parse_add_ons_input(input)
-    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."
+    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
     assert message in capsys.readouterr().err
 
 
@@ -881,7 +889,7 @@ class TestFlagsNotAllowed:
 class TestAddOnsFromUserPrompts:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "none", "2,3,4", "3-5", "all"],
+        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all"],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
@@ -913,7 +921,7 @@ class TestAddOnsFromUserPrompts:
 class TestAddOnsFromConfigFile:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "none", "2,3,4", "3-5", "all"],
+        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all"],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         """Test project created from config."""
@@ -963,6 +971,7 @@ class TestAddOnsFromCLI:
             "log",
             "docs",
             "data",
+            "pyspark",
             "none",
             "test,log,docs",
             "test,data,lint",
@@ -992,7 +1001,7 @@ class TestAddOnsFromCLI:
 
         assert result.exit_code != 0
         assert (
-            "Please select from the available add-ons: lint, test, log, docs, data, all, none"
+            "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none"
             in result.output
         )
 

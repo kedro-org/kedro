@@ -286,10 +286,7 @@ def test_parse_add_ons_valid(input, expected):
     assert result == expected
 
 
-@pytest.mark.parametrize(
-    "input",
-    ["5-2", "3-1"],
-)
+@pytest.mark.parametrize("input", ["5-2", "3-1"], ["9"])  # Option that doesn't exist
 def test_parse_add_ons_invalid_range(input, capsys):
     with pytest.raises(SystemExit):
         _parse_add_ons_input(input)

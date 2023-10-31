@@ -90,7 +90,7 @@ def _get_expected_files(add_ons: str):
         "4": 2,
         "5": 8,
         "6": 2,
-        "7": 2,
+        "7": 1,
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
 
@@ -132,13 +132,16 @@ def _assert_requirements_ok(
             (
                 """
 [tool.ruff]
+line-length = 88
+show-fixes = true
 select = [
-    "F",  # Pyflakes
-    "E",  # Pycodestyle
-    "W",  # Pycodestyle
+    "F",   # Pyflakes
+    "W",   # pycodestyle
+    "E",   # pycodestyle
+    "I",   # isort
     "UP",  # pyupgrade
-    "I",  # isort
-    "PL", # Pylint
+    "PL",  # Pylint
+    "T201", # Print Statement
 ]
 ignore = ["E501"]  # Black takes care of line-too-long
 """
@@ -182,6 +185,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
         assert (
             (
                 """
+[project.optional-dependencies]
 docs = [
     "docutils<0.18.0",
     "sphinx~=3.4.3",

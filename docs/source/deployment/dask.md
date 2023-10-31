@@ -51,8 +51,8 @@ from kedro.runner import AbstractRunner, run_node
 from pluggy import PluginManager
 
 
-class _DaskDataSet(AbstractDataset):
-    """``_DaskDataSet`` publishes/gets named datasets to/from the Dask
+class _DaskDataset(AbstractDataset):
+    """``_DaskDataset`` publishes/gets named datasets to/from the Dask
     scheduler."""
 
     def __init__(self, name: str):
@@ -102,17 +102,17 @@ class DaskRunner(AbstractRunner):
     def __del__(self):
         Client.current().close()
 
-    def create_default_data_set(self, ds_name: str) -> _DaskDataSet:
+    def create_default_dataset(self, ds_name: str) -> _DaskDataset:
         """Factory method for creating the default dataset for the runner.
 
         Args:
             ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of ``_DaskDataSet`` to be used for all
+            An instance of ``_DaskDataset`` to be used for all
             unregistered datasets.
         """
-        return _DaskDataSet(ds_name)
+        return _DaskDataset(ds_name)
 
     @staticmethod
     def _run_node(
@@ -184,13 +184,13 @@ class DaskRunner(AbstractRunner):
             # Decrement load counts, and release any datasets we
             # have finished with. This is particularly important
             # for the shared, default datasets we created above.
-            for data_set in node.inputs:
-                load_counts[data_set] -= 1
-                if load_counts[data_set] < 1 and data_set not in pipeline.inputs():
-                    catalog.release(data_set)
-            for data_set in node.outputs:
-                if load_counts[data_set] < 1 and data_set not in pipeline.outputs():
-                    catalog.release(data_set)
+            for dataset in node.inputs:
+                load_counts[dataset] -= 1
+                if load_counts[dataset] < 1 and dataset not in pipeline.inputs():
+                    catalog.release(dataset)
+            for dataset in node.outputs:
+                if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
+                    catalog.release(dataset)
 
     def run_only_missing(
         self, pipeline: Pipeline, catalog: DataCatalog
@@ -220,13 +220,13 @@ class DaskRunner(AbstractRunner):
 
         # We also need any missing datasets that are required to run the
         # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())
+        unregistered_ds = pipeline.datasets() - set(catalog.list())
         # Some of the unregistered datasets could have been published to
         # the scheduler in a previous run, so we need not recreate them.
         missing_unregistered_ds = {
             ds_name
             for ds_name in unregistered_ds
-            if not self.create_default_data_set(ds_name).exists()
+            if not self.create_default_dataset(ds_name).exists()
         }
         output_to_unregistered = pipeline.only_nodes_with_outputs(
             *missing_unregistered_ds
@@ -239,7 +239,7 @@ class DaskRunner(AbstractRunner):
         # think that the `to_rerun` pipeline's inputs are not satisfied.
         catalog = catalog.shallow_copy()
         for ds_name in unregistered_ds - missing_unregistered_ds:
-            catalog.add(ds_name, self.create_default_data_set(ds_name))
+            catalog.add(ds_name, self.create_default_dataset(ds_name))
 
         return self.run(to_rerun, catalog)
 ```

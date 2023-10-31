@@ -140,7 +140,7 @@ def _resolve_project_path(
     else:
         if local_namespace and "context" in local_namespace:
             # noqa: protected-access
-            project_path = local_namespace["context"]._project_path
+            project_path = local_namespace["context"].project_path
         else:
             project_path = _find_kedro_project(Path.cwd())
         if project_path:
@@ -155,7 +155,7 @@ def _resolve_project_path(
         project_path
         and local_namespace
         and "context" in local_namespace
-        and project_path != local_namespace["context"]._project_path
+        and project_path != local_namespace["context"].project_path
     ):
         logger.info("Updating path to Kedro project: %s...", project_path)
 

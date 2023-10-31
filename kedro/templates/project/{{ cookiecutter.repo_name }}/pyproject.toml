@@ -1,17 +1,27 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{ cookiecutter.python_package }}"
+readme = "README.md"
+dynamic = ["dependencies", "version"]
+
+[project.scripts]
+{{ cookiecutter.repo_name }} = "{{ cookiecutter.python_package }}.__main__:main"
+
+[project.entry-points."kedro.hooks"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = "requirements.txt"}
+version = {attr = "{{ cookiecutter.python_package }}.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
 [tool.kedro]
 package_name = "{{ cookiecutter.python_package }}"
 project_name = "{{ cookiecutter.project_name }}"
 kedro_init_version = "{{ cookiecutter.kedro_version }}"
-
-[tool.isort]
-profile = "black"
-
-[tool.pytest.ini_options]
-addopts = """
---cov-report term-missing \
---cov src/{{ cookiecutter.python_package }} -ra"""
-
-[tool.coverage.report]
-fail_under = 0
-show_missing = true
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+add_ons = {{ cookiecutter.add_ons | string | replace("\'", "\"") }}

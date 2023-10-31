@@ -13,13 +13,9 @@ from tools.cli import get_cli_structure
 REPO_NAME = "cli_tools_dummy_project"
 PACKAGE_NAME = "cli_tools_dummy_package"
 DEFAULT_KEDRO_COMMANDS = [
-    "activate-nbstripout",
-    "build-docs",
-    "build-reqs",
     "catalog",
     "ipython",
     "jupyter",
-    "lint",
     "new",
     "package",
     "pipeline",
@@ -27,7 +23,6 @@ DEFAULT_KEDRO_COMMANDS = [
     "registry",
     "run",
     "starter",
-    "test",
 ]
 
 
@@ -106,6 +101,8 @@ class TestCLITools:
                 "-v",
                 "--config",
                 "-c",
+                "--addons",
+                "-a",
                 "--starter",
                 "-s",
                 "--checkout",

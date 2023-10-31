@@ -36,7 +36,6 @@ def run(
     """
     if isinstance(cmd, str) and split:
         cmd = shlex.split(cmd)
-    # pylint: disable=subprocess-run-check
     result = subprocess.run(cmd, input="", capture_output=True, **kwargs)
     result.stdout = result.stdout.decode("utf-8")
     result.stderr = result.stderr.decode("utf-8")

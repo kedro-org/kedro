@@ -8,11 +8,11 @@
 # An example data set definition can look as follows:
 #
 #bikes:
-#  type: pandas.CSVDataSet
+#  type: pandas.CSVDataset
 #  filepath: "data/01_raw/bikes.csv"
 #
 #weather:
-#  type: spark.SparkDataSet
+#  type: spark.SparkDataset
 #  filepath: s3a://your_bucket/data/01_raw/weather*
 #  file_format: csv
 #  credentials: dev_s3
@@ -24,7 +24,7 @@
 #    header: True
 #
 #scooters:
-#  type: pandas.SQLTableDataSet
+#  type: pandas.SQLTableDataset
 #  credentials: scooters_credentials
 #  table_name: scooters
 #  load_args:
@@ -35,7 +35,7 @@
 #    # if_exists: 'fail'
 #    # if_exists: 'append'
 #
-# The Data Catalog supports being able to reference the same file using two different DataSet implementations
+# The Data Catalog supports being able to reference the same file using two different dataset implementations
 # (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
 # https://kedro.readthedocs.io/en/stable/data/data_catalog.html
 #
@@ -43,5 +43,5 @@
 # template. Please feel free to remove it once you remove the example pipeline.
 
 example_iris_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/iris.csv

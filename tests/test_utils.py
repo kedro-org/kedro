@@ -5,7 +5,6 @@ import pytest
 from kedro.utils import load_obj
 
 
-# pylint: disable=too-few-public-methods
 class DummyClass:
     pass
 

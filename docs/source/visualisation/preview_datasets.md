@@ -11,7 +11,7 @@ Then, in your terminal window, navigate to the folder you want to store the proj
 Generate a copy of the spaceflights tutorial project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas):
 
 ```bash
-kedro new --starter=spaceflights
+kedro new --starter=spaceflights-pandas
 ```
 
 When prompted for a project name, you can enter anything, but we will assume `Spaceflights` throughout.
@@ -30,7 +30,7 @@ To enable dataset preview, add the `preview_args` attribute to the kedro-viz con
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
   metadata:
     kedro-viz:
@@ -39,7 +39,7 @@ companies:
           nrows: 5
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/reviews.csv
   metadata:
     kedro-viz:
@@ -48,7 +48,7 @@ reviews:
           nrows: 10
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: data/01_raw/shuttles.xlsx
   metadata:
     kedro-viz:

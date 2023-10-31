@@ -37,8 +37,7 @@ The command opens a browser tab to serve the visualisation at `http://127.0.0.1:
 
 You should see the following:
 
-```{eval-rst}
-.. thumbnail:: ../meta/images/pipeline_visualisation.png
+```{thumbnail} ../meta/images/pipeline_visualisation.png
 ```
 
 If a visualisation panel opens up and a pipeline is not visible, refresh the view, and check that your tutorial project code is complete if you've not generated it from the starter template. If you still don't see the visualisation, the Kedro community can help:
@@ -56,14 +55,12 @@ You can use the `--autoreload` flag to autoreload Kedro-Viz when a `Python` or `
 kedro viz --autoreload
 ```
 
-```{eval-rst}
-.. thumbnail:: ../meta/images/kedro_viz_autoreload.gif
+```{thumbnail} ../meta/images/kedro_viz_autoreload.gif
 ```
 
 The `autoreload` flag reflects changes to the project as they happen. For example, commenting out `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
 
-```{eval-rst}
-.. thumbnail:: ../meta/images/autoreload.gif
+```{thumbnail} ../meta/images/autoreload.gif
 ```
 
 ## Visualise layers
@@ -153,13 +150,12 @@ regressor:
 
 The visualisation now includes the layers:
 
-```{eval-rst}
-.. thumbnail:: ../meta/images/pipeline_visualisation_with_layers.png
+```{thumbnail} ../meta/images/pipeline_visualisation_with_layers.png
 ```
 
 ## Share a pipeline visualisation
 
-You can share a the pipeline structure within a Kedro-Viz visualisation as a JSON file from the terminal:
+You can share the pipeline structure within a Kedro-Viz visualisation as a JSON file from the terminal:
 
 ```bash
 kedro viz --save-file=my_shareable_pipeline.json

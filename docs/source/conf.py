@@ -314,7 +314,6 @@ texinfo_documents = [
 
 # https://sphinxcontrib-images.readthedocs.io/en/latest/
 images_config = {
-    'override_image_directive': True,
     'default_image_width': '70%',
 }
 

@@ -15,7 +15,7 @@ This page also contains a set of guidance for advanced configuration requirement
 * [How to override configuration with runtime parameters with the `OmegaConfigLoader`](#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
 * [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 * [How to load credentials through environment variables with `OmegaConfigLoader`](#how-to-load-credentials-through-environment-variables)
-* [How to change the merging strategy used by `OmegaConfigLoader`](#how-to-change-the-merging-strategy-used-by-omegaconfigloader)
+* [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
 
 ## OmegaConfigLoader
 
@@ -416,9 +416,9 @@ dev_s3:
 Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials.
 ```
 
-### How to change the merging strategy used by `OmegaConfigLoader`
-By default, the `OmegaConfigLoader` merges configuration [in different environments](configuration_basics.md#configuration-environments) in a destructive way. This means that whatever configuration resides in your overriding environment (`local` by default) will take precedence when the same top-level key is present in the base and overriding environment.
-You can change the merging strategy for each configuration type in your project's `src/<package_name>/settings.py`. The accepted merging strategies are `soft` and `destructive`.
+### How to change the merge strategy used by `OmegaConfigLoader`
+By default, `OmegaConfigLoader` merges configuration [in different environments](configuration_basics.md#configuration-environments) in a destructive way. This means that whatever configuration resides in your overriding environment (`local` by default) takes precedence when the same top-level key is present in the base and overriding environment. Any configuration for that key **besides that given in the overriding environment** is discarded.
+You can change the merge strategy for each configuration type in your project's `src/<package_name>/settings.py`. The accepted merging strategies are `soft` and `destructive`.
 
 ```python
 from kedro.config import OmegaConfigLoader
@@ -434,5 +434,5 @@ CONFIG_LOADER_ARGS = {
 }
 ```
 
-If no merging strategy is defined, the default destructive merging strategy will be applied. Note that this merge strategy setting only applies to configuration files in different environments.
-When files are part of the same environment, they are always merged in a soft way and an error will be thrown when files in the same environment contain the same top-level keys.
+If no merge strategy is defined, the default destructive strategy will be applied. Note that this merge strategy setting only applies to configuration files in **different** environments.
+When files are part of the same environment, they are always merged in a soft way. An error is thrown when files in the same environment contain the same top-level keys.

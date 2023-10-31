@@ -125,7 +125,7 @@ ADD_ONS_DICT = {
     "6": "Pyspark",
 }
 
-NAME_ARG_HELP = "The name of the Kedro project."
+NAME_ARG_HELP = "The name of your new Kedro project."
 
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
@@ -327,10 +327,12 @@ def new(  # noqa: too-many-arguments
     else:
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
-    config = _get_addons_from_cli_input(selected_addons, config)
-    config = _get_name_from_cli_input(name, config)
+    config_with_add_ons = _get_addons_from_cli_input(selected_addons, config)
+    config_with_add_ons_and_name = _get_name_from_cli_input(name, config_with_add_ons)
 
-    cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
+    cookiecutter_args = _make_cookiecutter_args(
+        config_with_add_ons_and_name, checkout, directory
+    )
 
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
 

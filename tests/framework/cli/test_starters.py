@@ -234,8 +234,6 @@ def _assert_template_ok(
 def _assert_name_ok(
     result,
     project_name="New Kedro Project",
-    repo_name="new-kedro-project",
-    output_dir=".",
 ):
     assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
@@ -1063,7 +1061,7 @@ class TestNameFromCLI:
 
         repo_name = name.lower().replace(" ", "_").replace("-", "_")
         assert result.exit_code == 0
-        _assert_name_ok(result, project_name=name, repo_name=repo_name)
+        _assert_name_ok(result, project_name=name)
         _clean_up_project(Path("./" + repo_name))
 
     @pytest.mark.parametrize(

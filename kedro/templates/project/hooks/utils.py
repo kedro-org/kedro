@@ -73,7 +73,7 @@ def remove_file(path):
         path.unlink()
 
 
-def handle_starter_setup(python_package_name):
+def handle_starter_setup(selected_add_ons_list, python_package_name):
     # Remove all .csv and .xlsx files from data/01_raw/
     raw_data_path = current_dir / "data/01_raw/"
     for file_path in raw_data_path.glob("*.*"):
@@ -90,8 +90,13 @@ def handle_starter_setup(python_package_name):
         remove_file(conf_base_path / param_file)
 
     # Remove the pipelines subdirectories
+    if "Kedro Viz" in selected_add_ons_list:
+        pipelines_to_remove = ["data_science", "data_processing", "reporting"]
+    else:
+        pipelines_to_remove = ["data_science", "data_processing"]
+
     pipelines_path = current_dir / f"src/{python_package_name}/pipelines/"
-    for pipeline_subdir in ["data_science", "data_processing"]:
+    for pipeline_subdir in pipelines_to_remove:
         remove_dir(pipelines_path / pipeline_subdir)
 
     # Remove all test files from tests/pipelines/
@@ -120,10 +125,10 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         remove_dir(current_dir / "data")
 
     if "Pyspark" in selected_add_ons_list:
-        handle_starter_setup(python_package_name)
+        handle_starter_setup(selected_add_ons_list, python_package_name)
 
     if "Kedro Viz" in selected_add_ons_list:
-        handle_starter_setup(python_package_name)
+        handle_starter_setup(selected_add_ons_list, python_package_name)
 
 
 def sort_requirements(requirements_file_path):

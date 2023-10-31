@@ -3,7 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-
+* Reduced `spaceflights` data to minimize waiting times during tutorial execution.
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*

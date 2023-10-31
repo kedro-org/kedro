@@ -1,56 +1,66 @@
 from pathlib import Path
 import shutil
+import toml
 
 current_dir = Path.cwd()
 
-lint_requirements = "black~=22.12.0\nruff~=0.0.290\n"
-lint_pyproject_requirements = """
-[tool.ruff]
-select = [
-    "F",  # Pyflakes
-    "E",  # Pycodestyle
-    "W",  # Pycodestyle
-    "UP",  # pyupgrade
-    "I",  # isort
-    "PL", # Pylint
-]
-ignore = ["E501"]  # Black takes care of line-too-long
-"""
+lint_requirements = "black~=22.0\nruff~=0.0.290\n"
+lint_pyproject_requirements = ["tool.ruff"]
 
 test_requirements = "pytest-cov~=3.0\npytest-mock>=1.7.1, <2.0\npytest~=7.2"
-test_pyproject_requirements = """
-[tool.pytest.ini_options]
-addopts = \"\"\"
---cov-report term-missing \\
---cov src/{{ cookiecutter.python_package }} -ra
-\"\"\"
+test_pyproject_requirements = ["tool.pytest.ini_options", "tool.coverage.report"]
 
-[tool.coverage.report]
-fail_under = 0
-show_missing = true
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
-"""
-
-docs_pyproject_requirements = """
-[project.optional-dependencies]
-docs = [
-    "docutils<0.18.0",
-    "sphinx~=3.4.3",
-    "sphinx_rtd_theme==0.5.1",
-    "nbsphinx==0.8.1",
-    "sphinx-autodoc-typehints==1.11.1",
-    "sphinx_copybutton==0.3.1",
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.1.0",
-    "myst-parser~=0.17.2",
-]
-"""
+docs_pyproject_requirements = ["project.optional-dependencies"]
 
 
 # Helper Functions
-def append_to_file(file_path, content):
-    with open(file_path, 'a') as file:
-        file.write(content)
+def remove_from_file(file_path, content_to_remove):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    # Split the content to remove into lines and remove trailing whitespaces/newlines
+    content_to_remove_lines = [line.strip() for line in content_to_remove.split('\n')]
+
+    # Keep lines that are not in content_to_remove
+    lines = [line for line in lines if line.strip() not in content_to_remove_lines]
+
+    with open(file_path, 'w') as file:
+        file.writelines(lines)
+
+
+def remove_nested_section(data, nested_key):
+    keys = nested_key.split('.')
+    d = data
+    for key in keys[:-1]:
+        if key in d:
+            d = d[key]
+        else:
+            return  # Parent section not found, nothing to remove
+
+    # Remove the nested section and any empty parent sections
+    d.pop(keys[-1], None)
+    for key in reversed(keys[:-1]):
+        parent = data
+        for k in keys[:keys.index(key)]:
+            parent = parent[k]
+        if not d:  # If the section is empty, remove it
+            parent.pop(key, None)
+            d = parent
+        else:
+            break  # If the section is not empty, stop removing
+
+
+def remove_from_toml(file_path, sections_to_remove):
+    # Load the TOML file
+    with open(file_path, 'r') as file:
+        data = toml.load(file)
+
+    # Remove the specified sections
+    for section in sections_to_remove:
+        remove_nested_section(data, section)
+
+    with open(file_path, 'w') as file:
+        toml.dump(data, file)
 
 
 def remove_dir(path):
@@ -90,22 +100,20 @@ def handle_starter_setup(python_package_name):
 
 
 def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path, python_package_name):
-    if "Linting" in selected_add_ons_list:
-        append_to_file(requirements_file_path, lint_requirements)
-        append_to_file(pyproject_file_path, lint_pyproject_requirements)
+    if "Linting" not in selected_add_ons_list:
+        remove_from_file(requirements_file_path, lint_requirements)
+        remove_from_toml(pyproject_file_path, lint_pyproject_requirements)
 
-    if "Testing" in selected_add_ons_list:
-        append_to_file(requirements_file_path, test_requirements)
-        append_to_file(pyproject_file_path, test_pyproject_requirements)
-    else:
+    if "Testing" not in selected_add_ons_list:
+        remove_from_file(requirements_file_path, test_requirements)
+        remove_from_toml(pyproject_file_path, test_pyproject_requirements)
         remove_dir(current_dir / "tests")
 
     if "Logging" not in selected_add_ons_list:
         remove_file(current_dir / "conf/logging.yml")
 
-    if "Documentation" in selected_add_ons_list:
-        append_to_file(pyproject_file_path, docs_pyproject_requirements)
-    else:
+    if "Documentation" not in selected_add_ons_list:
+        remove_from_toml(pyproject_file_path, docs_pyproject_requirements)
         remove_dir(current_dir / "docs")
 
     if "Data Structure" not in selected_add_ons_list:

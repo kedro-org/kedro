@@ -215,7 +215,7 @@ class TestKedroContext:
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader
-        conf_catalog = config_loader.get("catalog*")
+        conf_catalog = config_loader["catalog"]
 
         # even though the raw configuration uses relative path
         assert conf_catalog["horses"]["filepath"] == "horses.csv"
@@ -287,7 +287,7 @@ class TestKedroContext:
         indirect=True,
     )
     def test_params_missing(self, mocker, extra_params, dummy_context):
-        mock_config_loader = mocker.patch("kedro.config.ConfigLoader.get")
+        mock_config_loader = mocker.patch("kedro.config.OmegaConfigLoader.__getitem__")
         mock_config_loader.side_effect = MissingConfigException("nope")
         extra_params = extra_params or {}
 

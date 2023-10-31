@@ -44,7 +44,7 @@
 
 
 ## Community contributors
-We are grateful to every community member who made a PR to Kedro that's found its way into 0.19.0, and give particular thanks to those who contributed between 0.18.4 and this release, either as part of their ongoing Kedro community involvement or as part of Hacktoberfest 2023 🎃
+We are grateful to every community member who made a PR to Kedro that's found its way into 0.19.0, and give particular thanks to those who contributed between 0.18.14 and this release, either as part of their ongoing Kedro community involvement or as part of Hacktoberfest 2023 🎃
 
 * [Jeroldine Akuye Oakley](https://github.com/JayOaks) 🎃
 * [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) 🎃

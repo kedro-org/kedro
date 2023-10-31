@@ -14,7 +14,7 @@ Data science extracts insights from data by using a combination of domain expert
 ## Kedro
 Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It applies software engineering best-practices to machine learning code, including modularity, separation of concerns and versioning.
 
-[Introduction to Kedro](../introduction/introduction.md)
+[Introduction to Kedro](../introduction/index.md)
 
 ## `KedroContext`
 A Python class that holds the configuration and Kedro’s main functionality.

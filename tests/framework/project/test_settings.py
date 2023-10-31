@@ -4,7 +4,7 @@ import textwrap
 
 import pytest
 
-from kedro.config import ConfigLoader, TemplatedConfigLoader
+from kedro.config import OmegaConfigLoader, TemplatedConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings, validate_settings
 from kedro.framework.session.shelvestore import ShelveStore
@@ -89,7 +89,7 @@ def test_settings_without_configure_project_shows_default_values():
     assert settings.SESSION_STORE_ARGS == {}
     assert settings.CONTEXT_CLASS is KedroContext
     assert settings.CONF_SOURCE == "conf"
-    assert settings.CONFIG_LOADER_CLASS == ConfigLoader
+    assert settings.CONFIG_LOADER_CLASS == OmegaConfigLoader
     assert settings.CONFIG_LOADER_ARGS == {}
     assert settings.DATA_CATALOG_CLASS == DataCatalog
 

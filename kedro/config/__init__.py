@@ -7,15 +7,15 @@ from .abstract_config import (
     BadConfigException,
     MissingConfigException,
 )
-from .config import ConfigLoader
+
+# from .config import ConfigLoader
 from .omegaconf_config import OmegaConfigLoader
-from .templated_config import TemplatedConfigLoader
+
+# from .templated_config import TemplatedConfigLoader
 
 __all__ = [
     "AbstractConfigLoader",
     "BadConfigException",
-    "ConfigLoader",
     "MissingConfigException",
-    "TemplatedConfigLoader",
     "OmegaConfigLoader",
 ]

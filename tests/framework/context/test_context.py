@@ -16,7 +16,7 @@ from attrs.exceptions import FrozenInstanceError
 from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import MissingConfigException, OmegaConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
@@ -190,7 +190,7 @@ def extra_params(request):
 @pytest.fixture
 def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
     configure_project(MOCK_PACKAGE_NAME)
-    config_loader = ConfigLoader(str(tmp_path / "conf"), env=env)
+    config_loader = OmegaConfigLoader(str(tmp_path / "conf"), env=env)
     context = KedroContext(
         MOCK_PACKAGE_NAME,
         str(tmp_path),

@@ -40,9 +40,9 @@ def _write_dummy_ini(filepath: Path):
 def base_config(tmp_path):
     filepath = str(tmp_path / "cars.csv")
     return {
-        "trains": {"type": "MemoryDataSet"},
+        "trains": {"type": "MemoryDataset"},
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": filepath,
             "save_args": {"index": True},
         },
@@ -54,11 +54,11 @@ def local_config(tmp_path):
     filepath = str(tmp_path / "cars.csv")
     return {
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": filepath,
             "save_args": {"index": False},
         },
-        "boats": {"type": "MemoryDataSet"},
+        "boats": {"type": "MemoryDataset"},
     }
 
 
@@ -85,7 +85,7 @@ def proj_catalog(tmp_path, base_config):
 @pytest.fixture
 def proj_catalog_nested(tmp_path):
     path = tmp_path / _BASE_ENV / "catalog" / "dir" / "nested.yml"
-    _write_yaml(path, {"nested": {"type": "MemoryDataSet"}})
+    _write_yaml(path, {"nested": {"type": "MemoryDataset"}})
 
 
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
@@ -101,9 +101,9 @@ class TestConfigLoader:
         catalog = conf["catalog"]
 
         assert params["param1"] == 1
-        assert catalog["trains"]["type"] == "MemoryDataSet"
-        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
-        assert catalog["boats"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
+        assert catalog["cars"]["type"] == "pandas.CSVDataset"
+        assert catalog["boats"]["type"] == "MemoryDataset"
         assert not catalog["cars"]["save_args"]["index"]
 
     @use_config_dir
@@ -118,9 +118,9 @@ class TestConfigLoader:
         assert params["param1"] == 1
         assert db_conf["prod"]["url"] == "postgresql://user:pass@url_prod/db"
 
-        assert catalog["trains"]["type"] == "MemoryDataSet"
-        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
-        assert catalog["boats"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
+        assert catalog["cars"]["type"] == "pandas.CSVDataset"
+        assert catalog["boats"]["type"] == "MemoryDataset"
         assert not catalog["cars"]["save_args"]["index"]
 
     @use_proj_catalog
@@ -159,9 +159,9 @@ class TestConfigLoader:
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*", "catalog*/**")
         assert catalog.keys() == {"cars", "trains", "nested"}
-        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
+        assert catalog["cars"]["type"] == "pandas.CSVDataset"
         assert catalog["cars"]["save_args"]["index"] is True
-        assert catalog["nested"]["type"] == "MemoryDataSet"
+        assert catalog["nested"]["type"] == "MemoryDataset"
 
     @use_config_dir
     def test_nested_subdirs_duplicate(self, tmp_path, base_config):
@@ -257,7 +257,6 @@ class TestConfigLoader:
     def test_key_not_found_dict_get(self, tmp_path):
         """Check the error if no config files satisfy a given pattern"""
         with pytest.raises(KeyError):
-            # pylint: disable=expression-not-assigned
             ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)["non-existent-pattern"]
 
     @use_config_dir
@@ -271,7 +270,6 @@ class TestConfigLoader:
             r"\[\'credentials\*\', \'credentials\*/\**\', \'\**/credentials\*\'\]"
         )
         with pytest.raises(MissingConfigException, match=pattern):
-            # pylint: disable=expression-not-assigned
             ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)["credentials"]
 
     def test_duplicate_paths(self, tmp_path, caplog):
@@ -324,7 +322,7 @@ class TestConfigLoader:
 
         example_catalog = """
         example_iris_data:
-              type: pandas.CSVDataSet
+              type: pandas.CSVDataset
           filepath: data/01_raw/iris.csv
         """
 
@@ -361,7 +359,7 @@ class TestConfigLoader:
         catalog = conf["catalog"]
         conf["spark"] = {"spark_config": "emr.blabla"}
 
-        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
         assert conf["spark"] == {"spark_config": "emr.blabla"}
 
     @use_config_dir

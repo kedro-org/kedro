@@ -12,7 +12,8 @@ import pandas as pd
 import pytest
 import toml
 import yaml
-from pandas.util.testing import assert_frame_equal
+from attrs.exceptions import FrozenInstanceError
+from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException
@@ -33,7 +34,7 @@ from kedro.framework.project import (
 MOCK_PACKAGE_NAME = "mock_package_name"
 
 
-class BadCatalog:  # pylint: disable=too-few-public-methods
+class BadCatalog:
     """
     Catalog class that doesn't subclass `DataCatalog`, for testing only.
     """
@@ -72,9 +73,9 @@ def base_config(tmp_path):
     trains_filepath = (tmp_path / "trains.csv").as_posix()
 
     return {
-        "trains": {"type": "pandas.CSVDataSet", "filepath": trains_filepath},
+        "trains": {"type": "pandas.CSVDataset", "filepath": trains_filepath},
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": cars_filepath,
             "save_args": {"index": True},
         },
@@ -89,19 +90,19 @@ def local_config(tmp_path):
     horses_filepath = "horses.csv"
     return {
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": cars_filepath,
             "save_args": {"index": False},
             "versioned": True,
         },
         "boats": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": boats_filepath,
             "versioned": True,
             "layer": "raw",
         },
         "horses": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": horses_filepath,
             "versioned": True,
         },
@@ -187,9 +188,7 @@ def extra_params(request):
 
 
 @pytest.fixture
-def dummy_context(
-    tmp_path, prepare_project_dir, env, extra_params
-):  # pylint: disable=unused-argument
+def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
     configure_project(MOCK_PACKAGE_NAME)
     config_loader = ConfigLoader(str(tmp_path / "conf"), env=env)
     context = KedroContext(
@@ -210,6 +209,10 @@ class TestKedroContext:
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
+    def test_immutable_instance(self, dummy_context):
+        with pytest.raises(FrozenInstanceError):
+            dummy_context.catalog = 1
+
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader
         conf_catalog = config_loader.get("catalog*")
@@ -220,11 +223,10 @@ class TestKedroContext:
         # the catalog and its dataset should be loaded using absolute path
         # based on the project path
         catalog = dummy_context._get_catalog()
-        ds_path = catalog._data_sets["horses"]._filepath
+        ds_path = catalog._datasets["horses"]._filepath
         assert PurePath(ds_path.as_posix()).is_absolute()
         assert (
-            ds_path.as_posix()
-            == (dummy_context._project_path / "horses.csv").as_posix()
+            ds_path.as_posix() == (dummy_context.project_path / "horses.csv").as_posix()
         )
 
     def test_get_catalog_validates_transcoded_datasets(self, dummy_context, mocker):
@@ -232,7 +234,7 @@ class TestKedroContext:
             "kedro.framework.context.context._transcode_split"
         )
         catalog = dummy_context.catalog
-        for dataset_name in catalog._data_sets.keys():
+        for dataset_name in catalog._datasets.keys():
             mock_transcode_split.assert_any_call(dataset_name)
 
         mock_validate = mocker.patch(

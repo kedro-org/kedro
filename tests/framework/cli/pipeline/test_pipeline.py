@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 import yaml
 from click.testing import CliRunner
+from kedro_datasets.pandas import CSVDataset
 from pandas import DataFrame
 
-from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.cli.pipeline import _sync_dirs
 from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
@@ -46,7 +46,7 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
-    def test_create_pipeline(  # pylint: disable=too-many-locals
+    def test_create_pipeline(
         self, fake_repo_path, fake_project_cli, fake_metadata, env, fake_package_path
     ):
         """Test creation of a pipeline"""
@@ -80,7 +80,7 @@ class TestPipelineCreateCommand:
         assert actual_files == expected_files
 
     @pytest.mark.parametrize("env", [None, "local"])
-    def test_create_pipeline_template(  # pylint: disable=too-many-locals
+    def test_create_pipeline_template(
         self,
         fake_repo_path,
         fake_project_cli,
@@ -112,7 +112,7 @@ class TestPipelineCreateCommand:
         assert result.exit_code == 0
 
     @pytest.mark.parametrize("env", [None, "local"])
-    def test_create_pipeline_template_command_line_override(  # pylint: disable=too-many-locals
+    def test_create_pipeline_template_command_line_override(
         self,
         fake_repo_path,
         fake_project_cli,
@@ -171,7 +171,7 @@ class TestPipelineCreateCommand:
         test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         assert test_dir.is_dir()
 
-    def test_catalog_and_params(  # pylint: disable=too-many-locals
+    def test_catalog_and_params(
         self, fake_repo_path, fake_project_cli, fake_metadata, fake_package_path
     ):
         """Test that catalog and parameter configs generated in pipeline
@@ -187,7 +187,7 @@ class TestPipelineCreateCommand:
         conf_dir = fake_repo_path / settings.CONF_SOURCE / "base"
         catalog_dict = {
             "ds_from_pipeline": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/iris.csv",
             }
         }
@@ -204,7 +204,7 @@ class TestPipelineCreateCommand:
 
         with KedroSession.create(PACKAGE_NAME) as session:
             ctx = session.load_context()
-        assert isinstance(ctx.catalog._data_sets["ds_from_pipeline"], CSVDataSet)
+        assert isinstance(ctx.catalog._datasets["ds_from_pipeline"], CSVDataset)
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)
         assert ctx.params["params_from_pipeline"] == params_dict["params_from_pipeline"]
 

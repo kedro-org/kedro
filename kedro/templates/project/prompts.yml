@@ -1,3 +1,22 @@
+add_ons:
+  title: "Project Add-Ons"
+  text: |
+    Here you can select which add-ons you'd like to include. By default, none are included.
+    To read more about these add-ons and what they do visit: kedro.org/{insert-documentation}
+
+    Add-Ons
+    1) Linting : Provides a basic linting set up with Black and ruff
+    2) Testing : Provides basic testing set up with pytest
+    3) Custom Logging : Provides more logging options
+    4) Documentation: Provides basic documentations setup with Sphinx
+    5) Data Structure: Provides a directory structure for storing data
+    6) PySpark : Provides a basic PySpark set up
+
+    Which add-ons would you like to include in your project? [1-6/1,3/all/none]:
+  regex_validator: "^(all|none|(\\d(,\\d)*|(\\d-\\d)))$"
+  error_message: |
+    Invalid input. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.
+
 project_name:
   title: "Project Name"
   text: |

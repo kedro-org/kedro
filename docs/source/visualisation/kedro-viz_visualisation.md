@@ -10,7 +10,7 @@ Then, in your terminal window, navigate to the folder you want to store the proj
 Generate a copy of the spaceflights tutorial project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas):
 
 ```bash
-kedro new --starter=spaceflights
+kedro new --starter=spaceflights-pandas
 ```
 
 When prompted for a project name, you can enter anything, but we will assume `Spaceflights` throughout.
@@ -18,7 +18,7 @@ When prompted for a project name, you can enter anything, but we will assume `Sp
 When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro-Viz:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 The next step is optional, but useful to check that all is working. Run the full set of pipelines for the tutorial project:
@@ -72,7 +72,7 @@ Here's an example of how to use the Kedro-Viz metadata to define layers:
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
   metadata:
     kedro-viz:
@@ -83,7 +83,7 @@ In earlier versions of Kedro, layers were specified within a dataset's definitio
 
 ```diff
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
 -  layer: raw
 +   metadata:
@@ -95,49 +95,49 @@ Open `catalog.yml` for the completed spaceflights tutorial and define layers in 
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
   metadata:
     kedro-viz:
       layer: raw
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/reviews.csv
   metadata:
     kedro-viz:
       layer: raw
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: data/01_raw/shuttles.xlsx
   metadata:
     kedro-viz:
       layer: raw
 
 preprocessed_companies:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_companies.pq
   metadata:
     kedro-viz:
       layer: intermediate
 
 preprocessed_shuttles:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_shuttles.pq
   metadata:
     kedro-viz:
       layer: intermediate
 
 model_input_table:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/03_primary/model_input_table.pq
   metadata:
     kedro-viz:
       layer: primary
 
 regressor:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/06_models/regressor.pickle
   versioned: true
   metadata:

@@ -63,8 +63,8 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         environment: "dev"
 
         datasets:
-            csv: "pandas.CSVDataSet"
-            spark: "spark.SparkDataSet"
+            csv: "pandas.CSVDataset"
+            spark: "spark.SparkDataset"
 
         folders:
             raw: "01_raw"
@@ -124,7 +124,6 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
-            "logging": ["logging*", "logging*/**", "**/logging*"],
         }
         self.config_patterns.update(config_patterns or {})
 

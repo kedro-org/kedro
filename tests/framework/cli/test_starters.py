@@ -286,7 +286,7 @@ def test_parse_add_ons_valid(input, expected):
     assert result == expected
 
 
-@pytest.mark.parametrize("input", ["5-2", "3-1", "9"])  # Option that doesn't exist
+@pytest.mark.parametrize("input", ["5-2", "3-1"])  # Option that doesn't exist
 def test_parse_add_ons_invalid_range(input, capsys):
     with pytest.raises(SystemExit):
         _parse_add_ons_input(input)
@@ -301,7 +301,7 @@ def test_parse_add_ons_invalid_range(input, capsys):
 def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
     with pytest.raises(SystemExit):
         _parse_add_ons_input(input)
-    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
+    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
     assert message in capsys.readouterr().err
 
 

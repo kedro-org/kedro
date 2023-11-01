@@ -84,13 +84,13 @@ def _convert_addon_names_to_numbers(selected_addons: str):
 
 def _get_expected_files(add_ons: str):
     add_ons_template_files = {
-        "1": 0,
-        "2": 3,
-        "3": 1,
-        "4": 2,
-        "5": 8,
-        "6": 2,
-        "7": 0,
+        "1": 0,  # Linting does not add any files
+        "2": 3,  # If Testing is selected, we add 2 init.py files and 1 test_run.py
+        "3": 1,  # If Logging is selected, we add logging.py
+        "4": 2,  # If Documentation is selected, we add conf.py and index.rst
+        "5": 8,  # If Data Structure is selected, we add 8 .gitkeep files
+        "6": 2,  # If Pyspark is selected, we add spark.yml and hooks.py
+        "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
 

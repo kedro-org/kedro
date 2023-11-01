@@ -88,7 +88,7 @@ def _get_expected_files(add_ons: str):
         "3": 1,
         "4": 2,
         "5": 8,
-        "6": 2,
+        "6": 3,
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
 

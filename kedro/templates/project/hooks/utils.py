@@ -31,14 +31,15 @@ def remove_from_file(file_path, content_to_remove):
 def remove_nested_section(data, nested_key):
     keys = nested_key.split('.')
     d = data
-    for key in keys[:-1]:
+    # Look for Parent section
+    for key in keys[:-1]:  # Iterate over all but last element
         if key in d:
             d = d[key]
         else:
             return  # Parent section not found, nothing to remove
 
     # Remove the nested section and any empty parent sections
-    d.pop(keys[-1], None)
+    d.pop(keys[-1], None)  # Remove last element otherwise return None
     for key in reversed(keys[:-1]):
         parent = data
         for k in keys[:keys.index(key)]:
@@ -86,7 +87,7 @@ def handle_starter_setup(selected_add_ons_list, python_package_name):
         catalog_yml_path.write_text('')
     # Remove parameter/reporting files from conf/base
     conf_base_path = current_dir / "conf/base/"
-    if "Kedro Viz" in selected_add_ons_list:
+    if "Kedro Viz" in selected_add_ons_list:  # Remove reporting.yml if Kedro Viz is selected
         param_to_remove = ["parameters_data_processing.yml", "parameters_data_science.yml", "parameters_reporting.yml", "reporting.yml"]
     else:
         param_to_remove = ["parameters_data_processing.yml", "parameters_data_science.yml"]
@@ -94,7 +95,7 @@ def handle_starter_setup(selected_add_ons_list, python_package_name):
         remove_file(conf_base_path / param_file)
 
     # Remove the pipelines subdirectories
-    if "Kedro Viz" in selected_add_ons_list:
+    if "Kedro Viz" in selected_add_ons_list: # Remove reporting if Kedro Viz is selected
         pipelines_to_remove = ["data_science", "data_processing", "reporting"]
     else:
         pipelines_to_remove = ["data_science", "data_processing"]

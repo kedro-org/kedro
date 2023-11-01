@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+import anyconfig
 import pytest
 import yaml
 from click.testing import CliRunner
@@ -108,7 +109,6 @@ def _assert_requirements_ok(
     repo_name="new-kedro-project",
     output_dir=".",
 ):
-
     assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
 
@@ -125,29 +125,13 @@ def _assert_requirements_ok(
         assert "black" in requirements
         assert "ruff" in requirements
 
-        with open(pyproject_file_path) as pyproject_file:
-            requirements = pyproject_file.read()
-
-        assert (
-            (
-                """
-[tool.ruff]
-line-length = 88
-show-fixes = true
-select = [
-    "F",   # Pyflakes
-    "W",   # pycodestyle
-    "E",   # pycodestyle
-    "I",   # isort
-    "UP",  # pyupgrade
-    "PL",  # Pylint
-    "T201", # Print Statement
-]
-ignore = ["E501"]  # Black takes care of line-too-long
-"""
-            )
-            in requirements
-        )
+        pyproject_config = anyconfig.load(pyproject_file_path)
+        expected = {
+            "tool": {
+                "ruff": {"select": ["F", "E", "W", "UP", "I", "PL"], "ignore": ["E501"]}
+            }
+        }
+        assert expected["tool"]["ruff"] == pyproject_config["tool"]["ruff"]
 
     if "2" in add_ons_list:
         with open(requirements_file_path) as requirements_file:
@@ -157,51 +141,45 @@ ignore = ["E501"]  # Black takes care of line-too-long
         assert "pytest-mock>=1.7.1, <2.0" in requirements
         assert "pytest~=7.2" in requirements
 
-        with open(pyproject_file_path) as pyproject_file:
-            requirements = pyproject_file.read()
-
-        assert (
-            (
-                """
-[tool.pytest.ini_options]
-addopts = \"\"\"
---cov-report term-missing \\
---cov src/{{ cookiecutter.python_package }} -ra
-\"\"\"
-
-[tool.coverage.report]
-fail_under = 0
-show_missing = true
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
-"""
-            )
-            in requirements
-        )
+        pyproject_config = anyconfig.load(pyproject_file_path)
+        expected = {
+            "pytest": {
+                "ini_options": {
+                    "addopts": "--cov-report term-missing --cov src/{{ cookiecutter.python_package }} -ra\n"
+                }
+            },
+            "coverage": {
+                "report": {
+                    "fail_under": 0,
+                    "show_missing": True,
+                    "exclude_lines": ["pragma: no cover", "raise NotImplementedError"],
+                }
+            },
+        }
+        assert expected["pytest"] == pyproject_config["tool"]["pytest"]
+        assert expected["coverage"] == pyproject_config["tool"]["coverage"]
 
     if "4" in add_ons_list:
-        with open(pyproject_file_path) as pyproject_file:
-            requirements = pyproject_file.read()
-
+        pyproject_config = anyconfig.load(pyproject_file_path)
+        expected = {
+            "optional-dependencies": {
+                "docs": [
+                    "docutils<0.18.0",
+                    "sphinx~=3.4.3",
+                    "sphinx_rtd_theme==0.5.1",
+                    "nbsphinx==0.8.1",
+                    "sphinx-autodoc-typehints==1.11.1",
+                    "sphinx_copybutton==0.3.1",
+                    "ipykernel>=5.3, <7.0",
+                    "Jinja2<3.1.0",
+                    "myst-parser~=0.17.2",
+                ]
+            }
+        }
         assert (
-            (
-                """
-[project.optional-dependencies]
-docs = [
-    "docutils<0.18.0",
-    "sphinx~=3.4.3",
-    "sphinx_rtd_theme==0.5.1",
-    "nbsphinx==0.8.1",
-    "sphinx-autodoc-typehints==1.11.1",
-    "sphinx_copybutton==0.3.1",
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.1.0",
-    "myst-parser~=0.17.2",
-]
-"""
-            )
-            in requirements
+            expected["optional-dependencies"]["docs"]
+            == pyproject_config["project"]["optional-dependencies"]["docs"]
         )
-
 
 # noqa: too-many-arguments
 def _assert_template_ok(
@@ -213,7 +191,6 @@ def _assert_template_ok(
     kedro_version=version,
     output_dir=".",
 ):
-
     assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
 

@@ -211,7 +211,7 @@ raw_car_data:
 
 ### 8. Deprecation of Jinja2
 `OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../data/kedro_dataset_factories.md).
-If you take the example from [the `TemplatedConfigLoader` with Jinja2 documentation](advanced_configuration.md#how-to-use-jinja2-syntax-in-configuration) you can rewrite your configuration as follows to work with `OmegaConfigLoader`:
+The following example shows how you can rewrite your Jinja2 configuration to work with `OmegaConfigLoader`:
 
 ```diff
 # catalog.yml

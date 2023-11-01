@@ -19,7 +19,7 @@ from kedro.framework.cli.starters import (
     _parse_add_ons_input,
 )
 
-FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 14
+FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 15
 
 
 @pytest.fixture

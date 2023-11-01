@@ -309,6 +309,8 @@ def new(  # noqa: too-many-arguments
     )
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
+    cookiecutter_context = None
+
     if not config_path:
         cookiecutter_context = _make_cookiecutter_context_for_prompts(cookiecutter_dir)
 
@@ -320,27 +322,15 @@ def new(  # noqa: too-many-arguments
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
-    if not prompts_required:
-        config = {}
-        if config_path:
-            config = _fetch_config_from_file(config_path)
-            _validate_config_file_inputs(config)
-
-    elif config_path:
-        config = _fetch_config_from_file(config_path)
-        _validate_config_file_against_prompts(config, prompts_required)
-        _validate_config_file_inputs(config)
-    else:
-        config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
-
-    config_with_add_ons = _get_addons_from_cli_input(selected_addons, config)
-    config_with_add_ons_and_name = _get_name_from_cli_input(
-        project_name, config_with_add_ons
+    config = _get_config(
+        prompts_required=prompts_required,
+        config_path=config_path,
+        cookiecutter_context=cookiecutter_context,
+        selected_addons=selected_addons,
+        project_name=project_name,
     )
 
-    cookiecutter_args = _make_cookiecutter_args(
-        config_with_add_ons_and_name, checkout, directory
-    )
+    cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
 
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
 
@@ -377,20 +367,49 @@ def list_starters():
         )
 
 
-def _get_addons_from_cli_input(
-    selected_addons: str, config: dict[str, str]
-) -> dict[str, str]:
-    """Inserts add-on selection from the CLI input in the project
-    configuration, if it exists. Replaces add-on strings with the
-    corresponding prompt number.
+def _get_config(
+    prompts_required,
+    config_path,
+    cookiecutter_context,
+    selected_addons,
+    project_name,
+):
+    if not prompts_required:
+        config = {}
+        if config_path:
+            config = _fetch_config_from_file(config_path)
+            _validate_config_file_inputs(config)
+
+    elif config_path:
+        config = _fetch_config_from_file(config_path)
+        _validate_config_file_against_prompts(config, prompts_required)
+        _validate_config_file_inputs(config)
+    else:
+        config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
+
+    add_ons = _get_addons_from_cli_input(selected_addons)
+
+    if add_ons is not None:
+        config["add_ons"] = add_ons
+
+    if project_name is not None:
+        config["project_name"] = project_name
+
+    return config
+
+
+def _get_addons_from_cli_input(selected_addons: str) -> str:
+    """Prepares add-on selection from the CLI input to the correct format
+    to be put in the project configuration, if it exists.
+    Replaces add-on strings with the corresponding prompt number.
 
     Args:
         selected_addons: a string containing the value for the --addons flag,
             or None in case the flag wasn't used.
 
     Returns:
-        Configuration for starting a new project, with the selected add-ons
-        from the `--addons` flag.
+        String with the numbers corresponding to the desired add_ons, or
+        None in case the --addons flag was not used.
     """
     string_to_number = {
         "lint": "1",
@@ -407,27 +426,9 @@ def _get_addons_from_cli_input(
             addon = addons[i].strip()
             if addon in string_to_number:
                 addons[i] = string_to_number[addon]
-        config["add_ons"] = ",".join(addons)
+        return ",".join(addons)
 
-    return config
-
-
-def _get_name_from_cli_input(name: str, config: dict[str, str]) -> dict[str, str]:
-    """Inserts project_name from the CLI input in the project
-    configuration, if it exists.
-
-    Args:
-        name: a string containing the value for the --name flag,
-            or None in case the flag wasn't used.
-
-    Returns:
-        Configuration for starting a new project, with the selected name
-        from the `--name` flag.
-    """
-
-    if name is not None:
-        config["project_name"] = name
-    return config
+    return None
 
 
 def _select_prompts_to_display(

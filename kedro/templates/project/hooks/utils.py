@@ -30,23 +30,23 @@ def remove_from_file(file_path, content_to_remove):
 
 def remove_nested_section(data, nested_key):
     keys = nested_key.split('.')
-    d = data
+    current_data = data
     # Look for Parent section
     for key in keys[:-1]:  # Iterate over all but last element
-        if key in d:
-            d = d[key]
+        if key in current_data:
+            current_data = current_data[key]
         else:
             return  # Parent section not found, nothing to remove
 
     # Remove the nested section and any empty parent sections
-    d.pop(keys[-1], None)  # Remove last element otherwise return None
+    current_data.pop(keys[-1], None)  # Remove last element otherwise return None
     for key in reversed(keys[:-1]):
-        parent = data
-        for k in keys[:keys.index(key)]:
-            parent = parent[k]
-        if not d:  # If the section is empty, remove it
-            parent.pop(key, None)
-            d = parent
+        parent_section = data
+        for key_part in keys[:keys.index(key)]:
+            parent_section = parent_section[key_part]
+        if not current_data:  # If the section is empty, remove it
+            parent_section.pop(key, None)
+            current_data = parent_section
         else:
             break  # If the section is not empty, stop removing
 

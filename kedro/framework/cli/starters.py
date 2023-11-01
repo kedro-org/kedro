@@ -567,7 +567,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     add_ons = extra_context.get("add_ons")
 
-    # Only core template and spaceflights-pyspark have configurable add-ons
+    # Only core template and spaceflight starters have configurable add-ons
     if template_path == str(TEMPLATE_PATH) or (
         add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)
     ):

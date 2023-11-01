@@ -12,7 +12,6 @@ authors = [
 description = "Kedro helps you build production-ready data and analytics pipelines"
 requires-python = ">=3.8"
 dependencies = [
-    "anyconfig>=0.10.0",
     "attrs>=21.3",
     "build>=0.7.0",
     "cachetools>=4.1",

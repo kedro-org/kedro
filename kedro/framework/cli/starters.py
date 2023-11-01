@@ -108,7 +108,7 @@ Add-Ons\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
-6) Pyspark: Provides a basic PySpark set up\n
+6) PySpark: Provides a basic PySpark set up\n
 
 Example usage:\n
 kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
@@ -122,7 +122,7 @@ ADD_ONS_DICT = {
     "3": "Custom Logging",
     "4": "Documentation",
     "5": "Data Structure",
-    "6": "Pyspark",
+    "6": "PySpark",
 }
 
 # noqa: unused-argument
@@ -511,7 +511,7 @@ def _make_cookiecutter_args(
 def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
-    if add_ons and "Pyspark" in add_ons:
+    if add_ons and "PySpark" in add_ons:
         cookiecutter_args["directory"] = "spaceflights-pyspark"
         pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
         return pyspark_path
@@ -553,7 +553,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     if (
         template_path == str(TEMPLATE_PATH)
         or add_ons is not None
-        and "Pyspark" in add_ons
+        and "PySpark" in add_ons
     ):
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")

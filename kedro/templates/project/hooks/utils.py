@@ -97,7 +97,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         if data_path.exists():
             shutil.rmtree(str(data_path))
 
-    if "Pyspark" not in selected_add_ons_list:  # If PySpark not selected
+    if "PySpark" not in selected_add_ons_list:  # If PySpark not selected
         pass
     else:  # Use spaceflights-pyspark to create pyspark template
         # Remove all .csv and .xlsx files from data/01_raw/

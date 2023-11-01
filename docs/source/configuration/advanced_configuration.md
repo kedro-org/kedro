@@ -15,6 +15,7 @@ This page also contains a set of guidance for advanced configuration requirement
 * [How to override configuration with runtime parameters with the `OmegaConfigLoader`](#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
 * [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 * [How to load credentials through environment variables with `OmegaConfigLoader`](#how-to-load-credentials-through-environment-variables)
+* [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
 
 ## OmegaConfigLoader
 
@@ -414,3 +415,24 @@ dev_s3:
 ```{note}
 Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials.
 ```
+
+### How to change the merge strategy used by `OmegaConfigLoader`
+By default, `OmegaConfigLoader` merges configuration [in different environments](configuration_basics.md#configuration-environments) in a destructive way. This means that whatever configuration resides in your overriding environment (`local` by default) takes precedence when the same top-level key is present in the base and overriding environment. Any configuration for that key **besides that given in the overriding environment** is discarded.
+You can change the merge strategy for each configuration type in your project's `src/<package_name>/settings.py`. The accepted merging strategies are `soft` and `destructive`.
+
+```python
+from kedro.config import OmegaConfigLoader
+
+CONFIG_LOADER_CLASS = OmegaConfigLoader
+
+CONFIG_LOADER_ARGS = {
+    "merge_strategy": {
+        "parameters": "soft",
+        "spark": "destructive",
+        "mlflow": "soft",
+    }
+}
+```
+
+If no merge strategy is defined, the default destructive strategy will be applied. Note that this merge strategy setting only applies to configuration files in **different** environments.
+When files are part of the same environment, they are always merged in a soft way. An error is thrown when files in the same environment contain the same top-level keys.

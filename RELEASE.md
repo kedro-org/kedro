@@ -27,6 +27,7 @@
 ### CLI
 * Removed deprecated `kedro docs` command.
 * Added the `--addons` flag to the `kedro new` command.
+* Added the `--name` flag to the `kedro new` command.
 
 ### ConfigLoader
 * Made `OmegaConfigLoader` the default config loader.

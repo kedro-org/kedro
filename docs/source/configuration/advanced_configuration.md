@@ -16,9 +16,6 @@ This page also contains a set of guidance for advanced configuration requirement
 * [How to load credentials through environment variables with `OmegaConfigLoader`](#how-to-load-credentials-through-environment-variables)
 
 
-
-## Advanced Kedro configuration
-
 ## How to use a custom configuration loader
 If you want to use a custom configuration loader, you can implement it by extending the [`AbstractConfigLoader`](/kedro.config.AbstractConfigLoader) class. The example below illustrates this:
 

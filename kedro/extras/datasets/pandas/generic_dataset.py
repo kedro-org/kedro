@@ -186,7 +186,6 @@ class GenericDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
             )
 
     def _load(self) -> pd.DataFrame:
-
         self._ensure_file_system_target()
 
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -201,7 +200,6 @@ class GenericDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         )
 
     def _save(self, data: pd.DataFrame) -> None:
-
         self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

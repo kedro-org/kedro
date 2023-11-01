@@ -843,7 +843,11 @@ def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
 
         project = Project(temp_dir_path)  # project where to do refactoring
         _refactor_code_for_package(
-            project, package_source, tests_source, alias, metadata  # type: ignore
+            project,
+            package_source,
+            tests_source,
+            alias,
+            metadata,  # type: ignore
         )
         project.close()
 

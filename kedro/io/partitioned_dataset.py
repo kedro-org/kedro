@@ -400,7 +400,6 @@ class IncrementalDataset(PartitionedDataset):
         fs_args: dict[str, Any] = None,
         metadata: dict[str, Any] = None,
     ):
-
         """Creates a new instance of ``IncrementalDataset``.
 
         Args:

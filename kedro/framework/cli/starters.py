@@ -108,7 +108,8 @@ Add-Ons\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
-6) Pyspark: Provides a basic PySpark set up\n
+6) Pyspark: Provides set up configuration for working with PySpark\n
+7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
 kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
@@ -123,6 +124,7 @@ ADD_ONS_DICT = {
     "4": "Documentation",
     "5": "Data Structure",
     "6": "Pyspark",
+    "7": "Kedro Viz",
 }
 
 # noqa: unused-argument
@@ -212,7 +214,7 @@ def _parse_add_ons_input(add_ons_str: str):
     def _validate_selection(add_ons: list[str]):
         for add_on in add_ons:
             if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
-                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
+                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
                 click.secho(message, fg="red", err=True)
                 sys.exit(1)
 
@@ -323,7 +325,6 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     config = _get_addons_from_cli_input(selected_addons, config)
 
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
-
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
 
     _create_project(project_template, cookiecutter_args)
@@ -381,6 +382,7 @@ def _get_addons_from_cli_input(
         "docs": "4",
         "data": "5",
         "pyspark": "6",
+        "viz": "7",
     }
 
     if selected_addons is not None:
@@ -408,14 +410,24 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = ["lint", "test", "log", "docs", "data", "pyspark", "all", "none"]
+    valid_addons = [
+        "lint",
+        "test",
+        "log",
+        "docs",
+        "data",
+        "pyspark",
+        "viz",
+        "all",
+        "none",
+    ]
 
     if selected_addons is not None:
         addons = re.sub(r"\s", "", selected_addons).split(",")
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
-                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none",
+                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, viz, all, none",
                     fg="red",
                     err=True,
                 )
@@ -511,11 +523,17 @@ def _make_cookiecutter_args(
 def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
-    if add_ons and "Pyspark" in add_ons:
+    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
+
+    if add_ons and "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+        cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+    elif add_ons and "Pyspark" in add_ons:
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-        pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
-        return pyspark_path
-    return template_path
+    elif add_ons and "Kedro Viz" in add_ons:
+        cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+    else:
+        starter_path = template_path
+    return starter_path
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
@@ -550,10 +568,8 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     add_ons = extra_context.get("add_ons")
 
     # Only core template and spaceflights-pyspark have configurable add-ons
-    if (
-        template_path == str(TEMPLATE_PATH)
-        or add_ons is not None
-        and "Pyspark" in add_ons
+    if template_path == str(TEMPLATE_PATH) or (
+        add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)
     ):
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")

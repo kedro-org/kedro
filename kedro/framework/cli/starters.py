@@ -260,9 +260,15 @@ def create_cli():  # pragma: no cover
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
-@click.option("--name", "-n", "name", help=NAME_ARG_HELP)
+@click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
 def new(  # noqa: too-many-arguments
-    config_path, starter_alias, selected_addons, name, checkout, directory, **kwargs
+    config_path,
+    starter_alias,
+    selected_addons,
+    project_name,
+    checkout,
+    directory,
+    **kwargs,
 ):
     """Create a new kedro project."""
     if checkout and not starter_alias:
@@ -299,7 +305,7 @@ def new(  # noqa: too-many-arguments
 
     # Select which prompts will be displayed to the user based on which flags were selected.
     prompts_required = _select_prompts_to_display(
-        prompts_required, selected_addons, name
+        prompts_required, selected_addons, project_name
     )
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
@@ -328,7 +334,9 @@ def new(  # noqa: too-many-arguments
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
     config_with_add_ons = _get_addons_from_cli_input(selected_addons, config)
-    config_with_add_ons_and_name = _get_name_from_cli_input(name, config_with_add_ons)
+    config_with_add_ons_and_name = _get_name_from_cli_input(
+        project_name, config_with_add_ons
+    )
 
     cookiecutter_args = _make_cookiecutter_args(
         config_with_add_ons_and_name, checkout, directory
@@ -423,7 +431,7 @@ def _get_name_from_cli_input(name: str, config: dict[str, str]) -> dict[str, str
 
 
 def _select_prompts_to_display(
-    prompts_required: dict, selected_addons: str, name: str
+    prompts_required: dict, selected_addons: str, project_name: str
 ) -> dict:
     """Selects which prompts an user will receive when creating a new
     Kedro project, based on what information was already made available
@@ -434,6 +442,8 @@ def _select_prompts_to_display(
             the user on project creation.
         selected_addons: a string containing the value for the --addons flag,
             or None in case the flag wasn't used.
+        project_name: a string containing the value for the --name flag, or
+            None in case the flag wasn't used.
 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
@@ -459,8 +469,8 @@ def _select_prompts_to_display(
             sys.exit(1)
         del prompts_required["add_ons"]
 
-    if name is not None:
-        if bool(re.match(r"^[\w -]{2,}$", name)) is False:
+    if project_name is not None:
+        if bool(re.match(r"^[\w -]{2,}$", project_name)) is False:
             click.secho(
                 "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
                 fg="red",

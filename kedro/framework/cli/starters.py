@@ -368,12 +368,29 @@ def list_starters():
 
 
 def _get_config(
-    prompts_required,
-    config_path,
-    cookiecutter_context,
-    selected_addons,
-    project_name,
-):
+    prompts_required: dict,
+    config_path: str,
+    cookiecutter_context: OrderedDict,
+    selected_addons: str,
+    project_name: str,
+) -> dict[str, str]:
+    """Generates a config dictionary to be used to generate cookiecutter args, based
+    on CLI flags, user prompts, or a configuration file.
+
+    Args:
+        prompts_required: a dictionary of all the prompts that will be shown to
+            the user on project creation.
+        config_path: a string containing the value for the --config flag, or
+            None in case the flag wasn't used.
+        cookiecutter_context: the context for Cookiecutter templates.
+        selected_addons: a string containing the value for the --addons flag,
+            or None in case the flag wasn't used.
+        project_name: a string containing the value for the --name flag, or
+            None in case the flag wasn't used.
+
+    Returns:
+        the prompts_required dictionary, with all the redundant information removed.
+    """
     if not prompts_required:
         config = {}
         if config_path:

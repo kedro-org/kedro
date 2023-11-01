@@ -4,6 +4,9 @@
 * Dropped Python 3.7 support.
 * Introduced add-ons to the `kedro new` CLI flow.
 * The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
+* Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
+* Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
+
 
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.

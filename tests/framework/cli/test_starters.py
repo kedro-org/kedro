@@ -128,7 +128,12 @@ def _assert_requirements_ok(
         pyproject_config = anyconfig.load(pyproject_file_path)
         expected = {
             "tool": {
-                "ruff": {"select": ["F", "E", "W", "UP", "I", "PL"], "ignore": ["E501"]}
+                "ruff": {
+                    "line-length": 88,
+                    "show-fixes": True,
+                    "select": ["F", "W", "E", "I", "UP", "PL", "T201"],
+                    "ignore": ["E501"],
+                }
             }
         }
         assert expected["tool"]["ruff"] == pyproject_config["tool"]["ruff"]
@@ -145,7 +150,7 @@ def _assert_requirements_ok(
         expected = {
             "pytest": {
                 "ini_options": {
-                    "addopts": "--cov-report term-missing --cov src/{{ cookiecutter.python_package }} -ra\n"
+                    "addopts": "--cov-report term-missing --cov src/new_kedro_project -ra"
                 }
             },
             "coverage": {
@@ -180,6 +185,7 @@ def _assert_requirements_ok(
             expected["optional-dependencies"]["docs"]
             == pyproject_config["project"]["optional-dependencies"]["docs"]
         )
+
 
 # noqa: too-many-arguments
 def _assert_template_ok(
@@ -910,9 +916,9 @@ class TestAddOnsFromConfigFile:
         """Test project created from config."""
         config = {
             "add_ons": add_ons,
-            "project_name": "My Project",
-            "repo_name": "my-project",
-            "python_package": "my_project",
+            "project_name": "New Kedro Project",
+            "repo_name": "new-kedro-project",
+            "python_package": "new_kedro_project",
         }
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
@@ -920,8 +926,8 @@ class TestAddOnsFromConfigFile:
         )
 
         _assert_template_ok(result, **config)
-        _assert_requirements_ok(result, add_ons=add_ons, repo_name="my-project")
-        _clean_up_project(Path("./my-project"))
+        _assert_requirements_ok(result, add_ons=add_ons, repo_name="new-kedro-project")
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_invalid_add_ons(self, fake_kedro_cli):
         """Test project created from config."""

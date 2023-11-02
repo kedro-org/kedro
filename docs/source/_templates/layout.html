@@ -38,11 +38,6 @@
       closeBtn.classList.remove('fa-bars');
       closeBtn.classList.add('fa-times');
       document.querySelector('.wy-nav-top').prepend(closeBtn)
-
-    // clone logo to mobile header
-    var logo = document.querySelector(".wy-header-logo img").cloneNode(true)
-    document.querySelector(".wy-nav-top a").innerHTML = '';
-    document.querySelector(".wy-nav-top a").append(logo);
   });
 </script>
 <link rel="stylesheet" href="https://kedro-shared-files.s3.eu-west-2.amazonaws.com/qb1-sphinx-rtd.css" type="text/css"

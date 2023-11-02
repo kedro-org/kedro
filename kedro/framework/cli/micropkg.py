@@ -8,6 +8,7 @@ import shutil
 import sys
 import tarfile
 import tempfile
+import toml
 from importlib import import_module
 from pathlib import Path
 from typing import Any, Iterable, Iterator, List, Tuple, Union
@@ -259,9 +260,6 @@ def _pull_package(  # noqa: too-many-arguments
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
-    # noqa: import-outside-toplevel
-    import toml  # for performance reasons
-
     config_dict = toml.load(metadata.config_file)
     config_dict = config_dict["tool"]["kedro"]
     build_specs = config_dict.get("micropkg", {}).get("pull")
@@ -283,8 +281,6 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
 
 def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
-    # noqa: import-outside-toplevel
-    import toml  # for performance reasons
 
     config_dict = toml.load(metadata.config_file)
     config_dict = config_dict["tool"]["kedro"]

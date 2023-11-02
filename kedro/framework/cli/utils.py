@@ -396,8 +396,6 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     with values specified in a config file. If command line
     options are passed, they override config file values.
     """
-    # for performance reasons
-    from omegaconf import OmegaConf
 
     ctx.default_map = ctx.default_map or {}
     section = ctx.info_name

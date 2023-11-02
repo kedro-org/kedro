@@ -7,11 +7,7 @@ from .abstract_config import (
     BadConfigException,
     MissingConfigException,
 )
-
-# from .config import ConfigLoader
 from .omegaconf_config import OmegaConfigLoader
-
-# from .templated_config import TemplatedConfigLoader
 
 __all__ = [
     "AbstractConfigLoader",

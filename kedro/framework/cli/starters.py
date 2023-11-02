@@ -209,6 +209,7 @@ def _parse_add_ons_input(add_ons_str: str):
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
+    add_ons_str = add_ons_str.lower()
     if add_ons_str == "all":
         return list(ADD_ONS_DICT)
     if add_ons_str == "none":
@@ -700,7 +701,7 @@ class _Prompt:
                     click.secho(message, fg="red", err=True)
                     sys.exit(1)
 
-        if self.regexp and not re.match(self.regexp, user_input):
+        if self.regexp and not re.match(self.regexp, user_input.lower()):
             message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
             click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
@@ -774,9 +775,11 @@ def _validate_config_file_inputs(config: dict[str, str]):
         click.secho(message, fg="red", err=True)
         sys.exit(1)
 
-    add_on_reg_ex = r"^(all|none|(( )*\d(,\d)*(,( )*\d)*( )*|( )*((\d-\d)|(\d - \d))( )*))$"
+    add_on_reg_ex = (
+        r"^(all|none|(( )*\d(,\d)*(,( )*\d)*( )*|( )*((\d-\d)|(\d - \d))( )*))$"
+    )
     input_add_ons = config.get("add_ons", "none")
-    if not re.match(add_on_reg_ex, input_add_ons):
+    if not re.match(add_on_reg_ex, input_add_ons.lower()):
         message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
         click.secho(message, fg="red", err=True)
         sys.exit(1)

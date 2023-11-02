@@ -88,7 +88,7 @@ def _get_expected_files(add_ons: str):
         "3": 1,
         "4": 2,
         "5": 8,
-        "6": 3,
+        "6": 2,
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
 
@@ -295,6 +295,7 @@ def test_parse_add_ons_invalid_range(input, capsys):
         _parse_add_ons_input(input)
     message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
     assert message in capsys.readouterr().err
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromUserPromptsValid:
@@ -877,7 +878,29 @@ class TestFlagsNotAllowed:
 class TestAddOnsFromUserPrompts:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all", "1, 2, 3", "1,    2,   3", "  1,  2, 3  ", " 1-3 ", "  1 - 3  " ],
+        [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "none",
+            "2,3,4",
+            "3-5",
+            "all",
+            "1, 2, 3",
+            "1,    2,   3",
+            "  1,  2, 3  ",
+            " 1-3 ",
+            "  1 - 3  ",
+            "ALL",
+            "All",
+            "AlL",
+            "NONE",
+            "None",
+            "nonE",
+        ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
@@ -939,7 +962,29 @@ class TestAddOnsFromUserPrompts:
 class TestAddOnsFromConfigFile:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all", "1, 2, 3 ", "1,    2,   3", "  1,  2, 3  ", " 1-3 ", "  1 - 3  "],
+        [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "none",
+            "2,3,4",
+            "3-5",
+            "all",
+            "1, 2, 3 ",
+            "1,    2,   3",
+            "  1,  2, 3  ",
+            " 1-3 ",
+            "  1 - 3  ",
+            "ALL",
+            "All",
+            "AlL",
+            "NONE",
+            "None",
+            "nonE",
+        ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         """Test project created from config."""

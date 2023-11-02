@@ -209,13 +209,6 @@ def _parse_add_ons_input(add_ons_str: str):
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
-    def _validate_selection(add_ons: list[str]):
-        for add_on in add_ons:
-            if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
-                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
-                click.secho(message, fg="red", err=True)
-                sys.exit(1)
-
     if add_ons_str == "all":
         return list(ADD_ONS_DICT)
     if add_ons_str == "none":
@@ -236,7 +229,6 @@ def _parse_add_ons_input(add_ons_str: str):
         else:
             selected.append(choice.strip())
 
-    _validate_selection(selected)
     return selected
 
 
@@ -700,11 +692,23 @@ class _Prompt:
 
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
+
+        def _validate_selection(add_ons: list[str]):
+            for add_on in add_ons:
+                if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
+                    message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
+                    click.secho(message, fg="red", err=True)
+                    sys.exit(1)
+
         if self.regexp and not re.match(self.regexp, user_input):
             message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
             click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
             sys.exit(1)
+
+        if self.title == "Project Add-Ons":
+            # Validate user input
+            _validate_selection(_parse_add_ons_input(user_input))
 
 
 def _get_available_tags(template_path: str) -> list:

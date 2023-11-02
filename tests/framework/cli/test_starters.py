@@ -88,7 +88,7 @@ def _get_expected_files(add_ons: str):
         "3": 1,
         "4": 2,
         "5": 8,
-        "6": 2,
+        "6": 3,
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
 
@@ -295,18 +295,6 @@ def test_parse_add_ons_invalid_range(input, capsys):
         _parse_add_ons_input(input)
     message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
     assert message in capsys.readouterr().err
-
-
-@pytest.mark.parametrize(
-    "input,first_invalid",
-    [("0,3,5", "0"), ("1,3,7", "7"), ("0-4", "0"), ("3-7", "7")],
-)
-def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
-    with pytest.raises(SystemExit):
-        _parse_add_ons_input(input)
-    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
-    assert message in capsys.readouterr().err
-
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromUserPromptsValid:
@@ -915,6 +903,36 @@ class TestAddOnsFromUserPrompts:
             "Invalid input. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
             in result.output
         )
+
+    @pytest.mark.parametrize(
+        "input,first_invalid",
+        [("0,3,5", "0"), ("1,3,7", "7"), ("0-4", "0"), ("3-7", "7")],
+    )
+    def test_invalid_add_ons_selection(self, fake_kedro_cli, input, first_invalid):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons=input),
+        )
+
+        assert result.exit_code != 0
+        message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
+        assert message in result.output
+
+    @pytest.mark.parametrize(
+        "input",
+        ["5-2", "3-1"],
+    )
+    def test_invalid_add_ons_range(self, fake_kedro_cli, input):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons=input),
+        )
+
+        assert result.exit_code != 0
+        message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
+        assert message in result.output
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

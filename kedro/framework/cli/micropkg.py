@@ -10,7 +10,7 @@ import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Iterable, Iterator, Union
+from typing import Any, Iterable, Iterator
 
 import click
 from build.util import project_wheel_metadata

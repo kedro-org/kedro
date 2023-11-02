@@ -503,9 +503,7 @@ def _add_jinja_filters(app):
 
     # LaTeXBuilder is used in the PDF docs build,
     # and it doesn't have attribute 'templates'
-    if not (
-        isinstance(app.builder, (LaTeXBuilder,CheckExternalLinksBuilder))
-    ):
+    if not (isinstance(app.builder, (LaTeXBuilder, CheckExternalLinksBuilder))):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 

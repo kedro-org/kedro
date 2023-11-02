@@ -300,7 +300,7 @@ def activate_nbstripout(metadata: ProjectMetadata, **kwargs):  # noqa: unused-ar
         ) from exc
 
     try:
-        res = subprocess.run(  # noqa: subprocess-run-check
+        res = subprocess.run(  # noqa: PLW1510
             ["git", "rev-parse", "--git-dir"],
             capture_output=True,
         )

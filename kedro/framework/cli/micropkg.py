@@ -154,7 +154,7 @@ def micropkg():
     help="Location of a configuration file for the fsspec filesystem used to pull the package.",
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def pull_package(  # noqa: unused-argument, PLR0913
+def pull_package(  # noqa: PLR0913
     metadata: ProjectMetadata,
     package_path,
     env,

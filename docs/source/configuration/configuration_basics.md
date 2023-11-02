@@ -151,7 +151,7 @@ To directly access configuration in code, for example to debug, you can do so as
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
-# Instantiate an OmegaConfigLoader instance with the location of your project configuration.
+# Instantiate an `OmegaConfigLoader` instance with the location of your project configuration.
 conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = OmegaConfigLoader(conf_source=conf_path)
 

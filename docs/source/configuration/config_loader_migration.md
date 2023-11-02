@@ -1,11 +1,11 @@
 # Migration guide for config loaders
-The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and have been removed in Kedro `0.19.0`. To ensure a smooth transition, we strongly recommend you adopt the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) as soon as possible.
+The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and were removed in Kedro `0.19.0`. To use that release or later, you must adopt the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader).
 This migration guide outlines the primary distinctions between the old loaders and the `OmegaConfigLoader`, providing step-by-step instructions on updating your code base to utilise the new class effectively.
 
-## `ConfigLoader`to [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)
+## `ConfigLoader` to `OmegaConfigLoader`
 
 ### 1. Install the Required Library
-The [`OmegaConfigLoader`](configuration_basics.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). In order to use it you need to ensure you have both a version of Kedro of `0.18.5` or above and `omegaconf` installed.
+The [`OmegaConfigLoader`](configuration_basics.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). To use it you need Kedro (version `0.18.5` or later) and `omegaconf` installed.
 You can install both using `pip`:
 
 ```bash
@@ -61,11 +61,11 @@ For error and exception handling, most errors are the same. Those you need to be
 * `OmegaConfigLoader` throws a `MissingConfigException` when configuration paths don't exist, rather than the `ValueError` used in `ConfigLoader`.
 * In `OmegaConfigLoader`, if there is bad syntax in your configuration files, it will trigger a `ParserError` instead of a `BadConfigException` used in `ConfigLoader`.
 
-## `TemplatedConfigLoader` to [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)
+## `TemplatedConfigLoader` to `OmegaConfigLoader`
 
 ### 1. Install the required library
 The [`OmegaConfigLoader`](configuration_basics.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). Features that replace `TemplatedConfigLoader` functionality have been released in later versions, so we recommend users
-to install at least Kedro version `0.18.13` to properly replace the `TemplatedConfigLoader` with `OmegaConfigLoader`.
+install Kedro version `0.18.13` or later to properly replace the `TemplatedConfigLoader` with `OmegaConfigLoader`.
 You can install both this Kedro version and `omegaconf` using `pip`:
 
 ```bash

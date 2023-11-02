@@ -13,7 +13,7 @@ add_ons:
     6) PySpark : Provides a basic PySpark set up
 
     Which add-ons would you like to include in your project? [1-6/1,3/all/none]:
-  regex_validator: "^(all|none|(( )*\\d(,\\d)*(,( )*\\d)*( )*|( )*((\\d-\\d)|(\\d - \\d))( )*))$"
+  regex_validator: "^(all|none|(( )*\\d*(,\\d*)*(,( )*\\d*)*( )*|( )*((\\d*-\\d*)|(\\d* - \\d*))( )*))$"
   error_message: |
     Invalid input. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.
 

@@ -737,6 +737,14 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
     return cookiecutter_context.get("cookiecutter", {})
 
 
+def _validate_selection(add_ons: list[str]):
+    for add_on in add_ons:
+        if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
+            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
+            click.secho(message, fg="red", err=True)
+            sys.exit(1)
+
+
 class _Prompt:
     """Represent a single CLI prompt for `kedro new`"""
 
@@ -761,13 +769,6 @@ class _Prompt:
 
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
-
-        def _validate_selection(add_ons: list[str]):
-            for add_on in add_ons:
-                if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
-                    message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
-                    click.secho(message, fg="red", err=True)
-                    sys.exit(1)
 
         if self.regexp and not re.match(self.regexp, user_input.lower()):
             message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
@@ -844,10 +845,12 @@ def _validate_config_file_inputs(config: dict[str, str]):
         sys.exit(1)
 
     add_on_reg_ex = (
-        r"^(all|none|(( )*\d(,\d)*(,( )*\d)*( )*|( )*((\d-\d)|(\d - \d))( )*))$"
+        r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d*-\d*)|(\d* - \d*))( )*))$"
     )
     input_add_ons = config.get("add_ons", "none")
     if not re.match(add_on_reg_ex, input_add_ons.lower()):
         message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
         click.secho(message, fg="red", err=True)
         sys.exit(1)
+
+    _validate_selection(_parse_add_ons_input(input_add_ons))

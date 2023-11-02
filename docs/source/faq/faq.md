@@ -31,9 +31,9 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 ### Advanced topics
 
 * [How do I change which configuration files are loaded](../configuration/advanced_configuration.md#how-to-change-which-configuration-files-are-loaded)?
+* [How do I use a custom configuration loader](../configuration/advanced_configuration.md#how-to-use-a-custom-configuration-loader)?
 * [How do I ensure non default configuration files get loaded](../configuration/advanced_configuration.md#how-to-ensure-non-default-configuration-files-get-loaded)?
 * [How do I bypass the configuration loading rules](../configuration/advanced_configuration.md#how-to-bypass-the-configuration-loading-rules)?
-* [How do I use Jinja2 syntax in configuration](../configuration/advanced_configuration.md#how-to-use-jinja2-syntax-in-configuration)?
 * [How do I do templating with the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader)?
 * [How to use global variables with the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader)?
 * [How do I use resolvers in the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-resolvers-in-the-omegaconfigloader)?

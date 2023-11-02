@@ -877,7 +877,7 @@ class TestFlagsNotAllowed:
 class TestAddOnsFromUserPrompts:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all"],
+        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all", "1, 2, 3", "1,    2,   3", "  1,  2, 3  ", " 1-3 ", "  1 - 3  " ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
@@ -939,7 +939,7 @@ class TestAddOnsFromUserPrompts:
 class TestAddOnsFromConfigFile:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all"],
+        ["1", "2", "3", "4", "5", "6", "none", "2,3,4", "3-5", "all", "1, 2, 3 ", "1,    2,   3", "  1,  2, 3  ", " 1-3 ", "  1 - 3  "],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         """Test project created from config."""

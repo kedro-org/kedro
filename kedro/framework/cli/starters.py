@@ -218,7 +218,7 @@ def _parse_add_ons_input(add_ons_str: str):
         return []  # pragma: no cover
 
     # Split by comma
-    add_ons_choices = add_ons_str.split(",")
+    add_ons_choices = add_ons_str.replace(" ", "").split(",")
     selected: list[str] = []
 
     for choice in add_ons_choices:
@@ -774,7 +774,7 @@ def _validate_config_file_inputs(config: dict[str, str]):
         click.secho(message, fg="red", err=True)
         sys.exit(1)
 
-    add_on_reg_ex = r"^(all|none|(\d(,\d)*|(\d-\d)))$"
+    add_on_reg_ex = r"^(all|none|(( )*\d(,\d)*(,( )*\d)*( )*|( )*((\d-\d)|(\d - \d))( )*))$"
     input_add_ons = config.get("add_ons", "none")
     if not re.match(add_on_reg_ex, input_add_ons):
         message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."

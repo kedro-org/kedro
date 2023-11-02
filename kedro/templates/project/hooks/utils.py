@@ -87,12 +87,10 @@ def handle_starter_setup(selected_add_ons_list, python_package_name):
         catalog_yml_path.write_text('')
     # Remove parameter/reporting files from conf/base
     conf_base_path = current_dir / "conf/base/"
-    if "Kedro Viz" in selected_add_ons_list:  # Remove reporting.yml if Kedro Viz is selected
-        param_to_remove = ["parameters_data_processing.yml", "parameters_data_science.yml", "parameters_reporting.yml", "reporting.yml"]
-    else:
-        param_to_remove = ["parameters_data_processing.yml", "parameters_data_science.yml"]
-    for param_file in param_to_remove:
-        remove_file(conf_base_path / param_file)
+    parameter_file_patterns = ["parameters_*.yml", "parameters/*.yml"]
+    for pattern in parameter_file_patterns:
+        for param_file in conf_base_path.glob(pattern):
+            remove_file(param_file)
 
     # Remove the pipelines subdirectories
     if "Kedro Viz" in selected_add_ons_list: # Remove reporting if Kedro Viz is selected

@@ -327,8 +327,6 @@ class TestKedroSession:
     def test_load_context_with_envvar(
         self, fake_project, monkeypatch, mock_package_name, mocker
     ):
-        mocker.patch("kedro.config.config.ConfigLoader.get")
-
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 
         session = KedroSession.create(mock_package_name, fake_project)

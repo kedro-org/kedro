@@ -77,7 +77,7 @@ class PickleDataSet(AbstractVersionedDataset[Any, Any]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments,too-many-locals
+    def __init__(  # noqa: PLR0913,too-many-locals
         self,
         filepath: str,
         backend: str = "pickle",

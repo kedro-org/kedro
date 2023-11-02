@@ -154,7 +154,7 @@ def micropkg():
     help="Location of a configuration file for the fsspec filesystem used to pull the package.",
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def pull_package(  # noqa: unused-argument, too-many-arguments
+def pull_package(  # noqa: unused-argument, PLR0913
     metadata: ProjectMetadata,
     package_path,
     env,
@@ -189,7 +189,7 @@ def pull_package(  # noqa: unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-def _pull_package(  # noqa: too-many-arguments
+def _pull_package(  # noqa: PLR0913
     package_path: str,
     metadata: ProjectMetadata,
     env: str = None,
@@ -331,7 +331,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 )
 @click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
-def package_micropkg(  # noqa: too-many-arguments
+def package_micropkg(  # noqa: PLR0913
     metadata: ProjectMetadata,
     module_path,
     env,
@@ -443,7 +443,7 @@ def _rename_files(conf_source: Path, old_name: str, new_name: str):
         config_file.rename(config_file.parent / new_config_name)
 
 
-def _refactor_code_for_unpacking(  # noqa: too-many-arguments
+def _refactor_code_for_unpacking(  # noqa: PLR0913
     project: Project,
     package_path: Path,
     tests_path: Path,
@@ -524,7 +524,7 @@ def _refactor_code_for_unpacking(  # noqa: too-many-arguments
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(  # noqa: too-many-arguments, too-many-locals
+def _install_files(  # noqa: PLR0913, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
@@ -824,7 +824,7 @@ def _refactor_code_for_package(
         _move_package_with_conflicting_name(tests_target, "tests")
 
 
-def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
+def _generate_sdist_file(  # noqa: PLR0913,too-many-locals
     micropkg_name: str,
     destination: Path,
     source_paths: tuple[Path, Path, list[tuple[Path, str]]],

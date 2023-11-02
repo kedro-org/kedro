@@ -335,7 +335,7 @@ def run_node(
     return node
 
 
-def _collect_inputs_from_hook(  # noqa: too-many-arguments
+def _collect_inputs_from_hook(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
@@ -368,7 +368,7 @@ def _collect_inputs_from_hook(  # noqa: too-many-arguments
     return additional_inputs
 
 
-def _call_node_run(  # noqa: too-many-arguments
+def _call_node_run(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],

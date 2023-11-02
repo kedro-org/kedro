@@ -72,7 +72,7 @@ class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         url: str,
         table: str,

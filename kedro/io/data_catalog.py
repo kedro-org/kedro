@@ -141,7 +141,7 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         data_sets: dict[str, AbstractDataset] = None,
         feed_dict: dict[str, Any] = None,

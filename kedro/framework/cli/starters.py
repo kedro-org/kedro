@@ -606,7 +606,7 @@ def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, 
             # Use the default template path for any other combinations or if "none" is chosen.
             starter_path = template_path
     else:
-        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty
+        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty.
         starter_path = template_path
     return starter_path
 

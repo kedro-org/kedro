@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import NamedTuple, Union
 
-import anyconfig
+import toml
 
 from kedro import __version__ as kedro_version
 from kedro.framework.project import configure_project
@@ -74,7 +74,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
         )
 
     try:
-        metadata_dict = anyconfig.load(pyproject_toml)
+        metadata_dict = toml.load(pyproject_toml)
     except Exception as exc:
         raise RuntimeError(f"Failed to parse '{_PYPROJECT}' file.") from exc
 

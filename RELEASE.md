@@ -48,10 +48,13 @@
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
-## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
+## Community contributors
+We are grateful to every community member who made a PR to Kedro that's found its way into 0.19.0, and give particular thanks to those who contributed between 0.18.14 and this release, either as part of their ongoing Kedro community involvement or as part of Hacktoberfest 2023 🎃
+
+* [Jeroldine Akuye Oakley](https://github.com/JayOaks) 🎃
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) 🎃
+* [Mustapha Abdullahi](https://github.com/mustious)
 * [Adam Kells](https://github.com/adamkells)
-* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
 
 # Release 0.18.14
 

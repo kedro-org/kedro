@@ -845,7 +845,7 @@ def _validate_config_file_inputs(config: dict[str, str]):
         sys.exit(1)
 
     add_on_reg_ex = (
-        r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d*-\d*)|(\d* - \d*))( )*))$"
+        r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d+-\d+)|(\d+ - \d+))( )*))$"
     )
     input_add_ons = config.get("add_ons", "none")
     if not re.match(add_on_reg_ex, input_add_ons.lower()):

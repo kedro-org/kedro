@@ -930,11 +930,15 @@ class TestAddOnsFromUserPrompts:
         _assert_requirements_ok(result, add_ons=add_ons)
         _clean_up_project(Path("./new-kedro-project"))
 
-    def test_invalid_add_ons(self, fake_kedro_cli):
+    @pytest.mark.parametrize(
+        "bad_input",
+        ["bad input", "-1", "3-"],
+    )
+    def test_invalid_add_ons(self, fake_kedro_cli, bad_input):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
-            input=_make_cli_prompt_input(add_ons="bad input"),
+            input=_make_cli_prompt_input(add_ons=bad_input),
         )
 
         assert result.exit_code != 0
@@ -1020,10 +1024,14 @@ class TestAddOnsFromConfigFile:
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="my-project")
         _clean_up_project(Path("./my-project"))
 
-    def test_invalid_add_ons(self, fake_kedro_cli):
+    @pytest.mark.parametrize(
+        "bad_input",
+        ["bad input", "-1", "3-"],
+    )
+    def test_invalid_add_ons(self, fake_kedro_cli, bad_input):
         """Test project created from config."""
         config = {
-            "add_ons": "bad input",
+            "add_ons": bad_input,
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",

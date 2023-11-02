@@ -105,6 +105,8 @@ class TestCLITools:
                 "-a",
                 "--starter",
                 "-s",
+                "--name",
+                "-n",
                 "--checkout",
                 "--directory",
                 "--help",

@@ -592,14 +592,21 @@ def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, 
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
-
-    if add_ons and "Pyspark" in add_ons and "Kedro Viz" in add_ons:
-        cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-    elif add_ons and "Pyspark" in add_ons:
-        cookiecutter_args["directory"] = "spaceflights-pyspark"
-    elif add_ons and "Kedro Viz" in add_ons:
-        cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+    if add_ons:
+        if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+            # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+        elif "Pyspark" in add_ons:
+            # Use the spaceflights-pyspark starter if only Pyspark is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark"
+        elif "Kedro Viz" in add_ons:
+            # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        else:
+            # Use the default template path for any other combinations or if "none" is chosen.
+            starter_path = template_path
     else:
+        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty
         starter_path = template_path
     return starter_path
 

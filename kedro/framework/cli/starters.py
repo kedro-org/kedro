@@ -296,6 +296,10 @@ def new(  # noqa: too-many-arguments
     cookiecutter_dir = _get_cookiecutter_dir(template_path, checkout, directory, tmpdir)
     prompts_required = _get_prompts_required(cookiecutter_dir)
 
+    # Format user input where necessary
+    if selected_addons is not None:
+        selected_addons = selected_addons.lower()
+
     # Select which prompts will be displayed to the user based on which flags were selected.
     prompts_required = _select_prompts_to_display(
         prompts_required, selected_addons, project_name

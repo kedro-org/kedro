@@ -78,7 +78,7 @@ def _convert_addon_names_to_numbers(selected_addons: str):
         "pyspark": "6",
     }
 
-    addons = selected_addons.split(",")
+    addons = selected_addons.lower().split(",")
     for i in range(len(addons)):
         addon = addons[i].strip()
         if addon in string_to_number:
@@ -1107,6 +1107,11 @@ class TestAddOnsFromCLI:
             "log, docs, data, test, lint",
             "log,       docs,     data,   test,     lint",
             "all",
+            "LINT",
+            "ALL",
+            "NONE",
+            "TEST, LOG, DOCS",
+            "test, DATA, liNt",
         ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):

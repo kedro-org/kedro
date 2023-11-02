@@ -127,6 +127,8 @@ ADD_ONS_DICT = {
     "7": "Kedro Viz",
 }
 
+NAME_ARG_HELP = "The name of your new Kedro project."
+
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
     """Remove readonly files on Windows
@@ -260,7 +262,16 @@ def create_cli():  # pragma: no cover
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
-def new(config_path, starter_alias, selected_addons, checkout, directory, **kwargs):
+@click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
+def new(  # noqa: too-many-arguments
+    config_path,
+    starter_alias,
+    selected_addons,
+    project_name,
+    checkout,
+    directory,
+    **kwargs,
+):
     """Create a new kedro project."""
     if checkout and not starter_alias:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
@@ -295,9 +306,13 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     prompts_required = _get_prompts_required(cookiecutter_dir)
 
     # Select which prompts will be displayed to the user based on which flags were selected.
-    prompts_required = _select_prompts_to_display(prompts_required, selected_addons)
+    prompts_required = _select_prompts_to_display(
+        prompts_required, selected_addons, project_name
+    )
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
+    cookiecutter_context = None
+
     if not config_path:
         cookiecutter_context = _make_cookiecutter_context_for_prompts(cookiecutter_dir)
 
@@ -309,20 +324,13 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
-    if not prompts_required:
-        config = {}
-        if config_path:
-            config = _fetch_config_from_file(config_path)
-            _validate_config_file_inputs(config)
-
-    elif config_path:
-        config = _fetch_config_from_file(config_path)
-        _validate_config_file_against_prompts(config, prompts_required)
-        _validate_config_file_inputs(config)
-    else:
-        config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
-
-    config = _get_addons_from_cli_input(selected_addons, config)
+    config = _get_config(
+        prompts_required=prompts_required,
+        config_path=config_path,
+        cookiecutter_context=cookiecutter_context,
+        selected_addons=selected_addons,
+        project_name=project_name,
+    )
 
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
@@ -360,20 +368,66 @@ def list_starters():
         )
 
 
-def _get_addons_from_cli_input(
-    selected_addons: str, config: dict[str, str]
+def _get_config(
+    prompts_required: dict,
+    config_path: str,
+    cookiecutter_context: OrderedDict,
+    selected_addons: str,
+    project_name: str,
 ) -> dict[str, str]:
-    """Inserts add-on selection from the CLI input in the project
-    configuration, if it exists. Replaces add-on strings with the
-    corresponding prompt number.
+    """Generates a config dictionary to be used to generate cookiecutter args, based
+    on CLI flags, user prompts, or a configuration file.
+
+    Args:
+        prompts_required: a dictionary of all the prompts that will be shown to
+            the user on project creation.
+        config_path: a string containing the value for the --config flag, or
+            None in case the flag wasn't used.
+        cookiecutter_context: the context for Cookiecutter templates.
+        selected_addons: a string containing the value for the --addons flag,
+            or None in case the flag wasn't used.
+        project_name: a string containing the value for the --name flag, or
+            None in case the flag wasn't used.
+
+    Returns:
+        the prompts_required dictionary, with all the redundant information removed.
+    """
+    if not prompts_required:
+        config = {}
+        if config_path:
+            config = _fetch_config_from_file(config_path)
+            _validate_config_file_inputs(config)
+
+    elif config_path:
+        config = _fetch_config_from_file(config_path)
+        _validate_config_file_against_prompts(config, prompts_required)
+        _validate_config_file_inputs(config)
+    else:
+        config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
+
+    add_ons = _get_addons_from_cli_input(selected_addons)
+
+    if add_ons is not None:
+        config["add_ons"] = add_ons
+
+    if project_name is not None:
+        config["project_name"] = project_name
+
+    return config
+
+
+def _get_addons_from_cli_input(selected_addons: str) -> str:
+    """Prepares add-on selection from the CLI input to the correct format
+    to be put in the project configuration, if it exists.
+    Replaces add-on strings with the corresponding prompt number.
 
     Args:
         selected_addons: a string containing the value for the --addons flag,
             or None in case the flag wasn't used.
 
     Returns:
-        Configuration for starting a new project, with the selected add-ons
-        from the `--addons` flag.
+        String with the numbers corresponding to the desired add_ons, or
+        None in case the --addons flag was not used.
     """
     string_to_number = {
         "lint": "1",
@@ -391,12 +445,14 @@ def _get_addons_from_cli_input(
             addon = addons[i].strip()
             if addon in string_to_number:
                 addons[i] = string_to_number[addon]
-        config["add_ons"] = ",".join(addons)
+        return ",".join(addons)
 
-    return config
+    return None
 
 
-def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> dict:
+def _select_prompts_to_display(
+    prompts_required: dict, selected_addons: str, project_name: str
+) -> dict:
     """Selects which prompts an user will receive when creating a new
     Kedro project, based on what information was already made available
     through CLI input.
@@ -406,6 +462,8 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
             the user on project creation.
         selected_addons: a string containing the value for the --addons flag,
             or None in case the flag wasn't used.
+        project_name: a string containing the value for the --name flag, or
+            None in case the flag wasn't used.
 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
@@ -440,6 +498,16 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
             )
             sys.exit(1)
         del prompts_required["add_ons"]
+
+    if project_name is not None:
+        if bool(re.match(r"^[\w -]{2,}$", project_name)) is False:
+            click.secho(
+                "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
+                fg="red",
+                err=True,
+            )
+            sys.exit(1)
+        del prompts_required["project_name"]
 
     return prompts_required
 

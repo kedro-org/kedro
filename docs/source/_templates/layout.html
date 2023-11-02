@@ -32,6 +32,12 @@
   document.addEventListener("DOMContentLoaded", function() {
       var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
       sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
+
+      // Prepend close icon to mobile header
+      var closeBtn = document.querySelector('.wy-nav-top i.fa-bars').cloneNode(true);
+      closeBtn.classList.remove('fa-bars');
+      closeBtn.classList.add('fa-times');
+      document.querySelector('.wy-nav-top').prepend(closeBtn)
   });
 </script>
 <link rel="stylesheet" href="https://kedro-shared-files.s3.eu-west-2.amazonaws.com/qb1-sphinx-rtd.css" type="text/css"

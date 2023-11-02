@@ -10,7 +10,7 @@ import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Iterable, Iterator, List, Tuple, Union
+from typing import Any, Iterable, Iterator, Union
 
 import click
 from build.util import project_wheel_metadata
@@ -824,13 +824,10 @@ def _refactor_code_for_package(
         _move_package_with_conflicting_name(tests_target, "tests")
 
 
-_SourcePathType = Union[Path, List[Tuple[Path, str]]]
-
-
 def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
     micropkg_name: str,
     destination: Path,
-    source_paths: tuple[_SourcePathType, ...],
+    source_paths: tuple[Path, Path, list[tuple[Path, str]]],
     version: str,
     metadata: ProjectMetadata,
     alias: str = None,
@@ -847,20 +844,20 @@ def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
             package_source,
             tests_source,
             alias,
-            metadata,  # type: ignore
+            metadata,
         )
         project.close()
 
         # Copy & "refactor" config
         _, _, conf_target = _get_package_artifacts(temp_dir_path, package_name)
-        _sync_path_list(conf_source, conf_target)  # type: ignore
+        _sync_path_list(conf_source, conf_target)
         if conf_target.is_dir() and alias:
             _rename_files(conf_target, micropkg_name, alias)
 
         # Build a pyproject.toml on the fly
         try:
             install_requires = _make_install_requires(
-                package_source / "requirements.txt"  # type: ignore
+                package_source / "requirements.txt"
             )
         except Exception as exc:
             click.secho("FAILED", fg="red")

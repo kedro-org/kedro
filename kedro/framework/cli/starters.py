@@ -493,7 +493,7 @@ def _select_prompts_to_display(
         del prompts_required["add_ons"]
 
     if project_name is not None:
-        if bool(re.match(r"^[\w -]{2,}$", project_name)) is False:
+        if not re.match(r"^[\w -]{2,}$", project_name):
             click.secho(
                 "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
                 fg="red",

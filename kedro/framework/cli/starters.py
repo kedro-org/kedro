@@ -335,7 +335,7 @@ def new(  # noqa: too-many-arguments
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
-    config = _get_config(
+    extra_context = _get_config(
         prompts_required=prompts_required,
         config_path=config_path,
         cookiecutter_context=cookiecutter_context,
@@ -343,7 +343,7 @@ def new(  # noqa: too-many-arguments
         project_name=project_name,
     )
 
-    cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
+    cookiecutter_args = _make_cookiecutter_args(extra_context, checkout, directory)
 
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
 

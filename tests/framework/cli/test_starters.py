@@ -913,10 +913,8 @@ class TestAddOnsFromUserPrompts:
             "  1 - 3  ",
             "ALL",
             "All",
-            "AlL",
             "NONE",
             "None",
-            "nonE",
         ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
@@ -1001,10 +999,8 @@ class TestAddOnsFromConfigFile:
             "  1 - 3  ",
             "ALL",
             "All",
-            "AlL",
             "NONE",
             "None",
-            "nonE",
         ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):

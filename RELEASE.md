@@ -31,6 +31,7 @@
 
 ### ConfigLoader
 * Made `OmegaConfigLoader` the default config loader.
+* Removed `ConfigLoader` and `TemplatedConfigLoader`.
 * `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.
 
 ### Other

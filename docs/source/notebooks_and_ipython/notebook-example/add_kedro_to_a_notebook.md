@@ -13,7 +13,7 @@ jupyter:
     name: python3
 ---
 
-<!-- This is markdown extracted from the Jupyter notebook of the same name. If you want to change the content to publish as new HTML on docs.kedro.org, first `pip install jupytext`. Then open the markdown (this page) make your changes and save. Next, type `jupytext --set-formats md,ipynb add_kedro_to_a_notebook.md` on the command line to regenerate the notebook. -->
+<!-- This is markdown extracted from the Jupyter notebook of the same name. If you want to change the content to publish as new HTML on docs.kedro.org, first `pip install jupytext`. Then open the markdown (this page) in a basic text editor (not an IDE) to make and save your changes. Next, type `jupytext --set-formats md,ipynb add_kedro_to_a_notebook.md` on the command line in the folder this file is located and regenerate the notebook. -->
 
 
 # Add Kedro features to a notebook
@@ -276,7 +276,7 @@ r2_score(y_test, y_pred)
 ```
 
 ## Use Kedro configuration
-Kedro offers a [configuration loader](/kedro.config.ConfigLoader) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
+Kedro offers a [configuration loader](/kedro.config.OmegaConfigLoader) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
 
 ### Use Kedro's configuration loader to load "magic values"
 To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follows:

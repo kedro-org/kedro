@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import multiprocessing
 import os
-import pickle
 import sys
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
@@ -23,50 +22,13 @@ from kedro.framework.hooks.manager import (
     _register_hooks_entry_points,
 )
 from kedro.framework.project import settings
-from kedro.io import DataCatalog, DatasetError, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset, SharedMemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
 
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61
-
-
-class _SharedMemoryDataset:
-    """``_SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
-    It is not inherited from AbstractDataset class.
-    """
-
-    def __init__(self, manager: SyncManager):
-        """Creates a new instance of ``_SharedMemoryDataset``,
-        and creates shared memorydataset attribute.
-
-        Args:
-            manager: An instance of multiprocessing manager for shared objects.
-
-        """
-        self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
-
-    def __getattr__(self, name):
-        # This if condition prevents recursive call when deserialising
-        if name == "__setstate__":
-            raise AttributeError()
-        return getattr(self.shared_memory_dataset, name)
-
-    def save(self, data: Any):
-        """Calls save method of a shared MemoryDataset in SyncManager."""
-        try:
-            self.shared_memory_dataset.save(data)
-        except Exception as exc:
-            # Checks if the error is due to serialisation or not
-            try:
-                pickle.dumps(data)
-            except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
-                raise DatasetError(
-                    f"{str(data.__class__)} cannot be serialised. ParallelRunner "
-                    "implicit memory datasets can only be used with serialisable data"
-                ) from serialisation_exc
-            raise exc
 
 
 class ParallelRunnerManager(SyncManager):
@@ -167,7 +129,7 @@ class ParallelRunner(AbstractRunner):
 
     def create_default_dataset(  # type: ignore
         self, ds_name: str
-    ) -> _SharedMemoryDataset:
+    ) -> SharedMemoryDataset:
         """Factory method for creating the default dataset for the runner.
 
         Args:
@@ -178,7 +140,7 @@ class ParallelRunner(AbstractRunner):
             unregistered datasets.
 
         """
-        return _SharedMemoryDataset(self._manager)
+        return SharedMemoryDataset(self._manager)
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):

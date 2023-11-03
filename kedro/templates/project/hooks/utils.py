@@ -122,7 +122,7 @@ def _handle_starter_setup(selected_add_ons_list: str, python_package_name: str) 
     catalog_yml_path = current_dir / "conf/base/catalog.yml"
     if catalog_yml_path.exists():
         catalog_yml_path.write_text('')
-    # Remove parameter/reporting files from conf/base
+    # Remove parameter files from conf/base
     conf_base_path = current_dir / "conf/base/"
     parameter_file_patterns = ["parameters_*.yml", "parameters/*.yml"]
     for pattern in parameter_file_patterns:

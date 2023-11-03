@@ -415,9 +415,11 @@ def _get_extra_context(
         _validate_config_file_against_prompts(extra_context, prompts_required)
         _validate_config_file_inputs(extra_context)
     else:
-        extra_context = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
+        extra_context = _fetch_config_from_user_prompts(
+            prompts_required, cookiecutter_context
+        )
 
-    add_ons = _get_addons_from_cli_input(selected_addons)
+    add_ons = _convert_addon_names_to_numbers(selected_addons)
 
     if add_ons is not None:
         extra_context["add_ons"] = add_ons
@@ -428,7 +430,7 @@ def _get_extra_context(
     return extra_context
 
 
-def _get_addons_from_cli_input(selected_addons: str) -> str:
+def _convert_addon_names_to_numbers(selected_addons: str) -> str:
     """Prepares add-on selection from the CLI input to the correct format
     to be put in the project configuration, if it exists.
     Replaces add-on strings with the corresponding prompt number.
@@ -450,7 +452,6 @@ def _get_addons_from_cli_input(selected_addons: str) -> str:
         if addon in ADD_ONS_SHORTNAME_TO_NUMBER:
             addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon])
     return ",".join(addons)
-
 
 
 def _select_prompts_to_display(

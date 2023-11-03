@@ -15,6 +15,7 @@ from kedro.framework.cli.starters import (
     _OFFICIAL_STARTER_SPECS,
     TEMPLATE_PATH,
     KedroStarterSpec,
+    _convert_addon_names_to_numbers,
     _parse_add_ons_input,
 )
 
@@ -66,25 +67,6 @@ def _make_cli_prompt_input_without_name(
     add_ons="none", repo_name="", python_package=""
 ):
     return "\n".join([add_ons, repo_name, python_package])
-
-
-def _convert_addon_names_to_numbers(selected_addons: str):
-    string_to_number = {
-        "lint": "1",
-        "test": "2",
-        "log": "3",
-        "docs": "4",
-        "data": "5",
-        "pyspark": "6",
-    }
-
-    addons = selected_addons.split(",")
-    for i in range(len(addons)):
-        addon = addons[i].strip()
-        if addon in string_to_number:
-            addons[i] = string_to_number[addon]
-
-    return ",".join(addons)
 
 
 def _get_expected_files(add_ons: str):

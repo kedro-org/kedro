@@ -448,9 +448,9 @@ def _convert_addon_names_to_numbers(selected_addons: str) -> str:
 
     addons = []
     for addon in selected_addons.split(","):
-        addon = addon.strip()
-        if addon in ADD_ONS_SHORTNAME_TO_NUMBER:
-            addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon])
+        addon_short_name = addon.strip()
+        if addon_short_name in ADD_ONS_SHORTNAME_TO_NUMBER:
+            addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon_short_name])
     return ",".join(addons)
 
 

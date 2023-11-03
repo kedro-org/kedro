@@ -116,7 +116,15 @@ kedro new --addons=all\n
 kedro new --addons=none
 """
 
-ADD_ONS_DICT = {
+ADD_ONS_SHORTNAME_TO_NUMBER = {
+    "lint": "1",
+    "test": "2",
+    "log": "3",
+    "docs": "4",
+    "data": "5",
+    "pyspark": "6",
+}
+NUMBER_TO_ADD_ONS_NAME = {
     "1": "Linting",
     "2": "Testing",
     "3": "Custom Logging",
@@ -124,6 +132,11 @@ ADD_ONS_DICT = {
     "5": "Data Structure",
     "6": "Pyspark",
 }
+ADD_ONS_SHORTNAME_TO_NAME = {
+    short_name: NUMBER_TO_ADD_ONS_NAME[num]
+    for short_name, num in ADD_ONS_SHORTNAME_TO_NUMBER.items()
+}
+
 
 NAME_ARG_HELP = "The name of your new Kedro project."
 
@@ -213,13 +226,13 @@ def _parse_add_ons_input(add_ons_str: str):
 
     def _validate_selection(add_ons: list[str]):
         for add_on in add_ons:
-            if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
+            if int(add_on) < 1 or int(add_on) > len(NUMBER_TO_ADD_ONS_NAME):
                 message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
                 click.secho(message, fg="red", err=True)
                 sys.exit(1)
 
     if add_ons_str == "all":
-        return list(ADD_ONS_DICT)
+        return list(NUMBER_TO_ADD_ONS_NAME)
     if add_ons_str == "none":
         return []
     # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
@@ -322,7 +335,7 @@ def new(  # noqa: too-many-arguments
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
-    extra_context = _get_extra_context(
+    config = _get_config(
         prompts_required=prompts_required,
         config_path=config_path,
         cookiecutter_context=cookiecutter_context,
@@ -330,7 +343,7 @@ def new(  # noqa: too-many-arguments
         project_name=project_name,
     )
 
-    cookiecutter_args = _make_cookiecutter_args(extra_context, checkout, directory)
+    cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
 
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
 
@@ -367,7 +380,7 @@ def list_starters():
         )
 
 
-def _get_extra_context(
+def _get_config(
     prompts_required: dict,
     config_path: str,
     cookiecutter_context: OrderedDict,
@@ -428,24 +441,16 @@ def _get_addons_from_cli_input(selected_addons: str) -> str:
         String with the numbers corresponding to the desired add_ons, or
         None in case the --addons flag was not used.
     """
-    string_to_number = {
-        "lint": "1",
-        "test": "2",
-        "log": "3",
-        "docs": "4",
-        "data": "5",
-        "pyspark": "6",
-    }
+    if selected_addons is None:
+        return None
 
-    if selected_addons is not None:
-        addons = selected_addons.split(",")
-        for i in range(len(addons)):
-            addon = addons[i].strip()
-            if addon in string_to_number:
-                addons[i] = string_to_number[addon]
-        return ",".join(addons)
+    addons = []
+    for addon in selected_addons.split(","):
+        addon = addon.strip()
+        if addon in ADD_ONS_SHORTNAME_TO_NUMBER:
+            addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon])
+    return ",".join(addons)
 
-    return None
 
 
 def _select_prompts_to_display(
@@ -558,7 +563,7 @@ def _make_cookiecutter_args(
     add_ons = config.get("add_ons")
     if add_ons:
         config["add_ons"] = [
-            ADD_ONS_DICT[add_on] for add_on in _parse_add_ons_input(add_ons)  # type: ignore
+            NUMBER_TO_ADD_ONS_NAME[add_on] for add_on in _parse_add_ons_input(add_ons)  # type: ignore
         ]
         config["add_ons"] = str(config["add_ons"])
 

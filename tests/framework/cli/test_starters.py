@@ -5,8 +5,8 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-import anyconfig
 import pytest
+import toml
 import yaml
 from click.testing import CliRunner
 from cookiecutter.exceptions import RepositoryCloneFailed
@@ -131,7 +131,7 @@ def _assert_requirements_ok(
         assert "black" in requirements
         assert "ruff" in requirements
 
-        pyproject_config = anyconfig.load(pyproject_file_path)
+        pyproject_config = toml.load(pyproject_file_path)
         expected = {
             "tool": {
                 "ruff": {
@@ -152,7 +152,7 @@ def _assert_requirements_ok(
         assert "pytest-mock>=1.7.1, <2.0" in requirements
         assert "pytest~=7.2" in requirements
 
-        pyproject_config = anyconfig.load(pyproject_file_path)
+        pyproject_config = toml.load(pyproject_file_path)
         expected = {
             "pytest": {
                 "ini_options": {
@@ -171,7 +171,7 @@ def _assert_requirements_ok(
         assert expected["coverage"] == pyproject_config["tool"]["coverage"]
 
     if "4" in add_ons_list:
-        pyproject_config = anyconfig.load(pyproject_file_path)
+        pyproject_config = toml.load(pyproject_file_path)
         expected = {
             "optional-dependencies": {
                 "docs": [

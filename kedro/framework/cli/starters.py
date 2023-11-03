@@ -125,6 +125,15 @@ ADD_ONS_DICT = {
     "6": "Pyspark",
 }
 
+ADD_ONS_SHORTNAME_TO_NUMBER = {
+    "lint": "1",
+    "test": "2",
+    "log": "3",
+    "docs": "4",
+    "data": "5",
+    "pyspark": "6",
+}
+
 NAME_ARG_HELP = "The name of your new Kedro project."
 
 # noqa: unused-argument
@@ -428,21 +437,13 @@ def _get_addons_from_cli_input(selected_addons: str) -> str:
         String with the numbers corresponding to the desired add_ons, or
         None in case the --addons flag was not used.
     """
-    string_to_number = {
-        "lint": "1",
-        "test": "2",
-        "log": "3",
-        "docs": "4",
-        "data": "5",
-        "pyspark": "6",
-    }
 
     if selected_addons is not None:
         addons = selected_addons.split(",")
         for i in range(len(addons)):
             addon = addons[i].strip()
-            if addon in string_to_number:
-                addons[i] = string_to_number[addon]
+            if addon in ADD_ONS_SHORTNAME_TO_NUMBER:
+                addons[i] = ADD_ONS_SHORTNAME_TO_NUMBER[addon]
         return ",".join(addons)
 
     return None

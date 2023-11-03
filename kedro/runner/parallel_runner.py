@@ -75,7 +75,7 @@ class ParallelRunnerManager(SyncManager):
     """
 
 
-ParallelRunnerManager.register("MemoryDataset", MemoryDataset)  # noqa: no-member
+# ParallelRunnerManager.register("MemoryDataset", MemoryDataset)  # noqa: no-member
 
 
 def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
@@ -147,6 +147,8 @@ class ParallelRunner(AbstractRunner):
         """
         super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
+        # print("REGISTERING @@@@@@@@")
+        self._manager.register("MemoryDataset", MemoryDataset)
         self._manager.start()  # noqa: consider-using-with
 
         # This code comes from the concurrent.futures library

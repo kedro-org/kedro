@@ -560,8 +560,6 @@ def _make_cookiecutter_args(
         config["add_ons"] = [
             ADD_ONS_DICT[add_on] for add_on in _parse_add_ons_input(add_ons)  # type: ignore
         ]
-        config["add_ons"] = str(config["add_ons"])
-
     cookiecutter_args = {
         "output_dir": config.get("output_dir", str(Path.cwd().resolve())),
         "no_input": True,
@@ -579,6 +577,8 @@ def _make_cookiecutter_args(
 def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
+    print("DEBUG**")
+    print(add_ons, type(add_ons))
     if add_ons and "Pyspark" in add_ons:
         cookiecutter_args["directory"] = "spaceflights-pyspark"
         pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"

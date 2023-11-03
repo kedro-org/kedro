@@ -74,7 +74,13 @@ def remove_file(path):
         path.unlink()
 
 
-def handle_starter_setup(selected_add_ons_list, python_package_name):
+def handle_starter_setup(selected_add_ons_list: str, python_package_name) -> None:
+    """Clean up the unnecessary files in the starters template.
+
+    Args:
+        selected_add_ons_list (str): A string contains the selected add-ons.
+        python_package_name (_type_): The name of the python package.
+    """
     # Remove all .csv and .xlsx files from data/01_raw/
     raw_data_path = current_dir / "data/01_raw/"
     for file_path in raw_data_path.glob("*.*"):
@@ -107,7 +113,15 @@ def handle_starter_setup(selected_add_ons_list, python_package_name):
     remove_file(test_pipeline_path)
 
 
-def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path, python_package_name):
+def setup_template_add_ons(selected_add_ons_list: str, requirements_file_path:str, pyproject_file_path: str, python_package_name: str) -> None:
+    """Setup the starter templates according to the choice of add-ons.
+
+    Args:
+        selected_add_ons_list (str): A string contains the selected add-ons.
+        requirements_file_path (str): The path of the `requiremenets.txt` in the starter template.
+        pyproject_file_path (str): The path of the `pyproject.toml` in the starter template
+        python_package_name (str): The name of the python package.
+    """
     if "Linting" not in selected_add_ons_list:
         remove_from_file(requirements_file_path, lint_requirements)
         remove_from_toml(pyproject_file_path, lint_pyproject_requirements)

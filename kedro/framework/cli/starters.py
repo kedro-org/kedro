@@ -341,7 +341,6 @@ def new(  # noqa: too-many-arguments
         project_name=project_name,
     )
 
-
     cookiecutter_args = _make_cookiecutter_args(extra_context, checkout, directory)
 
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)

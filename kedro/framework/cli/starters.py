@@ -335,7 +335,7 @@ def new(  # noqa: too-many-arguments
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
-    extra_context = _get_config(
+    extra_context = _get_extra_context(
         prompts_required=prompts_required,
         config_path=config_path,
         cookiecutter_context=cookiecutter_context,
@@ -380,14 +380,14 @@ def list_starters():
         )
 
 
-def _get_config(
+def _get_extra_context(
     prompts_required: dict,
     config_path: str,
     cookiecutter_context: OrderedDict,
     selected_addons: str,
     project_name: str,
 ) -> dict[str, str]:
-    """Generates a config dictionary to will be passed, based
+    """Generates a config dictionary that will be passed to cookiecutters as `extra_context`, based
     on CLI flags, user prompts, or a configuration file.
 
     Args:

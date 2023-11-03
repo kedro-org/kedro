@@ -374,7 +374,7 @@ def _get_extra_context(
     selected_addons: str,
     project_name: str,
 ) -> dict[str, str]:
-    """Generates a config dictionary to will be passed to cookiecutter as `extra_context`, based
+    """Generates a config dictionary to will be passed, based
     on CLI flags, user prompts, or a configuration file.
 
     Args:
@@ -392,27 +392,27 @@ def _get_extra_context(
         the prompts_required dictionary, with all the redundant information removed.
     """
     if not prompts_required:
-        extra_context = {}
+        config = {}
         if config_path:
-            extra_context = _fetch_config_from_file(config_path)
-            _validate_config_file_inputs(extra_context)
+            config = _fetch_config_from_file(config_path)
+            _validate_config_file_inputs(config)
 
     elif config_path:
-        extra_context = _fetch_config_from_file(config_path)
-        _validate_config_file_against_prompts(extra_context, prompts_required)
-        _validate_config_file_inputs(extra_context)
+        config = _fetch_config_from_file(config_path)
+        _validate_config_file_against_prompts(config, prompts_required)
+        _validate_config_file_inputs(config)
     else:
-        extra_context = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
+        config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
     add_ons = _get_addons_from_cli_input(selected_addons)
 
     if add_ons is not None:
-        extra_context["add_ons"] = add_ons
+        config["add_ons"] = add_ons
 
     if project_name is not None:
-        extra_context["project_name"] = project_name
+        config["project_name"] = project_name
 
-    return extra_context
+    return config
 
 
 def _get_addons_from_cli_input(selected_addons: str) -> str:

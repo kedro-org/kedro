@@ -441,16 +441,16 @@ def _get_addons_from_cli_input(selected_addons: str) -> str:
         String with the numbers corresponding to the desired add_ons, or
         None in case the --addons flag was not used.
     """
+    if selected_addons is None:
+        return None
 
-    if selected_addons is not None:
-        addons = selected_addons.split(",")
-        for i in range(len(addons)):
-            addon = addons[i].strip()
-            if addon in ADD_ONS_SHORTNAME_TO_NUMBER:
-                addons[i] = ADD_ONS_SHORTNAME_TO_NUMBER[addon]
-        return ",".join(addons)
+    addons = []
+    for addon in selected_addons.split(","):
+        addon = addon.strip()
+        if addon in ADD_ONS_SHORTNAME_TO_NUMBER:
+            addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon])
+    return ",".join(addons)
 
-    return None
 
 
 def _select_prompts_to_display(

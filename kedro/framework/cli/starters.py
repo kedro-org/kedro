@@ -132,10 +132,6 @@ NUMBER_TO_ADD_ONS_NAME = {
     "5": "Data Structure",
     "6": "Pyspark",
 }
-ADD_ONS_SHORTNAME_TO_NAME = {
-    short_name: NUMBER_TO_ADD_ONS_NAME[num]
-    for short_name, num in ADD_ONS_SHORTNAME_TO_NUMBER.items()
-}
 
 
 NAME_ARG_HELP = "The name of your new Kedro project."
@@ -226,7 +222,7 @@ def _parse_add_ons_input(add_ons_str: str):
 
     def _validate_selection(add_ons: list[str]):
         for add_on in add_ons:
-            if int(add_on) < 1 or int(add_on) > len(NUMBER_TO_ADD_ONS_NAME):
+            if add_on not in NUMBER_TO_ADD_ONS_NAME:
                 message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
                 click.secho(message, fg="red", err=True)
                 sys.exit(1)
@@ -387,7 +383,7 @@ def _get_extra_context(
     selected_addons: str,
     project_name: str,
 ) -> dict[str, str]:
-    """Generates a config dictionary that will be passed to cookiecutters as `extra_context`, based
+    """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
     on CLI flags, user prompts, or a configuration file.
 
     Args:
@@ -472,7 +468,7 @@ def _select_prompts_to_display(
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = list(ADD_ONS_SHORTNAME_TO_NAME) + ["all", "none"]
+    valid_addons = list(ADD_ONS_SHORTNAME_TO_NUMBER) + ["all", "none"]
 
     if selected_addons is not None:
         addons = re.sub(r"\s", "", selected_addons).split(",")

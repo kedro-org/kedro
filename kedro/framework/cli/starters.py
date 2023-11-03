@@ -124,6 +124,7 @@ ADD_ONS_SHORTNAME_TO_NUMBER = {
     "docs": "4",
     "data": "5",
     "pyspark": "6",
+    "viz": "7",
 }
 NUMBER_TO_ADD_ONS_NAME = {
     "1": "Linting",

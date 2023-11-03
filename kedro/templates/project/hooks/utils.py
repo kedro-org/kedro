@@ -105,12 +105,12 @@ def _remove_file(path: Path) -> None:
         path.unlink()
 
 
-def _handle_starter_setup(selected_add_ons_list: str, python_package_name) -> None:
+def _handle_starter_setup(selected_add_ons_list: str, python_package_name: str) -> None:
     """Clean up the unnecessary files in the starters template.
 
     Args:
         selected_add_ons_list (str): A string contains the selected add-ons.
-        python_package_name (_type_): The name of the python package.
+        python_package_name (str): The name of the python package.
     """
     # Remove all .csv and .xlsx files from data/01_raw/
     raw_data_path = current_dir / "data/01_raw/"

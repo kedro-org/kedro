@@ -435,7 +435,7 @@ def _get_addons_from_cli_input(selected_addons: str) -> str:
 
     Args:
         selected_addons: a string containing the value for the --addons flag,
-            or None in case the flag wasn't used.
+            or None in case the flag wasn't used, i.e. lint,docs.
 
     Returns:
         String with the numbers corresponding to the desired add_ons, or
@@ -471,7 +471,7 @@ def _select_prompts_to_display(
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = ["lint", "test", "log", "docs", "data", "pyspark", "all", "none"]
+    valid_addons = list(ADD_ONS_SHORTNAME_TO_NAME) + ["all", "none"]
 
     if selected_addons is not None:
         addons = re.sub(r"\s", "", selected_addons).split(",")

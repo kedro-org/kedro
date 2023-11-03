@@ -108,7 +108,8 @@ Add-Ons\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
-6) Pyspark: Provides a basic PySpark set up\n
+6) Pyspark: Provides set up configuration for working with PySpark\n
+7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
 kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
@@ -123,6 +124,7 @@ ADD_ONS_SHORTNAME_TO_NUMBER = {
     "docs": "4",
     "data": "5",
     "pyspark": "6",
+    "viz": "7",
 }
 NUMBER_TO_ADD_ONS_NAME = {
     "1": "Linting",
@@ -131,6 +133,7 @@ NUMBER_TO_ADD_ONS_NAME = {
     "4": "Documentation",
     "5": "Data Structure",
     "6": "Pyspark",
+    "7": "Kedro Viz",
 }
 
 
@@ -223,7 +226,7 @@ def _parse_add_ons_input(add_ons_str: str):
     def _validate_selection(add_ons: list[str]):
         for add_on in add_ons:
             if add_on not in NUMBER_TO_ADD_ONS_NAME:
-                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
+                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
                 click.secho(message, fg="red", err=True)
                 sys.exit(1)
 
@@ -475,7 +478,7 @@ def _select_prompts_to_display(
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
-                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none",
+                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, viz, all, none",
                     fg="red",
                     err=True,
                 )
@@ -581,11 +584,24 @@ def _make_cookiecutter_args(
 def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
-    if add_ons and "Pyspark" in add_ons:
-        cookiecutter_args["directory"] = "spaceflights-pyspark"
-        pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
-        return pyspark_path
-    return template_path
+    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
+    if add_ons:
+        if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+            # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+        elif "Pyspark" in add_ons:
+            # Use the spaceflights-pyspark starter if only Pyspark is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark"
+        elif "Kedro Viz" in add_ons:
+            # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        else:
+            # Use the default template path for any other combinations or if "none" is chosen.
+            starter_path = template_path
+    else:
+        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty.
+        starter_path = template_path
+    return starter_path
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
@@ -619,11 +635,9 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     add_ons = extra_context.get("add_ons")
 
-    # Only core template and spaceflights-pyspark have configurable add-ons
-    if (
-        template_path == str(TEMPLATE_PATH)
-        or add_ons is not None
-        and "Pyspark" in add_ons
+    # Only core template and spaceflight starters have configurable add-ons
+    if template_path == str(TEMPLATE_PATH) or (
+        add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)
     ):
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")

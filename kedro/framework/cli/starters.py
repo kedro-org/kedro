@@ -405,27 +405,27 @@ def _get_extra_context(
         the prompts_required dictionary, with all the redundant information removed.
     """
     if not prompts_required:
-        config = {}
+        extra_context = {}
         if config_path:
-            config = _fetch_config_from_file(config_path)
-            _validate_config_file_inputs(config)
+            extra_context = _fetch_config_from_file(config_path)
+            _validate_config_file_inputs(extra_context)
 
     elif config_path:
-        config = _fetch_config_from_file(config_path)
-        _validate_config_file_against_prompts(config, prompts_required)
-        _validate_config_file_inputs(config)
+        extra_context = _fetch_config_from_file(config_path)
+        _validate_config_file_against_prompts(extra_context, prompts_required)
+        _validate_config_file_inputs(extra_context)
     else:
-        config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
+        extra_context = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
     add_ons = _get_addons_from_cli_input(selected_addons)
 
     if add_ons is not None:
-        config["add_ons"] = add_ons
+        extra_context["add_ons"] = add_ons
 
     if project_name is not None:
-        config["project_name"] = project_name
+        extra_context["project_name"] = project_name
 
-    return config
+    return extra_context
 
 
 def _get_addons_from_cli_input(selected_addons: str) -> str:

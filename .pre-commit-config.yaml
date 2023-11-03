@@ -57,7 +57,8 @@ repos:
       rev: v1.12.1
       hooks:
           - id: blacken-docs
-            additional_dependencies: [black~=22.0]
+            additional_dependencies:
+            - black==23.10.1
             entry: blacken-docs --skip-errors
 
     - repo: local

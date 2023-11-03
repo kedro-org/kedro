@@ -33,20 +33,15 @@
       var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
       sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
 
-      // Prepend close icon to mobile header
-      var closeBtn = document.querySelector('.wy-nav-top i.fa-bars').cloneNode(true);
-      closeBtn.classList.remove('fa-bars');
-      closeBtn.classList.add('fa-times');
-      document.querySelector('.wy-nav-top').prepend(closeBtn)
+      // Prepend close button to mobile header
+      var closeBtn = document.createElement("span");
+      closeBtn.dataset.toggle = 'wy-nav-top';
+      closeBtn.classList.add('wy-nav-top-close');
+      document.querySelector('.wy-nav-top').prepend(closeBtn);
   });
 </script>
 <link rel="stylesheet" href="https://kedro-shared-files.s3.eu-west-2.amazonaws.com/qb1-sphinx-rtd.css" type="text/css"
 />
 <link rel="stylesheet" href="https://kedro-shared-files.s3.eu-west-2.amazonaws.com/theme-overrides.css" type="text/css"
 />
-<style>
-  .wy-nav-top:after {
-    background: url('../kedro-horizontal-color-on-light.svg') no-repeat center;
-  }
-</style>
 {% endblock %}

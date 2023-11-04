@@ -137,7 +137,7 @@ class PartitionedDataset(AbstractDataset):
 
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         path: str,
         dataset: str | type[AbstractDataset] | dict[str, Any],
@@ -321,7 +321,7 @@ class PartitionedDataset(AbstractDataset):
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
             if callable(partition_data):
-                partition_data = partition_data()  # noqa: redefined-loop-name
+                partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)
         self._invalidate_caches()
 
@@ -388,7 +388,7 @@ class IncrementalDataset(PartitionedDataset):
     DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataSet"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         path: str,
         dataset: str | type[AbstractDataset] | dict[str, Any],
@@ -400,7 +400,6 @@ class IncrementalDataset(PartitionedDataset):
         fs_args: dict[str, Any] = None,
         metadata: dict[str, Any] = None,
     ):
-
         """Creates a new instance of ``IncrementalDataset``.
 
         Args:

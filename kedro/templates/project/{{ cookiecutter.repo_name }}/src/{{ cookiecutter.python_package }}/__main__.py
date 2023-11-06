@@ -41,9 +41,10 @@ def main(*args, **kwargs):
     package_name = Path(__file__).parent.name
     configure_project(package_name)
     run = _find_run_command(package_name)
+
     interactive = not hasattr(sys, 'ps1')
     kwargs["standalone_mode"] = not interactive
-    
+
     run(*args, **kwargs)
 
 

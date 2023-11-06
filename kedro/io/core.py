@@ -397,13 +397,13 @@ def parse_dataset_definition(
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
 
         trials = (_load_obj(class_path) for class_path in class_paths)
-        try:
+        for:
             class_obj = next(obj for obj in trials if obj is not None)
-        except StopIteration as exc:
+        else:
             raise DatasetError(
                 f"Class '{class_obj}' not found or one of its dependencies "
                 f"has not been installed."
-            ) from exc
+            )
 
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(

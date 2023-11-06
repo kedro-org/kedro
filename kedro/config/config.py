@@ -66,7 +66,7 @@ class ConfigLoader(AbstractConfigLoader):
 
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         conf_source: str,
         env: str = None,

@@ -4,13 +4,13 @@ This page describes how to make interactive visualisations of a Kedro project wi
 
 ## Visualisation with Plotly
 
-We use the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and add a reporting pipeline that uses Plotly. Even if you have not yet worked through the tutorial, you can still follow this example; you'll need to use the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) to generate a copy of the project with working code in place.
+We use the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and add a reporting pipeline that uses Plotly. Even if you have not yet worked through the tutorial, you can still follow this example; you'll need to use the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) to generate a copy of the project with working code in place.
 
 If you haven't installed Kedro [follow the documentation to get set up](../get_started/install.md).
 
 Then, in your terminal window, navigate to the folder you want to store the project.
 
-Generate a copy of the spaceflights tutorial project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+Generate a copy of the spaceflights tutorial project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas):
 
 ```bash
 kedro new --starter=spaceflights
@@ -85,6 +85,7 @@ import plotly.express as px
 import plotly.graph_objs as go
 import pandas as pd
 
+
 # This function uses plotly.express
 def compare_passenger_capacity_exp(preprocessed_shuttles: pd.DataFrame):
     return (
@@ -96,7 +97,6 @@ def compare_passenger_capacity_exp(preprocessed_shuttles: pd.DataFrame):
 
 # This function uses plotly.graph_objects
 def compare_passenger_capacity_go(preprocessed_shuttles: pd.DataFrame):
-
     data_frame = (
         preprocessed_shuttles.groupby(["shuttle_type"])
         .mean(numeric_only=True)

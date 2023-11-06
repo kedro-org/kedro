@@ -69,7 +69,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"save_format": "tf"}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

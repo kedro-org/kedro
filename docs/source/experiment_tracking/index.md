@@ -23,7 +23,7 @@ Kedro has always supported parameter versioning (as part of your codebase with a
 
 Kedro-Viz version 4.1.1 introduced metadata capture, visualisation, discovery and comparison, enabling you to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 
-Kedro-Viz version 5.0 also supports the [display and comparison of plots, such as Plotly and Matplotlib](../visualisation/visualise_charts_with_plotly.md). Support for metric plots (timeseries and parellel coords) was added to Kedro-Viz version 5.2.1.
+Kedro-Viz version 5.0 also supports the [display and comparison of plots, such as Plotly and Matplotlib](../visualisation/visualise_charts_with_plotly.md). Support for metric plots (timeseries and parallel coords) was added to Kedro-Viz version 5.2.1.
 
 Kedro-Viz version 6.2 includes support for collaborative experiment tracking using a cloud storage solution. This means that multiple users can store their experiment data in a centralized remote storage, such as AWS S3, and access it through Kedro-Viz.
 

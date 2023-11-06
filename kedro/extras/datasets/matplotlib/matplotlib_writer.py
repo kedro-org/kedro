@@ -111,7 +111,7 @@ class MatplotlibWriter(
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,

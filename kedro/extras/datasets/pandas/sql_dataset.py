@@ -337,7 +337,7 @@ class SQLQueryDataSet(AbstractDataset[None, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: Dict[str, Any] = {}
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         sql: str = None,
         credentials: Dict[str, Any] = None,

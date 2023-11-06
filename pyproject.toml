@@ -74,12 +74,11 @@ include = ["kedro*"]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}
 
-[tool.black]
-exclude = "/templates/|^features/steps/test_starter"
+[tool.ruff.format]
+exclude = ["**/templates", "features/steps/test_starter"]
 
 [tool.isort]
 profile = "black"
-
 
 [tool.pylint]
 [tool.pylint.master]
@@ -216,7 +215,7 @@ select = [
     "PL",  # Pylint
     "T201", # Print Statement
 ]
-ignore = ["E501"]  # Black takes care of line-too-long
+ignore = ["E501"]  # ruff format takes care of line-too-long
 
 [tool.ruff.isort]
 known-first-party = ["kedro"]

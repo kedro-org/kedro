@@ -1,12 +1,18 @@
 # Upcoming Release 0.19.0
 
 ## Major features and improvements
+* Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
 
 ## Bug fixes and other changes
-
+* Reduced `spaceflights` data to minimize waiting times during tutorial execution.
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Adam Kells](https://github.com/adamkells)
+* [Laiza Parizotto]((https://github.com/laizaparizotto)
 
 # Release 0.18.14
 

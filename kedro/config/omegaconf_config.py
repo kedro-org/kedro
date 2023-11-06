@@ -76,7 +76,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         conf_source: str,
         env: str = None,
@@ -254,7 +254,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
-    def load_and_merge_dir_config(  # noqa: too-many-arguments
+    def load_and_merge_dir_config(  # noqa: PLR0913
         self,
         conf_path: str,
         patterns: Iterable[str],

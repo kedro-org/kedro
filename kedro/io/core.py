@@ -396,9 +396,10 @@ def parse_dataset_definition(
             )
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
 
-        trials = (_load_obj(class_path) for class_path in class_paths)
-        for:
-            class_obj = next(obj for obj in trials if obj is not None)
+        for class_path in class_paths:
+            class_obj = _load_obj(class_path)
+            if class_obj is not None:
+                break
         else:
             raise DatasetError(
                 f"Class '{class_obj}' not found or one of its dependencies "

@@ -227,7 +227,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
 
-    def __str__(self):
         def _to_str(obj, is_root=False):
             """Returns a string representation where
             1. The root level (i.e. the Dataset.__init__ arguments) are
@@ -252,7 +251,11 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             # not a dictionary
             return str(obj)
 
-        return f"{type(self).__name__}({_to_str(self._describe(), True)})"
+    def __str__(self):
+        return f"{type(self).__name__}({self._to_str(self._describe(), True)})"
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self._to_str(self._describe(), True)})"
 
     @abc.abstractmethod
     def _load(self) -> _DO:

@@ -196,6 +196,19 @@ class DataCatalog:
         if feed_dict:
             self.add_feed_dict(feed_dict)
 
+    def __repr__(self):
+        dataset_repr = {
+            name: repr(dataset) for name, dataset in self._data_sets.items()
+        }
+        ## solution 1: built in pprint
+        # from pprint import PrettyPrinter
+        # return f"DataCatalog(data_sets=\n{PrettyPrinter().pformat(dataset_repr)}\n)"
+
+        # solution 2: black
+        from black import Mode, format_str
+
+        return format_str(f"DataCatalog(data_sets={dataset_repr})", mode=Mode())
+
     @property
     def _logger(self):
         return logging.getLogger(__name__)

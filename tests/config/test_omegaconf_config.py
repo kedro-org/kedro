@@ -518,7 +518,7 @@ class TestOmegaConfigLoader:
 
     @use_config_dir
     def test_load_config_from_tar_file(self, tmp_path):
-        subprocess.run(  # pylint: disable=subprocess-run-check
+        subprocess.run(  # noqa: PLW1510
             [
                 "tar",
                 "--exclude=local/*.yml",

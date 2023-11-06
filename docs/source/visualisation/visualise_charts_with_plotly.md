@@ -85,6 +85,7 @@ import plotly.express as px
 import plotly.graph_objs as go
 import pandas as pd
 
+
 # This function uses plotly.express
 def compare_passenger_capacity_exp(preprocessed_shuttles: pd.DataFrame):
     return (
@@ -96,7 +97,6 @@ def compare_passenger_capacity_exp(preprocessed_shuttles: pd.DataFrame):
 
 # This function uses plotly.graph_objects
 def compare_passenger_capacity_go(preprocessed_shuttles: pd.DataFrame):
-
     data_frame = (
         preprocessed_shuttles.groupby(["shuttle_type"])
         .mean(numeric_only=True)

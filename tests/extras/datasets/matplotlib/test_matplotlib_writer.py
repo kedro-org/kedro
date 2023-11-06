@@ -103,9 +103,7 @@ def overwrite(request):
 
 
 @pytest.fixture
-def plot_writer(
-    mocked_s3_bucket, fs_args, save_args, overwrite
-):  # pylint: disable=unused-argument
+def plot_writer(mocked_s3_bucket, fs_args, save_args, overwrite):  # pylint: disable=unused-argument
     return MatplotlibWriter(
         filepath=FULL_PATH,
         credentials=AWS_CREDENTIALS,
@@ -170,7 +168,6 @@ class TestMatplotlibWriter:
         plot_writer.save(mock_dict_plot)
 
         for colour in COLOUR_LIST:
-
             download_path = tmp_path / "downloaded_image.png"
             actual_filepath = tmp_path / "locally_saved.png"
 
@@ -361,7 +358,6 @@ class TestMatplotlibWriterVersioned:
         versioned_plot_writer.save(mock_list_plot)
 
         for index in range(5):
-
             test_path = tmp_path / "test_image.png"
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 

@@ -234,7 +234,7 @@ class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # ruff: noqa: PLR0913
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         file_format: str = "parquet",
@@ -345,7 +345,6 @@ class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
 
     @staticmethod
     def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
-
         filepath = schema.get("filepath")
         if not filepath:
             raise DatasetError(
@@ -361,7 +360,6 @@ class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
 
         # Open schema file
         with file_system.open(load_path) as fs_file:
-
             try:
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:

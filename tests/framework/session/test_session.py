@@ -728,7 +728,6 @@ class TestKedroSession:
     def test_run_non_existent_pipeline(
         self, fake_project, mock_package_name, mock_runner
     ):
-
         pattern = (
             "Failed to find the pipeline named 'doesnotexist'. "
             "It needs to be generated and returned "

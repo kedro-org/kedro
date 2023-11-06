@@ -376,21 +376,21 @@ def parse_dataset_definition(
     if "type" not in config:
         raise DatasetError("'type' is missing from dataset catalog configuration")
 
-    class_obj = config.pop("type")
-    if isinstance(class_obj, str):
+    dataset_type = config.pop("type")
+    if isinstance(dataset_type, str):
         if len(class_obj.strip(".")) != len(class_obj):
             raise DatasetError(
                 "'type' class path does not support relative "
                 "paths or paths ending with a dot."
             )
-        class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
+        class_paths = (prefix + dataset_type for prefix in _DEFAULT_PACKAGES)
 
         trials = (_load_obj(class_path) for class_path in class_paths)
         try:
             class_obj = next(obj for obj in trials if obj is not None)
         except StopIteration as exc:
             raise DatasetError(
-                f"Class '{class_obj}' not found or one of its dependencies "
+                f"Class '{dataset_type}' not found or one of its dependencies "
                 f"has not been installed."
             ) from exc
 

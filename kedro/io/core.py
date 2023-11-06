@@ -378,7 +378,7 @@ def parse_dataset_definition(
 
     dataset_type = config.pop("type")
     if isinstance(dataset_type, str):
-        if len(class_obj.strip(".")) != len(class_obj):
+        if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
                 "'type' class path does not support relative "
                 "paths or paths ending with a dot."

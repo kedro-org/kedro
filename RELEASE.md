@@ -4,6 +4,9 @@
 * Dropped Python 3.7 support.
 * Introduced add-ons to the `kedro new` CLI flow.
 * The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
+* Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
+* Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
+
 
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.
@@ -24,9 +27,11 @@
 ### CLI
 * Removed deprecated `kedro docs` command.
 * Added the `--addons` flag to the `kedro new` command.
+* Added the `--name` flag to the `kedro new` command.
 
 ### ConfigLoader
 * Made `OmegaConfigLoader` the default config loader.
+* Removed `ConfigLoader` and `TemplatedConfigLoader`.
 * `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.
 
 ### Other
@@ -44,10 +49,13 @@
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
-## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
+## Community contributors
+We are grateful to every community member who made a PR to Kedro that's found its way into 0.19.0, and give particular thanks to those who contributed between 0.18.14 and this release, either as part of their ongoing Kedro community involvement or as part of Hacktoberfest 2023 🎃
+
+* [Jeroldine Akuye Oakley](https://github.com/JayOaks) 🎃
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) 🎃
+* [Mustapha Abdullahi](https://github.com/mustious)
 * [Adam Kells](https://github.com/adamkells)
-* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
 
 # Release 0.18.14
 

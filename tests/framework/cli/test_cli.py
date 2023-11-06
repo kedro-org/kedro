@@ -3,9 +3,9 @@ from itertools import cycle
 from os import rename
 from pathlib import Path
 
-import anyconfig
 import click
 from click.testing import CliRunner
+from omegaconf import OmegaConf
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
@@ -423,14 +423,15 @@ class TestRunCommand:
     @fixture(params=["run_config.yml", "run_config.json"])
     def fake_run_config(request, fake_root_dir):
         config_path = str(fake_root_dir / request.param)
-        anyconfig.dump(
-            {
-                "run": {
-                    "pipeline": "pipeline1",
-                    "tag": ["tag1", "tag2"],
-                    "node_names": ["node1", "node2"],
-                }
-            },
+        config = {
+            "run": {
+                "pipeline": "pipeline1",
+                "tag": ["tag1", "tag2"],
+                "node_names": ["node1", "node2"],
+            }
+        }
+        OmegaConf.save(
+            config,
             config_path,
         )
         return config_path
@@ -438,9 +439,9 @@ class TestRunCommand:
     @staticmethod
     @fixture
     def fake_run_config_with_params(fake_run_config, request):
-        config = anyconfig.load(fake_run_config)
+        config = OmegaConf.to_container(OmegaConf.load(fake_run_config))
         config["run"].update(request.param)
-        anyconfig.dump(config, fake_run_config)
+        OmegaConf.save(config, fake_run_config)
         return fake_run_config
 
     def test_run_successfully(

@@ -924,64 +924,6 @@ class TestRunCommand:
 
     # the following tests should be deleted in 0.19.0
 
-    def test_both_node_flags(
-        self,
-        fake_project_cli,
-        fake_metadata,
-        fake_session,
-        mocker,
-    ):
-        nodes_input = ["splitting_data", "training_model"]
-        nodes_expected = ("splitting_data", "training_model")
-        node_command = "--node=" + nodes_input[0]
-        nodes_command = "--nodes=" + nodes_input[1]
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", node_command, nodes_command], obj=fake_metadata
-        )
-        assert not result.exit_code
-
-        fake_session.run.assert_called_once_with(
-            tags=(),
-            runner=mocker.ANY,
-            node_names=nodes_expected,
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions={},
-            pipeline_name=None,
-            namespace=None,
-        )
-
-    def test_both_tag_flags(
-        self,
-        fake_project_cli,
-        fake_metadata,
-        fake_session,
-        mocker,
-    ):
-        tags_input = ["tag1", "tag2"]
-        tags_expected = ("tag1", "tag2")
-        tag_command = "--tag=" + tags_input[0]
-        tags_command = "--tags=" + tags_input[1]
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", tag_command, tags_command], obj=fake_metadata
-        )
-        assert not result.exit_code
-
-        fake_session.run.assert_called_once_with(
-            tags=tags_expected,
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions={},
-            pipeline_name=None,
-            namespace=None,
-        )
-
     def test_both_load_version_flags(
         self, fake_project_cli, fake_metadata, fake_session, mocker
     ):

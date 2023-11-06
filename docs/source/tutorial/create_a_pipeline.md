@@ -149,6 +149,12 @@ You should see output similar to the below:
 You can run the `preprocess_shuttles` node similarly. To test both nodes together as the complete data processing pipeline:
 
 ```bash
+kedro run
+```
+
+You can also run both nodes by naming each in turn, as follows:
+
+```bash
 kedro run --nodes=preprocess_companies_node,preprocess_shuttles_node
 ```
 

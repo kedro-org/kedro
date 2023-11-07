@@ -925,7 +925,7 @@ class TestAddOnsFromUserPrompts:
 
     @pytest.mark.parametrize(
         "input,first_invalid",
-        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("33", "33")],
+        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "8"), ("33", "33")],
     )
     def test_invalid_add_ons_selection(self, fake_kedro_cli, input, first_invalid):
         result = CliRunner().invoke(
@@ -1018,7 +1018,7 @@ class TestAddOnsFromConfigFile:
 
     @pytest.mark.parametrize(
         "input,first_invalid",
-        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("33", "33")],
+        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "8"), ("33", "33")],
     )
     def test_invalid_add_ons_selection(self, fake_kedro_cli, input, first_invalid):
         config = {

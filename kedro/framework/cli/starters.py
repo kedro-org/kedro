@@ -224,13 +224,6 @@ def _parse_add_ons_input(add_ons_str: str):
             sys.exit(1)
 
     add_ons_str = add_ons_str.lower()
-    #     def _validate_selection(add_ons: list[str]):
-    #         for add_on in add_ons:
-    #             if add_on not in NUMBER_TO_ADD_ONS_NAME:
-    #                 message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
-    #                 click.secho(message, fg="red", err=True)
-    #                 sys.exit(1)
-
     if add_ons_str == "all":
         return list(NUMBER_TO_ADD_ONS_NAME)
     if add_ons_str == "none":
@@ -856,28 +849,39 @@ def _validate_config_file_against_prompts(
 
 
 def _validate_config_file_inputs(config: dict[str, str]):
-    """Checks that variables provided through the config file are of the expected format.
+    """Checks that variables provided through the config file are of the expected format. This
+    validate the config provided by `kedro new --config` in a similar way to `prompts.yml`
+    for starters.
 
     Args:
-        config: The config as a dictionary.
+        config: The config as a dictionary
 
     Raises:
         SystemExit: If the provided variables are not properly formatted.
     """
-    project_name_reg_ex = r"^[\w -]{2,}$"
+    project_name_validation_config = {
+        "regex_validator": r"^[\w -]{2,}$",
+        "error_message": "'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
+    }
+
     input_project_name = config.get("project_name", "New Kedro Project")
-    if not re.match(project_name_reg_ex, input_project_name):
-        message = f"'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
-        click.secho(message, fg="red", err=True)
+    if not re.match(
+        project_name_validation_config["regex_validator"], input_project_name
+    ):
+
+        click.secho(project_name_validation_config["error_message"], fg="red", err=True)
         sys.exit(1)
 
-    add_on_reg_ex = (
-        r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d+-\d+)|(\d+ - \d+))( )*))$"
-    )
     input_add_ons = config.get("add_ons", "none")
-    if not re.match(add_on_reg_ex, input_add_ons.lower()):
-        message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
+    add_on_validation_config = {
+        "regex_validator": r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d+-\d+)|(\d+ - \d+))( )*))$",
+        "error_message": f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.",
+    }
+
+    if not re.match(add_on_validation_config["regex_validator"], input_add_ons.lower()):
+        message = add_on_validation_config["error_message"]
         click.secho(message, fg="red", err=True)
         sys.exit(1)
 
-    _validate_selection(_parse_add_ons_input(input_add_ons))
+    selected_add_ons = _parse_add_ons_input(input_add_ons)
+    _validate_selection(selected_add_ons)

@@ -228,7 +228,6 @@ def run(  # noqa: too-many-arguments,unused-argument,too-many-locals
 
     tags = _get_values_as_tuple(tags)
     node_names = _get_values_as_tuple(node_names)
-
     load_version = {**load_version, **load_versions}
 
     with KedroSession.create(

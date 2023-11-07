@@ -426,8 +426,8 @@ class TestRunCommand:
         config = {
             "run": {
                 "pipeline": "pipeline1",
-                "tag": ["tag1", "tag2"],
-                "node_names": ["node1", "node2"],
+                "tags": "tag1, tag2",
+                "node_names": "node1, node2",
             }
         }
         OmegaConf.save(

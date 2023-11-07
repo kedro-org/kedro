@@ -1033,7 +1033,7 @@ class TestAddOnsFromConfigFile:
         )
 
         assert result.exit_code != 0
-        message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
+        message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
         assert message in result.output
 
     @pytest.mark.parametrize(

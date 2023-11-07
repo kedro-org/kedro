@@ -274,7 +274,7 @@ def create_cli():  # pragma: no cover
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
-def new(  # noqa: too-many-arguments
+def new(  # noqa: PLR0913
     config_path,
     starter_alias,
     selected_addons,

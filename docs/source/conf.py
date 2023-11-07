@@ -54,6 +54,7 @@ extensions = [
     "myst_parser",
     "notfound.extension",
     "sphinxcontrib.jquery",
+    "sphinx.ext.intersphinx",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class
@@ -65,6 +66,11 @@ napoleon_include_init_with_doc = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 html_static_path = ["_static"]
+
+intersphinx_mapping = {
+    "kedro-viz": ("https://docs.kedro.org/projects/kedro-viz/en/v6.6.1/", None),
+    "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-1.8.0/", None),
+}
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:

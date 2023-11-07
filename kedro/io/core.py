@@ -437,7 +437,7 @@ def _load_obj(class_path: str) -> object | None:
         class_obj = load_obj(class_path)
     except (ModuleNotFoundError, ValueError, AttributeError) as exc:
         # If it's available, module exist but dependencies are missing
-        if available_classes:
+        if available_classes and class_name in available_classes:
             raise DatasetError(
                 f"{exc}. Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"

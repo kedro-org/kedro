@@ -435,20 +435,11 @@ def _load_obj(class_path: str) -> object | None:
         available_classes = None
     try:
         class_obj = load_obj(class_path)
-    except (ModuleNotFoundError, ValueError) as exc:
+    except (ModuleNotFoundError, ValueError, AttributeError) as exc:
         # If it's available, module exist but dependencies are missing
         if available_classes:
             raise DatasetError(
-                f"{exc} Please see the documentation on how to "
-                f"install relevant dependencies for {class_path}:\n"
-                f"https://kedro.readthedocs.io/en/stable/"
-                f"kedro_project_setup/dependencies.html"
-            ) from exc
-        return None
-    except AttributeError as exc:
-        if available_classes and class_name in available_classes:
-            raise DatasetError(
-                f"{exc} Please see the documentation on how to "
+                f"{exc}. Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
                 f"https://kedro.readthedocs.io/en/stable/"
                 f"kedro_project_setup/dependencies.html"

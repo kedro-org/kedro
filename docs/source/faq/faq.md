@@ -2,10 +2,6 @@
 
 This is a growing set of technical FAQs. The [product FAQs on the Kedro website](https://kedro.org/#faq) explain how Kedro can answer the typical use cases and requirements of data scientists, data engineers, machine learning engineers and product owners.
 
-## Visualisation
-
-* {doc}`Can I annotate a Kedro-Viz visualisation to show different data layers <kedro-viz:kedro-viz_visualisation#visualise-layers>`?
-
 ## Working with Jupyter
 
 * [How can I convert functions from Jupyter Notebooks into Kedro nodes](../notebooks_and_ipython/kedro_and_notebooks.md#how-to-use-tags-to-convert-functions-from-jupyter-notebooks-into-kedro-nodes)?

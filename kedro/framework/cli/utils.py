@@ -262,9 +262,6 @@ class KedroCliError(click.exceptions.ClickException):
     VERBOSE_ERROR = False
 
     def show(self, file=None):
-        if file is None:
-            # noqa: protected-access
-            file = click._compat.get_text_stderr()
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
         else:
@@ -274,7 +271,6 @@ class KedroCliError(click.exceptions.ClickException):
                 f"{formatted_exception}Run with --verbose to see the full exception",
                 fg="yellow",
             )
-        click.secho(f"Error: {self.message}", fg="red", file=file)
 
 
 def _clean_pycache(path: Path):
@@ -402,9 +398,39 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
 
     if value:
         config = OmegaConf.to_container(OmegaConf.load(value))[section]
+        for key, value in config.items():
+            _validate_config_file(key)
         ctx.default_map.update(config)
 
     return value
+
+
+def _validate_config_file(key):
+    """Validate the keys provided in the config file against the accepted keys."""
+    accepted_keys = [
+        "from_inputs",
+        "to_outputs",
+        "from_nodes",
+        "to_nodes",
+        "node_names",
+        "runner",
+        "env",
+        "tags",
+        "load_versions",
+        "pipeline",
+        "namespace",
+        "conf_source",
+        "params",
+        "is_async",
+        "tag",
+        "nodes_names",
+        "load_version",
+    ]
+    if key not in accepted_keys:
+        message = _suggest_cli_command(key, accepted_keys)
+        raise KedroCliError(
+            f"Key `{key}` in provided configuration is not valid. {message}"
+        )
 
 
 def _reformat_load_versions(ctx, param, value) -> dict[str, str]:

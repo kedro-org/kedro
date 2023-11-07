@@ -437,6 +437,23 @@ class TestRunCommand:
         return config_path
 
     @staticmethod
+    @fixture(params=["run_config.yml", "run_config.json"])
+    def fake_invalid_run_config(request, fake_root_dir):
+        config_path = str(fake_root_dir / request.param)
+        config = {
+            "run": {
+                "pipeline": "pipeline1",
+                "tag": ["tag1", "tag2"],
+                "node-names": ["node1", "node2"],
+            }
+        }
+        OmegaConf.save(
+            config,
+            config_path,
+        )
+        return config_path
+
+    @staticmethod
     @fixture
     def fake_run_config_with_params(fake_run_config, request):
         config = OmegaConf.to_container(OmegaConf.load(fake_run_config))
@@ -636,6 +653,26 @@ class TestRunCommand:
             load_versions={},
             pipeline_name="pipeline1",
             namespace=None,
+        )
+
+    @mark.parametrize("config_flag", ["--config", "-c"])
+    def test_run_with_invalid_config(
+        self,
+        config_flag,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        fake_invalid_run_config,
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", config_flag, fake_invalid_run_config],
+            obj=fake_metadata,
+        )
+        assert result.exit_code
+        assert (
+            "Key `node-names` in provided configuration is not valid. \n\nDid you mean one of these?\n    node_names\n    nodes_names\n    to_nodes"
+            in result.stdout
         )
 
     @mark.parametrize(

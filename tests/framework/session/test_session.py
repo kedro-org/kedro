@@ -11,7 +11,7 @@ import yaml
 from omegaconf import OmegaConf
 
 from kedro import __version__ as kedro_version
-from kedro.config import AbstractConfigLoader, ConfigLoader, OmegaConfigLoader
+from kedro.config import AbstractConfigLoader, OmegaConfigLoader
 from kedro.framework.cli.utils import _split_params
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
@@ -95,7 +95,7 @@ def mock_settings_custom_context_class(mocker):
 
 @pytest.fixture
 def mock_settings_custom_config_loader_class(mocker):
-    class MyConfigLoader(ConfigLoader):
+    class MyConfigLoader(AbstractConfigLoader):
         pass
 
     class MockSettings(_ProjectSettings):
@@ -282,7 +282,7 @@ class TestKedroSession:
 
         assert session.store == expected_store
         assert session.load_context() is mock_context_class.return_value
-        assert isinstance(session._get_config_loader(), ConfigLoader)
+        assert isinstance(session._get_config_loader(), OmegaConfigLoader)
 
     @pytest.mark.usefixtures("mock_settings")
     def test_create_multiple_sessions(self, fake_project, mock_package_name):
@@ -321,14 +321,12 @@ class TestKedroSession:
 
         assert session.store == expected_store
         assert session.load_context() is mock_context_class.return_value
-        assert isinstance(session._get_config_loader(), ConfigLoader)
+        assert isinstance(session._get_config_loader(), OmegaConfigLoader)
 
     @pytest.mark.usefixtures("mock_settings")
     def test_load_context_with_envvar(
         self, fake_project, monkeypatch, mock_package_name, mocker
     ):
-        mocker.patch("kedro.config.config.ConfigLoader.get")
-
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 
         session = KedroSession.create(mock_package_name, fake_project)
@@ -340,16 +338,15 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings")
     def test_load_config_loader_with_envvar(
-        self, fake_project, monkeypatch, mock_package_name, mocker
+        self, fake_project, monkeypatch, mock_package_name
     ):
-        mocker.patch("kedro.config.config.ConfigLoader.get")
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 
         session = KedroSession.create(mock_package_name, fake_project)
         result = session._get_config_loader()
 
-        assert isinstance(result, ConfigLoader)
-        assert result.__class__.__name__ == "ConfigLoader"
+        assert isinstance(result, OmegaConfigLoader)
+        assert result.__class__.__name__ == "OmegaConfigLoader"
         assert result.env == "my_fake_env"
 
     @pytest.mark.usefixtures("mock_settings_custom_context_class")
@@ -375,7 +372,7 @@ class TestKedroSession:
         session = KedroSession.create(mock_package_name, fake_project)
         result = session._get_config_loader()
 
-        assert isinstance(result, ConfigLoader)
+        assert isinstance(result, OmegaConfigLoader)
         assert result.config_patterns["catalog"] == [
             "catalog*",
             "catalog*/**",
@@ -383,7 +380,7 @@ class TestKedroSession:
         ]
         assert result.config_patterns["spark"] == ["spark/*"]
         mocker.patch(
-            "kedro.config.config.ConfigLoader.get",
+            "kedro.config.OmegaConfigLoader.__getitem__",
             return_value=["spark/*"],
         )
         assert result["spark"] == ["spark/*"]

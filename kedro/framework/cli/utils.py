@@ -396,14 +396,12 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     with values specified in a config file. If command line
     options are passed, they override config file values.
     """
-    # for performance reasons
-    import anyconfig  # noqa: import-outside-toplevel
 
     ctx.default_map = ctx.default_map or {}
     section = ctx.info_name
 
     if value:
-        config = anyconfig.load(value)[section]
+        config = OmegaConf.to_container(OmegaConf.load(value))[section]
         ctx.default_map.update(config)
 
     return value

@@ -422,7 +422,7 @@ def parse_dataset_definition(
     return class_obj, config
 
 
-def _load_obj(class_path: str) -> object | None:
+def _load_obj(class_path: str) -> Any | None:
     mod_path, _, class_name = class_path.rpartition(".")
     # Check if the module exists
     try:

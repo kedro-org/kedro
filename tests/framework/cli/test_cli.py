@@ -1,13 +1,11 @@
-# pylint: disable=too-many-lines
 from collections import namedtuple
 from itertools import cycle
 from os import rename
 from pathlib import Path
-from unittest.mock import patch
 
-import anyconfig
 import click
 from click.testing import CliRunner
+from omegaconf import OmegaConf
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
@@ -43,17 +41,17 @@ def stub_command():
 
 
 @forward_command(stub_cli, name="forwarded_command")
-def forwarded_command(args, **kwargs):  # pylint: disable=unused-argument
+def forwarded_command(args, **kwargs):
     print("fred", args)
 
 
 @forward_command(stub_cli, name="forwarded_help", forward_help=True)
-def forwarded_help(args, **kwargs):  # pylint: disable=unused-argument
+def forwarded_help(args, **kwargs):
     print("fred", args)
 
 
 @forward_command(stub_cli)
-def unnamed(args, **kwargs):  # pylint: disable=unused-argument
+def unnamed(args, **kwargs):
     print("fred", args)
 
 
@@ -120,18 +118,6 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["-h"])
         assert result.exit_code == 0
         assert "-h, --help     Show this message and exit." in result.output
-
-    @patch("webbrowser.open")
-    def test_docs(self, patched_browser):
-        """Check that `kedro docs` opens a correct file in the browser."""
-        result = CliRunner().invoke(cli, ["docs"])
-
-        assert result.exit_code == 0
-        expected = f"https://kedro.readthedocs.io/en/{version}"
-
-        assert patched_browser.call_count == 1
-        args, _ = patched_browser.call_args
-        assert expected in args[0]
 
 
 class TestCommandCollection:
@@ -437,14 +423,15 @@ class TestRunCommand:
     @fixture(params=["run_config.yml", "run_config.json"])
     def fake_run_config(request, fake_root_dir):
         config_path = str(fake_root_dir / request.param)
-        anyconfig.dump(
-            {
-                "run": {
-                    "pipeline": "pipeline1",
-                    "tag": ["tag1", "tag2"],
-                    "node_names": ["node1", "node2"],
-                }
-            },
+        config = {
+            "run": {
+                "pipeline": "pipeline1",
+                "tag": ["tag1", "tag2"],
+                "node_names": ["node1", "node2"],
+            }
+        }
+        OmegaConf.save(
+            config,
             config_path,
         )
         return config_path
@@ -452,9 +439,9 @@ class TestRunCommand:
     @staticmethod
     @fixture
     def fake_run_config_with_params(fake_run_config, request):
-        config = anyconfig.load(fake_run_config)
+        config = OmegaConf.to_container(OmegaConf.load(fake_run_config))
         config["run"].update(request.param)
-        anyconfig.dump(config, fake_run_config)
+        OmegaConf.save(config, fake_run_config)
         return fake_run_config
 
     def test_run_successfully(

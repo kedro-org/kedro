@@ -113,16 +113,15 @@ type_targets = {
         "typing.Type",
         "typing.Set",
         "kedro.config.config.ConfigLoader",
-        "kedro.io.core.AbstractDataSet",
-        "kedro.io.core.AbstractVersionedDataSet",
-        "kedro.io.core.DataSetError",
+        "kedro.io.core.AbstractDataset",
+        "kedro.io.core.AbstractVersionedDataset",
+        "kedro.io.core.DatasetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
-        "kedro.io.memory_dataset.MemoryDataSet",
-        "kedro.io.partitioned_dataset.PartitionedDataSet",
+        "kedro.io.memory_dataset.MemoryDataset",
+        "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
-        "kedro.runner.parallel_runner._SharedMemoryDataSet",
         "kedro.runner.parallel_runner._SharedMemoryDataset",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
@@ -137,8 +136,7 @@ type_targets = {
         "CONF_SOURCE",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
-        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
-        "kedro_datasets.pandas.json_dataset.JSONDataSet",
+        "kedro_datasets.pandas.json_dataset.JSONDataset",
         "pluggy._manager.PluginManager",
         "PluginManager",
         "_DI",
@@ -167,7 +165,7 @@ type_targets = {
         "ValueError",
         "BadConfigException",
         "MissingConfigException",
-        "DataSetError",
+        "DatasetError",
         "ImportError",
         "KedroCliError",
         "Exception",
@@ -320,8 +318,6 @@ KEDRO_MODULES = [
     "kedro.pipeline",
     "kedro.runner",
     "kedro.config",
-    "kedro.extras.datasets",
-    "kedro.extras.logging",
     "kedro_datasets",
 ]
 
@@ -351,16 +347,16 @@ def autolink_replacements(what: str) -> list[tuple[str, str, str]]:
     is a reStructuredText link to their documentation.
 
     For example, if the docstring reads:
-        This LambdaDataSet loads and saves ...
+        This LambdaDataset loads and saves ...
 
-    Then the word ``LambdaDataSet``, will be replaced by
-    :class:`~kedro.io.LambdaDataSet`
+    Then the word ``LambdaDataset``, will be replaced by
+    :class:`~kedro.io.LambdaDataset`
 
     Works for plural as well, e.g:
-        These ``LambdaDataSet``s load and save
+        These ``LambdaDataset``s load and save
 
     Will convert to:
-        These :class:`kedro.io.LambdaDataSet` load and save
+        These :class:`kedro.io.LambdaDataset` load and save
 
     Args:
         what: The objects to create replacement tuples for. Possible values

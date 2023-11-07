@@ -9,8 +9,8 @@ import os
 import re
 import shutil
 import stat
+import sys
 import tempfile
-import warnings
 from collections import OrderedDict
 from itertools import groupby
 from pathlib import Path
@@ -21,7 +21,6 @@ import yaml
 from attrs import define, field
 
 import kedro
-from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
@@ -35,13 +34,6 @@ from kedro.framework.cli.utils import (
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
-
-_DEPRECATED_STARTERS = [
-    "pandas-iris",
-    "pyspark-iris",
-    "pyspark",
-    "standalone-datacatalog",
-]
 
 
 @define(order=True)
@@ -76,7 +68,14 @@ _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("pandas-iris", _STARTERS_REPO, "pandas-iris"),
     KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
     KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
-    KedroStarterSpec("spaceflights", _STARTERS_REPO, "spaceflights"),
+    KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
+    KedroStarterSpec(
+        "spaceflights-pandas-viz", _STARTERS_REPO, "spaceflights-pandas-viz"
+    ),
+    KedroStarterSpec("spaceflights-pyspark", _STARTERS_REPO, "spaceflights-pyspark"),
+    KedroStarterSpec(
+        "spaceflights-pyspark-viz", _STARTERS_REPO, "spaceflights-pyspark-viz"
+    ),
     KedroStarterSpec("databricks-iris", _STARTERS_REPO, "databricks-iris"),
 ]
 # Set the origin for official starters
@@ -99,6 +98,46 @@ DIRECTORY_ARG_HELP = (
     "An optional directory inside the repository where the starter resides."
 )
 
+# TODO; Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these add-ons.).
+ADDON_ARG_HELP = """
+Select which add-ons you'd like to include. By default, none are included.\n
+
+Add-Ons\n
+1) Linting: Provides a basic linting setup with Black and Ruff\n
+2) Testing: Provides basic testing setup with pytest\n
+3) Custom Logging: Provides more logging options\n
+4) Documentation: Basic documentation setup with Sphinx\n
+5) Data Structure: Provides a directory structure for storing data\n
+6) Pyspark: Provides set up configuration for working with PySpark\n
+7) Kedro Viz: Provides Kedro's native visualisation tool \n
+
+Example usage:\n
+kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
+kedro new --addons=all\n
+kedro new --addons=none
+"""
+
+ADD_ONS_SHORTNAME_TO_NUMBER = {
+    "lint": "1",
+    "test": "2",
+    "log": "3",
+    "docs": "4",
+    "data": "5",
+    "pyspark": "6",
+    "viz": "7",
+}
+NUMBER_TO_ADD_ONS_NAME = {
+    "1": "Linting",
+    "2": "Testing",
+    "3": "Custom Logging",
+    "4": "Documentation",
+    "5": "Data Structure",
+    "6": "Pyspark",
+    "7": "Kedro Viz",
+}
+
+
+NAME_ARG_HELP = "The name of your new Kedro project."
 
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
@@ -161,15 +200,58 @@ def _starter_spec_to_dict(
     """Convert a dictionary of starters spec to a nicely formatted dictionary"""
     format_dict: dict[str, dict[str, str]] = {}
     for alias, spec in starter_specs.items():
-        if alias in _DEPRECATED_STARTERS:
-            key = alias + " (deprecated)"
-        else:
-            key = alias
-        format_dict[key] = {}  # Each dictionary represent 1 starter
-        format_dict[key]["template_path"] = spec.template_path
+        format_dict[alias] = {}  # Each dictionary represent 1 starter
+        format_dict[alias]["template_path"] = spec.template_path
         if spec.directory:
-            format_dict[key]["directory"] = spec.directory
+            format_dict[alias]["directory"] = spec.directory
     return format_dict
+
+
+def _parse_add_ons_input(add_ons_str: str):
+    """Parse the add-ons input string.
+
+    Args:
+        add_ons_str: Input string from prompts.yml.
+
+    Returns:
+        list: List of selected add-ons as strings.
+    """
+
+    def _validate_range(start, end):
+        if int(start) > int(end):
+            message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
+            click.secho(message, fg="red", err=True)
+            sys.exit(1)
+
+    def _validate_selection(add_ons: list[str]):
+        for add_on in add_ons:
+            if add_on not in NUMBER_TO_ADD_ONS_NAME:
+                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
+                click.secho(message, fg="red", err=True)
+                sys.exit(1)
+
+    if add_ons_str == "all":
+        return list(NUMBER_TO_ADD_ONS_NAME)
+    if add_ons_str == "none":
+        return []
+    # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
+    if not add_ons_str:
+        return []  # pragma: no cover
+
+    # Split by comma
+    add_ons_choices = add_ons_str.split(",")
+    selected: list[str] = []
+
+    for choice in add_ons_choices:
+        if "-" in choice:
+            start, end = choice.split("-")
+            _validate_range(start, end)
+            selected.extend(str(i) for i in range(int(start), int(end) + 1))
+        else:
+            selected.append(choice.strip())
+
+    _validate_selection(selected)
+    return selected
 
 
 # noqa: missing-function-docstring
@@ -189,21 +271,18 @@ def create_cli():  # pragma: no cover
 @click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-def new(config_path, starter_alias, checkout, directory, **kwargs):
+@click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
+@click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
+def new(  # noqa: too-many-arguments
+    config_path,
+    starter_alias,
+    selected_addons,
+    project_name,
+    checkout,
+    directory,
+    **kwargs,
+):
     """Create a new kedro project."""
-
-    if starter_alias in _DEPRECATED_STARTERS:
-        warnings.warn(
-            f"The starter '{starter_alias}' has been deprecated and will be archived from Kedro 0.19.0.",
-            KedroDeprecationWarning,
-        )
-    click.secho(
-        "From Kedro 0.19.0, the command `kedro new` will come with the option of interactively selecting add-ons "
-        "for your project such as linting, testing, custom logging, and more. The selected add-ons will add the "
-        "basic setup for the utilities selected to your projects.",
-        fg="green",
-    )
-
     if checkout and not starter_alias:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
@@ -235,7 +314,15 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
     tmpdir = tempfile.mkdtemp()
     cookiecutter_dir = _get_cookiecutter_dir(template_path, checkout, directory, tmpdir)
     prompts_required = _get_prompts_required(cookiecutter_dir)
+
+    # Select which prompts will be displayed to the user based on which flags were selected.
+    prompts_required = _select_prompts_to_display(
+        prompts_required, selected_addons, project_name
+    )
+
     # We only need to make cookiecutter_context if interactive prompts are needed.
+    cookiecutter_context = None
+
     if not config_path:
         cookiecutter_context = _make_cookiecutter_context_for_prompts(cookiecutter_dir)
 
@@ -247,18 +334,19 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
-    if not prompts_required:
-        config = {}
-        if config_path:
-            config = _fetch_config_from_file(config_path)
-    elif config_path:
-        config = _fetch_config_from_file(config_path)
-        _validate_config_file(config, prompts_required)
-    else:
-        config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
+    extra_context = _get_extra_context(
+        prompts_required=prompts_required,
+        config_path=config_path,
+        cookiecutter_context=cookiecutter_context,
+        selected_addons=selected_addons,
+        project_name=project_name,
+    )
 
-    cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
-    _create_project(template_path, cookiecutter_args)
+    cookiecutter_args = _make_cookiecutter_args(extra_context, checkout, directory)
+
+    project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
+
+    _create_project(project_template, cookiecutter_args)
 
 
 @create_cli.group()
@@ -283,15 +371,138 @@ def list_starters():
     sorted_starters_dict = dict(
         sorted(sorted_starters_dict.items(), key=lambda x: x == "kedro")
     )
-    warnings.warn(
-        f"The starters {_DEPRECATED_STARTERS} are deprecated and will be archived in Kedro 0.19.0."
-    )
 
     for origin, starters_spec in sorted_starters_dict.items():
         click.secho(f"\nStarters from {origin}\n", fg="yellow")
         click.echo(
             yaml.safe_dump(_starter_spec_to_dict(starters_spec), sort_keys=False)
         )
+
+
+def _get_extra_context(
+    prompts_required: dict,
+    config_path: str,
+    cookiecutter_context: OrderedDict,
+    selected_addons: str,
+    project_name: str,
+) -> dict[str, str]:
+    """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
+    on CLI flags, user prompts, or a configuration file.
+
+    Args:
+        prompts_required: a dictionary of all the prompts that will be shown to
+            the user on project creation.
+        config_path: a string containing the value for the --config flag, or
+            None in case the flag wasn't used.
+        cookiecutter_context: the context for Cookiecutter templates.
+        selected_addons: a string containing the value for the --addons flag,
+            or None in case the flag wasn't used.
+        project_name: a string containing the value for the --name flag, or
+            None in case the flag wasn't used.
+
+    Returns:
+        the prompts_required dictionary, with all the redundant information removed.
+    """
+    if not prompts_required:
+        extra_context = {}
+        if config_path:
+            extra_context = _fetch_config_from_file(config_path)
+            _validate_config_file_inputs(extra_context)
+
+    elif config_path:
+        extra_context = _fetch_config_from_file(config_path)
+        _validate_config_file_against_prompts(extra_context, prompts_required)
+        _validate_config_file_inputs(extra_context)
+    else:
+        extra_context = _fetch_config_from_user_prompts(
+            prompts_required, cookiecutter_context
+        )
+
+    add_ons = _convert_addon_names_to_numbers(selected_addons)
+
+    if add_ons is not None:
+        extra_context["add_ons"] = add_ons
+
+    if project_name is not None:
+        extra_context["project_name"] = project_name
+
+    return extra_context
+
+
+def _convert_addon_names_to_numbers(selected_addons: str) -> str:
+    """Prepares add-on selection from the CLI input to the correct format
+    to be put in the project configuration, if it exists.
+    Replaces add-on strings with the corresponding prompt number.
+
+    Args:
+        selected_addons: a string containing the value for the --addons flag,
+            or None in case the flag wasn't used, i.e. lint,docs.
+
+    Returns:
+        String with the numbers corresponding to the desired add_ons, or
+        None in case the --addons flag was not used.
+    """
+    if selected_addons is None:
+        return None
+
+    addons = []
+    for addon in selected_addons.split(","):
+        addon_short_name = addon.strip()
+        if addon_short_name in ADD_ONS_SHORTNAME_TO_NUMBER:
+            addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon_short_name])
+    return ",".join(addons)
+
+
+def _select_prompts_to_display(
+    prompts_required: dict, selected_addons: str, project_name: str
+) -> dict:
+    """Selects which prompts an user will receive when creating a new
+    Kedro project, based on what information was already made available
+    through CLI input.
+
+    Args:
+        prompts_required: a dictionary of all the prompts that will be shown to
+            the user on project creation.
+        selected_addons: a string containing the value for the --addons flag,
+            or None in case the flag wasn't used.
+        project_name: a string containing the value for the --name flag, or
+            None in case the flag wasn't used.
+
+    Returns:
+        the prompts_required dictionary, with all the redundant information removed.
+    """
+    valid_addons = list(ADD_ONS_SHORTNAME_TO_NUMBER) + ["all", "none"]
+
+    if selected_addons is not None:
+        addons = re.sub(r"\s", "", selected_addons).split(",")
+        for addon in addons:
+            if addon not in valid_addons:
+                click.secho(
+                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, viz, all, none",
+                    fg="red",
+                    err=True,
+                )
+                sys.exit(1)
+        if ("none" in addons or "all" in addons) and len(addons) > 1:
+            click.secho(
+                "Add-on options 'all' and 'none' cannot be used with other options",
+                fg="red",
+                err=True,
+            )
+            sys.exit(1)
+        del prompts_required["add_ons"]
+
+    if project_name is not None:
+        if not re.match(r"^[\w -]{2,}$", project_name):
+            click.secho(
+                "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
+                fg="red",
+                err=True,
+            )
+            sys.exit(1)
+        del prompts_required["project_name"]
+
+    return prompts_required
 
 
 def _fetch_config_from_file(config_path: str) -> dict[str, str]:
@@ -325,7 +536,7 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
 
 
 def _make_cookiecutter_args(
-    config: dict[str, str],
+    config: dict[str, str | list[str]],
     checkout: str,
     directory: str,
 ) -> dict[str, Any]:
@@ -348,17 +559,49 @@ def _make_cookiecutter_args(
     """
     config.setdefault("kedro_version", version)
 
+    # Map the selected add on lists to readable name
+    add_ons = config.get("add_ons")
+    if add_ons:
+        config["add_ons"] = [
+            NUMBER_TO_ADD_ONS_NAME[add_on] for add_on in _parse_add_ons_input(add_ons)  # type: ignore
+        ]
+        config["add_ons"] = str(config["add_ons"])
+
     cookiecutter_args = {
         "output_dir": config.get("output_dir", str(Path.cwd().resolve())),
         "no_input": True,
         "extra_context": config,
     }
+
     if checkout:
         cookiecutter_args["checkout"] = checkout
     if directory:
         cookiecutter_args["directory"] = directory
 
     return cookiecutter_args
+
+
+def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
+    extra_context = cookiecutter_args["extra_context"]
+    add_ons = extra_context.get("add_ons")
+    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
+    if add_ons:
+        if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+            # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+        elif "Pyspark" in add_ons:
+            # Use the spaceflights-pyspark starter if only Pyspark is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark"
+        elif "Kedro Viz" in add_ons:
+            # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        else:
+            # Use the default template path for any other combinations or if "none" is chosen.
+            starter_path = template_path
+    else:
+        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty.
+        starter_path = template_path
+    return starter_path
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
@@ -390,6 +633,17 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     python_package = extra_context.get(
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )
+    add_ons = extra_context.get("add_ons")
+
+    # Only core template and spaceflight starters have configurable add-ons
+    if template_path == str(TEMPLATE_PATH) or (
+        add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)
+    ):
+        if add_ons == "[]":  # TODO: This should be a list
+            click.secho("\nYou have selected no add-ons")
+        else:
+            click.secho(f"\nYou have selected the following add-ons: {add_ons}")
+
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "
         f"\n- The project title in {result_path}/README.md "
@@ -398,7 +652,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running 'pip install -r src/requirements.txt' to install "
+        "a virtual environment before running 'pip install -r requirements.txt' to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )
@@ -531,10 +785,10 @@ class _Prompt:
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
         if self.regexp and not re.match(self.regexp, user_input):
-            message = f"'{user_input}' is an invalid value for {self.title}."
+            message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
             click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
-            raise ValueError(message, self.error_message)
+            sys.exit(1)
 
 
 def _get_available_tags(template_path: str) -> list:
@@ -557,7 +811,9 @@ def _get_available_tags(template_path: str) -> list:
     return sorted(unique_tags)
 
 
-def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
+def _validate_config_file_against_prompts(
+    config: dict[str, str], prompts: dict[str, Any]
+):
     """Checks that the configuration file contains all needed variables.
 
     Args:
@@ -580,3 +836,27 @@ def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
             f"'{config['output_dir']}' is not a valid output directory. "
             "It must be a relative or absolute path to an existing directory."
         )
+
+
+def _validate_config_file_inputs(config: dict[str, str]):
+    """Checks that variables provided through the config file are of the expected format.
+
+    Args:
+        config: The config as a dictionary.
+
+    Raises:
+        SystemExit: If the provided variables are not properly formatted.
+    """
+    project_name_reg_ex = r"^[\w -]{2,}$"
+    input_project_name = config.get("project_name", "New Kedro Project")
+    if not re.match(project_name_reg_ex, input_project_name):
+        message = f"'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
+        click.secho(message, fg="red", err=True)
+        sys.exit(1)
+
+    add_on_reg_ex = r"^(all|none|(\d(,\d)*|(\d-\d)))$"
+    input_add_ons = config.get("add_ons", "none")
+    if not re.match(add_on_reg_ex, input_add_ons):
+        message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
+        click.secho(message, fg="red", err=True)
+        sys.exit(1)

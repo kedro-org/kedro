@@ -343,7 +343,7 @@ def _check_module_importable(module_name: str) -> None:
     except ImportError as exc:
         raise KedroCliError(
             f"Module '{module_name}' not found. Make sure to install required project "
-            f"dependencies by running the 'pip install -r src/requirements.txt' command first."
+            f"dependencies by running the 'pip install -r requirements.txt' command first."
         ) from exc
 
 
@@ -395,14 +395,12 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     with values specified in a config file. If command line
     options are passed, they override config file values.
     """
-    # for performance reasons
-    import anyconfig  # noqa: import-outside-toplevel
 
     ctx.default_map = ctx.default_map or {}
     section = ctx.info_name
 
     if value:
-        config = anyconfig.load(value)[section]
+        config = OmegaConf.to_container(OmegaConf.load(value))[section]
         ctx.default_map.update(config)
 
     return value

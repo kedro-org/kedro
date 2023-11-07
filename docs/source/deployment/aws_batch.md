@@ -25,48 +25,48 @@ To use AWS Batch, ensure you have the following prerequisites in place:
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: s3://<your-bucket>/shuttles.xlsx
 
 preprocessed_companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/preprocessed_companies.csv
 
 preprocessed_shuttles:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/preprocessed_shuttles.csv
 
 model_input_table:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/model_input_table.csv
 
 regressor:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/regressor.pickle
   versioned: true
 
 X_train:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/X_train.pickle
 
 X_test:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/X_test.pickle
 
 y_train:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/y_train.pickle
 
 y_test:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/y_test.pickle
 ```
 
@@ -160,7 +160,7 @@ class AWSBatchRunner(ThreadRunner):
         self._job_definition = job_definition
         self._client = boto3.client("batch")
 
-    def create_default_data_set(self, ds_name: str):
+    def create_default_dataset(self, ds_name: str):
         raise NotImplementedError("All datasets must be defined in the catalog")
 
     def _get_required_workers_count(self, pipeline: Pipeline):
@@ -169,7 +169,7 @@ class AWSBatchRunner(ThreadRunner):
 
         return super()._get_required_workers_count(pipeline)
 
-    def _run(  # pylint: disable=too-many-locals,useless-suppression
+    def _run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,

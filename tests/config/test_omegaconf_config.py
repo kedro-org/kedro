@@ -1,4 +1,3 @@
-# pylint: disable=expression-not-assigned, pointless-statement
 from __future__ import annotations
 
 import configparser
@@ -47,9 +46,9 @@ def _write_dummy_ini(filepath: Path):
 def base_config(tmp_path):
     filepath = str(tmp_path / "cars.csv")
     return {
-        "trains": {"type": "MemoryDataSet"},
+        "trains": {"type": "MemoryDataset"},
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": filepath,
             "save_args": {"index": True},
         },
@@ -61,11 +60,11 @@ def local_config(tmp_path):
     filepath = str(tmp_path / "cars.csv")
     return {
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": filepath,
             "save_args": {"index": False},
         },
-        "boats": {"type": "MemoryDataSet"},
+        "boats": {"type": "MemoryDataset"},
     }
 
 
@@ -105,7 +104,7 @@ def proj_catalog(tmp_path, base_config):
 @pytest.fixture
 def proj_catalog_nested(tmp_path):
     path = tmp_path / _BASE_ENV / "catalog" / "dir" / "nested.yml"
-    _write_yaml(path, {"nested": {"type": "MemoryDataSet"}})
+    _write_yaml(path, {"nested": {"type": "MemoryDataset"}})
 
 
 @pytest.fixture
@@ -120,6 +119,31 @@ def proj_credentials_env_variable(tmp_path):
     _write_yaml(
         path, {"user": {"name": "${oc.env:TEST_USERNAME}", "key": "${oc.env:TEST_KEY}"}}
     )
+
+
+@pytest.fixture
+def mlflow_config(tmp_path):
+    base_mlflow = tmp_path / _BASE_ENV / "mlflow.yml"
+    base_config = {
+        "tracking": {
+            "disable_tracking": {"pipelines": "[on_exit_notification]"},
+            "experiment": {
+                "name": "name-of-local-experiment",
+            },
+            "params": {"long_params_strategy": "tag"},
+        }
+    }
+    local_mlflow = tmp_path / _DEFAULT_RUN_ENV / "mlflow.yml"
+    local_config = {
+        "tracking": {
+            "experiment": {
+                "name": "name-of-prod-experiment",
+            },
+        }
+    }
+
+    _write_yaml(base_mlflow, base_config)
+    _write_yaml(local_mlflow, local_config)
 
 
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
@@ -139,7 +163,7 @@ class TestOmegaConfigLoader:
         catalog = conf["catalog"]
 
         assert params["param1"] == 1
-        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
 
     @use_config_dir
     def test_load_core_config_get_syntax(self, tmp_path):
@@ -149,7 +173,7 @@ class TestOmegaConfigLoader:
         catalog = conf.get("catalog")
 
         assert params["param1"] == 1
-        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
 
     @use_config_dir
     def test_load_local_config_overrides_base(self, tmp_path):
@@ -160,9 +184,9 @@ class TestOmegaConfigLoader:
         catalog = conf["catalog"]
 
         assert params["param1"] == 1
-        assert catalog["trains"]["type"] == "MemoryDataSet"
-        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
-        assert catalog["boats"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
+        assert catalog["cars"]["type"] == "pandas.CSVDataset"
+        assert catalog["boats"]["type"] == "MemoryDataset"
         assert not catalog["cars"]["save_args"]["index"]
 
     @use_proj_catalog
@@ -205,9 +229,9 @@ class TestOmegaConfigLoader:
 
         catalog = config_loader["catalog"]
         assert catalog.keys() == {"cars", "trains", "nested"}
-        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
+        assert catalog["cars"]["type"] == "pandas.CSVDataset"
         assert catalog["cars"]["save_args"]["index"] is True
-        assert catalog["nested"]["type"] == "MemoryDataSet"
+        assert catalog["nested"]["type"] == "MemoryDataset"
 
     @use_config_dir
     def test_nested_subdirs_duplicate(self, tmp_path, base_config):
@@ -385,7 +409,7 @@ class TestOmegaConfigLoader:
 
         example_catalog = """
         example_iris_data:
-              type: pandas.CSVDataSet
+              type: pandas.CSVDataset
           filepath: data/01_raw/iris.csv
         """
 
@@ -418,30 +442,8 @@ class TestOmegaConfigLoader:
             "**/params*",
         ]
 
-    def test_destructive_merging_strategy(self, tmp_path):
+    def test_default_destructive_merging_strategy(self, tmp_path, mlflow_config):
         mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
-        base_mlflow = tmp_path / _BASE_ENV / "mlflow.yml"
-        base_config = {
-            "tracking": {
-                "disable_tracking": {"pipelines": "[on_exit_notification]"},
-                "experiment": {
-                    "name": "name-of-local-experiment",
-                },
-                "params": {"long_params_strategy": "tag"},
-            }
-        }
-        local_mlflow = tmp_path / _DEFAULT_RUN_ENV / "mlflow.yml"
-        local_config = {
-            "tracking": {
-                "experiment": {
-                    "name": "name-of-prod-experiment",
-                },
-            }
-        }
-
-        _write_yaml(base_mlflow, base_config)
-        _write_yaml(local_mlflow, local_config)
-
         conf = OmegaConfigLoader(str(tmp_path), config_patterns=mlflow_patterns)[
             "mlflow"
         ]
@@ -454,6 +456,49 @@ class TestOmegaConfigLoader:
             }
         }
 
+    def test_destructive_merging_strategy(self, tmp_path, mlflow_config):
+        mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
+        conf = OmegaConfigLoader(
+            str(tmp_path),
+            config_patterns=mlflow_patterns,
+            merge_strategy={"mlflow": "destructive"},
+        )["mlflow"]
+
+        assert conf == {
+            "tracking": {
+                "experiment": {
+                    "name": "name-of-prod-experiment",
+                },
+            }
+        }
+
+    def test_soft_merging_strategy(self, tmp_path, mlflow_config):
+        mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
+        conf = OmegaConfigLoader(
+            str(tmp_path),
+            config_patterns=mlflow_patterns,
+            merge_strategy={"mlflow": "soft"},
+        )["mlflow"]
+
+        assert conf == {
+            "tracking": {
+                "disable_tracking": {"pipelines": "[on_exit_notification]"},
+                "experiment": {
+                    "name": "name-of-prod-experiment",
+                },
+                "params": {"long_params_strategy": "tag"},
+            }
+        }
+
+    def test_unsupported_merge_strategy(self, tmp_path, mlflow_config):
+        mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
+        with pytest.raises(ValueError):
+            OmegaConfigLoader(
+                str(tmp_path),
+                config_patterns=mlflow_patterns,
+                merge_strategy={"mlflow": "hard"},
+            )["mlflow"]
+
     @use_config_dir
     def test_adding_extra_keys_to_confloader(self, tmp_path):
         """Make sure extra keys can be added directly to the config loader instance."""
@@ -461,7 +506,7 @@ class TestOmegaConfigLoader:
         catalog = conf["catalog"]
         conf["spark"] = {"spark_config": "emr.blabla"}
 
-        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
         assert conf["spark"] == {"spark_config": "emr.blabla"}
 
     @use_config_dir
@@ -531,7 +576,7 @@ class TestOmegaConfigLoader:
 
         conf = OmegaConfigLoader(conf_source=f"{tmp_path}/tar_conf.tar.gz")
         catalog = conf["catalog"]
-        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
 
     @use_config_dir
     def test_load_config_from_zip_file(self, tmp_path):
@@ -555,7 +600,7 @@ class TestOmegaConfigLoader:
 
         conf = OmegaConfigLoader(conf_source=f"{tmp_path}/Python.zip")
         catalog = conf["catalog"]
-        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert catalog["trains"]["type"] == "MemoryDataset"
 
     @use_config_dir
     def test_variable_interpolation_with_correct_env(self, tmp_path):
@@ -588,13 +633,11 @@ class TestOmegaConfigLoader:
         parameters = conf["parameters"]
         catalog = conf["catalog"]
         credentials = conf["credentials"]
-        logging = conf["logging"]
         spark = conf["spark"]
 
         assert key in parameters
         assert key not in catalog
         assert key not in credentials
-        assert key not in logging
         assert key not in spark
 
     def test_ignore_hidden_keys(self, tmp_path):
@@ -624,13 +667,13 @@ class TestOmegaConfigLoader:
                 "type": "${_pandas.type}",
                 "filepath": "data/01_raw/companies.csv",
             },
-            "_pandas": {"type": "pandas.CSVDataSet"},
+            "_pandas": {"type": "pandas.CSVDataset"},
         }
         _write_yaml(base_catalog, catalog_config)
 
         conf = OmegaConfigLoader(str(tmp_path))
         conf.default_run_env = ""
-        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataSet"
+        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_variable_interpolation_in_catalog_with_separate_templates_file(
         self, tmp_path
@@ -643,13 +686,13 @@ class TestOmegaConfigLoader:
             }
         }
         tmp_catalog = tmp_path / _BASE_ENV / "catalog_temp.yml"
-        template = {"_pandas": {"type": "pandas.CSVDataSet"}}
+        template = {"_pandas": {"type": "pandas.CSVDataset"}}
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(tmp_catalog, template)
 
         conf = OmegaConfigLoader(str(tmp_path))
         conf.default_run_env = ""
-        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataSet"
+        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_custom_resolvers(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
@@ -699,7 +742,7 @@ class TestOmegaConfigLoader:
                 "filepath": "data/01_raw/companies.csv",
             },
         }
-        globals_config = {"x": 34, "dataset_type": "pandas.CSVDataSet"}
+        globals_config = {"x": 34, "dataset_type": "pandas.CSVDataset"}
         _write_yaml(base_params, param_config)
         _write_yaml(globals_params, globals_config)
         _write_yaml(base_catalog, catalog_config)
@@ -890,7 +933,7 @@ class TestOmegaConfigLoader:
         runtime_params = {
             "x": 45,
             "dataset": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
             },
         }
         param_config = {
@@ -972,12 +1015,12 @@ class TestOmegaConfigLoader:
         }
         globals_config = {
             "dataset": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
             }
         }
         catalog_config = {
             "companies": {
-                "type": "${runtime_params:type, ${globals:dataset.type, 'MemoryDataSet'}}",
+                "type": "${runtime_params:type, ${globals:dataset.type, 'MemoryDataset'}}",
                 "filepath": "data/01_raw/companies.csv",
             },
         }

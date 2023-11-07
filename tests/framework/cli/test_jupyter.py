@@ -184,11 +184,3 @@ class TestCreateKernel:
         pattern = "Cannot setup kedro kernel for Jupyter"
         with pytest.raises(KedroCliError, match=pattern):
             _create_kernel("my_kernel_name", "My display name")
-
-
-@pytest.fixture
-def cleanup_nodes_dir(fake_package_path):
-    yield
-    nodes_dir = fake_package_path / "nodes"
-    if nodes_dir.exists():
-        shutil.rmtree(str(nodes_dir))

@@ -48,7 +48,7 @@ There are three steps to enable experiment tracking features with Kedro-Viz. We 
 - [Modify your nodes and pipelines to output those metrics](#modify-your-nodes-and-pipelines-to-log-metrics)
 
 ### Install Kedro and Kedro-Viz
-To use this tutorial code, you must already have [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). You can confirm the versions you have installed by running `kedro info`
+To use this tutorial code, you must already have [installed Kedro](../get_started/install.md) and {doc}`Kedro-Viz <kedro-viz:kedro-viz_visualisation>`. You can confirm the versions you have installed by running `kedro info`
 
 ```{note}
 The example code uses a version of Kedro-Viz `>6.2.0`.

@@ -94,7 +94,7 @@ The first time you type a `kedro` command in a new project, you will be asked wh
 
 ## Visualise a Kedro project
 
-This section swiftly introduces project visualisation using Kedro-Viz. See the [visualisation documentation](../visualisation/kedro-viz_visualisation) for more detail.
+This section swiftly introduces project visualisation using Kedro-Viz. See the {doc}`visualisation documentation <kedro-viz:kedro-viz_visualisation> for more detail.
 
 The Kedro-Viz package needs to be installed into your virtual environment separately as it is not part of the standard Kedro installation:
 
@@ -119,7 +119,7 @@ You have completed the section on Kedro project creation for new users. Now choo
 
 * Learn hands-on: If you prefer to learn hands-on, move on to the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). The tutorial illustrates how to set up a working project, add dependencies, create nodes, register pipelines, set up the Data Catalog, add documentation, and package the project.
 
-* How-to guides: The documentation sections following the tutorial explain [how to visualise a Kedro project](../visualisation/kedro-viz_visualisation.md) and [how to combine Kedro with a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md).
+* How-to guides: The documentation sections following the tutorial explain {doc}`how to visualise a Kedro project <kedro-viz:kedro-viz_visualisation>` and [how to combine Kedro with a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md).
 
 If you've worked through the documentation listed and are unsure where to go next, review the [Kedro repositories on GitHub](https://github.com/kedro-org) and [Kedro's Slack channels](https://slack.kedro.org).
 

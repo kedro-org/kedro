@@ -4,7 +4,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Visualisation
 
-* [Can I annotate a Kedro-Viz visualisation to show different data layers](../visualisation/kedro-viz_visualisation.md#visualise-layers)?
+* {doc}`Can I annotate a Kedro-Viz visualisation to show different data layers <kedro-viz:kedro-viz_visualisation#visualise-layers>`?
 
 ## Working with Jupyter
 

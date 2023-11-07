@@ -18,6 +18,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
     _convert_addon_names_to_numbers,
     _parse_add_ons_input,
+    _validate_selection,
 )
 
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 15
@@ -284,14 +285,14 @@ def test_parse_add_ons_invalid_range(input, capsys):
     assert message in capsys.readouterr().err
 
 
-
 @pytest.mark.parametrize(
     "input,first_invalid",
     [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-8", "8")],
 )
 def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
     with pytest.raises(SystemExit):
-        _parse_add_ons_input(input)
+        selected = _parse_add_ons_input(input)
+        _validate_selection(selected)
     message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
     assert message in capsys.readouterr().err
 
@@ -892,7 +893,7 @@ class TestAddOnsFromUserPrompts:
             "1, 2, 3",
             "  1,  2, 3  ",
             "ALL",
-        ]
+        ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
@@ -973,7 +974,7 @@ class TestAddOnsFromConfigFile:
             "1, 2, 3",
             "  1,  2, 3  ",
             "ALL",
-        ]
+        ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         """Test project created from config."""

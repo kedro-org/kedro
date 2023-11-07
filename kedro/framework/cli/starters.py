@@ -760,7 +760,7 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
 def _validate_selection(add_ons: list[str]):
     for add_on in add_ons:
         if add_on not in NUMBER_TO_ADD_ONS_NAME:
-            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
+            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 

@@ -223,14 +223,13 @@ def _parse_add_ons_input(add_ons_str: str):
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
-
     add_ons_str = add_ons_str.lower()
-#     def _validate_selection(add_ons: list[str]):
-#         for add_on in add_ons:
-#             if add_on not in NUMBER_TO_ADD_ONS_NAME:
-#                 message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
-#                 click.secho(message, fg="red", err=True)
-#                 sys.exit(1)
+    #     def _validate_selection(add_ons: list[str]):
+    #         for add_on in add_ons:
+    #             if add_on not in NUMBER_TO_ADD_ONS_NAME:
+    #                 message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
+    #                 click.secho(message, fg="red", err=True)
+    #                 sys.exit(1)
 
     if add_ons_str == "all":
         return list(NUMBER_TO_ADD_ONS_NAME)
@@ -767,7 +766,7 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
 
 def _validate_selection(add_ons: list[str]):
     for add_on in add_ons:
-        if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
+        if add_on not in NUMBER_TO_ADD_ONS_NAME:
             message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
             click.secho(message, fg="red", err=True)
             sys.exit(1)

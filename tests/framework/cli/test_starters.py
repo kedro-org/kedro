@@ -82,7 +82,6 @@ def _get_expected_files(add_ons: str):
         "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
-
     expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
 
     for add_on in add_ons_list:
@@ -926,7 +925,7 @@ class TestAddOnsFromUserPrompts:
 
     @pytest.mark.parametrize(
         "input,first_invalid",
-        [("0,3,5", "0"), ("1,3,7", "7"), ("0-4", "0"), ("3-7", "7"), ("33", "33")],
+        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("33", "33")],
     )
     def test_invalid_add_ons_selection(self, fake_kedro_cli, input, first_invalid):
         result = CliRunner().invoke(
@@ -936,7 +935,7 @@ class TestAddOnsFromUserPrompts:
         )
 
         assert result.exit_code != 0
-        message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
+        message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
         assert message in result.output
 
     @pytest.mark.parametrize(
@@ -1019,7 +1018,7 @@ class TestAddOnsFromConfigFile:
 
     @pytest.mark.parametrize(
         "input,first_invalid",
-        [("0,3,5", "0"), ("1,3,7", "7"), ("0-4", "0"), ("3-7", "7"), ("33", "33")],
+        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("33", "33")],
     )
     def test_invalid_add_ons_selection(self, fake_kedro_cli, input, first_invalid):
         config = {
@@ -1084,7 +1083,7 @@ class TestAddOnsFromCLI:
             "test, DATA, liNt",
         ],
     )
-    def test_valid_add_ons(self, fake_kedro_cli, add_ons):
+    def test_valid_add_ons_flag(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--addons", add_ons],
@@ -1095,7 +1094,7 @@ class TestAddOnsFromCLI:
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="new-kedro-project")
         _clean_up_project(Path("./new-kedro-project"))
 
-    def test_invalid_add_ons(self, fake_kedro_cli):
+    def test_invalid_add_ons_flag(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--addons", "bad_input"],
@@ -1112,7 +1111,7 @@ class TestAddOnsFromCLI:
         "add_ons",
         ["lint,all", "test,none", "all,none"],
     )
-    def test_invalid_add_on_combination(self, fake_kedro_cli, add_ons):
+    def test_invalid_add_ons_flag_combination(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--addons", add_ons],

@@ -94,7 +94,7 @@ The first time you type a `kedro` command in a new project, you will be asked wh
 
 ## Visualise a Kedro project
 
-This section swiftly introduces project visualisation using Kedro-Viz. See the {doc}`visualisation documentation <kedro-viz:kedro-viz_visualisation> for more detail.
+This section swiftly introduces project visualisation using Kedro-Viz. See the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
 
 The Kedro-Viz package needs to be installed into your virtual environment separately as it is not part of the standard Kedro installation:
 

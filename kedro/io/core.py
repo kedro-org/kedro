@@ -391,9 +391,7 @@ def parse_dataset_definition(
                 class_obj = tmp
                 break
         else:
-            raise DatasetError(
-                f"Class '{dataset_type}' not found, is this a typo?"
-            )
+            raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
 
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(

@@ -139,6 +139,7 @@ NUMBER_TO_ADD_ONS_NAME = {
 
 NAME_ARG_HELP = "The name of your new Kedro project."
 
+
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
     """Remove readonly files on Windows
@@ -273,7 +274,7 @@ def create_cli():  # pragma: no cover
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
-def new(  # noqa: too-many-arguments
+def new(  # noqa: PLR0913
     config_path,
     starter_alias,
     selected_addons,
@@ -563,7 +564,8 @@ def _make_cookiecutter_args(
     add_ons = config.get("add_ons")
     if add_ons:
         config["add_ons"] = [
-            NUMBER_TO_ADD_ONS_NAME[add_on] for add_on in _parse_add_ons_input(add_ons)  # type: ignore
+            NUMBER_TO_ADD_ONS_NAME[add_on]
+            for add_on in _parse_add_ons_input(add_ons)  # type: ignore
         ]
         config["add_ons"] = str(config["add_ons"])
 

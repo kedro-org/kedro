@@ -446,6 +446,7 @@ class TestRunCommand:
                 "tag": ["tag1", "tag2"],
                 "node-names": ["node1", "node2"],
             }
+            ,"dummy": {"dummy": "dummy"}
         }
         OmegaConf.save(
             config,

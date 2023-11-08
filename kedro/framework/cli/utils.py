@@ -259,15 +259,23 @@ class KedroCliError(click.exceptions.ClickException):
     """
 
     VERBOSE_ERROR = False
+    VERBOSE_EXISTS = True
 
     def show(self, file=None):
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
-        else:
+        elif self.VERBOSE_EXISTS:
             etype, value, _ = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             click.secho(
                 f"{formatted_exception}Run with --verbose to see the full exception",
+                fg="yellow",
+            )
+        else:
+            etype, value, _ = sys.exc_info()
+            formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            click.secho(
+                f"{formatted_exception}",
                 fg="yellow",
             )
 
@@ -411,6 +419,7 @@ def _validate_config_file(key):
     run_args = [click_arg.name for click_arg in run.params]
     run_args.remove("config")
     if key not in run_args:
+        KedroCliError.VERBOSE_EXISTS = False
         message = _suggest_cli_command(key, run_args)
         raise KedroCliError(
             f"Key `{key}` in provided configuration is not valid. {message}"

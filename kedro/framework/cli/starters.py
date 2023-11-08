@@ -108,7 +108,8 @@ Add-Ons\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
-6) Pyspark: Provides a basic PySpark set up\n
+6) Pyspark: Provides set up configuration for working with PySpark\n
+7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
 kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
@@ -116,16 +117,28 @@ kedro new --addons=all\n
 kedro new --addons=none
 """
 
-ADD_ONS_DICT = {
+ADD_ONS_SHORTNAME_TO_NUMBER = {
+    "lint": "1",
+    "test": "2",
+    "log": "3",
+    "docs": "4",
+    "data": "5",
+    "pyspark": "6",
+    "viz": "7",
+}
+NUMBER_TO_ADD_ONS_NAME = {
     "1": "Linting",
     "2": "Testing",
     "3": "Custom Logging",
     "4": "Documentation",
     "5": "Data Structure",
     "6": "Pyspark",
+    "7": "Kedro Viz",
 }
 
+
 NAME_ARG_HELP = "The name of your new Kedro project."
+
 
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
@@ -213,13 +226,13 @@ def _parse_add_ons_input(add_ons_str: str):
 
     def _validate_selection(add_ons: list[str]):
         for add_on in add_ons:
-            if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
-                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."  # nosec
+            if add_on not in NUMBER_TO_ADD_ONS_NAME:
+                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
                 click.secho(message, fg="red", err=True)
                 sys.exit(1)
 
     if add_ons_str == "all":
-        return list(ADD_ONS_DICT)
+        return list(NUMBER_TO_ADD_ONS_NAME)
     if add_ons_str == "none":
         return []
     # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
@@ -261,7 +274,7 @@ def create_cli():  # pragma: no cover
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
-def new(  # noqa: too-many-arguments
+def new(  # noqa: PLR0913
     config_path,
     starter_alias,
     selected_addons,
@@ -322,7 +335,7 @@ def new(  # noqa: too-many-arguments
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
-    config = _get_config(
+    extra_context = _get_extra_context(
         prompts_required=prompts_required,
         config_path=config_path,
         cookiecutter_context=cookiecutter_context,
@@ -330,7 +343,7 @@ def new(  # noqa: too-many-arguments
         project_name=project_name,
     )
 
-    cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
+    cookiecutter_args = _make_cookiecutter_args(extra_context, checkout, directory)
 
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
 
@@ -367,14 +380,14 @@ def list_starters():
         )
 
 
-def _get_config(
+def _get_extra_context(
     prompts_required: dict,
     config_path: str,
     cookiecutter_context: OrderedDict,
     selected_addons: str,
     project_name: str,
 ) -> dict[str, str]:
-    """Generates a config dictionary to be used to generate cookiecutter args, based
+    """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
     on CLI flags, user prompts, or a configuration file.
 
     Args:
@@ -392,60 +405,53 @@ def _get_config(
         the prompts_required dictionary, with all the redundant information removed.
     """
     if not prompts_required:
-        config = {}
+        extra_context = {}
         if config_path:
-            config = _fetch_config_from_file(config_path)
-            _validate_config_file_inputs(config)
+            extra_context = _fetch_config_from_file(config_path)
+            _validate_config_file_inputs(extra_context)
 
     elif config_path:
-        config = _fetch_config_from_file(config_path)
-        _validate_config_file_against_prompts(config, prompts_required)
-        _validate_config_file_inputs(config)
+        extra_context = _fetch_config_from_file(config_path)
+        _validate_config_file_against_prompts(extra_context, prompts_required)
+        _validate_config_file_inputs(extra_context)
     else:
-        config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
+        extra_context = _fetch_config_from_user_prompts(
+            prompts_required, cookiecutter_context
+        )
 
-    add_ons = _get_addons_from_cli_input(selected_addons)
+    add_ons = _convert_addon_names_to_numbers(selected_addons)
 
     if add_ons is not None:
-        config["add_ons"] = add_ons
+        extra_context["add_ons"] = add_ons
 
     if project_name is not None:
-        config["project_name"] = project_name
+        extra_context["project_name"] = project_name
 
-    return config
+    return extra_context
 
 
-def _get_addons_from_cli_input(selected_addons: str) -> str:
+def _convert_addon_names_to_numbers(selected_addons: str) -> str:
     """Prepares add-on selection from the CLI input to the correct format
     to be put in the project configuration, if it exists.
     Replaces add-on strings with the corresponding prompt number.
 
     Args:
         selected_addons: a string containing the value for the --addons flag,
-            or None in case the flag wasn't used.
+            or None in case the flag wasn't used, i.e. lint,docs.
 
     Returns:
         String with the numbers corresponding to the desired add_ons, or
         None in case the --addons flag was not used.
     """
-    string_to_number = {
-        "lint": "1",
-        "test": "2",
-        "log": "3",
-        "docs": "4",
-        "data": "5",
-        "pyspark": "6",
-    }
+    if selected_addons is None:
+        return None
 
-    if selected_addons is not None:
-        addons = selected_addons.split(",")
-        for i in range(len(addons)):
-            addon = addons[i].strip()
-            if addon in string_to_number:
-                addons[i] = string_to_number[addon]
-        return ",".join(addons)
-
-    return None
+    addons = []
+    for addon in selected_addons.split(","):
+        addon_short_name = addon.strip()
+        if addon_short_name in ADD_ONS_SHORTNAME_TO_NUMBER:
+            addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon_short_name])
+    return ",".join(addons)
 
 
 def _select_prompts_to_display(
@@ -466,14 +472,14 @@ def _select_prompts_to_display(
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = ["lint", "test", "log", "docs", "data", "pyspark", "all", "none"]
+    valid_addons = list(ADD_ONS_SHORTNAME_TO_NUMBER) + ["all", "none"]
 
     if selected_addons is not None:
         addons = re.sub(r"\s", "", selected_addons).split(",")
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
-                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none",
+                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, viz, all, none",
                     fg="red",
                     err=True,
                 )
@@ -488,7 +494,7 @@ def _select_prompts_to_display(
         del prompts_required["add_ons"]
 
     if project_name is not None:
-        if bool(re.match(r"^[\w -]{2,}$", project_name)) is False:
+        if not re.match(r"^[\w -]{2,}$", project_name):
             click.secho(
                 "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
                 fg="red",
@@ -558,7 +564,8 @@ def _make_cookiecutter_args(
     add_ons = config.get("add_ons")
     if add_ons:
         config["add_ons"] = [
-            ADD_ONS_DICT[add_on] for add_on in _parse_add_ons_input(add_ons)  # type: ignore
+            NUMBER_TO_ADD_ONS_NAME[add_on]
+            for add_on in _parse_add_ons_input(add_ons)  # type: ignore
         ]
     cookiecutter_args = {
         "output_dir": config.get("output_dir", str(Path.cwd().resolve())),
@@ -577,13 +584,24 @@ def _make_cookiecutter_args(
 def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
-    print("DEBUG**")
-    print(add_ons, type(add_ons))
-    if add_ons and "Pyspark" in add_ons:
-        cookiecutter_args["directory"] = "spaceflights-pyspark"
-        pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
-        return pyspark_path
-    return template_path
+    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
+    if add_ons:
+        if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+            # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+        elif "Pyspark" in add_ons:
+            # Use the spaceflights-pyspark starter if only Pyspark is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark"
+        elif "Kedro Viz" in add_ons:
+            # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        else:
+            # Use the default template path for any other combinations or if "none" is chosen.
+            starter_path = template_path
+    else:
+        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty.
+        starter_path = template_path
+    return starter_path
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
@@ -617,11 +635,9 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     add_ons = extra_context.get("add_ons")
 
-    # Only core template and spaceflights-pyspark have configurable add-ons
-    if (
-        template_path == str(TEMPLATE_PATH)
-        or add_ons is not None
-        and "Pyspark" in add_ons
+    # Only core template and spaceflight starters have configurable add-ons
+    if template_path == str(TEMPLATE_PATH) or (
+        add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)
     ):
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")

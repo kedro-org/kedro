@@ -12,6 +12,19 @@ dynamic = ["dependencies", "version"]
 
 [project.entry-points."kedro.hooks"]
 
+[project.optional-dependencies]
+docs = [
+    "docutils<0.18.0",
+    "sphinx~=3.4.3",
+    "sphinx_rtd_theme==0.5.1",
+    "nbsphinx==0.8.1",
+    "sphinx-autodoc-typehints==1.11.1",
+    "sphinx_copybutton==0.3.1",
+    "ipykernel>=5.3, <7.0",
+    "Jinja2<3.1.0",
+    "myst-parser~=0.17.2",
+]
+
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements.txt"}
 version = {attr = "{{ cookiecutter.python_package }}.__version__"}
@@ -25,3 +38,27 @@ package_name = "{{ cookiecutter.python_package }}"
 project_name = "{{ cookiecutter.project_name }}"
 kedro_init_version = "{{ cookiecutter.kedro_version }}"
 add_ons = {{ cookiecutter.add_ons | tojson }}
+
+[tool.pytest.ini_options]
+addopts = """
+--cov-report term-missing \
+--cov src/{{ cookiecutter.python_package }} -ra"""
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+select = [
+    "F",   # Pyflakes
+    "W",   # pycodestyle
+    "E",   # pycodestyle
+    "I",   # isort
+    "UP",  # pyupgrade
+    "PL",  # Pylint
+    "T201", # Print Statement
+]
+ignore = ["E501"]  # Black takes care of line-too-long

@@ -25,7 +25,14 @@
 * Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ### CLI
-* Removed deprecated `kedro docs` command.
+* Removed deprecated commands:
+   * `kedro docs`
+   * `kedro jupyter convert`
+   * `kedro activate-nbstripout`
+   * `kedro build-docs`
+   * `kedro build-reqs`
+   * `kedro lint`
+   * `kedro test`
 * Added the `--addons` flag to the `kedro new` command.
 * Added the `--name` flag to the `kedro new` command.
 

@@ -274,8 +274,8 @@ class TestCoreFunctions:
         with pytest.raises(DatasetError, match=f"Class '{dataset_name}' not found, is this a typo?"):
             parse_dataset_definition({"type": dataset_name})
 
-    def test_missing_dependencies(self, mocker):
-        # If the module is found but importing the dataset trigger ModuleNotFoundError
+    def test_dataset_missing_dependencies(self, mocker):
+        # If the module is found but import the dataset trigger ModuleNotFoundError
         dataset_name = "LambdaDataset"
 
         def side_effect_function(value):
@@ -285,7 +285,6 @@ class TestCoreFunctions:
                 raise ModuleNotFoundError
 
         mocker.patch("kedro.io.core.load_obj", side_effect=side_effect_function)
-        # mock_import.return_value = side_effect_function
 
         pattern = "Please see the documentation on how to install relevant dependencies"
         with pytest.raises(DatasetError, match=pattern):

@@ -872,7 +872,6 @@ def _validate_config_file_inputs(config: dict[str, str]):
     if not re.match(
         project_name_validation_config["regex_validator"], input_project_name
     ):
-
         click.secho(project_name_validation_config["error_message"], fg="red", err=True)
         sys.exit(1)
 

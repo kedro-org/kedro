@@ -438,6 +438,12 @@ class DataCatalog:
             return True
         return False
 
+    def add_default_pattern(self, dataset_type):
+        for pattern, _ in self._dataset_patterns.items():
+            if self._specificity(pattern) == 0:
+                return
+        self._dataset_patterns["{default}"] = {"type": dataset_type}
+
     @classmethod
     def _resolve_config(
         cls,

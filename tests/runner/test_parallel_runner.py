@@ -13,7 +13,6 @@ from kedro.io import (
     DatasetError,
     LambdaDataset,
     MemoryDataset,
-    SharedMemoryDataset,
 )
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
@@ -51,10 +50,10 @@ class SingleProcessDataset(AbstractDataset):
     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
 class TestValidParallelRunner:
-    def test_create_default_dataset(self):
-        # dataset is a proxy to a dataset in another process.
-        dataset = ParallelRunner().create_default_dataset("")
-        assert isinstance(dataset, SharedMemoryDataset)
+    # def test_create_default_dataset(self):
+    #     # dataset is a proxy to a dataset in another process.
+    #     dataset = ParallelRunner().create_default_dataset("")
+    #     assert isinstance(dataset, SharedMemoryDataset)
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):

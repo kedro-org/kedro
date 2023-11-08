@@ -22,7 +22,12 @@ from kedro.framework.hooks.manager import (
     _register_hooks_entry_points,
 )
 from kedro.framework.project import settings
-from kedro.io import DataCatalog, MemoryDataset, SharedMemoryDataset
+from kedro.io import (
+    DataCatalog,
+    DatasetNotFoundError,
+    MemoryDataset,
+    SharedMemoryDataset,
+)
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
@@ -127,20 +132,20 @@ class ParallelRunner(AbstractRunner):
     def __del__(self):
         self._manager.shutdown()
 
-    def create_default_dataset(  # type: ignore
-        self, ds_name: str
-    ) -> SharedMemoryDataset:
-        """Factory method for creating the default dataset for the runner.
-
-        Args:
-            ds_name: Name of the missing dataset.
-
-        Returns:
-            An instance of ``_SharedMemoryDataset`` to be used for all
-            unregistered datasets.
-
-        """
-        return SharedMemoryDataset(self._manager)
+    # def create_default_dataset(  # type: ignore
+    #     self, ds_name: str
+    # ) -> SharedMemoryDataset:
+    #     """Factory method for creating the default dataset for the runner.
+    #
+    #     Args:
+    #         ds_name: Name of the missing dataset.
+    #
+    #     Returns:
+    #         An instance of ``_SharedMemoryDataset`` to be used for all
+    #         unregistered datasets.
+    #
+    #     """
+    #     return SharedMemoryDataset(self._manager)
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
@@ -208,6 +213,17 @@ class ParallelRunner(AbstractRunner):
                 f"MemoryDatasets"
             )
 
+    def set_manager_datasets(self, catalog, pipeline):
+        for dataset in pipeline.datasets():
+            try:
+                catalog._get_dataset(dataset)
+            except DatasetNotFoundError:
+                pass
+        for name, ds in catalog._datasets.items():
+            if isinstance(ds, SharedMemoryDataset):
+                ds.set_manager(self._manager)
+        # print(catalog._datasets)
+
     def _get_required_workers_count(self, pipeline: Pipeline):
         """
         Calculate the max number of processes required for the pipeline,
@@ -250,7 +266,8 @@ class ParallelRunner(AbstractRunner):
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
         self._validate_nodes(nodes)
-
+        catalog.add_default_pattern("SharedMemoryDataset")
+        self.set_manager_datasets(catalog, pipeline)
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())

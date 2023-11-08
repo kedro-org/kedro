@@ -6,7 +6,7 @@ Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/), 
 
 In the following chapters, you will learn [how to set up Kedro](../get_started/install.md) and discover the [key Kedro concepts](../get_started/kedro_concepts.md). You can then review the [spaceflights tutorial](../tutorial/tutorial_template.md) to get hands-on experience with a Kedro project.
 
-For new and intermediate Kedro users, there's a comprehensive section on {doc}`visualising Kedro projects using Kedro-Viz <kedro-viz:kedro-viz_visualisation>` and [working with Kedro and Jupyter notebooks](../notebooks_and_ipython/index.md).
+For new and intermediate Kedro users, there's a comprehensive section on [working with Kedro and Jupyter notebooks](../notebooks_and_ipython/index.md).
 
 Use the left-hand table of contents to explore the documentation available for more advanced Kedro usage and deployment. We also recommend the [glossary](../resources/glossary.md) and the [API reference documentation](/kedro).
 

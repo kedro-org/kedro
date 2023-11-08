@@ -272,7 +272,7 @@ class TestCoreFunctions:
         mocker.patch("kedro.io.core.load_obj", return_value=None)
         dataset_name = "lAmbDaDaTAsET"
 
-        with pytest.raises(DatasetError, match=f"Class '{dataset_name}' not found"):
+        with pytest.raises(DatasetError, match=f"Class '{dataset_name}' not found, is this a typo?"):
             parse_dataset_definition({"type": dataset_name})
 
     def test_missing_dependencies(self, mocker):

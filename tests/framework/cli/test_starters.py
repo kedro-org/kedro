@@ -285,14 +285,14 @@ def test_parse_add_ons_invalid_range(input, capsys):
 
 
 @pytest.mark.parametrize(
-    "input,first_invalid",
-    [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-8", "8")],
+    "input,last_invalid",
+    [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-9", "9")],
 )
-def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
+def test_parse_add_ons_invalid_selection(input, last_invalid, capsys):
     with pytest.raises(SystemExit):
         selected = _parse_add_ons_input(input)
         _validate_selection(selected)
-    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
+    message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
     assert message in capsys.readouterr().err
 
 
@@ -924,10 +924,10 @@ class TestAddOnsFromUserPrompts:
         )
 
     @pytest.mark.parametrize(
-        "input,first_invalid",
-        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "8"), ("33", "33")],
+        "input,last_invalid",
+        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("99", "99")],
     )
-    def test_invalid_add_ons_selection(self, fake_kedro_cli, input, first_invalid):
+    def test_invalid_add_ons_selection(self, fake_kedro_cli, input, last_invalid):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
@@ -935,7 +935,7 @@ class TestAddOnsFromUserPrompts:
         )
 
         assert result.exit_code != 0
-        message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
+        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
         assert message in result.output
 
     @pytest.mark.parametrize(
@@ -1017,10 +1017,10 @@ class TestAddOnsFromConfigFile:
         )
 
     @pytest.mark.parametrize(
-        "input,first_invalid",
-        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "8"), ("33", "33")],
+        "input,last_invalid",
+        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("99", "99")],
     )
-    def test_invalid_add_ons_selection(self, fake_kedro_cli, input, first_invalid):
+    def test_invalid_add_ons_selection(self, fake_kedro_cli, input, last_invalid):
         config = {
             "add_ons": input,
             "project_name": "My Project",
@@ -1033,7 +1033,7 @@ class TestAddOnsFromConfigFile:
         )
 
         assert result.exit_code != 0
-        message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
+        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
         assert message in result.output
 
     @pytest.mark.parametrize(

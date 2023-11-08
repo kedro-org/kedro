@@ -150,7 +150,7 @@ def _get_param_names_mapping(
     return params
 
 
-def pipeline(  # noqa: too-many-arguments
+def pipeline(  # noqa: PLR0913
     pipe: Iterable[Node | Pipeline] | Pipeline,
     *,
     inputs: str | set[str] | dict[str, str] | None = None,

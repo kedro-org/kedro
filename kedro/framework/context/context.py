@@ -9,14 +9,13 @@ from urllib.parse import urlparse
 from warnings import warn
 
 from attrs import field, frozen
+from omegaconf import OmegaConf
 from pluggy import PluginManager
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import _transcode_split
-
-from omegaconf import OmegaConf
 
 
 def _is_relative_path(path_string: str) -> bool:

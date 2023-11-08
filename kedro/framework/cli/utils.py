@@ -432,8 +432,12 @@ def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
 
+    if not value:
+        return {}
+    param_list = value.split(",")
+
     # The input is expected to be in OmegaConf dotlist format
-    conf = OmegaConf.from_dotlist(value)
+    conf = OmegaConf.from_dotlist(param_list)
 
     # Convert the OmegaConf object to a plain dictionary
     return OmegaConf.to_container(conf, resolve=True)

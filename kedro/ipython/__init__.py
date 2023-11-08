@@ -12,10 +12,11 @@ from typing import Any
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+from omegaconf import MissingMandatoryValue, OmegaConf, ValidationError
 
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import CONF_SOURCE_HELP, PARAMS_ARG_HELP
-from kedro.framework.cli.utils import ENV_HELP, _split_params
+from kedro.framework.cli.utils import ENV_HELP
 from kedro.framework.project import (
     LOGGING,  # noqa
     configure_project,
@@ -23,8 +24,6 @@ from kedro.framework.project import (
 )
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
-
-from omegaconf import OmegaConf, ValidationError, MissingMandatoryValue
 
 logger = logging.getLogger(__name__)
 
@@ -81,12 +80,13 @@ def magic_reload_kedro(
     processed_params = None
     if args.params:
         try:
-            processed_params = OmegaConf.to_container(OmegaConf.from_dotlist(args.params.split()), resolve=True)
+            processed_params = OmegaConf.to_container(
+                OmegaConf.from_dotlist(args.params.split()), resolve=True
+            )
         except (ValidationError, MissingMandatoryValue) as e:
             logger.error(f"Failed to parse --params argument: {str(e)}")
             return
     reload_kedro(args.path, args.env, processed_params, local_ns, args.conf_source)
-
 
 
 def reload_kedro(

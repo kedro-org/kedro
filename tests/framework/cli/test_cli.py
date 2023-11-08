@@ -428,7 +428,8 @@ class TestRunCommand:
                 "pipeline": "pipeline1",
                 "tag": ["tag1", "tag2"],
                 "node_names": ["node1", "node2"],
-            }
+            },
+            "dummy": {"dummy": "dummy"},
         }
         OmegaConf.save(
             config,
@@ -445,8 +446,8 @@ class TestRunCommand:
                 "pipeline": "pipeline1",
                 "tag": ["tag1", "tag2"],
                 "node-names": ["node1", "node2"],
-            }
-            ,"dummy": {"dummy": "dummy"}
+            },
+            "dummy": {"dummy": "dummy"},
         }
         OmegaConf.save(
             config,

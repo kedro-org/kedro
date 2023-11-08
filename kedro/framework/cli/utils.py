@@ -406,27 +406,12 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
 
 def _validate_config_file(key):
     """Validate the keys provided in the config file against the accepted keys."""
-    accepted_keys = [
-        "from_inputs",
-        "to_outputs",
-        "from_nodes",
-        "to_nodes",
-        "node_names",
-        "runner",
-        "env",
-        "tags",
-        "load_versions",
-        "pipeline",
-        "namespace",
-        "conf_source",
-        "params",
-        "is_async",
-        "tag",
-        "nodes_names",
-        "load_version",
-    ]
-    if key not in accepted_keys:
-        message = _suggest_cli_command(key, accepted_keys)
+    from kedro.framework.cli.project import run
+
+    run_args = [click_arg.name for click_arg in run.params]
+    run_args.remove("config")
+    if key not in run_args:
+        message = _suggest_cli_command(key, run_args)
         raise KedroCliError(
             f"Key `{key}` in provided configuration is not valid. {message}"
         )

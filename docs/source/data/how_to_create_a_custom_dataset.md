@@ -569,7 +569,7 @@ class ImageDataset(AbstractVersionedDataset):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset's constructor, please see the implementation of the {class}` `SparkDataset` <kedro-datasets:kedro_datasets.spark.SparkDataset>`.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset's constructor, please see the implementation of the {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`.
 
 
 ## How to contribute a custom dataset implementation

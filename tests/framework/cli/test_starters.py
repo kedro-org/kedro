@@ -174,7 +174,7 @@ def _assert_requirements_ok(
         )
 
 
-# noqa: too-many-arguments
+# noqa: PLR0913
 def _assert_template_ok(
     result,
     add_ons="none",

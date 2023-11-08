@@ -76,7 +76,7 @@ class LambdaDataset(AbstractDataset):
         else:
             self.__release()
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,

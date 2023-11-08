@@ -441,8 +441,8 @@ def _load_obj(class_path: str) -> Any | None:
             raise DatasetError(
                 f"{exc}. Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
-                f"https://kedro.readthedocs.io/en/stable/"
-                f"kedro_project_setup/dependencies.html"
+                f"https://docs.kedro.org/en/stable/kedro_project_setup/"
+                f"dependencies.html#install-dependencies-related-to-the-data-catalog"
             ) from exc
         return None
 

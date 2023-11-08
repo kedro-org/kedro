@@ -1,5 +1,6 @@
 black~=22.0
 jupyterlab>=3.0
+notebook
 kedro~={{ cookiecutter.kedro_version }}
 kedro-telemetry>=0.3.1
 pytest-cov~=3.0

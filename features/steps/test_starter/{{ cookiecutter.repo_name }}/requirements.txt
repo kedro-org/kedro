@@ -1,5 +1,6 @@
 black~=22.0
 jupyterlab>=3.0
+notebook
 kedro~={{ cookiecutter.kedro_version}}
 kedro-datasets[pandas.CSVDataset]
 kedro-telemetry>=0.3.1

@@ -24,6 +24,8 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
 
+from omegaconf import OmegaConf, ValidationError, MissingMandatoryValue
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,7 +63,7 @@ def load_ipython_extension(ipython):
 @argument("-e", "--env", type=str, default=None, help=ENV_HELP)
 @argument(
     "--params",
-    type=lambda value: _split_params(None, None, value),
+    type=str,
     default=None,
     help=PARAMS_ARG_HELP,
 )
@@ -75,7 +77,16 @@ def magic_reload_kedro(
     for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
-    reload_kedro(args.path, args.env, args.params, local_ns, args.conf_source)
+    # Process --params using OmegaConf
+    processed_params = None
+    if args.params:
+        try:
+            processed_params = OmegaConf.to_container(OmegaConf.from_dotlist(args.params.split()), resolve=True)
+        except (ValidationError, MissingMandatoryValue) as e:
+            logger.error(f"Failed to parse --params argument: {str(e)}")
+            return
+    reload_kedro(args.path, args.env, processed_params, local_ns, args.conf_source)
+
 
 
 def reload_kedro(

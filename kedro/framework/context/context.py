@@ -16,6 +16,8 @@ from kedro.framework.project import settings
 from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import _transcode_split
 
+from omegaconf import OmegaConf
+
 
 def _is_relative_path(path_string: str) -> bool:
     """Checks whether a path string is a relative path.
@@ -137,23 +139,6 @@ def _validate_transcoded_datasets(catalog: DataCatalog):
         _transcode_split(dataset_name)
 
 
-def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
-    """Update a nested dict with values of new_dict.
-
-    Args:
-        old_dict: dict to be updated
-        new_dict: dict to use for updating old_dict
-
-    """
-    for key, value in new_dict.items():
-        if key not in old_dict:
-            old_dict[key] = value
-        elif isinstance(old_dict[key], dict) and isinstance(value, dict):
-            _update_nested_dict(old_dict[key], value)
-        else:
-            old_dict[key] = value
-
-
 def _expand_full_path(project_path: str | Path) -> Path:
     return Path(project_path).expanduser().resolve()
 
@@ -212,12 +197,20 @@ class KedroContext:
                 extra parameters passed at initialization.
         """
         try:
-            params = self.config_loader["parameters"]
+            raw_params = self.config_loader.get("parameters")
+            # Convert raw_params to OmegaConf object if it's not already one
+            params = OmegaConf.create(raw_params)
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
-            params = {}
-        _update_nested_dict(params, self._extra_params or {})
-        return params
+            params = OmegaConf.create()  # Create an empty OmegaConf object
+
+        if self._extra_params:
+            # Merge extra_params (already a dict) with loaded params (OmegaConf object)
+            extra_params_conf = OmegaConf.create(self._extra_params)
+            params = OmegaConf.merge(params, extra_params_conf)
+
+        # Convert the OmegaConf object to a plain Python dictionary
+        return OmegaConf.to_container(params, resolve=True)
 
     def _get_catalog(
         self,

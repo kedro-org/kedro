@@ -679,7 +679,7 @@ class Pipeline:  # noqa: too-many-public-methods
         nodes = [node for node in self.nodes if tags & node.tags]
         return Pipeline(nodes)
 
-    def filter(  # noqa: too-many-arguments
+    def filter(  # noqa: PLR0913
         self,
         tags: Iterable[str] = None,
         from_nodes: Iterable[str] = None,

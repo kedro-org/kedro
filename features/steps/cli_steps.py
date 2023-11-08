@@ -391,6 +391,7 @@ def exec_notebook(context, command):
 @then('I wait for the jupyter webserver to run for up to "{timeout:d}" seconds')
 def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
+    # FIXME: Will continue iterating after the process has returned
     while time() < timeout_start + timeout:
         stdout = context.result.stdout.readline()
         if "http://127.0.0.1:" in stdout:

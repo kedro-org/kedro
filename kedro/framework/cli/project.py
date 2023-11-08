@@ -10,7 +10,6 @@ from kedro.framework.cli.utils import (
     _check_module_importable,
     _config_file_callback,
     _get_values_as_tuple,
-    _reformat_load_versions,
     _split_load_versions,
     _split_params,
     call,
@@ -169,15 +168,8 @@ def package(metadata: ProjectMetadata):
     callback=split_string,
 )
 @click.option(
-    "--load-version",
-    "-lv",
-    type=str,
-    multiple=True,
-    help=LOAD_VERSION_HELP,
-    callback=_reformat_load_versions,
-)
-@click.option(
     "--load-versions",
+    "-lv",
     type=str,
     default="",
     help=LOAD_VERSION_HELP,
@@ -214,7 +206,6 @@ def run(  # noqa: too-many-arguments,unused-argument,too-many-locals
     from_nodes,
     from_inputs,
     to_outputs,
-    load_version,
     load_versions,
     pipeline,
     config,
@@ -225,10 +216,8 @@ def run(  # noqa: too-many-arguments,unused-argument,too-many-locals
     """Run the pipeline."""
 
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-
     tags = _get_values_as_tuple(tags)
     node_names = _get_values_as_tuple(node_names)
-    load_version = {**load_version, **load_versions}
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params
@@ -241,7 +230,7 @@ def run(  # noqa: too-many-arguments,unused-argument,too-many-locals
             to_nodes=to_nodes,
             from_inputs=from_inputs,
             to_outputs=to_outputs,
-            load_versions=load_version,
+            load_versions=load_versions,
             pipeline_name=pipeline,
             namespace=namespace,
         )

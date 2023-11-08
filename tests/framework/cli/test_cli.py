@@ -757,32 +757,6 @@ class TestRunCommand:
         assert "Parameter key cannot be an empty string" in result.stdout
 
     @mark.parametrize(
-        "option,value",
-        [("--load-version", "dataset1:time1"), ("-lv", "dataset2:time2")],
-    )
-    def test_reformat_load_versions(
-        self, fake_project_cli, fake_metadata, fake_session, option, value, mocker
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", option, value], obj=fake_metadata
-        )
-        assert not result.exit_code, result.output
-
-        ds, t = value.split(":", 1)
-        fake_session.run.assert_called_once_with(
-            tags=(),
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions={ds: t},
-            pipeline_name=None,
-            namespace=None,
-        )
-
-    @mark.parametrize(
         "lv_input, lv_dict",
         [
             [
@@ -921,34 +895,3 @@ class TestRunCommand:
             " does not exist."
         )
         assert expected_output in result.output
-
-    # the following tests should be deleted in 0.19.0
-
-    def test_both_load_version_flags(
-        self, fake_project_cli, fake_metadata, fake_session, mocker
-    ):
-        lv_input = ["dataset1:time1", "dataset2:time2"]
-        lv_dict = {"dataset1": "time1", "dataset2": "time2"}
-
-        load_version_command = "--load-version=" + lv_input[0]
-        load_versions_command = "--load-versions=" + lv_input[1]
-
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["run", load_version_command, load_versions_command],
-            obj=fake_metadata,
-        )
-        assert not result.exit_code, result.output
-
-        fake_session.run.assert_called_once_with(
-            tags=(),
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions=lv_dict,
-            pipeline_name=None,
-            namespace=None,
-        )

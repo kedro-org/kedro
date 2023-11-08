@@ -183,8 +183,10 @@ type_targets = {
         "ParserError",
     ),
 }
+
+nitpicky = False
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
-nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
+# nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"

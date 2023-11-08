@@ -432,32 +432,12 @@ def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
-    dot_list = []
-    for item in split_string(ctx, param, value):
-        equals_idx = item.find("=")
-        colon_idx = item.find(":")
-        if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
-            # For cases where key-value pair is separated by = and the value contains a colon
-            # which should not be replaced by =
-            pass
-        else:
-            item = item.replace(":", "=", 1)  # noqa: redefined-loop-name
-        items = item.split("=", 1)
-        if len(items) != 2:  # noqa: PLR2004
-            ctx.fail(
-                f"Invalid format of `{param.name}` option: "
-                f"Item `{items[0]}` must contain "
-                f"a key and a value separated by `:` or `=`."
-            )
-        key = items[0].strip()
-        if not key:
-            ctx.fail(
-                f"Invalid format of `{param.name}` option: Parameter key "
-                f"cannot be an empty string."
-            )
-        dot_list.append(item)
-    conf = OmegaConf.from_dotlist(dot_list)
-    return OmegaConf.to_container(conf)
+
+    # The input is expected to be in OmegaConf dotlist format
+    conf = OmegaConf.from_dotlist(value)
+
+    # Convert the OmegaConf object to a plain dictionary
+    return OmegaConf.to_container(conf, resolve=True)
 
 
 def _split_load_versions(ctx, param, value):
@@ -468,3 +448,30 @@ def _split_load_versions(ctx, param, value):
 def _get_values_as_tuple(values: Iterable[str]) -> tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
 
+
+def _deprecate_options(ctx, param, value):
+    deprecated_flag = {
+        "node_names": "--node",
+        "tag": "--tag",
+        "load_version": "--load-version",
+    }
+    new_flag = {
+        "node_names": "--nodes",
+        "tag": "--tags",
+        "load_version": "--load-versions",
+    }
+    shorthand_flag = {
+        "node_names": "-n",
+        "tag": "-t",
+        "load_version": "-lv",
+    }
+    if value:
+        deprecation_message = (
+            f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
+            "and will not be available from Kedro 0.19.0. "
+            f"Use the flag '{new_flag[param.name]}' instead. Shorthand "
+            f"'{shorthand_flag[param.name]}' will be updated to use "
+            f"'{new_flag[param.name]}' in Kedro 0.19.0."
+        )
+        click.secho(deprecation_message, fg="red")
+    return value

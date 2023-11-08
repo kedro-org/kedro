@@ -391,7 +391,6 @@ random_state = conf_params["model_options"]["random_state"]
 
 ```python
 def big_function():
-
     ####################
     # Data processing  #
     ####################
@@ -469,14 +468,12 @@ def _parse_money(x: pd.Series) -> pd.Series:
 
 
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
-
     companies["iata_approved"] = _is_true(companies["iata_approved"])
     companies["company_rating"] = _parse_percentage(companies["company_rating"])
     return companies
 
 
 def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
-
     shuttles["d_check_complete"] = _is_true(shuttles["d_check_complete"])
     shuttles["moon_clearance_complete"] = _is_true(shuttles["moon_clearance_complete"])
     shuttles["price"] = _parse_money(shuttles["price"])
@@ -486,7 +483,6 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 def create_model_input_table(
     shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
 ) -> pd.DataFrame:
-
     rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
     model_input_table = rated_shuttles.merge(
         companies, left_on="company_id", right_on="id"
@@ -590,14 +586,12 @@ def _parse_money(x: pd.Series) -> pd.Series:
 
 
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
-
     companies["iata_approved"] = _is_true(companies["iata_approved"])
     companies["company_rating"] = _parse_percentage(companies["company_rating"])
     return companies
 
 
 def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
-
     shuttles["d_check_complete"] = _is_true(shuttles["d_check_complete"])
     shuttles["moon_clearance_complete"] = _is_true(shuttles["moon_clearance_complete"])
     shuttles["price"] = _parse_money(shuttles["price"])
@@ -607,7 +601,6 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 def create_model_input_table(
     shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
 ) -> pd.DataFrame:
-
     rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
     model_input_table = rated_shuttles.merge(
         companies, left_on="company_id", right_on="id"

@@ -18,7 +18,7 @@ class DataCatalogSpecs:
     """Namespace that defines all specifications for a data catalog's lifecycle hooks."""
 
     @hook_spec
-    def after_catalog_created(  # noqa: too-many-arguments
+    def after_catalog_created(  # noqa: PLR0913
         self,
         catalog: DataCatalog,
         conf_catalog: dict[str, Any],
@@ -48,7 +48,7 @@ class NodeSpecs:
     """Namespace that defines all specifications for a node's lifecycle hooks."""
 
     @hook_spec
-    def before_node_run(  # noqa: too-many-arguments
+    def before_node_run(  # noqa: PLR0913
         self,
         node: Node,
         catalog: DataCatalog,
@@ -76,7 +76,7 @@ class NodeSpecs:
         pass
 
     @hook_spec
-    def after_node_run(  # noqa: too-many-arguments
+    def after_node_run(  # noqa: PLR0913
         self,
         node: Node,
         catalog: DataCatalog,
@@ -104,7 +104,7 @@ class NodeSpecs:
         pass
 
     @hook_spec
-    def on_node_error(  # noqa: too-many-arguments
+    def on_node_error(  # noqa: PLR0913
         self,
         error: Exception,
         node: Node,

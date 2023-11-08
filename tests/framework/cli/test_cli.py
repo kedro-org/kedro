@@ -796,20 +796,6 @@ class TestRunCommand:
             namespace=None,
         )
 
-    def test_fail_reformat_load_versions(self, fake_project_cli, fake_metadata):
-        load_version = "2020-05-12T12.00.00"
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "-lv", load_version], obj=fake_metadata
-        )
-        assert result.exit_code, result.output
-
-        expected_output = (
-            f"Error: Expected the form of 'load_version' to be "
-            f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
-            f"found {load_version} instead\n"
-        )
-        assert expected_output in result.output
-
     def test_fail_split_load_versions(self, fake_project_cli, fake_metadata):
         load_version = "2020-05-12T12.00.00"
         result = CliRunner().invoke(

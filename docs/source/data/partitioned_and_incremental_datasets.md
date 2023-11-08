@@ -2,7 +2,7 @@
 
 ## Partitioned datasets
 
-Distributed systems play an increasingly important role in ETL data pipelines. They increase the processing throughput, enabling us to work with much larger volumes of input data. A situation may arise where your Kedro node needs to read the data from a directory full of uniform files of the same type like JSON or CSV. Tools like `PySpark` and the corresponding {class}` `SparkDataset` <kedro-datasets:kedro_datasets.spark.SparkDataset>` cater for such use cases but may not always be possible.
+Distributed systems play an increasingly important role in ETL data pipelines. They increase the processing throughput, enabling us to work with much larger volumes of input data. A situation may arise where your Kedro node needs to read the data from a directory full of uniform files of the same type like JSON or CSV. Tools like `PySpark` and the corresponding {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>` cater for such use cases but may not always be possible.
 
 This is why Kedro provides {class}`PartitionedDataset<kedro-datasets:kedro_datasets.partitions.PartitionedDataset>` with the following features:
 

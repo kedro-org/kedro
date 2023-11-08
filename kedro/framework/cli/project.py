@@ -196,7 +196,7 @@ def package(metadata: ProjectMetadata):
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-def run(  # noqa: too-many-arguments,unused-argument,too-many-locals
+def run(  # noqa: PLR0913,unused-argument,too-many-locals
     tags,
     env,
     runner,

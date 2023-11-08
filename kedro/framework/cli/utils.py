@@ -438,7 +438,6 @@ def _split_params(ctx, param, value):
 
 
 def _split_load_versions(ctx, param, value):
-
     if not value:
         return {}
 

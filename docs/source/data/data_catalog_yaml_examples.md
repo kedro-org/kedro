@@ -210,7 +210,7 @@ scooters_query:
     index_col: [name]
 ```
 
-When you use [`pandas.SQLTableDataset`](/kedro_datasets.pandas.SQLTableDataset) or [`pandas.SQLQueryDataset`](/kedro_datasets.pandas.SQLQueryDataset), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
+When you use {class}`pandas.SQLTableDataset<kedro-datasets:kedro_datasets.pandas.SQLTableDataset>`, or {class}`pandas.SQLQueryDataset<kedro-datasets:kedro_datasets.pandas.SQLQueryDataset>` you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
 
 Note that `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataset` only).
 

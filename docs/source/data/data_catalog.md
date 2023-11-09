@@ -34,7 +34,7 @@ shuttles:
 
 Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml and more.
 
-[The `kedro-datasets` package documentation](/kedro_datasets) contains a comprehensive list of all available file types.
+{doc}`The kedro-datasets package documentation<kedro-datasets:kedro_datasets>` contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 

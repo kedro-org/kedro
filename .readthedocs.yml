@@ -24,7 +24,7 @@ build:
       - python -m pip install --upgrade --upgrade-strategy only-if-needed --no-cache-dir .[docs,test]
     pre_build:
       - pip freeze
-      - python -m sphinx -ETa -j auto -D language=en -b -d _build/doctrees docs/source _build/linkcheck
+      - python -m sphinx -ETa -j auto -D language=en -b html -d _build/doctrees docs/source _build/linkcheck
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

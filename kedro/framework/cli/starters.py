@@ -273,6 +273,72 @@ def _get_prompts_required(cookiecutter_dir: Path) -> dict[str, Any] | None:
         ) from exc
 
 
+def _get_available_tags(template_path: str) -> list:
+    # Not at top level so that kedro CLI works without a working git executable.
+    # noqa: import-outside-toplevel
+    import git
+
+    try:
+        tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
+
+        unique_tags = {
+            tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")
+        }
+        # Remove git ref "^{}" and duplicates. For example,
+        # tags: ['/tags/version', '/tags/version^{}']
+        # unique_tags: {'version'}
+
+    except git.GitCommandError:
+        return []
+    return sorted(unique_tags)
+
+
+def _get_starters_dict() -> dict[str, KedroStarterSpec]:
+    """This function lists all the starter aliases declared in
+    the core repo and in plugins entry points.
+
+    For example, the output for official kedro starters looks like:
+    {"astro-airflow-iris":
+        KedroStarterSpec(
+            name="astro-airflow-iris",
+            template_path="git+https://github.com/kedro-org/kedro-starters.git",
+            directory="astro-airflow-iris",
+            origin="kedro"
+        ),
+    "astro-iris":
+        KedroStarterSpec(
+            name="astro-iris",
+            template_path="git+https://github.com/kedro-org/kedro-starters.git",
+            directory="astro-airflow-iris",
+            origin="kedro"
+        ),
+    }
+    """
+    starter_specs = _OFFICIAL_STARTER_SPECS
+
+    for starter_entry_point in _get_entry_points(name="starters"):
+        origin = starter_entry_point.module.split(".")[0]
+        specs = _safe_load_entry_point(starter_entry_point) or []
+        for spec in specs:
+            if not isinstance(spec, KedroStarterSpec):
+                click.secho(
+                    f"The starter configuration loaded from module {origin}"
+                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
+                    fg="red",
+                )
+            elif spec.alias in starter_specs:
+                click.secho(
+                    f"Starter alias `{spec.alias}` from `{origin}` "
+                    f"has been ignored as it is already defined by"
+                    f"`{starter_specs[spec.alias].origin}`",
+                    fg="red",
+                )
+            else:
+                spec.origin = origin
+                starter_specs[spec.alias] = spec
+    return starter_specs
+
+
 def _fetch_config_from_file(config_path: str) -> dict[str, str]:
     """Obtains configuration for a new kedro project non-interactively from a file.
 
@@ -489,26 +555,6 @@ class _Prompt:
             raise ValueError(message, self.error_message)
 
 
-def _get_available_tags(template_path: str) -> list:
-    # Not at top level so that kedro CLI works without a working git executable.
-    # noqa: import-outside-toplevel
-    import git
-
-    try:
-        tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
-
-        unique_tags = {
-            tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")
-        }
-        # Remove git ref "^{}" and duplicates. For example,
-        # tags: ['/tags/version', '/tags/version^{}']
-        # unique_tags: {'version'}
-
-    except git.GitCommandError:
-        return []
-    return sorted(unique_tags)
-
-
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
     """Remove readonly files on Windows
@@ -516,52 +562,6 @@ def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no 
     """
     os.chmod(path, stat.S_IWRITE)
     func(path)
-
-
-def _get_starters_dict() -> dict[str, KedroStarterSpec]:
-    """This function lists all the starter aliases declared in
-    the core repo and in plugins entry points.
-
-    For example, the output for official kedro starters looks like:
-    {"astro-airflow-iris":
-        KedroStarterSpec(
-            name="astro-airflow-iris",
-            template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris",
-            origin="kedro"
-        ),
-    "astro-iris":
-        KedroStarterSpec(
-            name="astro-iris",
-            template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris",
-            origin="kedro"
-        ),
-    }
-    """
-    starter_specs = _OFFICIAL_STARTER_SPECS
-
-    for starter_entry_point in _get_entry_points(name="starters"):
-        origin = starter_entry_point.module.split(".")[0]
-        specs = _safe_load_entry_point(starter_entry_point) or []
-        for spec in specs:
-            if not isinstance(spec, KedroStarterSpec):
-                click.secho(
-                    f"The starter configuration loaded from module {origin}"
-                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
-                    fg="red",
-                )
-            elif spec.alias in starter_specs:
-                click.secho(
-                    f"Starter alias `{spec.alias}` from `{origin}` "
-                    f"has been ignored as it is already defined by"
-                    f"`{starter_specs[spec.alias].origin}`",
-                    fg="red",
-                )
-            else:
-                spec.origin = origin
-                starter_specs[spec.alias] = spec
-    return starter_specs
 
 
 def _starter_spec_to_dict(

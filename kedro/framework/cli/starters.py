@@ -333,6 +333,31 @@ def _make_cookiecutter_args(
     return cookiecutter_args
 
 
+def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
+    """Checks that the configuration file contains all needed variables.
+
+    Args:
+        config: The config as a dictionary.
+        prompts: Prompts from prompts.yml.
+
+    Raises:
+        KedroCliError: If the config file is empty or does not contain all the keys
+            required in prompts, or if the output_dir specified does not exist.
+    """
+    if config is None:
+        raise KedroCliError("Config file is empty.")
+    missing_keys = set(prompts) - set(config)
+    if missing_keys:
+        click.echo(yaml.dump(config, default_flow_style=False))
+        raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
+
+    if "output_dir" in config and not Path(config["output_dir"]).exists():
+        raise KedroCliError(
+            f"'{config['output_dir']}' is not a valid output directory. "
+            "It must be a relative or absolute path to an existing directory."
+        )
+
+
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
@@ -482,31 +507,6 @@ def _get_available_tags(template_path: str) -> list:
     except git.GitCommandError:
         return []
     return sorted(unique_tags)
-
-
-def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
-    """Checks that the configuration file contains all needed variables.
-
-    Args:
-        config: The config as a dictionary.
-        prompts: Prompts from prompts.yml.
-
-    Raises:
-        KedroCliError: If the config file is empty or does not contain all the keys
-            required in prompts, or if the output_dir specified does not exist.
-    """
-    if config is None:
-        raise KedroCliError("Config file is empty.")
-    missing_keys = set(prompts) - set(config)
-    if missing_keys:
-        click.echo(yaml.dump(config, default_flow_style=False))
-        raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
-
-    if "output_dir" in config and not Path(config["output_dir"]).exists():
-        raise KedroCliError(
-            f"'{config['output_dir']}' is not a valid output directory. "
-            "It must be a relative or absolute path to an existing directory."
-        )
 
 
 # noqa: unused-argument

@@ -323,6 +323,43 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
     return config
 
 
+def _fetch_config_from_user_prompts(
+    prompts: dict[str, Any], cookiecutter_context: OrderedDict
+) -> dict[str, str]:
+    """Interactively obtains information from user prompts.
+
+    Args:
+        prompts: Prompts from prompts.yml.
+        cookiecutter_context: Cookiecutter context generated from cookiecutter.json.
+
+    Returns:
+        Configuration for starting a new project. This is passed as ``extra_context``
+            to cookiecutter and will overwrite the cookiecutter.json defaults.
+    """
+    # noqa: import-outside-toplevel
+    from cookiecutter.environment import StrictEnvironment
+    from cookiecutter.prompt import read_user_variable, render_variable
+
+    config: dict[str, str] = {}
+
+    for variable_name, prompt_dict in prompts.items():
+        prompt = _Prompt(**prompt_dict)
+
+        # render the variable on the command line
+        cookiecutter_variable = render_variable(
+            env=StrictEnvironment(context=cookiecutter_context),
+            raw=cookiecutter_context.get(variable_name),
+            cookiecutter_dict=config,
+        )
+
+        # read the user's input for the variable
+        user_input = read_user_variable(str(prompt), cookiecutter_variable)
+        if user_input:
+            prompt.validate(user_input)
+            config[variable_name] = user_input
+    return config
+
+
 def _make_cookiecutter_args(
     config: dict[str, str],
     checkout: str,
@@ -458,43 +495,6 @@ def _get_prompts_required(cookiecutter_dir: Path) -> dict[str, Any] | None:
         raise KedroCliError(
             "Failed to generate project: could not load prompts.yml."
         ) from exc
-
-
-def _fetch_config_from_user_prompts(
-    prompts: dict[str, Any], cookiecutter_context: OrderedDict
-) -> dict[str, str]:
-    """Interactively obtains information from user prompts.
-
-    Args:
-        prompts: Prompts from prompts.yml.
-        cookiecutter_context: Cookiecutter context generated from cookiecutter.json.
-
-    Returns:
-        Configuration for starting a new project. This is passed as ``extra_context``
-            to cookiecutter and will overwrite the cookiecutter.json defaults.
-    """
-    # noqa: import-outside-toplevel
-    from cookiecutter.environment import StrictEnvironment
-    from cookiecutter.prompt import read_user_variable, render_variable
-
-    config: dict[str, str] = {}
-
-    for variable_name, prompt_dict in prompts.items():
-        prompt = _Prompt(**prompt_dict)
-
-        # render the variable on the command line
-        cookiecutter_variable = render_variable(
-            env=StrictEnvironment(context=cookiecutter_context),
-            raw=cookiecutter_context.get(variable_name),
-            cookiecutter_dict=config,
-        )
-
-        # read the user's input for the variable
-        user_input = read_user_variable(str(prompt), cookiecutter_variable)
-        if user_input:
-            prompt.validate(user_input)
-            config[variable_name] = user_input
-    return config
 
 
 def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):

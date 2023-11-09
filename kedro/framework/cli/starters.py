@@ -99,78 +99,6 @@ for starter_spec in _OFFICIAL_STARTER_SPECS:
 _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 
 
-# noqa: unused-argument
-def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
-    """Remove readonly files on Windows
-    See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
-    """
-    os.chmod(path, stat.S_IWRITE)
-    func(path)
-
-
-def _get_starters_dict() -> dict[str, KedroStarterSpec]:
-    """This function lists all the starter aliases declared in
-    the core repo and in plugins entry points.
-
-    For example, the output for official kedro starters looks like:
-    {"astro-airflow-iris":
-        KedroStarterSpec(
-            name="astro-airflow-iris",
-            template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris",
-            origin="kedro"
-        ),
-    "astro-iris":
-        KedroStarterSpec(
-            name="astro-iris",
-            template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris",
-            origin="kedro"
-        ),
-    }
-    """
-    starter_specs = _OFFICIAL_STARTER_SPECS
-
-    for starter_entry_point in _get_entry_points(name="starters"):
-        origin = starter_entry_point.module.split(".")[0]
-        specs = _safe_load_entry_point(starter_entry_point) or []
-        for spec in specs:
-            if not isinstance(spec, KedroStarterSpec):
-                click.secho(
-                    f"The starter configuration loaded from module {origin}"
-                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
-                    fg="red",
-                )
-            elif spec.alias in starter_specs:
-                click.secho(
-                    f"Starter alias `{spec.alias}` from `{origin}` "
-                    f"has been ignored as it is already defined by"
-                    f"`{starter_specs[spec.alias].origin}`",
-                    fg="red",
-                )
-            else:
-                spec.origin = origin
-                starter_specs[spec.alias] = spec
-    return starter_specs
-
-
-def _starter_spec_to_dict(
-    starter_specs: dict[str, KedroStarterSpec]
-) -> dict[str, dict[str, str]]:
-    """Convert a dictionary of starters spec to a nicely formatted dictionary"""
-    format_dict: dict[str, dict[str, str]] = {}
-    for alias, spec in starter_specs.items():
-        if alias in _DEPRECATED_STARTERS:
-            key = alias + " (deprecated)"
-        else:
-            key = alias
-        format_dict[key] = {}  # Each dictionary represent 1 starter
-        format_dict[key]["template_path"] = spec.template_path
-        if spec.directory:
-            format_dict[key]["directory"] = spec.directory
-    return format_dict
-
-
 # noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
@@ -579,3 +507,75 @@ def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
             f"'{config['output_dir']}' is not a valid output directory. "
             "It must be a relative or absolute path to an existing directory."
         )
+
+
+# noqa: unused-argument
+def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
+    """Remove readonly files on Windows
+    See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
+    """
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+def _get_starters_dict() -> dict[str, KedroStarterSpec]:
+    """This function lists all the starter aliases declared in
+    the core repo and in plugins entry points.
+
+    For example, the output for official kedro starters looks like:
+    {"astro-airflow-iris":
+        KedroStarterSpec(
+            name="astro-airflow-iris",
+            template_path="git+https://github.com/kedro-org/kedro-starters.git",
+            directory="astro-airflow-iris",
+            origin="kedro"
+        ),
+    "astro-iris":
+        KedroStarterSpec(
+            name="astro-iris",
+            template_path="git+https://github.com/kedro-org/kedro-starters.git",
+            directory="astro-airflow-iris",
+            origin="kedro"
+        ),
+    }
+    """
+    starter_specs = _OFFICIAL_STARTER_SPECS
+
+    for starter_entry_point in _get_entry_points(name="starters"):
+        origin = starter_entry_point.module.split(".")[0]
+        specs = _safe_load_entry_point(starter_entry_point) or []
+        for spec in specs:
+            if not isinstance(spec, KedroStarterSpec):
+                click.secho(
+                    f"The starter configuration loaded from module {origin}"
+                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
+                    fg="red",
+                )
+            elif spec.alias in starter_specs:
+                click.secho(
+                    f"Starter alias `{spec.alias}` from `{origin}` "
+                    f"has been ignored as it is already defined by"
+                    f"`{starter_specs[spec.alias].origin}`",
+                    fg="red",
+                )
+            else:
+                spec.origin = origin
+                starter_specs[spec.alias] = spec
+    return starter_specs
+
+
+def _starter_spec_to_dict(
+    starter_specs: dict[str, KedroStarterSpec]
+) -> dict[str, dict[str, str]]:
+    """Convert a dictionary of starters spec to a nicely formatted dictionary"""
+    format_dict: dict[str, dict[str, str]] = {}
+    for alias, spec in starter_specs.items():
+        if alias in _DEPRECATED_STARTERS:
+            key = alias + " (deprecated)"
+        else:
+            key = alias
+        format_dict[key] = {}  # Each dictionary represent 1 starter
+        format_dict[key]["template_path"] = spec.template_path
+        if spec.directory:
+            format_dict[key]["directory"] = spec.directory
+    return format_dict

@@ -360,6 +360,14 @@ def _fetch_config_from_user_prompts(
     return config
 
 
+def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
+    # noqa: import-outside-toplevel
+    from cookiecutter.generate import generate_context
+
+    cookiecutter_context = generate_context(cookiecutter_dir / "cookiecutter.json")
+    return cookiecutter_context.get("cookiecutter", {})
+
+
 def _make_cookiecutter_args(
     config: dict[str, str],
     checkout: str,
@@ -495,14 +503,6 @@ def _get_prompts_required(cookiecutter_dir: Path) -> dict[str, Any] | None:
         raise KedroCliError(
             "Failed to generate project: could not load prompts.yml."
         ) from exc
-
-
-def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
-    # noqa: import-outside-toplevel
-    from cookiecutter.generate import generate_context
-
-    cookiecutter_context = generate_context(cookiecutter_dir / "cookiecutter.json")
-    return cookiecutter_context.get("cookiecutter", {})
 
 
 class _Prompt:

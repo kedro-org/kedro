@@ -75,16 +75,6 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
 
-   visualisation/index.md
-
-.. toctree::
-   :maxdepth: 2
-
-   experiment_tracking/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    notebooks_and_ipython/index.md
    resources/index.md
 

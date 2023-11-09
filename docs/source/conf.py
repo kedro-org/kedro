@@ -65,7 +65,6 @@ napoleon_include_init_with_doc = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
-html_static_path = ["_static"]
 
 intersphinx_mapping = {
     "kedro-viz": ("https://docs.kedro.org/projects/kedro-viz/en/v6.6.1/", None),
@@ -196,7 +195,6 @@ pygments_style = "sphinx"
 #
 html_theme = "sphinx_rtd_theme"
 here = Path(__file__).parent.absolute()
-html_logo = str(here / "kedro_logo.svg")
 
 # Theme options are theme-specific and customise the look and feel of a theme
 # further.  For a list of options available for each theme, see the

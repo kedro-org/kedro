@@ -756,7 +756,7 @@ class TestRunCommand:
 
     @mark.parametrize(
         "option,value",
-        [("--load-version", "dataset1=time1"), ("-lv", "dataset2=time2")],
+        [("--load-version", "dataset1:time1"), ("-lv", "dataset2:time2")],
     )
     def test_reformat_load_versions(
         self, fake_project_cli, fake_metadata, fake_session, option, value, mocker
@@ -766,7 +766,7 @@ class TestRunCommand:
         )
         assert not result.exit_code, result.output
 
-        ds, t = value.split("=", 1)
+        ds, t = value.split(":", 1)
         fake_session.run.assert_called_once_with(
             tags=(),
             runner=mocker.ANY,
@@ -784,17 +784,17 @@ class TestRunCommand:
         "lv_input, lv_dict",
         [
             [
-                "dataset1=time1",
+                "dataset1:time1",
                 {
                     "dataset1": "time1",
                 },
             ],
             [
-                "dataset1=time1,dataset2=time2",
+                "dataset1:time1,dataset2:time2",
                 {"dataset1": "time1", "dataset2": "time2"},
             ],
             [
-                "dataset1=time1, dataset2=time2",
+                "dataset1:time1, dataset2:time2",
                 {"dataset1": "time1", "dataset2": "time2"},
             ],
         ],

@@ -66,15 +66,15 @@ class KedroStarterSpec:  # noqa: too-few-public-methods
     origin: str | None = field(init=False)
 
 
+KEDRO_PATH = Path(kedro.__file__).parent
+TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
+
 _DEPRECATED_STARTERS = [
     "pandas-iris",
     "pyspark-iris",
     "pyspark",
     "standalone-datacatalog",
 ]
-KEDRO_PATH = Path(kedro.__file__).parent
-TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
-
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),

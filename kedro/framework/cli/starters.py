@@ -224,13 +224,7 @@ def _parse_add_ons_input(add_ons_str: str):
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
-    def _validate_selection(add_ons: list[str]):
-        for add_on in add_ons:
-            if add_on not in NUMBER_TO_ADD_ONS_NAME:
-                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
-                click.secho(message, fg="red", err=True)
-                sys.exit(1)
-
+    add_ons_str = add_ons_str.lower()
     if add_ons_str == "all":
         return list(NUMBER_TO_ADD_ONS_NAME)
     if add_ons_str == "none":
@@ -240,7 +234,7 @@ def _parse_add_ons_input(add_ons_str: str):
         return []  # pragma: no cover
 
     # Split by comma
-    add_ons_choices = add_ons_str.split(",")
+    add_ons_choices = add_ons_str.replace(" ", "").split(",")
     selected: list[str] = []
 
     for choice in add_ons_choices:
@@ -251,7 +245,6 @@ def _parse_add_ons_input(add_ons_str: str):
         else:
             selected.append(choice.strip())
 
-    _validate_selection(selected)
     return selected
 
 
@@ -315,6 +308,10 @@ def new(  # noqa: PLR0913
     tmpdir = tempfile.mkdtemp()
     cookiecutter_dir = _get_cookiecutter_dir(template_path, checkout, directory, tmpdir)
     prompts_required = _get_prompts_required(cookiecutter_dir)
+
+    # Format user input where necessary
+    if selected_addons is not None:
+        selected_addons = selected_addons.lower()
 
     # Select which prompts will be displayed to the user based on which flags were selected.
     prompts_required = _select_prompts_to_display(
@@ -447,7 +444,7 @@ def _convert_addon_names_to_numbers(selected_addons: str) -> str:
         return None
 
     addons = []
-    for addon in selected_addons.split(","):
+    for addon in selected_addons.lower().split(","):
         addon_short_name = addon.strip()
         if addon_short_name in ADD_ONS_SHORTNAME_TO_NUMBER:
             addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon_short_name])
@@ -760,6 +757,16 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
     return cookiecutter_context.get("cookiecutter", {})
 
 
+def _validate_selection(add_ons: list[str]):
+    # start validating from the end, when user select 1-20, it will generate a message
+    # '20' is not a valid selection instead of '8'
+    for add_on in add_ons[::-1]:
+        if add_on not in NUMBER_TO_ADD_ONS_NAME:
+            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
+            click.secho(message, fg="red", err=True)
+            sys.exit(1)
+
+
 class _Prompt:
     """Represent a single CLI prompt for `kedro new`"""
 
@@ -784,11 +791,16 @@ class _Prompt:
 
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
-        if self.regexp and not re.match(self.regexp, user_input):
+
+        if self.regexp and not re.match(self.regexp, user_input.lower()):
             message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
             click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
             sys.exit(1)
+
+        if self.title == "Project Add-Ons":
+            # Validate user input
+            _validate_selection(_parse_add_ons_input(user_input))
 
 
 def _get_available_tags(template_path: str) -> list:
@@ -839,24 +851,38 @@ def _validate_config_file_against_prompts(
 
 
 def _validate_config_file_inputs(config: dict[str, str]):
-    """Checks that variables provided through the config file are of the expected format.
+    """Checks that variables provided through the config file are of the expected format. This
+    validate the config provided by `kedro new --config` in a similar way to `prompts.yml`
+    for starters.
 
     Args:
-        config: The config as a dictionary.
+        config: The config as a dictionary
 
     Raises:
         SystemExit: If the provided variables are not properly formatted.
     """
-    project_name_reg_ex = r"^[\w -]{2,}$"
+    project_name_validation_config = {
+        "regex_validator": r"^[\w -]{2,}$",
+        "error_message": "'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
+    }
+
     input_project_name = config.get("project_name", "New Kedro Project")
-    if not re.match(project_name_reg_ex, input_project_name):
-        message = f"'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
+    if not re.match(
+        project_name_validation_config["regex_validator"], input_project_name
+    ):
+        click.secho(project_name_validation_config["error_message"], fg="red", err=True)
+        sys.exit(1)
+
+    input_add_ons = config.get("add_ons", "none")
+    add_on_validation_config = {
+        "regex_validator": r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d+-\d+)|(\d+ - \d+))( )*))$",
+        "error_message": f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.",
+    }
+
+    if not re.match(add_on_validation_config["regex_validator"], input_add_ons.lower()):
+        message = add_on_validation_config["error_message"]
         click.secho(message, fg="red", err=True)
         sys.exit(1)
 
-    add_on_reg_ex = r"^(all|none|(\d(,\d)*|(\d-\d)))$"
-    input_add_ons = config.get("add_ons", "none")
-    if not re.match(add_on_reg_ex, input_add_ons):
-        message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
-        click.secho(message, fg="red", err=True)
-        sys.exit(1)
+    selected_add_ons = _parse_add_ons_input(input_add_ons)
+    _validate_selection(selected_add_ons)

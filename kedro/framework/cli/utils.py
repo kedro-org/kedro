@@ -438,6 +438,16 @@ def _split_params(ctx, param, value):
 
 
 def _split_load_versions(ctx, param, value):
+    """Split and format the string coming from the --load-versions
+    flag in kedro run, e.g.:
+    "dataset1:time1,dataset2:time2" -> {"dataset1": "time1", "dataset2": "time2"}
+
+    Args:
+        value: the string with the contents of the --load-versions flag.
+
+    Returns:
+        A dictionary with the formatted load versions data.
+    """
     if not value:
         return {}
 
@@ -449,7 +459,7 @@ def _split_load_versions(ctx, param, value):
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:  # noqa: PLR2004
             raise KedroCliError(
-                f"Expected the form of 'load_version' to be "
+                f"Expected the form of 'load_versions' to be "
                 f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
                 f"found {load_version} instead"
             )

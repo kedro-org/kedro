@@ -32,16 +32,19 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 
-KEDRO_PATH = Path(kedro.__file__).parent
-TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
-_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
-
-_DEPRECATED_STARTERS = [
-    "pandas-iris",
-    "pyspark-iris",
-    "pyspark",
-    "standalone-datacatalog",
-]
+CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
+must supply  the keys required by the template's prompts.yml. When not using a starter,
+these are `project_name`, `repo_name` and `python_package`."""
+STARTER_ARG_HELP = """Specify the starter template to use when creating the project.
+This can be the path to a local directory, a URL to a remote VCS repository supported
+by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
+"""
+CHECKOUT_ARG_HELP = (
+    "An optional tag, branch or commit to checkout in the starter repository."
+)
+DIRECTORY_ARG_HELP = (
+    "An optional directory inside the repository where the starter resides."
+)
 
 
 @define(order=True)
@@ -63,6 +66,17 @@ class KedroStarterSpec:  # noqa: too-few-public-methods
     origin: str | None = field(init=False)
 
 
+_DEPRECATED_STARTERS = [
+    "pandas-iris",
+    "pyspark-iris",
+    "pyspark",
+    "standalone-datacatalog",
+]
+KEDRO_PATH = Path(kedro.__file__).parent
+TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
+
+
+_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external)
@@ -83,21 +97,6 @@ _OFFICIAL_STARTER_SPECS = [
 for starter_spec in _OFFICIAL_STARTER_SPECS:
     starter_spec.origin = "kedro"
 _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
-
-
-CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
-must supply  the keys required by the template's prompts.yml. When not using a starter,
-these are `project_name`, `repo_name` and `python_package`."""
-STARTER_ARG_HELP = """Specify the starter template to use when creating the project.
-This can be the path to a local directory, a URL to a remote VCS repository supported
-by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
-"""
-CHECKOUT_ARG_HELP = (
-    "An optional tag, branch or commit to checkout in the starter repository."
-)
-DIRECTORY_ARG_HELP = (
-    "An optional directory inside the repository where the starter resides."
-)
 
 
 # noqa: unused-argument

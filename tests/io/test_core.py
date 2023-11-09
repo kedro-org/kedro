@@ -57,7 +57,6 @@ class MyDataset(AbstractDataset):
         return pd.read_csv(self._filepath)
 
     def _save(self, data: str) -> None:
-
         with open(self._filepath, mode="w") as file:
             file.write(data)
 

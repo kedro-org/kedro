@@ -17,7 +17,7 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 To use AWS Batch, ensure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
-- A `name` attribute is set for each [Kedro node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node=<node_name>`.
+- A `name` attribute is set for each [Kedro node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --nodes=<node_name>`.
 - [All node input/output datasets must be configured in `catalog.yml`](../data/data_catalog_yaml_examples.md) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
 <details>
@@ -229,7 +229,7 @@ Next you will want to add the implementation of the `_submit_job()` method refer
 
 * Correctly specified upstream dependencies
 * A unique job name
-* The corresponding command to run, namely `kedro run --node=<node_name>`.
+* The corresponding command to run, namely `kedro run --nodes=<node_name>`.
 
 Once submitted, the method tracks progress and surfaces any errors if the jobs end in `FAILED` state.
 
@@ -247,7 +247,7 @@ def _submit_job(
 
     job_name = f"kedro_{session_id}_{node.name}".replace(".", "-")
     depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
-    command = ["kedro", "run", "--node", node.name]
+    command = ["kedro", "run", "--nodes", node.name]
 
     response = self._client.submit_job(
         jobName=job_name,

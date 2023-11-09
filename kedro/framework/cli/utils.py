@@ -432,15 +432,34 @@ def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
 
-    if not value:
-        return {}
-    param_list = value.split(",")
 
-    # The input is expected to be in OmegaConf dotlist format
-    conf = OmegaConf.from_dotlist(param_list)
+    dot_list = []
+    for item in split_string(ctx, param, value):
+        equals_idx = item.find("=")
+        if equals_idx == -1:
+            # If an equals sign is not found, fail with an error message.
+            ctx.fail(
+                f"Invalid format for `{param.name}` option: "
+                f"Item `{item}` must contain a key and a value separated by `=`."
+            )
 
-    # Convert the OmegaConf object to a plain dictionary
-    return OmegaConf.to_container(conf, resolve=True)
+
+        # Split the item into key and value
+        key, _, value = item.partition("=")
+        key = key.strip()
+        if not key:
+            # If the key is empty after stripping whitespace, fail with an error message.
+            ctx.fail(
+                f"Invalid format for `{param.name}` option: Parameter key "
+                f"cannot be an empty string."
+            )
+
+        # # Add "key=value" pair to dot_list.
+        dot_list.append(f"{key}={val}")
+
+    conf = OmegaConf.from_dotlist(dot_list)
+    return OmegaConf.to_container(conf)
+
 
 
 def _split_load_versions(ctx, param, value):

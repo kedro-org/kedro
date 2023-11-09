@@ -456,7 +456,3 @@ def _split_load_versions(ctx, param, value):
         load_versions_dict[load_version_list[0]] = load_version_list[1]
 
     return load_versions_dict
-
-
-def _get_values_as_tuple(values: Iterable[str]) -> tuple[str, ...]:
-    return tuple(chain.from_iterable(value.split(",") for value in values))

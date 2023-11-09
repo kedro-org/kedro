@@ -9,7 +9,6 @@ import click
 from kedro.framework.cli.utils import (
     _check_module_importable,
     _config_file_callback,
-    _get_values_as_tuple,
     _split_load_versions,
     _split_params,
     call,
@@ -216,8 +215,8 @@ def run(  # noqa: PLR0913,unused-argument,too-many-locals
     """Run the pipeline."""
 
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-    tags = _get_values_as_tuple(tags)
-    node_names = _get_values_as_tuple(node_names)
+    tags = tuple(tags)
+    node_names = tuple(node_names)
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params

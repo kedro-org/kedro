@@ -75,7 +75,6 @@ _DEPRECATED_STARTERS = [
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
-
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
@@ -96,6 +95,7 @@ _OFFICIAL_STARTER_SPECS = [
 # Set the origin for official starters
 for starter_spec in _OFFICIAL_STARTER_SPECS:
     starter_spec.origin = "kedro"
+
 _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 
 
@@ -103,6 +103,11 @@ _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
     pass
+
+
+@create_cli.group()
+def starter():
+    """Commands for working with project starters."""
 
 
 @command_with_verbosity(create_cli, short_help="Create a new kedro project.")
@@ -186,11 +191,6 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
 
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
     _create_project(template_path, cookiecutter_args)
-
-
-@create_cli.group()
-def starter():
-    """Commands for working with project starters."""
 
 
 @starter.command("list")

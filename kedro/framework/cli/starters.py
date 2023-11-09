@@ -32,16 +32,19 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 
-KEDRO_PATH = Path(kedro.__file__).parent
-TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
-_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
-
-_DEPRECATED_STARTERS = [
-    "pandas-iris",
-    "pyspark-iris",
-    "pyspark",
-    "standalone-datacatalog",
-]
+CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
+must supply  the keys required by the template's prompts.yml. When not using a starter,
+these are `project_name`, `repo_name` and `python_package`."""
+STARTER_ARG_HELP = """Specify the starter template to use when creating the project.
+This can be the path to a local directory, a URL to a remote VCS repository supported
+by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
+"""
+CHECKOUT_ARG_HELP = (
+    "An optional tag, branch or commit to checkout in the starter repository."
+)
+DIRECTORY_ARG_HELP = (
+    "An optional directory inside the repository where the starter resides."
+)
 
 
 @define(order=True)
@@ -63,6 +66,16 @@ class KedroStarterSpec:  # noqa: too-few-public-methods
     origin: str | None = field(init=False)
 
 
+KEDRO_PATH = Path(kedro.__file__).parent
+TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
+
+_DEPRECATED_STARTERS = [
+    "pandas-iris",
+    "pyspark-iris",
+    "pyspark",
+    "standalone-datacatalog",
+]
+_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external)
@@ -82,100 +95,19 @@ _OFFICIAL_STARTER_SPECS = [
 # Set the origin for official starters
 for starter_spec in _OFFICIAL_STARTER_SPECS:
     starter_spec.origin = "kedro"
+
 _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
-
-
-CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
-must supply  the keys required by the template's prompts.yml. When not using a starter,
-these are `project_name`, `repo_name` and `python_package`."""
-STARTER_ARG_HELP = """Specify the starter template to use when creating the project.
-This can be the path to a local directory, a URL to a remote VCS repository supported
-by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
-"""
-CHECKOUT_ARG_HELP = (
-    "An optional tag, branch or commit to checkout in the starter repository."
-)
-DIRECTORY_ARG_HELP = (
-    "An optional directory inside the repository where the starter resides."
-)
-
-
-# noqa: unused-argument
-def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
-    """Remove readonly files on Windows
-    See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
-    """
-    os.chmod(path, stat.S_IWRITE)
-    func(path)
-
-
-def _get_starters_dict() -> dict[str, KedroStarterSpec]:
-    """This function lists all the starter aliases declared in
-    the core repo and in plugins entry points.
-
-    For example, the output for official kedro starters looks like:
-    {"astro-airflow-iris":
-        KedroStarterSpec(
-            name="astro-airflow-iris",
-            template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris",
-            origin="kedro"
-        ),
-    "astro-iris":
-        KedroStarterSpec(
-            name="astro-iris",
-            template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris",
-            origin="kedro"
-        ),
-    }
-    """
-    starter_specs = _OFFICIAL_STARTER_SPECS
-
-    for starter_entry_point in _get_entry_points(name="starters"):
-        origin = starter_entry_point.module.split(".")[0]
-        specs = _safe_load_entry_point(starter_entry_point) or []
-        for spec in specs:
-            if not isinstance(spec, KedroStarterSpec):
-                click.secho(
-                    f"The starter configuration loaded from module {origin}"
-                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
-                    fg="red",
-                )
-            elif spec.alias in starter_specs:
-                click.secho(
-                    f"Starter alias `{spec.alias}` from `{origin}` "
-                    f"has been ignored as it is already defined by"
-                    f"`{starter_specs[spec.alias].origin}`",
-                    fg="red",
-                )
-            else:
-                spec.origin = origin
-                starter_specs[spec.alias] = spec
-    return starter_specs
-
-
-def _starter_spec_to_dict(
-    starter_specs: dict[str, KedroStarterSpec]
-) -> dict[str, dict[str, str]]:
-    """Convert a dictionary of starters spec to a nicely formatted dictionary"""
-    format_dict: dict[str, dict[str, str]] = {}
-    for alias, spec in starter_specs.items():
-        if alias in _DEPRECATED_STARTERS:
-            key = alias + " (deprecated)"
-        else:
-            key = alias
-        format_dict[key] = {}  # Each dictionary represent 1 starter
-        format_dict[key]["template_path"] = spec.template_path
-        if spec.directory:
-            format_dict[key]["directory"] = spec.directory
-    return format_dict
 
 
 # noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
     pass
+
+
+@create_cli.group()
+def starter():
+    """Commands for working with project starters."""
 
 
 @command_with_verbosity(create_cli, short_help="Create a new kedro project.")
@@ -261,11 +193,6 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
     _create_project(template_path, cookiecutter_args)
 
 
-@create_cli.group()
-def starter():
-    """Commands for working with project starters."""
-
-
 @starter.command("list")
 def list_starters():
     """List all official project starters available."""
@@ -292,121 +219,6 @@ def list_starters():
         click.echo(
             yaml.safe_dump(_starter_spec_to_dict(starters_spec), sort_keys=False)
         )
-
-
-def _fetch_config_from_file(config_path: str) -> dict[str, str]:
-    """Obtains configuration for a new kedro project non-interactively from a file.
-
-    Args:
-        config_path: The path of the config.yml which should contain the data required
-            by ``prompts.yml``.
-
-    Returns:
-        Configuration for starting a new project. This is passed as ``extra_context``
-            to cookiecutter and will overwrite the cookiecutter.json defaults.
-
-    Raises:
-        KedroCliError: If the file cannot be parsed.
-
-    """
-    try:
-        with open(config_path, encoding="utf-8") as config_file:
-            config = yaml.safe_load(config_file)
-
-        if KedroCliError.VERBOSE_ERROR:
-            click.echo(config_path + ":")
-            click.echo(yaml.dump(config, default_flow_style=False))
-    except Exception as exc:
-        raise KedroCliError(
-            f"Failed to generate project: could not load config at {config_path}."
-        ) from exc
-
-    return config
-
-
-def _make_cookiecutter_args(
-    config: dict[str, str],
-    checkout: str,
-    directory: str,
-) -> dict[str, Any]:
-    """Creates a dictionary of arguments to pass to cookiecutter.
-
-    Args:
-        config: Configuration for starting a new project. This is passed as
-            ``extra_context`` to cookiecutter and will overwrite the cookiecutter.json
-            defaults.
-        checkout: The tag, branch or commit in the starter repository to checkout.
-            Maps directly to cookiecutter's ``checkout`` argument. Relevant only when
-            using a starter.
-        directory: The directory of a specific starter inside a repository containing
-            multiple starters. Maps directly to cookiecutter's ``directory`` argument.
-            Relevant only when using a starter.
-            https://cookiecutter.readthedocs.io/en/1.7.2/advanced/directories.html
-
-    Returns:
-        Arguments to pass to cookiecutter.
-    """
-    config.setdefault("kedro_version", version)
-
-    cookiecutter_args = {
-        "output_dir": config.get("output_dir", str(Path.cwd().resolve())),
-        "no_input": True,
-        "extra_context": config,
-    }
-    if checkout:
-        cookiecutter_args["checkout"] = checkout
-    if directory:
-        cookiecutter_args["directory"] = directory
-
-    return cookiecutter_args
-
-
-def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
-    """Creates a new kedro project using cookiecutter.
-
-    Args:
-        template_path: The path to the cookiecutter template to create the project.
-            It could either be a local directory or a remote VCS repository
-            supported by cookiecutter. For more details, please see:
-            https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
-        cookiecutter_args: Arguments to pass to cookiecutter.
-
-    Raises:
-        KedroCliError: If it fails to generate a project.
-    """
-    # noqa: import-outside-toplevel
-    from cookiecutter.main import cookiecutter  # for performance reasons
-
-    try:
-        result_path = cookiecutter(template=template_path, **cookiecutter_args)
-    except Exception as exc:
-        raise KedroCliError(
-            "Failed to generate project when running cookiecutter."
-        ) from exc
-
-    _clean_pycache(Path(result_path))
-    extra_context = cookiecutter_args["extra_context"]
-    project_name = extra_context.get("project_name", "New Kedro Project")
-    python_package = extra_context.get(
-        "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
-    )
-    click.secho(
-        f"\nThe project name '{project_name}' has been applied to: "
-        f"\n- The project title in {result_path}/README.md "
-        f"\n- The folder created for your project in {result_path} "
-        f"\n- The project's python package in {result_path}/src/{python_package}"
-    )
-    click.secho(
-        "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running 'pip install -r src/requirements.txt' to install "
-        "project-specific dependencies. Refer to the Kedro documentation: "
-        "https://kedro.readthedocs.io/"
-    )
-    click.secho(
-        f"\nChange directory to the project generated in {result_path} by "
-        f"entering 'cd {result_path}'",
-        fg="green",
-    )
 
 
 def _get_cookiecutter_dir(
@@ -461,6 +273,102 @@ def _get_prompts_required(cookiecutter_dir: Path) -> dict[str, Any] | None:
         ) from exc
 
 
+def _get_available_tags(template_path: str) -> list:
+    # Not at top level so that kedro CLI works without a working git executable.
+    # noqa: import-outside-toplevel
+    import git
+
+    try:
+        tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
+
+        unique_tags = {
+            tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")
+        }
+        # Remove git ref "^{}" and duplicates. For example,
+        # tags: ['/tags/version', '/tags/version^{}']
+        # unique_tags: {'version'}
+
+    except git.GitCommandError:
+        return []
+    return sorted(unique_tags)
+
+
+def _get_starters_dict() -> dict[str, KedroStarterSpec]:
+    """This function lists all the starter aliases declared in
+    the core repo and in plugins entry points.
+
+    For example, the output for official kedro starters looks like:
+    {"astro-airflow-iris":
+        KedroStarterSpec(
+            name="astro-airflow-iris",
+            template_path="git+https://github.com/kedro-org/kedro-starters.git",
+            directory="astro-airflow-iris",
+            origin="kedro"
+        ),
+    "astro-iris":
+        KedroStarterSpec(
+            name="astro-iris",
+            template_path="git+https://github.com/kedro-org/kedro-starters.git",
+            directory="astro-airflow-iris",
+            origin="kedro"
+        ),
+    }
+    """
+    starter_specs = _OFFICIAL_STARTER_SPECS
+
+    for starter_entry_point in _get_entry_points(name="starters"):
+        origin = starter_entry_point.module.split(".")[0]
+        specs = _safe_load_entry_point(starter_entry_point) or []
+        for spec in specs:
+            if not isinstance(spec, KedroStarterSpec):
+                click.secho(
+                    f"The starter configuration loaded from module {origin}"
+                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
+                    fg="red",
+                )
+            elif spec.alias in starter_specs:
+                click.secho(
+                    f"Starter alias `{spec.alias}` from `{origin}` "
+                    f"has been ignored as it is already defined by"
+                    f"`{starter_specs[spec.alias].origin}`",
+                    fg="red",
+                )
+            else:
+                spec.origin = origin
+                starter_specs[spec.alias] = spec
+    return starter_specs
+
+
+def _fetch_config_from_file(config_path: str) -> dict[str, str]:
+    """Obtains configuration for a new kedro project non-interactively from a file.
+
+    Args:
+        config_path: The path of the config.yml which should contain the data required
+            by ``prompts.yml``.
+
+    Returns:
+        Configuration for starting a new project. This is passed as ``extra_context``
+            to cookiecutter and will overwrite the cookiecutter.json defaults.
+
+    Raises:
+        KedroCliError: If the file cannot be parsed.
+
+    """
+    try:
+        with open(config_path, encoding="utf-8") as config_file:
+            config = yaml.safe_load(config_file)
+
+        if KedroCliError.VERBOSE_ERROR:
+            click.echo(config_path + ":")
+            click.echo(yaml.dump(config, default_flow_style=False))
+    except Exception as exc:
+        raise KedroCliError(
+            f"Failed to generate project: could not load config at {config_path}."
+        ) from exc
+
+    return config
+
+
 def _fetch_config_from_user_prompts(
     prompts: dict[str, Any], cookiecutter_context: OrderedDict
 ) -> dict[str, str]:
@@ -506,6 +414,116 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
     return cookiecutter_context.get("cookiecutter", {})
 
 
+def _make_cookiecutter_args(
+    config: dict[str, str],
+    checkout: str,
+    directory: str,
+) -> dict[str, Any]:
+    """Creates a dictionary of arguments to pass to cookiecutter.
+
+    Args:
+        config: Configuration for starting a new project. This is passed as
+            ``extra_context`` to cookiecutter and will overwrite the cookiecutter.json
+            defaults.
+        checkout: The tag, branch or commit in the starter repository to checkout.
+            Maps directly to cookiecutter's ``checkout`` argument. Relevant only when
+            using a starter.
+        directory: The directory of a specific starter inside a repository containing
+            multiple starters. Maps directly to cookiecutter's ``directory`` argument.
+            Relevant only when using a starter.
+            https://cookiecutter.readthedocs.io/en/1.7.2/advanced/directories.html
+
+    Returns:
+        Arguments to pass to cookiecutter.
+    """
+    config.setdefault("kedro_version", version)
+
+    cookiecutter_args = {
+        "output_dir": config.get("output_dir", str(Path.cwd().resolve())),
+        "no_input": True,
+        "extra_context": config,
+    }
+    if checkout:
+        cookiecutter_args["checkout"] = checkout
+    if directory:
+        cookiecutter_args["directory"] = directory
+
+    return cookiecutter_args
+
+
+def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
+    """Checks that the configuration file contains all needed variables.
+
+    Args:
+        config: The config as a dictionary.
+        prompts: Prompts from prompts.yml.
+
+    Raises:
+        KedroCliError: If the config file is empty or does not contain all the keys
+            required in prompts, or if the output_dir specified does not exist.
+    """
+    if config is None:
+        raise KedroCliError("Config file is empty.")
+    missing_keys = set(prompts) - set(config)
+    if missing_keys:
+        click.echo(yaml.dump(config, default_flow_style=False))
+        raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
+
+    if "output_dir" in config and not Path(config["output_dir"]).exists():
+        raise KedroCliError(
+            f"'{config['output_dir']}' is not a valid output directory. "
+            "It must be a relative or absolute path to an existing directory."
+        )
+
+
+def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
+    """Creates a new kedro project using cookiecutter.
+
+    Args:
+        template_path: The path to the cookiecutter template to create the project.
+            It could either be a local directory or a remote VCS repository
+            supported by cookiecutter. For more details, please see:
+            https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
+        cookiecutter_args: Arguments to pass to cookiecutter.
+
+    Raises:
+        KedroCliError: If it fails to generate a project.
+    """
+    # noqa: import-outside-toplevel
+    from cookiecutter.main import cookiecutter  # for performance reasons
+
+    try:
+        result_path = cookiecutter(template=template_path, **cookiecutter_args)
+    except Exception as exc:
+        raise KedroCliError(
+            "Failed to generate project when running cookiecutter."
+        ) from exc
+
+    _clean_pycache(Path(result_path))
+    extra_context = cookiecutter_args["extra_context"]
+    project_name = extra_context.get("project_name", "New Kedro Project")
+    python_package = extra_context.get(
+        "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
+    )
+    click.secho(
+        f"\nThe project name '{project_name}' has been applied to: "
+        f"\n- The project title in {result_path}/README.md "
+        f"\n- The folder created for your project in {result_path} "
+        f"\n- The project's python package in {result_path}/src/{python_package}"
+    )
+    click.secho(
+        "\nA best-practice setup includes initialising git and creating "
+        "a virtual environment before running 'pip install -r src/requirements.txt' to install "
+        "project-specific dependencies. Refer to the Kedro documentation: "
+        "https://kedro.readthedocs.io/"
+    )
+    click.secho(
+        f"\nChange directory to the project generated in {result_path} by "
+        f"entering 'cd {result_path}'",
+        fg="green",
+    )
+
+
 class _Prompt:
     """Represent a single CLI prompt for `kedro new`"""
 
@@ -537,46 +555,27 @@ class _Prompt:
             raise ValueError(message, self.error_message)
 
 
-def _get_available_tags(template_path: str) -> list:
-    # Not at top level so that kedro CLI works without a working git executable.
-    # noqa: import-outside-toplevel
-    import git
-
-    try:
-        tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
-
-        unique_tags = {
-            tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")
-        }
-        # Remove git ref "^{}" and duplicates. For example,
-        # tags: ['/tags/version', '/tags/version^{}']
-        # unique_tags: {'version'}
-
-    except git.GitCommandError:
-        return []
-    return sorted(unique_tags)
-
-
-def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
-    """Checks that the configuration file contains all needed variables.
-
-    Args:
-        config: The config as a dictionary.
-        prompts: Prompts from prompts.yml.
-
-    Raises:
-        KedroCliError: If the config file is empty or does not contain all the keys
-            required in prompts, or if the output_dir specified does not exist.
+# noqa: unused-argument
+def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
+    """Remove readonly files on Windows
+    See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
     """
-    if config is None:
-        raise KedroCliError("Config file is empty.")
-    missing_keys = set(prompts) - set(config)
-    if missing_keys:
-        click.echo(yaml.dump(config, default_flow_style=False))
-        raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
 
-    if "output_dir" in config and not Path(config["output_dir"]).exists():
-        raise KedroCliError(
-            f"'{config['output_dir']}' is not a valid output directory. "
-            "It must be a relative or absolute path to an existing directory."
-        )
+
+def _starter_spec_to_dict(
+    starter_specs: dict[str, KedroStarterSpec]
+) -> dict[str, dict[str, str]]:
+    """Convert a dictionary of starters spec to a nicely formatted dictionary"""
+    format_dict: dict[str, dict[str, str]] = {}
+    for alias, spec in starter_specs.items():
+        if alias in _DEPRECATED_STARTERS:
+            key = alias + " (deprecated)"
+        else:
+            key = alias
+        format_dict[key] = {}  # Each dictionary represent 1 starter
+        format_dict[key]["template_path"] = spec.template_path
+        if spec.directory:
+            format_dict[key]["directory"] = spec.directory
+    return format_dict

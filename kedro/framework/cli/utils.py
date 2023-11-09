@@ -406,28 +406,6 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     return value
 
 
-def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
-    """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
-    ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
-    """
-    if param.name == "load_version":
-        _deprecate_options(ctx, param, value)
-
-    load_versions_dict = {}
-    for load_version in value:
-        load_version = load_version.strip()  # noqa: PLW2901
-        load_version_list = load_version.split(":", 1)
-        if len(load_version_list) != 2:  # noqa: PLR2004
-            raise KedroCliError(
-                f"Expected the form of 'load_version' to be "
-                f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
-                f"found {load_version} instead"
-            )
-        load_versions_dict[load_version_list[0]] = load_version_list[1]
-
-    return load_versions_dict
-
-
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
@@ -460,37 +438,31 @@ def _split_params(ctx, param, value):
 
 
 def _split_load_versions(ctx, param, value):
-    lv_tuple = _get_values_as_tuple([value])
-    return _reformat_load_versions(ctx, param, lv_tuple) if value else {}
+    """Split and format the string coming from the --load-versions
+    flag in kedro run, e.g.:
+    "dataset1:time1,dataset2:time2" -> {"dataset1": "time1", "dataset2": "time2"}
 
+    Args:
+        value: the string with the contents of the --load-versions flag.
 
-def _get_values_as_tuple(values: Iterable[str]) -> tuple[str, ...]:
-    return tuple(chain.from_iterable(value.split(",") for value in values))
+    Returns:
+        A dictionary with the formatted load versions data.
+    """
+    if not value:
+        return {}
 
+    lv_tuple = tuple(chain.from_iterable(value.split(",") for value in [value]))
 
-def _deprecate_options(ctx, param, value):
-    deprecated_flag = {
-        "node_names": "--node",
-        "tag": "--tag",
-        "load_version": "--load-version",
-    }
-    new_flag = {
-        "node_names": "--nodes",
-        "tag": "--tags",
-        "load_version": "--load-versions",
-    }
-    shorthand_flag = {
-        "node_names": "-n",
-        "tag": "-t",
-        "load_version": "-lv",
-    }
-    if value:
-        deprecation_message = (
-            f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
-            "and will not be available from Kedro 0.19.0. "
-            f"Use the flag '{new_flag[param.name]}' instead. Shorthand "
-            f"'{shorthand_flag[param.name]}' will be updated to use "
-            f"'{new_flag[param.name]}' in Kedro 0.19.0."
-        )
-        click.secho(deprecation_message, fg="red")
-    return value
+    load_versions_dict = {}
+    for load_version in lv_tuple:
+        load_version = load_version.strip()  # noqa: PLW2901
+        load_version_list = load_version.split(":", 1)
+        if len(load_version_list) != 2:  # noqa: PLR2004
+            raise KedroCliError(
+                f"Expected the form of 'load_versions' to be "
+                f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
+                f"found {load_version} instead"
+            )
+        load_versions_dict[load_version_list[0]] = load_version_list[1]
+
+    return load_versions_dict

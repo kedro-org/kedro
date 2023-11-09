@@ -431,8 +431,6 @@ def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
-
-
     dot_list = []
     for item in split_string(ctx, param, value):
         equals_idx = item.find("=")
@@ -442,24 +440,20 @@ def _split_params(ctx, param, value):
                 f"Invalid format for `{param.name}` option: "
                 f"Item `{item}` must contain a key and a value separated by `=`."
             )
-
-
         # Split the item into key and value
         key, _, value = item.partition("=")
         key = key.strip()
         if not key:
             # If the key is empty after stripping whitespace, fail with an error message.
             ctx.fail(
-                f"Invalid format for `{param.name}` option: Parameter key "
+                f"Invalid format of `{param.name}` option: Parameter key "
                 f"cannot be an empty string."
             )
-
-        # # Add "key=value" pair to dot_list.
+        # Add "key=value" pair to dot_list.
         dot_list.append(f"{key}={val}")
 
     conf = OmegaConf.from_dotlist(dot_list)
     return OmegaConf.to_container(conf)
-
 
 
 def _split_load_versions(ctx, param, value):

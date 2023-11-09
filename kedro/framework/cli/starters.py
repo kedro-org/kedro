@@ -221,6 +221,58 @@ def list_starters():
         )
 
 
+def _get_cookiecutter_dir(
+    template_path: str, checkout: str, directory: str, tmpdir: str
+) -> Path:
+    """Gives a path to the cookiecutter directory. If template_path is a repo then
+    clones it to ``tmpdir``; if template_path is a file path then directly uses that
+    path without copying anything.
+    """
+    # noqa: import-outside-toplevel
+    from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
+    from cookiecutter.repository import determine_repo_dir  # for performance reasons
+
+    try:
+        cookiecutter_dir, _ = determine_repo_dir(
+            template=template_path,
+            abbreviations={},
+            clone_to_dir=Path(tmpdir).resolve(),
+            checkout=checkout,
+            no_input=True,
+            directory=directory,
+        )
+    except (RepositoryNotFound, RepositoryCloneFailed) as exc:
+        error_message = f"Kedro project template not found at {template_path}."
+
+        if checkout:
+            error_message += (
+                f" Specified tag {checkout}. The following tags are available: "
+                + ", ".join(_get_available_tags(template_path))
+            )
+        official_starters = sorted(_OFFICIAL_STARTER_SPECS)
+        raise KedroCliError(
+            f"{error_message}. The aliases for the official Kedro starters are: \n"
+            f"{yaml.safe_dump(official_starters, sort_keys=False)}"
+        ) from exc
+
+    return Path(cookiecutter_dir)
+
+
+def _get_prompts_required(cookiecutter_dir: Path) -> dict[str, Any] | None:
+    """Finds the information a user must supply according to prompts.yml."""
+    prompts_yml = cookiecutter_dir / "prompts.yml"
+    if not prompts_yml.is_file():
+        return None
+
+    try:
+        with prompts_yml.open("r") as prompts_file:
+            return yaml.safe_load(prompts_file)
+    except Exception as exc:
+        raise KedroCliError(
+            "Failed to generate project: could not load prompts.yml."
+        ) from exc
+
+
 def _fetch_config_from_file(config_path: str) -> dict[str, str]:
     """Obtains configuration for a new kedro project non-interactively from a file.
 
@@ -404,58 +456,6 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         f"entering 'cd {result_path}'",
         fg="green",
     )
-
-
-def _get_cookiecutter_dir(
-    template_path: str, checkout: str, directory: str, tmpdir: str
-) -> Path:
-    """Gives a path to the cookiecutter directory. If template_path is a repo then
-    clones it to ``tmpdir``; if template_path is a file path then directly uses that
-    path without copying anything.
-    """
-    # noqa: import-outside-toplevel
-    from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
-    from cookiecutter.repository import determine_repo_dir  # for performance reasons
-
-    try:
-        cookiecutter_dir, _ = determine_repo_dir(
-            template=template_path,
-            abbreviations={},
-            clone_to_dir=Path(tmpdir).resolve(),
-            checkout=checkout,
-            no_input=True,
-            directory=directory,
-        )
-    except (RepositoryNotFound, RepositoryCloneFailed) as exc:
-        error_message = f"Kedro project template not found at {template_path}."
-
-        if checkout:
-            error_message += (
-                f" Specified tag {checkout}. The following tags are available: "
-                + ", ".join(_get_available_tags(template_path))
-            )
-        official_starters = sorted(_OFFICIAL_STARTER_SPECS)
-        raise KedroCliError(
-            f"{error_message}. The aliases for the official Kedro starters are: \n"
-            f"{yaml.safe_dump(official_starters, sort_keys=False)}"
-        ) from exc
-
-    return Path(cookiecutter_dir)
-
-
-def _get_prompts_required(cookiecutter_dir: Path) -> dict[str, Any] | None:
-    """Finds the information a user must supply according to prompts.yml."""
-    prompts_yml = cookiecutter_dir / "prompts.yml"
-    if not prompts_yml.is_file():
-        return None
-
-    try:
-        with prompts_yml.open("r") as prompts_file:
-            return yaml.safe_load(prompts_file)
-    except Exception as exc:
-        raise KedroCliError(
-            "Failed to generate project: could not load prompts.yml."
-        ) from exc
 
 
 class _Prompt:

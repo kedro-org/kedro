@@ -437,11 +437,11 @@ def _split_params(ctx, param, value):
         if equals_idx == -1:
             # If an equals sign is not found, fail with an error message.
             ctx.fail(
-                f"Invalid format for `{param.name}` option: "
+                f"Invalid format of `{param.name}` option: "
                 f"Item `{item}` must contain a key and a value separated by `=`."
             )
         # Split the item into key and value
-        key, _, value = item.partition("=")
+        key, _, val = item.partition("=")
         key = key.strip()
         if not key:
             # If the key is empty after stripping whitespace, fail with an error message.

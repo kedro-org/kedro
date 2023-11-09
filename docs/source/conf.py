@@ -189,7 +189,6 @@ pygments_style = "sphinx"
 #
 html_theme = "sphinx_rtd_theme"
 here = Path(__file__).parent.absolute()
-html_logo = str(here / "kedro-horizontal-color-on-light.svg")
 
 # Theme options are theme-specific and customise the look and feel of a theme
 # further.  For a list of options available for each theme, see the

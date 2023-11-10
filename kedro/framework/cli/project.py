@@ -9,9 +9,6 @@ import click
 from kedro.framework.cli.utils import (
     _check_module_importable,
     _config_file_callback,
-    _deprecate_options,
-    _get_values_as_tuple,
-    _reformat_load_versions,
     _split_load_versions,
     _split_params,
     call,
@@ -150,17 +147,9 @@ def package(metadata: ProjectMetadata):
     "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
 )
 @click.option(
-    "--node",
+    "--nodes",
     "-n",
     "node_names",
-    type=str,
-    multiple=True,
-    help=NODE_ARG_HELP,
-    callback=_deprecate_options,
-)
-@click.option(
-    "--nodes",
-    "nodes_names",
     type=str,
     default="",
     help=NODE_ARG_HELP,
@@ -170,30 +159,16 @@ def package(metadata: ProjectMetadata):
 @click.option("--async", "is_async", is_flag=True, help=ASYNC_ARG_HELP)
 @env_option
 @click.option(
-    "--tag",
-    "-t",
-    type=str,
-    multiple=True,
-    help=TAG_ARG_HELP,
-    callback=_deprecate_options,
-)
-@click.option(
     "--tags",
+    "-t",
     type=str,
     default="",
     help=TAG_ARG_HELP,
     callback=split_string,
 )
 @click.option(
-    "--load-version",
-    "-lv",
-    type=str,
-    multiple=True,
-    help=LOAD_VERSION_HELP,
-    callback=_reformat_load_versions,
-)
-@click.option(
     "--load-versions",
+    "-lv",
     type=str,
     default="",
     help=LOAD_VERSION_HELP,
@@ -221,18 +196,15 @@ def package(metadata: ProjectMetadata):
     callback=_split_params,
 )
 def run(  # noqa: PLR0913,unused-argument,too-many-locals
-    tag,
     tags,
     env,
     runner,
     is_async,
     node_names,
-    nodes_names,
     to_nodes,
     from_nodes,
     from_inputs,
     to_outputs,
-    load_version,
     load_versions,
     pipeline,
     config,
@@ -243,30 +215,21 @@ def run(  # noqa: PLR0913,unused-argument,too-many-locals
     """Run the pipeline."""
 
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-
-    tag = _get_values_as_tuple(tag)
-    node_names = _get_values_as_tuple(node_names)
-
-    # temporary duplicates for the plural flags
-    tags = _get_values_as_tuple(tags)
-    nodes_names = _get_values_as_tuple(nodes_names)
-
-    tag = tag + tags
-    node_names = node_names + nodes_names
-    load_version = {**load_version, **load_versions}
+    tags = tuple(tags)
+    node_names = tuple(node_names)
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params
     ) as session:
         session.run(
-            tags=tag,
+            tags=tags,
             runner=runner(is_async=is_async),
             node_names=node_names,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
             from_inputs=from_inputs,
             to_outputs=to_outputs,
-            load_versions=load_version,
+            load_versions=load_versions,
             pipeline_name=pipeline,
             namespace=namespace,
         )

@@ -147,9 +147,9 @@ In this example, `filepath` is used as the basis of a folder that stores version
 By default, `kedro run` loads the latest version of the dataset. However, you can also specify a particular versioned data set with `--load-version` flag as follows:
 
 ```bash
-kedro run --load-version=cars:YYYY-MM-DDThh.mm.ss.sssZ
+kedro run --load-versions=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
-where `--load-version` is dataset name and version timestamp separated by `:`.
+where `--load-versions` is dataset name and version timestamp separated by `:`.
 
 A dataset offers versioning support if it extends the [`AbstractVersionedDataset`](/kedro.io.AbstractVersionedDataset) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
 

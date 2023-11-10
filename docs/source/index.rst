@@ -72,6 +72,12 @@ Welcome to Kedro's documentation!
 
    tutorial/spaceflights_tutorial.md
 
+
+.. toctree::
+   :maxdepth: 2
+
+   visualisation/index.md
+
 .. toctree::
    :maxdepth: 2
 

@@ -617,7 +617,15 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     # noqa: import-outside-toplevel
     from cookiecutter.main import cookiecutter  # for performance reasons
 
+    extra_context = cookiecutter_args["extra_context"]
+    project_name = extra_context.get("project_name", "New Kedro Project")
+    python_package = extra_context.get(
+        "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
+    )
+    add_ons = extra_context.get("add_ons")
+
     try:
+        # This will trigger post_gen_hook.py
         result_path = cookiecutter(template=template_path, **cookiecutter_args)
     except Exception as exc:
         raise KedroCliError(

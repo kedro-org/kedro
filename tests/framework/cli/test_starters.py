@@ -14,6 +14,7 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (
     _OFFICIAL_STARTER_SPECS,
+    NUMBER_TO_ADD_ONS_NAME,
     TEMPLATE_PATH,
     KedroStarterSpec,
     _convert_addon_names_to_numbers,
@@ -953,6 +954,27 @@ class TestAddOnsFromUserPrompts:
         message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
         assert message in result.output
 
+    @pytest.mark.parametrize(
+        "input,expected_add_ons",
+        [
+            ("", []),
+            ("1", ["Linting"]),
+            ("all", list(NUMBER_TO_ADD_ONS_NAME.values())),
+        ],
+    )
+    def test_cookiecutter_args(self, mocker, fake_kedro_cli, input, expected_add_ons):
+        from kedro.framework.cli import starters
+
+        spy = mocker.spy(starters, "_make_cookiecutter_args")
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons=input),
+        )
+
+        assert spy.call_count == 1
+        assert spy.return_value["extra_context"]["add_ons"] == expected_add_ons
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestAddOnsFromConfigFile:
@@ -1123,7 +1145,26 @@ class TestAddOnsFromCLI:
             "Add-on options 'all' and 'none' cannot be used with other options"
             in result.output
         )
+    @pytest.mark.parametrize(
+        "add_ons_flag,expected_add_ons",
+        [
+            ("none", []),
+            ("lint", ["Linting"]),
+            ("all", list(NUMBER_TO_ADD_ONS_NAME.values())),
+        ],
+    )
+    def test_cookiecutter_args(self, mocker, fake_kedro_cli, add_ons_flag, expected_add_ons):
+        from kedro.framework.cli import starters
 
+        spy = mocker.spy(starters, "_make_cookiecutter_args")
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", add_ons_flag],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+
+        assert spy.call_count == 1
+        assert spy.return_value["extra_context"]["add_ons"] == expected_add_ons
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNameFromCLI:

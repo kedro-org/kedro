@@ -157,6 +157,7 @@ type_targets = {
         "an object providing a view on D's values",
         "(k, v), remove and return some (key, value) pair",
         "D.get(k,d), also set D[k]=d if k not in D",
+        "D[k] if k in D, else d.  d defaults to None.",
         "None.  Update D from mapping/iterable E and F.",
     ),
     "py:data": (

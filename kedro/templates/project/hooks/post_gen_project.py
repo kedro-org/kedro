@@ -14,7 +14,10 @@ def main():
     python_package_name = '{{ cookiecutter.python_package }}'
 
     # Get the selected add-ons from cookiecutter
-    selected_add_ons = "{{ cookiecutter.add_ons }}"
+    # Use `_cookiecutter` insteaf of `cookiecutter` because of a bug
+    # https://github.com/cookiecutter/cookiecutter/issues/1975
+
+    selected_add_ons = "{{ _cookiecutter.add_ons }}"
 
     # Handle template directories and requirements according to selected add-ons
     setup_template_add_ons(selected_add_ons, requirements_file_path, pyproject_file_path, python_package_name)

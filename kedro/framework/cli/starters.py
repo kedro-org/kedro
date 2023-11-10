@@ -33,7 +33,7 @@ from kedro.framework.cli.utils import (
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
-_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+_STARTERS_REPO = "git+https://github.com/noklam/kedro-starters.git"
 
 
 @define(order=True)

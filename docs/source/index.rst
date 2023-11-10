@@ -129,6 +129,7 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
 
    integrations/pyspark_integration.md
+   integrations/dvc_integration.md
 
 .. toctree::
    :maxdepth: 2

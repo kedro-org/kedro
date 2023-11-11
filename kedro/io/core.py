@@ -227,35 +227,11 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
 
-        def _to_str(obj, is_root=False):
-            """Returns a string representation where
-            1. The root level (i.e. the Dataset.__init__ arguments) are
-            formatted like Dataset(key=value).
-            2. Dictionaries have the keys alphabetically sorted recursively.
-            3. None values are not shown.
-            """
-
-            fmt = "{}={}" if is_root else "'{}': {}"  # 1
-
-            if isinstance(obj, dict):
-                sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
-
-                text = ", ".join(
-                    fmt.format(key, _to_str(value))  # 2
-                    for key, value in sorted_dict
-                    if value is not None  # 3
-                )
-
-                return text if is_root else "{" + text + "}"  # 1
-
-            # not a dictionary
-            return str(obj)
-
     def __str__(self):
-        return f"{type(self).__name__}({self._to_str(self._describe(), True)})"
+        return f"{type(self).__name__}({_prettify_dict_to_str(self._describe(), True)})"
 
     def __repr__(self):
-        return f"{type(self).__name__}({self._to_str(self._describe(), True)})"
+        return f"{type(self).__name__}({_prettify_dict_to_str(self._describe(), True)})"
 
     @abc.abstractmethod
     def _load(self) -> _DO:
@@ -786,3 +762,28 @@ def __getattr__(name):
         )
         return alias
     raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
+
+
+def _prettify_dict_to_str(obj, is_root=False):
+    """Returns a string representation where
+    1. The root level (i.e. the Dataset.__init__ arguments) are
+    formatted like Dataset(key=value).
+    2. Dictionaries have the keys alphabetically sorted recursively.
+    3. None values are not shown.
+    """
+
+    fmt = "{}={}" if is_root else "'{}': {}"  # 1
+
+    if isinstance(obj, dict):
+        sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
+
+        text = ", ".join(
+            fmt.format(key, _prettify_dict_to_str(value))  # 2
+            for key, value in sorted_dict
+            if value is not None  # 3
+        )
+
+        return text if is_root else "{" + text + "}"  # 1
+
+    # not a dictionary
+    return str(obj)

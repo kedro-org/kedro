@@ -336,11 +336,15 @@ def new(  # noqa: PLR0913
         prompts_required=prompts_required,
         config_path=config_path,
         cookiecutter_context=cookiecutter_context,
+    )
+
+    cookiecutter_args = _make_cookiecutter_args(
+        config=extra_context,
+        checkout=checkout,
+        directory=directory,
         selected_addons=selected_addons,
         project_name=project_name,
     )
-
-    cookiecutter_args = _make_cookiecutter_args(extra_context, checkout, directory)
 
     project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
 
@@ -381,8 +385,6 @@ def _get_extra_context(
     prompts_required: dict,
     config_path: str,
     cookiecutter_context: OrderedDict,
-    selected_addons: str,
-    project_name: str,
 ) -> dict[str, str]:
     """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
     on CLI flags, user prompts, or a configuration file.
@@ -393,10 +395,7 @@ def _get_extra_context(
         config_path: a string containing the value for the --config flag, or
             None in case the flag wasn't used.
         cookiecutter_context: the context for Cookiecutter templates.
-        selected_addons: a string containing the value for the --addons flag,
-            or None in case the flag wasn't used.
-        project_name: a string containing the value for the --name flag, or
-            None in case the flag wasn't used.
+
 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
@@ -415,14 +414,6 @@ def _get_extra_context(
         extra_context = _fetch_config_from_user_prompts(
             prompts_required, cookiecutter_context
         )
-
-    add_ons = _convert_addon_names_to_numbers(selected_addons)
-
-    if add_ons is not None:
-        extra_context["add_ons"] = add_ons
-
-    if project_name is not None:
-        extra_context["project_name"] = project_name
 
     return extra_context
 
@@ -537,6 +528,8 @@ def _make_cookiecutter_args(
     config: dict[str, str | list[str]],
     checkout: str,
     directory: str,
+    selected_addons: str,
+    project_name: str,
 ) -> dict[str, Any]:
     """Creates a dictionary of arguments to pass to cookiecutter.
 
@@ -551,11 +544,22 @@ def _make_cookiecutter_args(
             multiple starters. Maps directly to cookiecutter's ``directory`` argument.
             Relevant only when using a starter.
             https://cookiecutter.readthedocs.io/en/1.7.2/advanced/directories.html
-
+        selected_addons: a string containing the value for the --addons flag,
+            or None in case the flag wasn't used.
+        project_name: a string containing the value for the --name flag, or
+            None in case the flag wasn't used.
     Returns:
         Arguments to pass to cookiecutter.
     """
     config.setdefault("kedro_version", version)
+
+    add_ons = _convert_addon_names_to_numbers(selected_addons)
+
+    if add_ons is not None:
+        config["add_ons"] = add_ons
+
+    if project_name is not None:
+        config["project_name"] = project_name
 
     # Map the selected add on lists to readable name
     add_ons = config.get("add_ons")

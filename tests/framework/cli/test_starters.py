@@ -1089,7 +1089,7 @@ class TestAddOnsFromCLI:
             ["new", "--addons", add_ons],
             input=_make_cli_prompt_input_without_addons(),
         )
-        add_ons = _convert_addon_names_to_numbers(selected_addons=add_ons)
+        add_ons = _convert_addon_names_to_numbers(selected_add_ons_flag=add_ons)
         _assert_template_ok(result, add_ons=add_ons)
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="new-kedro-project")
         _clean_up_project(Path("./new-kedro-project"))

@@ -265,12 +265,12 @@ def create_cli():  # pragma: no cover
 @click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-@click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
+@click.option("--addons", "-a", "selected_add_ons_flag", help=ADDON_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
 def new(  # noqa: PLR0913
     config_path,
     starter_alias,
-    selected_addons,
+    selected_add_ons_flag,
     project_name,
     checkout,
     directory,
@@ -310,12 +310,12 @@ def new(  # noqa: PLR0913
     prompts_required = _get_prompts_required(cookiecutter_dir)
 
     # Format user input where necessary
-    if selected_addons is not None:
-        selected_addons = selected_addons.lower()
+    if selected_add_ons_flag is not None:
+        selected_add_ons_flag = selected_add_ons_flag.lower()
 
     # Select which prompts will be displayed to the user based on which flags were selected.
     prompts_required = _select_prompts_to_display(
-        prompts_required, selected_addons, project_name
+        prompts_required, selected_add_ons_flag, project_name
     )
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
@@ -342,7 +342,7 @@ def new(  # noqa: PLR0913
         config=extra_context,
         checkout=checkout,
         directory=directory,
-        selected_addons=selected_addons,
+        selected_add_ons_flag=selected_add_ons_flag,
         project_name=project_name,
     )
 
@@ -418,24 +418,24 @@ def _get_extra_context(
     return extra_context
 
 
-def _convert_addon_names_to_numbers(selected_addons: str) -> str:
+def _convert_addon_names_to_numbers(selected_add_ons_flag: str) -> str:
     """Prepares add-on selection from the CLI input to the correct format
     to be put in the project configuration, if it exists.
     Replaces add-on strings with the corresponding prompt number.
 
     Args:
-        selected_addons: a string containing the value for the --addons flag,
+        selected_add_ons_flag: a string containing the value for the --addons flag,
             or None in case the flag wasn't used, i.e. lint,docs.
 
     Returns:
         String with the numbers corresponding to the desired add_ons, or
         None in case the --addons flag was not used.
     """
-    if selected_addons is None:
+    if selected_add_ons_flag is None:
         return None
 
     addons = []
-    for addon in selected_addons.lower().split(","):
+    for addon in selected_add_ons_flag.lower().split(","):
         addon_short_name = addon.strip()
         if addon_short_name in ADD_ONS_SHORTNAME_TO_NUMBER:
             addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon_short_name])
@@ -443,7 +443,7 @@ def _convert_addon_names_to_numbers(selected_addons: str) -> str:
 
 
 def _select_prompts_to_display(
-    prompts_required: dict, selected_addons: str, project_name: str
+    prompts_required: dict, selected_add_ons_flag: str, project_name: str
 ) -> dict:
     """Selects which prompts an user will receive when creating a new
     Kedro project, based on what information was already made available
@@ -452,7 +452,7 @@ def _select_prompts_to_display(
     Args:
         prompts_required: a dictionary of all the prompts that will be shown to
             the user on project creation.
-        selected_addons: a string containing the value for the --addons flag,
+        selected_add_ons_flag: a string containing the value for the --addons flag,
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
             None in case the flag wasn't used.
@@ -462,8 +462,8 @@ def _select_prompts_to_display(
     """
     valid_addons = list(ADD_ONS_SHORTNAME_TO_NUMBER) + ["all", "none"]
 
-    if selected_addons is not None:
-        addons = re.sub(r"\s", "", selected_addons).split(",")
+    if selected_add_ons_flag is not None:
+        addons = re.sub(r"\s", "", selected_add_ons_flag).split(",")
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
@@ -528,7 +528,7 @@ def _make_cookiecutter_args(
     config: dict[str, str | list[str]],
     checkout: str,
     directory: str,
-    selected_addons: str,
+    selected_add_ons_flag: str,
     project_name: str,
 ) -> dict[str, Any]:
     """Creates a dictionary of arguments to pass to cookiecutter.
@@ -544,7 +544,7 @@ def _make_cookiecutter_args(
             multiple starters. Maps directly to cookiecutter's ``directory`` argument.
             Relevant only when using a starter.
             https://cookiecutter.readthedocs.io/en/1.7.2/advanced/directories.html
-        selected_addons: a string containing the value for the --addons flag,
+        selected_add_ons_flag: a string containing the value for the --addons flag,
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
             None in case the flag wasn't used.
@@ -553,7 +553,7 @@ def _make_cookiecutter_args(
     """
     config.setdefault("kedro_version", version)
 
-    add_ons = _convert_addon_names_to_numbers(selected_addons)
+    add_ons = _convert_addon_names_to_numbers(selected_add_ons_flag)
 
     if add_ons is not None:
         config["add_ons"] = add_ons

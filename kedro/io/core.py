@@ -17,6 +17,7 @@ from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Callable, Generic, TypeVar
 from urllib.parse import urlsplit
 
+from black import Mode, format_str
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
@@ -227,10 +228,37 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
 
-    def __str__(self):
-        return f"{type(self).__name__}({_prettify_dict_to_str(self._describe(), True)})"
+    # def __str__(self):
+    #     return format_str(self.build_str_representation(), mode=Mode())
 
     def __repr__(self):
+        return format_str(self._build_str_representation(), mode=Mode())
+
+    def _build_str_representation(self):
+        def _prettify_dict_to_str(obj, is_root=False):
+            """Returns a string representation where
+            1. The root level (i.e. the Dataset.__init__ arguments) are
+            formatted like Dataset(key=value).
+            2. Root arguments are alphabetically sorted.
+            3. None / empty dict values are not shown.
+            """
+
+            fmt = "{}={}" if is_root else "'{}': {}"  # 1
+
+            if is_root:
+                sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
+
+                text = ", ".join(
+                    fmt.format(key, _prettify_dict_to_str(value))  # 2
+                    for key, value in sorted_dict
+                    if value  # 3
+                )
+
+                return text if is_root else "{" + text + "}"  # 1
+
+            # not the root
+            return f"'{str(obj)}'" if isinstance(obj, PurePath) else str(obj)
+
         return f"{type(self).__name__}({_prettify_dict_to_str(self._describe(), True)})"
 
     @abc.abstractmethod
@@ -762,28 +790,3 @@ def __getattr__(name):
         )
         return alias
     raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
-
-
-def _prettify_dict_to_str(obj, is_root=False):
-    """Returns a string representation where
-    1. The root level (i.e. the Dataset.__init__ arguments) are
-    formatted like Dataset(key=value).
-    2. Dictionaries have the keys alphabetically sorted recursively.
-    3. None values are not shown.
-    """
-
-    fmt = "{}={}" if is_root else "'{}': {}"  # 1
-
-    if isinstance(obj, dict):
-        sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
-
-        text = ", ".join(
-            fmt.format(key, _prettify_dict_to_str(value))  # 2
-            for key, value in sorted_dict
-            if value is not None  # 3
-        )
-
-        return text if is_root else "{" + text + "}"  # 1
-
-    # not a dictionary
-    return str(obj)

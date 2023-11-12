@@ -197,17 +197,27 @@ class DataCatalog:
             self.add_feed_dict(feed_dict)
 
     def __repr__(self):
-        dataset_repr = {
-            name: repr(dataset) for name, dataset in self._data_sets.items()
-        }
         ## solution 1: built in pprint
         # from pprint import PrettyPrinter
+
         # return f"DataCatalog(data_sets=\n{PrettyPrinter().pformat(dataset_repr)}\n)"
 
-        # solution 2: black
-        from black import Mode, format_str
+        # # solution 2: black
+        # from black import Mode, format_str
 
-        return format_str(f"DataCatalog(data_sets={dataset_repr})", mode=Mode())
+        # return format_str(f"DataCatalog(data_sets={dataset_repr})", mode=Mode())
+
+        # solution 3: plain python formatting, with each dataset representation on one row
+        # we use str(dataset) instead of repr (dataset) to avoid black formatting which addds extra line jumps and spaces
+        datasets_repr = [
+            f"'{name}': {dataset._build_str_representation()}"
+            for name, dataset in self._data_sets.items()
+        ]
+        catalog_arguments_repr = ",\n        ".join(datasets_repr)
+        catalog_repr = (
+            f"DataCatalog(\n    data_sets={{\n        {catalog_arguments_repr}\n}})"
+        )
+        return catalog_repr
 
     @property
     def _logger(self):

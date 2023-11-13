@@ -198,7 +198,7 @@ CONFIG_LOADER_ARGS = {"default_run_env": "prod"}
 ```
 
 ### How to use only one configuration environment
-If, for some reason, your project does not have any other environments apart from `base` (i.e. no `local` environment to default to), you must customise the configuration loader arguments in `settings.py` as follows:
+Customise the configuration loader arguments in `settings.py` as follows if your project does not have any other environments apart from `base` (i.e. no `local` environment to default to):
 
 ```python
 CONFIG_LOADER_ARGS = {"default_run_env": "base"}

@@ -94,7 +94,7 @@ For more details, see the following resources:
 
 - [Package a Kedro project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#package-a-kedro-project)
 - [Run a packaged project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#run-a-packaged-project)
-- [Customising an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
+- [Customizing an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
 - [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
 
 ## Setup

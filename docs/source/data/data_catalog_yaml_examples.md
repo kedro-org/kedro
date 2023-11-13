@@ -369,7 +369,7 @@ In this example, the default `csv` configuration is inserted into `airplanes` an
 
 You might come across a situation where you would like to read the same file using two different dataset implementations (known as transcoding). For example, Parquet files can not only be loaded via the `ParquetDataSet` using `pandas`, but also directly by `SparkDataSet`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
 
-Define two `DataCatalog` entries for the same dataset in a common format (e.g. Parquet, JSON, CSV) in your `conf/base/catalog.yml`:
+Define two `DataCatalog` entries for the same dataset in a common format (for example, Parquet, JSON, CSV) in your `conf/base/catalog.yml`:
 
 ```yaml
 my_dataframe@spark:

@@ -196,20 +196,16 @@ class KedroContext:
                 extra parameters passed at initialization.
         """
         try:
-            raw_params = self.config_loader.get("parameters")
-            # Convert raw_params to OmegaConf object if it's not already one
-            params = OmegaConf.create(raw_params)
+            params = self.config_loader.get("parameters")
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
-            params = OmegaConf.create()  # Create an empty OmegaConf object
+            params = {}
 
         if self._extra_params:
-            # Merge extra_params (already a dict) with loaded params (OmegaConf object)
-            extra_params_conf = OmegaConf.create(self._extra_params)
-            params = OmegaConf.merge(params, extra_params_conf)
+            # Merge nested structures
+            params = OmegaConf.merge(params, self._extra_params)
 
-        # Convert the OmegaConf object to a plain Python dictionary
-        return OmegaConf.to_container(params, resolve=True)
+        return OmegaConf.to_container(params)
 
     def _get_catalog(
         self,

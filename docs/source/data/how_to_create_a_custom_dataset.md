@@ -1,6 +1,6 @@
 # Advanced: Tutorial to create a custom dataset
 
-[Kedro supports many datasets](/kedro_datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
+{doc}`Kedro supports many datasets<kedro-datasets:kedro_datasets>` out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## AbstractDataset
 
@@ -271,7 +271,7 @@ class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
 
 Currently, the `ImageDataset` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-Kedro's [`PartitionedDataset`](/kedro_datasets.partitions.PartitionedDataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+Kedro's {class}`PartitionedDataset<kedro-datasets:kedro_datasets.partitions.PartitionedDataset>` is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
 
 To use `PartitionedDataset` with `ImageDataset` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataset` loads all PNG files from the data directory using `ImageDataset`:
 
@@ -511,7 +511,7 @@ Inspect the content of the data directory to find a new version of the data, wri
 
 Kedro datasets should work with the [SequentialRunner](/kedro.runner.SequentialRunner) and the [ParallelRunner](/kedro.runner.ParallelRunner), so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
-There is one dataset that is an exception: [SparkDataset](/kedro_datasets.spark.SparkDataset). The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that leverages Spark please consider the alternative [ThreadRunner](/kedro.runner.ThreadRunner).
+There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that leverages Spark please consider the alternative [ThreadRunner](/kedro.runner.ThreadRunner).
 
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an iPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 
@@ -569,7 +569,7 @@ class ImageDataset(AbstractVersionedDataset):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataset](/kedro_datasets.spark.SparkDataset)'s implementation.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset's constructor, please see the implementation of the {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`.
 
 
 ## How to contribute a custom dataset implementation

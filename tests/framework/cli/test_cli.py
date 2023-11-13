@@ -674,7 +674,7 @@ class TestRunCommand:
         assert result.exit_code
         assert (
             "Key `node-names` in provided configuration is not valid. \n\nDid you mean one of "
-            "these?\n    node_names\n    to_nodes\n    namespace " in result.stdout
+            "these?\n    node_names\n    to_nodes\n    namespace" in result.stdout
         )
 
     @mark.parametrize(

@@ -445,7 +445,7 @@ class TestRunCommand:
             "run": {
                 "pipeline": "pipeline1",
                 "tags": "tag1, tag2",
-                "node_names": "node1, node2",
+                "node-names": "node1, node2",
             },
             "dummy": {"dummy": "dummy"},
         }
@@ -673,8 +673,8 @@ class TestRunCommand:
         )
         assert result.exit_code
         assert (
-            "Key `node-names` in provided configuration is not valid. \n\nDid you mean one of these?\n    node_names\n    nodes_names\n    to_nodes"
-            in result.stdout
+            "Key `node-names` in provided configuration is not valid. \n\nDid you mean one of "
+            "these?\n    node_names\n    to_nodes\n    namespace " in result.stdout
         )
 
     @mark.parametrize(

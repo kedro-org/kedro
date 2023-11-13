@@ -166,7 +166,9 @@ class KedroContext:
     """
 
     _package_name: str = field(init=True, on_setattr=frozen)
-    project_path: Path = field(init=True, converter=_expand_full_path)
+    project_path: Path = field(
+        init=True, converter=_expand_full_path, on_setattr=frozen
+    )
     config_loader: AbstractConfigLoader = field(init=True, on_setattr=frozen)
     _hook_manager: PluginManager = field(init=True, on_setattr=frozen)
     env: str | None = field(init=True, on_setattr=frozen)

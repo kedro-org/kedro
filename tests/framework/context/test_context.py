@@ -12,7 +12,7 @@ import pandas as pd
 import pytest
 import toml
 import yaml
-from attrs.exceptions import FrozenInstanceError
+from attrs.exceptions import FrozenAttributeError
 from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
@@ -209,9 +209,29 @@ class TestKedroContext:
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
-    def test_immutable_instance(self, dummy_context):
-        with pytest.raises(FrozenInstanceError):
-            dummy_context.catalog = 1
+    @pytest.mark.parametrize(
+        "attr",
+        (
+            "project_path",
+            "config_loader",
+            "env",
+        ),
+    )
+    def test_public_attributes(self, dummy_context, attr):
+        getattr(dummy_context, attr)
+
+    @pytest.mark.parametrize(
+        "internal_attr", ("_package_name", "_hook_manager", "_extra_params")
+    )
+    def test_internal_attributes(self, dummy_context, internal_attr):
+        getattr(dummy_context, internal_attr)
+
+    def test_immutable_class_attribute(self, dummy_context):
+        with pytest.raises(FrozenAttributeError):
+            dummy_context.project_path = "dummy"
+
+    def test_set_new_attribute(self, dummy_context):
+        dummy_context.mlflow = 1
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader

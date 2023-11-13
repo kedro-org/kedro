@@ -31,7 +31,7 @@ def notebook_run(...):
     == ADD YOUR CUSTOM NOTEBOOK COMMAND CODE HERE ==
 ```
 
-To inject additional CLI commands intended to be reused across projects, please refer to [our plugin system](./plugins.md). An example of one such command is the `kedro viz` command introduced by the [Kedro-Viz plugin](https://github.com/kedro-org/kedro-viz). This command is intended to work on every Kedro project and therefore must be a standalone plugin.
+To inject additional CLI commands intended to be reused across projects, see [our plugin system](./plugins.md). An example of one such command is the `kedro viz` command introduced by the [Kedro-Viz plugin](https://github.com/kedro-org/kedro-viz). This command is intended to work on every Kedro project and therefore must be a standalone plugin.
 
 ```{note}
 Your plugin's implementation can take advantage of other extension mechanisms such as Hooks.
@@ -39,4 +39,4 @@ Your plugin's implementation can take advantage of other extension mechanisms su
 
 ## Use Case 4: How to customise the initial boilerplate of your project
 
-Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, please visit the [guide for creating Kedro starters](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter) to solve this extension requirement.
+Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, see the [guide for creating Kedro starters](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).

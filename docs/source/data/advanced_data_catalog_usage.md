@@ -200,7 +200,7 @@ assert data1.equals(reloaded)
 io.save("test_data_set", data2)
 ```
 
-We do not recommend passing exact load and/or save versions, since it might lead to inconsistencies between operations. For example, if versions for load and save operations do not match, a save operation would result in a `UserWarning`.
+We do not recommend passing exact load or save versions, since it might lead to inconsistencies between operations. For example, if versions for load and save operations do not match, a save operation would result in a `UserWarning`.
 
 Imagine a simple pipeline with two nodes, where B takes the output from A. If you specify the load-version of the data for B to be `my_data_2023_08_16.csv`, the data that A produces (`my_data_20230818.csv`) is not used.
 

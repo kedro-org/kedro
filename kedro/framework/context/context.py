@@ -8,7 +8,8 @@ from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
 
-from attrs import field, frozen
+from attrs import define, field
+from attrs.setters import frozen
 from pluggy import PluginManager
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
@@ -158,18 +159,20 @@ def _expand_full_path(project_path: str | Path) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
-@frozen
+@define(slots=False)  # Enable setting new attributes to `KedroContext`
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
     """
 
-    _package_name: str
-    project_path: Path = field(converter=_expand_full_path)
-    config_loader: AbstractConfigLoader
-    _hook_manager: PluginManager
-    env: str | None = None
-    _extra_params: dict[str, Any] | None = field(default=None, converter=deepcopy)
+    _package_name: str = field(init=True, on_setattr=frozen)
+    project_path: Path = field(init=True, converter=_expand_full_path)
+    config_loader: AbstractConfigLoader = field(init=True, on_setattr=frozen)
+    _hook_manager: PluginManager = field(init=True, on_setattr=frozen)
+    env: str | None = field(init=True, on_setattr=frozen)
+    _extra_params: dict[str, Any] | None = field(
+        init=True, default=None, converter=deepcopy, on_setattr=frozen
+    )
 
     """Create a context object by providing the root of a Kedro project and
     the environment configuration subfolders (see ``kedro.config.OmegaConfigLoader``)

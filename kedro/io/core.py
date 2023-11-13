@@ -376,14 +376,14 @@ def parse_dataset_definition(
     if "type" not in config:
         raise DatasetError("'type' is missing from dataset catalog configuration")
 
-    class_obj = config.pop("type")
-    if isinstance(class_obj, str):
-        if len(class_obj.strip(".")) != len(class_obj):
+    dataset_type = config.pop("type")
+    if isinstance(dataset_type, str):
+        if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
                 "'type' class path does not support relative "
                 "paths or paths ending with a dot."
             )
-        class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
+        class_paths = (prefix + dataset_type for prefix in _DEFAULT_PACKAGES)
 
         for class_path in class_paths:
             tmp = _load_obj(class_path)
@@ -391,10 +391,7 @@ def parse_dataset_definition(
                 class_obj = tmp
                 break
         else:
-            raise DatasetError(
-                f"Class '{class_obj}' not found or one of its dependencies "
-                f"has not been installed."
-            )
+            raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
 
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(
@@ -422,8 +419,9 @@ def parse_dataset_definition(
     return class_obj, config
 
 
-def _load_obj(class_path: str) -> object | None:
+def _load_obj(class_path: str) -> Any | None:
     mod_path, _, class_name = class_path.rpartition(".")
+    # Check if the module exists
     try:
         available_classes = load_obj(f"{mod_path}.__all__")
     # ModuleNotFoundError: When `load_obj` can't find `mod_path` (e.g `kedro.io.pandas`)
@@ -432,18 +430,16 @@ def _load_obj(class_path: str) -> object | None:
     #                 `__all__` attribute -- either because it's a custom or a kedro.io dataset
     except (ModuleNotFoundError, AttributeError, ValueError):
         available_classes = None
-
     try:
         class_obj = load_obj(class_path)
-    except (ModuleNotFoundError, ValueError):
-        return None
-    except AttributeError as exc:
+    except (ModuleNotFoundError, ValueError, AttributeError) as exc:
+        # If it's available, module exist but dependencies are missing
         if available_classes and class_name in available_classes:
             raise DatasetError(
-                f"{exc} Please see the documentation on how to "
+                f"{exc}. Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
-                f"https://kedro.readthedocs.io/en/stable/"
-                f"kedro_project_setup/dependencies.html"
+                f"https://docs.kedro.org/en/stable/kedro_project_setup/"
+                f"dependencies.html#install-dependencies-related-to-the-data-catalog"
             ) from exc
         return None
 

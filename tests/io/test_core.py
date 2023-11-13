@@ -19,6 +19,7 @@ from kedro.io.core import (
     generate_timestamp,
     get_filepath_str,
     get_protocol_and_path,
+    parse_dataset_definition,
     validate_on_forbidden_chars,
 )
 
@@ -264,6 +265,32 @@ class TestCoreFunctions:
         )
         with pytest.raises(DatasetError, match=expected_error_message):
             validate_on_forbidden_chars(**input)
+
+    def test_dataset_name_typo(self, mocker):
+        # If the module doesn't exist, it return None instead ModuleNotFoundError
+        mocker.patch("kedro.io.core.load_obj", return_value=None)
+        dataset_name = "lAmbDaDaTAsET"
+
+        with pytest.raises(
+            DatasetError, match=f"Class '{dataset_name}' not found, is this a typo?"
+        ):
+            parse_dataset_definition({"type": dataset_name})
+
+    def test_dataset_missing_dependencies(self, mocker):
+        # If the module is found but import the dataset trigger ModuleNotFoundError
+        dataset_name = "LambdaDataset"
+
+        def side_effect_function(value):
+            if "__all__" in value:
+                return [dataset_name]
+            else:
+                raise ModuleNotFoundError
+
+        mocker.patch("kedro.io.core.load_obj", side_effect=side_effect_function)
+
+        pattern = "Please see the documentation on how to install relevant dependencies"
+        with pytest.raises(DatasetError, match=pattern):
+            parse_dataset_definition({"type": dataset_name})
 
 
 class TestAbstractVersionedDataset:

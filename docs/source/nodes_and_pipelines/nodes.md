@@ -145,7 +145,7 @@ Alternatively, you can also make use of a helper function that creates the mappi
 
 ## How to tag a node
 
-Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tag=ds` will only run nodes that have a `ds` tag attached.
+Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tags=ds` will only run nodes that have a `ds` tag attached.
 
 To tag a node, you can simply specify the `tags` argument:
 
@@ -158,7 +158,7 @@ Moreover, you can [tag all nodes in a `Pipeline`](./pipeline_introduction.md#how
 To run a pipeline using a tag:
 
 ```bash
-kedro run --tag=pipeline_tag
+kedro run --tags=pipeline_tag
 ```
 
 This will run only the nodes found within the pipeline tagged with `pipeline_tag`.

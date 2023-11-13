@@ -34,7 +34,7 @@ shuttles:
 
 Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml and more.
 
-[The `kedro-datasets` package documentation](/kedro_datasets) contains a comprehensive list of all available file types.
+{doc}`The kedro-datasets package documentation<kedro-datasets:kedro_datasets>` contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 
@@ -147,9 +147,9 @@ In this example, `filepath` is used as the basis of a folder that stores version
 By default, `kedro run` loads the latest version of the dataset. However, you can also specify a particular versioned data set with `--load-version` flag as follows:
 
 ```bash
-kedro run --load-version=cars:YYYY-MM-DDThh.mm.ss.sssZ
+kedro run --load-versions=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
-where `--load-version` is dataset name and version timestamp separated by `:`.
+where `--load-versions` is dataset name and version timestamp separated by `:`.
 
 A dataset offers versioning support if it extends the [`AbstractVersionedDataset`](/kedro.io.AbstractVersionedDataset) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
 

@@ -18,6 +18,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
     _convert_addon_names_to_numbers,
     _parse_add_ons_input,
+    _validate_selection,
 )
 
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 15
@@ -81,7 +82,6 @@ def _get_expected_files(add_ons: str):
         "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
-
     expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
 
     for add_on in add_ons_list:
@@ -285,13 +285,14 @@ def test_parse_add_ons_invalid_range(input, capsys):
 
 
 @pytest.mark.parametrize(
-    "input,first_invalid",
-    [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-8", "8")],
+    "input,last_invalid",
+    [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-9", "9")],
 )
-def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
+def test_parse_add_ons_invalid_selection(input, last_invalid, capsys):
     with pytest.raises(SystemExit):
-        _parse_add_ons_input(input)
-    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
+        selected = _parse_add_ons_input(input)
+        _validate_selection(selected)
+    message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
     assert message in capsys.readouterr().err
 
 
@@ -876,7 +877,22 @@ class TestFlagsNotAllowed:
 class TestAddOnsFromUserPrompts:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "6", "7", "none", "2,3,4", "3-5", "all"],
+        [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "none",
+            "2,3,4",
+            "3-5",
+            "all",
+            "1, 2, 3",
+            "  1,  2, 3  ",
+            "ALL",
+        ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
@@ -889,11 +905,15 @@ class TestAddOnsFromUserPrompts:
         _assert_requirements_ok(result, add_ons=add_ons)
         _clean_up_project(Path("./new-kedro-project"))
 
-    def test_invalid_add_ons(self, fake_kedro_cli):
+    @pytest.mark.parametrize(
+        "bad_input",
+        ["bad input", "-1", "3-"],
+    )
+    def test_invalid_add_ons(self, fake_kedro_cli, bad_input):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
-            input=_make_cli_prompt_input(add_ons="bad input"),
+            input=_make_cli_prompt_input(add_ons=bad_input),
         )
 
         assert result.exit_code != 0
@@ -903,12 +923,57 @@ class TestAddOnsFromUserPrompts:
             in result.output
         )
 
+    @pytest.mark.parametrize(
+        "input,last_invalid",
+        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("99", "99")],
+    )
+    def test_invalid_add_ons_selection(self, fake_kedro_cli, input, last_invalid):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons=input),
+        )
+
+        assert result.exit_code != 0
+        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
+        assert message in result.output
+
+    @pytest.mark.parametrize(
+        "input",
+        ["5-2", "3-1"],
+    )
+    def test_invalid_add_ons_range(self, fake_kedro_cli, input):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons=input),
+        )
+
+        assert result.exit_code != 0
+        message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
+        assert message in result.output
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestAddOnsFromConfigFile:
     @pytest.mark.parametrize(
         "add_ons",
-        ["1", "2", "3", "4", "5", "6", "7", "none", "2,3,4", "3-5", "all"],
+        [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "none",
+            "2,3,4",
+            "3-5",
+            "all",
+            "1, 2, 3",
+            "  1,  2, 3  ",
+            "ALL",
+        ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         """Test project created from config."""
@@ -927,10 +992,14 @@ class TestAddOnsFromConfigFile:
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="new-kedro-project")
         _clean_up_project(Path("./new-kedro-project"))
 
-    def test_invalid_add_ons(self, fake_kedro_cli):
+    @pytest.mark.parametrize(
+        "bad_input",
+        ["bad input", "-1", "3-"],
+    )
+    def test_invalid_add_ons(self, fake_kedro_cli, bad_input):
         """Test project created from config."""
         config = {
-            "add_ons": "bad input",
+            "add_ons": bad_input,
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",
@@ -946,6 +1015,46 @@ class TestAddOnsFromConfigFile:
             "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
             in result.output
         )
+
+    @pytest.mark.parametrize(
+        "input,last_invalid",
+        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("99", "99")],
+    )
+    def test_invalid_add_ons_selection(self, fake_kedro_cli, input, last_invalid):
+        config = {
+            "add_ons": input,
+            "project_name": "My Project",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+
+        assert result.exit_code != 0
+        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."
+        assert message in result.output
+
+    @pytest.mark.parametrize(
+        "input",
+        ["5-2", "3-1"],
+    )
+    def test_invalid_add_ons_range(self, fake_kedro_cli, input):
+        config = {
+            "add_ons": input,
+            "project_name": "My Project",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+
+        assert result.exit_code != 0
+        message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
+        assert message in result.output
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -967,20 +1076,25 @@ class TestAddOnsFromCLI:
             "log, docs, data, test, lint",
             "log,       docs,     data,   test,     lint",
             "all",
+            "LINT",
+            "ALL",
+            "NONE",
+            "TEST, LOG, DOCS",
+            "test, DATA, liNt",
         ],
     )
-    def test_valid_add_ons(self, fake_kedro_cli, add_ons):
+    def test_valid_add_ons_flag(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--addons", add_ons],
             input=_make_cli_prompt_input_without_addons(),
         )
-        add_ons = _convert_addon_names_to_numbers(selected_addons=add_ons)
+        add_ons = _convert_addon_names_to_numbers(selected_add_ons_flag=add_ons)
         _assert_template_ok(result, add_ons=add_ons)
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="new-kedro-project")
         _clean_up_project(Path("./new-kedro-project"))
 
-    def test_invalid_add_ons(self, fake_kedro_cli):
+    def test_invalid_add_ons_flag(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--addons", "bad_input"],
@@ -997,7 +1111,7 @@ class TestAddOnsFromCLI:
         "add_ons",
         ["lint,all", "test,none", "all,none"],
     )
-    def test_invalid_add_on_combination(self, fake_kedro_cli, add_ons):
+    def test_invalid_add_ons_flag_combination(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--addons", add_ons],

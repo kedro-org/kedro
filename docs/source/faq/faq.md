@@ -2,9 +2,9 @@
 
 This is a growing set of technical FAQs. The [product FAQs on the Kedro website](https://kedro.org/#faq) explain how Kedro can answer the typical use cases and requirements of data scientists, data engineers, machine learning engineers and product owners.
 
-## Visualisation
-
-* [Can I annotate a Kedro-Viz visualisation to show different data layers](../visualisation/kedro-viz_visualisation.md#visualise-layers)?
+## Kedro documentation
+* {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
+* {doc}`Where can I find the documentation for Kedro's datasets<kedro-datasets:kedro_datasets>`?
 
 ## Working with Jupyter
 

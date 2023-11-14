@@ -6,7 +6,8 @@
 * The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 * Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
 * Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
-
+* Modified the mechanism of importing datasets, raise more explicit error when dependencies are missing.
+* Added validation for configuration file used to override run commands via the CLI.
 
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.
@@ -35,6 +36,7 @@
    * `kedro test`
 * Added the `--addons` flag to the `kedro new` command.
 * Added the `--name` flag to the `kedro new` command.
+* Removed `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
 
 ### ConfigLoader
 * Made `OmegaConfigLoader` the default config loader.

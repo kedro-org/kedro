@@ -4,7 +4,7 @@ If you prefer to learn by following a video tutorial, you can follow the hands-o
 
 The course is structured into sections, which are further divided in short videos covering a specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorial/index.md) to get hands-on with that example and rapidly pick up key Kedro concepts.
 
-### Who is this course for?
+## Who is this course for?
 
 This course is for data scientists, data engineers and machine learning engineers. You can be junior, mid-level or senior in your field of work. You're likely to be hands-on with projects, or a decision-maker who regularly makes design and implementation choices about Python data products.
 

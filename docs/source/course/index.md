@@ -1,0 +1,66 @@
+# Learn Kedro with hands-on video
+
+If you prefer to learn by following a video tutorial, you can follow the hands-on video course about Kedro 
+
+The course is structured in five parts, and part is further divided in short videos that cover a specific topic about Kedro. It is based on the [spaceflights tutorial](../tutorial/index.md) and complements this documentation so you can read and get hands-on with the video as you get up-to-speed with Kedro basics.
+
+### Who is this course for?
+
+This course is for data scientists, data engineers and machine learning engineers. You can be junior, mid-level or senior in your field of work, and you're likely to be hands-on with projects, or a decision-maker who regularly makes design and implementation choices for products.
+
+We assume you know these concepts: 
+* Python basics (coding on Jupyter and other notebook interfaces)
+* Manipulating data with pandas
+* Visualising insights
+* Command line basics
+
+We don't assume knowledge of software engineering in Python, so the course contains information about reusability principles, how to create a Python package, and how to use version control.
+
+## What you'll learn
+
+In short, you'll learn how create maintainable, reusable data science code. 
+
+- [x] What Kedro is: the problems is solves and how it fits in the data science ecosystem
+- [x] How to create a Kedro project
+- [x] How to refactor a Jupyter notebook to a Kedro project
+- [x] How to package your code as a Python library
+- [x] How to work with Kedro projects in VSCode 
+- [x] Advanced Kedro features: namespaces and dataset factories
+- [x] How to deploy a project using container solutions like Docker and open source orchestrators like Airflow,
+- [x] Kedro plugins
+- [x] How to contribute to Kedro
+
+## Course index
+
+- Part 0: Introduction
+    - 0.1. Data science in production: the good, the bad, and the ugly
+    - 0.2. What is Kedro?
+    - 0.3. Kedro and data orchestrators
+    - 0.4. Where does Kedro fit in the data science ecosystem?
+- Part 1: Get started with Kedro
+    - 1.1. The spaceflights starter
+    - 1.2. Create a Kedro project from scratch
+    - 1.3. Use Kedro from Jupyter notebook
+    - 1.4. Set up the Kedro Data Catalog
+    - 1.5. Explore the spaceflights data
+    - 1.6. Refactor your data processing code into functions
+    - 1.7. Create your first data pipeline with Kedro
+    - 1.8. Assemble your nodes into a Kedro pipeline
+    - 1.9. Run your Kedro pipeline
+    - 1.10. Visualise your data pipeline with Kedro-Viz
+- Part 2: Make complex Kedro pipelines
+    - 2.1. Merge different dataframes in Kedro
+    - 2.2. Predict prices using machine learning
+    - 2.3. Refactor your data science code into functions
+    - 2.4. How to work with parameters in Kedro
+    - 2.5. Create a Kedro pipeline with parameters
+    - 2.6. Reuse your Kedro pipeline using namespaces
+    - 2.7. Accelerate your Kedro pipeline using runners
+    - 2.8. Create Kedro datasets dynamically using factories
+- Part 3: Ship your Kedro project to production
+    - 3.1. Define your own Kedro environments
+    - 3.2. Use S3 and MinIO cloud storages with Kedro
+    - 3.3. Package your Kedro project into a Python wheel
+    - 3.4. Turn your Kedro project into a Docker container
+    - 3.5. Deploy your Kedro project to Apache Airflow
+- Part 4: Continue your Kedro journey

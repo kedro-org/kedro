@@ -259,21 +259,25 @@ class KedroCliError(click.exceptions.ClickException):
     """
 
     VERBOSE_ERROR = False
+    VERBOSE_EXISTS = True
 
     def show(self, file=None):
-        if file is None:
-            # noqa: protected-access
-            file = click._compat.get_text_stderr()
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
-        else:
+        elif self.VERBOSE_EXISTS:
             etype, value, _ = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             click.secho(
                 f"{formatted_exception}Run with --verbose to see the full exception",
                 fg="yellow",
             )
-        click.secho(f"Error: {self.message}", fg="red", file=file)
+        else:
+            etype, value, _ = sys.exc_info()
+            formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            click.secho(
+                f"{formatted_exception}",
+                fg="yellow",
+            )
 
 
 def _clean_pycache(path: Path):
@@ -401,9 +405,25 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
 
     if value:
         config = OmegaConf.to_container(OmegaConf.load(value))[section]
+        for key, value in config.items():
+            _validate_config_file(key)
         ctx.default_map.update(config)
 
     return value
+
+
+def _validate_config_file(key):
+    """Validate the keys provided in the config file against the accepted keys."""
+    from kedro.framework.cli.project import run
+
+    run_args = [click_arg.name for click_arg in run.params]
+    run_args.remove("config")
+    if key not in run_args:
+        KedroCliError.VERBOSE_EXISTS = False
+        message = _suggest_cli_command(key, run_args)
+        raise KedroCliError(
+            f"Key `{key}` in provided configuration is not valid. {message}"
+        )
 
 
 def _split_params(ctx, param, value):

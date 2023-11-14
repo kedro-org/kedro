@@ -45,6 +45,46 @@ DIRECTORY_ARG_HELP = (
     "An optional directory inside the repository where the starter resides."
 )
 
+# TODO(lrcouto): Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these add-ons.).
+ADDON_ARG_HELP = """
+Select which add-ons you'd like to include. By default, none are included.\n
+
+Add-Ons\n
+1) Linting: Provides a basic linting setup with Black and Ruff\n
+2) Testing: Provides basic testing setup with pytest\n
+3) Custom Logging: Provides more logging options\n
+4) Documentation: Basic documentation setup with Sphinx\n
+5) Data Structure: Provides a directory structure for storing data\n
+6) Pyspark: Provides set up configuration for working with PySpark\n
+7) Kedro Viz: Provides Kedro's native visualisation tool \n
+
+Example usage:\n
+kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
+kedro new --addons=all\n
+kedro new --addons=none
+"""
+
+ADD_ONS_SHORTNAME_TO_NUMBER = {
+    "lint": "1",
+    "test": "2",
+    "log": "3",
+    "docs": "4",
+    "data": "5",
+    "pyspark": "6",
+    "viz": "7",
+}
+NUMBER_TO_ADD_ONS_NAME = {
+    "1": "Linting",
+    "2": "Testing",
+    "3": "Custom Logging",
+    "4": "Documentation",
+    "5": "Data Structure",
+    "6": "Pyspark",
+    "7": "Kedro Viz",
+}
+
+NAME_ARG_HELP = "The name of your new Kedro project."
+
 
 @define(order=True)
 class KedroStarterSpec:  # noqa: too-few-public-methods
@@ -103,47 +143,6 @@ for starter_spec in _OFFICIAL_STARTER_SPECS:
     starter_spec.origin = "kedro"
 
 _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
-
-# TODO; Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these add-ons.).
-ADDON_ARG_HELP = """
-Select which add-ons you'd like to include. By default, none are included.\n
-
-Add-Ons\n
-1) Linting: Provides a basic linting setup with Black and Ruff\n
-2) Testing: Provides basic testing setup with pytest\n
-3) Custom Logging: Provides more logging options\n
-4) Documentation: Basic documentation setup with Sphinx\n
-5) Data Structure: Provides a directory structure for storing data\n
-6) Pyspark: Provides set up configuration for working with PySpark\n
-7) Kedro Viz: Provides Kedro's native visualisation tool \n
-
-Example usage:\n
-kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
-kedro new --addons=all\n
-kedro new --addons=none
-"""
-
-ADD_ONS_SHORTNAME_TO_NUMBER = {
-    "lint": "1",
-    "test": "2",
-    "log": "3",
-    "docs": "4",
-    "data": "5",
-    "pyspark": "6",
-    "viz": "7",
-}
-NUMBER_TO_ADD_ONS_NAME = {
-    "1": "Linting",
-    "2": "Testing",
-    "3": "Custom Logging",
-    "4": "Documentation",
-    "5": "Data Structure",
-    "6": "Pyspark",
-    "7": "Kedro Viz",
-}
-
-
-NAME_ARG_HELP = "The name of your new Kedro project."
 
 
 def _parse_add_ons_input(add_ons_str: str):

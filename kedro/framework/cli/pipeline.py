@@ -140,9 +140,7 @@ def create_pipeline(
     "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def delete_pipeline(
-    metadata: ProjectMetadata, name, env, yes, **kwargs
-):  # noqa: unused-argument
+def delete_pipeline(metadata: ProjectMetadata, name, env, yes, **kwargs):  # noqa: unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE

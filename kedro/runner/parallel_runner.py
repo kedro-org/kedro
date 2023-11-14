@@ -104,7 +104,7 @@ def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
     configure_logging(logging_config)
 
 
-def _run_node_synchronization(  # noqa: too-many-arguments
+def _run_node_synchronization(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,

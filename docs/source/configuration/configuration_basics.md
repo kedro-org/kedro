@@ -143,7 +143,7 @@ Or the following command to create a `zip` file:
 zip -x <conf-dir>/local/** -r <my_conf_name>.zip <conf-dir>
 ```
 
-Note that for both the `tar.gz` and `zip` file the following structure is expected:
+For both the `tar.gz` and `zip` file, the following structure is expected:
 
 ```text
 <conf_dir>
@@ -198,7 +198,7 @@ CONFIG_LOADER_ARGS = {"default_run_env": "prod"}
 ```
 
 ### How to use only one configuration environment
-If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise the configuration loader argument settings in `src/<package_name>/settings.py` and set the `CONFIG_LOADER_ARGS` key to `"default_run_env": "base"`
+Customise the configuration loader arguments in `settings.py` as follows if your project does not have any other environments apart from `base` (i.e. no `local` environment to default to):
 
 ```python
 CONFIG_LOADER_ARGS = {"default_run_env": "base"}

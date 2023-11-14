@@ -26,7 +26,7 @@ Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="http
 
 
 ## Get help
-If you hit an issue with the tutorial:
+If you encounter an issue with the tutorial:
 
 * Check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already.
 * Use [Kedro-Viz](../visualisation/kedro-viz_visualisation) to visualise your project to better understand how the datasets, nodes and pipelines fit together.

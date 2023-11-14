@@ -31,20 +31,6 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 
-CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
-must supply  the keys required by the template's prompts.yml. When not using a starter,
-these are `project_name`, `repo_name` and `python_package`."""
-STARTER_ARG_HELP = """Specify the starter template to use when creating the project.
-This can be the path to a local directory, a URL to a remote VCS repository supported
-by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
-"""
-CHECKOUT_ARG_HELP = (
-    "An optional tag, branch or commit to checkout in the starter repository."
-)
-DIRECTORY_ARG_HELP = (
-    "An optional directory inside the repository where the starter resides."
-)
-
 # TODO(lrcouto): Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these add-ons.).
 ADDON_ARG_HELP = """
 Select which add-ons you'd like to include. By default, none are included.\n
@@ -63,27 +49,20 @@ kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these optio
 kedro new --addons=all\n
 kedro new --addons=none
 """
-
-ADD_ONS_SHORTNAME_TO_NUMBER = {
-    "lint": "1",
-    "test": "2",
-    "log": "3",
-    "docs": "4",
-    "data": "5",
-    "pyspark": "6",
-    "viz": "7",
-}
-NUMBER_TO_ADD_ONS_NAME = {
-    "1": "Linting",
-    "2": "Testing",
-    "3": "Custom Logging",
-    "4": "Documentation",
-    "5": "Data Structure",
-    "6": "Pyspark",
-    "7": "Kedro Viz",
-}
-
+CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
+must supply  the keys required by the template's prompts.yml. When not using a starter,
+these are `project_name`, `repo_name` and `python_package`."""
+CHECKOUT_ARG_HELP = (
+    "An optional tag, branch or commit to checkout in the starter repository."
+)
+DIRECTORY_ARG_HELP = (
+    "An optional directory inside the repository where the starter resides."
+)
 NAME_ARG_HELP = "The name of your new Kedro project."
+STARTER_ARG_HELP = """Specify the starter template to use when creating the project.
+This can be the path to a local directory, a URL to a remote VCS repository supported
+by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
+"""
 
 
 @define(order=True)
@@ -145,44 +124,24 @@ for starter_spec in _OFFICIAL_STARTER_SPECS:
 _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 
 
-def _parse_add_ons_input(add_ons_str: str):
-    """Parse the add-ons input string.
-
-    Args:
-        add_ons_str: Input string from prompts.yml.
-
-    Returns:
-        list: List of selected add-ons as strings.
-    """
-
-    def _validate_range(start, end):
-        if int(start) > int(end):
-            message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
-            click.secho(message, fg="red", err=True)
-            sys.exit(1)
-
-    add_ons_str = add_ons_str.lower()
-    if add_ons_str == "all":
-        return list(NUMBER_TO_ADD_ONS_NAME)
-    if add_ons_str == "none":
-        return []
-    # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
-    if not add_ons_str:
-        return []  # pragma: no cover
-
-    # Split by comma
-    add_ons_choices = add_ons_str.replace(" ", "").split(",")
-    selected: list[str] = []
-
-    for choice in add_ons_choices:
-        if "-" in choice:
-            start, end = choice.split("-")
-            _validate_range(start, end)
-            selected.extend(str(i) for i in range(int(start), int(end) + 1))
-        else:
-            selected.append(choice.strip())
-
-    return selected
+ADD_ONS_SHORTNAME_TO_NUMBER = {
+    "lint": "1",
+    "test": "2",
+    "log": "3",
+    "docs": "4",
+    "data": "5",
+    "pyspark": "6",
+    "viz": "7",
+}
+NUMBER_TO_ADD_ONS_NAME = {
+    "1": "Linting",
+    "2": "Testing",
+    "3": "Custom Logging",
+    "4": "Documentation",
+    "5": "Data Structure",
+    "6": "Pyspark",
+    "7": "Kedro Viz",
+}
 
 
 # noqa: missing-function-docstring
@@ -625,6 +584,29 @@ def _fetch_config_from_user_prompts(
     return config
 
 
+def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
+    extra_context = cookiecutter_args["extra_context"]
+    add_ons = extra_context.get("add_ons")
+    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
+    if add_ons:
+        if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+            # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+        elif "Pyspark" in add_ons:
+            # Use the spaceflights-pyspark starter if only Pyspark is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pyspark"
+        elif "Kedro Viz" in add_ons:
+            # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
+            cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        else:
+            # Use the default template path for any other combinations or if "none" is chosen.
+            starter_path = template_path
+    else:
+        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty.
+        starter_path = template_path
+    return starter_path
+
+
 def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
     # noqa: import-outside-toplevel
     from cookiecutter.generate import generate_context
@@ -745,27 +727,54 @@ def _validate_config_file_inputs(config: dict[str, str]):
     _validate_selection(selected_add_ons)
 
 
-def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
-    extra_context = cookiecutter_args["extra_context"]
-    add_ons = extra_context.get("add_ons")
-    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
-    if add_ons:
-        if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
-            # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
-            cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-        elif "Pyspark" in add_ons:
-            # Use the spaceflights-pyspark starter if only Pyspark is chosen.
-            cookiecutter_args["directory"] = "spaceflights-pyspark"
-        elif "Kedro Viz" in add_ons:
-            # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
-            cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+def _validate_selection(add_ons: list[str]):
+    # start validating from the end, when user select 1-20, it will generate a message
+    # '20' is not a valid selection instead of '8'
+    for add_on in add_ons[::-1]:
+        if add_on not in NUMBER_TO_ADD_ONS_NAME:
+            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
+            click.secho(message, fg="red", err=True)
+            sys.exit(1)
+
+
+def _parse_add_ons_input(add_ons_str: str):
+    """Parse the add-ons input string.
+
+    Args:
+        add_ons_str: Input string from prompts.yml.
+
+    Returns:
+        list: List of selected add-ons as strings.
+    """
+
+    def _validate_range(start, end):
+        if int(start) > int(end):
+            message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
+            click.secho(message, fg="red", err=True)
+            sys.exit(1)
+
+    add_ons_str = add_ons_str.lower()
+    if add_ons_str == "all":
+        return list(NUMBER_TO_ADD_ONS_NAME)
+    if add_ons_str == "none":
+        return []
+    # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
+    if not add_ons_str:
+        return []  # pragma: no cover
+
+    # Split by comma
+    add_ons_choices = add_ons_str.replace(" ", "").split(",")
+    selected: list[str] = []
+
+    for choice in add_ons_choices:
+        if "-" in choice:
+            start, end = choice.split("-")
+            _validate_range(start, end)
+            selected.extend(str(i) for i in range(int(start), int(end) + 1))
         else:
-            # Use the default template path for any other combinations or if "none" is chosen.
-            starter_path = template_path
-    else:
-        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty.
-        starter_path = template_path
-    return starter_path
+            selected.append(choice.strip())
+
+    return selected
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
@@ -825,16 +834,6 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         f"entering 'cd {result_path}'",
         fg="green",
     )
-
-
-def _validate_selection(add_ons: list[str]):
-    # start validating from the end, when user select 1-20, it will generate a message
-    # '20' is not a valid selection instead of '8'
-    for add_on in add_ons[::-1]:
-        if add_on not in NUMBER_TO_ADD_ONS_NAME:
-            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
-            click.secho(message, fg="red", err=True)
-            sys.exit(1)
 
 
 class _Prompt:

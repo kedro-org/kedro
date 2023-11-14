@@ -37,6 +37,7 @@
 * Added the `--addons` flag to the `kedro new` command.
 * Added the `--name` flag to the `kedro new` command.
 * Removed `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
+* Removed the custom Kedro syntax for `--params`please use the OmegaConf syntax instead.
 
 ### ConfigLoader
 * Made `OmegaConfigLoader` the default config loader.

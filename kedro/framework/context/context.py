@@ -196,7 +196,7 @@ class KedroContext:
                 extra parameters passed at initialization.
         """
         try:
-            params = self.config_loader.get("parameters")
+            params = self.config_loader["parameters"]
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
             params = {}

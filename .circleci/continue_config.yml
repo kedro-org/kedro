@@ -250,5 +250,3 @@ workflows:
         - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - publish_kedro:
-          requires:
-            - build_kedro

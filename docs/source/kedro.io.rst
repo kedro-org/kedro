@@ -5,36 +5,29 @@ kedro.io
 
 .. automodule:: kedro.io
 
-.. rubric:: Classes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. rubric:: Modules
 
 .. autosummary::
    :toctree:
-   :template: autosummary/class.rst
+   :recursive:
 
-   kedro.io.AbstractDataset
-   kedro.io.AbstractVersionedDataset
-   kedro.io.CachedDataSet
-   kedro.io.CachedDataset
-   kedro.io.DataCatalog
-   kedro.io.IncrementalDataSet
-   kedro.io.IncrementalDataset
-   kedro.io.LambdaDataSet
-   kedro.io.LambdaDataset
-   kedro.io.MemoryDataSet
-   kedro.io.MemoryDataset
-   kedro.io.PartitionedDataSet
-   kedro.io.PartitionedDataset
-   kedro.io.Version
-
-.. rubric:: Exceptions
-
-.. autosummary::
-   :toctree:
-   :template: autosummary/class.rst
-
-   kedro.io.DataSetAlreadyExistsError
-   kedro.io.DataSetError
-   kedro.io.DataSetNotFoundError
-   kedro.io.DatasetAlreadyExistsError
-   kedro.io.DatasetError
-   kedro.io.DatasetNotFoundError
+   kedro.io.cached_dataset
+   kedro.io.core
+   kedro.io.data_catalog
+   kedro.io.lambda_dataset
+   kedro.io.memory_dataset
+   kedro.io.partitioned_dataset

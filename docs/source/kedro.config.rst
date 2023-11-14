@@ -5,20 +5,28 @@ kedro.config
 
 .. automodule:: kedro.config
 
-.. rubric:: Classes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. rubric:: Modules
 
 .. autosummary::
    :toctree:
-   :template: autosummary/class.rst
+   :recursive:
 
-   kedro.config.ConfigLoader
-   kedro.config.TemplatedConfigLoader
-   kedro.config.OmegaConfigLoader
-
-.. rubric:: Exceptions
-
-.. autosummary::
-   :toctree:
-   :template: autosummary/class.rst
-
-   kedro.config.MissingConfigException
+   kedro.config.abstract_config
+   kedro.config.common
+   kedro.config.config
+   kedro.config.omegaconf_config
+   kedro.config.templated_config

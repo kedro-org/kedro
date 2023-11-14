@@ -203,14 +203,6 @@ jobs:
               --header 'content-type: application/json' \
               --data '{"branch":"main"}'
 
-  all_circleci_checks_succeeded:
-    docker:
-      - image: circleci/python # any light-weight image
-    steps:
-      - run:
-          name: Success!
-          command: echo "All checks passed"
-
 workflows:
   version: 2.1
 
@@ -241,6 +233,24 @@ workflows:
         filters:
           branches:
             only: main
+
+  # Python versions that are supported on `main`.
+  nightly_build_main:
+    when:
+      and:
+        - <<pipeline.parameters.run_nightly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+    jobs:
+      - build_docker_image:
+          context:
+            - kedro-ecr-publish
+          matrix:
+            parameters:
+              python_version: [ "3.7", "3.8", "3.9", "3.10" ]
+          filters:
+            branches:
+              only: main
 
   kedro_release:
     when:

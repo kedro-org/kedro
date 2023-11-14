@@ -1,14 +1,14 @@
 # Learn Kedro with hands-on video
 
-If you prefer to learn by following a video tutorial, you can follow the hands-on video course about Kedro 
+If you prefer to learn by following a video tutorial, you can follow the hands-on video course about Kedro
 
-The course is structured in five parts, and part is further divided in short videos that cover a specific topic about Kedro. It is based on the [spaceflights tutorial](../tutorial/index.md) and complements this documentation so you can read and get hands-on with the video as you get up-to-speed with Kedro basics.
+The course is structured into sections, which are further divided in short videos covering a specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorial/index.md) to get hands-on with that example and rapidly pick up key Kedro concepts.
 
 ### Who is this course for?
 
-This course is for data scientists, data engineers and machine learning engineers. You can be junior, mid-level or senior in your field of work, and you're likely to be hands-on with projects, or a decision-maker who regularly makes design and implementation choices for products.
+This course is for data scientists, data engineers and machine learning engineers. You can be junior, mid-level or senior in your field of work. You're likely to be hands-on with projects, or a decision-maker who regularly makes design and implementation choices about Python data products.
 
-We assume you know these concepts: 
+We assume you know these concepts:
 * Python basics (coding on Jupyter and other notebook interfaces)
 * Manipulating data with pandas
 * Visualising insights
@@ -18,13 +18,13 @@ We don't assume knowledge of software engineering in Python, so the course conta
 
 ## What you'll learn
 
-In short, you'll learn how create maintainable, reusable data science code. 
+In short, you'll learn how create maintainable, reusable data science code.
 
 - [x] What Kedro is: the problems is solves and how it fits in the data science ecosystem
 - [x] How to create a Kedro project
 - [x] How to refactor a Jupyter notebook to a Kedro project
 - [x] How to package your code as a Python library
-- [x] How to work with Kedro projects in VSCode 
+- [x] How to work with Kedro projects in VSCode
 - [x] Advanced Kedro features: namespaces and dataset factories
 - [x] How to deploy a project using container solutions like Docker and open source orchestrators like Airflow,
 - [x] Kedro plugins
@@ -55,11 +55,11 @@ In short, you'll learn how create maintainable, reusable data science code.
     - 2.4. How to work with parameters in Kedro
     - 2.5. Create a Kedro pipeline with parameters
     - 2.6. Reuse your Kedro pipeline using namespaces
-    - 2.7. Accelerate your Kedro pipeline using runners
+    - 2.7. Kedro pipeline runners
     - 2.8. Create Kedro datasets dynamically using factories
 - Part 3: Ship your Kedro project to production
     - 3.1. Define your own Kedro environments
-    - 3.2. Use S3 and MinIO cloud storages with Kedro
+    - 3.2. Use S3 and MinIO cloud storage with Kedro
     - 3.3. Package your Kedro project into a Python wheel
     - 3.4. Turn your Kedro project into a Docker container
     - 3.5. Deploy your Kedro project to Apache Airflow

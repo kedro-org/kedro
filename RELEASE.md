@@ -8,6 +8,7 @@
 * Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
 * Modified the mechanism of importing datasets, raise more explicit error when dependencies are missing.
 * Added validation for configuration file used to override run commands via the CLI.
+* Moved the default environment `base` and `local` from config loader to `_ProjectSettings`. This enable the use of config loader as a standalone class without affecting existing Kedro Project users.
 
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.

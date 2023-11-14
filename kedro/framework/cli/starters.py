@@ -443,7 +443,7 @@ def _get_extra_context(
     return extra_context
 
 
-def _convert_addon_names_to_numbers(selected_add_ons_flag: str) -> str:
+def _convert_addon_names_to_numbers(selected_add_ons_flag: str | None) -> str | None:
     """Prepares add-on selection from the CLI input to the correct format
     to be put in the project configuration, if it exists.
     Replaces add-on strings with the corresponding prompt number.

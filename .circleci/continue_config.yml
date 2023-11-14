@@ -249,4 +249,4 @@ workflows:
         - not: <<pipeline.parameters.run_hourly>>
         - not: <<pipeline.parameters.run_nightly>>
     jobs:
-      - publish_kedro:
+      - publish_kedro

@@ -1086,15 +1086,10 @@ class TestOmegaConfigLoader:
         ):
             OmegaConfigLoader(
                 tmp_path,
-                base_env="",
-                default_run_env="local",
+                base_env=_BASE_ENV,
+                default_run_env=_DEFAULT_RUN_ENV,
                 runtime_params=runtime_params,
             )
-        with pytest.raises(
-            UnsupportedInterpolationType,
-            match=r"The `runtime_params:` resolver is not supported for globals.",
-        ):
-            OmegaConfigLoader(tmp_path, runtime_params=runtime_params)
 
     def test_runtime_params_default_global(self, tmp_path):
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
@@ -1116,7 +1111,7 @@ class TestOmegaConfigLoader:
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(base_globals, globals_config)
         conf = OmegaConfigLoader(
-            tmp_path, default_run_env="", runtime_params=runtime_params
+            tmp_path, base_env=_BASE_ENV, runtime_params=runtime_params
         )
         # runtime params are resolved correctly in catalog using global default
         assert conf["catalog"]["companies"]["type"] == globals_config["dataset"]["type"]
@@ -1164,7 +1159,12 @@ class TestOmegaConfigLoader:
             UnsupportedInterpolationType,
             match=r"Unsupported interpolation type non_existent_resolver",
         ):
-            OmegaConfigLoader(tmp_path, runtime_params=runtime_params)
+            OmegaConfigLoader(
+                tmp_path,
+                base_env=_BASE_ENV,
+                default_run_env=_DEFAULT_RUN_ENV,
+                runtime_params=runtime_params,
+            )
         with pytest.raises(
             UnsupportedInterpolationType,
             match=r"Unsupported interpolation type non_existent_resolver",

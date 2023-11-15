@@ -1197,10 +1197,12 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["my_global"] == 89
         assert conf["parameters"]["my_second_global"] == 24
 
+
 class TestOmegaConfigLoaderStandalone:
     """
     Test OmegaConfigLoader in standalone mode (defaults settings without environments)
     """
+
     def test_load_config_without_local(self, tmp_path):
         base_catalog = tmp_path / "catalog.yml"
         catalog_config = {
@@ -1211,11 +1213,10 @@ class TestOmegaConfigLoaderStandalone:
         }
         _write_yaml(base_catalog, catalog_config)
 
-        conf = OmegaConfigLoader(
-            tmp_path
+        conf = OmegaConfigLoader(tmp_path)
+        assert (
+            conf["catalog"]["companies"]["type"] == catalog_config["companies"]["type"]
         )
-        assert conf["catalog"]["companies"]["type"] == catalog_config["companies"]["type"]
-
 
     def test_variable_interpolation_in_catalog_with_templates(self, tmp_path):
         base_catalog = tmp_path / "catalog.yml"
@@ -1228,19 +1229,22 @@ class TestOmegaConfigLoaderStandalone:
         }
         _write_yaml(base_catalog, catalog_config)
 
-        conf = OmegaConfigLoader(str(tmp_path), )
+        conf = OmegaConfigLoader(
+            str(tmp_path),
+        )
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
+
     def test_variable_interpolation_in_catalog_with_separate_templates_file(
         self, tmp_path
     ):
-        base_catalog = tmp_path  / "catalog.yml"
+        base_catalog = tmp_path / "catalog.yml"
         catalog_config = {
             "companies": {
                 "type": "${_pandas.type}",
                 "filepath": "data/01_raw/companies.csv",
             }
         }
-        tmp_catalog = tmp_path  / "catalog_temp.yml"
+        tmp_catalog = tmp_path / "catalog_temp.yml"
         template = {"_pandas": {"type": "pandas.CSVDataset"}}
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(tmp_catalog, template)
@@ -1249,7 +1253,7 @@ class TestOmegaConfigLoaderStandalone:
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_globals(self, tmp_path):
-        globals_params = tmp_path  / "globals.yml"
+        globals_params = tmp_path / "globals.yml"
         globals_config = {
             "x": 0,
         }
@@ -1259,9 +1263,10 @@ class TestOmegaConfigLoaderStandalone:
         assert OmegaConf.has_resolver("globals")
         # Globals is readable in a dict way
         assert conf["globals"] == globals_config
+
     def test_globals_resolution(self, tmp_path):
-        base_params = tmp_path  / "parameters.yml"
-        base_catalog = tmp_path  / "catalog.yml"
+        base_params = tmp_path / "parameters.yml"
+        base_catalog = tmp_path / "catalog.yml"
         globals_params = tmp_path / "globals.yml"
         param_config = {
             "my_param": "${globals:x}",
@@ -1286,8 +1291,8 @@ class TestOmegaConfigLoaderStandalone:
         assert conf["catalog"]["companies"]["type"] == globals_config["dataset_type"]
 
     def test_globals_nested(self, tmp_path):
-        base_params = tmp_path  / "parameters.yml"
-        globals_params = tmp_path  / "globals.yml"
+        base_params = tmp_path / "parameters.yml"
+        globals_params = tmp_path / "globals.yml"
         param_config = {
             "my_param": "${globals:x}",
             "my_nested_param": "${globals:nested.y}",
@@ -1306,8 +1311,8 @@ class TestOmegaConfigLoaderStandalone:
         assert conf["parameters"]["my_nested_param"] == globals_config["nested"]["y"]
 
     def test_globals_default(self, tmp_path):
-        base_params = tmp_path  / "parameters.yml"
-        base_globals = tmp_path  / "globals.yml"
+        base_params = tmp_path / "parameters.yml"
+        base_globals = tmp_path / "globals.yml"
         base_param_config = {
             "int": "${globals:x.NOT_EXIST, 1}",
             "str": "${globals: x.NOT_EXIST, '2'}",
@@ -1323,8 +1328,9 @@ class TestOmegaConfigLoaderStandalone:
         assert conf["parameters"]["str"] == "2"
         # Test when x.DUMMY is not a dictionary it should still work
         assert conf["parameters"]["dummy"] == "2"
+
     def test_globals_default_none(self, tmp_path):
-        base_params = tmp_path /  "parameters.yml"
+        base_params = tmp_path / "parameters.yml"
         base_globals = tmp_path / "globals.yml"
         base_param_config = {
             "zero": "${globals: x.NOT_EXIST, 0}",
@@ -1347,8 +1353,8 @@ class TestOmegaConfigLoaderStandalone:
         assert conf["parameters"]["null2"] is None
 
     def test_runtime_params_resolution(self, tmp_path):
-        base_params = tmp_path  / "parameters.yml"
-        base_catalog = tmp_path  / "catalog.yml"
+        base_params = tmp_path / "parameters.yml"
+        base_catalog = tmp_path / "catalog.yml"
         runtime_params = {
             "x": 45,
             "dataset": {
@@ -1379,7 +1385,7 @@ class TestOmegaConfigLoaderStandalone:
         assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
 
     def test_runtime_params_in_globals_not_allowed(self, tmp_path):
-        base_globals = tmp_path  / "globals.yml"
+        base_globals = tmp_path / "globals.yml"
         runtime_params = {
             "x": 45,
         }
@@ -1397,6 +1403,7 @@ class TestOmegaConfigLoaderStandalone:
                 tmp_path,
                 runtime_params=runtime_params,
             )
+
     def test_runtime_params_default_global(self, tmp_path):
         base_globals = tmp_path / "globals.yml"
         base_catalog = tmp_path / "catalog.yml"
@@ -1416,8 +1423,6 @@ class TestOmegaConfigLoaderStandalone:
         }
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(base_globals, globals_config)
-        conf = OmegaConfigLoader(
-            tmp_path, runtime_params=runtime_params
-        )
+        conf = OmegaConfigLoader(tmp_path, runtime_params=runtime_params)
         # runtime params are resolved correctly in catalog using global default
         assert conf["catalog"]["companies"]["type"] == globals_config["dataset"]["type"]

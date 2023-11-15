@@ -1196,3 +1196,228 @@ class TestOmegaConfigLoader:
         }
         assert conf["parameters"]["my_global"] == 89
         assert conf["parameters"]["my_second_global"] == 24
+
+class TestOmegaConfigLoaderStandalone:
+    """
+    Test OmegaConfigLoader in standalone mode (defaults settings without environments)
+    """
+    def test_load_config_without_local(self, tmp_path):
+        base_catalog = tmp_path / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "MemoryDataset",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+
+        conf = OmegaConfigLoader(
+            tmp_path
+        )
+        assert conf["catalog"]["companies"]["type"] == catalog_config["companies"]["type"]
+
+
+    def test_variable_interpolation_in_catalog_with_templates(self, tmp_path):
+        base_catalog = tmp_path / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${_pandas.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+            "_pandas": {"type": "pandas.CSVDataset"},
+        }
+        _write_yaml(base_catalog, catalog_config)
+
+        conf = OmegaConfigLoader(str(tmp_path), )
+        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
+    def test_variable_interpolation_in_catalog_with_separate_templates_file(
+        self, tmp_path
+    ):
+        base_catalog = tmp_path  / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${_pandas.type}",
+                "filepath": "data/01_raw/companies.csv",
+            }
+        }
+        tmp_catalog = tmp_path  / "catalog_temp.yml"
+        template = {"_pandas": {"type": "pandas.CSVDataset"}}
+        _write_yaml(base_catalog, catalog_config)
+        _write_yaml(tmp_catalog, template)
+
+        conf = OmegaConfigLoader(str(tmp_path))
+        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
+
+    def test_globals(self, tmp_path):
+        globals_params = tmp_path  / "globals.yml"
+        globals_config = {
+            "x": 0,
+        }
+        _write_yaml(globals_params, globals_config)
+        conf = OmegaConfigLoader(tmp_path)
+        # OmegaConfigLoader has globals resolver
+        assert OmegaConf.has_resolver("globals")
+        # Globals is readable in a dict way
+        assert conf["globals"] == globals_config
+    def test_globals_resolution(self, tmp_path):
+        base_params = tmp_path  / "parameters.yml"
+        base_catalog = tmp_path  / "catalog.yml"
+        globals_params = tmp_path / "globals.yml"
+        param_config = {
+            "my_param": "${globals:x}",
+            "my_param_default": "${globals:y,34}",  # y does not exist in globals
+        }
+        catalog_config = {
+            "companies": {
+                "type": "${globals:dataset_type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        globals_config = {"x": 34, "dataset_type": "pandas.CSVDataset"}
+        _write_yaml(base_params, param_config)
+        _write_yaml(globals_params, globals_config)
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(tmp_path)
+        # Globals are resolved correctly in parameter
+        assert conf["parameters"]["my_param"] == globals_config["x"]
+        # The default value is used if the key does not exist
+        assert conf["parameters"]["my_param_default"] == 34
+        # Globals are resolved correctly in catalog
+        assert conf["catalog"]["companies"]["type"] == globals_config["dataset_type"]
+
+    def test_globals_nested(self, tmp_path):
+        base_params = tmp_path  / "parameters.yml"
+        globals_params = tmp_path  / "globals.yml"
+        param_config = {
+            "my_param": "${globals:x}",
+            "my_nested_param": "${globals:nested.y}",
+        }
+        globals_config = {
+            "x": 34,
+            "nested": {
+                "y": 42,
+            },
+        }
+        _write_yaml(base_params, param_config)
+        _write_yaml(globals_params, globals_config)
+        conf = OmegaConfigLoader(tmp_path)
+        assert conf["parameters"]["my_param"] == globals_config["x"]
+        # Nested globals are accessible with dot notation
+        assert conf["parameters"]["my_nested_param"] == globals_config["nested"]["y"]
+
+    def test_globals_default(self, tmp_path):
+        base_params = tmp_path  / "parameters.yml"
+        base_globals = tmp_path  / "globals.yml"
+        base_param_config = {
+            "int": "${globals:x.NOT_EXIST, 1}",
+            "str": "${globals: x.NOT_EXIST, '2'}",
+            "dummy": "${globals: x.DUMMY.DUMMY, '2'}",
+        }
+        base_globals_config = {"x": {"DUMMY": 3}}
+        _write_yaml(base_params, base_param_config)
+        _write_yaml(base_globals, base_globals_config)
+        conf = OmegaConfigLoader(tmp_path)
+        # Default value is being used as int
+        assert conf["parameters"]["int"] == 1
+        # Default value is being used as str
+        assert conf["parameters"]["str"] == "2"
+        # Test when x.DUMMY is not a dictionary it should still work
+        assert conf["parameters"]["dummy"] == "2"
+    def test_globals_default_none(self, tmp_path):
+        base_params = tmp_path /  "parameters.yml"
+        base_globals = tmp_path / "globals.yml"
+        base_param_config = {
+            "zero": "${globals: x.NOT_EXIST, 0}",
+            "null": "${globals: x.NOT_EXIST, null}",
+            "null2": "${globals: x.y}",
+        }
+        base_globals_config = {
+            "x": {
+                "z": 23,
+                "y": None,
+            },
+        }
+        _write_yaml(base_params, base_param_config)
+        _write_yaml(base_globals, base_globals_config)
+        conf = OmegaConfigLoader(tmp_path)
+        # Default value can be 0 or null
+        assert conf["parameters"]["zero"] == 0
+        assert conf["parameters"]["null"] is None
+        # Global value is null
+        assert conf["parameters"]["null2"] is None
+
+    def test_runtime_params_resolution(self, tmp_path):
+        base_params = tmp_path  / "parameters.yml"
+        base_catalog = tmp_path  / "catalog.yml"
+        runtime_params = {
+            "x": 45,
+            "dataset": {
+                "type": "pandas.CSVDataset",
+            },
+        }
+        param_config = {
+            "my_runtime_param": "${runtime_params:x}",
+            "my_param_default": "${runtime_params:y,34}",  # y does not exist in globals
+        }
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_params, param_config)
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            runtime_params=runtime_params,
+        )
+        # runtime are resolved correctly in parameter
+        assert conf["parameters"]["my_runtime_param"] == runtime_params["x"]
+        # The default value is used if the key does not exist
+        assert conf["parameters"]["my_param_default"] == 34
+        # runtime params are resolved correctly in catalog
+        assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
+
+    def test_runtime_params_in_globals_not_allowed(self, tmp_path):
+        base_globals = tmp_path  / "globals.yml"
+        runtime_params = {
+            "x": 45,
+        }
+        base_globals_config = {
+            "my_global_var": "${runtime_params:x}",
+        }
+
+        _write_yaml(base_globals, base_globals_config)
+
+        with pytest.raises(
+            UnsupportedInterpolationType,
+            match=r"The `runtime_params:` resolver is not supported for globals.",
+        ):
+            OmegaConfigLoader(
+                tmp_path,
+                runtime_params=runtime_params,
+            )
+    def test_runtime_params_default_global(self, tmp_path):
+        base_globals = tmp_path / "globals.yml"
+        base_catalog = tmp_path / "catalog.yml"
+        runtime_params = {
+            "x": 45,
+        }
+        globals_config = {
+            "dataset": {
+                "type": "pandas.CSVDataset",
+            }
+        }
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:type, ${globals:dataset.type, 'MemoryDataset'}}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        _write_yaml(base_globals, globals_config)
+        conf = OmegaConfigLoader(
+            tmp_path, runtime_params=runtime_params
+        )
+        # runtime params are resolved correctly in catalog using global default
+        assert conf["catalog"]["companies"]["type"] == globals_config["dataset"]["type"]

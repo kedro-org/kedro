@@ -2,7 +2,7 @@
 
 If you prefer to learn by following a video tutorial, you can follow the hands-on video course about Kedro
 
-The course is structured into sections, which are further divided in short videos covering a specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorial/index.md) to get hands-on with that example and rapidly pick up key Kedro concepts.
+The course is structured into sections, which are further divided in short videos covering a specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) to get hands-on with that example and rapidly pick up key Kedro concepts.
 
 ## Who is this course for?
 
@@ -20,15 +20,34 @@ We don't assume knowledge of software engineering in Python, so the course conta
 
 In short, you'll learn how create maintainable, reusable data science code.
 
-- [x] What Kedro is: the problems is solves and how it fits in the data science ecosystem
-- [x] How to create a Kedro project
-- [x] How to refactor a Jupyter notebook to a Kedro project
-- [x] How to package your code as a Python library
-- [x] How to work with Kedro projects in VSCode
-- [x] Advanced Kedro features: namespaces and dataset factories
-- [x] How to deploy a project using container solutions like Docker and open source orchestrators like Airflow,
-- [x] Kedro plugins
-- [x] How to contribute to Kedro
+
+<input type="checkbox" checked /><label>What Kedro is: the problems is solves and how it fits in the data science ecosystem.</label>
+
+<input type="checkbox"  checked />
+  <label>How to create a Kedro project.</label>
+
+<input type="checkbox" checked />
+  <label>How to refactor a Jupyter notebook to a Kedro project.</label>
+
+<input type="checkbox" checked />
+  <label>How to package your code as a Python library.</label>
+
+<input type="checkbox" checked />
+  <label>How to work with Kedro projects in VSCode.</label>
+
+<input type="checkbox" checked />
+  <label>Advanced Kedro features: namespaces and dataset factories.</label>
+
+
+<input type="checkbox" checked />
+  <label>How to deploy a project using container solutions like Docker and open source orchestrators like Airflow.</label>
+
+<input type="checkbox" checked />
+  <label>Kedro plugins.</label>
+
+<input type="checkbox" checked />
+  <label>How to contribute to Kedro.</label>
+
 
 ## Course index
 

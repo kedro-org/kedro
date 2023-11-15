@@ -103,6 +103,8 @@ class TestCLITools:
                 "-c",
                 "--addons",
                 "-a",
+                "--example",
+                "-e",
                 "--starter",
                 "-s",
                 "--name",

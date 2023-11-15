@@ -19,6 +19,7 @@ from kedro.framework.cli.starters import (
     _convert_addon_names_to_numbers,
     _parse_add_ons_input,
     _validate_selection,
+    _validate_yn,
 )
 
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 15
@@ -54,9 +55,15 @@ def _write_yaml(filepath: Path, config: dict):
 
 
 def _make_cli_prompt_input(
-    add_ons="none", project_name="", repo_name="", python_package=""
+    add_ons="none",
+    project_name="",
+    example_pipeline="No",
+    repo_name="",
+    python_package="",
 ):
-    return "\n".join([add_ons, project_name, repo_name, python_package])
+    return "\n".join(
+        [add_ons, project_name, example_pipeline, repo_name, python_package]
+    )
 
 
 def _make_cli_prompt_input_without_addons(
@@ -71,7 +78,7 @@ def _make_cli_prompt_input_without_name(
     return "\n".join([add_ons, repo_name, python_package])
 
 
-def _get_expected_files(add_ons: str):
+def _get_expected_files(add_ons: str, example_pipeline: str):
     add_ons_template_files = {
         "1": 0,  # Linting does not add any files
         "2": 3,  # If Testing is selected, we add 2 init.py files and 1 test_run.py
@@ -82,10 +89,14 @@ def _get_expected_files(add_ons: str):
         "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
+    example_pipeline_bool = _validate_yn(None, None, example_pipeline)
     expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
 
     for add_on in add_ons_list:
         expected_files = expected_files + add_ons_template_files[add_on]
+    # If example pipeline was choosen we don't need to delete /data folder
+    if example_pipeline_bool and "5" not in add_ons_list:
+        expected_files += add_ons_template_files["5"]
 
     return expected_files
 
@@ -179,6 +190,7 @@ def _assert_template_ok(
     result,
     add_ons="none",
     project_name="New Kedro Project",
+    example_pipeline="No",
     repo_name="new-kedro-project",
     python_package="new_kedro_project",
     kedro_version=version,
@@ -192,7 +204,7 @@ def _assert_template_ok(
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
     ]
 
-    assert len(generated_files) == _get_expected_files(add_ons)
+    assert len(generated_files) == _get_expected_files(add_ons, example_pipeline)
     assert full_path.exists()
     assert (full_path / ".gitignore").is_file()
     assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
@@ -488,6 +500,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -503,6 +516,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "Project X",
+            "example_pipeline": "No",
             "repo_name": "projectx",
             "python_package": "proj_x",
         }
@@ -518,6 +532,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
             "kedro_version": "my_version",
@@ -534,6 +549,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
             "output_dir": "my_output_dir",
@@ -551,6 +567,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -599,6 +616,7 @@ class TestNewFromConfigFileInvalid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
             "output_dir": "does_not_exist",
@@ -612,6 +630,7 @@ class TestNewFromConfigFileInvalid:
         """Check the error if keys are missing from config file."""
         config = {
             "add_ons": "none",
+            "example_pipeline": "No",
             "python_package": "my_project",
             "repo_name": "my-project",
         }
@@ -644,6 +663,7 @@ class TestNewFromConfigFileInvalid:
         config = {
             "add_ons": "none",
             "project_name": "My $Project!",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -662,6 +682,7 @@ class TestNewFromConfigFileInvalid:
         config = {
             "add_ons": "none",
             "project_name": "P",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -898,7 +919,7 @@ class TestAddOnsFromUserPrompts:
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
-            input=_make_cli_prompt_input(add_ons=add_ons),
+            input=_make_cli_prompt_input(add_ons=add_ons, example_pipeline="No"),
         )
 
         _assert_template_ok(result, add_ons=add_ons)
@@ -980,6 +1001,7 @@ class TestAddOnsFromConfigFile:
         config = {
             "add_ons": add_ons,
             "project_name": "New Kedro Project",
+            "example_pipeline": "No",
             "repo_name": "new-kedro-project",
             "python_package": "new_kedro_project",
         }
@@ -1001,6 +1023,7 @@ class TestAddOnsFromConfigFile:
         config = {
             "add_ons": bad_input,
             "project_name": "My Project",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -1024,6 +1047,7 @@ class TestAddOnsFromConfigFile:
         config = {
             "add_ons": input,
             "project_name": "My Project",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -1044,6 +1068,7 @@ class TestAddOnsFromConfigFile:
         config = {
             "add_ons": input,
             "project_name": "My Project",
+            "example_pipeline": "No",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -1086,7 +1111,7 @@ class TestAddOnsFromCLI:
     def test_valid_add_ons_flag(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--addons", add_ons],
+            ["new", "--addons", add_ons, "--example=No"],
             input=_make_cli_prompt_input_without_addons(),
         )
         add_ons = _convert_addon_names_to_numbers(selected_add_ons_flag=add_ons)

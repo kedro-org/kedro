@@ -144,7 +144,7 @@ def _handle_starter_setup(selected_add_ons_list: str, python_package_name: str) 
     _remove_file(test_pipeline_path)
 
 
-def setup_template_add_ons(selected_add_ons_list: str, requirements_file_path: str, pyproject_file_path: str, python_package_name: str) -> None:
+def setup_template_add_ons(selected_add_ons_list: str, requirements_file_path: str, pyproject_file_path: str, python_package_name: str, example_pipeline: str) -> None:
     """Setup the templates according to the choice of add-ons.
 
     Args:
@@ -169,13 +169,13 @@ def setup_template_add_ons(selected_add_ons_list: str, requirements_file_path: s
         _remove_from_toml(pyproject_file_path, docs_pyproject_requirements)
         _remove_dir(current_dir / "docs")
 
-    if "Data Structure" not in selected_add_ons_list:
+    if "Data Structure" not in selected_add_ons_list and example_pipeline != "True":
         _remove_dir(current_dir / "data")
 
-    if "Pyspark" in selected_add_ons_list:
+    if "Pyspark" in selected_add_ons_list and example_pipeline != "True":
         _handle_starter_setup(selected_add_ons_list, python_package_name)
 
-    if "Kedro Viz" in selected_add_ons_list:
+    if "Kedro Viz" in selected_add_ons_list and example_pipeline != "True":
         _handle_starter_setup(selected_add_ons_list, python_package_name)
 
 

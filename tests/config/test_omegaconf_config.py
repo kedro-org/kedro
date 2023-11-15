@@ -422,7 +422,10 @@ class TestOmegaConfigLoader:
         }
 
         catalog = OmegaConfigLoader(
-            conf_source=str(tmp_path), env="dev", config_patterns=catalog_patterns
+            conf_source=str(tmp_path),
+            base_env=_BASE_ENV,
+            env="dev",
+            config_patterns=catalog_patterns,
         )["catalog"]
         expected_catalog = {
             "env": "dev",
@@ -679,7 +682,12 @@ class TestOmegaConfigLoader:
     @use_config_dir
     def test_runtime_params_override_interpolated_value(self, tmp_path):
         """Make sure interpolated value is updated correctly with runtime_params"""
-        conf = OmegaConfigLoader(str(tmp_path), runtime_params={"test_env": "dummy"})
+        conf = OmegaConfigLoader(
+            str(tmp_path),
+            base_env=_BASE_ENV,
+            default_run_env=_DEFAULT_RUN_ENV,
+            runtime_params={"test_env": "dummy"},
+        )
         params = conf["parameters"]
         assert params["interpolated_param"] == "dummy"
 
@@ -741,10 +749,7 @@ class TestOmegaConfigLoader:
         }
         _write_yaml(base_catalog, catalog_config)
 
-        conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
-        )
-        conf.default_run_env = ""
+        conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_variable_interpolation_in_catalog_with_separate_templates_file(
@@ -762,10 +767,7 @@ class TestOmegaConfigLoader:
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(tmp_catalog, template)
 
-        conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
-        )
-        conf.default_run_env = ""
+        conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_custom_resolvers(self, tmp_path):
@@ -788,9 +790,7 @@ class TestOmegaConfigLoader:
             tmp_path,
             custom_resolvers=custom_resolvers,
             base_env=_BASE_ENV,
-            default_run_env=_DEFAULT_RUN_ENV,
         )
-        conf.default_run_env = ""
         assert conf["parameters"]["model_options"]["param1"] == 7
         assert conf["parameters"]["model_options"]["param2"] == 3
         assert conf["parameters"]["model_options"]["param3"] == "my_env_variable"
@@ -825,7 +825,7 @@ class TestOmegaConfigLoader:
         _write_yaml(base_params, param_config)
         _write_yaml(globals_params, globals_config)
         _write_yaml(base_catalog, catalog_config)
-        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
         # Globals are resolved correctly in parameter
         assert conf["parameters"]["my_param"] == globals_config["x"]
         # The default value is used if the key does not exist
@@ -848,7 +848,7 @@ class TestOmegaConfigLoader:
         }
         _write_yaml(base_params, param_config)
         _write_yaml(globals_params, globals_config)
-        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
         assert conf["parameters"]["my_param"] == globals_config["x"]
         # Nested globals are accessible with dot notation
         assert conf["parameters"]["my_nested_param"] == globals_config["nested"]["y"]
@@ -875,7 +875,9 @@ class TestOmegaConfigLoader:
         _write_yaml(local_params, local_param_config)
         _write_yaml(base_globals, base_globals_config)
         _write_yaml(local_globals, local_globals_config)
-        conf = OmegaConfigLoader(tmp_path)
+        conf = OmegaConfigLoader(
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+        )
         # Local global overwrites the base global value
         assert conf["parameters"]["param1"] == local_globals_config["y"]
         # Base global value is accessible to local params
@@ -892,7 +894,7 @@ class TestOmegaConfigLoader:
         base_globals_config = {"x": {"DUMMY": 3}}
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
-        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
         # Default value is being used as int
         assert conf["parameters"]["int"] == 1
         # Default value is being used as str
@@ -916,7 +918,7 @@ class TestOmegaConfigLoader:
         }
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
-        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
         # Default value can be 0 or null
         assert conf["parameters"]["zero"] == 0
         assert conf["parameters"]["null"] is None
@@ -936,7 +938,7 @@ class TestOmegaConfigLoader:
         }
         _write_yaml(base_params, param_config)
         _write_yaml(globals_params, globals_config)
-        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
 
         with pytest.raises(
             InterpolationResolutionError,
@@ -955,7 +957,7 @@ class TestOmegaConfigLoader:
         }
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
-        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
         with pytest.raises(
             InterpolationResolutionError,
             match=r"Keys starting with '_' are not supported for globals.",
@@ -1030,7 +1032,10 @@ class TestOmegaConfigLoader:
         _write_yaml(base_params, param_config)
         _write_yaml(base_catalog, catalog_config)
         conf = OmegaConfigLoader(
-            tmp_path, default_run_env="", runtime_params=runtime_params
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params=runtime_params,
         )
         # runtime are resolved correctly in parameter
         assert conf["parameters"]["my_runtime_param"] == runtime_params["x"]
@@ -1049,7 +1054,10 @@ class TestOmegaConfigLoader:
         }
         _write_yaml(base_params, param_config)
         conf = OmegaConfigLoader(
-            tmp_path, default_run_env="", runtime_params=runtime_params
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params=runtime_params,
         )
         with pytest.raises(
             InterpolationResolutionError,

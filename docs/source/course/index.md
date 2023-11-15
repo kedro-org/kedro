@@ -20,6 +20,10 @@ We don't assume knowledge of software engineering in Python, so the course conta
 
 In short, you'll learn how create maintainable, reusable data science code.
 
+* [ ] A checkbox
+* [ ] Another checkbox
+* [x] Cant format
+* [] How?
 
 <input type="checkbox" checked /><label>What Kedro is: the problems is solves and how it fits in the data science ecosystem.</label>
 

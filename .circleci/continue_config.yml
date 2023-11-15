@@ -128,31 +128,6 @@ jobs:
           name: Maybe merge an automatic PR into develop
           command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
 
-  build_docker_image:
-    parameters:
-      python_version:
-        type: string
-    docker:
-      - image: cimg/python:3.8
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - checkout
-      - run:
-          name: Setup AWS CLI
-          command: pip install -U awscli
-      - run:
-          name: Login to AWS ECR
-          command: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - run:
-          name: Build docker images
-          command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder" "<<parameters.python_version>>"
-          no_output_timeout: 20m
-      - run:
-          name: Logout from AWS ECR
-          command: docker logout public.ecr.aws
-          when: always  # logout even if the previous step has failed
-
   publish_kedro:
     executor:
       name: docker
@@ -233,24 +208,6 @@ workflows:
         filters:
           branches:
             only: main
-
-  # Python versions that are supported on `main`.
-  nightly_build_main:
-    when:
-      and:
-        - <<pipeline.parameters.run_nightly>>
-        - not: <<pipeline.parameters.release_kedro>>
-        - not: <<pipeline.parameters.run_hourly>>
-    jobs:
-      - build_docker_image:
-          context:
-            - kedro-ecr-publish
-          matrix:
-            parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
-          filters:
-            branches:
-              only: main
 
   kedro_release:
     when:

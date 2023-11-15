@@ -144,8 +144,10 @@ NUMBER_TO_ADD_ONS_NAME = {
     "7": "Kedro Viz",
 }
 
+
 def _validate_yn(ctx, param, value):
     return value.lower() in ["y", "yes"] if value is not None else None
+
 
 # noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")

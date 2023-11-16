@@ -126,7 +126,7 @@ kedro_viz: 4.4.0 (hooks:global,line_magic)
 kedro new
 ```
 
-## Customise or Override Project-specific Kedro commands
+## Customise or override project-specific Kedro commands
 
 ```{note}
 All project related CLI commands should be run from the project’s root directory.
@@ -314,7 +314,7 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --config=<config_file_name>.yml`                         | Specify all command line options in a named YAML configuration file                                                                                                                                                                                     |
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
 | `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
-| `kedro run --params=<param_key1>:<value1>,<param_key2>:<value2>`    | Does a parametrised kedro run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
+| `kedro run --params=<param_key1>:<value1>,<param_key2>:<value2>`    | Does a parametrised run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
 
 You can also combine these options together, so the following command runs all the nodes from `split` to `predict` and `report`:
 

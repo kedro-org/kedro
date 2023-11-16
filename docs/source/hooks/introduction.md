@@ -140,7 +140,7 @@ Hooks are registered in the following order:
 1. Project Hooks in `settings.py` - If you have `HOOKS = (hook_a, hook_b,)`, `hook_b` will be executed before `hook_a`
 2. Plugin Hooks registered in `kedro.hooks`, which follows alphabetical order
 
-In general, Hook execution order is not guaranteed and you should not rely on it. If you need to make sure a particular Hook is executed first or last, you can use the the [`tryfirst` or `trylast` argument](https://pluggy.readthedocs.io/en/stable/index.html#call-time-order) for `hook_impl`.
+In general, Hook execution order is not guaranteed and you should not rely on it. If you need to make sure a particular Hook is executed first or last, you can use the [`tryfirst` or `trylast` argument](https://pluggy.readthedocs.io/en/stable/index.html#call-time-order) for `hook_impl`.
 
 ## Under the hood
 

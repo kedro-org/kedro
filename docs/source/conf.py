@@ -207,9 +207,6 @@ html_extra_path = [str(here / "robots.txt")]
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
 
-# Enable checkbox
-myst_enable_checkboxes = True
-
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [

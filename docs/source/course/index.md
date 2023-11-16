@@ -1,14 +1,15 @@
 # Learn Kedro with hands-on video
 
-If you prefer to learn by following a video tutorial, you can follow the hands-on video course about Kedro
+If you prefer to learn by following a video tutorial, you can follow our hands-on video course "Introduction to Kedro: Building Maintainable Data Pipelines" on YouTube.
 
-The course is structured into sections, which are further divided in short videos covering a specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) to get hands-on with that example and rapidly pick up key Kedro concepts.
+The course is structured into sections, which are further divided in short videos covering a specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) to get hands-on with that example and pick up key Kedro concepts like datasets and the Kedro Data Catalog, nodes and pipelines, and configuration management.
 
 ## Who is this course for?
 
 This course is for data scientists, data engineers and machine learning engineers. You can be junior, mid-level or senior in your field of work. You're likely to be hands-on with projects, or a decision-maker who regularly makes design and implementation choices about Python data products.
 
 We assume you know these concepts:
+
 * Python basics (coding on Jupyter and other notebook interfaces)
 * Manipulating data with pandas
 * Visualising insights
@@ -18,42 +19,23 @@ We don't assume knowledge of software engineering in Python, so the course conta
 
 ## What you'll learn
 
-In short, you'll learn how create maintainable, reusable data science code.
+In short, you'll learn answers to the following:
 
-* [ ] A checkbox
-* [ ] Another checkbox
-* [x] Cant format
-* [] How?
-
-<input type="checkbox" checked /><label>What Kedro is: the problems is solves and how it fits in the data science ecosystem.</label>
-
-<input type="checkbox"  checked />
-  <label>How to create a Kedro project.</label>
-
-<input type="checkbox" checked />
-  <label>How to refactor a Jupyter notebook to a Kedro project.</label>
-
-<input type="checkbox" checked />
-  <label>How to package your code as a Python library.</label>
-
-<input type="checkbox" checked />
-  <label>How to work with Kedro projects in VSCode.</label>
-
-<input type="checkbox" checked />
-  <label>Advanced Kedro features: namespaces and dataset factories.</label>
+* What is Kedro? How does it help you create maintainable, reusable data science code?
+* How does Kedro fit into the data science ecosystem?
+* What do you need to do to create a Kedro project?
+* How can you refactor a Jupyter notebook to a Kedro project?
+* How do you package Python code as a library?
+* How do you work with Kedro projects in VSCode?
+* What are namespaces and dataset factories?
+* What is needed to deploy a Kedro project using container solutions like Docker and open source orchestrators like Airflow?
+* What are Kedro plugins?
+* How can you contribute to Kedro?
 
 
-<input type="checkbox" checked />
-  <label>How to deploy a project using container solutions like Docker and open source orchestrators like Airflow.</label>
+## Index of videos 
 
-<input type="checkbox" checked />
-  <label>Kedro plugins.</label>
-
-<input type="checkbox" checked />
-  <label>How to contribute to Kedro.</label>
-
-
-## Course index
+"Introduction to Kedro: Building Maintainable Data Pipelines" is split into the following videos:
 
 - Part 0: Introduction
     - 0.1. Data science in production: the good, the bad, and the ugly
@@ -87,3 +69,5 @@ In short, you'll learn how create maintainable, reusable data science code.
     - 3.4. Turn your Kedro project into a Docker container
     - 3.5. Deploy your Kedro project to Apache Airflow
 - Part 4: Continue your Kedro journey
+
+You don't need to register for the course and you can skip around the sections to find help on a particular area as you pick up the skills needed to build your own Kedro projects.

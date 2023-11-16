@@ -1,5 +1,3 @@
-# pylint: disable=unused-argument
-
 import pytest
 
 from kedro.io import LambdaDataset

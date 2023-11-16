@@ -187,7 +187,7 @@ class TestNodeComparisons:
         pattern = "'<' not supported between instances of 'Node' and 'str'"
 
         with pytest.raises(TypeError, match=pattern):
-            n < "hello"  # pylint: disable=pointless-statement
+            n < "hello"
 
     def test_different_input_list_order_not_equal(self):
         first = node(biconcat, ["input1", "input2"], "output1", name="A")
@@ -266,13 +266,13 @@ def duplicate_output_list_node():
         (
             duplicate_output_dict_node,
             r"Failed to create node identity"
-            r"\(\[A\]\) -> \[A,A\] due to "
+            r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
         ),
         (
             duplicate_output_list_node,
             r"Failed to create node identity"
-            r"\(\[A\]\) -> \[A,A\] due to "
+            r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
         ),
     ],

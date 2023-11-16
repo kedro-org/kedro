@@ -76,7 +76,7 @@ class AbstractRunner(ABC):
 
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog
-        registered_ds = [ds for ds in pipeline.data_sets() if ds in catalog]
+        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
@@ -90,11 +90,11 @@ class AbstractRunner(ABC):
         # Check if there's any output datasets that aren't in the catalog and don't match a pattern
         # in the catalog.
         free_outputs = pipeline.outputs() - set(registered_ds)
-        unregistered_ds = pipeline.data_sets() - set(registered_ds)
+        unregistered_ds = pipeline.datasets() - set(registered_ds)
 
         # Create a default dataset for unregistered datasets
         for ds_name in unregistered_ds:
-            catalog.add(ds_name, self.create_default_data_set(ds_name))
+            catalog.add(ds_name, self.create_default_dataset(ds_name))
 
         if self._is_async:
             self._logger.info(
@@ -136,7 +136,7 @@ class AbstractRunner(ABC):
 
         # We also need any missing datasets that are required to run the
         # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())
+        unregistered_ds = pipeline.datasets() - set(catalog.list())
         output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
         input_from_unregistered = to_rerun.inputs() & unregistered_ds
         to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)
@@ -164,7 +164,7 @@ class AbstractRunner(ABC):
         pass
 
     @abstractmethod  # pragma: no cover
-    def create_default_data_set(self, ds_name: str) -> AbstractDataset:
+    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
         """Factory method for creating the default dataset for the runner.
 
         Args:
@@ -287,7 +287,7 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
     """
     for node_input in node.inputs:
         # noqa: protected-access
-        if isinstance(catalog._data_sets[node_input], MemoryDataset):
+        if isinstance(catalog._datasets[node_input], MemoryDataset):
             return False
     return True
 

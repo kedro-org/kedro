@@ -81,7 +81,7 @@ class TestMicropkgRequirements:
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
     ):
         """Pipeline requirements.txt and project requirements.txt."""
-        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        project_requirements_txt = fake_repo_path / "requirements.txt"
         with open(project_requirements_txt, "a", encoding="utf-8") as file:
             file.write(COMPLEX_REQUIREMENTS)
         existing_requirements = _safe_parse_requirements(
@@ -112,7 +112,7 @@ class TestMicropkgRequirements:
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
     ):
         """Pipeline requirements.txt and project requirements.txt."""
-        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        project_requirements_txt = fake_repo_path / "requirements.txt"
         existing_requirements = _safe_parse_requirements(
             project_requirements_txt.read_text()
         )
@@ -146,7 +146,7 @@ class TestMicropkgRequirements:
         project level."""
 
         # Remove project requirements.txt
-        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        project_requirements_txt = fake_repo_path / "requirements.txt"
         project_requirements_txt.unlink()
 
         self.call_pipeline_create(fake_project_cli, fake_metadata)
@@ -176,7 +176,7 @@ class TestMicropkgRequirements:
         """No pipeline requirements.txt, and also no requirements.txt
         at project level."""
         # Remove project requirements.txt
-        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        project_requirements_txt = fake_repo_path / "requirements.txt"
         project_requirements_txt.unlink()
 
         self.call_pipeline_create(fake_project_cli, fake_metadata)
@@ -195,7 +195,7 @@ class TestMicropkgRequirements:
         pipeline_requirements_txt = (
             fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"
         )
-        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        project_requirements_txt = fake_repo_path / "requirements.txt"
         pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
         project_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
@@ -214,7 +214,7 @@ class TestMicropkgRequirements:
         create project requirements.txt."""
 
         # Remove project requirements.txt
-        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        project_requirements_txt = fake_repo_path / "requirements.txt"
         project_requirements_txt.unlink()
 
         self.call_pipeline_create(fake_project_cli, fake_metadata)
@@ -231,7 +231,7 @@ class TestMicropkgRequirements:
         create project requirements.txt."""
 
         # Remove project requirements.txt
-        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        project_requirements_txt = fake_repo_path / "requirements.txt"
         project_requirements_txt.unlink()
 
         self.call_pipeline_create(fake_project_cli, fake_metadata)

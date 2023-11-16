@@ -11,7 +11,7 @@ from warnings import warn
 from attrs import field, frozen
 from pluggy import PluginManager
 
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import _transcode_split
@@ -166,30 +166,10 @@ class KedroContext:
 
     _package_name: str
     project_path: Path = field(converter=_expand_full_path)
-    config_loader: ConfigLoader
+    config_loader: AbstractConfigLoader
     _hook_manager: PluginManager
     env: str | None = None
     _extra_params: dict[str, Any] | None = field(default=None, converter=deepcopy)
-
-    """Create a context object by providing the root of a Kedro project and
-    the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
-
-    Raises:
-        KedroContextError: If there is a mismatch
-            between Kedro project version and package version.
-
-    Args:
-        package_name: Package name for the Kedro project the context is
-            created for.
-        project_path: Project path to define the context for.
-        config_loader: Kedro's ``ConfigLoader`` for loading the configuration files.
-        hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
-        env: Optional argument for configuration default environment to be used
-            for running the pipeline. If not specified, it defaults to "local".
-        extra_params: Optional dictionary containing extra project parameters.
-            If specified, will update (and therefore take precedence over)
-            the parameters retrieved from the project configuration.
-    """
 
     @property
     def catalog(self) -> DataCatalog:

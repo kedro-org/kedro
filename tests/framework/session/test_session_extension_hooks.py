@@ -79,9 +79,9 @@ class TestCatalogHooks:
         assert len(relevant_records) == 1
         record = relevant_records[0]
         assert record.catalog is catalog
-        assert record.conf_creds == config_loader.get("credentials*")
+        assert record.conf_creds == config_loader["credentials"]
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
-            project_path=project_path, conf_dictionary=config_loader.get("catalog*")
+            project_path=project_path, conf_dictionary=config_loader["catalog"]
         )
         # save_version is only passed during a run, not on the property getter
         assert record.save_version is None
@@ -116,9 +116,9 @@ class TestCatalogHooks:
         # one for context.catalog, one for the run
         assert len(relevant_records) == 2
         record = relevant_records[1]
-        assert record.conf_creds == config_loader.get("credentials*")
+        assert record.conf_creds == config_loader["credentials"]
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
-            project_path=project_path, conf_dictionary=config_loader.get("catalog*")
+            project_path=project_path, conf_dictionary=config_loader["catalog"]
         )
         assert record.save_version is fake_save_version
         assert record.load_versions is None
@@ -236,7 +236,6 @@ class TestNodeHooks:
     @SKIP_ON_WINDOWS
     @pytest.mark.usefixtures("mock_broken_pipelines")
     def test_on_node_error_hook_parallel_runner(self, mock_session, logs_listener):
-
         with pytest.raises(ValueError, match="broken"):
             mock_session.run(
                 runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]

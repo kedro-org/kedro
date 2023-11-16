@@ -141,7 +141,7 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         datasets: dict[str, AbstractDataset] = None,
         feed_dict: dict[str, Any] = None,
@@ -286,7 +286,7 @@ class DataCatalog:
         layers: dict[str, set[str]] = defaultdict(set)
 
         for ds_name, ds_config in catalog.items():
-            ds_config = _resolve_credentials(  # noqa: redefined-loop-name
+            ds_config = _resolve_credentials(  # noqa: PLW2901
                 ds_config, credentials
             )
             if cls._is_pattern(ds_name):

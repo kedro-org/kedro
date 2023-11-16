@@ -12,7 +12,6 @@ authors = [
 description = "Kedro helps you build production-ready data and analytics pipelines"
 requires-python = ">=3.8"
 dependencies = [
-    "anyconfig>=0.10.0",
     "attrs>=21.3",
     "build>=0.7.0",
     "cachetools>=4.1",
@@ -125,8 +124,8 @@ kedro = ["py.typed"]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}
 
-[tool.black]
-exclude = "/templates/|^features/steps/test_starter"
+[tool.ruff.format]
+exclude = ["**/templates", "features/steps/test_starter"]
 
 [tool.coverage.report]
 fail_under = 100
@@ -230,7 +229,7 @@ select = [
     "PL",  # Pylint
     "T201", # Print Statement
 ]
-ignore = ["E501"]  # Black takes care of line-too-long
+ignore = ["E501"]  # ruff format takes care of line-too-long
 
 [tool.ruff.isort]
 known-first-party = ["kedro"]

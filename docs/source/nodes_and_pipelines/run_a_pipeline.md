@@ -340,8 +340,8 @@ where `config.yml` is formatted as below (for example):
 run:
   tags: tag1, tag2, tag3
   pipeline: pipeline1
-  parallel: true
-  nodes_names: node1, node2
+  runner: ParallelRunner
+  node_names: node1, node2
   env: env1
 ```
 

@@ -72,15 +72,11 @@ Welcome to Kedro's documentation!
 
    tutorial/spaceflights_tutorial.md
 
+
 .. toctree::
    :maxdepth: 2
 
    visualisation/index.md
-
-.. toctree::
-   :maxdepth: 2
-
-   experiment_tracking/index.md
 
 .. toctree::
    :maxdepth: 2
@@ -162,7 +158,6 @@ API documentation
    :recursive:
 
    kedro
-   kedro_datasets
 
 Indices and tables
 ==================

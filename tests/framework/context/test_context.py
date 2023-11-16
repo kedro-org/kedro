@@ -16,7 +16,7 @@ from attrs.exceptions import FrozenInstanceError
 from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import MissingConfigException, OmegaConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
@@ -190,7 +190,7 @@ def extra_params(request):
 @pytest.fixture
 def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
     configure_project(MOCK_PACKAGE_NAME)
-    config_loader = ConfigLoader(str(tmp_path / "conf"), env=env)
+    config_loader = OmegaConfigLoader(str(tmp_path / "conf"), env=env)
     context = KedroContext(
         MOCK_PACKAGE_NAME,
         str(tmp_path),
@@ -215,7 +215,7 @@ class TestKedroContext:
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader
-        conf_catalog = config_loader.get("catalog*")
+        conf_catalog = config_loader["catalog"]
 
         # even though the raw configuration uses relative path
         assert conf_catalog["horses"]["filepath"] == "horses.csv"
@@ -287,7 +287,7 @@ class TestKedroContext:
         indirect=True,
     )
     def test_params_missing(self, mocker, extra_params, dummy_context):
-        mock_config_loader = mocker.patch("kedro.config.ConfigLoader.get")
+        mock_config_loader = mocker.patch("kedro.config.OmegaConfigLoader.__getitem__")
         mock_config_loader.side_effect = MissingConfigException("nope")
         extra_params = extra_params or {}
 

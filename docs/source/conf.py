@@ -54,6 +54,7 @@ extensions = [
     "myst_parser",
     "notfound.extension",
     "sphinxcontrib.jquery",
+    "sphinx.ext.intersphinx",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class
@@ -64,7 +65,11 @@ napoleon_include_init_with_doc = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
-html_static_path = ["_static"]
+
+intersphinx_mapping = {
+    "kedro-viz": ("https://docs.kedro.org/projects/kedro-viz/en/v6.6.1/", None),
+    "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-1.8.0/", None),
+}
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -152,6 +157,7 @@ type_targets = {
         "an object providing a view on D's values",
         "(k, v), remove and return some (key, value) pair",
         "D.get(k,d), also set D[k]=d if k not in D",
+        "D[k] if k in D, else d.  d defaults to None.",
         "None.  Update D from mapping/iterable E and F.",
     ),
     "py:data": (
@@ -190,7 +196,6 @@ pygments_style = "sphinx"
 #
 html_theme = "sphinx_rtd_theme"
 here = Path(__file__).parent.absolute()
-html_logo = str(here / "kedro_logo.svg")
 
 # Theme options are theme-specific and customise the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -441,13 +446,13 @@ def log_suggestions(lines: list[str], name: str):
                 "["
                 + str(i)
                 + "] "
-                + re.sub(existing, r"{}".format(style(obj, fg="magenta")), lines[i])
+                + re.sub(existing, rf"{style(obj, fg='magenta')}", lines[i])
             )
             print(
                 "["
                 + str(i)
                 + "] "
-                + re.sub(existing, r"``{}``".format(style(obj, fg="green")), lines[i])
+                + re.sub(existing, rf"``{style(obj, fg='green')}``", lines[i])
             )
 
     if title_printed:
@@ -472,8 +477,8 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PL
         print(
             style(
                 "Failed to check for class name mentions that can be "
-                "converted to reStructuredText links in docstring of {}. "
-                "Error is: \n{}".format(name, str(e)),
+                f"converted to reStructuredText links in docstring of {name}. "
+                f"Error is: \n{str(e)}",
                 fg="red",
             )
         )
@@ -499,9 +504,7 @@ def _add_jinja_filters(app):
 
     # LaTeXBuilder is used in the PDF docs build,
     # and it doesn't have attribute 'templates'
-    if not (
-        isinstance(app.builder, (LaTeXBuilder,CheckExternalLinksBuilder))
-    ):
+    if not (isinstance(app.builder, (LaTeXBuilder, CheckExternalLinksBuilder))):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
@@ -537,7 +540,7 @@ except Exception as e:
         style(
             "Failed to create list of (regex, reStructuredText link "
             "replacement) for class names and method names in docstrings. "
-            "Error is: \n{}".format(str(e)),
+            f"Error is: \n{str(e)}",
             fg="red",
         )
     )

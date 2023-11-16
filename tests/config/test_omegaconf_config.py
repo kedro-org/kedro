@@ -1071,13 +1071,10 @@ class TestOmegaConfigLoader:
         runtime_params = {
             "x": 45,
         }
-        base_globals_config = {
-            "my_global_var": "${runtime_params:x}",
-        }
         local_globals_config = {
             "my_local_var": "${runtime_params:x}",  # x does exist but shouldn't be allowed in globals
         }
-        _write_yaml(base_globals, base_globals_config)
+
         _write_yaml(local_globals, local_globals_config)
 
         with pytest.raises(

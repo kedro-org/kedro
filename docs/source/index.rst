@@ -71,6 +71,7 @@ Welcome to Kedro's documentation!
    :caption: Tutorial and basic Kedro usage
 
    tutorial/spaceflights_tutorial.md
+   starters/starters.md
 
 
 .. toctree::
@@ -99,12 +100,6 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
 
    nodes_and_pipelines/index.md
-
-.. toctree::
-   :maxdepth: 2
-
-   starters/index.md
-
 
 .. toctree::
    :maxdepth: 2

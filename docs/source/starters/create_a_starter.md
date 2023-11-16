@@ -17,7 +17,7 @@ You then need to decide which are:
 * the common, boilerplate parts of the project
 * the configurable elements, which need to be replaced by `cookiecutter` strings
 
-### Configuration variables
+## Configuration variables
 
 By default, when you create a new project using a Kedro starter, `kedro new` launches in interactive mode. The user is then prompted for the variables that have been set in `prompts.yml`.
 
@@ -48,7 +48,7 @@ If the input to the prompts needs to be **validated**, for example to make sure 
 
 If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See [the default starter `cookiecutter.json`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/cookiecutter.json) as example.
 
-### Example Kedro starter
+## Example Kedro starter
 
 To review an example Kedro starter, check out the [`pandas-iris` starter on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris).
 

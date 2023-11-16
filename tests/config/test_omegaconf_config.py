@@ -1067,15 +1067,14 @@ class TestOmegaConfigLoader:
 
     def test_runtime_params_in_globals_not_allowed(self, tmp_path):
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
-        local_globals = tmp_path / _DEFAULT_RUN_ENV / "globals.yml"
         runtime_params = {
             "x": 45,
         }
-        local_globals_config = {
-            "my_local_var": "${runtime_params:x}",  # x does exist but shouldn't be allowed in globals
+        base_globals_config = {
+            "my_global_var": "${runtime_params:x}",  # x does exist but shouldn't be allowed in globals
         }
 
-        _write_yaml(local_globals, local_globals_config)
+        _write_yaml(base_globals, base_globals_config)
 
         with pytest.raises(
             UnsupportedInterpolationType,

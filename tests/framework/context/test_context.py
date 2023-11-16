@@ -122,7 +122,6 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     env_catalog = tmp_path / "conf" / str(env) / "catalog.yml"
     env_credentials = tmp_path / "conf" / str(env) / "credentials.yml"
     parameters = tmp_path / "conf" / "base" / "parameters.json"
-    db_config_path = tmp_path / "conf" / "base" / "db.ini"
     project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
 
     # Create configurations

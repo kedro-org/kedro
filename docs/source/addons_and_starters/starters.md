@@ -1,5 +1,9 @@
 # Kedro starters
 
+<!--TO DO-->
+<!--This page needs updating-->
+
+
 A Kedro starter contains code in the form of a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template for a Kedro project. Metaphorically, a starter is similar to using a pre-defined layout when creating a presentation or document.
 
 Kedro starters provide pre-defined example code and configuration that can be reused, for example:

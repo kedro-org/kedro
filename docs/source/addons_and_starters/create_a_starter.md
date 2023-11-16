@@ -1,5 +1,9 @@
 # How to create a Kedro starter
 
+<!--TO DO-->
+<!--This page needs improving-->
+
+
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. A good example is the Iris dataset example of basic Kedro project layout, configuration and initialisation code. A team may find it useful to build Kedro starters to create reusable projects that bootstrap a common base and can be extended.
 
 A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project.
@@ -90,3 +94,5 @@ Here is the layout of the project as a Cookiecutter template:
 ```{note}
 You can [add an alias by creating a plugin using `kedro.starters` entry point](../extend_kedro/plugins.md#extend-starter-aliases), which will allows you to do `kedro new --starter=your_starters` and shows up on shows up on `kedro starter list`.
 ```
+
+

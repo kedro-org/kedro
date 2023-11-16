@@ -212,7 +212,7 @@ scooters_query:
 
 When you use {class}`pandas.SQLTableDataset<kedro-datasets:kedro_datasets.pandas.SQLTableDataset>`, or {class}`pandas.SQLQueryDataset<kedro-datasets:kedro_datasets.pandas.SQLQueryDataset>` you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
 
-`scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+`scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataset` only).
 
 
 ## Load data from an API endpoint
@@ -247,7 +247,7 @@ usda_credentials:
 
 ```yaml
 test:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://your_bucket/test.csv # assume `test.csv` is uploaded to the MinIO server.
   credentials: dev_minio
 ```

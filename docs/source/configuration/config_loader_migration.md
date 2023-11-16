@@ -5,7 +5,7 @@ This migration guide outlines the primary distinctions between the old loaders a
 ## `ConfigLoader` to `OmegaConfigLoader`
 
 ### 1. Install the required library
-The [`OmegaConfigLoader`](advanced_configuration.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). In order to use it you need to ensure you have both a version of Kedro of `0.18.5` or above and `omegaconf` installed.
+The [`OmegaConfigLoader`](configuration_basics.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). To use it you need Kedro (version `0.18.5` or later) and `omegaconf` installed.
 You can install both using `pip`:
 
 ```bash

@@ -11,7 +11,7 @@
 
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.
-* Reduced `spaceflights` data to minimize waiting times during tutorial execution.
+* Reduced `spaceflights` data to minimise waiting times during tutorial execution.
 * Added validation to node tags to be consistent with node names.
 
 ## Breaking changes to the API

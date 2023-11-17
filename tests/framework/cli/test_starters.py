@@ -97,6 +97,19 @@ def _get_expected_files(add_ons: str, example_pipeline: str):
     # If example pipeline was choosen we don't need to delete /data folder
     if example_pipeline_bool and "5" not in add_ons_list:
         expected_files += add_ons_template_files["5"]
+    example_files_count = [
+        3,  # Raw data files
+        2,  # Parameters_ .yml files
+        6,  # .py files in pipelines folder
+    ]
+    if example_pipeline_bool:  # If example option is chosen
+        expected_files += sum(example_files_count)
+        expected_files += (
+            4 if "7" in add_ons_list else 0
+        )  # add 3 .py and 1 parameters files in reporting for Viz
+        expected_files += (
+            1 if "2" in add_ons_list else 0
+        )  # add 1 test file if tests is chosen in add_ons
 
     return expected_files
 
@@ -895,7 +908,7 @@ class TestFlagsNotAllowed:
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
-class TestAddOnsFromUserPrompts:
+class TestAddOnsAndExampleFromUserPrompts:
     @pytest.mark.parametrize(
         "add_ons",
         [
@@ -915,14 +928,17 @@ class TestAddOnsFromUserPrompts:
             "ALL",
         ],
     )
-    def test_valid_add_ons(self, fake_kedro_cli, add_ons):
+    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
+    def test_valid_add_ons_and_example(self, fake_kedro_cli, add_ons, example_pipeline):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
-            input=_make_cli_prompt_input(add_ons=add_ons, example_pipeline="No"),
+            input=_make_cli_prompt_input(
+                add_ons=add_ons, example_pipeline=example_pipeline
+            ),
         )
 
-        _assert_template_ok(result, add_ons=add_ons)
+        _assert_template_ok(result, add_ons=add_ons, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, add_ons=add_ons)
         _clean_up_project(Path("./new-kedro-project"))
 
@@ -974,9 +990,37 @@ class TestAddOnsFromUserPrompts:
         message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
         assert message in result.output
 
+    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
+    def test_valid_example(self, fake_kedro_cli, example_pipeline):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(example_pipeline=example_pipeline),
+        )
+
+        _assert_template_ok(result, example_pipeline=example_pipeline)
+        _clean_up_project(Path("./new-kedro-project"))
+
+    @pytest.mark.parametrize(
+        "bad_input",
+        ["bad input", "Not", "ye", "True", "t"],
+    )
+    def test_invalid_example(self, fake_kedro_cli, bad_input):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(example_pipeline=bad_input),
+        )
+
+        assert result.exit_code != 0
+        assert "is an invalid value for example pipeline." in result.output
+        assert (
+            "It must contain only y, n, YES, NO, case insensitive.\n" in result.output
+        )
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
-class TestAddOnsFromConfigFile:
+class TestAddOnsAndExampleFromConfigFile:
     @pytest.mark.parametrize(
         "add_ons",
         [
@@ -996,12 +1040,13 @@ class TestAddOnsFromConfigFile:
             "ALL",
         ],
     )
-    def test_valid_add_ons(self, fake_kedro_cli, add_ons):
+    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
+    def test_valid_add_ons_and_example(self, fake_kedro_cli, add_ons, example_pipeline):
         """Test project created from config."""
         config = {
             "add_ons": add_ons,
             "project_name": "New Kedro Project",
-            "example_pipeline": "No",
+            "example_pipeline": example_pipeline,
             "repo_name": "new-kedro-project",
             "python_package": "new_kedro_project",
         }
@@ -1081,9 +1126,51 @@ class TestAddOnsFromConfigFile:
         message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
         assert message in result.output
 
+    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
+    def test_valid_example(self, fake_kedro_cli, example_pipeline):
+        """Test project created from config."""
+        config = {
+            "add_ons": "none",
+            "project_name": "New Kedro Project",
+            "example_pipeline": example_pipeline,
+            "repo_name": "new-kedro-project",
+            "python_package": "new_kedro_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+
+        _assert_template_ok(result, **config)
+        _clean_up_project(Path("./new-kedro-project"))
+
+    @pytest.mark.parametrize(
+        "bad_input",
+        ["bad input", "Not", "ye", "True", "t"],
+    )
+    def test_invalid_example(self, fake_kedro_cli, bad_input):
+        """Test project created from config."""
+        config = {
+            "add_ons": "none",
+            "project_name": "My Project",
+            "example_pipeline": bad_input,
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+
+        assert result.exit_code != 0
+        assert "is an invalid value for example pipeline." in result.output
+        assert (
+            "It must contain only y, n, YES, NO, case insensitive.\n" in result.output
+        )
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
-class TestAddOnsFromCLI:
+class TestAddOnsAndExampleFromCLI:
     @pytest.mark.parametrize(
         "add_ons",
         [
@@ -1108,14 +1195,15 @@ class TestAddOnsFromCLI:
             "test, DATA, liNt",
         ],
     )
-    def test_valid_add_ons_flag(self, fake_kedro_cli, add_ons):
+    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
+    def test_valid_add_ons_flag(self, fake_kedro_cli, add_ons, example_pipeline):
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--addons", add_ons, "--example=No"],
+            ["new", "--addons", add_ons, "--example", example_pipeline],
             input=_make_cli_prompt_input_without_addons(),
         )
         add_ons = _convert_addon_names_to_numbers(selected_add_ons_flag=add_ons)
-        _assert_template_ok(result, add_ons=add_ons)
+        _assert_template_ok(result, add_ons=add_ons, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="new-kedro-project")
         _clean_up_project(Path("./new-kedro-project"))
 

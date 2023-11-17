@@ -15,7 +15,7 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Iterable, Iterator
+from typing import Any, Collection, Iterable, Iterator
 
 from more_itertools import interleave
 from pluggy import PluginManager
@@ -240,59 +240,68 @@ def _find_persistent_ancestors(
         ``Node``s.
 
     """
-    ancestor_nodes_to_run = set()
+    initial_nodes_to_run: set[Node] = set()
+
     queue, visited = deque(children), set(children)
     while queue:
         current_node = queue.popleft()
-        if _has_persistent_inputs(current_node, catalog):
-            ancestor_nodes_to_run.add(current_node)
+        impersistent_inputs = _enumerate_impersistent_inputs(current_node, catalog)
+
+        # If all inputs are persistent, we can run this node as is
+        if not impersistent_inputs:
+            initial_nodes_to_run.add(current_node)
             continue
-        for parent in _enumerate_parents(pipeline, current_node):
-            if parent in visited:
+
+        # Otherwise, look for the nodes that produce impersistent inputs
+        for node in _enumerate_nodes_with_outputs(pipeline, impersistent_inputs):
+            if node in visited:
                 continue
-            visited.add(parent)
-            queue.append(parent)
-    return ancestor_nodes_to_run
+            visited.add(node)
+            queue.append(node)
+
+    return initial_nodes_to_run
 
 
-def _enumerate_parents(pipeline: Pipeline, child: Node) -> list[Node]:
-    """For a given ``Node``, returns a list containing the direct parents
-    of that ``Node`` in the given ``Pipeline``.
-
-    Args:
-        pipeline: the ``Pipeline`` to search for direct parents in.
-        child: the ``Node`` to find parents of.
-
-    Returns:
-        A list of all ``Node``s that are direct parents of ``child``.
-
-    """
-    parent_pipeline = pipeline.only_nodes_with_outputs(*child.inputs)
-    return parent_pipeline.nodes
-
-
-def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
-    """Check if a ``Node`` exclusively has either persisted Datasets
-    or parameters as inputs. If at least one non-parametric input
-    is a ``MemoryDataset``, return False.
+def _enumerate_impersistent_inputs(node: Node, catalog: DataCatalog) -> set[str]:
+    """Enumerate impersistent input Datasets of a ``Node``.
 
     Args:
         node: the ``Node`` to check the inputs of.
         catalog: the ``DataCatalog`` of the run.
 
     Returns:
-        True if the ``Node`` being checked exclusively has inputs that
-        are persisted Datasets or parameters, else False.
+        Set of names of impersistent inputs of given ``Node``.
 
     """
+    # We use _data_sets because they pertain parameter name format
+    catalog_datasets = catalog._data_sets
+    missing_inputs: set[str] = set()
     for node_input in node.inputs:
-        # Parameters are represented as MemoryDatasets but are considered persistent
+        # Important difference vs. Kedro approach
         if node_input.startswith("params:"):
             continue
-        # noqa: protected-access
-        if isinstance(catalog._data_sets[node_input], MemoryDataset):
-            return False
-    return True
+        if isinstance(catalog_datasets[node_input], MemoryDataset):
+            missing_inputs.add(node_input)
+
+    return missing_inputs
+
+
+def _enumerate_nodes_with_outputs(
+    pipeline: Pipeline, outputs: Collection[str]
+) -> list[Node]:
+    """For given outputs, returns a list containing nodes that
+    generate them in the given ``Pipeline``.
+
+    Args:
+        pipeline: the ``Pipeline`` to search for nodes in.
+        outputs: the dataset names to find source nodes for.
+
+    Returns:
+        A list of all ``Node``s that are producing ``outputs``.
+
+    """
+    parent_pipeline = pipeline.only_nodes_with_outputs(*outputs)
+    return parent_pipeline.nodes
 
 
 def _find_initial_nodes(pipeline: Pipeline, nodes: Iterable[Node]) -> list[Node]:

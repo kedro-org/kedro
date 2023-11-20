@@ -532,7 +532,7 @@ def _select_prompts_to_display(
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
             None in case the flag wasn't used.
-        example_pipeline: True or False for --example flag, or
+        example_pipeline: "Yes" or "No" for --example flag, or
             None in case the flag wasn't used.
 
     Returns:
@@ -670,10 +670,8 @@ def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, 
         ] = "3076-add-example-pipeline-to-hooks"  # ToDel: temporary for test
     elif example_pipeline:
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
-        cookiecutter_args["directory"] = "spaceflights-pandas"  # pragma: no cover
-        cookiecutter_args[
-            "checkout"
-        ] = "3076-add-example-pipeline-to-hooks"  # pragma: no cover
+        cookiecutter_args["directory"] = "spaceflights-pandas"
+        cookiecutter_args["checkout"] = "3076-add-example-pipeline-to-hooks"
     else:
         # Use the default template path for non Pyspark, Viz or example options:
         starter_path = template_path

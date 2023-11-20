@@ -149,6 +149,7 @@ def setup_template_add_ons(selected_add_ons_list: str, requirements_file_path: s
         requirements_file_path (str): The path of the `requiremenets.txt` in the template.
         pyproject_file_path (str): The path of the `pyproject.toml` in the template
         python_package_name (str): The name of the python package.
+        example_pipeline (str): 'True' if example pipeline was selected
     """
     if "Linting" not in selected_add_ons_list:
         _remove_from_file(requirements_file_path, lint_requirements)

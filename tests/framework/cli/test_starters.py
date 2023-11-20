@@ -57,7 +57,7 @@ def _write_yaml(filepath: Path, config: dict):
 def _make_cli_prompt_input(
     add_ons="none",
     project_name="",
-    example_pipeline="No",
+    example_pipeline="no",
     repo_name="",
     python_package="",
 ):
@@ -203,7 +203,7 @@ def _assert_template_ok(
     result,
     add_ons="none",
     project_name="New Kedro Project",
-    example_pipeline="No",
+    example_pipeline="no",
     repo_name="new-kedro-project",
     python_package="new_kedro_project",
     kedro_version=version,
@@ -513,7 +513,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -529,7 +529,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "Project X",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "projectx",
             "python_package": "proj_x",
         }
@@ -545,7 +545,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
             "kedro_version": "my_version",
@@ -562,7 +562,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
             "output_dir": "my_output_dir",
@@ -580,7 +580,7 @@ class TestNewFromConfigFileValid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -629,7 +629,7 @@ class TestNewFromConfigFileInvalid:
         config = {
             "add_ons": "none",
             "project_name": "My Project",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
             "output_dir": "does_not_exist",
@@ -643,7 +643,7 @@ class TestNewFromConfigFileInvalid:
         """Check the error if keys are missing from config file."""
         config = {
             "add_ons": "none",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "python_package": "my_project",
             "repo_name": "my-project",
         }
@@ -676,7 +676,7 @@ class TestNewFromConfigFileInvalid:
         config = {
             "add_ons": "none",
             "project_name": "My $Project!",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -695,7 +695,7 @@ class TestNewFromConfigFileInvalid:
         config = {
             "add_ons": "none",
             "project_name": "P",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -1068,7 +1068,7 @@ class TestAddOnsAndExampleFromConfigFile:
         config = {
             "add_ons": bad_input,
             "project_name": "My Project",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -1092,7 +1092,7 @@ class TestAddOnsAndExampleFromConfigFile:
         config = {
             "add_ons": input,
             "project_name": "My Project",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
         }
@@ -1113,7 +1113,7 @@ class TestAddOnsAndExampleFromConfigFile:
         config = {
             "add_ons": input,
             "project_name": "My Project",
-            "example_pipeline": "No",
+            "example_pipeline": "no",
             "repo_name": "my-project",
             "python_package": "my_project",
         }

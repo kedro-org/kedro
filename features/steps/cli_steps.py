@@ -153,7 +153,7 @@ def create_config_file(context):
     config = {
         "add_ons": "1-5",
         "project_name": context.project_name,
-        "example_pipeline": "No",
+        "example_pipeline": "no",
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
         "python_package": context.package_name,

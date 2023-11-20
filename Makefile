@@ -24,6 +24,10 @@ test-no-spark-sequential:
 test-no-datasets:
 	pytest --no-cov --ignore tests/extras/datasets/ --numprocesses 4 --dist loadfile
 
+show-coverage:
+	coverage html --show-contexts || true
+	open htmlcov/index.html
+
 e2e-tests:
 	behave --tags=-skip
 

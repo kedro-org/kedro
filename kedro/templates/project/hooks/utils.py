@@ -105,11 +105,11 @@ def _remove_file(path: Path) -> None:
         path.unlink()
 
 
-def _handle_starter_setup(selected_add_ons_list: str, python_package_name: str) -> None:
+def _handle_PySpark_Viz_starter_setup(is_Viz: bool, python_package_name: str) -> None:
     """Clean up the unnecessary files in the starters template.
 
     Args:
-        selected_add_ons_list (str): A string contains the selected add-ons.
+        is_Viz (bool): if Viz included in starter, then need to remove "reporting" folder.
         python_package_name (str): The name of the python package.
     """
     # Remove all .csv and .xlsx files from data/01_raw/
@@ -129,11 +129,8 @@ def _handle_starter_setup(selected_add_ons_list: str, python_package_name: str) 
         for param_file in conf_base_path.glob(pattern):
             _remove_file(param_file)
 
-    # Remove the pipelines subdirectories
-    if "Kedro Viz" in selected_add_ons_list: # Remove reporting if Kedro Viz is selected
-        pipelines_to_remove = ["data_science", "data_processing", "reporting"]
-    else:
-        pipelines_to_remove = ["data_science", "data_processing"]
+    # Remove the pipelines subdirectories, if Viz - also "reporting" folder
+    pipelines_to_remove = ["data_science", "data_processing"] + (["reporting"] if is_Viz else [])
 
     pipelines_path = current_dir / f"src/{python_package_name}/pipelines/"
     for pipeline_subdir in pipelines_to_remove:
@@ -172,11 +169,8 @@ def setup_template_add_ons(selected_add_ons_list: str, requirements_file_path: s
     if "Data Structure" not in selected_add_ons_list and example_pipeline != "True":
         _remove_dir(current_dir / "data")
 
-    if "Pyspark" in selected_add_ons_list and example_pipeline != "True":
-        _handle_starter_setup(selected_add_ons_list, python_package_name)
-
-    if "Kedro Viz" in selected_add_ons_list and example_pipeline != "True":
-        _handle_starter_setup(selected_add_ons_list, python_package_name)
+    if ("Pyspark" in selected_add_ons_list or "Kedro Viz" in selected_add_ons_list) and example_pipeline != "True":
+        _handle_PySpark_Viz_starter_setup("Kedro Viz" in selected_add_ons_list, python_package_name)
 
 
 def sort_requirements(requirements_file_path: Path) -> None:

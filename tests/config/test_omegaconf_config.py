@@ -1199,7 +1199,7 @@ class TestOmegaConfigLoaderStandalone:
     Test OmegaConfigLoader in standalone mode (defaults settings without environments)
     """
 
-    def test_load_config_without_local(self, tmp_path):
+    def test_load_config_without_environment(self, tmp_path):
         base_catalog = tmp_path / "catalog.yml"
         catalog_config = {
             "companies": {

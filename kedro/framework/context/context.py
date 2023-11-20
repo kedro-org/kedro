@@ -9,7 +9,6 @@ from urllib.parse import urlparse
 from warnings import warn
 
 from attrs import define, field
-from attrs.setters import frozen
 from pluggy import PluginManager
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
@@ -183,15 +182,13 @@ class KedroContext:
 
     """
 
-    project_path: Path = field(
-        init=True, converter=_expand_full_path, on_setattr=frozen
-    )
-    config_loader: AbstractConfigLoader = field(init=True, on_setattr=frozen)
-    env: str | None = field(init=True, on_setattr=frozen)
-    _package_name: str = field(init=True, on_setattr=frozen)
-    _hook_manager: PluginManager = field(init=True, on_setattr=frozen)
+    project_path: Path = field(init=True, converter=_expand_full_path)
+    config_loader: AbstractConfigLoader = field(init=True)
+    env: str | None = field(init=True)
+    _package_name: str = field(init=True)
+    _hook_manager: PluginManager = field(init=True)
     _extra_params: dict[str, Any] | None = field(
-        init=True, default=None, converter=deepcopy, on_setattr=frozen
+        init=True, default=None, converter=deepcopy
     )
 
     @property

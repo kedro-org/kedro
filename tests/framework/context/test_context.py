@@ -12,7 +12,6 @@ import pandas as pd
 import pytest
 import toml
 import yaml
-from attrs.exceptions import FrozenAttributeError
 from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
@@ -192,11 +191,11 @@ def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
     configure_project(MOCK_PACKAGE_NAME)
     config_loader = OmegaConfigLoader(str(tmp_path / "conf"), env=env)
     context = KedroContext(
-        MOCK_PACKAGE_NAME,
-        str(tmp_path),
+        project_path=str(tmp_path),
         config_loader=config_loader,
-        hook_manager=_create_hook_manager(),
         env=env,
+        package_name=MOCK_PACKAGE_NAME,
+        hook_manager=_create_hook_manager(),
         extra_params=extra_params,
     )
 
@@ -225,10 +224,6 @@ class TestKedroContext:
     )
     def test_internal_attributes(self, dummy_context, internal_attr):
         getattr(dummy_context, internal_attr)
-
-    def test_immutable_class_attribute(self, dummy_context):
-        with pytest.raises(FrozenAttributeError):
-            dummy_context.project_path = "dummy"
 
     def test_set_new_attribute(self, dummy_context):
         dummy_context.mlflow = 1

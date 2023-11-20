@@ -4,5 +4,5 @@
     "python_package": "{{ cookiecutter.project_name.strip().replace(' ', '_').replace('-', '_').lower() }}",
     "kedro_version": "{{ cookiecutter.kedro_version }}",
     "add_ons": "none",
-    "example_pipeline": "No"
+    "example_pipeline": "no"
 }

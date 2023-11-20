@@ -369,6 +369,15 @@ class TestTag:
         assert "hello" in tagged_node.tags
         assert "world" in tagged_node.tags
 
+    @pytest.mark.parametrize("bad_tag", ["tag,with,comma", "tag with space"])
+    def test_invalid_tag(self, bad_tag):
+        pattern = (
+            f"'{bad_tag}' is not a valid node tag. It must contain only "
+            f"letters, digits, hyphens, underscores and/or fullstops."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            node(identity, ["in"], ["out"], tags=bad_tag)
+
 
 class TestNames:
     def test_named(self):

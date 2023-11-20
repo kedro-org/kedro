@@ -11,7 +11,7 @@ From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to 
 
 To use the `DataCatalog` API, construct a `DataCatalog` object programmatically in a file like `catalog.py`.
 
-In the following code, we use several pre-built data loaders documented in the [API reference documentation](/kedro_datasets).
+In the following code, we use several pre-built data loaders documented in the {doc}`kedro-datasets documentation<kedro-datasets:kedro_datasets>`.
 
 ```python
 from kedro.io import DataCatalog
@@ -200,7 +200,7 @@ assert data1.equals(reloaded)
 io.save("test_dataset", data2)
 ```
 
-We do not recommend passing exact load and/or save versions, since it might lead to inconsistencies between operations. For example, if versions for load and save operations do not match, a save operation would result in a `UserWarning`.
+We do not recommend passing exact load or save versions, since it might lead to inconsistencies between operations. For example, if versions for load and save operations do not match, a save operation would result in a `UserWarning`.
 
 Imagine a simple pipeline with two nodes, where B takes the output from A. If you specify the load-version of the data for B to be `my_data_2023_08_16.csv`, the data that A produces (`my_data_20230818.csv`) is not used.
 

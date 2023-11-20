@@ -66,10 +66,11 @@ HOOKS = (SparkHooks(),)
 
 We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
-* [spark.DeltaTableDataset](/kedro_datasets.spark.DeltaTableDataset)
-* [spark.SparkDataset](/kedro_datasets.spark.SparkDataset)
-* [spark.SparkJDBCDataset](/kedro_datasets.spark.SparkJDBCDataset)
-* [spark.SparkHiveDataset](/kedro_datasets.spark.SparkHiveDataset)
+* {class}`spark.DeltaTableDataset <kedro-datasets:kedro_datasets.spark.DeltaTableDataset>`
+* {class}`spark.SparkDataset <kedro-datasets:kedro_datasets.spark.SparkDataset>`
+* {class}`spark.SparkJDBCDataset <kedro-datasets:kedro_datasets.spark.SparkJDBCDataset>`
+* {class}`spark.SparkHiveDataset <kedro-datasets:kedro_datasets.spark.SparkHiveDataset>`
+
 
 The example below illustrates how to use `spark.SparkDataset` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
 
@@ -112,7 +113,7 @@ To setup PySpark with Delta Lake, have a look at [the recommendations in Delta L
 
 We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../data/data_catalog_yaml_examples.md#read-the-same-file-using-two-different-datasets):
 
-* To create a Delta table, use a `SparkDataset` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table and/or overwrite it.
+* To create a Delta table, use a `SparkDataset` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table or overwrite it.
 * To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataset` and perform the write operations within the node function.
 
 As a result, we end up with a catalog that looks like this:
@@ -253,4 +254,4 @@ To further increase the concurrency level, if you are using Spark >= 0.8, you ca
 spark.scheduler.mode: FAIR
 ```
 
-For more information, please visit Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).
+For more information, see the Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).

@@ -32,21 +32,21 @@ shuttles:
 ```
 ### Dataset `type`
 
-Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml and more.
+Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet files, Feather files, HDF5 files, JSON documents, pickled objects, SQL tables, SQL queries, and more. They are supported using libraries such as pandas, PySpark, NetworkX, and Matplotlib.
 
-[The `kedro-datasets` package documentation](/kedro_datasets) contains a comprehensive list of all available file types.
+{doc}`The kedro-datasets package documentation<kedro-datasets:kedro_datasets>` contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 
 Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, you should provide a URL using the general form `protocol://path/to/data`.  If no protocol is provided, the local file system is assumed (which is the same as ``file://``).
 
-The following prepends are available:
+The following protocols are available:
 
 - **Local or Network File System**: `file://` - the local file system is default in the absence of any protocol, it also permits relative paths.
 - **Hadoop File System (HDFS)**: `hdfs://user@server:port/path/to/data` - Hadoop Distributed File System, for resilient, replicated files within a cluster.
 - **Amazon S3**: `s3://my-bucket-name/path/to/data` - Amazon S3 remote binary store, often used with Amazon EC2,
   using the library s3fs.
-- **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - e.g. Minio, using the s3fs library.
+- **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - for example, MinIO, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
   resource using gcsfs (in development).
 - **Azure Blob Storage / Azure Data Lake Storage Gen2**: `abfs://` - Azure Blob Storage, typically used when working on an Azure environment.

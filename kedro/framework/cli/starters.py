@@ -146,7 +146,7 @@ NUMBER_TO_ADD_ONS_NAME = {
 
 VALIDATION_PATTERNS = {
     "yes_no": {
-        "regex": "(?i)^(y|yes|n|no)$",
+        "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
         "error_message": "|It must contain only y, n, YES, NO, case insensitive.",
     }
 }
@@ -163,7 +163,7 @@ def _validate_regex(pattern_name, text):
 
 
 def _parse_yes_no_to_bool(value):
-    return value.lower() in ["y", "yes"] if value is not None else None
+    return value.strip().lower() in ["y", "yes"] if value is not None else None
 
 
 # noqa: missing-function-docstring

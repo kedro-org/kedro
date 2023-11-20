@@ -7,11 +7,11 @@ If you're running your Kedro pipeline from the CLI or you can't/don't want to ru
 * If you have long running nodes or pipelines, inserting `print` statements and running them multiple times quickly becomes time-consuming.
 * Debugging nodes outside the `run` session isn't very helpful because getting access to the local scope within the `node` can be hard, especially if you're dealing with large data or memory datasets, where you need to chain a few nodes together or re-run your pipeline to produce the data for debugging purposes.
 
-This guide provides examples on [how to instantiate a post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](../hooks/introduction.md) when an uncaught error occurs during a pipeline run. Note that [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
+This guide provides examples on [how to instantiate a post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](../hooks/introduction.md) when an uncaught error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
 
 For guides on how to set up debugging with IDEs, please visit the [guide for debugging in VSCode](./set_up_vscode.md#debugging) and the [guide for debugging in PyCharm](./set_up_pycharm.md#debugging).
 
-## Debugging Node
+## Debugging a node
 
 To start a debugging session when an uncaught error is raised within your `node`, implement the `on_node_error` [Hook specification](/kedro.framework.hooks):
 
@@ -46,7 +46,7 @@ You can then register this `PDBNodeDebugHook` in your project's `settings.py`:
 HOOKS = (PDBNodeDebugHook(),)
 ```
 
-## Debugging Pipeline
+## Debugging a pipeline
 
 To start a debugging session when an uncaught error is raised within your `pipeline`, implement the `on_pipeline_error` [Hook specification](/kedro.framework.hooks):
 

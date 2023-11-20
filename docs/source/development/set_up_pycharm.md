@@ -143,7 +143,7 @@ Click **OK** and then select your run configuration from the toolbar and click *
 
 ## Configure Python Console
 
-You can configure Pycharm's IPython to load Kedro's Extension.
+You can configure PyCharm's IPython to load Kedro's Extension.
 
 Click **PyCharm | Preferences** for macOS or **File | Settings**, inside **Build, Execution, Deployment** and **Console**, enter the **Python Console** configuration.
 

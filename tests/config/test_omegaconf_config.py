@@ -722,9 +722,7 @@ class TestOmegaConfigLoader:
         _write_yaml(tmp_path / _BASE_ENV / "catalog1.yml", {"k1": "v1", "_k2": "v2"})
         _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", {"k3": "v3", "_k2": "v4"})
 
-        conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
-        )
+        conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
         conf.default_run_env = ""
         catalog = conf["catalog"]
         assert catalog.keys() == {"k1", "k3"}
@@ -1067,15 +1065,31 @@ class TestOmegaConfigLoader:
 
     def test_runtime_params_in_globals_not_allowed(self, tmp_path):
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        local_globals = tmp_path / _DEFAULT_RUN_ENV / "globals.yml"
+
         runtime_params = {
             "x": 45,
         }
+
         base_globals_config = {
-            "my_global_var": "${runtime_params:x}",  # x does exist but shouldn't be allowed in globals
+            "my_global_var": "${runtime_params:x}",
+        }
+        local_globals_config = {
+            "my_local_var": "${runtime_params:x}",  # x does exist but shouldn't be allowed in globals
         }
 
         _write_yaml(base_globals, base_globals_config)
+        _write_yaml(local_globals, local_globals_config)
 
+        with pytest.raises(
+            UnsupportedInterpolationType,
+            match=r"The `runtime_params:` resolver is not supported for globals.",
+        ):
+            OmegaConfigLoader(
+                tmp_path,
+                default_run_env=_DEFAULT_RUN_ENV,
+                runtime_params=runtime_params,
+            )
         with pytest.raises(
             UnsupportedInterpolationType,
             match=r"The `runtime_params:` resolver is not supported for globals.",
@@ -1213,6 +1227,24 @@ class TestOmegaConfigLoaderStandalone:
         assert (
             conf["catalog"]["companies"]["type"] == catalog_config["companies"]["type"]
         )
+
+    def test_load_config_only_base_environment(self, tmp_path):
+        base_parameters = tmp_path / _BASE_ENV / "parameters.yml"
+        base_parameters_config = {"dummy": "base"}
+
+        _write_yaml(base_parameters, base_parameters_config)
+
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
+        assert conf["parameters"]["dummy"] == "base"
+
+    def test_load_config_only_default_run_environment(self, tmp_path):
+        default_env_parameters = tmp_path / _DEFAULT_RUN_ENV / "parameters.yml"
+        default_env_parameters_config = {"dummy": "default"}
+
+        _write_yaml(default_env_parameters, default_env_parameters_config)
+
+        conf = OmegaConfigLoader(tmp_path, default_run_env=_DEFAULT_RUN_ENV)
+        assert conf["parameters"]["dummy"] == "default"
 
     def test_variable_interpolation_in_catalog_with_templates(self, tmp_path):
         base_catalog = tmp_path / "catalog.yml"

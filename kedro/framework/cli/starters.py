@@ -144,8 +144,25 @@ NUMBER_TO_ADD_ONS_NAME = {
     "7": "Kedro Viz",
 }
 
+VALIDATION_PATTERNS = {
+    "yes_no": {
+        "regex": "(?i)^(y|yes|n|no)$",
+        "error_message": "|It must contain only y, n, YES, NO, case insensitive.",
+    }
+}
 
-def _validate_yn(ctx, param, value):
+
+def _validate_regex(pattern_name, text):
+    if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], text):
+        click.secho(
+            VALIDATION_PATTERNS[pattern_name]["error_message"],
+            fg="red",
+            err=True,
+        )
+        sys.exit(1)
+
+
+def _parse_yes_no_to_bool(value):
     return value.lower() in ["y", "yes"] if value is not None else None
 
 
@@ -173,14 +190,7 @@ def starter():
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--addons", "-a", "selected_add_ons_flag", help=ADDON_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
-@click.option(
-    "--example",
-    "-e",
-    "example_pipeline",
-    type=click.Choice(["y", "n", "yes", "no"], case_sensitive=False),
-    callback=_validate_yn,
-    help=EXAMPLE_ARG_HELP,
-)
+@click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
 def new(  # noqa: PLR0913
     config_path,
     starter_alias,
@@ -416,7 +426,7 @@ def _get_extra_context(  # noqa: PLR0913
     cookiecutter_context: OrderedDict,
     selected_add_ons_flag: str | None,
     project_name: str | None,
-    example_pipeline: bool,
+    example_pipeline: str | None,
 ) -> dict[str, str]:
     """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
     on CLI flags, user prompts, or a configuration file.
@@ -471,9 +481,11 @@ def _get_extra_context(  # noqa: PLR0913
         extra_context["add_ons"] = str(extra_context["add_ons"])
 
     extra_context["example_pipeline"] = (
-        example_pipeline  # type: ignore
-        if example_pipeline is not None
-        else _validate_yn(None, None, extra_context.get("example_pipeline", None))
+        _parse_yes_no_to_bool(
+            example_pipeline
+            if example_pipeline is not None
+            else extra_context.get("example_pipeline", "no")
+        )  # type: ignore
     )
 
     return extra_context
@@ -507,7 +519,7 @@ def _select_prompts_to_display(
     prompts_required: dict,
     selected_add_ons_flag: str,
     project_name: str,
-    example_pipeline: bool,
+    example_pipeline: str,
 ) -> dict:
     """Selects which prompts an user will receive when creating a new
     Kedro project, based on what information was already made available
@@ -558,6 +570,7 @@ def _select_prompts_to_display(
         del prompts_required["project_name"]
 
     if example_pipeline is not None:
+        _validate_regex("yes_no", example_pipeline)
         del prompts_required["example_pipeline"]
 
     return prompts_required
@@ -775,6 +788,7 @@ def _validate_config_file_inputs(config: dict[str, str]):
 
     selected_add_ons = _parse_add_ons_input(input_add_ons)
     _validate_selection(selected_add_ons)
+    _validate_regex("yes_no", config.get("example_pipeline", "no"))
 
 
 def _validate_selection(add_ons: list[str]):

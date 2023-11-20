@@ -18,8 +18,8 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
     _convert_addon_names_to_numbers,
     _parse_add_ons_input,
+    _parse_yes_no_to_bool,
     _validate_selection,
-    _validate_yn,
 )
 
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 15
@@ -89,7 +89,7 @@ def _get_expected_files(add_ons: str, example_pipeline: str):
         "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each add-on
     add_ons_list = _parse_add_ons_input(add_ons)
-    example_pipeline_bool = _validate_yn(None, None, example_pipeline)
+    example_pipeline_bool = _parse_yes_no_to_bool(example_pipeline)
     expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
 
     for add_on in add_ons_list:

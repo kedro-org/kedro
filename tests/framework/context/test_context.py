@@ -232,6 +232,7 @@ class TestKedroContext:
 
     def test_set_new_attribute(self, dummy_context):
         dummy_context.mlflow = 1
+        assert dummy_context.mlflow == 1
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader

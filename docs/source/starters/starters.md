@@ -82,4 +82,3 @@ kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark
 ```
 
 This option is useful when the starter requires more configuration than the default mode requires.
-

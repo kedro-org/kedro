@@ -14,7 +14,7 @@ kedro new
 ```
 
 ### Tools to configure the new project
-After you enter `kedro new`, the command line interface will ask which tools you'd like to include, which will depend on the requirements of your project. 
+After you enter `kedro new`, the command line interface will ask which tools you'd like to include, which will depend on the requirements of your project.
 
 Add one or more of the options, or follow the default and add none at all:
 
@@ -68,7 +68,7 @@ python_package: test_kedro
 ```
 ## Create a new project containing starter code
 
-You can create a new Kedro project with a [starter](../starters/starters.md) that adds a set of code for a common project use case from the [range available](../starters/starters.md). 
+You can create a new Kedro project with a [starter](../starters/starters.md) that adds a set of code for a common project use case from the [range available](../starters/starters.md).
 
 The following illustrates a project created with example code for the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). Navigate to your preferred directory and type the following:
 

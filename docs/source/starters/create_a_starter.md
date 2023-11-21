@@ -94,7 +94,7 @@ Here is the layout of the project as a Cookiecutter template:
 
 ## Extend starter aliases
 
-You can add an alias by creating a plugin using `kedro.starters` entry point which enables you to call `kedro new --starter=your_starters`. That is, it can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. 
+You can add an alias by creating a plugin using `kedro.starters` entry point which enables you to call `kedro new --starter=your_starters`. That is, it can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments.
 
 A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`.
 

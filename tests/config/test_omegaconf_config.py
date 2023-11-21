@@ -723,7 +723,6 @@ class TestOmegaConfigLoader:
         _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", {"k3": "v3", "_k2": "v4"})
 
         conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
-        conf.default_run_env = ""
         catalog = conf["catalog"]
         assert catalog.keys() == {"k1", "k3"}
 
@@ -1229,21 +1228,23 @@ class TestOmegaConfigLoaderStandalone:
         )
 
     def test_load_config_only_base_environment(self, tmp_path):
-        base_parameters = tmp_path / _BASE_ENV / "parameters.yml"
+        dummy_env = "dummy_base_env"
+        base_parameters = tmp_path / dummy_env / "parameters.yml"
         base_parameters_config = {"dummy": "base"}
 
         _write_yaml(base_parameters, base_parameters_config)
 
-        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
+        conf = OmegaConfigLoader(tmp_path, base_env=dummy_env)
         assert conf["parameters"]["dummy"] == "base"
 
     def test_load_config_only_default_run_environment(self, tmp_path):
-        default_env_parameters = tmp_path / _DEFAULT_RUN_ENV / "parameters.yml"
+        dummy_env = "dummy_base_env"
+        default_env_parameters = tmp_path / dummy_env / "parameters.yml"
         default_env_parameters_config = {"dummy": "default"}
 
         _write_yaml(default_env_parameters, default_env_parameters_config)
 
-        conf = OmegaConfigLoader(tmp_path, default_run_env=_DEFAULT_RUN_ENV)
+        conf = OmegaConfigLoader(tmp_path, default_run_env=dummy_env)
         assert conf["parameters"]["dummy"] == "default"
 
     def test_variable_interpolation_in_catalog_with_templates(self, tmp_path):

@@ -37,7 +37,6 @@
 * Added the `--addons` flag to the `kedro new` command.
 * Added the `--name` flag to the `kedro new` command.
 * Removed `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
-* Removed the custom Kedro syntax for `--params`, use the OmegaConf syntax instead.
 
 ### ConfigLoader
 * Made `OmegaConfigLoader` the default config loader.
@@ -53,6 +52,7 @@
 * The `spaceflights` starter has been renamed to `spaceflights-pandas`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+* Removed the custom Kedro syntax for `--params`, use the OmegaConf syntax instead by replacing `:` with `=`.
 
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.

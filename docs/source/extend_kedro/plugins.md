@@ -65,12 +65,12 @@ starters = [
     KedroStarterSpec(
         alias="test_plugin_starter",
         template_path="https://github.com/kedro-org/kedro-starters/",
-        directory="pandas-iris",
+        directory="spaceflights-pandas",
     )
 ]
 ```
 
-The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. For an example, see the [pandas-iris starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris).
+The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. For an example, see the [spaceflights-pandas starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas).
 
 In your `pyproject.toml`, you need to register the specifications to `kedro.starters`:
 
@@ -145,7 +145,7 @@ from kedro.framework.hooks import hook_impl
 
 class MyHooks:
     @hook_impl
-    def after_catalog_created(self, catalog):  # pylint: disable=unused-argument
+    def after_catalog_created(self, catalog):
         logging.info("Reached after_catalog_created hook")
 
 

@@ -3,15 +3,15 @@ from io import StringIO
 
 import pytest
 import yaml
+from kedro_datasets.pandas import CSVDataset
 
-from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io import CachedDataset, DataCatalog, DatasetError, MemoryDataset
 
 YML_CONFIG = """
 test_ds:
   type: CachedDataset
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataSet
+    type: kedro_datasets.pandas.CSVDataset
     filepath: example.csv
 """
 
@@ -20,7 +20,7 @@ test_ds:
   type: CachedDataset
   versioned: true
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataSet
+    type: kedro_datasets.pandas.CSVDataset
     filepath: example.csv
 """
 
@@ -28,7 +28,7 @@ YML_CONFIG_VERSIONED_BAD = """
 test_ds:
   type: CachedDataset
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataSet
+    type: kedro_datasets.pandas.CSVDataset
     filepath: example.csv
     versioned: true
 """
@@ -60,10 +60,10 @@ class TestCachedDataset:
 
         cached_ds.save(42)
         assert cached_ds.load() == 42
-        assert wrapped.load.call_count == 0  # pylint: disable=no-member
-        assert wrapped.save.call_count == 1  # pylint: disable=no-member
-        assert cached_ds._cache.load.call_count == 1  # pylint: disable=no-member
-        assert cached_ds._cache.save.call_count == 1  # pylint: disable=no-member
+        assert wrapped.load.call_count == 0
+        assert wrapped.save.call_count == 1
+        assert cached_ds._cache.load.call_count == 1
+        assert cached_ds._cache.save.call_count == 1
 
     def test_load_empty_cache(self, mocker):
         wrapped = MemoryDataset(-42)
@@ -73,16 +73,16 @@ class TestCachedDataset:
         mocker.spy(cached_ds._cache, "load")
 
         assert cached_ds.load() == -42
-        assert wrapped.load.call_count == 1  # pylint: disable=no-member
-        assert cached_ds._cache.load.call_count == 0  # pylint: disable=no-member
+        assert wrapped.load.call_count == 1
+        assert cached_ds._cache.load.call_count == 0
 
     def test_from_yaml(self, mocker):
         config = yaml.safe_load(StringIO(YML_CONFIG))
         catalog = DataCatalog.from_config(config)
         assert catalog.list() == ["test_ds"]
         mock = mocker.Mock()
-        assert isinstance(catalog._data_sets["test_ds"]._dataset, CSVDataSet)
-        catalog._data_sets["test_ds"]._dataset = mock
+        assert isinstance(catalog._datasets["test_ds"]._dataset, CSVDataset)
+        catalog._datasets["test_ds"]._dataset = mock
         catalog.save("test_ds", 20)
 
         assert catalog.load("test_ds") == 20
@@ -101,7 +101,7 @@ class TestCachedDataset:
     def test_config_good_version(self):
         config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED))
         catalog = DataCatalog.from_config(config, load_versions={"test_ds": "42"})
-        assert catalog._data_sets["test_ds"]._dataset._version.load == "42"
+        assert catalog._datasets["test_ds"]._dataset._version.load == "42"
 
     def test_config_bad_version(self):
         config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED_BAD))

@@ -84,7 +84,7 @@ To follow this tutorial, ensure you have the following:
     pip install kedro-airflow~=0.4
     ```
 
-5. Run `pip install -r src/requirements.txt` to install all dependencies.
+5. Run `pip install -r requirements.txt` to install all dependencies.
 
 ### Deployment process
 
@@ -95,25 +95,25 @@ To follow this tutorial, ensure you have the following:
 
 ```yaml
 example_iris_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/iris.csv
 example_train_x:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/05_model_input/example_train_x.pkl
 example_train_y:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/05_model_input/example_train_y.pkl
 example_test_x:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/05_model_input/example_test_x.pkl
 example_test_y:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/05_model_input/example_test_y.pkl
 example_model:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/06_models/example_model.pkl
 example_predictions:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/07_model_output/example_predictions.pkl
 ```
 

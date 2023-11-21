@@ -250,7 +250,7 @@ class Pipeline:  # noqa: too-many-public-methods
         """
         return self._remove_intermediates(self.all_outputs())
 
-    def data_sets(self) -> set[str]:
+    def datasets(self) -> set[str]:
         """The names of all data sets used by the ``Pipeline``,
         including inputs and outputs.
 
@@ -261,7 +261,7 @@ class Pipeline:  # noqa: too-many-public-methods
         return self.all_outputs() | self.all_inputs()
 
     def _transcode_compatible_names(self):
-        return {_strip_transcoding(ds) for ds in self.data_sets()}
+        return {_strip_transcoding(ds) for ds in self.datasets()}
 
     def describe(self, names_only: bool = True) -> str:
         """Obtain the order of execution and expected free input variables in
@@ -442,10 +442,10 @@ class Pipeline:  # noqa: too-many-public-methods
             Set of ``Nodes`` that use the given datasets as inputs.
         """
         missing = sorted(
-            datasets - self.data_sets() - self._transcode_compatible_names()
+            datasets - self.datasets() - self._transcode_compatible_names()
         )
         if missing:
-            raise ValueError(f"Pipeline does not contain data_sets named {missing}")
+            raise ValueError(f"Pipeline does not contain datasets named {missing}")
 
         relevant_nodes = set()
         for input_ in datasets:
@@ -473,10 +473,10 @@ class Pipeline:  # noqa: too-many-public-methods
             Set of ``Nodes`` that output to the given datasets.
         """
         missing = sorted(
-            datasets - self.data_sets() - self._transcode_compatible_names()
+            datasets - self.datasets() - self._transcode_compatible_names()
         )
         if missing:
-            raise ValueError(f"Pipeline does not contain data_sets named {missing}")
+            raise ValueError(f"Pipeline does not contain datasets named {missing}")
 
         relevant_nodes = set()
         for output in datasets:

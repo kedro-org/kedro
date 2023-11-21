@@ -4,7 +4,7 @@ import textwrap
 
 import pytest
 
-from kedro.config import ConfigLoader, TemplatedConfigLoader
+from kedro.config import OmegaConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings, validate_settings
 from kedro.framework.session.shelvestore import ShelveStore
@@ -20,7 +20,7 @@ class MyDataCatalog(DataCatalog):
     pass
 
 
-class ProjectHooks:  # pylint: disable=too-few-public-methods
+class ProjectHooks:
     pass
 
 
@@ -50,8 +50,8 @@ def mock_package_name_with_settings_file(tmpdir):
                 CONTEXT_CLASS = MyContext
                 CONF_SOURCE = "test_conf"
 
-                from kedro.config import TemplatedConfigLoader
-                CONFIG_LOADER_CLASS = TemplatedConfigLoader
+                from kedro.config import OmegaConfigLoader
+                CONFIG_LOADER_CLASS = OmegaConfigLoader
                 CONFIG_LOADER_ARGS = {{
                      "globals_pattern": "*globals.yml",
                 }}
@@ -89,8 +89,11 @@ def test_settings_without_configure_project_shows_default_values():
     assert settings.SESSION_STORE_ARGS == {}
     assert settings.CONTEXT_CLASS is KedroContext
     assert settings.CONF_SOURCE == "conf"
-    assert settings.CONFIG_LOADER_CLASS == ConfigLoader
-    assert settings.CONFIG_LOADER_ARGS == {}
+    assert settings.CONFIG_LOADER_CLASS == OmegaConfigLoader
+    assert settings.CONFIG_LOADER_ARGS == {
+        "base_env": "base",
+        "default_run_env": "local",
+    }
     assert settings.DATA_CATALOG_CLASS == DataCatalog
 
 
@@ -104,7 +107,7 @@ def test_settings_after_configuring_project_shows_updated_values(
     assert settings.SESSION_STORE_ARGS == {"path": "./sessions"}
     assert settings.CONTEXT_CLASS is MyContext
     assert settings.CONF_SOURCE == "test_conf"
-    assert settings.CONFIG_LOADER_CLASS == TemplatedConfigLoader
+    assert settings.CONFIG_LOADER_CLASS == OmegaConfigLoader
     assert settings.CONFIG_LOADER_ARGS == {"globals_pattern": "*globals.yml"}
     assert settings.DATA_CATALOG_CLASS == MyDataCatalog
 

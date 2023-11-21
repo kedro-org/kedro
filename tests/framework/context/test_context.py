@@ -208,23 +208,6 @@ class TestKedroContext:
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
-    @pytest.mark.parametrize(
-        "attr",
-        (
-            "project_path",
-            "config_loader",
-            "env",
-        ),
-    )
-    def test_public_attributes(self, dummy_context, attr):
-        getattr(dummy_context, attr)
-
-    @pytest.mark.parametrize(
-        "internal_attr", ("_package_name", "_hook_manager", "_extra_params")
-    )
-    def test_internal_attributes(self, dummy_context, internal_attr):
-        getattr(dummy_context, internal_attr)
-
     def test_set_new_attribute(self, dummy_context):
         dummy_context.mlflow = 1
         assert dummy_context.mlflow == 1

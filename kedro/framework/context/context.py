@@ -171,10 +171,10 @@ class KedroContext:
     Args:
         project_path: Project path to define the context for.
         config_loader: Kedro's ``OmegaConfigLoader`` for loading the configuration files.
-        package_name: Package name for the Kedro project the context is
-            created for.
         env: Optional argument for configuration default environment to be used
             for running the pipeline. If not specified, it defaults to "local".
+        package_name: Package name for the Kedro project the context is
+            created for.
         hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
         extra_params: Optional dictionary containing extra project parameters.
             If specified, will update (and therefore take precedence over)

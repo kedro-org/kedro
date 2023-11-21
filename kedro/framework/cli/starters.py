@@ -88,26 +88,9 @@ class KedroStarterSpec:  # noqa: too-few-public-methods
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
-_DEPRECATED_STARTERS = [
-    "pandas-iris",
-    "pyspark-iris",
-    "pyspark",
-    "standalone-datacatalog",
-]
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
-    # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external)
-    # documentation and tutorials still refer to `astro-iris`. We create an alias to
-    # check if a user has entered old `astro-iris` as the starter name and changes it
-    # to `astro-airflow-iris`.
-    KedroStarterSpec("astro-iris", _STARTERS_REPO, "astro-airflow-iris"),
-    KedroStarterSpec(
-        "standalone-datacatalog", _STARTERS_REPO, "standalone-datacatalog"
-    ),
-    KedroStarterSpec("pandas-iris", _STARTERS_REPO, "pandas-iris"),
-    KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
-    KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
     KedroStarterSpec(
         "spaceflights-pandas-viz", _STARTERS_REPO, "spaceflights-pandas-viz"
@@ -123,7 +106,6 @@ for starter_spec in _OFFICIAL_STARTER_SPECS:
     starter_spec.origin = "kedro"
 
 _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
-
 
 ADD_ONS_SHORTNAME_TO_NUMBER = {
     "lint": "1",
@@ -382,13 +364,6 @@ def _get_starters_dict() -> dict[str, KedroStarterSpec]:
     {"astro-airflow-iris":
         KedroStarterSpec(
             name="astro-airflow-iris",
-            template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris",
-            origin="kedro"
-        ),
-    "astro-iris":
-        KedroStarterSpec(
-            name="astro-iris",
             template_path="git+https://github.com/kedro-org/kedro-starters.git",
             directory="astro-airflow-iris",
             origin="kedro"

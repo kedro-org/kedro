@@ -105,11 +105,11 @@ def _remove_file(path: Path) -> None:
         path.unlink()
 
 
-def _remove_pyspark_viz_starter_files(is_Viz: bool, python_package_name: str) -> None:
+def _remove_pyspark_viz_starter_files(is_viz: bool, python_package_name: str) -> None:
     """Clean up the unnecessary files in the starters template.
 
     Args:
-        is_Viz (bool): if Viz included in starter, then need to remove "reporting" folder.
+        is_viz (bool): if Viz included in starter, then need to remove "reporting" folder.
         python_package_name (str): The name of the python package.
     """
     # Remove all .csv and .xlsx files from data/01_raw/
@@ -130,7 +130,7 @@ def _remove_pyspark_viz_starter_files(is_Viz: bool, python_package_name: str) ->
             _remove_file(param_file)
 
     # Remove the pipelines subdirectories, if Viz - also "reporting" folder
-    pipelines_to_remove = ["data_science", "data_processing"] + (["reporting"] if is_Viz else [])
+    pipelines_to_remove = ["data_science", "data_processing"] + (["reporting"] if is_viz else [])
 
     pipelines_path = current_dir / f"src/{python_package_name}/pipelines/"
     for pipeline_subdir in pipelines_to_remove:

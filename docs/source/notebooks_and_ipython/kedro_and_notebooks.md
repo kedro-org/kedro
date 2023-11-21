@@ -4,15 +4,11 @@ This page explains how to use a Jupyter notebook to explore elements of a Kedro 
 
 This page also explains how to use line magic to display a Kedro-Viz visualisation of your pipeline directly in your notebook.
 
-## Iris dataset example
+## Example project
 
-Create a sample Kedro project with the [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) as we showed in the [get started documentation](../get_started/new_project.md#create-a-new-project-containing-starter-code):
-
-```bash
-kedro new --starter=pandas-iris
-```
-
-We will assume you call the project `iris`, but you can call it whatever you choose.
+The example adds a notebook to experiment with the retired [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris). As an alternative, you can follow the example using a different starter, such as [`pandas-spaceflights`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-spaceflights) or just add a notebook to your own project.
+	
+We will assume the example project is called `iris`, but you can call it whatever you choose.
 
 Navigate to the project directory (`cd iris`) and issue the following command in the terminal to launch Jupyter:
 

@@ -44,10 +44,10 @@ To follow this tutorial, ensure you have the following:
     astro dev init
     ```
 
-2. Create a new Kedro project using the `pandas-iris` starter. You can use the default value in the project creation process:
+2. Create a new Kedro project using the `astro-airflow-iris` starter. You can use the default value in the project creation process:
 
     ```shell
-    kedro new --starter=pandas-iris
+    kedro new --starter=astro-airflow-iris
     ```
 
 3. Copy all files and directories under `new-kedro-project`, which was the default project name created in step 2, to the root directory so Kedro and Astro CLI share the same project root:

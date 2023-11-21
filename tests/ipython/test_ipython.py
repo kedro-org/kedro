@@ -226,7 +226,7 @@ class TestLoadIPythonExtension:
             ". --env=base",
             "--env=base",
             "-e base",
-            ". --env=base --params=key:val",
+            ". --env=base --params=key=val",
             "--conf-source=new_conf",
         ],
     )

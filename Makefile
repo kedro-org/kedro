@@ -12,6 +12,10 @@ lint:
 test:
 	pytest --numprocesses 4 --dist loadfile
 
+show-coverage:
+	coverage html --show-contexts || true
+	open htmlcov/index.html
+
 e2e-tests:
 	behave --tags=-skip
 

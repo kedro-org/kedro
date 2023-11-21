@@ -105,7 +105,7 @@ def _remove_file(path: Path) -> None:
         path.unlink()
 
 
-def _handle_PySpark_Viz_starter_setup(is_Viz: bool, python_package_name: str) -> None:
+def _remove_pyspark_viz_starter_files(is_Viz: bool, python_package_name: str) -> None:
     """Clean up the unnecessary files in the starters template.
 
     Args:
@@ -171,7 +171,7 @@ def setup_template_add_ons(selected_add_ons_list: str, requirements_file_path: s
         _remove_dir(current_dir / "data")
 
     if ("Pyspark" in selected_add_ons_list or "Kedro Viz" in selected_add_ons_list) and example_pipeline != "True":
-        _handle_PySpark_Viz_starter_setup("Kedro Viz" in selected_add_ons_list, python_package_name)
+        _remove_pyspark_viz_starter_files("Kedro Viz" in selected_add_ons_list, python_package_name)
 
 
 def sort_requirements(requirements_file_path: Path) -> None:

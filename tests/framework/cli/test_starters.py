@@ -94,7 +94,7 @@ def _get_expected_files(add_ons: str, example_pipeline: str):
 
     for add_on in add_ons_list:
         expected_files = expected_files + add_ons_template_files[add_on]
-    # If example pipeline was choosen we don't need to delete /data folder
+    # If example pipeline was chosen we don't need to delete /data folder
     if example_pipeline_bool and "5" not in add_ons_list:
         expected_files += add_ons_template_files["5"]
     example_files_count = [

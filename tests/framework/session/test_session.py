@@ -1,9 +1,12 @@
 import logging
 import re
 import subprocess
+import sys
 import textwrap
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Any, Type
+from unittest.mock import create_autospec
 
 import pytest
 import toml
@@ -13,7 +16,6 @@ from omegaconf import OmegaConf
 from kedro import __version__ as kedro_version
 from kedro.config import AbstractConfigLoader, OmegaConfigLoader
 from kedro.framework.cli.utils import _split_params
-from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     LOGGING,
     ValidationError,
@@ -23,7 +25,7 @@ from kedro.framework.project import (
     _ProjectSettings,
 )
 from kedro.framework.session import KedroSession
-from kedro.framework.session.session import KedroSessionError
+from kedro.framework.session.session import KedroContext, KedroSessionError
 from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
 
@@ -43,6 +45,36 @@ class BadConfigLoader:
     """
 
 
+ATTRS_ATTRIBUTE = "__attrs_attrs__"
+
+NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
+
+
+def create_attrs_autospec(spec: Type, spec_set: bool = True) -> Any:
+    """Creates a mock of an attr class (creates mocks recursively on all attributes).
+    https://github.com/python-attrs/attrs/issues/462#issuecomment-1134656377
+
+    :param spec: the spec to mock
+    :param spec_set: if True, AttributeError will be raised if an attribute that is not in the spec is set.
+    """
+
+    if not hasattr(spec, ATTRS_ATTRIBUTE):
+        raise TypeError(f"{spec!r} is not an attrs class")
+    mock = create_autospec(spec, spec_set=spec_set)
+    for attribute in getattr(spec, ATTRS_ATTRIBUTE):
+        attribute_type = attribute.type
+        if NEW_TYPING:
+            # A[T] does not get a copy of __dict__ from A(Generic[T]) anymore, use __origin__ to get it
+            while hasattr(attribute_type, "__origin__"):
+                attribute_type = attribute_type.__origin__
+        if hasattr(attribute_type, ATTRS_ATTRIBUTE):
+            mock_attribute = create_attrs_autospec(attribute_type, spec_set)
+        else:
+            mock_attribute = create_autospec(attribute_type, spec_set=spec_set)
+        object.__setattr__(mock, attribute.name, mock_attribute)
+    return mock
+
+
 @pytest.fixture
 def mock_runner(mocker):
     mock_runner = mocker.patch(
@@ -55,7 +87,12 @@ def mock_runner(mocker):
 
 @pytest.fixture
 def mock_context_class(mocker):
-    return mocker.patch("kedro.framework.session.session.KedroContext", autospec=True)
+    mock_cls = create_attrs_autospec(KedroContext)
+    return mocker.patch(
+        "kedro.framework.session.session.KedroContext",
+        autospec=True,
+        return_value=mock_cls,
+    )
 
 
 def _mock_imported_settings_paths(mocker, mock_settings):
@@ -75,6 +112,7 @@ def mock_settings(mocker):
 @pytest.fixture
 def mock_settings_context_class(mocker, mock_context_class):
     class MockSettings(_ProjectSettings):
+        # dynaconf automatically deleted some attribute when the class is MagicMock
         _CONTEXT_CLASS = Validator(
             "CONTEXT_CLASS", default=lambda *_: mock_context_class
         )

@@ -16,7 +16,7 @@ from attrs.exceptions import FrozenInstanceError
 from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
-from kedro.config import MissingConfigException, OmegaConfigLoader
+from kedro.config import MissingConfigException
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
@@ -26,9 +26,10 @@ from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.project import (
     ValidationError,
     _ProjectSettings,
-    configure_project,
     pipelines,
 )
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
 
 MOCK_PACKAGE_NAME = "mock_package_name"
 
@@ -120,15 +121,19 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     env_catalog = tmp_path / "conf" / str(env) / "catalog.yml"
     env_credentials = tmp_path / "conf" / str(env) / "credentials.yml"
     parameters = tmp_path / "conf" / "base" / "parameters.json"
-    db_config_path = tmp_path / "conf" / "base" / "db.ini"
     project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
+
+    # Create configurations
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
     _write_yaml(env_credentials, local_config)
     _write_json(parameters, project_parameters)
-    _write_dummy_ini(db_config_path)
 
     _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
+
+    # Create the necessary files in src/
+    (tmp_path / "src" / MOCK_PACKAGE_NAME).mkdir(parents=True, exist_ok=True)
+    (tmp_path / "src" / MOCK_PACKAGE_NAME / "__init__.py").write_text(" ")
 
 
 @pytest.fixture
@@ -188,8 +193,13 @@ def extra_params(request):
 
 @pytest.fixture
 def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
-    configure_project(MOCK_PACKAGE_NAME)
-    config_loader = OmegaConfigLoader(str(tmp_path / "conf"), env=env)
+    bootstrap_project(tmp_path)
+
+    session = KedroSession.create(
+        project_path=tmp_path, env=env, extra_params=extra_params
+    )
+    context = session.load_context()
+    config_loader = context.config_loader
     context = KedroContext(
         MOCK_PACKAGE_NAME,
         str(tmp_path),

@@ -111,7 +111,6 @@ def mock_settings(mocker):
 
 @pytest.fixture
 def mock_settings_context_class(mocker, mock_context_class):
-    # mocker.patch("dynaconf.base.LazySettings.unset")
     class MockSettings(_ProjectSettings):
         # dynaconf automatically deleted some attribute when the class is MagicMock
         _CONTEXT_CLASS = Validator(
@@ -640,9 +639,7 @@ class TestKedroSession:
                 "__default__": mocker.Mock(),
             },
         )
-        print(f"{mock_context_class=}")
         mock_context = mock_context_class.return_value
-        print(f"{mock_context=}")
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value

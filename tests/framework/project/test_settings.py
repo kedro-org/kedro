@@ -90,7 +90,10 @@ def test_settings_without_configure_project_shows_default_values():
     assert settings.CONTEXT_CLASS is KedroContext
     assert settings.CONF_SOURCE == "conf"
     assert settings.CONFIG_LOADER_CLASS == OmegaConfigLoader
-    assert settings.CONFIG_LOADER_ARGS == {}
+    assert settings.CONFIG_LOADER_ARGS == {
+        "base_env": "base",
+        "default_run_env": "local",
+    }
     assert settings.DATA_CATALOG_CLASS == DataCatalog
 
 

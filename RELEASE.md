@@ -8,7 +8,7 @@
 * Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
 * Modified the mechanism of importing datasets, raise more explicit error when dependencies are missing.
 * Added validation for configuration file used to override run commands via the CLI.
-
+* Moved the default environment `base` and `local` from config loader to `_ProjectSettings`. This enables the use of config loader as a standalone class without affecting existing Kedro Framework users.
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.
 * Reduced `spaceflights` data to minimise waiting times during tutorial execution.
@@ -53,6 +53,7 @@
 * The `spaceflights` starter has been renamed to `spaceflights-pandas`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+* Removed the custom Kedro syntax for `--params`, use the OmegaConf syntax instead by replacing `:` with `=`.
 
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.

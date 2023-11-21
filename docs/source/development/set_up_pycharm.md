@@ -61,7 +61,7 @@ Specify the **Run / Debug Configuration** name in the **Name** field, and edit t
 ![](../meta/images/pycharm_edit_py_run_config.png)
 
 ```{note}
-**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/logging.md#default-framework-side-logging-configuration).
+**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/index.md).
 ```
 
 To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar (if that toolbar is not visible, you can enable it by going to **View > Toolbar**). Click the green triangle:
@@ -72,7 +72,7 @@ You may also select **Run** from the toolbar and execute from there. <br />
 
 ![](../meta/images/pycharm_conf_run_dropdown.png)
 
-For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (e.g., `test`, `package`, `build-docs` etc.).
+For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (e.g., `jupyter`, `package`, `registry` etc.).
 
 
 ## Debugging

@@ -51,7 +51,10 @@ The Kedro team maintains the following starters for a range of Kedro projects:
 * [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris): The [Kedro Iris dataset example project](../get_started/new_project.md)
 * [`pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../integrations/pyspark_integration.md)
 * [`pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../integrations/pyspark_integration.md)
-* [`spaceflights`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code
+* [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pandas` datasets.
+* [`spaceflights-pandas-viz`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pandas` datasets and visualisation and experiment tracking `kedro-viz` features.
+* [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pyspark` datasets.
+* [`spaceflights-pyspark-viz`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pyspark` datasets and visualisation and experiment tracking `kedro-viz` features.
 
 ## Starter versioning
 
@@ -155,7 +158,6 @@ Here is the layout of the project as a Cookiecutter template:
 ├── docs                         # Project documentation
 ├── notebooks                    # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
 ├── README.md                    # Project README
-├── .flake8                      # Configuration options for `flake8` (linting)
 └── src                          # Project source code
     └── {{ cookiecutter.python_package }}
        ├── __init.py__

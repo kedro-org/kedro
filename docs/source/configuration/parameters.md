@@ -74,9 +74,7 @@ You can use `add_feed_dict()` to inject any other entries into your `DataCatalog
 
 ## How to load parameters in code
 
-Parameters project configuration can be loaded by any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
-
-The following examples all make use of the `OmegaConfigLoader` class.
+Parameters project configuration can be loaded by the configuration loader class, which is `OmegaConfigLoader` by default.
 
 ```python
 from kedro.config import OmegaConfigLoader

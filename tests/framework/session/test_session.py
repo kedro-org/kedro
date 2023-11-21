@@ -128,6 +128,17 @@ def mock_settings_config_loader_args(mocker):
 
 
 @pytest.fixture
+def mock_settings_config_loader_args_env(mocker):
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_ARGS = Validator(
+            "CONFIG_LOADER_ARGS",
+            default={"base_env": "something_new"},
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
 def mock_settings_file_bad_config_loader_class(tmpdir):
     mock_settings_file = tmpdir.join("mock_settings_file.py")
     mock_settings_file.write(
@@ -384,6 +395,28 @@ class TestKedroSession:
             return_value=["spark/*"],
         )
         assert result["spark"] == ["spark/*"]
+
+    @pytest.mark.usefixtures("mock_settings_config_loader_args")
+    def test_config_loader_args_dont_overwrite_env(
+        self, fake_project, mock_package_name, mocker
+    ):
+        session = KedroSession.create(mock_package_name, fake_project)
+        result = session._get_config_loader()
+
+        assert isinstance(result, OmegaConfigLoader)
+        assert result.base_env == "base"
+        assert result.default_run_env == "local"
+
+    @pytest.mark.usefixtures("mock_settings_config_loader_args_env")
+    def test_config_loader_args_overwrite_env(
+        self, fake_project, mock_package_name, mocker
+    ):
+        session = KedroSession.create(mock_package_name, fake_project)
+        result = session._get_config_loader()
+
+        assert isinstance(result, OmegaConfigLoader)
+        assert result.base_env == "something_new"
+        assert result.default_run_env == ""
 
     def test_broken_config_loader(self, mock_settings_file_bad_config_loader_class):
         pattern = (

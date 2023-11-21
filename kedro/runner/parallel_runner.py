@@ -7,7 +7,6 @@ import multiprocessing
 import os
 import pickle
 import sys
-import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
@@ -18,7 +17,6 @@ from typing import Any, Iterable
 
 from pluggy import PluginManager
 
-from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import (
     _create_hook_manager,
     _register_hooks,
@@ -32,9 +30,6 @@ from kedro.runner.runner import AbstractRunner, run_node
 
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-_SharedMemoryDataSet: type[_SharedMemoryDataset]
 
 
 class _SharedMemoryDataset:
@@ -72,19 +67,6 @@ class _SharedMemoryDataset:
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
             raise exc
-
-
-def __getattr__(name):
-    if name == "_SharedMemoryDataSet":
-        alias = _SharedMemoryDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 class ParallelRunnerManager(SyncManager):
@@ -181,7 +163,7 @@ class ParallelRunner(AbstractRunner):
     def __del__(self):
         self._manager.shutdown()
 
-    def create_default_data_set(  # type: ignore
+    def create_default_dataset(  # type: ignore
         self, ds_name: str
     ) -> _SharedMemoryDataset:
         """Factory method for creating the default dataset for the runner.
@@ -223,15 +205,15 @@ class ParallelRunner(AbstractRunner):
         will not be synchronized across threads.
         """
 
-        data_sets = catalog._data_sets  # noqa: protected-access
+        datasets = catalog._datasets  # noqa: protected-access
 
         unserialisable = []
-        for name, data_set in data_sets.items():
-            if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
+        for name, dataset in datasets.items():
+            if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
                 unserialisable.append(name)
                 continue
             try:
-                ForkingPickler.dumps(data_set)
+                ForkingPickler.dumps(dataset)
             except (AttributeError, PicklingError):
                 unserialisable.append(name)
 
@@ -246,11 +228,11 @@ class ParallelRunner(AbstractRunner):
             )
 
         memory_datasets = []
-        for name, data_set in data_sets.items():
+        for name, dataset in datasets.items():
             if (
                 name in pipeline.all_outputs()
-                and isinstance(data_set, MemoryDataset)
-                and not isinstance(data_set, BaseProxy)
+                and isinstance(dataset, MemoryDataset)
+                and not isinstance(dataset, BaseProxy)
             ):
                 memory_datasets.append(name)
 
@@ -355,16 +337,16 @@ class ParallelRunner(AbstractRunner):
                     # Decrement load counts, and release any datasets we
                     # have finished with. This is particularly important
                     # for the shared, default datasets we created above.
-                    for data_set in node.inputs:
-                        load_counts[data_set] -= 1
+                    for dataset in node.inputs:
+                        load_counts[dataset] -= 1
                         if (
-                            load_counts[data_set] < 1
-                            and data_set not in pipeline.inputs()
+                            load_counts[dataset] < 1
+                            and dataset not in pipeline.inputs()
                         ):
-                            catalog.release(data_set)
-                    for data_set in node.outputs:
+                            catalog.release(dataset)
+                    for dataset in node.outputs:
                         if (
-                            load_counts[data_set] < 1
-                            and data_set not in pipeline.outputs()
+                            load_counts[dataset] < 1
+                            and dataset not in pipeline.outputs()
                         ):
-                            catalog.release(data_set)
+                            catalog.release(dataset)

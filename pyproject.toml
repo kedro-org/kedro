@@ -144,6 +144,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
 addopts="""
+--cov-context test  \
 --cov-config pyproject.toml \
 --cov-report xml:coverage.xml \
 --cov-report term-missing \

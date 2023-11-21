@@ -6,7 +6,7 @@ This page also explains how to use line magic to display a Kedro-Viz visualisati
 
 ## Iris dataset example
 
-Create a sample Kedro project with the [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) as we showed in the [get started documentation](../get_started/new_project.md#create-a-new-project-containing-example-code):
+Create a sample Kedro project with the [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) as we showed in the [get started documentation](../get_started/new_project.md#create-a-new-project-containing-starter-code):
 
 ```bash
 kedro new --starter=pandas-iris

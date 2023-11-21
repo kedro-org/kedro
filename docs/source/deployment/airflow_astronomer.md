@@ -15,7 +15,7 @@ The following tutorial uses a different approach and shows how to deploy a Kedro
 
 [Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster easily in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
 
-The tutorial discusses how to run the [example Iris classification pipeline](../get_started/new_project.md#create-a-new-project-containing-example-code) on a local Airflow cluster with Astronomer. You may also consider using our [`astro-airflow-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris) which provides a template containing the boilerplate code that the tutorial describes:
+The tutorial discusses how to run the [example Iris classification pipeline](../get_started/new_project.md#create-a-new-project-containing-starter-code) on a local Airflow cluster with Astronomer. You may also consider using our [`astro-airflow-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris) which provides a template containing the boilerplate code that the tutorial describes:
 
 ```shell
 kedro new --starter=astro-airflow-iris

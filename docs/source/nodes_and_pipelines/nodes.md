@@ -188,7 +188,7 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 ### Set up the project
 
-To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the `pandas-iris` starter. If you haven't already created a Kedro project, you can follow the [get started guide](../get_started/new_project.md#create-a-new-project-containing-example-code) to create it.
+To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the `pandas-iris` starter. If you haven't already created a Kedro project, you can follow the [get started guide](../get_started/new_project.md#create-a-new-project-containing-starter-code) to create it.
 
 Create the project with this command:
 ```bash

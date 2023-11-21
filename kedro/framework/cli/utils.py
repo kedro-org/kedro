@@ -432,27 +432,24 @@ def _split_params(ctx, param, value):
     dot_list = []
     for item in split_string(ctx, param, value):
         equals_idx = item.find("=")
-        colon_idx = item.find(":")
-        if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
-            # For cases where key-value pair is separated by = and the value contains a colon
-            # which should not be replaced by =
-            pass
-        else:
-            item = item.replace(":", "=", 1)  # noqa: PLW2901
-        items = item.split("=", 1)
-        if len(items) != 2:  # noqa: PLR2004
+        if equals_idx == -1:
+            # If an equals sign is not found, fail with an error message.
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "
-                f"Item `{items[0]}` must contain "
-                f"a key and a value separated by `:` or `=`."
+                f"Item `{item}` must contain a key and a value separated by `=`."
             )
-        key = items[0].strip()
+        # Split the item into key and value
+        key, _, val = item.partition("=")
+        key = key.strip()
         if not key:
+            # If the key is empty after stripping whitespace, fail with an error message.
             ctx.fail(
                 f"Invalid format of `{param.name}` option: Parameter key "
                 f"cannot be an empty string."
             )
-        dot_list.append(item)
+        # Add "key=value" pair to dot_list.
+        dot_list.append(f"{key}={val}")
+
     conf = OmegaConf.from_dotlist(dot_list)
     return OmegaConf.to_container(conf)
 

@@ -105,7 +105,9 @@ class _ProjectSettings(LazySettings):
         "CONFIG_LOADER_CLASS",
         default=_get_default_class("kedro.config.OmegaConfigLoader"),
     )
-    _CONFIG_LOADER_ARGS = Validator("CONFIG_LOADER_ARGS", default={})
+    _CONFIG_LOADER_ARGS = Validator(
+        "CONFIG_LOADER_ARGS", default={"base_env": "base", "default_run_env": "local"}
+    )
     _DATA_CATALOG_CLASS = _IsSubclassValidator(
         "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
     )

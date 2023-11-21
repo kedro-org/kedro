@@ -12,7 +12,6 @@ import pandas as pd
 import pytest
 import toml
 import yaml
-from attrs.exceptions import FrozenInstanceError
 from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
@@ -201,11 +200,11 @@ def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
     context = session.load_context()
     config_loader = context.config_loader
     context = KedroContext(
-        MOCK_PACKAGE_NAME,
-        str(tmp_path),
+        project_path=str(tmp_path),
         config_loader=config_loader,
-        hook_manager=_create_hook_manager(),
         env=env,
+        package_name=MOCK_PACKAGE_NAME,
+        hook_manager=_create_hook_manager(),
         extra_params=extra_params,
     )
 
@@ -218,9 +217,9 @@ class TestKedroContext:
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
-    def test_immutable_instance(self, dummy_context):
-        with pytest.raises(FrozenInstanceError):
-            dummy_context.catalog = 1
+    def test_set_new_attribute(self, dummy_context):
+        dummy_context.mlflow = 1
+        assert dummy_context.mlflow == 1
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader

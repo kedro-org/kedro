@@ -866,7 +866,7 @@ class TestFlagsNotAllowed:
     def test_directory_flag_with_starter_alias(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--starter", "pyspark-iris", "--directory", "some-dir"],
+            ["new", "--starter", "spaceflights-pandas", "--directory", "some-dir"],
             input=_make_cli_prompt_input(),
         )
         assert result.exit_code != 0

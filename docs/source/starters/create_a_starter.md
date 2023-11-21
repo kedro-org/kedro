@@ -91,8 +91,49 @@ Here is the layout of the project as a Cookiecutter template:
     └── tests
 ```
 
-```{note}
-You can [add an alias by creating a plugin using `kedro.starters` entry point](../extend_kedro/plugins.md#extend-starter-aliases), which will allows you to do `kedro new --starter=your_starters` and shows up on shows up on `kedro starter list`.
+
+## Extend starter aliases
+
+You can add an alias by creating a plugin using `kedro.starters` entry point which enables you to call `kedro new --starter=your_starters`. That is, it can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. 
+
+A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`.
+
+You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
+
+Example for a non-git repository starter:
+```python
+# plugin.py
+starters = [
+    KedroStarterSpec(
+        alias="test_plugin_starter",
+        template_path="your_local_directory/starter_folder",
+    )
+]
 ```
 
+Example for a git repository starter:
+```python
+# plugin.py
+starters = [
+    KedroStarterSpec(
+        alias="test_plugin_starter",
+        template_path="https://github.com/kedro-org/kedro-starters/",
+        directory="spaceflights-pandas",
+    )
+]
+```
 
+The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. For an example, see the [spaceflights-pandas starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas).
+
+In your `pyproject.toml`, you need to register the specifications to `kedro.starters`:
+
+```toml
+[project.entry-points."kedro.starters"]
+starter = "plugin:starters"
+```
+
+After that you can use this starter with `kedro new --starter=test_plugin_starter`.
+
+```{note}
+If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.12`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
+```

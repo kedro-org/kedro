@@ -57,7 +57,7 @@ python_package: test_kedro
 ```
 ## Create a new project containing example code
 
-Use a [Kedro starter](../kedro_project_setup/starters.md) to create a project containing some sample code, to run as-is or to adapt and extend.
+Use a [Kedro starter](../starters/starters.md) to create a project containing some sample code, to run as-is or to adapt and extend.
 
 
 <!--TO DO-->
@@ -116,7 +116,7 @@ There are a few ways to create a new project once you have [set up Kedro](instal
 
 * You can [create a Kedro project populated with template code](#create-a-new-project-containing-example-code) that acts as a starter example. There is a [range of Kedro starter projects](../starters/starters.md#list-of-official-starters) available to use.
 * You can use `kedro new` to [create a basic Kedro project](#create-a-new-empty-project) containing project directories and basic code, but empty to extend as you need.
-* You can use `kedro new` and [pass in a configuration file](#create-a-new-project-from-a-configuration-file) to manually control project details such as the name, folder and package name.
+* You can use `kedro new` and [pass in a configuration file](#create-a-new-empty-project-from-a-configuration-file) to manually control project details such as the name, folder and package name.
 
 
 For any new project, once it is created, you need to navigate to its project folder and install its dependencies: `pip install -r requirements.txt`

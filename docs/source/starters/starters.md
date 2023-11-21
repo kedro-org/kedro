@@ -12,7 +12,7 @@ Kedro starters provide pre-defined example code and configuration that can be re
 * To add a `docker-compose` setup to launch Kedro next to a monitoring stack
 * To add deployment scripts and CI/CD setup for your targeted infrastructure
 
-You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).
+You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../starters/create_a_starter.md).
 
 ## How to use Kedro starters
 
@@ -50,11 +50,9 @@ kedro starter list
 
 The Kedro team maintains the following starters for a range of Kedro projects:
 
+The Kedro team maintains the following starters for a range of Kedro projects:
+
 * [`astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): The [Kedro Iris dataset example project](../get_started/new_project.md) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
-* [`standalone-datacatalog`](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog): A minimum setup to use the traditional [Iris dataset](https://www.kaggle.com/uciml/iris) with Kedro's [`DataCatalog`](../data/data_catalog.md), which is a core component of Kedro. This starter is of use in the exploratory phase of a project. It was formerly known as `mini-kedro`.
-* [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris): The [Kedro Iris dataset example project](../get_started/new_project.md)
-* [`pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../integrations/pyspark_integration.md)
-* [`pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../integrations/pyspark_integration.md)
 * [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pandas` datasets.
 * [`spaceflights-pandas-viz`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pandas` datasets and visualisation and experiment tracking `kedro-viz` features.
 * [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pyspark` datasets.
@@ -77,7 +75,7 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 By default, when you create a new project using a starter, `kedro new` asks you to enter the `project_name`, which it uses to set the `repo_name` and `python_package` name. This is the same behavior as when you [create a new empty project](../get_started/new_project.md#create-a-new-empty-project)
 
-However, Kedro also allows you to [specify a configuration file](../get_started/new_project.md#create-a-new-project-from-a-configuration-file) when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
+However, Kedro also allows you to [specify a configuration file](../get_started/new_project.md#create-a-new-empty-project-from-a-configuration-file) when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
 
 ```bash
 kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark

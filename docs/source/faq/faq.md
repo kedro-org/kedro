@@ -13,7 +13,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Kedro project development
 
-* [How do I write my own Kedro starter projects](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter)?
+* [How do I write my own Kedro starter projects](../starters/create_a_starter.md)?
 
 ## Configuration
 

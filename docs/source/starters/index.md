@@ -1,4 +1,4 @@
-# Add-ons and starters
+# New project tools
 
 
 <!--TO DO-->
@@ -8,6 +8,6 @@
 ```{toctree}
 :maxdepth: 1
 
-addons
+new_project_tools
 starters
 ```

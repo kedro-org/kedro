@@ -75,10 +75,10 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Kedro projects
 
+   starters/index.md
    configuration/index.md
    data/index.md
    nodes_and_pipelines/index.md
-   addons_and_starters/index.md
 
 .. toctree::
    :maxdepth: 2

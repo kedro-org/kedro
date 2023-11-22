@@ -12,8 +12,6 @@ We recommend that you use the same version of Kedro that was most recently used 
 
 In your terminal, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas). The project will be populated with a complete set of working example code:
 
-<!--TO DO-->
-<!--Addons flow or messages about addons in terminal need to be noted here-->
 
 ```bash
 kedro new --starter=spaceflights-pandas

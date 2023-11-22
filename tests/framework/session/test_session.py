@@ -435,15 +435,15 @@ class TestKedroSession:
         assert result["spark"] == ["spark/*"]
 
     @pytest.mark.usefixtures("mock_settings_config_loader_args")
-    def test_config_loader_args_dont_overwrite_env(
+    def test_config_loader_args_no_env_overwrites_env(
         self, fake_project, mock_package_name, mocker
     ):
         session = KedroSession.create(mock_package_name, fake_project)
         result = session._get_config_loader()
 
         assert isinstance(result, OmegaConfigLoader)
-        assert result.base_env == "base"
-        assert result.default_run_env == "local"
+        assert result.base_env == ""
+        assert result.default_run_env == ""
 
     @pytest.mark.usefixtures("mock_settings_config_loader_args_env")
     def test_config_loader_args_overwrite_env(

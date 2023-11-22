@@ -253,16 +253,11 @@ class KedroSession:
         extra_params = self.store.get("extra_params")
 
         config_loader_class = settings.CONFIG_LOADER_CLASS
-        config_loader_args = settings.CONFIG_LOADER_ARGS
-        if not (
-            "base_env" in config_loader_args or "default_run_env" in config_loader_args
-        ):
-            config_loader_args.update({"base_env": "base", "default_run_env": "local"})
         return config_loader_class(
             conf_source=self._conf_source,
             env=env,
             runtime_params=extra_params,
-            **config_loader_args,
+            **settings.CONFIG_LOADER_ARGS,
         )
 
     def close(self):

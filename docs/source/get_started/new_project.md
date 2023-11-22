@@ -41,7 +41,9 @@ So, if you enter "Get Started", the folder for the project (`repo_name`) is auto
 | The Python package name for the project (short, all-lowercase) | `python_package` | `get_started` |
 
 
-The output of `kedro new` is a directory containing all the project files and subdirectories required for a basic Kedro project. The exact code added for the project will depend on which tools you selected.
+After you enter `kedro new`, the command line interface will ask which tools you'd like to include, which will depend on the requirements of your project. The options are [described in more detail above](#tools-to-configure-the-new-project) and in the [documentation about the new project tools](../starters/new_project_tools.md).
+
+The output of `kedro new` is a directory containing all the project files and subdirectories required. The exact code added for the project will depend on which tools you selected.
 
 ### Create a basic project from a configuration file
 
@@ -50,7 +52,6 @@ To create a new project with custom directory and package names, navigate to you
 ```bash
 kedro new --config=<path>/config.yml
 ```
-
 The configuration file must contain:
 
 -   `output_dir` The path in which to create the project directory
@@ -66,6 +67,8 @@ project_name: My First Kedro Project
 repo_name: testing-kedro
 python_package: test_kedro
 ```
+
+
 ## Create a new project containing starter code
 
 You can create a new Kedro project with a [starter](../starters/starters.md) that adds a set of code for a common project use case from the [range available](../starters/starters.md).
@@ -76,8 +79,7 @@ The following illustrates a project created with example code for the [spaceflig
 kedro new --starter=pandas-spaceflights
 ```
 
-You will not be offered the opportunity to select different project tools as for the basic Kedro project above.
-
+After you enter `kedro new`, the command line interface will ask which tools you'd like to include, which will depend on the requirements of your project. The options are [described in more detail above](#tools-to-configure-the-new-project) and in the [documentation about the new project tools](../starters/new_project_tools.md).
 
 ## Run the project
 

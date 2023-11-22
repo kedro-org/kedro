@@ -7,7 +7,7 @@ There are several ways to create a new Kedro project depending on whether you wa
 
 ## Create a basic project
 
-You can create a basic Kedro project containing just the default code needed to set up your own nodes and pipelines. Navigate to your preferred directory and type:
+You can create a basic Kedro project containing the default code needed to set up your own nodes and pipelines. Navigate to your preferred directory and type:
 
 ```bash
 kedro new
@@ -23,12 +23,12 @@ Add one or more of the options, or follow the default and add none at all:
 * Custom Logging: Additional logging options
 * Documentation: Configuration for basic documentation built with Sphinx
 * Data Structure: The [directory structure](../faq/faq.md#what-is-data-engineering-convention) for storing data
-* Pyspark: Setup and configuration for working with PySpark
+* PySpark: Setup and configuration for working with PySpark
 * Kedro Viz: Kedro's native visualisation tool.
 
 Find out more about these options in the documentation that explains how to [configure a new project](../starters/new_project_tools.md).
 
-You'll then be asked to enter a name for the project, which can be human-readable and may contain alphanumeric symbols, spaces, underscores and hyphens. It must be at least two characters long.
+You'll then be asked to enter a name for the project, which can be human-readable and may contain alphanumeric symbols, spaces, underscores, and hyphens. It must be at least two characters long.
 
 It's best to keep the name simple because the choice is set as the value of `project_name` and is also used to generate the folder and package names for the project automatically.
 
@@ -79,7 +79,7 @@ The following illustrates a project created with example code for the [spaceflig
 kedro new --starter=pandas-spaceflights
 ```
 
-After you enter `kedro new`, the command line interface will ask which tools you'd like to include, which will depend on the requirements of your project. The options are [described in more detail above](#tools-to-configure-the-new-project) and in the [documentation about the new project tools](../starters/new_project_tools.md).
+If you opt to use `--starter` with `kedro new` you will **not** be asked which tools you'd like to include as [described in more detail above](#tools-to-configure-the-new-project) for a basic Kedro project.
 
 ## Run the project
 
@@ -121,14 +121,14 @@ To exit the visualisation, close the browser tab. To regain control of the termi
 
 ## Summary
 
-There are a few ways to create a new project once you have [set up Kedro](install.md):
+There are three ways to create a new project after you have [set up Kedro](install.md):
 
 * You can use `kedro new` to [create a basic Kedro project](#create-a-basic-project) containing project directories and basic code, which you can configure depending on the tooling you need, but otherwise empty to extend as you need.
 * You can use `kedro new` and [pass in a configuration file](#create-a-basic-project-from-a-configuration-file) to manually control project details such as the name, folder and package name.
 * You can [create a Kedro project populated with starter code](#create-a-new-project-containing-starter-code) from the [range of Kedro starter projects](../starters/starters.md#list-of-official-starters) available.
 
 
-For any new project, once it is created, you need to navigate to its project folder and install its dependencies: `pip install -r requirements.txt`
+After you create a new project you need to navigate to its project folder and install its dependencies: `pip install -r requirements.txt`
 
 * **To run the project**, from the project folder type `kedro run`
 * **To visualise the project**, from the project folder type `kedro viz`

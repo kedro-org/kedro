@@ -4,7 +4,7 @@ In this section, we introduce the concept of a node, for which the relevant API 
 
 Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end (E2E) production workflows.
 
-You must first import libraries from Kedro and other standard tools to run the code snippets demonstrated below.
+You must first import libraries from Kedro and other standard tools to run the code snippets below.
 
 ```python
 from kedro.pipeline import *
@@ -194,7 +194,7 @@ To check the version installed, type `kedro -V` in your terminal window.
 
 ### Set up the project
 
-To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the legacy `pandas-iris` starter. Create the project with this command, assuming Kedro version 0.18.14:
+Set up a Kedro project using the legacy `pandas-iris` starter. Create the project with this command, assuming Kedro version 0.18.14:
 
 ```bash
 kedro new --starter=pandas-iris --checkout=0.18.14

@@ -16,12 +16,9 @@ Navigate to the folder you want to store the project. Type the following to gene
 kedro new --starter=spaceflights-pandas
 ```
 
-Note the following:
+When prompted for a project name, you should accept the default choice (`Spaceflights`) as the rest of this tutorial assumes that project name.
 
-1. The command line interface will ask which tools you'd like to include, which typically depend on the requirements of your project. You don't need any for this tutorial so can follow the default and add none at all. For further information, consult the [new project toolsdocumentation](../starters/new_project_tools.md).
-2. When prompted for a project name, you should accept the default choice (`Spaceflights`) as the rest of this tutorial assumes that project name.
-
-When Kedro has created the project, navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
+After Kedro has created the project, navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 
 ```bash
 cd spaceflights

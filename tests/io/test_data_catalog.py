@@ -359,7 +359,7 @@ class TestDataCatalog:
             multi_catalog.list("((")
 
     def test_eq(self, multi_catalog, data_catalog):
-        assert multi_catalog == multi_catalog.shallow_copy()
+        assert multi_catalog == multi_catalog.shallow_copy({})
         assert multi_catalog != data_catalog
 
     def test_datasets_on_init(self, data_catalog_from_config):

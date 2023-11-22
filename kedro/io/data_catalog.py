@@ -730,16 +730,22 @@ class DataCatalog:
             ) from exc
         return [dset_name for dset_name in self._datasets if pattern.search(dset_name)]
 
-    def shallow_copy(self) -> DataCatalog:
+    def shallow_copy(
+        self, default_dataset_pattern: Patterns | None = None
+    ) -> DataCatalog:
         """Returns a shallow copy of the current object.
 
         Returns:
             Copy of the current object.
         """
+        if default_dataset_pattern:
+            dataset_patterns = {**self._dataset_patterns, **default_dataset_pattern}
+        else:
+            dataset_patterns = self._dataset_patterns
         return DataCatalog(
             datasets=self._datasets,
             layers=self.layers,
-            dataset_patterns=self._dataset_patterns,
+            dataset_patterns=dataset_patterns,
             load_versions=self._load_versions,
             save_version=self._save_version,
         )

@@ -11,7 +11,7 @@ from itertools import chain
 
 from pluggy import PluginManager
 
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
@@ -44,25 +44,15 @@ class ThreadRunner(AbstractRunner):
                 "node inputs and outputs asynchronously with threads. "
                 "Setting 'is_async' to False."
             )
-        super().__init__(is_async=False)
+        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
+        super().__init__(
+            is_async=False, default_dataset_pattern=default_dataset_pattern
+        )
 
         if max_workers is not None and max_workers <= 0:
             raise ValueError("max_workers should be positive")
 
         self._max_workers = max_workers
-
-    def create_default_dataset(self, ds_name: str) -> MemoryDataset:  # type: ignore
-        """Factory method for creating the default dataset for the runner.
-
-        Args:
-            ds_name: Name of the missing dataset.
-
-        Returns:
-            An instance of ``MemoryDataset`` to be used for all
-            unregistered datasets.
-
-        """
-        return MemoryDataset()
 
     def _get_required_workers_count(self, pipeline: Pipeline):
         """

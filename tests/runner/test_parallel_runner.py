@@ -21,7 +21,6 @@ from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
     _run_node_synchronization,
-    _SharedMemoryDataset,
 )
 from tests.runner.conftest import (
     exception_fn,
@@ -51,11 +50,6 @@ class SingleProcessDataset(AbstractDataset):
     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
 class TestValidParallelRunner:
-    def test_create_default_dataset(self):
-        # dataset is a proxy to a dataset in another process.
-        dataset = ParallelRunner().create_default_dataset("")
-        assert isinstance(dataset, _SharedMemoryDataset)
-
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})

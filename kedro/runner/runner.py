@@ -21,7 +21,7 @@ from more_itertools import interleave
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -31,7 +31,11 @@ class AbstractRunner(ABC):
     implementations.
     """
 
-    def __init__(self, is_async: bool = False):
+    def __init__(
+        self,
+        is_async: bool = False,
+        default_dataset_pattern: dict[str, dict[str, Any]] | None = None,
+    ):
         """Instantiates the runner class.
 
         Args:
@@ -40,6 +44,7 @@ class AbstractRunner(ABC):
 
         """
         self._is_async = is_async
+        self._default_dataset_pattern = default_dataset_pattern
 
     @property
     def _logger(self):
@@ -90,11 +95,11 @@ class AbstractRunner(ABC):
         # Check if there's any output datasets that aren't in the catalog and don't match a pattern
         # in the catalog.
         free_outputs = pipeline.outputs() - set(registered_ds)
-        unregistered_ds = pipeline.datasets() - set(registered_ds)
 
-        # Create a default dataset for unregistered datasets
-        for ds_name in unregistered_ds:
-            catalog.add(ds_name, self.create_default_dataset(ds_name))
+        # Register the default dataset pattern with the catalog
+        catalog = catalog.shallow_copy(
+            default_dataset_pattern=self._default_dataset_pattern
+        )
 
         if self._is_async:
             self._logger.info(
@@ -160,19 +165,6 @@ class AbstractRunner(ABC):
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
-        """
-        pass
-
-    @abstractmethod  # pragma: no cover
-    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
-        """Factory method for creating the default dataset for the runner.
-
-        Args:
-            ds_name: Name of the missing dataset.
-
-        Returns:
-            An instance of an implementation of ``AbstractDataset`` to be
-            used for all unregistered datasets.
         """
         pass
 

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import multiprocessing
 import os
-import pickle
 import sys
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
@@ -23,50 +22,18 @@ from kedro.framework.hooks.manager import (
     _register_hooks_entry_points,
 )
 from kedro.framework.project import settings
-from kedro.io import DataCatalog, DatasetError, MemoryDataset
+from kedro.io import (
+    DataCatalog,
+    DatasetNotFoundError,
+    MemoryDataset,
+    SharedMemoryDataset,
+)
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
 
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61
-
-
-class _SharedMemoryDataset:
-    """``_SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
-    It is not inherited from AbstractDataset class.
-    """
-
-    def __init__(self, manager: SyncManager):
-        """Creates a new instance of ``_SharedMemoryDataset``,
-        and creates shared memorydataset attribute.
-
-        Args:
-            manager: An instance of multiprocessing manager for shared objects.
-
-        """
-        self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
-
-    def __getattr__(self, name):
-        # This if condition prevents recursive call when deserialising
-        if name == "__setstate__":
-            raise AttributeError()
-        return getattr(self.shared_memory_dataset, name)
-
-    def save(self, data: Any):
-        """Calls save method of a shared MemoryDataset in SyncManager."""
-        try:
-            self.shared_memory_dataset.save(data)
-        except Exception as exc:
-            # Checks if the error is due to serialisation or not
-            try:
-                pickle.dumps(data)
-            except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
-                raise DatasetError(
-                    f"{str(data.__class__)} cannot be serialised. ParallelRunner "
-                    "implicit memory datasets can only be used with serialisable data"
-                ) from serialisation_exc
-            raise exc
 
 
 class ParallelRunnerManager(SyncManager):
@@ -145,7 +112,10 @@ class ParallelRunner(AbstractRunner):
         Raises:
             ValueError: bad parameters passed
         """
-        super().__init__(is_async=is_async)
+        default_dataset_pattern = {"{default}": {"type": "SharedMemoryDataset"}}
+        super().__init__(
+            is_async=is_async, default_dataset_pattern=default_dataset_pattern
+        )
         self._manager = ParallelRunnerManager()
         self._manager.start()  # noqa: consider-using-with
 
@@ -162,21 +132,6 @@ class ParallelRunner(AbstractRunner):
 
     def __del__(self):
         self._manager.shutdown()
-
-    def create_default_dataset(  # type: ignore
-        self, ds_name: str
-    ) -> _SharedMemoryDataset:
-        """Factory method for creating the default dataset for the runner.
-
-        Args:
-            ds_name: Name of the missing dataset.
-
-        Returns:
-            An instance of ``_SharedMemoryDataset`` to be used for all
-            unregistered datasets.
-
-        """
-        return _SharedMemoryDataset(self._manager)
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
@@ -244,6 +199,16 @@ class ParallelRunner(AbstractRunner):
                 f"MemoryDatasets"
             )
 
+    def _set_manager_datasets(self, catalog, pipeline):
+        for dataset in pipeline.datasets():
+            try:
+                catalog._get_dataset(dataset)
+            except DatasetNotFoundError:
+                pass
+        for name, ds in catalog._datasets.items():
+            if isinstance(ds, SharedMemoryDataset):
+                ds.set_manager(self._manager)
+
     def _get_required_workers_count(self, pipeline: Pipeline):
         """
         Calculate the max number of processes required for the pipeline,
@@ -286,7 +251,7 @@ class ParallelRunner(AbstractRunner):
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
         self._validate_nodes(nodes)
-
+        self._set_manager_datasets(catalog, pipeline)
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())

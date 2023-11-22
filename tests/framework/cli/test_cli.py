@@ -682,7 +682,7 @@ class TestRunCommand:
         [
             ({}, {}),
             ({"params": {"foo": "baz"}}, {"foo": "baz"}),
-            ({"params": "foo:baz"}, {"foo": "baz"}),
+            ({"params": "foo=baz"}, {"foo": "baz"}),
             (
                 {"params": {"foo": "123.45", "baz": "678", "bar": 9}},
                 {"foo": "123.45", "baz": "678", "bar": 9},
@@ -727,10 +727,9 @@ class TestRunCommand:
     @mark.parametrize(
         "cli_arg,expected_extra_params",
         [
-            ("foo:bar", {"foo": "bar"}),
             ("foo=bar", {"foo": "bar"}),
             (
-                "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
+                "foo=123.45, bar=1a,baz=678. ,qux=1e-2,quux=0,quuz=",
                 {
                     "foo": 123.45,
                     "bar": "1a",
@@ -740,19 +739,18 @@ class TestRunCommand:
                     "quuz": None,
                 },
             ),
-            ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
-            ("foo=fizz:buzz", {"foo": "fizz:buzz"}),
-            ("foo:fizz=buzz", {"foo": "fizz=buzz"}),
+            ("foo=bar,baz=fizz=buzz", {"foo": "bar", "baz": "fizz=buzz"}),
+            ("foo=fizz=buzz", {"foo": "fizz=buzz"}),
             (
-                "foo:bar, baz: https://example.com",
+                "foo=bar, baz= https://example.com",
                 {"foo": "bar", "baz": "https://example.com"},
             ),
-            ("foo:bar, foo:fizz buzz", {"foo": "fizz buzz"}),
-            ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
-            ("foo.nested:bar", {"foo": {"nested": "bar"}}),
+            ("foo=bar, foo=fizz buzz", {"foo": "fizz buzz"}),
+            ("foo=bar,baz=fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
+            ("foo.nested=bar", {"foo": {"nested": "bar"}}),
             ("foo.nested=123.45", {"foo": {"nested": 123.45}}),
             (
-                "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
+                "foo.nested_1.double_nest=123.45,foo.nested_2=1a",
                 {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
             ),
         ],
@@ -776,18 +774,18 @@ class TestRunCommand:
             env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
         )
 
-    @mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
+    @mark.parametrize("bad_arg", ["bad", "foo=bar,bad"])
     def test_bad_extra_params(self, fake_project_cli, fake_metadata, bad_arg):
         result = CliRunner().invoke(
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )
         assert result.exit_code
         assert (
-            "Item `bad` must contain a key and a value separated by `:` or `=`."
+            "Item `bad` must contain a key and a value separated by `=`."
             in result.stdout
         )
 
-    @mark.parametrize("bad_arg", [":", ":value", " :value"])
+    @mark.parametrize("bad_arg", ["=", "=value", " =value"])
     def test_bad_params_key(self, fake_project_cli, fake_metadata, bad_arg):
         result = CliRunner().invoke(
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata

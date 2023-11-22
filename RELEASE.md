@@ -8,7 +8,7 @@
 * Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
 * Modified the mechanism of importing datasets, raise more explicit error when dependencies are missing.
 * Added validation for configuration file used to override run commands via the CLI.
-
+* Moved the default environment `base` and `local` from config loader to `_ProjectSettings`. This enables the use of config loader as a standalone class without affecting existing Kedro Framework users.
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.
 * Reduced `spaceflights` data to minimise waiting times during tutorial execution.
@@ -53,6 +53,7 @@
 * The `spaceflights` starter has been renamed to `spaceflights-pandas`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+* Removed the custom Kedro syntax for `--params`, use the OmegaConf syntax instead by replacing `:` with `=`.
 
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
@@ -479,7 +480,7 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
-* `KedroContext` is now an `attrs`'s frozen class and `config_loader` is available as public attribute.
+* `KedroContext` is now a attr's dataclass, `config_loader` is available as public attribute.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Updated [Databricks documentation](https://docs.kedro.org/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.

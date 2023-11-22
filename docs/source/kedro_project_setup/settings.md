@@ -28,9 +28,9 @@ Every Kedro project comes with a default pre-populated `pyproject.toml` file in 
 
 ```toml
 [tool.kedro]
-package_name = package_name
-project_name = project_name
-kedro_init_version = kedro_version
+package_name = "package_name"
+project_name = "project_name"
+kedro_init_version = "kedro_version"
 ```
 
 The `package_name` should be a [valid Python package name](https://peps.python.org/pep-0423/) and the `project_name` should be a human-readable name. They are both mandatory keys for your project.

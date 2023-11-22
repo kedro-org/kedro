@@ -6,7 +6,7 @@ This page also explains how to use line magic to display a Kedro-Viz visualisati
 
 ## Example project
 
-The example adds a notebook to experiment with the retired [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris). As an alternative, you can follow the example using a different starter, such as [`pandas-spaceflights`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-spaceflights) or just add a notebook to your own project.
+The example adds a notebook to experiment with the retired [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris). As an alternative, you can follow the example using a different starter, such as [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) or just add a notebook to your own project.
 
 We will assume the example project is called `iris`, but you can call it whatever you choose.
 

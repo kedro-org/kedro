@@ -284,7 +284,7 @@ To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follo
 ```python
 from kedro.config import OmegaConfigLoader
 
-conf_loader = OmegaConfigLoader(".")
+conf_loader = OmegaConfigLoader(conf_source=".")
 ```
 
 ```python

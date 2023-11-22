@@ -628,25 +628,15 @@ def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, 
     if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
         # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-        cookiecutter_args[
-            "checkout"
-        ] = "3076-add-example-pipeline-to-hooks"  # ToDel: temporary for test
     elif "Pyspark" in add_ons:
         # Use the spaceflights-pyspark starter if only Pyspark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-        cookiecutter_args[
-            "checkout"
-        ] = "3076-add-example-pipeline-to-hooks"  # ToDel: temporary for test
     elif "Kedro Viz" in add_ons:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
-        cookiecutter_args[
-            "checkout"
-        ] = "3076-add-example-pipeline-to-hooks"  # ToDel: temporary for test
     elif example_pipeline:
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
-        cookiecutter_args["checkout"] = "3076-add-example-pipeline-to-hooks"
     else:
         # Use the default template path for non Pyspark, Viz or example options:
         starter_path = template_path

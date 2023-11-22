@@ -60,7 +60,7 @@ Configuration files will be matched according to file name and type rules. Suppo
 * *Either* of the following is true:
   * filename starts with `catalog`
   * file is located in a subfolder whose name is prefixed with `catalog`
-* *And* file extension is one of the following: yaml`, `yml`, or `json`
+* *And* file extension is one of the following: `yaml`, `yml`, or `json`
 
 ### Configuration patterns
 Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.

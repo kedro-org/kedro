@@ -184,18 +184,22 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 ## How to use generator functions in a node
 
+```{warning}
+This documentation section uses the `pandas-iris` starter that is unavailable in Kedro version 0.19.0 and beyond. The latest version of Kedro that supports `pandas-iris` is Kedro 0.18.14: install that or an earlier version to work through this example `pip install example-package<=0.18.14`).
+```
+
 [Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255) and are a special kind of function in Python that returns lazy iterators. They are often used for lazy-loading or lazy-saving of data, which can be particularly useful when dealing with large datasets that do not fit entirely into memory. In the context of Kedro, generator functions can be used in nodes to efficiently process and handle such large datasets.
 
 ### Set up the project
 
-To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the `pandas-iris` starter. If you haven't already created a Kedro project, you can follow the [get started guide](../get_started/new_project.md#create-a-new-project-containing-starter-code) to create it.
+To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the legacy `pandas-iris` starter. Create the project with this command, assuming Kedro version 0.18.14:
 
-Create the project with this command:
 ```bash
-kedro new -s pandas-iris
+kedro new --starter=pandas-iris --checkout=0.18.14
 ```
 
 ### Loading data with generators
+
 To use generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
 
 You need to add a new dataset in your `catalog.yml` as follows:

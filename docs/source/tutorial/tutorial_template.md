@@ -7,19 +7,19 @@ This section shows how to create a new project with `kedro new` using the [Kedro
 [Set up Kedro](../get_started/install.md) if you have not already done so.
 
 ```{important}
-We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.6). To check the version installed, type `kedro -V` in your terminal window.
+We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.19.0). To check the version installed, type `kedro -V` in your terminal window.
 ```
 
-In your terminal, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas). The project will be populated with a complete set of working example code:
-
-<!--TO DO-->
-<!--Addons flow or messages about addons in terminal need to be noted here-->
+Navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas). The project will be populated with a complete set of working example code:
 
 ```bash
 kedro new --starter=spaceflights-pandas
 ```
 
-When prompted for a project name, you should accept the default choice (`Spaceflights`) as the rest of this tutorial assumes that project name.
+Note the following:
+
+1. The command line interface will ask which tools you'd like to include, which typically depend on the requirements of your project. You don't need any for this tutorial so can follow the default and add none at all. For further information, consult the [new project toolsdocumentation](../starters/new_project_tools.md).
+2. When prompted for a project name, you should accept the default choice (`Spaceflights`) as the rest of this tutorial assumes that project name.
 
 When Kedro has created the project, navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 

@@ -427,10 +427,12 @@ def _validate_config_file(key):
 
 
 def _split_params(ctx, param, value):
+    print(f"{param=}")
+    print(f"{value=}")
     if isinstance(value, dict):
         return value
     dot_list = []
-    for item in split_string(ctx, param, value):
+    for item in new_split_string(value):
         equals_idx = item.find("=")
         if equals_idx == -1:
             # If an equals sign is not found, fail with an error message.
@@ -483,3 +485,35 @@ def _split_load_versions(ctx, param, value):
         load_versions_dict[load_version_list[0]] = load_version_list[1]
 
     return load_versions_dict
+
+
+def new_split_string(string):
+    """Split string not enclosed by []"""
+    res = []
+    curr = 0
+    in_bracket = 0
+    print(f"{string=}")
+
+    for i, char in enumerate(string):
+        print(f"{curr=}", f"{i=}", f"{char=}", f"{in_bracket=}", f"{res=}")
+        if char == "[":
+            in_bracket += 1
+        if char == "]":
+            in_bracket -= 1
+        # Only split if the comma is not enclosed
+        if char == "," and in_bracket == 0:
+            item = string[curr : i + 1]
+            if item.strip():
+                res.append(item)
+            curr = i + 1  # Update the current index
+    if curr != i + 1:  # Last item
+        res.append(string[curr:])
+    print(f"{curr=}", f"{i=}", f"{char=}", f"{in_bracket=}", f"{res=}")
+    return res
+
+    # return [item.strip() for item in value.split(",") if item.strip()]
+
+
+# def split_string(ctx, param, value):  # noqa: unused-argument
+#     """Split string by comma."""
+#     return [item.strip() for item in value.split(",") if item.strip()]

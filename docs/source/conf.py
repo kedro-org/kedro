@@ -49,6 +49,7 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
+    "sphinx_search.extension",
     "sphinx_copybutton",
     "sphinxcontrib.mermaid",
     "myst_parser",

@@ -88,6 +88,7 @@ extras_require = {
         "docutils==0.16",
         "sphinx~=5.3.0",
         "sphinx_rtd_theme==1.2.0",
+        "readthedocs-sphinx-search == 0.3.1"
         # Regression on sphinx-autodoc-typehints 1.21
         # that creates some problematic docstrings
         "sphinx-autodoc-typehints==1.20.2",

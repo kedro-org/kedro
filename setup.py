@@ -25,7 +25,7 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.12", "triad>=0.6.7, <1.0"]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
@@ -143,7 +143,7 @@ extras_require["test"] = [
     "black~=22.0",
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
-    "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
+    "dask[complete]~=2021.12",  # pinned by Snyk to avoid a vulnerability
     "delta-spark>=1.2.1; python_version >= '3.11'",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
     "delta-spark~=1.2.1; python_version < '3.11'",
     "dill~=0.3.1",

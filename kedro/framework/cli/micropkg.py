@@ -21,7 +21,7 @@ from rope.base.project import Project
 from rope.contrib import generate
 from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
-from setuptools.discovery import FlatLayoutPackageFinder
+# from setuptools.discovery import FlatLayoutPackageFinder
 
 from build.util import project_wheel_metadata
 from kedro.framework.cli.pipeline import (
@@ -51,8 +51,9 @@ version = "{version}"
 description = "Micro-package `{name}`"
 dependencies = {install_requires}
 
-[tool.setuptools.packages]
-find = {{}}
+[tool.kedro]
+package_name = "{name}"
+
 """
 
 logger = logging.getLogger(__name__)
@@ -211,6 +212,7 @@ def _pull_package(  # noqa: PLR0913
                 f"got {contents}"
             )
         project_root_dir = contents[0]
+        x = toml.load(project_root_dir / "pyproject.toml")
 
         # This is much slower than parsing the requirements
         # directly from the metadata files
@@ -226,21 +228,22 @@ def _pull_package(  # noqa: PLR0913
         # project_name = library_meta.get("Name")
         # However, the rest of the code expects the non-normalized package name,
         # so we have to find it.
-        packages = [
-            package
-            for package in FlatLayoutPackageFinder().find(project_root_dir)
-            if "." not in package
-        ]
-        if len(packages) != 1:
-            # Should not happen if user is calling `micropkg pull`
-            # with the result of a `micropkg package`,
-            # and in general if the distribution only contains one package (most likely),
-            # but helps give a sensible error message otherwise
-            raise KedroCliError(
-                "Invalid package contents: exactly one package was expected, "
-                f"got {packages}"
-            )
-        package_name = packages[0]
+        # packages = [
+        #     package
+        #     for package in FlatLayoutPackageFinder().find(project_root_dir)
+        #     if "." not in package
+        # ]
+        package_name = x["tool"]["kedro"]["package_name"]
+
+        # if len(packages) != 1:
+        #     # Should not happen if user is calling `micropkg pull`
+        #     # with the result of a `micropkg package`,
+        #     # and in general if the distribution only contains one package (most likely),
+        #     # but helps give a sensible error message otherwise
+        #     raise KedroCliError(
+        #         "Invalid package contents: exactly one package was expected, "
+        #         f"got {packages}"
+        #     )
 
         package_reqs = _get_all_library_reqs(library_meta)
 

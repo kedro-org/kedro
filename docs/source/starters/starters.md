@@ -72,7 +72,7 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 By default, when you create a new project using a starter, `kedro new` asks you to enter the `project_name`, which it uses to set the `repo_name` and `python_package` name. This is the same behaviour as when you [create a new empty project](../get_started/new_project.md)
 
-Kedro also allows you to [specify a configuration file](../get_started/new_project.md#create-a-basic-project-from-a-configuration-file) when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
+Kedro also allows you to specify a configuration file when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
 
 ```bash
 kedro new --config=my_kedro_project.yml --starter=spaceflights-pandas

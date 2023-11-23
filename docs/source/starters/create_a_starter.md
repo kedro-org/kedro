@@ -1,4 +1,4 @@
-# How to create a Kedro starter
+# Create a Kedro starter
 
 Kedro starters are a useful way to create a new project that contains code to run as-is, or to adapt and extend.
 

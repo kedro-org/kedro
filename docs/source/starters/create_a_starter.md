@@ -37,7 +37,7 @@ custom_prompt:
 
 At the very least, the prompt `title` must be defined for the prompt to be valid. After Kedro receives the user's input for each prompt, it passes the value to Cookiecutter, so every key in `prompts.yml` must have a corresponding key in [`cookiecutter.json`](https://cookiecutter.readthedocs.io/en/stable/tutorials/tutorial1.html#cookiecutter-json).
 
-If the input to the prompts needs to be validated, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. Consider using [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/stable/advanced/hooks.html#using-pre-post-generate-hooks-0-7-0) for more complex validation.
+If the input to the prompts needs to be validated, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. Consider using [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/stable/advanced/hooks.html) for more complex validation.
 
 If you want `cookiecutter` to provide sensible default values, in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See [the default starter `cookiecutter.json`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/cookiecutter.json) as example.
 

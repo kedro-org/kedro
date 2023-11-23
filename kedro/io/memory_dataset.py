@@ -167,7 +167,10 @@ class SharedMemoryDataset(AbstractDataset):
             raise AttributeError()
         return getattr(self.shared_memory_dataset, name)
 
-    def save(self, data: Any):
+    def _load(self) -> Any:
+        return self.shared_memory_dataset.load()
+
+    def _save(self, data: Any):
         """Calls save method of a shared MemoryDataset in SyncManager."""
         try:
             self.shared_memory_dataset.save(data)
@@ -181,12 +184,6 @@ class SharedMemoryDataset(AbstractDataset):
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
             raise exc
-
-    def _load(self) -> Any:
-        return self.shared_memory_dataset.load()
-
-    def _save(self, data: Any):
-        return self.shared_memory_dataset.save(data)
 
     def _describe(self):
         return "Shared memory dataset"

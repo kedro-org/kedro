@@ -1,12 +1,10 @@
 # How to create a Kedro starter
 
-<!--TO DO-->
-<!--This page needs improving-->
+Kedro starters are a useful way to create a new project that contains code to run as-is, or to adapt and extend. 
 
+A team may find it useful to build Kedro starters to create reusable projects that bootstrap a common base and can be extended.
 
-Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. A good example is the Iris dataset example of basic Kedro project layout, configuration and initialisation code. A team may find it useful to build Kedro starters to create reusable projects that bootstrap a common base and can be extended.
-
-A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project.
+A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/) template that contains the boilerplate code for a Kedro project.
 
 To create a Kedro starter, you need a base project to convert to a `cookiecutter` template, which forms the boilerplate for all projects that use the Kedro starter.
 
@@ -46,9 +44,9 @@ custom_prompt:
       information they should provide.
 ```
 
-At the very least, the prompt `title` must be defined for the prompt to be valid. After Kedro gets the user's input for each prompt, we pass the value to [`cookiecutter`](https://cookiecutter.readthedocs.io/en/1.7.2/), so every key in your `prompts.yml` must have a corresponding key in [`cookiecutter.json`](https://cookiecutter.readthedocs.io/en/1.7.2/tutorial1.html#cookiecutter-json).
+At the very least, the prompt `title` must be defined for the prompt to be valid. After Kedro gets the user's input for each prompt, we pass the value to [`cookiecutter`](https://cookiecutter.readthedocs.io), so every key in your `prompts.yml` must have a corresponding key in [`cookiecutter.json`](https://cookiecutter.readthedocs.io/en/stable/tutorials/tutorial1.html#cookiecutter-json).
 
-If the input to the prompts needs to be **validated**, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. For more complex validation, have a look at [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/1.7.2/advanced/hooks.html#using-pre-post-generate-hooks-0-7-0).
+If the input to the prompts needs to be **validated**, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. For more complex validation, have a look at [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/stable/advanced/hooks.html#using-pre-post-generate-hooks-0-7-0).
 
 If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See [the default starter `cookiecutter.json`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/cookiecutter.json) as example.
 

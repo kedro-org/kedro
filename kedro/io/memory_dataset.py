@@ -161,7 +161,7 @@ class SharedMemoryDataset(AbstractDataset):
     def set_manager(self, manager: SyncManager):
         self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
 
-    def __getattr__(self, name):
+    def __getattr__(self, name):   # pragma: no cover
         # This if condition prevents recursive call when deserialising
         if name == "__setstate__":
             raise AttributeError()

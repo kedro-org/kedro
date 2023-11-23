@@ -301,3 +301,11 @@ class TestSharedMemoryDataset:
     def test_str_representation(self, shared_memory_dataset):
         """Test string representation of the dataset"""
         assert "Shared memory dataset" in str(shared_memory_dataset)
+
+    def test_throw_exception(self, shared_memory_dataset, mocker):
+        mocker.patch(
+            "kedro.io.memory_dataset.SharedMemoryDataset.save",
+            side_effect=Exception
+        )
+        with pytest.raises(Exception):
+            shared_memory_dataset.save("fake_data")

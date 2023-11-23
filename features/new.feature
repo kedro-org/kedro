@@ -1,8 +1,5 @@
 
 Feature: Kedro Add-ons E2E Testing
-  In order to ensure the 'kedro new' command works correctly with various add-ons
-  As a Kedro developer
-  I want to have end-to-end tests for the add-ons flow
 
   Scenario: Create a new Kedro project without any add-ons
     When I run the command "kedro new --addons=none"

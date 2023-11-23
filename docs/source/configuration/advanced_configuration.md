@@ -17,7 +17,7 @@ This page also contains a set of guidance for advanced configuration requirement
 * [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
 
 
-## How to use a custom configuration loader
+### How to use a custom configuration loader
 You can implement a custom configuration loader by extending the [`AbstractConfigLoader`](/kedro.config.AbstractConfigLoader) class:
 
 ```python

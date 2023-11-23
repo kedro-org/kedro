@@ -183,7 +183,7 @@ class SharedMemoryDataset(AbstractDataset):
                     f"{str(data.__class__)} cannot be serialised. ParallelRunner "
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
-            raise exc
+            raise exc  # pragma: no cover
 
     def _describe(self):
         return "Shared memory dataset"

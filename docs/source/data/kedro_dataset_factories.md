@@ -151,7 +151,7 @@ You can now have one dataset factory pattern in your catalog instead of two sepa
 and `candidate_modelling_pipeline.regressor` as below:
 
 ```yaml
-"{namespace}."regressor":
+"{namespace}.regressor":
   type: pickle.PickleDataset
   filepath: data/06_models/regressor_{namespace}.pkl
   versioned: true

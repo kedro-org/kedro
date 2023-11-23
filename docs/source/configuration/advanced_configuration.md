@@ -299,8 +299,9 @@ Unlike a Kedro Project, when you use the `OmegaConfigLoader` directly, it assume
 
 ### Read configuration
 The config loader can work without a Kedro project structure.
-```sh
+```bash
 tree .
+.
 └── parameters.yml
 ```
 
@@ -321,12 +322,12 @@ config_loader = OmegaConfigLoader(conf_source=".")
 {'learning_rate': 0.01, 'train_test_ratio': 0.7}
 ```
 
-For the full list of features, please refer to [configuration_basics](./configuration_basics.md) and [advanced_configuration]
+For the full list of features, please refer to [configuration_basics](./configuration_basics.md) and [advanced_configuration](./advanced_configuration.md)
 
 ### How to use Custom Resolvers with `OmegaConfigLoader`
 You can register custom resolvers to use non-primitive type for parmaeters.
 
-```yml
+```yaml
 # parameters.yml
 polar_float64: "${polars: Float64}"
 today: "${today:}"

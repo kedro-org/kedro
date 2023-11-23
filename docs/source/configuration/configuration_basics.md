@@ -22,7 +22,7 @@ The configuration source folder is [`conf`](../get_started/kedro_concepts.md#con
 ## Configuration environments
 A configuration environment is a way of organising your configuration settings for different stages of your data pipeline. For example, you might have different settings for development, testing, and production environments.
 
-By default, Kedro Framework has a `base` and a `local` environment.
+By default, Kedro projects have a `base` and a `local` environment.
 
 ### Base
 In Kedro, the base configuration environment refers to the default configuration settings that are used as the foundation for all other configuration environments.

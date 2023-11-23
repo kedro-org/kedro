@@ -48,9 +48,9 @@ The following Kedro starters have been archived and are unavailable in Kedro ver
 * [`pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris)
 * [`pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark)
 
-The latest version of Kedro that supports these starters is Kedro 0.18.14. 
+The latest version of Kedro that supports these starters is Kedro 0.18.14.
 
-* To check the version of Kedro you have installed, type `kedro -V` in your terminal window. 
+* To check the version of Kedro you have installed, type `kedro -V` in your terminal window.
 * To install a specific version of Kedro, e.g. 0.18.14, type `pip install example-package<=0.18.14`.
 * To create a project with one of these starters using `kedro new`,  type the following (assuming Kedro version 0.18.14) `kedro new --starter=pandas-iris --checkout=0.18.14` (for example, to use the `pandas-iris` starter).
 

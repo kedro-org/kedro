@@ -3,6 +3,7 @@ The documentation on [configuration](./configuration_basics.md) describes how to
 
 By default, Kedro is set up to use the [OmegaConfigLoader](/kedro.config.OmegaConfigLoader) class.
 
+## Advanced Configuration for Kedro Project
 This page also contains a set of guidance for advanced configuration requirements of standard Kedro projects:
 
 * [How to use a custom config loader](#how-to-use-a-custom-configuration-loader)
@@ -289,3 +290,58 @@ CONFIG_LOADER_ARGS = {
 
 If no merge strategy is defined, the default destructive strategy will be applied. Note that this merge strategy setting only applies to configuration files in **different** environments.
 When files are part of the same environment, they are always merged in a soft way. An error is thrown when files in the same environment contain the same top-level keys.
+
+
+## Advance Configurations without Kedro Project
+By defaults, Kedro Project has a `base` and `local` environments. In some cases, you may only want to use the `OmegaConfigLoader` without a Kedro project. This is possible because Kedro embrace [modularity at the core](https://github.com/kedro-org/kedro/wiki/Kedro-Principles#1-modularity-at-the-core-%EF%B8%8F).
+
+Unlike a Kedro Project, when you use the `OmegaConfigLoader` directly, it assumes *no* environment. You may find it useful to [add Kedro to your existing notebooks](../notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md).
+
+### Read configuration
+The config loader can work with just a single file.
+```sh
+└── parameters.yml
+```
+
+```yml
+# parameters.yml
+learning_rate: 0.01
+train_test_ratio: 0.7
+```
+
+```python
+from kedro.config import OmegaConfigLoader
+config_loader = OmegaConfigLoader(conf_source=".")
+
+# Optionally, you can also use environments
+# config_loader = OmegaConfigLoader(conf_source=".", base_env="base", default_run_env="local")
+
+>>> config_loader["parameters"]
+{'learning_rate': 0.01, 'train_test_ratio': 0.7}
+```
+
+For the full list of features, please refer to [configuration_basics](./configuration_basics.md) and [advanced_configuration]
+
+### How to use Custom Resolvers with `OmegaConfigLoader`
+You can register custom resolvers to use non-primitive type for parmaeters.
+
+```yml
+# parameters.yml
+polar_float64: "${polars: Float64}"
+today: "${today:}"
+```
+
+```python
+import polars as pl
+from datetime import date
+
+from kedro.config import OmegaConfigLoader
+
+custom_resolvers = {"polars": lambda x: getattr(pl, x),
+                    "today": lambda: date.today()}
+
+# Register custom resolvers
+config_loader = OmegaConfigLoader(conf_source=".", custom_resolvers=custom_resolvers)
+>>> print(config_loader["parameters"])
+{'polar_float64': Float64, 'today': datetime.date(2023, 11, 23)}
+```

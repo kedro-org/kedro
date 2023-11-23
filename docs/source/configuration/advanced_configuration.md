@@ -293,7 +293,7 @@ When files are part of the same environment, they are always merged in a soft wa
 
 
 ## Advanced configuration without a full Kedro project
-By default, a Kedro project has a `base` and `local` environment. In some cases, you may only want to use the `OmegaConfigLoader` without a Kedro project. This is possible because Kedro embraces [modularity at the core](https://github.com/kedro-org/kedro/wiki/Kedro-Principles#1-modularity-at-the-core-%EF%B8%8F).
+By default, a Kedro project have a `base` and `local` environment. In some cases, you may only want to use the `OmegaConfigLoader` without a Kedro project. This is possible because Kedro embraces [modularity at the core](https://github.com/kedro-org/kedro/wiki/Kedro-Principles#1-modularity-at-the-core-%EF%B8%8F).
 
 Unlike a Kedro Project, when you use the `OmegaConfigLoader` directly, it assumes *no* environment. You may find it useful to [add Kedro to your existing notebooks](../notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md).
 

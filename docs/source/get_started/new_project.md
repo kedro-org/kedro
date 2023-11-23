@@ -34,7 +34,7 @@ You can add one or more of the options, or follow the default and add none at al
 * Testing: A basic testing setup with pytest
 * Custom Logging: Additional logging options
 * Documentation: Configuration for basic documentation built with Sphinx
-* Data Structure: The [directory structure](../faq/faq.md#what-is-data-engineering-convention) for storing data
+* Data Structure: The [directory structure](../faq/faq.md#what-is-data-engineering-convention) for storing data locally
 * PySpark: Setup and configuration for working with PySpark
 * Kedro Viz: Kedro's native visualisation tool.
 

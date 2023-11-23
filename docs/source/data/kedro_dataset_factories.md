@@ -151,7 +151,7 @@ You can now have one dataset factory pattern in your catalog instead of two sepa
 and `candidate_modelling_pipeline.regressor` as below:
 
 ```yaml
-{namespace}.regressor:
+"{namespace}."regressor":
   type: pickle.PickleDataset
   filepath: data/06_models/regressor_{namespace}.pkl
   versioned: true
@@ -253,11 +253,11 @@ Consider a catalog file with the following patterns:
   type: pandas.CSVDataset
   filepath: data/{layer}/{dataset_name}.csv
 
-preprocessed_{dataset_name}:
+"preprocessed_{dataset_name}":
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{dataset_name}.pq
 
-processed_{dataset_name}:
+"processed_{dataset_name}":
   type: pandas.ParquetDataset
   filepath: data/03_primary/processed_{dataset_name}.pq
 
@@ -278,8 +278,8 @@ processed_{dataset_name}:
 Running `kedro catalog rank` will result in the following output:
 
 ```
-- preprocessed_{dataset_name}
-- processed_{dataset_name}
+- 'preprocessed_{dataset_name}'
+- 'processed_{dataset_name}'
 - '{namespace}.{dataset_name}_pq'
 - '{dataset_name}_csv'
 - '{layer}.{dataset_name}'
@@ -312,7 +312,7 @@ shuttles:
   load_args:
     engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
 
-preprocessed_{name}:
+"preprocessed_{name}":
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{name}.pq
 

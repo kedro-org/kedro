@@ -14,4 +14,3 @@ Feature: New Kedro project
     Given I have installed the test plugin
     When I run a non-interactive kedro new with starter "test_plugin_starter"
     Then the expected project directories and files should be created
-    

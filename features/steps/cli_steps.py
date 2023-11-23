@@ -161,7 +161,7 @@ def create_config_file(context):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
-@given("I have prepared a config file with add-ons '{addons}'")
+@given('I have prepared a config file with add-ons "{addons}"')
 def create_config_file_with_add_ons(context, addons):
     """Behave step to create a temporary config file
     (given the existing temp directory) and store it in the context.

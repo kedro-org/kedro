@@ -731,7 +731,7 @@ class DataCatalog:
         return [dset_name for dset_name in self._datasets if pattern.search(dset_name)]
 
     def shallow_copy(
-        self, default_dataset_pattern: Patterns | None = None
+        self, extra_dataset_patterns: Patterns | None = None
     ) -> DataCatalog:
         """Returns a shallow copy of the current object.
 

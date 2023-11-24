@@ -165,7 +165,7 @@ class SharedMemoryDataset(AbstractDataset):
         # This if condition prevents recursive call when deserialising
         if name == "__setstate__":
             raise AttributeError()
-        return getattr(self.shared_memory_dataset, name)
+        return getattr(self.shared_memory_dataset, name)  # pragma: no cover
 
     def _load(self) -> Any:
         return self.shared_memory_dataset.load()

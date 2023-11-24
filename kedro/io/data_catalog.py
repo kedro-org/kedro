@@ -738,8 +738,8 @@ class DataCatalog:
         Returns:
             Copy of the current object.
         """
-        if default_dataset_pattern:
-            dataset_patterns = {**self._dataset_patterns, **default_dataset_pattern}
+        if extra_dataset_patterns:
+            dataset_patterns = {**self._dataset_patterns, **extra_dataset_patterns}
         else:
             dataset_patterns = self._dataset_patterns
         return DataCatalog(

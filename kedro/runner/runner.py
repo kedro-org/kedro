@@ -34,7 +34,7 @@ class AbstractRunner(ABC):
     def __init__(
         self,
         is_async: bool = False,
-        default_dataset_pattern: dict[str, dict[str, Any]] | None = None,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """Instantiates the runner class.
 
@@ -44,7 +44,7 @@ class AbstractRunner(ABC):
 
         """
         self._is_async = is_async
-        self._default_dataset_pattern = default_dataset_pattern
+        self._extra_dataset_patterns = extra_dataset_patterns
 
     @property
     def _logger(self):
@@ -98,7 +98,7 @@ class AbstractRunner(ABC):
 
         # Register the default dataset pattern with the catalog
         catalog = catalog.shallow_copy(
-            default_dataset_pattern=self._default_dataset_pattern
+            extra_dataset_patterns=self._extra_dataset_patterns
         )
 
         if self._is_async:

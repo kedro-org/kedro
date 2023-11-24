@@ -45,9 +45,7 @@ class ThreadRunner(AbstractRunner):
                 "Setting 'is_async' to False."
             )
         default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
-        super().__init__(
-            is_async=False, default_dataset_pattern=default_dataset_pattern
-        )
+        super().__init__(is_async=False, extra_dataset_patterns=default_dataset_pattern)
 
         if max_workers is not None and max_workers <= 0:
             raise ValueError("max_workers should be positive")

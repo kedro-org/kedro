@@ -141,12 +141,12 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
 
 
 class SharedMemoryDataset(AbstractDataset):
-    """``_SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
+    """``SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
     It is not inherited from AbstractDataset class.
     """
 
     def __init__(self, manager: SyncManager = None):
-        """Creates a new instance of ``_SharedMemoryDataset``,
+        """Creates a new instance of ``SharedMemoryDataset``,
         and creates shared MemoryDataset attribute.
 
         Args:
@@ -161,7 +161,7 @@ class SharedMemoryDataset(AbstractDataset):
     def set_manager(self, manager: SyncManager):
         self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
 
-    def __getattr__(self, name):   # pragma: no cover
+    def __getattr__(self, name):  # pragma: no cover
         # This if condition prevents recursive call when deserialising
         if name == "__setstate__":
             raise AttributeError()

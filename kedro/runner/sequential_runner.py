@@ -29,7 +29,7 @@ class SequentialRunner(AbstractRunner):
         """
         default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
         super().__init__(
-            is_async=is_async, default_dataset_pattern=default_dataset_pattern
+            is_async=is_async, extra_dataset_patterns=default_dataset_pattern
         )
 
     def _run(

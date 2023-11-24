@@ -114,7 +114,7 @@ class ParallelRunner(AbstractRunner):
         """
         default_dataset_pattern = {"{default}": {"type": "SharedMemoryDataset"}}
         super().__init__(
-            is_async=is_async, default_dataset_pattern=default_dataset_pattern
+            is_async=is_async, extra_dataset_patterns=default_dataset_pattern
         )
         self._manager = ParallelRunnerManager()
         self._manager.start()  # noqa: consider-using-with

@@ -63,6 +63,7 @@ STARTER_ARG_HELP = """Specify the starter template to use when creating the proj
 This can be the path to a local directory, a URL to a remote VCS repository supported
 by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
 """
+EXAMPLE_ARG_HELP = "Enter y to enable, n to disable the example pipeline."
 
 
 @define(order=True)
@@ -125,6 +126,27 @@ NUMBER_TO_ADD_ONS_NAME = {
     "7": "Kedro Viz",
 }
 
+VALIDATION_PATTERNS = {
+    "yes_no": {
+        "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
+        "error_message": "|It must contain only y, n, YES, NO, case insensitive.",
+    }
+}
+
+
+def _validate_regex(pattern_name, text):
+    if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], text):
+        click.secho(
+            VALIDATION_PATTERNS[pattern_name]["error_message"],
+            fg="red",
+            err=True,
+        )
+        sys.exit(1)
+
+
+def _parse_yes_no_to_bool(value):
+    return value.strip().lower() in ["y", "yes"] if value is not None else None
+
 
 # noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
@@ -150,6 +172,7 @@ def starter():
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--addons", "-a", "selected_add_ons_flag", help=ADDON_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
+@click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
 def new(  # noqa: PLR0913
     config_path,
     starter_alias,
@@ -157,6 +180,7 @@ def new(  # noqa: PLR0913
     project_name,
     checkout,
     directory,
+    example_pipeline,  # This will be True or False
     **kwargs,
 ):
     """Create a new kedro project."""
@@ -198,7 +222,7 @@ def new(  # noqa: PLR0913
 
     # Select which prompts will be displayed to the user based on which flags were selected.
     prompts_required = _select_prompts_to_display(
-        prompts_required, selected_add_ons_flag, project_name
+        prompts_required, selected_add_ons_flag, project_name, example_pipeline
     )
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
@@ -221,6 +245,7 @@ def new(  # noqa: PLR0913
         cookiecutter_context=cookiecutter_context,
         selected_add_ons_flag=selected_add_ons_flag,
         project_name=project_name,
+        example_pipeline=example_pipeline,
     )
 
     cookiecutter_args = _make_cookiecutter_args(
@@ -370,12 +395,13 @@ def _get_starters_dict() -> dict[str, KedroStarterSpec]:
     return starter_specs
 
 
-def _get_extra_context(
+def _get_extra_context(  # noqa: PLR0913
     prompts_required: dict,
     config_path: str,
     cookiecutter_context: OrderedDict,
     selected_add_ons_flag: str | None,
     project_name: str | None,
+    example_pipeline: str | None,
 ) -> dict[str, str]:
     """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
     on CLI flags, user prompts, or a configuration file.
@@ -429,6 +455,14 @@ def _get_extra_context(
         ]
         extra_context["add_ons"] = str(extra_context["add_ons"])
 
+    extra_context["example_pipeline"] = (
+        _parse_yes_no_to_bool(
+            example_pipeline
+            if example_pipeline is not None
+            else extra_context.get("example_pipeline", "no")
+        )  # type: ignore
+    )
+
     return extra_context
 
 
@@ -457,7 +491,10 @@ def _convert_addon_names_to_numbers(selected_add_ons_flag: str | None) -> str | 
 
 
 def _select_prompts_to_display(
-    prompts_required: dict, selected_add_ons_flag: str, project_name: str
+    prompts_required: dict,
+    selected_add_ons_flag: str,
+    project_name: str,
+    example_pipeline: str,
 ) -> dict:
     """Selects which prompts an user will receive when creating a new
     Kedro project, based on what information was already made available
@@ -469,6 +506,8 @@ def _select_prompts_to_display(
         selected_add_ons_flag: a string containing the value for the --addons flag,
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
+            None in case the flag wasn't used.
+        example_pipeline: "Yes" or "No" for --example flag, or
             None in case the flag wasn't used.
 
     Returns:
@@ -504,6 +543,10 @@ def _select_prompts_to_display(
             )
             sys.exit(1)
         del prompts_required["project_name"]
+
+    if example_pipeline is not None:
+        _validate_regex("yes_no", example_pipeline)
+        del prompts_required["example_pipeline"]
 
     return prompts_required
 
@@ -577,23 +620,25 @@ def _fetch_config_from_user_prompts(
 
 def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
-    add_ons = extra_context.get("add_ons")
+    # If 'add_ons' or 'example_pipeline' are not specified in prompts.yml and not prompted in 'kedro new' options,
+    # default options will be used instead
+    add_ons = extra_context.get("add_ons", [])
+    example_pipeline = extra_context.get("example_pipeline", False)
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
-    if add_ons:
-        if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
-            # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
-            cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-        elif "Pyspark" in add_ons:
-            # Use the spaceflights-pyspark starter if only Pyspark is chosen.
-            cookiecutter_args["directory"] = "spaceflights-pyspark"
-        elif "Kedro Viz" in add_ons:
-            # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
-            cookiecutter_args["directory"] = "spaceflights-pandas-viz"
-        else:
-            # Use the default template path for any other combinations or if "none" is chosen.
-            starter_path = template_path
+    if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+        # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
+        cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+    elif "Pyspark" in add_ons:
+        # Use the spaceflights-pyspark starter if only Pyspark is chosen.
+        cookiecutter_args["directory"] = "spaceflights-pyspark"
+    elif "Kedro Viz" in add_ons:
+        # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
+        cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+    elif example_pipeline:
+        # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
+        cookiecutter_args["directory"] = "spaceflights-pandas"
     else:
-        # Use the default template path if add_ons is None, which can occur if there is no prompts.yml or its empty.
+        # Use the default template path for non Pyspark, Viz or example options:
         starter_path = template_path
     return starter_path
 
@@ -706,6 +751,7 @@ def _validate_config_file_inputs(config: dict[str, str]):
 
     selected_add_ons = _parse_add_ons_input(input_add_ons)
     _validate_selection(selected_add_ons)
+    _validate_regex("yes_no", config.get("example_pipeline", "no"))
 
 
 def _validate_selection(add_ons: list[str]):
@@ -789,10 +835,8 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     add_ons = extra_context.get("add_ons")
 
-    # Only core template and spaceflight starters have configurable add-ons
-    if template_path == str(TEMPLATE_PATH) or (
-        add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)
-    ):
+    # we can use starters without add_ons:
+    if add_ons is not None:
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")
         else:

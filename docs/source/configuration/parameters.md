@@ -128,8 +128,4 @@ If any extra parameter key or value contains spaces, wrap the whole option conte
 kedro run --params="key1=value with spaces,key2=value"
 ```
 
-Since key-value pairs are split on the first equals sign, values can contain equals signs, but keys cannot. This is the valid CLI command:
-
-```bash
-kedro run --params=endpoint_url=https://endpoint.example.com
-```
+Since key-value pairs are split on the first equals sign, values can contain equals signs, but keys cannot.

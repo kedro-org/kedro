@@ -46,9 +46,9 @@ class SingleProcessDataset(AbstractDataset):
         pass
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
+# @pytest.mark.skipif(
+#     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+# )
 class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):

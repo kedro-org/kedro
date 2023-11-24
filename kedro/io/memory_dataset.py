@@ -161,7 +161,7 @@ class SharedMemoryDataset(AbstractDataset):
     def set_manager(self, manager: SyncManager):
         self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
 
-    def __getattr__(self, name):  # pragma: no cover
+    def __getattr__(self, name):
         # This if condition prevents recursive call when deserialising
         if name == "__setstate__":
             raise AttributeError()
@@ -183,7 +183,7 @@ class SharedMemoryDataset(AbstractDataset):
                     f"{str(data.__class__)} cannot be serialised. ParallelRunner "
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
-            raise exc  # pragma: no cover
+            raise exc
 
     def _describe(self):
         return "Shared memory dataset"

@@ -42,6 +42,5 @@ jobs:
         run: |
           make install-test-requirements
           make install-pre-commit
-          pip install pip-tools
       - name: Run pip-compile
         run: make pip-compile

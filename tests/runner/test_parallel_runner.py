@@ -78,9 +78,9 @@ class TestValidParallelRunner:
         assert result["Z"] == ("42", "42", "42")
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
+# @pytest.mark.skipif(
+#     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+# )
 class TestMaxWorkers:
     @pytest.mark.parametrize("is_async", [False, True])
     @pytest.mark.parametrize(
@@ -137,9 +137,9 @@ class TestMaxWorkers:
         assert parallel_runner._max_workers == _MAX_WINDOWS_WORKERS
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
+# @pytest.mark.skipif(
+#     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+# )
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
     def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
@@ -260,9 +260,9 @@ if not sys.platform.startswith("win"):
     ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
+# @pytest.mark.skipif(
+#     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+# )
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):

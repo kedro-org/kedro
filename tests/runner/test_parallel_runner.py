@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
 
@@ -247,13 +246,9 @@ class LoggingDataset(AbstractDataset):
         return {}
 
 
-# if not sys.platform.startswith("win"):
-#     ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
-#
-#
-# @pytest.mark.skipif(
-#     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-# )
+ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
+
+
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):

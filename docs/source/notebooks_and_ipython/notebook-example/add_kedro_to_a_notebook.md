@@ -13,7 +13,7 @@ jupyter:
     name: python3
 ---
 
-<!-- This is markdown extracted from the Jupyter notebook of the same name. If you want to change the content to publish as new HTML on docs.kedro.org, first `pip install jupytext`. Then open the markdown (this page) make your changes and save. Next, type `jupytext --set-formats md,ipynb add_kedro_to_a_notebook.md` on the command line to regenerate the notebook. -->
+<!-- This is markdown extracted from the Jupyter notebook of the same name. If you want to change the content to publish as new HTML on docs.kedro.org, first `pip install jupytext`. Then open the markdown (this page) in a basic text editor (not an IDE) to make and save your changes. Next, type `jupytext --set-formats md,ipynb add_kedro_to_a_notebook.md` on the command line in the folder this file is located and regenerate the notebook. -->
 
 
 # Add Kedro features to a notebook
@@ -99,7 +99,7 @@ r2_score(y_test, y_pred)
 ## Use Kedro for data processing
 Even if you’re not ready to work with a full Kedro project, you can still use its for data handling within an existing notebook project. This section shows you how.
 
-Kedro’s Data Catalog is a registry of all data sources available for use by the project. It offers a separate place to declare details of the datasets your projects use. Kedro provides [built-in datasets for different file types and file systems](/kedro_datasets) so you don’t have to write any of the logic for reading or writing data.
+Kedro’s Data Catalog is a registry of all data sources available for use by the project. It offers a separate place to declare details of the datasets your projects use. Kedro provides built-in datasets for different file types and file systems so you don’t have to write any of the logic for reading or writing data.
 
 Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames, and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml, and beyond. It relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. You can pass arguments in to load and save operations, and use versioning and credentials for data access.
 
@@ -276,7 +276,7 @@ r2_score(y_test, y_pred)
 ```
 
 ## Use Kedro configuration
-Kedro offers a [configuration loader](/kedro.config.ConfigLoader) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
+Kedro offers a [configuration loader](/kedro.config.OmegaConfigLoader) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
 
 ### Use Kedro's configuration loader to load "magic values"
 To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follows:
@@ -391,7 +391,6 @@ random_state = conf_params["model_options"]["random_state"]
 
 ```python
 def big_function():
-
     ####################
     # Data processing  #
     ####################
@@ -469,14 +468,12 @@ def _parse_money(x: pd.Series) -> pd.Series:
 
 
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
-
     companies["iata_approved"] = _is_true(companies["iata_approved"])
     companies["company_rating"] = _parse_percentage(companies["company_rating"])
     return companies
 
 
 def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
-
     shuttles["d_check_complete"] = _is_true(shuttles["d_check_complete"])
     shuttles["moon_clearance_complete"] = _is_true(shuttles["moon_clearance_complete"])
     shuttles["price"] = _parse_money(shuttles["price"])
@@ -486,7 +483,6 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 def create_model_input_table(
     shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
 ) -> pd.DataFrame:
-
     rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
     model_input_table = rated_shuttles.merge(
         companies, left_on="company_id", right_on="id"
@@ -590,14 +586,12 @@ def _parse_money(x: pd.Series) -> pd.Series:
 
 
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
-
     companies["iata_approved"] = _is_true(companies["iata_approved"])
     companies["company_rating"] = _parse_percentage(companies["company_rating"])
     return companies
 
 
 def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
-
     shuttles["d_check_complete"] = _is_true(shuttles["d_check_complete"])
     shuttles["moon_clearance_complete"] = _is_true(shuttles["moon_clearance_complete"])
     shuttles["price"] = _parse_money(shuttles["price"])
@@ -607,7 +601,6 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 def create_model_input_table(
     shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
 ) -> pd.DataFrame:
-
     rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
     model_input_table = rated_shuttles.merge(
         companies, left_on="company_id", right_on="id"

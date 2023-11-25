@@ -3,4 +3,4 @@ include LICENSE.md
 include kedro/framework/project/default_logging.yml
 include kedro/ipython/*.png
 include kedro/ipython/*.svg
-recursive-include templates *
+recursive-include kedro/templates *

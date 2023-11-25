@@ -73,15 +73,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         conf_source: str,
         env: str = None,
         runtime_params: dict[str, Any] = None,
         *,
         config_patterns: dict[str, list[str]] = None,
-        base_env: str = "base",
-        default_run_env: str = "local",
+        base_env: str = None,
+        default_run_env: str = None,
         custom_resolvers: dict[str, Callable] = None,
         merge_strategy: dict[str, str] = None,
     ):
@@ -102,8 +102,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
             custom_resolvers: A dictionary of custom resolvers to be registered. For more information,
              see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
         """
-        self.base_env = base_env
-        self.default_run_env = default_run_env
+        self.base_env = base_env or ""
+        self.default_run_env = default_run_env or ""
         self.merge_strategy = merge_strategy or {}
 
         self.config_patterns = {
@@ -251,7 +251,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
-    def load_and_merge_dir_config(  # noqa: too-many-arguments
+    def load_and_merge_dir_config(  # noqa: PLR0913
         self,
         conf_path: str,
         patterns: Iterable[str],

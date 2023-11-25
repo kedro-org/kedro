@@ -105,7 +105,9 @@ class _ProjectSettings(LazySettings):
         "CONFIG_LOADER_CLASS",
         default=_get_default_class("kedro.config.OmegaConfigLoader"),
     )
-    _CONFIG_LOADER_ARGS = Validator("CONFIG_LOADER_ARGS", default={})
+    _CONFIG_LOADER_ARGS = Validator(
+        "CONFIG_LOADER_ARGS", default={"base_env": "base", "default_run_env": "local"}
+    )
     _DATA_CATALOG_CLASS = _IsSubclassValidator(
         "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
     )
@@ -374,7 +376,7 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
-        except:  # noqa: bare-except  # noqa: E722
+        except:  # noqa: E722
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()

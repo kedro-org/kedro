@@ -126,7 +126,7 @@ kedro_viz: 4.4.0 (hooks:global,line_magic)
 kedro new
 ```
 
-## Customise or Override Project-specific Kedro commands
+## Customise or override project-specific Kedro commands
 
 ```{note}
 All project related CLI commands should be run from the project’s root directory.
@@ -191,15 +191,15 @@ def cli():
 @click.option(
     "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
 )
-@click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
+@click.option("--nodes", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
 @env_option
-@click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
+@click.option("--tags", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
-    "--load-version",
+    "--load-versions",
     "-lv",
     type=str,
     multiple=True,
@@ -227,7 +227,7 @@ def cli():
     callback=_split_params,
 )
 def run(
-    tag,
+    tags,
     env,
     runner,
     is_async,
@@ -236,7 +236,7 @@ def run(
     from_nodes,
     from_inputs,
     to_outputs,
-    load_version,
+    load_versions,
     pipeline,
     config,
     conf_source,
@@ -244,24 +244,22 @@ def run(
 ):
     """Run the pipeline."""
 
-    ##### ADD YOUR CUSTOM RUN COMMAND CODE HERE #####
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-
-    tag = _get_values_as_tuple(tag) if tag else tag
-    node_names = _get_values_as_tuple(node_names) if node_names else node_names
+    tags = tuple(tags)
+    node_names = tuple(node_names)
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params
     ) as session:
         session.run(
-            tags=tag,
+            tags=tags,
             runner=runner(is_async=is_async),
             node_names=node_names,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
             from_inputs=from_inputs,
             to_outputs=to_outputs,
-            load_versions=load_version,
+            load_versions=load_versions,
             pipeline_name=pipeline,
         )
 
@@ -307,16 +305,16 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --runner=<runner_name>`                                  | Run the pipeline with a specific runner                                                                                                                                                                                                                 |
 | `kedro run --async`                                                 | Load and save node inputs and outputs asynchronously with threads                                                                                                                                                                                       |
 | `kedro run --env=<env_name>`                                        | Run the pipeline in the env_name environment. Defaults to local if not provided                                                                                                                                                                         |
-| [DEPRECATED] `kedro run --tag=<tag_name1>,<tag_name2>`              | Run only nodes which have any of these tags attached. <br /> Multiple instances allowed. <br /> NOTE: This flag will be deprecated in `Kedro 0.19.0`. Use the following flag `--tags` instead.                                                                                                                                                                 |
-| `kedro run --tags=<tag_name1>,<tag_name2>`                          | Run only nodes which have any of these tags attached.                                                                                            |
-| [DEPRECATED] `kedro run --load-version=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ`  | Specify a particular dataset version (timestamp) for loading. <br /> Multiple instances allowed. <br /> NOTE: This flag will be deprecated in `Kedro 0.19.0`. Use the following flag `--load-versions` instead.                            |
+| [DEPRECATED] `kedro run --tag=<tag_name1>,<tag_name2>`              | Run only nodes which have any of these tags attached. <br /> Multiple instances allowed. <br /> NOTE: This flag will be deprecated in `Kedro 0.19.0`. Use the following flag `--tags` instead.                                                          |
+| `kedro run --tags=<tag_name1>,<tag_name2>`                          | Run only nodes which have any of these tags attached.                                                                                                                                                                                                   |
+| [DEPRECATED] `kedro run --load-version=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ`  | Specify a particular dataset version (timestamp) for loading. <br /> Multiple instances allowed. <br /> NOTE: This flag will be deprecated in `Kedro 0.19.0`. Use the following flag `--load-versions` instead.                                         |
 | `kedro run --load-versions=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ` | Specify particular dataset versions (timestamp) for loading.                                                                                                                                                                                            |
 | `kedro run --pipeline=<pipeline_name>`                              | Run the whole pipeline by its name                                                                                                                                                                                                                      |
 | `kedro run --namespace=<namespace>`                                 | Run only nodes with the specified namespace                                                                                                                                                                                                             |
 | `kedro run --config=<config_file_name>.yml`                         | Specify all command line options in a named YAML configuration file                                                                                                                                                                                     |
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
-| `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/advanced_configuration.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                  |
-| `kedro run --params=<param_key1>:<value1>,<param_key2>:<value2>`    | Does a parametrised kedro run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
+| `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
+| `kedro run --params=<param_key1>=<value1>,<param_key2>=<value2>`    | Does a parametrised run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
 
 You can also combine these options together, so the following command runs all the nodes from `split` to `predict` and `report`:
 

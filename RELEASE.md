@@ -2,15 +2,19 @@
 
 ## Major features and improvements
 * Dropped Python 3.7 support.
-* Introduced add-ons to the `kedro new` CLI flow.
+* Introduced add-ons and example to the `kedro new` CLI flow.
 * The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 * Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
 * Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
-
+* Modified the mechanism of importing datasets, raise more explicit error when dependencies are missing.
+* Added validation for configuration file used to override run commands via the CLI.
+* Moved the default environment `base` and `local` from config loader to `_ProjectSettings`. This enables the use of config loader as a standalone class without affecting existing Kedro Framework users.
 
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.
-* Reduced `spaceflights` data to minimize waiting times during tutorial execution.
+* Reduced `spaceflights` data to minimise waiting times during tutorial execution.
+* Added validation to node tags to be consistent with node names.
+* Removed `pip-tools` as a dependency.
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
@@ -25,11 +29,21 @@
 * Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ### CLI
-* Removed deprecated `kedro docs` command.
+* Removed deprecated commands:
+   * `kedro docs`
+   * `kedro jupyter convert`
+   * `kedro activate-nbstripout`
+   * `kedro build-docs`
+   * `kedro build-reqs`
+   * `kedro lint`
+   * `kedro test`
 * Added the `--addons` flag to the `kedro new` command.
+* Added the `--name` flag to the `kedro new` command.
+* Removed `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
 
 ### ConfigLoader
 * Made `OmegaConfigLoader` the default config loader.
+* Removed `ConfigLoader` and `TemplatedConfigLoader`.
 * `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.
 
 ### Other
@@ -41,16 +55,20 @@
 * The `spaceflights` starter has been renamed to `spaceflights-pandas`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+* Removed the custom Kedro syntax for `--params`, use the OmegaConf syntax instead by replacing `:` with `=`.
 
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
-## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
+## Community contributors
+We are grateful to every community member who made a PR to Kedro that's found its way into 0.19.0, and give particular thanks to those who contributed between 0.18.14 and this release, either as part of their ongoing Kedro community involvement or as part of Hacktoberfest 2023 🎃
+
+* [Jeroldine Akuye Oakley](https://github.com/JayOaks) 🎃
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) 🎃
+* [Mustapha Abdullahi](https://github.com/mustious)
 * [Adam Kells](https://github.com/adamkells)
-* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
 
 # Release 0.18.14
 
@@ -464,7 +482,7 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
-* `KedroContext` is now an `attrs`'s frozen class and `config_loader` is available as public attribute.
+* `KedroContext` is now a attr's dataclass, `config_loader` is available as public attribute.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Updated [Databricks documentation](https://docs.kedro.org/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.

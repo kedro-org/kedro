@@ -8,7 +8,8 @@ from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
 
-from attrs import field, frozen
+from attrs import define, field
+from omegaconf import OmegaConf
 from pluggy import PluginManager
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
@@ -137,59 +138,42 @@ def _validate_transcoded_datasets(catalog: DataCatalog):
         _transcode_split(dataset_name)
 
 
-def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
-    """Update a nested dict with values of new_dict.
-
-    Args:
-        old_dict: dict to be updated
-        new_dict: dict to use for updating old_dict
-
-    """
-    for key, value in new_dict.items():
-        if key not in old_dict:
-            old_dict[key] = value
-        elif isinstance(old_dict[key], dict) and isinstance(value, dict):
-            _update_nested_dict(old_dict[key], value)
-        else:
-            old_dict[key] = value
-
-
 def _expand_full_path(project_path: str | Path) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
-@frozen
+@define(slots=False)  # Enable setting new attributes to `KedroContext`
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
-    """
 
-    _package_name: str
-    project_path: Path = field(converter=_expand_full_path)
-    config_loader: AbstractConfigLoader
-    _hook_manager: PluginManager
-    env: str | None = None
-    _extra_params: dict[str, Any] | None = field(default=None, converter=deepcopy)
-
-    """Create a context object by providing the root of a Kedro project and
+    Create a context object by providing the root of a Kedro project and
     the environment configuration subfolders (see ``kedro.config.OmegaConfigLoader``)
-
     Raises:
         KedroContextError: If there is a mismatch
             between Kedro project version and package version.
-
     Args:
-        package_name: Package name for the Kedro project the context is
-            created for.
         project_path: Project path to define the context for.
         config_loader: Kedro's ``OmegaConfigLoader`` for loading the configuration files.
-        hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
         env: Optional argument for configuration default environment to be used
             for running the pipeline. If not specified, it defaults to "local".
+        package_name: Package name for the Kedro project the context is
+            created for.
+        hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
         extra_params: Optional dictionary containing extra project parameters.
             If specified, will update (and therefore take precedence over)
             the parameters retrieved from the project configuration.
+
     """
+
+    project_path: Path = field(init=True, converter=_expand_full_path)
+    config_loader: AbstractConfigLoader = field(init=True)
+    env: str | None = field(init=True)
+    _package_name: str = field(init=True)
+    _hook_manager: PluginManager = field(init=True)
+    _extra_params: dict[str, Any] | None = field(
+        init=True, default=None, converter=deepcopy
+    )
 
     @property
     def catalog(self) -> DataCatalog:
@@ -216,8 +200,12 @@ class KedroContext:
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
             params = {}
-        _update_nested_dict(params, self._extra_params or {})
-        return params
+
+        if self._extra_params:
+            # Merge nested structures
+            params = OmegaConf.merge(params, self._extra_params)
+
+        return OmegaConf.to_container(params) if OmegaConf.is_config(params) else params
 
     def _get_catalog(
         self,

@@ -286,16 +286,3 @@ jupyter qtconsole --kernel=kedro_iris
 
 This will automatically load the Kedro IPython in a console that supports graphical features such as embedded figures:
 ![Plot of example iris data in a Qt Console](../meta/images/jupyter_qtconsole.png)
-
-
-## Find out more
-
-We recommend the following:
-
-* [Power is nothing without control: Don’t break up with Jupyter notebooks. Just use Kedro too!](https://towardsdatascience.com/power-is-nothing-without-control-aa43523745b6)
-
-* [Two Tricks to Optimize your Kedro Jupyter Flow](https://youtu.be/ZHIqXJEp0-w)
-
-* [Handling Custom Jupyter Data Sources](https://youtu.be/dRnCovp1GRQ)
-
-* [Why transition from vanilla Jupyter notebooks to Kedro?](https://www.youtube.com/watch?v=JLTYNPoK7nw&ab_channel=PyConUS)

@@ -12,6 +12,10 @@ lint:
 test:
 	pytest --numprocesses 4 --dist loadfile
 
+show-coverage:
+	coverage html --show-contexts || true
+	open htmlcov/index.html
+
 e2e-tests:
 	behave --tags=-skip
 
@@ -41,7 +45,7 @@ install-test-requirements:
 	python -m pip install -U "pip>=21.2,<23.2"
 	pip install .[test]
 
-install-pre-commit: install-test-requirements
+install-pre-commit:
 	pre-commit install --install-hooks
 
 uninstall-pre-commit:

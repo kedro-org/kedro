@@ -155,7 +155,7 @@ Execution should stop at the breakpoint:
 
 ![](../meta/images/vscode_breakpoint.png)
 
-### Advanced: Remote Interpreter / Debugging
+### Advanced: Remote interpreter debugging
 
 It is possible to debug remotely using VS Code. The following example assumes SSH access is available on the remote computer (running a Unix-like OS) running the code that will be debugged.
 

@@ -116,7 +116,6 @@ import great_expectations as ge
 
 
 class DataValidationHooks:
-
     # Map expectation to dataset
     DATASET_EXPECTATION_MAPPING = {
         "companies": "raw_companies_dataset_expectation",
@@ -207,7 +206,6 @@ import great_expectations as ge
 
 
 class DataValidationHooks:
-
     # Map checkpoint to dataset
     DATASET_CHECKPOINT_MAPPING = {
         "companies": "raw_companies_dataset_checkpoint",

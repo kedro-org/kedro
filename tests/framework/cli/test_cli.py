@@ -3,9 +3,9 @@ from itertools import cycle
 from os import rename
 from pathlib import Path
 
-import anyconfig
 import click
 from click.testing import CliRunner
+from omegaconf import OmegaConf
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
@@ -423,14 +423,34 @@ class TestRunCommand:
     @fixture(params=["run_config.yml", "run_config.json"])
     def fake_run_config(request, fake_root_dir):
         config_path = str(fake_root_dir / request.param)
-        anyconfig.dump(
-            {
-                "run": {
-                    "pipeline": "pipeline1",
-                    "tag": ["tag1", "tag2"],
-                    "node_names": ["node1", "node2"],
-                }
+        config = {
+            "run": {
+                "pipeline": "pipeline1",
+                "tags": "tag1, tag2",
+                "node_names": "node1, node2",
             },
+            "dummy": {"dummy": "dummy"},
+        }
+        OmegaConf.save(
+            config,
+            config_path,
+        )
+        return config_path
+
+    @staticmethod
+    @fixture(params=["run_config.yml", "run_config.json"])
+    def fake_invalid_run_config(request, fake_root_dir):
+        config_path = str(fake_root_dir / request.param)
+        config = {
+            "run": {
+                "pipeline": "pipeline1",
+                "tags": "tag1, tag2",
+                "node-names": "node1, node2",
+            },
+            "dummy": {"dummy": "dummy"},
+        }
+        OmegaConf.save(
+            config,
             config_path,
         )
         return config_path
@@ -438,9 +458,9 @@ class TestRunCommand:
     @staticmethod
     @fixture
     def fake_run_config_with_params(fake_run_config, request):
-        config = anyconfig.load(fake_run_config)
+        config = OmegaConf.to_container(OmegaConf.load(fake_run_config))
         config["run"].update(request.param)
-        anyconfig.dump(config, fake_run_config)
+        OmegaConf.save(config, fake_run_config)
         return fake_run_config
 
     def test_run_successfully(
@@ -637,12 +657,32 @@ class TestRunCommand:
             namespace=None,
         )
 
+    @mark.parametrize("config_flag", ["--config", "-c"])
+    def test_run_with_invalid_config(
+        self,
+        config_flag,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        fake_invalid_run_config,
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", config_flag, fake_invalid_run_config],
+            obj=fake_metadata,
+        )
+        assert result.exit_code
+        assert (
+            "Key `node-names` in provided configuration is not valid. \n\nDid you mean one of "
+            "these?\n    node_names\n    to_nodes\n    namespace" in result.stdout
+        )
+
     @mark.parametrize(
         "fake_run_config_with_params,expected",
         [
             ({}, {}),
             ({"params": {"foo": "baz"}}, {"foo": "baz"}),
-            ({"params": "foo:baz"}, {"foo": "baz"}),
+            ({"params": "foo=baz"}, {"foo": "baz"}),
             (
                 {"params": {"foo": "123.45", "baz": "678", "bar": 9}},
                 {"foo": "123.45", "baz": "678", "bar": 9},
@@ -687,10 +727,9 @@ class TestRunCommand:
     @mark.parametrize(
         "cli_arg,expected_extra_params",
         [
-            ("foo:bar", {"foo": "bar"}),
             ("foo=bar", {"foo": "bar"}),
             (
-                "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
+                "foo=123.45, bar=1a,baz=678. ,qux=1e-2,quux=0,quuz=",
                 {
                     "foo": 123.45,
                     "bar": "1a",
@@ -700,19 +739,18 @@ class TestRunCommand:
                     "quuz": None,
                 },
             ),
-            ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
-            ("foo=fizz:buzz", {"foo": "fizz:buzz"}),
-            ("foo:fizz=buzz", {"foo": "fizz=buzz"}),
+            ("foo=bar,baz=fizz=buzz", {"foo": "bar", "baz": "fizz=buzz"}),
+            ("foo=fizz=buzz", {"foo": "fizz=buzz"}),
             (
-                "foo:bar, baz: https://example.com",
+                "foo=bar, baz= https://example.com",
                 {"foo": "bar", "baz": "https://example.com"},
             ),
-            ("foo:bar, foo:fizz buzz", {"foo": "fizz buzz"}),
-            ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
-            ("foo.nested:bar", {"foo": {"nested": "bar"}}),
+            ("foo=bar, foo=fizz buzz", {"foo": "fizz buzz"}),
+            ("foo=bar,baz=fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
+            ("foo.nested=bar", {"foo": {"nested": "bar"}}),
             ("foo.nested=123.45", {"foo": {"nested": 123.45}}),
             (
-                "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
+                "foo.nested_1.double_nest=123.45,foo.nested_2=1a",
                 {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
             ),
         ],
@@ -736,50 +774,24 @@ class TestRunCommand:
             env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
         )
 
-    @mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
+    @mark.parametrize("bad_arg", ["bad", "foo=bar,bad"])
     def test_bad_extra_params(self, fake_project_cli, fake_metadata, bad_arg):
         result = CliRunner().invoke(
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )
         assert result.exit_code
         assert (
-            "Item `bad` must contain a key and a value separated by `:` or `=`."
+            "Item `bad` must contain a key and a value separated by `=`."
             in result.stdout
         )
 
-    @mark.parametrize("bad_arg", [":", ":value", " :value"])
+    @mark.parametrize("bad_arg", ["=", "=value", " =value"])
     def test_bad_params_key(self, fake_project_cli, fake_metadata, bad_arg):
         result = CliRunner().invoke(
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )
         assert result.exit_code
         assert "Parameter key cannot be an empty string" in result.stdout
-
-    @mark.parametrize(
-        "option,value",
-        [("--load-version", "dataset1:time1"), ("-lv", "dataset2:time2")],
-    )
-    def test_reformat_load_versions(
-        self, fake_project_cli, fake_metadata, fake_session, option, value, mocker
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", option, value], obj=fake_metadata
-        )
-        assert not result.exit_code, result.output
-
-        ds, t = value.split(":", 1)
-        fake_session.run.assert_called_once_with(
-            tags=(),
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions={ds: t},
-            pipeline_name=None,
-            namespace=None,
-        )
 
     @mark.parametrize(
         "lv_input, lv_dict",
@@ -821,20 +833,6 @@ class TestRunCommand:
             namespace=None,
         )
 
-    def test_fail_reformat_load_versions(self, fake_project_cli, fake_metadata):
-        load_version = "2020-05-12T12.00.00"
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "-lv", load_version], obj=fake_metadata
-        )
-        assert result.exit_code, result.output
-
-        expected_output = (
-            f"Error: Expected the form of 'load_version' to be "
-            f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
-            f"found {load_version} instead\n"
-        )
-        assert expected_output in result.output
-
     def test_fail_split_load_versions(self, fake_project_cli, fake_metadata):
         load_version = "2020-05-12T12.00.00"
         result = CliRunner().invoke(
@@ -845,7 +843,7 @@ class TestRunCommand:
         assert result.exit_code, result.output
 
         expected_output = (
-            f"Error: Expected the form of 'load_version' to be "
+            f"Error: Expected the form of 'load_versions' to be "
             f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
             f"found {load_version} instead\n"
         )
@@ -920,92 +918,3 @@ class TestRunCommand:
             " does not exist."
         )
         assert expected_output in result.output
-
-    # the following tests should be deleted in 0.19.0
-
-    def test_both_node_flags(
-        self,
-        fake_project_cli,
-        fake_metadata,
-        fake_session,
-        mocker,
-    ):
-        nodes_input = ["splitting_data", "training_model"]
-        nodes_expected = ("splitting_data", "training_model")
-        node_command = "--node=" + nodes_input[0]
-        nodes_command = "--nodes=" + nodes_input[1]
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", node_command, nodes_command], obj=fake_metadata
-        )
-        assert not result.exit_code
-
-        fake_session.run.assert_called_once_with(
-            tags=(),
-            runner=mocker.ANY,
-            node_names=nodes_expected,
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions={},
-            pipeline_name=None,
-            namespace=None,
-        )
-
-    def test_both_tag_flags(
-        self,
-        fake_project_cli,
-        fake_metadata,
-        fake_session,
-        mocker,
-    ):
-        tags_input = ["tag1", "tag2"]
-        tags_expected = ("tag1", "tag2")
-        tag_command = "--tag=" + tags_input[0]
-        tags_command = "--tags=" + tags_input[1]
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", tag_command, tags_command], obj=fake_metadata
-        )
-        assert not result.exit_code
-
-        fake_session.run.assert_called_once_with(
-            tags=tags_expected,
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions={},
-            pipeline_name=None,
-            namespace=None,
-        )
-
-    def test_both_load_version_flags(
-        self, fake_project_cli, fake_metadata, fake_session, mocker
-    ):
-        lv_input = ["dataset1:time1", "dataset2:time2"]
-        lv_dict = {"dataset1": "time1", "dataset2": "time2"}
-
-        load_version_command = "--load-version=" + lv_input[0]
-        load_versions_command = "--load-versions=" + lv_input[1]
-
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["run", load_version_command, load_versions_command],
-            obj=fake_metadata,
-        )
-        assert not result.exit_code, result.output
-
-        fake_session.run.assert_called_once_with(
-            tags=(),
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions=lv_dict,
-            pipeline_name=None,
-            namespace=None,
-        )

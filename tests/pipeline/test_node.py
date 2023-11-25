@@ -300,7 +300,7 @@ def inconsistent_input_kwargs():
     return dummy_func_args, "A", "B"
 
 
-lambda_identity = lambda input1: input1  # noqa: disable=E731
+lambda_identity = lambda input1: input1  # noqa: E731
 
 
 def lambda_inconsistent_input_size():
@@ -368,6 +368,15 @@ class TestTag:
         tagged_node = node(identity, "input", "output", tags="hello").tag("world")
         assert "hello" in tagged_node.tags
         assert "world" in tagged_node.tags
+
+    @pytest.mark.parametrize("bad_tag", ["tag,with,comma", "tag with space"])
+    def test_invalid_tag(self, bad_tag):
+        pattern = (
+            f"'{bad_tag}' is not a valid node tag. It must contain only "
+            f"letters, digits, hyphens, underscores and/or fullstops."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            node(identity, ["in"], ["out"], tags=bad_tag)
 
 
 class TestNames:

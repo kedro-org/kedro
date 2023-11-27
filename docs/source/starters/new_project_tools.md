@@ -147,3 +147,53 @@ Selecting the custom logging tool introduces the file `logging.yml` to your proj
 This tool allows you to customise your logging configuration instead of using [Kedro's default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). The populated `conf/logging.yml` provides two additional logging handlers: `console` and `info_file_handler`, as well as `rich` that is available in the default configuration. However, only `info_file_handler` and `rich` are used.
 
 To learn more about using logging in your project, or modifying the logging configuration, take a look at out [logging documentation](../logging/index.md).
+
+### Documentation 
+
+Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, allowing for the auto generation of HTML documentation. 
+The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration. It will help you to create and maintain guides and API docs.
+See the [official documentation](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project) for guidance on adding documentation to a Kedro project.
+
+### Data Structure 
+
+The Data Structure tool provides a standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data.
+This tool is fundamental if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
+This tool will help you in maintaining a clean and organised data workflow, with clear separation of data at various processing stages.
+We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
+You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure).
+
+### PySpark 
+
+The PySpark tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
+PySpark aligns with Kedro's scalability principle, as it provides data processing capabilities for large datasets.
+See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for more information on setup and usage.
+
+### Kedro Viz
+
+This tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
+See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
+
+---
+
+Here's a flowchart to guide your choice of tools and examples:
+```{mermaid}
+:alt: mermaid-Decision making diagram for setting up a new Kedro project
+flowchart TD
+    A[Start] -->|Run 'kedro new'| B{Select Tools}
+    B -->|None| C{Include example pipeline?}
+    B -->|All| C{Include example pipeline?}
+    B -->|Combination of Lint, Test, Logs, Docs, Data, PySpark, Viz| C
+    C -->|No| D[Proceed without example pipeline and only the basic template]
+    C -->|Yes| E{Which add-ons are included?}
+    E -->|None| F[Include 'spaceflights-pandas' example]
+    E -->|All| I[Include 'spaceflights-pyspark-viz' example]
+    E -->|Viz without PySpark| G[Include 'spaceflights-pandas-viz' example]
+    E -->|PySpark without Viz| H[Include 'spaceflights-pyspark' example]
+    E -->|Viz & PySpark| I[Include 'spaceflights-pyspark-viz' example]
+    E -->|Without Viz and PySpark| F[Include 'spaceflights-pandas' example]
+    D --> J[Project setup complete]
+    F --> J
+    G --> J
+    H --> J
+    I --> J
+```

@@ -194,11 +194,7 @@ To check the version installed, type `kedro -V` in your terminal window.
 
 ### Set up the project
 
-<<<<<<< HEAD
-To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the legacy `pandas-iris` starter. Create the project with this command, assuming Kedro version 0.18.14:
-=======
 Set up a Kedro project using the legacy `pandas-iris` starter. Create the project with this command, assuming Kedro version 0.18.14:
->>>>>>> develop
 
 ```bash
 kedro new --starter=pandas-iris --checkout=0.18.14

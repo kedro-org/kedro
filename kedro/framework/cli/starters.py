@@ -170,13 +170,13 @@ def starter():
 @click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-@click.option("--addons", "-a", "selected_add_ons_flag", help=ADDON_ARG_HELP)
+@click.option("--addons", "-a", "tools", help=ADDON_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
 @click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
 def new(  # noqa: PLR0913
     config_path,
     starter_alias,
-    selected_add_ons_flag,
+    tools,
     project_name,
     checkout,
     directory,
@@ -190,6 +190,11 @@ def new(  # noqa: PLR0913
     if directory and not starter_alias:
         raise KedroCliError(
             "Cannot use the --directory flag without a --starter value."
+        )
+
+    if (tools or example_pipeline) and starter_alias:
+        raise KedroCliError(
+            "Cannot use the --starter flag with the --example and/or --tools flag."
         )
 
     starters_dict = _get_starters_dict()
@@ -217,12 +222,12 @@ def new(  # noqa: PLR0913
     prompts_required = _get_prompts_required(cookiecutter_dir)
 
     # Format user input where necessary
-    if selected_add_ons_flag is not None:
-        selected_add_ons_flag = selected_add_ons_flag.lower()
+    if tools is not None:
+        tools = tools.lower()
 
     # Select which prompts will be displayed to the user based on which flags were selected.
     prompts_required = _select_prompts_to_display(
-        prompts_required, selected_add_ons_flag, project_name, example_pipeline
+        prompts_required, tools, project_name, example_pipeline
     )
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
@@ -243,7 +248,7 @@ def new(  # noqa: PLR0913
         prompts_required=prompts_required,
         config_path=config_path,
         cookiecutter_context=cookiecutter_context,
-        selected_add_ons_flag=selected_add_ons_flag,
+        selected_add_ons_flag=tools,
         project_name=project_name,
         example_pipeline=example_pipeline,
     )

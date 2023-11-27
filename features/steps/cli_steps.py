@@ -169,7 +169,7 @@ def create_config_file_with_add_ons(context, addons):
     It takes a custom add-ons list and sets example prompt to `y`.
     """
 
-    addons_str = addons if addons != 'none' else ''
+    addons_str = addons if addons != "none" else ""
 
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
@@ -177,7 +177,7 @@ def create_config_file_with_add_ons(context, addons):
     context.package_name = context.project_name.replace("-", "_")
     config = {
         "add_ons": addons_str,
-        "example_pipeline": 'y',
+        "example_pipeline": "y",
         "project_name": context.project_name,
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),

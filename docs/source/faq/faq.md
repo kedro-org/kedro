@@ -2,6 +2,12 @@
 
 This is a growing set of technical FAQs. The [product FAQs on the Kedro website](https://kedro.org/#faq) explain how Kedro can answer the typical use cases and requirements of data scientists, data engineers, machine learning engineers and product owners.
 
+
+## Installing Kedro
+* [How do I install a development version of Kedro](https://github.com/kedro-org/kedro/wiki/Guidelines-for-contributing-developers)?
+
+* **How can I check the version of Kedro installed?** To check the version installed, type `kedro -V` in your terminal window.
+
 ## Kedro documentation
 * {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
 * {doc}`Where can I find the documentation for Kedro's datasets<kedro-datasets:kedro_datasets>`?

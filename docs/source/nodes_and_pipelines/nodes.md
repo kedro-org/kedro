@@ -4,7 +4,7 @@ In this section, we introduce the concept of a node, for which the relevant API 
 
 Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end (E2E) production workflows.
 
-You must first import libraries from Kedro and other standard tools to run the code snippets demonstrated below.
+You must first import libraries from Kedro and other standard tools to run the code snippets below.
 
 ```python
 from kedro.pipeline import *
@@ -185,7 +185,11 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 ## How to use generator functions in a node
 
 ```{warning}
+<<<<<<< HEAD
 This documentation section uses the `pandas-iris` starter that is unavailable in Kedro version 0.19.0 and beyond. The latest version of Kedro that supports `pandas-iris` is Kedro 0.18.14: install that or an earlier version to work through this example `pip install example-package<=0.18.14`).
+=======
+This documentation section uses the `pandas-iris` starter that is unavailable in Kedro version 0.19.0 and beyond. The latest version of Kedro that supports `pandas-iris` is Kedro 0.18.14: install that or an earlier version to work through this example `pip install kedro==0.18.14`).
+>>>>>>> develop
 
 To check the version installed, type `kedro -V` in your terminal window.
 ```
@@ -194,7 +198,11 @@ To check the version installed, type `kedro -V` in your terminal window.
 
 ### Set up the project
 
+<<<<<<< HEAD
 To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the legacy `pandas-iris` starter. Create the project with this command, assuming Kedro version 0.18.14:
+=======
+Set up a Kedro project using the legacy `pandas-iris` starter. Create the project with this command, assuming Kedro version 0.18.14:
+>>>>>>> develop
 
 ```bash
 kedro new --starter=pandas-iris --checkout=0.18.14

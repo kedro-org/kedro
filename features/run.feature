@@ -57,6 +57,6 @@ Feature: Run Project
   Scenario: Run kedro run with extra parameters
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
-    When I execute the kedro command "run --params extra1:1,extra2:value2"
+    When I execute the kedro command "run --params extra1=1,extra2=value2"
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run

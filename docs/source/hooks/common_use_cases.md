@@ -143,13 +143,13 @@ These credentials will be used to access these datasets in the data catalog:
 
 ```yaml
 weather:
- type: spark.SparkDataSet
+ type: spark.SparkDataset
  filepath: s3a://your_bucket/data/01_raw/weather*
  file_format: csv
  credentials: s3_creds
 
 cars:
- type: pandas.CSVDataSet
+ type: pandas.CSVDataset
  filepath: https://your_data_store.blob.core.windows.net/data/01_raw/cars.csv
  file_format: csv
  credentials: abs_creds

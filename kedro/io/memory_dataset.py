@@ -3,16 +3,11 @@
 from __future__ import annotations
 
 import copy
-import warnings
 from typing import Any
 
-from kedro import KedroDeprecationWarning
 from kedro.io.core import AbstractDataset, DatasetError
 
 _EMPTY = object()
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-MemoryDataSet: type[MemoryDataset]
 
 
 class MemoryDataset(AbstractDataset):
@@ -27,14 +22,14 @@ class MemoryDataset(AbstractDataset):
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
-        >>> data_set = MemoryDataset(data=data)
+        >>> dataset = MemoryDataset(data=data)
         >>>
-        >>> loaded_data = data_set.load()
+        >>> loaded_data = dataset.load()
         >>> assert loaded_data.equals(data)
         >>>
         >>> new_data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5]})
-        >>> data_set.save(new_data)
-        >>> reloaded_data = data_set.load()
+        >>> dataset.save(new_data)
+        >>> reloaded_data = dataset.load()
         >>> assert reloaded_data.equals(new_data)
 
     """
@@ -141,16 +136,3 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
         )
 
     return copied_data
-
-
-def __getattr__(name):
-    if name == "MemoryDataSet":
-        alias = MemoryDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

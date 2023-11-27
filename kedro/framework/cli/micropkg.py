@@ -8,12 +8,13 @@ import shutil
 import sys
 import tarfile
 import tempfile
+import toml
 from importlib import import_module
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 import click
-from build.util import project_wheel_metadata
+from omegaconf import OmegaConf
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
 from rope.base.project import Project
@@ -22,6 +23,7 @@ from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
 from setuptools.discovery import FlatLayoutPackageFinder
 
+from build.util import project_wheel_metadata
 from kedro.framework.cli.pipeline import (
     _assert_pkg_name_ok,
     _check_pipeline_name,
@@ -243,7 +245,7 @@ def _pull_package(  # noqa: PLR0913
         package_reqs = _get_all_library_reqs(library_meta)
 
         if package_reqs:
-            requirements_txt = metadata.source_dir / "requirements.txt"
+            requirements_txt = metadata.project_path / "requirements.txt"
             _append_package_reqs(requirements_txt, package_reqs, package_name)
 
         _clean_pycache(temp_dir_path)
@@ -258,10 +260,7 @@ def _pull_package(  # noqa: PLR0913
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
-    # noqa: import-outside-toplevel
-    import anyconfig  # for performance reasons
-
-    config_dict = anyconfig.load(metadata.config_file)
+    config_dict = toml.load(metadata.config_file)
     config_dict = config_dict["tool"]["kedro"]
     build_specs = config_dict.get("micropkg", {}).get("pull")
 
@@ -282,10 +281,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
 
 def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
-    # noqa: import-outside-toplevel
-    import anyconfig  # for performance reasons
-
-    config_dict = anyconfig.load(metadata.config_file)
+    config_dict = toml.load(metadata.config_file)
     config_dict = config_dict["tool"]["kedro"]
     build_specs = config_dict.get("micropkg", {}).get("package")
 
@@ -366,13 +362,12 @@ def package_micropkg(  # noqa: PLR0913
 
 def _get_fsspec_filesystem(location: str, fs_args: str | None):
     # noqa: import-outside-toplevel
-    import anyconfig
     import fsspec
 
     from kedro.io.core import get_protocol_and_path
 
     protocol, _ = get_protocol_and_path(location)
-    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
+    fs_args_config = OmegaConf.to_container(OmegaConf.load(fs_args)) if fs_args else {}
 
     try:
         return fsspec.filesystem(protocol, **fs_args_config)
@@ -963,8 +958,8 @@ def _append_package_reqs(
             file.write(sep.join(sorted_reqs))
 
     click.secho(
-        "Use 'kedro build-reqs' to compile and 'pip install -r src/requirements.lock' to install "
-        "the updated list of requirements."
+        "Use 'pip-compile requirements.txt --output-file requirements.lock' to compile "
+        "and 'pip install -r requirements.lock' to install the updated list of requirements."
     )
 
 

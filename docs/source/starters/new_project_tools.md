@@ -92,4 +92,29 @@ Be sure to note default values
 Be sure to note what happens when using a config file that omits add-ons - project fails
 -->
 
+---
+Here's a flowchart to guide your choice of tools and examples:
+```{mermaid}
+:alt: mermaid-Decision making diagram for setting up a new Kedro project
+
+flowchart TD
+    A[Start] -->|Run 'kedro new'| B{Select Tools}
+    B -->|None| C{Include example pipeline?}
+    B -->|All| C{Include example pipeline?}
+    B -->|Combination of Lint, Test, Logs, Docs, Data, PySpark, Viz| C
+    C -->|No| D[Proceed without example pipeline and only the basic template]
+    C -->|Yes| E{Which add-ons are included?}
+    E -->|None| F[Include 'spaceflights-pandas' example]
+    E -->|All| I[Include 'spaceflights-pyspark-viz' example]
+    E -->|Viz without PySpark| G[Include 'spaceflights-pandas-viz' example]
+    E -->|PySpark without Viz| H[Include 'spaceflights-pyspark' example]
+    E -->|Viz & PySpark| I[Include 'spaceflights-pyspark-viz' example]
+    E -->|Without Viz and PySpark| F[Include 'spaceflights-pandas' example]
+    D --> J[Project setup complete]
+    F --> J
+    G --> J
+    H --> J
+    I --> J
+
+```
 

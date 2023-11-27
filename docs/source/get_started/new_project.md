@@ -12,6 +12,8 @@ You can create a basic Kedro project containing the default code needed to set u
 kedro new
 ```
 
+### Project name
+
 The command line interface then asks you to enter a name for the project. This is the human-readable name, and it may contain alphanumeric symbols, spaces, underscores, and hyphens. It must be at least two characters long.
 
 It's best to keep the name simple because the choice is set as the value of `project_name` and is also used to generate the folder and package names for the project automatically.
@@ -24,7 +26,7 @@ So, if you enter "Get Started", the folder for the project (`repo_name`) is auto
 | Local directory to store the project                           | `repo_name`      | `get-started` |
 | The Python package name for the project (short, all-lowercase) | `python_package` | `get_started` |
 
-## Project tools
+### Project tools
 
 The command line interface then asks which tools you'd like to include in the project. The options are as follows and described in more detail above in the [documentation about the new project tools](../starters/new_project_tools.md).
 
@@ -38,7 +40,7 @@ You can add one or more of the options, or follow the default and add none at al
 * PySpark: Setup and configuration for working with PySpark
 * Kedro Viz: Kedro's native visualisation tool.
 
-## Project examples
+### Project examples
 
 TO DO
 
@@ -80,7 +82,7 @@ This command automatically opens a browser tab to serve the visualisation at `ht
 
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
-### Where next?
+## Where next?
 You have completed the section on Kedro project creation for new users. Here are some useful resources to learn more:
 
 * Understand more about Kedro: The following page explains the [fundamental Kedro concepts](./kedro_concepts.md).

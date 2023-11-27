@@ -69,7 +69,9 @@ Here is the layout of the project as a Cookiecutter template:
 ├── data                         # Local project data (not committed to version control)
 ├── docs                         # Project documentation
 ├── notebooks                    # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
+├── pyproject.toml               #
 ├── README.md                    # Project README
+├── requirements.txt
 └── src                          # Project source code
     └── {{ cookiecutter.python_package }}
        ├── __init.py__
@@ -77,9 +79,7 @@ Here is the layout of the project as a Cookiecutter template:
        ├── pipeline_registry.py
        ├── __main__.py
        └── settings.py
-    ├── requirements.txt
-    ├── pyproject.toml
-    └── tests
+└── tests
 ```
 
 

@@ -2,17 +2,19 @@
 
 ## Major features and improvements
 * Dropped Python 3.7 support.
-* Introduced add-ons to the `kedro new` CLI flow.
+* Introduced add-ons and example to the `kedro new` CLI flow.
 * The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 * Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
 * Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
 * Modified the mechanism of importing datasets, raise more explicit error when dependencies are missing.
 * Added validation for configuration file used to override run commands via the CLI.
 * Moved the default environment `base` and `local` from config loader to `_ProjectSettings`. This enables the use of config loader as a standalone class without affecting existing Kedro Framework users.
+
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.
 * Reduced `spaceflights` data to minimise waiting times during tutorial execution.
 * Added validation to node tags to be consistent with node names.
+* Removed `pip-tools` as a dependency.
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
@@ -480,7 +482,7 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
-* `KedroContext` is now an `attrs`'s frozen class and `config_loader` is available as public attribute.
+* `KedroContext` is now a attr's dataclass, `config_loader` is available as public attribute.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Updated [Databricks documentation](https://docs.kedro.org/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.

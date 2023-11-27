@@ -15,9 +15,10 @@ def main():
 
     # Get the selected add-ons from cookiecutter
     selected_add_ons = "{{ cookiecutter.add_ons }}"
+    example_pipeline = "{{ cookiecutter.example_pipeline }}"
 
     # Handle template directories and requirements according to selected add-ons
-    setup_template_add_ons(selected_add_ons, requirements_file_path, pyproject_file_path, python_package_name)
+    setup_template_add_ons(selected_add_ons, requirements_file_path, pyproject_file_path, python_package_name, example_pipeline)
 
     # Sort requirements.txt file in alphabetical order
     sort_requirements(requirements_file_path)

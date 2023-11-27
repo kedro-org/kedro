@@ -123,7 +123,7 @@ omit = [
     "kedro/extras/datasets/holoviews/*",
     "tests/*"
 ]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError", "if TYPE_CHECKING:"]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
 addopts="""

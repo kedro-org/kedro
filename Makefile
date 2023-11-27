@@ -45,7 +45,7 @@ install-test-requirements:
 	python -m pip install -U "pip>=21.2,<23.2"
 	pip install .[test]
 
-install-pre-commit: install-test-requirements
+install-pre-commit:
 	pre-commit install --install-hooks
 
 uninstall-pre-commit:

@@ -41,43 +41,28 @@ The available tools include: linting, testing, custom logging, documentation, da
 
 ### Documentation 
 
-<!--
-    - What the tool modifies in the project structure and requirements
-    - Does it have any prerequisites/couplings/exclusions with other tools?
-    - What does it enable/how to utilise the tool in the new project setup
-    - Tools link back to Kedro principles; why do we recommend using this tool, what value does it provide to the user/link on best practice (short, 1-2 sentence)
-    - For more information look at our [docs docs](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project)
--->
+Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, allowing for the auto generation of HTML documentation. 
+The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration. It will help you to create and maintain guides and API docs.
+See the [official documentation](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project) for guidance on adding documentation to a Kedro project.
 
 ### Data Structure 
 
-<!--
-    - What the tool modifies in the project structure
-    - Does it have any prerequisites/couplings/exclusions with other tools? NOTE: examples cannot omit data structure
-    - What does it enable/how to utilise the tool in the new project setup
-    - Tools link back to Kedro principles; why do we recommend using this tool, what value does it provide to the user/link on best practice (short, 1-2 sentence)
-    see: https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure
--->
+The Data Structure tool provides a standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data.
+This tool is fundamental if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
+This tool will help you in maintaining a clean and organised data workflow, with clear separation of data at various processing stages.
+We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
+You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure).
 
-### Pyspark 
+### PySpark 
 
-<!--
-    - What the tool modifies in the project structure and requirements
-    - Does it have any prerequisites/couplings/exclusions with other tools?
-    - What does it enable/how to utilise the tool in the new project setup
-    - Tools link back to Kedro principles; why do we recommend using this tool, what value does it provide to the user/link on best practice (short, 1-2 sentence)
-    see: https://docs.kedro.org/en/stable/integrations/pyspark_integration.html
--->
+The PySpark tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
+PySpark aligns with Kedro's scalability principle, as it provides data processing capabilities for large datasets.
+See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for more information on setup and usage.
 
 ### Kedro Viz
 
-<!--
-    - What the tool modifies in the project structure and requirements
-    - Does it have any prerequisites/couplings/exclusions with other tools?
-    - What does it enable/how to utilise the tool in the new project setup
-    - Tools link back to Kedro principles; why do we recommend using this tool, what value does it provide to the user/link on best practice (short, 1-2 sentence)
-    - For more information visit our [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html)
--->
+This tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
+See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
 
 
 ## Configuring your tool selection

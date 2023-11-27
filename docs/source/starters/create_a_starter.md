@@ -104,6 +104,7 @@ starters = [
 ```
 
 Example for a git repository starter:
+
 ```python
 # plugin.py
 starters = [

@@ -14,7 +14,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -22,6 +22,9 @@ from cachetools.keys import hashkey
 
 from kedro import KedroDeprecationWarning
 from kedro.utils import load_obj
+
+if TYPE_CHECKING:
+    import os
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
@@ -709,7 +712,9 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
     return options
 
 
-def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, str]:
+def get_protocol_and_path(
+    filepath: str | os.PathLike, version: Version = None
+) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 
     .. warning::
@@ -725,7 +730,7 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, 
     Raises:
         DatasetError: when protocol is http(s) and version is not None.
     """
-    options_dict = _parse_filepath(filepath)
+    options_dict = _parse_filepath(str(filepath))
     path = options_dict["path"]
     protocol = options_dict["protocol"]
 

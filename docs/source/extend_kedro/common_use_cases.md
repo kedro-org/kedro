@@ -39,4 +39,4 @@ Your plugin's implementation can take advantage of other extension mechanisms su
 
 ## Use Case 4: How to customise the initial boilerplate of your project
 
-Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, see the [guide for creating Kedro starters](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).
+Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, see the [guide for creating Kedro starters](../starters/create_a_starter.md).

@@ -37,7 +37,7 @@ Kedro framework serves as the interface between a Kedro project and Kedro librar
 
 ## Kedro starter
 
-You can use a [Kedro starter](../kedro_project_setup/starters.md) to generate a Kedro project that contains boilerplate code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
+You can use a [Kedro starter](../starters/starters.md) to generate a Kedro project that contains boilerplate code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
 
 ## Kedro library
 

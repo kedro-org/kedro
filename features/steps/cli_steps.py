@@ -168,17 +168,14 @@ def create_config_file_with_add_ons(context, addons):
     It takes a custom add-ons list and sets example prompt to `y`.
     """
 
-    if addons != 'none':
-        addons_list = addons.split(',')
-    else:
-        addons_list = []
+    addons_str = addons if addons != 'none' else ''
 
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "add_ons": addons_list,
+        "add_ons": addons_str,
         "example": 'y',
         "project_name": context.project_name,
         "repo_name": context.project_name,
@@ -477,6 +474,18 @@ def check_created_project_structure(context):
         return (context.root_project_dir / name).exists()
 
     for path in ("README.md", "src", "data"):
+        assert is_created(path)
+
+
+@then("the expected add-on directories and files should be created")
+def check_created_project_structure(context):
+    """Behave step to check the subdirectories created by kedro new."""
+
+    def is_created(name):
+        """Check if path exists."""
+        return (context.root_project_dir / name).exists()
+
+    for path in ("README.md", "src", "pyproject.toml", "requirements.txt"):
         assert is_created(path)
 
 

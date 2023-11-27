@@ -6,6 +6,7 @@ from __future__ import annotations
 import abc
 import copy
 import logging
+import os
 import re
 import warnings
 from collections import namedtuple
@@ -14,7 +15,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -22,9 +23,6 @@ from cachetools.keys import hashkey
 
 from kedro import KedroDeprecationWarning
 from kedro.utils import load_obj
-
-if TYPE_CHECKING:
-    import os
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
@@ -568,7 +566,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
     @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
-    def _fetch_latest_save_version(self) -> str:  # noqa: no-self-use
+    def _fetch_latest_save_version(self) -> str:
         """Generate and cache the current save version"""
         return generate_timestamp()
 
@@ -615,7 +613,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:  # noqa: useless-parent-delegation
+    def load(self) -> _DO:
         return super().load()
 
     def save(self, data: _DI) -> None:

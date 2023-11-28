@@ -21,25 +21,7 @@
 {% endblock %}
 
 {%- block extrahead %}
-<script type="text/javascript">
-    // Wait for DOM to load and clone main nav into the sidebar
-  document.addEventListener("DOMContentLoaded", function() {
-      var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
-      sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
 
-      // Prepend close button to mobile header
-      var closeBtn = document.createElement("span");
-      closeBtn.dataset.toggle = 'wy-nav-top';
-      closeBtn.classList.add('wy-nav-top-close');
-      document.querySelector('.wy-nav-top').prepend(closeBtn);
-
-    // Prepend open button to mobile header
-      var openBtn = document.createElement("span");
-      openBtn.dataset.toggle = 'wy-nav-top';
-      openBtn.classList.add('wy-nav-top-open');
-      document.querySelector('.wy-nav-top').prepend(openBtn);
-  });
-</script>
 <link rel="stylesheet" href="https://kedro-shared-files.s3.eu-west-2.amazonaws.com/qb1-sphinx-rtd.css" type="text/css"
 />
 <link rel="stylesheet" href="https://kedro-shared-files.s3.eu-west-2.amazonaws.com/theme-overrides.css" type="text/css"

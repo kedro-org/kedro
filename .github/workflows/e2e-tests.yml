@@ -43,6 +43,7 @@ jobs:
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
       - name: Setup Hadoop binary
+        if: inputs.os == 'windows-latest'
         run: |
           Invoke-WebRequest "https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe?raw=true" -OutFile winutils.exe
           Invoke-WebRequest "https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/hadoop.dll?raw=true" -OutFile hadoop.dll

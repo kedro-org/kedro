@@ -17,13 +17,13 @@ add_ons:
     To read more about these add-ons and what they do visit: kedro.org/ # TODO - add docs link in #3048
 
     Add-Ons
-    1) Lint: Provides a basic linting set up with Black, Ruff
-    2) Test: Provides basic testing set up with pytest
-    3) Log: Provides more logging options, environment specific,
-    4) Docs: Provides basic documentations setup with Sphinx
-    5) Data Folder: Provides a folder structure for data management
-    6) PySpark: Provides set up configuration for working with PySpark
-    7) Kedro-Viz: Provides Kedro's native visualisation tool
+    1) Lint: Basic linting set up with Black, and Ruff
+    2) Test: Basic testing set up with pytest
+    3) Log: More logging options, environment specific,
+    4) Docs: Basic documentations setup with Sphinx
+    5) Data Folder: Folder structure for data management
+    6) PySpark: Set up configuration for working with PySpark
+    7) Kedro-Viz: Kedro's native visualisation tool
 
     Which add-ons would you like to include in your project? [1-7/1,3/all/none]:
   regex_validator: "^(all|none|(( )*\\d*(,\\d*)*(,( )*\\d*)*( )*|( )*((\\d+-\\d+)|(\\d+ - \\d+))( )*))$"

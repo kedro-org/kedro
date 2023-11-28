@@ -222,6 +222,9 @@ def _assert_template_ok(
         in result.output
     )
 
+    if "y" in example_pipeline.lower():
+        assert "It has been created with an example pipeline." in result.output
+
     generated_files = [
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
     ]

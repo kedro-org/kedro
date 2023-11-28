@@ -46,7 +46,7 @@ jobs:
         if: inputs.os == 'windows-latest'
         uses: actions/setup-java@v2
         with:
-          java-version: '1.8'
+          java-version: '8'
           distribution: 'adopt'
       - name: Set HADOOP_HOME
         run: |

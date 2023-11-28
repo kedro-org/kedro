@@ -36,7 +36,7 @@ In short, you'll learn answers to the following:
 
 You don't need to register for the course and you can skip around the sections to find help on a particular area as you pick up the skills needed to build your own Kedro projects.
 
-## Index of videos 
+## Index of videos
 
 [Introduction to Kedro: Building Maintainable Data Pipelines](https://www.youtube.com/playlist?list=PL-JJgymPjK5LddZXbIzp9LWurkLGgB-nY) is split into the following videos:
 
@@ -82,5 +82,3 @@ You don't need to register for the course and you can skip around the sections t
 ### Part 4: Where next?
 
 [Continue your Kedro journey](https://www.youtube.com/watch?v=JvXhv8_0tlE)
-
-

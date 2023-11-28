@@ -135,7 +135,7 @@ Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom spark or mlflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.
 
 ### How to load a data catalog with templating in code?
-If you want to directly load a data catalog that contains templating in code you can leverage the `OmegaConfigLoader`. Under the hood the `OmegaConfigLoader` will resolve any templates, so no further steps are required to load catalog entries properly.
+You can use the `OmegaConfigLoader` to directly load a data catalog that contains templating in code. Under the hood the `OmegaConfigLoader` will resolve any templates, so no further steps are required to load catalog entries properly.
 ```yaml
 # Example catalog with templating
 companies:

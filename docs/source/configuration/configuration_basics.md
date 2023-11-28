@@ -17,16 +17,16 @@ From Kedro 0.18.5 you can use the [`OmegaConfigLoader`](/kedro.config.OmegaConfi
 `OmegaConfigLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
 
 ### `OmegaConf` vs. Kedro's `OmegaConfigLoader`
-`OmegaConf` is a configuration management library in Python that allows you to manage hierarchical configurations. On the other hand, Kedro's `OmegaConfigLoader` is a component within the Kedro framework that utilises `OmegaConf` for handling configurations.
-This means that when you work with `OmegaConfigLoader` in Kedro, you are leveraging the capabilities of `OmegaConf` without directly interacting with it.
+`OmegaConf` is a configuration management library in Python that allows you to manage hierarchical configurations. Kedro's `OmegaConfigLoader` uses `OmegaConf` for handling configurations.
+This means that when you work with `OmegaConfigLoader` in Kedro, you are using the capabilities of `OmegaConf` without directly interacting with it.
 
-`OmegaConfigLoader` in Kedro is designed to handle more complex configuration setups commonly used in Kedro projects. It automates the process of merging configuration files, such as those for catalogs, and takes into account different environments, making it convenient for managing configurations in a structured way.
+`OmegaConfigLoader` in Kedro is designed to handle more complex configuration setups commonly used in Kedro projects. It automates the process of merging configuration files, such as those for catalogs, and accounts for different environments to make it convenient to manage configurations in a structured way.
 
 When you need to load configurations manually, such as for exploration in a notebook, you have two options:
 1. Use the `OmegaConfigLoader` class provided by Kedro.
 2. Directly use the `OmegaConf` library.
 
-If your use case involves loading only one configuration file and you don't have the complexity that Kedro's `OmegaConfigLoader` is designed to handle, it may be simpler to use `OmegaConf` directly.
+Kedro's `OmegaConfigLoader` is designed to handle complex project environments. If your use case involves loading only one configuration file and is straightforward, it may be simpler to use `OmegaConf` directly. 
 
 ```python
 from omegaconf import OmegaConf
@@ -34,9 +34,9 @@ from omegaconf import OmegaConf
 parameters = OmegaConf.load("/path/to/parameters.yml")
 ```
 
-When your configuration files are more complex and contain credentials or templating Kedro's `OmegaConfigLoader` is better suited to load configuration, as described in more detail in [How to load a data catalog with credentials in code?](#how-to-load-a-data-catalog-with-credentials-in-code) and [How to load a data catalog with templating in code?](advanced_configuration.md#how-to-load-a-data-catalog-with-templating-in-code).
+When your configuration files are complex and contain credentials or templating, Kedro's `OmegaConfigLoader` is more suitable, as described in more detail in [How to load a data catalog with credentials in code?](#how-to-load-a-data-catalog-with-credentials-in-code) and [How to load a data catalog with templating in code?](advanced_configuration.md#how-to-load-a-data-catalog-with-templating-in-code).
 
-In summary, while both `OmegaConf` and Kedro's `OmegaConfigLoader` provide ways to manage configurations, the latter is specifically tailored for Kedro projects with a focus on handling more intricate configuration structures and environments. The choice between them depends on the complexity of your configuration needs and whether you are working within the context of the Kedro framework.
+In summary, while both `OmegaConf` and Kedro's `OmegaConfigLoader` provide ways to manage configurations, your choice depends on the complexity of your configuration and whether you are working within the context of the Kedro framework. 
 
 ## Configuration source
 The configuration source folder is [`conf`](../get_started/kedro_concepts.md#conf) by default. We recommend that you keep all configuration files in the default `conf` folder of a Kedro project.

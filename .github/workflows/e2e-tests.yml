@@ -46,8 +46,12 @@ jobs:
         if: inputs.os == 'windows-latest'
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '1.8'
           distribution: 'adopt'
+      - name: Set HADOOP_HOME
+        run: |
+          echo "HADOOP_HOME=C:\dummy\hadoop" >> $GITHUB_ENV
+          echo "hadoop.home.dir=C:\dummy\hadoop" >> $GITHUB_ENV
       - name: Install dependencies
         run: |
           pip install --upgrade pip

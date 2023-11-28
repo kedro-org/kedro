@@ -1,6 +1,6 @@
 # Using tools to configure your Kedro project
 
-## Configuring your tool selection
+## Configuring your project setup
 
 There are several ways to configure your project tool when creating a new Kedro project.
 
@@ -12,7 +12,7 @@ Navigate to the directory in which you would like to create your new Kedro proje
 kedro new
 ```
 
-This will start the new project creation wizard<!--wording-->, promptng you to input a project name, any tools you would like to include, and whether or not you would like to populate the project with example code. The creation wizard will provide you with a list of available tools and a brief description of each:
+This will start the new project creation wizard<!--wording-->, prompting you to input a project name, any tools you would like to include, and whether you would like to populate the project with example code. The creation wizard will provide you with a list of available tools and a brief description of each:
 
 | ![cli-prompt.jpg](IMAGE RESOURCE PLACEHOLDER) |
 |:--:|
@@ -30,19 +30,21 @@ You may also specify your tools selection directly from the command line by usin
 kedro new --tools=<your tool selection>
 ```
 
-To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. Currently the following tools are availavle for selection: lint, test, log, docs, data, pyspark, and viz.
+To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. The following tools are available for selection: lint, test, log, docs, data, pyspark, and viz.
 
 A list of available tools can also be accessed by running `kedro new --help`
 
 ![cli-output.jpg](IMAGE RESOURCE PLACEHOLDER)
 
-Providing your tool configuration in the command line will skip the tool selection prompt as part of the project creation wizard. The other prompts, for projet name and example code, can be skipped by the flags `--name` and `--example` respectively.
+Providing your tool configuration in the command line will skip the tool selection prompt as part of the project creation wizard. The other prompts, for project name and example code, can be skipped by the flags `--name` and `--example` respectively.
 
 ### Using a configuration file `kedro new --config/-c=`
 
-You can also supply your selected tools by providing a config file to your `kedro new` command. Consider the following config:
+You can also supply your selected tools by providing a config file to your `kedro new` command. Consider the following configuration:
 
 ```yaml
+# config.yml
+
 "project_name":
     "My Project"
 
@@ -62,14 +64,14 @@ Then, after navigating to the directory in which you would like to create your n
 kedro new --config=<path/to/config.yml>
 ```
 
-Note: When using a config file to create a new project, you must provide values for the project, repository and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
+Note: When using a configuration file to create a new project, you must provide values for the project, repository, and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
 
 ## Kedro tools
 <!--TO DO: FILL PLACEHOLDERS-->
 
 Tools are [modular functionalities that can be added to a basic Kedro project] . They allow for [...]. When creating a new project, you may select one or more of the available tools, or none at all.
 
-The available tools include: linting, testing, custom logging, documentation, data structure, Pyspark, and Kedro-Viz.
+The available tools include: linting, testing, custom logging, documentation, data structure, PySpark, and Kedro-Viz.
 
 ### Linting
 
@@ -105,17 +107,21 @@ ruff format path/to/project/root
 black path/to/project/root --check
 ```
 
-Though it has no impact on how your code works, linting is important for code quality because improves consistency, readabity, debugging, and maintainability. To learn more about linting your Kedro projects, check our [linting documentation](../development/linting.md).
+Though it has no impact on how your code works, linting is important for code quality because improves consistency, readability, debugging, and maintainability. To learn more about linting your Kedro projects, check our [linting documentation](../development/linting.md).
 
 ### Testing
 
-This tool introduces the `tests` directory to the new project's structure, containing the file `test_run.py` with an example unit test.
+This tool introduces the `tests` directory to the new project's structure, containing the file `test_run.py` with an example unit test. [`Pytest`](https://docs.pytest.org/en/7.4.x/) is added as a dependency in your new project's requirements. After project creation, make sure it is installed by running the following command:
+
+```bash
+pip install -r path/to/project/root/requirements.txt
+```
 
 | ![cli-output.jpg](IMAGE RESOURCE PLACEHOLDER) |
 |:--:|
 | *Prompt for tools selection* |
 
-The tool leverages [`pytest`](https://docs.pytest.org/en/7.4.x/) with the following configuration:
+The tool leverages `pytest` with the following configuration:
 
 ```toml
 [tool.pytest.ini_options]
@@ -144,9 +150,9 @@ Selecting the custom logging tool introduces the file `logging.yml` to your proj
 |:--:|
 | *Prompt for tools selection* |
 
-This tool allows you to customise your logging configuration instead of using [Kedro's default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). The populated `conf/logging.yml` provides two additional logging handlers: `console` and `info_file_handler`, as well as `rich` that is available in the default configuration. However, only `info_file_handler` and `rich` are used.
+This tool allows you to customise your logging configuration instead of using [Kedro's default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). The populated `conf/logging.yml` provides two additional logging handlers: `console` and `info_file_handler`, as well as `rich` that is available in the default configuration, though only `info_file_handler` and `rich` are used.
 
-To learn more about using logging in your project, or modifying the logging configuration, take a look at out [logging documentation](../logging/index.md).
+To learn more about using logging in your project, or modifying the logging configuration, take a look at our [logging documentation](../logging/index.md).
 
 ### Documentation
 
@@ -156,7 +162,7 @@ See the [official documentation](https://docs.kedro.org/en/stable/tutorial/packa
 
 ### Data Structure
 
-The Data Structure tool provides a standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data.
+The Data Structure tool provides a standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention).
 This tool is fundamental if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
 This tool will help you in maintaining a clean and organised data workflow, with clear separation of data at various processing stages.
 We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.

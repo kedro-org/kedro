@@ -62,7 +62,7 @@ def _make_cli_prompt_input(
     python_package="",
 ):
     return "\n".join(
-        [add_ons, project_name, example_pipeline, repo_name, python_package]
+        [project_name, add_ons, example_pipeline, repo_name, python_package]
     )
 
 
@@ -121,9 +121,12 @@ def _assert_requirements_ok(
     output_dir=".",
 ):
     assert result.exit_code == 0, result.output
-    assert "Change directory to the project generated in" in result.output
 
     root_path = (Path(output_dir) / repo_name).resolve()
+
+    assert "Congratulations!" in result.output
+    assert f"has been created in the directory \n{root_path}" in result.output
+
     requirements_file_path = root_path / "requirements.txt"
     pyproject_file_path = root_path / "pyproject.toml"
 
@@ -210,9 +213,15 @@ def _assert_template_ok(
     output_dir=".",
 ):
     assert result.exit_code == 0, result.output
-    assert "Change directory to the project generated in" in result.output
 
     full_path = (Path(output_dir) / repo_name).resolve()
+
+    assert "Congratulations!" in result.output
+    assert (
+        f"Your project '{project_name}' has been created in the directory \n{full_path}"
+        in result.output
+    )
+
     generated_files = [
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
     ]
@@ -231,9 +240,10 @@ def _assert_name_ok(
     project_name="New Kedro Project",
 ):
     assert result.exit_code == 0, result.output
-    assert "Change directory to the project generated in" in result.output
+    assert "Congratulations!" in result.output
     assert (
-        "The project name '" + project_name + "' has been applied to: " in result.output
+        f"Your project '{project_name}' has been created in the directory"
+        in result.output
     )
 
 

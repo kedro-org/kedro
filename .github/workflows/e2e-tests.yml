@@ -48,11 +48,12 @@ jobs:
       - name: Set up Hadoop binary
         if: inputs.os == 'windows-latest'
         run: choco install hadoop
-      - name: Set HADOOP_HOME
+      - name: Set HADOOP_HOME and update PATH
         if: inputs.os == 'windows-latest'
         run: |
-          echo "HADOOP_HOME=C:\Hadoop" >> $GITHUB_ENV
-          echo "PATH=${{ env.HADOOP_HOME }}\bin;${{ env.HADOOP_HOME }}\sbin;$PATH" >> $GITHUB_ENV
+          echo "HADOOP_HOME=C:\Hadoop" | Out-File -Append -FilePath $env:GITHUB_ENV
+          echo "PATH=$env:HADOOP_HOME\bin;$env:HADOOP_HOME\sbin;$env:PATH" | Out-File -Append -FilePath $env:GITHUB_ENV
+        shell: pwsh
       - name: Install dependencies
         run: |
           pip install --upgrade pip

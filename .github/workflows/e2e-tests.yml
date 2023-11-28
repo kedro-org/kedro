@@ -49,8 +49,9 @@ jobs:
         if: inputs.os == 'windows-latest'
         run: choco install hadoop
       - name: Set HADOOP_HOME
+        if: inputs.os == 'windows-latest'
         run: |
-          echo "HADOOP_HOME=C:\hadoop" >> $GITHUB_ENV
+          echo "HADOOP_HOME=C:\Hadoop" >> $GITHUB_ENV
           echo "PATH=${{ env.HADOOP_HOME }}\bin;${{ env.HADOOP_HOME }}\sbin;$PATH" >> $GITHUB_ENV
       - name: Install dependencies
         run: |

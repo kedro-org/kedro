@@ -42,27 +42,16 @@ jobs:
       - name: Add MSBuild to PATH
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
-      - name: Install Microsoft Visual C++ Redistributable
-        if: inputs.os == 'windows-latest'
-        run: |
-          choco install vcredist140
-        shell: powershell
       - name: Set up Java
         if: inputs.os == 'windows-latest'
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'adopt'
+        run: choco install openjdk
       - name: Set up Hadoop binary
         if: inputs.os == 'windows-latest'
+        run: choco install hadoop
+      - name: Set HADOOP_HOME
         run: |
-          $ProgressPreference = "SilentlyContinue"
-          Invoke-WebRequest "https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe" -OutFile "winutils.exe" -UseBasicParsing
-          New-Item -ItemType directory -Path "C:\hadoop\bin" -Force
-          Move-Item -Path ".\winutils.exe" -Destination "C:\hadoop\bin"
-          [Environment]::SetEnvironmentVariable("HADOOP_HOME", "C:\hadoop\", [EnvironmentVariableTarget]::Machine)
-          echo "HADOOP_HOME=C:\hadoop\" | Out-File -FilePath $env:GITHUB_ENV -Append
-        shell: powershell
+          echo "HADOOP_HOME=C:\hadoop" >> $GITHUB_ENV
+          echo "PATH=${{ env.HADOOP_HOME }}\bin;${{ env.HADOOP_HOME }}\sbin;$PATH" >> $GITHUB_ENV
       - name: Install dependencies
         run: |
           pip install --upgrade pip

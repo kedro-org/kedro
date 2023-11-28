@@ -15,6 +15,7 @@
 * Reduced `spaceflights` data to minimise waiting times during tutorial execution.
 * Added validation to node tags to be consistent with node names.
 * Removed `pip-tools` as a dependency.
+* Accepted path-like filepaths more broadly for datasets.
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.

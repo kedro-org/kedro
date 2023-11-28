@@ -48,15 +48,6 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
-      - name: Set up Hadoop binary
-        if: inputs.os == 'windows-latest'
-        run: |
-          $ProgressPreference = "SilentlyContinue"
-          Invoke-WebRequest "https://github.com/steveloughran/winutils/raw/master/hadoop-2.6.3/bin/winutils.exe" -OutFile "winutils.exe" -UseBasicParsing
-          New-Item -ItemType directory -Path "C:\hadoop\bin" -Force
-          Move-Item -Path ".\winutils.exe" -Destination "C:\hadoop\bin"
-          echo "HADOOP_HOME=C:\hadoop\" | Out-File -FilePath $env:GITHUB_ENV -Append
-        shell: powershell
       - name: Install dependencies
         run: |
           pip install --upgrade pip

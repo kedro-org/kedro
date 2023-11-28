@@ -486,8 +486,33 @@ def check_created_project_structure_from_addons(context):
         """Check if path exists."""
         return (context.root_project_dir / name).exists()
 
-    for path in ("README.md", "src", "pyproject.toml", "requirements.txt"):
-        assert is_created(path)
+    # Base checks for any project
+    for path in ["README.md", "src", "pyproject.toml", "requirements.txt"]:
+        assert is_created(path), f"{path} does not exist"
+
+    add_ons = context.config["add_ons"].split(",") if context.config["add_ons"] != "all" else ["1", "2", "3", "4", "5",
+                                                                                               "6", "7"]
+
+    if "1" in add_ons:  # lint add-on
+        pass
+
+    if "2" in add_ons:  # test add-on
+        assert is_created("tests"), "tests directory does not exist"
+    if "3" in add_ons:  # log add-on
+        assert is_created("conf/logging.yml"), "logging configuration does not exist"
+
+    if "4" in add_ons:  # docs add-on
+        assert is_created("docs"), "docs directory does not exist"
+
+    if "5" in add_ons:  # data add-on
+        assert is_created("data"), "data directory does not exist"
+
+    if "6" in add_ons:  # PySpark add-on
+        assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
+
+    if "7" in add_ons:  # 'viz' add-on
+        expected_reporting_path = Path(f"src/{context.package_name}/pipelines/reporting")
+        assert is_created(expected_reporting_path), "reporting pipeline directory does not exist"
 
 
 @then("the logs should show that {number} nodes were run")

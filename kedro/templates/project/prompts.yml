@@ -37,7 +37,7 @@ example_pipeline:
     To skip this step in the future use --example=y/n
     To read more about how examples work visit: kedro.org/ # TODO - add docs link in #3048
 
-    Would you like to include an example pipeline? \[y/N]:
+    Would you like to include an example pipeline? [y/N]:
   regex_validator: "(?i)^(y|yes|n|no)$"
   error_message: |
     It must contain only y, n, YES, NO, case insensitive.

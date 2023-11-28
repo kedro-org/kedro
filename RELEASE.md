@@ -5,6 +5,8 @@
 
 ## Bug fixes and other changes
 * Reduced `spaceflights` data to minimise waiting times during tutorial execution.
+* Accepted path-like filepaths more broadly for datasets.
+
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*

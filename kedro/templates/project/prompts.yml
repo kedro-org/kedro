@@ -1,7 +1,7 @@
 project_name:
   title: "Project Name"
   text: |
-    Please enter a human readable name for your new project.
+    Please enter a name for your new project.
     Spaces, hyphens, and underscores are allowed.
     To skip this step in future use --name
   regex_validator: "^[\\w -]{2,}$"
@@ -12,17 +12,17 @@ project_name:
 add_ons:
   title: "Project Add-Ons"
   text: |
-    These optional tools are here to help you apply software engineering best practices to your project quickly and easily.
+    These optional tools can help you apply software engineering best practices.
     To skip this step in future use --add-ons
-    To read more about these add-ons and what they do visit: kedro.org/ # TODO - add docs link in #3048
+    To find out more: kedro.org/ # TODO - add docs link in #3048
 
     Add-Ons
-    1) Lint: Basic linting set up with Black and Ruff
-    2) Test: Basic testing set up with pytest
-    3) Log: More logging options, environment specific,
-    4) Docs: Basic documentations setup with Sphinx
-    5) Data Folder: Folder structure for data management
-    6) PySpark: Set up configuration for working with PySpark
+    1) Lint: Basic linting with Black and Ruff
+    2) Test: Basic testing with pytest
+    3) Log: Additional, environment-specific logging options
+    4) Docs: A Sphinx documentation setup
+    5) Data Folder: A folder structure for data management
+    6) PySpark: Configuration for working with PySpark
     7) Kedro-Viz: Kedro's native visualisation tool
 
     Which add-ons would you like to include in your project? [1-7/1,3/all/none]:
@@ -35,7 +35,7 @@ example_pipeline:
   text: |
     Select whether you would like an example spaceflights pipeline included in your project.
     To skip this step in the future use --example=y/n
-    To read more about how examples work visit: kedro.org/ # TODO - add docs link in #3048
+    To find out more: kedro.org/ # TODO - add docs link in #3048
 
     Would you like to include an example pipeline? [y/N]:
   regex_validator: "(?i)^(y|yes|n|no)$"

@@ -853,8 +853,8 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
             click.secho("It has been created with an example pipeline.")
 
     click.secho(
-        "\n To skip the interactive flow you can run `kedro new` with"
-        "\n kedro new --name=<your-name> --addons=<your-addons> --example=<yes/no>"
+        "\nTo skip the interactive flow you can run `kedro new` with"
+        "\nkedro new --name=<your-name> --addons=<your-addons> --example=<yes/no>"
     )
 
 

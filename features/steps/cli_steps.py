@@ -478,8 +478,8 @@ def check_created_project_structure(context):
         assert is_created(path)
 
 
-@then("the expected add-on directories and files should be created")
-def check_created_project_structure_from_addons(context):
+@then('the expected add-on directories and files should be created with "{addons}"')
+def check_created_project_structure_from_addons(context, addons):
     """Behave step to check the subdirectories created by kedro new with add-ons."""
 
     def is_created(name):
@@ -490,30 +490,29 @@ def check_created_project_structure_from_addons(context):
     for path in ["README.md", "src", "pyproject.toml", "requirements.txt"]:
         assert is_created(path), f"{path} does not exist"
 
-    add_ons = (
-        context.config["add_ons"].split(",")
-        if context.config["add_ons"] != "all"
-        else ["1", "2", "3", "4", "5", "6", "7"]
+    addons_list = (
+        addons.split(",") if addons != "all" else ["1", "2", "3", "4", "5", "6", "7"]
     )
 
-    if "1" in add_ons:  # lint add-on
+    if "1" in addons_list:  # lint add-on
         pass
 
-    if "2" in add_ons:  # test add-on
+    if "2" in addons_list:  # test add-on
         assert is_created("tests"), "tests directory does not exist"
-    if "3" in add_ons:  # log add-on
+
+    if "3" in addons_list:  # log add-on
         assert is_created("conf/logging.yml"), "logging configuration does not exist"
 
-    if "4" in add_ons:  # docs add-on
+    if "4" in addons_list:  # docs add-on
         assert is_created("docs"), "docs directory does not exist"
 
-    if "5" in add_ons:  # data add-on
+    if "5" in addons_list:  # data add-on
         assert is_created("data"), "data directory does not exist"
 
-    if "6" in add_ons:  # PySpark add-on
+    if "6" in addons_list:  # PySpark add-on
         assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
 
-    if "7" in add_ons:  # 'viz' add-on
+    if "7" in addons_list:  # 'viz' add-on
         expected_reporting_path = Path(
             f"src/{context.package_name}/pipelines/reporting"
         )

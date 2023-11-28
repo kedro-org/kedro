@@ -834,30 +834,27 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )
     add_ons = extra_context.get("add_ons")
+    example_pipeline = extra_context.get("example_pipeline")
+
+    click.secho(
+        "\nCongratulations!"
+        f"\nYour project '{project_name}' has been created in the directory \n{result_path}"
+    )
 
     # we can use starters without add_ons:
     if add_ons is not None:
         if add_ons == "[]":  # TODO: This should be a list
-            click.secho("\nYou have selected no add-ons")
+            click.secho("You have selected no add-ons")
         else:
-            click.secho(f"\nYou have selected the following add-ons: {add_ons}")
+            click.secho(f"You have selected the following add-ons: {add_ons}")
+
+    if example_pipeline is not None:
+        if example_pipeline:
+            click.secho("It has been created with an example pipeline.")
 
     click.secho(
-        f"\nThe project name '{project_name}' has been applied to: "
-        f"\n- The project title in {result_path}/README.md "
-        f"\n- The folder created for your project in {result_path} "
-        f"\n- The project's python package in {result_path}/src/{python_package}"
-    )
-    click.secho(
-        "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running 'pip install -r requirements.txt' to install "
-        "project-specific dependencies. Refer to the Kedro documentation: "
-        "https://kedro.readthedocs.io/"
-    )
-    click.secho(
-        f"\nChange directory to the project generated in {result_path} by "
-        f"entering 'cd {result_path}'",
-        fg="green",
+        "\n To skip the interactive flow you can run `kedro new` with"
+        "\n kedro new --name=<your-name> --addons=<your-addons> --example=<yes/no>"
     )
 
 

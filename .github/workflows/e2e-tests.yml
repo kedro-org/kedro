@@ -45,9 +45,8 @@ jobs:
       - name: Install Microsoft Visual C++ Redistributable
         if: inputs.os == 'windows-latest'
         run: |
-          $ProgressPreference = "SilentlyContinue"
-          Invoke-WebRequest https://aka.ms/vs/16/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe
-          .\vc_redist.x64.exe /S /v/qn
+          choco install vcredist140
+        shell: powershell
       - name: Set up Java
         if: inputs.os == 'windows-latest'
         uses: actions/setup-java@v2
@@ -58,11 +57,12 @@ jobs:
         if: inputs.os == 'windows-latest'
         run: |
           $ProgressPreference = "SilentlyContinue"
-          Invoke-WebRequest "https://github.com/steveloughran/winutils/raw/master/hadoop-2.6.3/bin/winutils.exe" -OutFile "winutils.exe" -UseBasicParsing
+          Invoke-WebRequest "https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe" -OutFile "winutils.exe" -UseBasicParsing
           New-Item -ItemType directory -Path "C:\hadoop\bin" -Force
           Move-Item -Path ".\winutils.exe" -Destination "C:\hadoop\bin"
           [Environment]::SetEnvironmentVariable("HADOOP_HOME", "C:\hadoop\", [EnvironmentVariableTarget]::Machine)
           echo "HADOOP_HOME=C:\hadoop\" | Out-File -FilePath $env:GITHUB_ENV -Append
+        shell: powershell
       - name: Install dependencies
         run: |
           pip install --upgrade pip

@@ -163,7 +163,7 @@ def kedro_init(
     context = session.load_context()
     catalog = context.catalog
     logger.info("Registering datasets...")
-    unregistered_ds = pipeline.data_sets() - set(catalog.list())  # NOQA
+    unregistered_ds = pipeline.datasets() - set(catalog.list())  # NOQA
     for ds_name in unregistered_ds:
         catalog.add(ds_name, MemoryDataset())
     return {"catalog": catalog, "sess_id": session.session_id}

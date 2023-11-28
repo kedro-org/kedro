@@ -42,6 +42,12 @@ jobs:
       - name: Add MSBuild to PATH
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
+      - name: Set Java environment variables
+        if: inputs.os == 'windows-latest'
+        run: |
+          echo "JAVA_HOME=C:\OpenJDK8U\openjdk-8u252-b09" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "Path=${env:Path};C:\OpenJDK8U\openjdk-8u252-b09\bin" | Out-File -FilePath $env:GITHUB_ENV -Append
+        shell: powershell
       - name: Set up Hadoop binary
         if: inputs.os == 'windows-latest'
         run: |
@@ -49,7 +55,7 @@ jobs:
           Invoke-WebRequest "https://github.com/steveloughran/winutils/raw/master/hadoop-2.6.3/bin/winutils.exe" -OutFile "winutils.exe" -UseBasicParsing
           New-Item -ItemType directory -Path "C:\hadoop\bin" -Force
           Move-Item -Path ".\winutils.exe" -Destination "C:\hadoop\bin"
-          [Environment]::SetEnvironmentVariable("HADOOP_HOME", "C:\hadoop\", [EnvironmentVariableTarget]::Machine)
+          echo "HADOOP_HOME=C:\hadoop\" | Out-File -FilePath $env:GITHUB_ENV -Append
         shell: powershell
       - name: Install dependencies
         run: |

@@ -490,8 +490,11 @@ def check_created_project_structure_from_addons(context):
     for path in ["README.md", "src", "pyproject.toml", "requirements.txt"]:
         assert is_created(path), f"{path} does not exist"
 
-    add_ons = context.config["add_ons"].split(",") if context.config["add_ons"] != "all" else ["1", "2", "3", "4", "5",
-                                                                                               "6", "7"]
+    add_ons = (
+        context.config["add_ons"].split(",")
+        if context.config["add_ons"] != "all"
+        else ["1", "2", "3", "4", "5", "6", "7"]
+    )
 
     if "1" in add_ons:  # lint add-on
         pass
@@ -511,8 +514,12 @@ def check_created_project_structure_from_addons(context):
         assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
 
     if "7" in add_ons:  # 'viz' add-on
-        expected_reporting_path = Path(f"src/{context.package_name}/pipelines/reporting")
-        assert is_created(expected_reporting_path), "reporting pipeline directory does not exist"
+        expected_reporting_path = Path(
+            f"src/{context.package_name}/pipelines/reporting"
+        )
+        assert is_created(
+            expected_reporting_path
+        ), "reporting pipeline directory does not exist"
 
 
 @then("the logs should show that {number} nodes were run")

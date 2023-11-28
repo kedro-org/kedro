@@ -25,8 +25,9 @@
 
     // Wait for DOM to load and clone main nav into the sidebar
   document.addEventListener("DOMContentLoaded", function() {
-      var inputElement = document.querySelector('.wy-side-nav-search div[role="search"] form input');
+      var inputElement = document.querySelector('.div[role="search"] form input');
       inputElement.addEventListener('focus', function() {
+        console.log("Input focused")
         var event = new Event('readthedocs-search-show');
         inputElement.dispatchEvent(event);
       });

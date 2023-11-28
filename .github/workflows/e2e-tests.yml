@@ -43,10 +43,10 @@ jobs:
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
       - name: Install Microsoft Visual C++ Redistributable
-          command: |
-            $ProgressPreference = "SilentlyContinue"
-            Invoke-WebRequest https://aka.ms/vs/16/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe
-            .\vc_redist.x64.exe /S /v/qn
+        run: |
+          $ProgressPreference = "SilentlyContinue"
+          Invoke-WebRequest https://aka.ms/vs/16/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe
+          .\vc_redist.x64.exe /S /v/qn
       - name: Set up Java
         if: inputs.os == 'windows-latest'
         uses: actions/setup-java@v2

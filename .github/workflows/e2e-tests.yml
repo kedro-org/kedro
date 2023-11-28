@@ -43,6 +43,7 @@ jobs:
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
       - name: Install Microsoft Visual C++ Redistributable
+        if: inputs.os == 'windows-latest'
         run: |
           $ProgressPreference = "SilentlyContinue"
           Invoke-WebRequest https://aka.ms/vs/16/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe

@@ -17,7 +17,7 @@ add_ons:
     To read more about these add-ons and what they do visit: kedro.org/ # TODO - add docs link in #3048
 
     Add-Ons
-    1) Lint: Basic linting set up with Black, and Ruff
+    1) Lint: Basic linting set up with Black and Ruff
     2) Test: Basic testing set up with pytest
     3) Log: More logging options, environment specific,
     4) Docs: Basic documentations setup with Sphinx

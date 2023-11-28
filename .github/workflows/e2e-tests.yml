@@ -42,6 +42,14 @@ jobs:
       - name: Add MSBuild to PATH
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
+      - name: Set up Hadoop binary
+        run: |
+          $ProgressPreference = "SilentlyContinue"
+          Invoke-WebRequest "https://github.com/steveloughran/winutils/raw/master/hadoop-2.6.3/bin/winutils.exe" -OutFile "winutils.exe" -UseBasicParsing
+          New-Item -ItemType directory -Path "C:\hadoop\bin" -Force
+          Move-Item -Path ".\winutils.exe" -Destination "C:\hadoop\bin"
+          [Environment]::SetEnvironmentVariable("HADOOP_HOME", "C:\hadoop\", [EnvironmentVariableTarget]::Machine)
+        shell: powershell
       - name: Install dependencies
         run: |
           pip install --upgrade pip

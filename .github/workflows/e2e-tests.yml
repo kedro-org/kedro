@@ -42,6 +42,11 @@ jobs:
       - name: Add MSBuild to PATH
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
+      - name: Install Microsoft Visual C++ Redistributable
+        if: inputs.os == 'windows-latest'
+        run: |
+          choco install vcredist-all
+        shell: powershell
       - name: Setup Hadoop binary
         if: inputs.os == 'windows-latest'
         run: |

@@ -479,8 +479,8 @@ def check_created_project_structure(context):
 
 
 @then("the expected add-on directories and files should be created")
-def check_created_project_structure(context):
-    """Behave step to check the subdirectories created by kedro new."""
+def check_created_project_structure_from_addons(context):
+    """Behave step to check the subdirectories created by kedro new with add-ons."""
 
     def is_created(name):
         """Check if path exists."""

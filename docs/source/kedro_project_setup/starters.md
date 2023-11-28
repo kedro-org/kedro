@@ -130,21 +130,23 @@ If you want `cookiecutter` to provide sensible **defaults** in case a user doesn
 
 ### Example Kedro starter
 
-To review an example Kedro starter, check out the [`pandas-iris` starter on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris).
+To review an example Kedro starter, check out the [`spaceflights-pandas` starter on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas).
 
-When you create an Iris dataset example project by calling `kedro new`, you supply configuration variables as the documentation in [Create a new project](../get_started/new_project.md) describes. When you go through the interactive flow you must supply the `project_name` variable, which is then used to generate the `repo_name` and `python_package` variables. If you use a configuration file, you must supply all three variables in the file. You can see how these variables are used by inspecting the template:
+When a new `spaceflights-pandas` project is created with `kedro new --starter=spaceflights-pandas`, the user is asked to enter a `project_name` variable, which is then used to generate the `repo_name` and `python_package` variables by default.
 
-**project_name**
+If you use a configuration file, you must supply all three variables in the file. You can see how these variables are used by [inspecting the template](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D):
 
-The human-readable `project_name` variable is used in the [README.md](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris/README.md) for the new project.
+### `project_name`
 
-**repo_name**
+The human-readable `project_name` variable is used in the [README.md](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/README.md) for the new project.
 
-The project structure contains a folder labelled [`{{ cookiecutter.repo_name }}`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D), which forms the top-level folder to contain the Iris dataset example when it is created. The folder storing the example project is represented by `cookiecutter.repo_name`, which is a customisable variable, as you would expect.
+### `repo_name`
 
-**python_package**
+The top-level folder labelled [`{{ cookiecutter.repo_name }}`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D), which forms the top-level folder to contain the starter project when it is created.
 
-Within the parent folder, inside the `src` subfolder, is another configurable variable [{{ cookiecutter.python_package }}](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D) which contains the source code for the example pipelines. The variable is also used within [`__main__.py`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/__main__.py).
+### `python_package`
+
+Within the parent folder, inside the `src` subfolder, is another configurable variable [{{ cookiecutter.python_package }}](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D) which contains the source code for the example pipelines. The variable is also used within [`__main__.py`](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/__main__.py).
 
 Here is the layout of the project as a Cookiecutter template:
 
@@ -154,8 +156,9 @@ Here is the layout of the project as a Cookiecutter template:
 ├── data                         # Local project data (not committed to version control)
 ├── docs                         # Project documentation
 ├── notebooks                    # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
+├── pyproject.toml               #
 ├── README.md                    # Project README
-├── .flake8                      # Configuration options for `flake8` (linting)
+├── requirements.txt
 └── src                          # Project source code
     └── {{ cookiecutter.python_package }}
        ├── __init.py__
@@ -163,11 +166,5 @@ Here is the layout of the project as a Cookiecutter template:
        ├── pipeline_registry.py
        ├── __main__.py
        └── settings.py
-    ├── requirements.txt
-    ├── pyproject.toml
-    └── tests
-```
-
-```{note}
-You can [add an alias by creating a plugin using `kedro.starters` entry point](../extend_kedro/plugins.md#extend-starter-aliases), which will allows you to do `kedro new --starter=your_starters` and shows up on shows up on `kedro starter list`.
+└── tests
 ```

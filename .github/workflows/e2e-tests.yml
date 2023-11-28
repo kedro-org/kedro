@@ -42,16 +42,26 @@ jobs:
       - name: Add MSBuild to PATH
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
+      - name: Install Microsoft Visual C++ Redistributable
+          command: |
+            $ProgressPreference = "SilentlyContinue"
+            Invoke-WebRequest https://aka.ms/vs/16/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe
+            .\vc_redist.x64.exe /S /v/qn
       - name: Set up Java
         if: inputs.os == 'windows-latest'
         uses: actions/setup-java@v2
         with:
           java-version: '8'
           distribution: 'adopt'
-      - name: Set HADOOP_HOME
+      - name: Set up Hadoop binary
+        if: inputs.os == 'windows-latest'
         run: |
-          echo "HADOOP_HOME=C:\dummy\hadoop" >> $GITHUB_ENV
-          echo "hadoop.home.dir=C:\dummy\hadoop" >> $GITHUB_ENV
+          $ProgressPreference = "SilentlyContinue"
+          Invoke-WebRequest "https://github.com/steveloughran/winutils/raw/master/hadoop-2.6.3/bin/winutils.exe" -OutFile "winutils.exe" -UseBasicParsing
+          New-Item -ItemType directory -Path "C:\hadoop\bin" -Force
+          Move-Item -Path ".\winutils.exe" -Destination "C:\hadoop\bin"
+          [Environment]::SetEnvironmentVariable("HADOOP_HOME", "C:\hadoop\", [EnvironmentVariableTarget]::Machine)
+          echo "HADOOP_HOME=C:\hadoop\" | Out-File -FilePath $env:GITHUB_ENV -Append
       - name: Install dependencies
         run: |
           pip install --upgrade pip

@@ -45,7 +45,7 @@ Add-Ons\n
 7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
-kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
+kedro new --addons=lint,test,log,docs,data,pyspark,viz (or any subset of these options)\n
 kedro new --addons=all\n
 kedro new --addons=none
 """

@@ -835,19 +835,28 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
 
     click.secho(
         "\nCongratulations!"
-        f"\nYour project '{project_name}' has been created in the directory \n{result_path}"
+        f"\nYour project '{project_name}' has been created in the directory \n{result_path}\n"
     )
 
     # we can use starters without add_ons:
     if add_ons is not None:
         if add_ons == "[]":  # TODO: This should be a list
-            click.secho("You have selected no add-ons")
+            click.secho(
+                "You have selected no add-ons",
+                fg="green",
+            )
         else:
-            click.secho(f"You have selected the following add-ons: {add_ons}")
+            click.secho(
+                f"You have selected the following add-ons: {add_ons}",
+                fg="green",
+            )
 
     if example_pipeline is not None:
         if example_pipeline:
-            click.secho("It has been created with an example pipeline.")
+            click.secho(
+                "It has been created with an example pipeline.",
+                fg="green",
+            )
 
     click.secho(
         "\nTo skip the interactive flow you can run `kedro new` with"

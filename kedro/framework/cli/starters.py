@@ -481,6 +481,10 @@ def _convert_addon_names_to_numbers(selected_add_ons_flag: str | None) -> str | 
     """
     if selected_add_ons_flag is None:
         return None
+    if selected_add_ons_flag.lower() == "none":
+        return ""
+    if selected_add_ons_flag.lower() == "all":
+        return ",".join(ADD_ONS_SHORTNAME_TO_NUMBER.values())
 
     addons = []
     for addon in selected_add_ons_flag.lower().split(","):

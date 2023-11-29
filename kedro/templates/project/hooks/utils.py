@@ -141,37 +141,37 @@ def _remove_pyspark_viz_starter_files(is_viz: bool, python_package_name: str) ->
     _remove_file(test_pipeline_path)
 
 
-def setup_template_add_ons(selected_add_ons_list: str, requirements_file_path: str, pyproject_file_path: str, python_package_name: str, example_pipeline: str) -> None:
-    """Setup the templates according to the choice of add-ons.
+def setup_template_tools(selected_tools_list: str, requirements_file_path: str, pyproject_file_path: str, python_package_name: str, example_pipeline: str) -> None:
+    """Setup the templates according to the choice of tools.
 
     Args:
-        selected_add_ons_list (str): A string contains the selected add-ons.
+        selected_tools_list (str): A string contains the selected tools.
         requirements_file_path (str): The path of the `requiremenets.txt` in the template.
         pyproject_file_path (str): The path of the `pyproject.toml` in the template
         python_package_name (str): The name of the python package.
         example_pipeline (str): 'True' if example pipeline was selected
     """
-    if "Linting" not in selected_add_ons_list:
+    if "Linting" not in selected_tools_list:
         _remove_from_file(requirements_file_path, lint_requirements)
         _remove_from_toml(pyproject_file_path, lint_pyproject_requirements)
 
-    if "Testing" not in selected_add_ons_list:
+    if "Testing" not in selected_tools_list:
         _remove_from_file(requirements_file_path, test_requirements)
         _remove_from_toml(pyproject_file_path, test_pyproject_requirements)
         _remove_dir(current_dir / "tests")
 
-    if "Logging" not in selected_add_ons_list:
+    if "Logging" not in selected_tools_list:
         _remove_file(current_dir / "conf/logging.yml")
 
-    if "Documentation" not in selected_add_ons_list:
+    if "Documentation" not in selected_tools_list:
         _remove_from_toml(pyproject_file_path, docs_pyproject_requirements)
         _remove_dir(current_dir / "docs")
 
-    if "Data Structure" not in selected_add_ons_list and example_pipeline != "True":
+    if "Data Structure" not in selected_tools_list and example_pipeline != "True":
         _remove_dir(current_dir / "data")
 
-    if ("Pyspark" in selected_add_ons_list or "Kedro Viz" in selected_add_ons_list) and example_pipeline != "True":
-        _remove_pyspark_viz_starter_files("Kedro Viz" in selected_add_ons_list, python_package_name)
+    if ("Pyspark" in selected_tools_list or "Kedro Viz" in selected_tools_list) and example_pipeline != "True":
+        _remove_pyspark_viz_starter_files("Kedro Viz" in selected_tools_list, python_package_name)
 
 
 def sort_requirements(requirements_file_path: Path) -> None:

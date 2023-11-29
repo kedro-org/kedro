@@ -317,8 +317,8 @@ The Databricks Command Line Interface (CLI) is another way to automate deploymen
 1. [Set up your Kedro project for deployment on Databricks.](#set-up-your-project-for-deployment-to-databricks)
 2. Install the Databricks CLI and authenticate it with your workspace.
 3. Create a JSON file containing your job's configuration.
-4. Use the [`jobs create` command](https://docs.databricks.com/dev-tools/cli/jobs-cli.html#create-a-job) to create a new job.
-5. Use the [`jobs run-now` command](https://docs.databricks.com/dev-tools/cli/jobs-cli.html#run-a-job) to run your newly created job.
+4. Use the [`jobs create` command](https://docs.databricks.com/archive/dev-tools/cli/jobs-cli.html#create-a-job) to create a new job.
+5. Use the [`jobs run-now` command](https://docs.databricks.com/archive/dev-tools/cli/jobs-cli.html#run-a-job) to run your newly created job.
 
 ## Summary
 

@@ -192,7 +192,7 @@ def new(  # noqa: PLR0913
             "Cannot use the --directory flag without a --starter value."
         )
 
-    if (tools or example_pipeline) and starter_alias:
+    if (selected_tools or example_pipeline) and starter_alias:
         raise KedroCliError(
             "Cannot use the --starter flag with the --example and/or --tools flag."
         )

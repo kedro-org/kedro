@@ -1,7 +1,7 @@
-# New project tools (title TBD)
-As you saw from the [First steps](../get_started/new_project.md) section, once you have [set up Kedro](../get_started/install.md), you can use `kedro new` to create a basic Kedro project containing project directories and basic code, which you can configure depending on the tooling and example code you need.
+# Customise a new project
+As you saw from the [First steps](../get_started/new_project.md) section, once you have [set up Kedro](../get_started/install.md), you can create a new project with `kedro new` and customise the code added to that project for its tooling and example code requirements.
 
-There are options to the code you include when you create a new Kedro project, which the pages in this section describe in detail.
+The pages in this section describe in detail the various options available.
 
 ```{toctree}
 :maxdepth: 1

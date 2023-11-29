@@ -1,10 +1,8 @@
-# Using tools to configure your Kedro project
+# Tools to customise a new Kedro project
 
-## Configuring your project setup
+There are several ways to configure your new project with the tools and example code.
 
-There are several ways to configure your project tool when creating a new Kedro project.
-
-### Through the `kedro new` prompt
+## `kedro new`
 
 Navigate to the directory in which you would like to create your new Kedro project, and run the following command:
 
@@ -12,17 +10,31 @@ Navigate to the directory in which you would like to create your new Kedro proje
 kedro new
 ```
 
-This will start the new project creation wizard<!--wording-->, prompting you to input a project name, any tools you would like to include, and whether you would like to populate the project with example code. The creation wizard will provide you with a list of available tools and a brief description of each:
+This will start the new project creation workflow:
+
+1. The first prompt asks you to input a project name.
+2. You are then asked select which tools to include. Choose from the list using comma separated values `(1,2,4)`, a range of values `(3-5)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`. Further information about each of the tools is described below in [Kedro tools](#kedro-tools).
+
 
 | ![cli-prompt.jpg](IMAGE RESOURCE PLACEHOLDER) |
 |:--:|
 | *Prompt for tools selection* |
 
-When selecting your desired tools, you may provide them as comma separated values `(1,2,4)`, a range of values `(3-5)`, or using the key words `all` or `none`.
+3. Finally, you are asked whether you want to populate the project with an example pipeline. Further information about this pipeline is below in [Example pipeline](#example-pipeline).
 
-Skipping the prompt by entering no value will result in the default selection of `none`.
+## Supply flags to `kedro new`
 
-### Through the use of the flag `kedro new --tools/-t=...`
+You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow.
+
+### `kedro new --project_name=`
+
+You can skip the step to name the project by adding it to your command. For example:
+
+```bash
+kedro new--project_name=spaceflights
+```
+
+### `kedro new --tools=`
 
 You may also specify your tools selection directly from the command line by using the flag `--tools`:
 
@@ -38,9 +50,17 @@ A list of available tools can also be accessed by running `kedro new --help`
 
 Providing your tool configuration in the command line will skip the tool selection prompt as part of the project creation wizard. The other prompts, for project name and example code, can be skipped by the flags `--name` and `--example` respectively.
 
-### Using a configuration file `kedro new --config/-c=`
+### `kedro new --example=`
 
-You can also supply your selected tools by providing a config file to your `kedro new` command. Consider the following configuration:
+You can add the example pipeline to your new project as follows:
+
+```bash
+kedro new --example=y
+```
+
+### `kedro new --config=`
+
+You can also supply values to `kedro new` by providing a YML config file to your `kedro new` command. Consider the following file:
 
 ```yaml
 # config.yml
@@ -58,13 +78,19 @@ You can also supply your selected tools by providing a config file to your `kedr
     "2-6"
 ```
 
-Then, after navigating to the directory in which you would like to create your new project, run the following command:
+To create a new project using the file to supply details to `kedro new`, run the following command:
 
 ```bash
 kedro new --config=<path/to/config.yml>
 ```
 
-Note: When using a configuration file to create a new project, you must provide values for the project, repository, and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
+``` {note}
+Note: When using a configuration file to create a new project, you must provide values for the project name, repository name, and package names.
+```
+
+Specifying your tools selection is optional, omitting them results in the default selection of `none`.
+
+<!--TO DO Need also to add examples?? -->
 
 ## Kedro tools
 <!--TO DO: FILL PLACEHOLDERS-->
@@ -203,3 +229,5 @@ flowchart TD
     H --> J
     I --> J
 ```
+
+## Example pipeline

@@ -438,7 +438,7 @@ def _get_extra_context(  # noqa: PLR0913
     # Format
     extra_context.setdefault("kedro_version", version)
 
-    tools = _convert_tools_names_to_numbers(selected_tools)
+    tools = _convert_tool_names_to_numbers(selected_tools)
 
     if tools is not None:
         extra_context["tools"] = tools
@@ -466,7 +466,7 @@ def _get_extra_context(  # noqa: PLR0913
     return extra_context
 
 
-def _convert_tools_names_to_numbers(selected_tools: str | None) -> str | None:
+def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
     """Prepares tools selection from the CLI input to the correct format
     to be put in the project configuration, if it exists.
     Replaces tool strings with the corresponding prompt number.

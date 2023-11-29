@@ -16,7 +16,7 @@ from kedro.framework.cli.starters import (
     _OFFICIAL_STARTER_SPECS,
     TEMPLATE_PATH,
     KedroStarterSpec,
-    _convert_tools_names_to_numbers,
+    _convert_tool_names_to_numbers,
     _parse_tools_input,
     _parse_yes_no_to_bool,
     _validate_selection,
@@ -1210,7 +1210,7 @@ class TestToolsAndExampleFromCLI:
             ["new", "--tools", tools, "--example", example_pipeline],
             input=_make_cli_prompt_input_without_tools(),
         )
-        tools = _convert_tools_names_to_numbers(selected_tools=tools)
+        tools = _convert_tool_names_to_numbers(selected_tools=tools)
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
         _clean_up_project(Path("./new-kedro-project"))

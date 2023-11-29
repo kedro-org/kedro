@@ -851,7 +851,8 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
 
     click.secho(
         "\nTo skip the interactive flow you can run `kedro new` with"
-        "\nkedro new --name=<your-project-name> --addons=<your-addons> --example=<yes/no>"
+        "\nkedro new --name=<your-project-name> --addons=<your-addons> --example=<yes/no>",
+        fg="green",
     )
 
 

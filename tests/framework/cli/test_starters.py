@@ -61,9 +61,7 @@ def _make_cli_prompt_input(
     repo_name="",
     python_package="",
 ):
-    return "\n".join(
-        [project_name, tools, example_pipeline, repo_name, python_package]
-    )
+    return "\n".join([project_name, tools, example_pipeline, repo_name, python_package])
 
 
 def _make_cli_prompt_input_without_tools(
@@ -72,9 +70,7 @@ def _make_cli_prompt_input_without_tools(
     return "\n".join([project_name, repo_name, python_package])
 
 
-def _make_cli_prompt_input_without_name(
-    tools="none", repo_name="", python_package=""
-):
+def _make_cli_prompt_input_without_name(tools="none", repo_name="", python_package=""):
     return "\n".join([tools, repo_name, python_package])
 
 

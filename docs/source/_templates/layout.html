@@ -23,27 +23,14 @@
 {%- block extrahead %}
 <script type="text/javascript">
 
-  // Wait for DOM to load and clone main nav into the sidebar
-  document.addEventListener("DOMContentLoaded", function() {
-    var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
-    sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
-    var inputElement = document.querySelector('div[role="search"] form input[type="text"]');
-      inputElement.addEventListener('focus', function() {
-          console.log("Input focused");
-          var event = new Event("readthedocs-search-show");
-          inputElement.dispatchEvent(event);
-
-  // Prepend close button to mobile header
-  var closeBtn = document.createElement("span");
-  closeBtn.dataset.toggle = 'wy-nav-top';
-  closeBtn.classList.add('wy-nav-top-close');
-  document.querySelector('.wy-nav-top').prepend(closeBtn);
-
-  // Prepend open button to mobile header
-  var openBtn = document.createElement("span");
-  openBtn.dataset.toggle = 'wy-nav-top';
-  openBtn.classList.add('wy-nav-top-open');
-  document.querySelector('.wy-nav-top').prepend(openBtn);
+  document.addEventListener("DOMContentLoaded", function(event) {
+    // Trigger Read the Docs' search addon instead of Material MkDocs default
+    document.querySelector('div[role="search"] form input[type="text"]').addEventListener("focus", (e) => {
+      console.log("Input focused");
+      const event = new CustomEvent("readthedocs-search-show");
+      document.dispatchEvent(event);
+    });
+  });
 
 </script>
 

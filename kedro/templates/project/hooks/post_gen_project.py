@@ -13,7 +13,7 @@ def main():
     pyproject_file_path = current_dir / "pyproject.toml"
     python_package_name = '{{ cookiecutter.python_package }}'
 
-    # Get the selected toolss from cookiecutter
+    # Get the selected tools from cookiecutter
     selected_tools = "{{ cookiecutter.tools }}"
     example_pipeline = "{{ cookiecutter.example_pipeline }}"
 

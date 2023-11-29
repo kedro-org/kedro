@@ -102,7 +102,7 @@ class TestCLITools:
                 "--config",
                 "-c",
                 "--tools",
-                "-a",
+                "-t",
                 "--example",
                 "-e",
                 "--starter",

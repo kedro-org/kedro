@@ -170,7 +170,7 @@ def starter():
 @click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-@click.option("--tools", "-a", "selected_tools", help=TOOLS_ARG_HELP)
+@click.option("--tools", "-t", "selected_tools", help=TOOLS_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
 @click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
 def new(  # noqa: PLR0913

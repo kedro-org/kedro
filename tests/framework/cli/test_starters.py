@@ -630,6 +630,20 @@ class TestNewFromConfigFileValid:
         _assert_template_ok(result, **config)
         _clean_up_project(Path("./my-project"))
 
+    def test_config_with_no_tools_example(self, fake_kedro_cli):
+        """Test project created from config."""
+        config = {
+            "project_name": "My Project",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+        _assert_template_ok(result, **config)
+        _clean_up_project(Path("./my-project"))
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromConfigFileInvalid:

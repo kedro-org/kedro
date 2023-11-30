@@ -184,10 +184,10 @@ conf_catalog = conf_loader["catalog"]
 
 ### How to load a data catalog with credentials in code?
 ```{note}
-It is not recommended to do load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
+We do not recommend that you load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
 ```
 
-Assuming your project contains a catalog and credentials file each located in a `base` and `local` environment respectively, you can use the `OmegaConfigLoader` to load these configurations and then pass them on to a `DataCatalog` object to get access to the catalog entries with resolved credentials.
+Assuming your project contains a catalog and credentials file, each located in `base` and `local` environments respectively, you can use the `OmegaConfigLoader` to load these configurations, and pass them to a `DataCatalog` object to access the catalog entries with resolved credentials.
 ```python
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings

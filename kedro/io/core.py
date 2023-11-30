@@ -389,14 +389,14 @@ def parse_dataset_definition(
         for class_path in class_paths:
             tmp = _load_obj(class_path)
             if tmp is not None:
-                class_obj = tmp
+                dataset_type = tmp
                 break
         else:
             raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
 
-    if not issubclass(class_obj, AbstractDataset):
+    if not issubclass(dataset_type, AbstractDataset):
         raise DatasetError(
-            f"Dataset type '{class_obj.__module__}.{class_obj.__qualname__}' "
+            f"Dataset type '{dataset_type.__module__}.{dataset_type.__qualname__}' "
             f"is invalid: all data set types must extend 'AbstractDataset'."
         )
 
@@ -413,11 +413,11 @@ def parse_dataset_definition(
     # dataset is either versioned explicitly by the user or versioned is set to true by default
     # on the dataset
     if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
-        class_obj, VERSIONED_FLAG_KEY, False
+        dataset_type, VERSIONED_FLAG_KEY, False
     ):
         config[VERSION_KEY] = Version(load_version, save_version)
 
-    return class_obj, config
+    return dataset_type, config
 
 
 def _load_obj(class_path: str) -> Any | None:

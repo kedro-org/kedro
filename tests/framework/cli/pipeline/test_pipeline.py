@@ -202,7 +202,7 @@ class TestPipelineCreateCommand:
         with params_file.open("w") as f:
             yaml.dump(params_dict, f)
 
-        with KedroSession.create(PACKAGE_NAME) as session:
+        with KedroSession.create() as session:
             ctx = session.load_context()
         assert isinstance(ctx.catalog._datasets["ds_from_pipeline"], CSVDataset)
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)

@@ -707,7 +707,7 @@ def _validate_config_file_against_prompts(
     if "project_name" in missing_keys:
         click.echo(yaml.dump(config, default_flow_style=False))
         raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
-    if "example_pipeline" in missing_keys:
+    if missing_keys:
         click.secho(
             f"{missing_keys} not found in the config file, default value is being used.",
             fg="yellow",

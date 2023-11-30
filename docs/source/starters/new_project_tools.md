@@ -10,23 +10,14 @@ Navigate to the directory in which you would like to create your new Kedro proje
 kedro new
 ```
 
-This will start the new project creation workflow:
+This will start the new project creation workflow.
 
-1. The first prompt asks you to input a project name.
-2. You are then asked select which tools to include. Choose from the list using comma separated values `(1,2,4)`, a range of values `(3-5)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`. Further information about each of the tools is described below in [Kedro tools](#kedro-tools).
+``` {note}
+You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow to skip queries about how you want to customise the project. The flags are described below.
+```
 
-
-| ![cli-prompt.jpg](IMAGE RESOURCE PLACEHOLDER) |
-|:--:|
-| *Prompt for tools selection* |
-
-3. Finally, you are asked whether you want to populate the project with an example pipeline. Further information about this pipeline is below in [Example pipeline](#example-pipeline).
-
-## Supply flags to `kedro new`
-
-You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow.
-
-### `kedro new --project_name=`
+### Project name
+The first prompt asks you to input a project name.
 
 You can skip the step to name the project by adding it to your command. For example:
 
@@ -34,7 +25,14 @@ You can skip the step to name the project by adding it to your command. For exam
 kedro new--project_name=spaceflights
 ```
 
-### `kedro new --tools=`
+### Tools
+You are then asked select which tools to include. Choose from the list using comma separated values `(1,2,4)`, a range of values `(3-5)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`. Further information about each of the tools is described below in [Kedro tools](#kedro-tools).
+
+
+| ![cli-prompt.jpg](IMAGE RESOURCE PLACEHOLDER) |
+|:--:|
+| *Prompt for tools selection* |
+
 
 You may also specify your tools selection directly from the command line by using the flag `--tools`:
 
@@ -42,15 +40,15 @@ You may also specify your tools selection directly from the command line by usin
 kedro new --tools=<your tool selection>
 ```
 
-To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. The following tools are available for selection: lint, test, log, docs, data, pyspark, and viz.
+To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, `pyspark`, and `viz`.
 
 A list of available tools can also be accessed by running `kedro new --help`
 
 ![cli-output.jpg](IMAGE RESOURCE PLACEHOLDER)
 
-Providing your tool configuration in the command line will skip the tool selection prompt as part of the project creation wizard. The other prompts, for project name and example code, can be skipped by the flags `--name` and `--example` respectively.
 
-### `kedro new --example=`
+### Example code
+In the final step you are asked whether you want to populate the project with an example pipeline. Further information about this pipeline is below in [Example pipeline](#example-pipeline).
 
 You can add the example pipeline to your new project as follows:
 
@@ -58,7 +56,7 @@ You can add the example pipeline to your new project as follows:
 kedro new --example=y
 ```
 
-### `kedro new --config=`
+## `kedro new --config=`
 
 You can also supply values to `kedro new` by providing a YML config file to your `kedro new` command. Consider the following file:
 

@@ -918,7 +918,7 @@ class TestFlagsNotAllowed:
     def test_starter_flag_with_tools_flag(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--addons", "all", "--starter", "spaceflights-pandas"],
+            ["new", "--tools", "all", "--starter", "spaceflights-pandas"],
             input=_make_cli_prompt_input(),
         )
         assert result.exit_code != 0

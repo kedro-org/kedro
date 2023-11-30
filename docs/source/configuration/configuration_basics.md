@@ -16,6 +16,28 @@ From Kedro 0.18.5 you can use the [`OmegaConfigLoader`](/kedro.config.OmegaConfi
 
 `OmegaConfigLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
 
+### `OmegaConf` vs. Kedro's `OmegaConfigLoader`
+`OmegaConf` is a configuration management library in Python that allows you to manage hierarchical configurations. Kedro's `OmegaConfigLoader` uses `OmegaConf` for handling configurations.
+This means that when you work with `OmegaConfigLoader` in Kedro, you are using the capabilities of `OmegaConf` without directly interacting with it.
+
+`OmegaConfigLoader` in Kedro is designed to handle more complex configuration setups commonly used in Kedro projects. It automates the process of merging configuration files, such as those for catalogs, and accounts for different environments to make it convenient to manage configurations in a structured way.
+
+When you need to load configurations manually, such as for exploration in a notebook, you have two options:
+1. Use the `OmegaConfigLoader` class provided by Kedro.
+2. Directly use the `OmegaConf` library.
+
+Kedro's `OmegaConfigLoader` is designed to handle complex project environments. If your use case involves loading only one configuration file and is straightforward, it may be simpler to use `OmegaConf` directly.
+
+```python
+from omegaconf import OmegaConf
+
+parameters = OmegaConf.load("/path/to/parameters.yml")
+```
+
+When your configuration files are complex and contain credentials or templating, Kedro's `OmegaConfigLoader` is more suitable, as described in more detail in [How to load a data catalog with credentials in code?](#how-to-load-a-data-catalog-with-credentials-in-code) and [How to load a data catalog with templating in code?](advanced_configuration.md#how-to-load-a-data-catalog-with-templating-in-code).
+
+In summary, while both `OmegaConf` and Kedro's `OmegaConfigLoader` provide ways to manage configurations, your choice depends on the complexity of your configuration and whether you are working within the context of the Kedro framework.
+
 ## Configuration source
 The configuration source folder is [`conf`](../get_started/kedro_concepts.md#conf) by default. We recommend that you keep all configuration files in the default `conf` folder of a Kedro project.
 
@@ -86,6 +108,7 @@ This section contains a set of guidance for the most common configuration requir
 * [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
 * [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
 * [How to access configuration in code](#how-to-access-configuration-in-code)
+* [How to load a data catalog with credentials in code?](#how-to-load-a-data-catalog-with-credentials-in-code)
 * [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
 * [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
 * [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
@@ -157,6 +180,31 @@ conf_loader = OmegaConfigLoader(conf_source=conf_path)
 
 # This line shows how to access the catalog configuration. You can access other configuration in the same way.
 conf_catalog = conf_loader["catalog"]
+```
+
+### How to load a data catalog with credentials in code?
+```{note}
+We do not recommend that you load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
+```
+
+Assuming your project contains a catalog and credentials file, each located in `base` and `local` environments respectively, you can use the `OmegaConfigLoader` to load these configurations, and pass them to a `DataCatalog` object to access the catalog entries with resolved credentials.
+```python
+from kedro.config import OmegaConfigLoader
+from kedro.framework.project import settings
+from kedro.io import DataCatalog
+
+# Instantiate an `OmegaConfigLoader` instance with the location of your project configuration.
+conf_path = str(project_path / settings.CONF_SOURCE)
+conf_loader = OmegaConfigLoader(
+    conf_source=conf_path, base_env="base", default_run_env="local"
+)
+
+# These lines show how to access the catalog and credentials configurations.
+conf_catalog = conf_loader["catalog"]
+conf_credentials = conf_loader["credentials"]
+
+# Fetch the catalog with resolved credentials from the configuration.
+catalog = DataCatalog.from_config(catalog=conf_catalog, credentials=conf_credentials)
 ```
 
 ### How to specify additional configuration environments

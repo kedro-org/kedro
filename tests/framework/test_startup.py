@@ -94,7 +94,7 @@ class TestGetProjectMetadata:
             project_name="fake_project_name",
             kedro_init_version=kedro_version,
             project_path=self.project_path,
-            add_ons=None,
+            tools=None,
         )
         assert actual == expected
 
@@ -121,7 +121,7 @@ class TestGetProjectMetadata:
             project_name="fake_project_name",
             kedro_init_version=kedro_version,
             project_path=self.project_path,
-            add_ons=None,
+            tools=None,
         )
         assert actual == expected
 
@@ -300,7 +300,7 @@ class TestBootstrapProject:
             "project_path": tmp_path,
             "kedro_init_version": kedro_version,
             "source_dir": src_dir,
-            "add_ons": None,
+            "tools": None,
         }
         assert result == ProjectMetadata(**expected_metadata)
         assert str(src_dir) in sys.path[0]

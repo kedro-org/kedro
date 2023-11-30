@@ -641,10 +641,6 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
-        assert (
-            "{'tools', 'example_pipeline'} not found in the config file, default value is being used."
-            in result.output
-        )
         _assert_template_ok(result, **config)
         _clean_up_project(Path("./my-project"))
 

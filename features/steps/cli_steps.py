@@ -163,7 +163,7 @@ def create_config_file(context):
 
 
 @given('I have prepared a config file with tools "{tools}"')
-def create_config_file_with_add_ons(context, tools):
+def create_config_file_with_tools(context, tools):
     """Behave step to create a temporary config file
     (given the existing temp directory) and store it in the context.
     It takes a custom tools list and sets example prompt to `y`.
@@ -176,7 +176,7 @@ def create_config_file_with_add_ons(context, tools):
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "add_ons": tools_str,
+        "tools": tools_str,
         "example_pipeline": "y",
         "project_name": context.project_name,
         "repo_name": context.project_name,

@@ -495,7 +495,7 @@ def check_created_project_structure_from_tools(context, tools):
     )
 
     if "1" in tools_list:  # lint tool
-        pass
+        pass  # No files are added
 
     if "2" in tools_list:  # test tool
         assert is_created("tests"), "tests directory does not exist"
@@ -512,7 +512,7 @@ def check_created_project_structure_from_tools(context, tools):
     if "6" in tools_list:  # PySpark tool
         assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
 
-    if "7" in tools_list:  # 'viz' tool
+    if "7" in tools_list:  # viz tool
         expected_reporting_path = Path(
             f"src/{context.package_name}/pipelines/reporting"
         )

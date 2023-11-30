@@ -46,7 +46,6 @@ jobs:
         if: inputs.os == 'windows-latest'
         run: |
           choco install vcredist-all
-        shell: powershell
       - name: Setup Hadoop binary
         if: inputs.os == 'windows-latest'
         run: |
@@ -55,10 +54,8 @@ jobs:
           Move-Item .\hadoop.dll C:\Windows\System32
           New-Item -ItemType directory -Path C:\hadoop\bin
           Move-Item .\winutils.exe C:\hadoop\bin
-          [System.Environment]::SetEnvironmentVariable('HADOOP_HOME', 'C:\hadoop', [System.EnvironmentVariableTarget]::Machine)
           echo "HADOOP_HOME=C:\hadoop" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
           echo "PATH=$env:HADOOP_HOME\bin;$env:PATH" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
-        shell: powershell
       - name: Install dependencies
         run: |
           pip install --upgrade pip

@@ -10,6 +10,7 @@ This page also contains a set of guidance for advanced configuration requirement
 * [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
 * [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
 * [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+* [How to load a data catalog with templating in code?](#how-to-load-a-data-catalog-with-templating-in-code)
 * [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
 * [How to override configuration with runtime parameters with the `OmegaConfigLoader`](#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
 * [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
@@ -132,6 +133,30 @@ Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the
 
 #### Other configuration files
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom spark or mlflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.
+
+### How to load a data catalog with templating in code?
+You can use the `OmegaConfigLoader` to directly load a data catalog that contains templating in code. Under the hood the `OmegaConfigLoader` will resolve any templates, so no further steps are required to load catalog entries properly.
+```yaml
+# Example catalog with templating
+companies:
+  type: ${_dataset_type}
+  filepath: data/01_raw/companies.csv
+
+_dataset_type: pandas.CSVDataset
+```
+
+```python
+from kedro.config import OmegaConfigLoader
+from kedro.framework.project import settings
+
+# Instantiate an `OmegaConfigLoader` instance with the location of your project configuration.
+conf_path = str(project_path / settings.CONF_SOURCE)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
+
+conf_catalog = conf_loader["catalog"]
+# conf_catalog["companies"]
+# Will result in: {'type': 'pandas.CSVDataset', 'filepath': 'data/01_raw/companies.csv'}
+```
 
 ### How to use global variables with the `OmegaConfigLoader`
 From Kedro `0.18.13`, you can use variable interpolation in your configurations using "globals" with `OmegaConfigLoader`.

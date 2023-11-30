@@ -989,7 +989,7 @@ class TestToolsAndExampleFromUserPrompts:
         assert result.exit_code != 0
         assert "is an invalid value for project tools." in result.output
         assert (
-            "Invalid input. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.\n"
+            "Invalid input. Please select valid options for project tools using comma-separated values, ranges, or 'all/none'.\n"
             in result.output
         )
 

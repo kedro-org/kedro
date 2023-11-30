@@ -205,27 +205,46 @@ See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/s
 
 ---
 
-Here's a flowchart to guide your choice of tools and examples:
+Here are some flowcharts to guide your choice of tools and examples:
+
 ```{mermaid}
-:alt: mermaid-Decision making diagram for setting up a new Kedro project
+:alt: General overview diagram for setting up a new Kedro project with tools
 flowchart TD
-    A[Start] -->|Run 'kedro new'| B{Select Tools}
-    B -->|None| C{Include example pipeline?}
-    B -->|All| C{Include example pipeline?}
-    B -->|Combination of Lint, Test, Logs, Docs, Data, PySpark, Viz| C
-    C -->|No| D[Proceed without example pipeline and only the basic template]
-    C -->|Yes| E{Which add-ons are included?}
-    E -->|None| F[Include 'spaceflights-pandas' example]
-    E -->|All| I[Include 'spaceflights-pyspark-viz' example]
-    E -->|Viz without PySpark| G[Include 'spaceflights-pandas-viz' example]
-    E -->|PySpark without Viz| H[Include 'spaceflights-pyspark' example]
-    E -->|Viz & PySpark| I[Include 'spaceflights-pyspark-viz' example]
-    E -->|Without Viz and PySpark| F[Include 'spaceflights-pandas' example]
-    D --> J[Project setup complete]
-    F --> J
-    G --> J
-    H --> J
-    I --> J
+    A[Start] --> B[Enter Project Name];
+    B --> C[Select Tools];
+
+    C -->|None| D[None];
+    C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
+    C -->|All| F[All];
+
+    D --> G[Include Example Pipeline?]
+    E --> G;
+    F --> G
+
+    G -->|Yes| H[New Project Created];
+    G -->|No| H;
+```
+
+```{mermaid}
+:alt: Example diagram of specific tool choices 
+flowchart TD
+    A[Start] --> B[Enter Project Name: Example Project];
+    B --> C3[Select Tools: None];
+    B --> C1[Select Tools: lint, docs, PySpark];
+    B --> C2[Select Tools: All];
+
+    C1 --> D1[Include Example Pipeline?];
+    C2 --> D2[Include Example Pipeline?];
+    C3 --> D3[Include Example Pipeline?];
+
+    D1 -->|Yes| E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes];
+    D1 -->|No| E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No];
+
+    D2 -->|Yes| F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: Yes];
+    D2 -->|No| F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: No];
+
+    D3 -->|Yes| G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes];
+    D3 -->|No| G2[New Project Created\nName: Example Project\nTools: None\nExample: No];
 ```
 
 ## Example pipeline

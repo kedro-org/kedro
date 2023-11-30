@@ -15,7 +15,7 @@ from kedro.framework.startup import ProjectMetadata
 
 def _create_session(package_name: str, **kwargs):
     kwargs.setdefault("save_on_close", False)
-    return KedroSession.create(package_name, **kwargs)
+    return KedroSession.create(**kwargs)
 
 
 # noqa: missing-function-docstring

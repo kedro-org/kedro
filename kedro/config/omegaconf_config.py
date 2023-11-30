@@ -50,9 +50,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         >>> conf_path = str(project_path / settings.CONF_SOURCE)
         >>> conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
         >>>
-        >>> conf_logging = conf_loader["logging"]
-        >>> logging.config.dictConfig(conf_logging)  # set logging conf
-        >>>
         >>> conf_catalog = conf_loader["catalog"]
         >>> conf_params = conf_loader["parameters"]
 
@@ -83,9 +80,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
         runtime_params: dict[str, Any] = None,
         *,
         config_patterns: dict[str, list[str]] = None,
-        base_env: str = "base",
-        default_run_env: str = "local",
+        base_env: str = None,
+        default_run_env: str = None,
         custom_resolvers: dict[str, Callable] = None,
+        merge_strategy: dict[str, str] = None,
     ):
         """Instantiates a ``OmegaConfigLoader``.
 
@@ -104,14 +102,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
             custom_resolvers: A dictionary of custom resolvers to be registered. For more information,
              see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
         """
-        self.base_env = base_env
-        self.default_run_env = default_run_env
+        self.base_env = base_env or ""
+        self.default_run_env = default_run_env or ""
+        self.merge_strategy = merge_strategy or {}
 
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
-            "logging": ["logging*", "logging*/**", "**/logging*"],
             "globals": ["globals.yml"],
         }
         self.config_patterns.update(config_patterns or {})
@@ -228,17 +226,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
             else:
                 raise exc
 
-        # Destructively merge the two env dirs. The chosen env will override base.
-        common_keys = config.keys() & env_config.keys()
-        if common_keys:
-            sorted_keys = ", ".join(sorted(common_keys))
-            msg = (
-                "Config from path '%s' will override the following "
-                "existing top-level config keys: %s"
+        merging_strategy = self.merge_strategy.get(key)
+        if merging_strategy == "soft":
+            resulting_config = self._soft_merge(config, env_config)
+        elif merging_strategy == "destructive" or not merging_strategy:
+            resulting_config = self._destructive_merge(config, env_config, env_path)
+        else:
+            raise ValueError(
+                f"Merging strategy {merging_strategy} not supported. The accepted merging "
+                f"strategies are `soft` and `destructive`."
             )
-            _config_logger.debug(msg, env_path, sorted_keys)
-
-        config.update(env_config)
 
         if not processed_files and key != "globals":
             raise MissingConfigException(
@@ -246,7 +243,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
             )
 
-        return config
+        return resulting_config
 
     def __repr__(self):  # pragma: no cover
         return (
@@ -448,6 +445,26 @@ class OmegaConfigLoader(AbstractConfigLoader):
             OmegaConf.clear_resolver("oc.env")
         else:
             OmegaConf.resolve(config)
+
+    @staticmethod
+    def _destructive_merge(config, env_config, env_path):
+        # Destructively merge the two env dirs. The chosen env will override base.
+        common_keys = config.keys() & env_config.keys()
+        if common_keys:
+            sorted_keys = ", ".join(sorted(common_keys))
+            msg = (
+                "Config from path '%s' will override the following "
+                "existing top-level config keys: %s"
+            )
+            _config_logger.debug(msg, env_path, sorted_keys)
+
+        config.update(env_config)
+        return config
+
+    @staticmethod
+    def _soft_merge(config, env_config):
+        # Soft merge the two env dirs. The chosen env will override base if keys clash.
+        return OmegaConf.to_container(OmegaConf.merge(config, env_config))
 
     def _is_hidden(self, path: str):
         """Check if path contains any hidden directory or is a hidden file"""

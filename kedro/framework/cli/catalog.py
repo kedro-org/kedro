@@ -15,12 +15,7 @@ from kedro.framework.startup import ProjectMetadata
 
 def _create_session(package_name: str, **kwargs):
     kwargs.setdefault("save_on_close", False)
-    try:
-        return KedroSession.create(package_name, **kwargs)
-    except Exception as exc:
-        raise KedroCliError(
-            f"Unable to instantiate Kedro session.\nError: {exc}"
-        ) from exc
+    return KedroSession.create(package_name, **kwargs)
 
 
 # noqa: missing-function-docstring
@@ -57,9 +52,14 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    data_catalog = context.catalog
-    datasets_meta = data_catalog._data_sets
-    catalog_ds = set(data_catalog.list())
+    try:
+        data_catalog = context.catalog
+        datasets_meta = data_catalog._datasets
+        catalog_ds = set(data_catalog.list())
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro Catalog.\nError: {exc}"
+        ) from exc
 
     target_pipelines = pipeline or pipelines.keys()
 
@@ -67,7 +67,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            pipeline_ds = pl_obj.data_sets()
+            pipeline_ds = pl_obj.datasets()
         else:
             existing_pls = ", ".join(sorted(pipelines.keys()))
             raise KedroCliError(
@@ -160,13 +160,13 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
 
     pipe_datasets = {
         ds_name
-        for ds_name in pipeline.data_sets()
+        for ds_name in pipeline.datasets()
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 
     catalog_datasets = {
         ds_name
-        for ds_name in context.catalog._data_sets.keys()  # noqa: protected-access
+        for ds_name in context.catalog._datasets.keys()  # noqa: protected-access
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 
@@ -240,7 +240,7 @@ def resolve_patterns(metadata: ProjectMetadata, env):
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            datasets.update(pl_obj.data_sets())
+            datasets.update(pl_obj.datasets())
 
     for ds_name in datasets:
         is_param = ds_name.startswith("params:") or ds_name == "parameters"

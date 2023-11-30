@@ -151,7 +151,7 @@ def create_config_file(context):
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "add_ons": "1-5",
+        "tools": "1-5",
         "project_name": context.project_name,
         "example_pipeline": "no",
         "repo_name": context.project_name,

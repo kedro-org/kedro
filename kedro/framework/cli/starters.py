@@ -704,9 +704,14 @@ def _validate_config_file_against_prompts(
     if config is None:
         raise KedroCliError("Config file is empty.")
     missing_keys = set(prompts) - set(config)
-    if missing_keys:
+    if "project_name" in missing_keys:
         click.echo(yaml.dump(config, default_flow_style=False))
         raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
+    if "example_pipeline" in missing_keys:
+        click.secho(
+            f"{missing_keys} not found in the config file, default value is being used.",
+            fg="yellow",
+        )
 
     if "output_dir" in config and not Path(config["output_dir"]).exists():
         raise KedroCliError(

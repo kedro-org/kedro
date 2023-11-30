@@ -1094,7 +1094,7 @@ Check your source directory. If you defined a different source directory (`sourc
 * **Copy changes to `kedro_cli.py`**. If you previously customised the `kedro run` command or added more CLI commands to your `kedro_cli.py`, you should move them into `<project_root>/src/<package_name>/cli.py`. Note, however, that the new way to run a Kedro pipeline is via a `KedroSession`, rather than using the `KedroContext`:
 
     ```python
-    with KedroSession.create() as session:
+    with KedroSession.create(package_name=...) as session:
         session.run()
     ```
 

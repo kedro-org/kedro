@@ -22,14 +22,14 @@ The first prompt asks you to input a project name.
 You can skip the step to name the project by adding it to your command. For example:
 
 ```bash
-kedro new--project_name=spaceflights
+kedro new --name=spaceflights
 ```
 
 ### Tools
 You are then asked select which tools to include. Choose from the list using comma separated values `(1,2,4)`, a range of values `(3-5)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`. Further information about each of the tools is described below in [Kedro tools](#kedro-tools).
 
 
-| ![cli-prompt.jpg](IMAGE RESOURCE PLACEHOLDER) |
+| ![](../meta/images/kedro-new-tools-prompt.png)|
 |:--:|
 | *Prompt for tools selection* |
 
@@ -44,7 +44,7 @@ To specify your desired tools you must provide them by name as a comma separated
 
 A list of available tools can also be accessed by running `kedro new --help`
 
-![cli-output.jpg](IMAGE RESOURCE PLACEHOLDER)
+![](../meta/images/kedro-new-help.png)
 
 
 ### Example code

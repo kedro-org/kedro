@@ -481,10 +481,10 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
     """
     if selected_tools is None:
         return None
-    if selected_add_ons_flag.lower() == "none":
+    if selected_tools.lower() == "none":
         return ""
-    if selected_add_ons_flag.lower() == "all":
-        return ",".join(ADD_ONS_SHORTNAME_TO_NUMBER.values())
+    if selected_tools.lower() == "all":
+        return ",".join(TOOLS_SHORTNAME_TO_NUMBER.values())
 
     tools = []
     for tool in selected_tools.lower().split(","):

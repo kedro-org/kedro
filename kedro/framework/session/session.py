@@ -124,7 +124,6 @@ class KedroSession:
     @classmethod
     def create(  # noqa: PLR0913
         cls,
-        package_name: str = None,
         project_path: Path | str | None = None,
         save_on_close: bool = True,
         env: str = None,
@@ -134,8 +133,6 @@ class KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
 
         Args:
-            package_name: Package name for the Kedro project the session is
-                created for. The package_name argument will be removed in Kedro `0.19.0`.
             project_path: Path to the project root directory. Default is
                 current working directory Path.cwd().
             save_on_close: Whether or not to save the session when it's closed.
@@ -152,7 +149,6 @@ class KedroSession:
         validate_settings()
 
         session = cls(
-            package_name=package_name,
             project_path=project_path,
             session_id=generate_timestamp(),
             save_on_close=save_on_close,
@@ -162,7 +158,6 @@ class KedroSession:
         # have to explicitly type session_data otherwise mypy will complain
         # possibly related to this: https://github.com/python/mypy/issues/1430
         session_data: dict[str, Any] = {
-            "package_name": session._package_name,
             "project_path": session._project_path,
             "session_id": session.session_id,
         }

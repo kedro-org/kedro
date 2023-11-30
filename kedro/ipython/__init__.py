@@ -95,7 +95,6 @@ def reload_kedro(
     configure_project(metadata.package_name)
 
     session = KedroSession.create(
-        metadata.package_name,
         project_path,
         env=env,
         extra_params=extra_params,

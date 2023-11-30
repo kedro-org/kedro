@@ -40,4 +40,8 @@ repo_name: testing-kedro
 python_package: test_kedro
 ```
 **Use `kedro new` with a `--starter`** <br />
-Alternatively, you can create a new Kedro project with a [starter](./starters.md) that adds a set of code for a common project use case.
+You can create a new Kedro project with a [starter](./starters.md) that adds a set of code for a common project use case.
+
+``` {important}
+You can not combine the use of a Kedro starter with the tools and example code options listed above.
+```

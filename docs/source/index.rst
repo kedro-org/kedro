@@ -61,6 +61,7 @@ Welcome to Kedro's documentation!
 
    introduction/index.md
    get_started/index.md
+   course/index.md
 
 .. toctree::
    :maxdepth: 2

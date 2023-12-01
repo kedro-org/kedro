@@ -58,7 +58,7 @@ kedro new --example=y
 
 ## `kedro new --config=`
 
-You can also supply values to `kedro new` by providing a YML config file to your `kedro new` command. Consider the following file:
+You can also supply values to `kedro new` by providing a YML configuration file to your `kedro new` command. Consider the following file:
 
 ```yaml
 # config.yml

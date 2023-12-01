@@ -80,4 +80,4 @@ kedro new --config=my_kedro_project.yml --starter=spaceflights-pandas
 This option is useful when the starter requires more configuration than the default mode requires.
 
 ## Create a starter
-You can build own starters for reuse within a project or team, as described in the [how to create a Kedro starter](../starters/create_a_starter.md) documentation.
+You can build your own starters for reuse within a project or team, as described in the [how to create a Kedro starter](../starters/create_a_starter.md) documentation.

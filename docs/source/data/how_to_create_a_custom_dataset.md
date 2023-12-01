@@ -86,14 +86,12 @@ class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
 ```
 </details>
 
-Create a subfolder called `extras` in `src/kedro_pokemon/`, and a `datasets` subfolder within that, to store the dataset definition `image_dataset.py` and mimic the structure inside Kedro's own codebase (including `__init__.py` to make Python treat those directories containing the file as packages that you can import from):
+Create a subfolder called `datasets` in `src/kedro_pokemon/` to store the dataset definition `image_dataset.py`, adding `__init__.py` to make Python treat the directory as a package that you can import from:
 
 ```
-src/kedro_pokemon/extras
+src/kedro_pokemon/datasets
 ├── __init__.py
-└── datasets
-    ├── __init__.py
-    └── image_dataset.py
+└── image_dataset.py
 ```
 
 ## Implement the `_load` method with `fsspec`
@@ -152,7 +150,7 @@ To test this out, let's add a dataset to the data catalog to load Pikachu's imag
 # in conf/base/catalog.yml
 
 pikachu:
-  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataset
+  type: kedro_pokemon.datasets.image_dataset.ImageDataset
   filepath: data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   # Note: the duplicated `images` path is part of the original Kaggle dataset
 ```
@@ -280,7 +278,7 @@ To use `PartitionedDataset` with `ImageDataset` to load all Pokemon PNG images, 
 
 pokemon:
   type: PartitionedDataset
-  dataset: kedro_pokemon.extras.datasets.image_dataset.ImageDataset
+  dataset: kedro_pokemon.datasets.image_dataset.ImageDataset
   path: data/01_raw/pokemon-images-and-types/images/images
   filename_suffix: ".png"
 ```
@@ -470,7 +468,7 @@ To test the code, you need to enable versioning support in the data catalog:
 # in conf/base/catalog.yml
 
 pikachu:
-  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataset
+  type: kedro_pokemon.datasets.image_dataset.ImageDataset
   filepath: data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   versioned: true
 ```
@@ -531,7 +529,7 @@ If your use case requires them, Kedro allows you to pass `credentials` and files
 # in conf/base/catalog.yml
 
 pikachu:
-  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataset
+  type: kedro_pokemon.datasets.image_dataset.ImageDataset
   filepath: s3://data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   credentials: <your_credentials>
   fs_args:

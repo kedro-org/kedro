@@ -1324,3 +1324,92 @@ class TestNameFromCLI:
             "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
             in result.output
         )
+
+
+class TestParseYesNoToBools:
+    @pytest.mark.parametrize(
+        "input",
+        ["yes", "YES", "y", "Y", "yEs"],
+    )
+    def parse_yes_no_to_bool_responds_true(self, input):
+        assert _parse_yes_no_to_bool(input) is True
+
+    @pytest.mark.parametrize(
+        "input",
+        ["no", "NO", "n", "N", "No", ""],
+    )
+    def parse_yes_no_to_bool_responds_false(self, input):
+        assert _parse_yes_no_to_bool(input) is False
+
+    def parse_yes_no_to_bool_responds_none(self):
+        assert _parse_yes_no_to_bool(None) is None
+
+
+class TestValidateSelection:
+    def test_validate_selection_valid(self):
+        tools = ["1", "2", "3", "4"]
+        assert _validate_selection(tools) is None
+
+    def test_validate_selection_invalid_single_tool(self):
+        tools = ["8"]
+        with pytest.raises(SystemExit):
+            _validate_selection(tools)
+
+    def test_validate_selection_invalid_multiple_tools(self):
+        tools = ["8", "10", "15"]
+        with pytest.raises(SystemExit):
+            _validate_selection(tools)
+
+    def test_validate_selection_mix_valid_invalid_tools(self):
+        tools = ["1", "8", "3", "15"]
+        with pytest.raises(SystemExit):
+            _validate_selection(tools)
+
+    def test_validate_selection_empty_list(self):
+        tools = []
+        assert _validate_selection(tools) is None
+
+
+class TestConvertToolNamesToNumbers:
+    def test_convert_tool_names_to_numbers_with_valid_tools(self):
+        selected_tools = "lint,test,docs"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,2,4"
+
+    def test_convert_tool_names_to_numbers_with_none(self):
+        result = _convert_tool_names_to_numbers(None)
+        assert result is None
+
+    def test_convert_tool_names_to_numbers_with_empty_string(self):
+        selected_tools = ""
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == ""
+
+    def test_convert_tool_names_to_numbers_with_none_string(self):
+        selected_tools = "none"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == ""
+
+    def test_convert_tool_names_to_numbers_with_all_string(self):
+        result = _convert_tool_names_to_numbers("all")
+        assert result == "1,2,3,4,5,6,7"
+
+    def test_convert_tool_names_to_numbers_with_mixed_valid_invalid_tools(self):
+        selected_tools = "lint,invalid_tool,docs"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,4"
+
+    def test_convert_tool_names_to_numbers_with_whitespace(self):
+        selected_tools = " lint , test , docs "
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,2,4"
+
+    def test_convert_tool_names_to_numbers_with_case_insensitive_tools(self):
+        selected_tools = "Lint,TEST,Docs"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,2,4"
+
+    def test_convert_tool_names_to_numbers_with_invalid_tools(self):
+        selected_tools = "invalid_tool1,invalid_tool2"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == ""

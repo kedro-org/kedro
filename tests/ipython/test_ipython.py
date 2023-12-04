@@ -38,7 +38,7 @@ def fake_metadata(tmp_path):
         project_name=PROJECT_NAME,
         kedro_init_version=PROJECT_INIT_VERSION,
         project_path=tmp_path,
-        add_ons=None,
+        tools=None,
     )
     return metadata
 
@@ -115,7 +115,6 @@ class TestLoadKedroObjects:
         reload_kedro()
 
         mock_session_create.assert_called_once_with(
-            PACKAGE_NAME,
             None,
             env=None,
             extra_params=None,
@@ -153,7 +152,6 @@ class TestLoadKedroObjects:
         )
 
         mock_session_create.assert_called_once_with(
-            PACKAGE_NAME,
             fake_metadata.project_path,
             env=dummy_env,
             extra_params=dummy_dict,

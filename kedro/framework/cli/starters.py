@@ -195,6 +195,11 @@ def new(  # noqa: PLR0913
             "Cannot use the --directory flag without a --starter value."
         )
 
+    if (selected_tools or example_pipeline) and starter_alias:
+        raise KedroCliError(
+            "Cannot use the --starter flag with the --example and/or --tools flag."
+        )
+
     starters_dict = _get_starters_dict()
 
     if starter_alias in starters_dict:
@@ -706,10 +711,20 @@ def _validate_config_file_against_prompts(
     """
     if config is None:
         raise KedroCliError("Config file is empty.")
+    additional_keys = {"tools": "none", "example_pipeline": "no"}
     missing_keys = set(prompts) - set(config)
-    if missing_keys:
+    missing_mandatory_keys = missing_keys - set(additional_keys)
+    if missing_mandatory_keys:
         click.echo(yaml.dump(config, default_flow_style=False))
-        raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
+        raise KedroCliError(
+            f"{', '.join(missing_mandatory_keys)} not found in config file."
+        )
+    for key, default_value in additional_keys.items():
+        if key in missing_keys:
+            click.secho(
+                f"The `{key}` key not found in the config file, default value '{default_value}' is being used.",
+                fg="yellow",
+            )
 
     if "output_dir" in config and not Path(config["output_dir"]).exists():
         raise KedroCliError(

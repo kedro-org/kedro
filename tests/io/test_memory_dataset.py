@@ -6,10 +6,10 @@ import pytest
 
 from kedro.io import DatasetError, MemoryDataset
 from kedro.io.memory_dataset import (
-    SharedMemoryDataset,
     _copy_with_mode,
     _infer_copy_mode,
 )
+from kedro.io.shared_memory_dataset import SharedMemoryDataset
 from kedro.runner.parallel_runner import ParallelRunnerManager
 
 

@@ -14,7 +14,8 @@ from .core import (
 )
 from .data_catalog import DataCatalog
 from .lambda_dataset import LambdaDataset
-from .memory_dataset import MemoryDataset, SharedMemoryDataset
+from .memory_dataset import MemoryDataset
+from .shared_memory_dataset import SharedMemoryDataset
 
 __all__ = [
     "AbstractDataset",

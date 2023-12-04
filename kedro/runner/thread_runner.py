@@ -8,6 +8,7 @@ import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
+from typing import Any
 
 from pluggy import PluginManager
 
@@ -23,7 +24,12 @@ class ThreadRunner(AbstractRunner):
     using threads.
     """
 
-    def __init__(self, max_workers: int = None, is_async: bool = False):
+    def __init__(
+        self,
+        max_workers: int = None,
+        is_async: bool = False,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
+    ):
         """
         Instantiates the runner.
 
@@ -45,7 +51,10 @@ class ThreadRunner(AbstractRunner):
                 "Setting 'is_async' to False."
             )
         default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
-        super().__init__(is_async=False, extra_dataset_patterns=default_dataset_pattern)
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
+        super().__init__(
+            is_async=False, extra_dataset_patterns=self._extra_dataset_patterns
+        )
 
         if max_workers is not None and max_workers <= 0:
             raise ValueError("max_workers should be positive")

@@ -5,6 +5,7 @@ of provided nodes.
 
 from collections import Counter
 from itertools import chain
+from typing import Any
 
 from pluggy import PluginManager
 
@@ -19,7 +20,11 @@ class SequentialRunner(AbstractRunner):
     topological sort of provided nodes.
     """
 
-    def __init__(self, is_async: bool = False):
+    def __init__(
+        self,
+        is_async: bool = False,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
+    ):
         """Instantiates the runner class.
 
         Args:
@@ -28,8 +33,9 @@ class SequentialRunner(AbstractRunner):
 
         """
         default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
         super().__init__(
-            is_async=is_async, extra_dataset_patterns=default_dataset_pattern
+            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )
 
     def _run(

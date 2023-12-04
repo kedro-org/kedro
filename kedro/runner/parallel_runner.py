@@ -97,7 +97,12 @@ class ParallelRunner(AbstractRunner):
     single process only using the `_SINGLE_PROCESS` dataset attribute.
     """
 
-    def __init__(self, max_workers: int = None, is_async: bool = False):
+    def __init__(
+        self,
+        max_workers: int = None,
+        is_async: bool = False,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
+    ):
         """
         Instantiates the runner by creating a Manager.
 
@@ -113,8 +118,9 @@ class ParallelRunner(AbstractRunner):
             ValueError: bad parameters passed
         """
         default_dataset_pattern = {"{default}": {"type": "SharedMemoryDataset"}}
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
         super().__init__(
-            is_async=is_async, extra_dataset_patterns=default_dataset_pattern
+            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )
         self._manager = ParallelRunnerManager()
         self._manager.start()  # noqa: consider-using-with

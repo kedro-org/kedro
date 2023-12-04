@@ -630,6 +630,20 @@ class TestNewFromConfigFileValid:
         _assert_template_ok(result, **config)
         _clean_up_project(Path("./my-project"))
 
+    def test_config_with_no_tools_example(self, fake_kedro_cli):
+        """Test project created from config."""
+        config = {
+            "project_name": "My Project",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+        _assert_template_ok(result, **config)
+        _clean_up_project(Path("./my-project"))
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromConfigFileInvalid:
@@ -914,6 +928,30 @@ class TestFlagsNotAllowed:
         )
         assert result.exit_code != 0
         assert "Cannot use the --directory flag with a --starter alias" in result.output
+
+    def test_starter_flag_with_tools_flag(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--tools", "all", "--starter", "spaceflights-pandas"],
+            input=_make_cli_prompt_input(),
+        )
+        assert result.exit_code != 0
+        assert (
+            "Cannot use the --starter flag with the --example and/or --tools flag."
+            in result.output
+        )
+
+    def test_starter_flag_with_example_flag(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--starter", "spaceflights-pandas", "--example", "no"],
+            input=_make_cli_prompt_input(),
+        )
+        assert result.exit_code != 0
+        assert (
+            "Cannot use the --starter flag with the --example and/or --tools flag."
+            in result.output
+        )
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

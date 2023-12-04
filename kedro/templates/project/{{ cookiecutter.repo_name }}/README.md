@@ -41,7 +41,7 @@ Have a look at the file `src/tests/test_run.py` for instructions on how to write
 pytest
 ```
 
-To configure the coverage threshold, look at the `.coveragerc` file.
+You can configure the coverage threshold in your project's `pyproject.toml` file under the `[tool.coverage.report]` section.
 
 
 ## Project dependencies

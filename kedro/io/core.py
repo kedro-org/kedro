@@ -359,8 +359,8 @@ def parse_dataset_definition(
         config: Data set config dictionary. It *must* contain the `type` key
             with fully qualified class name.
         load_version: Version string to be used for ``load`` operation if
-                the data set is versioned. Has no effect on the data set
-                if versioning was not enabled.
+            the data set is versioned. Has no effect on the data set
+            if versioning was not enabled.
         save_version: Version string to be used for ``save`` operation if
             the data set is versioned. Has no effect on the data set
             if versioning was not enabled.

@@ -293,9 +293,8 @@ When files are part of the same environment, they are always merged in a soft wa
 
 
 ## Advanced configuration without a full Kedro project
- In some cases, you may only want to use the `OmegaConfigLoader` without a Kedro project. By default, a Kedro project have a `base` and `local` environment.
-
-Unlike a Kedro Project, when you use the `OmegaConfigLoader` directly, it assumes *no* environment. You may find it useful to [add Kedro to your existing notebooks](../notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md).
+ In some cases, you may only want to use the `OmegaConfigLoader` without a Kedro project. By default, a Kedro project has a `base` and `local` environment.
+However, when you use the `OmegaConfigLoader` directly, it assumes *no* environment. You may find it useful to [add Kedro to your existing notebooks](../notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md).
 
 ### Read configuration
 The config loader can work without a Kedro project structure.
@@ -325,7 +324,7 @@ config_loader = OmegaConfigLoader(conf_source=".")
 For the full list of features, please refer to [configuration_basics](./configuration_basics.md) and [advanced_configuration](./advanced_configuration.md)
 
 ### How to use Custom Resolvers with `OmegaConfigLoader`
-You can register custom resolvers to use non-primitive type for parmaeters.
+You can register custom resolvers to use non-primitive types for parmaeters.
 
 ```yaml
 # parameters.yml

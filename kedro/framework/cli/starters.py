@@ -755,7 +755,7 @@ def _validate_config_file_inputs(config: dict[str, str]):
 
     input_tools = config.get("tools", "none")
     tools_validation_config = {
-        "regex_validator": r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|(( )*\d*,)*( )*((\d+-\d+)(,( )*\d*)*|(( )*\d*,)*(\d+ - \d+))(,( )*\d*)*( )*))$",
+        "regex_validator": r"^(all|none|(( )*(\d*|\d( )?-( )?\d)(( )*,( )*(\d*|\d( )?-( )?\d))*( )*))$",
         "error_message": f"'{input_tools}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
     }
 

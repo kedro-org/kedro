@@ -42,7 +42,25 @@ You can add one or more of the options, or follow the default and add none at al
 
 ### Project examples
 
-TO DO
+Here is a flowchart to help guide your choice of tools and examples you can select:
+
+```{mermaid}
+:alt: General overview diagram for setting up a new Kedro project with tools
+flowchart TD
+    A[Start] --> B[Enter Project Name];
+    B --> C[Select Tools];
+
+    C -->|None| D[None];
+    C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
+    C -->|All| F[All];
+
+    D --> G[Include Example Pipeline?]
+    E --> G;
+    F --> G
+
+    G -->|Yes| H[New Project Created];
+    G -->|No| H;
+```
 
 ## Run the new project
 

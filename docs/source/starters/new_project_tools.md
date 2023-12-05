@@ -180,50 +180,34 @@ To learn more about using logging in your project, or modifying the logging conf
 
 ### Documentation
 
-Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, allowing for the auto generation of HTML documentation.
-The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration. It will help you to create and maintain guides and API docs.
-See the [official documentation](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project) for guidance on adding documentation to a Kedro project.
+Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, `conf.py` and `index.rst`, with some added features such as auto generation of HTML documentation.
+The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration by helping you create and maintain guides and API docs.
+
+If you did not initially select `docs` and want to implement it later you can do so by following the [official documentation](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project) for guidance on adding documentation to a Kedro project.
 
 ### Data Structure
 
 The Data Structure tool provides a standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention).
-This tool is fundamental if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
-This tool will help you in maintaining a clean and organised data workflow, with clear separation of data at various processing stages.
+This is crucial if you want to include an example pipelines during the creation of your project as it can not be omitted from the tool selections.
+Moreover, it will help you in maintaining a clean and organised data workflow, with clear separation of data at various processing stages.
 We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
 You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure).
 
 ### PySpark
 
-The PySpark tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
+The `PySpark` tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
 PySpark aligns with Kedro's scalability principle, as it provides data processing capabilities for large datasets.
 See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for more information on setup and usage.
 
 ### Kedro Viz
 
-This tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
+The `viz` tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
+In addition, `viz` will also add setup for experiment tracking and plotting datasets.
 See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
 
 ---
 
-Here are some flowcharts to guide your choice of tools and examples:
-
-```{mermaid}
-:alt: General overview diagram for setting up a new Kedro project with tools
-flowchart TD
-    A[Start] --> B[Enter Project Name];
-    B --> C[Select Tools];
-
-    C -->|None| D[None];
-    C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
-    C -->|All| F[All];
-
-    D --> G[Include Example Pipeline?]
-    E --> G;
-    F --> G
-
-    G -->|Yes| H[New Project Created];
-    G -->|No| H;
-```
+Here is a flowchart to help illustrate some example choice of tools you can select:
 
 ```{mermaid}
 :alt: Example diagram of specific tool choices 

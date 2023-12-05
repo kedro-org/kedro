@@ -485,6 +485,7 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PL
 
     remove_arrows_in_examples(lines)
 
+
 def env_override(default_appid):
     build_version = os.getenv("READTHEDOCS_VERSION")
 

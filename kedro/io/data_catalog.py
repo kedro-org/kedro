@@ -289,6 +289,10 @@ class DataCatalog:
             ds_config = _resolve_credentials(  # noqa: PLW2901
                 ds_config, credentials
             )
+            if ds_name == "{default}":
+                raise DatasetError(
+                    "The {default} pattern name is reserved to be used by Kedro to generate the default dataset type set in the runner."
+                )
             if cls._is_pattern(ds_name):
                 # Add each factory to the dataset_patterns dict.
                 dataset_patterns[ds_name] = ds_config

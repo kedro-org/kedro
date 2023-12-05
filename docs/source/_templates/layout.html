@@ -23,21 +23,19 @@
 {%- block extrahead %}
 <script type="text/javascript">
   // window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=document.createElement("script");r.type="text/javascript",r.async=!0,r.src="https://cdn.heapanalytics.com/js/heap-"+e+".js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetIdentity","removeEventProperty","setEventProperties","track","unsetEventProperty"],o=0;o<p.length;o++)heap[p[o]]=n(p[o])};
+  
+  //inline styling for read-the-docs flyout 
+  document.documentElement.style.setProperty('--readthedocs-flyout-font-size', '0.9em');
 
-  // heap.load({{ "2164194004" | env_override }});{# 2164194004 coresponds to the Development environment #}
-
+  
   document.addEventListener("DOMContentLoaded", function(event) {
+    document.querySelector('div[role="search"] form input').addEventListener("focus", (e) => {
+      const event = new CustomEvent("readthedocs-search-show");
+      document.dispatchEvent(event);
+    });
 
-      // Set the font size of the read-the-docs flyout to 0.9em
-      document.documentElement.style.setProperty('--readthedocs-flyout-font-size', '0.9em');
-
-      //Activate read-the-docs search when user focuses on search input
-      document.querySelector('div[role="search"] form input').addEventListener("focus", (e) => {
-        const event = new CustomEvent("readthedocs-search-show");
-        document.dispatchEvent(event);
-      });
-
-      // Clone main nav into the sidebar
+    // Wait for DOM to load and clone main nav into the sidebar
+    document.addEventListener("DOMContentLoaded", function() {
       var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
       sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
 
@@ -52,6 +50,7 @@
       openBtn.dataset.toggle = 'wy-nav-top';
       openBtn.classList.add('wy-nav-top-open');
       document.querySelector('.wy-nav-top').prepend(openBtn);
+  });
   });
 </script>
 

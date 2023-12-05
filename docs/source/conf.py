@@ -514,7 +514,7 @@ def _override_permalinks_icon(app):
 
 
 def setup(app):
-    app.connect("builder-inited", _add_jinja_filters)
+    # app.connect("builder-inited", _add_jinja_filters)
     app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.add_css_file("css/qb1-sphinx-rtd.css")

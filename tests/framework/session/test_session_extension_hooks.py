@@ -437,7 +437,7 @@ def mock_session_with_before_node_run_hooks(
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    return KedroSession.create(mock_package_name, tmp_path)
+    return KedroSession.create(tmp_path)
 
 
 @pytest.fixture
@@ -455,7 +455,7 @@ def mock_session_with_broken_before_node_run_hooks(
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    return KedroSession.create(mock_package_name, tmp_path)
+    return KedroSession.create(tmp_path)
 
 
 class TestBeforeNodeRunHookWithInputUpdates:

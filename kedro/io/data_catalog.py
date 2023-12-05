@@ -356,16 +356,27 @@ class DataCatalog:
         1. Decreasing specificity (number of characters outside the curly brackets)
         2. Decreasing number of placeholders (number of curly bracket pairs)
         3. Alphabetically
+        4. The default pattern always comes last.
         """
+        non_default_patterns = {
+            key: pattern
+            for key, pattern in dataset_patterns.items()
+            if key != "{default}"
+        }
         sorted_keys = sorted(
-            dataset_patterns,
+            non_default_patterns,
             key=lambda pattern: (
                 -(cls._specificity(pattern)),
                 -pattern.count("{"),
                 pattern,
             ),
         )
-        return {key: dataset_patterns[key] for key in sorted_keys}
+        sorted_patterns = {key: dataset_patterns[key] for key in sorted_keys}
+
+        default_pattern = dataset_patterns.get("{default}", None)
+        if default_pattern:
+            sorted_patterns["{default}"] = default_pattern
+        return sorted_patterns
 
     @staticmethod
     def _specificity(pattern: str) -> int:

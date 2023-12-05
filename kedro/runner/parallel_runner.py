@@ -208,7 +208,7 @@ class ParallelRunner(AbstractRunner):
     def _set_manager_datasets(self, catalog, pipeline):
         for dataset in pipeline.datasets():
             try:
-                catalog._get_dataset(dataset)
+                catalog.exists(dataset)
             except DatasetNotFoundError:
                 pass
         for name, ds in catalog._datasets.items():

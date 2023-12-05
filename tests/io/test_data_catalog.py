@@ -168,6 +168,10 @@ def config_with_dataset_factories_only_patterns():
                 "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{dataset}s.csv",
             },
+            "{user_default}": {
+                "type": "pandas.ExcelDataset",
+                "filepath": "data/01_raw/{default}.xlsx",
+            },
         },
     }
 
@@ -369,7 +373,7 @@ class TestDataCatalog:
 
     def test_datasets_on_add(self, data_catalog_from_config):
         """Check datasets are updated correctly after adding"""
-        data_catalog_from_config.add("new_dataset", CSVDataset("some_path"))
+        data_catalog_from_config.add("new_dataset", CSVDataset(filepath="some_path"))
         assert isinstance(data_catalog_from_config.datasets.new_dataset, CSVDataset)
         assert isinstance(data_catalog_from_config.datasets.boats, CSVDataset)
 
@@ -769,7 +773,7 @@ class TestDataCatalogVersioned:
         monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummmy")
         monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummmy")
         version = Version(load=None, save=None)
-        versioned_dataset = CSVDataset("s3://bucket/file.csv", version=version)
+        versioned_dataset = CSVDataset(filepath="s3://bucket/file.csv", version=version)
         pattern = re.escape(
             f"Did not find any versions for {versioned_dataset}. "
             f"This could be due to insufficient permission."
@@ -845,6 +849,7 @@ class TestDataCatalogDatasetFactories:
             "{country}_companies",
             "{namespace}_{dataset}",
             "{dataset}s",
+            "{user_default}",
             "{default}",
         ]
         assert list(catalog._dataset_patterns.keys()) == sorted_keys_expected

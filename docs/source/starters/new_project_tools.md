@@ -91,7 +91,6 @@ Specifying your tools selection is optional, omitting them results in the defaul
 <!--TO DO Need also to add examples?? -->
 
 ## Kedro tools
-<!--TO DO: FILL PLACEHOLDERS-->
 
 Tools are [modular functionalities that can be added to a basic Kedro project] . They allow for [...]. When creating a new project, you may select one or more of the available tools, or none at all.
 
@@ -141,10 +140,6 @@ This tool introduces the `tests` directory to the new project's structure, conta
 pip install -r path/to/project/root/requirements.txt
 ```
 
-| ![cli-output.jpg](IMAGE RESOURCE PLACEHOLDER) |
-|:--:|
-| *Prompt for tools selection* |
-
 The tool leverages `pytest` with the following configuration:
 
 ```toml
@@ -168,13 +163,13 @@ Kedro promotes the use of unit tests to achieve high code quality and maintainab
 
 ### Custom logging
 
-Selecting the custom logging tool introduces the file `logging.yml` to your project's `conf` directory.
+Selecting the custom logging tool introduces the file `logging.yml` to your project's `conf` directory. This tool allows you to customise your logging configuration instead of using [Kedro's default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). The populated `conf/logging.yml` provides two additional logging handlers: `console` and `info_file_handler`, as well as `rich` that is available in the default configuration, though only `info_file_handler` and `rich` are used.
 
-| ![cli-output.jpg](IMAGE RESOURCE PLACEHOLDER) |
-|:--:|
-| *Prompt for tools selection* |
+To use this provided logging configuration, remember to set the `KEDRO_LOGGING_CONFIG` environment variable to point to `logging.yml` by naviagting to your project root and running the following command:
 
-This tool allows you to customise your logging configuration instead of using [Kedro's default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). The populated `conf/logging.yml` provides two additional logging handlers: `console` and `info_file_handler`, as well as `rich` that is available in the default configuration, though only `info_file_handler` and `rich` are used.
+```bash
+export KEDRO_LOGGING_CONFIG=conf/logging.yml
+```
 
 To learn more about using logging in your project, or modifying the logging configuration, take a look at our [logging documentation](../logging/index.md).
 

@@ -863,8 +863,8 @@ class TestDataCatalogDatasetFactories:
         assert log_record.levelname == "WARNING"
         assert (
             "Config from the dataset factory pattern '{default_dataset}' "
-            "in the catalog will be used to override the default "
-            "MemoryDataset creation for the dataset 'jet@planes'" in log_record.message
+            "in the catalog will be used to override the default dataset creation for 'jet@planes'"
+            in log_record.message
         )
         assert isinstance(jet_dataset, CSVDataset)
 

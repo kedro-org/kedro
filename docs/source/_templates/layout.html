@@ -27,30 +27,29 @@
   //inline styling for read-the-docs flyout 
   document.documentElement.style.setProperty('--readthedocs-flyout-font-size', '0.9em');
 
-  
   document.addEventListener("DOMContentLoaded", function(event) {
+
+    // Activate read-the-docs search when user focuses on search
     document.querySelector('div[role="search"] form input').addEventListener("focus", (e) => {
       const event = new CustomEvent("readthedocs-search-show");
       document.dispatchEvent(event);
     });
 
-    // Wait for DOM to load and clone main nav into the sidebar
-    document.addEventListener("DOMContentLoaded", function() {
-      var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
-      sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
+    // Clone main nav into the sidebar
+    var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
+    sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
 
-      // Prepend close button to mobile header
-      var closeBtn = document.createElement("span");
-      closeBtn.dataset.toggle = 'wy-nav-top';
-      closeBtn.classList.add('wy-nav-top-close');
-      document.querySelector('.wy-nav-top').prepend(closeBtn);
+    // Prepend close button to mobile header
+    var closeBtn = document.createElement("span");
+    closeBtn.dataset.toggle = 'wy-nav-top';
+    closeBtn.classList.add('wy-nav-top-close');
+    document.querySelector('.wy-nav-top').prepend(closeBtn);
 
-    // Prepend open button to mobile header
-      var openBtn = document.createElement("span");
-      openBtn.dataset.toggle = 'wy-nav-top';
-      openBtn.classList.add('wy-nav-top-open');
-      document.querySelector('.wy-nav-top').prepend(openBtn);
-  });
+  // Prepend open button to mobile header
+    var openBtn = document.createElement("span");
+    openBtn.dataset.toggle = 'wy-nav-top';
+    openBtn.classList.add('wy-nav-top-open');
+    document.querySelector('.wy-nav-top').prepend(openBtn);
   });
 </script>
 

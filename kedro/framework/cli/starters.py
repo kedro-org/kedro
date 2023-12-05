@@ -747,7 +747,7 @@ def _validate_config_file_inputs(config: dict[str, str], starter_alias: str | No
     """
     if starter_alias and ("tools" in config or "example_pipeline" in config):
         raise KedroCliError(
-            "Cannot use the --starter flag with the --example and/or --tools options in config."
+            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file."
         )
 
     project_name_validation_config = {

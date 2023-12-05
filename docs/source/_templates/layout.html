@@ -21,49 +21,7 @@
 {% endblock %}
 
 {%- block extrahead %}
-<script type="text/javascript">
-  // window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=document.createElement("script");r.type="text/javascript",r.async=!0,r.src="https://cdn.heapanalytics.com/js/heap-"+e+".js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetIdentity","removeEventProperty","setEventProperties","track","unsetEventProperty"],o=0;o<p.length;o++)heap[p[o]]=n(p[o])};
-  // heap.load({{ "2164194004" | env_override }});{# 2164194004 coresponds to the Development environment #}
-  //inline styling for read-the-docs flyout 
-  document.documentElement.style.setProperty('--readthedocs-flyout-font-size', '0.9em');
 
-  
-  document.addEventListener("DOMContentLoaded", function() {
-    // Simplify the focus event listener
-    const searchInput = document.querySelector('div[role="search"] form input');
-    if (searchInput) {
-        searchInput.addEventListener("focus", () => {
-            document.dispatchEvent(new CustomEvent("readthedocs-search-show"));
-        });
-    }
-
-    // Function to create and prepend a button
-    function prependButton(className, datasetToggle) {
-        const button = document.createElement("span");
-        button.dataset.toggle = datasetToggle;
-        button.classList.add(className);
-        const navTop = document.querySelector('.wy-nav-top');
-        if (navTop) {
-            navTop.prepend(button);
-        }
-    }
-
-    // Clone and insert sidebar search
-    const sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
-    const mainNav = document.querySelector('.wy-main-nav');
-    if (sidebarSearch && mainNav) {
-        sidebarSearch.parentNode.insertBefore(mainNav.cloneNode(true), sidebarSearch);
-    }
-
-    // Prepend buttons to mobile header
-    prependButton('wy-nav-top-close', 'wy-nav-top');
-    prependButton('wy-nav-top-open', 'wy-nav-top');
-});
-
-
-      
-
-</script>
 <link rel="stylesheet" href="https://kedro-shared-files.s3.eu-west-2.amazonaws.com/qb1-sphinx-rtd.css" type="text/css"
 />
 <link rel="stylesheet" href="https://kedro-shared-files.s3.eu-west-2.amazonaws.com/theme-overrides.css" type="text/css"

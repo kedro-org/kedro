@@ -41,7 +41,7 @@ Have a look at the file `src/tests/test_run.py` for instructions on how to write
 pytest
 ```
 
-To configure the coverage threshold, look at the `.coveragerc` file.
+You can configure the coverage threshold in your project's `pyproject.toml` file under the `[tool.coverage.report]` section.
 
 
 ## Project dependencies
@@ -52,7 +52,7 @@ To see and update the dependency requirements for your project use `requirements
 
 ## How to work with Kedro and notebooks
 
-> Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `context`, `catalog`, and `startup_error`.
+> Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `context`, 'session', `catalog`, and `pipelines`.
 >
 > Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r requirements.txt` you will not need to take any extra steps before you use them.
 

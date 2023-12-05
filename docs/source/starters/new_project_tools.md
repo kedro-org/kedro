@@ -210,7 +210,7 @@ See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/s
 Here is a flowchart to help illustrate some example choice of tools you can select:
 
 ```{mermaid}
-:alt: Example diagram of specific tool choices 
+:alt: Example diagram of specific tool choices
 flowchart TD
     A[Start] --> B[Enter Project Name: Example Project];
     B --> C3[Select Tools: None];

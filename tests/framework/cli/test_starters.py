@@ -1154,7 +1154,7 @@ class TestToolsAndExampleFromConfigFile:
 
         assert result.exit_code != 0
         assert (
-            "Cannot use the --starter flag with the --example and/or --tools options in config.\n"
+            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file.\n"
             in result.output
         )
 

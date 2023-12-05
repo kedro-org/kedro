@@ -77,7 +77,7 @@ You can bypass the configuration patterns and set configuration directly on the 
 
 For example, you can [use hooks to load external credentials](../hooks/common_use_cases.md#use-hooks-to-load-external-credentials).
 
-Alternatively, if you are using config loader as a standalone component, you can override configuration as follow:
+Alternatively, if you are using config loader as a standalone component, you can override configuration as follows:
 
 ```{code-block} python
 :lineno-start: 10

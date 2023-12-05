@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pickle
 from multiprocessing.managers import SyncManager
 from typing import Any

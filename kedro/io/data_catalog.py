@@ -414,10 +414,13 @@ class DataCatalog:
                 self._load_versions.get(dataset_name),
                 self._save_version,
             )
-            if self._specificity(matched_pattern) == 0:
+            if (
+                self._specificity(matched_pattern) == 0
+                and matched_pattern != "{default}"
+            ):
                 self._logger.warning(
                     "Config from the dataset factory pattern '%s' in the catalog will be used to "
-                    "override the default MemoryDataset creation for the dataset '%s'",
+                    "override the default dataset creation for '%s'",
                     matched_pattern,
                     dataset_name,
                 )

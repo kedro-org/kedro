@@ -231,6 +231,10 @@ You can use dataset factories to define a catch-all pattern which will overwrite
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
 as `pandas.CSVDataset`.
 
+```{note}
+Make sure to name your overwriting pattern anything other than "{default}" which is the reserved name used by Kedro under the hood to generate the default datasets.
+```
+
 ## CLI commands for dataset factories
 
 To manage your dataset factories, two new commands have been added to the Kedro CLI: `kedro catalog rank` (0.18.12) and `kedro catalog resolve` (0.18.13).

@@ -1,6 +1,6 @@
 # Tools to customise a new Kedro project
 
-There are several ways to configure your new project with the tools and example code.
+There are several ways to customise your new project with the tools and example code.
 
 ## `kedro new`
 

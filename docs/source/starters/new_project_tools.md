@@ -58,7 +58,7 @@ kedro new --example=y
 
 ## `kedro new --config=`
 
-You can also supply values to `kedro new` by providing a YML configuration file to your `kedro new` command. Consider the following file:
+As an alternative to the interactive project creation workflow, you can also supply values to `kedro new` by providing a YML configuration file to your `kedro new` command. Consider the following file:
 
 ```yaml
 # config.yml
@@ -87,8 +87,6 @@ Note: When using a configuration file to create a new project, you must provide 
 ```
 
 Specifying your tools selection is optional, omitting them results in the default selection of `none`.
-
-<!--TO DO Need also to add examples?? -->
 
 ## Kedro tools
 

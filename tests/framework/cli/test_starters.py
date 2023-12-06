@@ -996,7 +996,7 @@ class TestToolsAndExampleFromUserPrompts:
 
     @pytest.mark.parametrize(
         "bad_input",
-        ["bad input", "-1", "3-"],
+        ["bad input", "-1", "3-", "1 1"],
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
         result = CliRunner().invoke(
@@ -1118,7 +1118,7 @@ class TestToolsAndExampleFromConfigFile:
 
     @pytest.mark.parametrize(
         "bad_input",
-        ["bad input", "-1", "3-"],
+        ["bad input", "-1", "3-", "1 1"],
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
         """Test project created from config."""

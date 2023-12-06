@@ -188,7 +188,6 @@ Kedro's capabilities extend far beyond local data storage. Kedro seamlessly inte
 We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
 You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure).
 
-
 ### PySpark
 
 The `PySpark` tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
@@ -201,7 +200,7 @@ The `viz` tool will add visualisation to your project by including Kedro-Viz, wh
 In addition, `viz` will also add setup for experiment tracking and plotting datasets.
 See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
 
----
+## Flowchart of example choice of tools and example selections
 
 Here is a flowchart to help illustrate some example choice of tools you can select:
 
@@ -226,5 +225,3 @@ flowchart TD
     D3 -->|Yes| G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes];
     D3 -->|No| G2[New Project Created\nName: Example Project\nTools: None\nExample: No];
 ```
-
-## Example pipeline

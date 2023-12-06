@@ -152,7 +152,7 @@ def config_with_dataset_factories_bad_pattern(config_with_dataset_factories):
 def config_with_dataset_factories_only_patterns():
     return {
         "catalog": {
-            "{default}": {
+            "{user_default}": {
                 "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{default}.csv",
             },
@@ -167,10 +167,6 @@ def config_with_dataset_factories_only_patterns():
             "{dataset}s": {
                 "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{dataset}s.csv",
-            },
-            "{user_default}": {
-                "type": "pandas.ExcelDataset",
-                "filepath": "data/01_raw/{default}.xlsx",
             },
         },
     }
@@ -850,9 +846,25 @@ class TestDataCatalogDatasetFactories:
             "{namespace}_{dataset}",
             "{dataset}s",
             "{user_default}",
-            "{default}",
         ]
         assert list(catalog._dataset_patterns.keys()) == sorted_keys_expected
+
+    def test_fail_overwriting_of_default_pattern(
+        self,
+    ):
+        catalog_config = {
+            "{default}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/{default}.csv",
+            },
+            "{namespace}_{dataset}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/{namespace}_{dataset}.pq",
+            },
+        }
+        pattern = "The {default} pattern name is reserved to be used by Kedro to generate the default dataset type set in the runner."
+        with pytest.raises(DatasetError, match=pattern):
+            DataCatalog.from_config(catalog_config)
 
     def test_default_dataset(self, config_with_dataset_factories_with_default, caplog):
         """Check that default dataset is used when no other pattern matches"""

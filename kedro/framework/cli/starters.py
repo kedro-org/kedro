@@ -110,8 +110,11 @@ _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 TOOLS_SHORTNAME_TO_NUMBER = {
     "lint": "1",
     "test": "2",
+    "tests": "2",
     "log": "3",
+    "logs": "3",
     "docs": "4",
+    "doc": "4",
     "data": "5",
     "pyspark": "6",
     "viz": "7",

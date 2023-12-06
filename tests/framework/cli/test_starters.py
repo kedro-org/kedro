@@ -966,8 +966,14 @@ class TestToolsAndExampleFromUserPrompts:
             "6",
             "7",
             "none",
+            "",
             "2,3,4",
             "3-5",
+            "1,2,4-6",
+            "1,2,4-6,7",
+            "4-6,7",
+            "1, 2 ,4 - 6, 7",
+            "1-3, 5-7",
             "all",
             "1, 2, 3",
             "  1,  2, 3  ",
@@ -990,7 +996,7 @@ class TestToolsAndExampleFromUserPrompts:
 
     @pytest.mark.parametrize(
         "bad_input",
-        ["bad input", "-1", "3-"],
+        ["bad input", "-1", "3-", "1 1"],
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
         result = CliRunner().invoke(
@@ -1078,8 +1084,14 @@ class TestToolsAndExampleFromConfigFile:
             "6",
             "7",
             "none",
+            "",
             "2,3,4",
             "3-5",
+            "1,2,4-6",
+            "1,2,4-6,7",
+            "4-6,7",
+            "1, 2 ,4 - 6, 7",
+            "1-3,5-7",
             "all",
             "1, 2, 3",
             "  1,  2, 3  ",
@@ -1107,7 +1119,7 @@ class TestToolsAndExampleFromConfigFile:
 
     @pytest.mark.parametrize(
         "bad_input",
-        ["bad input", "-1", "3-"],
+        ["bad input", "-1", "3-", "1 1"],
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
         """Test project created from config."""

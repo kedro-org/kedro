@@ -291,43 +291,42 @@ def test_starter_list_with_invalid_starter_plugin(
     assert expected in result.output
 
 
-@pytest.mark.parametrize(
-    "input,expected",
-    [
-        ("1", ["1"]),
-        ("1,2,3", ["1", "2", "3"]),
-        ("2-4", ["2", "3", "4"]),
-        ("3-3", ["3"]),
-        ("all", ["1", "2", "3", "4", "5", "6", "7"]),
-        ("none", []),
-    ],
-)
-def test_parse_tools_valid(input, expected):
-    result = _parse_tools_input(input)
-    assert result == expected
+class TestParseToolsInput:
+    @pytest.mark.parametrize(
+        "input,expected",
+        [
+            ("1", ["1"]),
+            ("1,2,3", ["1", "2", "3"]),
+            ("2-4", ["2", "3", "4"]),
+            ("3-3", ["3"]),
+            ("all", ["1", "2", "3", "4", "5", "6", "7"]),
+            ("none", []),
+        ],
+    )
+    def test_parse_tools_valid(self, input, expected):
+        result = _parse_tools_input(input)
+        assert result == expected
 
+    @pytest.mark.parametrize(
+        "input",
+        ["5-2", "3-1"],
+    )
+    def test_parse_tools_invalid_range(self, input, capsys):
+        with pytest.raises(SystemExit):
+            _parse_tools_input(input)
+        message = f"'{input}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
+        assert message in capsys.readouterr().err
 
-@pytest.mark.parametrize(
-    "input",
-    ["5-2", "3-1"],
-)
-def test_parse_tools_invalid_range(input, capsys):
-    with pytest.raises(SystemExit):
-        _parse_tools_input(input)
-    message = f"'{input}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
-    assert message in capsys.readouterr().err
-
-
-@pytest.mark.parametrize(
-    "input,last_invalid",
-    [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-9", "9")],
-)
-def test_parse_tools_invalid_selection(input, last_invalid, capsys):
-    with pytest.raises(SystemExit):
-        selected = _parse_tools_input(input)
-        _validate_selection(selected)
-    message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
-    assert message in capsys.readouterr().err
+    @pytest.mark.parametrize(
+        "input,last_invalid",
+        [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-9", "9")],
+    )
+    def test_parse_tools_invalid_selection(self, input, last_invalid, capsys):
+        with pytest.raises(SystemExit):
+            selected = _parse_tools_input(input)
+            _validate_selection(selected)
+        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -1353,20 +1352,26 @@ class TestValidateSelection:
         tools = ["1", "2", "3", "4"]
         assert _validate_selection(tools) is None
 
-    def test_validate_selection_invalid_single_tool(self):
+    def test_validate_selection_invalid_single_tool(self, capsys):
         tools = ["8"]
         with pytest.raises(SystemExit):
             _validate_selection(tools)
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
 
-    def test_validate_selection_invalid_multiple_tools(self):
+    def test_validate_selection_invalid_multiple_tools(self, capsys):
         tools = ["8", "10", "15"]
         with pytest.raises(SystemExit):
             _validate_selection(tools)
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
 
-    def test_validate_selection_mix_valid_invalid_tools(self):
+    def test_validate_selection_mix_valid_invalid_tools(self, capsys):
         tools = ["1", "8", "3", "15"]
         with pytest.raises(SystemExit):
             _validate_selection(tools)
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
 
     def test_validate_selection_empty_list(self):
         tools = []

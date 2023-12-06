@@ -29,7 +29,11 @@ The configuration file must contain:
 * `project_name`
 * `repo_name`
 * `python_package`
-* TO DO -- tools and example code options
+
+Additionally, the configuration file may contain:
+
+* `tools` The tools to customise your project setup with. Select from comma-separated values, ranges, or 'all/none'. Omitting this from your configuration file will result in the default selection of `none`.
+* `example` Indicate `yes` or `no` to select whether you would like your project to be populated with example code. Omitting this from your configuration file will result in the default selection of `no`.
 
 The `output_dir` can be specified as `~` for the home directory or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 

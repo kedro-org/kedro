@@ -1231,7 +1231,7 @@ class TestToolsAndExampleFromCLI:
             "pyspark",
             "viz",
             "none",
-            "tests,logs,docs",
+            "tests,logs,doc",
             "test,data,lint",
             "log,docs,data,test,lint",
             "log, docs, data, test, lint",

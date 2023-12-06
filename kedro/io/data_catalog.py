@@ -757,7 +757,11 @@ class DataCatalog:
             Copy of the current object.
         """
         if extra_dataset_patterns:
-            dataset_patterns = {**self._dataset_patterns, **extra_dataset_patterns}
+            unsorted_dataset_patterns = {
+                **self._dataset_patterns,
+                **extra_dataset_patterns,
+            }
+            dataset_patterns = self._sort_patterns(unsorted_dataset_patterns)
         else:
             dataset_patterns = self._dataset_patterns
         return DataCatalog(

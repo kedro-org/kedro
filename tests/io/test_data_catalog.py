@@ -869,6 +869,33 @@ class TestDataCatalogDatasetFactories:
             list(catalog_with_default._dataset_patterns.keys()) == sorted_keys_expected
         )
 
+    def test_sorting_order_with_default_and_other_dataset_through_extra_pattern(
+        self, config_with_dataset_factories_only_patterns
+    ):
+        """Check that the sorted order of the patterns is correct according to parsing rules when a default dataset is added through extra patterns (this would happen via the runner)."""
+        extra_dataset_patterns = {
+            "{default}": {"type": "MemoryDataset"},
+            "{another}#csv": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{another}.csv",
+            },
+        }
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
+        catalog_with_default = catalog.shallow_copy(
+            extra_dataset_patterns=extra_dataset_patterns
+        )
+        sorted_keys_expected = [
+            "{country}_companies",
+            "{another}#csv",
+            "{namespace}_{dataset}",
+            "{dataset}s",
+            "{user_default}",
+            "{default}",
+        ]
+        assert (
+            list(catalog_with_default._dataset_patterns.keys()) == sorted_keys_expected
+        )
+
     def test_fail_overwriting_of_default_pattern(
         self,
     ):

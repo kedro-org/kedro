@@ -223,7 +223,7 @@ The matches are ranked according to the following criteria:
 You can use dataset factories to define a catch-all pattern which will overwrite the default [`MemoryDataset`](/kedro.io.MemoryDataset) creation.
 
 ```yaml
-"{default_dataset}":
+"{a_default_dataset}":
   type: pandas.CSVDataset
   filepath: data/{default_dataset}.csv
 
@@ -232,7 +232,8 @@ Kedro will now treat all the datasets mentioned in your project's pipelines that
 as `pandas.CSVDataset`.
 
 ```{note}
-Make sure to name your overwriting pattern anything other than "{default}" which is the reserved name used by Kedro under the hood to generate the default datasets.
+Under the hood Kedro uses the pattern name "{default}" to generate the default datasets set in the runners. If you want to overwrite this pattern you should make sure you choose a name that comes
+before "default" in the alphabet for it to be resolved first.
 ```
 
 ## CLI commands for dataset factories

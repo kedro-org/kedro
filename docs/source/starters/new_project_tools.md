@@ -182,11 +182,12 @@ If you did not initially select `docs` and want to implement it later you can do
 
 ### Data Structure
 
-The Data Structure tool provides a standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention).
-This is crucial if you want to include an example pipelines during the creation of your project as it can not be omitted from the tool selections.
-Moreover, it will help you in maintaining a clean and organised data workflow, with clear separation of data at various processing stages.
+The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention).
+This is crucial if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
+Kedro's capabilities extend far beyond local data storage. Kedro seamlessly integrates with Data Lakes and various databases through fsspec URIs, catering to the needs of professional teams that store their data in blob/object storage or databases.
 We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
 You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure).
+
 
 ### PySpark
 

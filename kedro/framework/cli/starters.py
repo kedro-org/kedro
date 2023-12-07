@@ -633,7 +633,7 @@ def fetch_template_based_on_tools(template_path, cookiecutter_args: dict[str, An
     tools = extra_context.get("tools", [])
     example_pipeline = extra_context.get("example_pipeline", False)
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
-    
+
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"

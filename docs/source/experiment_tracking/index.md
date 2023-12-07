@@ -247,7 +247,7 @@ Execute `kedro run` a few times in a row to generate a larger set of experiment 
 Here comes the fun part of accessing your run data on Kedro-Viz. Having generated some run data, execute the following command:
 
 ```bash
-kedro viz
+kedro viz run
 ```
 
 When you open the Kedro-Viz web app, you see an experiment tracking icon on the left-hand side of the screen.

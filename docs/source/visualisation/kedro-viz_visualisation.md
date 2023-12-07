@@ -30,7 +30,7 @@ kedro run
 To start Kedro-Viz, type the following into your terminal from the project directory:
 
 ```bash
-kedro viz
+kedro viz run
 ```
 
 The command opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.

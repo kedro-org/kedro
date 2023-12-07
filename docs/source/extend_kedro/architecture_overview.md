@@ -3,7 +3,7 @@
 There are different ways to leverage Kedro in your work, you can:
 
  - Commit to using all of Kedro (framework, project, starters and library); which is preferable to take advantage of the full value proposition of Kedro
- - You can leverage parts of Kedro, like the DataCatalog (I/O), ConfigLoader, Pipelines and Runner, by using it as a Python library; this best supports a workflow where you don't want to adopt the Kedro project template
+ - You can use parts of Kedro, like the DataCatalog (I/O), OmegaConfigLoader, Pipelines and Runner, by using it as a Python library; this best supports a workflow where you don't want to adopt the Kedro project template
  - Or, you can develop extensions for Kedro e.g. custom starters, plugins, Hooks and more
 
 At a high level, Kedro consists of five main parts:
@@ -37,13 +37,13 @@ Kedro framework serves as the interface between a Kedro project and Kedro librar
 
 ## Kedro starter
 
-You can use a [Kedro starter](../kedro_project_setup/starters.md) to generate a Kedro project that contains boilerplate code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
+You can use a [Kedro starter](../starters/starters.md) to generate a Kedro project that contains boilerplate code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
 
 ## Kedro library
 
 Kedro library consists of independent units, each responsible for one aspect of computation in a data pipeline:
 
-* **[`ConfigLoader`](/kedro.config.ConfigLoader)** provides utility to parse and load configuration defined in a Kedro project.
+* **[`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)** provides utility to parse and load configuration defined in a Kedro project.
 * **[`Pipeline`](/kedro.pipeline)** provides a collection of abstractions to model data pipelines.
 * **[`Runner`](/kedro.runner)** provides an abstraction for different execution strategy of a data pipeline.
 * **[`I/O`](/kedro.io)** provides a collection of abstractions to handle I/O in a project, including `DataCatalog` and many `Dataset` implementations.

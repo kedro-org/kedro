@@ -1,0 +1,43 @@
+# To enable this custom logging configuration, set KEDRO_LOGGING_CONFIG to the path of this file.
+# More information available at https://docs.kedro.org/en/stable/logging/logging.html
+version: 1
+
+disable_existing_loggers: False
+
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+  info_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: simple
+    filename: info.log
+    maxBytes: 10485760 # 10MB
+    backupCount: 20
+    encoding: utf8
+    delay: True
+
+  rich:
+    class: kedro.logging.RichHandler
+    rich_tracebacks: True
+    # Advance options for customisation.
+    # See https://docs.kedro.org/en/stable/logging/logging.html#project-side-logging-configuration
+    # tracebacks_show_locals: False
+
+loggers:
+  kedro:
+    level: INFO
+
+  {{ cookiecutter.python_package }}:
+    level: INFO
+
+root:
+  handlers: [rich, info_file_handler]

@@ -378,6 +378,7 @@ def parse_dataset_definition(
         raise DatasetError("'type' is missing from dataset catalog configuration")
 
     dataset_type = config.pop("type")
+    class_obj = None
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
@@ -393,6 +394,9 @@ def parse_dataset_definition(
                 break
         else:
             raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
+
+    if not class_obj:
+        class_obj = dataset_type
 
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(

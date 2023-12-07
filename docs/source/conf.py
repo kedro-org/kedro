@@ -127,7 +127,6 @@ type_targets = {
         "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
-        "kedro.runner.parallel_runner._SharedMemoryDataset",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",

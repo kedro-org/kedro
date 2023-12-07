@@ -8,10 +8,11 @@ import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
+from typing import Any
 
 from pluggy import PluginManager
 
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
@@ -23,7 +24,12 @@ class ThreadRunner(AbstractRunner):
     using threads.
     """
 
-    def __init__(self, max_workers: int = None, is_async: bool = False):
+    def __init__(
+        self,
+        max_workers: int = None,
+        is_async: bool = False,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
+    ):
         """
         Instantiates the runner.
 
@@ -34,6 +40,9 @@ class ThreadRunner(AbstractRunner):
             is_async: If True, set to False, because `ThreadRunner`
                 doesn't support loading and saving the node inputs and
                 outputs asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets to MemoryDataset
+                for `ThreadRunner`.
 
         Raises:
             ValueError: bad parameters passed
@@ -44,25 +53,16 @@ class ThreadRunner(AbstractRunner):
                 "node inputs and outputs asynchronously with threads. "
                 "Setting 'is_async' to False."
             )
-        super().__init__(is_async=False)
+        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
+        super().__init__(
+            is_async=False, extra_dataset_patterns=self._extra_dataset_patterns
+        )
 
         if max_workers is not None and max_workers <= 0:
             raise ValueError("max_workers should be positive")
 
         self._max_workers = max_workers
-
-    def create_default_dataset(self, ds_name: str) -> MemoryDataset:  # type: ignore
-        """Factory method for creating the default dataset for the runner.
-
-        Args:
-            ds_name: Name of the missing dataset.
-
-        Returns:
-            An instance of ``MemoryDataset`` to be used for all
-            unregistered datasets.
-
-        """
-        return MemoryDataset()
 
     def _get_required_workers_count(self, pipeline: Pipeline):
         """

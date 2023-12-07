@@ -165,7 +165,15 @@ class DataCatalog:
                 data engineering convention. For more details, see
                 https://docs.kedro.org/en/stable/resources/glossary.html#layers-data-engineering-convention
             dataset_patterns: A dictionary of data set factory patterns
-                and corresponding data set configuration
+                and corresponding data set configuration. When fetched from catalog configuration
+                these patterns will be sorted by:
+                1. Decreasing specificity (number of characters outside the curly brackets)
+                2. Decreasing number of placeholders (number of curly bracket pairs)
+                3. Alphabetically
+                A pattern of specificity 0 is a catch-all pattern and will overwrite the default
+                pattern provided through the runners if it comes before "default" in the alphabet.
+                Such an overwriting pattern will emit a warning. The `"{default}"` name will
+                not emit a warning.
             load_versions: A mapping between data set names and versions
                 to load. Has no effect on data sets without enabled versioning.
             save_version: Version string to be used for ``save`` operations

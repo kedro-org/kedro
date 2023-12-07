@@ -51,4 +51,5 @@ class SharedMemoryDataset(AbstractDataset):
             raise exc  # pragma: no cover
 
     def _describe(self) -> dict[str, Any]:
-        return {"shared_memory_dataset": self.shared_memory_dataset}
+        """SharedMemoryDataset doesn't have any constructor argument to return."""
+        return {}

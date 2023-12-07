@@ -14,10 +14,6 @@ from tests.runner.conftest import exception_fn, identity, return_none, sink, sou
 
 
 class TestValidThreadRunner:
-    def test_create_default_dataset(self):
-        dataset = ThreadRunner().create_default_dataset("")
-        assert isinstance(dataset, MemoryDataset)
-
     def test_thread_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
         result = ThreadRunner().run(fan_out_fan_in, catalog)

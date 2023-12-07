@@ -20,14 +20,14 @@
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
 * Renamed the `data_sets()` method in `Pipeline` and all references to it to `datasets()`.
-* Renamed the `create_default_data_set()` method in the `Runner` to `create_default_dataset()`.
 * Renamed all other uses of `data_set` and `data_sets` in the codebase to `dataset` and `datasets` respectively.
 * Remove deprecated `project_version` from `ProjectMetadata`.
 * Removed `package_name` argument from `KedroSession.create`.
+* Removed the `create_default_data_set()` method in the `Runner` in favour of using dataset factories to create default dataset instances.
 
-### DataSets
+### Datasets
 * Removed `kedro.extras.datasets` and tests.
-* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+* Reduced constructor arguments for `APIDataset` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
 * Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ### CLI
@@ -58,8 +58,9 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 * Removed the custom Kedro syntax for `--params`, use the OmegaConf syntax instead by replacing `:` with `=`.
+* Removed the `create_default_data_set()` method in the `Runner`. To overwrite the default dataset creation, use the new `Runner` class argument `extra_dataset_patterns` instead.
 
-### DataSets
+### Datasets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.

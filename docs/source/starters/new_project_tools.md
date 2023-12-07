@@ -64,33 +64,33 @@ A list of available tools can also be accessed by running `kedro new --help`
 ...
 -t, --tools TEXT    Select which tools you'd like to include. By default,
                       none are included.
-                      
+
                       Tools
-                      
+
                       1) Linting: Provides a basic linting setup with Black
                       and Ruff
-                      
+
                       2) Testing: Provides basic testing setup with pytest
-                      
+
                       3) Custom Logging: Provides more logging options
-                      
+
                       4) Documentation: Basic documentation setup with Sphinx
-                      
+
                       5) Data Structure: Provides a directory structure for
                       storing data
-                      
+
                       6) PySpark: Provides set up configuration for working
                       with PySpark
-                      
+
                       7) Kedro Viz: Provides Kedro's native visualisation tool
-                      
+
                       Example usage:
-                      
+
                       kedro new --tools=lint,test,log,docs,data,pyspark,viz
                       (or any subset of these options)
-                      
+
                       kedro new --tools=all
-                      
+
                       kedro new --tools=none
 ...
 ```

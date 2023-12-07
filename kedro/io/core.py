@@ -6,6 +6,7 @@ from __future__ import annotations
 import abc
 import copy
 import logging
+import os
 import re
 import warnings
 from collections import namedtuple
@@ -20,6 +21,7 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
+from kedro import KedroDeprecationWarning
 from kedro.utils import load_obj
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
@@ -354,7 +356,7 @@ _CONSISTENCY_WARNING = (
 )
 
 # `kedro_datasets` is probed before `kedro.extras.datasets`,
-# hence the DeprecationWarning will not be shown
+# hence the KedroDeprecationWarning will not be shown
 # if the dataset is available in the former
 _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", ""]
 
@@ -395,14 +397,16 @@ def parse_dataset_definition(
             )
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
 
-        trials = (_load_obj(class_path) for class_path in class_paths)
-        try:
-            class_obj = next(obj for obj in trials if obj is not None)
-        except StopIteration as exc:
+        for class_path in class_paths:
+            tmp = _load_obj(class_path)
+            if tmp is not None:
+                class_obj = tmp
+                break
+        else:
             raise DatasetError(
                 f"Class '{class_obj}' not found or one of its dependencies "
                 f"has not been installed."
-            ) from exc
+            )
 
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(
@@ -562,7 +566,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
     @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
-    def _fetch_latest_save_version(self) -> str:  # noqa: no-self-use
+    def _fetch_latest_save_version(self) -> str:
         """Generate and cache the current save version"""
         return generate_timestamp()
 
@@ -609,7 +613,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:  # noqa: useless-parent-delegation
+    def load(self) -> _DO:
         return super().load()
 
     def save(self, data: _DI) -> None:
@@ -706,7 +710,9 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
     return options
 
 
-def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, str]:
+def get_protocol_and_path(
+    filepath: str | os.PathLike, version: Version = None
+) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 
     .. warning::
@@ -722,7 +728,7 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, 
     Raises:
         DatasetError: when protocol is http(s) and version is not None.
     """
-    options_dict = _parse_filepath(filepath)
+    options_dict = _parse_filepath(str(filepath))
     path = options_dict["path"]
     protocol = options_dict["protocol"]
 
@@ -777,7 +783,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

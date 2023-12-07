@@ -67,7 +67,7 @@ pip install kedro dbx --upgrade
 
 **Now, you must authenticate the Databricks CLI with your Databricks instance.**
 
-[Refer to the Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication) for a complete guide on how to authenticate your CLI. The key steps are:
+[Refer to the Databricks documentation](https://docs.databricks.com/en/dev-tools/cli/authentication.html) for a complete guide on how to authenticate your CLI. The key steps are:
 
 1. Create a personal access token for your user on your Databricks instance.
 2. Run `databricks configure --token`.
@@ -87,6 +87,10 @@ kedro new --starter=databricks-iris
 ```
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
+
+ ```{note}
+ If you are not using the `databricks-iris` starter to create a Kedro project, then you should [disable file-based logging](../../logging/logging.md#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
+ ```
 
 ### Create a Repo on Databricks
 
@@ -144,7 +148,7 @@ When run on Databricks, Kedro cannot access data stored in your project's direct
 
 The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
-There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI command to upload your locally stored data to DBFS:
+There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/archive/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI command to upload your locally stored data to DBFS:
 
 ```bash
 databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris-databricks/data

@@ -15,6 +15,7 @@ from typing import Any, Dict
 
 from parse import parse
 
+from kedro import KedroDeprecationWarning
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -140,7 +141,7 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         data_sets: dict[str, AbstractDataset] = None,
         feed_dict: dict[str, Any] = None,
@@ -285,7 +286,7 @@ class DataCatalog:
         layers: dict[str, set[str]] = defaultdict(set)
 
         for ds_name, ds_config in catalog.items():
-            ds_config = _resolve_credentials(  # noqa: redefined-loop-name
+            ds_config = _resolve_credentials(  # noqa: PLW2901
                 ds_config, credentials
             )
             if cls._is_pattern(ds_name):
@@ -302,7 +303,7 @@ class DataCatalog:
                         "and will be removed in Kedro 0.19.0. Please move 'layer' inside the 'metadata' -> "
                         "'kedro-viz' attributes. See https://docs.kedro.org/en/latest/visualisation/kedro"
                         "-viz_visualisation.html#visualise-layers for more information.",
-                        FutureWarning,
+                        KedroDeprecationWarning,
                     )
                 ds_layer = ds_config.pop("layer", None)
                 if ds_layer is not None:

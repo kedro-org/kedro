@@ -72,7 +72,7 @@ class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         url: str,
         table: str,
@@ -131,7 +131,6 @@ class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
 
         # Update properties in load_args and save_args with credentials.
         if credentials is not None:
-
             # Check credentials for bad inputs.
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:

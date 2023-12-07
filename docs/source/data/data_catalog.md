@@ -5,6 +5,11 @@ In a Kedro project, the Data Catalog is a registry of all data sources available
 
 This page introduces the basic sections of `catalog.yml`, which is the file Kedro uses to register data sources for a project.
 
+```{warning}
+Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
+```
+
 ## The basics of `catalog.yml`
 A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorial/set_up_data.md).
 
@@ -27,7 +32,7 @@ shuttles:
 ```
 ### Dataset `type`
 
-Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml and more.
+Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet files, Feather files, HDF5 files, JSON documents, pickled objects, SQL tables, SQL queries, and more. They are supported using libraries such as pandas, PySpark, NetworkX, and Matplotlib.
 
 [The `kedro-datasets` package documentation](/kedro_datasets) contains a comprehensive list of all available file types.
 
@@ -35,13 +40,13 @@ Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, 
 
 Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, you should provide a URL using the general form `protocol://path/to/data`.  If no protocol is provided, the local file system is assumed (which is the same as ``file://``).
 
-The following prepends are available:
+The following protocols are available:
 
 - **Local or Network File System**: `file://` - the local file system is default in the absence of any protocol, it also permits relative paths.
 - **Hadoop File System (HDFS)**: `hdfs://user@server:port/path/to/data` - Hadoop Distributed File System, for resilient, replicated files within a cluster.
 - **Amazon S3**: `s3://my-bucket-name/path/to/data` - Amazon S3 remote binary store, often used with Amazon EC2,
   using the library s3fs.
-- **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - e.g. Minio, using the s3fs library.
+- **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - for example, MinIO, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
   resource using gcsfs (in development).
 - **Azure Blob Storage / Azure Data Lake Storage Gen2**: `abfs://` - Azure Blob Storage, typically used when working on an Azure environment.
@@ -151,7 +156,7 @@ A dataset offers versioning support if it extends the [`AbstractVersionedDataset
 To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 
 ```{note}
-Note that HTTP(S) is a supported file system in the dataset implementations, but if you it, you can't also use versioning.
+Note that HTTP(S) is a supported file system in the dataset implementations, but if you use it, you can't also use versioning.
 ```
 
 ## Use the Data Catalog within Kedro configuration

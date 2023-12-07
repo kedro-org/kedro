@@ -53,6 +53,7 @@ extensions = [
     "sphinxcontrib.mermaid",
     "myst_parser",
     "notfound.extension",
+    "sphinxcontrib.jquery",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class
@@ -444,13 +445,13 @@ def log_suggestions(lines: list[str], name: str):
                 "["
                 + str(i)
                 + "] "
-                + re.sub(existing, r"{}".format(style(obj, fg="magenta")), lines[i])
+                + re.sub(existing, rf"{style(obj, fg='magenta')}", lines[i])
             )
             print(
                 "["
                 + str(i)
                 + "] "
-                + re.sub(existing, r"``{}``".format(style(obj, fg="green")), lines[i])
+                + re.sub(existing, rf"``{style(obj, fg='green')}``", lines[i])
             )
 
     if title_printed:
@@ -475,8 +476,8 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PL
         print(
             style(
                 "Failed to check for class name mentions that can be "
-                "converted to reStructuredText links in docstring of {}. "
-                "Error is: \n{}".format(name, str(e)),
+                f"converted to reStructuredText links in docstring of {name}. "
+                f"Error is: \n{str(e)}",
                 fg="red",
             )
         )
@@ -502,9 +503,7 @@ def _add_jinja_filters(app):
 
     # LaTeXBuilder is used in the PDF docs build,
     # and it doesn't have attribute 'templates'
-    if not (
-        isinstance(app.builder, (LaTeXBuilder,CheckExternalLinksBuilder))
-    ):
+    if not (isinstance(app.builder, (LaTeXBuilder, CheckExternalLinksBuilder))):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
@@ -540,7 +539,7 @@ except Exception as e:
         style(
             "Failed to create list of (regex, reStructuredText link "
             "replacement) for class names and method names in docstrings. "
-            "Error is: \n{}".format(str(e)),
+            f"Error is: \n{str(e)}",
             fg="red",
         )
     )

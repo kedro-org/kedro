@@ -56,6 +56,10 @@ kedro new --starter=databricks-iris
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
 
+ ```{note}
+ If you are not using the `databricks-iris` starter to create a Kedro project, then you should [disable file-based logging](../../logging/logging.md#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
+ ```
+
 ### Create a GitHub repository
 
 Now you should [create a new repository in GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo) using the official guide. Keep the repository private and don't commit to it yet. For consistency with the rest of this guide, name your GitHub repository `iris-databricks`.

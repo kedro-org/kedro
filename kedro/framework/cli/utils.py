@@ -10,9 +10,7 @@ import subprocess
 import sys
 import textwrap
 import traceback
-import warnings
 from collections import defaultdict
-from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
@@ -52,8 +50,7 @@ def call(cmd: list[str], **kwargs):  # pragma: no cover
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
     click.echo(" ".join(shlex.quote(c) for c in cmd))
-    # noqa: subprocess-run-check
-    code = subprocess.run(cmd, **kwargs).returncode
+    code = subprocess.run(cmd, **kwargs).returncode  # noqa: PLW1510
     if code:
         raise click.exceptions.Exit(code=code)
 
@@ -222,7 +219,7 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
     pattern = re.compile(package_name + r"([^\w]|$)")
     with reqs_path.open("r", encoding="utf-8") as reqs_file:
         for req_line in reqs_file:
-            req_line = req_line.strip()  # noqa: redefined-loop-name
+            req_line = req_line.strip()  # noqa: PLW2901
             if pattern.search(req_line):
                 return req_line
 
@@ -340,14 +337,6 @@ def env_option(func_=None, **kwargs):
     return opt(func_) if func_ else opt
 
 
-@contextmanager
-def _filter_deprecation_warnings():
-    """Temporarily suppress all DeprecationWarnings."""
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
-        yield
-
-
 def _check_module_importable(module_name: str) -> None:
     try:
         import_module(module_name)
@@ -453,7 +442,7 @@ def _split_params(ctx, param, value):
             # which should not be replaced by =
             pass
         else:
-            item = item.replace(":", "=", 1)  # noqa: redefined-loop-name
+            item = item.replace(":", "=", 1)  # noqa: PLW2901
         items = item.split("=", 1)
         if len(items) != 2:  # noqa: PLR2004
             ctx.fail(

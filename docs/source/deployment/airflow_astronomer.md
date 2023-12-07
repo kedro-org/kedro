@@ -36,7 +36,7 @@ To follow this tutorial, ensure you have the following:
 
 ### Tutorial project setup
 
-1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/create-project). Let's call it `kedro-airflow-iris`
+1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project). Let's call it `kedro-airflow-iris`
 
     ```shell
     mkdir kedro-airflow-iris
@@ -155,7 +155,7 @@ kedro airflow create --target-dir=dags/ --env=airflow
 astro dev start
 ```
 
-If you visit the Airflow UI, you should now see the Kedro pipeline as an Airflow DAG:
+If you examine the Airflow UI, you should now see the Kedro pipeline as an Airflow DAG:
 
 ![](../meta/images/kedro_airflow_dag.png)
 

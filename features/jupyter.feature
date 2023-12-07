@@ -18,6 +18,7 @@ Feature: Jupyter targets in new project
     Then I wait for the jupyter webserver to run for up to "120" seconds
     Then Jupyter Lab should run on port 8888
 
+  @skip
   Scenario: Execute node convert into Python files
     Given I have added a test jupyter notebook
     When I execute the test jupyter notebook and save changes

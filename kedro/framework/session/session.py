@@ -15,6 +15,7 @@ from typing import Any, Iterable
 
 import click
 
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLoader
 from kedro.framework.context import KedroContext
@@ -100,7 +101,7 @@ class KedroSession:
 
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         session_id: str,
         package_name: str = None,
@@ -125,7 +126,7 @@ class KedroSession:
         )
 
     @classmethod
-    def create(  # noqa: too-many-arguments
+    def create(  # noqa: PLR0913
         cls,
         package_name: str = None,
         project_path: Path | str | None = None,
@@ -269,7 +270,7 @@ class KedroSession:
                 f" the documentation for OmegaConfigLoader, see here:"
                 f" https://docs.kedro.org/en/stable/configuration/"
                 f"advanced_configuration.html#omegaconfigloader",
-                FutureWarning,
+                KedroDeprecationWarning,
             )
         context_class = settings.CONTEXT_CLASS
         context = context_class(
@@ -312,7 +313,7 @@ class KedroSession:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def run(  # noqa: too-many-arguments,too-many-locals
+    def run(  # noqa: PLR0913,too-many-locals
         self,
         pipeline_name: str = None,
         tags: Iterable[str] = None,

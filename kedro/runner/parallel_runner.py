@@ -18,6 +18,7 @@ from typing import Any, Iterable
 
 from pluggy import PluginManager
 
+from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import (
     _create_hook_manager,
     _register_hooks,
@@ -79,7 +80,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias
@@ -103,7 +104,7 @@ def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
     configure_logging(logging_config)
 
 
-def _run_node_synchronization(  # noqa: too-many-arguments
+def _run_node_synchronization(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,

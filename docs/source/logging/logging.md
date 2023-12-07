@@ -43,7 +43,7 @@ Alternatively, if you would like to keep other configuration in `conf/base/loggi
 +  handlers: [console]
 ```
 
-### Customise the `rich` Handler
+### Customise the `rich` handler
 
 Kedro's `kedro.extras.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
 

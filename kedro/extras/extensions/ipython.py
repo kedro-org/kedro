@@ -10,7 +10,8 @@ importing the underlying Python functions.
 """
 import warnings
 
-from ...ipython import (  # noqa  # noqa: unused-import
+from kedro import KedroDeprecationWarning
+from kedro.ipython import (  # noqa  # noqa: unused-import
     load_ipython_extension,
     reload_kedro,
 )
@@ -18,5 +19,5 @@ from ...ipython import (  # noqa  # noqa: unused-import
 warnings.warn(
     "kedro.extras.extensions.ipython should be accessed only using the alias "
     "kedro.ipython. The unaliased name will be removed in Kedro 0.19.0.",
-    DeprecationWarning,
+    KedroDeprecationWarning,
 )

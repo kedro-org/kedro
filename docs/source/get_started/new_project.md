@@ -42,7 +42,7 @@ You can add one or more of the options, or follow the default and add none at al
 
 ### Project examples
 
-The CLI offers the option to include example pipelines. Your choice of tools determines which spaceflights example starters are provided. Here's a guide to understanding which starter examples are used based on your selections:
+The CLI offers the option to include example pipelines. Your choice of tools determines which spaceflights starter example is provided. Here's a guide to understanding which starter examples are used based on your selections:
 
 * [Default Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) (`spaceflights-pandas`): Used when you select any combination of Linting, Testing, Custom Logging, Documentation, and Data Structure, excluding PySpark and Kedro Viz.
 * [PySpark Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark) (`spaceflights-pyspark`): Chosen when PySpark is selected with any other tools, except Kedro Viz.

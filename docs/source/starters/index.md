@@ -32,8 +32,8 @@ The configuration file must contain:
 
 Additionally, the configuration file may contain:
 
-* `tools` The tools to customise your project setup with. Select from comma-separated values, ranges, or 'all/none'. Omitting this from your configuration file will result in the default selection of `none`.
-* `example` Indicate `yes` or `no` to select whether you would like your project to be populated with example code. Omitting this from your configuration file will result in the default selection of `no`.
+* `tools`: The tools to customise your project setup with. Select from comma-separated values, ranges, or 'all/none'. Omitting this from your configuration file will result in the default selection of `none`.
+* `example`: Indicate `yes` or `no` to select whether you would like your project to be populated with example code. Omitting this from your configuration file will result in the default selection of `no`.
 
 The `output_dir` can be specified as `~` for the home directory or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 
@@ -44,7 +44,7 @@ repo_name: testing-kedro
 python_package: test_kedro
 ```
 **Use `kedro new` with a `--starter`** <br />
-You can create a new Kedro project with a [starter](./starters.md) that adds a set of code for a common project use case.
+You can create a new Kedro project with a [starter](./starters.md) that adds code for a common project use case.
 
 ``` {important}
 You can not combine the use of a Kedro starter with the tools and example code options listed above.

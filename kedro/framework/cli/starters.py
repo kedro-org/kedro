@@ -492,7 +492,7 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
     if selected_tools.lower() == "none":
         return ""
     if selected_tools.lower() == "all":
-        return ",".join(TOOLS_SHORTNAME_TO_NUMBER.values())
+        return ",".join(NUMBER_TO_TOOLS_NAME.keys())
 
     tools = []
     for tool in selected_tools.lower().split(","):

@@ -31,11 +31,11 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 
-# TODO(lrcouto): Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these add-ons.).
-ADDON_ARG_HELP = """
-Select which add-ons you'd like to include. By default, none are included.\n
+# TODO(lrcouto): Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these tools.).
+TOOLS_ARG_HELP = """
+Select which tools you'd like to include. By default, none are included.\n
 
-Add-Ons\n
+Tools\n
 1) Linting: Provides a basic linting setup with Black and Ruff\n
 2) Testing: Provides basic testing setup with pytest\n
 3) Custom Logging: Provides more logging options\n
@@ -45,9 +45,9 @@ Add-Ons\n
 7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
-kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
-kedro new --addons=all\n
-kedro new --addons=none
+kedro new --tools=lint,test,log,docs,data,pyspark,viz (or any subset of these options)\n
+kedro new --tools=all\n
+kedro new --tools=none
 """
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,
@@ -107,16 +107,19 @@ for starter_spec in _OFFICIAL_STARTER_SPECS:
 
 _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 
-ADD_ONS_SHORTNAME_TO_NUMBER = {
+TOOLS_SHORTNAME_TO_NUMBER = {
     "lint": "1",
     "test": "2",
+    "tests": "2",
     "log": "3",
+    "logs": "3",
     "docs": "4",
+    "doc": "4",
     "data": "5",
     "pyspark": "6",
     "viz": "7",
 }
-NUMBER_TO_ADD_ONS_NAME = {
+NUMBER_TO_TOOLS_NAME = {
     "1": "Linting",
     "2": "Testing",
     "3": "Custom Logging",
@@ -170,13 +173,13 @@ def starter():
 @click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-@click.option("--addons", "-a", "selected_add_ons_flag", help=ADDON_ARG_HELP)
+@click.option("--tools", "-t", "selected_tools", help=TOOLS_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
 @click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
 def new(  # noqa: PLR0913
     config_path,
     starter_alias,
-    selected_add_ons_flag,
+    selected_tools,
     project_name,
     checkout,
     directory,
@@ -190,6 +193,11 @@ def new(  # noqa: PLR0913
     if directory and not starter_alias:
         raise KedroCliError(
             "Cannot use the --directory flag without a --starter value."
+        )
+
+    if (selected_tools or example_pipeline) and starter_alias:
+        raise KedroCliError(
+            "Cannot use the --starter flag with the --example and/or --tools flag."
         )
 
     starters_dict = _get_starters_dict()
@@ -217,12 +225,12 @@ def new(  # noqa: PLR0913
     prompts_required = _get_prompts_required(cookiecutter_dir)
 
     # Format user input where necessary
-    if selected_add_ons_flag is not None:
-        selected_add_ons_flag = selected_add_ons_flag.lower()
+    if selected_tools is not None:
+        selected_tools = selected_tools.lower()
 
     # Select which prompts will be displayed to the user based on which flags were selected.
     prompts_required = _select_prompts_to_display(
-        prompts_required, selected_add_ons_flag, project_name, example_pipeline
+        prompts_required, selected_tools, project_name, example_pipeline
     )
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
@@ -243,7 +251,7 @@ def new(  # noqa: PLR0913
         prompts_required=prompts_required,
         config_path=config_path,
         cookiecutter_context=cookiecutter_context,
-        selected_add_ons_flag=selected_add_ons_flag,
+        selected_tools=selected_tools,
         project_name=project_name,
         example_pipeline=example_pipeline,
     )
@@ -254,7 +262,7 @@ def new(  # noqa: PLR0913
         directory=directory,
     )
 
-    project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
+    project_template = fetch_template_based_on_tools(template_path, cookiecutter_args)
 
     _create_project(project_template, cookiecutter_args)
 
@@ -399,7 +407,7 @@ def _get_extra_context(  # noqa: PLR0913
     prompts_required: dict,
     config_path: str,
     cookiecutter_context: OrderedDict,
-    selected_add_ons_flag: str | None,
+    selected_tools: str | None,
     project_name: str | None,
     example_pipeline: str | None,
 ) -> dict[str, str]:
@@ -412,7 +420,7 @@ def _get_extra_context(  # noqa: PLR0913
         config_path: a string containing the value for the --config flag, or
             None in case the flag wasn't used.
         cookiecutter_context: the context for Cookiecutter templates.
-        selected_add_ons_flag: a string containing the value for the --addons flag,
+        selected_tools: a string containing the value for the --tools flag,
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
             None in case the flag wasn't used.
@@ -438,22 +446,22 @@ def _get_extra_context(  # noqa: PLR0913
     # Format
     extra_context.setdefault("kedro_version", version)
 
-    add_ons = _convert_addon_names_to_numbers(selected_add_ons_flag)
+    tools = _convert_tool_names_to_numbers(selected_tools)
 
-    if add_ons is not None:
-        extra_context["add_ons"] = add_ons
+    if tools is not None:
+        extra_context["tools"] = tools
 
     if project_name is not None:
         extra_context["project_name"] = project_name
 
-    # Map the selected add on lists to readable name
-    add_ons = extra_context.get("add_ons")
-    if add_ons:
-        extra_context["add_ons"] = [
-            NUMBER_TO_ADD_ONS_NAME[add_on]
-            for add_on in _parse_add_ons_input(add_ons)  # type: ignore
+    # Map the selected tools lists to readable name
+    tools = extra_context.get("tools")
+    if tools:
+        extra_context["tools"] = [
+            NUMBER_TO_TOOLS_NAME[tool]
+            for tool in _parse_tools_input(tools)  # type: ignore
         ]
-        extra_context["add_ons"] = str(extra_context["add_ons"])
+        extra_context["tools"] = str(extra_context["tools"])
 
     extra_context["example_pipeline"] = (
         _parse_yes_no_to_bool(
@@ -466,33 +474,33 @@ def _get_extra_context(  # noqa: PLR0913
     return extra_context
 
 
-def _convert_addon_names_to_numbers(selected_add_ons_flag: str | None) -> str | None:
-    """Prepares add-on selection from the CLI input to the correct format
+def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
+    """Prepares tools selection from the CLI input to the correct format
     to be put in the project configuration, if it exists.
-    Replaces add-on strings with the corresponding prompt number.
+    Replaces tool strings with the corresponding prompt number.
 
     Args:
-        selected_add_ons_flag: a string containing the value for the --addons flag,
+        selected_tools: a string containing the value for the --tools flag,
             or None in case the flag wasn't used, i.e. lint,docs.
 
     Returns:
-        String with the numbers corresponding to the desired add_ons, or
-        None in case the --addons flag was not used.
+        String with the numbers corresponding to the desired tools, or
+        None in case the --tools flag was not used.
     """
-    if selected_add_ons_flag is None:
+    if selected_tools is None:
         return None
 
-    addons = []
-    for addon in selected_add_ons_flag.lower().split(","):
-        addon_short_name = addon.strip()
-        if addon_short_name in ADD_ONS_SHORTNAME_TO_NUMBER:
-            addons.append(ADD_ONS_SHORTNAME_TO_NUMBER[addon_short_name])
-    return ",".join(addons)
+    tools = []
+    for tool in selected_tools.lower().split(","):
+        tool_short_name = tool.strip()
+        if tool_short_name in TOOLS_SHORTNAME_TO_NUMBER:
+            tools.append(TOOLS_SHORTNAME_TO_NUMBER[tool_short_name])
+    return ",".join(tools)
 
 
 def _select_prompts_to_display(
     prompts_required: dict,
-    selected_add_ons_flag: str,
+    selected_tools: str,
     project_name: str,
     example_pipeline: str,
 ) -> dict:
@@ -503,7 +511,7 @@ def _select_prompts_to_display(
     Args:
         prompts_required: a dictionary of all the prompts that will be shown to
             the user on project creation.
-        selected_add_ons_flag: a string containing the value for the --addons flag,
+        selected_tools: a string containing the value for the --tools flag,
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
             None in case the flag wasn't used.
@@ -513,26 +521,26 @@ def _select_prompts_to_display(
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = list(ADD_ONS_SHORTNAME_TO_NUMBER) + ["all", "none"]
+    valid_tools = list(TOOLS_SHORTNAME_TO_NUMBER) + ["all", "none"]
 
-    if selected_add_ons_flag is not None:
-        addons = re.sub(r"\s", "", selected_add_ons_flag).split(",")
-        for addon in addons:
-            if addon not in valid_addons:
+    if selected_tools is not None:
+        tools = re.sub(r"\s", "", selected_tools).split(",")
+        for tool in tools:
+            if tool not in valid_tools:
                 click.secho(
-                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, viz, all, none",
+                    "Please select from the available tools: lint, test, log, docs, data, pyspark, viz, all, none",
                     fg="red",
                     err=True,
                 )
                 sys.exit(1)
-        if ("none" in addons or "all" in addons) and len(addons) > 1:
+        if ("none" in tools or "all" in tools) and len(tools) > 1:
             click.secho(
-                "Add-on options 'all' and 'none' cannot be used with other options",
+                "Tools options 'all' and 'none' cannot be used with other options",
                 fg="red",
                 err=True,
             )
             sys.exit(1)
-        del prompts_required["add_ons"]
+        del prompts_required["tools"]
 
     if project_name is not None:
         if not re.match(r"^[\w -]{2,}$", project_name):
@@ -618,20 +626,20 @@ def _fetch_config_from_user_prompts(
     return config
 
 
-def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
+def fetch_template_based_on_tools(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
-    # If 'add_ons' or 'example_pipeline' are not specified in prompts.yml and not prompted in 'kedro new' options,
+    # If 'tools' or 'example_pipeline' are not specified in prompts.yml and not prompted in 'kedro new' options,
     # default options will be used instead
-    add_ons = extra_context.get("add_ons", [])
+    tools = extra_context.get("tools", [])
     example_pipeline = extra_context.get("example_pipeline", False)
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
-    if "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+    if "Pyspark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-    elif "Pyspark" in add_ons:
+    elif "Pyspark" in tools:
         # Use the spaceflights-pyspark starter if only Pyspark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-    elif "Kedro Viz" in add_ons:
+    elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
     elif example_pipeline:
@@ -703,10 +711,20 @@ def _validate_config_file_against_prompts(
     """
     if config is None:
         raise KedroCliError("Config file is empty.")
+    additional_keys = {"tools": "none", "example_pipeline": "no"}
     missing_keys = set(prompts) - set(config)
-    if missing_keys:
+    missing_mandatory_keys = missing_keys - set(additional_keys)
+    if missing_mandatory_keys:
         click.echo(yaml.dump(config, default_flow_style=False))
-        raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
+        raise KedroCliError(
+            f"{', '.join(missing_mandatory_keys)} not found in config file."
+        )
+    for key, default_value in additional_keys.items():
+        if key in missing_keys:
+            click.secho(
+                f"The `{key}` key not found in the config file, default value '{default_value}' is being used.",
+                fg="yellow",
+            )
 
     if "output_dir" in config and not Path(config["output_dir"]).exists():
         raise KedroCliError(
@@ -738,62 +756,70 @@ def _validate_config_file_inputs(config: dict[str, str]):
         click.secho(project_name_validation_config["error_message"], fg="red", err=True)
         sys.exit(1)
 
-    input_add_ons = config.get("add_ons", "none")
-    add_on_validation_config = {
-        "regex_validator": r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d+-\d+)|(\d+ - \d+))( )*))$",
-        "error_message": f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.",
+    input_tools = config.get("tools", "none")
+    tools_validation_config = {
+        "regex_validator": r"""^(
+            all|none|                        # A: "all" or "none" or
+            (\ *\d+                          # B: any number of spaces followed by one or more digits
+            (\ *-\ *\d+)?                    # C: zero or one instances of: a hyphen followed by one or more digits, spaces allowed
+            (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
+            \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
+            $""",
+        "error_message": f"'{input_tools}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
     }
 
-    if not re.match(add_on_validation_config["regex_validator"], input_add_ons.lower()):
-        message = add_on_validation_config["error_message"]
+    if not re.match(
+        tools_validation_config["regex_validator"], input_tools.lower(), flags=re.X
+    ):
+        message = tools_validation_config["error_message"]
         click.secho(message, fg="red", err=True)
         sys.exit(1)
 
-    selected_add_ons = _parse_add_ons_input(input_add_ons)
-    _validate_selection(selected_add_ons)
+    selected_tools = _parse_tools_input(input_tools)
+    _validate_selection(selected_tools)
     _validate_regex("yes_no", config.get("example_pipeline", "no"))
 
 
-def _validate_selection(add_ons: list[str]):
+def _validate_selection(tools: list[str]):
     # start validating from the end, when user select 1-20, it will generate a message
     # '20' is not a valid selection instead of '8'
-    for add_on in add_ons[::-1]:
-        if add_on not in NUMBER_TO_ADD_ONS_NAME:
-            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
+    for tool in tools[::-1]:
+        if tool not in NUMBER_TO_TOOLS_NAME:
+            message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."  # nosec
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
 
-def _parse_add_ons_input(add_ons_str: str):
-    """Parse the add-ons input string.
+def _parse_tools_input(tools_str: str):
+    """Parse the tools input string.
 
     Args:
-        add_ons_str: Input string from prompts.yml.
+        tools_str: Input string from prompts.yml.
 
     Returns:
-        list: List of selected add-ons as strings.
+        list: List of selected tools as strings.
     """
 
     def _validate_range(start, end):
         if int(start) > int(end):
-            message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
+            message = f"'{start}-{end}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
-    add_ons_str = add_ons_str.lower()
-    if add_ons_str == "all":
-        return list(NUMBER_TO_ADD_ONS_NAME)
-    if add_ons_str == "none":
+    tools_str = tools_str.lower()
+    if tools_str == "all":
+        return list(NUMBER_TO_TOOLS_NAME)
+    if tools_str == "none":
         return []
-    # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
-    if not add_ons_str:
+    # Guard clause if tools_str is None, which can happen if prompts.yml is removed
+    if not tools_str:
         return []  # pragma: no cover
 
     # Split by comma
-    add_ons_choices = add_ons_str.replace(" ", "").split(",")
+    tools_choices = tools_str.replace(" ", "").split(",")
     selected: list[str] = []
 
-    for choice in add_ons_choices:
+    for choice in tools_choices:
         if "-" in choice:
             start, end = choice.split("-")
             _validate_range(start, end)
@@ -830,33 +856,37 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     _clean_pycache(Path(result_path))
     extra_context = cookiecutter_args["extra_context"]
     project_name = extra_context.get("project_name", "New Kedro Project")
-    python_package = extra_context.get(
-        "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
-    )
-    add_ons = extra_context.get("add_ons")
+    tools = extra_context.get("tools")
+    example_pipeline = extra_context.get("example_pipeline")
 
-    # we can use starters without add_ons:
-    if add_ons is not None:
-        if add_ons == "[]":  # TODO: This should be a list
-            click.secho("\nYou have selected no add-ons")
+    click.secho(
+        "\nCongratulations!"
+        f"\nYour project '{project_name}' has been created in the directory \n{result_path}\n"
+    )
+
+    # we can use starters without tools:
+    if tools is not None:
+        if tools == "[]":  # TODO: This should be a list
+            click.secho(
+                "You have selected no project tools",
+                fg="green",
+            )
         else:
-            click.secho(f"\nYou have selected the following add-ons: {add_ons}")
+            click.secho(
+                f"You have selected the following project tools: {tools}",
+                fg="green",
+            )
+
+    if example_pipeline is not None:
+        if example_pipeline:
+            click.secho(
+                "It has been created with an example pipeline.",
+                fg="green",
+            )
 
     click.secho(
-        f"\nThe project name '{project_name}' has been applied to: "
-        f"\n- The project title in {result_path}/README.md "
-        f"\n- The folder created for your project in {result_path} "
-        f"\n- The project's python package in {result_path}/src/{python_package}"
-    )
-    click.secho(
-        "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running 'pip install -r requirements.txt' to install "
-        "project-specific dependencies. Refer to the Kedro documentation: "
-        "https://kedro.readthedocs.io/"
-    )
-    click.secho(
-        f"\nChange directory to the project generated in {result_path} by "
-        f"entering 'cd {result_path}'",
+        "\nTo skip the interactive flow you can run `kedro new` with"
+        "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
         fg="green",
     )
 
@@ -892,9 +922,9 @@ class _Prompt:
             click.secho(self.error_message, fg="red", err=True)
             sys.exit(1)
 
-        if self.title == "Project Add-Ons":
+        if self.title == "Project Tools":
             # Validate user input
-            _validate_selection(_parse_add_ons_input(user_input))
+            _validate_selection(_parse_tools_input(user_input))
 
 
 # noqa: unused-argument

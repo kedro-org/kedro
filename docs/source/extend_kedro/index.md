@@ -6,4 +6,5 @@
 common_use_cases
 plugins
 architecture_overview
+../starters/create_a_starter
 ```

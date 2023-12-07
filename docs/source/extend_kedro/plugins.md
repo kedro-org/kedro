@@ -42,49 +42,6 @@ Once the plugin is installed, you can run it as follows:
 kedro to_json
 ```
 
-## Extend starter aliases
-It is possible to extend the list of starter aliases built into Kedro. This means that a [custom Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter) can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`.
-
-You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
-
-Example for a non-git repository starter:
-```python
-# plugin.py
-starters = [
-    KedroStarterSpec(
-        alias="test_plugin_starter",
-        template_path="your_local_directory/starter_folder",
-    )
-]
-```
-
-Example for a git repository starter:
-```python
-# plugin.py
-starters = [
-    KedroStarterSpec(
-        alias="test_plugin_starter",
-        template_path="https://github.com/kedro-org/kedro-starters/",
-        directory="spaceflights-pandas",
-    )
-]
-```
-
-The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. For an example, see the [spaceflights-pandas starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas).
-
-In your `pyproject.toml`, you need to register the specifications to `kedro.starters`:
-
-```toml
-[project.entry-points."kedro.starters"]
-starter = "plugin:starters"
-```
-
-After that you can use this starter with `kedro new --starter=test_plugin_starter`.
-
-```{note}
-If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.12`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
-```
-
 ## Working with `click`
 
 Commands must be provided as [`click` `Groups`](https://click.palletsprojects.com/en/7.x/api/#click.Group)

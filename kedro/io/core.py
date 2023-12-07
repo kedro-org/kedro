@@ -6,6 +6,7 @@ from __future__ import annotations
 import abc
 import copy
 import logging
+import os
 import re
 import warnings
 from collections import namedtuple
@@ -358,8 +359,8 @@ def parse_dataset_definition(
         config: Data set config dictionary. It *must* contain the `type` key
             with fully qualified class name.
         load_version: Version string to be used for ``load`` operation if
-                the data set is versioned. Has no effect on the data set
-                if versioning was not enabled.
+            the data set is versioned. Has no effect on the data set
+            if versioning was not enabled.
         save_version: Version string to be used for ``save`` operation if
             the data set is versioned. Has no effect on the data set
             if versioning was not enabled.
@@ -550,7 +551,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
     @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
-    def _fetch_latest_save_version(self) -> str:  # noqa: no-self-use
+    def _fetch_latest_save_version(self) -> str:
         """Generate and cache the current save version"""
         return generate_timestamp()
 
@@ -597,7 +598,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:  # noqa: useless-parent-delegation
+    def load(self) -> _DO:
         return super().load()
 
     def save(self, data: _DI) -> None:
@@ -694,7 +695,9 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
     return options
 
 
-def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, str]:
+def get_protocol_and_path(
+    filepath: str | os.PathLike, version: Version = None
+) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 
     .. warning::
@@ -710,7 +713,7 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, 
     Raises:
         DatasetError: when protocol is http(s) and version is not None.
     """
-    options_dict = _parse_filepath(filepath)
+    options_dict = _parse_filepath(str(filepath))
     path = options_dict["path"]
     protocol = options_dict["protocol"]
 

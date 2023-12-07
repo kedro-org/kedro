@@ -162,28 +162,6 @@ When migrating an existing project to a newer Kedro version, make sure you also 
 * For projects generated with versions of Kedro > 0.17.0, you'll do this in the `pyproject.toml` file from the project root directory.
 * If your project was generated with a version of Kedro <0.17.0, you will instead need to update the `ProjectContext`, which is found in `src/<package_name>/run.py`.
 
-## How to install a development version of Kedro
-
-This section explains how to try out a development version of Kedro direct from the [Kedro GitHub repository](https://github.com/kedro-org/kedro).
-
-```{important}
-The development version of Kedro is not guaranteed to be bug-free and/or compatible with any of the [stable versions](https://pypi.org/project/kedro/#history). We do not recommend that you use a development version of Kedro in any production systems. Please install and use with caution.
-```
-
-To try out latest, unreleased functionality from the `develop` branch of the Kedro GitHub repository, run the following installation command:
-
-```bash
-pip install git+https://github.com/kedro-org/kedro.git@develop
-```
-
-This will install Kedro from the `develop` branch of the GitHub repository, which is always the most up to date. This command will install Kedro from source, unlike `pip install kedro` which installs Kedro from PyPI.
-
-If you want to roll back to a stable version of Kedro, execute the following in your environment:
-
-```bash
-pip uninstall kedro -y
-pip install kedro
-```
 
 ## Summary
 

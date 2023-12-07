@@ -41,7 +41,7 @@ Tools\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
-6) Pyspark: Provides set up configuration for working with PySpark\n
+6) PySpark: Provides set up configuration for working with PySpark\n
 7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
@@ -110,8 +110,11 @@ _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 TOOLS_SHORTNAME_TO_NUMBER = {
     "lint": "1",
     "test": "2",
+    "tests": "2",
     "log": "3",
+    "logs": "3",
     "docs": "4",
+    "doc": "4",
     "data": "5",
     "pyspark": "6",
     "viz": "7",
@@ -122,7 +125,7 @@ NUMBER_TO_TOOLS_NAME = {
     "3": "Custom Logging",
     "4": "Documentation",
     "5": "Data Structure",
-    "6": "Pyspark",
+    "6": "PySpark",
     "7": "Kedro Viz",
 }
 
@@ -632,11 +635,12 @@ def fetch_template_based_on_tools(template_path, cookiecutter_args: dict[str, An
     tools = extra_context.get("tools", [])
     example_pipeline = extra_context.get("example_pipeline", False)
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
-    if "Pyspark" in tools and "Kedro Viz" in tools:
-        # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
+
+    if "PySpark" in tools and "Kedro Viz" in tools:
+        # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-    elif "Pyspark" in tools:
-        # Use the spaceflights-pyspark starter if only Pyspark is chosen.
+    elif "PySpark" in tools:
+        # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
@@ -645,7 +649,7 @@ def fetch_template_based_on_tools(template_path, cookiecutter_args: dict[str, An
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
     else:
-        # Use the default template path for non Pyspark, Viz or example options:
+        # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path
     return starter_path
 
@@ -764,11 +768,19 @@ def _validate_config_file_inputs(config: dict[str, str], starter_alias: str | No
 
     input_tools = config.get("tools", "none")
     tools_validation_config = {
-        "regex_validator": r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d+-\d+)|(\d+ - \d+))( )*))$",
+        "regex_validator": r"""^(
+            all|none|                        # A: "all" or "none" or
+            (\ *\d+                          # B: any number of spaces followed by one or more digits
+            (\ *-\ *\d+)?                    # C: zero or one instances of: a hyphen followed by one or more digits, spaces allowed
+            (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
+            \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
+            $""",
         "error_message": f"'{input_tools}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
     }
 
-    if not re.match(tools_validation_config["regex_validator"], input_tools.lower()):
+    if not re.match(
+        tools_validation_config["regex_validator"], input_tools.lower(), flags=re.X
+    ):
         message = tools_validation_config["error_message"]
         click.secho(message, fg="red", err=True)
         sys.exit(1)

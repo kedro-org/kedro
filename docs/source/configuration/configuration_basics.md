@@ -44,7 +44,7 @@ The configuration source folder is [`conf`](../get_started/kedro_concepts.md#con
 ## Configuration environments
 A configuration environment is a way of organising your configuration settings for different stages of your data pipeline. For example, you might have different settings for development, testing, and production environments.
 
-By default, Kedro has a `base` and a `local` environment.
+By default, Kedro projects have a `base` and a `local` environment.
 
 ### Base
 In Kedro, the base configuration environment refers to the default configuration settings that are used as the foundation for all other configuration environments.
@@ -82,7 +82,7 @@ Configuration files will be matched according to file name and type rules. Suppo
 * *Either* of the following is true:
   * filename starts with `catalog`
   * file is located in a subfolder whose name is prefixed with `catalog`
-* *And* file extension is one of the following: yaml`, `yml`, or `json`
+* *And* file extension is one of the following: `yaml`, `yml`, or `json`
 
 ### Configuration patterns
 Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.

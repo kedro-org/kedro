@@ -139,10 +139,11 @@ if __name__ == "__main__":
     main()
 ```
 
-2. **Define a new entry point**: Open `<project_root>/src/setup.py` in a text editor or IDE and add a new line in the definition of the `entry_point` tuple, so that it becomes:
+2. **Define a new entry point**: Open `<project_root>/pyproject.toml` in a text editor or IDE and add a new line in the `[project.scripts]` section, so that it becomes:
 
 ```python
-entry_point = (..., "databricks_run = <package_name>.databricks_run:main")
+[project.scripts]
+databricks_run = "<package_name>.databricks_run:main"
 ```
 
 Remember to replace <package_name> with the correct package name for your project.
@@ -151,7 +152,7 @@ This process adds an entry point to your project which can be used to run it on 
 
 ```{note}
 Because you are no longer using the default entry-point for Kedro, you will not be able to run your project with the options it usually provides. Instead, the `databricks_run` entry point in the above code and in the `databricks-iris` starter contains a simple implementation of two options:
-- `--package_name` (required): the package name (defined in `setup.py`) of your packaged project.
+- `--package_name` (required): the package name (defined in `pyproject.toml`) of your packaged project.
 - `--env`: specifies a [Kedro configuration environment](../../configuration/configuration_basics.md#configuration-environments) to load for your run.
 - `--conf-source`: specifies the location of the `conf/` directory to use with your Kedro project.
 ```
@@ -233,7 +234,10 @@ Configure the job cluster with the following settings:
 
 - In the `name` field enter `kedro_deployment_demo`.
 - Select the radio button for `Single node`.
-- Select the runtime `12.2 LTS` in the `Databricks runtime version` field.
+- Select the runtime `13.3 LTS` in the `Databricks runtime version` field.
+- In the `Advanced options` section, under the `Spark` tab, locate the `Environment variables` field. Add the following line:
+`KEDRO_LOGGING_CONFIG="/dbfs/FileStore/iris-databricks/conf/logging.yml"`
+Here, ensure you specify the correct path to your custom logging configuration. This step is crucial because the default Kedro logging configuration incorporates the rich library, which is incompatible with Databricks jobs. In the `databricks-iris` Kedro starter, the `rich` handler in `logging.yml` is altered to a `console` handler for compatibility. For additional information about logging configurations, refer to the [Kedro Logging Manual](https://docs.kedro.org/en/stable/logging/logging.html).
 - Leave all other settings with their default values in place.
 
 The final configuration for the job cluster should look the same as the following:

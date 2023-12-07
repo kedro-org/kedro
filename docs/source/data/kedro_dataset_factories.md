@@ -1,5 +1,5 @@
 # Kedro dataset factories
-You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro 0.18.12.
+You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`.
 
 The syntax allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 

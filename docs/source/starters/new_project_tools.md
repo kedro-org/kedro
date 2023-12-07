@@ -97,7 +97,7 @@ Specifying your tools selection is optional, omitting them results in the defaul
 
 Tools in Kedro serve as modular functionalities that enhance a foundational project template. They provide a means to tailor your Kedro project to meet your unique requirements. When creating a new project, you may select one or more of the available tools, or none at all.
 
-The available tools include: linting, testing, custom logging, documentation, data structure, PySpark, and Kedro-Viz.
+The available tools include: [linting](#linting), [testing](#testing), [custom logging](#custom-logging), [documentation](#documentation), [data structure](#data-structure), [PySpark](#pyspark), and [Kedro-Viz](#kedro-viz).
 
 ### Linting
 

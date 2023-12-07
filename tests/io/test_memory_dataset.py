@@ -5,7 +5,10 @@ import pandas as pd
 import pytest
 
 from kedro.io import DatasetError, MemoryDataset
-from kedro.io.memory_dataset import _copy_with_mode, _infer_copy_mode
+from kedro.io.memory_dataset import (
+    _copy_with_mode,
+    _infer_copy_mode,
+)
 
 
 def _update_data(data, idx, jdx, value):
@@ -24,26 +27,6 @@ def _check_equals(data1, data2):
     if isinstance(data1, np.ndarray) and isinstance(data2, np.ndarray):
         return np.array_equal(data1, data2)
     return False  # pragma: no cover
-
-
-@pytest.fixture
-def dummy_numpy_array():
-    return np.array([[1, 4, 5], [2, 5, 6]])
-
-
-@pytest.fixture
-def dummy_dataframe():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-
-@pytest.fixture(params=["dummy_dataframe", "dummy_numpy_array"])
-def input_data(request):
-    return request.getfixturevalue(request.param)
-
-
-@pytest.fixture
-def new_data():
-    return pd.DataFrame({"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]})
 
 
 @pytest.fixture

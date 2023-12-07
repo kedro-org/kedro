@@ -173,7 +173,6 @@ def setup_template_tools(selected_tools_list: str, requirements_file_path: str, 
     if ("PySpark" in selected_tools_list or "Kedro Viz" in selected_tools_list) and example_pipeline != "True":
         _remove_pyspark_viz_starter_files("Kedro Viz" in selected_tools_list, python_package_name)
 
-
 def sort_requirements(requirements_file_path: Path) -> None:
     """Sort the requirements.txt file alphabetically and write it back to the file.
 

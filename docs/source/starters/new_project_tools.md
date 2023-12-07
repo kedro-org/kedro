@@ -29,9 +29,25 @@ kedro new --name=spaceflights
 You are then asked to select which tools to include. Choose from the list using comma separated values `(1,2,4)`, ranges of values `(1-3,5-7)`, a combination of the two `(1,3-5,7)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`. Further information about each of the tools is described below in [Kedro tools](#kedro-tools).
 
 
-| ![](../meta/images/kedro-new-tools-prompt.png)|
-|:--:|
-| *Prompt for tools selection* |
+```bash
+Project Tools
+=============
+These optional tools can help you apply software engineering best practices.
+To skip this step in future use --tools
+To find out more: https://docs.kedro.org/en/stable/starters/new_project_tools.html
+
+Tools
+1) Lint: Basic linting with Black and Ruff
+2) Test: Basic testing with pytest
+3) Log: Additional, environment-specific logging options
+4) Docs: A Sphinx documentation setup
+5) Data Folder: A folder structure for data management
+6) PySpark: Configuration for working with PySpark
+7) Kedro-Viz: Kedro's native visualisation tool
+
+Which tools would you like to include in your project? [1-7/1,3/all/none]:
+ [none]:
+```
 
 
 You may also specify your tools selection directly from the command line by using the flag `--tools`:
@@ -44,7 +60,40 @@ To specify your desired tools you must provide them by name as a comma separated
 
 A list of available tools can also be accessed by running `kedro new --help`
 
-![](../meta/images/kedro-new-help.png)
+```bash
+...
+-t, --tools TEXT    Select which tools you'd like to include. By default,
+                      none are included.
+                      
+                      Tools
+                      
+                      1) Linting: Provides a basic linting setup with Black
+                      and Ruff
+                      
+                      2) Testing: Provides basic testing setup with pytest
+                      
+                      3) Custom Logging: Provides more logging options
+                      
+                      4) Documentation: Basic documentation setup with Sphinx
+                      
+                      5) Data Structure: Provides a directory structure for
+                      storing data
+                      
+                      6) PySpark: Provides set up configuration for working
+                      with PySpark
+                      
+                      7) Kedro Viz: Provides Kedro's native visualisation tool
+                      
+                      Example usage:
+                      
+                      kedro new --tools=lint,test,log,docs,data,pyspark,viz
+                      (or any subset of these options)
+                      
+                      kedro new --tools=all
+                      
+                      kedro new --tools=none
+...
+```
 
 
 ### Example code

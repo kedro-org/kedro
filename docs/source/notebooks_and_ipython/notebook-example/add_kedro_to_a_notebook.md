@@ -284,7 +284,7 @@ To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follo
 ```python
 from kedro.config import OmegaConfigLoader
 
-conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
+conf_loader = OmegaConfigLoader(conf_source=".")
 ```
 
 ```python
@@ -348,7 +348,7 @@ To load `catalog.yml` the code is as follows:
 from kedro.config import OmegaConfigLoader
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
+conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 
 # Create the DataCatalog instance from the configuration
@@ -372,7 +372,7 @@ Code in a Kedro project runs in one or more pipelines, where a pipeline is a ser
 from kedro.config import OmegaConfigLoader
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
+conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 conf_params = conf_loader["parameters"]
 
@@ -546,7 +546,7 @@ And that's it. The notebook code has been refactored into a series of functions.
 from kedro.config import OmegaConfigLoader
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
+conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 conf_params = conf_loader["parameters"]
 

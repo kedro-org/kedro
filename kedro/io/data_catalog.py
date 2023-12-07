@@ -15,7 +15,6 @@ from typing import Any, Dict
 
 from parse import parse
 
-from kedro import KedroDeprecationWarning
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -302,20 +301,6 @@ class DataCatalog:
                 dataset_patterns[ds_name] = ds_config
 
             else:
-                # Check if 'layer' attribute is defined at the top level
-                if "layer" in ds_config:
-                    import warnings
-
-                    warnings.warn(
-                        "Defining the 'layer' attribute at the top level is deprecated "
-                        "and will be removed in Kedro 0.19.0. Please move 'layer' inside the 'metadata' -> "
-                        "'kedro-viz' attributes. See https://docs.kedro.org/en/latest/visualisation/kedro"
-                        "-viz_visualisation.html#visualise-layers for more information.",
-                        KedroDeprecationWarning,
-                    )
-                ds_layer = ds_config.pop("layer", None)
-                if ds_layer is not None:
-                    layers[ds_layer].add(ds_name)
                 datasets[ds_name] = AbstractDataset.from_config(
                     ds_name, ds_config, load_versions.get(ds_name), save_version
                 )

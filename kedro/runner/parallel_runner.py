@@ -113,6 +113,9 @@ class ParallelRunner(AbstractRunner):
                 cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets to SharedMemoryDataset
+                for `ParallelRunner`.
 
         Raises:
             ValueError: bad parameters passed

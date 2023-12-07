@@ -31,6 +31,9 @@ class SequentialRunner(AbstractRunner):
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets to MemoryDataset
+                for `SequentialRunner`.
 
         """
         default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}

@@ -41,6 +41,8 @@ class AbstractRunner(ABC):
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets on the Runner instances.
 
         """
         self._is_async = is_async

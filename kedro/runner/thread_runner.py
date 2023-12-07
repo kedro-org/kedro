@@ -40,6 +40,9 @@ class ThreadRunner(AbstractRunner):
             is_async: If True, set to False, because `ThreadRunner`
                 doesn't support loading and saving the node inputs and
                 outputs asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets to MemoryDataset
+                for `ThreadRunner`.
 
         Raises:
             ValueError: bad parameters passed

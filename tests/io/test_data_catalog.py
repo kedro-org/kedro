@@ -882,9 +882,9 @@ class TestDataCatalogDatasetFactories:
         )
 
     def test_runner_default_overwrites_user_default(
-        selfself, config_with_dataset_factories_only_patterns
+        self, config_with_dataset_factories_only_patterns
     ):
-        """Check that the sorted order of the patterns is correct according to parsing rules when a default dataset is added through extra patterns (this would happen via the runner)."""
+        """Check that the runner default overwrites the user default."""
         catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
         assert catalog._dataset_patterns["{default}"] == {
             "filepath": "data/01_raw/{default}.csv",
@@ -904,6 +904,41 @@ class TestDataCatalogDatasetFactories:
         assert catalog_with_runner_default._dataset_patterns["{default}"] == {
             "type": "MemoryDataset"
         }
+
+    def test_user_default_overwrites_runner_default_alphabetically(self):
+        """Check that the runner default overwrites the user default if earlier in alphabet."""
+        catalog_config = {
+            "catalog": {
+                "{dataset}s": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": "data/01_raw/{dataset}s.csv",
+                },
+                "{a_default}": {
+                    "type": "pandas.ExcelDataset",
+                    "filepath": "data/01_raw/{a_default}.xlsx",
+                },
+            },
+        }
+        catalog = DataCatalog.from_config(catalog_config)
+        extra_dataset_patterns = {
+            "{default}": {"type": "MemoryDataset"},
+            "{another}#csv": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{another}.csv",
+            },
+        }
+        catalog_with_runner_default = catalog.shallow_copy(
+            extra_dataset_patterns=extra_dataset_patterns
+        )
+        sorted_keys_expected = [
+            "{dataset}s",
+            "{a_default}",
+            "{default}",
+        ]
+        assert (
+            list(catalog_with_runner_default._dataset_patterns.keys())
+            == sorted_keys_expected
+        )
 
     def test_default_dataset(self, config_with_dataset_factories_with_default, caplog):
         """Check that default dataset is used when no other pattern matches"""

@@ -2,7 +2,7 @@
 
 There are several ways to customise your new project with the tools and example code.
 
-## `kedro new`
+## Specify tools configuration using `kedro new`
 
 Navigate to the directory in which you would like to create your new Kedro project, and run the following command:
 
@@ -61,7 +61,7 @@ You can add the example pipeline to your new project as follows:
 kedro new --example=y
 ```
 
-## `kedro new --config=`
+## Specify tools configuration using `kedro new --config=`
 
 As an alternative to the interactive project creation workflow, you can also supply values to `kedro new` by providing a YML configuration file to your `kedro new` command. Consider the following file:
 

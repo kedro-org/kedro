@@ -142,7 +142,7 @@ def create_run_config_file(context):
 
 
 @given("I have prepared a config file")
-# will you it with starter, so tools and example_options removed
+# We will use that config with starters, so tools and example_options removed
 def create_config_file(context):
     """Behave step to create a temporary config file
     (given the existing temp directory) and store it in the context.

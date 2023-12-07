@@ -48,7 +48,12 @@ A list of available tools can also be accessed by running `kedro new --help`
 
 
 ### Example code
-In the final step you are asked whether you want to populate the project with an example pipeline. Further information about this pipeline is below in [Example pipeline](#example-pipeline).
+In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. Here’s a brief overview:
+
+* [Default Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) (`spaceflights-pandas`): For combinations of Linting, Testing, Custom Logging, Documentation, and Data Structure, without PySpark and Kedro Viz.
+* [PySpark Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark) (`spaceflights-pyspark`): Selected with PySpark, excluding Kedro Viz.
+* [Kedro Viz Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz) (`spaceflights-pandas-viz`): For choices including Kedro Viz, without PySpark.
+* [Full Feature Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz) (`spaceflights-pyspark-viz`): When all tools are selected, including PySpark and Kedro Viz.
 
 You can add the example pipeline to your new project as follows:
 

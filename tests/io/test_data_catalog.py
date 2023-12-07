@@ -908,15 +908,13 @@ class TestDataCatalogDatasetFactories:
     def test_user_default_overwrites_runner_default_alphabetically(self):
         """Check that the runner default overwrites the user default if earlier in alphabet."""
         catalog_config = {
-            "catalog": {
-                "{dataset}s": {
-                    "type": "pandas.CSVDataset",
-                    "filepath": "data/01_raw/{dataset}s.csv",
-                },
-                "{a_default}": {
-                    "type": "pandas.ExcelDataset",
-                    "filepath": "data/01_raw/{a_default}.xlsx",
-                },
+            "{dataset}s": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/{dataset}s.csv",
+            },
+            "{a_default}": {
+                "type": "pandas.ExcelDataset",
+                "filepath": "data/01_raw/{a_default}.xlsx",
             },
         }
         catalog = DataCatalog.from_config(catalog_config)
@@ -931,6 +929,7 @@ class TestDataCatalogDatasetFactories:
             extra_dataset_patterns=extra_dataset_patterns
         )
         sorted_keys_expected = [
+            "{another}#csv",
             "{dataset}s",
             "{a_default}",
             "{default}",

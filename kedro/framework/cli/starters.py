@@ -110,8 +110,11 @@ _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 TOOLS_SHORTNAME_TO_NUMBER = {
     "lint": "1",
     "test": "2",
+    "tests": "2",
     "log": "3",
+    "logs": "3",
     "docs": "4",
+    "doc": "4",
     "data": "5",
     "pyspark": "6",
     "viz": "7",
@@ -755,11 +758,19 @@ def _validate_config_file_inputs(config: dict[str, str]):
 
     input_tools = config.get("tools", "none")
     tools_validation_config = {
-        "regex_validator": r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d+-\d+)|(\d+ - \d+))( )*))$",
+        "regex_validator": r"""^(
+            all|none|                        # A: "all" or "none" or
+            (\ *\d+                          # B: any number of spaces followed by one or more digits
+            (\ *-\ *\d+)?                    # C: zero or one instances of: a hyphen followed by one or more digits, spaces allowed
+            (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
+            \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
+            $""",
         "error_message": f"'{input_tools}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
     }
 
-    if not re.match(tools_validation_config["regex_validator"], input_tools.lower()):
+    if not re.match(
+        tools_validation_config["regex_validator"], input_tools.lower(), flags=re.X
+    ):
         message = tools_validation_config["error_message"]
         click.secho(message, fg="red", err=True)
         sys.exit(1)

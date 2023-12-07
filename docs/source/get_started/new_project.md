@@ -13,7 +13,7 @@ Once you've created a project:
 
 * You need to **navigate to its project folder** and **install its dependencies**: `pip install -r src/requirements.txt`
 * **To run the project**: `kedro run`
-* **To visualise the project**: `kedro viz`
+* **To visualise the project**: `kedro viz run`
 
 ## Create a new empty project
 

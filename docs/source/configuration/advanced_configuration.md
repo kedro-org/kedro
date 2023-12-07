@@ -349,11 +349,11 @@ config_loader = OmegaConfigLoader(conf_source=".")
 For the full list of features, please refer to [configuration_basics](./configuration_basics.md) and [advanced_configuration](./advanced_configuration.md)
 
 ### How to use Custom Resolvers with `OmegaConfigLoader`
-You can register custom resolvers to use non-primitive types for parmaeters.
+You can register custom resolvers to use non-primitive types for parameters.
 
 ```yaml
 # parameters.yml
-polar_float64: "${polars: Float64}"
+polars_float64: "${polars: Float64}"
 today: "${today:}"
 ```
 
@@ -369,5 +369,5 @@ custom_resolvers = {"polars": lambda x: getattr(pl, x),
 # Register custom resolvers
 config_loader = OmegaConfigLoader(conf_source=".", custom_resolvers=custom_resolvers)
 >>> print(config_loader["parameters"])
-{'polar_float64': Float64, 'today': datetime.date(2023, 11, 23)}
+{'polars_float64': Float64, 'today': datetime.date(2023, 11, 23)}
 ```

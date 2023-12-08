@@ -29,7 +29,7 @@ kedro new --name=spaceflights
 You are then asked to select which tools to include. Choose from the list using comma separated values `(1,2,4)`, ranges of values `(1-3,5-7)`, a combination of the two `(1,3-5,7)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`. Further information about each of the tools is described below in [Kedro tools](#kedro-tools).
 
 
-```bash
+```
 Project Tools
 =============
 These optional tools can help you apply software engineering best practices.
@@ -60,7 +60,7 @@ To specify your desired tools you must provide them by name as a comma separated
 
 A list of available tools can also be accessed by running `kedro new --help`
 
-```bash
+```
 ...
 -t, --tools TEXT    Select which tools you'd like to include. By default,
                       none are included.

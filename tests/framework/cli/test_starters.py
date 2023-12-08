@@ -81,7 +81,7 @@ def _get_expected_files(tools: str, example_pipeline: str):
         "3": 1,  # If Logging is selected, we add logging.py
         "4": 2,  # If Documentation is selected, we add conf.py and index.rst
         "5": 8,  # If Data Structure is selected, we add 8 .gitkeep files
-        "6": 2,  # If Pyspark is selected, we add spark.yml and hooks.py
+        "6": 2,  # If PySpark is selected, we add spark.yml and hooks.py
         "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each tool
     tools_list = _parse_tools_input(tools)

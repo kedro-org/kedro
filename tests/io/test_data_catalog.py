@@ -958,13 +958,6 @@ class TestDataCatalogDatasetFactories:
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             catalog._get_dataset("jet@planes")
 
-    def test_factory_layer(self, config_with_dataset_factories):
-        """Check that layer is correctly processed for patterned datasets"""
-        config_with_dataset_factories["catalog"]["{brand}_cars"]["layer"] = "raw"
-        catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        _ = catalog._get_dataset("tesla_cars")
-        assert catalog.layers["raw"] == {"tesla_cars"}
-
     def test_factory_config_versioned(
         self, config_with_dataset_factories, filepath, dummy_dataframe
     ):

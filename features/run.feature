@@ -22,7 +22,7 @@ Feature: Run Project
     And the logs should show that "report_accuracy" was run
 
   Scenario: Run default python entry point without example code
-    Given I have prepared a config file
+    Given I have prepared a config file without starter
     And I have run a non-interactive kedro new without starter
     When I execute the kedro command "run"
     Then I should get an error exit code

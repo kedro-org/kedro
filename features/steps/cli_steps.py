@@ -142,7 +142,27 @@ def create_run_config_file(context):
 
 
 @given("I have prepared a config file")
+# We will use that config with starters, so tools and example_options removed
 def create_config_file(context):
+    """Behave step to create a temporary config file
+    (given the existing temp directory) and store it in the context.
+    """
+    context.config_file = context.temp_dir / "config.yml"
+    context.project_name = "project-dummy"
+    context.root_project_dir = context.temp_dir / context.project_name
+    context.package_name = context.project_name.replace("-", "_")
+    config = {
+        "project_name": context.project_name,
+        "repo_name": context.project_name,
+        "output_dir": str(context.temp_dir),
+        "python_package": context.package_name,
+    }
+    with context.config_file.open("w") as config_file:
+        yaml.dump(config, config_file, default_flow_style=False)
+
+
+@given("I have prepared a config file without starter")
+def create_config_file_without_starter(context):
     """Behave step to create a temporary config file
     (given the existing temp directory) and store it in the context.
     """

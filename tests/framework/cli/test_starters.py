@@ -1142,6 +1142,33 @@ class TestToolsAndExampleFromConfigFile:
             in result.output
         )
 
+    def test_invalid_tools_with_starter(self, fake_kedro_cli):
+        """Test project created from config with tools and example used with --starter"""
+        config = {
+            "tools": "all",
+            "project_name": "My Project",
+            "example_pipeline": "no",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "-v",
+                "--config",
+                "config.yml",
+                "--starter=spaceflights-pandas-viz",
+            ],
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file.\n"
+            in result.output
+        )
+
     @pytest.mark.parametrize(
         "input,last_invalid",
         [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("99", "99")],

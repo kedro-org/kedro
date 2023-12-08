@@ -254,6 +254,7 @@ def new(  # noqa: PLR0913
         selected_tools=selected_tools,
         project_name=project_name,
         example_pipeline=example_pipeline,
+        starter_alias=starter_alias,
     )
 
     cookiecutter_args = _make_cookiecutter_args(
@@ -410,6 +411,7 @@ def _get_extra_context(  # noqa: PLR0913
     selected_tools: str | None,
     project_name: str | None,
     example_pipeline: str | None,
+    starter_alias: str | None,
 ) -> dict[str, str]:
     """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
     on CLI flags, user prompts, or a configuration file.
@@ -432,12 +434,12 @@ def _get_extra_context(  # noqa: PLR0913
         extra_context = {}
         if config_path:
             extra_context = _fetch_config_from_file(config_path)
-            _validate_config_file_inputs(extra_context)
+            _validate_config_file_inputs(extra_context, starter_alias)
 
     elif config_path:
         extra_context = _fetch_config_from_file(config_path)
         _validate_config_file_against_prompts(extra_context, prompts_required)
-        _validate_config_file_inputs(extra_context)
+        _validate_config_file_inputs(extra_context, starter_alias)
     else:
         extra_context = _fetch_config_from_user_prompts(
             prompts_required, cookiecutter_context
@@ -738,17 +740,24 @@ def _validate_config_file_against_prompts(
         )
 
 
-def _validate_config_file_inputs(config: dict[str, str]):
+def _validate_config_file_inputs(config: dict[str, str], starter_alias: str | None):
     """Checks that variables provided through the config file are of the expected format. This
     validate the config provided by `kedro new --config` in a similar way to `prompts.yml`
     for starters.
+    Also validates that "tools" or "example_pipeline" options cannot be used in config when any starter option is selected.
 
     Args:
         config: The config as a dictionary
+        starter_alias: Starter alias if it was provided from CLI, otherwise None
 
     Raises:
         SystemExit: If the provided variables are not properly formatted.
     """
+    if starter_alias and ("tools" in config or "example_pipeline" in config):
+        raise KedroCliError(
+            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file."
+        )
+
     project_name_validation_config = {
         "regex_validator": r"^[\w -]{2,}$",
         "error_message": "'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",

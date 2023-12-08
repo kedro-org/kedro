@@ -10,7 +10,6 @@ import copy
 import difflib
 import logging
 import re
-from collections import defaultdict
 from typing import Any, Dict
 
 from parse import parse
@@ -290,7 +289,6 @@ class DataCatalog:
         credentials = copy.deepcopy(credentials) or {}
         save_version = save_version or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
-        layers: dict[str, set[str]] = defaultdict(set)
 
         for ds_name, ds_config in catalog.items():
             ds_config = _resolve_credentials(  # noqa: PLW2901
@@ -304,7 +302,6 @@ class DataCatalog:
                 datasets[ds_name] = AbstractDataset.from_config(
                     ds_name, ds_config, load_versions.get(ds_name), save_version
                 )
-        dataset_layers = layers or None
         sorted_patterns = cls._sort_patterns(dataset_patterns)
         missing_keys = [
             key
@@ -319,7 +316,6 @@ class DataCatalog:
 
         return cls(
             datasets=datasets,
-            layers=dataset_layers,
             dataset_patterns=sorted_patterns,
             load_versions=load_versions,
             save_version=save_version,

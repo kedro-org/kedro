@@ -428,10 +428,6 @@ class TestDataCatalog:
         with pytest.raises(DatasetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
 
-    def test_layers(self, data_catalog, data_catalog_from_config):
-        """Test dataset layers are correctly parsed"""
-        assert data_catalog.layers is None
-
 
 class TestDataCatalogFromConfig:
     def test_from_sane_config(self, data_catalog_from_config, dummy_dataframe):

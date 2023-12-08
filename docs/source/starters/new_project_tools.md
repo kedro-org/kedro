@@ -128,6 +128,9 @@ As an alternative to the interactive project creation workflow, you can also sup
 
 "tools":
     "2-6"
+
+"example_pipeline":
+    "y"
 ```
 
 To create a new project using the file to supply details to `kedro new`, run the following command:

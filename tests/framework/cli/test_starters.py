@@ -81,7 +81,7 @@ def _get_expected_files(tools: str, example_pipeline: str):
         "3": 1,  # If Logging is selected, we add logging.py
         "4": 2,  # If Documentation is selected, we add conf.py and index.rst
         "5": 8,  # If Data Structure is selected, we add 8 .gitkeep files
-        "6": 2,  # If Pyspark is selected, we add spark.yml and hooks.py
+        "6": 2,  # If PySpark is selected, we add spark.yml and hooks.py
         "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each tool
     tools_list = _parse_tools_input(tools)
@@ -1140,6 +1140,33 @@ class TestToolsAndExampleFromConfigFile:
         assert "is an invalid value for project tools." in result.output
         assert (
             "Please select valid options for tools using comma-separated values, ranges, or 'all/none'.\n"
+            in result.output
+        )
+
+    def test_invalid_tools_with_starter(self, fake_kedro_cli):
+        """Test project created from config with tools and example used with --starter"""
+        config = {
+            "tools": "all",
+            "project_name": "My Project",
+            "example_pipeline": "no",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "-v",
+                "--config",
+                "config.yml",
+                "--starter=spaceflights-pandas-viz",
+            ],
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file.\n"
             in result.output
         )
 

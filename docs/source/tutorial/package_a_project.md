@@ -4,7 +4,11 @@ This section explains how to build project documentation, and how to bundle a Ke
 
 Kedro also has an advanced feature which supports packaging on a pipeline level allowing you share and reuse pipelines across projects! To read more about this please look at the [section on micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 
-## Add documentation to a Kedro project
+## Add documentation to a Kedro project if you have not selected `docs` tool
+
+```{note}
+These steps are for projects without the `docs` tool option. You can verify this by looking to see if you don't have a `docs` directory in your project.
+```
 
 There are several documentation frameworks for Python projects. This section describes how to use [Sphinx](https://www.sphinx-doc.org).
 

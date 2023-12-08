@@ -2,8 +2,6 @@
 
 A Kedro starter contains code in the form of a [Cookiecutter](https://cookiecutter.readthedocs.io/) template for a Kedro project. Using a starter is like using a pre-defined layout when creating a presentation or document.
 
-You can create your own starters for reuse within a project or team, as described in the [how to create a Kedro starter](../starters/create_a_starter.md) documentation.
-
 ## How to use a starter
 
 To create a Kedro project using a starter, apply the `--starter` flag to `kedro new`. For example:
@@ -80,3 +78,6 @@ kedro new --config=my_kedro_project.yml --starter=spaceflights-pandas
 ```
 
 This option is useful when the starter requires more configuration than the default mode requires.
+
+## Create a starter
+You can build your own starters for reuse within a project or team, as described in the [how to create a Kedro starter](../starters/create_a_starter.md) documentation.

@@ -184,8 +184,7 @@ def dataset(filepath):
 def multi_catalog():
     csv = CSVDataset(filepath="abc.csv")
     parq = ParquetDataset(filepath="xyz.parq")
-    layers = {"raw": {"abc.csv"}, "model": {"xyz.parq"}}
-    return DataCatalog({"abc": csv, "xyz": parq}, layers=layers)
+    return DataCatalog({"abc": csv, "xyz": parq})
 
 
 @pytest.fixture

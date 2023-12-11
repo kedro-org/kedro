@@ -3,6 +3,7 @@ The documentation on [configuration](./configuration_basics.md) describes how to
 
 By default, Kedro is set up to use the [OmegaConfigLoader](/kedro.config.OmegaConfigLoader) class.
 
+## Advanced configuration for Kedro projects
 This page also contains a set of guidance for advanced configuration requirements of standard Kedro projects:
 
 * [How to use a custom config loader](#how-to-use-a-custom-configuration-loader)
@@ -18,7 +19,7 @@ This page also contains a set of guidance for advanced configuration requirement
 * [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
 
 
-## How to use a custom configuration loader
+### How to use a custom configuration loader
 You can implement a custom configuration loader by extending the [`AbstractConfigLoader`](/kedro.config.AbstractConfigLoader) class:
 
 ```python
@@ -74,6 +75,10 @@ CONFIG_LOADER_ARGS = {
 
 ### How to bypass the configuration loading rules
 You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters and credentials) as well as additional configuration.
+
+For example, you can [use hooks to load external credentials](../hooks/common_use_cases.md#use-hooks-to-load-external-credentials).
+
+Alternatively, if you are using config loader as a standalone component, you can override configuration as follows:
 
 ```{code-block} python
 :lineno-start: 10
@@ -310,3 +315,59 @@ CONFIG_LOADER_ARGS = {
 
 If no merge strategy is defined, the default destructive strategy will be applied. Note that this merge strategy setting only applies to configuration files in **different** environments.
 When files are part of the same environment, they are always merged in a soft way. An error is thrown when files in the same environment contain the same top-level keys.
+
+
+## Advanced configuration without a full Kedro project
+ In some cases, you may only want to use the `OmegaConfigLoader` without a Kedro project. By default, a Kedro project has a `base` and `local` environment.
+However, when you use the `OmegaConfigLoader` directly, it assumes *no* environment. You may find it useful to [add Kedro to your existing notebooks](../notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md).
+
+### Read configuration
+The config loader can work without a Kedro project structure.
+```bash
+tree .
+.
+└── parameters.yml
+```
+
+```yaml
+# parameters.yml
+learning_rate: 0.01
+train_test_ratio: 0.7
+```
+
+```python
+from kedro.config import OmegaConfigLoader
+config_loader = OmegaConfigLoader(conf_source=".")
+
+# Optionally, you can also use environments
+# config_loader = OmegaConfigLoader(conf_source=".", base_env="base", default_run_env="local")
+
+>>> config_loader["parameters"]
+{'learning_rate': 0.01, 'train_test_ratio': 0.7}
+```
+
+For the full list of features, please refer to [configuration_basics](./configuration_basics.md) and [advanced_configuration](./advanced_configuration.md)
+
+### How to use Custom Resolvers with `OmegaConfigLoader`
+You can register custom resolvers to use non-primitive types for parameters.
+
+```yaml
+# parameters.yml
+polars_float64: "${polars: Float64}"
+today: "${today:}"
+```
+
+```python
+import polars as pl
+from datetime import date
+
+from kedro.config import OmegaConfigLoader
+
+custom_resolvers = {"polars": lambda x: getattr(pl, x),
+                    "today": lambda: date.today()}
+
+# Register custom resolvers
+config_loader = OmegaConfigLoader(conf_source=".", custom_resolvers=custom_resolvers)
+>>> print(config_loader["parameters"])
+{'polars_float64': Float64, 'today': datetime.date(2023, 11, 23)}
+```

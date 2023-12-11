@@ -14,7 +14,7 @@ tools:
   text: |
     These optional tools can help you apply software engineering best practices.
     To skip this step in future use --tools
-    To find out more: kedro.org/ # TODO - add docs link in #3048
+    To find out more: https://docs.kedro.org/en/stable/starters/new_project_tools.html
 
     Tools
     1) Lint: Basic linting with Black and Ruff
@@ -35,7 +35,7 @@ example_pipeline:
   text: |
     Select whether you would like an example spaceflights pipeline included in your project.
     To skip this step in the future use --example=y/n
-    To find out more: kedro.org/ # TODO - add docs link in #3048
+    To find out more: https://docs.kedro.org/en/stable/starters/new_project_tools.html
 
     Would you like to include an example pipeline? [y/N]:
   regex_validator: "(?i)^(y|yes|n|no)$"

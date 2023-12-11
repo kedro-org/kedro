@@ -4,7 +4,7 @@ import json
 import shutil
 import textwrap
 from pathlib import Path
-from time import time
+from time import sleep, time
 
 import behave
 import requests
@@ -395,6 +395,8 @@ def wait_for_notebook_to_run(context, timeout):
     while time() < timeout_start + timeout:
         stdout = context.result.stdout.readline()
         if "http://127.0.0.1:" in stdout:
+            # Take a breath, and declare success
+            sleep(1)
             break
 
     if time() >= timeout_start + timeout:

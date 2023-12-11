@@ -17,6 +17,7 @@
 * Removed `pip-tools` as a dependency.
 * Accepted path-like filepaths more broadly for datasets.
 * Removed support for defining the `layer` attribute at top-level within DataCatalog.
+* Bumped `kedro-datasets` to latest `2.0.0`.
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.

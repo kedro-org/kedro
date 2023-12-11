@@ -47,7 +47,6 @@ def sane_config(filepath):
                 "type": "pandas.CSVDataset",
                 "filepath": "s3://test_bucket/test_file.csv",
                 "credentials": "s3_credentials",
-                "layer": "raw",
             },
         },
         "credentials": {
@@ -185,8 +184,7 @@ def dataset(filepath):
 def multi_catalog():
     csv = CSVDataset(filepath="abc.csv")
     parq = ParquetDataset(filepath="xyz.parq")
-    layers = {"raw": {"abc.csv"}, "model": {"xyz.parq"}}
-    return DataCatalog({"abc": csv, "xyz": parq}, layers=layers)
+    return DataCatalog({"abc": csv, "xyz": parq})
 
 
 @pytest.fixture
@@ -428,12 +426,6 @@ class TestDataCatalog:
         does not have `confirm` method"""
         with pytest.raises(DatasetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
-
-    def test_layers(self, data_catalog, data_catalog_from_config):
-        """Test dataset layers are correctly parsed"""
-        assert data_catalog.layers is None
-        # only one dataset is assigned a layer in the config
-        assert data_catalog_from_config.layers == {"raw": {"cars"}}
 
 
 class TestDataCatalogFromConfig:
@@ -964,13 +956,6 @@ class TestDataCatalogDatasetFactories:
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             catalog._get_dataset("jet@planes")
-
-    def test_factory_layer(self, config_with_dataset_factories):
-        """Check that layer is correctly processed for patterned datasets"""
-        config_with_dataset_factories["catalog"]["{brand}_cars"]["layer"] = "raw"
-        catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        _ = catalog._get_dataset("tesla_cars")
-        assert catalog.layers["raw"] == {"tesla_cars"}
 
     def test_factory_config_versioned(
         self, config_with_dataset_factories, filepath, dummy_dataframe

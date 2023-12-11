@@ -2,10 +2,10 @@
 
 ## Major features and improvements
 * Dropped Python 3.7 support.
-* Introduced project tools and example to the `kedro new` CLI flow.
+* [Introduced project tools and example to the `kedro new` CLI flow](docs/source/get_started/new_project.md#project-tools). 
 * The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 * Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
-* Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`.
+* [Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`](docs/source/configuration/advanced_configuration.md#how-to-change-the-merge-strategy-used-by-omegaconfigloader).
 * Modified the mechanism of importing datasets, raise more explicit error when dependencies are missing.
 * Added validation for configuration file used to override run commands via the CLI.
 * Moved the default environment `base` and `local` from config loader to `_ProjectSettings`. This enables the use of config loader as a standalone class without affecting existing Kedro Framework users.
@@ -57,13 +57,29 @@
 * The default project template now has one `pyproject.toml` at the root of the project (containing both the packaging metadata and the Kedro build config).
 * The `requirements.txt` in the default project template moved to the root of the project as well (hence dependencies are now installed with `pip install -r requirements.txt` instead of `pip install -r src/requirements.txt`).
 * The `spaceflights` starter has been renamed to `spaceflights-pandas`.
+* The starters `pandas-iris`, `pyspark-iris`, `pyspark`, and `standalone-datacatalog` have been archived.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 * Removed the custom Kedro syntax for `--params`, use the OmegaConf syntax instead by replacing `:` with `=`.
 * Removed the `create_default_data_set()` method in the `Runner`. To overwrite the default dataset creation, use the new `Runner` class argument `extra_dataset_patterns` instead.
+* Removed `project_version` in `pyproject.toml` please use `kedro_init_version` instead.
 
 ### Datasets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
+* Using the `layer` attribute at the top level is removed. Please move `layer` inside the `metadata` -> `kedro-viz` attributes.
+* Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" and error classes starting with "DataSet" are removed. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+| Type                        | Removed Alias               | Location                       |
+| --------------------------- | --------------------------- | ------------------------------ |
+| `AbstractDataset`           | `AbstractDataSet`           | `kedro.io.core`                |
+| `AbstractVersionedDataset`  | `AbstractVersionedDataSet`  | `kedro.io.core`                |
+| `CachedDataset`             | `CachedDataSet`             | `kedro.io.cached_dataset`      |
+| `LambdaDataset`             | `LambdaDataSet`             | `kedro.io.lambda_dataset`      |
+| `MemoryDataset`             | `MemoryDataSet`             | `kedro.io.memory_dataset`      |
+| `DatasetError`              | `DataSetError`              | `kedro.io.core`                |
+| `DatasetAlreadyExistsError` | `DataSetAlreadyExistsError` | `kedro.io.core`                |
+| `DatasetNotFoundError`      | `DataSetNotFoundError`      | `kedro.io.core`                |
+* All other dataset classes are removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
@@ -74,6 +90,7 @@ We are grateful to every community member who made a PR to Kedro that's found it
 * [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) 🎃
 * [Mustapha Abdullahi](https://github.com/mustious)
 * [Adam Kells](https://github.com/adamkells)
+* [Ajay Gonepuri](https://github.com/HKABIG)
 
 # Release 0.18.14
 
@@ -254,8 +271,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [tomasvanpottelbergh](https://github.com/tomasvanpottelbergh)
 * [https://github.com/debugger24](https://github.com/debugger24)
-
-## Upcoming deprecations for Kedro 0.19.0
 
 # Release 0.18.8
 
@@ -497,9 +512,6 @@ We are grateful to the following for submitting PRs that contributed to this rel
 * `config_loader` is available as a public read-only attribute of `KedroContext`.
 * Made `hook_manager` argument optional for `runner.run`.
 * `kedro docs` now opens an online version of the Kedro documentation instead of a locally built version.
-
-## Upcoming deprecations for Kedro 0.19.0
-* `kedro docs` will be removed in 0.19.0.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.

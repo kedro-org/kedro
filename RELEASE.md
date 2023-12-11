@@ -25,6 +25,7 @@
 * Remove deprecated `project_version` from `ProjectMetadata`.
 * Removed `package_name` argument from `KedroSession.create`.
 * Removed the `create_default_data_set()` method in the `Runner` in favour of using dataset factories to create default dataset instances.
+* Removed `layer` argument from the DataCatalog.
 
 ### Datasets
 * Removed `kedro.extras.datasets` and tests.

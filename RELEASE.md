@@ -16,6 +16,7 @@
 * Added validation to node tags to be consistent with node names.
 * Removed `pip-tools` as a dependency.
 * Accepted path-like filepaths more broadly for datasets.
+* Removed support for defining the `layer` attribute at top-level within DataCatalog.
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
@@ -24,6 +25,7 @@
 * Remove deprecated `project_version` from `ProjectMetadata`.
 * Removed `package_name` argument from `KedroSession.create`.
 * Removed the `create_default_data_set()` method in the `Runner` in favour of using dataset factories to create default dataset instances.
+* Removed `layer` argument from the DataCatalog.
 
 ### Datasets
 * Removed `kedro.extras.datasets` and tests.

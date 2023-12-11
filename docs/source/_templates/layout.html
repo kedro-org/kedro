@@ -23,19 +23,29 @@
 {%- block extrahead %}
 <script type="text/javascript">
 
-  window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=document.createElement("script");r.type="text/javascript",r.async=!0,r.src="https://cdn.heapanalytics.com/js/heap-"+e+".js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetIdentity","removeEventProperty","setEventProperties","track","unsetEventProperty"],o=0;o<p.length;o++)heap[p[o]]=n(p[o])};
-  heap.load({{ "2164194004" | env_override }});{# 2164194004 coresponds to the Development environment #}
+  // window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=document.createElement("script");r.type="text/javascript",r.async=!0,r.src="https://cdn.heapanalytics.com/js/heap-"+e+".js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetIdentity","removeEventProperty","setEventProperties","track","unsetEventProperty"],o=0;o<p.length;o++)heap[p[o]]=n(p[o])};
+  // heap.load({{ "2164194004" | env_override }});{# 2164194004 coresponds to the Development environment #}
 
   //inline styling for read-the-docs flyout
   document.documentElement.style.setProperty('--readthedocs-flyout-font-size', '0.9em');
 
   document.addEventListener("DOMContentLoaded", function(event) {
 
-    // Activate read-the-docs search when user focuses on search
-    document.querySelector('div[role="search"] form input').addEventListener("focus", (e) => {
-      const event = new CustomEvent("readthedocs-search-show");
-      document.dispatchEvent(event);
-    });
+    function showReadTheDocsSearch() {
+    const searchEvent = new CustomEvent("readthedocs-search-show");
+    document.dispatchEvent(searchEvent);
+  }
+
+  // Activate read-the-docs search when user focuses on search
+  document.querySelector('div[role="search"] form input').addEventListener("focus", showReadTheDocsSearch);
+
+  // Add keyboard event listener for Cmd+K (Mac) or Ctrl+K (Windows)
+  document.addEventListener("keydown", function(e) {
+    if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault(); 
+      showReadTheDocsSearch();
+    }
+  });
 
     // Clone main nav into the sidebar
     var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');

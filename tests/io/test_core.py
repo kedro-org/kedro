@@ -22,6 +22,7 @@ from kedro.io.core import (
     parse_dataset_definition,
     validate_on_forbidden_chars,
 )
+from kedro.io.lambda_dataset import LambdaDataset
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
 # Excludes None, as None values are not shown in the str representation.
@@ -291,6 +292,15 @@ class TestCoreFunctions:
         pattern = "Please see the documentation on how to install relevant dependencies"
         with pytest.raises(DatasetError, match=pattern):
             parse_dataset_definition({"type": dataset_name})
+
+    def test_parse_dataset_definition(self):
+        config = {"type": "LambdaDataset"}
+        dataset, _ = parse_dataset_definition(config)
+        assert dataset is LambdaDataset
+
+    def test_test_parse_dataset_definition_with_python_class_type(self):
+        config = {"type": MyDataset}
+        parse_dataset_definition(config)
 
 
 class TestAbstractVersionedDataset:

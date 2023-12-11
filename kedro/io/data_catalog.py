@@ -143,7 +143,6 @@ class DataCatalog:
         self,
         datasets: dict[str, AbstractDataset] = None,
         feed_dict: dict[str, Any] = None,
-        layers: dict[str, set[str]] = None,
         dataset_patterns: Patterns = None,
         load_versions: dict[str, str] = None,
         save_version: str = None,
@@ -158,10 +157,6 @@ class DataCatalog:
         Args:
             datasets: A dictionary of data set names and data set instances.
             feed_dict: A feed dict with data to be added in memory.
-            layers: A dictionary of data set layers. It maps a layer name
-                to a set of data set names, according to the
-                data engineering convention. For more details, see
-                https://docs.kedro.org/en/stable/resources/glossary.html#layers-data-engineering-convention
             dataset_patterns: A dictionary of data set factory patterns
                 and corresponding data set configuration. When fetched from catalog configuration
                 these patterns will be sorted by:
@@ -192,7 +187,6 @@ class DataCatalog:
         """
         self._datasets = dict(datasets or {})
         self.datasets = _FrozenDatasets(self._datasets)
-        self.layers = layers
         # Keep a record of all patterns in the catalog.
         # {dataset pattern name : dataset pattern body}
         self._dataset_patterns = dataset_patterns or {}
@@ -382,10 +376,6 @@ class DataCatalog:
             dataset_config = self._resolve_config(
                 dataset_name, matched_pattern, config_copy
             )
-            ds_layer = dataset_config.pop("layer", None)
-            if ds_layer:
-                self.layers = self.layers or {}
-                self.layers.setdefault(ds_layer, set()).add(dataset_name)
             dataset = AbstractDataset.from_config(
                 dataset_name,
                 dataset_config,
@@ -740,16 +730,14 @@ class DataCatalog:
             dataset_patterns = self._dataset_patterns
         return DataCatalog(
             datasets=self._datasets,
-            layers=self.layers,
             dataset_patterns=dataset_patterns,
             load_versions=self._load_versions,
             save_version=self._save_version,
         )
 
     def __eq__(self, other):
-        return (self._datasets, self.layers, self._dataset_patterns) == (
+        return (self._datasets, self._dataset_patterns) == (
             other._datasets,
-            other.layers,
             other._dataset_patterns,
         )
 

@@ -42,7 +42,14 @@ You can add one or more of the options, or follow the default and add none at al
 
 ### Project examples
 
-TO DO
+The CLI offers the option to include example pipelines. Your choice of tools determines which spaceflights starter example is provided. Here's a guide to understanding which starter examples are used based on your selections:
+
+* [Default Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) (`spaceflights-pandas`): Used when you select any combination of Linting, Testing, Custom Logging, Documentation, and Data Structure, excluding PySpark and Kedro Viz.
+* [PySpark Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark) (`spaceflights-pyspark`): Chosen when PySpark is selected with any other tools, except Kedro Viz.
+* [Kedro Viz Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz) (`spaceflights-pandas-viz`): Applicable when Kedro Viz is part of your selection, with any other tools, excluding PySpark.
+* [Full Feature Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz) (`spaceflights-pyspark-viz`): This example is used when you select all available tools, including PySpark and Kedro Viz.
+
+Each starter example is tailored to demonstrate the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
 
 ## Run the new project
 
@@ -92,3 +99,25 @@ You have completed the section on Kedro project creation for new users. Here are
 * How-to guide for notebook users: The documentation section following the tutorial explains [how to combine Kedro with a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md).
 
 If you've worked through the documentation listed and are unsure where to go next, review the [Kedro repositories on GitHub](https://github.com/kedro-org) and [Kedro's Slack channels](https://slack.kedro.org).
+
+## Flowchart of general choice of tools
+
+Here is a flowchart to help guide your choice of tools and examples you can select:
+
+```{mermaid}
+:alt: General overview diagram for setting up a new Kedro project with tools
+flowchart TD
+    A[Start] --> B[Enter Project Name];
+    B --> C[Select Tools];
+
+    C -->|None| D[None];
+    C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
+    C -->|All| F[All];
+
+    D --> G[Include Example Pipeline?]
+    E --> G;
+    F --> G
+
+    G -->|Yes| H[New Project Created];
+    G -->|No| H;
+```

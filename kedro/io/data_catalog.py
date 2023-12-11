@@ -165,7 +165,15 @@ class DataCatalog:
                 data engineering convention. For more details, see
                 https://docs.kedro.org/en/stable/resources/glossary.html#layers-data-engineering-convention
             dataset_patterns: A dictionary of data set factory patterns
-                and corresponding data set configuration
+                and corresponding data set configuration. When fetched from catalog configuration
+                these patterns will be sorted by:
+                1. Decreasing specificity (number of characters outside the curly brackets)
+                2. Decreasing number of placeholders (number of curly bracket pairs)
+                3. Alphabetically
+                A pattern of specificity 0 is a catch-all pattern and will overwrite the default
+                pattern provided through the runners if it comes before "default" in the alphabet.
+                Such an overwriting pattern will emit a warning. The `"{default}"` name will
+                not emit a warning.
             load_versions: A mapping between data set names and versions
                 to load. Has no effect on data sets without enabled versioning.
             save_version: Version string to be used for ``save`` operations
@@ -403,10 +411,13 @@ class DataCatalog:
                 self._load_versions.get(dataset_name),
                 self._save_version,
             )
-            if self._specificity(matched_pattern) == 0:
+            if (
+                self._specificity(matched_pattern) == 0
+                and matched_pattern != "{default}"
+            ):
                 self._logger.warning(
                     "Config from the dataset factory pattern '%s' in the catalog will be used to "
-                    "override the default MemoryDataset creation for the dataset '%s'",
+                    "override the default dataset creation for '%s'",
                     matched_pattern,
                     dataset_name,
                 )
@@ -730,16 +741,26 @@ class DataCatalog:
             ) from exc
         return [dset_name for dset_name in self._datasets if pattern.search(dset_name)]
 
-    def shallow_copy(self) -> DataCatalog:
+    def shallow_copy(
+        self, extra_dataset_patterns: Patterns | None = None
+    ) -> DataCatalog:
         """Returns a shallow copy of the current object.
 
         Returns:
             Copy of the current object.
         """
+        if extra_dataset_patterns:
+            unsorted_dataset_patterns = {
+                **self._dataset_patterns,
+                **extra_dataset_patterns,
+            }
+            dataset_patterns = self._sort_patterns(unsorted_dataset_patterns)
+        else:
+            dataset_patterns = self._dataset_patterns
         return DataCatalog(
             datasets=self._datasets,
             layers=self.layers,
-            dataset_patterns=self._dataset_patterns,
+            dataset_patterns=dataset_patterns,
             load_versions=self._load_versions,
             save_version=self._save_version,
         )

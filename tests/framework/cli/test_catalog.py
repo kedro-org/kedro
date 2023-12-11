@@ -134,11 +134,11 @@ class TestCatalogListCommand:
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         catalog_datasets = {
-            "iris_data": CSVDataset("test.csv"),
+            "iris_data": CSVDataset(filepath="test.csv"),
             "intermediate": MemoryDataset(),
             "parameters": MemoryDataset(),
             "params:data_ratio": MemoryDataset(),
-            "not_used": CSVDataset("test2.csv"),
+            "not_used": CSVDataset(filepath="test2.csv"),
         }
 
         mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
@@ -177,7 +177,7 @@ class TestCatalogListCommand:
         """
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
-        catalog_datasets = {"some_dataset": CSVDataset("test.csv")}
+        catalog_datasets = {"some_dataset": CSVDataset(filepath="test.csv")}
         mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
@@ -341,8 +341,8 @@ class TestCatalogCreateCommand:
         mocked_context = fake_load_context.return_value
 
         catalog_datasets = {
-            "input_data": CSVDataset("test.csv"),
-            "output_data": CSVDataset("test2.csv"),
+            "input_data": CSVDataset(filepath="test.csv"),
+            "output_data": CSVDataset(filepath="test2.csv"),
         }
         mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocked_context.project_path = fake_repo_path
@@ -445,9 +445,9 @@ def test_rank_catalog_factories_with_no_factories(
     mocked_context = fake_load_context.return_value
 
     catalog_datasets = {
-        "iris_data": CSVDataset("test.csv"),
+        "iris_data": CSVDataset(filepath="test.csv"),
         "intermediate": MemoryDataset(),
-        "not_used": CSVDataset("test2.csv"),
+        "not_used": CSVDataset(filepath="test2.csv"),
     }
     mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
 
@@ -561,7 +561,7 @@ def test_no_param_datasets_in_resolve(
     }
 
     catalog_datasets = {
-        "iris_data": CSVDataset("test.csv"),
+        "iris_data": CSVDataset(filepath="test.csv"),
         "intermediate": MemoryDataset(),
         "parameters": MemoryDataset(),
         "params:data_ratio": MemoryDataset(),

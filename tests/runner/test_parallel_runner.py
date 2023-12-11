@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
 
@@ -21,7 +20,6 @@ from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
     _run_node_synchronization,
-    _SharedMemoryDataset,
 )
 from tests.runner.conftest import (
     exception_fn,
@@ -47,15 +45,7 @@ class SingleProcessDataset(AbstractDataset):
         pass
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 class TestValidParallelRunner:
-    def test_create_default_dataset(self):
-        # dataset is a proxy to a dataset in another process.
-        dataset = ParallelRunner().create_default_dataset("")
-        assert isinstance(dataset, _SharedMemoryDataset)
-
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
@@ -84,9 +74,6 @@ class TestValidParallelRunner:
         assert result["Z"] == ("42", "42", "42")
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 class TestMaxWorkers:
     @pytest.mark.parametrize("is_async", [False, True])
     @pytest.mark.parametrize(
@@ -143,9 +130,6 @@ class TestMaxWorkers:
         assert parallel_runner._max_workers == _MAX_WINDOWS_WORKERS
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
     def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
@@ -262,13 +246,9 @@ class LoggingDataset(AbstractDataset):
         return {}
 
 
-if not sys.platform.startswith("win"):
-    ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
+ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):

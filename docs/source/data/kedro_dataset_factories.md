@@ -1,5 +1,5 @@
 # Kedro dataset factories
-You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro 0.18.12.
+You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`.
 
 The syntax allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
@@ -223,13 +223,18 @@ The matches are ranked according to the following criteria:
 You can use dataset factories to define a catch-all pattern which will overwrite the default [`MemoryDataset`](/kedro.io.MemoryDataset) creation.
 
 ```yaml
-"{default_dataset}":
+"{a_default_dataset}":
   type: pandas.CSVDataset
-  filepath: data/{default_dataset}.csv
+  filepath: data/{a_default_dataset}.csv
 
 ```
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
 as `pandas.CSVDataset`.
+
+```{note}
+Under the hood Kedro uses the pattern name "{default}" to generate the default datasets set in the runners. If you want to overwrite this pattern you should make sure you choose a name that comes
+before "default" in the alphabet for it to be resolved first.
+```
 
 ## CLI commands for dataset factories
 
@@ -291,6 +296,7 @@ As we can see, the entries are ranked firstly by how many non-placeholders are i
 ### How to use `kedro catalog resolve`
 
 This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.
+This command is runner agnostic and thus won't take into account any default dataset creation defined in the runner.
 
 To illustrate this, consider the following catalog file:
 
@@ -316,9 +322,9 @@ shuttles:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{name}.pq
 
-"{default}":
+"{a_default}":
   type: pandas.ParquetDataset
-  filepath: data/03_primary/{default}.pq
+  filepath: data/03_primary/{a_default}.pq
 ```
 </details>
 

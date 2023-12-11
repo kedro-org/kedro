@@ -41,7 +41,7 @@ Tools\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
-6) Pyspark: Provides set up configuration for working with PySpark\n
+6) PySpark: Provides set up configuration for working with PySpark\n
 7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
@@ -110,8 +110,11 @@ _OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 TOOLS_SHORTNAME_TO_NUMBER = {
     "lint": "1",
     "test": "2",
+    "tests": "2",
     "log": "3",
+    "logs": "3",
     "docs": "4",
+    "doc": "4",
     "data": "5",
     "pyspark": "6",
     "viz": "7",
@@ -122,7 +125,7 @@ NUMBER_TO_TOOLS_NAME = {
     "3": "Custom Logging",
     "4": "Documentation",
     "5": "Data Structure",
-    "6": "Pyspark",
+    "6": "PySpark",
     "7": "Kedro Viz",
 }
 
@@ -251,6 +254,7 @@ def new(  # noqa: PLR0913
         selected_tools=selected_tools,
         project_name=project_name,
         example_pipeline=example_pipeline,
+        starter_alias=starter_alias,
     )
 
     cookiecutter_args = _make_cookiecutter_args(
@@ -407,6 +411,7 @@ def _get_extra_context(  # noqa: PLR0913
     selected_tools: str | None,
     project_name: str | None,
     example_pipeline: str | None,
+    starter_alias: str | None,
 ) -> dict[str, str]:
     """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
     on CLI flags, user prompts, or a configuration file.
@@ -429,12 +434,12 @@ def _get_extra_context(  # noqa: PLR0913
         extra_context = {}
         if config_path:
             extra_context = _fetch_config_from_file(config_path)
-            _validate_config_file_inputs(extra_context)
+            _validate_config_file_inputs(extra_context, starter_alias)
 
     elif config_path:
         extra_context = _fetch_config_from_file(config_path)
         _validate_config_file_against_prompts(extra_context, prompts_required)
-        _validate_config_file_inputs(extra_context)
+        _validate_config_file_inputs(extra_context, starter_alias)
     else:
         extra_context = _fetch_config_from_user_prompts(
             prompts_required, cookiecutter_context
@@ -486,6 +491,10 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
     """
     if selected_tools is None:
         return None
+    if selected_tools.lower() == "none":
+        return ""
+    if selected_tools.lower() == "all":
+        return ",".join(NUMBER_TO_TOOLS_NAME.keys())
 
     tools = []
     for tool in selected_tools.lower().split(","):
@@ -630,11 +639,12 @@ def fetch_template_based_on_tools(template_path, cookiecutter_args: dict[str, An
     tools = extra_context.get("tools", [])
     example_pipeline = extra_context.get("example_pipeline", False)
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
-    if "Pyspark" in tools and "Kedro Viz" in tools:
-        # Use the spaceflights-pyspark-viz starter if both Pyspark and Kedro Viz are chosen.
+
+    if "PySpark" in tools and "Kedro Viz" in tools:
+        # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-    elif "Pyspark" in tools:
-        # Use the spaceflights-pyspark starter if only Pyspark is chosen.
+    elif "PySpark" in tools:
+        # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
@@ -643,7 +653,7 @@ def fetch_template_based_on_tools(template_path, cookiecutter_args: dict[str, An
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
     else:
-        # Use the default template path for non Pyspark, Viz or example options:
+        # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path
     return starter_path
 
@@ -730,17 +740,24 @@ def _validate_config_file_against_prompts(
         )
 
 
-def _validate_config_file_inputs(config: dict[str, str]):
+def _validate_config_file_inputs(config: dict[str, str], starter_alias: str | None):
     """Checks that variables provided through the config file are of the expected format. This
     validate the config provided by `kedro new --config` in a similar way to `prompts.yml`
     for starters.
+    Also validates that "tools" or "example_pipeline" options cannot be used in config when any starter option is selected.
 
     Args:
         config: The config as a dictionary
+        starter_alias: Starter alias if it was provided from CLI, otherwise None
 
     Raises:
         SystemExit: If the provided variables are not properly formatted.
     """
+    if starter_alias and ("tools" in config or "example_pipeline" in config):
+        raise KedroCliError(
+            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file."
+        )
+
     project_name_validation_config = {
         "regex_validator": r"^[\w -]{2,}$",
         "error_message": "'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
@@ -755,11 +772,19 @@ def _validate_config_file_inputs(config: dict[str, str]):
 
     input_tools = config.get("tools", "none")
     tools_validation_config = {
-        "regex_validator": r"^(all|none|(( )*\d*(,\d*)*(,( )*\d*)*( )*|( )*((\d+-\d+)|(\d+ - \d+))( )*))$",
+        "regex_validator": r"""^(
+            all|none|                        # A: "all" or "none" or
+            (\ *\d+                          # B: any number of spaces followed by one or more digits
+            (\ *-\ *\d+)?                    # C: zero or one instances of: a hyphen followed by one or more digits, spaces allowed
+            (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
+            \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
+            $""",
         "error_message": f"'{input_tools}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
     }
 
-    if not re.match(tools_validation_config["regex_validator"], input_tools.lower()):
+    if not re.match(
+        tools_validation_config["regex_validator"], input_tools.lower(), flags=re.X
+    ):
         message = tools_validation_config["error_message"]
         click.secho(message, fg="red", err=True)
         sys.exit(1)

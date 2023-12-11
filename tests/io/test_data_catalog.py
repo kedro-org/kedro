@@ -168,6 +168,10 @@ def config_with_dataset_factories_only_patterns():
                 "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{dataset}s.csv",
             },
+            "{user_default}": {
+                "type": "pandas.ExcelDataset",
+                "filepath": "data/01_raw/{user_default}.xlsx",
+            },
         },
     }
 
@@ -359,7 +363,7 @@ class TestDataCatalog:
             multi_catalog.list("((")
 
     def test_eq(self, multi_catalog, data_catalog):
-        assert multi_catalog == multi_catalog.shallow_copy()
+        assert multi_catalog == multi_catalog.shallow_copy({})
         assert multi_catalog != data_catalog
 
     def test_datasets_on_init(self, data_catalog_from_config):
@@ -369,7 +373,7 @@ class TestDataCatalog:
 
     def test_datasets_on_add(self, data_catalog_from_config):
         """Check datasets are updated correctly after adding"""
-        data_catalog_from_config.add("new_dataset", CSVDataset("some_path"))
+        data_catalog_from_config.add("new_dataset", CSVDataset(filepath="some_path"))
         assert isinstance(data_catalog_from_config.datasets.new_dataset, CSVDataset)
         assert isinstance(data_catalog_from_config.datasets.boats, CSVDataset)
 
@@ -769,7 +773,7 @@ class TestDataCatalogVersioned:
         monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummmy")
         monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummmy")
         version = Version(load=None, save=None)
-        versioned_dataset = CSVDataset("s3://bucket/file.csv", version=version)
+        versioned_dataset = CSVDataset(filepath="s3://bucket/file.csv", version=version)
         pattern = re.escape(
             f"Did not find any versions for {versioned_dataset}. "
             f"This could be due to insufficient permission."
@@ -846,8 +850,94 @@ class TestDataCatalogDatasetFactories:
             "{namespace}_{dataset}",
             "{dataset}s",
             "{default}",
+            "{user_default}",
         ]
         assert list(catalog._dataset_patterns.keys()) == sorted_keys_expected
+
+    def test_sorting_order_with_default_and_other_dataset_through_extra_pattern(
+        self, config_with_dataset_factories_only_patterns
+    ):
+        """Check that the sorted order of the patterns is correct according to parsing rules when a default dataset is added through extra patterns (this would happen via the runner)."""
+        extra_dataset_patterns = {
+            "{default}": {"type": "MemoryDataset"},
+            "{another}#csv": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{another}.csv",
+            },
+        }
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
+        catalog_with_default = catalog.shallow_copy(
+            extra_dataset_patterns=extra_dataset_patterns
+        )
+        sorted_keys_expected = [
+            "{country}_companies",
+            "{another}#csv",
+            "{namespace}_{dataset}",
+            "{dataset}s",
+            "{default}",
+            "{user_default}",
+        ]
+        assert (
+            list(catalog_with_default._dataset_patterns.keys()) == sorted_keys_expected
+        )
+
+    def test_runner_default_overwrites_user_default(
+        self, config_with_dataset_factories_only_patterns
+    ):
+        """Check that the runner default overwrites the user default."""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
+        assert catalog._dataset_patterns["{default}"] == {
+            "filepath": "data/01_raw/{default}.csv",
+            "type": "pandas.CSVDataset",
+        }
+
+        extra_dataset_patterns = {
+            "{default}": {"type": "MemoryDataset"},
+            "{another}#csv": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{another}.csv",
+            },
+        }
+        catalog_with_runner_default = catalog.shallow_copy(
+            extra_dataset_patterns=extra_dataset_patterns
+        )
+        assert catalog_with_runner_default._dataset_patterns["{default}"] == {
+            "type": "MemoryDataset"
+        }
+
+    def test_user_default_overwrites_runner_default_alphabetically(self):
+        """Check that the runner default overwrites the user default if earlier in alphabet."""
+        catalog_config = {
+            "{dataset}s": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/{dataset}s.csv",
+            },
+            "{a_default}": {
+                "type": "pandas.ExcelDataset",
+                "filepath": "data/01_raw/{a_default}.xlsx",
+            },
+        }
+        catalog = DataCatalog.from_config(catalog_config)
+        extra_dataset_patterns = {
+            "{default}": {"type": "MemoryDataset"},
+            "{another}#csv": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{another}.csv",
+            },
+        }
+        catalog_with_runner_default = catalog.shallow_copy(
+            extra_dataset_patterns=extra_dataset_patterns
+        )
+        sorted_keys_expected = [
+            "{another}#csv",
+            "{dataset}s",
+            "{a_default}",
+            "{default}",
+        ]
+        assert (
+            list(catalog_with_runner_default._dataset_patterns.keys())
+            == sorted_keys_expected
+        )
 
     def test_default_dataset(self, config_with_dataset_factories_with_default, caplog):
         """Check that default dataset is used when no other pattern matches"""
@@ -858,8 +948,8 @@ class TestDataCatalogDatasetFactories:
         assert log_record.levelname == "WARNING"
         assert (
             "Config from the dataset factory pattern '{default_dataset}' "
-            "in the catalog will be used to override the default "
-            "MemoryDataset creation for the dataset 'jet@planes'" in log_record.message
+            "in the catalog will be used to override the default dataset creation for 'jet@planes'"
+            in log_record.message
         )
         assert isinstance(jet_dataset, CSVDataset)
 

@@ -220,7 +220,8 @@ def rank_catalog_factories(metadata: ProjectMetadata, env):
 @env_option
 @click.pass_obj
 def resolve_patterns(metadata: ProjectMetadata, env):
-    """Resolve catalog factories against pipeline datasets"""
+    """Resolve catalog factories against pipeline datasets. Note that this command is runner
+    agnostic and thus won't take into account any default dataset creation defined in the runner."""
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()

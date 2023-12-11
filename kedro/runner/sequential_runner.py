@@ -2,13 +2,15 @@
 used to run the ``Pipeline`` in a sequential manner using a topological sort
 of provided nodes.
 """
+from __future__ import annotations
 
 from collections import Counter
 from itertools import chain
+from typing import Any
 
 from pluggy import PluginManager
 
-from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
+from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner, run_node
 
@@ -19,28 +21,26 @@ class SequentialRunner(AbstractRunner):
     topological sort of provided nodes.
     """
 
-    def __init__(self, is_async: bool = False):
-        """Instantiates the runner classs.
+    def __init__(
+        self,
+        is_async: bool = False,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
+    ):
+        """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets to MemoryDataset
+                for `SequentialRunner`.
 
         """
-        super().__init__(is_async=is_async)
-
-    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
-        """Factory method for creating the default data set for the runner.
-
-        Args:
-            ds_name: Name of the missing data set
-
-        Returns:
-            An instance of an implementation of AbstractDataset to be used
-            for all unregistered data sets.
-
-        """
-        return MemoryDataset()
+        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
+        super().__init__(
+            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
+        )
 
     def _run(
         self,

@@ -81,7 +81,7 @@ def _get_expected_files(tools: str, example_pipeline: str):
         "3": 1,  # If Logging is selected, we add logging.py
         "4": 2,  # If Documentation is selected, we add conf.py and index.rst
         "5": 8,  # If Data Structure is selected, we add 8 .gitkeep files
-        "6": 2,  # If Pyspark is selected, we add spark.yml and hooks.py
+        "6": 2,  # If PySpark is selected, we add spark.yml and hooks.py
         "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each tool
     tools_list = _parse_tools_input(tools)
@@ -291,43 +291,42 @@ def test_starter_list_with_invalid_starter_plugin(
     assert expected in result.output
 
 
-@pytest.mark.parametrize(
-    "input,expected",
-    [
-        ("1", ["1"]),
-        ("1,2,3", ["1", "2", "3"]),
-        ("2-4", ["2", "3", "4"]),
-        ("3-3", ["3"]),
-        ("all", ["1", "2", "3", "4", "5", "6", "7"]),
-        ("none", []),
-    ],
-)
-def test_parse_tools_valid(input, expected):
-    result = _parse_tools_input(input)
-    assert result == expected
+class TestParseToolsInput:
+    @pytest.mark.parametrize(
+        "input,expected",
+        [
+            ("1", ["1"]),
+            ("1,2,3", ["1", "2", "3"]),
+            ("2-4", ["2", "3", "4"]),
+            ("3-3", ["3"]),
+            ("all", ["1", "2", "3", "4", "5", "6", "7"]),
+            ("none", []),
+        ],
+    )
+    def test_parse_tools_valid(self, input, expected):
+        result = _parse_tools_input(input)
+        assert result == expected
 
+    @pytest.mark.parametrize(
+        "input",
+        ["5-2", "3-1"],
+    )
+    def test_parse_tools_invalid_range(self, input, capsys):
+        with pytest.raises(SystemExit):
+            _parse_tools_input(input)
+        message = f"'{input}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
+        assert message in capsys.readouterr().err
 
-@pytest.mark.parametrize(
-    "input",
-    ["5-2", "3-1"],
-)
-def test_parse_tools_invalid_range(input, capsys):
-    with pytest.raises(SystemExit):
-        _parse_tools_input(input)
-    message = f"'{input}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
-    assert message in capsys.readouterr().err
-
-
-@pytest.mark.parametrize(
-    "input,last_invalid",
-    [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-9", "9")],
-)
-def test_parse_tools_invalid_selection(input, last_invalid, capsys):
-    with pytest.raises(SystemExit):
-        selected = _parse_tools_input(input)
-        _validate_selection(selected)
-    message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
-    assert message in capsys.readouterr().err
+    @pytest.mark.parametrize(
+        "input,last_invalid",
+        [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-9", "9")],
+    )
+    def test_parse_tools_invalid_selection(self, input, last_invalid, capsys):
+        with pytest.raises(SystemExit):
+            selected = _parse_tools_input(input)
+            _validate_selection(selected)
+        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -967,8 +966,14 @@ class TestToolsAndExampleFromUserPrompts:
             "6",
             "7",
             "none",
+            "",
             "2,3,4",
             "3-5",
+            "1,2,4-6",
+            "1,2,4-6,7",
+            "4-6,7",
+            "1, 2 ,4 - 6, 7",
+            "1-3, 5-7",
             "all",
             "1, 2, 3",
             "  1,  2, 3  ",
@@ -991,7 +996,7 @@ class TestToolsAndExampleFromUserPrompts:
 
     @pytest.mark.parametrize(
         "bad_input",
-        ["bad input", "-1", "3-"],
+        ["bad input", "-1", "3-", "1 1"],
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
         result = CliRunner().invoke(
@@ -1079,8 +1084,14 @@ class TestToolsAndExampleFromConfigFile:
             "6",
             "7",
             "none",
+            "",
             "2,3,4",
             "3-5",
+            "1,2,4-6",
+            "1,2,4-6,7",
+            "4-6,7",
+            "1, 2 ,4 - 6, 7",
+            "1-3,5-7",
             "all",
             "1, 2, 3",
             "  1,  2, 3  ",
@@ -1108,7 +1119,7 @@ class TestToolsAndExampleFromConfigFile:
 
     @pytest.mark.parametrize(
         "bad_input",
-        ["bad input", "-1", "3-"],
+        ["bad input", "-1", "3-", "1 1"],
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
         """Test project created from config."""
@@ -1128,6 +1139,33 @@ class TestToolsAndExampleFromConfigFile:
         assert "is an invalid value for project tools." in result.output
         assert (
             "Please select valid options for tools using comma-separated values, ranges, or 'all/none'.\n"
+            in result.output
+        )
+
+    def test_invalid_tools_with_starter(self, fake_kedro_cli):
+        """Test project created from config with tools and example used with --starter"""
+        config = {
+            "tools": "all",
+            "project_name": "My Project",
+            "example_pipeline": "no",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "-v",
+                "--config",
+                "config.yml",
+                "--starter=spaceflights-pandas-viz",
+            ],
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file.\n"
             in result.output
         )
 
@@ -1222,13 +1260,16 @@ class TestToolsAndExampleFromCLI:
         [
             "lint",
             "test",
+            "tests",
             "log",
+            "logs",
             "docs",
+            "doc",
             "data",
             "pyspark",
             "viz",
             "none",
-            "test,log,docs",
+            "tests,logs,doc",
             "test,data,lint",
             "log,docs,data,test,lint",
             "log, docs, data, test, lint",
@@ -1324,3 +1365,98 @@ class TestNameFromCLI:
             "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
             in result.output
         )
+
+
+class TestParseYesNoToBools:
+    @pytest.mark.parametrize(
+        "input",
+        ["yes", "YES", "y", "Y", "yEs"],
+    )
+    def parse_yes_no_to_bool_responds_true(self, input):
+        assert _parse_yes_no_to_bool(input) is True
+
+    @pytest.mark.parametrize(
+        "input",
+        ["no", "NO", "n", "N", "No", ""],
+    )
+    def parse_yes_no_to_bool_responds_false(self, input):
+        assert _parse_yes_no_to_bool(input) is False
+
+    def parse_yes_no_to_bool_responds_none(self):
+        assert _parse_yes_no_to_bool(None) is None
+
+
+class TestValidateSelection:
+    def test_validate_selection_valid(self):
+        tools = ["1", "2", "3", "4"]
+        assert _validate_selection(tools) is None
+
+    def test_validate_selection_invalid_single_tool(self, capsys):
+        tools = ["8"]
+        with pytest.raises(SystemExit):
+            _validate_selection(tools)
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
+
+    def test_validate_selection_invalid_multiple_tools(self, capsys):
+        tools = ["8", "10", "15"]
+        with pytest.raises(SystemExit):
+            _validate_selection(tools)
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
+
+    def test_validate_selection_mix_valid_invalid_tools(self, capsys):
+        tools = ["1", "8", "3", "15"]
+        with pytest.raises(SystemExit):
+            _validate_selection(tools)
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
+
+    def test_validate_selection_empty_list(self):
+        tools = []
+        assert _validate_selection(tools) is None
+
+
+class TestConvertToolNamesToNumbers:
+    def test_convert_tool_names_to_numbers_with_valid_tools(self):
+        selected_tools = "lint,test,docs"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,2,4"
+
+    def test_convert_tool_names_to_numbers_with_none(self):
+        result = _convert_tool_names_to_numbers(None)
+        assert result is None
+
+    def test_convert_tool_names_to_numbers_with_empty_string(self):
+        selected_tools = ""
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == ""
+
+    def test_convert_tool_names_to_numbers_with_none_string(self):
+        selected_tools = "none"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == ""
+
+    def test_convert_tool_names_to_numbers_with_all_string(self):
+        result = _convert_tool_names_to_numbers("all")
+        assert result == "1,2,3,4,5,6,7"
+
+    def test_convert_tool_names_to_numbers_with_mixed_valid_invalid_tools(self):
+        selected_tools = "lint,invalid_tool,docs"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,4"
+
+    def test_convert_tool_names_to_numbers_with_whitespace(self):
+        selected_tools = " lint , test , docs "
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,2,4"
+
+    def test_convert_tool_names_to_numbers_with_case_insensitive_tools(self):
+        selected_tools = "Lint,TEST,Docs"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,2,4"
+
+    def test_convert_tool_names_to_numbers_with_invalid_tools(self):
+        selected_tools = "invalid_tool1,invalid_tool2"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == ""

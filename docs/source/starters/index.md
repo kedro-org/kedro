@@ -1,7 +1,7 @@
-# New project tools (title TBD)
-As you saw from the [First steps](../get_started/new_project.md) section, once you have [set up Kedro](../get_started/install.md), you can use `kedro new` to create a basic Kedro project containing project directories and basic code, which you can configure depending on the tooling and example code you need.
+# Customise a new project
+As you saw from the [First steps](../get_started/new_project.md) section, once you have [set up Kedro](../get_started/install.md), you can create a new project with `kedro new` and customise the code added to that project for its tooling and example code requirements.
 
-There are options to the code you include when you create a new Kedro project, which the pages in this section describe in detail.
+The pages in this section describe in detail the various options available.
 
 ```{toctree}
 :maxdepth: 1
@@ -29,7 +29,11 @@ The configuration file must contain:
 * `project_name`
 * `repo_name`
 * `python_package`
-* TO DO -- tools and example code options
+
+Additionally, the configuration file may contain:
+
+* `tools`: The tools to customise your project setup with. Select from comma-separated values, ranges, or 'all/none'. Omitting this from your configuration file will result in the default selection of `none`.
+* `example`: Indicate `yes` or `no` to select whether you would like your project to be populated with example code. Omitting this from your configuration file will result in the default selection of `no`.
 
 The `output_dir` can be specified as `~` for the home directory or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 
@@ -40,4 +44,8 @@ repo_name: testing-kedro
 python_package: test_kedro
 ```
 **Use `kedro new` with a `--starter`** <br />
-Alternatively, you can create a new Kedro project with a [starter](./starters.md) that adds a set of code for a common project use case.
+You can create a new Kedro project with a [starter](./starters.md) that adds code for a common project use case.
+
+``` {important}
+You can not combine the use of a Kedro starter with the tools and example code options listed above.
+```

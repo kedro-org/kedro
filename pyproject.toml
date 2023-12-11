@@ -79,7 +79,7 @@ test = [
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
-    "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
+    "s3fs<2024.1 and >=2021.4",
     "semver",
     "trufflehog~=2.1",
 ]

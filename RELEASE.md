@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 * Dropped Python 3.7 support.
-* [Introduced project tools and example to the `kedro new` CLI flow](docs/source/get_started/new_project.md#project-tools). 
+* [Introduced project tools and example to the `kedro new` CLI flow](docs/source/get_started/new_project.md#project-tools).
 * The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 * Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
 * [Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`](docs/source/configuration/advanced_configuration.md#how-to-change-the-merge-strategy-used-by-omegaconfigloader).

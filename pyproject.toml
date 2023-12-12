@@ -79,14 +79,12 @@ test = [
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
-    "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
+    "s3fs>=2021.4, <2024.1",  # Upper bound set arbitrarily, to be reassessed in early 2024
     "semver",
     "trufflehog~=2.1",
 ]
 docs = [
-    # docutils>=0.17 changed the HTML
-    # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
-    "docutils==0.16",
+    "docutils<0.18",
     "sphinx~=5.3.0",
     "sphinx_rtd_theme==1.2.0",
     # Regression on sphinx-autodoc-typehints 1.21
@@ -98,7 +96,6 @@ docs = [
     "sphinxcontrib-mermaid~=0.7.1",
     "myst-parser~=1.0.0",
     "Jinja2<3.1.0",
-    "kedro-datasets[all]~=1.8.0",
 ]
 all = [ "kedro[test,docs]" ]
 

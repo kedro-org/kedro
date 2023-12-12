@@ -68,7 +68,7 @@ templates_path = ["_templates"]
 
 intersphinx_mapping = {
     "kedro-viz": ("https://docs.kedro.org/projects/kedro-viz/en/v6.6.1/", None),
-    "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-1.8.0/", None),
+    "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-2.0.0/", None),
 }
 
 # The suffix(es) of source filenames.

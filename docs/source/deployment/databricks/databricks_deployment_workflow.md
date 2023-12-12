@@ -237,7 +237,7 @@ Configure the job cluster with the following settings:
 - Select the runtime `13.3 LTS` in the `Databricks runtime version` field.
 - In the `Advanced options` section, under the `Spark` tab, locate the `Environment variables` field. Add the following line:
 `KEDRO_LOGGING_CONFIG="/dbfs/FileStore/iris-databricks/conf/logging.yml"`
-Here, ensure you specify the correct path to your custom logging configuration. This step is crucial because the default Kedro logging configuration incorporates the rich library, which is incompatible with Databricks jobs. In the `databricks-iris` Kedro starter, the `rich` handler in `logging.yml` is altered to a `console` handler for compatibility. For additional information about logging configurations, refer to the [Kedro Logging Manual](https://docs.kedro.org/en/stable/logging/logging.html).
+Here, ensure you specify the correct path to your custom logging configuration. This step is crucial because the default Kedro logging configuration incorporates the rich library, which is incompatible with Databricks jobs. In the `databricks-iris` Kedro starter, the `rich` handler in `logging.yml` is altered to a `console` handler for compatibility. For additional information about logging configurations, refer to the [Kedro Logging Manual](https://docs.kedro.org/en/stable/logging/index.html).
 - Leave all other settings with their default values in place.
 
 The final configuration for the job cluster should look the same as the following:

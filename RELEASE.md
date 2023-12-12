@@ -69,6 +69,7 @@
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 * Using the `layer` attribute at the top level is removed. Please move `layer` inside the `metadata` -> `kedro-viz` attributes.
 * Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" and error classes starting with "DataSet" are removed. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+
 | Type                        | Removed Alias               | Location                       |
 | --------------------------- | --------------------------- | ------------------------------ |
 | `AbstractDataset`           | `AbstractDataSet`           | `kedro.io.core`                |

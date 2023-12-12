@@ -1,4 +1,16 @@
-# Upcoming Release 0.19.0
+# Upcoming Release 0.19.1
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Documentation changes
+
+## Community contributions
+
+# Release 0.19.0
 
 ## Major features and improvements
 * Dropped Python 3.7 support.

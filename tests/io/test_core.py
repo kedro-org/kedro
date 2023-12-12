@@ -348,7 +348,7 @@ class TestAbstractVersionedDataset:
         shutil.rmtree(my_versioned_dataset._filepath)
 
     def test_exists_general_exception(self):
-        """Check if all exceptions are shown as DataSetError for exists() check"""
+        """Check if all exceptions are shown as DatasetError for exists() check"""
         version = Version(load=None, save=None)
         my_other_versioned_dataset = MyOtherVersionedDataset(
             "test.csv", version=version

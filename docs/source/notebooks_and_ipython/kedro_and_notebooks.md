@@ -91,7 +91,7 @@ catalog.load("example_iris_data")
 The output:
 
 ```ipython
-INFO     Loading data from 'example_iris_data' (CSVDataSet)...
+INFO     Loading data from 'example_iris_data' (CSVDataset)...
 
      sepal_length  sepal_width  petal_length  petal_width    species
 0             5.1          3.5           1.4          0.2     setosa

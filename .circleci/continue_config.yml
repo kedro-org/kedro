@@ -131,7 +131,7 @@ jobs:
   publish_kedro:
     executor:
       name: docker
-      python_version: "3.7"
+      python_version: "3.11"
     steps:
       - setup
       - add_ssh_keys

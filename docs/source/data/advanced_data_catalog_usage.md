@@ -11,7 +11,7 @@ From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to 
 
 To use the `DataCatalog` API, construct a `DataCatalog` object programmatically in a file like `catalog.py`.
 
-In the following code, we use several pre-built data loaders documented in the {doc}`kedro-datasets documentation<kedro-datasets:kedro_datasets>`.
+In the following code, we use several pre-built data loaders documented in the {py:mod}`kedro-datasets documentation <kedro-datasets:kedro_datasets>`.
 
 ```python
 from kedro.io import DataCatalog

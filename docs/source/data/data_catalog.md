@@ -34,7 +34,7 @@ shuttles:
 
 Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet files, Feather files, HDF5 files, JSON documents, pickled objects, SQL tables, SQL queries, and more. They are supported using libraries such as pandas, PySpark, NetworkX, and Matplotlib.
 
-{doc}`The kedro-datasets package documentation<kedro-datasets:kedro_datasets>` contains a comprehensive list of all available file types.
+{py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 

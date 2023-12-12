@@ -4,7 +4,7 @@ Kedro has a few built-in mechanisms for you to extend its behaviour. This docume
 
 ## Use Case 1: How to add extra behaviour to Kedro's execution timeline
 
-The execution timeline of a Kedro pipeline can be thought of as a sequence of actions performed by various Kedro library components, such as the {doc}`datasets<kedro-datasets:kedro_datasets>`, [DataCatalog](/kedro.io.DataCatalog), [Pipeline](/kedro.pipeline.Pipeline), [Node](/kedro.pipeline.node.Node) and [KedroContext](/kedro.framework.context.KedroContext).
+The execution timeline of a Kedro pipeline can be thought of as a sequence of actions performed by various Kedro library components, such as the {py:mod}`datasets <kedro-datasets:kedro_datasets>`, [DataCatalog](/kedro.io.DataCatalog), [Pipeline](/kedro.pipeline.Pipeline), [Node](/kedro.pipeline.node.Node) and [KedroContext](/kedro.framework.context.KedroContext).
 
 At different points in the lifecycle of these components, you might want to add extra behaviour: for example, you could add extra computation for profiling purposes _before_ and _after_ a node runs, or _before_ and _after_ the I/O actions of a dataset, namely the `load` and `save` actions.
 
@@ -12,7 +12,7 @@ This can now achieved by using [Hooks](../hooks/introduction.md), to define the 
 
 ## Use Case 2: How to integrate Kedro with additional data sources
 
-You can use {doc}`datasets<kedro-datasets:kedro_datasets>` to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](../data/how_to_create_a_custom_dataset.md).
+You can use {py:mod}`datasets <kedro-datasets:kedro_datasets>` to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](../data/how_to_create_a_custom_dataset.md).
 
 ## Use Case 3: How to add or modify CLI commands
 

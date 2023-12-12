@@ -10,7 +10,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Kedro documentation
 * {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
-* {doc}`Where can I find the documentation for Kedro's datasets<kedro-datasets:kedro_datasets>`?
+* {py:mod}`Where can I find the documentation for Kedro's datasets <kedro-datasets:kedro_datasets>`?
 
 ## Working with Jupyter
 

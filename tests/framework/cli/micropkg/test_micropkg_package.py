@@ -492,10 +492,9 @@ class TestMicropkgPackageCommand:
     "chdir_to_dummy_project", "cleanup_dist", "cleanup_pyproject_toml"
 )
 class TestMicropkgPackageFromManifest:
-    def test_micropkg_package_all(  # pylint: disable=too-many-locals
+    def test_micropkg_package_all(
         self, fake_repo_path, fake_project_cli, fake_metadata, tmp_path, mocker
     ):
-        # pylint: disable=import-outside-toplevel
         from kedro.framework.cli import micropkg
 
         spy = mocker.spy(micropkg, "_package_micropkg")
@@ -535,7 +534,6 @@ class TestMicropkgPackageFromManifest:
     def test_micropkg_package_all_empty_toml(
         self, fake_repo_path, fake_project_cli, fake_metadata, mocker
     ):
-        # pylint: disable=import-outside-toplevel
         from kedro.framework.cli import micropkg
 
         spy = mocker.spy(micropkg, "_package_micropkg")

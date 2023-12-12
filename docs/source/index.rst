@@ -23,9 +23,9 @@ Welcome to Kedro's documentation!
     :target: https://opensource.org/license/apache2-0-php/
     :alt: License is Apache 2.0
 
-.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
+.. image:: https://img.shields.io/badge/3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
     :target: https://pypi.org/project/kedro/
-    :alt: Python version 3.7, 3.8, 3.9, 3.10, 3.11
+    :alt: Python version 3.8, 3.9, 3.10, 3.11
 
 .. image:: https://badge.fury.io/py/kedro.svg
     :target: https://pypi.org/project/kedro/
@@ -69,7 +69,6 @@ Welcome to Kedro's documentation!
 
    tutorial/spaceflights_tutorial.md
    visualisation/index.md
-   experiment_tracking/index.md
    notebooks_and_ipython/index.md
    resources/index.md
 
@@ -77,6 +76,7 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Kedro projects
 
+   starters/index.md
    configuration/index.md
    data/index.md
    nodes_and_pipelines/index.md
@@ -109,7 +109,6 @@ API documentation
    :recursive:
 
    kedro
-   kedro_datasets
 
 Indices and tables
 ==================

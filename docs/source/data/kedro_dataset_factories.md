@@ -1,5 +1,5 @@
 # Kedro dataset factories
-You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro 0.18.12.
+You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`.
 
 The syntax allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
@@ -14,12 +14,12 @@ Consider the following catalog entries:
 
 ```yaml
 factory_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/factory_data.csv
 
 
 process_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/process_data.csv
 ```
 
@@ -27,7 +27,7 @@ The datasets in this catalog can be generalised to the following dataset factory
 
 ```yaml
 "{name}_data":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/{name}_data.csv
 ```
 
@@ -38,19 +38,19 @@ quotes to avoid YAML parsing errors.
 ## How to generalise datasets of the same type
 
 You can also combine all the datasets with the same type and configuration details. For example, consider the following
-catalog with three datasets named `boats`, `cars` and `planes` of the type `pandas.CSVDataSet`:
+catalog with three datasets named `boats`, `cars` and `planes` of the type `pandas.CSVDataset`:
 
 ```yaml
 boats:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/shuttles.csv
 
 cars:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/reviews.csv
 
 planes:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
 ```
 
@@ -58,7 +58,7 @@ These datasets can be combined into the following dataset factory:
 
 ```yaml
 "{dataset_name}#csv":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/{dataset_name}.csv
 ```
 
@@ -151,8 +151,8 @@ You can now have one dataset factory pattern in your catalog instead of two sepa
 and `candidate_modelling_pipeline.regressor` as below:
 
 ```yaml
-{namespace}.regressor:
-  type: pickle.PickleDataSet
+"{namespace}.regressor":
+  type: pickle.PickleDataset
   filepath: data/06_models/regressor_{namespace}.pkl
   versioned: true
 ```
@@ -163,21 +163,21 @@ entries share `type`, `file_format` and `save_args`:
 
 ```yaml
 processing.factory_data:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/processing/factory_data.pq
   file_format: parquet
   save_args:
     mode: overwrite
 
 processing.process_data:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/processing/process_data.pq
   file_format: parquet
   save_args:
     mode: overwrite
 
 modelling.metrics:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/modelling/factory_data.pq
   file_format: parquet
   save_args:
@@ -188,7 +188,7 @@ This could be generalised to the following pattern:
 
 ```yaml
 "{layer}.{dataset_name}":
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/{layer}/{dataset_name}.pq
   file_format: parquet
   save_args:
@@ -201,12 +201,12 @@ You can have multiple dataset factories in your catalog. For example:
 
 ```yaml
 "{namespace}.{dataset_name}@spark":
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/{namespace}/{dataset_name}.pq
   file_format: parquet
 
 "{dataset_name}@csv":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/{dataset_name}.csv
 ```
 
@@ -223,13 +223,18 @@ The matches are ranked according to the following criteria:
 You can use dataset factories to define a catch-all pattern which will overwrite the default [`MemoryDataset`](/kedro.io.MemoryDataset) creation.
 
 ```yaml
-"{default_dataset}":
-  type: pandas.CSVDataSet
-  filepath: data/{default_dataset}.csv
+"{a_default_dataset}":
+  type: pandas.CSVDataset
+  filepath: data/{a_default_dataset}.csv
 
 ```
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
-as `pandas.CSVDataSet`.
+as `pandas.CSVDataset`.
+
+```{note}
+Under the hood Kedro uses the pattern name "{default}" to generate the default datasets set in the runners. If you want to overwrite this pattern you should make sure you choose a name that comes
+before "default" in the alphabet for it to be resolved first.
+```
 
 ## CLI commands for dataset factories
 
@@ -250,27 +255,27 @@ Consider a catalog file with the following patterns:
 
 ```yaml
 "{layer}.{dataset_name}":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/{layer}/{dataset_name}.csv
 
-preprocessed_{dataset_name}:
-  type: pandas.ParquetDataSet
+"preprocessed_{dataset_name}":
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{dataset_name}.pq
 
-processed_{dataset_name}:
-  type: pandas.ParquetDataSet
+"processed_{dataset_name}":
+  type: pandas.ParquetDataset
   filepath: data/03_primary/processed_{dataset_name}.pq
 
 "{dataset_name}_csv":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/03_primary/{dataset_name}.csv
 
 "{namespace}.{dataset_name}_pq":
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/03_primary/{dataset_name}_{namespace}.pq
 
 "{default_dataset}":
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/01_raw/{default_dataset}.pickle
 ```
 </details>
@@ -278,8 +283,8 @@ processed_{dataset_name}:
 Running `kedro catalog rank` will result in the following output:
 
 ```
-- preprocessed_{dataset_name}
-- processed_{dataset_name}
+- 'preprocessed_{dataset_name}'
+- 'processed_{dataset_name}'
 - '{namespace}.{dataset_name}_pq'
 - '{dataset_name}_csv'
 - '{layer}.{dataset_name}'
@@ -291,6 +296,7 @@ As we can see, the entries are ranked firstly by how many non-placeholders are i
 ### How to use `kedro catalog resolve`
 
 This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.
+This command is runner agnostic and thus won't take into account any default dataset creation defined in the runner.
 
 To illustrate this, consider the following catalog file:
 
@@ -299,26 +305,26 @@ To illustrate this, consider the following catalog file:
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: data/01_raw/shuttles.xlsx
   load_args:
     engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
 
-preprocessed_{name}:
-  type: pandas.ParquetDataSet
+"preprocessed_{name}":
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{name}.pq
 
-"{default}":
-  type: pandas.ParquetDataSet
-  filepath: data/03_primary/{default}.pq
+"{a_default}":
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/{a_default}.pq
 ```
 </details>
 
@@ -362,24 +368,24 @@ The resolved catalog output by the command will be as follows:
 ```yaml
 companies:
   filepath: data/01_raw/companies.csv
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
 model_input_table:
   filepath: data/03_primary/model_input_table.pq
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
 preprocessed_companies:
   filepath: data/02_intermediate/preprocessed_companies.pq
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
 preprocessed_shuttles:
   filepath: data/02_intermediate/preprocessed_shuttles.pq
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
 reviews:
   filepath: data/01_raw/reviews.csv
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
 shuttles:
   filepath: data/01_raw/shuttles.xlsx
   load_args:
     engine: openpyxl
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
 ```
 </details>
 

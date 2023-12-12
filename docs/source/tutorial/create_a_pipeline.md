@@ -183,7 +183,8 @@ You should see output similar to the following:
 
 ## Preprocessed data registration
 
-Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format [pandas.ParquetDataset](/kedro_datasets.pandas.ParquetDataset) because they are registered within the [Data Catalog](../resources/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format {class}`pandas.ParquetDataset<kedro-datasets:kedro_datasets.pandas.ParquetDataset>` because they are registered within the [Data Catalog](../resources/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -337,7 +338,7 @@ To start Kedro-Viz, enter the following in your terminal:
 kedro viz
 ```
 
-This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the [visualisation documentation](../visualisation/kedro-viz_visualisation) for more detail.
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
 
 To exit, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 

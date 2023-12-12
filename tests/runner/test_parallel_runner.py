@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import importlib
-import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
 
 import pytest
 
-from kedro import KedroDeprecationWarning
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
@@ -23,7 +20,6 @@ from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
     _run_node_synchronization,
-    _SharedMemoryDataset,
 )
 from tests.runner.conftest import (
     exception_fn,
@@ -35,23 +31,21 @@ from tests.runner.conftest import (
 )
 
 
-def test_deprecation():
-    class_name = "_SharedMemoryDataSet"
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module("kedro.runner.parallel_runner"), class_name)
+class SingleProcessDataset(AbstractDataset):
+    def __init__(self):
+        self._SINGLE_PROCESS = True
+
+    def _load(self):
+        pass
+
+    def _save(self):
+        pass
+
+    def _describe(self):
+        pass
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 class TestValidParallelRunner:
-    def test_create_default_data_set(self):
-        # data_set is a proxy to a dataset in another process.
-        data_set = ParallelRunner().create_default_data_set("")
-        assert isinstance(data_set, _SharedMemoryDataset)
-
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
@@ -80,9 +74,6 @@ class TestValidParallelRunner:
         assert result["Z"] == ("42", "42", "42")
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 class TestMaxWorkers:
     @pytest.mark.parametrize("is_async", [False, True])
     @pytest.mark.parametrize(
@@ -139,17 +130,20 @@ class TestMaxWorkers:
         assert parallel_runner._max_workers == _MAX_WINDOWS_WORKERS
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
-    def test_task_validation(self, is_async, fan_out_fan_in, catalog):
+    def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise the lambda function."""
         catalog.add_feed_dict({"A": 42})
         pipeline = modular_pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
+
+    def test_task_dataset_validation(self, is_async, fan_out_fan_in, catalog):
+        """ParallelRunner cannot serialise datasets marked with `_SINGLE_PROCESS`."""
+        catalog.add("A", SingleProcessDataset())
+        with pytest.raises(AttributeError):
+            ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
 
     def test_task_exception(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(feed_dict={"A": 42})
@@ -175,7 +169,7 @@ class TestInvalidParallelRunner:
         with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_data_set_not_serialisable(self, is_async, fan_out_fan_in):
+    def test_dataset_not_serialisable(self, is_async, fan_out_fan_in):
         """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """
@@ -252,13 +246,9 @@ class LoggingDataset(AbstractDataset):
         return {}
 
 
-if not sys.platform.startswith("win"):
-    ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
+ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):

@@ -13,7 +13,7 @@ jupyter:
     name: python3
 ---
 
-<!-- This is markdown extracted from the Jupyter notebook of the same name. If you want to change the content to publish as new HTML on docs.kedro.org, first `pip install jupytext`. Then open the markdown (this page) make your changes and save. Next, type `jupytext --set-formats md,ipynb add_kedro_to_a_notebook.md` on the command line to regenerate the notebook. -->
+<!-- This is markdown extracted from the Jupyter notebook of the same name. If you want to change the content to publish as new HTML on docs.kedro.org, first `pip install jupytext`. Then open the markdown (this page) in a basic text editor (not an IDE) to make and save your changes. Next, type `jupytext --set-formats md,ipynb add_kedro_to_a_notebook.md` on the command line in the folder this file is located and regenerate the notebook. -->
 
 
 # Add Kedro features to a notebook
@@ -99,7 +99,7 @@ r2_score(y_test, y_pred)
 ## Use Kedro for data processing
 Even if you’re not ready to work with a full Kedro project, you can still use its for data handling within an existing notebook project. This section shows you how.
 
-Kedro’s Data Catalog is a registry of all data sources available for use by the project. It offers a separate place to declare details of the datasets your projects use. Kedro provides [built-in datasets for different file types and file systems](/kedro_datasets) so you don’t have to write any of the logic for reading or writing data.
+Kedro’s Data Catalog is a registry of all data sources available for use by the project. It offers a separate place to declare details of the datasets your projects use. Kedro provides built-in datasets for different file types and file systems so you don’t have to write any of the logic for reading or writing data.
 
 Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames, and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml, and beyond. It relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. You can pass arguments in to load and save operations, and use versioning and credentials for data access.
 
@@ -107,15 +107,15 @@ To start using the Data Catalog, you'll need a `catalog.yml` to define datasets 
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: data/shuttles.xlsx
 ```
 
@@ -276,7 +276,7 @@ r2_score(y_test, y_pred)
 ```
 
 ## Use Kedro configuration
-Kedro offers a [configuration loader](/kedro.config.ConfigLoader) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
+Kedro offers a [configuration loader](/kedro.config.OmegaConfigLoader) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
 
 ### Use Kedro's configuration loader to load "magic values"
 To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follows:
@@ -284,7 +284,7 @@ To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follo
 ```python
 from kedro.config import OmegaConfigLoader
 
-conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
+conf_loader = OmegaConfigLoader(conf_source=".")
 ```
 
 ```python
@@ -348,7 +348,7 @@ To load `catalog.yml` the code is as follows:
 from kedro.config import OmegaConfigLoader
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
+conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 
 # Create the DataCatalog instance from the configuration
@@ -372,7 +372,7 @@ Code in a Kedro project runs in one or more pipelines, where a pipeline is a ser
 from kedro.config import OmegaConfigLoader
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
+conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 conf_params = conf_loader["parameters"]
 
@@ -546,7 +546,7 @@ And that's it. The notebook code has been refactored into a series of functions.
 from kedro.config import OmegaConfigLoader
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
+conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 conf_params = conf_loader["parameters"]
 

@@ -9,11 +9,11 @@ def mocked_save(mocker):
 
 
 @pytest.fixture
-def mocked_data_set(mocked_save):
+def mocked_dataset(mocked_save):
     return LambdaDataset(None, mocked_save)
 
 
-def test_data_set_describe():
+def test_dataset_describe():
     """Test `describe` method invocation"""
 
     def _dummy_load():
@@ -56,8 +56,8 @@ class TestLambdaDatasetLoad:
     def test_load_invocation(self, mocker):
         """Test the basic `load` method invocation"""
         mocked_load = mocker.Mock(return_value=42)
-        data_set = LambdaDataset(mocked_load, None)
-        result = data_set.load()
+        dataset = LambdaDataset(mocked_load, None)
+        result = dataset.load()
 
         mocked_load.assert_called_once_with()
         assert result == 42
@@ -69,9 +69,9 @@ class TestLambdaDatasetLoad:
         def internal_load():
             raise FileNotFoundError(error_message)
 
-        data_set = LambdaDataset(internal_load, None)
+        dataset = LambdaDataset(internal_load, None)
         with pytest.raises(DatasetError, match=error_message):
-            data_set.load()
+            dataset.load()
 
     def test_load_undefined(self):
         """Check the error if `LambdaDataset.__load` is None"""
@@ -88,12 +88,12 @@ class TestLambdaDatasetLoad:
 
 
 class TestLambdaDatasetSave:
-    def test_save_invocation(self, mocked_save, mocked_data_set):
+    def test_save_invocation(self, mocked_save, mocked_dataset):
         """Test the basic `save` method invocation"""
-        mocked_data_set.save("foo")
+        mocked_dataset.save("foo")
         mocked_save.assert_called_once_with("foo")
 
-    def test_save_raises_error(self, mocked_save, mocked_data_set):
+    def test_save_raises_error(self, mocked_save, mocked_dataset):
         """Check the error if saving the LambdaDataset raises an exception"""
         error_message = "Cannot save to an existing file"
         mocked_save.side_effect = FileExistsError(error_message)
@@ -103,7 +103,7 @@ class TestLambdaDatasetSave:
             + error_message
         )
         with pytest.raises(DatasetError, match=pattern):
-            mocked_data_set.save("data")
+            mocked_dataset.save("data")
         mocked_save.assert_called_once_with("data")
 
     def test_save_undefined(self):
@@ -111,11 +111,11 @@ class TestLambdaDatasetSave:
         with pytest.raises(DatasetError, match="Cannot save to data set"):
             LambdaDataset(None, None).save(42)
 
-    def test_save_none(self, mocked_save, mocked_data_set):
+    def test_save_none(self, mocked_save, mocked_dataset):
         """Check the error when passing None to `save` call"""
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
-            mocked_data_set.save(None)
+            mocked_dataset.save(None)
         assert mocked_save.called == 0
 
     def test_save_not_callable(self):
@@ -131,25 +131,25 @@ class TestLambdaDatasetExists:
     def test_exists_invocation(self, mocker):
         """Test the basic `exists` method invocation"""
         mocked_exists = mocker.Mock(return_value=True)
-        data_set = LambdaDataset(None, None, mocked_exists)
-        result = data_set.exists()
+        dataset = LambdaDataset(None, None, mocked_exists)
+        result = dataset.exists()
         mocked_exists.assert_called_once_with()
         assert result is True
 
     def test_exists_not_implemented(self):
         """Check that `exists` method returns False by default"""
-        data_set = LambdaDataset(None, None)
-        assert not data_set.exists()
+        dataset = LambdaDataset(None, None)
+        assert not dataset.exists()
 
     def test_exists_raises_error(self, mocker):
         """Check the error when `exists` raises an exception"""
         mocked_exists = mocker.Mock()
         error_message = "File not found"
         mocked_exists.side_effect = FileNotFoundError(error_message)
-        data_set = LambdaDataset(None, None, mocked_exists)
+        dataset = LambdaDataset(None, None, mocked_exists)
 
         with pytest.raises(DatasetError, match=error_message):
-            data_set.exists()
+            dataset.exists()
         mocked_exists.assert_called_once_with()
 
     def test_exists_not_callable(self):
@@ -165,24 +165,24 @@ class TestLambdaDatasetRelease:
     def test_release_invocation(self, mocker):
         """Test the basic `release` method invocation"""
         mocked_release = mocker.Mock()
-        data_set = LambdaDataset(None, None, None, mocked_release)
-        data_set.release()
+        dataset = LambdaDataset(None, None, None, mocked_release)
+        dataset.release()
         mocked_release.assert_called_once_with()
 
     def test_release_not_implemented(self):
         """Check that `release` does nothing by default"""
-        data_set = LambdaDataset(None, None)
-        data_set.release()
+        dataset = LambdaDataset(None, None)
+        dataset.release()
 
     def test_release_raises_error(self, mocker):
         """Check the error when `release` raises an exception"""
         mocked_release = mocker.Mock()
         error_message = "File not found"
         mocked_release.side_effect = FileNotFoundError(error_message)
-        data_set = LambdaDataset(None, None, None, mocked_release)
+        dataset = LambdaDataset(None, None, None, mocked_release)
 
         with pytest.raises(DatasetError, match=error_message):
-            data_set.release()
+            dataset.release()
         mocked_release.assert_called_once_with()
 
     def test_release_not_callable(self):

@@ -136,7 +136,7 @@ jobs:
       - setup
       - add_ssh_keys
       - run:
-          name: Check the Kedro version
+          name: Check Kedro version
           command: |
             KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
             if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"

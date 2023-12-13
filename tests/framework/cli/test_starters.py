@@ -1152,6 +1152,7 @@ class TestToolsAndExampleFromConfigFile:
             "python_package": "my_project",
         }
         _write_yaml(Path("config.yml"), config)
+        shutil.copytree(TEMPLATE_PATH, "template")
         result = CliRunner().invoke(
             fake_kedro_cli,
             [
@@ -1159,7 +1160,7 @@ class TestToolsAndExampleFromConfigFile:
                 "-v",
                 "--config",
                 "config.yml",
-                "--starter=spaceflights-pandas-viz",
+                "--starter=template",
             ],
         )
 

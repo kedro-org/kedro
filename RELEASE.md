@@ -1,4 +1,4 @@
-# Upcoming Release 0.19.1
+# Upcoming Release 0.19.2
 
 ## Major features and improvements
 
@@ -9,6 +9,11 @@
 ## Documentation changes
 
 ## Community contributions
+
+# Release 0.19.1
+
+## Bug fixes and other changes
+* Loosened pin for `kedro-telemtry` to fix dependency issues in `0.19.0`.
 
 # Release 0.19.0
 

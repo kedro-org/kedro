@@ -29,6 +29,13 @@ class TestValidSequentialRunner:
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
+    def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
+        catalog.add_feed_dict({"A": 42})
+        SequentialRunner().run(fan_out_fan_in, catalog)
+        assert (
+            "Asynchronous mode is disabled for loading and saving data." in caplog.text
+        )
+
 
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSeqentialRunnerBranchlessPipeline:

@@ -1,11 +1,11 @@
 # Migration guide for config loaders
-The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. To ensure a smooth transition, we strongly recommend you adopt the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) as soon as possible.
+The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and were removed in Kedro `0.19.0`. To use that release or later, you must adopt the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader).
 This migration guide outlines the primary distinctions between the old loaders and the `OmegaConfigLoader`, providing step-by-step instructions on updating your code base to utilise the new class effectively.
 
-## [`ConfigLoader`](/kedro.config.ConfigLoader) to [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)
+## `ConfigLoader` to `OmegaConfigLoader`
 
-### 1. Install the Required Library
-The [`OmegaConfigLoader`](advanced_configuration.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). In order to use it you need to ensure you have both a version of Kedro of `0.18.5` or above and `omegaconf` installed.
+### 1. Install the required library
+The [`OmegaConfigLoader`](configuration_basics.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). To use it you need Kedro (version `0.18.5` or later) and `omegaconf` installed.
 You can install both using `pip`:
 
 ```bash
@@ -28,7 +28,7 @@ To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` consta
 + CONFIG_LOADER_CLASS = OmegaConfigLoader
 ```
 
-### 3. Import Statements
+### 3. Import statements
 Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoader`:
 
 ```diff
@@ -37,10 +37,10 @@ Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoa
 + from kedro.config import OmegaConfigLoader
 ```
 
-### 4. File Format Support
+### 4. File format support
 `OmegaConfigLoader` supports only `yaml` and `json` file formats. Make sure that all your configuration files are in one of these formats. If you previously used other formats with `ConfigLoader`, convert them to `yaml` or `json`.
 
-### 5. Load Configuration
+### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `ConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
 When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
 
@@ -56,20 +56,20 @@ When you migrate to use `OmegaConfigLoader` it  requires you to fetch configurat
 
 In this example, `"catalog"` is the key to the default catalog patterns specified in the `OmegaConfigLoader` class.
 
-### 6. Exception Handling
+### 6. Exception handling
 For error and exception handling, most errors are the same. Those you need to be aware of that are different between the original `ConfigLoader` and `OmegaConfigLoader` are as follows:
 * `OmegaConfigLoader` throws a `MissingConfigException` when configuration paths don't exist, rather than the `ValueError` used in `ConfigLoader`.
 * In `OmegaConfigLoader`, if there is bad syntax in your configuration files, it will trigger a `ParserError` instead of a `BadConfigException` used in `ConfigLoader`.
 
-## [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader) to [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)
+## `TemplatedConfigLoader` to `OmegaConfigLoader`
 
 ### 1. Install the required library
-The [`OmegaConfigLoader`](advanced_configuration.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). Features that replace `TemplatedConfigLoader` functionality have been released in later versions, so we recommend users
-to install at least Kedro version `0.18.13` to properly replace the `TemplatedConfigLoader` with `OmegaConfigLoader`.
+The [`OmegaConfigLoader`](configuration_basics.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). Features that replace `TemplatedConfigLoader` functionality have been released in later versions, so we recommend users
+install Kedro version `0.18.13` or later to properly replace the `TemplatedConfigLoader` with `OmegaConfigLoader`.
 You can install both this Kedro version and `omegaconf` using `pip`:
 
 ```bash
-pip install "kedro>=0.18.13, <0.19.0"
+pip install "kedro>=0.18.13"
 ```
 This would be the minimum required Kedro version which includes `omegaconf` as a dependency and the necessary functionality to replace `TemplatedConfigLoader`.
 Or you can run:
@@ -132,8 +132,8 @@ Suppose you are migrating a templated **catalog** file from using `TemplatedConf
 
 - datasets:
 + _datasets:
-    csv: "pandas.CSVDataSet"
-    spark: "spark.SparkDataSet"
+    csv: "pandas.CSVDataset"
+    spark: "spark.SparkDataset"
 
 ```
 
@@ -175,8 +175,8 @@ bucket_name: "my_s3_bucket"
 key_prefix: "my/key/prefix/"
 
 datasets:
-    csv: "pandas.CSVDataSet"
-    spark: "spark.SparkDataSet"
+    csv: "pandas.CSVDataset"
+    spark: "spark.SparkDataset"
 
 folders:
     raw: "01_raw"
@@ -211,18 +211,18 @@ raw_car_data:
 
 ### 8. Deprecation of Jinja2
 `OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../data/kedro_dataset_factories.md).
-If you take the example from [the `TemplatedConfigLoader` with Jinja2 documentation](advanced_configuration.md#how-to-use-jinja2-syntax-in-configuration) you can rewrite your configuration as follows to work with `OmegaConfigLoader`:
+The following example shows how you can rewrite your Jinja2 configuration to work with `OmegaConfigLoader`:
 
 ```diff
 # catalog.yml
 - {% for speed in ['fast', 'slow'] %}
 - {{ speed }}-trains:
 + "{speed}-trains":
-    type: MemoryDataSet
+    type: MemoryDataset
 
 - {{ speed }}-cars:
 + "{speed}-cars":
-    type: pandas.CSVDataSet
+    type: pandas.CSVDataset
 -    filepath: s3://${bucket_name}/{{ speed }}-cars.csv
 +    filepath: s3://${bucket_name}/{speed}-cars.csv
     save_args:

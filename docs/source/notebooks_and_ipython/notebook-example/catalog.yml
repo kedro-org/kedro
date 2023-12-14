@@ -1,0 +1,11 @@
+companies:
+  type: pandas.CSVDataset
+  filepath: data/companies.csv
+
+reviews:
+  type: pandas.CSVDataset
+  filepath: data/reviews.csv
+
+shuttles:
+  type: pandas.ExcelDataset
+  filepath: data/shuttles.xlsx

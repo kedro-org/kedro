@@ -4,7 +4,6 @@ This module implements commands available from the kedro CLI.
 """
 import importlib
 import sys
-import webbrowser
 from collections import defaultdict
 from pathlib import Path
 from typing import Sequence
@@ -79,19 +78,6 @@ def info():
             )
     else:
         click.echo("No plugins installed")
-
-
-@cli.command(short_help="See the kedro API docs and introductory tutorial.")
-def docs():
-    """Display the online API docs and introductory tutorial in the browser. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro docs' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-    index_path = f"https://kedro.readthedocs.io/en/{version}"
-    click.echo(f"Opening {index_path}")
-    webbrowser.open(index_path)
 
 
 def _init_plugins() -> None:

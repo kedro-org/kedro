@@ -39,7 +39,7 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert "E" in outputs
         assert len(outputs) == 1
 
-    def test_no_data_sets(self, is_async, branchless_pipeline):
+    def test_no_datasets(self, is_async, branchless_pipeline):
         catalog = DataCatalog({}, {"ds1": 42})
         outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
@@ -236,7 +236,7 @@ class TestSequentialRunnerRelease:
     )
     def test_confirms(self, mocker, test_pipeline, is_async):
         fake_dataset_instance = mocker.Mock()
-        catalog = DataCatalog(data_sets={"ds1": fake_dataset_instance})
+        catalog = DataCatalog(datasets={"ds1": fake_dataset_instance})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
         fake_dataset_instance.confirm.assert_called_once_with()
 

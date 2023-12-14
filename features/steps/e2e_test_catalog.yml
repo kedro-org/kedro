@@ -1,20 +1,20 @@
 A:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/input_1.csv
   save_args:
     index: False
 C:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/input_2.csv
   save_args:
     index: False
 E:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/02_intermediate/output_1.csv
   save_args:
     index: False
 F:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/02_intermediate/output_2.csv
   save_args:
     index: False

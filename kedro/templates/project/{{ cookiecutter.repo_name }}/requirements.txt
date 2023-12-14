@@ -1,0 +1,13 @@
+black~=22.0
+ipython~=8.10; python_version >= '3.8'
+jupyter~=1.0
+jupyterlab_server>=2.11.1, <2.16.0
+jupyterlab~=3.0, <3.6.0
+kedro~={{ cookiecutter.kedro_version }}
+kedro-telemetry>=0.3.1
+pytest-cov~=3.0
+pytest-mock>=1.7.1, <2.0
+pytest~=7.2
+ruff~=0.0.290
+# Pin problematic traitlets release -  https://github.com/jupyter/notebook/issues/7048
+traitlets<5.10.0

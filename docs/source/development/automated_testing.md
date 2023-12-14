@@ -1,4 +1,4 @@
-# Automated Testing
+# Automated testing
 
 An important step towards achieving high code quality and maintainability in your Kedro project is the use of automated tests. Let's look at how you can set this up.
 ## Introduction

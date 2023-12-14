@@ -2,19 +2,24 @@
 
 This is a growing set of technical FAQs. The [product FAQs on the Kedro website](https://kedro.org/#faq) explain how Kedro can answer the typical use cases and requirements of data scientists, data engineers, machine learning engineers and product owners.
 
-## Visualisation
 
-* [Can I annotate a Kedro-Viz visualisation to show different data layers](../visualisation/kedro-viz_visualisation.md#visualise-layers)?
+## Installing Kedro
+* [How do I install a development version of Kedro](https://github.com/kedro-org/kedro/wiki/Guidelines-for-contributing-developers)?
+
+* **How can I check the version of Kedro installed?** To check the version installed, type `kedro -V` in your terminal window.
+
+## Kedro documentation
+* {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
+* {py:mod}`Where can I find the documentation for Kedro's datasets <kedro-datasets:kedro_datasets>`?
 
 ## Working with Jupyter
 
-* [How can I convert functions from Jupyter Notebooks into Kedro nodes](../notebooks_and_ipython/kedro_and_notebooks.md#convert-functions-from-jupyter-notebooks-into-kedro-nodes)?
-
+* [How can I convert functions from Jupyter Notebooks into Kedro nodes](../notebooks_and_ipython/kedro_and_notebooks.md#how-to-use-tags-to-convert-functions-from-jupyter-notebooks-into-kedro-nodes)?
 * [How do I connect a Kedro project kernel to other Jupyter clients like JupyterLab](../notebooks_and_ipython/kedro_and_notebooks.md#ipython-jupyterlab-and-other-jupyter-clients)?
 
 ## Kedro project development
 
-* [How do I write my own Kedro starter projects](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter)?
+* [How do I write my own Kedro starter projects](../starters/create_a_starter.md)?
 
 ## Configuration
 
@@ -32,9 +37,9 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 ### Advanced topics
 
 * [How do I change which configuration files are loaded](../configuration/advanced_configuration.md#how-to-change-which-configuration-files-are-loaded)?
+* [How do I use a custom configuration loader](../configuration/advanced_configuration.md#how-to-use-a-custom-configuration-loader)?
 * [How do I ensure non default configuration files get loaded](../configuration/advanced_configuration.md#how-to-ensure-non-default-configuration-files-get-loaded)?
 * [How do I bypass the configuration loading rules](../configuration/advanced_configuration.md#how-to-bypass-the-configuration-loading-rules)?
-* [How do I use Jinja2 syntax in configuration](../configuration/advanced_configuration.md#how-to-use-jinja2-syntax-in-configuration)?
 * [How do I do templating with the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader)?
 * [How to use global variables with the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader)?
 * [How do I use resolvers in the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-resolvers-in-the-omegaconfigloader)?

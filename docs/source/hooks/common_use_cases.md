@@ -143,13 +143,13 @@ These credentials will be used to access these datasets in the data catalog:
 
 ```yaml
 weather:
- type: spark.SparkDataSet
+ type: spark.SparkDataset
  filepath: s3a://your_bucket/data/01_raw/weather*
  file_format: csv
  credentials: s3_creds
 
 cars:
- type: pandas.CSVDataSet
+ type: pandas.CSVDataset
  filepath: https://your_data_store.blob.core.windows.net/data/01_raw/cars.csv
  file_format: csv
  credentials: abs_creds
@@ -189,7 +189,7 @@ class AzureSecretsHook:
         }
 ```
 
-Finally, [register the hook](./introduction.md#registering-your-hook-implementations-with-kedro) in your `settings.py` file:
+Finally, [register the Hook](./introduction.md#registering-the-hook-implementation-with-kedro) in `settings.py`:
 
 ```python
 from my_project.hooks import AzureSecretsHook

@@ -15,7 +15,7 @@ The following tutorial uses a different approach and shows how to deploy a Kedro
 
 [Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster easily in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
 
-The tutorial discusses how to run the [example Iris classification pipeline](../get_started/new_project.md#create-a-new-project-containing-example-code) on a local Airflow cluster with Astronomer. You may also consider using our [`astro-airflow-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris) which provides a template containing the boilerplate code that the tutorial describes:
+The tutorial discusses how to run the example Iris classification pipeline on a local Airflow cluster with Astronomer. You may also consider using our [`astro-airflow-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris) which provides a template containing the boilerplate code that the tutorial describes:
 
 ```shell
 kedro new --starter=astro-airflow-iris
@@ -36,7 +36,7 @@ To follow this tutorial, ensure you have the following:
 
 ### Tutorial project setup
 
-1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/create-project). Let's call it `kedro-airflow-iris`
+1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project). Let's call it `kedro-airflow-iris`
 
     ```shell
     mkdir kedro-airflow-iris
@@ -44,10 +44,10 @@ To follow this tutorial, ensure you have the following:
     astro dev init
     ```
 
-2. Create a new Kedro project using the `pandas-iris` starter. You can use the default value in the project creation process:
+2. Create a new Kedro project using the `astro-airflow-iris` starter. You can use the default value in the project creation process:
 
     ```shell
-    kedro new --starter=pandas-iris
+    kedro new --starter=astro-airflow-iris
     ```
 
 3. Copy all files and directories under `new-kedro-project`, which was the default project name created in step 2, to the root directory so Kedro and Astro CLI share the same project root:
@@ -84,7 +84,7 @@ To follow this tutorial, ensure you have the following:
     pip install kedro-airflow~=0.4
     ```
 
-5. Run `pip install -r src/requirements.txt` to install all dependencies.
+5. Run `pip install -r requirements.txt` to install all dependencies.
 
 ### Deployment process
 
@@ -95,25 +95,25 @@ To follow this tutorial, ensure you have the following:
 
 ```yaml
 example_iris_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/iris.csv
 example_train_x:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/05_model_input/example_train_x.pkl
 example_train_y:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/05_model_input/example_train_y.pkl
 example_test_x:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/05_model_input/example_test_x.pkl
 example_test_y:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/05_model_input/example_test_y.pkl
 example_model:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/06_models/example_model.pkl
 example_predictions:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/07_model_output/example_predictions.pkl
 ```
 
@@ -155,7 +155,7 @@ kedro airflow create --target-dir=dags/ --env=airflow
 astro dev start
 ```
 
-If you visit the Airflow UI, you should now see the Kedro pipeline as an Airflow DAG:
+If you examine the Airflow UI, you should now see the Kedro pipeline as an Airflow DAG:
 
 ![](../meta/images/kedro_airflow_dag.png)
 

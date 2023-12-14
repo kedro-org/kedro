@@ -67,7 +67,7 @@ def _validate_datasets_exist(
     inputs = {_strip_transcoding(k) for k in inputs}
     outputs = {_strip_transcoding(k) for k in outputs}
 
-    existing = {_strip_transcoding(ds) for ds in pipe.data_sets()}
+    existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
     non_existent = (inputs | outputs | parameters) - existing
     if non_existent:
         raise ModularPipelineError(
@@ -150,7 +150,7 @@ def _get_param_names_mapping(
     return params
 
 
-def pipeline(  # noqa: too-many-arguments
+def pipeline(  # noqa: PLR0913
     pipe: Iterable[Node | Pipeline] | Pipeline,
     *,
     inputs: str | set[str] | dict[str, str] | None = None,

@@ -11,8 +11,7 @@ kedro.config
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.config.ConfigLoader
-   kedro.config.TemplatedConfigLoader
+   kedro.config.AbstractConfigLoader
    kedro.config.OmegaConfigLoader
 
 .. rubric:: Exceptions

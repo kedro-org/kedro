@@ -49,7 +49,7 @@ def cleanup_micropackages(fake_repo_path, fake_package_path):
 def cleanup_pipelines(fake_repo_path, fake_package_path):
     pipes_path = fake_package_path / "pipelines"
     old_pipelines = {p.name for p in pipes_path.iterdir() if p.is_dir()}
-    requirements_txt = fake_repo_path / "src" / "requirements.txt"
+    requirements_txt = fake_repo_path / "requirements.txt"
     requirements = requirements_txt.read_text()
     yield
 

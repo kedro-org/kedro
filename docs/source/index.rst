@@ -23,9 +23,9 @@ Welcome to Kedro's documentation!
     :target: https://opensource.org/license/apache2-0-php/
     :alt: License is Apache 2.0
 
-.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
+.. image:: https://img.shields.io/badge/3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
     :target: https://pypi.org/project/kedro/
-    :alt: Python version 3.7, 3.8, 3.9, 3.10, 3.11
+    :alt: Python version 3.8, 3.9, 3.10, 3.11
 
 .. image:: https://badge.fury.io/py/kedro.svg
     :target: https://pypi.org/project/kedro/
@@ -60,31 +60,15 @@ Welcome to Kedro's documentation!
    :caption: Learn about Kedro
 
    introduction/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    get_started/index.md
+   course/index.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Tutorial and basic Kedro usage
 
    tutorial/spaceflights_tutorial.md
-
-.. toctree::
-   :maxdepth: 2
-
    visualisation/index.md
-
-.. toctree::
-   :maxdepth: 2
-
-   experiment_tracking/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    notebooks_and_ipython/index.md
    resources/index.md
 
@@ -92,53 +76,21 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Kedro projects
 
-   kedro_project_setup/index.md
-
-.. toctree::
-   :maxdepth: 2
-
+   starters/index.md
    configuration/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    data/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    nodes_and_pipelines/index.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Advanced usage
 
+   kedro_project_setup/index.md
    extend_kedro/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    hooks/index.md
-
-
-.. toctree::
-   :maxdepth: 2
-
    logging/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    integrations/pyspark_integration.md
-
-.. toctree::
-   :maxdepth: 2
-
    development/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    deployment/index.md
 
 .. toctree::
@@ -157,7 +109,6 @@ API documentation
    :recursive:
 
    kedro
-   kedro_datasets
 
 Indices and tables
 ==================

@@ -8,12 +8,13 @@ import shutil
 import sys
 import tarfile
 import tempfile
+import toml
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Iterable, Iterator, List, Tuple, Union
+from typing import Any, Iterable, Iterator
 
 import click
-from build.util import project_wheel_metadata
+from omegaconf import OmegaConf
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
 from rope.base.project import Project
@@ -22,6 +23,7 @@ from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
 from setuptools.discovery import FlatLayoutPackageFinder
 
+from build.util import project_wheel_metadata
 from kedro.framework.cli.pipeline import (
     _assert_pkg_name_ok,
     _check_pipeline_name,
@@ -154,7 +156,7 @@ def micropkg():
     help="Location of a configuration file for the fsspec filesystem used to pull the package.",
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def pull_package(  # noqa: unused-argument, too-many-arguments
+def pull_package(  # noqa: PLR0913
     metadata: ProjectMetadata,
     package_path,
     env,
@@ -189,7 +191,7 @@ def pull_package(  # noqa: unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-def _pull_package(  # noqa: too-many-arguments
+def _pull_package(  # noqa: PLR0913
     package_path: str,
     metadata: ProjectMetadata,
     env: str = None,
@@ -243,7 +245,7 @@ def _pull_package(  # noqa: too-many-arguments
         package_reqs = _get_all_library_reqs(library_meta)
 
         if package_reqs:
-            requirements_txt = metadata.source_dir / "requirements.txt"
+            requirements_txt = metadata.project_path / "requirements.txt"
             _append_package_reqs(requirements_txt, package_reqs, package_name)
 
         _clean_pycache(temp_dir_path)
@@ -258,10 +260,7 @@ def _pull_package(  # noqa: too-many-arguments
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
-    # noqa: import-outside-toplevel
-    import anyconfig  # for performance reasons
-
-    config_dict = anyconfig.load(metadata.config_file)
+    config_dict = toml.load(metadata.config_file)
     config_dict = config_dict["tool"]["kedro"]
     build_specs = config_dict.get("micropkg", {}).get("pull")
 
@@ -282,10 +281,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
 
 def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
-    # noqa: import-outside-toplevel
-    import anyconfig  # for performance reasons
-
-    config_dict = anyconfig.load(metadata.config_file)
+    config_dict = toml.load(metadata.config_file)
     config_dict = config_dict["tool"]["kedro"]
     build_specs = config_dict.get("micropkg", {}).get("package")
 
@@ -331,7 +327,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 )
 @click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
-def package_micropkg(  # noqa: too-many-arguments
+def package_micropkg(  # noqa: PLR0913
     metadata: ProjectMetadata,
     module_path,
     env,
@@ -366,13 +362,12 @@ def package_micropkg(  # noqa: too-many-arguments
 
 def _get_fsspec_filesystem(location: str, fs_args: str | None):
     # noqa: import-outside-toplevel
-    import anyconfig
     import fsspec
 
     from kedro.io.core import get_protocol_and_path
 
     protocol, _ = get_protocol_and_path(location)
-    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
+    fs_args_config = OmegaConf.to_container(OmegaConf.load(fs_args)) if fs_args else {}
 
     try:
         return fsspec.filesystem(protocol, **fs_args_config)
@@ -443,7 +438,7 @@ def _rename_files(conf_source: Path, old_name: str, new_name: str):
         config_file.rename(config_file.parent / new_config_name)
 
 
-def _refactor_code_for_unpacking(  # noqa: too-many-arguments
+def _refactor_code_for_unpacking(  # noqa: PLR0913
     project: Project,
     package_path: Path,
     tests_path: Path,
@@ -524,7 +519,7 @@ def _refactor_code_for_unpacking(  # noqa: too-many-arguments
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(  # noqa: too-many-arguments, too-many-locals
+def _install_files(  # noqa: PLR0913, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
@@ -824,13 +819,10 @@ def _refactor_code_for_package(
         _move_package_with_conflicting_name(tests_target, "tests")
 
 
-_SourcePathType = Union[Path, List[Tuple[Path, str]]]
-
-
-def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
+def _generate_sdist_file(  # noqa: PLR0913,too-many-locals
     micropkg_name: str,
     destination: Path,
-    source_paths: tuple[_SourcePathType, ...],
+    source_paths: tuple[Path, Path, list[tuple[Path, str]]],
     version: str,
     metadata: ProjectMetadata,
     alias: str = None,
@@ -843,20 +835,24 @@ def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
 
         project = Project(temp_dir_path)  # project where to do refactoring
         _refactor_code_for_package(
-            project, package_source, tests_source, alias, metadata  # type: ignore
+            project,
+            package_source,
+            tests_source,
+            alias,
+            metadata,
         )
         project.close()
 
         # Copy & "refactor" config
         _, _, conf_target = _get_package_artifacts(temp_dir_path, package_name)
-        _sync_path_list(conf_source, conf_target)  # type: ignore
+        _sync_path_list(conf_source, conf_target)
         if conf_target.is_dir() and alias:
             _rename_files(conf_target, micropkg_name, alias)
 
         # Build a pyproject.toml on the fly
         try:
             install_requires = _make_install_requires(
-                package_source / "requirements.txt"  # type: ignore
+                package_source / "requirements.txt"
             )
         except Exception as exc:
             click.secho("FAILED", fg="red")
@@ -962,8 +958,8 @@ def _append_package_reqs(
             file.write(sep.join(sorted_reqs))
 
     click.secho(
-        "Use 'kedro build-reqs' to compile and 'pip install -r src/requirements.lock' to install "
-        "the updated list of requirements."
+        "Use 'pip-compile requirements.txt --output-file requirements.lock' to compile "
+        "and 'pip install -r requirements.lock' to install the updated list of requirements."
     )
 
 

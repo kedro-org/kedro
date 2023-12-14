@@ -5,6 +5,7 @@ https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 # Instantiated project hooks.
 # For example, after creating a hooks.py and defining a ProjectHooks class there, do
 # from {{cookiecutter.python_package}}.hooks import ProjectHooks
+# Hooks are executed in a Last-In-First-Out (LIFO) order.
 # HOOKS = (ProjectHooks(),)
 
 # Installed plugins for which to disable hook auto-registration.
@@ -22,16 +23,19 @@ https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 # CONF_SOURCE = "conf"
 
 # Class that manages how configuration is loaded.
-from kedro.config import OmegaConfigLoader  # noqa: import-outside-toplevel
+# from kedro.config import OmegaConfigLoader  # noqa: import-outside-toplevel
 
-CONFIG_LOADER_CLASS = OmegaConfigLoader
+# CONFIG_LOADER_CLASS = OmegaConfigLoader
+
 # Keyword arguments to pass to the `CONFIG_LOADER_CLASS` constructor.
-# CONFIG_LOADER_ARGS = {
-#       "config_patterns": {
-#           "spark" : ["spark*/"],
-#           "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
-#       }
-# }
+CONFIG_LOADER_ARGS = {
+    "base_env": "base",
+    "default_run_env": "local",
+    # "config_patterns": {
+    #     "spark" : ["spark*/"],
+    #     "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
+    # }
+}
 
 # Class that manages Kedro's library components.
 # from kedro.framework.context import KedroContext

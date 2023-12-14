@@ -4,13 +4,9 @@ providing custom load, save, and exists methods without extending
 """
 from __future__ import annotations
 
-import warnings
 from typing import Any, Callable
 
 from kedro.io.core import AbstractDataset, DatasetError
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-LambdaDataSet: type[LambdaDataset]
 
 
 class LambdaDataset(AbstractDataset):
@@ -32,7 +28,7 @@ class LambdaDataset(AbstractDataset):
         >>> def load() -> pd.DataFrame:
         >>>     raise FileNotFoundError("'{}' csv file not found."
         >>>                             .format(file_name))
-        >>> data_set = LambdaDataset(load, None)
+        >>> dataset = LambdaDataset(load, None)
     """
 
     def _describe(self) -> dict[str, Any]:
@@ -80,7 +76,7 @@ class LambdaDataset(AbstractDataset):
         else:
             self.__release()
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,
@@ -121,16 +117,3 @@ class LambdaDataset(AbstractDataset):
         self.__exists = exists
         self.__release = release
         self.metadata = metadata
-
-
-def __getattr__(name):
-    if name == "LambdaDataSet":
-        alias = LambdaDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

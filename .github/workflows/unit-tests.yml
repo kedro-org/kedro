@@ -7,12 +7,17 @@ on:
         type: string
       python-version:
         type: string
+      branch:
+        type: string
+        default: ''
 jobs:
   unit-tests:
     runs-on: ${{ inputs.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.branch }}
       - name: Set up Python ${{inputs.python-version}}
         uses: actions/setup-python@v3
         with:
@@ -36,14 +41,7 @@ jobs:
         run: |
             make install-test-requirements
             make install-pre-commit
-      - name: Install pytables (only for windows)
-        if: inputs.os == 'windows-latest'
-        run: pip install tables
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests
-        if: inputs.os == 'ubuntu-latest'
         run: make test
-      - name: Run unit tests without spark (Windows)
-        if: inputs.os == 'windows-latest'
-        run: make test-no-spark

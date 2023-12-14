@@ -6,16 +6,19 @@ configuration and pipeline assembly.
 import sys
 import warnings
 
-__version__ = "0.18.13"
+__version__ = "0.19.1"
+
+
+class KedroDeprecationWarning(DeprecationWarning):
+    """Custom class for warnings about deprecated Kedro features."""
 
 
 class KedroPythonVersionWarning(UserWarning):
     """Custom class for warnings about incompatibilities with Python versions."""
 
-    pass
-
 
 if not sys.warnoptions:
+    warnings.simplefilter("default", KedroDeprecationWarning)
     warnings.simplefilter("error", KedroPythonVersionWarning)
 
 if sys.version_info >= (3, 12):

@@ -19,7 +19,7 @@ class Node:
     run user-provided functions as part of Kedro pipelines.
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         func: Callable,
         inputs: None | str | list[str] | dict[str, str],
@@ -109,6 +109,12 @@ class Node:
         self._name = name
         self._namespace = namespace
         self._tags = set(_to_list(tags))
+        for tag in self._tags:
+            if not re.match(r"[\w\.-]+$", tag):
+                raise ValueError(
+                    f"'{tag}' is not a valid node tag. It must contain only "
+                    f"letters, digits, hyphens, underscores and/or fullstops."
+                )
 
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
@@ -163,7 +169,7 @@ class Node:
 
     def __str__(self):
         def _set_to_str(xset):
-            return f"[{','.join(xset)}]"
+            return f"[{';'.join(xset)}]"
 
         out_str = _set_to_str(self.outputs) if self._outputs else "None"
         in_str = _set_to_str(self.inputs) if self._inputs else "None"
@@ -353,7 +359,12 @@ class Node:
 
         # purposely catch all exceptions
         except Exception as exc:
-            self._logger.error("Node '%s' failed with error: \n%s", str(self), str(exc))
+            self._logger.error(
+                "Node %s failed with error: \n%s",
+                str(self),
+                str(exc),
+                extra={"markup": True},
+            )
             raise exc
 
     def _run_with_no_inputs(self, inputs: dict[str, Any]):
@@ -519,7 +530,7 @@ def _node_error_message(msg) -> str:
     )
 
 
-def node(  # noqa: too-many-arguments
+def node(  # noqa: PLR0913
     func: Callable,
     inputs: None | str | list[str] | dict[str, str],
     outputs: None | str | list[str] | dict[str, str],

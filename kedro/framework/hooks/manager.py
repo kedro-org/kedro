@@ -49,10 +49,10 @@ def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:
             hook_manager.register(hooks_collection)
 
 
-def _register_hooks_setuptools(
+def _register_hooks_entry_points(
     hook_manager: PluginManager, disabled_plugins: Iterable[str]
 ) -> None:
-    """Register pluggy hooks from setuptools entrypoints.
+    """Register pluggy hooks from python package entrypoints.
 
     Args:
         hook_manager: Hook manager instance to register the hooks with.

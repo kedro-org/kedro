@@ -53,23 +53,17 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 * Global Kedro commands
   * [`kedro --help`](#get-help-on-kedro-commands)
   * [`kedro --version`](#confirm-the-kedro-version)
-  * [`kedro docs`](#open-the-kedro-documentation-in-your-browser)
   * [`kedro info`](#confirm-kedro-information)
   * [`kedro new`](#create-a-new-kedro-project)
 
 * Project-specific Kedro commands
-  * [`kedro activate-nbstripout`](#strip-output-cells)(deprecated from version 0.19.0)
-  * [`kedro build-docs`](#build-the-project-documentation) (deprecated from version 0.19.0)
-  * [`kedro build-reqs`](#build-the-projects-dependency-tree) (deprecated from version 0.19.0)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
   * [`kedro catalog resolve`](#resolve-dataset-factories-in-the-catalog)
   * [`kedro catalog rank`](#rank-dataset-factories-in-the-catalog)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro ipython`](#notebooks)
-  * [`kedro jupyter convert`](#copy-tagged-cells) (deprecated from version 0.19.0)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro lint`](#lint-your-project) (deprecated from version 0.19.0)
   * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package)
   * [`kedro micropkg pull <package_name>`](#pull-a-micro-package)
   * [`kedro package`](#deploy-the-project)
@@ -78,7 +72,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro registry describe <pipeline_name>`](#describe-a-registered-pipeline)
   * [`kedro registry list`](#list-all-registered-pipelines-in-your-project)
   * [`kedro run`](#run-the-project)
-  * [`kedro test`](#test-your-project) (deprecated from version 0.19.0)
 
 ## Global Kedro commands
 
@@ -116,7 +109,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.18.13
+v0.19.1
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -133,13 +126,7 @@ kedro_viz: 4.4.0 (hooks:global,line_magic)
 kedro new
 ```
 
-### Open the Kedro documentation in your browser
-
-```bash
-kedro docs
-```
-
-## Customise or Override Project-specific Kedro commands
+## Customise or override project-specific Kedro commands
 
 ```{note}
 All project related CLI commands should be run from the project’s root directory.
@@ -204,15 +191,15 @@ def cli():
 @click.option(
     "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
 )
-@click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
+@click.option("--nodes", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
 @env_option
-@click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
+@click.option("--tags", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
-    "--load-version",
+    "--load-versions",
     "-lv",
     type=str,
     multiple=True,
@@ -239,9 +226,8 @@ def cli():
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-# pylint: disable=too-many-arguments,unused-argument
 def run(
-    tag,
+    tags,
     env,
     runner,
     is_async,
@@ -250,7 +236,7 @@ def run(
     from_nodes,
     from_inputs,
     to_outputs,
-    load_version,
+    load_versions,
     pipeline,
     config,
     conf_source,
@@ -258,24 +244,22 @@ def run(
 ):
     """Run the pipeline."""
 
-    ##### ADD YOUR CUSTOM RUN COMMAND CODE HERE #####
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-
-    tag = _get_values_as_tuple(tag) if tag else tag
-    node_names = _get_values_as_tuple(node_names) if node_names else node_names
+    tags = tuple(tags)
+    node_names = tuple(node_names)
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params
     ) as session:
         session.run(
-            tags=tag,
+            tags=tags,
             runner=runner(is_async=is_async),
             node_names=node_names,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
             from_inputs=from_inputs,
             to_outputs=to_outputs,
-            load_versions=load_version,
+            load_versions=load_versions,
             pipeline_name=pipeline,
         )
 
@@ -285,27 +269,12 @@ def run(
 
 ### Project setup
 
-#### Build the project's dependency tree
-
-```{note}
-_This command will be deprecated from Kedro version 0.19.0._
-```
-```bash
-kedro build-reqs
-```
-
-This command runs [`pip-compile`](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) on the project's `src/requirements.txt` file and will create `src/requirements.lock` with the compiled requirements.
-
-`kedro build-reqs` has two optional arguments to specify which file to compile the requirements from and where to save the compiled requirements to. These arguments are `--input-file` and `--output-file` respectively.
-
-`kedro build-reqs` also accepts and passes through CLI options accepted by `pip-compile`. For example, `kedro build-reqs --generate-hashes` will call `pip-compile --output-file=src/requirements.lock --generate-hashes src/requirements.txt`.
-
 #### Install all package dependencies
 
-The following runs [`pip`](https://github.com/pypa/pip) to install all package dependencies specified in `src/requirements.txt`:
+The following runs [`pip`](https://github.com/pypa/pip) to install all package dependencies specified in `requirements.txt`:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 For further information, see the [documentation on installing project-specific dependencies](../kedro_project_setup/dependencies.md#install-project-specific-dependencies).
@@ -336,16 +305,16 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --runner=<runner_name>`                                  | Run the pipeline with a specific runner                                                                                                                                                                                                                 |
 | `kedro run --async`                                                 | Load and save node inputs and outputs asynchronously with threads                                                                                                                                                                                       |
 | `kedro run --env=<env_name>`                                        | Run the pipeline in the env_name environment. Defaults to local if not provided                                                                                                                                                                         |
-| [DEPRECATED] `kedro run --tag=<tag_name1>,<tag_name2>`              | Run only nodes which have any of these tags attached. <br /> Multiple instances allowed. <br /> NOTE: This flag will be deprecated in `Kedro 0.19.0`. Use the following flag `--tags` instead.                                                                                                                                                                 |
-| `kedro run --tags=<tag_name1>,<tag_name2>`                          | Run only nodes which have any of these tags attached.                                                                                            |
-| [DEPRECATED] `kedro run --load-version=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ`  | Specify a particular dataset version (timestamp) for loading. <br /> Multiple instances allowed. <br /> NOTE: This flag will be deprecated in `Kedro 0.19.0`. Use the following flag `--load-versions` instead.                            |
+| [DEPRECATED] `kedro run --tag=<tag_name1>,<tag_name2>`              | Run only nodes which have any of these tags attached. <br /> Multiple instances allowed. <br /> NOTE: This flag will be deprecated in `Kedro 0.19.0`. Use the following flag `--tags` instead.                                                          |
+| `kedro run --tags=<tag_name1>,<tag_name2>`                          | Run only nodes which have any of these tags attached.                                                                                                                                                                                                   |
+| [DEPRECATED] `kedro run --load-version=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ`  | Specify a particular dataset version (timestamp) for loading. <br /> Multiple instances allowed. <br /> NOTE: This flag will be deprecated in `Kedro 0.19.0`. Use the following flag `--load-versions` instead.                                         |
 | `kedro run --load-versions=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ` | Specify particular dataset versions (timestamp) for loading.                                                                                                                                                                                            |
 | `kedro run --pipeline=<pipeline_name>`                              | Run the whole pipeline by its name                                                                                                                                                                                                                      |
 | `kedro run --namespace=<namespace>`                                 | Run only nodes with the specified namespace                                                                                                                                                                                                             |
 | `kedro run --config=<config_file_name>.yml`                         | Specify all command line options in a named YAML configuration file                                                                                                                                                                                     |
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
-| `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/advanced_configuration.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                  |
-| `kedro run --params=<param_key1>:<value1>,<param_key2>:<value2>`    | Does a parametrised kedro run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
+| `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
+| `kedro run --params=<param_key1>=<value1>,<param_key2>=<value2>`    | Does a parametrised run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
 
 You can also combine these options together, so the following command runs all the nodes from `split` to `predict` and `report`:
 
@@ -387,44 +356,6 @@ The above command will take the bundled `.tar.gz` file and do the following:
 * Cloud storage: `kedro micropkg pull s3://<my-bucket>/<my-pipeline>-0.1.tar.gz`
 
 ### Project quality
-
-#### Build the project documentation
-
-```{note}
-_This command will be deprecated from Kedro version 0.19.0._
-```
-
-```bash
-kedro build-docs
-```
-
-The `build-docs` command builds [project documentation](../tutorial/package_a_project.md#add-documentation-to-a-kedro-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
-
-
-#### Lint your project
-
-```{note}
-_This command will be deprecated from Kedro version 0.19.0._. We still recommend to (../development/linting.md) and you can find more help here
-```
-
-```bash
-kedro lint
-```
-
-Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://github.com/PyCQA/flake8) and [`isort`](https://github.com/PyCQA/isort).
-
-
-#### Test your project
-
-```{note}
-_This command will be deprecated from Kedro version 0.19.0._
-```
-
-The following runs all `pytest` unit tests found in `src/tests`, including coverage (see the file `.coveragerc`):
-
-```bash
-kedro test
-```
 
 ### Project development
 
@@ -543,7 +474,7 @@ To start an IPython shell:
 kedro ipython
 ```
 
-The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#a-custom-kedro-kernel) makes the following variables available in your IPython or Jupyter session:
+The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
 * `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
@@ -551,29 +482,3 @@ The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#a-
 * `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
 To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined.
-
-##### Copy tagged cells
-
-```{note}
-_This command will be deprecated from Kedro version 0.19.0._
-```
-
-To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
-
-```bash
-kedro jupyter convert --all
-```
-
-##### Strip output cells
-
-```{note}
-_This command will be deprecated from Kedro version 0.19.0._
-```
-
-Output cells of Jupyter Notebook should not be tracked by git, especially if they contain sensitive information. To strip them out:
-
-```bash
-kedro activate-nbstripout
-```
-
-This command adds a `git hook` which clears all notebook output cells before committing anything to `git`. It needs to run only once per local repository.

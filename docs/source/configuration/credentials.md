@@ -8,9 +8,8 @@ If you would rather store your credentials in environment variables instead of a
 
 ## How to load credentials in code
 
-Credentials configuration can be loaded the same way as any other project configuration using any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
+Credentials configuration can be loaded the same way as any other project configuration using the configuration loader class `OmegaConfigLoader`.
 
-The following examples are valid for both, the `ConfigLoader` and the `OmegaConfigLoader`.
 
 ```python
 from pathlib import Path
@@ -20,7 +19,7 @@ from kedro.framework.project import settings
 
 # Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html#terminology)
 conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
 credentials = conf_loader["credentials"]
 ```
 
@@ -49,4 +48,4 @@ The `kedro.framework.context.KedroContext` class uses the approach above to load
 
 ## How to work with AWS credentials
 
-When you work with AWS credentials on datasets, you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
+When you work with AWS credentials on datasets, you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. See the [official AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.

@@ -40,7 +40,7 @@ Run a Prefect Server instance:
 prefect server start
 ```
 
-In a separate terminal, [create a work pool](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-pool-configuration) to organize the work and [create a work queue](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-queues) for your agent to pull from:
+In a separate terminal, [create a work pool](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-pool-configuration) to organise the work and [create a work queue](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-queues) for your agent to pull from:
 
 ```bash
 prefect work-pool create --type prefect-agent <work_pool_name>
@@ -163,7 +163,7 @@ def kedro_init(
     context = session.load_context()
     catalog = context.catalog
     logger.info("Registering datasets...")
-    unregistered_ds = pipeline.data_sets() - set(catalog.list())  # NOQA
+    unregistered_ds = pipeline.datasets() - set(catalog.list())  # NOQA
     for ds_name in unregistered_ds:
         catalog.add(ds_name, MemoryDataset())
     return {"catalog": catalog, "sess_id": session.session_id}

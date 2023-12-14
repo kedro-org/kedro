@@ -7,6 +7,9 @@ on:
         type: string
       python-version:
         type: string
+      branch:
+        type: string
+        default: ''
 
 jobs:
   lint:
@@ -14,6 +17,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.branch }}
       - name: Set up Python ${{ inputs.python-version }}
         uses: actions/setup-python@v3
         with:

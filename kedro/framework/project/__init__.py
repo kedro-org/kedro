@@ -102,9 +102,12 @@ class _ProjectSettings(LazySettings):
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())
     _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
-        "CONFIG_LOADER_CLASS", default=_get_default_class("kedro.config.ConfigLoader")
+        "CONFIG_LOADER_CLASS",
+        default=_get_default_class("kedro.config.OmegaConfigLoader"),
     )
-    _CONFIG_LOADER_ARGS = Validator("CONFIG_LOADER_ARGS", default={})
+    _CONFIG_LOADER_ARGS = Validator(
+        "CONFIG_LOADER_ARGS", default={"base_env": "base", "default_run_env": "local"}
+    )
     _DATA_CATALOG_CLASS = _IsSubclassValidator(
         "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
     )
@@ -226,6 +229,14 @@ class _ProjectLogging(UserDict):
         logging.config.dictConfig(logging_config)
         self.data = logging_config
 
+    def set_project_logging(self, package_name: str):
+        """Add the project level logging to the loggers upon provision of a package name.
+        Checks if project logger already exists to prevent overwriting, if none exists
+        it defaults to setting project logs at INFO level."""
+        if package_name not in self.data["loggers"]:
+            self.data["loggers"][package_name] = {"level": "INFO"}
+            self.configure(self.data)
+
 
 PACKAGE_NAME = None
 LOGGING = _ProjectLogging()
@@ -252,6 +263,9 @@ def configure_project(package_name: str):
     global PACKAGE_NAME  # noqa: PLW0603
     PACKAGE_NAME = package_name
 
+    if PACKAGE_NAME:
+        LOGGING.set_project_logging(PACKAGE_NAME)
+
 
 def configure_logging(logging_config: dict[str, Any]) -> None:
     """Configure logging according to ``logging_config`` dictionary."""
@@ -259,7 +273,7 @@ def configure_logging(logging_config: dict[str, Any]) -> None:
 
 
 def validate_settings():
-    """Eagerly validate that the settings module is importable. This is desirable to
+    """Eagerly validate that the settings module is importable if it exists. This is desirable to
     surface any syntax or import errors early. In particular, without eagerly importing
     the settings module, dynaconf would silence any import error (e.g. missing
     dependency, missing/mislabelled pipeline), and users would instead get a cryptic
@@ -272,8 +286,12 @@ def validate_settings():
             "'bootstrap_project'. This should happen automatically if you are using "
             "Kedro command line interface."
         )
-
-    importlib.import_module(f"{PACKAGE_NAME}.settings")
+    # Check if file exists, if it does, validate it.
+    if importlib.util.find_spec(f"{PACKAGE_NAME}.settings") is not None:  # type: ignore
+        importlib.import_module(f"{PACKAGE_NAME}.settings")
+    else:
+        logger = logging.getLogger(__name__)
+        logger.warning("No 'settings.py' found, defaults will be used.")
 
 
 def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
@@ -351,11 +369,14 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         pipeline_name = pipeline_dir.name
         if pipeline_name == "__pycache__":
             continue
+        # Prevent imports of hidden directories/files
+        if pipeline_name.startswith("."):
+            continue
 
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
-        except:  # noqa: bare-except  # noqa: E722
+        except:  # noqa: E722
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()

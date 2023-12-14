@@ -50,24 +50,18 @@ Add a new **Python** Run configuration:
 
 ![](../meta/images/pycharm_add_py_run_config.png)
 
-Create a **Run / Debug Configuration** for `kedro run` and get the path to the Kedro CLI script:
+Specify the **Run / Debug Configuration** name in the **Name** field, and edit the new Run configuration as follows:
 
-```console
-# macOS / Linux
-which kedro
-
-# Windows (in `cmd`)
-python -c "import sys, os.path; print(os.path.join(os.path.dirname(sys.executable), 'Lib\site-packages\kedro\__main__.py'))"
-```
-
-Edit the new Run configuration as follows:
+- Pick **Module** from the dropdown
+- Enter ``kedro`` in the **Module Name** field
+- Enter ``run`` in the **Parameters** field
+- Enter the path of your project directory into the **Working directory** field
+- Pick ``Emulate terminal in output console`` from the **Modify options** dropdown, and then click **OK**
 
 ![](../meta/images/pycharm_edit_py_run_config.png)
 
-Replace **Script path** with path obtained above and **Working directory** with the path of your project directory and then click **OK**.
-
 ```{note}
-**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/logging.md#default-framework-side-logging-configuration).
+**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/index.md).
 ```
 
 To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar (if that toolbar is not visible, you can enable it by going to **View > Toolbar**). Click the green triangle:
@@ -78,7 +72,7 @@ You may also select **Run** from the toolbar and execute from there. <br />
 
 ![](../meta/images/pycharm_conf_run_dropdown.png)
 
-For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (e.g., `test`, `package`, `build-docs` etc.).
+For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (e.g., `jupyter`, `package`, `registry` etc.).
 
 
 ## Debugging
@@ -149,7 +143,7 @@ Click **OK** and then select your run configuration from the toolbar and click *
 
 ## Configure Python Console
 
-You can configure Pycharm's IPython to load Kedro's Extension.
+You can configure PyCharm's IPython to load Kedro's Extension.
 
 Click **PyCharm | Preferences** for macOS or **File | Settings**, inside **Build, Execution, Deployment** and **Console**, enter the **Python Console** configuration.
 

@@ -1,0 +1,5 @@
+# params.yml
+
+model_options:
+  test_size: 0.3
+  random_state: 3

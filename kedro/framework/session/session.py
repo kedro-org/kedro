@@ -8,7 +8,6 @@ import os
 import subprocess
 import sys
 import traceback
-import warnings
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterable
@@ -16,13 +15,11 @@ from typing import Any, Iterable
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLoader
+from kedro.config import AbstractConfigLoader
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
-    configure_logging,
     pipelines,
     settings,
     validate_settings,
@@ -100,7 +97,7 @@ class KedroSession:
 
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         session_id: str,
         package_name: str = None,
@@ -117,7 +114,7 @@ class KedroSession:
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
-        _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+        _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
 
         self._conf_source = conf_source or str(
@@ -125,9 +122,8 @@ class KedroSession:
         )
 
     @classmethod
-    def create(  # noqa: too-many-arguments
+    def create(  # noqa: PLR0913
         cls,
-        package_name: str = None,
         project_path: Path | str | None = None,
         save_on_close: bool = True,
         env: str = None,
@@ -137,8 +133,6 @@ class KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
 
         Args:
-            package_name: Package name for the Kedro project the session is
-                created for. The package_name argument will be removed in Kedro `0.19.0`.
             project_path: Path to the project root directory. Default is
                 current working directory Path.cwd().
             save_on_close: Whether or not to save the session when it's closed.
@@ -155,7 +149,6 @@ class KedroSession:
         validate_settings()
 
         session = cls(
-            package_name=package_name,
             project_path=project_path,
             session_id=generate_timestamp(),
             save_on_close=save_on_close,
@@ -165,7 +158,6 @@ class KedroSession:
         # have to explicitly type session_data otherwise mypy will complain
         # possibly related to this: https://github.com/python/mypy/issues/1430
         session_data: dict[str, Any] = {
-            "package_name": session._package_name,
             "project_path": session._project_path,
             "session_id": session.session_id,
         }
@@ -188,35 +180,10 @@ class KedroSession:
                 "Unable to get username. Full exception: %s", exc
             )
 
-        session._store.update(session_data)
-
-        # We need ConfigLoader and env to setup logging correctly
-        session._setup_logging()
         session_data.update(**_describe_git(session._project_path))
         session._store.update(session_data)
 
         return session
-
-    def _get_logging_config(self) -> dict[str, Any]:
-        logging_config = self._get_config_loader()["logging"]
-        # turn relative paths in logging config into absolute path
-        # before initialising loggers
-        logging_config = _convert_paths_to_absolute_posix(
-            project_path=self._project_path, conf_dictionary=logging_config
-        )
-        return logging_config
-
-    def _setup_logging(self) -> None:
-        """Register logging specified in logging directory."""
-        try:
-            logging_config = self._get_logging_config()
-        except MissingConfigException:
-            self._logger.debug(
-                "No project logging configuration loaded; "
-                "Kedro's default logging configuration will be used."
-            )
-        else:
-            configure_logging(logging_config)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS
@@ -262,15 +229,6 @@ class KedroSession:
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
         config_loader = self._get_config_loader()
-        if isinstance(config_loader, (ConfigLoader, TemplatedConfigLoader)):
-            warnings.warn(
-                f"{type(config_loader).__name__} will be deprecated in Kedro 0.19."
-                f" Please use the OmegaConfigLoader instead. To consult"
-                f" the documentation for OmegaConfigLoader, see here:"
-                f" https://docs.kedro.org/en/stable/configuration/"
-                f"advanced_configuration.html#omegaconfigloader",
-                FutureWarning,
-            )
         context_class = settings.CONTEXT_CLASS
         context = context_class(
             package_name=self._package_name,
@@ -284,7 +242,7 @@ class KedroSession:
 
         return context
 
-    def _get_config_loader(self) -> ConfigLoader:
+    def _get_config_loader(self) -> AbstractConfigLoader:
         """An instance of the config loader."""
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
@@ -312,7 +270,7 @@ class KedroSession:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def run(  # noqa: too-many-arguments,too-many-locals
+    def run(  # noqa: PLR0913,too-many-locals
         self,
         pipeline_name: str = None,
         tags: Iterable[str] = None,

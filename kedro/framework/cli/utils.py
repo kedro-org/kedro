@@ -10,9 +10,7 @@ import subprocess
 import sys
 import textwrap
 import traceback
-import warnings
 from collections import defaultdict
-from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
@@ -52,8 +50,7 @@ def call(cmd: list[str], **kwargs):  # pragma: no cover
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
     click.echo(" ".join(shlex.quote(c) for c in cmd))
-    # noqa: subprocess-run-check
-    code = subprocess.run(cmd, **kwargs).returncode
+    code = subprocess.run(cmd, **kwargs).returncode  # noqa: PLW1510
     if code:
         raise click.exceptions.Exit(code=code)
 
@@ -222,7 +219,7 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
     pattern = re.compile(package_name + r"([^\w]|$)")
     with reqs_path.open("r", encoding="utf-8") as reqs_file:
         for req_line in reqs_file:
-            req_line = req_line.strip()  # noqa: redefined-loop-name
+            req_line = req_line.strip()  # noqa: PLW2901
             if pattern.search(req_line):
                 return req_line
 
@@ -262,21 +259,25 @@ class KedroCliError(click.exceptions.ClickException):
     """
 
     VERBOSE_ERROR = False
+    VERBOSE_EXISTS = True
 
     def show(self, file=None):
-        if file is None:
-            # noqa: protected-access
-            file = click._compat.get_text_stderr()
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
-        else:
+        elif self.VERBOSE_EXISTS:
             etype, value, _ = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             click.secho(
                 f"{formatted_exception}Run with --verbose to see the full exception",
                 fg="yellow",
             )
-        click.secho(f"Error: {self.message}", fg="red", file=file)
+        else:
+            etype, value, _ = sys.exc_info()
+            formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            click.secho(
+                f"{formatted_exception}",
+                fg="yellow",
+            )
 
 
 def _clean_pycache(path: Path):
@@ -340,21 +341,13 @@ def env_option(func_=None, **kwargs):
     return opt(func_) if func_ else opt
 
 
-@contextmanager
-def _filter_deprecation_warnings():
-    """Temporarily suppress all DeprecationWarnings."""
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
-        yield
-
-
 def _check_module_importable(module_name: str) -> None:
     try:
         import_module(module_name)
     except ImportError as exc:
         raise KedroCliError(
             f"Module '{module_name}' not found. Make sure to install required project "
-            f"dependencies by running the 'pip install -r src/requirements.txt' command first."
+            f"dependencies by running the 'pip install -r requirements.txt' command first."
         ) from exc
 
 
@@ -406,39 +399,31 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     with values specified in a config file. If command line
     options are passed, they override config file values.
     """
-    # for performance reasons
-    import anyconfig  # noqa: import-outside-toplevel
 
     ctx.default_map = ctx.default_map or {}
     section = ctx.info_name
 
     if value:
-        config = anyconfig.load(value)[section]
+        config = OmegaConf.to_container(OmegaConf.load(value))[section]
+        for key, value in config.items():
+            _validate_config_file(key)
         ctx.default_map.update(config)
 
     return value
 
 
-def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
-    """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
-    ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
-    """
-    if param.name == "load_version":
-        _deprecate_options(ctx, param, value)
+def _validate_config_file(key):
+    """Validate the keys provided in the config file against the accepted keys."""
+    from kedro.framework.cli.project import run
 
-    load_versions_dict = {}
-    for load_version in value:
-        load_version = load_version.strip()  # noqa: PLW2901
-        load_version_list = load_version.split(":", 1)
-        if len(load_version_list) != 2:  # noqa: PLR2004
-            raise KedroCliError(
-                f"Expected the form of 'load_version' to be "
-                f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
-                f"found {load_version} instead"
-            )
-        load_versions_dict[load_version_list[0]] = load_version_list[1]
-
-    return load_versions_dict
+    run_args = [click_arg.name for click_arg in run.params]
+    run_args.remove("config")
+    if key not in run_args:
+        KedroCliError.VERBOSE_EXISTS = False
+        message = _suggest_cli_command(key, run_args)
+        raise KedroCliError(
+            f"Key `{key}` in provided configuration is not valid. {message}"
+        )
 
 
 def _split_params(ctx, param, value):
@@ -447,63 +432,54 @@ def _split_params(ctx, param, value):
     dot_list = []
     for item in split_string(ctx, param, value):
         equals_idx = item.find("=")
-        colon_idx = item.find(":")
-        if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
-            # For cases where key-value pair is separated by = and the value contains a colon
-            # which should not be replaced by =
-            pass
-        else:
-            item = item.replace(":", "=", 1)  # noqa: redefined-loop-name
-        items = item.split("=", 1)
-        if len(items) != 2:  # noqa: PLR2004
+        if equals_idx == -1:
+            # If an equals sign is not found, fail with an error message.
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "
-                f"Item `{items[0]}` must contain "
-                f"a key and a value separated by `:` or `=`."
+                f"Item `{item}` must contain a key and a value separated by `=`."
             )
-        key = items[0].strip()
+        # Split the item into key and value
+        key, _, val = item.partition("=")
+        key = key.strip()
         if not key:
+            # If the key is empty after stripping whitespace, fail with an error message.
             ctx.fail(
                 f"Invalid format of `{param.name}` option: Parameter key "
                 f"cannot be an empty string."
             )
-        dot_list.append(item)
+        # Add "key=value" pair to dot_list.
+        dot_list.append(f"{key}={val}")
+
     conf = OmegaConf.from_dotlist(dot_list)
     return OmegaConf.to_container(conf)
 
 
 def _split_load_versions(ctx, param, value):
-    lv_tuple = _get_values_as_tuple([value])
-    return _reformat_load_versions(ctx, param, lv_tuple) if value else {}
+    """Split and format the string coming from the --load-versions
+    flag in kedro run, e.g.:
+    "dataset1:time1,dataset2:time2" -> {"dataset1": "time1", "dataset2": "time2"}
 
+    Args:
+        value: the string with the contents of the --load-versions flag.
 
-def _get_values_as_tuple(values: Iterable[str]) -> tuple[str, ...]:
-    return tuple(chain.from_iterable(value.split(",") for value in values))
+    Returns:
+        A dictionary with the formatted load versions data.
+    """
+    if not value:
+        return {}
 
+    lv_tuple = tuple(chain.from_iterable(value.split(",") for value in [value]))
 
-def _deprecate_options(ctx, param, value):
-    deprecated_flag = {
-        "node_names": "--node",
-        "tag": "--tag",
-        "load_version": "--load-version",
-    }
-    new_flag = {
-        "node_names": "--nodes",
-        "tag": "--tags",
-        "load_version": "--load-versions",
-    }
-    shorthand_flag = {
-        "node_names": "-n",
-        "tag": "-t",
-        "load_version": "-lv",
-    }
-    if value:
-        deprecation_message = (
-            f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
-            "and will not be available from Kedro 0.19.0. "
-            f"Use the flag '{new_flag[param.name]}' instead. Shorthand "
-            f"'{shorthand_flag[param.name]}' will be updated to use "
-            f"'{new_flag[param.name]}' in Kedro 0.19.0."
-        )
-        click.secho(deprecation_message, fg="red")
-    return value
+    load_versions_dict = {}
+    for load_version in lv_tuple:
+        load_version = load_version.strip()  # noqa: PLW2901
+        load_version_list = load_version.split(":", 1)
+        if len(load_version_list) != 2:  # noqa: PLR2004
+            raise KedroCliError(
+                f"Expected the form of 'load_versions' to be "
+                f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
+                f"found {load_version} instead"
+            )
+        load_versions_dict[load_version_list[0]] = load_version_list[1]
+
+    return load_versions_dict

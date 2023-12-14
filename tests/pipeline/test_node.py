@@ -187,7 +187,7 @@ class TestNodeComparisons:
         pattern = "'<' not supported between instances of 'Node' and 'str'"
 
         with pytest.raises(TypeError, match=pattern):
-            n < "hello"  # pylint: disable=pointless-statement
+            n < "hello"
 
     def test_different_input_list_order_not_equal(self):
         first = node(biconcat, ["input1", "input2"], "output1", name="A")
@@ -266,13 +266,13 @@ def duplicate_output_list_node():
         (
             duplicate_output_dict_node,
             r"Failed to create node identity"
-            r"\(\[A\]\) -> \[A,A\] due to "
+            r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
         ),
         (
             duplicate_output_list_node,
             r"Failed to create node identity"
-            r"\(\[A\]\) -> \[A,A\] due to "
+            r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
         ),
     ],
@@ -300,7 +300,7 @@ def inconsistent_input_kwargs():
     return dummy_func_args, "A", "B"
 
 
-lambda_identity = lambda input1: input1  # noqa: disable=E731 # pylint: disable=C3001
+lambda_identity = lambda input1: input1  # noqa: E731
 
 
 def lambda_inconsistent_input_size():
@@ -368,6 +368,15 @@ class TestTag:
         tagged_node = node(identity, "input", "output", tags="hello").tag("world")
         assert "hello" in tagged_node.tags
         assert "world" in tagged_node.tags
+
+    @pytest.mark.parametrize("bad_tag", ["tag,with,comma", "tag with space"])
+    def test_invalid_tag(self, bad_tag):
+        pattern = (
+            f"'{bad_tag}' is not a valid node tag. It must contain only "
+            f"letters, digits, hyphens, underscores and/or fullstops."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            node(identity, ["in"], ["out"], tags=bad_tag)
 
 
 class TestNames:

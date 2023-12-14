@@ -841,6 +841,10 @@ def _parse_tools_input(tools_str: str):
         else:
             selected.append(choice.strip())
 
+    # Ensure unique entries only
+    seen = set()
+    selected = [x for x in selected if not (x in seen or seen.add(x))]
+
     return selected
 
 

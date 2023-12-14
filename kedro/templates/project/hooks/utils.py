@@ -18,6 +18,7 @@ docs_pyproject_requirements = ["project.optional-dependencies"]  # For pyproject
 # Requirements for example pipelines
 example_pipeline_requirements = "seaborn~=0.12.1\nscikit-learn~=1.0\n"
 
+
 # Helper Functions
 def _remove_from_file(file_path: Path, content_to_remove: str) -> None:
     """Remove specified content from the file.
@@ -142,6 +143,7 @@ def _remove_pyspark_viz_starter_files(is_viz: bool, python_package_name: str) ->
     test_pipeline_path = current_dir / "tests/pipelines/test_data_science.py"
     _remove_file(test_pipeline_path)
 
+
 def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
     """Remove all extras from kedro-datasets in the requirements file.
 
@@ -164,8 +166,9 @@ def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
         file.writelines(new_lines)
 
 
-def setup_template_tools(selected_tools_list: str, requirements_file_path: Path, pyproject_file_path: Path, python_package_name: str, example_pipeline: str) -> None:
-    """Setup the templates according to the choice of tools.
+def setup_template_tools(selected_tools_list: str, requirements_file_path: Path, pyproject_file_path: Path,
+                         python_package_name: str, example_pipeline: str) -> None:
+    """Set up the templates according to the choice of tools.
 
     Args:
         selected_tools_list (str): A string contains the selected tools.

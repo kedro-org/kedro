@@ -62,7 +62,7 @@ class SequentialRunner(AbstractRunner):
         """
         if not self._is_async:
             self._logger.info(
-                "Asynchronous mode is disabled for loading and saving data. Use the --async flag "
+                "Using synchronous mode for loading and saving data. Use the --async flag "
                 "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
             )
         nodes = pipeline.nodes

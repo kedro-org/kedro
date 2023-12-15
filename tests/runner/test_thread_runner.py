@@ -38,7 +38,7 @@ class TestValidThreadRunner:
         catalog.add_feed_dict({"A": 42})
         ThreadRunner().run(fan_out_fan_in, catalog)
         assert (
-            "Asynchronous mode is disabled for loading and saving data."
+            "Using synchronous mode for loading and saving data."
             not in caplog.text
         )
 

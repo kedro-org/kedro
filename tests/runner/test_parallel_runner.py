@@ -77,7 +77,7 @@ class TestValidParallelRunner:
         catalog.add_feed_dict({"A": 42})
         ParallelRunner().run(fan_out_fan_in, catalog)
         assert (
-            "Asynchronous mode is disabled for loading and saving data." in caplog.text
+            "Using synchronous mode for loading and saving data." in caplog.text
         )
 
 

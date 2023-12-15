@@ -3,8 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-
-## Breaking changes to the API
+* Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
 
 ## Documentation changes
 

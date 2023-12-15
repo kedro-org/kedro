@@ -153,17 +153,13 @@ def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
     with open(file_path, 'r') as file:
         lines = file.readlines()
 
-    new_lines = []
-    for line in lines:
+    for i, line in enumerate(lines):
         if 'kedro-datasets[' in line:
             # Remove the extras by keeping only the part before the '['
-            new_line = line.split('[')[0] + '\n'
-            new_lines.append(new_line)
-        else:
-            new_lines.append(line)
+            lines[i] = line.split('[')[0] + '\n'
 
     with open(file_path, 'w') as file:
-        file.writelines(new_lines)
+        file.writelines(lines)
 
 
 def setup_template_tools(selected_tools_list: str, requirements_file_path: Path, pyproject_file_path: Path,

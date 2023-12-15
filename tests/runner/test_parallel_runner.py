@@ -76,9 +76,7 @@ class TestValidParallelRunner:
     def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
         catalog.add_feed_dict({"A": 42})
         ParallelRunner().run(fan_out_fan_in, catalog)
-        assert (
-            "Using synchronous mode for loading and saving data." in caplog.text
-        )
+        assert "Using synchronous mode for loading and saving data." in caplog.text
 
 
 class TestMaxWorkers:

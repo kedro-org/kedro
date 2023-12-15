@@ -156,10 +156,10 @@ def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
     for i, line in enumerate(lines):
         if 'kedro-datasets[' in line:
             # Split the line at '[', and keep the part before it
-            base_package = line.split('[', 1)[0]
-            # Extract version '>'
-            version_specifier = line.split(']')[-1]
-            lines[i] = base_package + version_specifier
+            package = line.split('[', 1)[0]
+            # Extract version
+            version = line.split(']')[-1]
+            lines[i] = package + version
 
     with open(file_path, 'w') as file:
         file.writelines(lines)

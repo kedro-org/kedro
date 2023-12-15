@@ -145,7 +145,7 @@ def _remove_pyspark_viz_starter_files(is_viz: bool, python_package_name: str) ->
 
 
 def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
-    """Remove all extras from kedro-datasets in the requirements file.
+    """Remove all extras from kedro-datasets in the requirements file, while keeping the version.
 
     Args:
         file_path (Path): The path of the requirements file.
@@ -155,8 +155,11 @@ def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
 
     for i, line in enumerate(lines):
         if 'kedro-datasets[' in line:
-            # Remove the extras by keeping only the part before the '['
-            lines[i] = line.split('[')[0] + '\n'
+            # Split the line at '[', and keep the part before it
+            base_package = line.split('[', 1)[0]
+            # Extract version '>'
+            version_specifier = line.split(']')[-1]
+            lines[i] = base_package + version_specifier
 
     with open(file_path, 'w') as file:
         file.writelines(lines)

@@ -1,4 +1,3 @@
-# pylint: disable=import-outside-toplevel
 from pathlib import Path
 
 import pytest
@@ -12,13 +11,13 @@ from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
-PROJECT_VERSION = "0.1"
+PROJECT_INIT_VERSION = "0.1"
 
 
 @pytest.fixture(autouse=True)
 def cleanup_pipeline():
     yield
-    from kedro.framework.project import pipelines  # pylint: disable=reimported
+    from kedro.framework.project import pipelines
 
     pipelines.configure()
 
@@ -37,9 +36,9 @@ def fake_metadata(tmp_path):
         config_file=tmp_path / "pyproject.toml",
         package_name=PACKAGE_NAME,
         project_name=PROJECT_NAME,
-        project_version=PROJECT_VERSION,
-        kedro_init_version=PROJECT_VERSION,
+        kedro_init_version=PROJECT_INIT_VERSION,
         project_path=tmp_path,
+        tools=None,
     )
     return metadata
 
@@ -116,7 +115,6 @@ class TestLoadKedroObjects:
         reload_kedro()
 
         mock_session_create.assert_called_once_with(
-            PACKAGE_NAME,
             None,
             env=None,
             extra_params=None,
@@ -154,7 +152,6 @@ class TestLoadKedroObjects:
         )
 
         mock_session_create.assert_called_once_with(
-            PACKAGE_NAME,
             fake_metadata.project_path,
             env=dummy_env,
             extra_params=dummy_dict,
@@ -171,9 +168,6 @@ class TestLoadKedroObjects:
 
 class TestLoadIPythonExtension:
     def test_load_ipython_extension(self, ipython):
-        ipython.magic("load_ext kedro.ipython")
-
-    def test_load_ipython_extension_old_location(self, ipython):
         ipython.magic("load_ext kedro.ipython")
 
     def test_load_extension_missing_dependency(self, mocker):
@@ -230,7 +224,7 @@ class TestLoadIPythonExtension:
             ". --env=base",
             "--env=base",
             "-e base",
-            ". --env=base --params=key:val",
+            ". --env=base --params=key=val",
             "--conf-source=new_conf",
         ],
     )
@@ -258,10 +252,9 @@ class TestProjectPathResolution:
         assert result == expected
 
     def test_only_local_namespace_specified(self):
-        # pylint: disable=too-few-public-methods
         class MockKedroContext:
             # A dummy stand-in for KedroContext sufficient for this test
-            _project_path = Path("/test").resolve()
+            project_path = Path("/test").resolve()
 
         result = _resolve_project_path(local_namespace={"context": MockKedroContext()})
         expected = Path("/test").resolve()
@@ -292,10 +285,9 @@ class TestProjectPathResolution:
         assert expected_message in log_messages
 
     def test_project_path_update(self, caplog):
-        # pylint: disable=too-few-public-methods
         class MockKedroContext:
             # A dummy stand-in for KedroContext sufficient for this test
-            _project_path = Path("/test").resolve()
+            project_path = Path("/test").resolve()
 
         local_namespace = {"context": MockKedroContext()}
         updated_path = Path("/updated_path").resolve()

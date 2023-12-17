@@ -1,6 +1,3 @@
-> **NOTE:** Kedro datasets are moving from `kedro.extras.datasets` to a separate `kedro-datasets` package in
-> [`kedro-plugins` repository](https://github.com/kedro-org/kedro-plugins). Any changes to the dataset implementations
-> should be done by opening a pull request in that repository.
 ## Description
 <!-- Why was this PR created? -->
 

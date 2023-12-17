@@ -74,7 +74,6 @@ class TestMicropkgPullCommand:
         fake_metadata,
     ):
         """Test for pulling a valid sdist file locally."""
-        # pylint: disable=too-many-locals
         call_pipeline_create(fake_project_cli, fake_metadata)
         call_micropkg_package(fake_project_cli, fake_metadata)
         call_pipeline_delete(fake_project_cli, fake_metadata)
@@ -147,7 +146,6 @@ class TestMicropkgPullCommand:
         into another location and check that unpacked files
         are identical to the ones in the original modular pipeline.
         """
-        # pylint: disable=too-many-locals
         pipeline_name = "another_pipeline"
         call_pipeline_create(fake_project_cli, fake_metadata)
         call_micropkg_package(fake_project_cli, fake_metadata, alias=pipeline_name)
@@ -291,7 +289,7 @@ class TestMicropkgPullCommand:
         expected_test_files = {"__init__.py", "test_pipeline.py"}
         assert actual_test_files == expected_test_files
 
-    def test_micropkg_alias_refactors_imports(  # pylint: disable=too-many-locals
+    def test_micropkg_alias_refactors_imports(
         self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
     ):
         call_pipeline_create(fake_project_cli, fake_metadata)
@@ -432,7 +430,6 @@ class TestMicropkgPullCommand:
         """Test for pulling a valid sdist file locally,
         but `tests` directory is missing from the sdist file.
         """
-        # pylint: disable=too-many-locals
         call_pipeline_create(fake_project_cli, fake_metadata)
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         shutil.rmtree(test_path)
@@ -495,7 +492,6 @@ class TestMicropkgPullCommand:
         Test for pulling a valid sdist file locally, but `config` directory is missing
         from the sdist file.
         """
-        # pylint: disable=too-many-locals
         call_pipeline_create(fake_project_cli, fake_metadata)
         source_params_config = (
             fake_repo_path
@@ -560,7 +556,6 @@ class TestMicropkgPullCommand:
         """
         Test for pulling a valid sdist file from pypi.
         """
-        # pylint: disable=too-many-locals
         call_pipeline_create(fake_project_cli, fake_metadata)
         # We mock the `pip download` call, and manually create a package sdist file
         # to simulate the pypi scenario instead
@@ -592,7 +587,7 @@ class TestMicropkgPullCommand:
         # Mock needed to avoid an error when build.util.project_wheel_metadata
         # calls tempfile.TemporaryDirectory, which is mocked
         class _FakeWheelMetadata:
-            def get_all(self, name, failobj=None):  # pylint: disable=unused-argument
+            def get_all(self, name, failobj=None):
                 return []
 
         mocker.patch(
@@ -854,10 +849,9 @@ class TestMicropkgPullCommand:
     "chdir_to_dummy_project", "cleanup_dist", "cleanup_pyproject_toml"
 )
 class TestMicropkgPullFromManifest:
-    def test_micropkg_pull_all(  # pylint: disable=too-many-locals
+    def test_micropkg_pull_all(
         self, fake_repo_path, fake_project_cli, fake_metadata, mocker
     ):
-        # pylint: disable=import-outside-toplevel, line-too-long
         from kedro.framework.cli import micropkg
 
         spy = mocker.spy(micropkg, "_pull_package")
@@ -897,7 +891,6 @@ class TestMicropkgPullFromManifest:
     def test_micropkg_pull_all_empty_toml(
         self, fake_repo_path, fake_project_cli, fake_metadata, mocker
     ):
-        # pylint: disable=import-outside-toplevel
         from kedro.framework.cli import micropkg
 
         spy = mocker.spy(micropkg, "_pull_package")

@@ -4,15 +4,11 @@ This page explains how to use a Jupyter notebook to explore elements of a Kedro 
 
 This page also explains how to use line magic to display a Kedro-Viz visualisation of your pipeline directly in your notebook.
 
-## Iris dataset example
+## Example project
 
-Create a sample Kedro project with the [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) as we showed in the [get started documentation](../get_started/new_project.md#create-a-new-project-containing-example-code):
+The example adds a notebook to experiment with the retired [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris). As an alternative, you can follow the example using a different starter, such as [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) or just add a notebook to your own project.
 
-```bash
-kedro new --starter=pandas-iris
-```
-
-We will assume you call the project `iris`, but you can call it whatever you choose.
+We will assume the example project is called `iris`, but you can call it whatever you choose.
 
 Navigate to the project directory (`cd iris`) and issue the following command in the terminal to launch Jupyter:
 
@@ -95,7 +91,7 @@ catalog.load("example_iris_data")
 The output:
 
 ```ipython
-INFO     Loading data from 'example_iris_data' (CSVDataSet)...
+INFO     Loading data from 'example_iris_data' (CSVDataset)...
 
      sepal_length  sepal_width  petal_length  petal_width    species
 0             5.1          3.5           1.4          0.2     setosa
@@ -286,16 +282,3 @@ jupyter qtconsole --kernel=kedro_iris
 
 This will automatically load the Kedro IPython in a console that supports graphical features such as embedded figures:
 ![Plot of example iris data in a Qt Console](../meta/images/jupyter_qtconsole.png)
-
-
-## Find out more
-
-We recommend the following:
-
-* [Power is nothing without control: Don’t break up with Jupyter notebooks. Just use Kedro too!](https://towardsdatascience.com/power-is-nothing-without-control-aa43523745b6)
-
-* [Two Tricks to Optimize your Kedro Jupyter Flow](https://youtu.be/ZHIqXJEp0-w)
-
-* [Handling Custom Jupyter Data Sources](https://youtu.be/dRnCovp1GRQ)
-
-* [Why transition from vanilla Jupyter notebooks to Kedro?](https://www.youtube.com/watch?v=JLTYNPoK7nw&ab_channel=PyConUS)

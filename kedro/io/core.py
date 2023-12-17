@@ -21,7 +21,6 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
-from kedro import KedroDeprecationWarning
 from kedro.utils import load_obj
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
@@ -30,13 +29,6 @@ VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-DataSetError: type[DatasetError]
-DataSetNotFoundError: type[DatasetNotFoundError]
-DataSetAlreadyExistsError: type[DatasetAlreadyExistsError]
-AbstractDataSet: type[AbstractDataset]
-AbstractVersionedDataSet: type[AbstractVersionedDataset]
 
 
 class DatasetError(Exception):
@@ -160,7 +152,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from exc
 
         try:
-            data_set = class_obj(**config)  # type: ignore
+            dataset = class_obj(**config)  # type: ignore
         except TypeError as err:
             raise DatasetError(
                 f"\n{err}.\nDataset '{name}' must only contain arguments valid for the "
@@ -171,7 +163,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 f"\n{err}.\nFailed to instantiate dataset '{name}' "
                 f"of type '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
-        return data_set
+        return dataset
 
     @property
     def _logger(self) -> logging.Logger:
@@ -355,10 +347,7 @@ _CONSISTENCY_WARNING = (
     "intermediate data sets where possible to avoid this warning."
 )
 
-# `kedro_datasets` is probed before `kedro.extras.datasets`,
-# hence the KedroDeprecationWarning will not be shown
-# if the dataset is available in the former
-_DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", ""]
+_DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", ""]
 
 
 def parse_dataset_definition(
@@ -368,10 +357,10 @@ def parse_dataset_definition(
 
     Args:
         config: Data set config dictionary. It *must* contain the `type` key
-            with fully qualified class name.
+            with fully qualified class name or the class object.
         load_version: Version string to be used for ``load`` operation if
-                the data set is versioned. Has no effect on the data set
-                if versioning was not enabled.
+            the data set is versioned. Has no effect on the data set
+            if versioning was not enabled.
         save_version: Version string to be used for ``save`` operation if
             the data set is versioned. Has no effect on the data set
             if versioning was not enabled.
@@ -388,14 +377,15 @@ def parse_dataset_definition(
     if "type" not in config:
         raise DatasetError("'type' is missing from dataset catalog configuration")
 
-    class_obj = config.pop("type")
-    if isinstance(class_obj, str):
-        if len(class_obj.strip(".")) != len(class_obj):
+    dataset_type = config.pop("type")
+    class_obj = None
+    if isinstance(dataset_type, str):
+        if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
                 "'type' class path does not support relative "
                 "paths or paths ending with a dot."
             )
-        class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
+        class_paths = (prefix + dataset_type for prefix in _DEFAULT_PACKAGES)
 
         for class_path in class_paths:
             tmp = _load_obj(class_path)
@@ -403,10 +393,10 @@ def parse_dataset_definition(
                 class_obj = tmp
                 break
         else:
-            raise DatasetError(
-                f"Class '{class_obj}' not found or one of its dependencies "
-                f"has not been installed."
-            )
+            raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
+
+    if not class_obj:
+        class_obj = dataset_type
 
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(
@@ -434,8 +424,9 @@ def parse_dataset_definition(
     return class_obj, config
 
 
-def _load_obj(class_path: str) -> object | None:
+def _load_obj(class_path: str) -> Any | None:
     mod_path, _, class_name = class_path.rpartition(".")
+    # Check if the module exists
     try:
         available_classes = load_obj(f"{mod_path}.__all__")
     # ModuleNotFoundError: When `load_obj` can't find `mod_path` (e.g `kedro.io.pandas`)
@@ -444,18 +435,16 @@ def _load_obj(class_path: str) -> object | None:
     #                 `__all__` attribute -- either because it's a custom or a kedro.io dataset
     except (ModuleNotFoundError, AttributeError, ValueError):
         available_classes = None
-
     try:
         class_obj = load_obj(class_path)
-    except (ModuleNotFoundError, ValueError):
-        return None
-    except AttributeError as exc:
+    except (ModuleNotFoundError, ValueError, AttributeError) as exc:
+        # If it's available, module exist but dependencies are missing
         if available_classes and class_name in available_classes:
             raise DatasetError(
-                f"{exc} Please see the documentation on how to "
+                f"{exc}. Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
-                f"https://kedro.readthedocs.io/en/stable/"
-                f"kedro_project_setup/dependencies.html"
+                f"https://docs.kedro.org/en/stable/kedro_project_setup/"
+                f"dependencies.html#install-dependencies-related-to-the-data-catalog"
             ) from exc
         return None
 
@@ -766,25 +755,3 @@ def validate_on_forbidden_chars(**kwargs):
             raise DatasetError(
                 f"Neither white-space nor semicolon are allowed in '{key}'."
             )
-
-
-_DEPRECATED_CLASSES = {
-    "DataSetError": DatasetError,
-    "DataSetNotFoundError": DatasetNotFoundError,
-    "DataSetAlreadyExistsError": DatasetAlreadyExistsError,
-    "AbstractDataSet": AbstractDataset,
-    "AbstractVersionedDataSet": AbstractVersionedDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

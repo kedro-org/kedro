@@ -8,11 +8,4 @@ The Kedro-Viz package needs to be installed separately as it is not part of the 
 pip install kedro-viz
 ```
 
-```{toctree}
-:maxdepth: 1
-
-kedro-viz_visualisation
-share_kedro_viz
-preview_datasets
-visualise_charts_with_plotly
-```
+Consult the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` to find out more about how to use the package.

@@ -5,15 +5,10 @@ so that the user avoids io operations with slow storage media
 from __future__ import annotations
 
 import logging
-import warnings
 from typing import Any
 
-from kedro import KedroDeprecationWarning
 from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, Version
 from kedro.io.memory_dataset import MemoryDataset
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-CachedDataSet: type[CachedDataset]
 
 
 class CachedDataset(AbstractDataset):
@@ -122,16 +117,3 @@ class CachedDataset(AbstractDataset):
         logging.getLogger(__name__).warning("%s: clearing cache to pickle.", str(self))
         self._cache.release()
         return self.__dict__
-
-
-def __getattr__(name):
-    if name == "CachedDataSet":
-        alias = CachedDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

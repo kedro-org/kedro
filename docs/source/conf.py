@@ -54,6 +54,7 @@ extensions = [
     "myst_parser",
     "notfound.extension",
     "sphinxcontrib.jquery",
+    "sphinx.ext.intersphinx",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class
@@ -64,7 +65,11 @@ napoleon_include_init_with_doc = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
-html_static_path = ["_static"]
+
+intersphinx_mapping = {
+    "kedro-viz": ("https://docs.kedro.org/projects/kedro-viz/en/v6.6.1/", None),
+    "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-2.0.0/", None),
+}
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -113,17 +118,15 @@ type_targets = {
         "typing.Type",
         "typing.Set",
         "kedro.config.config.ConfigLoader",
-        "kedro.io.core.AbstractDataSet",
-        "kedro.io.core.AbstractVersionedDataSet",
-        "kedro.io.core.DataSetError",
+        "kedro.io.core.AbstractDataset",
+        "kedro.io.core.AbstractVersionedDataset",
+        "kedro.io.core.DatasetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
-        "kedro.io.memory_dataset.MemoryDataSet",
-        "kedro.io.partitioned_dataset.PartitionedDataSet",
+        "kedro.io.memory_dataset.MemoryDataset",
+        "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
-        "kedro.runner.parallel_runner._SharedMemoryDataSet",
-        "kedro.runner.parallel_runner._SharedMemoryDataset",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",
@@ -137,8 +140,7 @@ type_targets = {
         "CONF_SOURCE",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
-        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
-        "kedro_datasets.pandas.json_dataset.JSONDataSet",
+        "kedro_datasets.pandas.json_dataset.JSONDataset",
         "pluggy._manager.PluginManager",
         "PluginManager",
         "_DI",
@@ -154,6 +156,7 @@ type_targets = {
         "an object providing a view on D's values",
         "(k, v), remove and return some (key, value) pair",
         "D.get(k,d), also set D[k]=d if k not in D",
+        "D[k] if k in D, else d.  d defaults to None.",
         "None.  Update D from mapping/iterable E and F.",
     ),
     "py:data": (
@@ -167,7 +170,7 @@ type_targets = {
         "ValueError",
         "BadConfigException",
         "MissingConfigException",
-        "DataSetError",
+        "DatasetError",
         "ImportError",
         "KedroCliError",
         "Exception",
@@ -192,7 +195,6 @@ pygments_style = "sphinx"
 #
 html_theme = "sphinx_rtd_theme"
 here = Path(__file__).parent.absolute()
-html_logo = str(here / "kedro_logo.svg")
 
 # Theme options are theme-specific and customise the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -227,7 +229,6 @@ linkcheck_ignore = [
     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
-    "https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/api/snowflake.snowpark.DataFrameWriter.saveAsTable.html",
     "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors",
     # temporarily, until the file actually exists in `main`
     "https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.flake8",
@@ -320,8 +321,6 @@ KEDRO_MODULES = [
     "kedro.pipeline",
     "kedro.runner",
     "kedro.config",
-    "kedro.extras.datasets",
-    "kedro.extras.logging",
     "kedro_datasets",
 ]
 
@@ -351,16 +350,16 @@ def autolink_replacements(what: str) -> list[tuple[str, str, str]]:
     is a reStructuredText link to their documentation.
 
     For example, if the docstring reads:
-        This LambdaDataSet loads and saves ...
+        This LambdaDataset loads and saves ...
 
-    Then the word ``LambdaDataSet``, will be replaced by
-    :class:`~kedro.io.LambdaDataSet`
+    Then the word ``LambdaDataset``, will be replaced by
+    :class:`~kedro.io.LambdaDataset`
 
     Works for plural as well, e.g:
-        These ``LambdaDataSet``s load and save
+        These ``LambdaDataset``s load and save
 
     Will convert to:
-        These :class:`kedro.io.LambdaDataSet` load and save
+        These :class:`kedro.io.LambdaDataset` load and save
 
     Args:
         what: The objects to create replacement tuples for. Possible values

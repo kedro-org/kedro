@@ -4,7 +4,7 @@ Kedro has a few built-in mechanisms for you to extend its behaviour. This docume
 
 ## Use Case 1: How to add extra behaviour to Kedro's execution timeline
 
-The execution timeline of a Kedro pipeline can be thought of as a sequence of actions performed by various Kedro library components, such as the [datasets](/kedro_datasets), [DataCatalog](/kedro.io.DataCatalog), [Pipeline](/kedro.pipeline.Pipeline), [Node](/kedro.pipeline.node.Node) and [KedroContext](/kedro.framework.context.KedroContext).
+The execution timeline of a Kedro pipeline can be thought of as a sequence of actions performed by various Kedro library components, such as the {py:mod}`datasets <kedro-datasets:kedro_datasets>`, [DataCatalog](/kedro.io.DataCatalog), [Pipeline](/kedro.pipeline.Pipeline), [Node](/kedro.pipeline.node.Node) and [KedroContext](/kedro.framework.context.KedroContext).
 
 At different points in the lifecycle of these components, you might want to add extra behaviour: for example, you could add extra computation for profiling purposes _before_ and _after_ a node runs, or _before_ and _after_ the I/O actions of a dataset, namely the `load` and `save` actions.
 
@@ -12,7 +12,7 @@ This can now achieved by using [Hooks](../hooks/introduction.md), to define the 
 
 ## Use Case 2: How to integrate Kedro with additional data sources
 
-You can use [datasets](/kedro_datasets) to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](../data/how_to_create_a_custom_dataset.md).
+You can use {py:mod}`datasets <kedro-datasets:kedro_datasets>` to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](../data/how_to_create_a_custom_dataset.md).
 
 ## Use Case 3: How to add or modify CLI commands
 
@@ -39,4 +39,4 @@ Your plugin's implementation can take advantage of other extension mechanisms su
 
 ## Use Case 4: How to customise the initial boilerplate of your project
 
-Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, see the [guide for creating Kedro starters](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).
+Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, see the [guide for creating Kedro starters](../starters/create_a_starter.md).

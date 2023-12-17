@@ -63,7 +63,7 @@ def wait_for(
         try:
             result = func(**kwargs)
             return result
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             if print_error:
                 print(err)
 

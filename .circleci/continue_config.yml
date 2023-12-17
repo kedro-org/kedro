@@ -52,7 +52,7 @@ commands:
           name: Install venv for some pre-commit hooks
           command: conda install -y virtualenv
       - run:
-          # pytables does not work properly with python 3.9 to handle our HDFDataSet
+          # pytables does not work properly with python 3.9 to handle our HDFDataset
           # if pip-installed, so we install this dependency via conda
           name: Install pytables
           command: conda install -c conda-forge pytables -y
@@ -131,7 +131,7 @@ jobs:
   publish_kedro:
     executor:
       name: docker
-      python_version: "3.7"
+      python_version: "3.11"
     steps:
       - setup
       - add_ssh_keys

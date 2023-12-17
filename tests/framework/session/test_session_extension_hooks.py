@@ -18,7 +18,7 @@ from kedro.framework.project import (
     settings,
 )
 from kedro.framework.session import KedroSession
-from kedro.io import DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node, pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
@@ -79,9 +79,9 @@ class TestCatalogHooks:
         assert len(relevant_records) == 1
         record = relevant_records[0]
         assert record.catalog is catalog
-        assert record.conf_creds == config_loader.get("credentials*")
+        assert record.conf_creds == config_loader["credentials"]
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
-            project_path=project_path, conf_dictionary=config_loader.get("catalog*")
+            project_path=project_path, conf_dictionary=config_loader["catalog"]
         )
         # save_version is only passed during a run, not on the property getter
         assert record.save_version is None
@@ -116,9 +116,9 @@ class TestCatalogHooks:
         # one for context.catalog, one for the run
         assert len(relevant_records) == 2
         record = relevant_records[1]
-        assert record.conf_creds == config_loader.get("credentials*")
+        assert record.conf_creds == config_loader["credentials"]
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
-            project_path=project_path, conf_dictionary=config_loader.get("catalog*")
+            project_path=project_path, conf_dictionary=config_loader["catalog"]
         )
         assert record.save_version is fake_save_version
         assert record.load_versions is None
@@ -285,7 +285,7 @@ class TestNodeHooks:
             assert set(record.outputs.keys()) <= {"planes", "ships"}
 
 
-class TestDataSetHooks:
+class TestDatasetHooks:
     @pytest.mark.usefixtures("mock_pipelines")
     def test_before_and_after_dataset_loaded_hooks_sequential_runner(
         self, mock_session, caplog, dummy_dataframe
@@ -418,7 +418,7 @@ class TestDataSetHooks:
             assert record.data.to_dict() == dummy_dataframe.to_dict()
 
 
-class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
+class MockDatasetReplacement:
     pass
 
 
@@ -437,7 +437,7 @@ def mock_session_with_before_node_run_hooks(
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    return KedroSession.create(mock_package_name, tmp_path)
+    return KedroSession.create(tmp_path)
 
 
 @pytest.fixture
@@ -455,7 +455,7 @@ def mock_session_with_broken_before_node_run_hooks(
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    return KedroSession.create(mock_package_name, tmp_path)
+    return KedroSession.create(tmp_path)
 
 
 class TestBeforeNodeRunHookWithInputUpdates:
@@ -553,10 +553,10 @@ class LogCatalog(DataCatalog):
 
 @pytest.fixture
 def memory_catalog():
-    ds1 = MemoryDataSet({"data": 42})
-    ds2 = MemoryDataSet({"data": 42})
-    ds3 = MemoryDataSet({"data": 42})
-    ds4 = MemoryDataSet({"data": 42})
+    ds1 = MemoryDataset({"data": 42})
+    ds2 = MemoryDataset({"data": 42})
+    ds3 = MemoryDataset({"data": 42})
+    ds4 = MemoryDataset({"data": 42})
     return LogCatalog({"ds1": ds1, "ds2": ds2, "ds3": ds3, "ds4": ds4})
 
 

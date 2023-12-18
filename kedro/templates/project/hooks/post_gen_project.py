@@ -26,7 +26,7 @@ def main():
 
     # Sort requirements.txt file in alphabetical order
     with open(requirements_file_path, "rb+") as file_obj:
-        fix_requirements(requirements_file_path)
+        fix_requirements(file_obj)
 
 
 if __name__ == "__main__":

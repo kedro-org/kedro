@@ -59,7 +59,6 @@ OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be sto
 CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def project_group():  # pragma: no cover
     pass
@@ -68,7 +67,7 @@ def project_group():  # pragma: no cover
 @forward_command(project_group, forward_help=True)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
-def ipython(metadata: ProjectMetadata, env, args, **kwargs):  # noqa: unused-argument
+def ipython(metadata: ProjectMetadata, env, args, **kwargs):
     """Open IPython with project specific variables loaded."""
     _check_module_importable("IPython")
 
@@ -195,7 +194,7 @@ def package(metadata: ProjectMetadata):
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-def run(  # noqa: PLR0913,unused-argument,too-many-locals
+def run(  # noqa: PLR0913
     tags,
     env,
     runner,

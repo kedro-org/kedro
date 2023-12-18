@@ -7,7 +7,6 @@ from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def registry_cli():  # pragma: no cover
     pass
@@ -27,7 +26,7 @@ def list_registered_pipelines():
 @command_with_verbosity(registry, "describe")
 @click.argument("name", nargs=1, default="__default__")
 @click.pass_obj
-def describe_registered_pipeline(metadata: ProjectMetadata, name, **kwargs):  # noqa: unused-argument, protected-access
+def describe_registered_pipeline(metadata: ProjectMetadata, name, **kwargs):
     """Describe a registered pipeline by providing a pipeline name.
     Defaults to the `__default__` pipeline.
     """

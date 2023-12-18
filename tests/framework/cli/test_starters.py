@@ -132,7 +132,6 @@ def _assert_requirements_ok(
         with open(requirements_file_path) as requirements_file:
             requirements = requirements_file.read()
 
-        assert "black" in requirements
         assert "ruff" in requirements
 
         pyproject_config = toml.load(pyproject_file_path)
@@ -143,6 +142,7 @@ def _assert_requirements_ok(
                     "show-fixes": True,
                     "select": ["F", "W", "E", "I", "UP", "PL", "T201"],
                     "ignore": ["E501"],
+                    "format": {"docstring-code-format": True},
                 }
             }
         }

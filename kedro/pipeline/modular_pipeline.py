@@ -77,7 +77,7 @@ def _validate_datasets_exist(
 
 
 def _get_dataset_names_mapping(
-    names: str | set[str] | dict[str, str] | None = None
+    names: str | set[str] | dict[str, str] | None = None,
 ) -> dict[str, str]:
     """Take a name or a collection of dataset names
     and turn it into a mapping from the old dataset names to the provided ones if necessary.
@@ -114,7 +114,7 @@ def _normalize_param_name(name: str) -> str:
 
 
 def _get_param_names_mapping(
-    names: str | set[str] | dict[str, str] | None = None
+    names: str | set[str] | dict[str, str] | None = None,
 ) -> dict[str, str]:
     """Take a parameter or a collection of parameter names
     and turn it into a mapping from existing parameter names to new ones if necessary.
@@ -259,7 +259,7 @@ def pipeline(  # noqa: PLR0913
         return name
 
     def _process_dataset_names(
-        datasets: None | str | list[str] | dict[str, str]
+        datasets: None | str | list[str] | dict[str, str],
     ) -> None | str | list[str] | dict[str, str]:
         if datasets is None:
             return None

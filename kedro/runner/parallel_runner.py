@@ -42,11 +42,10 @@ class ParallelRunnerManager(SyncManager):
     """
 
 
-ParallelRunnerManager.register("MemoryDataset", MemoryDataset)  # noqa: no-member
+ParallelRunnerManager.register("MemoryDataset", MemoryDataset)
 
 
 def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
-    # noqa: import-outside-toplevel,cyclic-import
     from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
@@ -126,7 +125,7 @@ class ParallelRunner(AbstractRunner):
             is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )
         self._manager = ParallelRunnerManager()
-        self._manager.start()  # noqa: consider-using-with
+        self._manager.start()
 
         # This code comes from the concurrent.futures library
         # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588
@@ -169,7 +168,7 @@ class ParallelRunner(AbstractRunner):
         will not be synchronized across threads.
         """
 
-        datasets = catalog._datasets  # noqa: protected-access
+        datasets = catalog._datasets
 
         unserialisable = []
         for name, dataset in datasets.items():
@@ -232,7 +231,7 @@ class ParallelRunner(AbstractRunner):
 
         return min(required_processes, self._max_workers)
 
-    def _run(  # noqa: too-many-locals,useless-suppression
+    def _run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
@@ -255,7 +254,6 @@ class ParallelRunner(AbstractRunner):
             Exception: In case of any downstream node failure.
 
         """
-        # noqa: import-outside-toplevel,cyclic-import
         if not self._is_async:
             self._logger.info(
                 "Using synchronous mode for loading and saving data. Use the --async flag "

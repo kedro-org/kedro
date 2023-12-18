@@ -50,7 +50,7 @@ def call(cmd: list[str], **kwargs):  # pragma: no cover
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
     click.echo(" ".join(shlex.quote(c) for c in cmd))
-    code = subprocess.run(cmd, **kwargs).returncode  # noqa: PLW1510
+    code = subprocess.run(cmd, **kwargs).returncode  # noqa: PLW1510, S603
     if code:
         raise click.exceptions.Exit(code=code)
 
@@ -226,7 +226,7 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
     raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
-def _update_verbose_flag(ctx, param, value):  # noqa: unused-argument
+def _update_verbose_flag(ctx, param, value):
     KedroCliError.VERBOSE_ERROR = value
 
 
@@ -292,12 +292,11 @@ def _clean_pycache(path: Path):
         shutil.rmtree(each, ignore_errors=True)
 
 
-def split_string(ctx, param, value):  # noqa: unused-argument
+def split_string(ctx, param, value):
     """Split string by comma."""
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-# noqa: unused-argument,missing-param-doc,missing-type-doc
 def split_node_names(ctx, param, to_split: str) -> list[str]:
     """Split string by comma, ignoring commas enclosed by square parentheses.
     This avoids splitting the string of nodes names on commas included in
@@ -356,13 +355,13 @@ def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
     return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
 
 
-def _safe_load_entry_point(  # noqa: inconsistent-return-statements
+def _safe_load_entry_point(
     entry_point,
 ):
     """Load entrypoint safely, if fails it will just skip the entrypoint."""
     try:
         return entry_point.load()
-    except Exception as exc:  # noqa: broad-except
+    except Exception as exc:
         logger.warning(
             "Failed to load %s commands from %s. Full exception: %s",
             entry_point.module,
@@ -394,7 +393,7 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def _config_file_callback(ctx, param, value):  # noqa: unused-argument
+def _config_file_callback(ctx, param, value):
     """CLI callback that replaces command line options
     with values specified in a config file. If command line
     options are passed, they override config file values.

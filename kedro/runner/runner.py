@@ -280,7 +280,6 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     """
     for node_input in node.inputs:
-        # noqa: protected-access
         if isinstance(catalog._datasets[node_input], MemoryDataset):
             return False
     return True

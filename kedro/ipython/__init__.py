@@ -17,7 +17,7 @@ from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import CONF_SOURCE_HELP, PARAMS_ARG_HELP
 from kedro.framework.cli.utils import ENV_HELP, _split_params
 from kedro.framework.project import (
-    LOGGING,  # noqa
+    LOGGING,  # noqa: F401
     configure_project,
     pipelines,
 )
@@ -71,7 +71,7 @@ def magic_reload_kedro(
 ):
     """
     The `%reload_kedro` IPython line magic.
-    See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic # noqa: line-too-long
+    See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic
     for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
@@ -138,7 +138,6 @@ def _resolve_project_path(
         project_path = Path(path).expanduser().resolve()
     else:
         if local_namespace and "context" in local_namespace:
-            # noqa: protected-access
             project_path = local_namespace["context"].project_path
         else:
             project_path = _find_kedro_project(Path.cwd())
@@ -149,7 +148,6 @@ def _resolve_project_path(
                 project_path,
             )
 
-    # noqa: protected-access
     if (
         project_path
         and local_namespace

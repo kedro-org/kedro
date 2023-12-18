@@ -1,5 +1,4 @@
 """This module defines a dedicated hook manager for hooks that extends Kedro CLI behaviour."""
-# noqa: global-statement,invalid-name
 import logging
 
 from pluggy import PluginManager

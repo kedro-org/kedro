@@ -32,7 +32,7 @@ The command line interface then asks which tools you'd like to include in the pr
 
 You can add one or more of the options, or follow the default and add none at all:
 
-* Linting: A basic linting setup with Black and ruff
+* Linting: A basic linting setup with ruff
 * Testing: A basic testing setup with pytest
 * Custom Logging: Additional logging options
 * Documentation: Configuration for basic documentation built with Sphinx

@@ -92,8 +92,8 @@ class CachedDataset(AbstractDataset):
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "dataset": self._dataset._describe(),  # noqa: protected-access
-            "cache": self._cache._describe(),  # noqa: protected-access
+            "dataset": self._dataset._describe(),
+            "cache": self._cache._describe(),
         }
 
     def _load(self):

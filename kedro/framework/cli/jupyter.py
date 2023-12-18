@@ -35,7 +35,6 @@ class JupyterCommandGroup(click.Group):
         return ["setup", "notebook", "lab", "convert"]
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def jupyter_cli():  # pragma: no cover
     pass
@@ -50,7 +49,7 @@ def jupyter():
 
 @forward_command(jupyter, "setup", forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
-def setup(metadata: ProjectMetadata, args, **kwargs):  # noqa: unused-argument
+def setup(metadata: ProjectMetadata, args, **kwargs):
     """Initialise the Jupyter Kernel for a kedro project."""
     _check_module_importable("ipykernel")
     validate_settings()
@@ -68,7 +67,7 @@ def jupyter_notebook(
     env,
     args,
     **kwargs,
-):  # noqa: unused-argument
+):
     """Open Jupyter Notebook with project specific variables loaded."""
     _check_module_importable("notebook")
     validate_settings()
@@ -94,7 +93,7 @@ def jupyter_lab(
     env,
     args,
     **kwargs,
-):  # noqa: unused-argument
+):
     """Open Jupyter Lab with project specific variables loaded."""
     _check_module_importable("jupyterlab")
     validate_settings()
@@ -153,7 +152,6 @@ def _create_kernel(kernel_name: str, display_name: str) -> str:
     """
     # These packages are required by jupyter lab and notebook, which we have already
     # checked are importable, so we don't run _check_module_importable on them.
-    # noqa: import-outside-toplevel
     from ipykernel.kernelspec import install
 
     try:

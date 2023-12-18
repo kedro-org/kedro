@@ -2,6 +2,8 @@ from pathlib import Path
 import shutil
 import toml
 
+from pre_commit_hooks.requirements_txt_fixer import fix_requirements
+
 current_dir = Path.cwd()
 
 # Requirements for linting tools
@@ -219,17 +221,10 @@ def setup_template_tools(
 
 
 def sort_requirements(requirements_file_path: Path) -> None:
-    """Sort the requirements.txt file alphabetically and write it back to the file.
+    """Sort entries in `requirements.txt`, writing back changes, if any.
 
     Args:
         requirements_file_path (Path): The path to the `requirements.txt` file.
     """
-    with open(requirements_file_path, "r") as requirements:
-        lines = requirements.readlines()
-
-    lines = [line.strip() for line in lines]
-    lines.sort()
-    sorted_content = "\n".join(lines)
-
-    with open(requirements_file_path, "w") as requirements:
-        requirements.write(sorted_content)
+    with open(requirements_file_path, "rb+") as file_obj:
+        fix_requirements(file_obj)

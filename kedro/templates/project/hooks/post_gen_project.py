@@ -1,8 +1,6 @@
 from pathlib import Path
 
-from pre_commit_hooks.requirements_txt_fixer import fix_requirements
-
-from kedro.templates.project.hooks.utils import setup_template_tools
+from kedro.templates.project.hooks.utils import setup_template_tools, sort_requirements
 
 
 def main():
@@ -25,8 +23,7 @@ def main():
     )
 
     # Sort requirements.txt file in alphabetical order
-    with open(requirements_file_path, "rb+") as file_obj:
-        fix_requirements(file_obj)
+    sort_requirements(requirements_file_path)
 
 
 if __name__ == "__main__":

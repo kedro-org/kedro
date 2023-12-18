@@ -61,7 +61,7 @@ test = [
     "black~=22.0",
     "coverage[toml]",
     "fsspec<2023.9", # Temporary, newer version causing "test_no_versions_with_cloud_protocol" to fail
-    "import-linter[toml]==1.8.0",
+    "import-linter[toml]==1.12.1",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
     "Jinja2<3.1.0",

@@ -60,6 +60,11 @@ class SequentialRunner(AbstractRunner):
         Raises:
             Exception: in case of any downstream node failure.
         """
+        if not self._is_async:
+            self._logger.info(
+                "Using synchronous mode for loading and saving data. Use the --async flag "
+                "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
+            )
         nodes = pipeline.nodes
         done_nodes = set()
 

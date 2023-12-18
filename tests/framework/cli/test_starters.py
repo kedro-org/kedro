@@ -991,6 +991,10 @@ class TestToolsAndExampleFromUserPrompts:
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools)
         assert "You have selected the following project tools:" in result.output
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            in result.output
+        )
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
@@ -1013,6 +1017,10 @@ class TestToolsAndExampleFromUserPrompts:
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools)
         assert "You have selected no project tools" in result.output
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            in result.output
+        )
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
@@ -1314,6 +1322,10 @@ class TestToolsAndExampleFromCLI:
         tools = _convert_tool_names_to_numbers(selected_tools=tools)
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            in result.output
+        )
         _clean_up_project(Path("./new-kedro-project"))
 
     def test_invalid_tools_flag(self, fake_kedro_cli):

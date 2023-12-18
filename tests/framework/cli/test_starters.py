@@ -965,8 +965,6 @@ class TestToolsAndExampleFromUserPrompts:
             "5",
             "6",
             "7",
-            "none",
-            "",
             "2,3,4",
             "3-5",
             "1,2,4-6",
@@ -992,6 +990,29 @@ class TestToolsAndExampleFromUserPrompts:
 
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools)
+        assert "You have selected the following project tools:" in result.output
+        _clean_up_project(Path("./new-kedro-project"))
+
+    @pytest.mark.parametrize(
+        "tools",
+        [
+            "none",
+            "",
+        ],
+    )
+    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
+    def test_no_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(
+                tools=tools, example_pipeline=example_pipeline
+            ),
+        )
+
+        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
+        _assert_requirements_ok(result, tools=tools)
+        assert "You have selected no project tools" in result.output
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(

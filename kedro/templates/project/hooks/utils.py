@@ -15,6 +15,9 @@ test_pyproject_requirements = ["tool.pytest.ini_options", "tool.coverage.report"
 # Configuration key for documentation dependencies
 docs_pyproject_requirements = ["project.optional-dependencies"]  # For pyproject.toml
 
+# Requirements for example pipelines
+example_pipeline_requirements = "seaborn~=0.12.1\nscikit-learn~=1.0\n"
+
 
 # Helper Functions
 def _remove_from_file(file_path: Path, content_to_remove: str) -> None:
@@ -141,13 +144,35 @@ def _remove_pyspark_viz_starter_files(is_viz: bool, python_package_name: str) ->
     _remove_file(test_pipeline_path)
 
 
-def setup_template_tools(selected_tools_list: str, requirements_file_path: str, pyproject_file_path: str, python_package_name: str, example_pipeline: str) -> None:
-    """Setup the templates according to the choice of tools.
+def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
+    """Remove all extras from kedro-datasets in the requirements file, while keeping the version.
+
+    Args:
+        file_path (Path): The path of the requirements file.
+    """
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    for i, line in enumerate(lines):
+        if 'kedro-datasets[' in line:
+            # Split the line at '[', and keep the part before it
+            package = line.split('[', 1)[0]
+            # Extract version
+            version = line.split(']')[-1]
+            lines[i] = package + version
+
+    with open(file_path, 'w') as file:
+        file.writelines(lines)
+
+
+def setup_template_tools(selected_tools_list: str, requirements_file_path: Path, pyproject_file_path: Path,
+                         python_package_name: str, example_pipeline: str) -> None:
+    """Set up the templates according to the choice of tools.
 
     Args:
         selected_tools_list (str): A string contains the selected tools.
-        requirements_file_path (str): The path of the `requiremenets.txt` in the template.
-        pyproject_file_path (str): The path of the `pyproject.toml` in the template
+        requirements_file_path (Path): The path of the `requiremenets.txt` in the template.
+        pyproject_file_path (Path): The path of the `pyproject.toml` in the template
         python_package_name (str): The name of the python package.
         example_pipeline (str): 'True' if example pipeline was selected
     """
@@ -172,6 +197,10 @@ def setup_template_tools(selected_tools_list: str, requirements_file_path: str, 
 
     if ("PySpark" in selected_tools_list or "Kedro Viz" in selected_tools_list) and example_pipeline != "True":
         _remove_pyspark_viz_starter_files("Kedro Viz" in selected_tools_list, python_package_name)
+        # Remove requirements used by example pipelines
+        _remove_from_file(requirements_file_path, example_pipeline_requirements)
+        _remove_extras_from_kedro_datasets(requirements_file_path)
+
 
 def sort_requirements(requirements_file_path: Path) -> None:
     """Sort the requirements.txt file alphabetically and write it back to the file.

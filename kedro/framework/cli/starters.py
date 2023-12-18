@@ -887,7 +887,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
 
     # we can use starters without tools:
     if tools is not None:
-        if tools == "[]":  # TODO: This should be a list
+        if tools in ("[]", ""):  # TODO: This should be a list
             click.secho(
                 "You have selected no project tools",
                 fg="green",

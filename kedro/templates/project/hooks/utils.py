@@ -216,3 +216,20 @@ def setup_template_tools(
         # Remove requirements used by example pipelines
         _remove_from_file(requirements_file_path, example_pipeline_requirements)
         _remove_extras_from_kedro_datasets(requirements_file_path)
+
+
+def sort_requirements(requirements_file_path: Path) -> None:
+    """Sort the requirements.txt file alphabetically and write it back to the file.
+
+    Args:
+        requirements_file_path (Path): The path to the `requirements.txt` file.
+    """
+    with open(requirements_file_path, "r") as requirements:
+        lines = requirements.readlines()
+
+    lines = [line.strip() for line in lines]
+    lines.sort()
+    sorted_content = "\n".join(lines)
+
+    with open(requirements_file_path, "w") as requirements:
+        requirements.write(sorted_content)

@@ -1290,7 +1290,11 @@ class TestToolsAndExampleFromCLI:
             ["new", "--tools", tools, "--example", example_pipeline],
             input=_make_cli_prompt_input_without_tools(),
         )
+
         tools = _convert_tool_names_to_numbers(selected_tools=tools)
+        if not tools:
+            tools = ""
+
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
         _clean_up_project(Path("./new-kedro-project"))
@@ -1436,7 +1440,7 @@ class TestConvertToolNamesToNumbers:
     def test_convert_tool_names_to_numbers_with_none_string(self):
         selected_tools = "none"
         result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == ""
+        assert result == None
 
     def test_convert_tool_names_to_numbers_with_all_string(self):
         result = _convert_tool_names_to_numbers("all")

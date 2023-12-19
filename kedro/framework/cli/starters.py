@@ -464,6 +464,8 @@ def _get_extra_context(  # noqa: PLR0913
             for tool in _parse_tools_input(tools)  # type: ignore
         ]
         extra_context["tools"] = str(extra_context["tools"])
+    else:
+        extra_context["tools"] = str(["None"])
 
     extra_context["example_pipeline"] = (
         _parse_yes_no_to_bool(
@@ -492,7 +494,7 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
     if selected_tools is None:
         return None
     if selected_tools.lower() == "none":
-        return ""
+        return None
     if selected_tools.lower() == "all":
         return ",".join(NUMBER_TO_TOOLS_NAME.keys())
 
@@ -808,7 +810,7 @@ def _validate_selection(tools: list[str]):
             sys.exit(1)
 
 
-def _parse_tools_input(tools_str: str):
+def _parse_tools_input(tools_str: str | None):
     """Parse the tools input string.
 
     Args:

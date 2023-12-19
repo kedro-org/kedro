@@ -1367,7 +1367,7 @@ class TestNameFromCLI:
 
         assert result.exit_code != 0
         assert (
-            "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
+            "is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
             in result.output
         )
 

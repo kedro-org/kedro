@@ -335,7 +335,7 @@ pip install kedro-viz
 To start Kedro-Viz, enter the following in your terminal:
 
 ```bash
-kedro viz
+kedro viz run
 ```
 
 This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.

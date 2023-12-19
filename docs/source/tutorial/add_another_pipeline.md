@@ -498,7 +498,7 @@ There are a separate set of parameters for `ds_pipeline_2` with the `candidate_m
 
 However, `model_input_table` does not get parameterised as it needs to be shared between instances, so is frozen outside the scope of the namespace wrappers.
 
-This renders as follows using `kedro viz` (hover over the datasets to see their full path) :
+This renders as follows using `kedro viz run` (hover over the datasets to see their full path) :
 
 ![modular_ds](../meta/images/modular_ds.gif)
 

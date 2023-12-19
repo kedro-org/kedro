@@ -162,9 +162,8 @@ from kedro.framework.cli.project import (
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     _config_file_callback,
-    _get_values_as_tuple,
-    _reformat_load_versions,
     _split_params,
+    _split_load_versions,
     env_option,
     split_string,
     split_node_names,
@@ -204,7 +203,7 @@ def cli():
     type=str,
     multiple=True,
     help=LOAD_VERSION_HELP,
-    callback=_reformat_load_versions,
+    callback=_split_load_versions,
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
 @click.option(

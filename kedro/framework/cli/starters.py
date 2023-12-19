@@ -463,8 +463,7 @@ def _get_extra_context(  # noqa: PLR0913
             NUMBER_TO_TOOLS_NAME[tool]
             for tool in _parse_tools_input(tools)  # type: ignore
         ]
-    else:
-        extra_context["tools"] = []  # type: ignore
+        extra_context["tools"] = str(extra_context["tools"])
 
     extra_context["example_pipeline"] = (
         _parse_yes_no_to_bool(
@@ -880,16 +879,17 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
 
     # we can use starters without tools:
-    if tools == []:
-        click.secho(
-            "You have selected no project tools",
-            fg="green",
-        )
-    else:
-        click.secho(
-            f"You have selected the following project tools: {tools}",
-            fg="green",
-        )
+    if tools is not None:
+        if tools == "[]":  # TODO: This should be a list
+            click.secho(
+                "You have selected no project tools",
+                fg="green",
+            )
+        else:
+            click.secho(
+                f"You have selected the following project tools: {tools}",
+                fg="green",
+            )
 
     if example_pipeline is not None:
         if example_pipeline:

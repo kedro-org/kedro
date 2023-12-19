@@ -299,7 +299,7 @@ def new(  # noqa: PLR0913
 
     _create_project(project_template, cookiecutter_args)
 
-    if prompts_required and not config_path:
+    if prompts_required and not config_path and not starter_alias:
         click.secho(
             "\nTo skip the interactive flow you can run `kedro new` with"
             "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",

@@ -854,6 +854,20 @@ class TestNewWithStarterValid:
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
 
+    def test_no_hint(self, fake_kedro_cli):
+        shutil.copytree(TEMPLATE_PATH, "template")
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "-v", "--starter", str(Path("./template").resolve())],
+            input=_make_cli_prompt_input(),
+        )
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            not in result.output
+        )
+        _assert_template_ok(result)
+        _clean_up_project(Path("./new-kedro-project"))
+
 
 class TestNewWithStarterInvalid:
     def test_invalid_starter(self, fake_kedro_cli):

@@ -501,6 +501,10 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
         tool_short_name = tool.strip()
         if tool_short_name in TOOLS_SHORTNAME_TO_NUMBER:
             tools.append(TOOLS_SHORTNAME_TO_NUMBER[tool_short_name])
+
+    # Remove duplicates if any
+    tools = sorted(list(set(tools)))
+
     return ",".join(tools)
 
 

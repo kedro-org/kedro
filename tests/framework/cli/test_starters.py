@@ -1461,3 +1461,8 @@ class TestConvertToolNamesToNumbers:
         selected_tools = "invalid_tool1,invalid_tool2"
         result = _convert_tool_names_to_numbers(selected_tools)
         assert result == ""
+
+    def test_convert_tool_names_to_numbers_with_duplicates(self):
+        selected_tools = "lint,test,tests"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,2"

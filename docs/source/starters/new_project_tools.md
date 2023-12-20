@@ -259,24 +259,26 @@ See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/s
 
 Here is a flowchart to help illustrate some example choice of tools you can select:
 
-```{mermaid}
-:alt: Example diagram of specific tool choices
-flowchart TD
-    A[Start] --> B[Enter Project Name: Example Project];
-    B --> C3[Select Tools: None];
-    B --> C1[Select Tools: lint, docs, PySpark];
-    B --> C2[Select Tools: All];
-
-    C1 --> D1[Include Example Pipeline?];
-    C2 --> D2[Include Example Pipeline?];
-    C3 --> D3[Include Example Pipeline?];
-
-    D1 -->|Yes| E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes];
-    D1 -->|No| E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No];
-
-    D2 -->|Yes| F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: Yes];
-    D2 -->|No| F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: No];
-
-    D3 -->|Yes| G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes];
-    D3 -->|No| G2[New Project Created\nName: Example Project\nTools: None\nExample: No];
+```{image} ../meta/images/project-tools-choices.png
+:alt: mermaid-Example diagram of specific tool choices
 ```
+
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
+% flowchart TD
+%     A[Start] --> B[Enter Project Name: Example Project];
+%     B --> C3[Select Tools: None];
+%     B --> C1[Select Tools: lint, docs, PySpark];
+%     B --> C2[Select Tools: All];
+%
+%     C1 --> D1[Include Example Pipeline?];
+%     C2 --> D2[Include Example Pipeline?];
+%     C3 --> D3[Include Example Pipeline?];
+%
+%     D1 -->|Yes| E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes];
+%     D1 -->|No| E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No];
+%
+%     D2 -->|Yes| F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: Yes];
+%     D2 -->|No| F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: No];
+%
+%     D3 -->|Yes| G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes];
+%     D3 -->|No| G2[New Project Created\nName: Example Project\nTools: None\nExample: No];

@@ -50,7 +50,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
-    "sphinxcontrib.mermaid",
     "myst_parser",
     "notfound.extension",
     "sphinxcontrib.jquery",
@@ -546,11 +545,3 @@ except Exception as e:
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
 
 myst_heading_anchors = 5
-
-# https://github.com/kedro-org/kedro/issues/1772
-mermaid_output_format = "png"
-# https://github.com/mermaidjs/mermaid.cli#linux-sandbox-issue
-# https://github.com/mermaid-js/mermaid-cli/issues/544
-mermaid_params = ["-p", here / "puppeteer-config.json", "-s", "2"]
-# https://github.com/kedro-org/kedro/issues/2451
-mermaid_version = mermaid_init_js = ""

@@ -538,15 +538,13 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
 
     Args:
         selected_tools: a string containing the value for the --tools flag,
-            or None in case the flag wasn't used, i.e. lint,docs.
+            or None in case none were provided, i.e. lint,docs.
 
     Returns:
         String with the numbers corresponding to the desired tools, or
         None in case the --tools flag was not used.
     """
-    if selected_tools is None:
-        return None
-    if selected_tools.lower() == "none":
+    if selected_tools is None or selected_tools.lower() == "none":
         return None
     if selected_tools.lower() == "all":
         return ",".join(NUMBER_TO_TOOLS_NAME.keys())

@@ -75,10 +75,10 @@ none ⮐
 no ⮐
 ```
 
-You can also enter this in a single line as follows: 
+You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=My-Project --tools=none -example=no
+kedro new --name=My-Project --tools=none -example=n
 ```
 
 2. To create a spaceflights project called `spaceflights` with Kedro Viz features and example code:
@@ -90,10 +90,10 @@ spaceflights ⮐
 yes ⮐
 ```
 
-You can also enter this in a single line as follows: 
+You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=spaceflights --tools=Kedro-Viz -example=yes
+kedro new --name=spaceflights --tools=viz -example=y
 ```
 
 3. To create a project, called `testproject` containing linting, documentation, and PySpark, but no example code:
@@ -105,10 +105,10 @@ testproject ⮐
 no ⮐
 ```
 
-You can also enter this in a single line as follows: 
+You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=testproject --tools=Lint, Docs, PySpark -example=no
+kedro new --name=testproject --tools=Lint, Docs, PySpark -example=n
 ```
 
 
@@ -165,20 +165,21 @@ If you've worked through the documentation listed and are unsure where to go nex
 
 Here is a flowchart to help guide your choice of tools and examples you can select:
 
-```{mermaid}
-:alt: General overview diagram for setting up a new Kedro project with tools
-flowchart TD
-    A[Start] --> B[Enter Project Name];
-    B --> C[Select Tools];
-
-    C -->|None| D[None];
-    C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
-    C -->|All| F[All];
-
-    D --> G[Include Example Pipeline?]
-    E --> G;
-    F --> G
-
-    G -->|Yes| H[New Project Created];
-    G -->|No| H;
+```{figure} ../meta/images/new-project-tools.png
+:alt: mermaid-General overview diagram for setting up a new Kedro project with tools
 ```
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
+% flowchart TD
+%     A[Start] --> B[Enter Project Name];
+%     B --> C[Select Tools];
+%
+%     C -->|None| D[None];
+%     C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
+%     C -->|All| F[All];
+%
+%     D --> G[Include Example Pipeline?]
+%     E --> G;
+%     F --> G
+%
+%     G -->|Yes| H[New Project Created];
+%     G -->|No| H;

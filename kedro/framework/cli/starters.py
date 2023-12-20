@@ -299,6 +299,13 @@ def new(  # noqa: PLR0913
 
     _create_project(project_template, cookiecutter_args)
 
+    if prompts_required and not config_path and not starter_alias:
+        click.secho(
+            "\nTo skip the interactive flow you can run `kedro new` with"
+            "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
+            fg="green",
+        )
+
 
 @starter.command("list")
 def list_starters():
@@ -844,7 +851,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
 
     # we can use starters without tools:
     if tools is not None:
-        if tools == "[]":  # TODO: This should be a list
+        if tools in ("[]", ""):  # TODO: This should be a list
             click.secho(
                 "You have selected no project tools",
                 fg="green",
@@ -861,12 +868,6 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
                 "It has been created with an example pipeline.",
                 fg="green",
             )
-
-    click.secho(
-        "\nTo skip the interactive flow you can run `kedro new` with"
-        "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
-        fg="green",
-    )
 
 
 class _Prompt:

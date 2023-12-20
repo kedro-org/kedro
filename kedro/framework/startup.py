@@ -112,7 +112,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     try:
         return ProjectMetadata(**metadata_dict)
     except TypeError as exc:
-        expected_keys = mandatory_keys + ["source_dir", "tools", "example"]
+        expected_keys = mandatory_keys + ["source_dir", "tools", "example_pipeline"]
         raise RuntimeError(
             f"Found unexpected keys in '{_PYPROJECT}'. Make sure "
             f"it only contains the following keys: {expected_keys}."

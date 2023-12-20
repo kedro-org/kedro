@@ -141,7 +141,7 @@ class TestGetProjectMetadata:
         pattern = (
             "Found unexpected keys in 'pyproject.toml'. Make sure it "
             "only contains the following keys: ['package_name', "
-            "'project_name', 'kedro_init_version', 'source_dir', 'tools']."
+            "'project_name', 'kedro_init_version', 'source_dir', 'tools', 'example']."
         )
 
         with pytest.raises(RuntimeError, match=re.escape(pattern)):

@@ -1440,7 +1440,7 @@ class TestConvertToolNamesToNumbers:
     def test_convert_tool_names_to_numbers_with_none_string(self):
         selected_tools = "none"
         result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == None
+        assert result is None
 
     def test_convert_tool_names_to_numbers_with_all_string(self):
         result = _convert_tool_names_to_numbers("all")

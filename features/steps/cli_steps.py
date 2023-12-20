@@ -4,7 +4,7 @@ import json
 import shutil
 import textwrap
 from pathlib import Path
-from time import time
+from time import sleep, time
 
 import behave
 import requests
@@ -391,9 +391,12 @@ def exec_notebook(context, command):
 @then('I wait for the jupyter webserver to run for up to "{timeout:d}" seconds')
 def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
+    # FIXME: Will continue iterating after the process has returned
     while time() < timeout_start + timeout:
         stdout = context.result.stdout.readline()
         if "http://127.0.0.1:" in stdout:
+            # Take a breath, and declare success
+            sleep(1)
             break
 
     if time() >= timeout_start + timeout:
@@ -661,7 +664,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        _check_service_up(context, url, "Jupyter Notebook")
+        _check_service_up(context, url, "Jupyter Server")
     finally:
         context.result.terminate()
 

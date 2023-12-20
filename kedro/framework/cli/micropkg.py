@@ -21,7 +21,6 @@ from rope.base.project import Project
 from rope.contrib import generate
 from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
-from setuptools.discovery import FlatLayoutPackageFinder
 
 from build.util import project_wheel_metadata
 from kedro.framework.cli.pipeline import (
@@ -227,9 +226,11 @@ def _pull_package(  # noqa: PLR0913
         # However, the rest of the code expects the non-normalized package name,
         # so we have to find it.
         packages = [
-            package
-            for package in FlatLayoutPackageFinder().find(project_root_dir)
-            if "." not in package
+            elem.name
+            for elem in project_root_dir.iterdir()
+            if elem.is_dir()
+            and elem.name != "tests"
+            and (elem / "__init__.py").exists()
         ]
         if len(packages) != 1:
             # Should not happen if user is calling `micropkg pull`

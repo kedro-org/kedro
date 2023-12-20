@@ -39,6 +39,7 @@ def fake_metadata(tmp_path):
         kedro_init_version=PROJECT_INIT_VERSION,
         project_path=tmp_path,
         tools=None,
+        example_pipeline=None,
     )
     return metadata
 

@@ -28,7 +28,7 @@ Here's a flowchart to guide your choice of workflow:
 :alt: mermaid-Decision making diagram for deploying Kedro projects to Databricks
 ```
 
-% Mermaid code
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
 % flowchart TD
 %   A[Start] --> B{Do you prefer developing your projects in notebooks?}
 %   B -->|Yes| C[Use a Databricks workspace to develop a Kedro project]

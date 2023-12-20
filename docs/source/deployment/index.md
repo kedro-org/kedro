@@ -14,7 +14,7 @@ If your pipeline is sizeable, you may want to run it across separate machines, s
 :alt: mermaid-Decision making diagram for deploying Kedro projects
 ```
 
-% Mermaid code
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
 % flowchart TD
 %     A{Can your Kedro pipeline run on a single machine?} -- YES --> B[Consult the single-machine deployment guide];
 %     B --> C{Do you have Docker on your machine?};

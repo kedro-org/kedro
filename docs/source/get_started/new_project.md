@@ -108,7 +108,7 @@ Here is a flowchart to help guide your choice of tools and examples you can sele
 :alt: mermaid-General overview diagram for setting up a new Kedro project with tools
 ```
 
-% Mermaid code
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
 % flowchart TD
 %     A[Start] --> B[Enter Project Name];
 %     B --> C[Select Tools];

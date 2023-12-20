@@ -263,7 +263,7 @@ Here is a flowchart to help illustrate some example choice of tools you can sele
 :alt: mermaid-Example diagram of specific tool choices
 ```
 
-% Mermaid code
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
 % flowchart TD
 %     A[Start] --> B[Enter Project Name: Example Project];
 %     B --> C3[Select Tools: None];

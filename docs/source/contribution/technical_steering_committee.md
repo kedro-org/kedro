@@ -56,20 +56,16 @@ We look for commitment markers who can do the following:
 | Name                                                     | Organisation                                                                            |
 |----------------------------------------------------------|---------------------------------------------------------------------------------------- |
 | [Ahdra Merali](https://github.com/AhdraMeraliQB)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Andrew Mackay](https://github.com/Mackay031)            | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Antony Milne](https://github.com/antonymilne)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Claypot AI](https://www.claypot.ai)                                                    |
 | [Dmitry Sorokin](https://github.com/DimedS)              | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ivan Danov](https://github.com/idanov)                  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Jo Stichbury](https://github.com/stichbury)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Joel Schwarzmann](https://github.com/datajoely)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Juan Luis Cano](https://github.com/astrojuanlu)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [GetInData \| Part of Xebia](https://getindata.com)                                      |
-| [Mehdi Naderi Varandi](https://github.com/MehdiNV)       | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nero Okwa](https://github.com/NeroOkwa)                 | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
@@ -77,7 +73,6 @@ We look for commitment markers who can do the following:
 | [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla)  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Sajid Alam](https://github.com/SajidAlamQB)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Stephanie Kaiser](https://github.com/stephkaiser)       | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Tynan DeBold](https://github.com/tynandebold)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Vladimir Nikolic](https://github.com/vladimir-mck)      | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Yetunde Dada](https://github.com/yetudada)              | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) |
@@ -88,7 +83,9 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 
 Former core team members with significant contributions include
 [Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
+[Andrew Mackay](https://github.com/Mackay031),
 [Anton Kirilenko](https://github.com/Flid),
+[Antony Milne](https://github.com/antonymilne),
 [Cvetanka Nechevska](https://github.com/cvetankanechevska),
 [Dmitrii Deriabin](https://github.com/dmder),
 [Gabriel Comym](https://github.com/comym),
@@ -97,14 +94,17 @@ Former core team members with significant contributions include
 [Ignacio Paricio](https://github.com/ignacioparicio),
 [Jannic Holzer](https://github.com/jmholzer),
 [Jiri Klein](https://github.com/jiriklein),
+[Joel Schwarzmann](https://github.com/datajoely),
 [Kiyohito Kunii](https://github.com/921kiyo),
 [Laís Carvalho](https://github.com/laisbsc),
 [Liam Brummitt](https://github.com/bru5),
 [Lim Hoang](https://github.com/limdauto),
 [Lorena Bălan](https://github.com/lorenabalan),
+[Mehdi Naderi Varandi](https://github.com/MehdiNV),
 [Nasef Khan](https://github.com/nakhan98),
 [Richard Westenra](https://github.com/richardwestenra),
-[Susanna Wong](https://github.com/studioswong) and
+[Susanna Wong](https://github.com/studioswong),
+[Tynan DeBold](https://github.com/tynandebold), and
 [Zain Patel](https://github.com/mzjp2).
 
 ## Application process

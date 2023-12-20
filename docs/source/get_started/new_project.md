@@ -33,13 +33,13 @@ Next, the CLI asks which tools you'd like to include in the project:
 Which tools would you like to include in your project? [1-7/1,3/all/none]:
 
 Tools
-1) **Lint**: Basic linting with Black and Ruff
-2) **Test**: Basic testing with pytest
-3) **Log**: Additional, environment-specific logging options
-4) **Docs**: A Sphinx documentation setup
-5) **Data Folder**: A folder structure for data management
-6) **PySpark**: Configuration for working with PySpark
-7) **Kedro-Viz**: Kedro's native visualisation tool
+1) Lint: Basic linting with Black and Ruff
+2) Test: Basic testing with pytest
+3) Log: Additional, environment-specific logging options
+4) Docs: A Sphinx documentation setup
+5) Data Folder: A folder structure for data management
+6) PySpark: Configuration for working with PySpark
+7) Kedro-Viz: Kedro's native visualisation tool
 ```
 
 The options are described in more detail in the [documentation about the new project tools](../starters/new_project_tools.md).
@@ -165,22 +165,20 @@ If you've worked through the documentation listed and are unsure where to go nex
 
 Here is a flowchart to help guide your choice of tools and examples you can select:
 
-```{figure} ../meta/images/new-project-tools.png
-:alt: mermaid-General overview diagram for setting up a new Kedro project with tools
-```
+```{mermaid}
+:alt: General overview diagram for setting up a new Kedro project with tools
+flowchart TD
+    A[Start] --> B[Enter Project Name];
+    B --> C[Select Tools];
 
-% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
-% flowchart TD
-%     A[Start] --> B[Enter Project Name];
-%     B --> C[Select Tools];
-%
-%     C -->|None| D[None];
-%     C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
-%     C -->|All| F[All];
-%
-%     D --> G[Include Example Pipeline?]
-%     E --> G;
-%     F --> G
-%
-%     G -->|Yes| H[New Project Created];
-%     G -->|No| H;
+    C -->|None| D[None];
+    C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
+    C -->|All| F[All];
+
+    D --> G[Include Example Pipeline?]
+    E --> G;
+    F --> G
+
+    G -->|Yes| H[New Project Created];
+    G -->|No| H;
+```

@@ -517,6 +517,8 @@ def _get_extra_context(  # noqa: PLR0913
             for tool in _parse_tools_input(tools)  # type: ignore
         ]
         extra_context["tools"] = str(extra_context["tools"])
+    else:
+        extra_context["tools"] = str(["None"])
 
     extra_context["example_pipeline"] = (
         _parse_yes_no_to_bool(
@@ -536,16 +538,14 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
 
     Args:
         selected_tools: a string containing the value for the --tools flag,
-            or None in case the flag wasn't used, i.e. lint,docs.
+            or None in case none were provided, i.e. lint,docs.
 
     Returns:
         String with the numbers corresponding to the desired tools, or
         None in case the --tools flag was not used.
     """
-    if selected_tools is None:
+    if selected_tools is None or selected_tools.lower() == "none":
         return None
-    if selected_tools.lower() == "none":
-        return ""
     if selected_tools.lower() == "all":
         return ",".join(NUMBER_TO_TOOLS_NAME.keys())
 
@@ -554,6 +554,10 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
         tool_short_name = tool.strip()
         if tool_short_name in TOOLS_SHORTNAME_TO_NUMBER:
             tools.append(TOOLS_SHORTNAME_TO_NUMBER[tool_short_name])
+
+    # Remove duplicates if any
+    tools = sorted(list(set(tools)))
+
     return ",".join(tools)
 
 

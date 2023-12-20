@@ -22,6 +22,7 @@ class ProjectMetadata(NamedTuple):
     source_dir: Path
     kedro_init_version: str
     tools: list
+    example_pipeline: str
 
 
 def _version_mismatch_error(kedro_init_version) -> str:
@@ -103,6 +104,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     source_dir = Path(metadata_dict.get("source_dir", "src")).expanduser()
     source_dir = (project_path / source_dir).resolve()
     metadata_dict["tools"] = metadata_dict.get("tools")
+    metadata_dict["example_pipeline"] = metadata_dict.get("example_pipeline")
 
     metadata_dict["source_dir"] = source_dir
     metadata_dict["config_file"] = pyproject_toml

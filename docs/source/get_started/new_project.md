@@ -104,20 +104,22 @@ If you've worked through the documentation listed and are unsure where to go nex
 
 Here is a flowchart to help guide your choice of tools and examples you can select:
 
-```{mermaid}
-:alt: General overview diagram for setting up a new Kedro project with tools
-flowchart TD
-    A[Start] --> B[Enter Project Name];
-    B --> C[Select Tools];
-
-    C -->|None| D[None];
-    C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
-    C -->|All| F[All];
-
-    D --> G[Include Example Pipeline?]
-    E --> G;
-    F --> G
-
-    G -->|Yes| H[New Project Created];
-    G -->|No| H;
+```{figure} ../meta/images/new-project-tools.png
+:alt: mermaid-General overview diagram for setting up a new Kedro project with tools
 ```
+
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
+% flowchart TD
+%     A[Start] --> B[Enter Project Name];
+%     B --> C[Select Tools];
+%
+%     C -->|None| D[None];
+%     C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
+%     C -->|All| F[All];
+%
+%     D --> G[Include Example Pipeline?]
+%     E --> G;
+%     F --> G
+%
+%     G -->|Yes| H[New Project Created];
+%     G -->|No| H;

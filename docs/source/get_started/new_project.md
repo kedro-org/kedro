@@ -40,7 +40,7 @@ Tools
 7) Kedro-Viz: Kedro's native visualisation tool
 
 Which tools would you like to include in your project? [1-7/1,3/all/none]:
- (none): 
+ (none):
 ```
 
 The options are described in more detail in the [documentation about the new project tools](../starters/new_project_tools.md).
@@ -54,7 +54,7 @@ Finally, the CLI offers the option to include starter example code in the projec
 
 ```text
 Would you like to include an example pipeline? :
- (no): 
+ (no):
 ```
 
 If you say `yes`, the example code included depends upon your previous choice of tools, as follows:

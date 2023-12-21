@@ -56,7 +56,7 @@ test = [
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
     "blacken-docs==1.9.2",
-    "black~=22.0",
+    "black>=22,<24",
     "coverage[toml]",
     "fsspec<2023.9", # Temporary, newer version causing "test_no_versions_with_cloud_protocol" to fail
     "import-linter==1.12.1",

@@ -30,8 +30,6 @@ It's best to keep the name simple because the choice is set as the value of `pro
 Next, the CLI asks which tools you'd like to include in the project:
 
 ```text
-Which tools would you like to include in your project? [1-7/1,3/all/none]:
-
 Tools
 1) Lint: Basic linting with Black and Ruff
 2) Test: Basic testing with pytest
@@ -40,6 +38,9 @@ Tools
 5) Data Folder: A folder structure for data management
 6) PySpark: Configuration for working with PySpark
 7) Kedro-Viz: Kedro's native visualisation tool
+
+Which tools would you like to include in your project? [1-7/1,3/all/none]:
+ (none): 
 ```
 
 The options are described in more detail in the [documentation about the new project tools](../starters/new_project_tools.md).

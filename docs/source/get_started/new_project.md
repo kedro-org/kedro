@@ -95,7 +95,7 @@ yes ⮐
 You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=spaceflights --tools=viz -example=y
+kedro new --name=spaceflights --tools=viz --example=y
 ```
 
 3. To create a project, called `testproject` containing linting, documentation, and PySpark, but no example code:

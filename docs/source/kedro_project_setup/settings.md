@@ -31,6 +31,8 @@ Every Kedro project comes with a default pre-populated `pyproject.toml` file in 
 package_name = "package_name"
 project_name = "project_name"
 kedro_init_version = "kedro_version"
+tools = ""
+source_dir = "src"
 ```
 
 The `package_name` should be a [valid Python package name](https://peps.python.org/pep-0423/) and the `project_name` should be a human-readable name. They are both mandatory keys for your project.
@@ -40,3 +42,11 @@ this value should also be updated.
 You can also use `pyproject.toml` to specify settings for functionalities such as [micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 You can also store the settings for the other tools you've used in your project, such as [`pytest` for automated testing](../development/automated_testing.md).
 Consult the respective documentation for the tools you have used to check how you can configure the settings with the `pyproject.toml` file for your project.
+
+### Use Kedro without the `src` folder
+Kedro using the `src` layout by default. It is possible to change this, for example, if you want to use a [flat layout](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/#src-layout-vs-flat-layout), you can modify the `pyproject.toml`.
+
+```diff
++++ source_dir = ""
+--- source_dir = "src"
+```

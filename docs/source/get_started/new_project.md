@@ -53,7 +53,8 @@ Select the tools by number, or `all` or follow the default to add `none`.
 Finally, the CLI offers the option to include starter example code in the project:
 
 ```text
-Select whether you would like an example spaceflights pipeline included in your project.
+Would you like to include an example pipeline? :
+ (no): 
 ```
 
 If you say `yes`, the example code included depends upon your previous choice of tools, as follows:

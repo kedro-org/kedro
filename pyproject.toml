@@ -31,7 +31,6 @@ dependencies = [
     "PyYAML>=4.2,<7.0",
     "rich>=12.0,<14.0",
     "rope>=0.21,<2.0",  # subject to LGPLv3 license
-    "setuptools>=65.5.1",
     "toml>=0.10.0",
     "toposort>=1.5",  # Needs to be at least 1.5 to be able to raise CircularDependencyError
 ]

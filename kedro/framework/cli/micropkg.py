@@ -226,11 +226,11 @@ def _pull_package(  # noqa: PLR0913
         # However, the rest of the code expects the non-normalized package name,
         # so we have to find it.
         packages = [
-            elem.name
-            for elem in project_root_dir.iterdir()
-            if elem.is_dir()
-            and elem.name != "tests"
-            and (elem / "__init__.py").exists()
+            project_item.name
+            for project_item in project_root_dir.iterdir()
+            if project_item.is_dir()
+            and project_item.name != "tests"
+            and (project_item / "__init__.py").exists()
         ]
         if len(packages) != 1:
             # Should not happen if user is calling `micropkg pull`

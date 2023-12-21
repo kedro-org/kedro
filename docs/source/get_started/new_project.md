@@ -110,7 +110,7 @@ no ⮐
 You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=testproject --tools=Lint, Docs, PySpark -example=n
+kedro new --name=testproject --tools=lint,docs,pyspark --example=n
 ```
 
 

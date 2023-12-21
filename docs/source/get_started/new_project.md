@@ -2,7 +2,7 @@
 
 There are several ways to create a new Kedro project. This page explains the flow to create a basic project using `kedro new` to output a project directory containing the basic files and subdirectories that make up a Kedro project.
 
-You can also create a new Kedro project with a starter that adds code for a common project use case. [Starters are explained separately](../starters/starters.md) later in the documentation set and the [spaceflights tutorial](../tutorial/tutorial_template.md) illustrates their use.
+You can also create a new Kedro project with a starter that adds code for a common project use case. [Starters are explained separately](../starters/starters.md) and the [spaceflights tutorial](../tutorial/tutorial_template.md) illustrates their use.
 
 ## Introducing `kedro new`
 

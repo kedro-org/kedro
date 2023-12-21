@@ -80,7 +80,7 @@ no ⮐
 You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=My-Project --tools=none -example=n
+kedro new --name=My-Project --tools=none --example=n
 ```
 
 2. To create a spaceflights project called `spaceflights` with Kedro Viz features and example code:

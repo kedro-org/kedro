@@ -135,6 +135,7 @@ def _assert_requirements_ok(
         assert "ruff" in requirements
 
         pyproject_config = toml.load(pyproject_file_path)
+        print(pyproject_config)
         expected = {
             "tool": {
                 "ruff": {

@@ -517,9 +517,9 @@ def _get_extra_context(  # noqa: PLR0913
             for tool in _parse_tools_input(tools)  # type: ignore
         ]
     if extra_context.get("tools"):
-        extra_context["tools"] = str(extra_context["tools"]) 
+        extra_context["tools"] = str(extra_context["tools"])
     else:
-        extra_context["tools"] = str(['None'])
+        extra_context["tools"] = str(["None"])
 
     extra_context["example_pipeline"] = (
         _parse_yes_no_to_bool(

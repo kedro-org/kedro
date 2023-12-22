@@ -50,6 +50,9 @@ fail_under = 0
 show_missing = true
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
+[tool.ruff.format]
+docstring-code-format = true
+
 [tool.ruff]
 line-length = 88
 show-fixes = true
@@ -63,6 +66,3 @@ select = [
     "T201", # Print Statement
 ]
 ignore = ["E501"]  # Ruff format takes care of line-too-long
-
-[tool.ruff.format]
-docstring-code-format = true

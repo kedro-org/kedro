@@ -3,6 +3,11 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Removed example pipeline requirements when examples are not selected in `tools`.
+* Allowed modern versions of JupyterLab and Jupyter Notebooks.
+* Removed setuptools dependency
+
+## Breaking changes to the API
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
 
 ## Documentation changes

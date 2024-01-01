@@ -24,20 +24,22 @@ The workflow documented in ["Use a Databricks job to deploy a Kedro project"](./
 ---
 Here's a flowchart to guide your choice of workflow:
 
-```{mermaid}
+```{image} ../../meta/images/databricks-flow-chart.png
 :alt: mermaid-Decision making diagram for deploying Kedro projects to Databricks
-
-flowchart TD
-  A[Start] --> B{Do you prefer developing your projects in notebooks?}
-  B -->|Yes| C[Use a Databricks workspace to develop a Kedro project]
-  B -->|No| D{Are you a beginner with Kedro?}
-  D -->|Yes| E[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
-  D -->|No| F{Do you have advanced project requirements<br>e.g. CI/CD, scheduling, production-ready, complex pipelines, etc.?}
-  F -->|Yes| G{Is rapid development needed for your project needs?}
-  F -->|No| H[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
-  G -->|Yes| I[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
-  G -->|No| J[Use a Databricks job to deploy a Kedro project]
 ```
+
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
+% flowchart TD
+%   A[Start] --> B{Do you prefer developing your projects in notebooks?}
+%   B -->|Yes| C[Use a Databricks workspace to develop a Kedro project]
+%   B -->|No| D{Are you a beginner with Kedro?}
+%   D -->|Yes| E[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
+%   D -->|No| F{Do you have advanced project requirements<br>e.g. CI/CD, scheduling, production-ready, complex pipelines, etc.?}
+%   F -->|Yes| G{Is rapid development needed for your project needs?}
+%   F -->|No| H[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
+%   G -->|Yes| I[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
+%   G -->|No| J[Use a Databricks job to deploy a Kedro project]
+
 
 Remember, the best choice of workflow is the one that aligns best with your project's requirements, whether that's quick development, notebook-based coding, or a production-ready setup. Make sure to consider these factors alongside your comfort level with Kedro when making your decision.
 

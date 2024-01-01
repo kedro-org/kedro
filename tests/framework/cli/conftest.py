@@ -89,6 +89,7 @@ def fake_metadata(fake_root_dir):
         kedro_init_version=kedro_version,
         source_dir=fake_root_dir / REPO_NAME / "src",
         tools=None,
+        example_pipeline=None,
     )
     return metadata
 

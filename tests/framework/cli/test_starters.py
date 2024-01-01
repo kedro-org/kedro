@@ -854,6 +854,20 @@ class TestNewWithStarterValid:
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
 
+    def test_no_hint(self, fake_kedro_cli):
+        shutil.copytree(TEMPLATE_PATH, "template")
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "-v", "--starter", str(Path("./template").resolve())],
+            input=_make_cli_prompt_input(),
+        )
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            not in result.output
+        )
+        _assert_template_ok(result)
+        _clean_up_project(Path("./new-kedro-project"))
+
 
 class TestNewWithStarterInvalid:
     def test_invalid_starter(self, fake_kedro_cli):
@@ -965,8 +979,6 @@ class TestToolsAndExampleFromUserPrompts:
             "5",
             "6",
             "7",
-            "none",
-            "",
             "2,3,4",
             "3-5",
             "1,2,4-6",
@@ -992,6 +1004,37 @@ class TestToolsAndExampleFromUserPrompts:
 
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools)
+        assert "You have selected the following project tools:" in result.output
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            in result.output
+        )
+        _clean_up_project(Path("./new-kedro-project"))
+
+    @pytest.mark.parametrize(
+        "tools",
+        [
+            "none",
+            "",
+        ],
+    )
+    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
+    def test_no_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(
+                tools=tools, example_pipeline=example_pipeline
+            ),
+        )
+
+        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
+        _assert_requirements_ok(result, tools=tools)
+        assert "You have selected no project tools" in result.output
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            in result.output
+        )
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
@@ -1115,6 +1158,10 @@ class TestToolsAndExampleFromConfigFile:
 
         _assert_template_ok(result, **config)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            not in result.output
+        )
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
@@ -1290,9 +1337,17 @@ class TestToolsAndExampleFromCLI:
             ["new", "--tools", tools, "--example", example_pipeline],
             input=_make_cli_prompt_input_without_tools(),
         )
+
         tools = _convert_tool_names_to_numbers(selected_tools=tools)
+        if not tools:
+            tools = ""
+
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            in result.output
+        )
         _clean_up_project(Path("./new-kedro-project"))
 
     def test_invalid_tools_flag(self, fake_kedro_cli):
@@ -1324,6 +1379,27 @@ class TestToolsAndExampleFromCLI:
             "Tools options 'all' and 'none' cannot be used with other options"
             in result.output
         )
+
+    def test_flags_skip_interactive_flow(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "--name",
+                "New Kedro Project",
+                "--tools",
+                "none",
+                "--example",
+                "no",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert (
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            not in result.output
+        )
+        _clean_up_project(Path("./new-kedro-project"))
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -1363,7 +1439,7 @@ class TestNameFromCLI:
 
         assert result.exit_code != 0
         assert (
-            "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
+            "is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
             in result.output
         )
 
@@ -1436,7 +1512,7 @@ class TestConvertToolNamesToNumbers:
     def test_convert_tool_names_to_numbers_with_none_string(self):
         selected_tools = "none"
         result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == ""
+        assert result is None
 
     def test_convert_tool_names_to_numbers_with_all_string(self):
         result = _convert_tool_names_to_numbers("all")
@@ -1461,3 +1537,8 @@ class TestConvertToolNamesToNumbers:
         selected_tools = "invalid_tool1,invalid_tool2"
         result = _convert_tool_names_to_numbers(selected_tools)
         assert result == ""
+
+    def test_convert_tool_names_to_numbers_with_duplicates(self):
+        selected_tools = "lint,test,tests"
+        result = _convert_tool_names_to_numbers(selected_tools)
+        assert result == "1,2"

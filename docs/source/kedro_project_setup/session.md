@@ -39,8 +39,7 @@ You can provide the following optional arguments in `KedroSession.create()`:
 for the underlying **`KedroContext`**; if specified, this will update (and therefore take precedence over) parameters retrieved from the project configuration
 
 ## `bootstrap_project` and `configure_project`
-```
-{figure} ../meta/images/kedro-session-creation.png
+```{image} ../meta/images/kedro-session-creation.png
 :alt: mermaid-General overview diagram for KedroSession creation
 ```
 

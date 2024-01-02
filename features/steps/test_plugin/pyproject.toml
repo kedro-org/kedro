@@ -1,5 +1,5 @@
 [project]
-name = "test_plugin"
+name = "test-plugin"
 description = "Dummy plugin with hook implementations and custom starters"
 version = "0.1"
 

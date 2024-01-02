@@ -36,4 +36,35 @@ You can provide the following optional arguments in `KedroSession.create()`:
 - `save_on_close`: A boolean value to indicate whether or not to save the session to disk when it's closed
 - `env`: Environment for the `KedroContext`
 - `extra_params`: Optional dictionary containing extra project parameters
-for the underlying `KedroContext`; if specified, this will update (and therefore take precedence over) parameters retrieved from the project configuration
+for the underlying **`KedroContext`**; if specified, this will update (and therefore take precedence over) parameters retrieved from the project configuration
+
+## `bootstrap_project` and `configure_project`
+```
+{figure} ../meta/images/kedro-session-creation.png
+:alt: mermaid-General overview diagram for KedroSession creation
+```
+
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
+% graph LR
+%  subgraph Kedro Startup Flowchart
+%    A[bootstrap_project] -->|Read pyproject.toml| B
+%    A -->|Add project root to sys.path| B[configure_project]
+%    C[Initialize KedroSession]
+%    B --> |Read settings.py| C
+%    B --> |Read pipeline_registry.py| C
+%  end
+
+
+Both `bootstrap_project` and `configure_project` handle the setup of a Kedro project, but there are subtle differences. `bootstrap_project` is used for project mode, and `configure_project` is used for packaged mode.
+
+In most cases, you don't need to use these functions because Kedro's CLI already runs them at startup, i.e. `kedro run`. If you want to [interact with Kedro Project programtically in an interactive session such as Notebook](../notebooks_and_ipython/kedro_and_notebooks.md#reload_kedro-line-magic), you can use the `%reload_kedro` with Jupyter or IPython. You should only use these functions directly if none of these methods work.
+
+
+
+### `bootstrap_project`
+
+This function uses `configure_project` under the hood. Additionally, it reads metadata from `pyproject.toml` and adds the project root to `sys.path`. This ensures your project can be imported as a Python package. This is usually used when you are working with the source code of a Kedro Project.
+
+### `configure_project`
+
+This function reads `settings.py` and `pipeline_registry.py` and registers the configuration before Kedro's run starts. If you have an packaged Kedro project, you only need to run `configure_project` before executing your pipeline.

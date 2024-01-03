@@ -94,9 +94,13 @@ class AbstractRunner(ABC):
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
 
+        # Identify MemoryDataset in the catalog
+        memory_datasets = {ds_name for ds_name, ds in catalog._datasets.items()
+                           if isinstance(ds, MemoryDataset)}
+
         # Check if there's any output datasets that aren't in the catalog and don't match a pattern
-        # in the catalog.
-        free_outputs = pipeline.outputs() - set(registered_ds)
+        # in the catalog and include MemoryDataset.
+        free_outputs = (pipeline.outputs() - set(registered_ds)) | memory_datasets
 
         # Register the default dataset pattern with the catalog
         catalog = catalog.shallow_copy(

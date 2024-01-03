@@ -53,16 +53,13 @@ for the underlying **`KedroContext`**; if specified, this will update (and there
 %    B --> |Read pipeline_registry.py| C
 %  end
 
+Both `bootstrap_project` and `configure_project` handle the setup of a Kedro project, but there are subtle differences: `bootstrap_project` is used for project mode, and `configure_project` is used for packaged mode.
 
-Both `bootstrap_project` and `configure_project` handle the setup of a Kedro project, but there are subtle differences. `bootstrap_project` is used for project mode, and `configure_project` is used for packaged mode.
-
-In most cases, you don't need to use these functions because Kedro's CLI already runs them at startup, i.e. `kedro run`. If you want to [interact with Kedro Project programtically in an interactive session such as Notebook](../notebooks_and_ipython/kedro_and_notebooks.md#reload_kedro-line-magic), you can use the `%reload_kedro` with Jupyter or IPython. You should only use these functions directly if none of these methods work.
-
-
+Kedro's CLI runs the functions at startup as part of `kedro run` so in most cases you don't need to call these functions. If you want to [interact with a Kedro project programatically in an interactive session such as Notebook](../notebooks_and_ipython/kedro_and_notebooks.md#reload_kedro-line-magic), use `%reload_kedro` line magic with Jupyter or IPython. Only use these functions directly if none of these methods work.
 
 ### `bootstrap_project`
 
-This function uses `configure_project` under the hood. Additionally, it reads metadata from `pyproject.toml` and adds the project root to `sys.path`. This ensures your project can be imported as a Python package. This is usually used when you are working with the source code of a Kedro Project.
+This function uses `configure_project` under the hood, and additionally reads metadata from `pyproject.toml` and adds the project root to `sys.path` so the project can be imported as a Python package. It is typically used to work directly with the source code of a Kedro project.
 
 ### `configure_project`
 

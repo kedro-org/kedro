@@ -938,7 +938,7 @@ def fake_project_with_logging_file_handler(fake_project):
         "version": 1,
         "handlers": {"info_file_handler": {"filename": "logs/info.log"}},
     }
-    logging_yml = fake_project / "conf" / "base" / "logging.yml"
+    logging_yml = fake_project / "conf" / "logging.yml"
     logging_yml.write_text(yaml.dump(logging_config))
     return fake_project
 

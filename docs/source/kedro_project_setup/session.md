@@ -66,4 +66,4 @@ This function uses `configure_project` under the hood. Additionally, it reads me
 
 ### `configure_project`
 
-This function reads `settings.py` and `pipeline_registry.py` and registers the configuration before Kedro's run starts. If you have an packaged Kedro project, you only need to run `configure_project` before executing your pipeline.
+This function reads `settings.py` and `pipeline_registry.py` and registers the configuration before Kedro's run starts. If you have a packaged Kedro project, you only need to run `configure_project` before executing your pipeline.

@@ -11,7 +11,7 @@
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
 
 ## Documentation changes
-
+* Add documentation about `kedro run` and hook execution order.
 ## Community contributions
 
 # Release 0.19.1

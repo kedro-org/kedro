@@ -1,5 +1,17 @@
 # Hooks
 
+
+# Hook Lifecycle
+# Hook Entrypoint
+# Dive Deep into a Kedro run
+- Refer to the bootstrap diagram
+
+
+
+
+
+
+
 ## Concepts
 
 A Hook consists of a Hook specification, and Hook implementation.

@@ -71,7 +71,7 @@ test = [
     "moto==4.1.12; python_version >= '3.10'",
     "pandas~=2.0",
     "pip-tools>=6.5",
-    "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
+    "pre-commit>=2.9.2, <4.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyproj~=3.0",

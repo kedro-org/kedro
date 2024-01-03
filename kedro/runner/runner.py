@@ -95,8 +95,11 @@ class AbstractRunner(ABC):
             )
 
         # Identify MemoryDataset in the catalog
-        memory_datasets = {ds_name for ds_name, ds in catalog._datasets.items()
-                           if isinstance(ds, MemoryDataset)}
+        memory_datasets = {
+            ds_name
+            for ds_name, ds in catalog._datasets.items()
+            if isinstance(ds, MemoryDataset)
+        }
 
         # Check if there's any output datasets that aren't in the catalog and don't match a pattern
         # in the catalog and include MemoryDataset.

@@ -44,7 +44,7 @@ You can also store the settings for the other tools you've used in your project,
 Consult the respective documentation for the tools you have used to check how you can configure the settings with the `pyproject.toml` file for your project.
 
 ### Use Kedro without the `src` folder
-Kedro uses the `src` layout by default. It is possible to change this, for example, to use a [flat layout](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/#src-layout-vs-flat-layout), you can modify the `pyproject.toml`.
+Kedro uses the `src` layout by default. It is possible to change this, for example, to use a [flat layout](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/#src-layout-vs-flat-layout), you can change the `pyproject.toml` as follow.
 
 ```diff
 +++ source_dir = ""

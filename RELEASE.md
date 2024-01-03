@@ -6,6 +6,7 @@
 * Removed example pipeline requirements when examples are not selected in `tools`.
 * Allowed modern versions of JupyterLab and Jupyter Notebooks.
 * Removed setuptools dependency
+* `MemoryDataset` entries are now included in free outputs.
 
 ## Breaking changes to the API
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.

@@ -277,7 +277,7 @@ To use `PartitionedDataset` with `ImageDataset` to load all Pokemon PNG images, 
 # in conf/base/catalog.yml
 
 pokemon:
-  type: PartitionedDataset
+  type: partitions.PartitionedDataset
   dataset: kedro_pokemon.datasets.image_dataset.ImageDataset
   path: data/01_raw/pokemon-images-and-types/images/images
   filename_suffix: ".png"

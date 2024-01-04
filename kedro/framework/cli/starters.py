@@ -299,7 +299,35 @@ def new(  # noqa: PLR0913
 
     _create_project(project_template, cookiecutter_args)
 
-    if prompts_required and not config_path and not starter_alias:
+    # End here if a starter was used
+    if starter_alias:
+        return
+
+    # Print tools and example selection
+    tools = extra_context.get("tools")
+    example_pipeline = extra_context.get("example_pipeline")
+
+    if tools is not None:
+        if tools == "['None']":
+            click.secho(
+                "You have selected no project tools",
+                fg="green",
+            )
+        else:
+            click.secho(
+                f"You have selected the following project tools: {tools}",
+                fg="green",
+            )
+
+    if example_pipeline is not None:
+        if example_pipeline:
+            click.secho(
+                "It has been created with an example pipeline.",
+                fg="green",
+            )
+
+    # If interactive flow used, print hint
+    if prompts_required and not config_path:
         click.secho(
             "\nTo skip the interactive flow you can run `kedro new` with"
             "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
@@ -843,36 +871,13 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     _clean_pycache(Path(result_path))
     extra_context = cookiecutter_args["extra_context"]
     project_name = extra_context.get("project_name", "New Kedro Project")
-    tools = extra_context.get("tools")
-    example_pipeline = extra_context.get("example_pipeline")
 
+    # Print success message
     click.secho(
         "\nCongratulations!"
         f"\nYour project '{project_name}' has been created in the directory \n{result_path}\n"
     )
 
-    # End here if a starter was used
-    if template_path != TEMPLATE_PATH:
-        return
-
-    if tools is not None:
-        if tools == "['None']":
-            click.secho(
-                "You have selected no project tools",
-                fg="green",
-            )
-        else:
-            click.secho(
-                f"You have selected the following project tools: {tools}",
-                fg="green",
-            )
-
-    if example_pipeline is not None:
-        if example_pipeline:
-            click.secho(
-                "It has been created with an example pipeline.",
-                fg="green",
-            )
 
 
 class _Prompt:

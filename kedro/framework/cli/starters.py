@@ -485,6 +485,10 @@ def _get_extra_context(  # noqa: PLR0913
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
             None in case the flag wasn't used.
+        example_pipeline: a string containing the value for the --example flag,
+            or None in case the flag wasn't used
+        starter_alias: a string containing the value for the --starter flag, or
+            None in case the flag wasn't used
 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
@@ -497,6 +501,9 @@ def _get_extra_context(  # noqa: PLR0913
         extra_context = _fetch_config_from_user_prompts(
             prompts_required, cookiecutter_context
         )
+
+    if starter_alias:
+        extra_context["starter_alias"] = starter_alias
 
     # Format
     extra_context.setdefault("kedro_version", version)
@@ -852,7 +859,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
 
     # End here if a starter was used
-    if template_path != TEMPLATE_PATH:
+    if extra_context.get("starter_alias"):
         return
 
     if tools is not None:

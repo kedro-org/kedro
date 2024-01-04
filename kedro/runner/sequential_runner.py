@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from collections import Counter
 from itertools import chain
-from typing import Any, Optional
+from typing import Any
 
 from pluggy import PluginManager
 
@@ -47,7 +47,7 @@ class SequentialRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: Optional | str = None,
+        session_id: str | None = None,
     ) -> None:
         """The method implementing sequential pipeline running.
 

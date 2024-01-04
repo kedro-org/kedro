@@ -11,7 +11,7 @@ import tempfile
 import toml
 from importlib import import_module
 from pathlib import Path
-from typing import Optional, Any, Iterable, Iterator
+from typing import Any, Iterable, Iterator
 
 import click
 from omegaconf import OmegaConf
@@ -193,10 +193,10 @@ def pull_package(  # noqa: PLR0913
 def _pull_package(  # noqa: PLR0913
     package_path: str,
     metadata: ProjectMetadata,
-    env: Optional | str = None,
-    alias: Optional | str = None,
-    destination: Optional | str = None,
-    fs_args: Optional | str = None,
+    env: str | None = None,
+    alias: str | None = None,
+    destination: str | None = None,
+    fs_args: str | None = None,
 ):
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
@@ -473,7 +473,7 @@ def _refactor_code_for_unpacking(  # noqa: PLR0913
     """
 
     def _move_package_with_conflicting_name(
-        target: Path, original_name: str, desired_name: Optional | str = None
+        target: Path, original_name: str, desired_name: str | None = None
     ) -> Path:
         _rename_package(project, original_name, "tmp_name")
         full_path = _create_nested_package(project, target)
@@ -524,9 +524,9 @@ def _install_files(  # noqa: PLR0913, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
-    env: Optional | str = None,
-    alias: Optional | str = None,
-    destination: Optional | str = None,
+    env: str | None = None,
+    alias: str | None = None,
+    destination: str | None = None,
 ):
     env = env or "base"
 
@@ -605,9 +605,9 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
 def _package_micropkg(
     micropkg_module_path: str,
     metadata: ProjectMetadata,
-    alias: Optional | str = None,
-    destination: Optional | str = None,
-    env: Optional | str = None,
+    alias: str | None = None,
+    destination: str | None = None,
+    env: str | None = None,
 ) -> Path:
     micropkg_name = micropkg_module_path.split(".")[-1]
     package_dir = metadata.source_dir / metadata.package_name
@@ -635,12 +635,14 @@ def _package_micropkg(
     # Check that micropkg directory exists and not empty
     _validate_dir(package_source)
 
-    destination = Path(destination) if destination else metadata.project_path / "dist"
+    package_destination = (
+        Path(destination) if destination else metadata.project_path / "dist"
+    )
     version = _get_default_version(metadata, micropkg_module_path)
 
     _generate_sdist_file(
         micropkg_name=micropkg_name,
-        destination=destination.resolve(),
+        destination=package_destination.resolve(),
         source_paths=source_paths,
         version=version,
         metadata=metadata,
@@ -650,7 +652,7 @@ def _package_micropkg(
     _clean_pycache(package_dir)
     _clean_pycache(metadata.project_path)
 
-    return destination
+    return package_destination
 
 
 def _validate_dir(path: Path) -> None:
@@ -826,7 +828,7 @@ def _generate_sdist_file(  # noqa: PLR0913,too-many-locals
     source_paths: tuple[Path, Path, list[tuple[Path, str]]],
     version: str,
     metadata: ProjectMetadata,
-    alias: Optional | str = None,
+    alias: None | str = None,
 ) -> None:
     package_name = alias or micropkg_name
     package_source, tests_source, conf_source = source_paths

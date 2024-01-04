@@ -5,7 +5,7 @@ so that the user avoids io operations with slow storage media
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, Version
 from kedro.io.memory_dataset import MemoryDataset
@@ -37,9 +37,9 @@ class CachedDataset(AbstractDataset):
     def __init__(
         self,
         dataset: AbstractDataset | dict,
-        version: Optional | Version = None,
-        copy_mode: Optional | str = None,
-        metadata: Optional | dict[str, Any] = None,
+        version: Version | None = None,
+        copy_mode: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``CachedDataset`` pointing to the
         provided Python object.

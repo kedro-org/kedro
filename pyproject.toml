@@ -83,6 +83,12 @@ test = [
     "s3fs>=2021.4, <2024.1",  # Upper bound set arbitrarily, to be reassessed in early 2024
     "semver",
     "trufflehog~=2.1",
+    # mypy related dependencies
+    "pandas-stubs",
+    "types-PyYAML",
+    "types-cachetools",
+    "types-toml",
+    "types-toposort"
 ]
 docs = [
     "docutils<0.18",
@@ -237,5 +243,5 @@ known-first-party = ["kedro"]
 "{tests,docs,tools,static,features,docs}/*" = ["T201"]  # Check print statement for kedro/ only
 
 [tool.mypy]
-warn_return_any = true
+ignore_missing_imports = true
 exclude = ['^kedro/templates/', '^docs/', '^features/steps/test_starter/']

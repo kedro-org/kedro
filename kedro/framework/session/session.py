@@ -10,7 +10,7 @@ import sys
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 import click
 
@@ -100,7 +100,7 @@ class KedroSession:
     def __init__(  # noqa: PLR0913
         self,
         session_id: str,
-        package_name: Optional | str = None,
+        package_name: None | str = None,
         project_path: Path | str | None = None,
         save_on_close: bool = False,
         conf_source: str | None = None,
@@ -126,8 +126,8 @@ class KedroSession:
         cls,
         project_path: Path | str | None = None,
         save_on_close: bool = True,
-        env: Optional | str = None,
-        extra_params: Optional | dict[str, Any] = None,
+        env: None | str = None,
+        extra_params: None | dict[str, Any] = None,
         conf_source: str | None = None,
     ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
@@ -272,16 +272,16 @@ class KedroSession:
 
     def run(  # noqa: PLR0913,too-many-locals
         self,
-        pipeline_name: Optional | str = None,
-        tags: Optional | Iterable[str] = None,
-        runner: Optional | AbstractRunner = None,
-        node_names: Optional | Iterable[str] = None,
-        from_nodes: Optional | Iterable[str] = None,
-        to_nodes: Optional | Iterable[str] = None,
-        from_inputs: Optional | Iterable[str] = None,
-        to_outputs: Optional | Iterable[str] = None,
-        load_versions: Optional | dict[str, str] = None,
-        namespace: Optional | str = None,
+        pipeline_name: None | str = None,
+        tags: None | Iterable[str] = None,
+        runner: None | AbstractRunner = None,
+        node_names: None | Iterable[str] = None,
+        from_nodes: None | Iterable[str] = None,
+        to_nodes: None | Iterable[str] = None,
+        from_inputs: None | Iterable[str] = None,
+        to_outputs: None | Iterable[str] = None,
+        load_versions: None | dict[str, str] = None,
+        namespace: None | str = None,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 

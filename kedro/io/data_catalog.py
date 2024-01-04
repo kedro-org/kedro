@@ -10,7 +10,7 @@ import copy
 import difflib
 import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from parse import parse
 
@@ -141,11 +141,11 @@ class DataCatalog:
 
     def __init__(  # noqa: PLR0913
         self,
-        datasets: Optional | dict[str, AbstractDataset] = None,
-        feed_dict: Optional | dict[str, Any] = None,
-        dataset_patterns: Optional | Patterns = None,
-        load_versions: Optional | dict[str, str] = None,
-        save_version: Optional | str = None,
+        datasets: None | dict[str, AbstractDataset] = None,
+        feed_dict: None | dict[str, Any] = None,
+        dataset_patterns: None | Patterns = None,
+        load_versions: None | dict[str, str] = None,
+        save_version: None | str = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -204,9 +204,9 @@ class DataCatalog:
     def from_config(
         cls,
         catalog: dict[str, dict[str, Any]] | None,
-        credentials: Optional | dict[str, dict[str, Any]] = None,
-        load_versions: Optional | dict[str, str] = None,
-        save_version: Optional | str = None,
+        credentials: None | dict[str, dict[str, Any]] = None,
+        load_versions: None | dict[str, str] = None,
+        save_version: None | str = None,
     ) -> DataCatalog:
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -368,7 +368,7 @@ class DataCatalog:
     def _get_dataset(
         self,
         dataset_name: str,
-        version: Optional | Version = None,
+        version: None | Version = None,
         suggest: bool = True,
     ) -> AbstractDataset:
         matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
@@ -451,7 +451,7 @@ class DataCatalog:
                 ) from exc
         return config
 
-    def load(self, name: str, version: Optional | str = None) -> Any:
+    def load(self, name: str, version: None | str = None) -> Any:
         """Loads a registered data set.
 
         Args:

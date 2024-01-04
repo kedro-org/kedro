@@ -7,7 +7,7 @@ import io
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Iterable
 
 import fsspec
 from omegaconf import OmegaConf
@@ -76,14 +76,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def __init__(  # noqa: PLR0913
         self,
         conf_source: str,
-        env: Optional | str = None,
-        runtime_params: Optional | dict[str, Any] = None,
+        env: None | str = None,
+        runtime_params: None | dict[str, Any] = None,
         *,
-        config_patterns: Optional | dict[str, list[str]] = None,
-        base_env: Optional | str = None,
-        default_run_env: Optional | str = None,
-        custom_resolvers: Optional | dict[str, Callable] = None,
-        merge_strategy: Optional | dict[str, str] = None,
+        config_patterns: None | dict[str, list[str]] = None,
+        base_env: None | str = None,
+        default_run_env: None | str = None,
+        custom_resolvers: None | dict[str, Callable] = None,
+        merge_strategy: None | dict[str, str] = None,
     ):
         """Instantiates a ``OmegaConfigLoader``.
 

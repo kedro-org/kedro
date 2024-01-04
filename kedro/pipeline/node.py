@@ -8,7 +8,7 @@ import inspect
 import logging
 import re
 from collections import Counter
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Iterable
 from warnings import warn
 
 from more_itertools import spy, unzip
@@ -25,10 +25,10 @@ class Node:
         inputs: None | str | list[str] | dict[str, str],
         outputs: None | str | list[str] | dict[str, str],
         *,
-        name: Optional | str = None,
+        name: None | str = None,
         tags: str | Iterable[str] | None = None,
         confirms: str | list[str] | None = None,
-        namespace: Optional | str = None,
+        namespace: None | str = None,
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -306,7 +306,7 @@ class Node:
         """
         return _to_list(self._confirms)
 
-    def run(self, inputs: Optional | dict[str, Any] = None) -> dict[str, Any]:
+    def run(self, inputs: None | dict[str, Any] = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results
         in a dictionary.
 
@@ -535,10 +535,10 @@ def node(  # noqa: PLR0913
     inputs: None | str | list[str] | dict[str, str],
     outputs: None | str | list[str] | dict[str, str],
     *,
-    name: Optional | str = None,
+    name: None | str = None,
     tags: str | Iterable[str] | None = None,
     confirms: str | list[str] | None = None,
-    namespace: Optional | str = None,
+    namespace: None | str = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.

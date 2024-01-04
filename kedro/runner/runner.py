@@ -15,7 +15,7 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterable, Iterator, Optional
 
 from more_itertools import interleave
 from pluggy import PluginManager
@@ -56,8 +56,8 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
-        hook_manager: PluginManager = None,
-        session_id: str = None,
+        hook_manager: Optional | PluginManager = None,
+        session_id: Optional | str = None,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -156,7 +156,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: str = None,
+        session_id: Optional | str = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
         inputs have already been checked and normalized by run().
@@ -291,7 +291,7 @@ def run_node(
     catalog: DataCatalog,
     hook_manager: PluginManager,
     is_async: bool = False,
-    session_id: str = None,
+    session_id: Optional | str = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -335,7 +335,7 @@ def _collect_inputs_from_hook(  # noqa: PLR0913
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: Optional | str = None,
 ) -> dict[str, Any]:
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
@@ -368,7 +368,7 @@ def _call_node_run(  # noqa: PLR0913
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: Optional | str = None,
 ) -> dict[str, Any]:
     try:
         outputs = node.run(inputs)
@@ -397,7 +397,7 @@ def _run_node_sequential(
     node: Node,
     catalog: DataCatalog,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: Optional | str = None,
 ) -> Node:
     inputs = {}
 
@@ -444,7 +444,7 @@ def _run_node_async(
     node: Node,
     catalog: DataCatalog,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: Optional | str = None,
 ) -> Node:
     def _synchronous_dataset_load(dataset_name: str):
         """Minimal wrapper to ensure Hooks are run synchronously

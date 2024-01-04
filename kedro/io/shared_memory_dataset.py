@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pickle
 from multiprocessing.managers import SyncManager
-from typing import Any
+from typing import Any, Optional
 
 from kedro.io.core import AbstractDataset, DatasetError
 
@@ -10,7 +10,7 @@ from kedro.io.core import AbstractDataset, DatasetError
 class SharedMemoryDataset(AbstractDataset):
     """``SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager."""
 
-    def __init__(self, manager: SyncManager = None):
+    def __init__(self, manager: Optional | SyncManager = None):
         """Creates a new instance of ``SharedMemoryDataset``,
         and creates shared MemoryDataset attribute.
 

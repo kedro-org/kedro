@@ -4,7 +4,7 @@ providing custom load, save, and exists methods without extending
 """
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from kedro.io.core import AbstractDataset, DatasetError
 
@@ -80,9 +80,9 @@ class LambdaDataset(AbstractDataset):
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,
-        exists: Callable[[], bool] = None,
-        release: Callable[[], None] = None,
-        metadata: dict[str, Any] = None,
+        exists: Optional | Callable[[], bool] = None,
+        release: Optional | Callable[[], None] = None,
+        metadata: Optional | dict[str, Any] = None,
     ):
         """Creates a new instance of ``LambdaDataset`` with references to the
         required input/output data set methods.

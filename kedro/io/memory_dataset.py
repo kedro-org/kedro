@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Any
+from typing import Any, Optional
 
 from kedro.io.core import AbstractDataset, DatasetError
 
@@ -35,7 +35,10 @@ class MemoryDataset(AbstractDataset):
     """
 
     def __init__(
-        self, data: Any = _EMPTY, copy_mode: str = None, metadata: dict[str, Any] = None
+        self,
+        data: Any = _EMPTY,
+        copy_mode: Optional | str = None,
+        metadata: Optional | dict[str, Any] = None,
     ):
         """Creates a new instance of ``MemoryDataset`` pointing to the
         provided Python object.

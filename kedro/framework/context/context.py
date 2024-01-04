@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -209,8 +209,8 @@ class KedroContext:
 
     def _get_catalog(
         self,
-        save_version: str = None,
-        load_versions: dict[str, str] = None,
+        save_version: Optional | str = None,
+        load_versions: Optional | dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 

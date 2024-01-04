@@ -15,7 +15,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, Optional, TypeVar
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -118,8 +118,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         cls: type,
         name: str,
         config: dict[str, Any],
-        load_version: str = None,
-        save_version: str = None,
+        load_version: Optional | str = None,
+        save_version: Optional | str = None,
     ) -> AbstractDataset:
         """Create a data set instance using the configuration provided.
 
@@ -351,7 +351,9 @@ _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", ""]
 
 
 def parse_dataset_definition(
-    config: dict[str, Any], load_version: str = None, save_version: str = None
+    config: dict[str, Any],
+    load_version: Optional | str = None,
+    save_version: Optional | str = None,
 ) -> tuple[type[AbstractDataset], dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
@@ -506,8 +508,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self,
         filepath: PurePosixPath,
         version: Version | None,
-        exists_function: Callable[[str], bool] = None,
-        glob_function: Callable[[str], list[str]] = None,
+        exists_function: Optional | Callable[[str], bool] = None,
+        glob_function: Optional | Callable[[str], list[str]] = None,
     ):
         """Creates a new instance of ``AbstractVersionedDataset``.
 
@@ -700,7 +702,7 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
 
 
 def get_protocol_and_path(
-    filepath: str | os.PathLike, version: Version = None
+    filepath: str | os.PathLike, version: Optional | Version = None
 ) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 

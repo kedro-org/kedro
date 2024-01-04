@@ -9,7 +9,7 @@ import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Iterable
+from typing import Iterable, Optional
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -681,13 +681,13 @@ class Pipeline:  # noqa: too-many-public-methods
 
     def filter(  # noqa: PLR0913
         self,
-        tags: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        node_names: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-        node_namespace: str = None,
+        tags: Optional | Iterable[str] = None,
+        from_nodes: Optional | Iterable[str] = None,
+        to_nodes: Optional | Iterable[str] = None,
+        node_names: Optional | Iterable[str] = None,
+        from_inputs: Optional | Iterable[str] = None,
+        to_outputs: Optional | Iterable[str] = None,
+        node_namespace: Optional | str = None,
     ) -> Pipeline:
         """Creates a new ``Pipeline`` object with the nodes that meet all of the
         specified filtering conditions.
@@ -805,7 +805,7 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
     seen_nodes: set[str] = set()
     duplicates: dict[Pipeline | None, set[str]] = defaultdict(set)
 
-    def _check_node(node_: Node, pipeline_: Pipeline = None):
+    def _check_node(node_: Node, pipeline_: Optional | Pipeline = None):
         name = node_.name
         if name in seen_nodes:
             duplicates[pipeline_].add(name)

@@ -10,7 +10,7 @@ import sys
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 
 import click
 
@@ -100,7 +100,7 @@ class KedroSession:
     def __init__(  # noqa: PLR0913
         self,
         session_id: str,
-        package_name: str = None,
+        package_name: Optional | str = None,
         project_path: Path | str | None = None,
         save_on_close: bool = False,
         conf_source: str | None = None,
@@ -126,8 +126,8 @@ class KedroSession:
         cls,
         project_path: Path | str | None = None,
         save_on_close: bool = True,
-        env: str = None,
-        extra_params: dict[str, Any] = None,
+        env: Optional | str = None,
+        extra_params: Optional | dict[str, Any] = None,
         conf_source: str | None = None,
     ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
@@ -272,16 +272,16 @@ class KedroSession:
 
     def run(  # noqa: PLR0913,too-many-locals
         self,
-        pipeline_name: str = None,
-        tags: Iterable[str] = None,
-        runner: AbstractRunner = None,
-        node_names: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-        load_versions: dict[str, str] = None,
-        namespace: str = None,
+        pipeline_name: Optional | str = None,
+        tags: Optional | Iterable[str] = None,
+        runner: Optional | AbstractRunner = None,
+        node_names: Optional | Iterable[str] = None,
+        from_nodes: Optional | Iterable[str] = None,
+        to_nodes: Optional | Iterable[str] = None,
+        from_inputs: Optional | Iterable[str] = None,
+        to_outputs: Optional | Iterable[str] = None,
+        load_versions: Optional | dict[str, str] = None,
+        namespace: Optional | str = None,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 

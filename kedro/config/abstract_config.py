@@ -4,7 +4,7 @@ class model for a `ConfigLoader` implementation.
 from __future__ import annotations
 
 from collections import UserDict
-from typing import Any
+from typing import Any, Optional
 
 
 class AbstractConfigLoader(UserDict):
@@ -17,8 +17,8 @@ class AbstractConfigLoader(UserDict):
     def __init__(
         self,
         conf_source: str,
-        env: str = None,
-        runtime_params: dict[str, Any] = None,
+        env: Optional | str = None,
+        runtime_params: Optional | dict[str, Any] = None,
         **kwargs,
     ):
         super().__init__()

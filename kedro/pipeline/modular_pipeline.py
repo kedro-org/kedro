@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import copy
-from typing import AbstractSet, Iterable
+from typing import AbstractSet, Iterable, Optional
 
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import (
@@ -157,7 +157,7 @@ def pipeline(  # noqa: PLR0913
     outputs: str | set[str] | dict[str, str] | None = None,
     parameters: str | set[str] | dict[str, str] | None = None,
     tags: str | Iterable[str] | None = None,
-    namespace: str = None,
+    namespace: Optional | str = None,
 ) -> Pipeline:
     r"""Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``\s.
 

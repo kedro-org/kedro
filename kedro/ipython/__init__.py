@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
@@ -67,7 +67,9 @@ def load_ipython_extension(ipython):
 )
 @argument("--conf-source", type=str, default=None, help=CONF_SOURCE_HELP)
 def magic_reload_kedro(
-    line: str, local_ns: dict[str, Any] = None, conf_source: str = None
+    line: str,
+    local_ns: Optional | dict[str, Any] = None,
+    conf_source: Optional | str = None,
 ):
     """
     The `%reload_kedro` IPython line magic.
@@ -79,11 +81,11 @@ def magic_reload_kedro(
 
 
 def reload_kedro(
-    path: str = None,
-    env: str = None,
-    extra_params: dict[str, Any] = None,
+    path: Optional | str = None,
+    env: Optional | str = None,
+    extra_params: Optional | dict[str, Any] = None,
     local_namespace: dict[str, Any] | None = None,
-    conf_source: str = None,
+    conf_source: Optional | str = None,
 ) -> None:  # pragma: no cover
     """Function that underlies the %reload_kedro Line magic. This should not be imported
     or run directly but instead invoked through %reload_kedro."""

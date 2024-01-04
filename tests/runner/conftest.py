@@ -40,6 +40,11 @@ def multi_input_list_output(arg1, arg2):
     return [arg1, arg2]
 
 
+def process_data(data):
+    # Dummy function
+    return data
+
+
 @pytest.fixture
 def conflicting_feed_dict(pandas_df_feed_dict):
     ds1 = MemoryDataset({"data": 0})
@@ -173,5 +178,23 @@ def pipeline_with_memory_datasets():
         [
             node(func=identity, inputs="Input1", outputs="MemOutput1", name="node1"),
             node(func=identity, inputs="Input2", outputs="MemOutput2", name="node2"),
+        ]
+    )
+
+
+@pytest.fixture
+def pipeline_with_intermediate_memory_dataset():
+    return pipeline(
+        [
+            node(
+                func=process_data,
+                inputs="input_data",
+                outputs="intermediate_memory_data",
+            ),
+            node(
+                func=process_data,
+                inputs="intermediate_memory_data",
+                outputs="final_output",
+            ),
         ]
     )

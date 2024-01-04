@@ -311,3 +311,22 @@ class TestMemoryDatasetBehaviour:
         assert (
             "RegularOutput" not in output
         )  # This output is registered in DataCatalog and so should not be in free outputs
+
+    def test_intermediate_memory_dataset(
+        self, pipeline_with_intermediate_memory_dataset
+    ):
+        catalog = DataCatalog(
+            {
+                "input_data": MemoryDataset(data="initial data"),
+                "intermediate_memory_data": MemoryDataset(),  # Intermediate dataset
+                "final_output": MemoryDataset(),
+            }
+        )
+
+        runner = SequentialRunner()
+        output = runner.run(pipeline_with_intermediate_memory_dataset, catalog)
+
+        assert (
+            "intermediate_memory_data" not in output
+        ), "Intermediate MemoryDataset should not be in free_outputs"
+        assert "final_output" in output, "Final output should be in free_outputs"

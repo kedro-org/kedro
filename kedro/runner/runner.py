@@ -103,7 +103,7 @@ class AbstractRunner(ABC):
 
         # Check if there's any output datasets that aren't in the catalog and don't match a pattern
         # in the catalog and include MemoryDataset.
-        free_outputs = (pipeline.outputs() - set(registered_ds)) | memory_datasets
+        free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
 
         # Register the default dataset pattern with the catalog
         catalog = catalog.shallow_copy(

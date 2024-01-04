@@ -865,6 +865,7 @@ class TestNewWithStarterValid:
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             not in result.output
         )
+        assert "You have selected" not in result.output
         _assert_template_ok(result)
         _clean_up_project(Path("./new-kedro-project"))
 

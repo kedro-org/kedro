@@ -851,9 +851,12 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         f"\nYour project '{project_name}' has been created in the directory \n{result_path}\n"
     )
 
-    # we can use starters without tools:
+    # End here if a starter was used
+    if template_path != TEMPLATE_PATH:
+        return
+
     if tools is not None:
-        if tools == "['None']":  # TODO: This should be a list
+        if tools == "['None']":
             click.secho(
                 "You have selected no project tools",
                 fg="green",

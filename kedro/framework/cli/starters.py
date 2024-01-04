@@ -879,7 +879,6 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
 
 
-
 class _Prompt:
     """Represent a single CLI prompt for `kedro new`"""
 

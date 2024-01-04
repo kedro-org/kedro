@@ -453,8 +453,8 @@ def _load_obj(class_path: str) -> Any | None:
     return class_obj
 
 
-def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
-    filepath = Path(filepath)
+def _local_exists(local_filepath: str) -> bool:  # SKIP_IF_NO_SPARK
+    filepath = Path(local_filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
@@ -734,17 +734,17 @@ def get_protocol_and_path(
     return protocol, path
 
 
-def get_filepath_str(path: PurePath, protocol: str) -> str:
+def get_filepath_str(raw_path: PurePath, protocol: str) -> str:
     """Returns filepath. Returns full filepath (with protocol) if protocol is HTTP(s).
 
     Args:
-        path: filepath without protocol.
+        raw_path: filepath without protocol.
         protocol: protocol.
 
     Returns:
         Filepath string.
     """
-    path = path.as_posix()
+    path = raw_path.as_posix()
     if protocol in HTTP_PROTOCOLS:
         path = "".join((protocol, PROTOCOL_DELIMITER, path))
     return path

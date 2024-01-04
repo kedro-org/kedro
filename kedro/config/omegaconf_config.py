@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 import fsspec
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, ListConfig, OmegaConf
 from omegaconf.errors import InterpolationResolutionError, UnsupportedInterpolationType
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
@@ -431,7 +431,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise ValueError(f"{dup_str}")
 
     @staticmethod
-    def _resolve_environment_variables(config: dict[str, Any]) -> None:
+    def _resolve_environment_variables(config: DictConfig | ListConfig) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
         them in-place, clearing the resolver after the operation is complete if
         it was not registered beforehand.
@@ -466,16 +466,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Soft merge the two env dirs. The chosen env will override base if keys clash.
         return OmegaConf.to_container(OmegaConf.merge(config, env_config))
 
-    def _is_hidden(self, path: str):
+    def _is_hidden(self, path_str: str):
         """Check if path contains any hidden directory or is a hidden file"""
-        path = Path(path)
+        path = Path(path_str)
         conf_path = Path(self.conf_source).resolve().as_posix()
         if self._protocol == "file":
             path = path.resolve()
-        path = path.as_posix()
-        if path.startswith(conf_path):
-            path = path.replace(conf_path, "")
-        parts = path.split(self._fs.sep)  # filesystem specific separator
+        posix_path = path.as_posix()
+        if posix_path.startswith(conf_path):
+            posix_path = posix_path.replace(conf_path, "")
+        parts = posix_path.split(self._fs.sep)  # filesystem specific separator
         HIDDEN = "."
         # Check if any component (folder or file) starts with a dot (.)
         return any(part.startswith(HIDDEN) for part in parts)

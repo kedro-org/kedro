@@ -9,6 +9,7 @@ clean:
 
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
+	mypy kedro
 test:
 	pytest --numprocesses 4 --dist loadfile
 

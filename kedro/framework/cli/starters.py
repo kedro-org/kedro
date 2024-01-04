@@ -793,7 +793,6 @@ def _parse_tools_input(tools_str: None | str):
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
-    # Guard clause if tools_str is None, which can happen if prompts.yml is removed
     if not tools_str:
         return []  # pragma: no cover
 

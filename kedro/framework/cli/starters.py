@@ -511,15 +511,18 @@ def _get_extra_context(  # noqa: PLR0913
 
     # Map the selected tools lists to readable name
     tools = extra_context.get("tools")
-    if tools:
-        extra_context["tools"] = [
-            NUMBER_TO_TOOLS_NAME[tool]
-            for tool in _parse_tools_input(tools)  # type: ignore
-        ]
-    if extra_context.get("tools"):
-        extra_context["tools"] = str(extra_context["tools"])
-    else:
+
+    # Check if no tools selected
+    if not tools or tools.lower() == "none":
         extra_context["tools"] = str(["None"])
+
+    else:
+        extra_context["tools"] = str(
+            [
+                NUMBER_TO_TOOLS_NAME[tool]
+                for tool in _parse_tools_input(tools)  # type: ignore
+            ]
+        )
 
     extra_context["example_pipeline"] = (
         _parse_yes_no_to_bool(

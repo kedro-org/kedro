@@ -182,6 +182,7 @@ def setup_template_tools(
     example_pipeline: str,
 ) -> None:
     """Set up the templates according to the choice of tools.
+    This code will be executed only if no starter is used
 
     Args:
         selected_tools_list (str): A string contains the selected tools.

@@ -14,7 +14,7 @@ from collections import defaultdict
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, Any
 
 import click
 import importlib_metadata
@@ -241,10 +241,10 @@ def _click_verbose(func):
     )(func)
 
 
-def command_with_verbosity(group: click.core.Group, *args, **kwargs):
+def command_with_verbosity(group: click.core.Group, *args, **kwargs) -> Any:
     """Custom command decorator with verbose flag added."""
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         func = _click_verbose(func)
         func = group.command(*args, **kwargs)(func)
         return func
@@ -333,7 +333,7 @@ def split_node_names(ctx, param, to_split: str) -> list[str]:
     return result
 
 
-def env_option(func_=None, **kwargs):
+def env_option(func_: Any | None = None, **kwargs) -> Any:
     """Add `--env` CLI option to a function."""
     default_args = {"type": str, "default": None, "help": ENV_HELP}
     kwargs = {**default_args, **kwargs}

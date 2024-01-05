@@ -13,12 +13,13 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (
+    _OFFICIAL_STARTER_SPECS_DICT,
     TEMPLATE_PATH,
     KedroStarterSpec,
     _convert_tool_names_to_numbers,
     _parse_tools_input,
     _parse_yes_no_to_bool,
-    _validate_selection, _OFFICIAL_STARTER_SPECS_DICT,
+    _validate_selection,
 )
 
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15

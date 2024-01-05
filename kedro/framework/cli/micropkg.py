@@ -780,7 +780,9 @@ def _refactor_code_for_package(
         |__ test.py
     """
 
-    def _move_package_with_conflicting_name(target: Path, conflicting_name: str) -> None:
+    def _move_package_with_conflicting_name(
+        target: Path, conflicting_name: str
+    ) -> None:
         tmp_name = "tmp_name"
         tmp_module = target.parent / tmp_name
         _rename_package(project, target.as_posix(), tmp_name)

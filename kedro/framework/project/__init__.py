@@ -129,7 +129,7 @@ class _ProjectSettings(LazySettings):
         super().__init__(*args, **kwargs)
 
 
-def _load_data_wrapper(func):
+def _load_data_wrapper(func: Any) -> Any:
     """Wrap a method in _ProjectPipelines so that data is loaded on first access.
     Taking inspiration from dynaconf.utils.functional.new_method_proxy
     """

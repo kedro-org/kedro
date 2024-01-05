@@ -2,6 +2,7 @@
 import copy
 from collections import defaultdict
 from itertools import chain
+from typing import Any
 
 import click
 import yaml
@@ -11,21 +12,22 @@ from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
+from kedro.io import AbstractDataset
 
 
-def _create_session(package_name: str, **kwargs):
+def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     kwargs.setdefault("save_on_close", False)
     return KedroSession.create(**kwargs)
 
 
 # noqa: missing-function-docstring
 @click.group(name="Kedro")
-def catalog_cli():  # pragma: no cover
+def catalog_cli() -> None:  # pragma: no cover
     pass
 
 
 @catalog_cli.group()
-def catalog():
+def catalog() -> None:
     """Commands for working with catalog."""
 
 
@@ -42,7 +44,7 @@ def catalog():
     callback=split_string,
 )
 @click.pass_obj
-def list_datasets(metadata: ProjectMetadata, pipeline, env):
+def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     """Show datasets per type."""
     title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
@@ -111,7 +113,9 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     secho(yaml.dump(result))
 
 
-def _map_type_to_datasets(datasets, datasets_meta):
+def _map_type_to_datasets(
+    datasets: set[str], datasets_meta: dict[str, AbstractDataset]
+) -> dict:
     """Build dictionary with a dataset type as a key and list of
     datasets of the specific type as a value.
     """

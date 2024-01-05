@@ -14,7 +14,7 @@ from collections import defaultdict
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Sequence, Any
+from typing import Any, Iterable, Sequence
 
 import click
 import importlib_metadata

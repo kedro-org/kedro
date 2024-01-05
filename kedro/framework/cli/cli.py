@@ -42,7 +42,7 @@ v{version}
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 @click.version_option(version, "--version", "-V", help="Show version and exit")
-def cli():  # pragma: no cover
+def cli() -> None:  # pragma: no cover
     """Kedro is a CLI for creating and using Kedro projects. For more
     information, type ``kedro info``.
 
@@ -51,7 +51,7 @@ def cli():  # pragma: no cover
 
 
 @cli.command()
-def info():
+def info() -> None:
     """Get more information about kedro."""
     click.secho(LOGO, fg="green")
     click.echo(
@@ -182,13 +182,13 @@ class KedroCLI(CommandCollection):
             raise KedroCliError(
                 f"Cannot load commands from {self._metadata.package_name}.cli"
             )
-        user_defined = project_cli.cli  # type: ignore
+        user_defined = project_cli.cli
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
         return [*built_in, *plugins, user_defined]
 
 
-def main():  # pragma: no cover
+def main() -> None:  # pragma: no cover
     """Main entry point. Look for a ``cli.py``, and, if found, add its
     commands to `kedro`'s before invoking the CLI.
     """

@@ -289,7 +289,7 @@ class TestSuggestResumeScenario:
 
 class TestMemoryDatasetBehaviour:
     def test_run_includes_memory_datasets(self, pipeline_with_memory_datasets):
-        # Create a catalog with MemoryDataSet entries and inputs for the pipeline
+        # Create a catalog with MemoryDataset entries and inputs for the pipeline
         catalog = DataCatalog(
             {
                 "Input1": LambdaDataset(load=lambda: "data1", save=lambda data: None),
@@ -305,7 +305,7 @@ class TestMemoryDatasetBehaviour:
         # Run the pipeline
         output = SequentialRunner().run(pipeline_with_memory_datasets, catalog)
 
-        # Check that MemoryDataSet outputs are included in the run results
+        # Check that MemoryDataset outputs are included in the run results
         assert "MemOutput1" in output
         assert "MemOutput2" in output
         assert (

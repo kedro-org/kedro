@@ -30,17 +30,17 @@ from kedro.runner import AbstractRunner, SequentialRunner
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
-    project_path = str(project_path)
+    path = str(project_path)
     try:
         res = subprocess.check_output(
             ["git", "rev-parse", "--short", "HEAD"],
-            cwd=project_path,
+            cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data: dict[str, Any] = {"commit_sha": res.decode().strip()}
         git_status_res = subprocess.check_output(
             ["git", "status", "--short"],
-            cwd=project_path,
+            cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data["dirty"] = bool(git_status_res.decode().strip())
@@ -48,7 +48,7 @@ def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except Exception:  # noqa: broad-except
         logger = logging.getLogger(__name__)
-        logger.debug("Unable to git describe %s", project_path)
+        logger.debug("Unable to git describe %s", path)
         logger.debug(traceback.format_exc())
         return {}
 

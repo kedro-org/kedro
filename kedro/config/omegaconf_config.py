@@ -6,6 +6,7 @@ from __future__ import annotations
 import io
 import logging
 import mimetypes
+import typing
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
@@ -251,6 +252,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
+    @typing.no_type_check
     def load_and_merge_dir_config(  # noqa: PLR0913
         self,
         conf_path: str,

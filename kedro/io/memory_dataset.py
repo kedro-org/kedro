@@ -96,11 +96,11 @@ def _infer_copy_mode(data: Any) -> str:
     try:
         import pandas as pd
     except ImportError:  # pragma: no cover
-        pd = None  # pragma: no cover
+        pd = None  # type: ignore  # pragma: no cover
     try:
         import numpy as np
     except ImportError:  # pragma: no cover
-        np = None  # pragma: no cover
+        np = None  # type: ignore # pragma: no cover
 
     if pd and isinstance(data, pd.DataFrame) or np and isinstance(data, np.ndarray):
         copy_mode = "copy"

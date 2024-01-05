@@ -78,7 +78,7 @@ class AbstractRunner(ABC):
 
         """
 
-        hook_manager = hook_manager or _NullPluginManager()
+        hook_or_null_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
 
         # Check which datasets used in the pipeline are in the catalog or match
@@ -107,7 +107,7 @@ class AbstractRunner(ABC):
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
-        self._run(pipeline, catalog, hook_manager, session_id)
+        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore
 
         self._logger.info("Pipeline execution completed successfully.")
 

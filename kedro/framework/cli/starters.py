@@ -105,7 +105,7 @@ _OFFICIAL_STARTER_SPECS = [
 for starter_spec in _OFFICIAL_STARTER_SPECS:
     starter_spec.origin = "kedro"
 
-_OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
+_OFFICIAL_STARTER_SPECS_DICT = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 
 TOOLS_SHORTNAME_TO_NUMBER = {
     "lint": "1",
@@ -308,7 +308,7 @@ def new(  # noqa: PLR0913
 
 
 @starter.command("list")
-def list_starters():
+def list_starters() -> None:
     """List all official project starters available."""
     starters_dict = _get_starters_dict()
 
@@ -438,7 +438,7 @@ def _get_starters_dict() -> dict[str, KedroStarterSpec]:
         ),
     }
     """
-    starter_specs = _OFFICIAL_STARTER_SPECS
+    starter_specs = _OFFICIAL_STARTER_SPECS_DICT
 
     for starter_entry_point in _get_entry_points(name="starters"):
         origin = starter_entry_point.module.split(".")[0]

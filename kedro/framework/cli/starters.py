@@ -511,16 +511,16 @@ def _get_extra_context(  # noqa: PLR0913
 
     # Map the selected tools lists to readable name
     tools = extra_context.get("tools")
+    tools = _parse_tools_input(tools)
 
     # Check if no tools selected
-    if not tools or tools.lower() == "none":
+    if not tools:
         extra_context["tools"] = str(["None"])
-
     else:
         extra_context["tools"] = str(
             [
                 NUMBER_TO_TOOLS_NAME[tool]
-                for tool in _parse_tools_input(tools)  # type: ignore
+                for tool in tools  # type: ignore
             ]
         )
 
@@ -777,7 +777,7 @@ def _validate_selection(tools: list[str]):
             sys.exit(1)
 
 
-def _parse_tools_input(tools_str: str):
+def _parse_tools_input(tools_str: None | str):
     """Parse the tools input string.
 
     Args:
@@ -793,14 +793,14 @@ def _parse_tools_input(tools_str: str):
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
+    if not tools_str:
+        return []  # pragma: no cover
+
     tools_str = tools_str.lower()
     if tools_str == "all":
         return list(NUMBER_TO_TOOLS_NAME)
     if tools_str == "none":
         return []
-    # Guard clause if tools_str is None, which can happen if prompts.yml is removed
-    if not tools_str:
-        return []  # pragma: no cover
 
     # Split by comma
     tools_choices = tools_str.replace(" ", "").split(",")

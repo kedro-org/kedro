@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: If something isn't working
-title: '<Title>'
-labels: 'Issue: Bug Report'
+title: "<Title>"
+labels: ''
 assignees: ''
 
 ---

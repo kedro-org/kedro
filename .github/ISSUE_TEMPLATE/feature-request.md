@@ -1,8 +1,8 @@
 ---
 name: Feature request
 about: Let us know if you have a feature request or enhancement
-title: '<Title>'
-labels: 'Issue: Feature Request'
+title: "<Title>"
+labels: ''
 assignees: ''
 
 ---

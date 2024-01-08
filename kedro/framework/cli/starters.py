@@ -31,7 +31,6 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 
-# TODO(lrcouto): Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these tools.).
 TOOLS_ARG_HELP = """
 Select which tools you'd like to include. By default, none are included.\n
 
@@ -48,6 +47,8 @@ Example usage:\n
 kedro new --tools=lint,test,log,docs,data,pyspark,viz (or any subset of these options)\n
 kedro new --tools=all\n
 kedro new --tools=none
+
+For more information on using tools, see https://docs.kedro.org/en/latest/starters/new_project_tools.html
 """
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,

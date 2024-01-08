@@ -15,6 +15,7 @@ from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any
 
+import dynaconf
 import importlib_resources
 import yaml
 from dynaconf import LazySettings
@@ -28,10 +29,10 @@ IMPORT_ERROR_MESSAGE = (
 )
 
 
-def _get_default_class(class_import_path):
+def _get_default_class(class_import_path: str) -> Any:
     module, _, class_name = class_import_path.rpartition(".")
 
-    def validator_func(settings, validators):
+    def validator_func(settings: dynaconf.base.Settings, validators: Any) -> Any:
         return getattr(importlib.import_module(module), class_name)
 
     return validator_func
@@ -40,7 +41,9 @@ def _get_default_class(class_import_path):
 class _IsSubclassValidator(Validator):
     """A validator to check if the supplied setting value is a subclass of the default class"""
 
-    def validate(self, settings, *args, **kwargs):
+    def validate(
+        self, settings: dynaconf.base.Settings, *args: Any, **kwargs: Any
+    ) -> None:
         super().validate(settings, *args, **kwargs)
 
         default_class = self.default(settings, self)
@@ -58,7 +61,9 @@ class _HasSharedParentClassValidator(Validator):
     """A validator to check that the parent of the default class is an ancestor of
     the settings value."""
 
-    def validate(self, settings, *args, **kwargs):
+    def validate(
+        self, settings: dynaconf.base.Settings, *args: Any, **kwargs: Any
+    ) -> None:
         super().validate(settings, *args, **kwargs)
 
         default_class = self.default(settings, self)
@@ -112,7 +117,7 @@ class _ProjectSettings(LazySettings):
         "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         kwargs.update(
             validators=[
                 self._CONF_SOURCE,
@@ -135,7 +140,7 @@ def _load_data_wrapper(func: Any) -> Any:
     """
 
     # noqa: protected-access
-    def inner(self, *args, **kwargs):
+    def inner(self: Any, *args: Any, **kwargs: Any) -> Any:
         self._load_data()
         return func(self._content, *args, **kwargs)
 
@@ -165,12 +170,12 @@ class _ProjectPipelines(MutableMapping):
         self._content: dict[str, Pipeline] = {}
 
     @staticmethod
-    def _get_pipelines_registry_callable(pipelines_module: str):
+    def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
         module_obj = importlib.import_module(pipelines_module)
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def _load_data(self):
+    def _load_data(self) -> None:
         """Lazily read pipelines defined in the pipelines registry module."""
 
         # If the pipelines dictionary has not been configured with a pipelines module
@@ -212,7 +217,7 @@ class _ProjectPipelines(MutableMapping):
 
 class _ProjectLogging(UserDict):
     # noqa: super-init-not-called
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialise project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
         path = os.environ.get(

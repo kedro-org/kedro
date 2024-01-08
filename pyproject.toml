@@ -61,7 +61,7 @@ test = [
     "import-linter==1.12.1",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
-    "Jinja2<3.1.0",
+    "Jinja2<3.2.0",
     "jupyterlab_server>=2.11.1",
     "jupyterlab~=3.0",
     "jupyter~=1.0",
@@ -93,7 +93,7 @@ docs = [
     "sphinx-notfound-page",
     "ipykernel>=5.3, <7.0",
     "myst-parser~=1.0.0",
-    "Jinja2<3.1.0",
+    "Jinja2<3.2.0",
 ]
 all = [ "kedro[test,docs]" ]
 

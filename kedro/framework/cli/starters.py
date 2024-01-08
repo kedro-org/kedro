@@ -236,7 +236,7 @@ def starter():
 @click.option("--tools", "-t", "selected_tools", help=TOOLS_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
 @click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
-def new(  # noqa: PLR0912,PLR0913
+def new(  # noqa: PLR0913
     config_path,
     starter_alias,
     selected_tools,

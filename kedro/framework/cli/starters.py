@@ -187,6 +187,29 @@ def _validate_selected_tools(selected_tools):
             sys.exit(1)
 
 
+def _print_tools_selection(selected_tools):
+    if selected_tools is not None:
+        if selected_tools == "['None']":
+            click.secho(
+                "You have selected no project tools",
+                fg="green",
+            )
+        else:
+            click.secho(
+                f"You have selected the following project tools: {selected_tools}",
+                fg="green",
+            )
+
+
+def _print_example_selection(example_pipeline):
+    if example_pipeline is not None:
+        if example_pipeline:
+            click.secho(
+                "It has been created with an example pipeline.",
+                fg="green",
+            )
+
+
 # noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
@@ -303,28 +326,10 @@ def new(  # noqa: PLR0912,PLR0913
     if starter_alias:
         return
 
-    # Print tools and example selection
-    tools = extra_context.get("tools")
-    example_pipeline = extra_context.get("example_pipeline")
-
-    if tools is not None:
-        if tools == "['None']":
-            click.secho(
-                "You have selected no project tools",
-                fg="green",
-            )
-        else:
-            click.secho(
-                f"You have selected the following project tools: {tools}",
-                fg="green",
-            )
-
-    if example_pipeline is not None:
-        if example_pipeline:
-            click.secho(
-                "It has been created with an example pipeline.",
-                fg="green",
-            )
+    # If not a starter, print tools and example selection
+    if not starter_alias:
+        _print_tools_selection(extra_context.get("tools"))
+        _print_example_selection(extra_context.get("example_pipeline"))
 
     # If interactive flow used, print hint
     if prompts_required and not config_path:
@@ -513,6 +518,10 @@ def _get_extra_context(  # noqa: PLR0913
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
             None in case the flag wasn't used.
+        example_pipeline: a string containing the value for the --example flag,
+            or None in case the flag wasn't used
+        starter_alias: a string containing the value for the --starter flag, or
+            None in case the flag wasn't used
 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.

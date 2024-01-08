@@ -107,7 +107,7 @@ def reload_kedro(
     context = session.load_context()
     catalog = context.catalog
 
-    IPython.get_ipython().push(  # type: ignore
+    IPython.get_ipython().push(  # type: ignore[attr-defined, no-untyped-call]
         variables={
             "context": context,
             "catalog": catalog,
@@ -122,8 +122,8 @@ def reload_kedro(
     )
 
     for line_magic in load_entry_points("line_magic"):
-        register_line_magic(needs_local_scope(line_magic))  # type: ignore
-        logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
+        register_line_magic(needs_local_scope(line_magic))  # type: ignore[no-untyped-call]
+        logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore[attr-defined]
 
 
 def _resolve_project_path(

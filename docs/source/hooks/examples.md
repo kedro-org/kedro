@@ -368,7 +368,7 @@ class NodeInputReplacementHook:
     @hook_impl
     def before_node_run(
         self, node: Node, catalog: DataCatalog
-    ) -> Optional | Dict[str, Any]:
+    ) -> None | dict[str, Any]:
         """Replace `first_input` for `my_node`"""
         if node.name == "my_node":
             # return the string filepath to the `first_input` dataset

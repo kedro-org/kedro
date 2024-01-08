@@ -77,7 +77,7 @@ class CachedDataset(AbstractDataset):
         self._dataset.release()
 
     @staticmethod
-    def _from_config(config, version):
+    def _from_config(config: dict, version: Version) -> AbstractDataset:
         if VERSIONED_FLAG_KEY in config:
             raise ValueError(
                 "Cached datasets should specify that they are versioned in the "

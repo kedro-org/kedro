@@ -7,6 +7,7 @@
 * Allowed modern versions of JupyterLab and Jupyter Notebooks.
 * Removed setuptools dependency
 * Added `source_dir` explicitly in `pyproject.toml` for non-src layout project.
+* `MemoryDataset` entries are now included in free outputs.
 
 ## Breaking changes to the API
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.

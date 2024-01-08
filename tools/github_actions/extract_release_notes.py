@@ -1,8 +1,9 @@
 import sys
 
+ARGUMENT_COUNT = 3
 
 def extract_section(filename, heading):
-    with open(filename, 'r') as file:
+    with open(filename) as file:
         lines = file.readlines()
 
     start_line, end_line = None, None
@@ -27,7 +28,7 @@ def extract_section(filename, heading):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
+    if len(sys.argv) != ARGUMENT_COUNT:
         raise Exception("Usage: python extract_release_notes.py <filename> <heading>")
 
     filename = sys.argv[1]

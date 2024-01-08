@@ -58,7 +58,6 @@ test = [
     "blacken-docs==1.9.2",
     "black~=22.0",
     "coverage[toml]",
-    "fsspec>=2021.4",
     "import-linter==1.12.1",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",

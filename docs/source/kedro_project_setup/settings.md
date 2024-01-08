@@ -32,6 +32,7 @@ package_name = "package_name"
 project_name = "project_name"
 kedro_init_version = "kedro_version"
 tools = ""
+example_pipeline = "False"
 source_dir = "src"
 ```
 

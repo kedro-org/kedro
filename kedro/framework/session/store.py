@@ -33,7 +33,7 @@ class BaseSessionStore(UserDict):
         )
         return {}
 
-    def save(self):
+    def save(self) -> None:
         """Persist the session store"""
         self._logger.debug(
             "'save()' not implemented for '%s'. Skipping the step.",

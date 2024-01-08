@@ -64,7 +64,7 @@ class ThreadRunner(AbstractRunner):
 
         self._max_workers = max_workers
 
-    def _get_required_workers_count(self, pipeline: Pipeline):
+    def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
         Calculate the max number of processes required for the pipeline
         """

@@ -6,6 +6,7 @@
 * Removed example pipeline requirements when examples are not selected in `tools`.
 * Allowed modern versions of JupyterLab and Jupyter Notebooks.
 * Removed setuptools dependency
+* Added `source_dir` explicitly in `pyproject.toml` for non-src layout project.
 
 ## Breaking changes to the API
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.

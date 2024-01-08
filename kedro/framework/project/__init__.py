@@ -287,7 +287,7 @@ def validate_settings() -> None:
             "Kedro command line interface."
         )
     # Check if file exists, if it does, validate it.
-    if importlib.util.find_spec(f"{PACKAGE_NAME}.settings") is not None:  # type: ignore
+    if importlib.util.find_spec(f"{PACKAGE_NAME}.settings") is not None:
         importlib.import_module(f"{PACKAGE_NAME}.settings")
     else:
         logger = logging.getLogger(__name__)

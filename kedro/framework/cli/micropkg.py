@@ -590,7 +590,7 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
         micropkg_module = import_module(
             f"{metadata.package_name}.{micropkg_module_path}"
         )
-        return micropkg_module.__version__  # type: ignore
+        return micropkg_module.__version__  # type: ignore[no-any-return]
     except (AttributeError, ModuleNotFoundError):
         logger.warning(
             "Micropackage version not found in '%s.%s', will take the top-level one in '%s'",
@@ -600,7 +600,7 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
         )
         # if micropkg version doesn't exist, take the project one
         project_module = import_module(f"{metadata.package_name}")
-        return project_module.__version__  # type: ignore
+        return project_module.__version__  # type: ignore[no-any-return]
 
 
 def _package_micropkg(

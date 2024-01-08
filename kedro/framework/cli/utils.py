@@ -144,19 +144,19 @@ class CommandCollection(click.CommandCollection):
         seen_names: set[str] = set()
         for cli_collection in reversed(cli_collections):
             for cmd_group in reversed(cli_collection.sources):
-                cmd_group.commands = {  # type: ignore
+                cmd_group.commands = {  # type: ignore[attr-defined]
                     cmd_name: cmd
-                    for cmd_name, cmd in cmd_group.commands.items()  # type: ignore
+                    for cmd_name, cmd in cmd_group.commands.items()  # type: ignore[attr-defined]
                     if cmd_name not in seen_names
                 }
-                seen_names |= cmd_group.commands.keys()  # type: ignore
+                seen_names |= cmd_group.commands.keys()  # type: ignore[attr-defined]
 
         # remove empty command groups
         for cli_collection in cli_collections:
             cli_collection.sources = [
                 cmd_group
                 for cmd_group in cli_collection.sources
-                if cmd_group.commands  # type: ignore
+                if cmd_group.commands  # type: ignore[attr-defined]
             ]
 
     @staticmethod
@@ -166,9 +166,9 @@ class CommandCollection(click.CommandCollection):
         named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
         helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
-            named_groups[group.name].append(group)  # type: ignore
+            named_groups[group.name].append(group)  # type: ignore[index]
             if group.help:
-                helps[group.name].append(group.help)  # type: ignore
+                helps[group.name].append(group.help)  # type: ignore[index]
 
         return [
             click.CommandCollection(

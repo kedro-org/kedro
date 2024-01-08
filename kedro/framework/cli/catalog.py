@@ -120,7 +120,7 @@ def _map_type_to_datasets(
     """Build dictionary with a dataset type as a key and list of
     datasets of the specific type as a value.
     """
-    mapping = defaultdict(list)  # type: ignore
+    mapping = defaultdict(list)  # type: ignore[var-annotated]
     for dataset in datasets:
         is_param = dataset.startswith("params:") or dataset == "parameters"
         if not is_param:

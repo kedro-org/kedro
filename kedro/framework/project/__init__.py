@@ -229,7 +229,7 @@ class _ProjectLogging(UserDict):
         logging.config.dictConfig(logging_config)
         self.data = logging_config
 
-    def set_project_logging(self, package_name: str):
+    def set_project_logging(self, package_name: str) -> None:
         """Add the project level logging to the loggers upon provision of a package name.
         Checks if project logger already exists to prevent overwriting, if none exists
         it defaults to setting project logs at INFO level."""
@@ -246,7 +246,7 @@ settings = _ProjectSettings()
 pipelines = _ProjectPipelines()
 
 
-def configure_project(package_name: str):
+def configure_project(package_name: str) -> None:
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py and pipeline_registry.py.
     """
@@ -272,7 +272,7 @@ def configure_logging(logging_config: dict[str, Any]) -> None:
     LOGGING.configure(logging_config)
 
 
-def validate_settings():
+def validate_settings() -> None:
     """Eagerly validate that the settings module is importable if it exists. This is desirable to
     surface any syntax or import errors early. In particular, without eagerly importing
     the settings module, dynaconf would silence any import error (e.g. missing

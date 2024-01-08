@@ -10,7 +10,7 @@ import typing
 from pathlib import Path
 from typing import Any
 
-from IPython import get_ipython
+import IPython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
@@ -107,7 +107,7 @@ def reload_kedro(
     context = session.load_context()
     catalog = context.catalog
 
-    get_ipython().push(  # type: ignore
+    IPython.get_ipython().push(  # type: ignore
         variables={
             "context": context,
             "catalog": catalog,

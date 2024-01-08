@@ -6,7 +6,7 @@ import importlib
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Sequence
 
 import click
 
@@ -104,12 +104,12 @@ class KedroCLI(CommandCollection):
 
     def main(
         self,
-        args=None,
-        prog_name=None,
-        complete_var=None,
-        standalone_mode=True,
-        **extra,
-    ):
+        args: Any | None = None,
+        prog_name: Any | None = None,
+        complete_var: Any | None = None,
+        standalone_mode: bool = True,
+        **extra: Any,
+    ) -> Any:
         if self._metadata:
             extra.update(obj=self._metadata)
 

@@ -70,10 +70,12 @@ def find_stylesheets() -> Iterable[str]:  # pragma: no cover
     )
 
 
-def forward_command(group, name=None, forward_help=False):
+def forward_command(
+    group: Any, name: str | None = None, forward_help: bool = False
+) -> Any:
     """A command that receives the rest of the command line as 'args'."""
 
-    def wrapit(func):
+    def wrapit(func: Any) -> Any:
         func = click.argument("args", nargs=-1, type=click.UNPROCESSED)(func)
         func = command_with_verbosity(
             group,
@@ -333,7 +335,7 @@ def split_node_names(ctx, param, to_split: str) -> list[str]:
     return result
 
 
-def env_option(func_: Any | None = None, **kwargs) -> Any:
+def env_option(func_: Any | None = None, **kwargs: Any) -> Any:
     """Add `--env` CLI option to a function."""
     default_args = {"type": str, "default": None, "help": ENV_HELP}
     kwargs = {**default_args, **kwargs}

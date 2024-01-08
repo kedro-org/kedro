@@ -10,11 +10,12 @@ import subprocess
 import sys
 import textwrap
 import traceback
+import typing
 from collections import defaultdict
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import IO, Any, Iterable, Sequence
 
 import click
 import importlib_metadata
@@ -39,7 +40,7 @@ ENTRY_POINT_GROUPS = {
 logger = logging.getLogger(__name__)
 
 
-def call(cmd: list[str], **kwargs):  # pragma: no cover
+def call(cmd: list[str], **kwargs: Any) -> None:  # pragma: no cover
     """Run a subprocess command and raise if it fails.
 
     Args:
@@ -55,7 +56,9 @@ def call(cmd: list[str], **kwargs):  # pragma: no cover
         raise click.exceptions.Exit(code=code)
 
 
-def python_call(module: str, arguments: Iterable[str], **kwargs):  # pragma: no cover
+def python_call(
+    module: str, arguments: Iterable[str], **kwargs: Any
+) -> None:  # pragma: no cover
     """Run a subprocess command that invokes a Python module."""
     call([sys.executable, "-m", module] + list(arguments), **kwargs)
 
@@ -104,7 +107,7 @@ def _suggest_cli_command(
         suggestion = "\n\nDid you mean this?"
     else:
         suggestion = "\n\nDid you mean one of these?\n"
-    suggestion += textwrap.indent("\n".join(matches), " " * 4)  # type: ignore
+    suggestion += textwrap.indent("\n".join(matches), " " * 4)
     return suggestion
 
 
@@ -126,7 +129,7 @@ class CommandCollection(click.CommandCollection):
         ]
         self._dedupe_commands(sources)
         super().__init__(
-            sources=sources,
+            sources=sources,  # type: ignore[arg-type]
             help="\n\n".join(help_texts),
             context_settings=CONTEXT_SETTINGS,
         )
@@ -134,7 +137,7 @@ class CommandCollection(click.CommandCollection):
         self.callback = sources[0].callback
 
     @staticmethod
-    def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]):
+    def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]) -> None:
         """Deduplicate commands by keeping the ones from the last source
         in the list.
         """
@@ -157,7 +160,9 @@ class CommandCollection(click.CommandCollection):
             ]
 
     @staticmethod
-    def _merge_same_name_collections(groups: Sequence[click.MultiCommand]):
+    def _merge_same_name_collections(
+        groups: Sequence[click.MultiCommand]
+    ) -> list[click.CommandCollection]:
         named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
         helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
@@ -177,7 +182,9 @@ class CommandCollection(click.CommandCollection):
             if cli_list
         ]
 
-    def resolve_command(self, ctx: click.core.Context, args: list):
+    def resolve_command(
+        self, ctx: click.core.Context, args: list
+    ) -> tuple[str | None, click.Command | None, list[str]]:
         try:
             return super().resolve_command(ctx, args)
         except click.exceptions.UsageError as exc:
@@ -190,7 +197,7 @@ class CommandCollection(click.CommandCollection):
 
     def format_commands(
         self, ctx: click.core.Context, formatter: click.formatting.HelpFormatter
-    ):
+    ) -> None:
         for title, cli in self.groups:
             for group in cli:
                 if group.sources:
@@ -228,11 +235,11 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
     raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
-def _update_verbose_flag(ctx, param, value):  # noqa: unused-argument
+def _update_verbose_flag(ctx: click.Context, param: Any, value: bool) -> None:  # noqa: unused-argument
     KedroCliError.VERBOSE_ERROR = value
 
 
-def _click_verbose(func):
+def _click_verbose(func: Any) -> Any:
     """Click option for enabling verbose mode."""
     return click.option(
         "--verbose",
@@ -243,7 +250,7 @@ def _click_verbose(func):
     )(func)
 
 
-def command_with_verbosity(group: click.core.Group, *args, **kwargs) -> Any:
+def command_with_verbosity(group: click.core.Group, *args: Any, **kwargs: Any) -> Any:
     """Custom command decorator with verbose flag added."""
 
     def decorator(func: Any) -> Any:
@@ -263,7 +270,7 @@ class KedroCliError(click.exceptions.ClickException):
     VERBOSE_ERROR = False
     VERBOSE_EXISTS = True
 
-    def show(self, file=None):
+    def show(self, file: IO | None = None) -> None:
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
         elif self.VERBOSE_EXISTS:
@@ -282,7 +289,7 @@ class KedroCliError(click.exceptions.ClickException):
             )
 
 
-def _clean_pycache(path: Path):
+def _clean_pycache(path: Path) -> None:
     """Recursively clean all __pycache__ folders from `path`.
 
     Args:
@@ -294,13 +301,13 @@ def _clean_pycache(path: Path):
         shutil.rmtree(each, ignore_errors=True)
 
 
-def split_string(ctx, param, value):  # noqa: unused-argument
+def split_string(ctx: click.Context, param: Any, value: str) -> list[str]:  # noqa: unused-argument
     """Split string by comma."""
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
 # noqa: unused-argument,missing-param-doc,missing-type-doc
-def split_node_names(ctx, param, to_split: str) -> list[str]:
+def split_node_names(ctx: click.Context, param: Any, to_split: str) -> list[str]:
     """Split string by comma, ignoring commas enclosed by square parentheses.
     This avoids splitting the string of nodes names on commas included in
     default node names, which have the pattern
@@ -353,14 +360,16 @@ def _check_module_importable(module_name: str) -> None:
         ) from exc
 
 
-def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
+def _get_entry_points(name: str) -> Any:
     """Get all kedro related entry points"""
-    return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
+    return importlib_metadata.entry_points().select(  # type: ignore[no-untyped-call]
+        group=ENTRY_POINT_GROUPS[name]
+    )
 
 
 def _safe_load_entry_point(  # noqa: inconsistent-return-statements
-    entry_point,
-):
+    entry_point: Any,
+) -> Any:
     """Load entrypoint safely, if fails it will just skip the entrypoint."""
     try:
         return entry_point.load()
@@ -396,7 +405,8 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def _config_file_callback(ctx, param, value):  # noqa: unused-argument
+@typing.no_type_check
+def _config_file_callback(ctx: click.Context, param: Any, value: Any) -> Any:  # noqa: unused-argument
     """CLI callback that replaces command line options
     with values specified in a config file. If command line
     options are passed, they override config file values.
@@ -414,7 +424,7 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     return value
 
 
-def _validate_config_file(key):
+def _validate_config_file(key: str) -> None:
     """Validate the keys provided in the config file against the accepted keys."""
     from kedro.framework.cli.project import run
 
@@ -422,13 +432,13 @@ def _validate_config_file(key):
     run_args.remove("config")
     if key not in run_args:
         KedroCliError.VERBOSE_EXISTS = False
-        message = _suggest_cli_command(key, run_args)
+        message = _suggest_cli_command(key, run_args)  # type: ignore[arg-type]
         raise KedroCliError(
             f"Key `{key}` in provided configuration is not valid. {message}"
         )
 
 
-def _split_params(ctx, param, value):
+def _split_params(ctx: click.Context, param: Any, value: Any) -> Any:
     if isinstance(value, dict):
         return value
     dot_list = []
@@ -456,7 +466,7 @@ def _split_params(ctx, param, value):
     return OmegaConf.to_container(conf)
 
 
-def _split_load_versions(ctx, param, value):
+def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str, str]:
     """Split and format the string coming from the --load-versions
     flag in kedro run, e.g.:
     "dataset1:time1,dataset2:time2" -> {"dataset1": "time1", "dataset2": "time2"}

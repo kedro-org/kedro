@@ -78,7 +78,7 @@ class AbstractRunner(ABC):
 
         """
 
-        hook_or_null_manager = hook_manager or _NullPluginManager()  # type: ignore[no-untyped-call]
+        hook_or_null_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
 
         # Check which datasets used in the pipeline are in the catalog or match

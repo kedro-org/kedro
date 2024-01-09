@@ -538,19 +538,19 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.
         pattern = str(self._get_versioned_path("*"))
-        version_paths = sorted(self._glob_function(pattern), reverse=True)
+        try:
+            version_paths = sorted(self._glob_function(pattern), reverse=True)
+        except Exception as exc:
+            message = (
+                f"Did not find any versions for {self}. This could be "
+                f"due to insufficient permission. Exception: {exc}"
+            )
+            raise VersionNotFoundError(message) from exc
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
-        protocol = getattr(self, "_protocol", None)
         if not most_recent:
-            if protocol in CLOUD_PROTOCOLS:
-                message = (
-                    f"Did not find any versions for {self}. This could be "
-                    f"due to insufficient permission."
-                )
-            else:
-                message = f"Did not find any versions for {self}"
+            message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
         return PurePath(most_recent).parent.name
 

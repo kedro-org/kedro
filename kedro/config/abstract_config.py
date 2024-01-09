@@ -19,7 +19,7 @@ class AbstractConfigLoader(UserDict):
         conf_source: str,
         env: None | str = None,
         runtime_params: None | dict[str, Any] = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__()
         self.conf_source = conf_source

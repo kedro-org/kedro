@@ -32,7 +32,7 @@ class LambdaDataset(AbstractDataset):
     """
 
     def _describe(self) -> dict[str, Any]:
-        def _to_str(func):
+        def _to_str(func: Any) -> str | None:
             if not func:
                 return None
             try:

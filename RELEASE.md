@@ -6,7 +6,7 @@
 * Removed example pipeline requirements when examples are not selected in `tools`.
 * Allowed modern versions of JupyterLab and Jupyter Notebooks.
 * Removed setuptools dependency
-* Removed black dependency
+* Removed black dependency and replaced it functionality with `ruff format`.
 
 ## Breaking changes to the API
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.

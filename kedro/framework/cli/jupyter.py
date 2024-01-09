@@ -49,7 +49,7 @@ def jupyter() -> None:
     """
 
 
-@forward_command(jupyter, "setup", forward_help=True)
+@forward_command(jupyter, "setup", forward_help=True)  # type: ignore[arg-type]
 @click.pass_obj  # this will pass the metadata as first argument
 def setup(metadata: ProjectMetadata, args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
     """Initialise the Jupyter Kernel for a kedro project."""
@@ -61,7 +61,7 @@ def setup(metadata: ProjectMetadata, args: Any, **kwargs: Any) -> None:  # noqa:
     click.secho(f"\nThe kernel has been created successfully at {kernel_path}")
 
 
-@forward_command(jupyter, "notebook", forward_help=True)
+@forward_command(jupyter, "notebook", forward_help=True)  # type: ignore[arg-type]
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
 def jupyter_notebook(
@@ -87,7 +87,7 @@ def jupyter_notebook(
     )
 
 
-@forward_command(jupyter, "lab", forward_help=True)
+@forward_command(jupyter, "lab", forward_help=True)  # type: ignore[arg-type]
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
 def jupyter_lab(

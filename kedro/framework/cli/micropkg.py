@@ -127,7 +127,7 @@ def micropkg() -> None:
     """Commands for working with micro-packages."""
 
 
-@command_with_verbosity(micropkg, "pull")
+@command_with_verbosity(micropkg, "pull")  # type: ignore[arg-type]
 @click.argument("package_path", nargs=1, required=False)
 @click.option(
     "--all",
@@ -303,7 +303,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
     click.secho("Micro-packages packaged!", fg="green")
 
 
-@command_with_verbosity(micropkg, "package")
+@command_with_verbosity(micropkg, "package")  # type: ignore[arg-type]
 @env_option(
     help="Environment where the micro-package configuration lives. Defaults to `base`."
 )

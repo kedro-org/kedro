@@ -82,7 +82,7 @@ def pipeline() -> None:
     """Commands for working with pipelines."""
 
 
-@command_with_verbosity(pipeline, "create")
+@command_with_verbosity(pipeline, "create")  # type: ignore[arg-type]
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @click.option(
     "--skip-config",
@@ -136,7 +136,7 @@ def create_pipeline(
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
 
 
-@command_with_verbosity(pipeline, "delete")
+@command_with_verbosity(pipeline, "delete")  # type: ignore[arg-type]
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @env_option(
     help="Environment to delete pipeline configuration from. Defaults to 'base'."

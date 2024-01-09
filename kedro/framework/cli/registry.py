@@ -26,7 +26,7 @@ def list_registered_pipelines() -> None:
     click.echo(yaml.dump(sorted(pipelines)))
 
 
-@command_with_verbosity(registry, "describe")
+@command_with_verbosity(registry, "describe")  # type: ignore[arg-type]
 @click.argument("name", nargs=1, default="__default__")
 @click.pass_obj
 def describe_registered_pipeline(

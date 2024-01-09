@@ -120,7 +120,7 @@ class Node:
         self._validate_inputs_dif_than_outputs()
         self._confirms = confirms
 
-    def _copy(self, **overwrite_params):
+    def _copy(self, **overwrite_params) -> Node:
         """
         Helper function to copy the node, replacing some values.
         """
@@ -137,11 +137,11 @@ class Node:
         return Node(**params)
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
     @property
-    def _unique_key(self):
+    def _unique_key(self) -> tuple[Any, Any] | Any | tuple:
         def hashable(value):
             if isinstance(value, dict):
                 # we sort it because a node with inputs/outputs
@@ -152,14 +152,14 @@ class Node:
                 return tuple(value)
             return value
 
-        return (self.name, hashable(self._inputs), hashable(self._outputs))
+        return self.name, hashable(self._inputs), hashable(self._outputs)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, Node):
             return NotImplemented
         return self._unique_key == other._unique_key
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         if not isinstance(other, Node):
             return NotImplemented
         return self._unique_key < other._unique_key

@@ -59,7 +59,7 @@ Kedro's CLI runs the functions at startup as part of `kedro run` so in most case
 
 ### `bootstrap_project`
 
-This function uses `configure_project` under the hood, and additionally reads metadata from `pyproject.toml` and adds the project root to `sys.path` so the project can be imported as a Python package. It is typically used to work directly with the source code of a Kedro project.
+This function uses `configure_project`, and additionally reads metadata from `pyproject.toml` and adds the project root to `sys.path` so the project can be imported as a Python package. It is typically used to work directly with the source code of a Kedro project.
 
 ### `configure_project`
 

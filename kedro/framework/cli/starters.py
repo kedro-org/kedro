@@ -131,7 +131,7 @@ NUMBER_TO_TOOLS_NAME = {
 }
 
 
-def _validate_flag_inputs(flag_inputs):
+def _validate_flag_inputs(flag_inputs: dict[str, Any]):
     if flag_inputs.get("checkout") and not flag_inputs.get("starter"):
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
@@ -205,7 +205,7 @@ def _validate_selected_tools(selected_tools):
             sys.exit(1)
 
 
-def _print_tools_selection(selected_tools):
+def _print_tools_selection(selected_tools: str | None):
     if selected_tools is not None:
         if selected_tools == "['None']":
             click.secho(
@@ -219,7 +219,7 @@ def _print_tools_selection(selected_tools):
             )
 
 
-def _print_example_selection(example_pipeline):
+def _print_example_selection(example_pipeline: bool | None):
     if example_pipeline is not None:
         if example_pipeline:
             click.secho(
@@ -321,7 +321,7 @@ def new(  # noqa: PLR0913
     extra_context = _get_extra_context(
         prompts_required=prompts_required,
         config_path=config_path,
-        cookiecutter_context=cookiecutter_context,
+        cookiecutter_context=cookiecutter_context,  # type: ignore
         selected_tools=selected_tools,
         project_name=project_name,
         example_pipeline=example_pipeline,
@@ -343,7 +343,7 @@ def new(  # noqa: PLR0913
 
     # When not a starter, print tools and example selection
     _print_tools_selection(extra_context.get("tools"))
-    _print_example_selection(extra_context.get("example_pipeline"))
+    _print_example_selection(extra_context.get("example_pipeline"))  # type: ignore
 
     # If interactive flow used, print hint
     if prompts_required and not config_path:

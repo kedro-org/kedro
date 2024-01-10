@@ -48,7 +48,7 @@ kedro new --tools=lint,test,log,docs,data,pyspark,viz (or any subset of these op
 kedro new --tools=all\n
 kedro new --tools=none
 
-For more information on using tools, see https://docs.kedro.org/en/latest/starters/new_project_tools.html
+For more information on using tools, see https://docs.kedro.org/en/stable/starters/new_project_tools.html
 """
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,
@@ -875,7 +875,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         template_path: The path to the cookiecutter template to create the project.
             It could either be a local directory or a remote VCS repository
             supported by cookiecutter. For more details, please see:
-            https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
+            https://cookiecutter.readthedocs.io/en/stable/usage.html#generate-your-project
         cookiecutter_args: Arguments to pass to cookiecutter.
 
     Raises:

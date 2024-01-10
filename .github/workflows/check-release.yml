@@ -63,8 +63,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: kedro-${{needs.check-version.outputs.kedro_version}}
-          name: kedro-${{needs.check-version.outputs.kedro_version}}
+          tag_name: ${{needs.check-version.outputs.kedro_version}}
+          name: ${{needs.check-version.outputs.kedro_version}}
           body_path: release_body.txt
           draft: false
           prerelease: false

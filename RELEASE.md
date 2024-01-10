@@ -6,11 +6,14 @@
 * Removed example pipeline requirements when examples are not selected in `tools`.
 * Allowed modern versions of JupyterLab and Jupyter Notebooks.
 * Removed setuptools dependency
+* Added `source_dir` explicitly in `pyproject.toml` for non-src layout project.
+* `MemoryDataset` entries are now included in free outputs.
 
 ## Breaking changes to the API
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
 
 ## Documentation changes
+* Added documentations about `bootstrap_project` and `configure_project`.
 
 ## Community contributions
 

@@ -58,13 +58,12 @@ test = [
     "blacken-docs==1.9.2",
     "black~=22.0",
     "coverage[toml]",
-    "fsspec<2023.9", # Temporary, newer version causing "test_no_versions_with_cloud_protocol" to fail
     "import-linter==1.12.1",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
     "Jinja2<3.1.0",
     "jupyterlab_server>=2.11.1",
-    "jupyterlab~=3.0",
+    "jupyterlab>=3,<5",
     "jupyter~=1.0",
     "kedro-datasets",
     "moto==1.3.7; python_version < '3.10'",
@@ -85,7 +84,7 @@ test = [
 ]
 docs = [
     "docutils<0.18",
-    "sphinx~=5.3.0",
+    "sphinx>=5.3,<7.3",
     "sphinx_rtd_theme==1.2.0",
     # Regression on sphinx-autodoc-typehints 1.21
     # that creates some problematic docstrings

@@ -131,6 +131,23 @@ NUMBER_TO_TOOLS_NAME = {
 }
 
 
+def _validate_flag_inputs(flag_inputs):
+    if flag_inputs.get("checkout") and not flag_inputs.get("starter"):
+        raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
+
+    if flag_inputs.get("directory") and not flag_inputs.get("starter"):
+        raise KedroCliError(
+            "Cannot use the --directory flag without a --starter value."
+        )
+
+    if (flag_inputs.get("tools") or flag_inputs.get("example")) and flag_inputs.get(
+        "starter"
+    ):
+        raise KedroCliError(
+            "Cannot use the --starter flag with the --example and/or --tools flag."
+        )
+
+
 def _validate_regex(pattern_name, text):
     VALIDATION_PATTERNS = {
         "yes_no": {
@@ -247,19 +264,16 @@ def new(  # noqa: PLR0913
     **kwargs,
 ):
     """Create a new kedro project."""
-    if checkout and not starter_alias:
-        raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
-
-    if directory and not starter_alias:
-        raise KedroCliError(
-            "Cannot use the --directory flag without a --starter value."
-        )
-
-    if (selected_tools or example_pipeline) and starter_alias:
-        raise KedroCliError(
-            "Cannot use the --starter flag with the --example and/or --tools flag."
-        )
-
+    flag_inputs = {
+        "config": config_path,
+        "starter": starter_alias,
+        "tools": selected_tools,
+        "name": project_name,
+        "checkout": checkout,
+        "directory": directory,
+        "example": example_pipeline,
+    }
+    _validate_flag_inputs(flag_inputs)
     starters_dict = _get_starters_dict()
 
     if starter_alias in starters_dict:

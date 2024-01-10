@@ -341,10 +341,9 @@ def new(  # noqa: PLR0913
     if starter_alias:
         return
 
-    # If not a starter, print tools and example selection
-    if not starter_alias:
-        _print_tools_selection(extra_context.get("tools"))
-        _print_example_selection(extra_context.get("example_pipeline"))
+    # When not a starter, print tools and example selection
+    _print_tools_selection(extra_context.get("tools"))
+    _print_example_selection(extra_context.get("example_pipeline"))
 
     # If interactive flow used, print hint
     if prompts_required and not config_path:

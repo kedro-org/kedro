@@ -82,7 +82,7 @@ def pipeline() -> None:
     """Commands for working with pipelines."""
 
 
-@command_with_verbosity(pipeline, "create")  # type: ignore[arg-type]
+@command_with_verbosity(pipeline, "create")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @click.option(
     "--skip-config",
@@ -104,6 +104,7 @@ def create_pipeline(
     template_path: Path,
     skip_config: bool,
     env: str,
+    /,
     **kwargs: Any,
 ) -> None:  # noqa: unused-argument
     """Create a new modular pipeline by providing a name."""
@@ -136,7 +137,7 @@ def create_pipeline(
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
 
 
-@command_with_verbosity(pipeline, "delete")  # type: ignore[arg-type]
+@command_with_verbosity(pipeline, "delete")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @env_option(
     help="Environment to delete pipeline configuration from. Defaults to 'base'."
@@ -146,7 +147,7 @@ def create_pipeline(
 )
 @click.pass_obj  # this will pass the metadata as first argument
 def delete_pipeline(
-    metadata: ProjectMetadata, name: str, env: str, yes: bool, **kwargs: Any
+    metadata: ProjectMetadata, name: str, env: str, yes: bool, /, **kwargs: Any
 ) -> None:  # noqa: unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name

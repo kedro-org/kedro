@@ -66,10 +66,10 @@ def project_group() -> None:  # pragma: no cover
     pass
 
 
-@forward_command(project_group, forward_help=True)  # type: ignore[arg-type]
+@forward_command(project_group, forward_help=True)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
-def ipython(metadata: ProjectMetadata, env: str, args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
+def ipython(metadata: ProjectMetadata, env: str, /, args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
     """Open IPython with project specific variables loaded."""
     _check_module_importable("IPython")
 

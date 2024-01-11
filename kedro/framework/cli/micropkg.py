@@ -828,7 +828,7 @@ def _generate_sdist_file(  # noqa: PLR0913,too-many-locals
     source_paths: tuple[Path, Path, list[tuple[Path, str]]],
     version: str,
     metadata: ProjectMetadata,
-    alias: None | str = None,
+    alias: str | None = None,
 ) -> None:
     package_name = alias or micropkg_name
     package_source, tests_source, conf_source = source_paths

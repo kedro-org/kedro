@@ -100,7 +100,7 @@ class KedroSession:
     def __init__(  # noqa: PLR0913
         self,
         session_id: str,
-        package_name: None | str = None,
+        package_name: str | None = None,
         project_path: Path | str | None = None,
         save_on_close: bool = False,
         conf_source: str | None = None,
@@ -126,8 +126,8 @@ class KedroSession:
         cls,
         project_path: Path | str | None = None,
         save_on_close: bool = True,
-        env: None | str = None,
-        extra_params: None | dict[str, Any] = None,
+        env: str | None = None,
+        extra_params: dict[str, Any] | None = None,
         conf_source: str | None = None,
     ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
@@ -272,16 +272,16 @@ class KedroSession:
 
     def run(  # noqa: PLR0913,too-many-locals
         self,
-        pipeline_name: None | str = None,
-        tags: None | Iterable[str] = None,
-        runner: None | AbstractRunner = None,
-        node_names: None | Iterable[str] = None,
-        from_nodes: None | Iterable[str] = None,
-        to_nodes: None | Iterable[str] = None,
-        from_inputs: None | Iterable[str] = None,
-        to_outputs: None | Iterable[str] = None,
-        load_versions: None | dict[str, str] = None,
-        namespace: None | str = None,
+        pipeline_name: str | None = None,
+        tags: Iterable[str] | None = None,
+        runner: AbstractRunner | None = None,
+        node_names: Iterable[str] | None = None,
+        from_nodes: Iterable[str] | None = None,
+        to_nodes: Iterable[str] | None = None,
+        from_inputs: Iterable[str] | None = None,
+        to_outputs: Iterable[str] | None = None,
+        load_versions: dict[str, str] | None = None,
+        namespace: str | None = None,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 

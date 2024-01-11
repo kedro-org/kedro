@@ -56,8 +56,8 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
-        hook_manager: None | PluginManager = None,
-        session_id: None | str = None,
+        hook_manager: PluginManager | None = None,
+        session_id: str | None = None,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -163,7 +163,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: None | str = None,
+        session_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
         inputs have already been checked and normalized by run().
@@ -298,7 +298,7 @@ def run_node(
     catalog: DataCatalog,
     hook_manager: PluginManager,
     is_async: bool = False,
-    session_id: None | str = None,
+    session_id: str | None = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -342,7 +342,7 @@ def _collect_inputs_from_hook(  # noqa: PLR0913
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
-    session_id: None | str = None,
+    session_id: str | None = None,
 ) -> dict[str, Any]:
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
@@ -375,7 +375,7 @@ def _call_node_run(  # noqa: PLR0913
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
-    session_id: None | str = None,
+    session_id: str | None = None,
 ) -> dict[str, Any]:
     try:
         outputs = node.run(inputs)
@@ -404,7 +404,7 @@ def _run_node_sequential(
     node: Node,
     catalog: DataCatalog,
     hook_manager: PluginManager,
-    session_id: None | str = None,
+    session_id: str | None = None,
 ) -> Node:
     inputs = {}
 
@@ -451,7 +451,7 @@ def _run_node_async(
     node: Node,
     catalog: DataCatalog,
     hook_manager: PluginManager,
-    session_id: None | str = None,
+    session_id: str | None = None,
 ) -> Node:
     def _synchronous_dataset_load(dataset_name: str):
         """Minimal wrapper to ensure Hooks are run synchronously

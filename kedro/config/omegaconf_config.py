@@ -77,14 +77,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def __init__(  # noqa: PLR0913
         self,
         conf_source: str,
-        env: None | str = None,
-        runtime_params: None | dict[str, Any] = None,
+        env: str | None = None,
+        runtime_params: dict[str, Any] | None = None,
         *,
-        config_patterns: None | dict[str, list[str]] = None,
-        base_env: None | str = None,
-        default_run_env: None | str = None,
-        custom_resolvers: None | dict[str, Callable] = None,
-        merge_strategy: None | dict[str, str] = None,
+        config_patterns: dict[str, list[str]] | None = None,
+        base_env: str | None = None,
+        default_run_env: str | None = None,
+        custom_resolvers: dict[str, Callable] | None = None,
+        merge_strategy: dict[str, str] | None = None,
     ):
         """Instantiates a ``OmegaConfigLoader``.
 

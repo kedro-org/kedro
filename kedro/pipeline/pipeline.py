@@ -681,13 +681,13 @@ class Pipeline:  # noqa: too-many-public-methods
 
     def filter(  # noqa: PLR0913
         self,
-        tags: None | Iterable[str] = None,
-        from_nodes: None | Iterable[str] = None,
-        to_nodes: None | Iterable[str] = None,
-        node_names: None | Iterable[str] = None,
-        from_inputs: None | Iterable[str] = None,
-        to_outputs: None | Iterable[str] = None,
-        node_namespace: None | str = None,
+        tags: Iterable[str] | None = None,
+        from_nodes: Iterable[str] | None = None,
+        to_nodes: Iterable[str] | None = None,
+        node_names: Iterable[str] | None = None,
+        from_inputs: Iterable[str] | None = None,
+        to_outputs: Iterable[str] | None = None,
+        node_namespace: str | None = None,
     ) -> Pipeline:
         """Creates a new ``Pipeline`` object with the nodes that meet all of the
         specified filtering conditions.
@@ -805,7 +805,7 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
     seen_nodes: set[str] = set()
     duplicates: dict[Pipeline | None, set[str]] = defaultdict(set)
 
-    def _check_node(node_: Node, pipeline_: None | Pipeline = None):
+    def _check_node(node_: Node, pipeline_: Pipeline | None = None):
         name = node_.name
         if name in seen_nodes:
             duplicates[pipeline_].add(name)

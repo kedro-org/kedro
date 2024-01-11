@@ -105,17 +105,6 @@ jobs:
       - run:
           name: Maybe merge main into develop or raise a PR
           command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
-      - run:
-          name: Maybe trigger the release workflow
-          command: |
-              KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
-              if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
-              then
-                  echo "Starting the release of Kedro ${KEDRO_VERSION}!"
-                  ./tools/circleci/circle-release.sh github/kedro-org/kedro
-              else
-                  echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
-              fi
 
   merge_pr_to_develop:
     docker:
@@ -128,41 +117,6 @@ jobs:
           name: Maybe merge an automatic PR into develop
           command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
 
-  publish_kedro:
-    executor:
-      name: docker
-      python_version: "3.11"
-    steps:
-      - setup
-      - add_ssh_keys
-      - run:
-          name: Check Kedro version
-          command: |
-            KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
-            if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
-            then
-                echo "export KEDRO_VERSION=\"${KEDRO_VERSION}\"" >> $BASH_ENV
-            else
-                echo "Error: Kedro version ${KEDRO_VERSION} already exists on PyPI"
-                exit 1
-            fi
-      - run:
-          name: Tag and publish release on Github
-          command: ./tools/circleci/github_scripts/release.sh kedro-org kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
-      - run:
-          name: Publish to PyPI
-          command: |
-            make package
-            python -m pip install twine -U
-            python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*
-      - run:
-          name: Trigger Read The Docs build
-          command: |
-            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} stable
-            # give some time for GitHub release to propagate
-            # otherwise RTD fails to build a new tag
-            sleep 120
-            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
 
   # Trigger kedro-viz build to ensure tests in that project pass
   viz_build:
@@ -208,12 +162,3 @@ workflows:
         filters:
           branches:
             only: main
-
-  kedro_release:
-    when:
-      and:
-        - <<pipeline.parameters.release_kedro>>
-        - not: <<pipeline.parameters.run_hourly>>
-        - not: <<pipeline.parameters.run_nightly>>
-    jobs:
-      - publish_kedro

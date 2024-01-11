@@ -92,7 +92,7 @@ docs = [
     "sphinx_copybutton==0.5.2",
     "sphinx-notfound-page",
     "ipykernel>=5.3, <7.0",
-    "myst-parser~=1.0.0",
+    "myst-parser>=1.0,<2.1",
     "Jinja2<3.1.0",
 ]
 all = [ "kedro[test,docs]" ]

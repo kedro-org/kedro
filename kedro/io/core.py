@@ -118,8 +118,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         cls: type,
         name: str,
         config: dict[str, Any],
-        load_version: None | str = None,
-        save_version: None | str = None,
+        load_version: str | None = None,
+        save_version: str | None = None,
     ) -> AbstractDataset:
         """Create a data set instance using the configuration provided.
 
@@ -352,8 +352,8 @@ _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", ""]
 
 def parse_dataset_definition(
     config: dict[str, Any],
-    load_version: None | str = None,
-    save_version: None | str = None,
+    load_version: str | None = None,
+    save_version: str | None = None,
 ) -> tuple[type[AbstractDataset], dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
@@ -508,8 +508,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self,
         filepath: PurePosixPath,
         version: Version | None,
-        exists_function: None | Callable[[str], bool] = None,
-        glob_function: None | Callable[[str], list[str]] = None,
+        exists_function: Callable[[str], bool] | None = None,
+        glob_function: Callable[[str], list[str]] | None = None,
     ):
         """Creates a new instance of ``AbstractVersionedDataset``.
 
@@ -538,19 +538,19 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.
         pattern = str(self._get_versioned_path("*"))
-        version_paths = sorted(self._glob_function(pattern), reverse=True)
+        try:
+            version_paths = sorted(self._glob_function(pattern), reverse=True)
+        except Exception as exc:
+            message = (
+                f"Did not find any versions for {self}. This could be "
+                f"due to insufficient permission. Exception: {exc}"
+            )
+            raise VersionNotFoundError(message) from exc
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
-        protocol = getattr(self, "_protocol", None)
         if not most_recent:
-            if protocol in CLOUD_PROTOCOLS:
-                message = (
-                    f"Did not find any versions for {self}. This could be "
-                    f"due to insufficient permission."
-                )
-            else:
-                message = f"Did not find any versions for {self}"
+            message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
         return PurePath(most_recent).parent.name
 
@@ -702,7 +702,7 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
 
 
 def get_protocol_and_path(
-    filepath: str | os.PathLike, version: None | Version = None
+    filepath: str | os.PathLike, version: Version | None = None
 ) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 

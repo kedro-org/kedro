@@ -139,11 +139,11 @@ class DataCatalog:
 
     def __init__(  # noqa: PLR0913
         self,
-        datasets: None | dict[str, AbstractDataset] = None,
-        feed_dict: None | dict[str, Any] = None,
-        dataset_patterns: None | Patterns = None,
-        load_versions: None | dict[str, str] = None,
-        save_version: None | str = None,
+        datasets: dict[str, AbstractDataset] | None = None,
+        feed_dict: dict[str, Any] | None = None,
+        dataset_patterns: Patterns | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -202,9 +202,9 @@ class DataCatalog:
     def from_config(
         cls,
         catalog: dict[str, dict[str, Any]] | None,
-        credentials: None | dict[str, dict[str, Any]] = None,
-        load_versions: None | dict[str, str] = None,
-        save_version: None | str = None,
+        credentials: dict[str, dict[str, Any]] | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
     ) -> DataCatalog:
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -366,7 +366,7 @@ class DataCatalog:
     def _get_dataset(
         self,
         dataset_name: str,
-        version: None | Version = None,
+        version: Version | None = None,
         suggest: bool = True,
     ) -> AbstractDataset:
         matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
@@ -449,7 +449,7 @@ class DataCatalog:
                 ) from exc
         return config
 
-    def load(self, name: str, version: None | str = None) -> Any:
+    def load(self, name: str, version: str | None = None) -> Any:
         """Loads a registered data set.
 
         Args:

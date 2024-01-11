@@ -70,8 +70,8 @@ def load_ipython_extension(ipython: Any) -> None:
 @argument("--conf-source", type=str, default=None, help=CONF_SOURCE_HELP)
 def magic_reload_kedro(
     line: str,
-    local_ns: None | dict[str, Any] = None,
-    conf_source: None | str = None,
+    local_ns: dict[str, Any] | None = None,
+    conf_source: str | None = None,
 ) -> None:
     """
     The `%reload_kedro` IPython line magic.
@@ -83,11 +83,11 @@ def magic_reload_kedro(
 
 
 def reload_kedro(
-    path: None | str = None,
-    env: None | str = None,
-    extra_params: None | dict[str, Any] = None,
+    path: str | None = None,
+    env: str | None = None,
+    extra_params: dict[str, Any] | None = None,
     local_namespace: dict[str, Any] | None = None,
-    conf_source: None | str = None,
+    conf_source: str | None = None,
 ) -> None:  # pragma: no cover
     """Function that underlies the %reload_kedro Line magic. This should not be imported
     or run directly but instead invoked through %reload_kedro."""

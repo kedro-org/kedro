@@ -209,8 +209,8 @@ class KedroContext:
 
     def _get_catalog(
         self,
-        save_version: str = None,
-        load_versions: dict[str, str] = None,
+        save_version: str | None = None,
+        load_versions: dict[str, str] | None = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 

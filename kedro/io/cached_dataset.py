@@ -37,9 +37,9 @@ class CachedDataset(AbstractDataset):
     def __init__(
         self,
         dataset: AbstractDataset | dict,
-        version: Version = None,
-        copy_mode: str = None,
-        metadata: dict[str, Any] = None,
+        version: Version | None = None,
+        copy_mode: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``CachedDataset`` pointing to the
         provided Python object.

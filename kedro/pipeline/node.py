@@ -22,13 +22,13 @@ class Node:
     def __init__(  # noqa: PLR0913
         self,
         func: Callable,
-        inputs: None | str | list[str] | dict[str, str],
-        outputs: None | str | list[str] | dict[str, str],
+        inputs: str | list[str] | dict[str, str] | None,
+        outputs: str | list[str] | dict[str, str] | None,
         *,
-        name: str = None,
+        name: str | None = None,
         tags: str | Iterable[str] | None = None,
         confirms: str | list[str] | None = None,
-        namespace: str = None,
+        namespace: str | None = None,
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -306,7 +306,7 @@ class Node:
         """
         return _to_list(self._confirms)
 
-    def run(self, inputs: dict[str, Any] = None) -> dict[str, Any]:
+    def run(self, inputs: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results
         in a dictionary.
 
@@ -509,7 +509,7 @@ class Node:
             )
 
     @staticmethod
-    def _process_inputs_for_bind(inputs: None | str | list[str] | dict[str, str]):
+    def _process_inputs_for_bind(inputs: str | list[str] | dict[str, str] | None):
         # Safeguard that we do not mutate list inputs
         inputs = copy.copy(inputs)
         args: list[str] = []
@@ -532,13 +532,13 @@ def _node_error_message(msg) -> str:
 
 def node(  # noqa: PLR0913
     func: Callable,
-    inputs: None | str | list[str] | dict[str, str],
-    outputs: None | str | list[str] | dict[str, str],
+    inputs: str | list[str] | dict[str, str] | None,
+    outputs: str | list[str] | dict[str, str] | None,
     *,
-    name: str = None,
+    name: str | None = None,
     tags: str | Iterable[str] | None = None,
     confirms: str | list[str] | None = None,
-    namespace: str = None,
+    namespace: str | None = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.
@@ -614,7 +614,7 @@ def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: dict[str, str]):
     return [*sig.args, *sig.kwargs.values()]
 
 
-def _to_list(element: None | str | Iterable[str] | dict[str, str]) -> list[str]:
+def _to_list(element: str | Iterable[str] | dict[str, str] | None) -> list[str]:
     """Make a list out of node inputs/outputs.
 
     Returns:

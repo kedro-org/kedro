@@ -205,7 +205,10 @@ def _validate_selected_tools(selected_tools):
             sys.exit(1)
 
 
-def _print_tools_selection(selected_tools: str | None) -> None:
+def _print_selection_and_prompt_info(
+    selected_tools: str | None, example_pipeline: bool | None, interactive: bool
+) -> None:
+    # Confirm tools selection
     if selected_tools is not None:
         if selected_tools == "['None']":
             click.secho(
@@ -218,14 +221,21 @@ def _print_tools_selection(selected_tools: str | None) -> None:
                 fg="green",
             )
 
-
-def _print_example_selection(example_pipeline: bool | None) -> None:
+    # Confirm example selection
     if example_pipeline is not None:
         if example_pipeline:
             click.secho(
                 "It has been created with an example pipeline.",
                 fg="green",
             )
+
+    # Give hint for skipping interactive flow
+    if interactive:
+        click.secho(
+            "\nTo skip the interactive flow you can run `kedro new` with"
+            "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
+            fg="green",
+        )
 
 
 # noqa: missing-function-docstring
@@ -337,21 +347,15 @@ def new(  # noqa: PLR0913
 
     _create_project(project_template, cookiecutter_args)
 
-    # End here if a starter was used
-    if starter_alias:
-        return
-
-    # When not a starter, print tools and example selection
-    _print_tools_selection(extra_context.get("tools"))
-    _print_example_selection(extra_context.get("example_pipeline"))  # type: ignore
-
-    # If interactive flow used, print hint
-    if prompts_required and not config_path:
-        click.secho(
-            "\nTo skip the interactive flow you can run `kedro new` with"
-            "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
-            fg="green",
-        )
+    # If not a starter, print tools and example selection
+    if not starter_alias:
+        # If interactive flow used, print hint
+        interactive_flow = prompts_required and not config_path
+        _print_selection_and_prompt_info(
+            extra_context.get("tools"),
+            extra_context.get("example_pipeline"),
+            interactive_flow,
+        )  # type: ignore
 
 
 @starter.command("list")

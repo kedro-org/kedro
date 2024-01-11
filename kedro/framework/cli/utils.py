@@ -159,9 +159,9 @@ class CommandCollection(click.CommandCollection):
         named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
         helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
-            named_groups[group.name].append(group)
+            named_groups[group.name].append(group)  # type: ignore
             if group.help:
-                helps[group.name].append(group.help)
+                helps[group.name].append(group.help)  # type: ignore
 
         return [
             click.CommandCollection(

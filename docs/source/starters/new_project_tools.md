@@ -267,9 +267,7 @@ See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/s
 
 Here is a flowchart to help illustrate some example choice of tools you can select:
 
-```{image} ../meta/images/project-tools-choices.png
-:alt: mermaid-Example diagram of specific tool choices
-```
+![Example diagram of specific tool choices](../meta/images/project-tools-choices.png)
 
 % Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
 % flowchart TD

@@ -165,3 +165,13 @@ def two_branches_crossed_pipeline():
             node(identity, "ds3_B", "ds4_B", name="node4_B"),
         ]
     )
+
+
+@pytest.fixture
+def pipeline_with_memory_datasets():
+    return pipeline(
+        [
+            node(func=identity, inputs="Input1", outputs="MemOutput1", name="node1"),
+            node(func=identity, inputs="Input2", outputs="MemOutput2", name="node2"),
+        ]
+    )

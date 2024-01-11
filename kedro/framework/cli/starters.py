@@ -777,7 +777,7 @@ def _validate_selection(tools: list[str]) -> None:
             sys.exit(1)
 
 
-def _parse_tools_input(tools_str: None | str) -> list[str]:
+def _parse_tools_input(tools_str: str | None) -> list[str]:
     """Parse the tools input string.
 
     Args:

@@ -131,7 +131,7 @@ NUMBER_TO_TOOLS_NAME = {
 }
 
 
-def _validate_flag_inputs(flag_inputs: dict[str, Any]):
+def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
     if flag_inputs.get("checkout") and not flag_inputs.get("starter"):
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
@@ -205,7 +205,7 @@ def _validate_selected_tools(selected_tools):
             sys.exit(1)
 
 
-def _print_tools_selection(selected_tools: str | None):
+def _print_tools_selection(selected_tools: str | None) -> None:
     if selected_tools is not None:
         if selected_tools == "['None']":
             click.secho(
@@ -219,7 +219,7 @@ def _print_tools_selection(selected_tools: str | None):
             )
 
 
-def _print_example_selection(example_pipeline: bool | None):
+def _print_example_selection(example_pipeline: bool | None) -> None:
     if example_pipeline is not None:
         if example_pipeline:
             click.secho(

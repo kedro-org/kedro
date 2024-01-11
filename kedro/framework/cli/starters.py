@@ -31,7 +31,6 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 
-# TODO(lrcouto): Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these tools.).
 TOOLS_ARG_HELP = """
 Select which tools you'd like to include. By default, none are included.\n
 
@@ -48,6 +47,8 @@ Example usage:\n
 kedro new --tools=lint,test,log,docs,data,pyspark,viz (or any subset of these options)\n
 kedro new --tools=all\n
 kedro new --tools=none
+
+For more information on using tools, see https://docs.kedro.org/en/stable/starters/new_project_tools.html
 """
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,
@@ -130,6 +131,23 @@ NUMBER_TO_TOOLS_NAME = {
 }
 
 
+def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
+    if flag_inputs.get("checkout") and not flag_inputs.get("starter"):
+        raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
+
+    if flag_inputs.get("directory") and not flag_inputs.get("starter"):
+        raise KedroCliError(
+            "Cannot use the --directory flag without a --starter value."
+        )
+
+    if (flag_inputs.get("tools") or flag_inputs.get("example")) and flag_inputs.get(
+        "starter"
+    ):
+        raise KedroCliError(
+            "Cannot use the --starter flag with the --example and/or --tools flag."
+        )
+
+
 def _validate_regex(pattern_name, text):
     VALIDATION_PATTERNS = {
         "yes_no": {
@@ -187,6 +205,39 @@ def _validate_selected_tools(selected_tools):
             sys.exit(1)
 
 
+def _print_selection_and_prompt_info(
+    selected_tools: str | None, example_pipeline: bool | None, interactive: bool
+) -> None:
+    # Confirm tools selection
+    if selected_tools is not None:
+        if selected_tools == "['None']":
+            click.secho(
+                "You have selected no project tools",
+                fg="green",
+            )
+        else:
+            click.secho(
+                f"You have selected the following project tools: {selected_tools}",
+                fg="green",
+            )
+
+    # Confirm example selection
+    if example_pipeline is not None:
+        if example_pipeline:
+            click.secho(
+                "It has been created with an example pipeline.",
+                fg="green",
+            )
+
+    # Give hint for skipping interactive flow
+    if interactive:
+        click.secho(
+            "\nTo skip the interactive flow you can run `kedro new` with"
+            "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
+            fg="green",
+        )
+
+
 # noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
@@ -223,19 +274,16 @@ def new(  # noqa: PLR0913
     **kwargs,
 ):
     """Create a new kedro project."""
-    if checkout and not starter_alias:
-        raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
-
-    if directory and not starter_alias:
-        raise KedroCliError(
-            "Cannot use the --directory flag without a --starter value."
-        )
-
-    if (selected_tools or example_pipeline) and starter_alias:
-        raise KedroCliError(
-            "Cannot use the --starter flag with the --example and/or --tools flag."
-        )
-
+    flag_inputs = {
+        "config": config_path,
+        "starter": starter_alias,
+        "tools": selected_tools,
+        "name": project_name,
+        "checkout": checkout,
+        "directory": directory,
+        "example": example_pipeline,
+    }
+    _validate_flag_inputs(flag_inputs)
     starters_dict = _get_starters_dict()
 
     if starter_alias in starters_dict:
@@ -283,7 +331,7 @@ def new(  # noqa: PLR0913
     extra_context = _get_extra_context(
         prompts_required=prompts_required,
         config_path=config_path,
-        cookiecutter_context=cookiecutter_context,
+        cookiecutter_context=cookiecutter_context,  # type: ignore
         selected_tools=selected_tools,
         project_name=project_name,
         example_pipeline=example_pipeline,
@@ -299,12 +347,15 @@ def new(  # noqa: PLR0913
 
     _create_project(project_template, cookiecutter_args)
 
-    if prompts_required and not config_path and not starter_alias:
-        click.secho(
-            "\nTo skip the interactive flow you can run `kedro new` with"
-            "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
-            fg="green",
-        )
+    # If not a starter, print tools and example selection
+    if not starter_alias:
+        # If interactive flow used, print hint
+        interactive_flow = prompts_required and not config_path
+        _print_selection_and_prompt_info(
+            extra_context.get("tools"),
+            extra_context.get("example_pipeline"),
+            interactive_flow,
+        )  # type: ignore
 
 
 @starter.command("list")
@@ -485,6 +536,10 @@ def _get_extra_context(  # noqa: PLR0913
             or None in case the flag wasn't used.
         project_name: a string containing the value for the --name flag, or
             None in case the flag wasn't used.
+        example_pipeline: a string containing the value for the --example flag,
+            or None in case the flag wasn't used
+        starter_alias: a string containing the value for the --starter flag, or
+            None in case the flag wasn't used
 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
@@ -824,7 +879,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         template_path: The path to the cookiecutter template to create the project.
             It could either be a local directory or a remote VCS repository
             supported by cookiecutter. For more details, please see:
-            https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
+            https://cookiecutter.readthedocs.io/en/stable/usage.html#generate-your-project
         cookiecutter_args: Arguments to pass to cookiecutter.
 
     Raises:
@@ -843,33 +898,12 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     _clean_pycache(Path(result_path))
     extra_context = cookiecutter_args["extra_context"]
     project_name = extra_context.get("project_name", "New Kedro Project")
-    tools = extra_context.get("tools")
-    example_pipeline = extra_context.get("example_pipeline")
 
+    # Print success message
     click.secho(
         "\nCongratulations!"
         f"\nYour project '{project_name}' has been created in the directory \n{result_path}\n"
     )
-
-    # we can use starters without tools:
-    if tools is not None:
-        if tools == "['None']":  # TODO: This should be a list
-            click.secho(
-                "You have selected no project tools",
-                fg="green",
-            )
-        else:
-            click.secho(
-                f"You have selected the following project tools: {tools}",
-                fg="green",
-            )
-
-    if example_pipeline is not None:
-        if example_pipeline:
-            click.secho(
-                "It has been created with an example pipeline.",
-                fg="green",
-            )
 
 
 class _Prompt:

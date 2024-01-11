@@ -104,6 +104,7 @@ def create_pipeline(
     template_path: Path,
     skip_config: bool,
     env: str,
+    /,
     **kwargs: Any,
 ) -> None:  # noqa: unused-argument
     """Create a new modular pipeline by providing a name."""
@@ -146,7 +147,7 @@ def create_pipeline(
 )
 @click.pass_obj  # this will pass the metadata as first argument
 def delete_pipeline(
-    metadata: ProjectMetadata, name: str, env: str, yes: bool, **kwargs: Any
+    metadata: ProjectMetadata, name: str, env: str, yes: bool, /, **kwargs: Any
 ) -> None:  # noqa: unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name

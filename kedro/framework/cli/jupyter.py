@@ -51,7 +51,7 @@ def jupyter() -> None:
 
 @forward_command(jupyter, "setup", forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
-def setup(metadata: ProjectMetadata, args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
+def setup(metadata: ProjectMetadata, /, args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
     """Initialise the Jupyter Kernel for a kedro project."""
     _check_module_importable("ipykernel")
     validate_settings()
@@ -67,6 +67,7 @@ def setup(metadata: ProjectMetadata, args: Any, **kwargs: Any) -> None:  # noqa:
 def jupyter_notebook(
     metadata: ProjectMetadata,
     env: str,
+    /,
     args: Any,
     **kwargs: Any,
 ) -> None:  # noqa: unused-argument
@@ -93,6 +94,7 @@ def jupyter_notebook(
 def jupyter_lab(
     metadata: ProjectMetadata,
     env: str,
+    /,
     args: Any,
     **kwargs: Any,
 ) -> None:  # noqa: unused-argument

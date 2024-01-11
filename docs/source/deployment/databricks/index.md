@@ -24,9 +24,7 @@ The workflow documented in ["Use a Databricks job to deploy a Kedro project"](./
 ---
 Here's a flowchart to guide your choice of workflow:
 
-```{image} ../../meta/images/databricks-flow-chart.png
-:alt: mermaid-Decision making diagram for deploying Kedro projects to Databricks
-```
+![Decision making diagram for deploying Kedro projects to Databricks](../../meta/images/databricks-flow-chart.png)
 
 % Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
 % flowchart TD

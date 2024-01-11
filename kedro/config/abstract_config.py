@@ -17,8 +17,8 @@ class AbstractConfigLoader(UserDict):
     def __init__(
         self,
         conf_source: str,
-        env: str = None,
-        runtime_params: dict[str, Any] = None,
+        env: str | None = None,
+        runtime_params: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__()

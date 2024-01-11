@@ -6,11 +6,12 @@ from __future__ import annotations
 import io
 import logging
 import mimetypes
+import typing
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
 import fsspec
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, OmegaConf
 from omegaconf.errors import InterpolationResolutionError, UnsupportedInterpolationType
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
@@ -76,14 +77,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def __init__(  # noqa: PLR0913
         self,
         conf_source: str,
-        env: str = None,
-        runtime_params: dict[str, Any] = None,
+        env: str | None = None,
+        runtime_params: dict[str, Any] | None = None,
         *,
-        config_patterns: dict[str, list[str]] = None,
-        base_env: str = None,
-        default_run_env: str = None,
-        custom_resolvers: dict[str, Callable] = None,
-        merge_strategy: dict[str, str] = None,
+        config_patterns: dict[str, list[str]] | None = None,
+        base_env: str | None = None,
+        default_run_env: str | None = None,
+        custom_resolvers: dict[str, Callable] | None = None,
+        merge_strategy: dict[str, str] | None = None,
     ):
         """Instantiates a ``OmegaConfigLoader``.
 
@@ -251,6 +252,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
+    @typing.no_type_check
     def load_and_merge_dir_config(  # noqa: PLR0913
         self,
         conf_path: str,
@@ -431,7 +433,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise ValueError(f"{dup_str}")
 
     @staticmethod
-    def _resolve_environment_variables(config: dict[str, Any]) -> None:
+    def _resolve_environment_variables(config: DictConfig) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
         them in-place, clearing the resolver after the operation is complete if
         it was not registered beforehand.
@@ -466,16 +468,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Soft merge the two env dirs. The chosen env will override base if keys clash.
         return OmegaConf.to_container(OmegaConf.merge(config, env_config))
 
-    def _is_hidden(self, path: str):
+    def _is_hidden(self, path_str: str):
         """Check if path contains any hidden directory or is a hidden file"""
-        path = Path(path)
+        path = Path(path_str)
         conf_path = Path(self.conf_source).resolve().as_posix()
         if self._protocol == "file":
             path = path.resolve()
-        path = path.as_posix()
-        if path.startswith(conf_path):
-            path = path.replace(conf_path, "")
-        parts = path.split(self._fs.sep)  # filesystem specific separator
+        posix_path = path.as_posix()
+        if posix_path.startswith(conf_path):
+            posix_path = posix_path.replace(conf_path, "")
+        parts = posix_path.split(self._fs.sep)  # filesystem specific separator
         HIDDEN = "."
         # Check if any component (folder or file) starts with a dot (.)
         return any(part.startswith(HIDDEN) for part in parts)

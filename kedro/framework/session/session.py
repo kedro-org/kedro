@@ -30,17 +30,17 @@ from kedro.runner import AbstractRunner, SequentialRunner
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
-    project_path = str(project_path)
+    path = str(project_path)
     try:
         res = subprocess.check_output(
             ["git", "rev-parse", "--short", "HEAD"],
-            cwd=project_path,
+            cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data: dict[str, Any] = {"commit_sha": res.decode().strip()}
         git_status_res = subprocess.check_output(
             ["git", "status", "--short"],
-            cwd=project_path,
+            cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data["dirty"] = bool(git_status_res.decode().strip())
@@ -48,7 +48,7 @@ def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except Exception:  # noqa: broad-except
         logger = logging.getLogger(__name__)
-        logger.debug("Unable to git describe %s", project_path)
+        logger.debug("Unable to git describe %s", path)
         logger.debug(traceback.format_exc())
         return {}
 
@@ -100,7 +100,7 @@ class KedroSession:
     def __init__(  # noqa: PLR0913
         self,
         session_id: str,
-        package_name: str = None,
+        package_name: str | None = None,
         project_path: Path | str | None = None,
         save_on_close: bool = False,
         conf_source: str | None = None,
@@ -126,8 +126,8 @@ class KedroSession:
         cls,
         project_path: Path | str | None = None,
         save_on_close: bool = True,
-        env: str = None,
-        extra_params: dict[str, Any] = None,
+        env: str | None = None,
+        extra_params: dict[str, Any] | None = None,
         conf_source: str | None = None,
     ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
@@ -272,16 +272,16 @@ class KedroSession:
 
     def run(  # noqa: PLR0913,too-many-locals
         self,
-        pipeline_name: str = None,
-        tags: Iterable[str] = None,
-        runner: AbstractRunner = None,
-        node_names: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-        load_versions: dict[str, str] = None,
-        namespace: str = None,
+        pipeline_name: str | None = None,
+        tags: Iterable[str] | None = None,
+        runner: AbstractRunner | None = None,
+        node_names: Iterable[str] | None = None,
+        from_nodes: Iterable[str] | None = None,
+        to_nodes: Iterable[str] | None = None,
+        from_inputs: Iterable[str] | None = None,
+        to_outputs: Iterable[str] | None = None,
+        load_versions: dict[str, str] | None = None,
+        namespace: str | None = None,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 

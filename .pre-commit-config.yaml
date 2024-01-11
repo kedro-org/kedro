@@ -32,27 +32,6 @@ repos:
           - id: requirements-txt-fixer # Sorts entries in requirements.txt
             exclude: "^kedro/templates/|^features/steps/test_starter/"
 
-    - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v0.961
-      hooks:
-          - id: mypy
-            args: [--allow-redefinition, --ignore-missing-imports]
-            exclude: |
-                (?x)(
-                  ^kedro/templates/|
-                  ^docs/|
-                  ^features/steps/test_starter/
-                )
-            additional_dependencies:
-            - types-cachetools
-            - types-filelock
-            - types-PyYAML
-            - types-redis
-            - types-requests
-            - types-setuptools
-            - types-toml
-            - attrs
-
     - repo: https://github.com/asottile/blacken-docs
       rev: v1.12.1
       hooks:
@@ -69,29 +48,8 @@ repos:
             pass_filenames: false
             entry: lint-imports
 
-    - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v0.961
-      hooks:
-          - id: mypy
-            args: [--allow-redefinition, --ignore-missing-imports]
-            exclude: |
-                (?x)(
-                  ^kedro/templates/|
-                  ^docs/|
-                  ^features/steps/test_starter/
-                )
-            additional_dependencies:
-            - types-cachetools
-            - types-filelock
-            - types-PyYAML
-            - types-redis
-            - types-requests
-            - types-setuptools
-            - types-toml
-            - attrs
     - repo: local
       hooks:
-          # Slow lintint
           - id: secret_scan
             name: "Secret scan"
             language: system
@@ -104,5 +62,3 @@ repos:
             types: [file, python]
             exclude: ^kedro/templates/|^tests/|^features/steps/test_starter
             entry: bandit -ll
-
-# Manual only

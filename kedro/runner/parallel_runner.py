@@ -9,7 +9,7 @@ import sys
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
-from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
+from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Iterable
@@ -45,12 +45,15 @@ class ParallelRunnerManager(SyncManager):
 ParallelRunnerManager.register("MemoryDataset", MemoryDataset)  # noqa: no-member
 
 
-def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
+def _bootstrap_subprocess(
+    package_name: str, logging_config: dict[str, Any] | None = None
+) -> None:
     # noqa: import-outside-toplevel,cyclic-import
     from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
-    configure_logging(logging_config)
+    if logging_config:
+        configure_logging(logging_config)
 
 
 def _run_node_synchronization(  # noqa: PLR0913
@@ -80,7 +83,7 @@ def _run_node_synchronization(  # noqa: PLR0913
 
     """
     if multiprocessing.get_start_method() == "spawn" and package_name:
-        _bootstrap_subprocess(package_name, logging_config)  # type: ignore
+        _bootstrap_subprocess(package_name, logging_config)
 
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
@@ -139,11 +142,11 @@ class ParallelRunner(AbstractRunner):
 
         self._max_workers = max_workers
 
-    def __del__(self):
+    def __del__(self) -> None:
         self._manager.shutdown()
 
     @classmethod
-    def _validate_nodes(cls, nodes: Iterable[Node]):
+    def _validate_nodes(cls, nodes: Iterable[Node]) -> None:
         """Ensure all tasks are serialisable."""
         unserialisable = []
         for node in nodes:
@@ -163,7 +166,7 @@ class ParallelRunner(AbstractRunner):
             )
 
     @classmethod
-    def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline):
+    def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline) -> None:
         """Ensure that all data sets are serialisable and that we do not have
         any non proxied memory data sets being used as outputs as their content
         will not be synchronized across threads.
@@ -208,7 +211,7 @@ class ParallelRunner(AbstractRunner):
                 f"MemoryDatasets"
             )
 
-    def _set_manager_datasets(self, catalog, pipeline):
+    def _set_manager_datasets(self, catalog: DataCatalog, pipeline: Pipeline) -> None:
         for dataset in pipeline.datasets():
             try:
                 catalog.exists(dataset)
@@ -218,7 +221,7 @@ class ParallelRunner(AbstractRunner):
             if isinstance(ds, SharedMemoryDataset):
                 ds.set_manager(self._manager)
 
-    def _get_required_workers_count(self, pipeline: Pipeline):
+    def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
         Calculate the max number of processes required for the pipeline,
         limit to the number of CPU cores.
@@ -289,7 +292,7 @@ class ParallelRunner(AbstractRunner):
                             self._is_async,
                             session_id,
                             package_name=PACKAGE_NAME,
-                            logging_config=LOGGING,  # type: ignore
+                            logging_config=LOGGING,  # type: ignore[arg-type]
                         )
                     )
                 if not futures:

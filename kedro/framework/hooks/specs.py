@@ -112,7 +112,7 @@ class NodeSpecs:
         inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
-    ):
+    ) -> None:
         """Hook to be invoked if a node run throws an uncaught error.
         The signature of this error hook should match the signature of ``before_node_run``
         along with the error that was raised.
@@ -211,7 +211,7 @@ class PipelineSpecs:
         run_params: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-    ):
+    ) -> None:
         """Hook to be invoked if a pipeline run throws an uncaught Exception.
         The signature of this error hook should match the signature of ``before_pipeline_run``
         along with the error that was raised.

@@ -10,9 +10,8 @@ If you decide to deploy your Kedro project onto a single machine, you should con
 
 If your pipeline is sizeable, you may want to run it across separate machines, so will need to consult our [guide to distributed deployment](distributed.md).
 
-```{image} ../meta/images/deployment-diagram.png
-:alt: mermaid-Decision making diagram for deploying Kedro projects
-```
+![Decision making diagram for deploying Kedro projects](../meta/images/deployment-diagram.png)
+
 
 % Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
 % flowchart TD

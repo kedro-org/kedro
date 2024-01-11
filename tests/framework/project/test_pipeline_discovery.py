@@ -1,3 +1,5 @@
+import os
+import re
 import shutil
 import sys
 import textwrap
@@ -16,8 +18,8 @@ def mock_package_name_with_pipelines(tmp_path, request):
     pipelines_dir.mkdir(parents=True)
     (pipelines_dir / "__init__.py").touch()
     for pipeline_name in request.param:
-        pipeline_dir = pipelines_dir / pipeline_name
-        pipeline_dir.mkdir()
+        pipeline_dir = pipelines_dir / os.path.join(*pipeline_name.split("."))
+        pipeline_dir.mkdir(parents=True)
         (pipeline_dir / "__init__.py").write_text(
             textwrap.dedent(
                 f"""
@@ -50,14 +52,32 @@ def pipeline_names(request):
 
 @pytest.mark.parametrize(
     "mock_package_name_with_pipelines,pipeline_names",
-    [(x, x) for x in [set(), {"my_pipeline"}]],
+    [(x, x) for x in [set(), {"my_pipeline", "myfolder.mynestedpipeline"}]],
     indirect=True,
 )
 def test_find_pipelines(mock_package_name_with_pipelines, pipeline_names):
     configure_project(mock_package_name_with_pipelines)
     pipelines = find_pipelines()
-    assert set(pipelines) == pipeline_names | {"__default__"}
+    final_names = set(name.split(".")[-1] for name in pipeline_names)
+    assert set(pipelines) == final_names | {"__default__"}
     assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [{"myfolder.p1", "myotherfolder.p1"}]],
+    indirect=True,
+)
+def test_find_pipelines_fail_on_duplicate_name(
+    mock_package_name_with_pipelines, pipeline_names
+):
+    configure_project(mock_package_name_with_pipelines)
+    # assert True
+    with pytest.raises(
+        ValueError,
+        match=re.compile(r"find_pipelines found two pipelines with the name.*"),
+    ):
+        find_pipelines()
 
 
 @pytest.mark.parametrize(

@@ -7,7 +7,13 @@ import pandas as pd
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataset, DataCatalog, DatasetError, LambdaDataset
+from kedro.io import (
+    AbstractDataset,
+    DataCatalog,
+    DatasetError,
+    LambdaDataset,
+    MemoryDataset,
+)
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
@@ -279,3 +285,29 @@ class TestSuggestResumeScenario:
                 hook_manager=_create_hook_manager(),
             )
         assert re.search(expected_pattern, caplog.text)
+
+
+class TestMemoryDatasetBehaviour:
+    def test_run_includes_memory_datasets(self, pipeline_with_memory_datasets):
+        # Create a catalog with MemoryDataset entries and inputs for the pipeline
+        catalog = DataCatalog(
+            {
+                "Input1": LambdaDataset(load=lambda: "data1", save=lambda data: None),
+                "Input2": LambdaDataset(load=lambda: "data2", save=lambda data: None),
+                "MemOutput1": MemoryDataset(),
+                "MemOutput2": MemoryDataset(),
+            }
+        )
+
+        # Add a regular dataset to the catalog
+        catalog.add("RegularOutput", LambdaDataset(None, None, lambda: True))
+
+        # Run the pipeline
+        output = SequentialRunner().run(pipeline_with_memory_datasets, catalog)
+
+        # Check that MemoryDataset outputs are included in the run results
+        assert "MemOutput1" in output
+        assert "MemOutput2" in output
+        assert (
+            "RegularOutput" not in output
+        )  # This output is registered in DataCatalog and so should not be in free outputs

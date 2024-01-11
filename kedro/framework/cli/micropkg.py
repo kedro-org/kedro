@@ -158,13 +158,13 @@ def micropkg() -> None:
 @click.pass_obj  # this will pass the metadata as first argument
 def pull_package(  # noqa: PLR0913
     metadata: ProjectMetadata,
+    /,
     package_path: str,
     env: str,
     alias: str,
     destination: str,
     fs_args: str,
     all_flag: str,
-    /,
     **kwargs: Any,
 ) -> None:
     """Pull and unpack a modular pipeline and other micro-packages in your project."""
@@ -332,12 +332,12 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 @click.pass_obj  # this will pass the metadata as first argument
 def package_micropkg(  # noqa: PLR0913
     metadata: ProjectMetadata,
+    /,
     module_path: str,
     env: str,
     alias: str,
     destination: str,
     all_flag: str,
-    /,
     **kwargs: Any,
 ) -> None:
     """Package up a modular pipeline or micro-package as a Python source distribution."""

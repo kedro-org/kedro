@@ -66,8 +66,8 @@ def setup(metadata: ProjectMetadata, /, args: Any, **kwargs: Any) -> None:  # no
 @click.pass_obj  # this will pass the metadata as first argument
 def jupyter_notebook(
     metadata: ProjectMetadata,
-    env: str,
     /,
+    env: str,
     args: Any,
     **kwargs: Any,
 ) -> None:  # noqa: unused-argument
@@ -93,8 +93,8 @@ def jupyter_notebook(
 @click.pass_obj  # this will pass the metadata as first argument
 def jupyter_lab(
     metadata: ProjectMetadata,
-    env: str,
     /,
+    env: str,
     args: Any,
     **kwargs: Any,
 ) -> None:  # noqa: unused-argument

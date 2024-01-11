@@ -30,7 +30,7 @@ def list_registered_pipelines() -> None:
 @click.argument("name", nargs=1, default="__default__")
 @click.pass_obj
 def describe_registered_pipeline(
-    metadata: ProjectMetadata, name: str, /, **kwargs: Any
+    metadata: ProjectMetadata, /, name: str, **kwargs: Any
 ) -> None:  # noqa: unused-argument, protected-access
     """Describe a registered pipeline by providing a pipeline name.
     Defaults to the `__default__` pipeline.

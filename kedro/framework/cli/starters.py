@@ -106,7 +106,7 @@ _OFFICIAL_STARTER_SPECS = [
 for starter_spec in _OFFICIAL_STARTER_SPECS:
     starter_spec.origin = "kedro"
 
-_OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
+_OFFICIAL_STARTER_SPECS_DICT = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
 
 TOOLS_SHORTNAME_TO_NUMBER = {
     "lint": "1",
@@ -355,7 +355,7 @@ def new(  # noqa: PLR0913
 
 
 @starter.command("list")
-def list_starters():
+def list_starters() -> None:
     """List all official project starters available."""
     starters_dict = _get_starters_dict()
 
@@ -407,7 +407,7 @@ def _get_cookiecutter_dir(
                 f" Specified tag {checkout}. The following tags are available: "
                 + ", ".join(_get_available_tags(template_path))
             )
-        official_starters = sorted(_OFFICIAL_STARTER_SPECS)
+        official_starters = sorted(_OFFICIAL_STARTER_SPECS_DICT)
         raise KedroCliError(
             f"{error_message}. The aliases for the official Kedro starters are: \n"
             f"{yaml.safe_dump(official_starters, sort_keys=False)}"
@@ -485,7 +485,7 @@ def _get_starters_dict() -> dict[str, KedroStarterSpec]:
         ),
     }
     """
-    starter_specs = _OFFICIAL_STARTER_SPECS
+    starter_specs = _OFFICIAL_STARTER_SPECS_DICT
 
     for starter_entry_point in _get_entry_points(name="starters"):
         origin = starter_entry_point.module.split(".")[0]
@@ -828,7 +828,7 @@ def _validate_selection(tools: list[str]):
             sys.exit(1)
 
 
-def _parse_tools_input(tools_str: None | str):
+def _parse_tools_input(tools_str: str | None):
     """Parse the tools input string.
 
     Args:

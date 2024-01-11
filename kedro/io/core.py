@@ -118,8 +118,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         cls: type,
         name: str,
         config: dict[str, Any],
-        load_version: str = None,
-        save_version: str = None,
+        load_version: str | None = None,
+        save_version: str | None = None,
     ) -> AbstractDataset:
         """Create a data set instance using the configuration provided.
 
@@ -351,7 +351,9 @@ _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", ""]
 
 
 def parse_dataset_definition(
-    config: dict[str, Any], load_version: str = None, save_version: str = None
+    config: dict[str, Any],
+    load_version: str | None = None,
+    save_version: str | None = None,
 ) -> tuple[type[AbstractDataset], dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
@@ -451,8 +453,8 @@ def _load_obj(class_path: str) -> Any | None:
     return class_obj
 
 
-def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
-    filepath = Path(filepath)
+def _local_exists(local_filepath: str) -> bool:  # SKIP_IF_NO_SPARK
+    filepath = Path(local_filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
@@ -506,8 +508,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self,
         filepath: PurePosixPath,
         version: Version | None,
-        exists_function: Callable[[str], bool] = None,
-        glob_function: Callable[[str], list[str]] = None,
+        exists_function: Callable[[str], bool] | None = None,
+        glob_function: Callable[[str], list[str]] | None = None,
     ):
         """Creates a new instance of ``AbstractVersionedDataset``.
 
@@ -700,7 +702,7 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
 
 
 def get_protocol_and_path(
-    filepath: str | os.PathLike, version: Version = None
+    filepath: str | os.PathLike, version: Version | None = None
 ) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 
@@ -732,17 +734,17 @@ def get_protocol_and_path(
     return protocol, path
 
 
-def get_filepath_str(path: PurePath, protocol: str) -> str:
+def get_filepath_str(raw_path: PurePath, protocol: str) -> str:
     """Returns filepath. Returns full filepath (with protocol) if protocol is HTTP(s).
 
     Args:
-        path: filepath without protocol.
+        raw_path: filepath without protocol.
         protocol: protocol.
 
     Returns:
         Filepath string.
     """
-    path = path.as_posix()
+    path = raw_path.as_posix()
     if protocol in HTTP_PROTOCOLS:
         path = "".join((protocol, PROTOCOL_DELIMITER, path))
     return path

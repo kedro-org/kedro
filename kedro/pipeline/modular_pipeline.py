@@ -157,7 +157,7 @@ def pipeline(  # noqa: PLR0913
     outputs: str | set[str] | dict[str, str] | None = None,
     parameters: str | set[str] | dict[str, str] | None = None,
     tags: str | Iterable[str] | None = None,
-    namespace: str = None,
+    namespace: str | None = None,
 ) -> Pipeline:
     r"""Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``\s.
 
@@ -259,8 +259,8 @@ def pipeline(  # noqa: PLR0913
         return name
 
     def _process_dataset_names(
-        datasets: None | str | list[str] | dict[str, str]
-    ) -> None | str | list[str] | dict[str, str]:
+        datasets: str | list[str] | dict[str, str] | None
+    ) -> str | list[str] | dict[str, str] | None:
         if datasets is None:
             return None
         if isinstance(datasets, str):

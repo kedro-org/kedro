@@ -11,13 +11,13 @@
 Welcome to Kedro's documentation!
 =============================================
 
-.. image:: https://img.shields.io/circleci/build/github/kedro-org/kedro/main?label=main
-    :target: https://circleci.com/gh/kedro-org/kedro/tree/main
-    :alt: CircleCI - Main Branch
+.. image:: https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main
+    :target: https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Amain
+    :alt: GitHub Actions - Main Branch
 
-.. image:: https://img.shields.io/circleci/build/github/kedro-org/kedro/develop?label=develop
-    :target: https://circleci.com/gh/kedro-org/kedro/tree/develop
-    :alt: CircleCI - Develop Branch
+.. image:: https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?branch=develop&label=develop
+    :target: https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Adevelop
+    :alt: GitHub Actions - Develop Branch
 
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
     :target: https://opensource.org/license/apache2-0-php/

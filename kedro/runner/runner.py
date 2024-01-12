@@ -49,7 +49,7 @@ class AbstractRunner(ABC):
         self._extra_dataset_patterns = extra_dataset_patterns
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(self.__module__)
 
     def run(
@@ -114,7 +114,7 @@ class AbstractRunner(ABC):
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
-        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore
+        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
 
         self._logger.info("Pipeline execution completed successfully.")
 
@@ -453,7 +453,7 @@ def _run_node_async(
     hook_manager: PluginManager,
     session_id: str | None = None,
 ) -> Node:
-    def _synchronous_dataset_load(dataset_name: str):
+    def _synchronous_dataset_load(dataset_name: str) -> Any:
         """Minimal wrapper to ensure Hooks are run synchronously
         within an asynchronous dataset load."""
         hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)

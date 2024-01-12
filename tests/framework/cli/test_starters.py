@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shutil
+from collections import OrderedDict
 from pathlib import Path
 
 import pytest
@@ -17,6 +18,7 @@ from kedro.framework.cli.starters import (
     TEMPLATE_PATH,
     KedroStarterSpec,
     _convert_tool_names_to_numbers,
+    _fetch_config_from_user_prompts,
     _parse_tools_input,
     _parse_yes_no_to_bool,
     _validate_selection,
@@ -438,6 +440,46 @@ class TestNewFromUserPromptsValid:
             python_package="my_project",
         )
         _clean_up_project(Path("./my_custom_repo"))
+
+    def test_fetch_config_from_user_prompts_with_context(self, mocker):
+        required_prompts = {
+            "project_name": {
+                "title": "Project Name",
+                "text": "Please enter a name for your new project.",
+            },
+            "tools": {
+                "title": "Project Tools",
+                "text": "These optional tools can help you apply software engineering best practices.",
+            },
+            "example_pipeline": {
+                "title": "Example Pipeline",
+                "text": "Select whether you would like an example spaceflights pipeline included in your project.",
+            },
+        }
+        cookiecutter_context = OrderedDict(
+            [
+                ("project_name", "New Kedro Project"),
+                ("tools", "none"),
+                ("example_pipeline", "no"),
+            ]
+        )
+        mocker.patch("cookiecutter.prompt.read_user_variable", return_value="none")
+        config = _fetch_config_from_user_prompts(
+            prompts=required_prompts, cookiecutter_context=cookiecutter_context
+        )
+        assert config == {
+            "example_pipeline": "none",
+            "project_name": "none",
+            "tools": "none",
+        }
+
+    def test_fetch_config_from_user_prompts_without_context(self):
+        required_prompts = {}
+        message = "No cookiecutter context available."
+        with pytest.raises(Exception, match=message):
+            _fetch_config_from_user_prompts(
+                prompts=required_prompts, cookiecutter_context=None
+            )
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

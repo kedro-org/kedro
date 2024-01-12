@@ -242,4 +242,5 @@ known-first-party = ["kedro"]
 
 [tool.mypy]
 ignore_missing_imports = true
+disable_error_code = ['misc']
 exclude = ['^kedro/templates/', '^docs/', '^features/steps/test_starter/']

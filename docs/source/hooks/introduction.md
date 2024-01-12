@@ -1,6 +1,5 @@
 # Hooks
 
-
 ## Concepts
 
 A Hook consists of a Hook specification, and Hook implementation.

@@ -600,7 +600,7 @@ def _convert_tool_short_names_to_numbers(selected_tools: str | None) -> list:
     return tools
 
 
-def _convert_tool_numbers_to_readable_names(tools_numbers: list | None) -> str:
+def _convert_tool_numbers_to_readable_names(tools_numbers: list) -> str:
     """Transform the list of tool numbers into a list of readable names, using 'None' for empty lists.
     Then, convert the result into a string format to prevent issues with Cookiecutter.
     """
@@ -635,15 +635,21 @@ def _fetch_validate_parse_config_from_file(
     """
     try:
         with open(config_path, encoding="utf-8") as config_file:
-            config = yaml.safe_load(config_file)
+            config_input = yaml.safe_load(config_file)
 
         if KedroCliError.VERBOSE_ERROR:
             click.echo(config_path + ":")
-            click.echo(yaml.dump(config, default_flow_style=False))
+            click.echo(yaml.dump(config_input, default_flow_style=False))
     except Exception as exc:
         raise KedroCliError(
             f"Failed to generate project: could not load config at {config_path}."
         ) from exc
+
+    config = (
+        {str(key): str(val) for key, val in config_input.items()}
+        if config_input
+        else {}
+    )
 
     _validate_config_file_against_prompts(config, prompts_required)
 
@@ -796,7 +802,7 @@ def _validate_config_file_against_prompts(
         KedroCliError: If the config file is empty or does not contain all the keys
             required in prompts, or if the output_dir specified does not exist.
     """
-    if config is None:
+    if not config:
         raise KedroCliError("Config file is empty.")
     additional_keys = {"tools": "none", "example_pipeline": "no"}
     missing_keys = set(prompts) - set(config)

@@ -13,8 +13,8 @@
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
 
 ## Documentation changes
-* Add documentation about `bootstrap_project` and `configure_project`.
-* Add documentation about `kedro run` and hook execution order.
+* Added documentation about `bootstrap_project` and `configure_project`.
+* Added documentation about `kedro run` and hook execution order.
 
 ## Community contributions
 

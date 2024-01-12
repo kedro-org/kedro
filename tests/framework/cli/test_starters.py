@@ -2,8 +2,8 @@
 """
 from __future__ import annotations
 
-import collections
 import shutil
+from collections import OrderedDict
 from pathlib import Path
 
 import pytest
@@ -456,7 +456,7 @@ class TestNewFromUserPromptsValid:
                 "text": "Select whether you would like an example spaceflights pipeline included in your project.",
             },
         }
-        cookiecutter_context = collections.OrderedDict(
+        cookiecutter_context = OrderedDict(
             [
                 ("project_name", "New Kedro Project"),
                 ("tools", "none"),

@@ -20,18 +20,18 @@ A Hook consists of a Hook specification, and Hook implementation.
 
 Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. Currently, the following Hook specifications are provided in [kedro.framework.hooks](/kedro.framework.hooks):
 
+* `after_context_created`
 * `after_catalog_created`
-* `before_node_run`
-* `after_node_run`
-* `on_node_error`
 * `before_pipeline_run`
-* `after_pipeline_run`
-* `on_pipeline_error`
 * `before_dataset_loaded`
 * `after_dataset_loaded`
+* `before_node_run`
+* `after_node_run`
 * `before_dataset_saved`
 * `after_dataset_saved`
-* `after_context_created`
+* `after_pipeline_run`
+* `on_node_error`
+* `on_pipeline_error`
 
 The naming convention for non-error Hooks is `<before/after>_<noun>_<past_participle>`, in which:
 

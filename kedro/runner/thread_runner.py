@@ -26,7 +26,7 @@ class ThreadRunner(AbstractRunner):
 
     def __init__(
         self,
-        max_workers: int = None,
+        max_workers: int | None = None,
         is_async: bool = False,
         extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
@@ -64,7 +64,7 @@ class ThreadRunner(AbstractRunner):
 
         self._max_workers = max_workers
 
-    def _get_required_workers_count(self, pipeline: Pipeline):
+    def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
         Calculate the max number of processes required for the pipeline
         """
@@ -86,7 +86,7 @@ class ThreadRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: str = None,
+        session_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines.
 

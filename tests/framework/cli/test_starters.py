@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shutil
+from collections import OrderedDict
 from pathlib import Path
 
 import pytest
@@ -13,10 +14,11 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (
-    _OFFICIAL_STARTER_SPECS,
+    _OFFICIAL_STARTER_SPECS_DICT,
     TEMPLATE_PATH,
     KedroStarterSpec,
     _convert_tool_names_to_numbers,
+    _fetch_config_from_user_prompts,
     _parse_tools_input,
     _parse_yes_no_to_bool,
     _validate_selection,
@@ -220,6 +222,8 @@ def _assert_template_ok(
 
     if "y" in example_pipeline.lower():
         assert "It has been created with an example pipeline." in result.output
+    else:
+        assert "It has been created with an example pipeline." not in result.output
 
     generated_files = [
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
@@ -251,7 +255,7 @@ def test_starter_list(fake_kedro_cli):
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
 
     assert result.exit_code == 0, result.output
-    for alias in _OFFICIAL_STARTER_SPECS:
+    for alias in _OFFICIAL_STARTER_SPECS_DICT:
         assert alias in result.output
 
 
@@ -436,6 +440,46 @@ class TestNewFromUserPromptsValid:
             python_package="my_project",
         )
         _clean_up_project(Path("./my_custom_repo"))
+
+    def test_fetch_config_from_user_prompts_with_context(self, mocker):
+        required_prompts = {
+            "project_name": {
+                "title": "Project Name",
+                "text": "Please enter a name for your new project.",
+            },
+            "tools": {
+                "title": "Project Tools",
+                "text": "These optional tools can help you apply software engineering best practices.",
+            },
+            "example_pipeline": {
+                "title": "Example Pipeline",
+                "text": "Select whether you would like an example spaceflights pipeline included in your project.",
+            },
+        }
+        cookiecutter_context = OrderedDict(
+            [
+                ("project_name", "New Kedro Project"),
+                ("tools", "none"),
+                ("example_pipeline", "no"),
+            ]
+        )
+        mocker.patch("cookiecutter.prompt.read_user_variable", return_value="none")
+        config = _fetch_config_from_user_prompts(
+            prompts=required_prompts, cookiecutter_context=cookiecutter_context
+        )
+        assert config == {
+            "example_pipeline": "none",
+            "project_name": "none",
+            "tools": "none",
+        }
+
+    def test_fetch_config_from_user_prompts_without_context(self):
+        required_prompts = {}
+        message = "No cookiecutter context available."
+        with pytest.raises(Exception, match=message):
+            _fetch_config_from_user_prompts(
+                prompts=required_prompts, cookiecutter_context=None
+            )
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -865,6 +909,7 @@ class TestNewWithStarterValid:
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             not in result.output
         )
+        assert "You have selected" not in result.output
         _assert_template_ok(result)
         _clean_up_project(Path("./new-kedro-project"))
 

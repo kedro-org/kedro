@@ -19,6 +19,7 @@ from typing import Any, Callable
 import click
 import yaml
 from attrs import define, field
+from importlib_metadata import EntryPoints
 
 import kedro
 from kedro import __version__ as version
@@ -148,7 +149,7 @@ def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
         )
 
 
-def _validate_regex(pattern_name, text):
+def _validate_regex(pattern_name: str, text: str) -> None:
     VALIDATION_PATTERNS = {
         "yes_no": {
             "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
@@ -179,11 +180,11 @@ def _validate_regex(pattern_name, text):
         sys.exit(1)
 
 
-def _parse_yes_no_to_bool(value):
+def _parse_yes_no_to_bool(value: str) -> Any:
     return value.strip().lower() in ["y", "yes"] if value is not None else None
 
 
-def _validate_selected_tools(selected_tools):
+def _validate_selected_tools(selected_tools: str | None) -> None:
     valid_tools = list(TOOLS_SHORTNAME_TO_NUMBER) + ["all", "none"]
 
     if selected_tools is not None:
@@ -206,7 +207,7 @@ def _validate_selected_tools(selected_tools):
 
 
 def _print_selection_and_prompt_info(
-    selected_tools: str | None, example_pipeline: bool | None, interactive: bool
+    selected_tools: str | None, example_pipeline: str | None, interactive: bool
 ) -> None:
     # Confirm tools selection
     if selected_tools is not None:
@@ -240,12 +241,12 @@ def _print_selection_and_prompt_info(
 
 # noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
-def create_cli():  # pragma: no cover
+def create_cli() -> None:  # pragma: no cover
     pass
 
 
 @create_cli.group()
-def starter():
+def starter() -> None:
     """Commands for working with project starters."""
 
 
@@ -264,15 +265,15 @@ def starter():
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
 @click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
 def new(  # noqa: PLR0913
-    config_path,
-    starter_alias,
-    selected_tools,
-    project_name,
-    checkout,
-    directory,
-    example_pipeline,  # This will be True or False
-    **kwargs,
-):
+    config_path: str,
+    starter_alias: str,
+    selected_tools: str,
+    project_name: str,
+    checkout: str,
+    directory: str,
+    example_pipeline: str,  # This will be True or False
+    **kwargs: Any,
+) -> None:
     """Create a new kedro project."""
     flag_inputs = {
         "config": config_path,
@@ -295,7 +296,7 @@ def new(  # noqa: PLR0913
         template_path = spec.template_path
         # "directory" is an optional key for starters from plugins, so if the key is
         # not present we will use "None".
-        directory = spec.directory
+        directory = spec.directory  # type: ignore[assignment]
         checkout = checkout or version
     elif starter_alias is not None:
         template_path = starter_alias
@@ -325,13 +326,13 @@ def new(  # noqa: PLR0913
     # but it causes an issue with readonly files on windows
     # see: https://bugs.python.org/issue26660.
     # So on error, we will attempt to clear the readonly bits and re-attempt the cleanup
-    shutil.rmtree(tmpdir, onerror=_remove_readonly)
+    shutil.rmtree(tmpdir, onerror=_remove_readonly)  # type: ignore[arg-type]
 
     # Obtain config, either from a file or from interactive user prompts.
     extra_context = _get_extra_context(
         prompts_required=prompts_required,
         config_path=config_path,
-        cookiecutter_context=cookiecutter_context,  # type: ignore
+        cookiecutter_context=cookiecutter_context,
         selected_tools=selected_tools,
         project_name=project_name,
         example_pipeline=example_pipeline,
@@ -355,7 +356,7 @@ def new(  # noqa: PLR0913
             extra_context.get("tools"),
             extra_context.get("example_pipeline"),
             interactive_flow,
-        )  # type: ignore
+        )
 
 
 @starter.command("list")
@@ -373,7 +374,7 @@ def list_starters() -> None:
 
     # ensure kedro starters are listed first
     sorted_starters_dict = dict(
-        sorted(sorted_starters_dict.items(), key=lambda x: x == "kedro")
+        sorted(sorted_starters_dict.items(), key=lambda x: x == "kedro")  # type: ignore[comparison-overlap]
     )
 
     for origin, starters_spec in sorted_starters_dict.items():
@@ -425,7 +426,7 @@ def _get_prompts_required_and_clear_from_CLI_provided(
     selected_tools: str,
     project_name: str,
     example_pipeline: str,
-) -> dict[str, Any]:
+) -> Any:
     """Finds the information a user must supply according to prompts.yml,
     and clear it from what has already been provided via the CLI(validate it before)"""
     prompts_yml = cookiecutter_dir / "prompts.yml"
@@ -493,7 +494,7 @@ def _get_starters_dict() -> dict[str, KedroStarterSpec]:
 
     for starter_entry_point in _get_entry_points(name="starters"):
         origin = starter_entry_point.module.split(".")[0]
-        specs = _safe_load_entry_point(starter_entry_point) or []
+        specs: EntryPoints | list = _safe_load_entry_point(starter_entry_point) or []
         for spec in specs:
             if not isinstance(spec, KedroStarterSpec):
                 click.secho(
@@ -517,7 +518,7 @@ def _get_starters_dict() -> dict[str, KedroStarterSpec]:
 def _get_extra_context(  # noqa: PLR0913
     prompts_required: dict,
     config_path: str,
-    cookiecutter_context: OrderedDict,
+    cookiecutter_context: OrderedDict | None,
     selected_tools: str | None,
     project_name: str | None,
     example_pipeline: str | None,
@@ -556,35 +557,28 @@ def _get_extra_context(  # noqa: PLR0913
     # Format
     extra_context.setdefault("kedro_version", version)
 
-    tools = _convert_tool_names_to_numbers(selected_tools)
+    converted_tools = _convert_tool_names_to_numbers(selected_tools)
 
-    if tools is not None:
-        extra_context["tools"] = tools
+    if converted_tools is not None:
+        extra_context["tools"] = converted_tools
 
     if project_name is not None:
         extra_context["project_name"] = project_name
 
     # Map the selected tools lists to readable name
-    tools = extra_context.get("tools")
-    tools = _parse_tools_input(tools)
+    tools_context = extra_context.get("tools")
+    tools = _parse_tools_input(tools_context)
 
     # Check if no tools selected
     if not tools:
         extra_context["tools"] = str(["None"])
     else:
-        extra_context["tools"] = str(
-            [
-                NUMBER_TO_TOOLS_NAME[tool]
-                for tool in tools  # type: ignore
-            ]
-        )
+        extra_context["tools"] = str([NUMBER_TO_TOOLS_NAME[tool] for tool in tools])
 
-    extra_context["example_pipeline"] = (
-        _parse_yes_no_to_bool(
-            example_pipeline
-            if example_pipeline is not None
-            else extra_context.get("example_pipeline", "no")
-        )  # type: ignore
+    extra_context["example_pipeline"] = _parse_yes_no_to_bool(
+        example_pipeline
+        if example_pipeline is not None
+        else extra_context.get("example_pipeline", "no")
     )
 
     return extra_context
@@ -647,11 +641,12 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
             f"Failed to generate project: could not load config at {config_path}."
         ) from exc
 
-    return config
+    # The return type defined is more specific than the "Any" type config return from yaml.safe_load
+    return config  # type: ignore[no-any-return]
 
 
 def _fetch_config_from_user_prompts(
-    prompts: dict[str, Any], cookiecutter_context: OrderedDict
+    prompts: dict[str, Any], cookiecutter_context: OrderedDict | None
 ) -> dict[str, str]:
     """Interactively obtains information from user prompts.
 
@@ -666,6 +661,9 @@ def _fetch_config_from_user_prompts(
     # noqa: import-outside-toplevel
     from cookiecutter.environment import StrictEnvironment
     from cookiecutter.prompt import read_user_variable, render_variable
+
+    if not cookiecutter_context:
+        raise Exception("No cookiecutter context available.")
 
     config: dict[str, str] = {}
 
@@ -687,20 +685,20 @@ def _fetch_config_from_user_prompts(
     return config
 
 
-def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
+def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path) -> OrderedDict:
     # noqa: import-outside-toplevel
     from cookiecutter.generate import generate_context
 
     cookiecutter_context = generate_context(cookiecutter_dir / "cookiecutter.json")
-    return cookiecutter_context.get("cookiecutter", {})
+    return cookiecutter_context.get("cookiecutter", {})  # type: ignore[no-any-return]
 
 
 def _make_cookiecutter_args_and_fetch_template(
-    config: dict[str, str | list[str]],
+    config: dict[str, str],
     checkout: str,
     directory: str,
     template_path: str,
-):
+) -> tuple[dict[str, object], str]:
     """Creates a dictionary of arguments to pass to cookiecutter and returns project template path.
 
     Args:
@@ -734,7 +732,7 @@ def _make_cookiecutter_args_and_fetch_template(
     # If 'tools' or 'example_pipeline' are not specified in prompts.yml, CLI or config.yml,
     # default options will be used instead
     # That can be when starter used or while loading from config.yml
-    tools = config.get("tools", [])
+    tools: str | list = config.get("tools", [])
     example_pipeline = config.get("example_pipeline", False)
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
@@ -759,7 +757,7 @@ def _make_cookiecutter_args_and_fetch_template(
 
 def _validate_config_file_against_prompts(
     config: dict[str, str], prompts: dict[str, Any]
-):
+) -> None:
     """Checks that the configuration file contains all needed variables.
 
     Args:
@@ -794,11 +792,13 @@ def _validate_config_file_against_prompts(
         )
 
 
-def _validate_config_file_inputs(config: dict[str, str], starter_alias: str | None):
+def _validate_config_file_inputs(
+    config: dict[str, str], starter_alias: str | None
+) -> None:
     """Checks that variables provided through the config file are of the expected format. This
-    validate the config provided by `kedro new --config` in a similar way to `prompts.yml`
-    for starters.
-    Also validates that "tools" or "example_pipeline" options cannot be used in config when any starter option is selected.
+    validates the config provided by `kedro new --config` in a similar way to `prompts.yml` for starters.
+    Also validates that "tools" or "example_pipeline" options cannot be used in config when any starter option is
+    selected.
 
     Args:
         config: The config as a dictionary
@@ -822,7 +822,7 @@ def _validate_config_file_inputs(config: dict[str, str], starter_alias: str | No
     _validate_regex("yes_no", config.get("example_pipeline", "no"))
 
 
-def _validate_selection(tools: list[str]):
+def _validate_selection(tools: list[str]) -> None:
     # start validating from the end, when user select 1-20, it will generate a message
     # '20' is not a valid selection instead of '8'
     for tool in tools[::-1]:
@@ -832,7 +832,7 @@ def _validate_selection(tools: list[str]):
             sys.exit(1)
 
 
-def _parse_tools_input(tools_str: str | None):
+def _parse_tools_input(tools_str: str | None) -> list[str]:
     """Parse the tools input string.
 
     Args:
@@ -842,7 +842,7 @@ def _parse_tools_input(tools_str: str | None):
         list: List of selected tools as strings.
     """
 
-    def _validate_range(start, end):
+    def _validate_range(start: Any, end: Any) -> None:
         if int(start) > int(end):
             message = f"'{start}-{end}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
             click.secho(message, fg="red", err=True)
@@ -872,7 +872,7 @@ def _parse_tools_input(tools_str: str | None):
     return selected
 
 
-def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
+def _create_project(template_path: str, cookiecutter_args: dict[str, Any]) -> None:
     """Creates a new kedro project using cookiecutter.
 
     Args:
@@ -909,7 +909,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
 class _Prompt:
     """Represent a single CLI prompt for `kedro new`"""
 
-    def __init__(self, *args, **kwargs) -> None:  # noqa: unused-argument
+    def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
         try:
             self.title = kwargs["title"]
         except KeyError as exc:
@@ -943,7 +943,9 @@ class _Prompt:
 
 
 # noqa: unused-argument
-def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
+def _remove_readonly(
+    func: Callable, path: Path, excinfo: tuple
+) -> None:  # pragma: no cover
     """Remove readonly files on Windows
     See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
     """

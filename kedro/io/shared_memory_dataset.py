@@ -19,14 +19,14 @@ class SharedMemoryDataset(AbstractDataset):
 
         """
         if manager:
-            self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
+            self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore[attr-defined]
         else:
-            self.shared_memory_dataset = None  # type: ignore
+            self.shared_memory_dataset = None
 
-    def set_manager(self, manager: SyncManager):
-        self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
+    def set_manager(self, manager: SyncManager) -> None:
+        self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore[attr-defined]
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         # This if condition prevents recursive call when deserialising
         if name == "__setstate__":
             raise AttributeError()
@@ -35,7 +35,7 @@ class SharedMemoryDataset(AbstractDataset):
     def _load(self) -> Any:
         return self.shared_memory_dataset.load()
 
-    def _save(self, data: Any):
+    def _save(self, data: Any) -> None:
         """Calls save method of a shared MemoryDataset in SyncManager."""
         try:
             self.shared_memory_dataset.save(data)

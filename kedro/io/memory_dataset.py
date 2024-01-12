@@ -65,7 +65,7 @@ class MemoryDataset(AbstractDataset):
         data = _copy_with_mode(self._data, copy_mode=copy_mode)
         return data
 
-    def _save(self, data: Any):
+    def _save(self, data: Any) -> None:
         copy_mode = self._copy_mode or _infer_copy_mode(data)
         self._data = _copy_with_mode(data, copy_mode=copy_mode)
 
@@ -96,11 +96,11 @@ def _infer_copy_mode(data: Any) -> str:
     try:
         import pandas as pd
     except ImportError:  # pragma: no cover
-        pd = None  # type: ignore  # pragma: no cover
+        pd = None  # type: ignore[assignment]  # pragma: no cover
     try:
         import numpy as np
     except ImportError:  # pragma: no cover
-        np = None  # type: ignore # pragma: no cover
+        np = None  # type: ignore[assignment] # pragma: no cover
 
     if pd and isinstance(data, pd.DataFrame) or np and isinstance(data, np.ndarray):
         copy_mode = "copy"

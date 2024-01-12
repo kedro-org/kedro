@@ -32,9 +32,7 @@ CREDENTIALS_KEY = "credentials"
 WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
-def _get_credentials(
-    credentials_name: str, credentials: dict[str, Any]
-) -> dict[str, Any]:
+def _get_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
     """Return a set of credentials from the provided credentials dict.
 
     Args:
@@ -121,7 +119,7 @@ class _FrozenDatasets:
                 )
 
     # Don't allow users to add/change attributes on the fly
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
         msg = "Operation not allowed! "
         if key in self.__dict__:
             msg += "Please change datasets through configuration."
@@ -197,7 +195,7 @@ class DataCatalog:
             self.add_feed_dict(feed_dict)
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
     @classmethod
@@ -316,7 +314,7 @@ class DataCatalog:
         )
 
     @staticmethod
-    def _is_pattern(pattern: str):
+    def _is_pattern(pattern: str) -> bool:
         """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
         return "{" in pattern
 
@@ -416,7 +414,7 @@ class DataCatalog:
 
         return dataset
 
-    def __contains__(self, dataset_name):
+    def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
         matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
         if dataset_name in self._datasets or matched_pattern:
@@ -551,7 +549,7 @@ class DataCatalog:
             return False
         return dataset.exists()
 
-    def release(self, name: str):
+    def release(self, name: str) -> None:
         """Release any cached data associated with a data set
 
         Args:
@@ -738,7 +736,7 @@ class DataCatalog:
             save_version=self._save_version,
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         return (self._datasets, self._dataset_patterns) == (
             other._datasets,
             other._dataset_patterns,
@@ -757,6 +755,6 @@ class DataCatalog:
         dataset = self._get_dataset(name)
 
         if hasattr(dataset, "confirm"):
-            dataset.confirm()  # type: ignore
+            dataset.confirm()
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")

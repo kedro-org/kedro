@@ -1,7 +1,11 @@
 """A collection of CLI commands for working with Kedro catalog."""
+from __future__ import annotations
+
 import copy
 from collections import defaultdict
 from itertools import chain
+from pathlib import Path
+from typing import Any
 
 import click
 import yaml
@@ -11,21 +15,22 @@ from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
+from kedro.io import AbstractDataset
 
 
-def _create_session(package_name: str, **kwargs):
+def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     kwargs.setdefault("save_on_close", False)
     return KedroSession.create(**kwargs)
 
 
 # noqa: missing-function-docstring
 @click.group(name="Kedro")
-def catalog_cli():  # pragma: no cover
+def catalog_cli() -> None:  # pragma: no cover
     pass
 
 
 @catalog_cli.group()
-def catalog():
+def catalog() -> None:
     """Commands for working with catalog."""
 
 
@@ -42,7 +47,7 @@ def catalog():
     callback=split_string,
 )
 @click.pass_obj
-def list_datasets(metadata: ProjectMetadata, pipeline, env):
+def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     """Show datasets per type."""
     title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
@@ -111,11 +116,13 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     secho(yaml.dump(result))
 
 
-def _map_type_to_datasets(datasets, datasets_meta):
+def _map_type_to_datasets(
+    datasets: set[str], datasets_meta: dict[str, AbstractDataset]
+) -> dict:
     """Build dictionary with a dataset type as a key and list of
     datasets of the specific type as a value.
     """
-    mapping = defaultdict(list)
+    mapping = defaultdict(list)  # type: ignore[var-annotated]
     for dataset in datasets:
         is_param = dataset.startswith("params:") or dataset == "parameters"
         if not is_param:
@@ -136,7 +143,7 @@ def _map_type_to_datasets(datasets, datasets_meta):
     help="Name of a pipeline.",
 )
 @click.pass_obj
-def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
+def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> None:
     """Create Data Catalog YAML configuration with missing datasets.
 
     Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
@@ -185,7 +192,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
         click.echo("All datasets are already configured.")
 
 
-def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
+def _add_missing_datasets_to_catalog(missing_ds: list[str], catalog_path: Path) -> None:
     if catalog_path.is_file():
         catalog_config = yaml.safe_load(catalog_path.read_text()) or {}
     else:
@@ -204,7 +211,7 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
 @catalog.command("rank")
 @env_option
 @click.pass_obj
-def rank_catalog_factories(metadata: ProjectMetadata, env):
+def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     """List all dataset factories in the catalog, ranked by priority by which they are matched."""
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
@@ -219,7 +226,7 @@ def rank_catalog_factories(metadata: ProjectMetadata, env):
 @catalog.command("resolve")
 @env_option
 @click.pass_obj
-def resolve_patterns(metadata: ProjectMetadata, env):
+def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
     """Resolve catalog factories against pipeline datasets. Note that this command is runner
     agnostic and thus won't take into account any default dataset creation defined in the runner."""
 
@@ -268,5 +275,5 @@ def resolve_patterns(metadata: ProjectMetadata, env):
     secho(yaml.dump(explicit_datasets))
 
 
-def _trim_filepath(project_path: str, file_path: str):
+def _trim_filepath(project_path: str, file_path: str) -> str:
     return file_path.replace(project_path, "", 1)

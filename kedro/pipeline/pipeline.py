@@ -166,7 +166,7 @@ class Pipeline:  # noqa: too-many-public-methods
         self._nodes = tagged_nodes
         self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""
         max_nodes_to_display = 10
 
@@ -178,27 +178,27 @@ class Pipeline:  # noqa: too-many-public-methods
         constructor_repr = f"({nodes_reprs_str})"
         return f"{self.__class__.__name__}{constructor_repr}"
 
-    def __add__(self, other):
+    def __add__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self.nodes + other.nodes))
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> Pipeline:
         if isinstance(other, int) and other == 0:
             return self
         return self.__add__(other)
 
-    def __sub__(self, other):
+    def __sub__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self.nodes) - set(other.nodes))
 
-    def __and__(self, other):
+    def __and__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self.nodes) & set(other.nodes))
 
-    def __or__(self, other):
+    def __or__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self.nodes + other.nodes))
@@ -260,7 +260,7 @@ class Pipeline:  # noqa: too-many-public-methods
         """
         return self.all_outputs() | self.all_inputs()
 
-    def _transcode_compatible_names(self):
+    def _transcode_compatible_names(self) -> set[str]:
         return {_strip_transcoding(ds) for ds in self.datasets()}
 
     def describe(self, names_only: bool = True) -> str:
@@ -300,7 +300,7 @@ class Pipeline:  # noqa: too-many-public-methods
 
         """
 
-        def set_to_string(set_of_strings):
+        def set_to_string(set_of_strings: set[str]) -> str:
             """Convert set to a string but return 'None' in case of an empty
             set.
             """
@@ -782,7 +782,7 @@ class Pipeline:  # noqa: too-many-public-methods
         nodes = [n.tag(tags) for n in self.nodes]
         return Pipeline(nodes)
 
-    def to_json(self):
+    def to_json(self) -> str:
         """Return a json representation of the pipeline."""
         transformed = [
             {
@@ -801,11 +801,11 @@ class Pipeline:  # noqa: too-many-public-methods
         return json.dumps(pipeline_versioned)
 
 
-def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
+def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]) -> None:
     seen_nodes: set[str] = set()
     duplicates: dict[Pipeline | None, set[str]] = defaultdict(set)
 
-    def _check_node(node_: Node, pipeline_: Pipeline | None = None):
+    def _check_node(node_: Node, pipeline_: Pipeline | None = None) -> None:
         name = node_.name
         if name in seen_nodes:
             duplicates[pipeline_].add(name)
@@ -884,7 +884,7 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
         )
 
 
-def _topologically_sorted(node_dependencies) -> list[list[Node]]:
+def _topologically_sorted(node_dependencies: dict[Node, set[Node]]) -> list[list[Node]]:
     """Topologically group and sort (order) nodes such that no node depends on
     a node that appears in the same or a later group.
 

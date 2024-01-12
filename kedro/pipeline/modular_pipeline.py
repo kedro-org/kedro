@@ -233,11 +233,11 @@ def pipeline(  # noqa: PLR0913
         base_name, _ = _transcode_split(name)
         return base_name in mapping
 
-    def _map_transcode_base(name: str):
+    def _map_transcode_base(name: str) -> str:
         base_name, transcode_suffix = _transcode_split(name)
         return TRANSCODING_SEPARATOR.join((mapping[base_name], transcode_suffix))
 
-    def _rename(name: str):
+    def _rename(name: str) -> str:
         rules = [
             # if name mapped to new name, update with new name
             (lambda n: n in mapping, lambda n: mapping[n]),
@@ -252,8 +252,9 @@ def pipeline(  # noqa: PLR0913
         ]
 
         for predicate, processor in rules:
-            if predicate(name):
-                return processor(name)
+            if predicate(name):  # type: ignore[no-untyped-call]
+                processor_name: str = processor(name)  # type: ignore[no-untyped-call]
+                return processor_name
 
         # leave name as is
         return name
@@ -281,11 +282,12 @@ def pipeline(  # noqa: PLR0913
                 f"{namespace}.{node.namespace}" if node.namespace else namespace
             )
 
-        return node._copy(
+        node_copy: Node = node._copy(
             inputs=_process_dataset_names(node._inputs),
             outputs=_process_dataset_names(node._outputs),
             namespace=new_namespace,
         )
+        return node_copy
 
     new_nodes = [_copy_node(n) for n in pipe.nodes]
 

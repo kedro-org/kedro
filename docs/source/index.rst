@@ -8,7 +8,7 @@
     :alt: Kedro logo
     :class: kedro-logo
 
-Welcome to Kedro's documentation!
+Welcome to Kedro's award-winning documentation!
 =============================================
 
 .. image:: https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main

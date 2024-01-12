@@ -207,7 +207,7 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
 
 
 def _print_selection_and_prompt_info(
-    selected_tools: str | None, example_pipeline: bool | None, interactive: bool
+    selected_tools: str | None, example_pipeline: str | None, interactive: bool
 ) -> None:
     # Confirm tools selection
     if selected_tools is not None:
@@ -332,7 +332,7 @@ def new(  # noqa: PLR0913
     extra_context = _get_extra_context(
         prompts_required=prompts_required,
         config_path=config_path,
-        cookiecutter_context=cookiecutter_context,  # type: ignore
+        cookiecutter_context=cookiecutter_context,
         selected_tools=selected_tools,
         project_name=project_name,
         example_pipeline=example_pipeline,
@@ -356,7 +356,7 @@ def new(  # noqa: PLR0913
             extra_context.get("tools"),
             extra_context.get("example_pipeline"),
             interactive_flow,
-        )  # type: ignore
+        )
 
 
 @starter.command("list")

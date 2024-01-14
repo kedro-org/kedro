@@ -20,7 +20,7 @@ from kedro.framework.cli.starters import (
     _fetch_validate_parse_config_from_user_prompts,
     _parse_tools_input,
     _parse_yes_no_to_bool,
-    _validate_selection,
+    _validate_tool_selection,
 )
 
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
@@ -327,7 +327,7 @@ class TestParseToolsInput:
     def test_parse_tools_range_too_high(self, input, right_border, capsys):
         with pytest.raises(SystemExit):
             selected = _parse_tools_input(input)
-            _validate_selection(selected)
+            _validate_tool_selection(selected)
         message = f"'{input}' is an invalid range for project tools.\n{right_border} is too large."
         assert message in capsys.readouterr().err
 
@@ -338,7 +338,7 @@ class TestParseToolsInput:
     def test_parse_tools_invalid_selection(self, input, last_invalid, capsys):
         with pytest.raises(SystemExit):
             selected = _parse_tools_input(input)
-            _validate_selection(selected)
+            _validate_tool_selection(selected)
         message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
@@ -1473,34 +1473,34 @@ class TestParseYesNoToBools:
 
 
 class TestValidateSelection:
-    def test_validate_selection_valid(self):
+    def test_validate_tool_selection_valid(self):
         tools = ["1", "2", "3", "4"]
-        assert _validate_selection(tools) is None
+        assert _validate_tool_selection(tools) is None
 
-    def test_validate_selection_invalid_single_tool(self, capsys):
+    def test_validate_tool_selection_invalid_single_tool(self, capsys):
         tools = ["8"]
         with pytest.raises(SystemExit):
-            _validate_selection(tools)
+            _validate_tool_selection(tools)
         message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
-    def test_validate_selection_invalid_multiple_tools(self, capsys):
+    def test_validate_tool_selection_invalid_multiple_tools(self, capsys):
         tools = ["8", "10", "15"]
         with pytest.raises(SystemExit):
-            _validate_selection(tools)
+            _validate_tool_selection(tools)
         message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
-    def test_validate_selection_mix_valid_invalid_tools(self, capsys):
+    def test_validate_tool_selection_mix_valid_invalid_tools(self, capsys):
         tools = ["1", "8", "3", "15"]
         with pytest.raises(SystemExit):
-            _validate_selection(tools)
+            _validate_tool_selection(tools)
         message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
-    def test_validate_selection_empty_list(self):
+    def test_validate_tool_selection_empty_list(self):
         tools = []
-        assert _validate_selection(tools) is None
+        assert _validate_tool_selection(tools) is None
 
 
 class TestConvertToolNamesToNumbers:

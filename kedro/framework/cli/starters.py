@@ -149,7 +149,7 @@ def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
         )
 
 
-def _validate_regex(pattern_name: str, text: str) -> None:
+def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
     VALIDATION_PATTERNS = {
         "yes_no": {
             "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
@@ -157,7 +157,7 @@ def _validate_regex(pattern_name: str, text: str) -> None:
         },
         "project_name": {
             "regex": r"^[\w -]{2,}$",
-            "error_message": f"{text}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
+            "error_message": f"{input}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
         },
         "tools": {
             "regex": r"""^(
@@ -167,11 +167,11 @@ def _validate_regex(pattern_name: str, text: str) -> None:
                 (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
                 \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
                 $""",
-            "error_message": f"'{text}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
+            "error_message": f"'{input}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
         },
     }
 
-    if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], text, flags=re.X):
+    if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], input, flags=re.X):
         click.secho(
             VALIDATION_PATTERNS[pattern_name]["error_message"],
             fg="red",
@@ -444,11 +444,11 @@ def _get_prompts_required_and_clear_from_CLI_provided(
         del prompts_required["tools"]
 
     if project_name is not None:
-        _validate_regex("project_name", project_name)
+        _validate_input_with_regex_pattern("project_name", project_name)
         del prompts_required["project_name"]
 
     if example_pipeline is not None:
-        _validate_regex("yes_no", example_pipeline)
+        _validate_input_with_regex_pattern("yes_no", example_pipeline)
         del prompts_required["example_pipeline"]
 
     return prompts_required
@@ -651,17 +651,19 @@ def _fetch_validate_parse_config_from_file(
         else {}
     )
 
-    _validate_config_file_against_prompts(config, prompts_required)
-
     if starter_alias and ("tools" in config or "example_pipeline" in config):
         raise KedroCliError(
             "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file."
         )
 
-    _validate_regex("project_name", config.get("project_name", "New Kedro Project"))
+    _validate_config_file_against_prompts(config, prompts_required)
+
+    _validate_input_with_regex_pattern(
+        "project_name", config.get("project_name", "New Kedro Project")
+    )
 
     example_pipeline = config.get("example_pipeline", "no")
-    _validate_regex("yes_no", example_pipeline)
+    _validate_input_with_regex_pattern("yes_no", example_pipeline)
     config["example_pipeline"] = str(_parse_yes_no_to_bool(example_pipeline))
 
     tools_short_names = config.get("tools", "none").lower()
@@ -713,7 +715,7 @@ def _fetch_validate_parse_config_from_user_prompts(
     if "tools" in config:
         # convert tools input to list of numbers and validate
         tools_numbers = _parse_tools_input(config["tools"])
-        _validate_selection(tools_numbers)
+        _validate_tool_selection(tools_numbers)
         config["tools"] = _convert_tool_numbers_to_readable_names(tools_numbers)
     if "example_pipeline" in config:
         example_pipeline_bool = _parse_yes_no_to_bool(config["example_pipeline"])
@@ -826,7 +828,7 @@ def _validate_config_file_against_prompts(
         )
 
 
-def _validate_selection(tools: list[str]) -> None:
+def _validate_tool_selection(tools: list[str]) -> None:
     # start validating from the end, when user select 1-20, it will generate a message
     # '20' is not a valid selection instead of '8'
     for tool in tools[::-1]:

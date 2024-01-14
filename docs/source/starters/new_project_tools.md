@@ -137,7 +137,7 @@ As an alternative to the interactive project creation workflow, you can also sup
     "my project"
 
 "tools":
-    "2-6"
+    "lint, test, log, docs, data, pyspark, viz"
 
 "example_pipeline":
     "y"

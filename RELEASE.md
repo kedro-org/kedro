@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.2
 
 ## Major features and improvements
+* Create the debugging line magic for Jupyter Notebook/IPython.
 
 ## Bug fixes and other changes
 * Removed example pipeline requirements when examples are not selected in `tools`.

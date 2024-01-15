@@ -69,7 +69,6 @@ We look for commitment markers who can do the following:
 | [Juan Luis Cano](https://github.com/astrojuanlu)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [GetInData \| Part of Xebia](https://getindata.com)                                      |
-| [Mehdi Naderi Varandi](https://github.com/MehdiNV)       | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nero Okwa](https://github.com/NeroOkwa)                 | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
@@ -102,6 +101,7 @@ Former core team members with significant contributions include
 [Liam Brummitt](https://github.com/bru5),
 [Lim Hoang](https://github.com/limdauto),
 [Lorena Bălan](https://github.com/lorenabalan),
+[Mehdi Naderi Varandi](https://github.com/MehdiNV),
 [Nasef Khan](https://github.com/nakhan98),
 [Richard Westenra](https://github.com/richardwestenra),
 [Susanna Wong](https://github.com/studioswong) and

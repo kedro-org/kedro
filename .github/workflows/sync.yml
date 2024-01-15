@@ -1,0 +1,23 @@
+name: Sync `main` and `develop`
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # every 30 minutes
+  workflow_dispatch: # on button click
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set git email and name
+        run: |
+          git config --global user.email "kedro@kedro.com"
+          git config --global user.name "Kedro"
+
+      - name: Maybe merge to develop or raise a PR
+        run: ./tools/github_actions/merge.sh . "main" "develop" "${{ secrets.GITHUB_TOKEN }}"

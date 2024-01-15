@@ -27,7 +27,6 @@ from kedro.framework.startup import _is_project, bootstrap_project
 
 logger = logging.getLogger(__name__)
 
-
 def load_ipython_extension(ipython: Any) -> None:
     """
     Main entry point when %load_ext kedro.ipython is executed, either manually or
@@ -36,6 +35,7 @@ def load_ipython_extension(ipython: Any) -> None:
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
     ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
+    ipython.register_magic_function(magic_reload_kedro, magic_name="debug_kedro")
 
     if _find_kedro_project(Path.cwd()) is None:
         logger.warning(
@@ -180,3 +180,18 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
         current_dir = current_dir.parent
 
     return None
+
+
+def debug_kedro():
+    """The line magic %load_node debug=True"""
+    ...
+
+
+def _find_node(module, node):
+    ...
+
+def _prepare_imports(module, func):
+    ...
+
+def _prepare_node_inputs(module, node):
+    ...

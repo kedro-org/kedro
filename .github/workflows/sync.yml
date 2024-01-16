@@ -1,4 +1,6 @@
 name: Sync `main` and `develop`
+# This workflow merges commits from `main` branch to `develop` branch if the commits can be merged
+# cleanly, otherwise creates a PR for the maintainers to manually resolve the conflicts.
 
 on:
   schedule:

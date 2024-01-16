@@ -1,4 +1,7 @@
 name: Label PRs
+# This workflow is a part of the sync and merge job, it labels the PRs created by `sync.yml`
+# workflows with the "automerge" label. This label is used by the `auto-merge-prs.yml` workflow
+
 on:
   pull_request:
     types:

@@ -1,4 +1,6 @@
 name: Auto-merge sync PR
+# This workflow automatically merges the PRs labelled "automerge". This is a part of syncing
+# of `develop` and `main` branches.
 
 on:
   schedule:

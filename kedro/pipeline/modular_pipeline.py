@@ -260,7 +260,7 @@ def pipeline(  # noqa: PLR0913
         return name
 
     def _process_dataset_names(
-        datasets: str | list[str] | dict[str, str] | None
+        datasets: str | list[str] | dict[str, str] | None,
     ) -> str | list[str] | dict[str, str] | None:
         if datasets is None:
             return None

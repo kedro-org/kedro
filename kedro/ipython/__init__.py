@@ -8,6 +8,7 @@ import inspect
 import logging
 import sys
 import typing
+from itertools import dropwhile
 from pathlib import Path
 from typing import Any
 
@@ -246,8 +247,26 @@ def _find_node(name):
         raise ValueError(f"Node {name} is not found in any pipelines.")
 
 
-def _prepare_imports():
-    ...
+def _prepare_imports(func):
+    """Prepare the import statements"""
+    python_file = inspect.getsourcefile(func)
+    is_import_statement = True
+    import_statement = []
+
+    with open(python_file) as file:
+        while is_import_statement:
+            line = file.readline()
+            if (
+                line.startswith("\n")
+                or line.startswith("from")
+                or line.startswith("import")
+            ):
+                import_statement.append(line)
+            else:
+                is_import_statement = False
+    # Cleaning trailing \n if necessary
+    import_statement = "".join(import_statement).strip()
+    return import_statement
 
 
 def _prepare_node_inputs(node):
@@ -261,3 +280,24 @@ def _prepare_node_inputs(node):
     for node_input, func_param in zip(node_inputs, func_params):
         statement += f"{func_param} = catalog.load({node_input})\n"
     return statement
+
+
+def get_function_body(func):
+    # https://stackoverflow.com/questions/38050649/getting-a-python-functions-source-code-without-the-definition-lines
+    source_lines = inspect.getsourcelines(func)[0]
+    source_lines = dropwhile(lambda x: x.startswith("@"), source_lines)
+    line = next(source_lines).strip()
+    if not line.startswith("def "):
+        return line.rsplit(":")[-1].strip()
+    elif not line.endswith(":"):
+        for line in source_lines:
+            line = line.strip()
+            if line.endswith(":"):
+                break
+    # Handle functions that are not one-liners
+    first_line = next(source_lines)
+    # Find the indentation of the first line
+    indentation = len(first_line) - len(first_line.lstrip())
+    return "".join(
+        [first_line[indentation:]] + [line[indentation:] for line in source_lines]
+    )

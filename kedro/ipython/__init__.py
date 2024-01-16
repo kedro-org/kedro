@@ -35,7 +35,9 @@ def load_ipython_extension(ipython: Any) -> None:
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
     ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
-    ipython.register_magic_function(magic_reload_kedro, magic_name="debug_kedro")
+    logger.info("Registered line magic 'reload_kedro'")
+    ipython.register_magic_function(magic_load_node, magic_name="load_node")
+    logger.info("Registered line magic 'load_node'")
 
     if _find_kedro_project(Path.cwd()) is None:
         logger.warning(
@@ -182,16 +184,58 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     return None
 
 
-def debug_kedro():
+# @needs_local_scope
+@magic_arguments()
+@argument(
+    "node",
+    type=str,
+    help=(
+        "Name of the Node."
+    ),
+    nargs="?",
+    default=None,
+)
+def magic_load_node(node):
     """The line magic %load_node debug=True"""
+    cells = _load_node(node)
+    from ipylab import JupyterFrontEnd
+    app = JupyterFrontEnd()
+
+    def _create_cell_with_text(text):
+        app.commands.execute('notebook:insert-cell-below')
+        app.commands.execute('notebook:replace-selection', {'text': text})
+
+    for cell in cells:
+        _create_cell_with_text(cell)
+
+def _load_node(node):
+    _find_node()
+    _prepare_imports()
+    _prepare_node_inputs()
+
+    node_inputs = """regressor = catalog.load("regressor")
+X_test = catalog.load("X_test")
+y_test = catalog.load("y_test")"""
+    imports = """from sklearn.metrics import max_error, mean_absolute_error, r2_score"""
+    function_text = ["""y_pred = regressor.predict(X_test)
+score = r2_score(y_test, y_pred)""", """raise""", """mae = mean_absolute_error(y_test, y_pred)
+me = max_error(y_test, y_pred)
+logger = logging.getLogger(__name__)
+logger.info("Model has a coefficient R^2 of %.3f on test data.", score)
+# return {"r2_score": score, "mae": mae, "max_error": me}"""]
+
+    cells: list[str] = []
+    cells.append(node_inputs)
+    cells.append(imports)
+    cells += function_text
+    return cells
+
+
+def _find_node():
     ...
 
-
-def _find_node(module, node):
+def _prepare_imports():
     ...
 
-def _prepare_imports(module, func):
-    ...
-
-def _prepare_node_inputs(module, node):
+def _prepare_node_inputs():
     ...

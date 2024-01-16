@@ -4,6 +4,7 @@ local scope.
 """
 from __future__ import annotations
 
+import inspect
 import logging
 import sys
 import typing
@@ -209,14 +210,11 @@ def magic_load_node(node):
         _create_cell_with_text(cell)
 
 
-def _load_node(node):
-    _find_node()
+def _load_node(node_name):
+    node = _find_node(node_name)
+    node_inputs = _prepare_node_inputs(node)
     _prepare_imports()
-    _prepare_node_inputs()
 
-    node_inputs = """regressor = catalog.load("regressor")
-X_test = catalog.load("X_test")
-y_test = catalog.load("y_test")"""
     imports = """from sklearn.metrics import max_error, mean_absolute_error, r2_score"""
     function_text = [
         """y_pred = regressor.predict(X_test)
@@ -236,13 +234,30 @@ logger.info("Model has a coefficient R^2 of %.3f on test data.", score)
     return cells
 
 
-def _find_node():
-    ...
+def _find_node(name):
+    from kedro.framework.project import pipelines
+
+    for pipeline in pipelines.values():
+        try:
+            return pipeline.filter(node_names=[name]).nodes[0]
+        except ValueError:
+            continue
+    else:
+        raise ValueError(f"Node {name} is not found in any pipelines.")
 
 
 def _prepare_imports():
     ...
 
 
-def _prepare_node_inputs():
-    ...
+def _prepare_node_inputs(node):
+    node_func = node.func
+    signature = inspect.signature(node_func)
+
+    node_inputs = node.inputs
+    func_params = list(signature.parameters)
+
+    statement = "# Prepare necessary inputs for debugging\n"
+    for node_input, func_param in zip(node_inputs, func_params):
+        statement += f"{func_param} = catalog.load({node_input})\n"
+    return statement

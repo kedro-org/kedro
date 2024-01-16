@@ -89,7 +89,7 @@ test = [
     "types-toposort"
 ]
 docs = [
-    "docutils<0.18",
+    "docutils<0.21",
     "sphinx>=5.3,<7.3",
     "sphinx_rtd_theme==2.0.0",
     # Regression on sphinx-autodoc-typehints 1.21

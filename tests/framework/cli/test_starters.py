@@ -22,6 +22,7 @@ from kedro.framework.cli.starters import (
     _parse_tools_input,
     _parse_yes_no_to_bool,
     _validate_selection,
+    _make_cookiecutter_args_and_fetch_template
 )
 
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
@@ -43,6 +44,14 @@ def mock_determine_repo_dir(mocker):
 @pytest.fixture
 def mock_cookiecutter(mocker):
     return mocker.patch("cookiecutter.main.cookiecutter")
+
+
+def mock_make_cookiecutter_args_and_fetch_template(*args, **kwargs):
+    cookiecutter_args, starter_path = _make_cookiecutter_args_and_fetch_template(*args, **kwargs)
+    print(cookiecutter_args, starter_path)
+    cookiecutter_args["checkout"] = "main"  # Force the checkout to be "main"
+    print(cookiecutter_args)
+    return cookiecutter_args, starter_path
 
 
 def _clean_up_project(project_dir):
@@ -134,7 +143,6 @@ def _assert_requirements_ok(
         with open(requirements_file_path) as requirements_file:
             requirements = requirements_file.read()
 
-        assert "black" in requirements
         assert "ruff" in requirements
 
         pyproject_config = toml.load(pyproject_file_path)
@@ -145,6 +153,9 @@ def _assert_requirements_ok(
                     "show-fixes": True,
                     "select": ["F", "W", "E", "I", "UP", "PL", "T201"],
                     "ignore": ["E501"],
+                    "format": {
+                        "docstring-code-format": True
+                    }
                 }
             }
         }
@@ -1185,8 +1196,14 @@ class TestToolsAndExampleFromConfigFile:
         ],
     )
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline, mocker):
         """Test project created from config."""
+
+        mocker.patch(
+            'kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template',
+            side_effect=mock_make_cookiecutter_args_and_fetch_template
+        )
+
         config = {
             "tools": tools,
             "project_name": "New Kedro Project",

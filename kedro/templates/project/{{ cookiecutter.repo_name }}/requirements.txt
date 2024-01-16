@@ -1,4 +1,3 @@
-black~=22.0
 ipython>=8.10
 jupyterlab>=3.0
 notebook

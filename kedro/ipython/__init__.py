@@ -27,6 +27,7 @@ from kedro.framework.startup import _is_project, bootstrap_project
 
 logger = logging.getLogger(__name__)
 
+
 def load_ipython_extension(ipython: Any) -> None:
     """
     Main entry point when %load_ext kedro.ipython is executed, either manually or
@@ -189,9 +190,7 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
 @argument(
     "node",
     type=str,
-    help=(
-        "Name of the Node."
-    ),
+    help=("Name of the Node."),
     nargs="?",
     default=None,
 )
@@ -199,14 +198,16 @@ def magic_load_node(node):
     """The line magic %load_node debug=True"""
     cells = _load_node(node)
     from ipylab import JupyterFrontEnd
+
     app = JupyterFrontEnd()
 
     def _create_cell_with_text(text):
-        app.commands.execute('notebook:insert-cell-below')
-        app.commands.execute('notebook:replace-selection', {'text': text})
+        app.commands.execute("notebook:insert-cell-below")
+        app.commands.execute("notebook:replace-selection", {"text": text})
 
     for cell in cells:
         _create_cell_with_text(cell)
+
 
 def _load_node(node):
     _find_node()
@@ -217,12 +218,16 @@ def _load_node(node):
 X_test = catalog.load("X_test")
 y_test = catalog.load("y_test")"""
     imports = """from sklearn.metrics import max_error, mean_absolute_error, r2_score"""
-    function_text = ["""y_pred = regressor.predict(X_test)
-score = r2_score(y_test, y_pred)""", """raise""", """mae = mean_absolute_error(y_test, y_pred)
+    function_text = [
+        """y_pred = regressor.predict(X_test)
+score = r2_score(y_test, y_pred)""",
+        """raise""",
+        """mae = mean_absolute_error(y_test, y_pred)
 me = max_error(y_test, y_pred)
 logger = logging.getLogger(__name__)
 logger.info("Model has a coefficient R^2 of %.3f on test data.", score)
-# return {"r2_score": score, "mae": mae, "max_error": me}"""]
+# return {"r2_score": score, "mae": mae, "max_error": me}""",
+    ]
 
     cells: list[str] = []
     cells.append(node_inputs)
@@ -234,8 +239,10 @@ logger.info("Model has a coefficient R^2 of %.3f on test data.", score)
 def _find_node():
     ...
 
+
 def _prepare_imports():
     ...
+
 
 def _prepare_node_inputs():
     ...

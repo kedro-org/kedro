@@ -91,7 +91,7 @@ test = [
 docs = [
     "docutils<0.21",
     "sphinx>=5.3,<7.3",
-    "sphinx_rtd_theme==1.2.0",
+    "sphinx_rtd_theme==2.0.0",
     # Regression on sphinx-autodoc-typehints 1.21
     # that creates some problematic docstrings
     "sphinx-autodoc-typehints==1.20.2",

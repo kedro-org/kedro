@@ -85,6 +85,7 @@ We look for commitment markers who can do the following:
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at [QuantumBlack](https://www.mckinsey.com/capabilities/quantumblack) to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 
 Former core team members with significant contributions include
+[Amanda Koh](https://github.com/amandakys),
 [Andrew Mackay](https://github.com/Mackay031),
 [Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
 [Anton Kirilenko](https://github.com/Flid),

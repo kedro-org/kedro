@@ -10,7 +10,7 @@
 
 ## Community contributions
 
-# Upcoming Release 0.19.2
+# Release 0.19.2
 
 ## Bug fixes and other changes
 * Removed example pipeline requirements when examples are not selected in `tools`.

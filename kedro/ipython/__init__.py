@@ -213,24 +213,16 @@ def magic_load_node(node):
 
 def _load_node(node_name):
     node = _find_node(node_name)
+    node_func = node.func
     node_inputs = _prepare_node_inputs(node)
-    imports = _prepare_imports(node)
-
-    function_text = [
-        """y_pred = regressor.predict(X_test)
-score = r2_score(y_test, y_pred)""",
-        """raise""",
-        """mae = mean_absolute_error(y_test, y_pred)
-me = max_error(y_test, y_pred)
-logger = logging.getLogger(__name__)
-logger.info("Model has a coefficient R^2 of %.3f on test data.", score)
-# return {"r2_score": score, "mae": mae, "max_error": me}""",
-    ]
+    imports = _prepare_imports(node_func)
+    function_text = get_function_body(node_func)
+    function_text = "# Function Body\n" + function_text
 
     cells: list[str] = []
     cells.append(node_inputs)
     cells.append(imports)
-    cells += function_text
+    cells.append(function_text)
     return cells
 
 
@@ -246,9 +238,8 @@ def _find_node(name):
         raise ValueError(f"Node {name} is not found in any pipelines.")
 
 
-def _prepare_imports(node):
+def _prepare_imports(node_func):
     """Prepare the import statements"""
-    node_func = node.func
     python_file = inspect.getsourcefile(node_func)
     is_import_statement = True
     import_statement = []

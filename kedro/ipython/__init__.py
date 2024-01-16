@@ -214,9 +214,8 @@ def magic_load_node(node):
 def _load_node(node_name):
     node = _find_node(node_name)
     node_inputs = _prepare_node_inputs(node)
-    _prepare_imports()
+    imports = _prepare_imports(node)
 
-    imports = """from sklearn.metrics import max_error, mean_absolute_error, r2_score"""
     function_text = [
         """y_pred = regressor.predict(X_test)
 score = r2_score(y_test, y_pred)""",
@@ -247,9 +246,10 @@ def _find_node(name):
         raise ValueError(f"Node {name} is not found in any pipelines.")
 
 
-def _prepare_imports(func):
+def _prepare_imports(node):
     """Prepare the import statements"""
-    python_file = inspect.getsourcefile(func)
+    node_func = node.func
+    python_file = inspect.getsourcefile(node_func)
     is_import_statement = True
     import_statement = []
 

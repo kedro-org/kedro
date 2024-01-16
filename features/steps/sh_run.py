@@ -82,7 +82,7 @@ class ChildTerminatingPopen(subprocess.Popen):
             **kwargs: keyword arguments such as env and cwd
 
         """
-        super().__init__(  # type: ignore
+        super().__init__(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs
         )
 

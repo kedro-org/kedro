@@ -1,8 +1,10 @@
 """A collection of CLI commands for working with Kedro project."""
+from __future__ import annotations
 
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import click
 
@@ -60,14 +62,14 @@ CONF_SOURCE_HELP = """Path of a directory where project configuration is stored.
 
 
 @click.group(name="Kedro")
-def project_group():  # pragma: no cover
+def project_group() -> None:  # pragma: no cover
     pass
 
 
 @forward_command(project_group, forward_help=True)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
-def ipython(metadata: ProjectMetadata, env, args, **kwargs):
+def ipython(metadata: ProjectMetadata, /, env: str, args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
     """Open IPython with project specific variables loaded."""
     _check_module_importable("IPython")
 
@@ -78,7 +80,7 @@ def ipython(metadata: ProjectMetadata, env, args, **kwargs):
 
 @project_group.command()
 @click.pass_obj  # this will pass the metadata as first argument
-def package(metadata: ProjectMetadata):
+def package(metadata: ProjectMetadata) -> None:
     """Package the project as a Python wheel."""
     # Even if the user decides for the older setup.py on purpose,
     # pyproject.toml is needed for Kedro metadata
@@ -195,35 +197,35 @@ def package(metadata: ProjectMetadata):
     callback=_split_params,
 )
 def run(  # noqa: PLR0913
-    tags,
-    env,
-    runner,
-    is_async,
-    node_names,
-    to_nodes,
-    from_nodes,
-    from_inputs,
-    to_outputs,
-    load_versions,
-    pipeline,
-    config,
-    conf_source,
-    params,
-    namespace,
-):
+    tags: str,
+    env: str,
+    runner: str,
+    is_async: bool,
+    node_names: str,
+    to_nodes: str,
+    from_nodes: str,
+    from_inputs: str,
+    to_outputs: str,
+    load_versions: dict[str, str] | None,
+    pipeline: str,
+    config: str,
+    conf_source: str,
+    params: dict[str, Any],
+    namespace: str,
+) -> None:
     """Run the pipeline."""
 
-    runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-    tags = tuple(tags)
-    node_names = tuple(node_names)
+    runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
+    tuple_tags = tuple(tags)
+    tuple_node_names = tuple(node_names)
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params
     ) as session:
         session.run(
-            tags=tags,
-            runner=runner(is_async=is_async),
-            node_names=node_names,
+            tags=tuple_tags,
+            runner=runner_obj(is_async=is_async),
+            node_names=tuple_node_names,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
             from_inputs=from_inputs,

@@ -30,7 +30,7 @@ from kedro.runner import AbstractRunner, SequentialRunner
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
-    project_path = str(project_path)
+    path = str(project_path)
     try:
         res = subprocess.check_output(
             ["git", "rev-parse", "--short", "HEAD"],  # noqa: S603, S607
@@ -48,7 +48,7 @@ def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except Exception:
         logger = logging.getLogger(__name__)
-        logger.debug("Unable to git describe %s", project_path)
+        logger.debug("Unable to git describe %s", path)
         logger.debug(traceback.format_exc())
         return {}
 
@@ -99,7 +99,7 @@ class KedroSession:
     def __init__(  # noqa: PLR0913
         self,
         session_id: str,
-        package_name: str = None,
+        package_name: str | None = None,
         project_path: Path | str | None = None,
         save_on_close: bool = False,
         conf_source: str | None = None,
@@ -125,8 +125,8 @@ class KedroSession:
         cls,
         project_path: Path | str | None = None,
         save_on_close: bool = True,
-        env: str = None,
-        extra_params: dict[str, Any] = None,
+        env: str | None = None,
+        extra_params: dict[str, Any] | None = None,
         conf_source: str | None = None,
     ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
@@ -192,7 +192,7 @@ class KedroSession:
         store_args["session_id"] = self.session_id
 
         try:
-            return store_class(**store_args)
+            return store_class(**store_args)  # type: ignore[no-any-return]
         except TypeError as err:
             raise ValueError(
                 f"\n{err}.\nStore config must only contain arguments valid "
@@ -203,7 +203,7 @@ class KedroSession:
                 f"\n{err}.\nFailed to instantiate session store of type '{classpath}'."
             ) from err
 
-    def _log_exception(self, exc_type, exc_value, exc_tb):
+    def _log_exception(self, exc_type: Any, exc_value: Any, exc_tb: Any) -> None:
         type_ = [] if exc_type.__module__ == "builtins" else [exc_type.__module__]
         type_.append(exc_type.__qualname__)
 
@@ -239,7 +239,7 @@ class KedroSession:
         )
         self._hook_manager.hook.after_context_created(context=context)
 
-        return context
+        return context  # type: ignore[no-any-return]
 
     def _get_config_loader(self) -> AbstractConfigLoader:
         """An instance of the config loader."""
@@ -247,40 +247,40 @@ class KedroSession:
         extra_params = self.store.get("extra_params")
 
         config_loader_class = settings.CONFIG_LOADER_CLASS
-        return config_loader_class(
+        return config_loader_class(  # type: ignore[no-any-return]
             conf_source=self._conf_source,
             env=env,
             runtime_params=extra_params,
             **settings.CONFIG_LOADER_ARGS,
         )
 
-    def close(self):
+    def close(self) -> None:
         """Close the current session and save its store to disk
         if `save_on_close` attribute is True.
         """
         if self.save_on_close:
             self._store.save()
 
-    def __enter__(self):
+    def __enter__(self) -> KedroSession:
         return self
 
-    def __exit__(self, exc_type, exc_value, tb_):
+    def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
         if exc_type:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
     def run(  # noqa: PLR0913
         self,
-        pipeline_name: str = None,
-        tags: Iterable[str] = None,
-        runner: AbstractRunner = None,
-        node_names: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-        load_versions: dict[str, str] = None,
-        namespace: str = None,
+        pipeline_name: str | None = None,
+        tags: Iterable[str] | None = None,
+        runner: AbstractRunner | None = None,
+        node_names: Iterable[str] | None = None,
+        from_nodes: Iterable[str] | None = None,
+        to_nodes: Iterable[str] | None = None,
+        from_inputs: Iterable[str] | None = None,
+        to_outputs: Iterable[str] | None = None,
+        load_versions: dict[str, str] | None = None,
+        namespace: str | None = None,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 

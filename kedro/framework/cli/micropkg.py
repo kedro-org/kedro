@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 import click
+from importlib_metadata import PackageMetadata
 from omegaconf import OmegaConf
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
@@ -106,7 +107,7 @@ class _EquivalentRequirement(Requirement):
         )
 
 
-def _check_module_path(ctx, param, value):  # noqa: unused-argument
+def _check_module_path(ctx: click.core.Context, param: Any, value: str) -> str:  # noqa: unused-argument
     if value and not re.match(r"^[\w.]+$", value):
         message = (
             "The micro-package location you provided is not a valid Python module path"
@@ -117,12 +118,12 @@ def _check_module_path(ctx, param, value):  # noqa: unused-argument
 
 # noqa: missing-function-docstring
 @click.group(name="Kedro")
-def micropkg_cli():  # pragma: no cover
+def micropkg_cli() -> None:  # pragma: no cover
     pass
 
 
 @micropkg_cli.group()
-def micropkg():
+def micropkg() -> None:
     """Commands for working with micro-packages."""
 
 
@@ -157,13 +158,14 @@ def micropkg():
 @click.pass_obj  # this will pass the metadata as first argument
 def pull_package(  # noqa: PLR0913
     metadata: ProjectMetadata,
-    package_path,
-    env,
-    alias,
-    destination,
-    fs_args,
-    all_flag,
-    **kwargs,
+    /,
+    package_path: str,
+    env: str,
+    alias: str,
+    destination: str,
+    fs_args: str,
+    all_flag: str,
+    **kwargs: Any,
 ) -> None:
     """Pull and unpack a modular pipeline and other micro-packages in your project."""
     if not package_path and not all_flag:
@@ -193,11 +195,11 @@ def pull_package(  # noqa: PLR0913
 def _pull_package(  # noqa: PLR0913
     package_path: str,
     metadata: ProjectMetadata,
-    env: str = None,
-    alias: str = None,
-    destination: str = None,
-    fs_args: str = None,
-):
+    env: str | None = None,
+    alias: str | None = None,
+    destination: str | None = None,
+    fs_args: str | None = None,
+) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
         _unpack_sdist(package_path, temp_dir_path, fs_args)
@@ -330,13 +332,14 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 @click.pass_obj  # this will pass the metadata as first argument
 def package_micropkg(  # noqa: PLR0913
     metadata: ProjectMetadata,
-    module_path,
-    env,
-    alias,
-    destination,
-    all_flag,
-    **kwargs,
-):
+    /,
+    module_path: str,
+    env: str,
+    alias: str,
+    destination: str,
+    all_flag: str,
+    **kwargs: Any,
+) -> None:
     """Package up a modular pipeline or micro-package as a Python source distribution."""
     if not module_path and not all_flag:
         click.secho(
@@ -361,7 +364,7 @@ def package_micropkg(  # noqa: PLR0913
     click.secho(message, fg="green")
 
 
-def _get_fsspec_filesystem(location: str, fs_args: str | None):
+def _get_fsspec_filesystem(location: str, fs_args: str | None) -> Any:
     # noqa: import-outside-toplevel
     import fsspec
 
@@ -380,13 +383,13 @@ def _get_fsspec_filesystem(location: str, fs_args: str | None):
         return None
 
 
-def _is_within_directory(directory, target):
+def _is_within_directory(directory: Path, target: Path) -> bool:
     abs_directory = directory.resolve()
     abs_target = target.resolve()
     return abs_directory in abs_target.parents
 
 
-def safe_extract(tar, path):
+def safe_extract(tar: tarfile.TarFile, path: Path) -> None:
     for member in tar.getmembers():
         member_path = path / member.name
         if not _is_within_directory(path, member_path):
@@ -428,7 +431,7 @@ def _unpack_sdist(location: str, destination: Path, fs_args: str | None) -> None
             safe_extract(fs_file, destination)
 
 
-def _rename_files(conf_source: Path, old_name: str, new_name: str):
+def _rename_files(conf_source: Path, old_name: str, new_name: str) -> None:
     config_files_to_rename = (
         each
         for each in conf_source.rglob("*")
@@ -473,7 +476,7 @@ def _refactor_code_for_unpacking(  # noqa: PLR0913
     """
 
     def _move_package_with_conflicting_name(
-        target: Path, original_name: str, desired_name: str = None
+        target: Path, original_name: str, desired_name: str | None = None
     ) -> Path:
         _rename_package(project, original_name, "tmp_name")
         full_path = _create_nested_package(project, target)
@@ -524,10 +527,10 @@ def _install_files(  # noqa: PLR0913, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
-    env: str = None,
-    alias: str = None,
-    destination: str = None,
-):
+    env: str | None = None,
+    alias: str | None = None,
+    destination: str | None = None,
+) -> None:
     env = env or "base"
 
     package_source, test_source, conf_source = _get_package_artifacts(
@@ -589,7 +592,7 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
         micropkg_module = import_module(
             f"{metadata.package_name}.{micropkg_module_path}"
         )
-        return micropkg_module.__version__  # type: ignore
+        return micropkg_module.__version__  # type: ignore[no-any-return]
     except (AttributeError, ModuleNotFoundError):
         logger.warning(
             "Micropackage version not found in '%s.%s', will take the top-level one in '%s'",
@@ -599,15 +602,15 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
         )
         # if micropkg version doesn't exist, take the project one
         project_module = import_module(f"{metadata.package_name}")
-        return project_module.__version__  # type: ignore
+        return project_module.__version__  # type: ignore[no-any-return]
 
 
 def _package_micropkg(
     micropkg_module_path: str,
     metadata: ProjectMetadata,
-    alias: str = None,
-    destination: str = None,
-    env: str = None,
+    alias: str | None = None,
+    destination: str | None = None,
+    env: str | None = None,
 ) -> Path:
     micropkg_name = micropkg_module_path.split(".")[-1]
     package_dir = metadata.source_dir / metadata.package_name
@@ -635,12 +638,14 @@ def _package_micropkg(
     # Check that micropkg directory exists and not empty
     _validate_dir(package_source)
 
-    destination = Path(destination) if destination else metadata.project_path / "dist"
+    package_destination = (
+        Path(destination) if destination else metadata.project_path / "dist"
+    )
     version = _get_default_version(metadata, micropkg_module_path)
 
     _generate_sdist_file(
         micropkg_name=micropkg_name,
-        destination=destination.resolve(),
+        destination=package_destination.resolve(),
         source_paths=source_paths,
         version=version,
         metadata=metadata,
@@ -650,7 +655,7 @@ def _package_micropkg(
     _clean_pycache(package_dir)
     _clean_pycache(metadata.project_path)
 
-    return destination
+    return package_destination
 
 
 def _validate_dir(path: Path) -> None:
@@ -660,7 +665,7 @@ def _validate_dir(path: Path) -> None:
         raise KedroCliError(f"'{path}' is an empty directory.")
 
 
-def _get_sdist_name(name, version):
+def _get_sdist_name(name: str, version: str) -> str:
     return f"{name}-{version}.tar.gz"
 
 
@@ -670,7 +675,7 @@ def _sync_path_list(source: list[tuple[Path, str]], target: Path) -> None:
         _sync_dirs(source_path, target_with_suffix)
 
 
-def _drop_comment(line):
+def _drop_comment(line: str) -> str:
     # https://github.com/pypa/setuptools/blob/b545fc7/\
     # pkg_resources/_vendor/jaraco/text/__init__.py#L554-L566
     return line.partition(" #")[0]
@@ -777,7 +782,9 @@ def _refactor_code_for_package(
         |__ test.py
     """
 
-    def _move_package_with_conflicting_name(target: Path, conflicting_name: str):
+    def _move_package_with_conflicting_name(
+        target: Path, conflicting_name: str
+    ) -> None:
         tmp_name = "tmp_name"
         tmp_module = target.parent / tmp_name
         _rename_package(project, target.as_posix(), tmp_name)
@@ -826,7 +833,7 @@ def _generate_sdist_file(  # noqa: PLR0913,too-many-locals
     source_paths: tuple[Path, Path, list[tuple[Path, str]]],
     version: str,
     metadata: ProjectMetadata,
-    alias: str = None,
+    alias: str | None = None,
 ) -> None:
     package_name = alias or micropkg_name
     package_source, tests_source, conf_source = source_paths
@@ -884,7 +891,7 @@ def _generate_sdist_file(  # noqa: PLR0913,too-many-locals
         )
 
 
-def _generate_manifest_file(output_dir: Path):
+def _generate_manifest_file(output_dir: Path) -> None:
     manifest_file = output_dir / "MANIFEST.in"
     manifest_file.write_text(
         """
@@ -964,7 +971,7 @@ def _append_package_reqs(
     )
 
 
-def _get_all_library_reqs(metadata):
+def _get_all_library_reqs(metadata: PackageMetadata) -> list[str]:
     """Get all library requirements from metadata, leaving markers intact."""
     # See https://discuss.python.org/t/\
     # programmatically-getting-non-optional-requirements-of-current-directory/26963/2

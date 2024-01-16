@@ -185,7 +185,7 @@ def setup_template_tools(
 
     Args:
         selected_tools_list (str): A string contains the selected tools.
-        requirements_file_path (Path): The path of the `requiremenets.txt` in the template.
+        requirements_file_path (Path): The path of the `requirements.txt` in the template.
         pyproject_file_path (Path): The path of the `pyproject.toml` in the template
         python_package_name (str): The name of the python package.
         example_pipeline (str): 'True' if example pipeline was selected

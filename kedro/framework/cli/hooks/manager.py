@@ -13,7 +13,7 @@ _cli_hook_manager = None
 _CLI_PLUGIN_HOOKS = "kedro.cli_hooks"
 
 
-def get_cli_hook_manager():
+def get_cli_hook_manager() -> PluginManager:
     """Create or return the global _hook_manager singleton instance."""
     global _cli_hook_manager  # noqa: PLW0603
     if _cli_hook_manager is None:

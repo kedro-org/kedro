@@ -1,4 +1,6 @@
 """A collection of CLI commands for working with registered Kedro pipelines."""
+from typing import Any
+
 import click
 import yaml
 
@@ -8,17 +10,17 @@ from kedro.framework.startup import ProjectMetadata
 
 
 @click.group(name="Kedro")
-def registry_cli():  # pragma: no cover
+def registry_cli() -> None:  # pragma: no cover
     pass
 
 
 @registry_cli.group()
-def registry():
+def registry() -> None:
     """Commands for working with registered pipelines."""
 
 
 @registry.command("list")
-def list_registered_pipelines():
+def list_registered_pipelines() -> None:
     """List all pipelines defined in your pipeline_registry.py file."""
     click.echo(yaml.dump(sorted(pipelines)))
 
@@ -26,7 +28,9 @@ def list_registered_pipelines():
 @command_with_verbosity(registry, "describe")
 @click.argument("name", nargs=1, default="__default__")
 @click.pass_obj
-def describe_registered_pipeline(metadata: ProjectMetadata, name, **kwargs):
+def describe_registered_pipeline(
+    metadata: ProjectMetadata, /, name: str, **kwargs: Any
+) -> None:
     """Describe a registered pipeline by providing a pipeline name.
     Defaults to the `__default__` pipeline.
     """

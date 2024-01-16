@@ -55,7 +55,7 @@ dynamic = ["readme", "version"]
 test = [
     "behave==1.2.6",
     "coverage[toml]",
-    "import-linter==1.12.1",
+    "import-linter==2.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
     "jupyterlab_server>=2.11.1",
@@ -72,7 +72,7 @@ test = [
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyproj~=3.0",
     "pytest-cov~=3.0",
-    "pytest-mock>=1.7.1, <2.0",
+    "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
     "s3fs>=2021.4, <2024.1",  # Upper bound set arbitrarily, to be reassessed in early 2024
@@ -88,7 +88,7 @@ test = [
 docs = [
     "docutils<0.21",
     "sphinx>=5.3,<7.3",
-    "sphinx_rtd_theme==1.2.0",
+    "sphinx_rtd_theme==2.0.0",
     # Regression on sphinx-autodoc-typehints 1.21
     # that creates some problematic docstrings
     "sphinx-autodoc-typehints==1.20.2",

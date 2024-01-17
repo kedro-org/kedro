@@ -34,6 +34,8 @@ class CachedDataset(AbstractDataset):
     # for parallelism please consider ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
+    _EPHEMERAL = True
+
     def __init__(
         self,
         dataset: AbstractDataset | dict,

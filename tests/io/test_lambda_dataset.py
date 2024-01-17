@@ -52,7 +52,7 @@ def test_dataset_describe():
     assert actual == expected
 
 
-def test_ephemeral_attribute(self, mocked_dataset):
+def test_ephemeral_attribute(mocked_dataset):
     assert mocked_dataset._EPHEMERAL is False
 
 

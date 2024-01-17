@@ -736,23 +736,28 @@ def _make_cookiecutter_args_and_fetch_template(
     example_pipeline = config.get("example_pipeline", False)
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
+    if os.environ.get("CI_ENVIRONMENT") == "true":  # For E2E tests in CI
+        checkout_version = "main"
+    else:
+        checkout_version = version
+
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
         # Ensures we use the same tag version of kedro for kedro-starters
-        cookiecutter_args["checkout"] = version
+        cookiecutter_args["checkout"] = checkout_version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-        cookiecutter_args["checkout"] = version
+        cookiecutter_args["checkout"] = checkout_version
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
-        cookiecutter_args["checkout"] = version
+        cookiecutter_args["checkout"] = checkout_version
     elif example_pipeline:
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
-        cookiecutter_args["checkout"] = version
+        cookiecutter_args["checkout"] = checkout_version
     else:
         # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path
@@ -891,23 +896,10 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]) -> No
         KedroCliError: If it fails to generate a project.
     """
     # noqa: import-outside-toplevel
-    from cookiecutter.exceptions import RepositoryCloneFailed
     from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
         result_path = cookiecutter(template=template_path, **cookiecutter_args)
-    except RepositoryCloneFailed:
-        click.secho(
-            "Specified branch or tag not found, falling back to 'main' branch.",
-            fg="yellow",
-        )
-        cookiecutter_args["checkout"] = "main"
-        try:
-            result_path = cookiecutter(template=template_path, **cookiecutter_args)
-        except Exception as exc:
-            raise KedroCliError(
-                "Failed to generate project when running cookiecutter."
-            ) from exc
     except Exception as exc:
         raise KedroCliError(
             "Failed to generate project when running cookiecutter."

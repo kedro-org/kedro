@@ -101,7 +101,11 @@ docs = [
     "myst-parser>=1.0,<2.1",
     "Jinja2<3.2.0",
 ]
-all = [ "kedro[test,docs]" ]
+jupyter = [
+    "notebook>=7.0.0",  # requires the new share backend of notebook and labs
+    "ipylab>=1.0.0"
+]
+all = [ "kedro[test,docs,jupyter]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

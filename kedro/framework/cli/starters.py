@@ -853,7 +853,7 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
             sys.exit(1)
         # safeguard to prevent passing of excessively large intervals that could cause freezing:
         if int(end) > len(NUMBER_TO_TOOLS_NAME):
-            message = f"'{start}-{end}' is an invalid range for project tools.\n{end} is too large."
+            message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 

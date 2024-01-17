@@ -297,3 +297,17 @@ class TestProjectPathResolution:
         log_messages = [record.getMessage() for record in caplog.records]
         expected_message = f"Updating path to Kedro project: {updated_path}..."
         assert expected_message in log_messages
+
+
+class TestLoadNodeMagic:
+    def test_import_helper_function_from_same_file():
+        """function body can refer to function other than the import statements but helper function
+        in the body
+        """
+        ...
+
+    def test_node_inputs_match_function_signature():
+        """node input names should match with function signature.
+        Usually they are the same but not necessary.
+        """
+        ...

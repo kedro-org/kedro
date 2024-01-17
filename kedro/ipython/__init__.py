@@ -269,7 +269,7 @@ def _prepare_node_inputs(node):
 
     statement = "# Prepare necessary inputs for debugging\n"
     for node_input, func_param in zip(node_inputs, func_params):
-        statement += f"{func_param} = catalog.load({node_input})\n"
+        statement += f'{func_param} = catalog.load("{node_input}")\n'
     return statement
 
 
@@ -289,6 +289,7 @@ def get_function_body(func):
     first_line = next(source_lines)
     # Find the indentation of the first line
     indentation = len(first_line) - len(first_line.lstrip())
-    return "".join(
+    body = "".join(
         [first_line[indentation:]] + [line[indentation:] for line in source_lines]
     )
+    return body

@@ -34,8 +34,6 @@ class CachedDataset(AbstractDataset):
     # for parallelism please consider ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    _EPHEMERAL = True
-
     def __init__(
         self,
         dataset: AbstractDataset | dict,
@@ -62,6 +60,8 @@ class CachedDataset(AbstractDataset):
             ValueError: If the provided dataset is not a valid dict/YAML
                 representation of a dataset or an actual dataset.
         """
+        self._EPHEMERAL = True
+
         if isinstance(dataset, dict):
             self._dataset = self._from_config(dataset, version)
         elif isinstance(dataset, AbstractDataset):

@@ -35,8 +35,6 @@ class MemoryDataset(AbstractDataset):
 
     """
 
-    _EPHEMERAL = True
-
     def __init__(
         self,
         data: Any = _EMPTY,
@@ -57,6 +55,7 @@ class MemoryDataset(AbstractDataset):
         self._data = _EMPTY
         self._copy_mode = copy_mode
         self.metadata = metadata
+        self._EPHEMERAL = True
         if data is not _EMPTY:
             self._save(data)
 

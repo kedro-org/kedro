@@ -52,10 +52,11 @@ def test_dataset_describe():
     assert actual == expected
 
 
-class TestLambdaDatasetLoad:
-    def test_ephemeral_attribute(self, mocker):
-        assert mocker._EPHEMERAL is False
+def test_ephemeral_attribute(self, mocked_dataset):
+    assert mocked_dataset._EPHEMERAL is False
 
+
+class TestLambdaDatasetLoad:
     def test_load_invocation(self, mocker):
         """Test the basic `load` method invocation"""
         mocked_load = mocker.Mock(return_value=42)

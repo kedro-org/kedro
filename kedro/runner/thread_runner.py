@@ -125,9 +125,7 @@ class ThreadRunner(AbstractRunner):
                         )
                     )
                 if not futures:
-                    if todo_nodes:
-                        msg = (todo_nodes, done_nodes, ready, done)
-                        raise AssertionError(msg)
+                    assert not todo_nodes, (todo_nodes, done_nodes, ready, done)  # noqa: S101
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:

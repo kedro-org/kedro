@@ -410,7 +410,7 @@ class DataCatalog:
         if version and isinstance(dataset, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
-            dataset = dataset._copy(_version=version)  # noqa: protected-access
+            dataset = dataset._copy(_version=version)
 
         return dataset
 

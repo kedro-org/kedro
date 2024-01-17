@@ -18,6 +18,7 @@
 * Removed setuptools dependency
 * Added `source_dir` explicitly in `pyproject.toml` for non-src layout project.
 * `MemoryDataset` entries are now included in free outputs.
+* Removed black dependency and replaced it functionality with `ruff format`.
 
 # Release 0.19.1
 

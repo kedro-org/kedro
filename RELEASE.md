@@ -14,7 +14,8 @@
 * Changed input format for tools option obtained from --config file from numbers to short names.
 
 ## Documentation changes
-* Added documentations about `bootstrap_project` and `configure_project`.
+* Added documentation about `bootstrap_project` and `configure_project`.
+* Added documentation about `kedro run` and hook execution order.
 
 ## Community contributions
 

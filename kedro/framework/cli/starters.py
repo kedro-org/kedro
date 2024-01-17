@@ -775,15 +775,19 @@ def _make_cookiecutter_args_and_fetch_template(
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+        # Ensures we use the same tag version of kedro for kedro-starters
+        cookiecutter_args["checkout"] = version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
+        cookiecutter_args["checkout"] = version
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
     elif example_pipeline == "True":
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
+        cookiecutter_args["checkout"] = version
     else:
         # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path

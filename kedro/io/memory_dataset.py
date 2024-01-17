@@ -12,7 +12,8 @@ _EMPTY = object()
 
 class MemoryDataset(AbstractDataset):
     """``MemoryDataset`` loads and saves data from/to an in-memory
-    Python object.
+    Python object. The `_EPHEMERAL` attribute is set to True to
+    indicate MemoryDataset's non-persistence.
 
     Example:
     ::
@@ -33,6 +34,8 @@ class MemoryDataset(AbstractDataset):
         >>> assert reloaded_data.equals(new_data)
 
     """
+
+    _EPHEMERAL = True
 
     def __init__(
         self,

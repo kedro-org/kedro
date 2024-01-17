@@ -22,4 +22,4 @@ jobs:
           git config --global user.name "Kedro"
 
       - name: Maybe merge to develop or raise a PR
-        run: ./tools/github_actions/merge.sh . "main" "develop" "${{ secrets.GITHUB_TOKEN }}"
+        run: ./tools/github_actions/merge.sh . "main" "develop" "${{ secrets.GH_TAGGING_TOKEN }}"

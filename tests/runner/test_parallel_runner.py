@@ -251,7 +251,7 @@ class LoggingDataset(AbstractDataset):
         return {}
 
 
-ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
+ParallelRunnerManager.register("LoggingDataset", LoggingDataset)
 
 
 @pytest.mark.parametrize("is_async", [False, True])
@@ -263,7 +263,6 @@ class TestParallelRunnerRelease:
         pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        # noqa: no-member
         catalog = DataCatalog(
             {
                 "in": runner._manager.LoggingDataset(log, "in", "stuff"),
@@ -287,7 +286,6 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        # noqa: no-member
         catalog = DataCatalog(
             {
                 "first": runner._manager.LoggingDataset(log, "first"),

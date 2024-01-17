@@ -577,7 +577,7 @@ class TestDataCatalogFromConfig:
 
     def test_idempotent_catalog(self, sane_config):
         """Test that data catalog instantiations are idempotent"""
-        _ = DataCatalog.from_config(**sane_config)  # NOQA
+        _ = DataCatalog.from_config(**sane_config)
         catalog = DataCatalog.from_config(**sane_config)
         assert catalog
 

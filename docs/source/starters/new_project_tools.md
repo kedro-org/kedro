@@ -190,7 +190,7 @@ With these installed, you can then make use of the following commands to format 
 
 ```bash
 ruff format path/to/project/root
-black path/to/project/root --check
+ruff check path/to/project/root
 ```
 
 Though it has no impact on how your code works, linting is important for code quality because improves consistency, readability, debugging, and maintainability. To learn more about linting your Kedro projects, check our [linting documentation](../development/linting.md).

@@ -100,6 +100,8 @@ class LambdaDataset(AbstractDataset):
 
         """
 
+        self._EPHEMERAL = False
+
         for name, value in [
             ("load", load),
             ("save", save),

@@ -20,6 +20,8 @@ class SharedMemoryDataset(AbstractDataset):
             manager: An instance of multiprocessing manager for shared objects.
 
         """
+        self._EPHEMERAL = True
+
         if manager:
             self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore[attr-defined]
         else:

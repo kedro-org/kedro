@@ -1509,10 +1509,6 @@ class TestConvertToolNamesToNumbers:
         result = _convert_tool_short_names_to_numbers(selected_tools)
         assert result == ["1", "2", "4"]
 
-    def test_convert_tool_short_names_to_numbers_with_none(self):
-        result = _convert_tool_short_names_to_numbers(None)
-        assert result == []
-
     def test_convert_tool_short_names_to_numbers_with_empty_string(self):
         selected_tools = ""
         result = _convert_tool_short_names_to_numbers(selected_tools)

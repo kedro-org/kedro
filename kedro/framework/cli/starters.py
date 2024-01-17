@@ -570,7 +570,7 @@ def _get_extra_context(  # noqa: PLR0913
     return extra_context
 
 
-def _convert_tool_short_names_to_numbers(selected_tools: str | None) -> list:
+def _convert_tool_short_names_to_numbers(selected_tools: str) -> list:
     """Prepares tools selection from the CLI or config input to the correct format
     to be put in the project configuration, if it exists.
     Replaces tool strings with the corresponding prompt number.
@@ -583,7 +583,7 @@ def _convert_tool_short_names_to_numbers(selected_tools: str | None) -> list:
         String with the numbers corresponding to the desired tools, or
         None in case the --tools flag was not used.
     """
-    if selected_tools is None or selected_tools.lower() == "none":
+    if selected_tools.lower() == "none":
         return []
     if selected_tools.lower() == "all":
         return list(NUMBER_TO_TOOLS_NAME.keys())
@@ -635,21 +635,15 @@ def _fetch_validate_parse_config_from_file(
     """
     try:
         with open(config_path, encoding="utf-8") as config_file:
-            config_input = yaml.safe_load(config_file)
+            config: dict[str, str] = yaml.safe_load(config_file)
 
         if KedroCliError.VERBOSE_ERROR:
             click.echo(config_path + ":")
-            click.echo(yaml.dump(config_input, default_flow_style=False))
+            click.echo(yaml.dump(config, default_flow_style=False))
     except Exception as exc:
         raise KedroCliError(
             f"Failed to generate project: could not load config at {config_path}."
         ) from exc
-
-    config = (
-        {str(key): str(val) for key, val in config_input.items()}
-        if config_input
-        else {}
-    )
 
     if starter_alias and ("tools" in config or "example_pipeline" in config):
         raise KedroCliError(
@@ -857,7 +851,8 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
             message = f"'{start}-{end}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
-        if int(end) > max([int(num) for num in NUMBER_TO_TOOLS_NAME]):
+        # safeguard to prevent passing of excessively large intervals that could cause freezing:
+        if int(end) > len(NUMBER_TO_TOOLS_NAME):
             message = f"'{start}-{end}' is an invalid range for project tools.\n{end} is too large."
             click.secho(message, fg="red", err=True)
             sys.exit(1)

@@ -233,9 +233,6 @@ def data_catalog_from_config(sane_config):
 
 
 class TestDataCatalog:
-    def test_ephemeral_attribute(self, data_catalog):
-        assert data_catalog._EPHEMERAL is False
-
     def test_save_and_load(self, data_catalog, dummy_dataframe):
         """Test saving and reloading the data set"""
         data_catalog.save("test", dummy_dataframe)

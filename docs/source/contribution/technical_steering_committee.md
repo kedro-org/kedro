@@ -56,7 +56,6 @@ We look for commitment markers who can do the following:
 | Name                                                     | Organisation                                                                            |
 |----------------------------------------------------------|---------------------------------------------------------------------------------------- |
 | [Ahdra Merali](https://github.com/AhdraMeraliQB)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Andrew Mackay](https://github.com/Mackay031)            | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Antony Milne](https://github.com/antonymilne)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Claypot AI](https://www.claypot.ai)                                                    |
@@ -87,6 +86,7 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 
 Former core team members with significant contributions include
 [Amanda Koh](https://github.com/amandakys),
+[Andrew Mackay](https://github.com/Mackay031),
 [Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
 [Anton Kirilenko](https://github.com/Flid),
 [Cvetanka Nechevska](https://github.com/cvetankanechevska),

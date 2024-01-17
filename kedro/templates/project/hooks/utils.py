@@ -7,8 +7,8 @@ from pre_commit_hooks.requirements_txt_fixer import fix_requirements
 current_dir = Path.cwd()
 
 # Requirements for linting tools
-lint_requirements = "black~=22.0\nruff~=0.0.290\n"  # For requirements.txt
-lint_pyproject_requirements = ["tool.ruff"]  # For pyproject.toml
+lint_requirements = "ruff~=0.1.8\n"  # For requirements.txt
+lint_pyproject_requirements = ["tool.ruff", "tool.ruff.format"]  # For pyproject.toml
 
 # Requirements and configurations for testing tools and coverage reporting
 test_requirements = (  # For requirements.txt

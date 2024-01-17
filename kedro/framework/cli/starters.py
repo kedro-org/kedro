@@ -892,9 +892,19 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]) -> No
     """
     # noqa: import-outside-toplevel
     from cookiecutter.main import cookiecutter  # for performance reasons
+    from cookiecutter.exceptions import RepositoryCloneFailed
 
     try:
         result_path = cookiecutter(template=template_path, **cookiecutter_args)
+    except RepositoryCloneFailed:
+        click.secho("Specified branch or tag not found, falling back to 'main' branch.", fg="yellow")
+        cookiecutter_args["checkout"] = "main"
+        try:
+            result_path = cookiecutter(template=template_path, **cookiecutter_args)
+        except Exception as exc:
+            raise KedroCliError(
+                "Failed to generate project when running cookiecutter."
+            ) from exc
     except Exception as exc:
         raise KedroCliError(
             "Failed to generate project when running cookiecutter."

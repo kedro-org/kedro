@@ -34,13 +34,13 @@ def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
     try:
         res = subprocess.check_output(
             ["git", "rev-parse", "--short", "HEAD"],  # noqa: S603, S607
-            cwd=project_path,
+            cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data: dict[str, Any] = {"commit_sha": res.decode().strip()}
         git_status_res = subprocess.check_output(
             ["git", "status", "--short"],  # noqa: S603, S607
-            cwd=project_path,
+            cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data["dirty"] = bool(git_status_res.decode().strip())

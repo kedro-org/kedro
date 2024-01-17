@@ -61,7 +61,6 @@ OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be sto
 CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def project_group() -> None:  # pragma: no cover
     pass
@@ -197,7 +196,7 @@ def package(metadata: ProjectMetadata) -> None:
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-def run(  # noqa: PLR0913,unused-argument,too-many-locals
+def run(  # noqa: PLR0913
     tags: str,
     env: str,
     runner: str,

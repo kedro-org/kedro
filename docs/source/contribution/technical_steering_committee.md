@@ -76,7 +76,6 @@ We look for commitment markers who can do the following:
 | [Sajid Alam](https://github.com/SajidAlamQB)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Stephanie Kaiser](https://github.com/stephkaiser)       | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Tynan DeBold](https://github.com/tynandebold)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Vladimir Nikolic](https://github.com/vladimir-mck)      | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Yetunde Dada](https://github.com/yetudada)              | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) |
 
@@ -105,7 +104,8 @@ Former core team members with significant contributions include
 [Mehdi Naderi Varandi](https://github.com/MehdiNV),
 [Nasef Khan](https://github.com/nakhan98),
 [Richard Westenra](https://github.com/richardwestenra),
-[Susanna Wong](https://github.com/studioswong) and
+[Susanna Wong](https://github.com/studioswong),
+[Vladimir Nikolic](https://github.com/vladimir-mck) and
 [Zain Patel](https://github.com/mzjp2).
 
 ## Application process

@@ -71,7 +71,7 @@ class ConfirmNotUniqueError(Exception):
     pass
 
 
-class Pipeline:  # noqa: too-many-public-methods
+class Pipeline:
     """A ``Pipeline`` defined as a collection of ``Node`` objects. This class
     treats nodes as part of a graph representation and provides inputs,
     outputs and execution order.

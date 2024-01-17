@@ -10,6 +10,8 @@ from kedro.io.core import AbstractDataset, DatasetError
 class SharedMemoryDataset(AbstractDataset):
     """``SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager."""
 
+    _EPHEMERAL = True
+
     def __init__(self, manager: SyncManager | None = None):
         """Creates a new instance of ``SharedMemoryDataset``,
         and creates shared MemoryDataset attribute.

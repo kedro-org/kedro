@@ -114,8 +114,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     """
 
     """
-    Datasets are persistent by default. user-defined Datasets that
-    are not made to be persistent, such as instances o MemoryDataset,
+    Datasets are persistent by default. User-defined datasets that
+    are not made to be persistent, such as instances of `MemoryDataset`,
     need to change the `_EPHEMERAL` attribute to 'True'.
     """
     _EPHEMERAL = False

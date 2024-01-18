@@ -209,6 +209,15 @@ You don't need to restart the kernel for the `catalog`, `context`, `pipelines` a
 
 For more details, run `%reload_kedro?`.
 
+#### Line magic function `%reload_kedro` not found.
+If you start your Jupyter instance with `kedro jupyter notebook/lab/setup` command, this command should be available whenever you start a notebook with the Kedro kernel.
+
+To fix this, you just need to start your notebook with one of the `kedro jupyter` command. Alternatively, you can always include an extra line at the top of your notebook
+`%load_ext kedro.ipython`, this get run automatically if your kernel is set up properly.
+
+After running this command, you should see `%reload_kedro` and `%load_node` are available to use.
+
+
 ## How to use tags to convert functions from Jupyter notebooks into Kedro nodes
 
 You can use the notebook to write experimental code for your Kedro project. If you later want to convert functions you've written to Kedro nodes, you can do this using `node` tags to export them to a Python file. Say you have the following code in your notebook:

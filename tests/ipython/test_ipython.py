@@ -300,14 +300,14 @@ class TestProjectPathResolution:
 
 
 class TestLoadNodeMagic:
-    def test_import_helper_function_from_same_file():
+    def test_import_helper_function_from_same_file(self):
         """function body can refer to function other than the import statements but helper function
         in the body
         """
-        ...
+        pass
 
-    def test_node_inputs_match_function_signature():
+    def test_node_inputs_match_function_signature(self):
         """node input names should match with function signature.
         Usually they are the same but not necessary.
         """
-        ...
+        pass

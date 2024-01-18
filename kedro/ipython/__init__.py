@@ -10,7 +10,7 @@ import sys
 import typing
 from itertools import dropwhile
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import IPython
 from IPython.core.magic import needs_local_scope, register_line_magic
@@ -26,6 +26,7 @@ from kedro.framework.project import (
 )
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
+from kedro.pipeline.node import Node
 
 logger = logging.getLogger(__name__)
 
@@ -187,7 +188,7 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     return None
 
 
-# @needs_local_scope
+@typing.no_type_check
 @magic_arguments()
 @argument(
     "node",
@@ -196,14 +197,14 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     nargs="?",
     default=None,
 )
-def magic_load_node(node):
+def magic_load_node(node: str) -> None:
     """The line magic %load_node debug=True"""
     cells = _load_node(node)
     from ipylab import JupyterFrontEnd
 
     app = JupyterFrontEnd()
 
-    def _create_cell_with_text(text):
+    def _create_cell_with_text(text: str) -> None:
         app.commands.execute("notebook:insert-cell-below")
         app.commands.execute("notebook:replace-selection", {"text": text})
 
@@ -211,7 +212,7 @@ def magic_load_node(node):
         _create_cell_with_text(cell)
 
 
-def _load_node(node_name):
+def _load_node(node_name: str) -> list[str]:
     node = _find_node(node_name)
     node_func = node.func
     node_inputs = _prepare_node_inputs(node)
@@ -226,41 +227,43 @@ def _load_node(node_name):
     return cells
 
 
-def _find_node(name):
-    from kedro.framework.project import pipelines
-
+def _find_node(node_name: str) -> Node:
     for pipeline in pipelines.values():
         try:
-            return pipeline.filter(node_names=[name]).nodes[0]
+            found_node: Node = pipeline.filter(node_names=[node_name]).nodes[0]
+            return found_node
         except ValueError:
             continue
-    else:
-        raise ValueError(f"Node {name} is not found in any pipelines.")
+    # If reached the node was not found in the project
+    raise ValueError(f"Node {node_name} is not found in any pipelines.")
 
 
-def _prepare_imports(node_func):
+def _prepare_imports(node_func: Callable) -> str:
     """Prepare the import statements"""
     python_file = inspect.getsourcefile(node_func)
-    is_import_statement = True
-    import_statement = []
+    # Confirm source file was found
+    if python_file:
+        is_import_statement = True
+        import_statement = []
+        with open(python_file) as file:
+            while is_import_statement:
+                line = file.readline()
+                if (
+                    line.startswith("\n")
+                    or line.startswith("from")
+                    or line.startswith("import")
+                ):
+                    import_statement.append(line)
+                else:
+                    is_import_statement = False
+        # Cleaning trailing \n if necessary
+        clean_imports = "".join(import_statement).strip()
+        return clean_imports
+    else:
+        raise FileNotFoundError(f"Could not find {node_func.__name__}")
 
-    with open(python_file) as file:
-        while is_import_statement:
-            line = file.readline()
-            if (
-                line.startswith("\n")
-                or line.startswith("from")
-                or line.startswith("import")
-            ):
-                import_statement.append(line)
-            else:
-                is_import_statement = False
-    # Cleaning trailing \n if necessary
-    import_statement = "".join(import_statement).strip()
-    return import_statement
 
-
-def _prepare_node_inputs(node):
+def _prepare_node_inputs(node: Node) -> str:
     node_func = node.func
     signature = inspect.signature(node_func)
 
@@ -273,23 +276,24 @@ def _prepare_node_inputs(node):
     return statement
 
 
-def get_function_body(func):
+def get_function_body(func: Callable) -> str:
     # https://stackoverflow.com/questions/38050649/getting-a-python-functions-source-code-without-the-definition-lines
-    source_lines = inspect.getsourcelines(func)[0]
-    source_lines = dropwhile(lambda x: x.startswith("@"), source_lines)
-    line = next(source_lines).strip()
+    all_source_lines = inspect.getsourcelines(func)[0]
+    # Remove any decorators
+    func_lines = dropwhile(lambda x: x.startswith("@"), all_source_lines)
+    line: str = next(func_lines).strip()
     if not line.startswith("def "):
         return line.rsplit(":")[-1].strip()
     elif not line.endswith(":"):
-        for line in source_lines:
-            line = line.strip()
-            if line.endswith(":"):
+        for line in func_lines:
+            stripped_line = line.strip()
+            if stripped_line.endswith(":"):
                 break
     # Handle functions that are not one-liners
-    first_line = next(source_lines)
+    first_line = next(func_lines)
     # Find the indentation of the first line
     indentation = len(first_line) - len(first_line.lstrip())
     body = "".join(
-        [first_line[indentation:]] + [line[indentation:] for line in source_lines]
+        [first_line[indentation:]] + [line[indentation:] for line in func_lines]
     )
     return body

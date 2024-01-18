@@ -1362,8 +1362,8 @@ class TestToolsAndExampleFromCLI:
         else:
             assert "You have selected no project tools" in result.output
         assert (
-                "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
-                in result.output
+            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            in result.output
         )
         _clean_up_project(Path("./new-kedro-project"))
 

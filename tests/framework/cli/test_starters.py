@@ -1352,25 +1352,6 @@ class TestToolsAndExampleFromCLI:
             input=_make_cli_prompt_input_without_tools(),
         )
 
-        tools = _convert_tool_names_to_numbers(selected_tools=tools)
-        if not tools:
-            tools = ""
-
-        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
-        _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
-        assert "You have selected the following project tools:" in result.output
-        assert (
-            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
-            in result.output
-        )
-        _clean_up_project(Path("./new-kedro-project"))
-
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new", "--tools", tools, "--example", example_pipeline],
-            input=_make_cli_prompt_input_without_tools(),
-        )
-
         tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
         tools = ",".join(tools) if tools != [] else "none"
 
@@ -1381,8 +1362,8 @@ class TestToolsAndExampleFromCLI:
         else:
             assert "You have selected no project tools" in result.output
         assert (
-            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
-            in result.output
+                "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+                in result.output
         )
         _clean_up_project(Path("./new-kedro-project"))
 

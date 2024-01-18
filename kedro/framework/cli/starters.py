@@ -36,7 +36,7 @@ TOOLS_ARG_HELP = """
 Select which tools you'd like to include. By default, none are included.\n
 
 Tools\n
-1) Linting: Provides a basic linting setup with Black and Ruff\n
+1) Linting: Provides a basic linting setup with Ruff\n
 2) Testing: Provides basic testing setup with pytest\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
@@ -69,7 +69,7 @@ EXAMPLE_ARG_HELP = "Enter y to enable, n to disable the example pipeline."
 
 
 @define(order=True)
-class KedroStarterSpec:  # noqa: too-few-public-methods
+class KedroStarterSpec:
     """Specification of custom kedro starter template
     Args:
         alias: alias of the starter which shows up on `kedro starter list` and is used
@@ -239,7 +239,6 @@ def _print_selection_and_prompt_info(
         )
 
 
-# noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli() -> None:  # pragma: no cover
     pass
@@ -391,7 +390,6 @@ def _get_cookiecutter_dir(
     clones it to ``tmpdir``; if template_path is a file path then directly uses that
     path without copying anything.
     """
-    # noqa: import-outside-toplevel
     from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
     from cookiecutter.repository import determine_repo_dir  # for performance reasons
 
@@ -458,7 +456,6 @@ def _get_prompts_required_and_clear_from_CLI_provided(
 
 def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
-    # noqa: import-outside-toplevel
     import git
 
     try:
@@ -658,7 +655,6 @@ def _fetch_config_from_user_prompts(
         Configuration for starting a new project. This is passed as ``extra_context``
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
-    # noqa: import-outside-toplevel
     from cookiecutter.environment import StrictEnvironment
     from cookiecutter.prompt import read_user_variable, render_variable
 
@@ -686,7 +682,6 @@ def _fetch_config_from_user_prompts(
 
 
 def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path) -> OrderedDict:
-    # noqa: import-outside-toplevel
     from cookiecutter.generate import generate_context
 
     cookiecutter_context = generate_context(cookiecutter_dir / "cookiecutter.json")
@@ -739,15 +734,20 @@ def _make_cookiecutter_args_and_fetch_template(
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+        # Ensures we use the same tag version of kedro for kedro-starters
+        cookiecutter_args["checkout"] = version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
+        cookiecutter_args["checkout"] = version
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        cookiecutter_args["checkout"] = version
     elif example_pipeline:
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
+        cookiecutter_args["checkout"] = version
     else:
         # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path
@@ -885,7 +885,6 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]) -> No
     Raises:
         KedroCliError: If it fails to generate a project.
     """
-    # noqa: import-outside-toplevel
     from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
@@ -954,7 +953,7 @@ def _remove_readonly(
 
 
 def _starter_spec_to_dict(
-    starter_specs: dict[str, KedroStarterSpec]
+    starter_specs: dict[str, KedroStarterSpec],
 ) -> dict[str, dict[str, str]]:
     """Convert a dictionary of starters spec to a nicely formatted dictionary"""
     format_dict: dict[str, dict[str, str]] = {}

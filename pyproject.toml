@@ -53,12 +53,9 @@ dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
 test = [
-    "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
-    "blacken-docs==1.9.2",
-    "black~=22.0",
     "coverage[toml]",
-    "import-linter==1.12.1",
+    "import-linter==2.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
     "jupyterlab_server>=2.11.1",
@@ -66,7 +63,7 @@ test = [
     "jupyter~=1.0",
     "kedro-datasets",
     "moto==1.3.7; python_version < '3.10'",
-    "moto==4.1.12; python_version >= '3.10'",
+    "moto==4.2.13; python_version >= '3.10'",
     "mypy~=1.0",
     "pandas~=2.0",
     "pip-tools>=6.5",
@@ -75,7 +72,7 @@ test = [
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyproj~=3.0",
     "pytest-cov~=3.0",
-    "pytest-mock>=1.7.1, <2.0",
+    "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
     "s3fs>=2021.4, <2024.1",  # Upper bound set arbitrarily, to be reassessed in early 2024
@@ -89,9 +86,9 @@ test = [
     "types-toposort"
 ]
 docs = [
-    "docutils<0.18",
+    "docutils<0.21",
     "sphinx>=5.3,<7.3",
-    "sphinx_rtd_theme==1.2.0",
+    "sphinx_rtd_theme==2.0.0",
     # Regression on sphinx-autodoc-typehints 1.21
     # that creates some problematic docstrings
     "sphinx-autodoc-typehints==1.20.2",
@@ -131,6 +128,7 @@ version = {attr = "kedro.__version__"}
 
 [tool.ruff.format]
 exclude = ["**/templates", "features/steps/test_starter"]
+docstring-code-format = true
 
 [tool.coverage.report]
 fail_under = 100
@@ -234,15 +232,16 @@ select = [
     "UP",  # pyupgrade
     "PL",  # Pylint
     "T201", # Print Statement
+    "S", # flake8-bandit
 ]
-ignore = ["E501"]  # ruff format takes care of line-too-long
+ignore = ["E501"]
 
 [tool.ruff.isort]
 known-first-party = ["kedro"]
 
 [tool.ruff.per-file-ignores]
 "{tests,docs}/*" = ["PLR2004","PLR0913"]
-"{tests,docs,tools,static,features,docs}/*" = ["T201"]  # Check print statement for kedro/ only
+"{tests,docs,tools,static,features,docs}/*" = ["T201", "S101", "S108"]  # Check print statement for kedro/ only
 
 [tool.mypy]
 ignore_missing_imports = true

@@ -99,9 +99,6 @@ class LambdaDataset(AbstractDataset):
             DatasetError: If a method is specified, but is not a Callable.
 
         """
-
-        self._EPHEMERAL = False
-
         for name, value in [
             ("load", load),
             ("save", save),

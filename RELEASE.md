@@ -24,6 +24,10 @@
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
 * Changed input format for tools option obtained from --config file from numbers to short names.
 
+## Documentation changes
+* Added documentation about `bootstrap_project` and `configure_project`.
+* Added documentation about `kedro run` and hook execution order.
+
 # Release 0.19.1
 
 ## Bug fixes and other changes

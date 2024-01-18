@@ -64,5 +64,4 @@ jobs:
       - name: pip freeze
         run: pip freeze
       - name: Run e2e tests
-        run: |
-          make e2e-tests
+        run: make e2e-tests

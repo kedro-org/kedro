@@ -20,6 +20,10 @@
 * `MemoryDataset` entries are now included in free outputs.
 * Removed black dependency and replaced it functionality with `ruff format`.
 
+## Breaking changes to the API
+* Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
+* Changed input format for tools option obtained from --config file from numbers to short names.
+
 # Release 0.19.1
 
 ## Bug fixes and other changes

@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          token: ${{ secrets.GH_TAGGING_TOKEN }}
 
       - name: Set git email and name
         run: |
@@ -22,4 +23,4 @@ jobs:
           git config --global user.name "Kedro"
 
       - name: Maybe merge to develop or raise a PR
-        run: ./tools/github_actions/merge.sh . "main" "develop" "${{ secrets.GITHUB_TOKEN }}"
+        run: ./tools/github_actions/merge.sh . "main" "develop" "${{ secrets.GH_TAGGING_TOKEN }}"

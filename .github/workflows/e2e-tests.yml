@@ -14,7 +14,6 @@ on:
 env:
   COLUMNS: 120
   LINES: 25
-  CI_ENVIRONMENT: true
 
 jobs:
   e2e-tests:

@@ -171,7 +171,7 @@ def create_config_file_without_starter(context):
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "tools": "1-5",
+        "tools": "lint, test, log, docs, data",
         "project_name": context.project_name,
         "example_pipeline": "no",
         "repo_name": context.project_name,
@@ -189,14 +189,12 @@ def create_config_file_with_tools(context, tools):
     It takes a custom tools list and sets example prompt to `n`.
     """
 
-    tools_str = tools if tools != "none" else ""
-
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "tools": tools_str,
+        "tools": tools,
         "example_pipeline": "n",
         "project_name": context.project_name,
         "repo_name": context.project_name,

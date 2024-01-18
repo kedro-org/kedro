@@ -335,9 +335,8 @@ class TestParseToolsInput:
     )
     def test_parse_tools_range_too_high(self, input, right_border, capsys):
         with pytest.raises(SystemExit):
-            selected = _parse_tools_input(input)
-            _validate_tool_selection(selected)
-        message = f"'{input}' is an invalid range for project tools.\n{right_border} is too large."
+            _parse_tools_input(input)
+        message = f"'{right_border}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
     @pytest.mark.parametrize(
@@ -1073,23 +1072,15 @@ class TestToolsAndExampleFromUserPrompts:
         )
 
     @pytest.mark.parametrize(
-        "input,right_border",
-        [("3-9", "9"), ("3-10000", "10000")],
-    )
-    def test_invalid_tools_range_too_high(self, fake_kedro_cli, input, right_border):
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new"],
-            input=_make_cli_prompt_input(tools=input),
-        )
-
-        assert result.exit_code != 0
-        message = f"'{input}' is an invalid range for project tools.\n{right_border} is too large."
-        assert message in result.output
-
-    @pytest.mark.parametrize(
         "input,last_invalid",
-        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("99", "99")],
+        [
+            ("0,3,5", "0"),
+            ("1,3,9", "9"),
+            ("0-4", "0"),
+            ("99", "99"),
+            ("3-9", "9"),
+            ("3-10000", "10000"),
+        ],
     )
     def test_invalid_tools_selection(self, fake_kedro_cli, input, last_invalid):
         result = CliRunner().invoke(

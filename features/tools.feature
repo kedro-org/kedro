@@ -9,4 +9,3 @@ Feature: New Kedro project with tools
     Given I have prepared a config file with tools "1,2,3,4,5"
     When I run a non-interactive kedro new without starter
     Then the expected tool directories and files should be created with "1,2,3,4,5"
-    

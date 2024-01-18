@@ -186,7 +186,7 @@ def create_config_file_without_starter(context):
 def create_config_file_with_tools(context, tools):
     """Behave step to create a temporary config file
     (given the existing temp directory) and store it in the context.
-    It takes a custom tools list and sets example prompt to `y`.
+    It takes a custom tools list and sets example prompt to `n`.
     """
 
     tools_str = tools if tools != "none" else ""
@@ -197,7 +197,7 @@ def create_config_file_with_tools(context, tools):
     context.package_name = context.project_name.replace("-", "_")
     config = {
         "tools": tools_str,
-        "example_pipeline": "y",
+        "example_pipeline": "n",
         "project_name": context.project_name,
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
@@ -312,7 +312,7 @@ def create_project_with_starter(context, starter):
 def create_project_without_starter(context):
     """Behave step to run kedro new given the config I previously created."""
     res = run(
-        [context.kedro, "new", "-c", str(context.config_file), "--verbose"],
+        [context.kedro, "new", "-c", str(context.config_file)],
         env=context.env,
         cwd=context.temp_dir,
     )

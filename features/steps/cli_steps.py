@@ -512,7 +512,9 @@ def check_created_project_structure_from_tools(context, tools):
         assert is_created(path), f"{path} does not exist"
 
     tools_list = (
-        tools.split(",") if tools != "all" else ["lint", "test", "log", "docs", "data", "pyspark", "viz"]
+        tools.split(",")
+        if tools != "all"
+        else ["lint", "test", "log", "docs", "data", "pyspark", "viz"]
     )
 
     if "lint" in tools_list:  # lint tool

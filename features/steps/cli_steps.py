@@ -312,7 +312,7 @@ def create_project_with_starter(context, starter):
 def create_project_without_starter(context):
     """Behave step to run kedro new given the config I previously created."""
     res = run(
-        [context.kedro, "new", "-c", str(context.config_file)],
+        [context.kedro, "new", "-c", str(context.config_file), "--verbose"],
         env=context.env,
         cwd=context.temp_dir,
     )

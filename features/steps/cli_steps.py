@@ -304,6 +304,10 @@ def create_project_with_starter(context, starter):
         env=context.env,
         cwd=context.temp_dir,
     )
+
+    # prevent telemetry from prompting for input during e2e tests
+    telemetry_file = context.root_project_dir / ".telemetry"
+    telemetry_file.write_text("consent: false", encoding="utf-8")
     assert res.returncode == OK_EXIT_CODE, res
 
 
@@ -732,3 +736,37 @@ def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
     )
     with pyproject_toml_path.open(mode="a") as file:
         file.write(project_toml_str)
+
+
+@given('I have executed the magic command "{command}"')
+@when('I execute the magic command "{command}"')
+def exec_magic_command(context, command):
+    """Execute Kedro target."""
+    # split_command = command.split()
+    # cmd = [context.kedro] + split_command
+    curr_dir = Path(__file__).parent
+    run_notebook = context.root_project_dir / "notebooks" / "load_node.ipynb"
+    shutil.copyfile(
+        str(curr_dir / "test_notebook" / "load_node.ipynb"), str(run_notebook)
+    )
+
+    print(run_notebook.exists())
+    util.execute_notebook(str(run_notebook))
+    with open(run_notebook) as f:
+        context.notebook = f.read()
+
+
+@then('the notebook should show "{pattern}"')
+def match_pattern_in_notebook(context, pattern):
+    """This is a very simple function to match pattern in an exeucted notebook.
+    Noted that the proper way to read a notebook is using `nbformat.read` and parse
+    the output corresponding. For now the test is simple and it tries to match a
+    specific keyword which is unlikely to collide. If you need to match generic
+    keywords it is better to parse the output as a JSON file instead of one big
+    string.
+    """
+    notebook = context.notebook
+
+    if pattern in notebook:
+        return True
+    raise ValueError(f"{pattern} is not found.")

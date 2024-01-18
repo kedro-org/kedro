@@ -14,6 +14,7 @@ on:
 env:
   COLUMNS: 120
   LINES: 25
+  CI_ENVIRONMENT: true
 
 jobs:
   e2e-tests:
@@ -27,8 +28,6 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{inputs.python-version}}
-      - name: Set CI environment variable
-        run: echo "CI_ENVIRONMENT=true" >> $GITHUB_ENV
       - name: Cache python packages for Linux
         if: inputs.os == 'ubuntu-latest'
         uses: actions/cache@v3
@@ -66,4 +65,5 @@ jobs:
       - name: pip freeze
         run: pip freeze
       - name: Run e2e tests
-        run: make e2e-tests
+        run: |
+          make e2e-tests

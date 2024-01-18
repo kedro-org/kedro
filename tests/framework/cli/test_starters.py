@@ -18,6 +18,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
     _convert_tool_short_names_to_numbers,
     _fetch_validate_parse_config_from_user_prompts,
+    _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
     _validate_tool_selection,
@@ -42,6 +43,14 @@ def mock_determine_repo_dir(mocker):
 @pytest.fixture
 def mock_cookiecutter(mocker):
     return mocker.patch("cookiecutter.main.cookiecutter")
+
+
+def mock_make_cookiecutter_args_and_fetch_template(*args, **kwargs):
+    cookiecutter_args, starter_path = _make_cookiecutter_args_and_fetch_template(
+        *args, **kwargs
+    )
+    cookiecutter_args["checkout"] = "main"  # Force the checkout to be "main"
+    return cookiecutter_args, starter_path
 
 
 def _clean_up_project(project_dir):
@@ -133,7 +142,6 @@ def _assert_requirements_ok(
         with open(requirements_file_path) as requirements_file:
             requirements = requirements_file.read()
 
-        assert "black" in requirements
         assert "ruff" in requirements
 
         pyproject_config = toml.load(pyproject_file_path)
@@ -144,6 +152,7 @@ def _assert_requirements_ok(
                     "show-fixes": True,
                     "select": ["F", "W", "E", "I", "UP", "PL", "T201"],
                     "ignore": ["E501"],
+                    "format": {"docstring-code-format": True},
                 }
             }
         }
@@ -1018,7 +1027,13 @@ class TestToolsAndExampleFromUserPrompts:
         ],
     )
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_and_example(
+        self, fake_kedro_cli, tools, example_pipeline, mocker
+    ):
+        mocker.patch(
+            "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
+            side_effect=mock_make_cookiecutter_args_and_fetch_template,
+        )
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
@@ -1161,8 +1176,15 @@ class TestToolsAndExampleFromConfigFile:
         ],
     )
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_and_example(
+        self, fake_kedro_cli, tools, example_pipeline, mocker
+    ):
         """Test project created from config."""
+        mocker.patch(
+            "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
+            side_effect=mock_make_cookiecutter_args_and_fetch_template,
+        )
+
         config = {
             "tools": tools,
             "project_name": "New Kedro Project",
@@ -1337,7 +1359,12 @@ class TestToolsAndExampleFromCLI:
         ],
     )
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_flag(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_flag(self, fake_kedro_cli, tools, example_pipeline, mocker):
+        mocker.patch(
+            "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
+            side_effect=mock_make_cookiecutter_args_and_fetch_template,
+        )
+        
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--tools", tools, "--example", example_pipeline],

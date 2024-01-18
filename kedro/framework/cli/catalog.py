@@ -23,7 +23,6 @@ def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     return KedroSession.create(**kwargs)
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def catalog_cli() -> None:  # pragma: no cover
     pass
@@ -34,7 +33,6 @@ def catalog() -> None:
     """Commands for working with catalog."""
 
 
-# noqa: too-many-locals,protected-access
 @catalog.command("list")
 @env_option
 @click.option(
@@ -173,7 +171,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
 
     catalog_datasets = {
         ds_name
-        for ds_name in context.catalog._datasets.keys()  # noqa: protected-access
+        for ds_name in context.catalog._datasets.keys()
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 

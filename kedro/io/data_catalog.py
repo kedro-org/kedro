@@ -32,9 +32,7 @@ CREDENTIALS_KEY = "credentials"
 WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
-def _get_credentials(
-    credentials_name: str, credentials: dict[str, Any]
-) -> dict[str, Any]:
+def _get_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
     """Return a set of credentials from the provided credentials dict.
 
     Args:
@@ -121,7 +119,7 @@ class _FrozenDatasets:
                 )
 
     # Don't allow users to add/change attributes on the fly
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
         msg = "Operation not allowed! "
         if key in self.__dict__:
             msg += "Please change datasets through configuration."
@@ -141,11 +139,11 @@ class DataCatalog:
 
     def __init__(  # noqa: PLR0913
         self,
-        datasets: dict[str, AbstractDataset] = None,
-        feed_dict: dict[str, Any] = None,
-        dataset_patterns: Patterns = None,
-        load_versions: dict[str, str] = None,
-        save_version: str = None,
+        datasets: dict[str, AbstractDataset] | None = None,
+        feed_dict: dict[str, Any] | None = None,
+        dataset_patterns: Patterns | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -197,16 +195,16 @@ class DataCatalog:
             self.add_feed_dict(feed_dict)
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
     @classmethod
     def from_config(
         cls,
         catalog: dict[str, dict[str, Any]] | None,
-        credentials: dict[str, dict[str, Any]] = None,
-        load_versions: dict[str, str] = None,
-        save_version: str = None,
+        credentials: dict[str, dict[str, Any]] | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
     ) -> DataCatalog:
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -316,7 +314,7 @@ class DataCatalog:
         )
 
     @staticmethod
-    def _is_pattern(pattern: str):
+    def _is_pattern(pattern: str) -> bool:
         """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
         return "{" in pattern
 
@@ -366,7 +364,10 @@ class DataCatalog:
         return len(result)
 
     def _get_dataset(
-        self, dataset_name: str, version: Version = None, suggest: bool = True
+        self,
+        dataset_name: str,
+        version: Version | None = None,
+        suggest: bool = True,
     ) -> AbstractDataset:
         matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
         if dataset_name not in self._datasets and matched_pattern:
@@ -409,11 +410,11 @@ class DataCatalog:
         if version and isinstance(dataset, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
-            dataset = dataset._copy(_version=version)  # noqa: protected-access
+            dataset = dataset._copy(_version=version)
 
         return dataset
 
-    def __contains__(self, dataset_name):
+    def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
         matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
         if dataset_name in self._datasets or matched_pattern:
@@ -448,7 +449,7 @@ class DataCatalog:
                 ) from exc
         return config
 
-    def load(self, name: str, version: str = None) -> Any:
+    def load(self, name: str, version: str | None = None) -> Any:
         """Loads a registered data set.
 
         Args:
@@ -548,7 +549,7 @@ class DataCatalog:
             return False
         return dataset.exists()
 
-    def release(self, name: str):
+    def release(self, name: str) -> None:
         """Release any cached data associated with a data set
 
         Args:
@@ -735,7 +736,7 @@ class DataCatalog:
             save_version=self._save_version,
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         return (self._datasets, self._dataset_patterns) == (
             other._datasets,
             other._dataset_patterns,
@@ -754,6 +755,6 @@ class DataCatalog:
         dataset = self._get_dataset(name)
 
         if hasattr(dataset, "confirm"):
-            dataset.confirm()  # type: ignore
+            dataset.confirm()
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")

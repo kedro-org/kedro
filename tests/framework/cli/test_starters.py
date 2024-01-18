@@ -13,13 +13,15 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (
-    _OFFICIAL_STARTER_SPECS,
+    _OFFICIAL_STARTER_SPECS_DICT,
     TEMPLATE_PATH,
     KedroStarterSpec,
-    _convert_tool_names_to_numbers,
+    _convert_tool_short_names_to_numbers,
+    _fetch_validate_parse_config_from_user_prompts,
+    _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
-    _validate_selection,
+    _validate_tool_selection,
 )
 
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
@@ -41,6 +43,14 @@ def mock_determine_repo_dir(mocker):
 @pytest.fixture
 def mock_cookiecutter(mocker):
     return mocker.patch("cookiecutter.main.cookiecutter")
+
+
+def mock_make_cookiecutter_args_and_fetch_template(*args, **kwargs):
+    cookiecutter_args, starter_path = _make_cookiecutter_args_and_fetch_template(
+        *args, **kwargs
+    )
+    cookiecutter_args["checkout"] = "main"  # Force the checkout to be "main"
+    return cookiecutter_args, starter_path
 
 
 def _clean_up_project(project_dir):
@@ -132,7 +142,6 @@ def _assert_requirements_ok(
         with open(requirements_file_path) as requirements_file:
             requirements = requirements_file.read()
 
-        assert "black" in requirements
         assert "ruff" in requirements
 
         pyproject_config = toml.load(pyproject_file_path)
@@ -143,6 +152,7 @@ def _assert_requirements_ok(
                     "show-fixes": True,
                     "select": ["F", "W", "E", "I", "UP", "PL", "T201"],
                     "ignore": ["E501"],
+                    "format": {"docstring-code-format": True},
                 }
             }
         }
@@ -220,6 +230,8 @@ def _assert_template_ok(
 
     if "y" in example_pipeline.lower():
         assert "It has been created with an example pipeline." in result.output
+    else:
+        assert "It has been created with an example pipeline." not in result.output
 
     generated_files = [
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
@@ -251,7 +263,7 @@ def test_starter_list(fake_kedro_cli):
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
 
     assert result.exit_code == 0, result.output
-    for alias in _OFFICIAL_STARTER_SPECS:
+    for alias in _OFFICIAL_STARTER_SPECS_DICT:
         assert alias in result.output
 
 
@@ -318,13 +330,23 @@ class TestParseToolsInput:
         assert message in capsys.readouterr().err
 
     @pytest.mark.parametrize(
+        "input,right_border",
+        [("3-9", "9"), ("3-10000", "10000")],
+    )
+    def test_parse_tools_range_too_high(self, input, right_border, capsys):
+        with pytest.raises(SystemExit):
+            _parse_tools_input(input)
+        message = f"'{right_border}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        assert message in capsys.readouterr().err
+
+    @pytest.mark.parametrize(
         "input,last_invalid",
-        [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0"), ("3-9", "9")],
+        [("0,3,5", "0"), ("1,3,8", "8"), ("0-4", "0")],
     )
     def test_parse_tools_invalid_selection(self, input, last_invalid, capsys):
         with pytest.raises(SystemExit):
             selected = _parse_tools_input(input)
-            _validate_selection(selected)
+            _validate_tool_selection(selected)
         message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
@@ -436,6 +458,14 @@ class TestNewFromUserPromptsValid:
             python_package="my_project",
         )
         _clean_up_project(Path("./my_custom_repo"))
+
+    def test_fetch_validate_parse_config_from_user_prompts_without_context(self):
+        required_prompts = {}
+        message = "No cookiecutter context available."
+        with pytest.raises(Exception, match=message):
+            _fetch_validate_parse_config_from_user_prompts(
+                prompts=required_prompts, cookiecutter_context=None
+            )
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -865,6 +895,7 @@ class TestNewWithStarterValid:
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             not in result.output
         )
+        assert "You have selected" not in result.output
         _assert_template_ok(result)
         _clean_up_project(Path("./new-kedro-project"))
 
@@ -990,36 +1021,18 @@ class TestToolsAndExampleFromUserPrompts:
             "1, 2, 3",
             "  1,  2, 3  ",
             "ALL",
-        ],
-    )
-    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new"],
-            input=_make_cli_prompt_input(
-                tools=tools, example_pipeline=example_pipeline
-            ),
-        )
-
-        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
-        _assert_requirements_ok(result, tools=tools)
-        assert "You have selected the following project tools:" in result.output
-        assert (
-            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
-            in result.output
-        )
-        _clean_up_project(Path("./new-kedro-project"))
-
-    @pytest.mark.parametrize(
-        "tools",
-        [
             "none",
             "",
         ],
     )
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_no_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_and_example(
+        self, fake_kedro_cli, tools, example_pipeline, mocker
+    ):
+        mocker.patch(
+            "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
+            side_effect=mock_make_cookiecutter_args_and_fetch_template,
+        )
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
@@ -1030,7 +1043,10 @@ class TestToolsAndExampleFromUserPrompts:
 
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools)
-        assert "You have selected no project tools" in result.output
+        if tools not in ("none", ""):
+            assert "You have selected the following project tools:" in result.output
+        else:
+            assert "You have selected no project tools" in result.output
         assert (
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             in result.output
@@ -1057,7 +1073,14 @@ class TestToolsAndExampleFromUserPrompts:
 
     @pytest.mark.parametrize(
         "input,last_invalid",
-        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("99", "99")],
+        [
+            ("0,3,5", "0"),
+            ("1,3,9", "9"),
+            ("0-4", "0"),
+            ("99", "99"),
+            ("3-9", "9"),
+            ("3-10000", "10000"),
+        ],
     )
     def test_invalid_tools_selection(self, fake_kedro_cli, input, last_invalid):
         result = CliRunner().invoke(
@@ -1119,29 +1142,40 @@ class TestToolsAndExampleFromConfigFile:
     @pytest.mark.parametrize(
         "tools",
         [
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "2,3,4",
-            "3-5",
-            "1,2,4-6",
-            "1,2,4-6,7",
-            "4-6,7",
-            "1, 2 ,4 - 6, 7",
-            "1-3,5-7",
+            "lint",
+            "test",
+            "tests",
+            "log",
+            "logs",
+            "docs",
+            "doc",
+            "data",
+            "pyspark",
+            "viz",
+            "tests,logs,doc",
+            "test,data,lint",
+            "log,docs,data,test,lint",
+            "log, docs, data, test, lint",
+            "log,       docs,     data,   test,     lint",
             "all",
-            "1, 2, 3",
-            "  1,  2, 3  ",
+            "LINT",
             "ALL",
+            "TEST, LOG, DOCS",
+            "test, DATA, liNt",
+            "none",
+            "NONE",
         ],
     )
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_and_example(
+        self, fake_kedro_cli, tools, example_pipeline, mocker
+    ):
         """Test project created from config."""
+        mocker.patch(
+            "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
+            side_effect=mock_make_cookiecutter_args_and_fetch_template,
+        )
+
         config = {
             "tools": tools,
             "project_name": "New Kedro Project",
@@ -1154,34 +1188,15 @@ class TestToolsAndExampleFromConfigFile:
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
 
-        _assert_template_ok(result, **config)
-        _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
-        assert "You have selected the following project tools:" in result.output
-        assert (
-            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
-            not in result.output
-        )
-        _clean_up_project(Path("./new-kedro-project"))
+        tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
+        tools = ",".join(tools) if tools != [] else "none"
 
-    @pytest.mark.parametrize("tools", ["none", "NONE", ""])
-    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_no_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
-        """Test project created from config."""
-        config = {
-            "tools": tools,
-            "project_name": "New Kedro Project",
-            "example_pipeline": example_pipeline,
-            "repo_name": "new-kedro-project",
-            "python_package": "new_kedro_project",
-        }
-        _write_yaml(Path("config.yml"), config)
-        result = CliRunner().invoke(
-            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
-        )
-
-        _assert_template_ok(result, **config)
+        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
-        assert "You have selected no project tools" in result.output
+        if tools not in ("none", "NONE", ""):
+            assert "You have selected the following project tools:" in result.output
+        else:
+            assert "You have selected no project tools" in result.output
         assert (
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             not in result.output
@@ -1190,7 +1205,7 @@ class TestToolsAndExampleFromConfigFile:
 
     @pytest.mark.parametrize(
         "bad_input",
-        ["bad input", "-1", "3-", "1 1"],
+        ["bad input", "0,3,5", "1,3,9", "llint", "tes", "test, lin"],
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
         """Test project created from config."""
@@ -1207,9 +1222,8 @@ class TestToolsAndExampleFromConfigFile:
         )
 
         assert result.exit_code != 0
-        assert "is an invalid value for project tools." in result.output
         assert (
-            "Please select valid options for tools using comma-separated values, ranges, or 'all/none'.\n"
+            "Please select from the available tools: lint, test, log, docs, data, pyspark, viz, all, none"
             in result.output
         )
 
@@ -1242,31 +1256,10 @@ class TestToolsAndExampleFromConfigFile:
         )
 
     @pytest.mark.parametrize(
-        "input,last_invalid",
-        [("0,3,5", "0"), ("1,3,9", "9"), ("0-4", "0"), ("3-9", "9"), ("99", "99")],
-    )
-    def test_invalid_tools_selection(self, fake_kedro_cli, input, last_invalid):
-        config = {
-            "tools": input,
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
-        _write_yaml(Path("config.yml"), config)
-        result = CliRunner().invoke(
-            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
-        )
-
-        assert result.exit_code != 0
-        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
-        assert message in result.output
-
-    @pytest.mark.parametrize(
         "input",
-        ["5-2", "3-1"],
+        ["lint,all", "test,none", "all,none"],
     )
-    def test_invalid_tools_range(self, fake_kedro_cli, input):
+    def test_invalid_tools_flag_combination(self, fake_kedro_cli, input):
         config = {
             "tools": input,
             "project_name": "My Project",
@@ -1280,8 +1273,10 @@ class TestToolsAndExampleFromConfigFile:
         )
 
         assert result.exit_code != 0
-        message = f"'{input}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
-        assert message in result.output
+        assert (
+            "Tools options 'all' and 'none' cannot be used with other options"
+            in result.output
+        )
 
     @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
     def test_valid_example(self, fake_kedro_cli, example_pipeline):
@@ -1350,51 +1345,32 @@ class TestToolsAndExampleFromCLI:
             "ALL",
             "TEST, LOG, DOCS",
             "test, DATA, liNt",
-        ],
-    )
-    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_flag(self, fake_kedro_cli, tools, example_pipeline):
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new", "--tools", tools, "--example", example_pipeline],
-            input=_make_cli_prompt_input_without_tools(),
-        )
-
-        tools = _convert_tool_names_to_numbers(selected_tools=tools)
-        if not tools:
-            tools = ""
-
-        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
-        _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
-        assert "You have selected the following project tools:" in result.output
-        assert (
-            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
-            in result.output
-        )
-        _clean_up_project(Path("./new-kedro-project"))
-
-    @pytest.mark.parametrize(
-        "tools",
-        [
             "none",
             "NONE",
         ],
     )
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_tools_flag_none(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_flag(self, fake_kedro_cli, tools, example_pipeline, mocker):
+        mocker.patch(
+            "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
+            side_effect=mock_make_cookiecutter_args_and_fetch_template,
+        )
+
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--tools", tools, "--example", example_pipeline],
             input=_make_cli_prompt_input_without_tools(),
         )
 
-        tools = _convert_tool_names_to_numbers(selected_tools=tools)
-        if not tools:
-            tools = ""
+        tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
+        tools = ",".join(tools) if tools != [] else "none"
 
         _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
-        assert "You have selected no project tools" in result.output
+        if tools not in ("none", "NONE"):
+            assert "You have selected the following project tools:" in result.output
+        else:
+            assert "You have selected no project tools" in result.output
         assert (
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             in result.output
@@ -1515,81 +1491,77 @@ class TestParseYesNoToBools:
 
 
 class TestValidateSelection:
-    def test_validate_selection_valid(self):
+    def test_validate_tool_selection_valid(self):
         tools = ["1", "2", "3", "4"]
-        assert _validate_selection(tools) is None
+        assert _validate_tool_selection(tools) is None
 
-    def test_validate_selection_invalid_single_tool(self, capsys):
+    def test_validate_tool_selection_invalid_single_tool(self, capsys):
         tools = ["8"]
         with pytest.raises(SystemExit):
-            _validate_selection(tools)
+            _validate_tool_selection(tools)
         message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
-    def test_validate_selection_invalid_multiple_tools(self, capsys):
+    def test_validate_tool_selection_invalid_multiple_tools(self, capsys):
         tools = ["8", "10", "15"]
         with pytest.raises(SystemExit):
-            _validate_selection(tools)
+            _validate_tool_selection(tools)
         message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
-    def test_validate_selection_mix_valid_invalid_tools(self, capsys):
+    def test_validate_tool_selection_mix_valid_invalid_tools(self, capsys):
         tools = ["1", "8", "3", "15"]
         with pytest.raises(SystemExit):
-            _validate_selection(tools)
+            _validate_tool_selection(tools)
         message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
         assert message in capsys.readouterr().err
 
-    def test_validate_selection_empty_list(self):
+    def test_validate_tool_selection_empty_list(self):
         tools = []
-        assert _validate_selection(tools) is None
+        assert _validate_tool_selection(tools) is None
 
 
 class TestConvertToolNamesToNumbers:
-    def test_convert_tool_names_to_numbers_with_valid_tools(self):
+    def test_convert_tool_short_names_to_numbers_with_valid_tools(self):
         selected_tools = "lint,test,docs"
-        result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == "1,2,4"
+        result = _convert_tool_short_names_to_numbers(selected_tools)
+        assert result == ["1", "2", "4"]
 
-    def test_convert_tool_names_to_numbers_with_none(self):
-        result = _convert_tool_names_to_numbers(None)
-        assert result is None
-
-    def test_convert_tool_names_to_numbers_with_empty_string(self):
+    def test_convert_tool_short_names_to_numbers_with_empty_string(self):
         selected_tools = ""
-        result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == ""
+        result = _convert_tool_short_names_to_numbers(selected_tools)
+        assert result == []
 
-    def test_convert_tool_names_to_numbers_with_none_string(self):
+    def test_convert_tool_short_names_to_numbers_with_none_string(self):
         selected_tools = "none"
-        result = _convert_tool_names_to_numbers(selected_tools)
-        assert result is None
+        result = _convert_tool_short_names_to_numbers(selected_tools)
+        assert result == []
 
-    def test_convert_tool_names_to_numbers_with_all_string(self):
-        result = _convert_tool_names_to_numbers("all")
-        assert result == "1,2,3,4,5,6,7"
+    def test_convert_tool_short_names_to_numbers_with_all_string(self):
+        result = _convert_tool_short_names_to_numbers("all")
+        assert result == ["1", "2", "3", "4", "5", "6", "7"]
 
-    def test_convert_tool_names_to_numbers_with_mixed_valid_invalid_tools(self):
+    def test_convert_tool_short_names_to_numbers_with_mixed_valid_invalid_tools(self):
         selected_tools = "lint,invalid_tool,docs"
-        result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == "1,4"
+        result = _convert_tool_short_names_to_numbers(selected_tools)
+        assert result == ["1", "4"]
 
-    def test_convert_tool_names_to_numbers_with_whitespace(self):
+    def test_convert_tool_short_names_to_numbers_with_whitespace(self):
         selected_tools = " lint , test , docs "
-        result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == "1,2,4"
+        result = _convert_tool_short_names_to_numbers(selected_tools)
+        assert result == ["1", "2", "4"]
 
-    def test_convert_tool_names_to_numbers_with_case_insensitive_tools(self):
+    def test_convert_tool_short_names_to_numbers_with_case_insensitive_tools(self):
         selected_tools = "Lint,TEST,Docs"
-        result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == "1,2,4"
+        result = _convert_tool_short_names_to_numbers(selected_tools)
+        assert result == ["1", "2", "4"]
 
-    def test_convert_tool_names_to_numbers_with_invalid_tools(self):
+    def test_convert_tool_short_names_to_numbers_with_invalid_tools(self):
         selected_tools = "invalid_tool1,invalid_tool2"
-        result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == ""
+        result = _convert_tool_short_names_to_numbers(selected_tools)
+        assert result == []
 
-    def test_convert_tool_names_to_numbers_with_duplicates(self):
+    def test_convert_tool_short_names_to_numbers_with_duplicates(self):
         selected_tools = "lint,test,tests"
-        result = _convert_tool_names_to_numbers(selected_tools)
-        assert result == "1,2"
+        result = _convert_tool_short_names_to_numbers(selected_tools)
+        assert result == ["1", "2"]

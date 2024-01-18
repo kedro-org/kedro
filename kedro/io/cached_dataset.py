@@ -37,9 +37,9 @@ class CachedDataset(AbstractDataset):
     def __init__(
         self,
         dataset: AbstractDataset | dict,
-        version: Version = None,
-        copy_mode: str = None,
-        metadata: dict[str, Any] = None,
+        version: Version | None = None,
+        copy_mode: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``CachedDataset`` pointing to the
         provided Python object.
@@ -77,7 +77,7 @@ class CachedDataset(AbstractDataset):
         self._dataset.release()
 
     @staticmethod
-    def _from_config(config, version):
+    def _from_config(config: dict, version: Version | None) -> AbstractDataset:
         if VERSIONED_FLAG_KEY in config:
             raise ValueError(
                 "Cached datasets should specify that they are versioned in the "
@@ -92,11 +92,11 @@ class CachedDataset(AbstractDataset):
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "dataset": self._dataset._describe(),  # noqa: protected-access
-            "cache": self._cache._describe(),  # noqa: protected-access
+            "dataset": self._dataset._describe(),
+            "cache": self._cache._describe(),
         }
 
-    def _load(self):
+    def _load(self) -> Any:
         data = self._cache.load() if self._cache.exists() else self._dataset.load()
 
         if not self._cache.exists():
@@ -111,7 +111,7 @@ class CachedDataset(AbstractDataset):
     def _exists(self) -> bool:
         return self._cache.exists() or self._dataset.exists()
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         # clearing the cache can be prevented by modifying
         # how parallel runner handles datasets (not trivial!)
         logging.getLogger(__name__).warning("%s: clearing cache to pickle.", str(self))

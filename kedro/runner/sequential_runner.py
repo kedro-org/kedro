@@ -47,7 +47,7 @@ class SequentialRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: str = None,
+        session_id: str | None = None,
     ) -> None:
         """The method implementing sequential pipeline running.
 

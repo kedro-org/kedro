@@ -31,7 +31,7 @@ Next, the CLI asks which tools you'd like to include in the project:
 
 ```text
 Tools
-1) Lint: Basic linting with Black and Ruff
+1) Lint: Basic linting with ruff
 2) Test: Basic testing with pytest
 3) Log: Additional, environment-specific logging options
 4) Docs: A Sphinx documentation setup
@@ -46,7 +46,6 @@ Which tools would you like to include in your project? [1-7/1,3/all/none]:
 The options are described in more detail in the [documentation about the new project tools](../starters/new_project_tools.md).
 
 Select the tools by number, or `all` or follow the default to add `none`.
-
 
 ### Project examples
 

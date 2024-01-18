@@ -137,7 +137,7 @@ As an alternative to the interactive project creation workflow, you can also sup
     "my project"
 
 "tools":
-    "2-6"
+    "lint, test, log, docs, data, pyspark, viz"
 
 "example_pipeline":
     "y"
@@ -190,7 +190,7 @@ With these installed, you can then make use of the following commands to format 
 
 ```bash
 ruff format path/to/project/root
-black path/to/project/root --check
+ruff check path/to/project/root
 ```
 
 Though it has no impact on how your code works, linting is important for code quality because improves consistency, readability, debugging, and maintainability. To learn more about linting your Kedro projects, check our [linting documentation](../development/linting.md).
@@ -267,9 +267,7 @@ See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/s
 
 Here is a flowchart to help illustrate some example choice of tools you can select:
 
-```{image} ../meta/images/project-tools-choices.png
-:alt: mermaid-Example diagram of specific tool choices
-```
+![Example diagram of specific tool choices](../meta/images/project-tools-choices.png)
 
 % Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
 % flowchart TD

@@ -9,7 +9,7 @@ import sys
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
-from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
+from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Iterable
@@ -42,24 +42,26 @@ class ParallelRunnerManager(SyncManager):
     """
 
 
-ParallelRunnerManager.register("MemoryDataset", MemoryDataset)  # noqa: no-member
+ParallelRunnerManager.register("MemoryDataset", MemoryDataset)
 
 
-def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
-    # noqa: import-outside-toplevel,cyclic-import
+def _bootstrap_subprocess(
+    package_name: str, logging_config: dict[str, Any] | None = None
+) -> None:
     from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
-    configure_logging(logging_config)
+    if logging_config:
+        configure_logging(logging_config)
 
 
 def _run_node_synchronization(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,
-    session_id: str = None,
-    package_name: str = None,
-    logging_config: dict[str, Any] = None,
+    session_id: str | None = None,
+    package_name: str | None = None,
+    logging_config: dict[str, Any] | None = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -80,7 +82,7 @@ def _run_node_synchronization(  # noqa: PLR0913
 
     """
     if multiprocessing.get_start_method() == "spawn" and package_name:
-        _bootstrap_subprocess(package_name, logging_config)  # type: ignore
+        _bootstrap_subprocess(package_name, logging_config)
 
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
@@ -99,7 +101,7 @@ class ParallelRunner(AbstractRunner):
 
     def __init__(
         self,
-        max_workers: int = None,
+        max_workers: int | None = None,
         is_async: bool = False,
         extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
@@ -126,7 +128,7 @@ class ParallelRunner(AbstractRunner):
             is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )
         self._manager = ParallelRunnerManager()
-        self._manager.start()  # noqa: consider-using-with
+        self._manager.start()
 
         # This code comes from the concurrent.futures library
         # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588
@@ -139,11 +141,11 @@ class ParallelRunner(AbstractRunner):
 
         self._max_workers = max_workers
 
-    def __del__(self):
+    def __del__(self) -> None:
         self._manager.shutdown()
 
     @classmethod
-    def _validate_nodes(cls, nodes: Iterable[Node]):
+    def _validate_nodes(cls, nodes: Iterable[Node]) -> None:
         """Ensure all tasks are serialisable."""
         unserialisable = []
         for node in nodes:
@@ -163,13 +165,13 @@ class ParallelRunner(AbstractRunner):
             )
 
     @classmethod
-    def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline):
+    def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline) -> None:
         """Ensure that all data sets are serialisable and that we do not have
         any non proxied memory data sets being used as outputs as their content
         will not be synchronized across threads.
         """
 
-        datasets = catalog._datasets  # noqa: protected-access
+        datasets = catalog._datasets
 
         unserialisable = []
         for name, dataset in datasets.items():
@@ -208,7 +210,7 @@ class ParallelRunner(AbstractRunner):
                 f"MemoryDatasets"
             )
 
-    def _set_manager_datasets(self, catalog, pipeline):
+    def _set_manager_datasets(self, catalog: DataCatalog, pipeline: Pipeline) -> None:
         for dataset in pipeline.datasets():
             try:
                 catalog.exists(dataset)
@@ -218,7 +220,7 @@ class ParallelRunner(AbstractRunner):
             if isinstance(ds, SharedMemoryDataset):
                 ds.set_manager(self._manager)
 
-    def _get_required_workers_count(self, pipeline: Pipeline):
+    def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
         Calculate the max number of processes required for the pipeline,
         limit to the number of CPU cores.
@@ -232,12 +234,12 @@ class ParallelRunner(AbstractRunner):
 
         return min(required_processes, self._max_workers)
 
-    def _run(  # noqa: too-many-locals,useless-suppression
+    def _run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: str = None,
+        session_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
@@ -255,7 +257,6 @@ class ParallelRunner(AbstractRunner):
             Exception: In case of any downstream node failure.
 
         """
-        # noqa: import-outside-toplevel,cyclic-import
         if not self._is_async:
             self._logger.info(
                 "Using synchronous mode for loading and saving data. Use the --async flag "
@@ -289,7 +290,7 @@ class ParallelRunner(AbstractRunner):
                             self._is_async,
                             session_id,
                             package_name=PACKAGE_NAME,
-                            logging_config=LOGGING,  # type: ignore
+                            logging_config=LOGGING,  # type: ignore[arg-type]
                         )
                     )
                 if not futures:

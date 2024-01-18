@@ -17,7 +17,7 @@ tools:
     To find out more: https://docs.kedro.org/en/stable/starters/new_project_tools.html
 
     Tools
-    1) Lint: Basic linting with Black and Ruff
+    1) Lint: Basic linting with Ruff
     2) Test: Basic testing with pytest
     3) Log: Additional, environment-specific logging options
     4) Docs: A Sphinx documentation setup

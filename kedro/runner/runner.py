@@ -49,15 +49,15 @@ class AbstractRunner(ABC):
         self._extra_dataset_patterns = extra_dataset_patterns
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(self.__module__)
 
     def run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
-        hook_manager: PluginManager = None,
-        session_id: str = None,
+        hook_manager: PluginManager | None = None,
+        session_id: str | None = None,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -78,7 +78,7 @@ class AbstractRunner(ABC):
 
         """
 
-        hook_manager = hook_manager or _NullPluginManager()
+        hook_or_null_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
 
         # Check which datasets used in the pipeline are in the catalog or match
@@ -94,9 +94,16 @@ class AbstractRunner(ABC):
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
 
+        # Identify MemoryDataset in the catalog
+        memory_datasets = {
+            ds_name
+            for ds_name, ds in catalog._datasets.items()
+            if isinstance(ds, MemoryDataset)
+        }
+
         # Check if there's any output datasets that aren't in the catalog and don't match a pattern
-        # in the catalog.
-        free_outputs = pipeline.outputs() - set(registered_ds)
+        # in the catalog and include MemoryDataset.
+        free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
 
         # Register the default dataset pattern with the catalog
         catalog = catalog.shallow_copy(
@@ -107,7 +114,7 @@ class AbstractRunner(ABC):
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
-        self._run(pipeline, catalog, hook_manager, session_id)
+        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
 
         self._logger.info("Pipeline execution completed successfully.")
 
@@ -156,7 +163,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: str = None,
+        session_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
         inputs have already been checked and normalized by run().
@@ -280,7 +287,6 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     """
     for node_input in node.inputs:
-        # noqa: protected-access
         if isinstance(catalog._datasets[node_input], MemoryDataset):
             return False
     return True
@@ -291,7 +297,7 @@ def run_node(
     catalog: DataCatalog,
     hook_manager: PluginManager,
     is_async: bool = False,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -335,7 +341,7 @@ def _collect_inputs_from_hook(  # noqa: PLR0913
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> dict[str, Any]:
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
@@ -368,7 +374,7 @@ def _call_node_run(  # noqa: PLR0913
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> dict[str, Any]:
     try:
         outputs = node.run(inputs)
@@ -397,7 +403,7 @@ def _run_node_sequential(
     node: Node,
     catalog: DataCatalog,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> Node:
     inputs = {}
 
@@ -444,9 +450,9 @@ def _run_node_async(
     node: Node,
     catalog: DataCatalog,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> Node:
-    def _synchronous_dataset_load(dataset_name: str):
+    def _synchronous_dataset_load(dataset_name: str) -> Any:
         """Minimal wrapper to ensure Hooks are run synchronously
         within an asynchronous dataset load."""
         hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)

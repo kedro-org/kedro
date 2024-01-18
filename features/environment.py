@@ -126,7 +126,6 @@ def _setup_minimal_env(context):
 
 
 def _install_project_requirements(context):
-    return
     install_reqs = (
         Path("kedro/templates/project/{{ cookiecutter.repo_name }}/requirements.txt")
         .read_text(encoding="utf-8")

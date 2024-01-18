@@ -1355,7 +1355,7 @@ class TestToolsAndExampleFromCLI:
             "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
             side_effect=mock_make_cookiecutter_args_and_fetch_template,
         )
-        
+
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--tools", tools, "--example", example_pipeline],

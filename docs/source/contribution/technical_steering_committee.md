@@ -57,7 +57,6 @@ We look for commitment markers who can do the following:
 |----------------------------------------------------------|---------------------------------------------------------------------------------------- |
 | [Ahdra Merali](https://github.com/AhdraMeraliQB)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Antony Milne](https://github.com/antonymilne)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Claypot AI](https://www.claypot.ai)                                                    |
 | [Dmitry Sorokin](https://github.com/DimedS)              | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
@@ -88,6 +87,7 @@ Former core team members with significant contributions include
 [Andrew Mackay](https://github.com/Mackay031),
 [Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
 [Anton Kirilenko](https://github.com/Flid),
+[Antony Milne](https://github.com/antonymilne),
 [Cvetanka Nechevska](https://github.com/cvetankanechevska),
 [Dmitrii Deriabin](https://github.com/dmder),
 [Gabriel Comym](https://github.com/comym),

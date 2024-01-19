@@ -14,6 +14,7 @@ from kedro.ipython import (
     _prepare_node_inputs,
     _resolve_project_path,
     load_ipython_extension,
+    magic_load_node,
     reload_kedro,
 )
 from kedro.pipeline import node
@@ -67,6 +68,7 @@ def dummy_function(dummy_input, extra_input):
     """
     # this is an in-line comment in the body of the function
     random_assignment = "Added for a longer function"
+    random_assignment += "make sure to modify variable"
     return not dummy_input
 
 
@@ -109,6 +111,7 @@ def dummy_function_file_lines():
         "# import here for performance" "from package4.module2 import class1",
         "# this is an in-line comment in the body of the function",
         'random_assignment = "Added for a longer function"',
+        'random_assignment += "make sure to modify variable"',
         "return not dummy_input" "import package5.module3",
     ]
     return "\n".join(file_lines)
@@ -395,8 +398,22 @@ class TestLoadNodeMagic:
         """
         pass
 
-    def test_load_node_magic(self):
-        pass
+    def test_load_node_magic(self, mocker, dummy_function_file_lines, dummy_pipeline):
+        mock_jupyter_console = mocker.MagicMock()
+        mocker.patch("ipylab.JupyterFrontEnd", mock_jupyter_console)
+        mocker.patch(
+            "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
+        )
+        mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
+
+        node_to_load = "dummy_node"
+        try:
+            magic_load_node(node_to_load)
+        except Exception:
+            # Fail if an error is thrown
+            assert False
+
+        assert True
 
     def test_load_node(self, mocker, dummy_function_file_lines, dummy_pipeline):
         # wraps all the other functions
@@ -419,6 +436,7 @@ class TestLoadNodeMagic:
             '"""\nReturns True if input is not\n"""',
             "\n# this is an in-line comment in the body of the function",
             '\nrandom_assignment = "Added for a longer function"',
+            '\nrandom_assignment += "make sure to modify variable"'
             "\nreturn not dummy_input\n",
         ]
         expected_cells = [
@@ -443,7 +461,7 @@ class TestLoadNodeMagic:
         mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
         node_to_find = "not_a_node"
         with pytest.raises(ValueError) as excinfo:
-            result = _find_node(node_to_find)
+            _find_node(node_to_find)
 
         assert f"Node {node_to_find} is not found in any pipelines." in str(
             excinfo.value
@@ -468,7 +486,7 @@ class TestLoadNodeMagic:
         mocker.patch("inspect.getsourcefile", return_value=None)
 
         with pytest.raises(FileNotFoundError) as excinfo:
-            result = _prepare_imports(dummy_function)
+            _prepare_imports(dummy_function)
 
         assert f"Could not find {dummy_function.__name__}" in str(excinfo.value)
 
@@ -489,6 +507,7 @@ class TestLoadNodeMagic:
             '"""\nReturns True if input is not\n"""',
             "\n# this is an in-line comment in the body of the function",
             '\nrandom_assignment = "Added for a longer function"',
+            '\nrandom_assignment += "make sure to modify variable"'
             "\nreturn not dummy_input\n",
         ]
         result = _get_function_body(dummy_function)

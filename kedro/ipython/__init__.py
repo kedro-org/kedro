@@ -282,11 +282,6 @@ def _get_function_body(func: Callable) -> str:
     line: str = next(func_lines).strip()
     if not line.startswith("def "):
         return line.rsplit(":")[-1].strip()
-    elif not line.endswith(":"):
-        for line in func_lines:
-            stripped_line = line.strip()
-            if stripped_line.endswith(":"):
-                break
     # Handle functions that are not one-liners
     first_line = next(func_lines)
     # Find the indentation of the first line

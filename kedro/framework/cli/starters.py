@@ -560,6 +560,7 @@ def _get_extra_context(  # noqa: PLR0913
         extra_context["example_pipeline"] = str(_parse_yes_no_to_bool(example_pipeline))
 
     # set defaults for required fields, will be used mostly for starters
+    # project_name defaut value will be taken from cookiecutter.json file
     extra_context.setdefault("kedro_version", version)
     extra_context.setdefault("tools", str(["None"]))
     extra_context.setdefault("example_pipeline", "False")

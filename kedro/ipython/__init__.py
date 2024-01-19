@@ -274,7 +274,7 @@ def _prepare_node_inputs(node: Node) -> str:
     return statement
 
 
-def get_function_body(func: Callable) -> str:
+def _get_function_body(func: Callable) -> str:
     # https://stackoverflow.com/questions/38050649/getting-a-python-functions-source-code-without-the-definition-lines
     all_source_lines = inspect.getsourcelines(func)[0]
     # Remove any decorators

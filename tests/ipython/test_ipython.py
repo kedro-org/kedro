@@ -6,8 +6,9 @@ from IPython.testing.globalipapp import get_ipython
 
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
-from kedro.ipython import _resolve_project_path, load_ipython_extension, reload_kedro
+from kedro.ipython import _resolve_project_path, load_ipython_extension, reload_kedro, magic_load_node, _load_node, _find_node, _prepare_imports, _prepare_node_inputs, _get_function_body
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import node
 
 PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
@@ -50,6 +51,33 @@ def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.configure_project")
     mocker.patch("kedro.ipython.KedroSession.create")
 
+
+def dummy_function(dummy_input, extra_input):
+    """
+    Returns True if input is not
+    """
+    # this is an in-line comment in the body of the function
+    random_assignment = "Added for a longer function"
+    return not dummy_input
+
+def dummy_nested_function(dummy_input):
+    def nested_function(input):
+        return not input
+    return nested_function(dummy_input)
+
+def dummy_function_with_loop(dummy_list):
+    for x in dummy_list:
+        continue
+    return len(dummy_list)
+
+@pytest.fixture
+def dummy_node():
+    return node(
+        func=dummy_function,
+        inputs=["dummy_input", "extra_input"],
+        outputs=["dummy_output"],
+        name="check_if_false_node",
+    )
 
 class TestLoadKedroObjects:
     def test_ipython_load_entry_points(
@@ -299,15 +327,83 @@ class TestProjectPathResolution:
         assert expected_message in log_messages
 
 
+
 class TestLoadNodeMagic:
+    # TODO 
+    # test magic, _load_node, _find_node, _prepare_node_inputs, test _prepare_imports, get_function_body
+
+    # node edge cases
+    #   comments
+    #   function is a lambda function
+    #   function has a loop
+    #   nested function inside function
+
+
+    # node file edge cases
+    #   interspersed imports
+    #   multi-line comments
+
     def test_import_helper_function_from_same_file(self):
         """function body can refer to function other than the import statements but helper function
         in the body
         """
         pass
+    
 
     def test_node_inputs_match_function_signature(self):
         """node input names should match with function signature.
         Usually they are the same but not necessary.
         """
         pass
+
+    def test_load_node_magic(self):
+        pass
+
+    def test_load_node(self):
+        node_name = "dummy node"
+        cells_list = True # _load_node("dummy node")
+        assert cells_list
+
+    def test_find_node(self):
+        node_name = "dummy node"
+        # _find_node(node_name)
+
+    def test_get_function_body(self):
+        func_strings = [
+        "\"\"\"\nReturns True if input is not\n\"\"\"",
+        "\n# this is an in-line comment in the body of the function",
+        "\nrandom_assignment = \"Added for a longer function\"",
+        "\nreturn not dummy_input\n"
+        ]
+        result = _get_function_body(dummy_function)
+        assert result == "".join(func_line for func_line in func_strings)
+
+    def test_get_lambda_function_body(self):
+        result = _get_function_body(lambda x: x)
+        assert result  == "lambda x: x"
+        # TODO fix - fails because it splits at the comma
+
+    def test_get_nested_function_body(self):
+        func_strings = [
+        "def nested_function(input):",
+        "\nreturn not input",
+        "\nreturn nested_function(dummy_input)\n"
+        ]
+        result = _get_function_body(dummy_nested_function)
+        assert result == "".join(func_line for func_line in func_strings)
+        # TODO fix - fails because skips nested function definition
+
+    def test_get_function_with_loop_body(self):
+        func_strings = [
+        "for x in dummy_list:",
+        "\ncontinue",
+        "\nreturn len(dummy_list)\n"
+        ]
+        result = _get_function_body(dummy_function_with_loop)
+        assert result == "".join(func_line for func_line in func_strings)
+        # TODO fix - fails because doesn't strip spaces from continue, inconsistent
+
+
+
+
+    

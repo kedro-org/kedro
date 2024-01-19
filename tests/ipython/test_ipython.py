@@ -6,9 +6,16 @@ from IPython.testing.globalipapp import get_ipython
 
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
-from kedro.ipython import _resolve_project_path, load_ipython_extension, reload_kedro, magic_load_node, _load_node, _find_node, _prepare_imports, _prepare_node_inputs, _get_function_body
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.ipython import (
+    _get_function_body,
+    _prepare_imports,
+    _prepare_node_inputs,
+    _resolve_project_path,
+    load_ipython_extension,
+    reload_kedro,
+)
 from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
@@ -60,15 +67,19 @@ def dummy_function(dummy_input, extra_input):
     random_assignment = "Added for a longer function"
     return not dummy_input
 
+
 def dummy_nested_function(dummy_input):
     def nested_function(input):
         return not input
+
     return nested_function(dummy_input)
+
 
 def dummy_function_with_loop(dummy_list):
     for x in dummy_list:
         continue
     return len(dummy_list)
+
 
 @pytest.fixture
 def dummy_node():
@@ -78,6 +89,28 @@ def dummy_node():
         outputs=["dummy_output"],
         name="check_if_false_node",
     )
+
+
+@pytest.fixture
+def dummy_function_file_lines():
+    # a list of lines that mimics a .py file
+    # includes imports, comments, and a file function
+    file_lines = [
+        '"""',
+        "This is a multi-line comment at the top of the file",
+        "It serves as an explanation for the contents of the file" '"""',
+        "import package1",
+        "from package2 import module1",
+        "# this is a comment about the next import",
+        "import package3 as pkg3",
+        "def my_func:",
+        "# import here for performance" "from package4.module2 import class1",
+        "# this is an in-line comment in the body of the function",
+        'random_assignment = "Added for a longer function"',
+        "return not dummy_input" "import package5.module3",
+    ]
+    return "\n".join(file_lines)
+
 
 class TestLoadKedroObjects:
     def test_ipython_load_entry_points(
@@ -327,17 +360,16 @@ class TestProjectPathResolution:
         assert expected_message in log_messages
 
 
-
 class TestLoadNodeMagic:
-    # TODO 
-    # test magic, _load_node, _find_node, _prepare_node_inputs, test _prepare_imports, get_function_body
+    # TODO
+    # test magic, _load_node, _find_node,
+    # _prepare_node_inputs, _prepare_imports, get_function_body
 
     # node edge cases
     #   comments
     #   function is a lambda function
     #   function has a loop
     #   nested function inside function
-
 
     # node file edge cases
     #   interspersed imports
@@ -348,7 +380,6 @@ class TestLoadNodeMagic:
         in the body
         """
         pass
-    
 
     def test_node_inputs_match_function_signature(self):
         """node input names should match with function signature.
@@ -361,19 +392,54 @@ class TestLoadNodeMagic:
 
     def test_load_node(self):
         node_name = "dummy node"
-        cells_list = True # _load_node("dummy node")
+        cells_list = True  # _load_node("dummy node")
         assert cells_list
 
     def test_find_node(self):
         node_name = "dummy node"
         # _find_node(node_name)
 
+    def test_prepare_imports(self, mocker, dummy_function_file_lines):
+        mocker.patch(
+            "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
+        )
+
+        func_imports = [
+            "import package1",
+            "from package2 import module1",
+            "import package5.module3",
+        ]
+
+        result = _prepare_imports(dummy_function)
+        assert result == func_imports
+        # TODO fix - fails because will stop looking for imports after comments
+
+    def test_prepare_imports_func_not_found(self, mocker):
+        mocker.patch("inspect.getsourcefile", return_value=None)
+
+        with pytest.raises(FileNotFoundError) as excinfo:
+            result = _prepare_imports(dummy_function)
+
+        assert f"Could not find {dummy_function.__name__}" in str(excinfo.value)
+
+    def test_prepare_node_inputs(self, dummy_node):
+        # TODO Ahdra check - does this address parameters properly?
+        func_inputs = [
+            "# Prepare necessary inputs for debugging\n",
+            'dummy_input = catalog.load("dummy_input")\n',
+            'extra_input = catalog.load("extra_input")\n',
+            # TODO Ahdra check - can/will these ever be mismatched?
+        ]
+
+        result = _prepare_node_inputs(dummy_node)
+        assert result == "".join(func_line for func_line in func_inputs)
+
     def test_get_function_body(self):
         func_strings = [
-        "\"\"\"\nReturns True if input is not\n\"\"\"",
-        "\n# this is an in-line comment in the body of the function",
-        "\nrandom_assignment = \"Added for a longer function\"",
-        "\nreturn not dummy_input\n"
+            '"""\nReturns True if input is not\n"""',
+            "\n# this is an in-line comment in the body of the function",
+            '\nrandom_assignment = "Added for a longer function"',
+            "\nreturn not dummy_input\n",
         ]
         result = _get_function_body(dummy_function)
         assert result == "".join(func_line for func_line in func_strings)
@@ -385,9 +451,9 @@ class TestLoadNodeMagic:
 
     def test_get_nested_function_body(self):
         func_strings = [
-        "def nested_function(input):",
-        "\nreturn not input",
-        "\nreturn nested_function(dummy_input)\n"
+            "def nested_function(input):",
+            "\nreturn not input",
+            "\nreturn nested_function(dummy_input)\n",
         ]
         result = _get_function_body(dummy_nested_function)
         assert result == "".join(func_line for func_line in func_strings)
@@ -395,15 +461,10 @@ class TestLoadNodeMagic:
 
     def test_get_function_with_loop_body(self):
         func_strings = [
-        "for x in dummy_list:",
-        "\ncontinue",
-        "\nreturn len(dummy_list)\n"
+            "for x in dummy_list:",
+            "\ncontinue",
+            "\nreturn len(dummy_list)\n",
         ]
         result = _get_function_body(dummy_function_with_loop)
         assert result == "".join(func_line for func_line in func_strings)
         # TODO fix - fails because doesn't strip spaces from continue, inconsistent
-
-
-
-
-    

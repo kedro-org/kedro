@@ -215,7 +215,7 @@ def _load_node(node_name: str) -> list[str]:
     node_func = node.func
     node_inputs = _prepare_node_inputs(node)
     imports = _prepare_imports(node_func)
-    function_text = get_function_body(node_func)
+    function_text = _get_function_body(node_func)
     function_text = "# Function Body\n" + function_text
 
     cells: list[str] = []

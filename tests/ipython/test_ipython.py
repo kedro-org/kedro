@@ -7,7 +7,9 @@ from IPython.testing.globalipapp import get_ipython
 from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.ipython import (
+    _find_node,
     _get_function_body,
+    _load_node,
     _prepare_imports,
     _prepare_node_inputs,
     _resolve_project_path,
@@ -87,7 +89,7 @@ def dummy_node():
         func=dummy_function,
         inputs=["dummy_input", "extra_input"],
         outputs=["dummy_output"],
-        name="check_if_false_node",
+        name="dummy_node",
     )
 
 
@@ -110,6 +112,12 @@ def dummy_function_file_lines():
         "return not dummy_input" "import package5.module3",
     ]
     return "\n".join(file_lines)
+
+
+@pytest.fixture
+def dummy_pipeline(dummy_node):
+    # return a list of pipelines
+    return [modular_pipeline([dummy_node])]
 
 
 class TestLoadKedroObjects:
@@ -390,14 +398,56 @@ class TestLoadNodeMagic:
     def test_load_node_magic(self):
         pass
 
-    def test_load_node(self):
-        node_name = "dummy node"
-        cells_list = True  # _load_node("dummy node")
-        assert cells_list
+    def test_load_node(self, mocker, dummy_function_file_lines, dummy_pipeline):
+        # wraps all the other functions
+        mocker.patch(
+            "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
+        )
+        mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
 
-    def test_find_node(self):
-        node_name = "dummy node"
-        # _find_node(node_name)
+        node_inputs = [
+            "# Prepare necessary inputs for debugging\n",
+            'dummy_input = catalog.load("dummy_input")\n',
+            'extra_input = catalog.load("extra_input")\n',
+        ]
+        node_imports = [
+            "import package1\n",
+            "from package2 import module1\n",
+            "import package5.module3\n",
+        ]
+        node_func_text = [
+            '"""\nReturns True if input is not\n"""',
+            "\n# this is an in-line comment in the body of the function",
+            '\nrandom_assignment = "Added for a longer function"',
+            "\nreturn not dummy_input\n",
+        ]
+        expected_cells = [
+            "".join(node_inputs),
+            "".join(node_imports),
+            "".join(node_func_text),
+        ]
+
+        node_to_load = "dummy_node"
+        cells_list = _load_node(node_to_load)
+
+        assert cells_list == expected_cells
+        # Fails because of import fetching
+
+    def test_find_node(self, mocker, dummy_pipeline, dummy_node):
+        mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
+        node_to_find = "dummy_node"
+        result = _find_node(node_to_find)
+        assert result == dummy_node
+
+    def test_node_not_found(self, mocker, dummy_pipeline):
+        mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
+        node_to_find = "not_a_node"
+        with pytest.raises(ValueError) as excinfo:
+            result = _find_node(node_to_find)
+
+        assert f"Node {node_to_find} is not found in any pipelines." in str(
+            excinfo.value
+        )
 
     def test_prepare_imports(self, mocker, dummy_function_file_lines):
         mocker.patch(
@@ -405,13 +455,13 @@ class TestLoadNodeMagic:
         )
 
         func_imports = [
-            "import package1",
-            "from package2 import module1",
-            "import package5.module3",
+            "import package1\n",
+            "from package2 import module1\n",
+            "import package5.module3\n",
         ]
 
         result = _prepare_imports(dummy_function)
-        assert result == func_imports
+        assert result == "".join(func_imports)
         # TODO fix - fails because will stop looking for imports after comments
 
     def test_prepare_imports_func_not_found(self, mocker):
@@ -432,7 +482,7 @@ class TestLoadNodeMagic:
         ]
 
         result = _prepare_node_inputs(dummy_node)
-        assert result == "".join(func_line for func_line in func_inputs)
+        assert result == "".join(func_inputs)
 
     def test_get_function_body(self):
         func_strings = [
@@ -442,11 +492,11 @@ class TestLoadNodeMagic:
             "\nreturn not dummy_input\n",
         ]
         result = _get_function_body(dummy_function)
-        assert result == "".join(func_line for func_line in func_strings)
+        assert result == "".join(func_strings)
 
     def test_get_lambda_function_body(self):
         result = _get_function_body(lambda x: x)
-        assert result  == "lambda x: x"
+        assert result == "lambda x: x"
         # TODO fix - fails because it splits at the comma
 
     def test_get_nested_function_body(self):
@@ -456,7 +506,7 @@ class TestLoadNodeMagic:
             "\nreturn nested_function(dummy_input)\n",
         ]
         result = _get_function_body(dummy_nested_function)
-        assert result == "".join(func_line for func_line in func_strings)
+        assert result == "".join(func_strings)
         # TODO fix - fails because skips nested function definition
 
     def test_get_function_with_loop_body(self):
@@ -466,5 +516,5 @@ class TestLoadNodeMagic:
             "\nreturn len(dummy_list)\n",
         ]
         result = _get_function_body(dummy_function_with_loop)
-        assert result == "".join(func_line for func_line in func_strings)
+        assert result == "".join(func_strings)
         # TODO fix - fails because doesn't strip spaces from continue, inconsistent

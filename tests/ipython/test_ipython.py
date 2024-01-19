@@ -62,7 +62,7 @@ def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.KedroSession.create")
 
 
-def dummy_function(dummy_input, extra_input):
+def dummy_function(dummy_input, my_input):
     """
     Returns True if input is not
     """
@@ -112,7 +112,8 @@ def dummy_function_file_lines():
         "# this is an in-line comment in the body of the function",
         'random_assignment = "Added for a longer function"',
         'random_assignment += "make sure to modify variable"',
-        "return not dummy_input" "import package5.module3",
+        "return not dummy_input",
+        "import package5.module3",
     ]
     return "\n".join(file_lines)
 
@@ -373,8 +374,6 @@ class TestProjectPathResolution:
 
 class TestLoadNodeMagic:
     # TODO
-    # test magic, _load_node, _find_node,
-    # _prepare_node_inputs, _prepare_imports, get_function_body
 
     # node edge cases
     #   comments
@@ -385,18 +384,6 @@ class TestLoadNodeMagic:
     # node file edge cases
     #   interspersed imports
     #   multi-line comments
-
-    def test_import_helper_function_from_same_file(self):
-        """function body can refer to function other than the import statements but helper function
-        in the body
-        """
-        pass
-
-    def test_node_inputs_match_function_signature(self):
-        """node input names should match with function signature.
-        Usually they are the same but not necessary.
-        """
-        pass
 
     def test_load_node_magic(self, mocker, dummy_function_file_lines, dummy_pipeline):
         mock_jupyter_console = mocker.MagicMock()
@@ -495,8 +482,7 @@ class TestLoadNodeMagic:
         func_inputs = [
             "# Prepare necessary inputs for debugging\n",
             'dummy_input = catalog.load("dummy_input")\n',
-            'extra_input = catalog.load("extra_input")\n',
-            # TODO Ahdra check - can/will these ever be mismatched?
+            'my_input = catalog.load("extra_input")\n',
         ]
 
         result = _prepare_node_inputs(dummy_node)

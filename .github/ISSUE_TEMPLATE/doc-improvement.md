@@ -11,8 +11,7 @@ labels: 'Component: Documentation'
 ### Documentation page (if applicable) 
 <!-- https://docs.kedro.org/en/stable/... -->
 
-
-## Context
+## Context
 <!-- Extra context. -->
 
 

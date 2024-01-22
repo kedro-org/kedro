@@ -97,25 +97,22 @@ def dummy_node():
 
 @pytest.fixture
 def dummy_function_file_lines():
-    # a list of lines that mimics a .py file
-    # includes imports, comments, and a file function
-    file_lines = [
-        '"""',
-        "This is a multi-line comment at the top of the file",
-        "It serves as an explanation for the contents of the file" '"""',
-        "import package1",
-        "from package2 import module1",
-        "# this is a comment about the next import",
-        "import package3 as pkg3",
-        "def my_func:",
-        "# import here for performance" "from package4.module2 import class1",
-        "# this is an in-line comment in the body of the function",
-        'random_assignment = "Added for a longer function"',
-        'random_assignment += "make sure to modify variable"',
-        "return not dummy_input",
-        "import package5.module3",
-    ]
-    return "\n".join(file_lines)
+    # string representation of a dummy function includes imports, comments, and a
+    # file function
+    file_lines = """This is a multi-line comment at the top of the file
+It serves as an explanation for the contents of the file ''
+import package1
+from package2 import module1
+# this is a comment about the next import
+import package3 as pkg3
+def my_func:,
+# import here for performance from package4.module2 import class1
+# this is an in-line comment in the body of the function
+'random_assignment = Added for a longer function'
+'random_assignment += make sure to modify variable'
+return not dummy_input
+import package5.module3"""
+    return file_lines
 
 
 @pytest.fixture
@@ -459,14 +456,13 @@ class TestLoadNodeMagic:
             "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
         )
 
-        func_imports = [
-            "import package1",
-            "from package2 import module1",
-            "import package5.module3",
-        ]
+        func_imports = """import package1
+from package2 import module1
+import package3 as pkg3
+import package5.module3"""
 
         result = _prepare_imports(dummy_function)
-        assert result == "\n".join(func_imports)
+        assert result == func_imports
         # TODO fix - fails because will stop looking for imports after comments
 
     def test_prepare_imports_func_not_found(self, mocker):
@@ -494,7 +490,7 @@ class TestLoadNodeMagic:
             "\n# this is an in-line comment in the body of the function",
             '\nrandom_assignment = "Added for a longer function"',
             '\nrandom_assignment += "make sure to modify variable"'
-            "\nreturn not dummy_input\n",
+            "\nreturn not dummy_input",
         ]
         result = _get_function_body(dummy_function)
         assert result == "".join(func_strings)
@@ -515,11 +511,10 @@ class TestLoadNodeMagic:
         # TODO fix - fails because skips nested function definition
 
     def test_get_function_with_loop_body(self):
-        func_strings = [
-            "for x in dummy_list:",
-            "\ncontinue",
-            "\nreturn len(dummy_list)\n",
-        ]
+        func_strings = """for x in dummy_list:
+    continue
+return len(dummy_list)"""
+
         result = _get_function_body(dummy_function_with_loop)
-        assert result == "".join(func_strings)
+        assert result == func_strings
         # TODO fix - fails because doesn't strip spaces from continue, inconsistent

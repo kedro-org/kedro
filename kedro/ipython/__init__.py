@@ -256,21 +256,17 @@ def _prepare_imports(node_func: Callable) -> str:
     """Prepare the import statements for loading a node."""
     python_file = inspect.getsourcefile(node_func)
     logger.info(f"Loading node defintion from {python_file}")
-    
+
     # Confirm source file was found
     if python_file:
-        is_import_statement = True
         import_statement = []
         with open(python_file) as file:
             # Parse any line start with from or import statement
             for line in file.readlines():
-                if (
-                    or line.startswith("from")
-                    or line.startswith("import")
-                ):
+                if line.startswith("from") or line.startswith("import"):
                     import_statement.append(line.strip())
 
-        clean_imports = "".join(import_statement).strip()
+        clean_imports = "\n".join(import_statement).strip()
         return clean_imports
     else:
         raise FileNotFoundError(f"Could not find {node_func.__name__}")
@@ -304,4 +300,5 @@ def _get_function_body(func: Callable) -> str:
     body = "".join(
         [first_line[indentation:]] + [line[indentation:] for line in func_lines]
     )
+    body = body.strip().strip("\n")
     return body

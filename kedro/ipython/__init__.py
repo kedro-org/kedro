@@ -196,13 +196,19 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     default=None,
 )
 def magic_load_node(node: str) -> None:
-    """The line magic %load_node debug=True"""
+    """The line magic %load_node <node_name>
+    Currently it only support Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
+    will generate code in multiple cells to load dataest from Data Catalog, import
+    relevant functions and modules, and the function body.
+    """
     cells = _load_node(node)
     from ipylab import JupyterFrontEnd
 
     app = JupyterFrontEnd()
 
     def _create_cell_with_text(text: str) -> None:
+        # Noted this only works with Notebook >7.0 or Jupyter Lab. It doesn't work with
+        # VS Code Notebook due to imcompatible backends.
         app.commands.execute("notebook:insert-cell-below")
         app.commands.execute("notebook:replace-selection", {"text": text})
 
@@ -211,8 +217,18 @@ def magic_load_node(node: str) -> None:
 
 
 def _load_node(node_name: str) -> list[str]:
+    """Prepare the code to load dataset from catalog, import statements and function body.
+
+    Args:
+        node_name (str): The name of the node.
+
+    Returns:
+        list[str]: A list of string which is the generated code, each string represent a
+        notebook cell.
+    """
     node = _find_node(node_name)
     node_func = node.func
+
     node_inputs = _prepare_node_inputs(node)
     imports = _prepare_imports(node_func)
     function_text = _get_function_body(node_func)

@@ -406,27 +406,26 @@ class TestLoadNodeMagic:
         )
         mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
 
-        node_inputs = [
-            "# Prepare necessary inputs for debugging\n",
-            'dummy_input = catalog.load("dummy_input")\n',
-            'extra_input = catalog.load("extra_input")\n',
-        ]
-        node_imports = [
-            "import package1\n",
-            "from package2 import module1\n",
-            "import package5.module3\n",
-        ]
-        node_func_text = [
-            '"""\nReturns True if input is not\n"""',
-            "\n# this is an in-line comment in the body of the function",
-            '\nrandom_assignment = "Added for a longer function"',
-            '\nrandom_assignment += "make sure to modify variable"'
-            "\nreturn not dummy_input\n",
-        ]
+        node_inputs = """# Prepare necessary inputs for debugging
+dummy_input = catalog.load("dummy_input")
+extra_input = catalog.load("extra_input")
+        ]"""
+
+        node_imports = """import package1
+from package2 import module1
+import package5.module3"""
+
+        node_docsting = '"""\nReturns True if input is not\n"""'
+        node_func_text = f"""{node_docsting}
+# this is an in-line comment in the body of the function"
+random_assignment = "Added for a longer function"
+random_assignment += "make sure to modify variable"
+return not dummy_input"""
+
         expected_cells = [
-            "".join(node_inputs),
-            "".join(node_imports),
-            "".join(node_func_text),
+            node_inputs,
+            node_imports,
+            node_func_text,
         ]
 
         node_to_load = "dummy_node"

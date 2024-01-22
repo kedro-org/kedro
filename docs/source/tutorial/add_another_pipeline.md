@@ -520,5 +520,10 @@ kedro run --runner=module.path.to.my.runner
 
 `ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and {class}`Dask<kedro-datasets:kedro_datasets.dask.ParquetDataset>`.
 
+### Watch the video
+
+```{eval-rst}
+..  youtube:: _B6R2uOj3-s
+```
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).

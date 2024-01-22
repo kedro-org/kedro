@@ -10,6 +10,10 @@ For new and intermediate Kedro users, there's a comprehensive section on [workin
 
 Use the left-hand table of contents to explore the documentation available for more advanced Kedro usage and deployment. We also recommend the [glossary](../resources/glossary.md) and the [API reference documentation](/kedro).
 
+```{eval-rst}
+..  youtube:: PdNkECqvI58
+```
+
 ```{note}
 We have designed the preliminary documentation and the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) for anyone new to Kedro. The more knowledge of Python you have, the easier you will find the learning curve.
 

@@ -24,6 +24,11 @@ spaceflights_tutorial_faqs
 
 Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="https://unsplash.com/s/photos/spaceship">Unsplash</a>
 
+## Watch the video
+
+```{eval-rst}
+..  youtube:: YBY2Lcz7Gw4
+```
 
 ## Get help
 If you encounter an issue with the tutorial:

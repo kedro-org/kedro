@@ -54,6 +54,7 @@ extensions = [
     "notfound.extension",
     "sphinxcontrib.jquery",
     "sphinx.ext.intersphinx",
+    "sphinxcontrib.youtube",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class

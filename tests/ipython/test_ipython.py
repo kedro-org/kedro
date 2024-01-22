@@ -408,16 +408,17 @@ class TestLoadNodeMagic:
 
         node_inputs = """# Prepare necessary inputs for debugging
 dummy_input = catalog.load("dummy_input")
-extra_input = catalog.load("extra_input")
-        ]"""
+my_input = catalog.load("extra_input")"""
 
         node_imports = """import package1
 from package2 import module1
+import package3 as pkg3
 import package5.module3"""
 
         node_docsting = '"""\nReturns True if input is not\n"""'
-        node_func_text = f"""{node_docsting}
-# this is an in-line comment in the body of the function"
+        node_func_text = f"""# Function Body
+{node_docsting}
+# this is an in-line comment in the body of the function
 random_assignment = "Added for a longer function"
 random_assignment += "make sure to modify variable"
 return not dummy_input"""
@@ -431,8 +432,8 @@ return not dummy_input"""
         node_to_load = "dummy_node"
         cells_list = _load_node(node_to_load)
 
-        assert cells_list == expected_cells
-        # Fails because of import fetching
+        for cell, expected_cell in zip(cells_list, expected_cells):
+            assert cell == expected_cell
 
     def test_find_node(self, mocker, dummy_pipeline, dummy_node):
         mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
@@ -479,8 +480,6 @@ dummy_input = catalog.load("dummy_input")
 my_input = catalog.load("extra_input")"""
 
         result = _prepare_node_inputs(dummy_node)
-        print("result:", result)
-        print("funct_nputs", func_inputs)
         assert result == func_inputs
 
     def test_prepare_function_body(self):

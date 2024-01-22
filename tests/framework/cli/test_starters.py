@@ -1135,7 +1135,8 @@ class TestToolsAndExampleFromUserPrompts:
         assert result.exit_code != 0
         assert "is an invalid value for example pipeline." in result.output
         assert (
-            "It must contain only y, n, YES, NO, case insensitive.\n" in result.output
+            "It must contain only y, n, YES, or NO (case insensitive).\n"
+            in result.output
         )
 
 
@@ -1311,7 +1312,8 @@ class TestToolsAndExampleFromConfigFile:
 
         assert result.exit_code != 0
         assert (
-            "It must contain only y, n, YES, NO, case insensitive.\n" in result.output
+            "It must contain only y, n, YES, or NO (case insensitive).\n"
+            in result.output
         )
 
 

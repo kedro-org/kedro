@@ -1,6 +1,16 @@
-# Upcoming Release 0.19.2
+# Upcoming Release 0.19.3
 
 ## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Documentation changes
+
+## Community contributions
+
+# Release 0.19.2
 
 ## Bug fixes and other changes
 * Removed example pipeline requirements when examples are not selected in `tools`.
@@ -17,8 +27,6 @@
 ## Documentation changes
 * Added documentation about `bootstrap_project` and `configure_project`.
 * Added documentation about `kedro run` and hook execution order.
-
-## Community contributions
 
 # Release 0.19.1
 

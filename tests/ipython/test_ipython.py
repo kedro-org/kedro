@@ -460,13 +460,13 @@ class TestLoadNodeMagic:
         )
 
         func_imports = [
-            "import package1\n",
-            "from package2 import module1\n",
-            "import package5.module3\n",
+            "import package1",
+            "from package2 import module1",
+            "import package5.module3",
         ]
 
         result = _prepare_imports(dummy_function)
-        assert result == "".join(func_imports)
+        assert result == "\n".join(func_imports)
         # TODO fix - fails because will stop looking for imports after comments
 
     def test_prepare_imports_func_not_found(self, mocker):

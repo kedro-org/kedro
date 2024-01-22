@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import subprocess
 import tempfile
 import venv
 from pathlib import Path
@@ -93,24 +94,35 @@ def _create_tmp_dir() -> Path:
 
 
 def _setup_minimal_env(context):
-    kedro_install_venv_dir = _create_new_venv()
-    context.kedro_install_venv_dir = kedro_install_venv_dir
-    context = _setup_context_with_venv(context, kedro_install_venv_dir)
-    call(
-        [
-            context.python,
-            "-m",
-            "pip",
-            "install",
-            "-U",
-            # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
-            # pip==23.3 breaks dependency resolution
-            "pip>=21.2,<23.2",
-        ],
-        env=context.env,
-    )
-    call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
-    return context
+    if os.environ.get("BEHAVE_LOCAL_ENV"):
+        output = subprocess.check_output(
+            ["which", "kedro"]  # noqa: S603, S607
+        )  # equivalent run "which kedro"
+        output = output.strip().decode("utf8")
+        kedro_install_venv_dir = Path(output).parent.parent
+        context.kedro_install_venv_dir = kedro_install_venv_dir
+        context = _setup_context_with_venv(context, kedro_install_venv_dir)
+        return context
+    else:
+        kedro_install_venv_dir = _create_new_venv()
+        context.kedro_install_venv_dir = kedro_install_venv_dir
+        context = _setup_context_with_venv(context, kedro_install_venv_dir)
+
+        call(
+            [
+                context.python,
+                "-m",
+                "pip",
+                "install",
+                "-U",
+                # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
+                # pip==23.3 breaks dependency resolution
+                "pip>=21.2,<23.2",
+            ],
+            env=context.env,
+        )
+        call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
+        return context
 
 
 def _install_project_requirements(context):

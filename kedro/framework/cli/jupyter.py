@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 from pathlib import Path
+from typing import Any
 
 import click
 
@@ -30,19 +31,18 @@ overwrite its contents."""
 class JupyterCommandGroup(click.Group):
     """A custom class for ordering the `kedro jupyter` command groups"""
 
-    def list_commands(self, ctx):
+    def list_commands(self, ctx: click.Context) -> list[str]:
         """List commands according to a custom order"""
         return ["setup", "notebook", "lab", "convert"]
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
-def jupyter_cli():  # pragma: no cover
+def jupyter_cli() -> None:  # pragma: no cover
     pass
 
 
 @jupyter_cli.group(cls=JupyterCommandGroup)
-def jupyter():
+def jupyter() -> None:
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.
     """
@@ -50,7 +50,7 @@ def jupyter():
 
 @forward_command(jupyter, "setup", forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
-def setup(metadata: ProjectMetadata, args, **kwargs):  # noqa: unused-argument
+def setup(metadata: ProjectMetadata, /, args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
     """Initialise the Jupyter Kernel for a kedro project."""
     _check_module_importable("ipykernel")
     validate_settings()
@@ -65,10 +65,11 @@ def setup(metadata: ProjectMetadata, args, **kwargs):  # noqa: unused-argument
 @click.pass_obj  # this will pass the metadata as first argument
 def jupyter_notebook(
     metadata: ProjectMetadata,
-    env,
-    args,
-    **kwargs,
-):  # noqa: unused-argument
+    /,
+    env: str,
+    args: Any,
+    **kwargs: Any,
+) -> None:  # noqa: unused-argument
     """Open Jupyter Notebook with project specific variables loaded."""
     _check_module_importable("notebook")
     validate_settings()
@@ -91,10 +92,11 @@ def jupyter_notebook(
 @click.pass_obj  # this will pass the metadata as first argument
 def jupyter_lab(
     metadata: ProjectMetadata,
-    env,
-    args,
-    **kwargs,
-):  # noqa: unused-argument
+    /,
+    env: str,
+    args: Any,
+    **kwargs: Any,
+) -> None:  # noqa: unused-argument
     """Open Jupyter Lab with project specific variables loaded."""
     _check_module_importable("jupyterlab")
     validate_settings()
@@ -153,7 +155,6 @@ def _create_kernel(kernel_name: str, display_name: str) -> str:
     """
     # These packages are required by jupyter lab and notebook, which we have already
     # checked are importable, so we don't run _check_module_importable on them.
-    # noqa: import-outside-toplevel
     from ipykernel.kernelspec import install
 
     try:

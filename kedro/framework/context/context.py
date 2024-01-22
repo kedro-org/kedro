@@ -120,7 +120,7 @@ def _convert_paths_to_absolute_posix(
     return conf_dictionary
 
 
-def _validate_transcoded_datasets(catalog: DataCatalog):
+def _validate_transcoded_datasets(catalog: DataCatalog) -> None:
     """Validates transcoded datasets are correctly named
 
     Args:
@@ -133,7 +133,6 @@ def _validate_transcoded_datasets(catalog: DataCatalog):
         `_transcode_split` function.
 
     """
-    # noqa: protected-access
     for dataset_name in catalog._datasets.keys():
         _transcode_split(dataset_name)
 
@@ -205,12 +204,12 @@ class KedroContext:
             # Merge nested structures
             params = OmegaConf.merge(params, self._extra_params)
 
-        return OmegaConf.to_container(params) if OmegaConf.is_config(params) else params
+        return OmegaConf.to_container(params) if OmegaConf.is_config(params) else params  # type: ignore[no-any-return]
 
     def _get_catalog(
         self,
-        save_version: str = None,
-        load_versions: dict[str, str] = None,
+        save_version: str | None = None,
+        load_versions: dict[str, str] | None = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 
@@ -229,7 +228,7 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        catalog = settings.DATA_CATALOG_CLASS.from_config(
+        catalog: DataCatalog = settings.DATA_CATALOG_CLASS.from_config(
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,
@@ -254,7 +253,7 @@ class KedroContext:
         params = self.params
         feed_dict = {"parameters": params}
 
-        def _add_param_to_feed_dict(param_name, param_value):
+        def _add_param_to_feed_dict(param_name: str, param_value: Any) -> None:
             """This recursively adds parameter paths to the `feed_dict`,
             whenever `param_value` is a dictionary itself, so that users can
             specify specific nested parameters in their node inputs.
@@ -281,7 +280,7 @@ class KedroContext:
     def _get_config_credentials(self) -> dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self.config_loader["credentials"]
+            conf_creds: dict[str, Any] = self.config_loader["credentials"]
         except MissingConfigException as exc:
             logging.getLogger(__name__).debug(
                 "Credentials not found in your Kedro project config.\n %s", str(exc)

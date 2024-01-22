@@ -25,7 +25,7 @@ class ProjectMetadata(NamedTuple):
     example_pipeline: str
 
 
-def _version_mismatch_error(kedro_init_version) -> str:
+def _version_mismatch_error(kedro_init_version: str) -> str:
     return (
         f"Your Kedro project version {kedro_init_version} does not match Kedro package "
         f"version {kedro_version} you are running. Make sure to update your project "

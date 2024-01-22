@@ -9,6 +9,7 @@ clean:
 
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
+	mypy kedro --strict --allow-any-generics
 test:
 	pytest --numprocesses 4 --dist loadfile
 
@@ -18,6 +19,10 @@ show-coverage:
 
 e2e-tests:
 	behave --tags=-skip
+
+e2e-tests-fast: export BEHAVE_LOCAL_ENV=TRUE
+e2e-tests-fast:
+	behave --tags=-skip --no-capture
 
 pip-compile:
 	pip-compile -q -o -

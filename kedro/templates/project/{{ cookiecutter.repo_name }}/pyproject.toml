@@ -39,6 +39,7 @@ project_name = "{{ cookiecutter.project_name }}"
 kedro_init_version = "{{ cookiecutter.kedro_version }}"
 tools = {{ cookiecutter.tools | default('') | string | replace('\"', '\\\"') }}
 example_pipeline = "{{ cookiecutter.example_pipeline }}"
+source_dir = "src"
 
 [tool.pytest.ini_options]
 addopts = """
@@ -49,6 +50,9 @@ addopts = """
 fail_under = 0
 show_missing = true
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [tool.ruff]
 line-length = 88
@@ -62,4 +66,4 @@ select = [
     "PL",  # Pylint
     "T201", # Print Statement
 ]
-ignore = ["E501"]  # Black takes care of line-too-long
+ignore = ["E501"]  # Ruff format takes care of line-too-long

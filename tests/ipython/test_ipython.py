@@ -484,15 +484,17 @@ my_input = catalog.load("extra_input")"""
         assert result == func_inputs
 
     def test_get_function_body(self):
-        func_strings = [
-            '"""\nReturns True if input is not\n"""',
-            "\n# this is an in-line comment in the body of the function",
-            '\nrandom_assignment = "Added for a longer function"',
-            '\nrandom_assignment += "make sure to modify variable"'
-            "\nreturn not dummy_input",
-        ]
+        func_docstring = '"""\nReturns True if input is not\n"""'
+        func_strings = f"""{func_docstring}
+# this is an in-line comment in the body of the function
+random_assignment = "Added for a longer function"
+random_assignment += "make sure to modify variable"
+return not dummy_input"""
+
         result = _get_function_body(dummy_function)
-        assert result == "".join(func_strings)
+        print(f"{result=}")
+        print(f"{func_strings=}")
+        assert result == func_strings
 
     def test_get_lambda_function_body(self):
         result = _get_function_body(lambda x: x)

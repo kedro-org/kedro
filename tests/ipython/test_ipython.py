@@ -474,14 +474,14 @@ import package5.module3"""
 
     def test_prepare_node_inputs(self, dummy_node):
         # TODO Ahdra check - does this address parameters properly?
-        func_inputs = [
-            "# Prepare necessary inputs for debugging\n",
-            'dummy_input = catalog.load("dummy_input")\n',
-            'my_input = catalog.load("extra_input")\n',
-        ]
+        func_inputs = """# Prepare necessary inputs for debugging
+dummy_input = catalog.load("dummy_input")
+my_input = catalog.load("extra_input")"""
 
         result = _prepare_node_inputs(dummy_node)
-        assert result == "".join(func_inputs)
+        print("result:", result)
+        print("funct_nputs", func_inputs)
+        assert result == func_inputs
 
     def test_get_function_body(self):
         func_strings = [

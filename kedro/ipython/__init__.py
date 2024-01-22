@@ -279,10 +279,13 @@ def _prepare_node_inputs(node: Node) -> str:
     node_inputs = node.inputs
     func_params = list(signature.parameters)
 
-    statement = "# Prepare necessary inputs for debugging\n"
+    statements = ["# Prepare necessary inputs for debugging"]
+
     for node_input, func_param in zip(node_inputs, func_params):
-        statement += f'{func_param} = catalog.load("{node_input}")\n'
-    return statement
+        statements.append(f'{func_param} = catalog.load("{node_input}")')
+
+    statements = "\n".join(statements)
+    return statements
 
 
 def _get_function_body(func: Callable) -> str:

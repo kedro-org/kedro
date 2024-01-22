@@ -5,7 +5,7 @@
 
 ## Migrate an existing project that uses Kedro 0.18.* to use 0.19.*
 
- 
+
 * [Kedro 0.19.0](https://github.com/kedro-org/kedro/releases/tag/0.19.0) removed the custom Kedro syntax for `--params`. To update, you need to use the OmegaConf syntax instead by replacing `:` with `=`.
 
 <!-- TO DO - add example code and say what file it is in -- config.yml?? and link to the OmegaConf syntax -->
@@ -29,11 +29,11 @@
 
 <!-- TO DO - add example code -->
 
-* In 0.19.0 we renamed dataset and error classes in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). 
+* In 0.19.0 we renamed dataset and error classes in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon).
 
     * Dataset classes ending with `DataSet` are replaced by classes that end with `Dataset`.
-    
-    * Error classes starting with `DataSet` are replaced by classes that start with `Dataset`. 
+
+    * Error classes starting with `DataSet` are replaced by classes that start with `Dataset`.
 
 Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
 

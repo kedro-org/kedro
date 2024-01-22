@@ -231,7 +231,7 @@ def _load_node(node_name: str) -> list[str]:
 
     node_inputs = _prepare_node_inputs(node)
     imports = _prepare_imports(node_func)
-    function_text = _get_function_body(node_func)
+    function_text = _prepare_function_body(node_func)
     function_text = "# Function Body\n" + function_text
 
     cells: list[str] = []
@@ -288,7 +288,7 @@ def _prepare_node_inputs(node: Node) -> str:
     return statements
 
 
-def _get_function_body(func: Callable) -> str:
+def _prepare_function_body(func: Callable) -> str:
     # https://stackoverflow.com/questions/38050649/getting-a-python-functions-source-code-without-the-definition-lines
     all_source_lines = inspect.getsourcelines(func)[0]
     # Remove any decorators

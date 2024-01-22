@@ -8,8 +8,8 @@ from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.ipython import (
     _find_node,
-    _get_function_body,
     _load_node,
+    _prepare_function_body,
     _prepare_imports,
     _prepare_node_inputs,
     _resolve_project_path,
@@ -483,7 +483,7 @@ my_input = catalog.load("extra_input")"""
         print("funct_nputs", func_inputs)
         assert result == func_inputs
 
-    def test_get_function_body(self):
+    def test_prepare_function_body(self):
         func_docstring = '"""\nReturns True if input is not\n"""'
         func_strings = f"""{func_docstring}
 # this is an in-line comment in the body of the function
@@ -491,13 +491,11 @@ random_assignment = "Added for a longer function"
 random_assignment += "make sure to modify variable"
 return not dummy_input"""
 
-        result = _get_function_body(dummy_function)
-        print(f"{result=}")
-        print(f"{func_strings=}")
+        result = _prepare_function_body(dummy_function)
         assert result == func_strings
 
     def test_get_lambda_function_body(self):
-        result = _get_function_body(lambda x: x)
+        result = _prepare_function_body(lambda x: x)
         assert result == "lambda x: x"
         # TODO fix - fails because it splits at the comma
 
@@ -507,7 +505,7 @@ return not dummy_input"""
             "\nreturn not input",
             "\nreturn nested_function(dummy_input)\n",
         ]
-        result = _get_function_body(dummy_nested_function)
+        result = _prepare_function_body(dummy_nested_function)
         assert result == "".join(func_strings)
         # TODO fix - fails because skips nested function definition
 
@@ -516,6 +514,6 @@ return not dummy_input"""
     continue
 return len(dummy_list)"""
 
-        result = _get_function_body(dummy_function_with_loop)
+        result = _prepare_function_body(dummy_function_with_loop)
         assert result == func_strings
         # TODO fix - fails because doesn't strip spaces from continue, inconsistent

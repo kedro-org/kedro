@@ -32,24 +32,3 @@ search:
   ranking:
     # Match API docs (files prefixed "kedro.") and push them down the ranking
     '*/kedro.*.html': -5
-
-    # Match all files under the markdown directories
-    configuration/*: 5
-    course/*: 5
-    data/*: 5
-    development/*: 5
-    deployment/*: 5
-    extend_kedro/*: 5
-    faq/*: 5
-    get_started/*: 5
-    hooks/*: 5
-    integrations/*: 5
-    introduction/*: 5
-    kedro_project_setup/*: 5
-    logging/*: 5
-    nodes_and_pipelines/*: 5
-    notebooks_and_ipython/*: 5
-    resources/*: 5
-    starters/*: 5
-    tutorial/*: 10
-    visualisation/*: 5

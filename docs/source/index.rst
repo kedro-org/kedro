@@ -47,9 +47,9 @@ Welcome to Kedro's award-winning documentation!
     :target: https://linen-slack.kedro.org/
     :alt: Kedro's Slack archive
 
-.. image:: https://img.shields.io/badge/code%20style-black-black.svg
-    :target: https://github.com/psf/black
-    :alt: Code style is Black
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+    :target: https://github.com/astral-sh/ruff
+    :alt: Linted and Formatted with Ruff
 
 .. image:: https://bestpractices.coreinfrastructure.org/projects/6711/badge
     :target: https://bestpractices.coreinfrastructure.org/projects/6711

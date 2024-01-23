@@ -29,7 +29,7 @@
 
 <!-- TO DO - add example code -->
 
-* In 0.19.0 we renamed dataset and error classes in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon).
+* In 0.19.0 we renamed dataset and error classes in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide).
 
     * Dataset classes ending with `DataSet` are replaced by classes that end with `Dataset`.
 

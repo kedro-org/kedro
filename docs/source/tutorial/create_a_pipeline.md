@@ -26,6 +26,7 @@ The [hands-on video course](../course/index.md#learn-kedro-with-hands-on-video) 
 
 ```{eval-rst}
 ..  youtube:: bZD8N0yv3Fs
+    :width: 90%
 ```
 
 ## Data preprocessing node functions
@@ -353,6 +354,7 @@ To exit, close the browser tab. To regain control of the terminal, enter `^+c` o
 
 ```{eval-rst}
 ..  youtube:: KWqSzbHgNW4
+    :width: 90%
 ```
 
 ## Checkpoint

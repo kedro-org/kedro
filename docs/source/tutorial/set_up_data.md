@@ -120,6 +120,7 @@ When you have finished, close `ipython` session with `exit()`.
 
 ```{eval-rst}
 ..  youtube:: rl2cncGxyts
+    :width: 90%
 ```
 
 ### Custom data

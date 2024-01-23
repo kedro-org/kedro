@@ -12,6 +12,7 @@ Use the left-hand table of contents to explore the documentation available for m
 
 ```{eval-rst}
 ..  youtube:: PdNkECqvI58
+    :width: 80%
 ```
 
 ```{note}

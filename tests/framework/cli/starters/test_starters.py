@@ -348,46 +348,22 @@ class TestValidateSelection:
 
 
 class TestConvertToolNamesToNumbers:
-    def test_convert_tool_short_names_to_numbers_with_valid_tools(self):
-        selected_tools = "lint,test,docs"
-        result = _convert_tool_short_names_to_numbers(selected_tools)
-        assert result == ["1", "2", "4"]
-
-    def test_convert_tool_short_names_to_numbers_with_empty_string(self):
-        selected_tools = ""
-        result = _convert_tool_short_names_to_numbers(selected_tools)
-        assert result == []
-
-    def test_convert_tool_short_names_to_numbers_with_none_string(self):
-        selected_tools = "none"
-        result = _convert_tool_short_names_to_numbers(selected_tools)
-        assert result == []
-
-    def test_convert_tool_short_names_to_numbers_with_all_string(self):
-        result = _convert_tool_short_names_to_numbers("all")
-        assert result == ["1", "2", "3", "4", "5", "6", "7"]
-
-    def test_convert_tool_short_names_to_numbers_with_mixed_valid_invalid_tools(self):
-        selected_tools = "lint,invalid_tool,docs"
-        result = _convert_tool_short_names_to_numbers(selected_tools)
-        assert result == ["1", "4"]
-
-    def test_convert_tool_short_names_to_numbers_with_whitespace(self):
-        selected_tools = " lint , test , docs "
-        result = _convert_tool_short_names_to_numbers(selected_tools)
-        assert result == ["1", "2", "4"]
-
-    def test_convert_tool_short_names_to_numbers_with_case_insensitive_tools(self):
-        selected_tools = "Lint,TEST,Docs"
-        result = _convert_tool_short_names_to_numbers(selected_tools)
-        assert result == ["1", "2", "4"]
-
-    def test_convert_tool_short_names_to_numbers_with_invalid_tools(self):
-        selected_tools = "invalid_tool1,invalid_tool2"
-        result = _convert_tool_short_names_to_numbers(selected_tools)
-        assert result == []
-
-    def test_convert_tool_short_names_to_numbers_with_duplicates(self):
-        selected_tools = "lint,test,tests"
-        result = _convert_tool_short_names_to_numbers(selected_tools)
-        assert result == ["1", "2"]
+    @pytest.mark.parametrize(
+        "tool_names, expected_conversion",
+        [
+            ("lint,test,docs", ["1", "2", "4"]),
+            ("all", ["1", "2", "3", "4", "5", "6", "7"]),
+            (" lint , test , docs ", ["1", "2", "4"]),
+            ("Lint,TEST,Docs", ["1", "2", "4"]),
+            ("lint,test,tests", ["1", "2"]),
+            ("lint,invalid_tool,docs", ["1", "4"]),
+            ("invalid_tool1,invalid_tool2", []),
+            ("none", []),
+            ("", []),
+        ],
+    )
+    def test_convert_tool_short_names_to_numbers_or_empty(
+        self, tool_names, expected_conversion
+    ):
+        result = _convert_tool_short_names_to_numbers(tool_names)
+        assert result == expected_conversion

@@ -6,7 +6,7 @@ The course is structured into sections and these are each broken into short vide
 
 ```{eval-rst}
 ..  youtube:: DD7JuYKp6BA
-    :width: 90%
+    :width: 100%
 ```
 
 ## Who is this course for?

@@ -54,6 +54,7 @@ extensions = [
     "notfound.extension",
     "sphinxcontrib.jquery",
     "sphinx.ext.intersphinx",
+    "sphinx_last_updated_by_git",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class

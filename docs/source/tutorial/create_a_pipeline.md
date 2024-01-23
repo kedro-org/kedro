@@ -354,7 +354,7 @@ To exit, close the browser tab. To regain control of the terminal, enter `^+c` o
 
 ```{eval-rst}
 ..  youtube:: KWqSzbHgNW4
-    :width: 90%
+    :width: 100%
 ```
 
 ## Checkpoint

@@ -524,7 +524,7 @@ kedro run --runner=module.path.to.my.runner
 
 ```{eval-rst}
 ..  youtube:: _B6R2uOj3-s
-    :width: 90%
+    :width: 100%
 ```
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).

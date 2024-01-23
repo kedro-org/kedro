@@ -33,20 +33,20 @@ def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
     path = str(project_path)
     try:
         res = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", "rev-parse", "--short", "HEAD"],  # noqa: S603, S607
             cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data: dict[str, Any] = {"commit_sha": res.decode().strip()}
         git_status_res = subprocess.check_output(
-            ["git", "status", "--short"],
+            ["git", "status", "--short"],  # noqa: S603, S607
             cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data["dirty"] = bool(git_status_res.decode().strip())
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except Exception:  # noqa: broad-except
+    except Exception:
         logger = logging.getLogger(__name__)
         logger.debug("Unable to git describe %s", path)
         logger.debug(traceback.format_exc())
@@ -72,7 +72,6 @@ class KedroSessionError(Exception):
     pass
 
 
-# noqa: too-many-instance-attributes
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
@@ -175,7 +174,7 @@ class KedroSession:
 
         try:
             session_data["username"] = getpass.getuser()
-        except Exception as exc:  # noqa: broad-except
+        except Exception as exc:
             logging.getLogger(__name__).debug(
                 "Unable to get username. Full exception: %s", exc
             )
@@ -270,7 +269,7 @@ class KedroSession:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def run(  # noqa: PLR0913,too-many-locals
+    def run(  # noqa: PLR0913
         self,
         pipeline_name: str | None = None,
         tags: Iterable[str] | None = None,
@@ -372,7 +371,7 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(  # noqa: protected-access
+        catalog = context._get_catalog(
             save_version=save_version,
             load_versions=load_versions,
         )

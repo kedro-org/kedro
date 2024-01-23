@@ -519,7 +519,7 @@ class Node:
 
     @staticmethod
     def _process_inputs_for_bind(
-        inputs: str | list[str] | dict[str, str] | None
+        inputs: str | list[str] | dict[str, str] | None,
     ) -> tuple[list[str], dict[str, str]]:
         # Safeguard that we do not mutate list inputs
         inputs = copy.copy(inputs)

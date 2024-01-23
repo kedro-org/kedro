@@ -26,7 +26,7 @@ The [hands-on video course](../course/index.md#learn-kedro-with-hands-on-video) 
 
 ```{eval-rst}
 ..  youtube:: bZD8N0yv3Fs
-    :width: 90%
+    :width: 100%
 ```
 
 ## Data preprocessing node functions

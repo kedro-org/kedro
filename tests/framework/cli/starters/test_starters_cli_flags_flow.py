@@ -1,3 +1,25 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+from click.testing import CliRunner
+
+from kedro.framework.cli.starters import (
+    _convert_tool_short_names_to_numbers,
+)
+from tests.framework.cli.starters.conftest import (
+    _assert_requirements_ok,
+    _assert_template_ok,
+    _clean_up_project,
+    _make_cli_prompt_input,
+    _make_cli_prompt_input_without_name,
+    _make_cli_prompt_input_without_tools,
+)
+
+FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
+
+
 class TestFlagsNotAllowed:
     def test_checkout_flag_without_starter(self, fake_kedro_cli):
         result = CliRunner().invoke(
@@ -158,6 +180,18 @@ class TestToolsAndExampleFromCLI:
             not in result.output
         )
         _clean_up_project(Path("./new-kedro-project"))
+
+
+def _assert_name_ok(
+    result,
+    project_name="New Kedro Project",
+):
+    assert result.exit_code == 0, result.output
+    assert "Congratulations!" in result.output
+    assert (
+        f"Your project '{project_name}' has been created in the directory"
+        in result.output
+    )
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

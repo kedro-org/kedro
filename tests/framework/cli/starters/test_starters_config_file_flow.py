@@ -1,3 +1,25 @@
+from __future__ import annotations
+
+import shutil
+from pathlib import Path
+
+import pytest
+from click.testing import CliRunner
+
+from kedro.framework.cli.starters import (
+    TEMPLATE_PATH,
+    _convert_tool_short_names_to_numbers,
+)
+from tests.framework.cli.starters.conftest import (
+    _assert_requirements_ok,
+    _assert_template_ok,
+    _clean_up_project,
+    _write_yaml,
+)
+
+FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
+
+
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromConfigFileValid:
     """Test `kedro new` with config file provided."""

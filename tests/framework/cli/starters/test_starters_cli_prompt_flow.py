@@ -1,3 +1,24 @@
+from __future__ import annotations
+
+import shutil
+from pathlib import Path
+
+import pytest
+from click.testing import CliRunner
+
+from kedro.framework.cli.starters import (
+    TEMPLATE_PATH,
+    _fetch_validate_parse_config_from_user_prompts,
+)
+from tests.framework.cli.starters.conftest import (
+    _assert_requirements_ok,
+    _assert_template_ok,
+    _clean_up_project,
+    _make_cli_prompt_input,
+    _write_yaml,
+)
+
+
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromUserPromptsValid:
     """Tests for running `kedro new` interactively."""

@@ -4,7 +4,7 @@ Kedro is an open-source Python framework to create reproducible, maintainable, a
 
 ```{eval-rst}
 ..  youtube:: PdNkECqvI58
-    :width: 90%
+    :width: 100%
 ```
 
 Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/), and you can find the [Kedro source code on GitHub](https://github.com/kedro-org/kedro).

@@ -21,6 +21,7 @@ from kedro.framework.cli.project import CONF_SOURCE_HELP, PARAMS_ARG_HELP
 from kedro.framework.cli.utils import ENV_HELP, _split_params
 from kedro.framework.project import (
     LOGGING,  # noqa: F401
+    _ProjectPipelines,
     configure_project,
     pipelines,
 )
@@ -201,7 +202,7 @@ def magic_load_node(node: str) -> None:
     will generate code in multiple cells to load dataest from Data Catalog, import
     relevant functions and modules, and the function body.
     """
-    cells = _load_node(node)
+    cells = _load_node(node, pipelines)
     from ipylab import JupyterFrontEnd
 
     app = JupyterFrontEnd()
@@ -216,7 +217,7 @@ def magic_load_node(node: str) -> None:
         _create_cell_with_text(cell)
 
 
-def _load_node(node_name: str) -> list[str]:
+def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
     """Prepare the code to load dataset from catalog, import statements and function body.
 
     Args:
@@ -226,7 +227,7 @@ def _load_node(node_name: str) -> list[str]:
         list[str]: A list of string which is the generated code, each string represent a
         notebook cell.
     """
-    node = _find_node(node_name)
+    node = _find_node(node_name, pipelines)
     node_func = node.func
 
     node_inputs = _prepare_node_inputs(node)
@@ -241,7 +242,7 @@ def _load_node(node_name: str) -> list[str]:
     return cells
 
 
-def _find_node(node_name: str) -> Node:
+def _find_node(node_name: str, pipelines: _ProjectPipelines) -> Node:
     for pipeline in pipelines.values():
         try:
             found_node: Node = pipeline.filter(node_names=[node_name]).nodes[0]

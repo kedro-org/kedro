@@ -284,8 +284,8 @@ def _prepare_node_inputs(node: Node) -> str:
     for node_input, func_param in zip(node_inputs, func_params):
         statements.append(f'{func_param} = catalog.load("{node_input}")')
 
-    statements = "\n".join(statements)
-    return statements
+    input_statements = "\n".join(statements)
+    return input_statements
 
 
 def _prepare_function_body(func: Callable) -> str:

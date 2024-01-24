@@ -493,13 +493,13 @@ return not dummy_input"""
         result = _prepare_function_body(dummy_function)
         assert result == func_strings
 
-    @pytest.mark.skip(reason="Not support yet")
+    @pytest.mark.skip(reason="Not supported yet")
     def test_get_lambda_function_body(self):
         result = _prepare_function_body(lambda x: x)
         assert result == "lambda x: x"
         # TODO fix - fails because it splits at the comma
 
-    @pytest.mark.skip(reason="Not support yet")
+    @pytest.mark.skip(reason="Not supported yet")
     def test_get_nested_function_body(self):
         func_strings = [
             "def nested_function(input):",

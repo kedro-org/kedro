@@ -17,10 +17,8 @@ from tests.framework.cli.starters.conftest import (
     _make_cli_prompt_input_without_tools,
 )
 
-FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
 
-
-class TestFlagsNotAllowed:
+class TestFlagCombinationsNotAllowed:
     def test_checkout_flag_without_starter(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,

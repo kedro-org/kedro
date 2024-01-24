@@ -370,18 +370,6 @@ class TestProjectPathResolution:
 
 
 class TestLoadNodeMagic:
-    # TODO
-
-    # node edge cases
-    #   comments
-    #   function is a lambda function
-    #   function has a loop
-    #   nested function inside function
-
-    # node file edge cases
-    #   interspersed imports
-    #   multi-line comments
-
     def test_load_node_magic(self, mocker, dummy_function_file_lines, dummy_pipeline):
         mock_jupyter_console = mocker.MagicMock()
         mocker.patch("ipylab.JupyterFrontEnd", mock_jupyter_console)
@@ -463,7 +451,6 @@ import package5.module3"""
 
         result = _prepare_imports(dummy_function)
         assert result == func_imports
-        # TODO fix - fails because will stop looking for imports after comments
 
     def test_prepare_imports_func_not_found(self, mocker):
         mocker.patch("inspect.getsourcefile", return_value=None)
@@ -517,4 +504,3 @@ return len(dummy_list)"""
 
         result = _prepare_function_body(dummy_function_with_loop)
         assert result == func_strings
-        # TODO fix - fails because doesn't strip spaces from continue, inconsistent

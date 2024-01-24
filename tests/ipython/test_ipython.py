@@ -447,7 +447,7 @@ return not dummy_input"""
         with pytest.raises(ValueError) as excinfo:
             _find_node(node_to_find)
 
-        assert f"Node {node_to_find} is not found in any pipelines." in str(
+        assert f"Node with name='{node_to_find}' not found in any pipelines." in str(
             excinfo.value
         )
 

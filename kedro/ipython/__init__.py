@@ -249,7 +249,7 @@ def _find_node(node_name: str) -> Node:
         except ValueError:
             continue
     # If reached the node was not found in the project
-    raise ValueError(f"Node {node_name} is not found in any pipelines.")
+    raise ValueError(f"Node with name='{node_name}' not found in any pipelines.")
 
 
 def _prepare_imports(node_func: Callable) -> str:

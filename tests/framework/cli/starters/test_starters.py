@@ -20,6 +20,7 @@ from kedro.framework.cli.starters import (
     _validate_tool_selection,
 )
 from tests.framework.cli.starters.conftest import (
+    _assert_project_created_ok,
     _assert_template_ok,
     _clean_up_project,
     _make_cli_prompt_input,
@@ -128,7 +129,8 @@ class TestNewWithStarterValid:
             ["new", "-v", "--starter", str(Path("./template").resolve())],
             input=_make_cli_prompt_input(),
         )
-        _assert_template_ok(result)
+        _assert_project_created_ok(result)
+        _assert_template_ok()
         _clean_up_project(Path("./new-kedro-project"))
 
     def test_relative_path(self, fake_kedro_cli):
@@ -138,7 +140,8 @@ class TestNewWithStarterValid:
             ["new", "-v", "--starter", "template"],
             input=_make_cli_prompt_input(),
         )
-        _assert_template_ok(result)
+        _assert_project_created_ok(result)
+        _assert_template_ok()
         _clean_up_project(Path("./new-kedro-project"))
 
     def test_relative_path_directory(self, fake_kedro_cli):
@@ -148,7 +151,8 @@ class TestNewWithStarterValid:
             ["new", "-v", "--starter", ".", "--directory", "template"],
             input=_make_cli_prompt_input(),
         )
-        _assert_template_ok(result)
+        _assert_project_created_ok(result)
+        _assert_template_ok()
         _clean_up_project(Path("./new-kedro-project"))
 
     def test_alias(self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter):
@@ -253,7 +257,8 @@ class TestNewWithStarterValid:
             not in result.output
         )
         assert "You have selected" not in result.output
-        _assert_template_ok(result)
+        _assert_project_created_ok(result)
+        _assert_template_ok()
         _clean_up_project(Path("./new-kedro-project"))
 
 

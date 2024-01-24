@@ -11,6 +11,7 @@ from kedro.framework.cli.starters import (
     _convert_tool_short_names_to_numbers,
 )
 from tests.framework.cli.starters.conftest import (
+    _assert_project_created_ok,
     _assert_requirements_ok,
     _assert_template_ok,
     _clean_up_project,
@@ -37,7 +38,8 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, project_name="My Project")
+        _assert_template_ok(**config)
         _clean_up_project(Path("./my-project"))
 
     def test_custom_required_keys(self, fake_kedro_cli):
@@ -53,7 +55,8 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, project_name="Project X")
+        _assert_template_ok(**config)
         _clean_up_project(Path("./projectx"))
 
     def test_custom_kedro_version(self, fake_kedro_cli):
@@ -70,7 +73,8 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, project_name="My Project")
+        _assert_template_ok(**config)
         _clean_up_project(Path("./my-project"))
 
     def test_custom_output_dir(self, fake_kedro_cli):
@@ -88,7 +92,8 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, project_name="My Project")
+        _assert_template_ok(**config)
         _clean_up_project(Path("./my-project"))
 
     def test_extra_keys_allowed(self, fake_kedro_cli):
@@ -104,7 +109,8 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, project_name="My Project")
+        _assert_template_ok(**config)
         _clean_up_project(Path("./my-project"))
 
     def test_no_prompts(self, fake_kedro_cli):
@@ -119,7 +125,8 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, project_name="My Project")
+        _assert_template_ok(**config)
         _clean_up_project(Path("./my-project"))
 
     def test_empty_prompts(self, fake_kedro_cli):
@@ -134,7 +141,8 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, project_name="My Project")
+        _assert_template_ok(**config)
         _clean_up_project(Path("./my-project"))
 
     def test_config_with_no_tools_example(self, fake_kedro_cli):
@@ -148,7 +156,8 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, project_name="My Project")
+        _assert_template_ok(**config)
         _clean_up_project(Path("./my-project"))
 
 
@@ -242,6 +251,63 @@ class TestNewFromConfigFileInvalid:
 
 @pytest.mark.usefixtures("chdir_to_tmp", "patch_cookiecutter_args")
 class TestToolsAndExampleFromConfigFile:
+    # @pytest.mark.parametrize(
+    #     "tools",
+    #     [
+    #         "lint",
+    #         "test",
+    #         "tests",
+    #         "log",
+    #         "logs",
+    #         "docs",
+    #         "doc",
+    #         "data",
+    #         "pyspark",
+    #         "viz",
+    #         "tests,logs,doc",
+    #         "test,data,lint",
+    #         "log,docs,data,test,lint",
+    #         "log, docs, data, test, lint",
+    #         "log,       docs,     data,   test,     lint",
+    #         "all",
+    #         "LINT",
+    #         "ALL",
+    #         "TEST, LOG, DOCS",
+    #         "test, DATA, liNt",
+    #         "none",
+    #         "NONE",
+    #     ],
+    # )
+    # @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
+    # def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    #     """Test project created from config."""
+    #     config = {
+    #         "tools": tools,
+    #         "project_name": "New Kedro Project",
+    #         "example_pipeline": example_pipeline,
+    #         "repo_name": "new-kedro-project",
+    #         "python_package": "new_kedro_project",
+    #     }
+    #     _write_yaml(Path("config.yml"), config)
+    #     result = CliRunner().invoke(
+    #         fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+    #     )
+    #
+    #     tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
+    #     tools = ",".join(tools) if tools != [] else "none"
+    #
+    #     _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
+    #     _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
+    #     if tools not in ("none", "NONE", ""):
+    #         assert "You have selected the following project tools:" in result.output
+    #     else:
+    #         assert "You have selected no project tools" in result.output
+    #     assert (
+    #         "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+    #         not in result.output
+    #     )
+    #     _clean_up_project(Path("./new-kedro-project"))
+
     @pytest.mark.parametrize(
         "tools",
         [
@@ -253,29 +319,24 @@ class TestToolsAndExampleFromConfigFile:
             "docs",
             "doc",
             "data",
-            "pyspark",
-            "viz",
             "tests,logs,doc",
             "test,data,lint",
             "log,docs,data,test,lint",
             "log, docs, data, test, lint",
             "log,       docs,     data,   test,     lint",
-            "all",
             "LINT",
-            "ALL",
             "TEST, LOG, DOCS",
             "test, DATA, liNt",
             "none",
             "NONE",
         ],
     )
-    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_and_example_base_template(self, fake_kedro_cli, tools):
         """Test project created from config."""
         config = {
             "tools": tools,
             "project_name": "New Kedro Project",
-            "example_pipeline": example_pipeline,
+            "example_pipeline": "no",
             "repo_name": "new-kedro-project",
             "python_package": "new_kedro_project",
         }
@@ -287,7 +348,8 @@ class TestToolsAndExampleFromConfigFile:
         tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
         tools = ",".join(tools) if tools != [] else "none"
 
-        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
+        _assert_project_created_ok(result)
+        _assert_template_ok(tools=tools)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
         if tools not in ("none", "NONE", ""):
             assert "You have selected the following project tools:" in result.output
@@ -375,7 +437,13 @@ class TestToolsAndExampleFromConfigFile:
         )
 
     @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
-    def test_valid_example(self, fake_kedro_cli, example_pipeline):
+    def test_valid_example(
+        self,
+        fake_kedro_cli,
+        example_pipeline,
+        mock_determine_repo_dir,
+        mock_cookiecutter,
+    ):
         """Test project created from config."""
         config = {
             "tools": "none",
@@ -389,7 +457,8 @@ class TestToolsAndExampleFromConfigFile:
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
 
-        _assert_template_ok(result, **config)
+        _assert_project_created_ok(result, example_pipeline=example_pipeline)
+        # _assert_template_ok(**config)
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(

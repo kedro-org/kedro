@@ -9,6 +9,7 @@ from kedro.framework.cli.starters import (
     _convert_tool_short_names_to_numbers,
 )
 from tests.framework.cli.starters.conftest import (
+    _assert_project_created_ok,
     _assert_requirements_ok,
     _assert_template_ok,
     _clean_up_project,
@@ -161,7 +162,8 @@ class TestToolsAndExampleFromCLI:
         tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
         tools = ",".join(tools) if tools != [] else "none"
 
-        _assert_template_ok(result, tools=tools)
+        _assert_project_created_ok(result)
+        _assert_template_ok(tools=tools)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
         if tools not in ("none", "NONE"):
             assert "You have selected the following project tools:" in result.output

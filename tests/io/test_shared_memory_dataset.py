@@ -13,6 +13,9 @@ def shared_memory_dataset():
 
 
 class TestSharedMemoryDataset:
+    def test_ephemeral_attribute(self, shared_memory_dataset):
+        assert shared_memory_dataset._EPHEMERAL is True
+
     def test_save_and_load(self, shared_memory_dataset, input_data):
         """Test basic load"""
         shared_memory_dataset.save(input_data)

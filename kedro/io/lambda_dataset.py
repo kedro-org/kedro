@@ -99,7 +99,6 @@ class LambdaDataset(AbstractDataset):
             DatasetError: If a method is specified, but is not a Callable.
 
         """
-
         for name, value in [
             ("load", load),
             ("save", save),

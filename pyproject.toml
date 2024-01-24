@@ -67,6 +67,7 @@ test = [
     "mypy~=1.0",
     "pandas~=2.0",
     "pip-tools>=6.5",
+    "pluggy>=1.0, <1.4", # pluggy 1.4 hide imports inside function and causing mocking issue
     "pre-commit>=2.9.2, <4.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors

@@ -96,6 +96,18 @@ def dummy_node():
 
 
 @pytest.fixture
+def lambda_node():
+    return node(
+        func=lambda x: x,
+        inputs=[
+            "x",
+        ],
+        outputs=["lambda_output"],
+        name="lambda_node",
+    )
+
+
+@pytest.fixture
 def dummy_function_file_lines():
     # string representation of a dummy function includes imports, comments, and a
     # file function
@@ -480,11 +492,9 @@ return not dummy_input"""
         result = _prepare_function_body(dummy_function)
         assert result == func_strings
 
-    @pytest.mark.skip(reason="Not supported yet")
-    def test_get_lambda_function_body(self):
-        result = _prepare_function_body(lambda x: x)
-        assert result == "lambda x: x"
-        # TODO fix - fails because it splits at the comma
+    def test_get_lambda_function_body(self, lambda_node):
+        result = _prepare_function_body(lambda_node.func)
+        assert result == "func=lambda x: x"
 
     @pytest.mark.skip(reason="Not supported yet")
     def test_get_nested_function_body(self):

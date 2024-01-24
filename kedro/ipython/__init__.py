@@ -295,7 +295,7 @@ def _prepare_function_body(func: Callable) -> str:
     func_lines = dropwhile(lambda x: x.startswith("@"), all_source_lines)
     line: str = next(func_lines).strip()
     if not line.startswith("def "):
-        return line.rsplit(":")[-1].strip()
+        return line.rsplit(",")[0].strip()
     # Handle functions that are not one-liners
     first_line = next(func_lines)
     # Find the indentation of the first line

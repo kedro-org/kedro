@@ -38,7 +38,7 @@ At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDatase
 `AbstractDataset` is generically typed with an input data type for saving data, and an output data type for loading data.
 This typing is optional however, and defaults to `Any` type.
 
-The `_EPHEMERAL` boolean attribute in `AbstractDataset` indicates if a dataset is persistent. For example, in the case of [MemoryDataset](/kedro.io.MemoryDataset), it is set to True. By default, `_EPHEMERAL` is set to False.
+The `_EPHEMERAL` boolean attribute in `AbstractDataset` indicates if a dataset is persistent. For example, in the case of [MemoryDataset](/kedro.io.MemoryDataset), which is not persistent, it is set to True. By default, `_EPHEMERAL` is set to False.
 
 Here is an example skeleton for `ImageDataset`:
 

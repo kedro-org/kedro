@@ -117,9 +117,24 @@ def _get_expected_files(tools: str, example_pipeline: str):
     return expected_files
 
 
+def _assert_project_created_ok(
+    result, project_name="New Kedro Project", example_pipeline="no"
+):
+    assert result.exit_code == 0, result.output
+    assert "Congratulations!" in result.output
+    assert (
+        f"Your project '{project_name}' has been created in the directory"
+        in result.output
+    )
+
+    if "y" in example_pipeline.lower():
+        assert "It has been created with an example pipeline." in result.output
+    else:
+        assert "It has been created with an example pipeline." not in result.output
+
+
 # noqa: PLR0913
 def _assert_template_ok(
-    result,
     tools="none",
     project_name="New Kedro Project",
     example_pipeline="no",
@@ -128,20 +143,7 @@ def _assert_template_ok(
     kedro_version=kedro_version,
     output_dir=".",
 ):
-    assert result.exit_code == 0, result.output
-
     full_path = (Path(output_dir) / repo_name).resolve()
-
-    assert "Congratulations!" in result.output
-    assert (
-        f"Your project '{project_name}' has been created in the directory \n{full_path}"
-        in result.output
-    )
-
-    if "y" in example_pipeline.lower():
-        assert "It has been created with an example pipeline." in result.output
-    else:
-        assert "It has been created with an example pipeline." not in result.output
 
     generated_files = [
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"

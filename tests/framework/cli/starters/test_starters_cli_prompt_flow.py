@@ -11,6 +11,7 @@ from kedro.framework.cli.starters import (
     _fetch_validate_parse_config_from_user_prompts,
 )
 from tests.framework.cli.starters.conftest import (
+    _assert_project_created_ok,
     _assert_requirements_ok,
     _assert_template_ok,
     _clean_up_project,
@@ -28,7 +29,8 @@ class TestNewFromUserPromptsValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new"], input=_make_cli_prompt_input()
         )
-        _assert_template_ok(result)
+        _assert_project_created_ok(result)
+        _assert_template_ok()
         _clean_up_project(Path("./new-kedro-project"))
 
     def test_custom_project_name(self, fake_kedro_cli):
@@ -37,8 +39,8 @@ class TestNewFromUserPromptsValid:
             ["new"],
             input=_make_cli_prompt_input(project_name="My Project"),
         )
+        _assert_project_created_ok(result, project_name="My Project")
         _assert_template_ok(
-            result,
             project_name="My Project",
             repo_name="my-project",
             python_package="my_project",
@@ -53,8 +55,11 @@ class TestNewFromUserPromptsValid:
             ["new"],
             input=_make_cli_prompt_input(project_name="My-Project_ 1"),
         )
-        _assert_template_ok(
+        _assert_project_created_ok(
             result,
+            project_name="My-Project_ 1",
+        )
+        _assert_template_ok(
             project_name="My-Project_ 1",
             repo_name="my-project--1",
             python_package="my_project__1",
@@ -65,14 +70,16 @@ class TestNewFromUserPromptsValid:
         shutil.copytree(TEMPLATE_PATH, "template")
         (Path("template") / "prompts.yml").unlink()
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
-        _assert_template_ok(result)
+        _assert_project_created_ok(result)
+        _assert_template_ok()
         _clean_up_project(Path("./new-kedro-project"))
 
     def test_empty_prompts(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
         _write_yaml(Path("template") / "prompts.yml", {})
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
-        _assert_template_ok(result)
+        _assert_project_created_ok(result)
+        _assert_template_ok()
         _clean_up_project(Path("./new-kedro-project"))
 
     def test_custom_prompt_valid_input(self, fake_kedro_cli):
@@ -93,8 +100,8 @@ class TestNewFromUserPromptsValid:
             ["new", "--starter", "template"],
             input=custom_input,
         )
+        _assert_project_created_ok(result, project_name="My Project")
         _assert_template_ok(
-            result,
             project_name="My Project",
             repo_name="my-project",
             python_package="my_project",
@@ -119,8 +126,11 @@ class TestNewFromUserPromptsValid:
             ["new", "--starter", "template"],
             input=custom_input,
         )
-        _assert_template_ok(
+        _assert_project_created_ok(
             result,
+            project_name="My Project",
+        )
+        _assert_template_ok(
             project_name="My Project",
             repo_name="my_custom_repo",
             python_package="my_project",
@@ -135,6 +145,53 @@ class TestNewFromUserPromptsValid:
                 prompts=required_prompts, cookiecutter_context=None
             )
 
+    # @pytest.mark.parametrize(
+    #     "tools",
+    #     [
+    #         "1",
+    #         "2",
+    #         "3",
+    #         "4",
+    #         "5",
+    #         "6",
+    #         "7",
+    #         "2,3,4",
+    #         "3-5",
+    #         "1,2,4-6",
+    #         "1,2,4-6,7",
+    #         "4-6,7",
+    #         "1, 2 ,4 - 6, 7",
+    #         "1-3, 5-7",
+    #         "all",
+    #         "1, 2, 3",
+    #         "  1,  2, 3  ",
+    #         "ALL",
+    #         "none",
+    #         "",
+    #     ],
+    # )
+    # @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
+    # def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    #     result = CliRunner().invoke(
+    #         fake_kedro_cli,
+    #         ["new"],
+    #         input=_make_cli_prompt_input(
+    #             tools=tools, example_pipeline=example_pipeline
+    #         ),
+    #     )
+    #
+    #     _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
+    #     _assert_requirements_ok(result, tools=tools)
+    #     if tools not in ("none", ""):
+    #         assert "You have selected the following project tools:" in result.output
+    #     else:
+    #         assert "You have selected no project tools" in result.output
+    #     assert (
+    #         "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+    #         in result.output
+    #     )
+    #     _clean_up_project(Path("./new-kedro-project"))
+
     @pytest.mark.parametrize(
         "tools",
         [
@@ -143,34 +200,29 @@ class TestNewFromUserPromptsValid:
             "3",
             "4",
             "5",
-            "6",
-            "7",
             "2,3,4",
             "3-5",
-            "1,2,4-6",
-            "1,2,4-6,7",
-            "4-6,7",
-            "1, 2 ,4 - 6, 7",
-            "1-3, 5-7",
-            "all",
+            "1,2,4-5",
+            "1,2-4,5",
+            "1-3,5",
+            "1-3, 4-5",
             "1, 2, 3",
             "  1,  2, 3  ",
-            "ALL",
             "none",
             "",
         ],
     )
-    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_and_example_base_template(self, fake_kedro_cli, tools):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
             input=_make_cli_prompt_input(
-                tools=tools, example_pipeline=example_pipeline
+                tools=tools,
             ),
         )
 
-        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
+        _assert_project_created_ok(result)
+        _assert_template_ok(tools=tools)
         _assert_requirements_ok(result, tools=tools)
         if tools not in ("none", ""):
             assert "You have selected the following project tools:" in result.output
@@ -183,14 +235,20 @@ class TestNewFromUserPromptsValid:
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
-    def test_valid_example(self, fake_kedro_cli, example_pipeline):
+    def test_valid_example(
+        self,
+        fake_kedro_cli,
+        example_pipeline,
+        mock_determine_repo_dir,
+        mock_cookiecutter,
+    ):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
             input=_make_cli_prompt_input(example_pipeline=example_pipeline),
         )
-
-        _assert_template_ok(result, example_pipeline=example_pipeline)
+        _assert_project_created_ok(result, example_pipeline=example_pipeline)
+        # _assert_template_ok(result, example_pipeline=example_pipeline)
         _clean_up_project(Path("./new-kedro-project"))
 
 

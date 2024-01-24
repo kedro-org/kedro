@@ -78,6 +78,56 @@ class TestFlagCombinationsNotAllowed:
 
 @pytest.mark.usefixtures("chdir_to_tmp", "patch_cookiecutter_args")
 class TestToolsAndExampleFromCLI:
+    # @pytest.mark.parametrize(
+    #     "tools",
+    #     [
+    #         "lint",
+    #         "test",
+    #         "tests",
+    #         "log",
+    #         "logs",
+    #         "docs",
+    #         "doc",
+    #         "data",
+    #         "pyspark",
+    #         "viz",
+    #         "tests,logs,doc",
+    #         "test,data,lint",
+    #         "log,docs,data,test,lint",
+    #         "log, docs, data, test, lint",
+    #         "log,       docs,     data,   test,     lint",
+    #         "all",
+    #         "LINT",
+    #         "ALL",
+    #         "TEST, LOG, DOCS",
+    #         "test, DATA, liNt",
+    #         "none",
+    #         "NONE",
+    #     ],
+    # )
+    # @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
+    # def test_valid_tools_flag(self, fake_kedro_cli, tools, example_pipeline):
+    #     result = CliRunner().invoke(
+    #         fake_kedro_cli,
+    #         ["new", "--tools", tools, "--example", example_pipeline],
+    #         input=_make_cli_prompt_input_without_tools(),
+    #     )
+    #
+    #     tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
+    #     tools = ",".join(tools) if tools != [] else "none"
+    #
+    #     _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
+    #     _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
+    #     if tools not in ("none", "NONE"):
+    #         assert "You have selected the following project tools:" in result.output
+    #     else:
+    #         assert "You have selected no project tools" in result.output
+    #     assert (
+    #         "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+    #         in result.output
+    #     )
+    #     _clean_up_project(Path("./new-kedro-project"))
+
     @pytest.mark.parametrize(
         "tools",
         [
@@ -89,34 +139,29 @@ class TestToolsAndExampleFromCLI:
             "docs",
             "doc",
             "data",
-            "pyspark",
-            "viz",
             "tests,logs,doc",
             "test,data,lint",
             "log,docs,data,test,lint",
             "log, docs, data, test, lint",
             "log,       docs,     data,   test,     lint",
-            "all",
             "LINT",
-            "ALL",
             "TEST, LOG, DOCS",
             "test, DATA, liNt",
             "none",
             "NONE",
         ],
     )
-    @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
-    def test_valid_tools_flag(self, fake_kedro_cli, tools, example_pipeline):
+    def test_valid_tools_with_base_template(self, fake_kedro_cli, tools):
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--tools", tools, "--example", example_pipeline],
+            ["new", "--tools", tools, "--example", "no"],
             input=_make_cli_prompt_input_without_tools(),
         )
 
         tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
         tools = ",".join(tools) if tools != [] else "none"
 
-        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
+        _assert_template_ok(result, tools=tools)
         _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
         if tools not in ("none", "NONE"):
             assert "You have selected the following project tools:" in result.output

@@ -4,6 +4,7 @@
 
 ## Bug fixes and other changes
 * Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
+* Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
 
 ## Breaking changes to the API
 
@@ -20,7 +21,6 @@
 * Added `source_dir` explicitly in `pyproject.toml` for non-src layout project.
 * `MemoryDataset` entries are now included in free outputs.
 * Removed black dependency and replaced it functionality with `ruff format`.
-* Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
 
 ## Breaking changes to the API
 * Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.

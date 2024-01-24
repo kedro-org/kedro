@@ -56,6 +56,7 @@ test = [
     "behave==1.2.6",
     "coverage[toml]",
     "import-linter==2.0",
+    "ipylab>=1.0.0,
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
     "jupyterlab_server>=2.11.1",
@@ -99,8 +100,8 @@ docs = [
     "Jinja2<3.2.0",
 ]
 jupyter = [
-    "notebook>=7.0.0",  # requires the new share backend of notebook and labs
-    "ipylab>=1.0.0"
+    "ipylab>=1.0.0,
+    "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
 ]
 all = [ "kedro[test,docs,jupyter]" ]
 

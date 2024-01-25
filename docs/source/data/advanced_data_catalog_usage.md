@@ -1,6 +1,6 @@
 # Advanced: Access the Data Catalog in code
 
-You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through [`kedro.io.DataCatalog`](/kedro.io.DataCatalog) using an API that allows you to configure data sources in code and use the IO module within notebooks.
+You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through [`kedro.io.DataCatalog`](/api/kedro.io.DataCatalog) using an API that allows you to configure data sources in code and use the IO module within notebooks.
 
 ```{warning}
 Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
@@ -27,11 +27,11 @@ io = DataCatalog(
         "bikes": CSVDataset(filepath="../data/01_raw/bikes.csv"),
         "cars": CSVDataset(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
         "cars_table": SQLTableDataset(
-            table_name="cars", credentials=dict(con="sqlite:///kedro.db")
+            table_name="cars", credentials=dict(con="sqlite:///api/kedro.db")
         ),
         "scooters_query": SQLQueryDataset(
             sql="select * from cars where gear=4",
-            credentials=dict(con="sqlite:///kedro.db"),
+            credentials=dict(con="sqlite:///api/kedro.db"),
         ),
         "ranked": ParquetDataset(filepath="ranked.parquet"),
     }
@@ -126,7 +126,7 @@ dev_s3:
     aws_secret_access_key: secret
 
 scooters_credentials:
-  con: sqlite:///kedro.db
+  con: sqlite:///api/kedro.db
 
 my_gcp_credentials:
   id_token: key

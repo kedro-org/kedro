@@ -256,7 +256,7 @@ def _find_node(node_name: str, pipelines: _ProjectPipelines) -> Node:
 def _prepare_imports(node_func: Callable) -> str:
     """Prepare the import statements for loading a node."""
     python_file = inspect.getsourcefile(node_func)
-    logger.info(f"Loading node defintion from {python_file}")
+    logger.info(f"Loading node definition from {python_file}")
 
     # Confirm source file was found
     if python_file:

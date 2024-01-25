@@ -27,7 +27,7 @@ io = DataCatalog(
         "bikes": CSVDataset(filepath="../data/01_raw/bikes.csv"),
         "cars": CSVDataset(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
         "cars_table": SQLTableDataset(
-            table_name="cars", credentials=dict(con="sqlite:///api/kedro.db")
+            table_name="cars", credentials=dict(con="sqlite:///kedro.db")
         ),
         "scooters_query": SQLQueryDataset(
             sql="select * from cars where gear=4",

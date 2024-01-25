@@ -27,3 +27,8 @@ python:
       path: .
       extra_requirements:
         - docs
+
+search:
+  ranking:
+    # Match API docs (files prefixed "kedro.") and push them down the ranking
+    '*/kedro.*.html': -5

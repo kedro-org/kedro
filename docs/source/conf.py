@@ -56,6 +56,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_last_updated_by_git",
     "sphinx_favicon",
+    "sphinxcontrib.youtube",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class

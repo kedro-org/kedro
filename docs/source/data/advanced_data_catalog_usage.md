@@ -31,7 +31,7 @@ io = DataCatalog(
         ),
         "scooters_query": SQLQueryDataset(
             sql="select * from cars where gear=4",
-            credentials=dict(con="sqlite:///api/kedro.db"),
+            credentials=dict(con="sqlite:///kedro.db"),
         ),
         "ranked": ParquetDataset(filepath="ranked.parquet"),
     }

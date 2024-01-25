@@ -126,7 +126,7 @@ dev_s3:
     aws_secret_access_key: secret
 
 scooters_credentials:
-  con: sqlite:///api/kedro.db
+  con: sqlite:///kedro.db
 
 my_gcp_credentials:
   id_token: key

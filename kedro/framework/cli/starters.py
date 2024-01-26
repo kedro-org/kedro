@@ -153,11 +153,11 @@ def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
     VALIDATION_PATTERNS = {
         "yes_no": {
             "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
-            "error_message": "|It must contain only y, n, YES, NO, case insensitive.",
+            "error_message": f"'{input}' is an invalid value for example pipeline. It must contain only y, n, YES, or NO (case insensitive).",
         },
         "project_name": {
             "regex": r"^[\w -]{2,}$",
-            "error_message": f"{input}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
+            "error_message": f"'{input}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
         },
         "tools": {
             "regex": r"""^(

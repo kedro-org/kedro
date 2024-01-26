@@ -2,7 +2,7 @@
 
 This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters.md), [credentials](./credentials.md), the [data catalog](../data/data_catalog.md), and [logging information](../logging/index.md).
 
-Kedro makes use of a configuration loader to load any project configuration files, which is [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) by default since Kedro 0.19.0.
+Kedro makes use of a configuration loader to load any project configuration files, which is [`OmegaConfigLoader`](/api/kedro.config.OmegaConfigLoader) by default since Kedro 0.19.0.
 
 ```{note}
 `ConfigLoader` and `TemplatedConfigLoader` have been removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
@@ -12,7 +12,7 @@ Kedro makes use of a configuration loader to load any project configuration file
 
 [OmegaConf](https://omegaconf.readthedocs.io/) is a Python library designed to handle and manage settings. It serves as a YAML-based hierarchical system to organise configurations, which can be structured to accommodate various sources, allowing you to merge settings from multiple locations.
 
-From Kedro 0.18.5 you can use the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) which uses `OmegaConf` to load data.
+From Kedro 0.18.5 you can use the [`OmegaConfigLoader`](/api/kedro.config.OmegaConfigLoader) which uses `OmegaConf` to load data.
 
 `OmegaConfigLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
 
@@ -63,7 +63,7 @@ Do not add any local configuration to version control.
 ```
 
 ## Configuration loading
-Kedro-specific configuration (e.g., `DataCatalog` configuration for I/O) is loaded using a configuration loader class, by default, this is [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader).
+Kedro-specific configuration (e.g., `DataCatalog` configuration for I/O) is loaded using a configuration loader class, by default, this is [`OmegaConfigLoader`](/api/kedro.config.OmegaConfigLoader).
 When you interact with Kedro through the command line, e.g. by running `kedro run`, Kedro loads all project configuration in the configuration source through this configuration loader.
 
 The loader recursively scans for configuration files inside the `conf` folder, firstly in `conf/base` (`base` being the default environment) and then in `conf/local` (`local` being the designated overriding environment).
@@ -128,7 +128,7 @@ kedro run --conf-source=<path-to-new-conf-folder>
 ```
 
 ### How to read configuration from a compressed file
-You can read configuration from a compressed file in `tar.gz` or `zip` format by using the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader).
+You can read configuration from a compressed file in `tar.gz` or `zip` format by using the [`OmegaConfigLoader`](/api/kedro.config.OmegaConfigLoader).
 
 How to reference a `tar.gz` file:
 

@@ -4,7 +4,7 @@
 
 ## AbstractDataset
 
-If you are a contributor and would like to submit a new dataset, you must extend the [`AbstractDataset` interface](/kedro.io.AbstractDataset) or [`AbstractVersionedDataset` interface](/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
+If you are a contributor and would like to submit a new dataset, you must extend the [`AbstractDataset` interface](/api/kedro.io.AbstractDataset) or [`AbstractVersionedDataset` interface](/api/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
 
 
 ## Scenario
@@ -29,7 +29,7 @@ Consult the [Pillow documentation](https://pillow.readthedocs.io/en/stable/insta
 
 ## The anatomy of a dataset
 
-At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataset](/kedro.io.AbstractDataset) and provide an implementation for the following abstract methods:
+At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataset](/api/kedro.io.AbstractDataset) and provide an implementation for the following abstract methods:
 
 * `_load`
 * `_save`
@@ -307,7 +307,7 @@ Versioning doesn't work with `PartitionedDataset`. You can't use both of them at
 ```
 
 To add versioning support to the new dataset we need to extend the
- [AbstractVersionedDataset](/kedro.io.AbstractVersionedDataset) to:
+ [AbstractVersionedDataset](/api/kedro.io.AbstractVersionedDataset) to:
 
 * Accept a `version` keyword argument as part of the constructor
 * Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively
@@ -507,9 +507,9 @@ Inspect the content of the data directory to find a new version of the data, wri
 
 ## Thread-safety
 
-Kedro datasets should work with the [SequentialRunner](/kedro.runner.SequentialRunner) and the [ParallelRunner](/kedro.runner.ParallelRunner), so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
+Kedro datasets should work with the [SequentialRunner](/api/kedro.runner.SequentialRunner) and the [ParallelRunner](/api/kedro.runner.ParallelRunner), so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
-There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that uses Spark, use [ThreadRunner](/kedro.runner.ThreadRunner) instead.
+There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/api/kedro.runner.ParallelRunner). For parallelism within a Kedro project that uses Spark, use [ThreadRunner](/api/kedro.runner.ThreadRunner) instead.
 
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an IPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 

@@ -32,5 +32,5 @@ python:
 
 search:
   ranking:
-    # Match API docs (files prefixed "kedro.") and push them down the ranking
-    '*/kedro.*.html': -5
+    # Push API docs in the /api directory down the ranking
+    api/*: -5

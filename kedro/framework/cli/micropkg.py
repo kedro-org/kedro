@@ -396,7 +396,7 @@ def safe_extract(tar: tarfile.TarFile, path: Path) -> None:
         if not _is_within_directory(path, member_path):
             # noqa: broad-exception-raised
             raise Exception("Failed to safely extract tar file.")
-        safe_members.append(member_path)
+        safe_members.append(member)
     tar.extractall(path, members=safe_members)  # nosec B202
 
 

@@ -137,8 +137,7 @@ venv.bak/
 # Sphinx documentation
 # Additional files created by sphinx.ext.autosummary
 # Some of them are actually tracked to control the output
-/docs/source/kedro.*
-/docs/source/kedro_datasets.*
+/docs/source/api/kedro.*
 
 # mypy
 .mypy_cache/

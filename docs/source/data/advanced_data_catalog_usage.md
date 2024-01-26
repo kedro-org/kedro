@@ -1,6 +1,6 @@
 # Advanced: Access the Data Catalog in code
 
-You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through [`kedro.io.DataCatalog`](/kedro.io.DataCatalog) using an API that allows you to configure data sources in code and use the IO module within notebooks.
+You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through [`kedro.io.DataCatalog`](/api/kedro.io.DataCatalog) using an API that allows you to configure data sources in code and use the IO module within notebooks.
 
 ```{warning}
 Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.

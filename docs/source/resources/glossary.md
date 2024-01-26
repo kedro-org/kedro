@@ -19,7 +19,7 @@ Kedro is an open-source Python framework for creating reproducible, maintainable
 ## `KedroContext`
 A Python class that holds the configuration and Kedro’s main functionality.
 
-API documentation for [`KedroContext`](/kedro.framework.context.KedroContext)
+API documentation for [`KedroContext`](/api/kedro.framework.context.KedroContext)
 
 ## `KedroSession`
 A KedroSession allows you to manage the lifecycle of a Kedro run, persist runtime parameters and trace back runtime parameters, such as CLI command flags and environment variables.

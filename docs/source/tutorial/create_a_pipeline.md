@@ -20,6 +20,14 @@ The data processing pipeline prepares the data for model building by combining t
 ```{note}
 Kedro provides the `kedro pipeline create` command to add the skeleton code for a new pipeline. If you are writing a project from scratch and want to add a new pipeline, run the following from the terminal: `kedro pipeline create <pipeline_name>`. You do **not** need to do this in the spaceflights example as it is already supplied by the starter project.
 ```
+### Watch the video
+
+The [hands-on video course](../course/index.md#learn-kedro-with-hands-on-video) walks through data exploration and data processing for the spaceflights data. There are several videos in the playlist that cover the topic starting with the following:
+
+```{eval-rst}
+..  youtube:: bZD8N0yv3Fs
+    :width: 100%
+```
 
 ## Data preprocessing node functions
 
@@ -200,7 +208,7 @@ preprocessed_shuttles:
 ```
 </details>
 
-If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the [MemoryDataset](/kedro.io.MemoryDataset) class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
+If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the [MemoryDataset](/api/kedro.io.MemoryDataset) class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
 
 
 ## Create a table for model input
@@ -341,6 +349,13 @@ kedro viz run
 This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
 
 To exit, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
+
+### Watch the video
+
+```{eval-rst}
+..  youtube:: KWqSzbHgNW4
+    :width: 100%
+```
 
 ## Checkpoint
 

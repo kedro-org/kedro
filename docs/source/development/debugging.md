@@ -13,7 +13,7 @@ For guides on how to set up debugging with IDEs, please visit the [guide for deb
 
 ## Debugging a node
 
-To start a debugging session when an uncaught error is raised within your `node`, implement the `on_node_error` [Hook specification](/kedro.framework.hooks):
+To start a debugging session when an uncaught error is raised within your `node`, implement the `on_node_error` [Hook specification](/api/kedro.framework.hooks):
 
 ```python
 import pdb
@@ -48,7 +48,7 @@ HOOKS = (PDBNodeDebugHook(),)
 
 ## Debugging a pipeline
 
-To start a debugging session when an uncaught error is raised within your `pipeline`, implement the `on_pipeline_error` [Hook specification](/kedro.framework.hooks):
+To start a debugging session when an uncaught error is raised within your `pipeline`, implement the `on_pipeline_error` [Hook specification](/api/kedro.framework.hooks):
 
 ```python
 import pdb

@@ -265,9 +265,14 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
                 ds_name, matched_pattern, ds_config_copy
             )
 
-            ds_config["filepath"] = _trim_filepath(
-                str(context.project_path) + "/", ds_config["filepath"]
-            )
+            path_keys_to_check = ["filepath", "path"]
+
+            for key in path_keys_to_check:
+                if key in ds_config:
+                    ds_config[key] = _trim_filepath(
+                        str(context.project_path) + "/", ds_config[key]
+                    )
+
             explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))

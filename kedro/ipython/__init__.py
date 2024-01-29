@@ -301,12 +301,31 @@ def _prepare_function_body(func: Callable) -> str:
     # https://stackoverflow.com/questions/38050649/getting-a-python-functions-source-code-without-the-definition-lines
     all_source_lines = inspect.getsourcelines(func)[0]
     # Remove any decorators
-    func_lines = dropwhile(lambda x: x.startswith("@"), all_source_lines)
-    line: str = next(func_lines).strip()
+    raw_func_lines = dropwhile(lambda x: x.startswith("@"), all_source_lines)
+    line: str = next(raw_func_lines).strip()
     if not line.startswith("def "):
         return line.rsplit(",")[0].strip()
     # Handle functions that are not one-liners
-    first_line = next(func_lines)
+    first_line = next(raw_func_lines)
+
+    # Convert return statements into print statements
+    func_lines = []
+    for line in raw_func_lines:
+        if line.lstrip().startswith("return"):
+            return_statement = line.lstrip()
+            line_indentation = len(line) - len(return_statement)
+            commented_return = line[:line_indentation] + "# " + return_statement
+            printed_return = (
+                line[:line_indentation]
+                + "print("
+                + return_statement[len("return") :].strip()
+                + ")"
+            )
+            func_lines.append(commented_return)
+            func_lines.append(printed_return)
+        else:
+            func_lines.append(line)
+
     # Find the indentation of the first line
     indentation = len(first_line) - len(first_line.lstrip())
     body = "".join(

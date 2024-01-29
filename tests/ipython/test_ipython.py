@@ -129,8 +129,8 @@ import package5.module3"""
 
 @pytest.fixture
 def dummy_pipelines(dummy_node):
-    # return a list of pipelines
-    return [modular_pipeline([dummy_node])]
+    # return a dict of pipelines
+    return {"dummy_pipeline": modular_pipeline([dummy_node])}
 
 
 class TestLoadKedroObjects:
@@ -393,7 +393,8 @@ class TestLoadNodeMagic:
         mocker.patch(
             "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
         )
-        mocker.patch.object(pipelines, "values", return_value=dummy_pipelines)
+        mock_pipeline_values = dummy_pipelines.values()
+        mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
 
         node_to_load = "dummy_node"
         magic_load_node(node_to_load)
@@ -403,7 +404,8 @@ class TestLoadNodeMagic:
         mocker.patch(
             "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
         )
-        mocker.patch.object(pipelines, "values", return_value=dummy_pipelines)
+        mock_pipeline_values = dummy_pipelines.values()
+        mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
 
         node_inputs = """# Prepare necessary inputs for debugging
 dummy_input = catalog.load("dummy_input")
@@ -437,19 +439,17 @@ print(not dummy_input)"""
 
     def test_find_node_by_node_name(self, dummy_pipelines, dummy_node):
         node_to_find = "dummy_node"
-        dummy_registered_pipelines = {"my_pipeline": dummy_pipelines[0]}
-        result = _find_node(node_to_find, dummy_registered_pipelines)
+        result = _find_node(node_to_find, dummy_pipelines)
         assert result == dummy_node
 
     def test_find_node_by_func_name(self, dummy_pipelines, dummy_node):
         node_to_find = "dummy_function"
-        dummy_registered_pipelines = {"my_pipeline": dummy_pipelines[0]}
-        result = _find_node(node_to_find, dummy_registered_pipelines)
+        result = _find_node(node_to_find, dummy_pipelines)
         assert result == dummy_node
 
     def test_node_not_found(self, dummy_pipelines):
         node_to_find = "not_a_node"
-        dummy_registered_pipelines = {"my_pipeline": dummy_pipelines[0]}
+        dummy_registered_pipelines = dummy_pipelines
         with pytest.raises(ValueError) as excinfo:
             _find_node(node_to_find, dummy_registered_pipelines)
 

@@ -81,7 +81,7 @@ class ThreadRunner(AbstractRunner):
             else required_threads
         )
 
-    def _run(  # noqa: too-many-locals,useless-suppression
+    def _run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
@@ -125,7 +125,7 @@ class ThreadRunner(AbstractRunner):
                         )
                     )
                 if not futures:
-                    assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
+                    assert not todo_nodes, (todo_nodes, done_nodes, ready, done)  # noqa: S101
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:

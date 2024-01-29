@@ -27,3 +27,8 @@ python:
       path: .
       extra_requirements:
         - docs
+
+search:
+  ranking:
+    # Push API docs in the /api directory down the ranking
+    api/*: -5

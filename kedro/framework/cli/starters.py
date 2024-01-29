@@ -36,7 +36,7 @@ TOOLS_ARG_HELP = """
 Select which tools you'd like to include. By default, none are included.\n
 
 Tools\n
-1) Linting: Provides a basic linting setup with Black and Ruff\n
+1) Linting: Provides a basic linting setup with Ruff\n
 2) Testing: Provides basic testing setup with pytest\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
@@ -69,7 +69,7 @@ EXAMPLE_ARG_HELP = "Enter y to enable, n to disable the example pipeline."
 
 
 @define(order=True)
-class KedroStarterSpec:  # noqa: too-few-public-methods
+class KedroStarterSpec:
     """Specification of custom kedro starter template
     Args:
         alias: alias of the starter which shows up on `kedro starter list` and is used
@@ -149,15 +149,15 @@ def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
         )
 
 
-def _validate_regex(pattern_name: str, text: str) -> None:
+def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
     VALIDATION_PATTERNS = {
         "yes_no": {
             "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
-            "error_message": "|It must contain only y, n, YES, NO, case insensitive.",
+            "error_message": f"'{input}' is an invalid value for example pipeline. It must contain only y, n, YES, or NO (case insensitive).",
         },
         "project_name": {
             "regex": r"^[\w -]{2,}$",
-            "error_message": f"{text}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
+            "error_message": f"'{input}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
         },
         "tools": {
             "regex": r"""^(
@@ -167,11 +167,11 @@ def _validate_regex(pattern_name: str, text: str) -> None:
                 (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
                 \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
                 $""",
-            "error_message": f"'{text}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
+            "error_message": f"'{input}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
         },
     }
 
-    if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], text, flags=re.X):
+    if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], input, flags=re.X):
         click.secho(
             VALIDATION_PATTERNS[pattern_name]["error_message"],
             fg="red",
@@ -207,28 +207,26 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
 
 
 def _print_selection_and_prompt_info(
-    selected_tools: str | None, example_pipeline: str | None, interactive: bool
+    selected_tools: str, example_pipeline: str, interactive: bool
 ) -> None:
     # Confirm tools selection
-    if selected_tools is not None:
-        if selected_tools == "['None']":
-            click.secho(
-                "You have selected no project tools",
-                fg="green",
-            )
-        else:
-            click.secho(
-                f"You have selected the following project tools: {selected_tools}",
-                fg="green",
-            )
+    if selected_tools == "['None']":
+        click.secho(
+            "You have selected no project tools",
+            fg="green",
+        )
+    else:
+        click.secho(
+            f"You have selected the following project tools: {selected_tools}",
+            fg="green",
+        )
 
     # Confirm example selection
-    if example_pipeline is not None:
-        if example_pipeline:
-            click.secho(
-                "It has been created with an example pipeline.",
-                fg="green",
-            )
+    if example_pipeline == "True":
+        click.secho(
+            "It has been created with an example pipeline.",
+            fg="green",
+        )
 
     # Give hint for skipping interactive flow
     if interactive:
@@ -239,7 +237,6 @@ def _print_selection_and_prompt_info(
         )
 
 
-# noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli() -> None:  # pragma: no cover
     pass
@@ -353,8 +350,8 @@ def new(  # noqa: PLR0913
         # If interactive flow used, print hint
         interactive_flow = prompts_required and not config_path
         _print_selection_and_prompt_info(
-            extra_context.get("tools"),
-            extra_context.get("example_pipeline"),
+            extra_context["tools"],
+            extra_context["example_pipeline"],
             interactive_flow,
         )
 
@@ -391,7 +388,6 @@ def _get_cookiecutter_dir(
     clones it to ``tmpdir``; if template_path is a file path then directly uses that
     path without copying anything.
     """
-    # noqa: import-outside-toplevel
     from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
     from cookiecutter.repository import determine_repo_dir  # for performance reasons
 
@@ -446,11 +442,11 @@ def _get_prompts_required_and_clear_from_CLI_provided(
         del prompts_required["tools"]
 
     if project_name is not None:
-        _validate_regex("project_name", project_name)
+        _validate_input_with_regex_pattern("project_name", project_name)
         del prompts_required["project_name"]
 
     if example_pipeline is not None:
-        _validate_regex("yes_no", example_pipeline)
+        _validate_input_with_regex_pattern("yes_no", example_pipeline)
         del prompts_required["example_pipeline"]
 
     return prompts_required
@@ -458,7 +454,6 @@ def _get_prompts_required_and_clear_from_CLI_provided(
 
 def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
-    # noqa: import-outside-toplevel
     import git
 
     try:
@@ -525,7 +520,8 @@ def _get_extra_context(  # noqa: PLR0913
     starter_alias: str | None,
 ) -> dict[str, str]:
     """Generates a config dictionary that will be passed to cookiecutter as `extra_context`, based
-    on CLI flags, user prompts, or a configuration file.
+    on CLI flags, user prompts, configuration file or Default values.
+    It is crucial to return a dictionary with string values, otherwise, there will be issues with Cookiecutter.
 
     Args:
         prompts_required: a dictionary of all the prompts that will be shown to
@@ -543,64 +539,51 @@ def _get_extra_context(  # noqa: PLR0913
             None in case the flag wasn't used
 
     Returns:
-        the prompts_required dictionary, with all the redundant information removed.
+        Config dictionary, passed the necessary processing, with default values if needed.
     """
     if config_path:
-        extra_context = _fetch_config_from_file(config_path)
-        _validate_config_file_against_prompts(extra_context, prompts_required)
-        _validate_config_file_inputs(extra_context, starter_alias)
+        extra_context = _fetch_validate_parse_config_from_file(
+            config_path, prompts_required, starter_alias
+        )
     else:
-        extra_context = _fetch_config_from_user_prompts(
+        extra_context = _fetch_validate_parse_config_from_user_prompts(
             prompts_required, cookiecutter_context
         )
 
-    # Format
-    extra_context.setdefault("kedro_version", version)
-
-    converted_tools = _convert_tool_names_to_numbers(selected_tools)
-
-    if converted_tools is not None:
-        extra_context["tools"] = converted_tools
-
+    # Update extra_context, if CLI inputs are available
+    if selected_tools is not None:
+        tools_numbers = _convert_tool_short_names_to_numbers(selected_tools)
+        extra_context["tools"] = _convert_tool_numbers_to_readable_names(tools_numbers)
     if project_name is not None:
         extra_context["project_name"] = project_name
+    if example_pipeline is not None:
+        extra_context["example_pipeline"] = str(_parse_yes_no_to_bool(example_pipeline))
 
-    # Map the selected tools lists to readable name
-    tools_context = extra_context.get("tools")
-    tools = _parse_tools_input(tools_context)
-
-    # Check if no tools selected
-    if not tools:
-        extra_context["tools"] = str(["None"])
-    else:
-        extra_context["tools"] = str([NUMBER_TO_TOOLS_NAME[tool] for tool in tools])
-
-    extra_context["example_pipeline"] = _parse_yes_no_to_bool(
-        example_pipeline
-        if example_pipeline is not None
-        else extra_context.get("example_pipeline", "no")
-    )
+    # set defaults for required fields, will be used mostly for starters
+    extra_context.setdefault("kedro_version", version)
+    extra_context.setdefault("tools", str(["None"]))
+    extra_context.setdefault("example_pipeline", "False")
 
     return extra_context
 
 
-def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
-    """Prepares tools selection from the CLI input to the correct format
+def _convert_tool_short_names_to_numbers(selected_tools: str) -> list:
+    """Prepares tools selection from the CLI or config input to the correct format
     to be put in the project configuration, if it exists.
     Replaces tool strings with the corresponding prompt number.
 
     Args:
-        selected_tools: a string containing the value for the --tools flag,
+        selected_tools: a string containing the value for the --tools flag or config file,
             or None in case none were provided, i.e. lint,docs.
 
     Returns:
         String with the numbers corresponding to the desired tools, or
         None in case the --tools flag was not used.
     """
-    if selected_tools is None or selected_tools.lower() == "none":
-        return None
+    if selected_tools.lower() == "none":
+        return []
     if selected_tools.lower() == "all":
-        return ",".join(NUMBER_TO_TOOLS_NAME.keys())
+        return list(NUMBER_TO_TOOLS_NAME.keys())
 
     tools = []
     for tool in selected_tools.lower().split(","):
@@ -611,11 +594,29 @@ def _convert_tool_names_to_numbers(selected_tools: str | None) -> str | None:
     # Remove duplicates if any
     tools = sorted(list(set(tools)))
 
-    return ",".join(tools)
+    return tools
 
 
-def _fetch_config_from_file(config_path: str) -> dict[str, str]:
+def _convert_tool_numbers_to_readable_names(tools_numbers: list) -> str:
+    """Transform the list of tool numbers into a list of readable names, using 'None' for empty lists.
+    Then, convert the result into a string format to prevent issues with Cookiecutter.
+    """
+    tools_names = [NUMBER_TO_TOOLS_NAME[tool] for tool in tools_numbers]
+    if tools_names == []:
+        tools_names = ["None"]
+    return str(tools_names)
+
+
+def _fetch_validate_parse_config_from_file(
+    config_path: str, prompts_required: dict, starter_alias: str | None
+) -> dict[str, str]:
     """Obtains configuration for a new kedro project non-interactively from a file.
+    Validates that:
+    1. All keys specified in prompts_required are retrieved from the configuration.
+    2. The options 'tools' and 'example_pipeline' are not used in the configuration when any starter option is selected.
+    3. Variables sourced from the configuration file adhere to the expected format.
+
+    Parse tools from short names to list of numbers
 
     Args:
         config_path: The path of the config.yml which should contain the data required
@@ -631,7 +632,7 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
     """
     try:
         with open(config_path, encoding="utf-8") as config_file:
-            config = yaml.safe_load(config_file)
+            config: dict[str, str] = yaml.safe_load(config_file)
 
         if KedroCliError.VERBOSE_ERROR:
             click.echo(config_path + ":")
@@ -641,11 +642,30 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
             f"Failed to generate project: could not load config at {config_path}."
         ) from exc
 
-    # The return type defined is more specific than the "Any" type config return from yaml.safe_load
-    return config  # type: ignore[no-any-return]
+    if starter_alias and ("tools" in config or "example_pipeline" in config):
+        raise KedroCliError(
+            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file."
+        )
+
+    _validate_config_file_against_prompts(config, prompts_required)
+
+    _validate_input_with_regex_pattern(
+        "project_name", config.get("project_name", "New Kedro Project")
+    )
+
+    example_pipeline = config.get("example_pipeline", "no")
+    _validate_input_with_regex_pattern("yes_no", example_pipeline)
+    config["example_pipeline"] = str(_parse_yes_no_to_bool(example_pipeline))
+
+    tools_short_names = config.get("tools", "none").lower()
+    _validate_selected_tools(tools_short_names)
+    tools_numbers = _convert_tool_short_names_to_numbers(tools_short_names)
+    config["tools"] = _convert_tool_numbers_to_readable_names(tools_numbers)
+
+    return config
 
 
-def _fetch_config_from_user_prompts(
+def _fetch_validate_parse_config_from_user_prompts(
     prompts: dict[str, Any], cookiecutter_context: OrderedDict | None
 ) -> dict[str, str]:
     """Interactively obtains information from user prompts.
@@ -658,7 +678,6 @@ def _fetch_config_from_user_prompts(
         Configuration for starting a new project. This is passed as ``extra_context``
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
-    # noqa: import-outside-toplevel
     from cookiecutter.environment import StrictEnvironment
     from cookiecutter.prompt import read_user_variable, render_variable
 
@@ -682,11 +701,20 @@ def _fetch_config_from_user_prompts(
         if user_input:
             prompt.validate(user_input)
             config[variable_name] = user_input
+
+    if "tools" in config:
+        # convert tools input to list of numbers and validate
+        tools_numbers = _parse_tools_input(config["tools"])
+        _validate_tool_selection(tools_numbers)
+        config["tools"] = _convert_tool_numbers_to_readable_names(tools_numbers)
+    if "example_pipeline" in config:
+        example_pipeline_bool = _parse_yes_no_to_bool(config["example_pipeline"])
+        config["example_pipeline"] = str(example_pipeline_bool)
+
     return config
 
 
 def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path) -> OrderedDict:
-    # noqa: import-outside-toplevel
     from cookiecutter.generate import generate_context
 
     cookiecutter_context = generate_context(cookiecutter_dir / "cookiecutter.json")
@@ -729,25 +757,26 @@ def _make_cookiecutter_args_and_fetch_template(
     if directory:
         cookiecutter_args["directory"] = directory
 
-    # If 'tools' or 'example_pipeline' are not specified in prompts.yml, CLI or config.yml,
-    # default options will be used instead
-    # That can be when starter used or while loading from config.yml
-    tools: str | list = config.get("tools", [])
-    example_pipeline = config.get("example_pipeline", False)
+    tools = config["tools"]
+    example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+        # Ensures we use the same tag version of kedro for kedro-starters
+        cookiecutter_args["checkout"] = version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
+        cookiecutter_args["checkout"] = version
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
-    elif example_pipeline:
+    elif example_pipeline == "True":
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
+        cookiecutter_args["checkout"] = version
     else:
         # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path
@@ -768,7 +797,7 @@ def _validate_config_file_against_prompts(
         KedroCliError: If the config file is empty or does not contain all the keys
             required in prompts, or if the output_dir specified does not exist.
     """
-    if config is None:
+    if not config:
         raise KedroCliError("Config file is empty.")
     additional_keys = {"tools": "none", "example_pipeline": "no"}
     missing_keys = set(prompts) - set(config)
@@ -792,37 +821,7 @@ def _validate_config_file_against_prompts(
         )
 
 
-def _validate_config_file_inputs(
-    config: dict[str, str], starter_alias: str | None
-) -> None:
-    """Checks that variables provided through the config file are of the expected format. This
-    validates the config provided by `kedro new --config` in a similar way to `prompts.yml` for starters.
-    Also validates that "tools" or "example_pipeline" options cannot be used in config when any starter option is
-    selected.
-
-    Args:
-        config: The config as a dictionary
-        starter_alias: Starter alias if it was provided from CLI, otherwise None
-
-    Raises:
-        SystemExit: If the provided variables are not properly formatted.
-    """
-    if starter_alias and ("tools" in config or "example_pipeline" in config):
-        raise KedroCliError(
-            "The --starter flag can not be used with `example_pipeline` and/or `tools` keys in the config file."
-        )
-
-    _validate_regex("project_name", config.get("project_name", "New Kedro Project"))
-
-    input_tools = config.get("tools", "none")
-    _validate_regex("tools", input_tools.lower())
-    selected_tools = _parse_tools_input(input_tools)
-    _validate_selection(selected_tools)
-
-    _validate_regex("yes_no", config.get("example_pipeline", "no"))
-
-
-def _validate_selection(tools: list[str]) -> None:
+def _validate_tool_selection(tools: list[str]) -> None:
     # start validating from the end, when user select 1-20, it will generate a message
     # '20' is not a valid selection instead of '8'
     for tool in tools[::-1]:
@@ -845,6 +844,11 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
     def _validate_range(start: Any, end: Any) -> None:
         if int(start) > int(end):
             message = f"'{start}-{end}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
+            click.secho(message, fg="red", err=True)
+            sys.exit(1)
+        # safeguard to prevent passing of excessively large intervals that could cause freezing:
+        if int(end) > len(NUMBER_TO_TOOLS_NAME):
+            message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
@@ -885,7 +889,6 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]) -> No
     Raises:
         KedroCliError: If it fails to generate a project.
     """
-    # noqa: import-outside-toplevel
     from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
@@ -937,10 +940,6 @@ class _Prompt:
             click.secho(self.error_message, fg="red", err=True)
             sys.exit(1)
 
-        if self.title == "Project Tools":
-            # Validate user input
-            _validate_selection(_parse_tools_input(user_input))
-
 
 # noqa: unused-argument
 def _remove_readonly(
@@ -954,7 +953,7 @@ def _remove_readonly(
 
 
 def _starter_spec_to_dict(
-    starter_specs: dict[str, KedroStarterSpec]
+    starter_specs: dict[str, KedroStarterSpec],
 ) -> dict[str, dict[str, str]]:
     """Convert a dictionary of starters spec to a nicely formatted dictionary"""
     format_dict: dict[str, dict[str, str]] = {}

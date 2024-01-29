@@ -1,6 +1,5 @@
-"""``kedro.framework.project`` module provides utitlity to
+"""``kedro.framework.project`` module provides utility to
 configure a Kedro project and access its settings."""
-# noqa: redefined-outer-name,unused-argument,global-statement
 from __future__ import annotations
 
 import importlib
@@ -139,7 +138,6 @@ def _load_data_wrapper(func: Any) -> Any:
     Taking inspiration from dynaconf.utils.functional.new_method_proxy
     """
 
-    # noqa: protected-access
     def inner(self: Any, *args: Any, **kwargs: Any) -> Any:
         self._load_data()
         return func(self._content, *args, **kwargs)
@@ -216,7 +214,6 @@ class _ProjectPipelines(MutableMapping):
 
 
 class _ProjectLogging(UserDict):
-    # noqa: super-init-not-called
     def __init__(self) -> None:
         """Initialise project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
@@ -348,7 +345,7 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
     try:
         pipeline_module = importlib.import_module(pipeline_module_name)
-    except Exception as exc:  # noqa: broad-except
+    except Exception as exc:
         if str(exc) != f"No module named '{pipeline_module_name}'":
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(

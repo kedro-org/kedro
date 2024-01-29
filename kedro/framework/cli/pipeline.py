@@ -71,7 +71,6 @@ def _check_pipeline_name(ctx: click.Context, param: Any, value: str) -> str:  # 
     return value
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def pipeline_cli() -> None:  # pragma: no cover
     pass
@@ -216,7 +215,6 @@ def _echo_deletion_warning(message: str, **paths: list[Path]) -> None:
 
 
 def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
-    # noqa: import-outside-toplevel
     from cookiecutter.main import cookiecutter
 
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}

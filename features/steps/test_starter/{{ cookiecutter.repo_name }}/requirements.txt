@@ -1,4 +1,4 @@
-black~=22.0
+ruff==0.1.8
 ipython>=8.10
 jupyterlab>=3.0
 notebook

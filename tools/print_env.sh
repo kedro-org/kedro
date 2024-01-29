@@ -17,7 +17,7 @@ eval_command CONDA "conda info 2>/dev/null || echo \"Conda not found\""
 eval_command PYTHON "which python && python -V"
 eval_command PIP "python -m pip -V"
 eval_command PYTEST "python -m pytest --version"
-eval_command BLACK "python -m black --version"
+eval_command RUFF "ruff --version"
 eval_command BEHAVE "python -m behave --version"
 eval_command PRE-COMMIT "python -m pre_commit --version"
 eval_command SPARK "python -c \\

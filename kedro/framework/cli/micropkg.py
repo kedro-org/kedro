@@ -398,6 +398,8 @@ def safe_extract(tar: tarfile.TarFile, path: Path) -> None:
             raise Exception("Failed to safely extract tar file.")
         safe_members.append(member)
     tar.extractall(path, members=safe_members)  # nosec B202
+    # The nosec is still required because bandit still flags this.
+    # Related issue: https://github.com/PyCQA/bandit/issues/1038
 
 
 def _unpack_sdist(location: str, destination: Path, fs_args: str | None) -> None:

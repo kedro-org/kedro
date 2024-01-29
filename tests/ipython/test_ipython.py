@@ -387,6 +387,7 @@ class TestLoadNodeMagic:
         # it was not removed by prior tests.
         from kedro.framework.project import pipelines
 
+        # Mocking setup
         mock_jupyter_console = mocker.MagicMock()
         mocker.patch("ipylab.JupyterFrontEnd", mock_jupyter_console)
         mocker.patch(
@@ -405,13 +406,7 @@ class TestLoadNodeMagic:
         )
 
         node_to_load = "dummy_node"
-        try:
-            magic_load_node(node_to_load)
-        except Exception:
-            # Fail if an error is thrown
-            assert False
-
-        assert True
+        magic_load_node(node_to_load)
 
     def test_load_node(self, mocker, dummy_function_file_lines, dummy_pipeline):
         # wraps all the other functions

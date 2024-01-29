@@ -319,7 +319,7 @@ def _prepare_function_body(func: Callable) -> str:
                 line[:line_indentation]
                 + "print("
                 + return_statement[len("return") :].strip()
-                + ")"
+                + ")\n"
             )
             func_lines.append(commented_return)
             func_lines.append(printed_return)

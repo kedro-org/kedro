@@ -503,16 +503,15 @@ print(not dummy_input)"""
         result = _prepare_function_body(lambda_node.func)
         assert result == "func=lambda x: x"
 
-    @pytest.mark.skip(reason="Not supported yet")
     def test_get_nested_function_body(self):
-        func_strings = [
-            "def nested_function(input):",
-            "\nreturn not input",
-            "\nreturn nested_function(dummy_input)\n",
-        ]
+        func_strings = """def nested_function(input):
+    # return not input
+    print(not input)
+# return nested_function(dummy_input)
+print(nested_function(dummy_input))"""
+
         result = _prepare_function_body(dummy_nested_function)
-        assert result == "".join(func_strings)
-        # TODO fix - fails because skips nested function definition
+        assert result == func_strings
 
     def test_get_function_with_loop_body(self):
         func_strings = """for x in dummy_list:

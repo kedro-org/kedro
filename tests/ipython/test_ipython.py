@@ -434,8 +434,14 @@ return not dummy_input"""
         for cell, expected_cell in zip(cells_list, expected_cells):
             assert cell == expected_cell
 
-    def test_find_node(self, dummy_pipelines, dummy_node):
+    def test_find_node_by_node_name(self, dummy_pipelines, dummy_node):
         node_to_find = "dummy_node"
+        dummy_registered_pipelines = {"my_pipeline": dummy_pipelines[0]}
+        result = _find_node(node_to_find, dummy_registered_pipelines)
+        assert result == dummy_node
+
+    def test_find_node_by_func_name(self, dummy_pipelines, dummy_node):
+        node_to_find = "dummy_function"
         dummy_registered_pipelines = {"my_pipeline": dummy_pipelines[0]}
         result = _find_node(node_to_find, dummy_registered_pipelines)
         assert result == dummy_node

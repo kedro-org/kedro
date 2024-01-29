@@ -479,7 +479,6 @@ import package5.module3"""
         assert f"Could not find {dummy_function.__name__}" in str(excinfo.value)
 
     def test_prepare_node_inputs(self, dummy_node):
-        # TODO Ahdra check - does this address parameters properly?
         func_inputs = """# Prepare necessary inputs for debugging
 dummy_input = catalog.load("dummy_input")
 my_input = catalog.load("extra_input")"""

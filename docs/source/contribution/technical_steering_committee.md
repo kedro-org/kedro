@@ -57,7 +57,7 @@ We look for commitment markers who can do the following:
 |----------------------------------------------------------|---------------------------------------------------------------------------------------- |
 | [Ahdra Merali](https://github.com/AhdraMeraliQB)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Deepyaman Datta](https://github.com/deepyaman)          | [Claypot AI](https://www.claypot.ai)                                                    |
+| [Deepyaman Datta](https://github.com/deepyaman)          | [Voltron Data](https://voltrondata.com)                                                 |
 | [Dmitry Sorokin](https://github.com/DimedS)              | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ivan Danov](https://github.com/idanov)                  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
@@ -66,7 +66,7 @@ We look for commitment markers who can do the following:
 | [Joel Schwarzmann](https://github.com/datajoely)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Juan Luis Cano](https://github.com/astrojuanlu)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Marcin Zabłocki](https://github.com/marrrcin)           | [GetInData \| Part of Xebia](https://getindata.com)                                      |
+| [Marcin Zabłocki](https://github.com/marrrcin)           | [GetInData \| Part of Xebia](https://getindata.com)                                     |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nero Okwa](https://github.com/NeroOkwa)                 | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |

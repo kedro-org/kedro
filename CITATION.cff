@@ -9,6 +9,7 @@ authors:
   given-names: Laura
 - family-names: Dada
   given-names: Yetunde
+  orcid: https://orcid.org/0000-0002-5273-954X
 - family-names: Danov
   given-names: Ivan
 - family-names: Datta
@@ -42,6 +43,7 @@ authors:
   given-names: Dmitry
 - family-names: Stichbury
   given-names: Jo
+  orcid: https://orcid.org/0000-0002-7474-4024
 - family-names: Theisen
   given-names: Merel
 - family-names: Zabłocki

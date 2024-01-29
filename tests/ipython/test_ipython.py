@@ -383,6 +383,10 @@ class TestProjectPathResolution:
 
 class TestLoadNodeMagic:
     def test_load_node_magic(self, mocker, dummy_function_file_lines, dummy_pipeline):
+        # Reimport `pipelines` from `kedro.framework.project` to ensure that
+        # it was not removed by prior tests.
+        from kedro.framework.project import pipelines
+
         mock_jupyter_console = mocker.MagicMock()
         mocker.patch("ipylab.JupyterFrontEnd", mock_jupyter_console)
         mocker.patch(

@@ -45,6 +45,9 @@ class TestCachedDataset:
         with pytest.raises(DatasetError, match=r"has not been saved yet"):
             _ = cached_ds.load()
 
+    def test_ephemeral_attribute(self, cached_ds):
+        assert cached_ds._EPHEMERAL is True
+
     def test_save_load(self, cached_ds):
         cached_ds.save(42)
         assert cached_ds.load() == 42

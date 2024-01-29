@@ -128,9 +128,9 @@ import package5.module3"""
 
 
 @pytest.fixture
-def dummy_pipeline(dummy_node):
+def dummy_pipelines(dummy_node):
     # return a list of pipelines
-    return {"dummy": modular_pipeline([dummy_node])}
+    return [modular_pipeline([dummy_node])]
 
 
 class TestLoadKedroObjects:
@@ -382,7 +382,7 @@ class TestProjectPathResolution:
 
 
 class TestLoadNodeMagic:
-    def test_load_node_magic(self, mocker, dummy_function_file_lines, dummy_pipeline):
+    def test_load_node_magic(self, mocker, dummy_function_file_lines, dummy_pipelines):
         # Reimport `pipelines` from `kedro.framework.project` to ensure that
         # it was not removed by prior tests.
         from kedro.framework.project import pipelines
@@ -393,38 +393,17 @@ class TestLoadNodeMagic:
         mocker.patch(
             "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
         )
-        pipelines.configure("dummy_pipeline")  # Setup the pipelines
-        my_pipelines = dummy_pipeline
-
-        def my_register_pipeline():
-            return my_pipelines
-
-        mocker.patch.object(
-            pipelines,
-            "_get_pipelines_registry_callable",
-            return_value=my_register_pipeline,
-        )
+        mocker.patch.object(pipelines, "values", return_value=dummy_pipelines)
 
         node_to_load = "dummy_node"
         magic_load_node(node_to_load)
 
-    def test_load_node(self, mocker, dummy_function_file_lines, dummy_pipeline):
+    def test_load_node(self, mocker, dummy_function_file_lines, dummy_pipelines):
         # wraps all the other functions
         mocker.patch(
             "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
         )
-        pipelines.configure("dummy_pipeline")  # Setup the pipelines
-
-        my_pipelines = dummy_pipeline
-
-        def my_register_pipeline():
-            return my_pipelines
-
-        mocker.patch.object(
-            pipelines,
-            "_get_pipelines_registry_callable",
-            return_value=my_register_pipeline,
-        )
+        mocker.patch.object(pipelines, "values", return_value=dummy_pipelines)
 
         node_inputs = """# Prepare necessary inputs for debugging
 dummy_input = catalog.load("dummy_input")
@@ -455,17 +434,17 @@ return not dummy_input"""
         for cell, expected_cell in zip(cells_list, expected_cells):
             assert cell == expected_cell
 
-    def test_find_node(self, mocker, dummy_pipeline, dummy_node):
-        mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
+    def test_find_node(self, dummy_pipelines, dummy_node):
         node_to_find = "dummy_node"
-        result = _find_node(node_to_find, dummy_pipeline)
+        dummy_registered_pipelines = {"my_pipeline": dummy_pipelines[0]}
+        result = _find_node(node_to_find, dummy_registered_pipelines)
         assert result == dummy_node
 
-    def test_node_not_found(self, mocker, dummy_pipeline):
-        mocker.patch.object(pipelines, "values", return_value=dummy_pipeline)
+    def test_node_not_found(self, dummy_pipelines):
         node_to_find = "not_a_node"
+        dummy_registered_pipelines = {"my_pipeline": dummy_pipelines[0]}
         with pytest.raises(ValueError) as excinfo:
-            _find_node(node_to_find, dummy_pipeline)
+            _find_node(node_to_find, dummy_registered_pipelines)
 
         assert f"Node with name='{node_to_find}' not found in any pipelines." in str(
             excinfo.value

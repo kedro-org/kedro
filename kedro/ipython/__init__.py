@@ -232,8 +232,8 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
 
     node_inputs = _prepare_node_inputs(node)
     imports = _prepare_imports(node_func)
-    function_text = _prepare_function_body(node_func)
-    function_text = "# Function Body\n" + function_text
+    raw_function_text = _prepare_function_body(node_func)
+    function_text = "# Function Body\n" + raw_function_text
 
     cells: list[str] = []
     cells.append(node_inputs)

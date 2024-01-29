@@ -17,6 +17,8 @@ authors:
   given-names: Tynan
 - family-names: Gundaniya
   given-names: Jitendra
+- family-names: Honoré-Rougé
+  given-names: Yolan
 - family-names: Kaiser
   given-names: Stephanie
 - family-names: Kanchwala
@@ -25,18 +27,10 @@ authors:
   given-names: Ankita
 - family-names: Kumar Pilla
   given-names: Ravi
-- family-names: Koh
-  given-names: Amanda
-- family-names: Mackay
-  given-names: Andrew
 - family-names: Merali
   given-names: Ahdra
-- family-names: Naderi Varandi
-  given-names: Mehdi
 - family-names: Nguyen
   given-names: Huong
-- family-names: Nikolic
-  given-names: Vladimir
 - family-names: Okwa
   given-names: Nero
 - family-names: Cano Rodríguez
@@ -50,6 +44,8 @@ authors:
   given-names: Jo
 - family-names: Theisen
   given-names: Merel
+- family-names: Zabłocki
+  given-names: Marcin
 title: Kedro
 version: 0.19.2
 date-released: 2024-01-22

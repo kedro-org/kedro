@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
 * Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
 
 ## Breaking changes to the API

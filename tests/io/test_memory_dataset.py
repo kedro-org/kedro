@@ -54,6 +54,9 @@ class TestMemoryDataset:
         loaded_data = MemoryDataset(None).load()
         assert loaded_data is None
 
+    def test_ephemeral_attribute(self, memory_dataset):
+        assert memory_dataset._EPHEMERAL is True
+
     def test_load_infer_mode(
         self, memory_dataset, input_data, mocked_infer_mode, mocked_copy_with_mode
     ):

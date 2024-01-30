@@ -762,7 +762,7 @@ class TestMicropkgPullCommand:
         assert sdist_file.is_file()
 
         with tarfile.open(sdist_file, "r:gz") as tar:
-            tar.extractall(tmp_path)
+            safe_extract(tar, tmp_path)
 
         # Create extra project
         extra_project = tmp_path / f"{PIPELINE_NAME}-0.1_extra"
@@ -801,7 +801,7 @@ class TestMicropkgPullCommand:
         assert sdist_file.is_file()
 
         with tarfile.open(sdist_file, "r:gz") as tar:
-            tar.extractall(tmp_path)
+            safe_extract(tar, tmp_path)
 
         # Create extra package
         extra_package = tmp_path / f"{PIPELINE_NAME}-0.1" / f"{PIPELINE_NAME}_extra"

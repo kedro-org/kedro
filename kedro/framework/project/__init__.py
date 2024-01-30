@@ -223,9 +223,10 @@ class _ProjectLogging(UserDict):
             sanitized_path = Path(__file__).parent / "default_logging.yml"
         else:
             # Validate Path
-            sanitized_path = Path(path)
-            if not sanitized_path.is_absolute():
-                raise ValueError("KEDRO_LOGGING_CONFIG only accepts absolute path.")
+
+            sanitized_path = os.path.normpath(path)
+
+            sanitized_path = Path(sanitized_path=os.path.normpath(path))
 
         with open(sanitized_path, encoding="utf-8") as f:
             logging_config = f.read()
@@ -250,9 +251,9 @@ class _ProjectLogging(UserDict):
 
 
 PACKAGE_NAME = None
+settings = _ProjectSettings()
 LOGGING = _ProjectLogging()
 
-settings = _ProjectSettings()
 
 pipelines = _ProjectPipelines()
 

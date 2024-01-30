@@ -217,10 +217,19 @@ class _ProjectLogging(UserDict):
     def __init__(self) -> None:
         """Initialise project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
-        path = os.environ.get(
-            "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml"
-        )
-        logging_config = Path(path).read_text(encoding="utf-8")
+        path = os.environ.get("KEDRO_LOGGING_CONFIG")
+
+        if not path:
+            sanitized_path = Path(__file__).parent / "default_logging.yml"
+        else:
+            # Validate Path
+            sanitized_path = Path(path)
+            if not sanitized_path.is_absolute():
+                raise ValueError("KEDRO_LOGGING_CONFIG only accepts absolute path.")
+
+        with open(sanitized_path, encoding="utf-8") as f:
+            logging_config = f.read()
+        # logging_config = sanitized_path.read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
 
     def configure(self, logging_config: dict[str, Any]) -> None:

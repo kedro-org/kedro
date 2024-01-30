@@ -113,6 +113,13 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             # param2 will be True by default
     """
 
+    """
+    Datasets are persistent by default. User-defined datasets that
+    are not made to be persistent, such as instances of `MemoryDataset`,
+    need to change the `_EPHEMERAL` attribute to 'True'.
+    """
+    _EPHEMERAL = False
+
     @classmethod
     def from_config(
         cls: type,

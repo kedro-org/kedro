@@ -42,14 +42,53 @@ project_name = "my project"
 
 ### Datasets changes in 0.19
 
-* From 0.19, if you use `APIDataSet`, you need to move all `requests`-specific arguments (e.g. `params`, `headers`), except for `url` and `method`, in the hierarchy to sit under `load_args`.
+* From 0.19, if you use `APIDataset`, you need to move all `requests`-specific arguments (e.g. `params`, `headers`), except for `url` and `method`, in the hierarchy to sit under `load_args`.
 
-<!-- TO DO - add example code and state where the change happens `catalog.yml` ??  -->
+For example the following `APIDataset` in `catalog.yml` changes from
+```yaml
+us_corn_yield_data:
+  type: api.APIDataSet
+  url: https://quickstats.nass.usda.gov
+  credentials: usda_credentials
+  params:
+    key: SOME_TOKEN
+    format: JSON
+```
 
+to
+
+```yaml
+us_corn_yield_data:
+  type: api.APIDataSet
+  url: https://quickstats.nass.usda.gov
+  credentials: usda_credentials
+  load_args:
+    params:
+      key: SOME_TOKEN
+      format: JSON
+```
 
 * From 0.19, the `layer` attribute at the top level has been  moved inside the `metadata` -> `kedro-viz` attributes. You need to update `catalog.yml` accordingly.
 
-<!-- TO DO - add example code -->
+The following `catalog.yml` entry changes from
+
+```yaml
+companies:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/companies.csv
+  layer: raw
+```
+
+to
+
+```yaml
+companies:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/companies.csv
+  metadata:
+    kedro-viz:
+      layer: raw
+```
 
 * In 0.19.0 we renamed dataset and error classes in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide).
 
@@ -73,6 +112,4 @@ Note that all of the below classes are also importable from `kedro.io`; only the
 * All other dataset classes are removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 
 ### Logging
-`logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
-
-<!-- TO DO - add example code that illustrates where the changes have occured (which files are affected) -->
+`logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it. The [documentation on logging](https://docs.kedro.org/en/stable/logging/index.html) describes in detail how logging works in Kedro and how it can be customised.

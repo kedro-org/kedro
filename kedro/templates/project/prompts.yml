@@ -40,4 +40,4 @@ example_pipeline:
     Would you like to include an example pipeline? [y/N]:
   regex_validator: "(?i)^(y|yes|n|no)$"
   error_message: |
-    It must contain only y, n, YES, NO, case insensitive.
+    It must contain only y, n, YES, or NO (case insensitive).

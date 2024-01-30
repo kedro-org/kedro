@@ -220,7 +220,7 @@ The matches are ranked according to the following criteria:
 
 ## How to override the default dataset creation with dataset factories
 
-You can use dataset factories to define a catch-all pattern which will overwrite the default [`MemoryDataset`](/kedro.io.MemoryDataset) creation.
+You can use dataset factories to define a catch-all pattern which will overwrite the default [`MemoryDataset`](/api/kedro.io.MemoryDataset) creation.
 
 ```yaml
 "{a_default_dataset}":

@@ -8,15 +8,37 @@
 
 * [Kedro 0.19.0](https://github.com/kedro-org/kedro/releases/tag/0.19.0) removed the custom Kedro syntax for `--params`. To update, you need to use the OmegaConf syntax instead by replacing `:` with `=`.
 
-<!-- TO DO - add example code and say what file it is in -- config.yml?? and link to the OmegaConf syntax -->
+This command
+```bash
+kedro run --params=param_key1:value1,param_key2:2.0
+```
+
+becomes
+```bash
+kedro run --params=param_key1=value1,param_key2=2.0
+```
+
+The ["How to specify parameters at runtime" section in the docs describes this in more detail.](https://docs.kedro.org/en/stable/configuration/parameters.html#how-to-specify-parameters-at-runtime)
 
 * Kedro 0.19 removed the `create_default_data_set()` method in the `Runner`. To overwrite the default dataset creation, you now need use the new `Runner` class argument `extra_dataset_patterns` instead.
 
-<!-- TO DO - add example code and state where you'd be making this change -->
+On class instantiation you can pass the `extra_dataset_patterns` argument and overwrite the default `MemoryDataset` creation as follows:
+
+```python
+from kedro.runner import ThreadRunner
+
+runner = ThreadRunner(extra_dataset_patterns={"{default}": {"type": "MyCustomDataset"}})
+```
 
 * Kedro 0.19 removed `project_version` in `pyproject.toml`. Use `kedro_init_version` instead.
 
-<!-- TO DO - add example  -->
+```diff
+[tool.kedro]
+package_name = "my_project"
+project_name = "my project"
+- project_version = "0.19.1"
++ kedro_init_version = "0.19.1"
+```
 
 ### Datasets changes in 0.19
 

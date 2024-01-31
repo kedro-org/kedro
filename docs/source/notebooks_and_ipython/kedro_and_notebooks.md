@@ -236,6 +236,84 @@ If a Jupyter kernel with the name `kedro_<package_name>` already exists then it 
 
 You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
 
+### Debugging with %debug and %pdb
+
+ `%debug` will run post-mortem debugging using IPython. Running `%debug` immediately after a `run`command that stopped on an error will load the stack trace and of the last unhandled exception, and will stop the program at the point where the exception occurred.
+
+ Example output:
+
+ ```ipython
+ > /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py(25)split_data()
+     23     )
+     24     value = 10
+---> 25     incorrect = value / 0
+     26     print(incorrect)
+     27
+ ```
+
+ Running `%pdb` before executing the program will enable the option to automatically start a debugger when an exception occurs. This behavior can be enabled with `%pdb 1` or `%pdb on`, and disabled with `%pdb 0` or `%pdb off`.
+
+ ### Interactive debugging with Ipython pdb
+
+ Starting the debugger with either of the methods above will open an interactive shell where the user can navigate through the stack trace, inspect the value of expressions and arguments, or add breakpoints to the code.
+
+ [I think we should add some visual examples here, with images or maybe video showing the commands. Maybe add a cheat sheet. Maybe a command cheat sheet, which is easier to read than using the help function on the shell itself]
+
+ ### Running and stopping on a specified breakpoint
+
+ When executing a script with `%run`, it is possible to start the debugger at the same time, by using the flag `-d`. For example, the command `%run -d FILE_PATH.py` will execute the specified file and automatically place a breakpoint on the first line.
+
+ Example output:
+
+ ```ipython
+ Breakpoint 1 at /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py:1
+NOTE: Enter 'c' at the ipdb>  prompt to continue execution.
+> /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py(1)<module>()
+1---> 1 import logging
+      2 from typing import Dict, Tuple
+      3
+      4 import pandas as pd
+      5 from sklearn.linear_model import LinearRegression
+ ```
+
+To specify a different breakpoint with the `-b` or `--breakpoint` flag, with `FILE_PATH:LINE` as an argument. For example, `-b src/debug_test/pipelines/data_science/nodes.py:19 ` will stop at line 19 of the specified file.
+
+ To debug a Python file that requires a different entrypoint, a second file can be specified as an argument after the breakpoint is declared. For example,
+
+  ```ipython
+ %run -d -b src/project_name/pipelines/data_science/nodes.py:19 src/project_name/__main__.py
+ ```
+
+Will run starting at `__main___.py`, and stop at line 19 of `nodes.py`, and produce the following output:
+
+```ipython
+> > /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py(19)split_data()
+     17         Split data.
+     18     """
+1--> 19     X = data[parameters["features"]]
+     20     y = data["price"]
+     21     X_train, X_test, y_train, y_test = train_test_split(
+
+```
+
+From there, it's possible to add more breakpoints to the code.
+```ipython
+ipdb>  break 24
+
+Breakpoint 2 at /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py:24
+
+ipdb>  c
+
+> /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py(24)split_data()
+     22         X, y, test_size=parameters["test_size"], random_state=parameters["random_state"]
+     23     )
+2--> 24     value = 10
+     25     incorrect = value / 0
+     26     print(incorrect)
+
+```
+
+
 ### Managed services
 
 If you work within a managed Jupyter service such as a Databricks notebook you may be unable to execute `kedro jupyter notebook`. You can explicitly load the Kedro IPython extension with the `%load_ext` line magic:

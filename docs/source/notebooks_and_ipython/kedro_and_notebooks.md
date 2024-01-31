@@ -216,82 +216,31 @@ If a Jupyter kernel with the name `kedro_<package_name>` already exists then it 
 
 You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
 
-### Debugging with %debug and %pdb
+### Interactive debugging in Jupyter notebooks
 
- `%debug` will run post-mortem debugging using IPython. Running `%debug` immediately after a `run`command that stopped on an error will load the stack trace and of the last unhandled exception, and will stop the program at the point where the exception occurred.
+You can use the `%debug` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint`/`-b` to provide a breakpoint.
 
- Example output:
+[insert gif of this debug flow]
 
- ```ipython
- > /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py(25)split_data()
-     23     )
-     24     value = 10
----> 25     incorrect = value / 0
-     26     print(incorrect)
-     27
- ```
+Alternatively, running `%debug` after an error occurs will load the stack trace of the last unhandled exception. This is referred to as post-mortem debugging.
 
- Running `%pdb` before executing the program will enable the option to automatically start a debugger when an exception occurs. This behavior can be enabled with `%pdb 1` or `%pdb on`, and disabled with `%pdb 0` or `%pdb off`.
+[insert gif of post-mortem debug]
 
- ### Interactive debugging with Ipython pdb
+To debug a notebook cell instead of a single statement, you can use the [cell magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#cell-magics) `%%debug`.
 
- Starting the debugger with either of the methods above will open an interactive shell where the user can navigate through the stack trace, inspect the value of expressions and arguments, or add breakpoints to the code.
+[insert gif of using cell magic]
 
- [I think we should add some visual examples here, with images or maybe video showing the commands. Maybe add a cheat sheet. Maybe a command cheat sheet, which is easier to read than using the help function on the shell itself]
+You can use `%pdb` to automatically launch a debugger when an exception is raised. This behavior can be enabled with `%pdb 1` or `%pdb on`, and disabled with `%pdb 0` or `%pdb off`.
 
- ### Running and stopping on a specified breakpoint
+[And another gif here of this approach]
 
- When executing a script with `%run`, it is possible to start the debugger at the same time, by using the flag `-d`. For example, the command `%run -d FILE_PATH.py` will execute the specified file and automatically place a breakpoint on the first line.
+#### Using the interactive debugger
 
- Example output:
+The following commands are some of the most commonly used when debugging:
 
- ```ipython
- Breakpoint 1 at /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py:1
-NOTE: Enter 'c' at the ipdb>  prompt to continue execution.
-> /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py(1)<module>()
-1---> 1 import logging
-      2 from typing import Dict, Tuple
-      3
-      4 import pandas as pd
-      5 from sklearn.linear_model import LinearRegression
- ```
+[Insert table with command | description]
 
-To specify a different breakpoint with the `-b` or `--breakpoint` flag, with `FILE_PATH:LINE` as an argument. For example, `-b src/debug_test/pipelines/data_science/nodes.py:19 ` will stop at line 19 of the specified file.
-
- To debug a Python file that requires a different entrypoint, a second file can be specified as an argument after the breakpoint is declared. For example,
-
-  ```ipython
- %run -d -b src/project_name/pipelines/data_science/nodes.py:19 src/project_name/__main__.py
- ```
-
-Will run starting at `__main___.py`, and stop at line 19 of `nodes.py`, and produce the following output:
-
-```ipython
-> > /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py(19)split_data()
-     17         Split data.
-     18     """
-1--> 19     X = data[parameters["features"]]
-     20     y = data["price"]
-     21     X_train, X_test, y_train, y_test = train_test_split(
-
-```
-
-From there, it's possible to add more breakpoints to the code.
-```ipython
-ipdb>  break 24
-
-Breakpoint 2 at /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py:24
-
-ipdb>  c
-
-> /home/kedro/project-name/src/project_name/pipelines/data_science/nodes.py(24)split_data()
-     22         X, y, test_size=parameters["test_size"], random_state=parameters["random_state"]
-     23     )
-2--> 24     value = 10
-     25     incorrect = value / 0
-     26     print(incorrect)
-
-```
+For a complete list of commands, use the `help` command in the debugger.
 
 
 ### Managed services

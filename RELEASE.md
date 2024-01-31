@@ -36,7 +36,7 @@
 # Release 0.19.1
 
 ## Bug fixes and other changes
-* Loosened pin for `kedro-telemtry` to fix dependency issues in `0.19.0`.
+* Loosened pin for `kedro-telemetry` to fix dependency issues in `0.19.0`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 [See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).

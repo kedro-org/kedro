@@ -209,26 +209,6 @@ You don't need to restart the kernel for the `catalog`, `context`, `pipelines` a
 
 For more details, run `%reload_kedro?`.
 
-## How to use tags to convert functions from Jupyter notebooks into Kedro nodes
-
-You can use the notebook to write experimental code for your Kedro project. If you later want to convert functions you've written to Kedro nodes, you can do this using `node` tags to export them to a Python file. Say you have the following code in your notebook:
-
-```ipython
-def some_action():
-    print("This function came from `notebooks/my_notebook.ipynb`")
-```
-
-1. Enable tags toolbar: `View` menu -> `Cell Toolbar` -> `Tags`
-![Enable the tags toolbar graphic](../meta/images/jupyter_notebook_workflow_activating_tags.png)
-
-2. Add the `node` tag to the cell containing your function
-![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
-
-
-3. Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
-4. From your terminal, run `kedro jupyter convert notebooks/my_notebook.ipynb` from the Kedro project directory. The output is a Python file `src/<package_name>/nodes/my_notebook.py` containing the `some_action` function definition
-5. The `some_action` function can now be used in your Kedro pipelines
-
 ## Useful to know (for advanced users)
 Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.
 

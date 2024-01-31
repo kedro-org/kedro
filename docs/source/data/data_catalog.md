@@ -34,7 +34,7 @@ shuttles:
 
 Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet files, Feather files, HDF5 files, JSON documents, pickled objects, SQL tables, SQL queries, and more. They are supported using libraries such as pandas, PySpark, NetworkX, and Matplotlib.
 
-{doc}`The kedro-datasets package documentation<kedro-datasets:kedro_datasets>` contains a comprehensive list of all available file types.
+{py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 
@@ -151,7 +151,7 @@ kedro run --load-versions=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
 where `--load-versions` is dataset name and version timestamp separated by `:`.
 
-A dataset offers versioning support if it extends the [`AbstractVersionedDataset`](/kedro.io.AbstractVersionedDataset) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
+A dataset offers versioning support if it extends the [`AbstractVersionedDataset`](/api/kedro.io.AbstractVersionedDataset) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
 
 To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 

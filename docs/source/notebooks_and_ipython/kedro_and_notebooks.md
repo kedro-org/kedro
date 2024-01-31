@@ -46,7 +46,7 @@ If the Kedro variables are not available within your Jupyter notebook, you could
 ```
 
 ## How to explore a Kedro project in a notebook
-Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
+Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](/api/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
 
 ### `%run_viz` line magic
 
@@ -91,7 +91,7 @@ catalog.load("example_iris_data")
 The output:
 
 ```ipython
-INFO     Loading data from 'example_iris_data' (CSVDataSet)...
+INFO     Loading data from 'example_iris_data' (CSVDataset)...
 
      sepal_length  sepal_width  petal_length  petal_width    species
 0             5.1          3.5           1.4          0.2     setosa
@@ -139,7 +139,7 @@ You should see output like this, according to your username and path:
 PosixPath('/Users/username/kedro_projects/iris')
 ```
 
-You can find out more about the `context` in the [API documentation](/kedro.framework.context.KedroContext).
+You can find out more about the `context` in the [API documentation](/api/kedro.framework.context.KedroContext).
 
 ### `pipelines`
 
@@ -183,7 +183,7 @@ You can also specify the following optional arguments for `session.run`:
 | Argument name   | Accepted types   | Description                                                                                                                                          |
 | --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `tags`          | `Iterable[str]`  | Construct the pipeline using nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags  |
-| `runner`        | `AbstractRunner` | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner). Can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)          |
+| `runner`        | `AbstractRunner` | An instance of Kedro [AbstractRunner](/api/kedro.runner.AbstractRunner). Can be an instance of a [ParallelRunner](/api/kedro.runner.ParallelRunner)          |
 | `node_names`    | `Iterable[str]`  | Run nodes with specified names                                                                                                                  |
 | `from_nodes`    | `Iterable[str]`  | A list of node names which should be used as a starting point                                                                                        |
 | `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                            |

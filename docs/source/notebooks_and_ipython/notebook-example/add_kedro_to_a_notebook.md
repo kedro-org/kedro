@@ -107,15 +107,15 @@ To start using the Data Catalog, you'll need a `catalog.yml` to define datasets 
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: data/shuttles.xlsx
 ```
 
@@ -276,7 +276,7 @@ r2_score(y_test, y_pred)
 ```
 
 ## Use Kedro configuration
-Kedro offers a [configuration loader](/kedro.config.OmegaConfigLoader) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
+Kedro offers a [configuration loader](/api/kedro.config.OmegaConfigLoader) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
 
 ### Use Kedro's configuration loader to load "magic values"
 To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follows:

@@ -1,8 +1,13 @@
 # Tools to customise a new Kedro project
 
-There are several ways to customise your new project with the tools and example code.
+There are several ways to customise your new project with the tools and example code:
 
-## Specify tools configuration using `kedro new`
+* [Specify tools using inputs to `kedro new`](#specify-tools-as-inputs-to-kedro-new)
+* [Specify tools using YAML configuration](#specify-tools-using-yaml-configuration)
+
+There is a [flowchart to illustrate the choices available](#flowchart-illustration) at the bottom of the page.
+
+## Specify tools as inputs to `kedro new`
 
 Navigate to the directory in which you would like to create your new Kedro project, and run the following command:
 
@@ -19,14 +24,16 @@ You can also add flags to `kedro new` to skip some or all of the steps in the pr
 ### Project name
 The first prompt asks you to input a project name.
 
-You can skip the step to name the project by adding it to your command. For example:
+To skip this step and name the project directly, add it to `kedro new` as follows:
 
 ```bash
 kedro new --name=spaceflights
 ```
 
 ### Tools
-You are then asked to select which tools to include. Choose from the list using comma separated values `(1,2,4)`, ranges of values `(1-3,5-7)`, a combination of the two `(1,3-5,7)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`. Further information about each of the tools is described below in [Kedro tools](#kedro-tools).
+You are then asked to select which tools to include. Choose from the list using comma separated values `(1,2,4)`, ranges of values `(1-3,5-7)`, a combination of the two `(1,3-5,7)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`.
+
+[Further information about each of the tools is described below](#kedro-tools).
 
 
 ```
@@ -48,15 +55,6 @@ Tools
 Which tools would you like to include in your project? [1-7/1,3/all/none]:
  [none]:
 ```
-
-
-You may also specify your tools selection directly from the command line by using the flag `--tools`:
-
-```bash
-kedro new --tools=<your tool selection>
-```
-
-To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, `pyspark`, and `viz`.
 
 A list of available tools can also be accessed by running `kedro new --help`
 
@@ -94,23 +92,35 @@ A list of available tools can also be accessed by running `kedro new --help`
                       kedro new --tools=none
 ...
 ```
+### Shortcut
 
+To skip this step and select tools directly, add the tools selection to `kedro new` as follows:
+
+```bash
+kedro new --tools=<your tool selection>
+```
+
+To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, `pyspark`, and `viz`.
 
 ### Example code
-In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. Here’s a brief overview:
+In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. If you select `yes`, the example code included depends upon your previous choice of tools, as follows:
 
-* [Default Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) (`spaceflights-pandas`): For combinations of Linting, Testing, Custom Logging, Documentation, and Data Structure, without PySpark and Kedro Viz.
-* [PySpark Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark) (`spaceflights-pyspark`): Selected with PySpark, excluding Kedro Viz.
-* [Kedro Viz Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz) (`spaceflights-pandas-viz`): For choices including Kedro Viz, without PySpark.
-* [Full Feature Starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz) (`spaceflights-pyspark-viz`): When all tools are selected, including PySpark and Kedro Viz.
+* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark or Kedro Viz.
+* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools, unless you also selected Kedro Viz.
+* [Kedro Viz spaceflights starter (`spaceflights-pandas-viz`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): Added if Kedro Viz was one of your tools choices, unless you also selected PySpark.
+* [Full feature spaceflights starter (`spaceflights-pyspark-viz`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz): Added if you selected all available tools, including PySpark and Kedro Viz.
 
-You can add the example pipeline to your new project as follows:
+Each starter example is tailored to demonstrate the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
+
+### Shortcut
+
+To skip this step and make a choice of example code directly, add the your preference to `kedro new` as follows:
 
 ```bash
 kedro new --example=y
 ```
 
-## Specify tools configuration using `kedro new --config=`
+## Specify tools using YAML configuration
 
 As an alternative to the interactive project creation workflow, you can also supply values to `kedro new` by providing a YML configuration file to your `kedro new` command. Consider the following file:
 
@@ -127,7 +137,10 @@ As an alternative to the interactive project creation workflow, you can also sup
     "my project"
 
 "tools":
-    "2-6"
+    "lint, test, log, docs, data, pyspark, viz"
+
+"example_pipeline":
+    "y"
 ```
 
 To create a new project using the file to supply details to `kedro new`, run the following command:
@@ -137,10 +150,8 @@ kedro new --config=<path/to/config.yml>
 ```
 
 ``` {note}
-Note: When using a configuration file to create a new project, you must provide values for the project name, repository name, and package names.
+Note: When using a configuration file to create a new project, you must provide values for the project name, repository name, and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
 ```
-
-Specifying your tools selection is optional, omitting them results in the default selection of `none`.
 
 ## Kedro tools
 
@@ -179,7 +190,7 @@ With these installed, you can then make use of the following commands to format 
 
 ```bash
 ruff format path/to/project/root
-black path/to/project/root --check
+ruff check path/to/project/root
 ```
 
 Though it has no impact on how your code works, linting is important for code quality because improves consistency, readability, debugging, and maintainability. To learn more about linting your Kedro projects, check our [linting documentation](../development/linting.md).
@@ -230,9 +241,9 @@ To learn more about using logging in your project, or modifying the logging conf
 Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, `conf.py` and `index.rst`, with some added features such as auto generation of HTML documentation.
 The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration by helping you create and maintain guides and API docs.
 
-If you did not initially select `docs` and want to implement it later you can do so by following the [official documentation](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project) for guidance on adding documentation to a Kedro project.
+If you did not initially select `docs` and want to implement it later you can do so by following the [official documentation](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project-if-you-have-not-selected-docs-tool) for guidance on adding documentation to a Kedro project.
 
-### Data Structure
+### Data structure
 
 The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention).
 This is crucial if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
@@ -252,28 +263,28 @@ The `viz` tool will add visualisation to your project by including Kedro-Viz, wh
 In addition, `viz` will also add setup for experiment tracking and plotting datasets.
 See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
 
-## Flowchart of example choice of tools and example selections
+## Flowchart illustration
 
 Here is a flowchart to help illustrate some example choice of tools you can select:
 
-```{mermaid}
-:alt: Example diagram of specific tool choices
-flowchart TD
-    A[Start] --> B[Enter Project Name: Example Project];
-    B --> C3[Select Tools: None];
-    B --> C1[Select Tools: lint, docs, PySpark];
-    B --> C2[Select Tools: All];
+![Example diagram of specific tool choices](../meta/images/project-tools-choices.png)
 
-    C1 --> D1[Include Example Pipeline?];
-    C2 --> D2[Include Example Pipeline?];
-    C3 --> D3[Include Example Pipeline?];
-
-    D1 -->|Yes| E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes];
-    D1 -->|No| E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No];
-
-    D2 -->|Yes| F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: Yes];
-    D2 -->|No| F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: No];
-
-    D3 -->|Yes| G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes];
-    D3 -->|No| G2[New Project Created\nName: Example Project\nTools: None\nExample: No];
-```
+% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
+% flowchart TD
+%     A[Start] --> B[Enter Project Name: Example Project];
+%     B --> C3[Select Tools: None];
+%     B --> C1[Select Tools: lint, docs, PySpark];
+%     B --> C2[Select Tools: All];
+%
+%     C1 --> D1[Include Example Pipeline?];
+%     C2 --> D2[Include Example Pipeline?];
+%     C3 --> D3[Include Example Pipeline?];
+%
+%     D1 -->|Yes| E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes];
+%     D1 -->|No| E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No];
+%
+%     D2 -->|Yes| F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: Yes];
+%     D2 -->|No| F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: No];
+%
+%     D3 -->|Yes| G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes];
+%     D3 -->|No| G2[New Project Created\nName: Example Project\nTools: None\nExample: No];

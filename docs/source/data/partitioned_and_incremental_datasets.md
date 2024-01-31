@@ -23,7 +23,7 @@ You can use a `PartitionedDataset` in `catalog.yml` file like any other regular 
 # conf/base/catalog.yml
 
 my_partitioned_dataset:
-  type: PartitionedDataset
+  type: partitions.PartitionedDataset
   path: s3://my-bucket-name/path/to/folder  # path to the location of partitions
   dataset: pandas.CSVDataset  # shorthand notation for the dataset which will handle individual partitions
   credentials: my_credentials
@@ -56,7 +56,7 @@ Alternatively, if you need more granular configuration of the underlying dataset
 # conf/base/catalog.yml
 
 my_partitioned_dataset:
-  type: PartitionedDataset
+  type: partitions.PartitionedDataset
   path: s3://my-bucket-name/path/to/folder
   dataset:  # full dataset config notation
     type: pandas.CSVDataset
@@ -89,7 +89,7 @@ The dataset definition should be passed into the `dataset` argument of the `Part
 
 #### Shorthand notation
 
-Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [AbstractDataset](/kedro.io.AbstractDataset).
+Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [AbstractDataset](/api/kedro.io.AbstractDataset).
 
 #### Full notation
 
@@ -171,7 +171,7 @@ Partition ID _does not_ represent the whole partition path, but only a part of i
 # conf/base/catalog.yml
 
 new_partitioned_dataset:
-  type: PartitionedDataset
+  type: partitions.PartitionedDataset
   path: s3://my-bucket-name
   dataset: pandas.CSVDataset
   filename_suffix: ".csv"
@@ -319,7 +319,7 @@ Important notes about the confirmation operation:
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataset
+  type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataset
   checkpoint:
@@ -336,7 +336,7 @@ Along with the standard dataset attributes, `checkpoint` config also accepts two
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataset
+  type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataset
   checkpoint:
@@ -347,7 +347,7 @@ my_partitioned_dataset:
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataset
+  type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataset
   checkpoint:
@@ -360,7 +360,7 @@ Specification of `force_checkpoint` is also supported via the shorthand notation
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataset
+  type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataset
   checkpoint: 2020-01-01/data.csv
@@ -372,7 +372,7 @@ If you need to force the partitioned dataset to load all available partitions, s
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataset
+  type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataset
   checkpoint: ""

@@ -4,7 +4,7 @@ import json
 import shutil
 import textwrap
 from pathlib import Path
-from time import time
+from time import sleep, time
 
 import behave
 import requests
@@ -171,7 +171,7 @@ def create_config_file_without_starter(context):
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "tools": "1-5",
+        "tools": "lint, test, log, docs, data",
         "project_name": context.project_name,
         "example_pipeline": "no",
         "repo_name": context.project_name,
@@ -186,18 +186,16 @@ def create_config_file_without_starter(context):
 def create_config_file_with_tools(context, tools):
     """Behave step to create a temporary config file
     (given the existing temp directory) and store it in the context.
-    It takes a custom tools list and sets example prompt to `y`.
+    It takes a custom tools list and sets example prompt to `n`.
     """
-
-    tools_str = tools if tools != "none" else ""
 
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "tools": tools_str,
-        "example_pipeline": "y",
+        "tools": tools,
+        "example_pipeline": "n",
         "project_name": context.project_name,
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
@@ -391,9 +389,12 @@ def exec_notebook(context, command):
 @then('I wait for the jupyter webserver to run for up to "{timeout:d}" seconds')
 def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
+    # FIXME: Will continue iterating after the process has returned
     while time() < timeout_start + timeout:
         stdout = context.result.stdout.readline()
         if "http://127.0.0.1:" in stdout:
+            # Take a breath, and declare success
+            sleep(1)
             break
 
     if time() >= timeout_start + timeout:
@@ -511,28 +512,30 @@ def check_created_project_structure_from_tools(context, tools):
         assert is_created(path), f"{path} does not exist"
 
     tools_list = (
-        tools.split(",") if tools != "all" else ["1", "2", "3", "4", "5", "6", "7"]
+        tools.split(",")
+        if tools != "all"
+        else ["lint", "test", "log", "docs", "data", "pyspark", "viz"]
     )
 
-    if "1" in tools_list:  # lint tool
+    if "lint" in tools_list:  # lint tool
         pass  # No files are added
 
-    if "2" in tools_list:  # test tool
+    if "test" in tools_list:  # test tool
         assert is_created("tests"), "tests directory does not exist"
 
-    if "3" in tools_list:  # log tool
+    if "log" in tools_list:  # log tool
         assert is_created("conf/logging.yml"), "logging configuration does not exist"
 
-    if "4" in tools_list:  # docs tool
+    if "docs" in tools_list:  # docs tool
         assert is_created("docs"), "docs directory does not exist"
 
-    if "5" in tools_list:  # data tool
+    if "data" in tools_list:  # data tool
         assert is_created("data"), "data directory does not exist"
 
-    if "6" in tools_list:  # PySpark tool
+    if "pyspark" in tools_list:  # PySpark tool
         assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
 
-    if "7" in tools_list:  # viz tool
+    if "viz" in tools_list:  # viz tool
         expected_reporting_path = Path(
             f"src/{context.package_name}/pipelines/reporting"
         )
@@ -661,7 +664,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        _check_service_up(context, url, "Jupyter Notebook")
+        _check_service_up(context, url, "Jupyter Server")
     finally:
         context.result.terminate()
 

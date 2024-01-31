@@ -10,7 +10,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Kedro documentation
 * {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
-* {doc}`Where can I find the documentation for Kedro's datasets<kedro-datasets:kedro_datasets>`?
+* {py:mod}`Where can I find the documentation for Kedro's datasets <kedro-datasets:kedro_datasets>`?
 
 ## Working with Jupyter
 
@@ -44,6 +44,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How to use global variables with the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader)?
 * [How do I use resolvers in the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-resolvers-in-the-omegaconfigloader)?
 * [How do I load credentials through environment variables](../configuration/advanced_configuration.md#how-to-load-credentials-through-environment-variables)?
+* [How do I use Kedro with different project structure?](../kedro_project_setup/settings.md#use-kedro-without-the-src-folder)
 
 
 ## Nodes and pipelines

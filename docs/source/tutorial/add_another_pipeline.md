@@ -498,7 +498,7 @@ There are a separate set of parameters for `ds_pipeline_2` with the `candidate_m
 
 However, `model_input_table` does not get parameterised as it needs to be shared between instances, so is frozen outside the scope of the namespace wrappers.
 
-This renders as follows using `kedro viz` (hover over the datasets to see their full path) :
+This renders as follows using `kedro viz run` (hover over the datasets to see their full path) :
 
 ![modular_ds](../meta/images/modular_ds.gif)
 
@@ -519,6 +519,5 @@ kedro run --runner=module.path.to.my.runner
 ```
 
 `ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and {class}`Dask<kedro-datasets:kedro_datasets.dask.ParquetDataset>`.
-
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).

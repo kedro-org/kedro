@@ -26,7 +26,7 @@ class ShelveStore(BaseSessionStore):
         """Read the data from disk using `shelve` package."""
         data: dict[str, Any] = {}
         try:
-            with shelve.open(str(self._location), flag="r") as _sh:  # nosec
+            with shelve.open(str(self._location), flag="r") as _sh:  # noqa: S301
                 data = dict(_sh)
         except dbm.error:
             pass
@@ -37,7 +37,7 @@ class ShelveStore(BaseSessionStore):
         location = self._location
         location.parent.mkdir(parents=True, exist_ok=True)
 
-        with self._lock, shelve.open(str(location)) as _sh:  # nosec
+        with self._lock, shelve.open(str(location)) as _sh:  # noqa: S301
             keys_to_del = _sh.keys() - self.data.keys()
             for key in keys_to_del:
                 del _sh[key]

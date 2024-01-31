@@ -89,6 +89,7 @@ def fake_metadata(fake_root_dir):
         kedro_init_version=kedro_version,
         source_dir=fake_root_dir / REPO_NAME / "src",
         tools=None,
+        example_pipeline=None,
     )
     return metadata
 
@@ -124,7 +125,7 @@ def fake_project_cli(
     )
     # Delete the project logging.yml, which leaves behind info.log and error.log files.
     # This leaves logging config as the framework default.
-    (fake_repo_path / "conf" / "base" / "logging.yml").unlink()
+    (fake_repo_path / "conf" / "logging.yml").unlink()
 
     # NOTE: Here we load a couple of modules, as they would be imported in
     # the code and tests.

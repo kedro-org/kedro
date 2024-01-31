@@ -73,6 +73,11 @@ class TestValidParallelRunner:
         assert len(result["Z"]) == 3
         assert result["Z"] == ("42", "42", "42")
 
+    def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
+        catalog.add_feed_dict({"A": 42})
+        ParallelRunner().run(fan_out_fan_in, catalog)
+        assert "Using synchronous mode for loading and saving data." in caplog.text
+
 
 class TestMaxWorkers:
     @pytest.mark.parametrize("is_async", [False, True])
@@ -246,7 +251,7 @@ class LoggingDataset(AbstractDataset):
         return {}
 
 
-ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
+ParallelRunnerManager.register("LoggingDataset", LoggingDataset)
 
 
 @pytest.mark.parametrize("is_async", [False, True])
@@ -258,7 +263,6 @@ class TestParallelRunnerRelease:
         pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        # noqa: no-member
         catalog = DataCatalog(
             {
                 "in": runner._manager.LoggingDataset(log, "in", "stuff"),
@@ -282,7 +286,6 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        # noqa: no-member
         catalog = DataCatalog(
             {
                 "first": runner._manager.LoggingDataset(log, "first"),

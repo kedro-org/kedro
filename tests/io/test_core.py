@@ -22,6 +22,7 @@ from kedro.io.core import (
     parse_dataset_definition,
     validate_on_forbidden_chars,
 )
+from kedro.io.lambda_dataset import LambdaDataset
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
 # Excludes None, as None values are not shown in the str representation.
@@ -292,6 +293,15 @@ class TestCoreFunctions:
         with pytest.raises(DatasetError, match=pattern):
             parse_dataset_definition({"type": dataset_name})
 
+    def test_parse_dataset_definition(self):
+        config = {"type": "LambdaDataset"}
+        dataset, _ = parse_dataset_definition(config)
+        assert dataset is LambdaDataset
+
+    def test_test_parse_dataset_definition_with_python_class_type(self):
+        config = {"type": MyDataset}
+        parse_dataset_definition(config)
+
 
 class TestAbstractVersionedDataset:
     def test_version_str_repr(self, load_version, save_version):
@@ -338,7 +348,7 @@ class TestAbstractVersionedDataset:
         shutil.rmtree(my_versioned_dataset._filepath)
 
     def test_exists_general_exception(self):
-        """Check if all exceptions are shown as DataSetError for exists() check"""
+        """Check if all exceptions are shown as DatasetError for exists() check"""
         version = Version(load=None, save=None)
         my_other_versioned_dataset = MyOtherVersionedDataset(
             "test.csv", version=version

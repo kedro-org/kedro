@@ -98,7 +98,6 @@ def local_config(tmp_path):
             "type": "pandas.CSVDataset",
             "filepath": boats_filepath,
             "versioned": True,
-            "layer": "raw",
         },
         "horses": {
             "type": "pandas.CSVDataset",
@@ -254,7 +253,6 @@ class TestKedroContext:
         mock_validate.assert_called_once_with(catalog)
 
     def test_catalog(self, dummy_context, dummy_dataframe):
-        assert dummy_context.catalog.layers == {"raw": {"boats"}}
         dummy_context.catalog.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.catalog.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)

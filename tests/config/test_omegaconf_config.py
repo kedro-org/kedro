@@ -623,7 +623,7 @@ class TestOmegaConfigLoader:
     @use_config_dir
     def test_load_config_from_tar_file(self, tmp_path):
         subprocess.run(  # noqa: PLW1510
-            [
+            [  # noqa: S603, S607
                 "tar",
                 "--exclude=local/*.yml",
                 "-czf",

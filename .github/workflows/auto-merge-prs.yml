@@ -1,0 +1,20 @@
+name: Auto-merge sync PR
+# This workflow automatically merges the PRs labelled "automerge". This is a part of syncing
+# of `develop` and `main` branches.
+
+on:
+  schedule:
+    - cron: '*/60 * * * *' # every 60 minutes
+  workflow_dispatch: # on button click
+
+jobs:
+  automerge:
+    permissions:
+      pull-requests: read
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Automerge PRs with "automerge" label
+        uses: "pascalgn/automerge-action@v0.16.2"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GH_TAGGING_TOKEN }}"

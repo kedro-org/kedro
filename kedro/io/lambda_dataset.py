@@ -32,7 +32,7 @@ class LambdaDataset(AbstractDataset):
     """
 
     def _describe(self) -> dict[str, Any]:
-        def _to_str(func):
+        def _to_str(func: Any) -> str | None:
             if not func:
                 return None
             try:
@@ -80,9 +80,9 @@ class LambdaDataset(AbstractDataset):
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,
-        exists: Callable[[], bool] = None,
-        release: Callable[[], None] = None,
-        metadata: dict[str, Any] = None,
+        exists: Callable[[], bool] | None = None,
+        release: Callable[[], None] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``LambdaDataset`` with references to the
         required input/output data set methods.
@@ -99,7 +99,6 @@ class LambdaDataset(AbstractDataset):
             DatasetError: If a method is specified, but is not a Callable.
 
         """
-
         for name, value in [
             ("load", load),
             ("save", save),

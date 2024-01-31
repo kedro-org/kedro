@@ -17,7 +17,7 @@ tools:
     To find out more: https://docs.kedro.org/en/stable/starters/new_project_tools.html
 
     Tools
-    1) Lint: Basic linting with Black and Ruff
+    1) Lint: Basic linting with Ruff
     2) Test: Basic testing with pytest
     3) Log: Additional, environment-specific logging options
     4) Docs: A Sphinx documentation setup
@@ -40,4 +40,4 @@ example_pipeline:
     Would you like to include an example pipeline? [y/N]:
   regex_validator: "(?i)^(y|yes|n|no)$"
   error_message: |
-    It must contain only y, n, YES, NO, case insensitive.
+    It must contain only y, n, YES, or NO (case insensitive).

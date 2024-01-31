@@ -113,13 +113,20 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             # param2 will be True by default
     """
 
+    """
+    Datasets are persistent by default. User-defined datasets that
+    are not made to be persistent, such as instances of `MemoryDataset`,
+    need to change the `_EPHEMERAL` attribute to 'True'.
+    """
+    _EPHEMERAL = False
+
     @classmethod
     def from_config(
         cls: type,
         name: str,
         config: dict[str, Any],
-        load_version: str = None,
-        save_version: str = None,
+        load_version: str | None = None,
+        save_version: str | None = None,
     ) -> AbstractDataset:
         """Create a data set instance using the configuration provided.
 
@@ -152,7 +159,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from exc
 
         try:
-            dataset = class_obj(**config)  # type: ignore
+            dataset = class_obj(**config)
         except TypeError as err:
             raise DatasetError(
                 f"\n{err}.\nDataset '{name}' must only contain arguments valid for the "
@@ -220,8 +227,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
 
-    def __str__(self):
-        def _to_str(obj, is_root=False):
+    def __str__(self) -> str:
+        def _to_str(obj: Any, is_root: bool = False) -> str:
             """Returns a string representation where
             1. The root level (i.e. the Dataset.__init__ arguments) are
             formatted like Dataset(key=value).
@@ -312,7 +319,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def _release(self) -> None:
         pass
 
-    def _copy(self, **overwrite_params) -> AbstractDataset:
+    def _copy(self, **overwrite_params: Any) -> AbstractDataset:
         dataset_copy = copy.deepcopy(self)
         for name, value in overwrite_params.items():
             setattr(dataset_copy, name, value)
@@ -351,13 +358,15 @@ _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", ""]
 
 
 def parse_dataset_definition(
-    config: dict[str, Any], load_version: str = None, save_version: str = None
+    config: dict[str, Any],
+    load_version: str | None = None,
+    save_version: str | None = None,
 ) -> tuple[type[AbstractDataset], dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
         config: Data set config dictionary. It *must* contain the `type` key
-            with fully qualified class name.
+            with fully qualified class name or the class object.
         load_version: Version string to be used for ``load`` operation if
             the data set is versioned. Has no effect on the data set
             if versioning was not enabled.
@@ -378,6 +387,7 @@ def parse_dataset_definition(
         raise DatasetError("'type' is missing from dataset catalog configuration")
 
     dataset_type = config.pop("type")
+    class_obj = None
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
@@ -393,6 +403,9 @@ def parse_dataset_definition(
                 break
         else:
             raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
+
+    if not class_obj:
+        class_obj = dataset_type
 
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(
@@ -447,8 +460,8 @@ def _load_obj(class_path: str) -> Any | None:
     return class_obj
 
 
-def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
-    filepath = Path(filepath)
+def _local_exists(local_filepath: str) -> bool:  # SKIP_IF_NO_SPARK
+    filepath = Path(local_filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
@@ -502,8 +515,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self,
         filepath: PurePosixPath,
         version: Version | None,
-        exists_function: Callable[[str], bool] = None,
-        glob_function: Callable[[str], list[str]] = None,
+        exists_function: Callable[[str], bool] | None = None,
+        glob_function: Callable[[str], list[str]] | None = None,
     ):
         """Creates a new instance of ``AbstractVersionedDataset``.
 
@@ -532,19 +545,19 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.
         pattern = str(self._get_versioned_path("*"))
-        version_paths = sorted(self._glob_function(pattern), reverse=True)
+        try:
+            version_paths = sorted(self._glob_function(pattern), reverse=True)
+        except Exception as exc:
+            message = (
+                f"Did not find any versions for {self}. This could be "
+                f"due to insufficient permission. Exception: {exc}"
+            )
+            raise VersionNotFoundError(message) from exc
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
-        protocol = getattr(self, "_protocol", None)
         if not most_recent:
-            if protocol in CLOUD_PROTOCOLS:
-                message = (
-                    f"Did not find any versions for {self}. This could be "
-                    f"due to insufficient permission."
-                )
-            else:
-                message = f"Did not find any versions for {self}"
+            message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
         return PurePath(most_recent).parent.name
 
@@ -560,7 +573,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         if not self._version:
             return None
         if self._version.load:
-            return self._version.load
+            return self._version.load  # type: ignore[no-any-return]
         return self._fetch_latest_load_version()
 
     def _get_load_path(self) -> PurePosixPath:
@@ -569,14 +582,14 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             return self._filepath
 
         load_version = self.resolve_load_version()
-        return self._get_versioned_path(load_version)  # type: ignore
+        return self._get_versioned_path(load_version)  # type: ignore[arg-type]
 
     def resolve_save_version(self) -> str | None:
         """Compute the version the dataset should be saved with."""
         if not self._version:
             return None
         if self._version.save:
-            return self._version.save
+            return self._version.save  # type: ignore[no-any-return]
         return self._fetch_latest_save_version()
 
     def _get_save_path(self) -> PurePosixPath:
@@ -585,7 +598,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             return self._filepath
 
         save_version = self.resolve_save_version()
-        versioned_path = self._get_versioned_path(save_version)  # type: ignore
+        versioned_path = self._get_versioned_path(save_version)  # type: ignore[arg-type]
 
         if self._exists_function(str(versioned_path)):
             raise DatasetError(
@@ -696,7 +709,7 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
 
 
 def get_protocol_and_path(
-    filepath: str | os.PathLike, version: Version = None
+    filepath: str | os.PathLike, version: Version | None = None
 ) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 
@@ -728,23 +741,23 @@ def get_protocol_and_path(
     return protocol, path
 
 
-def get_filepath_str(path: PurePath, protocol: str) -> str:
+def get_filepath_str(raw_path: PurePath, protocol: str) -> str:
     """Returns filepath. Returns full filepath (with protocol) if protocol is HTTP(s).
 
     Args:
-        path: filepath without protocol.
+        raw_path: filepath without protocol.
         protocol: protocol.
 
     Returns:
         Filepath string.
     """
-    path = path.as_posix()
+    path = raw_path.as_posix()
     if protocol in HTTP_PROTOCOLS:
         path = "".join((protocol, PROTOCOL_DELIMITER, path))
     return path
 
 
-def validate_on_forbidden_chars(**kwargs):
+def validate_on_forbidden_chars(**kwargs: Any) -> None:
     """Validate that string values do not include white-spaces or ;"""
     for key, value in kwargs.items():
         if " " in value or ";" in value:

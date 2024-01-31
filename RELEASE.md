@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Addressed CLI Command `kedro catalog resolve` failing on dataset factories that use `PartitionedDataset`.
 
 ## Breaking changes to the API
 

@@ -1,7 +1,6 @@
 User-agent: *
 Disallow: /
 Allow: /en/stable/
-Allow: /en/latest/
 Allow: /en/0.19.2/
 Allow: /en/0.19.1/
 Allow: /en/0.19.0/

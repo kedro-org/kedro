@@ -424,7 +424,7 @@ import package5.module3"""
 random_assignment = "Added for a longer function"
 random_assignment += "make sure to modify variable"
 # return not dummy_input
-display(not dummy_input)"""
+print(not dummy_input)"""
 
         expected_cells = [
             node_inputs,
@@ -491,7 +491,7 @@ my_input = catalog.load("extra_input")"""
 random_assignment = "Added for a longer function"
 random_assignment += "make sure to modify variable"
 # return not dummy_input
-display(not dummy_input)"""
+print(not dummy_input)"""
 
         result = _prepare_function_body(dummy_function)
         assert result == func_strings
@@ -503,9 +503,9 @@ display(not dummy_input)"""
     def test_get_nested_function_body(self):
         func_strings = """def nested_function(input):
     # return not input
-    display(not input)
+    print(not input)
 # return nested_function(dummy_input)
-display(nested_function(dummy_input))"""
+print(nested_function(dummy_input))"""
 
         result = _prepare_function_body(dummy_nested_function)
         assert result == func_strings
@@ -514,7 +514,7 @@ display(nested_function(dummy_input))"""
         func_strings = """for x in dummy_list:
     continue
 # return len(dummy_list)
-display(len(dummy_list))"""
+print(len(dummy_list))"""
 
         result = _prepare_function_body(dummy_function_with_loop)
         assert result == func_strings

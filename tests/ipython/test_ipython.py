@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import inspect
 import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
@@ -71,6 +71,18 @@ def dummy_function(dummy_input, my_input):
     random_assignment += "make sure to modify variable"
     return not dummy_input
 
+@pytest.fixture
+def dummy_function_defintion():
+    body = '''def dummy_function(dummy_input, my_input):
+    """
+    Returns True if input is not
+    """
+    # this is an in-line comment in the body of the function
+    random_assignment = "Added for a longer function"
+    random_assignment += "make sure to modify variable"
+    return not dummy_input
+'''
+    return body
 
 def dummy_nested_function(dummy_input):
     def nested_function(input):
@@ -399,7 +411,7 @@ class TestLoadNodeMagic:
         node_to_load = "dummy_node"
         magic_load_node(node_to_load)
 
-    def test_load_node(self, mocker, dummy_function_file_lines, dummy_pipelines):
+    def test_load_node(self, mocker, dummy_function_file_lines, dummy_function_defintion,dummy_pipelines):
         # wraps all the other functions
         mocker.patch(
             "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
@@ -408,7 +420,7 @@ class TestLoadNodeMagic:
         mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
 
         node_inputs = """# Prepare necessary inputs for debugging
-#  All debugging inputs must be defined in your project catalog
+# All debugging inputs must be defined in your project catalog
 dummy_input = catalog.load("dummy_input")
 my_input = catalog.load("extra_input")"""
 
@@ -417,18 +429,14 @@ from package2 import module1
 import package3 as pkg3
 import package5.module3"""
 
-        node_docsting = '"""\nReturns True if input is not\n"""'
-        node_func_text = f"""# Function Body
-{node_docsting}
-# this is an in-line comment in the body of the function
-random_assignment = "Added for a longer function"
-random_assignment += "make sure to modify variable"
-return not dummy_input"""
+        node_func_definition = dummy_function_defintion
+        node_func_call = "dummy_function(dummy_input, my_input)"
 
         expected_cells = [
             node_inputs,
             node_imports,
-            node_func_text,
+            node_func_definition,
+            node_func_call,
         ]
 
         node_to_load = "dummy_node"

@@ -146,7 +146,7 @@ In 0.19.x:
 
 ```
 CONFIG_LOADER_ARGS = {
-      "base_env": "base",  #
+      "base_env": "base", 
       "default_run_env": "local",
           "config_patterns": {
               "spark": ["spark*", "spark*/**"],

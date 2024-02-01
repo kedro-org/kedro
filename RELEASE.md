@@ -5,6 +5,7 @@
 
 ## Bug fixes and other changes
 * Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
+* Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
 
 ## Breaking changes to the API
 

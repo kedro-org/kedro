@@ -423,8 +423,7 @@ import package5.module3"""
 # this is an in-line comment in the body of the function
 random_assignment = "Added for a longer function"
 random_assignment += "make sure to modify variable"
-# return not dummy_input
-print(not dummy_input)"""
+return not dummy_input"""
 
         expected_cells = [
             node_inputs,
@@ -490,8 +489,7 @@ my_input = catalog.load("extra_input")"""
 # this is an in-line comment in the body of the function
 random_assignment = "Added for a longer function"
 random_assignment += "make sure to modify variable"
-# return not dummy_input
-print(not dummy_input)"""
+return not dummy_input"""
 
         result = _prepare_function_body(dummy_function)
         assert result == func_strings
@@ -513,8 +511,7 @@ print(nested_function(dummy_input))"""
     def test_get_function_with_loop_body(self):
         func_strings = """for x in dummy_list:
     continue
-# return len(dummy_list)
-print(len(dummy_list))"""
+return len(dummy_list)"""
 
         result = _prepare_function_body(dummy_function_with_loop)
         assert result == func_strings

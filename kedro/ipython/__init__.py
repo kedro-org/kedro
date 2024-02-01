@@ -8,6 +8,7 @@ import inspect
 import logging
 import sys
 import typing
+import warnings
 from itertools import dropwhile
 from pathlib import Path
 from typing import Any, Callable
@@ -227,6 +228,10 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
         list[str]: A list of string which is the generated code, each string represent a
         notebook cell.
     """
+    warnings.warn(
+        """This is an experimental feature, only Jupyter Notebook (>7.0) & Jupyter Lab are supported. If you find any unexpected issue, please report
+                  in https://github.com/kedro-org/kedro/issues/3580"""
+    )
     node = _find_node(node_name, pipelines)
     node_func = node.func
 

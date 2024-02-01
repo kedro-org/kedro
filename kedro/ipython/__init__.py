@@ -285,7 +285,7 @@ def _prepare_node_inputs(node: Node) -> str:
     statements = [
         "# Prepare necessary inputs for debugging",
         "#  All debugging inputs must be specified in your project catalog",
-        ]
+    ]
 
     for node_input, func_param in zip(node_inputs, func_params):
         statements.append(f'{func_param} = catalog.load("{node_input}")')

@@ -500,10 +500,8 @@ return not dummy_input"""
 
     def test_get_nested_function_body(self):
         func_strings = """def nested_function(input):
-    # return not input
-    print(not input)
-# return nested_function(dummy_input)
-print(nested_function(dummy_input))"""
+    return not input
+return nested_function(dummy_input)"""
 
         result = _prepare_function_body(dummy_nested_function)
         assert result == func_strings

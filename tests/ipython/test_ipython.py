@@ -448,8 +448,9 @@ display(not dummy_input)"""
         with pytest.raises(ValueError) as excinfo:
             _find_node(node_to_find, dummy_registered_pipelines)
 
-        assert f"Node with name='{node_to_find}' not found in any pipelines." in str(
-            excinfo.value
+        assert (
+            f"Node with name='{node_to_find}' not found in any pipelines. Remember to specify the node name, not the node function."
+            in str(excinfo.value)
         )
 
     def test_prepare_imports(self, mocker, dummy_function_file_lines):

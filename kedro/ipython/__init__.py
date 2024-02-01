@@ -9,7 +9,6 @@ import logging
 import sys
 import typing
 import warnings
-from itertools import dropwhile
 from pathlib import Path
 from typing import Any, Callable
 
@@ -237,13 +236,14 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
 
     node_inputs = _prepare_node_inputs(node)
     imports = _prepare_imports(node_func)
-    raw_function_text = _prepare_function_body(node_func)
-    function_text = "# Function Body\n" + raw_function_text
+    function_definition = _prepare_function_body(node_func)
+    function_call = _prepare_function_call(node_func)
 
     cells: list[str] = []
     cells.append(node_inputs)
     cells.append(imports)
-    cells.append(function_text)
+    cells.append(function_definition)
+    cells.append(function_call)
     return cells
 
 
@@ -300,19 +300,18 @@ def _prepare_node_inputs(node: Node) -> str:
 
 
 def _prepare_function_body(func: Callable) -> str:
-    # https://stackoverflow.com/questions/38050649/getting-a-python-functions-source-code-without-the-definition-lines
-    all_source_lines = inspect.getsourcelines(func)[0]
-    # Remove any decorators
-    func_lines = dropwhile(lambda x: x.startswith("@"), all_source_lines)
-    line: str = next(func_lines).strip()
-    if not line.startswith("def "):
-        return line.rsplit(",")[0].strip()
-    # Handle functions that are not one-liners
-    first_line = next(func_lines)
-    # Find the indentation of the first line
-    indentation = len(first_line) - len(first_line.lstrip())
-    body = "".join(
-        [first_line[indentation:]] + [line[indentation:] for line in func_lines]
-    )
-    body = body.strip().strip("\n")
+    source_lines, _ = inspect.getsourcelines(func)
+    body = "".join(source_lines)
+    return body
+
+
+def _prepare_function_call(node_func: Callable) -> str:
+    """Prepare the text for the function call."""
+    func_name = node_func.__name__
+    signature = inspect.signature(node_func)
+    func_params = list(signature.parameters)
+
+    # Construct the statement of func_name(a=1,b=2,c=3)
+    func_args = ",".join(func_params)
+    body = f"""{func_name}({func_args})"""
     return body

@@ -250,7 +250,9 @@ def _find_node(node_name: str, pipelines: _ProjectPipelines) -> Node:
         except ValueError:
             continue
     # If reached the node was not found in the project
-    raise ValueError(f"Node with name='{node_name}' not found in any pipelines.")
+    raise ValueError(
+        f"Node with name='{node_name}' not found in any pipelines. Remember to specify the node name, not the node function."
+    )
 
 
 def _prepare_imports(node_func: Callable) -> str:
@@ -280,7 +282,10 @@ def _prepare_node_inputs(node: Node) -> str:
     node_inputs = node.inputs
     func_params = list(signature.parameters)
 
-    statements = ["# Prepare necessary inputs for debugging"]
+    statements = [
+        "# Prepare necessary inputs for debugging",
+        "#  All debugging inputs must be defined in your project catalog",
+    ]
 
     for node_input, func_param in zip(node_inputs, func_params):
         statements.append(f'{func_param} = catalog.load("{node_input}")')

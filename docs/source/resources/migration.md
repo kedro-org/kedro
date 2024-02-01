@@ -89,7 +89,7 @@ to this in 0.19.x:
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
   metadata:
     kedro-viz:

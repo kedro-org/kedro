@@ -482,9 +482,9 @@ import package5.module3"""
 
         assert f"Could not find {dummy_function.__name__}" in str(excinfo.value)
 
-    def test_prepare_node_inputs(self, dummy_node):
+    def test_prepare_node_inputs(self, dummy_node,):
         func_inputs = """# Prepare necessary inputs for debugging
-#  All debugging inputs must be defined in your project catalog
+# All debugging inputs must be defined in your project catalog
 dummy_input = catalog.load("dummy_input")
 my_input = catalog.load("extra_input")"""
 

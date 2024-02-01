@@ -289,7 +289,7 @@ def _prepare_node_inputs(node: Node) -> str:
 
     statements = [
         "# Prepare necessary inputs for debugging",
-        "#  All debugging inputs must be defined in your project catalog",
+        "# All debugging inputs must be defined in your project catalog",
     ]
 
     for node_input, func_param in zip(node_inputs, func_params):
@@ -312,6 +312,6 @@ def _prepare_function_call(node_func: Callable) -> str:
     func_params = list(signature.parameters)
 
     # Construct the statement of func_name(a=1,b=2,c=3)
-    func_args = ",".join(func_params)
+    func_args = ", ".join(func_params)
     body = f"""{func_name}({func_args})"""
     return body

@@ -249,14 +249,6 @@ def _find_node(node_name: str, pipelines: _ProjectPipelines) -> Node:
             return found_node
         except ValueError:
             continue
-
-    # Try looking at node func names instead?
-    for pipeline in pipelines.values():
-        for node in pipeline.nodes:
-            if node.func.__name__ == node_name:
-                found_func_node: Node = node
-                return found_func_node
-
     # If reached the node was not found in the project
     raise ValueError(f"Node with name='{node_name}' not found in any pipelines.")
 

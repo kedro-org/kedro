@@ -75,7 +75,7 @@ test = [
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
-    "pytest~=7.2",
+    "pytest>=7.2,<9.0",
     "s3fs>=2021.4, <2024.1",  # Upper bound set arbitrarily, to be reassessed in early 2024
     "semver",
     "trufflehog~=2.1",
@@ -98,6 +98,8 @@ docs = [
     "ipykernel>=5.3, <7.0",
     "myst-parser>=1.0,<2.1",
     "Jinja2<3.2.0",
+    "sphinx-last-updated-by-git",
+    "sphinx-favicon",
     "sphinxcontrib-youtube",
 ]
 all = [ "kedro[test,docs]" ]

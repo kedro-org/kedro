@@ -309,7 +309,7 @@ def _prepare_function_body(func: Callable) -> str:
             commented_return = line[:line_indentation] + "# " + return_statement
             printed_return = (
                 line[:line_indentation]
-                + "print("
+                + "display("
                 + return_statement[len("return") :].strip()
                 + ")\n"
             )

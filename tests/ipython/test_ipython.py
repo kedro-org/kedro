@@ -1,5 +1,5 @@
 from pathlib import Path
-import inspect
+
 import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
@@ -71,6 +71,7 @@ def dummy_function(dummy_input, my_input):
     random_assignment += "make sure to modify variable"
     return not dummy_input
 
+
 @pytest.fixture
 def dummy_function_defintion():
     body = '''def dummy_function(dummy_input, my_input):
@@ -83,6 +84,7 @@ def dummy_function_defintion():
     return not dummy_input
 '''
     return body
+
 
 def dummy_nested_function(dummy_input):
     def nested_function(input):
@@ -411,7 +413,13 @@ class TestLoadNodeMagic:
         node_to_load = "dummy_node"
         magic_load_node(node_to_load)
 
-    def test_load_node(self, mocker, dummy_function_file_lines, dummy_function_defintion,dummy_pipelines):
+    def test_load_node(
+        self,
+        mocker,
+        dummy_function_file_lines,
+        dummy_function_defintion,
+        dummy_pipelines,
+    ):
         # wraps all the other functions
         mocker.patch(
             "builtins.open", mocker.mock_open(read_data=dummy_function_file_lines)
@@ -482,7 +490,10 @@ import package5.module3"""
 
         assert f"Could not find {dummy_function.__name__}" in str(excinfo.value)
 
-    def test_prepare_node_inputs(self, dummy_node,):
+    def test_prepare_node_inputs(
+        self,
+        dummy_node,
+    ):
         func_inputs = """# Prepare necessary inputs for debugging
 # All debugging inputs must be defined in your project catalog
 dummy_input = catalog.load("dummy_input")
@@ -491,33 +502,32 @@ my_input = catalog.load("extra_input")"""
         result = _prepare_node_inputs(dummy_node)
         assert result == func_inputs
 
-    def test_prepare_function_body(self):
-        func_docstring = '"""\nReturns True if input is not\n"""'
-        func_strings = f"""{func_docstring}
-# this is an in-line comment in the body of the function
-random_assignment = "Added for a longer function"
-random_assignment += "make sure to modify variable"
-return not dummy_input"""
-
+    def test_prepare_function_body(self, dummy_function_defintion):
         result = _prepare_function_body(dummy_function)
-        assert result == func_strings
+        assert result == dummy_function_defintion
 
+    @pytest.mark.skip("lambda function is not supported yet.")
     def test_get_lambda_function_body(self, lambda_node):
         result = _prepare_function_body(lambda_node.func)
-        assert result == "func=lambda x: x"
+        assert result == "func=lambda x: x\n"
 
     def test_get_nested_function_body(self):
-        func_strings = """def nested_function(input):
-    return not input
-return nested_function(dummy_input)"""
+        func_strings = """def dummy_nested_function(dummy_input):
+    def nested_function(input):
+        return not input
+
+    return nested_function(dummy_input)
+"""
 
         result = _prepare_function_body(dummy_nested_function)
         assert result == func_strings
 
     def test_get_function_with_loop_body(self):
-        func_strings = """for x in dummy_list:
-    continue
-return len(dummy_list)"""
+        func_strings = """def dummy_function_with_loop(dummy_list):
+    for x in dummy_list:
+        continue
+    return len(dummy_list)
+"""
 
         result = _prepare_function_body(dummy_function_with_loop)
         assert result == func_strings

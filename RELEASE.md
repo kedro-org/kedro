@@ -1,7 +1,7 @@
 # Upcoming Release 0.19.3
 
 ## Major features and improvements
-* Create the debugging line magic for Jupyter Notebook/IPython.
+* Create the debugging line magic `%load_node` for Jupyter Notebook/IPython.
 
 ## Bug fixes and other changes
 * Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.

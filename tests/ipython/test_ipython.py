@@ -408,6 +408,7 @@ class TestLoadNodeMagic:
         mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
 
         node_inputs = """# Prepare necessary inputs for debugging
+#  All debugging inputs must be specified in your project catalog
 dummy_input = catalog.load("dummy_input")
 my_input = catalog.load("extra_input")"""
 
@@ -476,6 +477,7 @@ import package5.module3"""
 
     def test_prepare_node_inputs(self, dummy_node):
         func_inputs = """# Prepare necessary inputs for debugging
+#  All debugging inputs must be specified in your project catalog
 dummy_input = catalog.load("dummy_input")
 my_input = catalog.load("extra_input")"""
 

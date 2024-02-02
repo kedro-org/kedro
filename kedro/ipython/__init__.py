@@ -200,7 +200,7 @@ def magic_load_node(node: str) -> None:
     """The line magic %load_node <node_name>
     Currently it only supports Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
     will generate code in multiple cells to load datasets from `DataCatalog`, import
-    relevant functions and modules, and the function body.
+    relevant functions and modules, node function definition and a function call.
     """
     cells = _load_node(node, pipelines)
     from ipylab import JupyterFrontEnd

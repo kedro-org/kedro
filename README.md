@@ -37,6 +37,14 @@ conda install -c conda-forge kedro
 
 Our [Get Started guide](https://docs.kedro.org/en/stable/get_started/install.html) contains full installation instructions, and includes how to set up Python virtual environments.
 
+### Installation from source
+To install Kedro from source code, clone the repository and run:
+```
+git clone git@github.com:kedro-org/kedro.git
+cd kedro
+pip install .
+```
+
 ## What are the main features of Kedro?
 
 | Feature              | What is this?                                                                                                                                                                                                                                                                                                                                                                                      |

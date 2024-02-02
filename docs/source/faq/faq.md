@@ -14,7 +14,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Working with Jupyter
 
-* [How can I debug a Kedro project in a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md#debugging-with-%debug-and-%pdb)?
+* [How can I debug a Kedro project in a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md#debugging-with-debug-and-pdb)?
 * [How do I connect a Kedro project kernel to other Jupyter clients like JupyterLab](../notebooks_and_ipython/kedro_and_notebooks.md#ipython-jupyterlab-and-other-jupyter-clients)?
 
 ## Kedro project development

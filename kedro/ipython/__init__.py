@@ -198,8 +198,8 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
 )
 def magic_load_node(node: str) -> None:
     """The line magic %load_node <node_name>
-    Currently it only support Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
-    will generate code in multiple cells to load dataest from Data Catalog, import
+    Currently it only supports Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
+    will generate code in multiple cells to load datasets from `DataCatalog`, import
     relevant functions and modules, and the function body.
     """
     cells = _load_node(node, pipelines)
@@ -228,8 +228,9 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
         notebook cell.
     """
     warnings.warn(
-        """This is an experimental feature, only Jupyter Notebook (>7.0) & Jupyter Lab are supported. If you find any unexpected issue, please report
-                  in https://github.com/kedro-org/kedro/issues/3580"""
+        "This is an experimental feature, only Jupyter Notebook (>7.0) & Jupyter Lab "
+        "are supported. If you encounter unexpected behaviour or would like to suggest "
+        "feature enhancements, add it under this github issue https://github.com/kedro-org/kedro/issues/3580"
     )
     node = _find_node(node_name, pipelines)
     node_func = node.func

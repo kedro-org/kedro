@@ -265,13 +265,6 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
                 ds_name, matched_pattern, ds_config_copy
             )
 
-            ds_config["filepath"] = _trim_filepath(
-                str(context.project_path) + "/", ds_config["filepath"]
-            )
             explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))
-
-
-def _trim_filepath(project_path: str, file_path: str) -> str:
-    return file_path.replace(project_path, "", 1)

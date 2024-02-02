@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Updated CLI Command `kedro catalog resolve` to work with dataset factories that use `PartitionedDataset`.
 * Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
 * Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
 
@@ -11,6 +12,9 @@
 ## Documentation changes
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [MosaicMan](https://github.com/MosaicMan)
+
 
 # Release 0.19.2
 

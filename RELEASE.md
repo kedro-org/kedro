@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.3
 
 ## Major features and improvements
+* Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
 
 ## Bug fixes and other changes
 * Updated CLI Command `kedro catalog resolve` to work with dataset factories that use `PartitionedDataset`.

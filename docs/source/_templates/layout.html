@@ -31,12 +31,21 @@
 
   document.addEventListener("DOMContentLoaded", function(event) {
 
-    // Activate read-the-docs search when user focuses on search
-    document.querySelector('div[role="search"] form input').addEventListener("focus", (e) => {
-      const event = new CustomEvent("readthedocs-search-show");
-      document.dispatchEvent(event);
-    });
+    function showReadTheDocsSearch() {
+    const searchEvent = new CustomEvent("readthedocs-search-show");
+    document.dispatchEvent(searchEvent);
+    }
 
+    // Activate read-the-docs search when user focuses on search
+    document.querySelector('div[role="search"] form input').addEventListener("focus", showReadTheDocsSearch);
+
+    // Add keyboard event listener for Cmd+K (Mac) or Ctrl+K (Windows)
+    document.addEventListener("keydown", function(e) {
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault(); 
+        showReadTheDocsSearch();
+      }
+    });
     // Clone main nav into the sidebar
     var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
     sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
@@ -47,11 +56,11 @@
     closeBtn.classList.add('wy-nav-top-close');
     document.querySelector('.wy-nav-top').prepend(closeBtn);
 
-  // Prepend open button to mobile header
-    var openBtn = document.createElement("span");
-    openBtn.dataset.toggle = 'wy-nav-top';
-    openBtn.classList.add('wy-nav-top-open');
-    document.querySelector('.wy-nav-top').prepend(openBtn);
+    // Prepend open button to mobile header
+      var openBtn = document.createElement("span");
+      openBtn.dataset.toggle = 'wy-nav-top';
+      openBtn.classList.add('wy-nav-top-open');
+      document.querySelector('.wy-nav-top').prepend(openBtn);
   });
 </script>
 

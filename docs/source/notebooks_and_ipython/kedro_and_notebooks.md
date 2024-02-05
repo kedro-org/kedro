@@ -238,15 +238,32 @@ You can use the `jupyter kernelspec` set of commands to manage your Jupyter kern
 
 ### Debugging with %debug and %pdb
 
- `%debug` will run post-mortem debugging using IPython. Running `%debug` immediately after an error has occurred will load the stack trace of the last unhandled exception, stop the program at the point where the exception occurred, and open an interactive shell where the user can navigate through the stack trace. Then, the user can inspect the value of expressions and arguments, or add breakpoints to the code.
+ `%debug` will run post-mortem debugging using IPython. Running `%debug` immediately after an error has occurred will:
+ - Load the stack trace of the last unhandled exception.
+ - Stop the program at the point where the exception occurred.
+ - Open an interactive shell where the user can navigate through the stack trace.
+ 
+ You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 
+<details>
+<summary>Click to see an example.</summary>
 
 ![jupyter_ipython_debug_command](../meta/images/jupyter_ipython_debug_command.gif)
 
+</details>
+
+---
+
  Running `%pdb` before executing the program will enable the option to automatically start a debugger when an exception occurs. This behavior can be enabled with `%pdb 1` or `%pdb on`, and disabled with `%pdb 0` or `%pdb off`.
 
+<details>
+<summary>Click to see an example.</summary>
 
  ![jupyter_ipython_pdb_command](../meta/images/jupyter_ipython_pdb_command.gif)
+
+</details>
+
+---
 
 Below are some examples of the possible commands that can be used to interact with the ipdb shell:
 

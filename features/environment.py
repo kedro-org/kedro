@@ -108,19 +108,19 @@ def _setup_minimal_env(context):
         context.kedro_install_venv_dir = kedro_install_venv_dir
         context = _setup_context_with_venv(context, kedro_install_venv_dir)
 
-        call(
-            [
-                context.python,
-                "-m",
-                "pip",
-                "install",
-                "-U",
-                # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
-                # pip==23.3 breaks dependency resolution
-                "pip>=21.2,<23.2",
-            ],
-            env=context.env,
-        )
+        # call(
+        #     [
+        #         context.python,
+        #         "-m",
+        #         "pip",
+        #         "install",
+        #         "-U",
+        #         # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
+        #         # pip==23.3 breaks dependency resolution
+        #         "pip>=21.2,<23.2",
+        #     ],
+        #     env=context.env,
+        # )
         call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
         return context
 

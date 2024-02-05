@@ -29,7 +29,7 @@ def test_pipelines_without_configure_project_is_empty(
     mock_package_name_with_pipelines_file,
 ):
     # Reimport `pipelines` from `kedro.framework.project` to ensure that
-    # it was not set by a pior call to the `configure_project` function.
+    # it was not set by a prior call to the `configure_project` function.
     del sys.modules["kedro.framework.project"]
     from kedro.framework.project import pipelines
 

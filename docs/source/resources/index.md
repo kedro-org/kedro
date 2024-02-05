@@ -5,5 +5,6 @@
 
 ../faq/faq
 glossary
+migration
 
 ```

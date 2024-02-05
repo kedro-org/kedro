@@ -254,7 +254,7 @@ You can use the `jupyter kernelspec` set of commands to manage your Jupyter kern
 
 ---
 
- Running `%pdb` before executing the program will enable the option to automatically start a debugger when an exception occurs. This behavior can be enabled with `%pdb 1` or `%pdb on`, and disabled with `%pdb 0` or `%pdb off`.
+You can set up the deubgger to run automatically when an exception occurs by running `%pdb 1` or `%pdb on` before executing a program. This automatic behaviour can be disabled with `%pdb 0` or `%pdb off`.
 
 <details>
 <summary>Click to see an example.</summary>

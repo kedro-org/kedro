@@ -7,6 +7,7 @@
 * Updated CLI Command `kedro catalog resolve` to work with dataset factories that use `PartitionedDataset`.
 * Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
 * Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
+* Activate read-the-docs search when user does Command/Ctrl + K. 
 
 ## Breaking changes to the API
 

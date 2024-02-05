@@ -242,7 +242,7 @@ You can use the `jupyter kernelspec` set of commands to manage your Jupyter kern
  - Load the stack trace of the last unhandled exception.
  - Stop the program at the point where the exception occurred.
  - Open an interactive shell where the user can navigate through the stack trace.
- 
+
  You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 
 <details>

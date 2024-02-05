@@ -42,11 +42,11 @@
     // Add keyboard event listener for Cmd+K (Mac) or Ctrl+K (Windows)
     document.addEventListener("keydown", function(e) {
       if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault(); 
+        e.preventDefault();
         showReadTheDocsSearch();
       }
     });
-    
+
     // Clone main nav into the sidebar
     var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
     sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);

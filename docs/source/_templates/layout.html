@@ -29,7 +29,7 @@
   //inline styling for read-the-docs flyout
   document.documentElement.style.setProperty('--readthedocs-flyout-font-size', '0.9em');
 
-  document.addEventListener("DOMContentLoaded", function(event) {
+  document.addEventListener("DOMContentLoaded", function() {
 
     function showReadTheDocsSearch() {
     const searchEvent = new CustomEvent("readthedocs-search-show");
@@ -46,6 +46,7 @@
         showReadTheDocsSearch();
       }
     });
+    
     // Clone main nav into the sidebar
     var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
     sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);

@@ -33,24 +33,7 @@ def dummy_function_with_loop(dummy_list):
     return len(dummy_list)
 
 
-@pytest.fixture
-def dummy_function_file_lines():
-    # string representation of a dummy function includes imports, comments, and a
-    # file function
-    file_lines = """This is a multi-line comment at the top of the file
-It serves as an explanation for the contents of the file ''
-import package1
-from package2 import module1
-# this is a comment about the next import
-import package3 as pkg3
-def my_func:,
-# import here for performance from package4.module2 import class1
-# this is an in-line comment in the body of the function
-'random_assignment = Added for a longer function'
-'random_assignment += make sure to modify variable'
-return not dummy_input
-import package5.module3"""
-    return file_lines
+
 
 
 @pytest.fixture

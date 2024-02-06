@@ -5,23 +5,13 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.ipython import (
     load_ipython_extension,
 )
+import inspect
 from kedro.pipeline import node
-
+from .dummy_function_fixtures import dummy_function
 # Constants
 PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
 PROJECT_INIT_VERSION = "0.1"
-
-
-# Dummy functions
-def dummy_function(dummy_input, my_input):
-    """
-    Returns True if input is not
-    """
-    # this is an in-line comment in the body of the function
-    random_assignment = "Added for a longer function"
-    random_assignment += "make sure to modify variable"
-    return not dummy_input
 
 
 # Fixture
@@ -61,19 +51,13 @@ def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.configure_project")
     mocker.patch("kedro.ipython.KedroSession.create")
 
+def _get_function_definition_literal(func):
+    source_lines, _ = inspect.getsourcelines(func)
+    return "".join(source_lines)
 
 @pytest.fixture
 def dummy_function_defintion():
-    body = '''def dummy_function(dummy_input, my_input):
-    """
-    Returns True if input is not
-    """
-    # this is an in-line comment in the body of the function
-    random_assignment = "Added for a longer function"
-    random_assignment += "make sure to modify variable"
-    return not dummy_input
-'''
-    return body
+    return _get_function_definition_literal(dummy_function)
 
 @pytest.fixture
 def dummy_function_file_lines():

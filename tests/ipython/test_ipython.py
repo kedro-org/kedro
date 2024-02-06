@@ -33,9 +33,6 @@ def dummy_function_with_loop(dummy_list):
     return len(dummy_list)
 
 
-
-
-
 @pytest.fixture
 def dummy_pipelines(dummy_node):
     # return a dict of pipelines

@@ -23,3 +23,16 @@ def dummy_function(dummy_input, my_input):
 
 # Import that isn't defined at the top
 import logging.config  # noqa Dummy import
+
+
+def dummy_nested_function(dummy_input):
+    def nested_function(input):
+        return not input
+
+    return nested_function(dummy_input)
+
+
+def dummy_function_with_loop(dummy_list):
+    for x in dummy_list:
+        continue
+    return len(dummy_list)

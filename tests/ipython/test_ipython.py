@@ -17,26 +17,7 @@ from kedro.ipython import (
 )
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
-from .conftest import dummy_function
-
-
-def dummy_nested_function(dummy_input):
-    def nested_function(input):
-        return not input
-
-    return nested_function(dummy_input)
-
-
-def dummy_function_with_loop(dummy_list):
-    for x in dummy_list:
-        continue
-    return len(dummy_list)
-
-
-@pytest.fixture
-def dummy_pipelines(dummy_node):
-    # return a dict of pipelines
-    return {"dummy_pipeline": modular_pipeline([dummy_node])}
+from .conftest import dummy_function, dummy_function_with_loop, dummy_nested_function
 
 
 class TestLoadKedroObjects:
@@ -392,23 +373,10 @@ my_input = catalog.load("extra_input")"""
         result = _prepare_function_body(lambda_node.func)
         assert result == "func=lambda x: x\n"
 
-    def test_get_nested_function_body(self):
-        func_strings = """def dummy_nested_function(dummy_input):
-    def nested_function(input):
-        return not input
-
-    return nested_function(dummy_input)
-"""
-
+    def test_get_nested_function_body(self, dummy_nested_function_literal):
         result = _prepare_function_body(dummy_nested_function)
-        assert result == func_strings
+        assert result == dummy_nested_function_literal
 
-    def test_get_function_with_loop_body(self):
-        func_strings = """def dummy_function_with_loop(dummy_list):
-    for x in dummy_list:
-        continue
-    return len(dummy_list)
-"""
-
+    def test_get_function_with_loop_body(self, dummy_function_with_loop_literal):
         result = _prepare_function_body(dummy_function_with_loop)
-        assert result == func_strings
+        assert result == dummy_function_with_loop_literal

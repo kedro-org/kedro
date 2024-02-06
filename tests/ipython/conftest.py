@@ -8,9 +8,14 @@ from kedro.ipython import (
     load_ipython_extension,
 )
 from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 from . import dummy_function_fixtures  # noqa It is needed for the inspect module
-from .dummy_function_fixtures import dummy_function
+from .dummy_function_fixtures import (
+    dummy_function,
+    dummy_function_with_loop,
+    dummy_nested_function,
+)
 
 # Constants
 PACKAGE_NAME = "fake_package_name"
@@ -56,6 +61,12 @@ def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.KedroSession.create")
 
 
+@pytest.fixture
+def dummy_pipelines(dummy_node):
+    # return a dict of pipelines
+    return {"dummy_pipeline": modular_pipeline([dummy_node])}
+
+
 def _get_function_definition_literal(func):
     source_lines, _ = inspect.getsourcelines(func)
     return "".join(source_lines)
@@ -64,6 +75,16 @@ def _get_function_definition_literal(func):
 @pytest.fixture
 def dummy_function_defintion():
     return _get_function_definition_literal(dummy_function)
+
+
+@pytest.fixture
+def dummy_nested_function_literal():
+    return _get_function_definition_literal(dummy_nested_function)
+
+
+@pytest.fixture
+def dummy_function_with_loop_literal():
+    return _get_function_definition_literal(dummy_function_with_loop)
 
 
 @pytest.fixture

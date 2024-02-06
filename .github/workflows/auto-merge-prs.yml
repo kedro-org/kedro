@@ -9,12 +9,18 @@ on:
 
 jobs:
   automerge:
-    permissions:
-      pull-requests: read
-      contents: write
     runs-on: ubuntu-latest
     steps:
-      - name: Automerge PRs with "automerge" label
-        uses: "pascalgn/automerge-action@v0.16.2"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GH_TAGGING_TOKEN }}"
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TAGGING_TOKEN }}
+
+      - name: Set git email and name
+        run: |
+          git config --global user.email "kedro@kedro.com"
+          git config --global user.name "Kedro"
+
+      - name: Maybe merge automerge PR to `develop`
+        run: ./tools/github_actions/attempt_merge_pr.sh "merge-main-to-develop" "develop" ${{ secrets.GH_TAGGING_TOKEN }}

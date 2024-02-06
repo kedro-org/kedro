@@ -26,7 +26,7 @@ dependencies = [
     "more_itertools>=8.14.0",
     "omegaconf>=2.1.1",
     "parse>=1.19.0",
-    "pluggy>=1.0",
+    "pluggy>=1.0, <1.4.0",
     "pre-commit-hooks",
     "PyYAML>=4.2,<7.0",
     "rich>=12.0,<14.0",
@@ -56,14 +56,13 @@ test = [
     "behave==1.2.6",
     "coverage[toml]",
     "import-linter==2.0",
+    "ipylab>=1.0.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
     "jupyterlab_server>=2.11.1",
     "jupyterlab>=3,<5",
     "jupyter~=1.0",
     "kedro-datasets",
-    "moto==1.3.7; python_version < '3.10'",
-    "moto==4.2.13; python_version >= '3.10'",
     "mypy~=1.0",
     "pandas~=2.0",
     "pip-tools>=6.5",
@@ -75,8 +74,8 @@ test = [
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
-    "pytest~=7.2",
-    "s3fs>=2021.4, <2024.1",  # Upper bound set arbitrarily, to be reassessed in early 2024
+    "pytest>=7.2,<9.0",
+    "s3fs>=2021.4, <2024.3",  # Upper bound set arbitrarily, to be reassessed in early 2024
     "semver",
     "trufflehog~=2.1",
     # mypy related dependencies
@@ -98,9 +97,15 @@ docs = [
     "ipykernel>=5.3, <7.0",
     "myst-parser>=1.0,<2.1",
     "Jinja2<3.2.0",
+    "sphinx-last-updated-by-git",
+    "sphinx-favicon",
     "sphinxcontrib-youtube",
 ]
-all = [ "kedro[test,docs]" ]
+jupyter = [
+    "ipylab>=1.0.0",
+    "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
+]
+all = [ "kedro[test,docs,jupyter]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

@@ -296,7 +296,6 @@ class TestLoadNodeMagic:
         # Mocking setup
         mock_jupyter_console = mocker.MagicMock()
         mocker.patch("ipylab.JupyterFrontEnd", mock_jupyter_console)
-        mocker.patch("builtins.open", mocker.mock_open(read_data=dummy_module_literal))
         mock_pipeline_values = dummy_pipelines.values()
         mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
 
@@ -306,12 +305,10 @@ class TestLoadNodeMagic:
     def test_load_node(
         self,
         mocker,
-        dummy_module_literal,
         dummy_function_defintion,
         dummy_pipelines,
     ):
         # wraps all the other functions
-        mocker.patch("builtins.open", mocker.mock_open(read_data=dummy_module_literal))
         mock_pipeline_values = dummy_pipelines.values()
         mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
 
@@ -358,8 +355,6 @@ import logging.config  # noqa Dummy import"""
         )
 
     def test_prepare_imports(self, mocker, dummy_module_literal):
-        mocker.patch("builtins.open", mocker.mock_open(read_data=dummy_module_literal))
-
         func_imports = """import logging  # noqa
 from logging import config  # noqa
 import logging as dummy_logging  # noqa

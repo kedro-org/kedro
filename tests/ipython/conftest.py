@@ -1,3 +1,5 @@
+import inspect
+
 import pytest
 from IPython.testing.globalipapp import get_ipython
 
@@ -5,9 +7,11 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.ipython import (
     load_ipython_extension,
 )
-import inspect
 from kedro.pipeline import node
+
+from . import dummy_function_fixtures  # noqa It is needed for the inspect module
 from .dummy_function_fixtures import dummy_function
+
 # Constants
 PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
@@ -51,31 +55,22 @@ def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.configure_project")
     mocker.patch("kedro.ipython.KedroSession.create")
 
+
 def _get_function_definition_literal(func):
     source_lines, _ = inspect.getsourcelines(func)
     return "".join(source_lines)
+
 
 @pytest.fixture
 def dummy_function_defintion():
     return _get_function_definition_literal(dummy_function)
 
+
 @pytest.fixture
-def dummy_function_file_lines():
+def dummy_module_literal():
     # string representation of a dummy function includes imports, comments, and a
     # file function
-    file_lines = """This is a multi-line comment at the top of the file
-It serves as an explanation for the contents of the file ''
-import package1
-from package2 import module1
-# this is a comment about the next import
-import package3 as pkg3
-def my_func:,
-# import here for performance from package4.module2 import class1
-# this is an in-line comment in the body of the function
-'random_assignment = Added for a longer function'
-'random_assignment += make sure to modify variable'
-return not dummy_input
-import package5.module3"""
+    file_lines = inspect.getsource(dummy_function_fixtures)
     return file_lines
 
 

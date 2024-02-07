@@ -209,26 +209,6 @@ You don't need to restart the kernel for the `catalog`, `context`, `pipelines` a
 
 For more details, run `%reload_kedro?`.
 
-## How to use tags to convert functions from Jupyter notebooks into Kedro nodes
-
-You can use the notebook to write experimental code for your Kedro project. If you later want to convert functions you've written to Kedro nodes, you can do this using `node` tags to export them to a Python file. Say you have the following code in your notebook:
-
-```ipython
-def some_action():
-    print("This function came from `notebooks/my_notebook.ipynb`")
-```
-
-1. Enable tags toolbar: `View` menu -> `Cell Toolbar` -> `Tags`
-![Enable the tags toolbar graphic](../meta/images/jupyter_notebook_workflow_activating_tags.png)
-
-2. Add the `node` tag to the cell containing your function
-![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
-
-
-3. Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
-4. From your terminal, run `kedro jupyter convert notebooks/my_notebook.ipynb` from the Kedro project directory. The output is a Python file `src/<package_name>/nodes/my_notebook.py` containing the `some_action` function definition
-5. The `some_action` function can now be used in your Kedro pipelines
-
 ## Useful to know (for advanced users)
 Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.
 
@@ -238,7 +218,8 @@ You can use the `jupyter kernelspec` set of commands to manage your Jupyter kern
 
 ### Debugging with %debug and %pdb
 
- `%debug` will run post-mortem debugging using IPython. Running `%debug` immediately after an error has occurred will:
+ You can use the `%debug` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint.
+Running `%debug` immediately after an error has occurred will:
  - Load the stack trace of the last unhandled exception.
  - Stop the program at the point where the exception occurred.
  - Open an interactive shell where the user can navigate through the stack trace.
@@ -254,7 +235,7 @@ You can use the `jupyter kernelspec` set of commands to manage your Jupyter kern
 
 ---
 
-You can set up the debugger to run automatically when an exception occurs by running `%pdb 1` or `%pdb on` before executing a program. This automatic behaviour can be disabled with `%pdb 0` or `%pdb off`.
+You can set up the debugger to run automatically when an exception occurs by using the `%pdb` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behavior can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
 
 <details>
 <summary>Click to see an example.</summary>
@@ -281,7 +262,7 @@ Below are some examples of the possible commands that can be used to interact wi
 | `b(reak)`         | Insert a breakpoint                                   |
 | `a(rgs)`          | Print the argument list of the current function        |
 
-For more information, use the `help` command in the debugger, or take a look at ipdb's [online documentation](https://github.com/gotcha/ipdb).
+For more information, use the `help` command in the debugger, or take at the [ipdb repository](https://github.com/gotcha/ipdb) for guidance.
 
 
 ### Managed services

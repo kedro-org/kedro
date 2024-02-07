@@ -1,7 +1,8 @@
 """
-This is a multi-line comment at the top of the file
-It serves as an explanation for the contents of the file.
-This file is used as a fixture for %load_node test_ipython.py
+This file serves as a fixture for the %load_node test_ipython.py in the testing suites.
+It contains variations of import statements for testing purposes. The usage of the
+`logging` library as a dummy library is intentional, as it is part of the standard
+libraries, but it can be replaced with any other library for further testing scenarios.
 """
 
 import logging  # noqa

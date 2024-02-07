@@ -15,6 +15,9 @@ from typing import Any, Callable
 import IPython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+from pygments import highlight
+from pygments.formatters import TerminalFormatter
+from pygments.lexers import PythonLexer
 
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import CONF_SOURCE_HELP, PARAMS_ARG_HELP
@@ -196,13 +199,16 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     nargs="?",
     default=None,
 )
-def magic_load_node(node: str) -> None:
+@argument("-p", "--print", help="Prints the content of the Node", action="store_true")
+def magic_load_node(args: str) -> None:
     """The line magic %load_node <node_name>
     Currently it only supports Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
     will generate code in multiple cells to load datasets from `DataCatalog`, import
     relevant functions and modules, node function definition and a function call.
     """
-    cells = _load_node(node, pipelines)
+    parameters = parse_argstring(magic_load_node, args)
+
+    cells = _load_node(parameters.node, pipelines)
     from ipylab import JupyterFrontEnd
 
     app = JupyterFrontEnd()
@@ -215,6 +221,8 @@ def magic_load_node(node: str) -> None:
 
     for cell in cells:
         _create_cell_with_text(cell)
+        if parameters.print:
+            print(highlight(cell, PythonLexer(), TerminalFormatter()))  # noqa: T201
 
 
 def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:

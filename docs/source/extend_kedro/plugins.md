@@ -10,7 +10,7 @@ Kedro's extension mechanism is built on [`pluggy`](https://pluggy.readthedocs.io
 
 [The Kedro-Telemetry plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) is an opt-in feature designed to gather anonymized and aggregated usage analytics, ensuring no personal data is collected. Its aim is to understand how Kedro's features are utilized to inform future product development and enhance the user experience. This telemetry data, approved under the [Telemetry Data Collection and Usage Policy](https://lfprojects.org/policies/telemetry-data-policy/) of LF Projects, LLC, ensures privacy while providing valuable insights to [Kedro Project maintainers](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html).
 
-### Collected Data Fields:
+### Collected data fields:
 
 - **Hashed Username:** An anonymized representation of the user's computer username.
 - **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy.

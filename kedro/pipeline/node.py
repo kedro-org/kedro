@@ -254,18 +254,6 @@ class Node:
             return f"{self.namespace}.{node_name}"
         return node_name
 
-    @property
-    def short_name(self) -> str:
-        """Node's name.
-
-        Returns:
-            Returns a short, user-friendly name that is not guaranteed to be unique.
-            The namespace is stripped out of the node name.
-        """
-        if self._name:
-            return self._name
-
-        return self._func_name.replace("_", " ").title()
 
     @property
     def namespace(self) -> str | None:

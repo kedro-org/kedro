@@ -246,7 +246,7 @@ You can set up the debugger to run automatically when an exception occurs by usi
 
 ---
 
-Below are some examples of the possible commands that can be used to interact with the ipdb shell:
+Some examples of the possible commands that can be used to interact with the ipdb shell are as follows:
 
 | Command           | Description                                           |
 | ----------------- | ----------------------------------------------------- |

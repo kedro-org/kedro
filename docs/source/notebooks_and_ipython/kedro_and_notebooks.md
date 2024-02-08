@@ -212,7 +212,7 @@ For more details, run `%reload_kedro?`.
 ## Useful to know (for advanced users)
 Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.
 
-To ensure that a Jupyter kernel always points to the correct Python executable, if one already exists with the same name `kedro_<package_name>`, then it is replaced. 
+To ensure that a Jupyter kernel always points to the correct Python executable, if one already exists with the same name `kedro_<package_name>`, then it is replaced.
 
 You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
 
@@ -221,8 +221,8 @@ You can use the `jupyter kernelspec` set of commands to manage your Jupyter kern
  You can use the `%debug` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint.
 The follow sequence occurs when `%debug` runs immediately after an error occurs:
  - The stack trace of the last unhandled exception loads.
- - Stop the program at the point where the exception occurred.
- - Open an interactive shell where the user can navigate through the stack trace.
+ - The program stops at the point where the exception occurred.
+ - An interactive shell where the user can navigate through the stack trace opens.
 
  You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 

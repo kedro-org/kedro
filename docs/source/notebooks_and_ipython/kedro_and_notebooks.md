@@ -219,7 +219,7 @@ You can use the `jupyter kernelspec` set of commands to manage your Jupyter kern
 ### Debugging with %debug and %pdb
 
  You can use the `%debug` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint.
-Running `%debug` immediately after an error has occurred will:
+The follow sequence occurs when `%debug` runs immediately after an error occurs:
  - The stack trace of the last unhandled exception loads.
  - Stop the program at the point where the exception occurred.
  - Open an interactive shell where the user can navigate through the stack trace.

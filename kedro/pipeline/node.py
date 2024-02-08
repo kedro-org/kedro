@@ -492,7 +492,7 @@ class Node:
                 func_args = inspect.signature(
                     func, follow_wrapped=False
                 ).parameters.keys()
-                func_name = _get_readable_func_name(func)
+                func_name = self._func_name
 
                 raise TypeError(
                     f"Inputs of '{func_name}' function expected {list(func_args)}, "

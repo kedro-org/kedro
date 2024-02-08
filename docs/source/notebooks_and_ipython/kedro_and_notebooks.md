@@ -235,7 +235,7 @@ The follow sequence occurs when `%debug` runs immediately after an error occurs:
 
 ---
 
-You can set up the debugger to run automatically when an exception occurs by using the `%pdb` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behavior can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
+You can set up the debugger to run automatically when an exception occurs by using the `%pdb` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
 
 <details>
 <summary>Click to see an example.</summary>

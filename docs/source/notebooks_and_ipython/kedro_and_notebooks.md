@@ -48,20 +48,6 @@ If the Kedro variables are not available within your Jupyter notebook, you could
 ## How to explore a Kedro project in a notebook
 Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](/api/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
 
-### `%run_viz` line magic
-
-``` {note}
-If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz) for the project, run `pip install kedro-viz` in your terminal from within the project directory.
-```
-
-You can display an interactive visualisation of your pipeline directly in your notebook using the `run-viz` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) from within a cell:
-
-```python
-%run_viz
-```
-
-![View your project's Kedro Viz inside a notebook](../meta/images/run_viz_in_notebook.png)
-
 ### `catalog`
 
 `catalog` can be used to explore your project's [Data Catalog](../data/data_catalog.md) using methods such as `catalog.list`, `catalog.load` and `catalog.save`.
@@ -195,6 +181,8 @@ You can also specify the following optional arguments for `session.run`:
 
 You can execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do more than one run, you'll have to run `%reload_kedro` line magic to get a new `session`.
 
+### Kedro line magics
+
 #### `%reload_kedro` line magic
 
 You can use `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) within your Jupyter notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog).
@@ -209,6 +197,21 @@ You don't need to restart the kernel for the `catalog`, `context`, `pipelines` a
 
 For more details, run `%reload_kedro?`.
 
+#### `%load_node` line magic
+
+#### `%run_viz` line magic
+
+``` {note}
+If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz) for the project, run `pip install kedro-viz` in your terminal from within the project directory.
+```
+
+You can display an interactive visualisation of your pipeline directly in your notebook using the `run-viz` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) from within a cell:
+
+```python
+%run_viz
+```
+
+![View your project's Kedro Viz inside a notebook](../meta/images/run_viz_in_notebook.png)
 
 ## Debugging a Kedro project within a notebook
 

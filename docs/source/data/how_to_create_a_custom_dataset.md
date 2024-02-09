@@ -146,7 +146,7 @@ class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
 ```
 </details>
 
-To test this out, let's add a dataset to the data catalog to load [Pikachu's](https://en.wikipedia.org/wiki/Pikachu) image.
+To test this out, let's add a dataset to the data catalog to load Pikachu's image.
 
 ```yaml
 # in conf/base/catalog.yml
@@ -511,9 +511,9 @@ Inspect the content of the data directory to find a new version of the data, wri
 
 Kedro datasets should work with the [SequentialRunner](/kedro.runner.SequentialRunner) and the [ParallelRunner](/kedro.runner.ParallelRunner), so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
-There is one dataset that is an exception: [SparkDataSet](/kedro_datasets.spark.SparkDataSet). The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that leverages Spark please consider the alternative [ThreadRunner](/kedro.runner.ThreadRunner).
+There is one dataset that is an exception: [SparkDataSet](/kedro_datasets.spark.SparkDataSet). [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that uses Spark, use [ThreadRunner](/kedro.runner.ThreadRunner) instead.
 
-To verify whether your dataset is serialisable by `multiprocessing`, use the console or an iPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
+To verify whether your dataset is serialisable by `multiprocessing`, use the console or an IPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 
 ```python
 dataset = context.catalog._data_sets["pokemon"]
@@ -569,7 +569,7 @@ class ImageDataSet(AbstractVersionedDataset):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro_datasets.spark.SparkDataSet)'s implementation.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset constructor, see the [SparkDataSet](/kedro_datasets.spark.SparkDataSet) implementation.
 
 
 ## How to contribute a custom dataset implementation

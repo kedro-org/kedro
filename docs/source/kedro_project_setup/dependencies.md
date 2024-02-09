@@ -5,9 +5,11 @@ Both `pip install kedro` and `conda install -c conda-forge kedro` install the co
 When you create a project, you then introduce additional dependencies for the tasks it performs.
 
 ## Project-specific dependencies
+
 You can specify a project's exact dependencies in the `src/requirements.txt` file to make it easier for you and others to run your project in the future,
 and to avoid version conflicts downstream. This can be achieved with the help of [`pip-tools`](https://pypi.org/project/pip-tools/).
 To install `pip-tools` in your virtual environment, run the following command:
+
 ```bash
 pip install pip-tools
 ```
@@ -15,7 +17,7 @@ pip install pip-tools
 To add or remove dependencies to a project, edit the `src/requirements.txt` file, then run the following:
 
 ```bash
-pip-compile --output-file=<project_root>/src/requirements.txt --input-file=<project_root>/src/requirements.txt
+pip-compile <project_root>/src/requirements.txt --output-file <project_root>/src/requirements.lock
 ```
 
 This will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in
@@ -30,21 +32,12 @@ The `src/requirements.txt` file contains "source" requirements, while `src/requi
 
 To further update the project requirements, modify the `src/requirements.txt` file (not `src/requirements.lock`) and re-run the `pip-compile` command above.
 
-
 ## Install project-specific dependencies
 
 To install the project-specific dependencies, navigate to the root directory of the project and run:
 
 ```bash
 pip install -r src/requirements.txt
-```
-
-## Workflow dependencies
-
-To install all the dependencies recorded in Kedro's [`setup.py`](https://github.com/kedro-org/kedro/blob/develop/setup.py), run:
-
-```bash
-pip install "kedro[all]"
 ```
 
 ### Install dependencies related to the Data Catalog

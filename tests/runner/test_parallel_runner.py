@@ -7,6 +7,7 @@ from typing import Any
 
 import pytest
 
+from kedro import KedroDeprecationWarning
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
@@ -36,7 +37,9 @@ from tests.runner.conftest import (
 
 def test_deprecation():
     class_name = "_SharedMemoryDataSet"
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module("kedro.runner.parallel_runner"), class_name)
 
 
@@ -103,7 +106,7 @@ class TestMaxWorkers:
         cpu_cores,
         user_specified_number,
         expected_number,
-    ):  # noqa: too-many-arguments
+    ):  # noqa: PLR0913
         """
         The system has 2 cores, but we initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 processes.

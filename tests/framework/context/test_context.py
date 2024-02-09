@@ -187,9 +187,7 @@ def extra_params(request):
 
 
 @pytest.fixture
-def dummy_context(
-    tmp_path, prepare_project_dir, env, extra_params
-):  # pylint: disable=unused-argument
+def dummy_context(tmp_path, prepare_project_dir, env, extra_params):  # pylint: disable=unused-argument
     configure_project(MOCK_PACKAGE_NAME)
     config_loader = ConfigLoader(str(tmp_path / "conf"), env=env)
     context = KedroContext(

@@ -22,7 +22,7 @@ dependencies = [
     "fsspec>=2021.4",
     "gitpython>=3.0",
     "importlib_metadata>=3.6,<5.0; python_version < '3.8'",  # The "selectable" entry points were introduced in `importlib_metadata` 3.6 and Python 3.10. Bandit on Python 3.7 relies on a library with `importlib_metadata` < 5.0
-    "importlib-metadata>=3.6,<7.0; python_version >= '3.8'",
+    "importlib-metadata>=3.6,<8.0; python_version >= '3.8'",
     "importlib_resources>=1.3,<7.0",  # The `files()` API was introduced in `importlib_resources` 1.3 and Python 3.9.
     "jmespath>=0.9.5",
     "more_itertools>=8.14.0",
@@ -74,12 +74,11 @@ include = ["kedro*"]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}
 
-[tool.black]
-exclude = "/templates/|^features/steps/test_starter"
+[tool.ruff.format]
+exclude = ["**/templates", "features/steps/test_starter"]
 
 [tool.isort]
 profile = "black"
-
 
 [tool.pylint]
 [tool.pylint.master]
@@ -128,6 +127,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
 addopts="""
+--cov-context test  \
 --cov-config pyproject.toml \
 --cov-report xml:coverage.xml \
 --cov-report term-missing \
@@ -216,7 +216,7 @@ select = [
     "PL",  # Pylint
     "T201", # Print Statement
 ]
-ignore = ["E501"]  # Black takes care of line-too-long
+ignore = ["E501"]  # ruff format takes care of line-too-long
 
 [tool.ruff.isort]
 known-first-party = ["kedro"]

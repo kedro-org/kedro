@@ -60,31 +60,16 @@ Welcome to Kedro's documentation!
    :caption: Learn about Kedro
 
    introduction/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    get_started/index.md
+   course/index.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Tutorial and basic Kedro usage
 
    tutorial/spaceflights_tutorial.md
-
-.. toctree::
-   :maxdepth: 2
-
    visualisation/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    experiment_tracking/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    notebooks_and_ipython/index.md
    resources/index.md
 
@@ -92,53 +77,20 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Kedro projects
 
-   kedro_project_setup/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    configuration/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    data/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    nodes_and_pipelines/index.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Advanced usage
 
+   kedro_project_setup/index.md
    extend_kedro/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    hooks/index.md
-
-
-.. toctree::
-   :maxdepth: 2
-
    logging/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    integrations/pyspark_integration.md
-
-.. toctree::
-   :maxdepth: 2
-
    development/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    deployment/index.md
 
 .. toctree::

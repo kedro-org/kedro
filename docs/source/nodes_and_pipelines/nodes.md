@@ -186,7 +186,6 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 [Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255) and are a special kind of function in Python that returns lazy iterators. They are often used for lazy-loading or lazy-saving of data, which can be particularly useful when dealing with large datasets that do not fit entirely into memory. In the context of Kedro, generator functions can be used in nodes to efficiently process and handle such large datasets.
 
-
 ### Set up the project
 
 To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the `pandas-iris` starter. If you haven't already created a Kedro project, you can follow the [get started guide](../get_started/new_project.md#create-a-new-project-containing-example-code) to create it.
@@ -196,7 +195,7 @@ Create the project with this command:
 kedro new -s pandas-iris
 ```
 
-### Loading data with Generators
+### Loading data with generators
 To use generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
 
 You need to add a new dataset in your `catalog.yml` as follows:
@@ -210,7 +209,7 @@ You need to add a new dataset in your `catalog.yml` as follows:
 
 With `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
 
-### Saving data with Generators
+### Saving data with generators
 To use generators to save data lazily, you need do three things:
 - Update the `make_prediction` function definition to use `yield` instead of `return`.
 - Create a [custom dataset](../data/how_to_create_a_custom_dataset.md) called `ChunkWiseCSVDataset`

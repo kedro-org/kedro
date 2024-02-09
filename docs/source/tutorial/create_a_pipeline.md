@@ -135,7 +135,7 @@ You should see output similar to the below:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[08/09/22 16:43:11] INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+[08/09/22 16:43:11] INFO     Loading data from 'companies' (CSVDataset)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
                     INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
@@ -152,18 +152,24 @@ You can run the `preprocess_shuttles` node similarly. To test both nodes togethe
 kedro run
 ```
 
+You can also run both nodes by naming each in turn, as follows:
+
+```bash
+kedro run --nodes=preprocess_companies_node,preprocess_shuttles_node
+```
+
 You should see output similar to the following:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```bash
-                    INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Loading data from 'companies' (CSVDataset)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
                     INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 2 tasks                                  sequential_runner.py:85
-                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
+                    INFO     Loading data from 'shuttles' (ExcelDataset)...                  data_catalog.py:343
 [08/09/22 16:46:08] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
                              -> [preprocessed_shuttles]
                     INFO     Saving data to 'preprocessed_shuttles' (MemoryDataset)...       data_catalog.py:382
@@ -177,18 +183,18 @@ You should see output similar to the following:
 
 ## Preprocessed data registration
 
-Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format [pandas.ParquetDataSet](/kedro_datasets.pandas.ParquetDataSet) because they are registered within the [Data Catalog](../resources/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format [pandas.ParquetDataset](/kedro_datasets.pandas.ParquetDataset) because they are registered within the [Data Catalog](../resources/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```yaml
 preprocessed_companies:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_companies.pq
 
 preprocessed_shuttles:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_shuttles.pq
 ```
 </details>
@@ -220,6 +226,7 @@ def create_model_input_table(
 
     """
     rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
+    rated_shuttles = rated_shuttles.drop("id", axis=1)
     model_input_table = rated_shuttles.merge(
         companies, left_on="company_id", right_on="id"
     )
@@ -273,7 +280,7 @@ The following entry in `conf/base/catalog.yml` saves the model input table datas
 
 ```yaml
 model_input_table:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/03_primary/model_input_table.pq
 ```
 
@@ -292,12 +299,12 @@ You should see output similar to the following:
 
 ```bash
 [08/09/22 17:01:10] INFO     Reached after_catalog_created hook                                     plugin.py:17
-                    INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Loading data from 'companies' (CSVDataset)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
                     INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 3 tasks                                  sequential_runner.py:85
-                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
+                    INFO     Loading data from 'shuttles' (ExcelDataset)...                  data_catalog.py:343
 [08/09/22 17:01:25] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
                              -> [preprocessed_shuttles]
 
@@ -305,7 +312,7 @@ You should see output similar to the following:
                     INFO     Completed 2 out of 3 tasks                                  sequential_runner.py:85
                     INFO     Loading data from 'preprocessed_shuttles' (MemoryDataset)...    data_catalog.py:343
                     INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
-                    INFO     Loading data from 'reviews' (CSVDataSet)...                     data_catalog.py:343
+                    INFO     Loading data from 'reviews' (CSVDataset)...                     data_catalog.py:343
                     INFO     Running node: create_model_input_table_node:                            node.py:327
                              create_model_input_table([preprocessed_shuttles,preprocessed_companies,
                              reviews]) -> [model_input_table]

@@ -1,4 +1,4 @@
-# Kedro project setup
+# Project setup
 
 ```{toctree}
 :maxdepth: 1

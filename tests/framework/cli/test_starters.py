@@ -48,7 +48,7 @@ def _make_cli_prompt_input(project_name="", repo_name="", python_package=""):
     return "\n".join([project_name, repo_name, python_package])
 
 
-# noqa: too-many-arguments
+# noqa: PLR0913
 def _assert_template_ok(
     result,
     project_name="New Kedro Project",

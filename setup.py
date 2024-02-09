@@ -196,7 +196,7 @@ extras_require["test"] = [
     "SQLAlchemy~=1.2",
     "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.8'",
     "tables~=3.8.0; platform_system == 'Windows' and python_version>='3.8'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
-    "tables~=3.6; platform_system != 'Windows'",
+    "tables~=3.6, <3.9.0; platform_system != 'Windows'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     # https://developer.apple.com/metal/tensorflow-plugin/
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",

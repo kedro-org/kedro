@@ -11,4 +11,5 @@ Allow: /en/0.18.10/
 Allow: /en/0.18.11/
 Allow: /en/0.18.12/
 Allow: /en/0.18.13/
+Allow: /en/0.18.14/
 Allow: /en/0.17.7/

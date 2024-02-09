@@ -127,7 +127,7 @@ Values provided in the CLI take precedence and overwrite parameters specified in
 * Parameter keys are _always_ treated as strings.
 * Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
 
-If any extra parameter key and/or value contains spaces, wrap the whole option contents in quotes:
+If any extra parameter key or value contains spaces, wrap the whole option contents in quotes:
 
 ```bash
 kedro run --params="key1=value with spaces,key2=value"

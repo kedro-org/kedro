@@ -116,7 +116,11 @@ class TestLoadKedroObjects:
         reload_kedro()
 
         mock_session_create.assert_called_once_with(
-            PACKAGE_NAME, None, env=None, extra_params=None
+            PACKAGE_NAME,
+            None,
+            env=None,
+            extra_params=None,
+            conf_source=None,
         )
         _, kwargs = ipython_spy.call_args_list[0]
         variables = kwargs["variables"]
@@ -143,14 +147,18 @@ class TestLoadKedroObjects:
         ipython_spy = mocker.spy(ipython, "push")
         dummy_env = "env"
         dummy_dict = {"key": "value"}
+        dummy_conf_source = "conf/"
 
-        reload_kedro(fake_metadata.project_path, "env", {"key": "value"})
+        reload_kedro(
+            fake_metadata.project_path, "env", {"key": "value"}, conf_source="conf/"
+        )
 
         mock_session_create.assert_called_once_with(
             PACKAGE_NAME,
             fake_metadata.project_path,
             env=dummy_env,
             extra_params=dummy_dict,
+            conf_source=dummy_conf_source,
         )
         _, kwargs = ipython_spy.call_args_list[0]
         variables = kwargs["variables"]
@@ -223,6 +231,7 @@ class TestLoadIPythonExtension:
             "--env=base",
             "-e base",
             ". --env=base --params=key:val",
+            "--conf-source=new_conf",
         ],
     )
     def test_line_magic_with_valid_arguments(self, mocker, args, ipython):

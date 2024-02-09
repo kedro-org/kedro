@@ -7,6 +7,7 @@ from __future__ import annotations
 import warnings
 from typing import Any, Callable
 
+from kedro import KedroDeprecationWarning
 from kedro.io.core import AbstractDataset, DatasetError
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
@@ -80,7 +81,7 @@ class LambdaDataset(AbstractDataset):
         else:
             self.__release()
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,
@@ -129,7 +130,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

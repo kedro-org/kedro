@@ -158,7 +158,7 @@ class KedroContext:
     Kedro's main functionality.
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         package_name: str,
         project_path: Path | str,

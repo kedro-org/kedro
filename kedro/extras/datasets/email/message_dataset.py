@@ -25,9 +25,7 @@ from kedro.io.core import (
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class EmailMessageDataSet(
-    AbstractVersionedDataset[Message, Message]
-):  # pylint: disable=too-many-instance-attributes
+class EmailMessageDataSet(AbstractVersionedDataset[Message, Message]):  # pylint: disable=too-many-instance-attributes
     """``EmailMessageDataSet`` loads/saves an email message from/to a file
     using an underlying filesystem (e.g.: local, S3, GCS). It uses the
     ``email`` package in the standard library to manage email messages.
@@ -60,7 +58,7 @@ class EmailMessageDataSet(
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

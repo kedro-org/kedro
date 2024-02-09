@@ -78,7 +78,7 @@ pip install kedro databricks-cli
 
 **Now, you must authenticate the Databricks CLI with your Databricks instance.**
 
-[Refer to the Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication) for a complete guide on how to authenticate your CLI. The key steps are:
+[Refer to the Databricks documentation](https://docs.databricks.com/en/dev-tools/cli/authentication.html) for a complete guide on how to authenticate your CLI. The key steps are:
 
 1. Create a personal access token for your user on your Databricks instance.
 2. Run `databricks configure --token`.
@@ -94,6 +94,10 @@ kedro new --starter=databricks-iris
 ```
 
 This command creates a new Kedro project using the `databricks-iris` starter template. Name your new project `iris-databricks` for consistency with the rest of this guide.
+
+ ```{note}
+ If you are not using the `databricks-iris` starter to create a Kedro project, then you should [disable file-based logging](../../logging/logging.md#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
+ ```
 
 ### Create an entry point for Databricks
 
@@ -172,7 +176,7 @@ Your packaged Kedro project needs access to data and configuration in order to r
 
 The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
-There are several ways to upload data to DBFS: you can use the [DBFS API](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/dbfs), the [`dbutils` module](https://docs.databricks.com/dev-tools/databricks-utils.html) in a Databricks notebook or the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html). In this guide, it is recommended to use the Databricks CLI because of the convenience it offers.
+There are several ways to upload data to DBFS: you can use the [DBFS API](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/dbfs), the [`dbutils` module](https://docs.databricks.com/dev-tools/databricks-utils.html) in a Databricks notebook or the [Databricks CLI](https://docs.databricks.com/archive/dev-tools/cli/dbfs-cli.html). In this guide, it is recommended to use the Databricks CLI because of the convenience it offers.
 
 - **Upload your project's data and config**: at the command line in your local environment, use the following Databricks CLI commands to upload your project's locally stored data and configuration to DBFS:
 
@@ -313,8 +317,8 @@ The Databricks Command Line Interface (CLI) is another way to automate deploymen
 1. [Set up your Kedro project for deployment on Databricks.](#set-up-your-project-for-deployment-to-databricks)
 2. Install the Databricks CLI and authenticate it with your workspace.
 3. Create a JSON file containing your job's configuration.
-4. Use the [`jobs create` command](https://docs.databricks.com/dev-tools/cli/jobs-cli.html#create-a-job) to create a new job.
-5. Use the [`jobs run-now` command](https://docs.databricks.com/dev-tools/cli/jobs-cli.html#run-a-job) to run your newly created job.
+4. Use the [`jobs create` command](https://docs.databricks.com/archive/dev-tools/cli/jobs-cli.html#create-a-job) to create a new job.
+5. Use the [`jobs run-now` command](https://docs.databricks.com/archive/dev-tools/cli/jobs-cli.html#run-a-job) to run your newly created job.
 
 ## Summary
 

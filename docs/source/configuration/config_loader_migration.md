@@ -4,7 +4,7 @@ This migration guide outlines the primary distinctions between the old loaders a
 
 ## [`ConfigLoader`](/kedro.config.ConfigLoader) to [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)
 
-### 1. Install the Required Library
+### 1. Install the required library
 The [`OmegaConfigLoader`](advanced_configuration.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). In order to use it you need to ensure you have both a version of Kedro of `0.18.5` or above and `omegaconf` installed.
 You can install both using `pip`:
 
@@ -28,7 +28,7 @@ To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` consta
 + CONFIG_LOADER_CLASS = OmegaConfigLoader
 ```
 
-### 3. Import Statements
+### 3. Import statements
 Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoader`:
 
 ```diff
@@ -37,10 +37,10 @@ Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoa
 + from kedro.config import OmegaConfigLoader
 ```
 
-### 4. File Format Support
+### 4. File format support
 `OmegaConfigLoader` supports only `yaml` and `json` file formats. Make sure that all your configuration files are in one of these formats. If you previously used other formats with `ConfigLoader`, convert them to `yaml` or `json`.
 
-### 5. Load Configuration
+### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `ConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
 When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
 
@@ -56,7 +56,7 @@ When you migrate to use `OmegaConfigLoader` it  requires you to fetch configurat
 
 In this example, `"catalog"` is the key to the default catalog patterns specified in the `OmegaConfigLoader` class.
 
-### 6. Exception Handling
+### 6. Exception handling
 For error and exception handling, most errors are the same. Those you need to be aware of that are different between the original `ConfigLoader` and `OmegaConfigLoader` are as follows:
 * `OmegaConfigLoader` throws a `MissingConfigException` when configuration paths don't exist, rather than the `ValueError` used in `ConfigLoader`.
 * In `OmegaConfigLoader`, if there is bad syntax in your configuration files, it will trigger a `ParserError` instead of a `BadConfigException` used in `ConfigLoader`.

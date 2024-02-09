@@ -365,7 +365,7 @@ def run_node(
     return node
 
 
-def _collect_inputs_from_hook(  # noqa: too-many-arguments
+def _collect_inputs_from_hook(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
@@ -373,7 +373,6 @@ def _collect_inputs_from_hook(  # noqa: too-many-arguments
     hook_manager: PluginManager,
     session_id: str = None,
 ) -> dict[str, Any]:
-
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
         node=node,
@@ -399,7 +398,7 @@ def _collect_inputs_from_hook(  # noqa: too-many-arguments
     return additional_inputs
 
 
-def _call_node_run(  # noqa: too-many-arguments
+def _call_node_run(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
@@ -407,7 +406,6 @@ def _call_node_run(  # noqa: too-many-arguments
     hook_manager: PluginManager,
     session_id: str = None,
 ) -> dict[str, Any]:
-
     try:
         outputs = node.run(inputs)
     except Exception as exc:

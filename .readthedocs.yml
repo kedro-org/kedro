@@ -15,6 +15,13 @@ build:
   jobs:
     post_create_environment:
       - npm install -g @mermaid-js/mermaid-cli
+    pre_install:
+    # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
+    # pip==23.3 breaks dependency resolution
+      - python -m pip install -U "pip>=21.2,<23.2"
+    # These are technically installation steps, due to RTD's limit we need to inject the installation earlier.
+      - python -m pip install --upgrade --no-cache-dir sphinx readthedocs-sphinx-ext
+      - python -m pip install --upgrade --upgrade-strategy only-if-needed --no-cache-dir .[docs,test]
     pre_build:
       - pip freeze
       - python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
@@ -30,10 +37,10 @@ sphinx:
 # configuration: mkdocs.yml
 
 # Optionally set the version of Python and requirements required to build your docs
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
-        - test
+# python:
+#   install:
+#     - method: pip
+#       path: .
+#       extra_requirements:
+#         - docs
+#         - test

@@ -13,7 +13,6 @@ import kedro
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
-    _filter_deprecation_warnings,
     command_with_verbosity,
     env_option,
 )
@@ -141,9 +140,7 @@ def create_pipeline(
     "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def delete_pipeline(
-    metadata: ProjectMetadata, name, env, yes, **kwargs
-):  # noqa: unused-argument
+def delete_pipeline(metadata: ProjectMetadata, name, env, yes, **kwargs):  # noqa: unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE
@@ -211,9 +208,8 @@ def _echo_deletion_warning(message: str, **paths: list[Path]):
 
 
 def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
-    with _filter_deprecation_warnings():
-        # noqa: import-outside-toplevel
-        from cookiecutter.main import cookiecutter
+    # noqa: import-outside-toplevel
+    from cookiecutter.main import cookiecutter
 
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
 

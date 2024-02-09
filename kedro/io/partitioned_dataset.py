@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from cachetools import Cache, cachedmethod
 
+from kedro import KedroDeprecationWarning
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
@@ -136,7 +137,7 @@ class PartitionedDataset(AbstractDataset):
 
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         path: str,
         dataset: str | type[AbstractDataset] | dict[str, Any],
@@ -195,6 +196,11 @@ class PartitionedDataset(AbstractDataset):
         from fsspec.utils import infer_storage_options  # for performance reasons
 
         super().__init__()
+
+        warnings.warn(
+            "'PartitionedDataset' has been moved to `kedro-datasets` and will be removed in Kedro 0.19.0.",
+            KedroDeprecationWarning,
+        )
 
         self._path = path
         self._filename_suffix = filename_suffix
@@ -315,7 +321,7 @@ class PartitionedDataset(AbstractDataset):
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
             if callable(partition_data):
-                partition_data = partition_data()  # noqa: redefined-loop-name
+                partition_data = partition_data()  # noqa: PLW2901
             dataset.save(partition_data)
         self._invalidate_caches()
 
@@ -382,7 +388,7 @@ class IncrementalDataset(PartitionedDataset):
     DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataSet"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         path: str,
         dataset: str | type[AbstractDataset] | dict[str, Any],
@@ -394,7 +400,6 @@ class IncrementalDataset(PartitionedDataset):
         fs_args: dict[str, Any] = None,
         metadata: dict[str, Any] = None,
     ):
-
         """Creates a new instance of ``IncrementalDataset``.
 
         Args:
@@ -454,6 +459,11 @@ class IncrementalDataset(PartitionedDataset):
             credentials=credentials,
             load_args=load_args,
             fs_args=fs_args,
+        )
+
+        warnings.warn(
+            "'IncrementalDataset' has been moved to `kedro-datasets` and will be removed in Kedro 0.19.0.",
+            KedroDeprecationWarning,
         )
 
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)
@@ -568,7 +578,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

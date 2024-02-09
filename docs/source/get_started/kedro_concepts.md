@@ -21,12 +21,14 @@ Here are two simple nodes as an example:
 ```python
 from kedro.pipeline import node
 
+
 # First node
 def return_greeting():
     return "Hello"
 
 
 return_greeting_node = node(func=return_greeting, inputs=None, outputs="my_salutation")
+
 
 # Second node
 def join_statements(greeting):

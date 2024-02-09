@@ -54,7 +54,7 @@ class YAMLDataSet(AbstractVersionedDataset[Dict, Dict]):
 
     DEFAULT_SAVE_ARGS = {"default_flow_style": False}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         save_args: Dict[str, Any] = None,

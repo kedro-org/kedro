@@ -99,9 +99,7 @@ def test(metadata: ProjectMetadata, args, **kwargs):  # noqa: ument
 @click.option("-c", "--check-only", is_flag=True, help=LINT_CHECK_ONLY_HELP)
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
 @click.pass_obj  # this will pass the metadata as first argument
-def lint(
-    metadata: ProjectMetadata, files, check_only, **kwargs
-):  # noqa: unused-argument
+def lint(metadata: ProjectMetadata, files, check_only, **kwargs):  # noqa: unused-argument
     """Run flake8, isort and black. (DEPRECATED)"""
     deprecation_message = (
         "DeprecationWarning: Command 'kedro lint' is deprecated and "
@@ -234,9 +232,7 @@ def build_docs(metadata: ProjectMetadata, open_docs):
     help=OUTPUT_FILE_HELP,
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def build_reqs(
-    metadata: ProjectMetadata, input_file, output_file, args, **kwargs
-):  # noqa: unused-argument
+def build_reqs(metadata: ProjectMetadata, input_file, output_file, args, **kwargs):  # noqa: unused-argument
     """Run `pip-compile` on src/requirements.txt or the user defined input file and save
     the compiled requirements to src/requirements.lock or the user defined output file.
     (DEPRECATED)
@@ -304,7 +300,7 @@ def activate_nbstripout(metadata: ProjectMetadata, **kwargs):  # noqa: unused-ar
         ) from exc
 
     try:
-        res = subprocess.run(  # noqa: subprocess-run-check
+        res = subprocess.run(  # noqa: PLW1510
             ["git", "rev-parse", "--git-dir"],
             capture_output=True,
         )
@@ -412,7 +408,7 @@ def activate_nbstripout(metadata: ProjectMetadata, **kwargs):  # noqa: unused-ar
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-def run(  # noqa: too-many-arguments,unused-argument,too-many-locals
+def run(  # noqa: PLR0913,unused-argument,too-many-locals
     tag,
     tags,
     env,

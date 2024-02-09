@@ -207,7 +207,7 @@ class TestConvertNotebookCommand:
         with NamedTemporaryFile() as f:
             yield Path(f.name)
 
-    # noqa: too-many-arguments
+    # noqa: PLR0913
     def test_convert_one_file_overwrite(
         self,
         mocker,

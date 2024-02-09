@@ -7,22 +7,47 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  kedro-test:
+  kedro-main-test:
     uses: ./.github/workflows/all-checks.yml
+    with:
+      branch: main
 
-  notify-kedro:
+  kedro-develop-test:
+    uses: ./.github/workflows/all-checks.yml
+    with:
+      branch: develop
+
+  notify-main:
     permissions:
       issues: write
-    name: Notify failed build for kedro
-    needs: kedro-test
+    name: Notify failed build for kedro-main
+    needs: kedro-main-test
     if: ${{ !success() }}
     runs-on: ubuntu-latest
     steps:
       - uses: jayqi/failed-build-issue-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          label-name: "nightly build"
-          title-template: "ci: Nightly build failure"
+          label-name: "main nightly build"
+          title-template: "ci: Nightly build failure on `main`"
+          body-template: |
+            GitHub Actions workflow [{{workflow}} #{{runNumber}}](https://github.com/{{repo.owner}}/{{repo.repo}}/actions/runs/{{runId}}) failed.
+          create-label: true
+          always-create-new-issue: false
+
+  notify-develop:
+    permissions:
+      issues: write
+    name: Notify failed build for kedro-develop
+    needs: kedro-develop-test
+    if: ${{ !success() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          label-name: "develop nightly build"
+          title-template: "ci: Nightly build failure on `develop`"
           body-template: |
             GitHub Actions workflow [{{workflow}} #{{runNumber}}](https://github.com/{{repo.owner}}/{{repo.repo}}/actions/runs/{{runId}}) failed.
           create-label: true

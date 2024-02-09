@@ -19,7 +19,7 @@ class Node:
     run user-provided functions as part of Kedro pipelines.
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         func: Callable,
         inputs: None | str | list[str] | dict[str, str],
@@ -519,7 +519,7 @@ def _node_error_message(msg) -> str:
     )
 
 
-def node(  # noqa: too-many-arguments
+def node(  # noqa: PLR0913
     func: Callable,
     inputs: None | str | list[str] | dict[str, str],
     outputs: None | str | list[str] | dict[str, str],

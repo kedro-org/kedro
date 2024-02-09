@@ -11,7 +11,7 @@ from typing import Any, Callable, Iterable
 
 import fsspec
 from omegaconf import OmegaConf
-from omegaconf.errors import InterpolationResolutionError
+from omegaconf.errors import InterpolationResolutionError, UnsupportedInterpolationType
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
@@ -76,7 +76,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     """
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         conf_source: str,
         env: str = None,
@@ -141,8 +141,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env=env,
             runtime_params=runtime_params,
         )
+        try:
+            self._globals = self["globals"]
+        except MissingConfigException:
+            self._globals = {}
 
-    def __getitem__(self, key) -> dict[str, Any]:
+    def __setitem__(self, key, value):
+        if key == "globals":
+            # Update the cached value at self._globals since it is used by the globals resolver
+            self._globals = value
+        super().__setitem__(key, value)
+
+    def __getitem__(self, key) -> dict[str, Any]:  # noqa: PLR0912
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -161,6 +171,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         # Allow bypassing of loading config from patterns if a key and value have been set
         # explicitly on the ``OmegaConfigLoader`` instance.
+
+        # Re-register runtime params resolver incase it was previously deactivated
+        self._register_runtime_params_resolver()
+
         if key in self:
             return super().__getitem__(key)
 
@@ -170,6 +184,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
             )
         patterns = [*self.config_patterns[key]]
 
+        if key == "globals":
+            # "runtime_params" resolver is not allowed in globals.
+            OmegaConf.clear_resolver("runtime_params")
+
         read_environment_variables = key == "credentials"
 
         processed_files: set[Path] = set()
@@ -178,9 +196,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
             base_path = str(Path(self.conf_source) / self.base_env)
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
-        base_config = self.load_and_merge_dir_config(
-            base_path, patterns, key, processed_files, read_environment_variables
-        )
+        try:
+            base_config = self.load_and_merge_dir_config(
+                base_path, patterns, key, processed_files, read_environment_variables
+            )
+        except UnsupportedInterpolationType as exc:
+            if "runtime_params" in str(exc):
+                raise UnsupportedInterpolationType(
+                    "The `runtime_params:` resolver is not supported for globals."
+                )
+            else:
+                raise exc
+
         config = base_config
 
         # Load chosen env config
@@ -189,9 +216,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env_path = str(Path(self.conf_source) / run_env)
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
-        env_config = self.load_and_merge_dir_config(
-            env_path, patterns, key, processed_files, read_environment_variables
-        )
+        try:
+            env_config = self.load_and_merge_dir_config(
+                env_path, patterns, key, processed_files, read_environment_variables
+            )
+        except UnsupportedInterpolationType as exc:
+            if "runtime_params" in str(exc):
+                raise UnsupportedInterpolationType(
+                    "The `runtime_params:` resolver is not supported for globals."
+                )
+            else:
+                raise exc
+
         # Destructively merge the two env dirs. The chosen env will override base.
         common_keys = config.keys() & env_config.keys()
         if common_keys:
@@ -209,6 +245,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 f"No files of YAML or JSON format found in {base_path} or {env_path} matching"
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
             )
+
         return config
 
     def __repr__(self):  # pragma: no cover
@@ -217,7 +254,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
-    def load_and_merge_dir_config(  # noqa: too-many-arguments
+    def load_and_merge_dir_config(  # noqa: PLR0913
         self,
         conf_path: str,
         patterns: Iterable[str],
@@ -297,6 +334,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
+
         return {
             k: v
             for k, v in OmegaConf.to_container(
@@ -322,21 +360,41 @@ class OmegaConfigLoader(AbstractConfigLoader):
             replace=True,
         )
 
+    def _register_runtime_params_resolver(self):
+        OmegaConf.register_new_resolver(
+            "runtime_params",
+            self._get_runtime_value,
+            replace=True,
+        )
+
     def _get_globals_value(self, variable, default_value=_NO_VALUE):
         """Return the globals values to the resolver"""
         if variable.startswith("_"):
             raise InterpolationResolutionError(
                 "Keys starting with '_' are not supported for globals."
             )
-        global_omegaconf = OmegaConf.create(self["globals"])
+        globals_oc = OmegaConf.create(self._globals)
         interpolated_value = OmegaConf.select(
-            global_omegaconf, variable, default=default_value
+            globals_oc, variable, default=default_value
         )
         if interpolated_value != _NO_VALUE:
             return interpolated_value
         else:
             raise InterpolationResolutionError(
                 f"Globals key '{variable}' not found and no default value provided."
+            )
+
+    def _get_runtime_value(self, variable, default_value=_NO_VALUE):
+        """Return the runtime params values to the resolver"""
+        runtime_oc = OmegaConf.create(self.runtime_params)
+        interpolated_value = OmegaConf.select(
+            runtime_oc, variable, default=default_value
+        )
+        if interpolated_value != _NO_VALUE:
+            return interpolated_value
+        else:
+            raise InterpolationResolutionError(
+                f"Runtime parameter '{variable}' not found and no default value provided."
             )
 
     @staticmethod
@@ -393,7 +451,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _is_hidden(self, path: str):
         """Check if path contains any hidden directory or is a hidden file"""
-        path = Path(path).resolve().as_posix()
+        path = Path(path)
+        conf_path = Path(self.conf_source).resolve().as_posix()
+        if self._protocol == "file":
+            path = path.resolve()
+        path = path.as_posix()
+        if path.startswith(conf_path):
+            path = path.replace(conf_path, "")
         parts = path.split(self._fs.sep)  # filesystem specific separator
         HIDDEN = "."
         # Check if any component (folder or file) starts with a dot (.)

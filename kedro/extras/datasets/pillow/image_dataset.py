@@ -40,7 +40,7 @@ class ImageDataSet(AbstractVersionedDataset[Image.Image, Image.Image]):
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # noqa: PLR0913
         self,
         filepath: str,
         save_args: Dict[str, Any] = None,

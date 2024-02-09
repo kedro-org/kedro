@@ -549,7 +549,6 @@ def test_no_overwrite(
 def test_no_param_datasets_in_resolve(
     fake_project_cli, fake_metadata, fake_load_context, mocker, mock_pipelines
 ):
-
     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     mocked_context = fake_load_context.return_value
 

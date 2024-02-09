@@ -200,8 +200,6 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
 )
 @argument("-p", "--print", help="Prints the content of the Node", action="store_true")
 def magic_load_node(args: str) -> None:
-@argument("-p", "--print", help="Prints the content of the Node", action="store_true")
-def magic_load_node(args: str) -> None:
     """The line magic %load_node <node_name>
     Currently it only supports Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
     will generate code in multiple cells to load datasets from `DataCatalog`, import

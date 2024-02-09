@@ -1,7 +1,10 @@
 # Debugging
 
-> [!NOTE]
-> Our debugging documentation has moved. Please see our existing guides:
+:::note
+
+Our debugging documentation has moved. Please see our existing guides:
+
+:::
 
 * [Debugging a Kedro project within a notebook](../notebooks_and_ipython/kedro_and_notebooks.md#debugging-a-kedro-project-within-a-notebook)
 * [Debugging in VSCode](./set_up_vscode.md#debugging)

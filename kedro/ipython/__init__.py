@@ -15,9 +15,8 @@ from typing import Any, Callable
 import IPython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
-from pygments import highlight
-from pygments.formatters import TerminalFormatter
-from pygments.lexers import PythonLexer
+from rich.console import Console
+from rich.syntax import Syntax
 
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import CONF_SOURCE_HELP, PARAMS_ARG_HELP
@@ -221,8 +220,15 @@ def magic_load_node(args: str) -> None:
 
     for cell in cells:
         _create_cell_with_text(cell)
-        if parameters.print:
-            print(highlight(cell, PythonLexer(), TerminalFormatter()))  # noqa: T201
+
+    if parameters.print:
+        for cell in cells:
+            Console().print("")
+            IPython.get_ipython().set_next_input(
+                Console().print(
+                    Syntax(cell, "python", theme="monokai", line_numbers=True)
+                )
+            )
 
 
 def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:

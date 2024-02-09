@@ -221,8 +221,11 @@ def magic_load_node(args: str) -> None:
         app.commands.execute("notebook:insert-cell-below")
         app.commands.execute("notebook:replace-selection", {"text": text})
 
-    for cell in cells:
-        _create_cell_with_text(cell)
+    if hasattr(IPython.get_ipython(), "kernel"):
+        # Verify if  the IPython instance object contains the attribute "kernel",
+        # which indicates that the user is working from a Jupyter instance.
+        for cell in cells:
+            _create_cell_with_text(cell)
 
     if parameters.print:
         for cell in cells:

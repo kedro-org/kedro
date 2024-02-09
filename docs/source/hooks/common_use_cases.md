@@ -220,7 +220,7 @@ You can hooks to launch a [post-mortem debugging session](https://docs.python.or
 
 ### Debugging a node
 
-To start a debugging session when an uncaught error is raised within your `node`, implement the `on_node_error` [Hook specification](/api/kedro.framework.hooks):
+To start a debugging session when an error is raised within your `node` that is not caught, implement the `on_node_error` [Hook specification](/api/kedro.framework.hooks):
 
 ```python
 import pdb
@@ -255,7 +255,7 @@ HOOKS = (PDBNodeDebugHook(),)
 
 ### Debugging a pipeline
 
-To start a debugging session when an uncaught error is raised within your `pipeline`, implement the `on_pipeline_error` [Hook specification](/api/kedro.framework.hooks):
+To start a debugging session when an error is raised within your `pipeline` that is not caught, implement the `on_pipeline_error` [Hook specification](/api/kedro.framework.hooks):
 
 ```python
 import pdb

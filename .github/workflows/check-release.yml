@@ -1,0 +1,76 @@
+name: Check Kedro version and build-publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+      - name: Check version
+        run: python tools/github_actions/github_actions_release.py
+      - name: Set outputs
+        id: version_check
+        run: |
+          echo "new_release=${{ env.NEW_RELEASE }}" >> $GITHUB_OUTPUT
+          echo "kedro_version=${{ env.KEDRO_VERSION }}" >> $GITHUB_OUTPUT
+    outputs:
+      new_release: ${{ steps.version_check.outputs.new_release }}
+      kedro_version: ${{ steps.version_check.outputs.kedro_version }}
+
+  test-kedro:
+    needs: check-version
+    if: ${{ needs.check-version.outputs.new_release == 'true' }}
+    uses: ./.github/workflows/all-checks.yml
+
+  build-publish:
+    needs: [check-version, test-kedro]
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.check-version.outputs.new_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+      - name: Build package
+        run: make package
+      - name: Extract release notes from RELEASE.md
+        id: extract
+        run: |
+          python tools/github_actions/extract_release_notes.py \
+          "RELEASE.md" \
+          "Release ${{needs.check-version.outputs.kedro_version}}"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{needs.check-version.outputs.kedro_version}}
+          name: ${{needs.check-version.outputs.kedro_version}}
+          body_path: release_body.txt
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GH_TAGGING_TOKEN }}
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+          password: ${{ secrets.KEDRO_PYPI_TOKEN }}

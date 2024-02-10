@@ -3,7 +3,7 @@ from random import random
 import pandas as pd
 import pytest
 
-from kedro.io import DataCatalog, LambdaDataSet, MemoryDataSet
+from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
 from kedro.pipeline import node, pipeline
 
 
@@ -19,7 +19,7 @@ def first_arg(*args):
     return args[0]
 
 
-def sink(arg):  # pylint: disable=unused-argument
+def sink(arg):
     pass
 
 
@@ -28,7 +28,7 @@ def fan_in(*args):
 
 
 def exception_fn(*args):
-    raise Exception("test exception")  # pylint: disable=broad-exception-raised
+    raise Exception("test exception")
 
 
 def return_none(arg):
@@ -36,7 +36,7 @@ def return_none(arg):
     return arg
 
 
-def return_not_serialisable(arg):  # pylint: disable=unused-argument
+def return_not_serialisable(arg):
     return lambda x: x
 
 
@@ -46,7 +46,7 @@ def multi_input_list_output(arg1, arg2, arg3=None):  # pylint: disable=unused-ar
 
 @pytest.fixture
 def conflicting_feed_dict(pandas_df_feed_dict):
-    ds1 = MemoryDataSet({"data": 0})
+    ds1 = MemoryDataset({"data": 0})
     ds3 = pandas_df_feed_dict["ds3"]
     return {"ds1": ds1, "ds3": ds3}
 
@@ -64,8 +64,8 @@ def catalog():
 
 @pytest.fixture
 def memory_catalog():
-    ds1 = MemoryDataSet({"data": 42})
-    ds2 = MemoryDataSet([1, 2, 3, 4, 5])
+    ds1 = MemoryDataset({"data": 42})
+    ds2 = MemoryDataset([1, 2, 3, 4, 5])
     return DataCatalog({"ds1": ds1, "ds2": ds2})
 
 
@@ -74,11 +74,10 @@ def persistent_dataset_catalog():
     def _load():
         return 0
 
-    # pylint: disable=unused-argument
     def _save(arg):
         pass
 
-    persistent_dataset = LambdaDataSet(load=_load, save=_save)
+    persistent_dataset = LambdaDataset(load=_load, save=_save)
     return DataCatalog(
         {
             "ds0_A": persistent_dataset,
@@ -86,7 +85,7 @@ def persistent_dataset_catalog():
             "ds2_A": persistent_dataset,
             "ds2_B": persistent_dataset,
             "dsX": persistent_dataset,
-            "params:p": MemoryDataSet(1),
+            "params:p": MemoryDataset(1),
         }
     )
 
@@ -202,5 +201,14 @@ def two_branches_crossed_pipeline_variable_inputs(request):
             node(first_arg, ["ds2_B"] + extra_inputs, "_ds3_B", name="node3_B"),
             node(first_arg, ["_ds3_A"] + extra_inputs, "_ds4_A", name="node4_A"),
             node(first_arg, ["_ds3_B"] + extra_inputs, "_ds4_B", name="node4_B"),
+        ]
+    )
+
+
+def pipeline_with_memory_datasets():
+    return pipeline(
+        [
+            node(func=identity, inputs="Input1", outputs="MemOutput1", name="node1"),
+            node(func=identity, inputs="Input2", outputs="MemOutput2", name="node2"),
         ]
     )

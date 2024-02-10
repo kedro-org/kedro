@@ -114,7 +114,7 @@ conda install -c conda-forge kedro
 Install the project’s dependencies, by running the following in the project's root directory:
 
 ```console
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 After having installed your project on the remote server you can run the Kedro project as follows from the root of the project:

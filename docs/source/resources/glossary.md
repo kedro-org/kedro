@@ -14,12 +14,12 @@ Data science extracts insights from data by using a combination of domain expert
 ## Kedro
 Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It applies software engineering best-practices to machine learning code, including modularity, separation of concerns and versioning.
 
-[Introduction to Kedro](../introduction/introduction.md)
+[Introduction to Kedro](../introduction/index.md)
 
 ## `KedroContext`
 A Python class that holds the configuration and Kedro’s main functionality.
 
-API documentation for [`KedroContext`](/kedro.framework.context.KedroContext)
+API documentation for [`KedroContext`](/api/kedro.framework.context.KedroContext)
 
 ## `KedroSession`
 A KedroSession allows you to manage the lifecycle of a Kedro run, persist runtime parameters and trace back runtime parameters, such as CLI command flags and environment variables.
@@ -33,12 +33,12 @@ You can use Kedro-Viz to visualise your Kedro data pipelines:
 * Get a clear picture when you have lots of datasets and nodes by using tags to visualise sub-pipelines
 * Search for nodes and datasets
 
-[Further information from the Kedro-Viz repository](https://github.com/kedro-org/kedro-viz) and [Kedro-Viz documentation](../visualisation/kedro-viz_visualisation.md)
+[Further information from the Kedro-Viz repository](https://github.com/kedro-org/kedro-viz) and {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>`.
 
 ## Layers (data engineering convention)
 According to [common data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71), a pipeline can be broken up into different layers according to how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or processing has happened.
 
-Kedro-Viz makes it easy to [visualise these data processing stages](../visualisation/kedro-viz_visualisation.md#visualise-layers) by adding a `layer` attribute to the `kedro-viz` section within the `metadata` of the datasets in the Data Catalog.
+Kedro-Viz makes it easy to visualise these data processing stages by adding a `layer` attribute to the `kedro-viz` section within the `metadata` of the datasets in the Data Catalog.
 
 ## Modular pipeline
 _(See also [Pipeline](#pipeline))_
@@ -89,7 +89,7 @@ Runners are different execution mechanisms to run pipelines with the specified d
 ## Starters
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused. A Kedro starter is a [Cookiecutter template](https://cookiecutter.readthedocs.io/) that contains the boilerplate code for a Kedro project.
 
-[Further information about Kedro starters](../kedro_project_setup/starters.md)
+[Further information about Kedro starters](../starters/starters.md)
 
 ## Tags
 You can apply tags to nodes or pipelines as a means of filtering which are executed.

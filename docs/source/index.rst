@@ -8,24 +8,24 @@
     :alt: Kedro logo
     :class: kedro-logo
 
-Welcome to Kedro's documentation!
-=============================================
+Welcome to Kedro's award-winning documentation!
+================================================
 
-.. image:: https://img.shields.io/circleci/build/github/kedro-org/kedro/main?label=main
-    :target: https://circleci.com/gh/kedro-org/kedro/tree/main
-    :alt: CircleCI - Main Branch
+.. image:: https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main
+    :target: https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Amain
+    :alt: GitHub Actions - Main Branch
 
-.. image:: https://img.shields.io/circleci/build/github/kedro-org/kedro/develop?label=develop
-    :target: https://circleci.com/gh/kedro-org/kedro/tree/develop
-    :alt: CircleCI - Develop Branch
+.. image:: https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?branch=develop&label=develop
+    :target: https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Adevelop
+    :alt: GitHub Actions - Develop Branch
 
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
     :target: https://opensource.org/license/apache2-0-php/
     :alt: License is Apache 2.0
 
-.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
+.. image:: https://img.shields.io/badge/3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
     :target: https://pypi.org/project/kedro/
-    :alt: Python version 3.7, 3.8, 3.9, 3.10, 3.11
+    :alt: Python version 3.8, 3.9, 3.10, 3.11
 
 .. image:: https://badge.fury.io/py/kedro.svg
     :target: https://pypi.org/project/kedro/
@@ -47,9 +47,9 @@ Welcome to Kedro's documentation!
     :target: https://linen-slack.kedro.org/
     :alt: Kedro's Slack archive
 
-.. image:: https://img.shields.io/badge/code%20style-black-black.svg
-    :target: https://github.com/psf/black
-    :alt: Code style is Black
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+    :target: https://github.com/astral-sh/ruff
+    :alt: Linted and Formatted with Ruff
 
 .. image:: https://bestpractices.coreinfrastructure.org/projects/6711/badge
     :target: https://bestpractices.coreinfrastructure.org/projects/6711
@@ -69,7 +69,6 @@ Welcome to Kedro's documentation!
 
    tutorial/spaceflights_tutorial.md
    visualisation/index.md
-   experiment_tracking/index.md
    notebooks_and_ipython/index.md
    resources/index.md
 
@@ -77,6 +76,7 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Kedro projects
 
+   starters/index.md
    configuration/index.md
    data/index.md
    nodes_and_pipelines/index.md
@@ -103,13 +103,12 @@ API documentation
 =================
 
 .. autosummary::
-   :toctree:
+   :toctree: api
    :caption: API documentation
    :template: autosummary/module.rst
    :recursive:
 
    kedro
-   kedro_datasets
 
 Indices and tables
 ==================

@@ -5,15 +5,10 @@ so that the user avoids io operations with slow storage media
 from __future__ import annotations
 
 import logging
-import warnings
 from typing import Any
 
-from kedro import KedroDeprecationWarning
 from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, Version
 from kedro.io.memory_dataset import MemoryDataset
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-CachedDataSet: type[CachedDataset]
 
 
 class CachedDataset(AbstractDataset):
@@ -42,9 +37,9 @@ class CachedDataset(AbstractDataset):
     def __init__(
         self,
         dataset: AbstractDataset | dict,
-        version: Version = None,
-        copy_mode: str = None,
-        metadata: dict[str, Any] = None,
+        version: Version | None = None,
+        copy_mode: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``CachedDataset`` pointing to the
         provided Python object.
@@ -65,6 +60,8 @@ class CachedDataset(AbstractDataset):
             ValueError: If the provided dataset is not a valid dict/YAML
                 representation of a dataset or an actual dataset.
         """
+        self._EPHEMERAL = True
+
         if isinstance(dataset, dict):
             self._dataset = self._from_config(dataset, version)
         elif isinstance(dataset, AbstractDataset):
@@ -82,7 +79,7 @@ class CachedDataset(AbstractDataset):
         self._dataset.release()
 
     @staticmethod
-    def _from_config(config, version):
+    def _from_config(config: dict, version: Version | None) -> AbstractDataset:
         if VERSIONED_FLAG_KEY in config:
             raise ValueError(
                 "Cached datasets should specify that they are versioned in the "
@@ -97,11 +94,11 @@ class CachedDataset(AbstractDataset):
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "dataset": self._dataset._describe(),  # noqa: protected-access
-            "cache": self._cache._describe(),  # noqa: protected-access
+            "dataset": self._dataset._describe(),
+            "cache": self._cache._describe(),
         }
 
-    def _load(self):
+    def _load(self) -> Any:
         data = self._cache.load() if self._cache.exists() else self._dataset.load()
 
         if not self._cache.exists():
@@ -116,22 +113,9 @@ class CachedDataset(AbstractDataset):
     def _exists(self) -> bool:
         return self._cache.exists() or self._dataset.exists()
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         # clearing the cache can be prevented by modifying
         # how parallel runner handles datasets (not trivial!)
         logging.getLogger(__name__).warning("%s: clearing cache to pickle.", str(self))
         self._cache.release()
         return self.__dict__
-
-
-def __getattr__(name):
-    if name == "CachedDataSet":
-        alias = CachedDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

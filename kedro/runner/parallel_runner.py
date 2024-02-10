@@ -5,86 +5,35 @@ from __future__ import annotations
 
 import multiprocessing
 import os
-import pickle
 import sys
-import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
-from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
+from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Iterable
 
 from pluggy import PluginManager
 
-from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import (
     _create_hook_manager,
     _register_hooks,
     _register_hooks_entry_points,
 )
 from kedro.framework.project import settings
-from kedro.io import DataCatalog, DatasetError, MemoryDataset
+from kedro.io import (
+    DataCatalog,
+    DatasetNotFoundError,
+    MemoryDataset,
+    SharedMemoryDataset,
+)
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
 
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-_SharedMemoryDataSet: type[_SharedMemoryDataset]
-
-
-class _SharedMemoryDataset:
-    """``_SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
-    It is not inherited from AbstractDataset class.
-    """
-
-    def __init__(self, manager: SyncManager):
-        """Creates a new instance of ``_SharedMemoryDataset``,
-        and creates shared memorydataset attribute.
-
-        Args:
-            manager: An instance of multiprocessing manager for shared objects.
-
-        """
-        self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
-
-    def __getattr__(self, name):
-        # This if condition prevents recursive call when deserialising
-        if name == "__setstate__":
-            raise AttributeError()
-        return getattr(self.shared_memory_dataset, name)
-
-    def save(self, data: Any):
-        """Calls save method of a shared MemoryDataset in SyncManager."""
-        try:
-            self.shared_memory_dataset.save(data)
-        except Exception as exc:
-            # Checks if the error is due to serialisation or not
-            try:
-                pickle.dumps(data)
-            except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
-                raise DatasetError(
-                    f"{str(data.__class__)} cannot be serialised. ParallelRunner "
-                    "implicit memory datasets can only be used with serialisable data"
-                ) from serialisation_exc
-            raise exc
-
-
-def __getattr__(name):
-    if name == "_SharedMemoryDataSet":
-        alias = _SharedMemoryDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 class ParallelRunnerManager(SyncManager):
@@ -93,24 +42,26 @@ class ParallelRunnerManager(SyncManager):
     """
 
 
-ParallelRunnerManager.register("MemoryDataset", MemoryDataset)  # noqa: no-member
+ParallelRunnerManager.register("MemoryDataset", MemoryDataset)
 
 
-def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
-    # noqa: import-outside-toplevel,cyclic-import
+def _bootstrap_subprocess(
+    package_name: str, logging_config: dict[str, Any] | None = None
+) -> None:
     from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
-    configure_logging(logging_config)
+    if logging_config:
+        configure_logging(logging_config)
 
 
 def _run_node_synchronization(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,
-    session_id: str = None,
-    package_name: str = None,
-    logging_config: dict[str, Any] = None,
+    session_id: str | None = None,
+    package_name: str | None = None,
+    logging_config: dict[str, Any] | None = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -131,7 +82,7 @@ def _run_node_synchronization(  # noqa: PLR0913
 
     """
     if multiprocessing.get_start_method() == "spawn" and package_name:
-        _bootstrap_subprocess(package_name, logging_config)  # type: ignore
+        _bootstrap_subprocess(package_name, logging_config)
 
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
@@ -148,7 +99,12 @@ class ParallelRunner(AbstractRunner):
     single process only using the `_SINGLE_PROCESS` dataset attribute.
     """
 
-    def __init__(self, max_workers: int = None, is_async: bool = False):
+    def __init__(
+        self,
+        max_workers: int | None = None,
+        is_async: bool = False,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
+    ):
         """
         Instantiates the runner by creating a Manager.
 
@@ -159,13 +115,20 @@ class ParallelRunner(AbstractRunner):
                 cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets to SharedMemoryDataset
+                for `ParallelRunner`.
 
         Raises:
             ValueError: bad parameters passed
         """
-        super().__init__(is_async=is_async)
+        default_dataset_pattern = {"{default}": {"type": "SharedMemoryDataset"}}
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
+        super().__init__(
+            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
+        )
         self._manager = ParallelRunnerManager()
-        self._manager.start()  # noqa: consider-using-with
+        self._manager.start()
 
         # This code comes from the concurrent.futures library
         # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588
@@ -178,26 +141,11 @@ class ParallelRunner(AbstractRunner):
 
         self._max_workers = max_workers
 
-    def __del__(self):
+    def __del__(self) -> None:
         self._manager.shutdown()
 
-    def create_default_data_set(  # type: ignore
-        self, ds_name: str
-    ) -> _SharedMemoryDataset:
-        """Factory method for creating the default dataset for the runner.
-
-        Args:
-            ds_name: Name of the missing dataset.
-
-        Returns:
-            An instance of ``_SharedMemoryDataset`` to be used for all
-            unregistered datasets.
-
-        """
-        return _SharedMemoryDataset(self._manager)
-
     @classmethod
-    def _validate_nodes(cls, nodes: Iterable[Node]):
+    def _validate_nodes(cls, nodes: Iterable[Node]) -> None:
         """Ensure all tasks are serialisable."""
         unserialisable = []
         for node in nodes:
@@ -217,21 +165,21 @@ class ParallelRunner(AbstractRunner):
             )
 
     @classmethod
-    def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline):
+    def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline) -> None:
         """Ensure that all data sets are serialisable and that we do not have
         any non proxied memory data sets being used as outputs as their content
         will not be synchronized across threads.
         """
 
-        data_sets = catalog._data_sets  # noqa: protected-access
+        datasets = catalog._datasets
 
         unserialisable = []
-        for name, data_set in data_sets.items():
-            if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
+        for name, dataset in datasets.items():
+            if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
                 unserialisable.append(name)
                 continue
             try:
-                ForkingPickler.dumps(data_set)
+                ForkingPickler.dumps(dataset)
             except (AttributeError, PicklingError):
                 unserialisable.append(name)
 
@@ -246,11 +194,11 @@ class ParallelRunner(AbstractRunner):
             )
 
         memory_datasets = []
-        for name, data_set in data_sets.items():
+        for name, dataset in datasets.items():
             if (
                 name in pipeline.all_outputs()
-                and isinstance(data_set, MemoryDataset)
-                and not isinstance(data_set, BaseProxy)
+                and isinstance(dataset, MemoryDataset)
+                and not isinstance(dataset, BaseProxy)
             ):
                 memory_datasets.append(name)
 
@@ -262,7 +210,17 @@ class ParallelRunner(AbstractRunner):
                 f"MemoryDatasets"
             )
 
-    def _get_required_workers_count(self, pipeline: Pipeline):
+    def _set_manager_datasets(self, catalog: DataCatalog, pipeline: Pipeline) -> None:
+        for dataset in pipeline.datasets():
+            try:
+                catalog.exists(dataset)
+            except DatasetNotFoundError:
+                pass
+        for name, ds in catalog._datasets.items():
+            if isinstance(ds, SharedMemoryDataset):
+                ds.set_manager(self._manager)
+
+    def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
         Calculate the max number of processes required for the pipeline,
         limit to the number of CPU cores.
@@ -276,12 +234,12 @@ class ParallelRunner(AbstractRunner):
 
         return min(required_processes, self._max_workers)
 
-    def _run(  # noqa: too-many-locals,useless-suppression
+    def _run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: str = None,
+        session_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
@@ -299,12 +257,16 @@ class ParallelRunner(AbstractRunner):
             Exception: In case of any downstream node failure.
 
         """
-        # noqa: import-outside-toplevel,cyclic-import
+        if not self._is_async:
+            self._logger.info(
+                "Using synchronous mode for loading and saving data. Use the --async flag "
+                "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
+            )
 
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
         self._validate_nodes(nodes)
-
+        self._set_manager_datasets(catalog, pipeline)
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())
@@ -328,7 +290,7 @@ class ParallelRunner(AbstractRunner):
                             self._is_async,
                             session_id,
                             package_name=PACKAGE_NAME,
-                            logging_config=LOGGING,  # type: ignore
+                            logging_config=LOGGING,  # type: ignore[arg-type]
                         )
                     )
                 if not futures:
@@ -355,16 +317,16 @@ class ParallelRunner(AbstractRunner):
                     # Decrement load counts, and release any datasets we
                     # have finished with. This is particularly important
                     # for the shared, default datasets we created above.
-                    for data_set in node.inputs:
-                        load_counts[data_set] -= 1
+                    for dataset in node.inputs:
+                        load_counts[dataset] -= 1
                         if (
-                            load_counts[data_set] < 1
-                            and data_set not in pipeline.inputs()
+                            load_counts[dataset] < 1
+                            and dataset not in pipeline.inputs()
                         ):
-                            catalog.release(data_set)
-                    for data_set in node.outputs:
+                            catalog.release(dataset)
+                    for dataset in node.outputs:
                         if (
-                            load_counts[data_set] < 1
-                            and data_set not in pipeline.outputs()
+                            load_counts[dataset] < 1
+                            and dataset not in pipeline.outputs()
                         ):
-                            catalog.release(data_set)
+                            catalog.release(dataset)

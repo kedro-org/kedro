@@ -2,5 +2,7 @@
     "project_name": "New Kedro Project",
     "repo_name": "{{ cookiecutter.project_name.replace(' ', '-').lower().strip('-') }}",
     "python_package": "{{ cookiecutter.project_name.replace(' ', '_').replace('-', '_').lower() }}",
-    "kedro_version": "{{ cookiecutter.kedro_version }}"
+    "kedro_version": "{{ cookiecutter.kedro_version }}",
+    "tools": "none",
+    "example_pipeline": "no"
 }

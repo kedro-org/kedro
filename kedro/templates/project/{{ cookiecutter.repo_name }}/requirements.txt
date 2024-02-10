@@ -1,0 +1,9 @@
+ipython>=8.10
+jupyterlab>=3.0
+notebook
+kedro~={{ cookiecutter.kedro_version }}
+kedro-telemetry>=0.3.1
+pytest-cov~=3.0
+pytest-mock>=1.7.1, <2.0
+pytest~=7.2
+ruff~=0.1.8

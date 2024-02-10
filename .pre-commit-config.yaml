@@ -5,7 +5,7 @@ default_stages: [commit, manual]
 
 repos:
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.1.3
+      rev: v0.1.8
       hooks:
         - id: ruff
           name: "ruff on kedro/, tests/ and docs/"
@@ -32,35 +32,6 @@ repos:
           - id: requirements-txt-fixer # Sorts entries in requirements.txt
             exclude: "^kedro/templates/|^features/steps/test_starter/"
 
-    - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v0.961
-      hooks:
-          - id: mypy
-            args: [--allow-redefinition, --ignore-missing-imports]
-            exclude: |
-                (?x)(
-                  ^kedro/templates/|
-                  ^docs/|
-                  ^features/steps/test_starter/
-                )
-            additional_dependencies:
-            - types-cachetools
-            - types-filelock
-            - types-PyYAML
-            - types-redis
-            - types-requests
-            - types-setuptools
-            - types-toml
-            - attrs
-
-    - repo: https://github.com/asottile/blacken-docs
-      rev: v1.12.1
-      hooks:
-          - id: blacken-docs
-            additional_dependencies:
-            - black~=23.0
-            entry: blacken-docs --skip-errors
-
     - repo: local
       hooks:
           - id: imports
@@ -69,40 +40,11 @@ repos:
             pass_filenames: false
             entry: lint-imports
 
-    - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v0.961
-      hooks:
-          - id: mypy
-            args: [--allow-redefinition, --ignore-missing-imports]
-            exclude: |
-                (?x)(
-                  ^kedro/templates/|
-                  ^docs/|
-                  ^features/steps/test_starter/
-                )
-            additional_dependencies:
-            - types-cachetools
-            - types-filelock
-            - types-PyYAML
-            - types-redis
-            - types-requests
-            - types-setuptools
-            - types-toml
-            - attrs
     - repo: local
       hooks:
-          # Slow lintint
           - id: secret_scan
             name: "Secret scan"
             language: system
             exclude: ^features/steps/test_starter
             pass_filenames: false
             entry: make secret-scan
-          - id: bandit
-            name: "Bandit security check"
-            language: system
-            types: [file, python]
-            exclude: ^kedro/templates/|^tests/|^features/steps/test_starter
-            entry: bandit -ll
-
-# Manual only

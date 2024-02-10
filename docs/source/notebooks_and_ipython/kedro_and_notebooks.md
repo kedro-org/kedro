@@ -4,15 +4,11 @@ This page explains how to use a Jupyter notebook to explore elements of a Kedro 
 
 This page also explains how to use line magic to display a Kedro-Viz visualisation of your pipeline directly in your notebook.
 
-## Iris dataset example
+## Example project
 
-Create a sample Kedro project with the [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) as we showed in the [get started documentation](../get_started/new_project.md#create-a-new-project-containing-example-code):
+The example adds a notebook to experiment with the retired [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris). As an alternative, you can follow the example using a different starter, such as [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) or just add a notebook to your own project.
 
-```bash
-kedro new --starter=pandas-iris
-```
-
-We will assume you call the project `iris`, but you can call it whatever you choose.
+We will assume the example project is called `iris`, but you can call it whatever you choose.
 
 Navigate to the project directory (`cd iris`) and issue the following command in the terminal to launch Jupyter:
 
@@ -50,7 +46,7 @@ If the Kedro variables are not available within your Jupyter notebook, you could
 ```
 
 ## How to explore a Kedro project in a notebook
-Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
+Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](/api/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
 
 ### `%run_viz` line magic
 
@@ -95,7 +91,7 @@ catalog.load("example_iris_data")
 The output:
 
 ```ipython
-INFO     Loading data from 'example_iris_data' (CSVDataSet)...
+INFO     Loading data from 'example_iris_data' (CSVDataset)...
 
      sepal_length  sepal_width  petal_length  petal_width    species
 0             5.1          3.5           1.4          0.2     setosa
@@ -143,7 +139,7 @@ You should see output like this, according to your username and path:
 PosixPath('/Users/username/kedro_projects/iris')
 ```
 
-You can find out more about the `context` in the [API documentation](/kedro.framework.context.KedroContext).
+You can find out more about the `context` in the [API documentation](/api/kedro.framework.context.KedroContext).
 
 ### `pipelines`
 
@@ -187,7 +183,7 @@ You can also specify the following optional arguments for `session.run`:
 | Argument name   | Accepted types   | Description                                                                                                                                          |
 | --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `tags`          | `Iterable[str]`  | Construct the pipeline using nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags  |
-| `runner`        | `AbstractRunner` | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner). Can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)          |
+| `runner`        | `AbstractRunner` | An instance of Kedro [AbstractRunner](/api/kedro.runner.AbstractRunner). Can be an instance of a [ParallelRunner](/api/kedro.runner.ParallelRunner)          |
 | `node_names`    | `Iterable[str]`  | Run nodes with specified names                                                                                                                  |
 | `from_nodes`    | `Iterable[str]`  | A list of node names which should be used as a starting point                                                                                        |
 | `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                            |
@@ -213,32 +209,61 @@ You don't need to restart the kernel for the `catalog`, `context`, `pipelines` a
 
 For more details, run `%reload_kedro?`.
 
-## How to use tags to convert functions from Jupyter notebooks into Kedro nodes
-
-You can use the notebook to write experimental code for your Kedro project. If you later want to convert functions you've written to Kedro nodes, you can do this using `node` tags to export them to a Python file. Say you have the following code in your notebook:
-
-```ipython
-def some_action():
-    print("This function came from `notebooks/my_notebook.ipynb`")
-```
-
-1. Enable tags toolbar: `View` menu -> `Cell Toolbar` -> `Tags`
-![Enable the tags toolbar graphic](../meta/images/jupyter_notebook_workflow_activating_tags.png)
-
-2. Add the `node` tag to the cell containing your function
-![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
-
-
-3. Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
-4. From your terminal, run `kedro jupyter convert notebooks/my_notebook.ipynb` from the Kedro project directory. The output is a Python file `src/<package_name>/nodes/my_notebook.py` containing the `some_action` function definition
-5. The `some_action` function can now be used in your Kedro pipelines
-
 ## Useful to know (for advanced users)
 Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.
 
-If a Jupyter kernel with the name `kedro_<package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook` to replace the kernel specification with one that points to the new environment.
+To ensure that a Jupyter kernel always points to the correct Python executable, if one already exists with the same name `kedro_<package_name>`, then it is replaced.
 
 You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
+
+### Debugging with %debug and %pdb
+
+ You can use the `%debug` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint.
+The follow sequence occurs when `%debug` runs immediately after an error occurs:
+ - The stack trace of the last unhandled exception loads.
+ - The program stops at the point where the exception occurred.
+ - An interactive shell where the user can navigate through the stack trace opens.
+
+ You can then inspect the value of expressions and arguments, or add breakpoints to the code.
+
+<details>
+<summary>Click to see an example.</summary>
+
+![jupyter_ipython_debug_command](../meta/images/jupyter_ipython_debug_command.gif)
+
+</details>
+
+---
+
+You can set up the debugger to run automatically when an exception occurs by using the `%pdb` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
+
+<details>
+<summary>Click to see an example.</summary>
+
+ ![jupyter_ipython_pdb_command](../meta/images/jupyter_ipython_pdb_command.gif)
+
+</details>
+
+---
+
+Some examples of the possible commands that can be used to interact with the ipdb shell are as follows:
+
+| Command           | Description                                           |
+| ----------------- | ----------------------------------------------------- |
+| `list`            | Show the current location in the file                 |
+| `h(elp)`          | Show a list of commands, or find help on a specific command |
+| `q(uit)`          | Quit the debugger and the program                     |
+| `c(ontinue)`      | Quit the debugger, continue in the program             |
+| `n(ext)`          | Go to the next step of the program                     |
+| `<enter>`         | Repeat the previous command                            |
+| `p(rint)`         | Print variables                                       |
+| `s(tep)`          | Step into a subroutine                                |
+| `r(eturn)`        | Return out of a subroutine                            |
+| `b(reak)`         | Insert a breakpoint                                   |
+| `a(rgs)`          | Print the argument list of the current function        |
+
+For more information, use the `help` command in the debugger, or take at the [ipdb repository](https://github.com/gotcha/ipdb) for guidance.
+
 
 ### Managed services
 
@@ -286,16 +311,3 @@ jupyter qtconsole --kernel=kedro_iris
 
 This will automatically load the Kedro IPython in a console that supports graphical features such as embedded figures:
 ![Plot of example iris data in a Qt Console](../meta/images/jupyter_qtconsole.png)
-
-
-## Find out more
-
-We recommend the following:
-
-* [Power is nothing without control: Don’t break up with Jupyter notebooks. Just use Kedro too!](https://towardsdatascience.com/power-is-nothing-without-control-aa43523745b6)
-
-* [Two Tricks to Optimize your Kedro Jupyter Flow](https://youtu.be/ZHIqXJEp0-w)
-
-* [Handling Custom Jupyter Data Sources](https://youtu.be/dRnCovp1GRQ)
-
-* [Why transition from vanilla Jupyter notebooks to Kedro?](https://www.youtube.com/watch?v=JLTYNPoK7nw&ab_channel=PyConUS)

@@ -4,7 +4,7 @@ import json
 import shutil
 import textwrap
 from pathlib import Path
-from time import time
+from time import sleep, time
 
 import behave
 import requests
@@ -142,6 +142,7 @@ def create_run_config_file(context):
 
 
 @given("I have prepared a config file")
+# We will use that config with starters, so tools and example_options removed
 def create_config_file(context):
     """Behave step to create a temporary config file
     (given the existing temp directory) and store it in the context.
@@ -160,10 +161,54 @@ def create_config_file(context):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
+@given("I have prepared a config file without starter")
+def create_config_file_without_starter(context):
+    """Behave step to create a temporary config file
+    (given the existing temp directory) and store it in the context.
+    """
+    context.config_file = context.temp_dir / "config.yml"
+    context.project_name = "project-dummy"
+    context.root_project_dir = context.temp_dir / context.project_name
+    context.package_name = context.project_name.replace("-", "_")
+    config = {
+        "tools": "lint, test, log, docs, data",
+        "project_name": context.project_name,
+        "example_pipeline": "no",
+        "repo_name": context.project_name,
+        "output_dir": str(context.temp_dir),
+        "python_package": context.package_name,
+    }
+    with context.config_file.open("w") as config_file:
+        yaml.dump(config, config_file, default_flow_style=False)
+
+
+@given('I have prepared a config file with tools "{tools}"')
+def create_config_file_with_tools(context, tools):
+    """Behave step to create a temporary config file
+    (given the existing temp directory) and store it in the context.
+    It takes a custom tools list and sets example prompt to `n`.
+    """
+
+    context.config_file = context.temp_dir / "config.yml"
+    context.project_name = "project-dummy"
+    context.root_project_dir = context.temp_dir / context.project_name
+    context.package_name = context.project_name.replace("-", "_")
+    config = {
+        "tools": tools,
+        "example_pipeline": "n",
+        "project_name": context.project_name,
+        "repo_name": context.project_name,
+        "output_dir": str(context.temp_dir),
+        "python_package": context.package_name,
+    }
+    with context.config_file.open("w") as config_file:
+        yaml.dump(config, config_file, default_flow_style=False)
+
+
 @given("I have installed the project dependencies")
 def pip_install_dependencies(context):
     """Install project dependencies using pip."""
-    reqs_path = "src/requirements.txt"
+    reqs_path = "requirements.txt"
     res = run(
         [context.pip, "install", "-r", reqs_path],
         env=context.env,
@@ -344,9 +389,12 @@ def exec_notebook(context, command):
 @then('I wait for the jupyter webserver to run for up to "{timeout:d}" seconds')
 def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
+    # FIXME: Will continue iterating after the process has returned
     while time() < timeout_start + timeout:
         stdout = context.result.stdout.readline()
         if "http://127.0.0.1:" in stdout:
+            # Take a breath, and declare success
+            sleep(1)
             break
 
     if time() >= timeout_start + timeout:
@@ -409,7 +457,7 @@ def update_pyproject_toml(context: behave.runner.Context, new_source_dir):
 @given("I have updated kedro requirements")
 def update_kedro_req(context: behave.runner.Context):
     """Remove kedro as a standalone requirement."""
-    reqs_path = context.root_project_dir / "src" / "requirements.txt"
+    reqs_path = context.root_project_dir / "requirements.txt"
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text().splitlines()
@@ -427,7 +475,7 @@ def update_kedro_req(context: behave.runner.Context):
 
 @when("I add {dependency} to the requirements")
 def add_req(context: behave.runner.Context, dependency: str):
-    reqs_path = context.root_project_dir / "src" / "requirements.txt"
+    reqs_path = context.root_project_dir / "requirements.txt"
     if reqs_path.is_file():
         reqs_path.write_text(reqs_path.read_text() + "\n" + str(dependency) + "\n")
 
@@ -451,24 +499,65 @@ def check_created_project_structure(context):
         assert is_created(path)
 
 
+@then('the expected tool directories and files should be created with "{tools}"')
+def check_created_project_structure_from_tools(context, tools):
+    """Behave step to check the subdirectories created by kedro new with tools."""
+
+    def is_created(name):
+        """Check if path exists."""
+        return (context.root_project_dir / name).exists()
+
+    # Base checks for any project
+    for path in ["README.md", "src", "pyproject.toml", "requirements.txt"]:
+        assert is_created(path), f"{path} does not exist"
+
+    tools_list = (
+        tools.split(",")
+        if tools != "all"
+        else ["lint", "test", "log", "docs", "data", "pyspark", "viz"]
+    )
+
+    if "lint" in tools_list:  # lint tool
+        pass  # No files are added
+
+    if "test" in tools_list:  # test tool
+        assert is_created("tests"), "tests directory does not exist"
+
+    if "log" in tools_list:  # log tool
+        assert is_created("conf/logging.yml"), "logging configuration does not exist"
+
+    if "docs" in tools_list:  # docs tool
+        assert is_created("docs"), "docs directory does not exist"
+
+    if "data" in tools_list:  # data tool
+        assert is_created("data"), "data directory does not exist"
+
+    if "pyspark" in tools_list:  # PySpark tool
+        assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
+
+    if "viz" in tools_list:  # viz tool
+        expected_reporting_path = Path(
+            f"src/{context.package_name}/pipelines/reporting"
+        )
+        assert is_created(
+            expected_reporting_path
+        ), "reporting pipeline directory does not exist"
+
+
 @then("the logs should show that {number} nodes were run")
 def check_one_node_run(context, number):
     expected_log_line = f"Completed {number} out of {number} tasks"
-    info_log = context.root_project_dir / "logs" / "info.log"
     assert expected_log_line in context.result.stdout
-    assert expected_log_line in info_log.read_text()
 
 
 @then('the logs should show that "{node}" was run')
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
-    info_log = context.root_project_dir / "logs" / "info.log"
     stdout = context.result.stdout
     assert expected_log_line in stdout, (
         "Expected the following message segment to be printed on stdout: "
         f"{expected_log_line},\nbut got {stdout}"
     )
-    assert expected_log_line in info_log.read_text(), info_log.read_text()
 
 
 @then("I should get a successful exit code")
@@ -575,7 +664,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        _check_service_up(context, url, "Jupyter Notebook")
+        _check_service_up(context, url, "Jupyter Server")
     finally:
         context.result.terminate()
 
@@ -609,14 +698,14 @@ def check_docs_generated(context: behave.runner.Context):
 @then("requirements should be generated")
 def check_reqs_generated(context: behave.runner.Context):
     """Check that new project requirements are generated."""
-    reqs_path = context.root_project_dir / "src" / "requirements.lock"
+    reqs_path = context.root_project_dir / "requirements.lock"
     assert reqs_path.is_file()
     assert "This file is autogenerated by pip-compile" in reqs_path.read_text()
 
 
 @then("{dependency} should be in the requirements")
 def check_dependency_in_reqs(context: behave.runner.Context, dependency: str):
-    reqs_path = context.root_project_dir / "src" / "requirements.txt"
+    reqs_path = context.root_project_dir / "requirements.txt"
     assert dependency in reqs_path.read_text()
 
 

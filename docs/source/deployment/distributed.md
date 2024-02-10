@@ -14,7 +14,7 @@ For better dependency management, we encourage you to containerise the entire pi
 Firstly make sure your [project requirements are up-to-date](../kedro_project_setup/dependencies.md) by running:
 
 ```bash
-pip-compile --output-file=<project_root>/src/requirements.txt --input-file=<project_root>/src/requirements.txt
+pip-compile --output-file=<project_root>/requirements.txt --input-file=<project_root>/requirements.txt
 ```
 
 We then recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process of building the image. [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
@@ -33,11 +33,11 @@ To perform the conversion programmatically, you will need to develop a script. M
 A `node` typically corresponds to a unit of compute, which can be run by parameterising the basic `kedro run`:
 
  ```bash
-kedro run --node=<node_name>
+kedro run --nodes=<node_name>
 ```
 
 We encourage you to play with different ways of parameterising your runs as you see fit. Use names, tags, custom flags, in preference to making a code change to execute different behaviour. All your jobs/tasks/operators/etc. should have the same version of the code, i.e. same Docker image, to run on.
 
 ## 4. (Optional) Create starters
 
-This is an optional step, but it may speed up your work in the long term. If you find yourself having to deploy in a similar environment or to a similar platform fairly often, you may want to [build your own Kedro starter](../kedro_project_setup/starters.md). That way you will be able to re-use any deployment scripts written as part of step 2.
+You may opt to [build your own Kedro starter](../starters/starters.md) if you regularly have to deploy in a similar environment or to a similar platform. The starter enables you to re-use any deployment scripts written as part of step 2.

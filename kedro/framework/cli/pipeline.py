@@ -5,7 +5,7 @@ import re
 import shutil
 from pathlib import Path
 from textwrap import indent
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 import click
 
@@ -41,7 +41,7 @@ class PipelineArtifacts(NamedTuple):
     pipeline_conf: Path
 
 
-def _assert_pkg_name_ok(pkg_name: str):
+def _assert_pkg_name_ok(pkg_name: str) -> None:
     """Check that python package name is in line with PEP8 requirements.
 
     Args:
@@ -65,20 +65,19 @@ def _assert_pkg_name_ok(pkg_name: str):
         raise KedroCliError(message)
 
 
-def _check_pipeline_name(ctx, param, value):  # noqa: unused-argument
+def _check_pipeline_name(ctx: click.Context, param: Any, value: str) -> str:  # noqa: unused-argument
     if value:
         _assert_pkg_name_ok(value)
     return value
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
-def pipeline_cli():  # pragma: no cover
+def pipeline_cli() -> None:  # pragma: no cover
     pass
 
 
 @pipeline_cli.group()
-def pipeline():
+def pipeline() -> None:
     """Commands for working with pipelines."""
 
 
@@ -99,8 +98,14 @@ def pipeline():
 @env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
 @click.pass_obj  # this will pass the metadata as first argument
 def create_pipeline(
-    metadata: ProjectMetadata, name, template_path, skip_config, env, **kwargs
-):  # noqa: unused-argument
+    metadata: ProjectMetadata,
+    /,
+    name: str,
+    template_path: Path,
+    skip_config: bool,
+    env: str,
+    **kwargs: Any,
+) -> None:  # noqa: unused-argument
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE
@@ -140,7 +145,9 @@ def create_pipeline(
     "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def delete_pipeline(metadata: ProjectMetadata, name, env, yes, **kwargs):  # noqa: unused-argument
+def delete_pipeline(
+    metadata: ProjectMetadata, /, name: str, env: str, yes: bool, **kwargs: Any
+) -> None:  # noqa: unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE
@@ -195,7 +202,7 @@ def delete_pipeline(metadata: ProjectMetadata, name, env, yes, **kwargs):  # noq
     )
 
 
-def _echo_deletion_warning(message: str, **paths: list[Path]):
+def _echo_deletion_warning(message: str, **paths: list[Path]) -> None:
     paths = {key: values for key, values in paths.items() if values}
 
     if paths:
@@ -208,7 +215,6 @@ def _echo_deletion_warning(message: str, **paths: list[Path]):
 
 
 def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
-    # noqa: import-outside-toplevel
     from cookiecutter.main import cookiecutter
 
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
@@ -216,7 +222,7 @@ def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
     click.echo(f"Creating the pipeline '{name}': ", nl=False)
 
     try:
-        result_path = cookiecutter(
+        cookiecutter_result = cookiecutter(
             str(template_path),
             output_dir=str(output_dir),
             no_input=True,
@@ -228,7 +234,7 @@ def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
         raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
     click.secho("OK", fg="green")
-    result_path = Path(result_path)
+    result_path = Path(cookiecutter_result)
     message = indent(f"Location: '{result_path.resolve()}'", " " * 2)
     click.secho(message, bold=True)
 
@@ -237,7 +243,9 @@ def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
     return result_path
 
 
-def _sync_dirs(source: Path, target: Path, prefix: str = "", overwrite: bool = False):
+def _sync_dirs(
+    source: Path, target: Path, prefix: str = "", overwrite: bool = False
+) -> None:
     """Recursively copies `source` directory (or file) into `target` directory without
     overwriting any existing files/directories in the target using the following
     rules:
@@ -313,7 +321,9 @@ def _get_artifacts_to_package(
     return artifacts
 
 
-def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Path):
+def _copy_pipeline_tests(
+    pipeline_name: str, result_path: Path, package_dir: Path
+) -> None:
     tests_source = result_path / "tests"
     tests_target = package_dir.parent / "tests" / "pipelines" / pipeline_name
     try:
@@ -324,7 +334,7 @@ def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Pat
 
 def _copy_pipeline_configs(
     result_path: Path, conf_path: Path, skip_config: bool, env: str
-):
+) -> None:
     config_source = result_path / "config"
     try:
         if not skip_config:
@@ -334,7 +344,7 @@ def _copy_pipeline_configs(
         shutil.rmtree(config_source)
 
 
-def _delete_artifacts(*artifacts: Path):
+def _delete_artifacts(*artifacts: Path) -> None:
     for artifact in artifacts:
         click.echo(f"Deleting '{artifact}': ", nl=False)
         try:

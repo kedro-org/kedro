@@ -1,12 +1,14 @@
 import re
 
-# pylint: disable=unused-argument
 import numpy as np
 import pandas as pd
 import pytest
 
 from kedro.io import DatasetError, MemoryDataset
-from kedro.io.memory_dataset import _copy_with_mode, _infer_copy_mode
+from kedro.io.memory_dataset import (
+    _copy_with_mode,
+    _infer_copy_mode,
+)
 
 
 def _update_data(data, idx, jdx, value):
@@ -25,26 +27,6 @@ def _check_equals(data1, data2):
     if isinstance(data1, np.ndarray) and isinstance(data2, np.ndarray):
         return np.array_equal(data1, data2)
     return False  # pragma: no cover
-
-
-@pytest.fixture
-def dummy_numpy_array():
-    return np.array([[1, 4, 5], [2, 5, 6]])
-
-
-@pytest.fixture
-def dummy_dataframe():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-
-@pytest.fixture(params=["dummy_dataframe", "dummy_numpy_array"])
-def input_data(request):
-    return request.getfixturevalue(request.param)
-
-
-@pytest.fixture
-def new_data():
-    return pd.DataFrame({"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]})
 
 
 @pytest.fixture
@@ -71,6 +53,9 @@ class TestMemoryDataset:
     def test_load_none(self):
         loaded_data = MemoryDataset(None).load()
         assert loaded_data is None
+
+    def test_ephemeral_attribute(self, memory_dataset):
+        assert memory_dataset._EPHEMERAL is True
 
     def test_load_infer_mode(
         self, memory_dataset, input_data, mocked_infer_mode, mocked_copy_with_mode
@@ -167,11 +152,11 @@ class TestMemoryDataset:
 
     def test_exists(self, new_data):
         """Test `exists` method invocation"""
-        data_set = MemoryDataset()
-        assert not data_set.exists()
+        dataset = MemoryDataset()
+        assert not dataset.exists()
 
-        data_set.save(new_data)
-        assert data_set.exists()
+        dataset.save(new_data)
+        assert dataset.exists()
 
 
 @pytest.mark.parametrize("data", [["a", "b"], [{"a": "b"}, {"c": "d"}]])
@@ -218,7 +203,7 @@ def test_infer_mode_deepcopy(data):
 
 
 def test_infer_mode_assign():
-    class DataFrame:  # pylint: disable=too-few-public-methods
+    class DataFrame:
         pass
 
     data = DataFrame()

@@ -74,7 +74,7 @@ def fake_plugin_distribution(mocker):
         version="0.1",
     )
     mocker.patch(
-        "pluggy._manager.importlib_metadata.distributions",
+        "pluggy._manager.importlib.metadata.distributions",
         return_value=[fake_distribution],
     )
     return fake_distribution
@@ -93,7 +93,7 @@ class TestKedroCLIHooks:
         mocker,
         fake_metadata,
         fake_plugin_distribution,
-        entry_points,  # pylint: disable=unused-argument
+        entry_points,
     ):
         caplog.set_level(logging.DEBUG, logger="kedro")
 

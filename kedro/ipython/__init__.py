@@ -215,32 +215,46 @@ def _guess_run_environment() -> str:
     default=None,
 )
 @argument("-p", "--print", help="Prints the content of the Node", action="store_true")
+@argument(
+    # "-p", cannot use -p unless we remove print
+    "--platform",
+    help="The running platforms, it can be one of ('jupyter','vscode','ipython','databricks')",
+    default=None,
+)
 def magic_load_node(args: str) -> None:
     """The line magic %load_node <node_name>
     Currently it only supports Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
     will generate code in multiple cells to load datasets from `DataCatalog`, import
     relevant functions and modules, node function definition and a function call.
     """
-    parameters = parse_argstring(magic_load_node, args)
-
-    cells = _load_node(parameters.node, pipelines)
-    parameters = parse_argstring(magic_load_node, args)
-
-    cells = _load_node(parameters.node, pipelines)
-    from ipylab import JupyterFrontEnd
-
-    app = JupyterFrontEnd()
 
     def _create_cell_with_text(text: str, is_jupyter=True) -> None:
         if is_jupyter:
+            from ipylab import JupyterFrontEnd
+
+            app = JupyterFrontEnd()
             # Noted this only works with Notebook >7.0 or Jupyter Lab. It doesn't work with
             # VS Code Notebook due to imcompatible backends.
             app.commands.execute("notebook:insert-cell-below")
             app.commands.execute("notebook:replace-selection", {"text": text})
         else:
-            get_ipython().set_next_input(text)
+            IPython.get_ipython().set_next_input(text)
 
-    run_environment = _guess_run_environment()
+    def _print_cells(cell):
+        for cell in cells:
+            Console().print("")
+            IPython.get_ipython().set_next_input(
+                Console().print(
+                    Syntax(cell, "python", theme="monokai", line_numbers=True)
+                )
+            )
+
+    parameters = parse_argstring(magic_load_node, args)
+    cells = _load_node(parameters.node, pipelines)
+
+    run_environment = (
+        _guess_run_environment() if not parameters.platform else parameters.platform
+    )
 
     if run_environment == "jupyter":
         # Only create cells if it is jupyter
@@ -250,15 +264,12 @@ def magic_load_node(args: str) -> None:
         # Combine multiple cells into one
         combined_cell = "\n\n".join(cells)
         _create_cell_with_text(combined_cell, is_jupyter=False)
+    else:
+        _print_cells(cells)
 
+    # TODO: Should we remove this?
     if parameters.print:
-        for cell in cells:
-            Console().print("")
-            IPython.In().set_next_input(
-                Console().print(
-                    Syntax(cell, "python", theme="monokai", line_numbers=True)
-                )
-            )
+        _print_cells(cells)
 
 
 def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:

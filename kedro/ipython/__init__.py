@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import os
 import sys
 import typing
 import warnings
@@ -30,6 +31,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
 from kedro.pipeline.node import Node
+from kedro.utils import _is_databricks
 
 logger = logging.getLogger(__name__)
 
@@ -189,6 +191,20 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     return None
 
 
+def _guess_run_environment() -> str:
+    """Best effort to guess the IPython/Jupyter environment"""
+    # https://github.com/microsoft/vscode-jupyter/issues/7380
+    if os.environ.get("VSCODE_PID"):
+        return "vscode"
+    elif _is_databricks():
+        return "databricks"
+    elif hasattr(IPython.get_ipython(), "kernel"):
+        # IPython terminal does not have this attribute
+        return "jupyter"
+    else:
+        return "ipython"
+
+
 @typing.no_type_check
 @magic_arguments()
 @argument(
@@ -215,22 +231,30 @@ def magic_load_node(args: str) -> None:
 
     app = JupyterFrontEnd()
 
-    def _create_cell_with_text(text: str) -> None:
-        # Noted this only works with Notebook >7.0 or Jupyter Lab. It doesn't work with
-        # VS Code Notebook due to imcompatible backends.
-        app.commands.execute("notebook:insert-cell-below")
-        app.commands.execute("notebook:replace-selection", {"text": text})
+    def _create_cell_with_text(text: str, is_jupyter=True) -> None:
+        if is_jupyter:
+            # Noted this only works with Notebook >7.0 or Jupyter Lab. It doesn't work with
+            # VS Code Notebook due to imcompatible backends.
+            app.commands.execute("notebook:insert-cell-below")
+            app.commands.execute("notebook:replace-selection", {"text": text})
+        else:
+            get_ipython().set_next_input(text)
 
-    if hasattr(IPython.get_ipython(), "kernel"):
-        # Verify if  the IPython instance object contains the attribute "kernel",
-        # which indicates that the user is working from a Jupyter instance.
+    run_environment = _guess_run_environment()
+
+    if run_environment == "jupyter":
+        # Only create cells if it is jupyter
         for cell in cells:
-            _create_cell_with_text(cell)
+            _create_cell_with_text(cell, is_jupyter=True)
+    elif run_environment in ("ipython", "vscode"):
+        # Combine multiple cells into one
+        combined_cell = "\n\n".join(cells)
+        _create_cell_with_text(combined_cell, is_jupyter=False)
 
     if parameters.print:
         for cell in cells:
             Console().print("")
-            IPython.get_ipython().set_next_input(
+            IPython.In().set_next_input(
                 Console().print(
                     Syntax(cell, "python", theme="monokai", line_numbers=True)
                 )

@@ -3,7 +3,6 @@ This module contains a logging handler class which produces coloured logs and tr
 """
 
 import logging
-import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -12,6 +11,8 @@ import click
 import rich.logging
 import rich.pretty
 import rich.traceback
+
+from kedro.utils import _is_databricks
 
 
 class RichHandler(rich.logging.RichHandler):
@@ -52,8 +53,8 @@ class RichHandler(rich.logging.RichHandler):
                 else:
                     traceback_install_kwargs[key_prefix_removed] = value
 
-        if self.rich_tracebacks and "DATABRICKS_RUNTIME_VERSION" not in os.environ:
+        if self.rich_tracebacks and not _is_databricks():
             # Rich traceback handling does not work on databricks. Hopefully this will be
             # fixed on their side at some point, but until then we disable it.
             # See https://github.com/Textualize/rich/issues/2455
-            rich.traceback.install(**traceback_install_kwargs)  # type: ignore[arg-type]
+            rich.traceback.install(**traceback_install_kwargs)

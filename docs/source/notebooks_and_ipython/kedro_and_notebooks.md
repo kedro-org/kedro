@@ -209,14 +209,8 @@ You don't need to restart the kernel for the `catalog`, `context`, `pipelines` a
 
 For more details, run `%reload_kedro?`.
 
-## Useful to know (for advanced users)
-Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.
 
-To ensure that a Jupyter kernel always points to the correct Python executable, if one already exists with the same name `kedro_<package_name>`, then it is replaced.
-
-You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
-
-### Debugging with %debug and %pdb
+## Debugging a Kedro project within a notebook
 
  You can use the `%debug` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint.
 The follow sequence occurs when `%debug` runs immediately after an error occurs:
@@ -264,6 +258,12 @@ Some examples of the possible commands that can be used to interact with the ipd
 
 For more information, use the `help` command in the debugger, or take at the [ipdb repository](https://github.com/gotcha/ipdb) for guidance.
 
+## Useful to know (for advanced users)
+Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.
+
+To ensure that a Jupyter kernel always points to the correct Python executable, if one already exists with the same name `kedro_<package_name>`, then it is replaced.
+
+You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
 
 ### Managed services
 

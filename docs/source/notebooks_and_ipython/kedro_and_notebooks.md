@@ -203,7 +203,7 @@ For more details, run `%reload_kedro?`.
 This is still an experimental feature and is currently only availble for Jupyter Notebook (>7.0) and Jupyter Lab. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580)
 ```
 
-You can load the contents of a node in your project into a series of cells using the `%load_node` command. 
+You can load the contents of a node in your project into a series of cells using the `%load_node` command.
 
 ```ipython
 %load_node <my-node-name>
@@ -213,9 +213,10 @@ Ensure you use the name of your node as defined in the pipeline, not the name of
 
 <!--insert gif-->
 
-To be able to access your node's inputs, make sure they are explicitely deginied in your project's catalog. 
+To be able to access your node's inputs, make sure they are explicitely deginied in your project's catalog.
 
 You can then run the generated cells to recreate how the node would run in your pipeline. You can use this to explore your node's inputs, behaviour, and outputs in isolation, or for [debugging](#debugging-a-kedro-project-within-a-notebook).
+
 #### `%run_viz` line magic
 
 ``` {note}

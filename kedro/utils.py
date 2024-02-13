@@ -27,5 +27,5 @@ def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
     return getattr(module_obj, obj_name)
 
 
-def _is_databricks():
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # type: ignore[arg-type]
+def _is_databricks() -> bool:
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ

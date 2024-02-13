@@ -216,11 +216,11 @@ class MetadataHook:
 ```
 
 ## Use Hooks to debug your pipeline
-You can hooks to launch a [post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](../hooks/introduction.md) when an uncaught error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
+You can use Hooks to launch a [post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](../hooks/introduction.md) when an error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
 
 ### Debugging a node
 
-To start a debugging session when an uncaught error is raised within your `node`, implement the `on_node_error` [Hook specification](/api/kedro.framework.hooks):
+To start a debugging session when an error is raised within your `node` that is not caught, implement the `on_node_error` [Hook specification](/api/kedro.framework.hooks):
 
 ```python
 import pdb
@@ -255,7 +255,7 @@ HOOKS = (PDBNodeDebugHook(),)
 
 ### Debugging a pipeline
 
-To start a debugging session when an uncaught error is raised within your `pipeline`, implement the `on_pipeline_error` [Hook specification](/api/kedro.framework.hooks):
+To start a debugging session when an error is raised within your `pipeline` that is not caught, implement the `on_pipeline_error` [Hook specification](/api/kedro.framework.hooks):
 
 ```python
 import pdb

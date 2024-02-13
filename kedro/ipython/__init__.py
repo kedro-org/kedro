@@ -214,9 +214,8 @@ def _guess_run_environment() -> str:
     nargs="?",
     default=None,
 )
-@argument("-p", "--print", help="Prints the content of the Node", action="store_true")
 @argument(
-    # "-p", cannot use -p unless we remove print
+    "-p",
     "--platform",
     help="The running platforms, it can be one of ('jupyter','vscode','ipython','databricks')",
     default=None,
@@ -243,11 +242,7 @@ def magic_load_node(args: str) -> None:
     def _print_cells(cell):
         for cell in cells:
             Console().print("")
-            IPython.get_ipython().set_next_input(
-                Console().print(
-                    Syntax(cell, "python", theme="monokai", line_numbers=True)
-                )
-            )
+            Console().print(Syntax(cell, "python", theme="monokai", line_numbers=True))
 
     parameters = parse_argstring(magic_load_node, args)
     cells = _load_node(parameters.node, pipelines)
@@ -265,10 +260,6 @@ def magic_load_node(args: str) -> None:
         combined_cell = "\n\n".join(cells)
         _create_cell_with_text(combined_cell, is_jupyter=False)
     else:
-        _print_cells(cells)
-
-    # TODO: Should we remove this?
-    if parameters.print:
         _print_cells(cells)
 
 

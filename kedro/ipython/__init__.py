@@ -238,7 +238,7 @@ def magic_load_node(args: str) -> None:
     def _print_cells(cell):
         for cell in cells:
             Console().print("")
-            Console().print(Syntax(cell, "python", theme="monokai", line_numbers=True))
+            Console().print(Syntax(cell, "python", theme="monokai", line_numbers=False))
 
     parameters = parse_argstring(magic_load_node, args)
     cells = _load_node(parameters.node, pipelines)

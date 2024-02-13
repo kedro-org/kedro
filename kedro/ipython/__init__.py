@@ -214,17 +214,13 @@ def _guess_run_environment() -> str:
     nargs="?",
     default=None,
 )
-@argument(
-    "-p",
-    "--platform",
-    help="The running platforms, it can be one of ('jupyter','vscode','ipython','databricks')",
-    default=None,
-)
 def magic_load_node(args: str) -> None:
     """The line magic %load_node <node_name>
-    Currently it only supports Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
-    will generate code in multiple cells to load datasets from `DataCatalog`, import
-    relevant functions and modules, node function definition and a function call.
+    Currently this feature has better supports with Jupyter Notebook (>7.0) and Jupyter Lab
+    and VSCode Notebook.This line magic will generate code in multiple cells to load
+    datasets from `DataCatalog`, import relevant functions and modules, node function
+    definition and a function call. If generating code is not possible, it will print
+    the code instead.
     """
 
     def _create_cell_with_text(text: str, is_jupyter=True) -> None:
@@ -247,9 +243,7 @@ def magic_load_node(args: str) -> None:
     parameters = parse_argstring(magic_load_node, args)
     cells = _load_node(parameters.node, pipelines)
 
-    run_environment = (
-        _guess_run_environment() if not parameters.platform else parameters.platform
-    )
+    run_environment = _guess_run_environment()
 
     if run_environment == "jupyter":
         # Only create cells if it is jupyter

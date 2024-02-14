@@ -43,6 +43,7 @@ def load_ipython_extension(ipython: Any) -> None:
     IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
+    print("DEBUG")
     ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
     logger.info("Registered line magic 'reload_kedro'")
     ipython.register_magic_function(magic_load_node, magic_name="load_node")
@@ -191,7 +192,7 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     return None
 
 
-def _guess_run_environment() -> str:
+def _guess_run_environment() -> str:  # pragma: no cover
     """Best effort to guess the IPython/Jupyter environment"""
     # https://github.com/microsoft/vscode-jupyter/issues/7380
     if os.environ.get("VSCODE_PID"):
@@ -217,7 +218,7 @@ def _guess_run_environment() -> str:
 def magic_load_node(args: str) -> None:
     """The line magic %load_node <node_name>
     Currently this feature has better supports with Jupyter Notebook (>7.0) and Jupyter Lab
-    and VSCode Notebook.This line magic will generate code in multiple cells to load
+    and VSCode Notebook. This line magic will generate code in multiple cells to load
     datasets from `DataCatalog`, import relevant functions and modules, node function
     definition and a function call. If generating code is not possible, it will print
     the code instead.

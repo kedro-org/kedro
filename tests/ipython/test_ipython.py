@@ -198,13 +198,13 @@ class TestLoadIPythonExtension:
             "--conf-source=new_conf",
         ],
     )
-    def test_line_magic_with_valid_arguments(self, mocker, args, ipython):
+    def test_reload_kedro_magic_with_valid_arguments(self, mocker, args, ipython):
         mocker.patch("kedro.ipython._find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
 
         ipython.magic(f"reload_kedro {args}")
 
-    def test_line_magic_with_invalid_arguments(self, mocker, ipython):
+    def test_reload_kedro_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython._find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
         load_ipython_extension(ipython)
@@ -380,3 +380,18 @@ my_input = catalog.load("extra_input")"""
     def test_get_function_with_loop_body(self, dummy_function_with_loop_literal):
         result = _prepare_function_body(dummy_function_with_loop)
         assert result == dummy_function_with_loop_literal
+
+    def test_load_node_magic_with_valid_arguments(self, mocker, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node")
+        ipython.magic(f"load_node <dummy_node>")
+
+    def test_load_node_with_invalid_arguments(self, mocker, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node")
+        load_ipython_extension(ipython)
+
+        with pytest.raises(
+            UsageError, match=r"unrecognized arguments: --invalid_arg=dummy"
+        ):
+            ipython.magic("load_node --invalid_arg=dummy")

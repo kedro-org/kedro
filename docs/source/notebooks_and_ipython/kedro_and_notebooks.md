@@ -10,6 +10,29 @@ The example adds a notebook to experiment with the retired [`pandas-iris` starte
 
 We will assume the example project is called `iris`, but you can call it whatever you choose.
 
+## Exploring the project with the `kedro.ipython` extension
+
+A quick way to explore the `catalog`, `context`, `pipelines`, and `session` variables in your project within a IPython compatible environment, such as Databricks notebooks, Google Colab, etc, is to use the `kedro.ipython` extension.
+This is tool-independent and useful in situations where launching a Jupyter kernel is not possible. You can use the `%load_ext` line magic to explicitly load the Kedro IPython extension:
+```ipython
+In [1]: %load_ext kedro.ipython
+```
+
+If you have launch your Jupyter instance from outside your Kedro project, you will need to run a second line magic to set the project path so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
+
+```ipython
+In [2]: %reload_kedro <project_root>
+```
+The Kedro IPython extension remembers the project path so that future calls to `%reload_kedro` do not need to specify it:
+
+```ipython
+In [1]: %load_ext kedro.ipython
+In [2]: %reload_kedro <project_root>
+In [3]: %reload_kedro
+```
+
+## Exploring the project with `kedro jupyter notebook`
+
 Navigate to the project directory (`cd iris`) and issue the following command in the terminal to launch Jupyter:
 
 ```bash
@@ -286,26 +309,6 @@ To ensure that a Jupyter kernel always points to the correct Python executable, 
 
 You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
 
-### Managed services
-
-If you work within a managed Jupyter service such as a Databricks notebook you may be unable to execute `kedro jupyter notebook`. You can explicitly load the Kedro IPython extension with the `%load_ext` line magic:
-
-```ipython
-In [1]: %load_ext kedro.ipython
-```
-
-If you launch your Jupyter instance from outside your Kedro project, you will need to run a second line magic to set the project path so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
-
-```ipython
-In [2]: %reload_kedro <project_root>
-```
-The Kedro IPython extension remembers the project path so that future calls to `%reload_kedro` do not need to specify it:
-
-```ipython
-In [1]: %load_ext kedro.ipython
-In [2]: %reload_kedro <project_root>
-In [3]: %reload_kedro
-```
 
 ### IPython, JupyterLab and other Jupyter clients
 

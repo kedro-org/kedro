@@ -12,13 +12,14 @@ We will assume the example project is called `iris`, but you can call it whateve
 
 ## Exploring the project with the `kedro.ipython` extension
 
-A quick way to explore the `catalog`, `context`, `pipelines`, and `session` variables in your project within a IPython compatible environment, such as Databricks notebooks, Google Colab, etc, is to use the `kedro.ipython` extension.
+A quick way to explore the `catalog`, `context`, `pipelines`, and `session` variables in your project within a IPython compatible environment, such as Databricks notebooks, Google Colab, and more, is to use the `kedro.ipython` extension.
 This is tool-independent and useful in situations where launching a Jupyter kernel is not possible. You can use the `%load_ext` line magic to explicitly load the Kedro IPython extension:
 ```ipython
 In [1]: %load_ext kedro.ipython
 ```
 
-If you have launch your Jupyter instance from outside your Kedro project, you will need to run a second line magic to set the project path so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
+If you have launched your Jupyter instance from outside your Kedro project, you will need to run a second line magic to set the project path.
+This is so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
 
 ```ipython
 In [2]: %reload_kedro <project_root>

@@ -6,24 +6,6 @@ Kedro plugins allow you to create new features for Kedro and inject additional c
 
 Kedro's extension mechanism is built on [`pluggy`](https://pluggy.readthedocs.io/), a solid plugin management library that was created for the [pytest](https://docs.pytest.org/) ecosystem. `pluggy` relies on [entry points](https://packaging.python.org/en/latest/specifications/entry-points/), a Python mechanism for packages to provide components that can be discovered by other packages using [`importlib.metadata`](https://docs.python.org/3/library/importlib.metadata.html#entry-points).
 
-## Kedro-Telemetry
-
-[The Kedro-Telemetry plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) is an opt-in feature designed to gather anonymized and aggregated usage analytics, ensuring no personal data is collected. Its aim is to understand how Kedro's features are utilized to inform future product development and enhance the user experience. This telemetry data, approved under the [Telemetry Data Collection and Usage Policy](https://lfprojects.org/policies/telemetry-data-policy/) of LF Projects, LLC, ensures privacy while providing valuable insights to [Kedro Project maintainers](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html).
-
-### Collected data fields:
-
-- **Hashed Username:** An anonymized representation of the user's computer username.
-- **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy.
-- **Hashed Package Name:** An anonymized identifier of the project.
-- **Kedro Project Version:** The version of Kedro being used.
-- **Kedro-Telemetry Version:** The version of the Kedro-Telemetry plugin.
-- **Python Version:** The version of Python in use.
-- **Operating System:** The operating system on which Kedro is running.
-- **Tools Selected:** The tools chosen during the `kedro new` command execution, if applicable.
-- **Number of Datasets, Nodes, and Pipelines:** Quantitative data about the project structure.
-
-This data is collected with the sole purpose of improving Kedro by understanding feature usage and streamlining the product's development. Importantly, this process is never utilized for marketing or promotional purposes, highlighting the Kedro team's commitment to privacy and product enhancement.
-
 ## Example of a simple plugin
 
 Here is a simple example of a plugin that prints the pipeline as JSON:

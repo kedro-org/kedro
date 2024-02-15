@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from IPython.core.error import UsageError
+
 import kedro.ipython
 from kedro.framework.project import pipelines
 from kedro.ipython import (
@@ -398,7 +399,7 @@ my_input = catalog.load("extra_input")"""
 
     def test_load_node_with_jupyter(self, mocker, ipython):
         mocker.patch("kedro.ipython._find_kedro_project")
-        mocker.patch("kedro.ipython._load_node", return_value=["cell1","cell2"])
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
         mocker.patch("kedro.ipython._guess_run_environment", return_value="jupyter")
         spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
         call = mocker.call
@@ -411,7 +412,7 @@ my_input = catalog.load("extra_input")"""
     @pytest.mark.parametrize("run_env", ["ipython", "vscode"])
     def test_load_node_with_ipython(self, mocker, ipython, run_env):
         mocker.patch("kedro.ipython._find_kedro_project")
-        mocker.patch("kedro.ipython._load_node", return_value=["cell1","cell2"])
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
         mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)
         spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
 
@@ -422,7 +423,7 @@ my_input = catalog.load("extra_input")"""
     @pytest.mark.parametrize("run_env", ["databricks", "colab", "dummy"])
     def test_load_node_with_other(self, mocker, ipython, run_env):
         mocker.patch("kedro.ipython._find_kedro_project")
-        mocker.patch("kedro.ipython._load_node", return_value=["cell1","cell2"])
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
         mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)
         spy = mocker.spy(kedro.ipython, "_print_cells")
 

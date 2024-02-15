@@ -43,7 +43,6 @@ def load_ipython_extension(ipython: Any) -> None:
     IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
-    print("DEBUG")
     ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
     logger.info("Registered line magic 'reload_kedro'")
     ipython.register_magic_function(magic_load_node, magic_name="load_node")
@@ -195,7 +194,7 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
 def _guess_run_environment() -> str:  # pragma: no cover
     """Best effort to guess the IPython/Jupyter environment"""
     # https://github.com/microsoft/vscode-jupyter/issues/7380
-    if os.environ.get("VSCODE_PID"):
+    if os.environ.get("VSCODE_PID") or os.environ.get("VSCODE_CWD"):
         return "vscode"
     elif _is_databricks():
         return "databricks"
@@ -228,7 +227,6 @@ def magic_load_node(args: str) -> None:
     cells = _load_node(parameters.node, pipelines)
 
     run_environment = _guess_run_environment()
-    print("DEBUG", run_environment)
     if run_environment == "jupyter":
         # Only create cells if it is jupyter
         for cell in cells:

@@ -13,7 +13,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Callable
 
-import IPython
+from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 from rich.console import Console
@@ -118,7 +118,7 @@ def reload_kedro(
     context = session.load_context()
     catalog = context.catalog
 
-    IPython.get_ipython().push(  # type: ignore[attr-defined, no-untyped-call]
+    get_ipython().push(  # type: ignore[attr-defined, no-untyped-call]
         variables={
             "context": context,
             "catalog": catalog,
@@ -198,7 +198,7 @@ def _guess_run_environment() -> str:  # pragma: no cover
         return "vscode"
     elif _is_databricks():
         return "databricks"
-    elif hasattr(IPython.get_ipython(), "kernel"):
+    elif hasattr(get_ipython(), "kernel"):
         # IPython terminal does not have this attribute
         return "jupyter"
     else:
@@ -249,7 +249,7 @@ def _create_cell_with_text(text: str, is_jupyter=True) -> None:
         app.commands.execute("notebook:insert-cell-below")
         app.commands.execute("notebook:replace-selection", {"text": text})
     else:
-        IPython.get_ipython().set_next_input(text)
+        get_ipython().set_next_input(text)
 
 
 def _print_cells(cells):

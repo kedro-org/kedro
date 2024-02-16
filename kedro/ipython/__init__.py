@@ -2,19 +2,23 @@
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
 """
+
 from __future__ import annotations
 
 import inspect
 import logging
+import os
 import sys
 import typing
 import warnings
 from pathlib import Path
 from typing import Any, Callable
 
-import IPython
+from IPython.core.getipython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+from rich.console import Console
+from rich.syntax import Syntax
 
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import CONF_SOURCE_HELP, PARAMS_ARG_HELP
@@ -28,6 +32,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
 from kedro.pipeline.node import Node
+from kedro.utils import _is_databricks
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +119,7 @@ def reload_kedro(
     context = session.load_context()
     catalog = context.catalog
 
-    IPython.get_ipython().push(  # type: ignore[attr-defined, no-untyped-call]
+    get_ipython().push(  # type: ignore[no-untyped-call]
         variables={
             "context": context,
             "catalog": catalog,
@@ -187,6 +192,20 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     return None
 
 
+def _guess_run_environment() -> str:  # pragma: no cover
+    """Best effort to guess the IPython/Jupyter environment"""
+    # https://github.com/microsoft/vscode-jupyter/issues/7380
+    if os.environ.get("VSCODE_PID") or os.environ.get("VSCODE_CWD"):
+        return "vscode"
+    elif _is_databricks():
+        return "databricks"
+    elif hasattr(get_ipython(), "kernel"):  # type: ignore[no-untyped-call]
+        # IPython terminal does not have this attribute
+        return "jupyter"
+    else:
+        return "ipython"
+
+
 @typing.no_type_check
 @magic_arguments()
 @argument(
@@ -196,25 +215,48 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     nargs="?",
     default=None,
 )
-def magic_load_node(node: str) -> None:
+def magic_load_node(args: str) -> None:
     """The line magic %load_node <node_name>
-    Currently it only supports Jupyter Notebook (>7.0) and Jupyter Lab. This line magic
-    will generate code in multiple cells to load datasets from `DataCatalog`, import
-    relevant functions and modules, node function definition and a function call.
+    Currently this feature has better supports with Jupyter Notebook (>7.0) and Jupyter Lab
+    and VSCode Notebook. This line magic will generate code in multiple cells to load
+    datasets from `DataCatalog`, import relevant functions and modules, node function
+    definition and a function call. If generating code is not possible, it will print
+    the code instead.
     """
-    cells = _load_node(node, pipelines)
-    from ipylab import JupyterFrontEnd
 
-    app = JupyterFrontEnd()
+    parameters = parse_argstring(magic_load_node, args)
+    cells = _load_node(parameters.node, pipelines)
 
-    def _create_cell_with_text(text: str) -> None:
+    run_environment = _guess_run_environment()
+    if run_environment == "jupyter":
+        # Only create cells if it is jupyter
+        for cell in cells:
+            _create_cell_with_text(cell, is_jupyter=True)
+    elif run_environment in ("ipython", "vscode"):
+        # Combine multiple cells into one
+        combined_cell = "\n\n".join(cells)
+        _create_cell_with_text(combined_cell, is_jupyter=False)
+    else:
+        _print_cells(cells)
+
+
+def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
+    if is_jupyter:
+        from ipylab import JupyterFrontEnd
+
+        app = JupyterFrontEnd()
         # Noted this only works with Notebook >7.0 or Jupyter Lab. It doesn't work with
         # VS Code Notebook due to imcompatible backends.
         app.commands.execute("notebook:insert-cell-below")
         app.commands.execute("notebook:replace-selection", {"text": text})
+    else:
+        get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
 
+
+def _print_cells(cells: list[str]) -> None:
     for cell in cells:
-        _create_cell_with_text(cell)
+        Console().print("")
+        Console().print(Syntax(cell, "python", theme="monokai", line_numbers=False))
 
 
 def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:

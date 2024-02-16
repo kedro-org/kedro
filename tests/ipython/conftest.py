@@ -14,6 +14,7 @@ from . import dummy_function_fixtures  # noqa It is needed for the inspect modul
 from .dummy_function_fixtures import (
     dummy_function,
     dummy_function_with_loop,
+    dummy_function_with_optional_arg,
     dummy_nested_function,
 )
 
@@ -99,6 +100,16 @@ def dummy_module_literal():
 def dummy_node():
     return node(
         func=dummy_function,
+        inputs=["dummy_input", "extra_input"],
+        outputs=["dummy_output"],
+        name="dummy_node",
+    )
+
+
+@pytest.fixture
+def dummy_node_with_optional_arg():
+    return node(
+        func=dummy_function_with_optional_arg,
         inputs=["dummy_input", "extra_input"],
         outputs=["dummy_output"],
         name="dummy_node",

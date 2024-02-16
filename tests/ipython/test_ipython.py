@@ -8,6 +8,7 @@ from kedro.ipython import (
     _find_node,
     _load_node,
     _prepare_function_body,
+    _prepare_function_call,
     _prepare_imports,
     _prepare_node_inputs,
     _resolve_project_path,
@@ -380,3 +381,20 @@ my_input = catalog.load("extra_input")"""
     def test_get_function_with_loop_body(self, dummy_function_with_loop_literal):
         result = _prepare_function_body(dummy_function_with_loop)
         assert result == dummy_function_with_loop_literal
+
+    def test_prepare_function_call_with_optional_arg(
+        self, dummy_node_with_optional_arg
+    ):
+        expected = "dummy_function_with_optional_arg(dummy_input, my_input)"
+        result = _prepare_function_call(dummy_node_with_optional_arg)
+        assert result == expected
+
+    # def test_prepare_function_call_with_star_args(self):
+    #     expected = "dummy_function_with_optinal_arg(dummy_input, my_input)"
+    #     result = _prepare_function_call(dummy_function_with_optional_arg)
+    #     assert result == expected
+
+    # def test_prepare_node_inputs_with_star_args(self, dummy_node_with_optional_arg):
+    #     expected = "dummy_function_with_optinal_arg(dummy_input, my_input)"
+    #     result = _prepare_node_inputs(dummy_node_with_optional_arg)
+    #     assert result == expected

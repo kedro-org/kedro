@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from IPython.core.error import UsageError
 
+import kedro.ipython
 from kedro.framework.project import pipelines
 from kedro.ipython import (
     _find_node,
@@ -198,13 +199,13 @@ class TestLoadIPythonExtension:
             "--conf-source=new_conf",
         ],
     )
-    def test_line_magic_with_valid_arguments(self, mocker, args, ipython):
+    def test_reload_kedro_magic_with_valid_arguments(self, mocker, args, ipython):
         mocker.patch("kedro.ipython._find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
 
         ipython.magic(f"reload_kedro {args}")
 
-    def test_line_magic_with_invalid_arguments(self, mocker, ipython):
+    def test_reload_kedro_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython._find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
         load_ipython_extension(ipython)
@@ -380,3 +381,52 @@ my_input = catalog.load("extra_input")"""
     def test_get_function_with_loop_body(self, dummy_function_with_loop_literal):
         result = _prepare_function_body(dummy_function_with_loop)
         assert result == dummy_function_with_loop_literal
+
+    def test_load_node_magic_with_valid_arguments(self, mocker, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node")
+        ipython.magic("load_node dummy_node")
+
+    def test_load_node_with_invalid_arguments(self, mocker, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node")
+        load_ipython_extension(ipython)
+
+        with pytest.raises(
+            UsageError, match=r"unrecognized arguments: --invalid_arg=dummy_node"
+        ):
+            ipython.magic("load_node --invalid_arg=dummy_node")
+
+    def test_load_node_with_jupyter(self, mocker, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
+        mocker.patch("kedro.ipython._guess_run_environment", return_value="jupyter")
+        spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
+        call = mocker.call
+
+        load_ipython_extension(ipython)
+        ipython.magic("load_node dummy_node")
+        calls = [call("cell1", is_jupyter=True), call("cell2", is_jupyter=True)]
+        spy.assert_has_calls(calls)
+
+    @pytest.mark.parametrize("run_env", ["ipython", "vscode"])
+    def test_load_node_with_ipython(self, mocker, ipython, run_env):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
+        mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)
+        spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
+
+        load_ipython_extension(ipython)
+        ipython.magic("load_node dummy_node")
+        spy.assert_called_once()
+
+    @pytest.mark.parametrize("run_env", ["databricks", "colab", "dummy"])
+    def test_load_node_with_other(self, mocker, ipython, run_env):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
+        mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)
+        spy = mocker.spy(kedro.ipython, "_print_cells")
+
+        load_ipython_extension(ipython)
+        ipython.magic("load_node dummy_node")
+        spy.assert_called_once()

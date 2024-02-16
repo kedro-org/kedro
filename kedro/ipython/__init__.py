@@ -2,6 +2,7 @@
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
 """
+
 from __future__ import annotations
 
 import inspect
@@ -13,7 +14,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Callable
 
-from IPython import get_ipython
+from IPython.core.getipython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 from rich.console import Console
@@ -118,7 +119,7 @@ def reload_kedro(
     context = session.load_context()
     catalog = context.catalog
 
-    get_ipython().push(
+    get_ipython().push(  # type: ignore[no-untyped-call]
         variables={
             "context": context,
             "catalog": catalog,
@@ -133,7 +134,7 @@ def reload_kedro(
     )
 
     for line_magic in load_entry_points("line_magic"):
-        register_line_magic(needs_local_scope(line_magic))
+        register_line_magic(needs_local_scope(line_magic))  # type: ignore[no-untyped-call]
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore[attr-defined]
 
 
@@ -198,7 +199,7 @@ def _guess_run_environment() -> str:  # pragma: no cover
         return "vscode"
     elif _is_databricks():
         return "databricks"
-    elif hasattr(get_ipython(), "kernel"):
+    elif hasattr(get_ipython(), "kernel"):  # type: ignore[no-untyped-call]
         # IPython terminal does not have this attribute
         return "jupyter"
     else:
@@ -249,7 +250,7 @@ def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
         app.commands.execute("notebook:insert-cell-below")
         app.commands.execute("notebook:replace-selection", {"text": text})
     else:
-        get_ipython().set_next_input(text)
+        get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
 
 
 def _print_cells(cells: list[str]) -> None:

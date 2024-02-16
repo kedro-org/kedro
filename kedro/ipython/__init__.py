@@ -238,7 +238,7 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
     node_inputs = _prepare_node_inputs(node)
     imports = _prepare_imports(node_func)
     function_definition = _prepare_function_body(node_func)
-    function_call = _prepare_function_call(node_func)
+    function_call = _prepare_function_call(node)
 
     cells: list[str] = []
     cells.append(node_inputs)
@@ -281,6 +281,10 @@ def _prepare_imports(node_func: Callable) -> str:
         raise FileNotFoundError(f"Could not find {node_func.__name__}")
 
 
+def _add_header(text: str, header: str = None):
+    return header + text
+
+
 def _prepare_node_inputs(node: Node) -> str:
     node_func = node.func
     signature = inspect.signature(node_func)
@@ -306,13 +310,20 @@ def _prepare_function_body(func: Callable) -> str:
     return body
 
 
-def _prepare_function_call(node_func: Callable) -> str:
+def _prepare_function_call(node: Node) -> str:
     """Prepare the text for the function call."""
-    func_name = node_func.__name__
+    node_func = node.func
     signature = inspect.signature(node_func)
+    func_name = node_func.__name__
+
+    node_inputs = node.inputs
     func_params = list(signature.parameters)
 
-    # Construct the statement of func_name(a=1,b=2,c=3)
+    # If func_params is longer than node_inputs, which mean the rest are optional
+    if len(func_params) > len(node_inputs):
+        func_params = func_params[: len(node_inputs)]
+
+    # Construct the statement of func_name(a, b, c)
     func_args = ", ".join(func_params)
     body = f"""{func_name}({func_args})"""
     return body

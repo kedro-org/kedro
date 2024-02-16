@@ -1,5 +1,6 @@
 # Upcoming Release 0.19.3
 
+
 ## Major features and improvements
 * Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
 * Add better IPython, VSCode Notebook support for `%load_node` and minimal support for Databricks.

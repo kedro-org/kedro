@@ -16,7 +16,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 * [How can I debug a Kedro project in a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md#debugging-a-kedro-project-within-a-notebook)?
 * [How do I connect a Kedro project kernel to other Jupyter clients like JupyterLab](../notebooks_and_ipython/kedro_and_notebooks.md#ipython-jupyterlab-and-other-jupyter-clients)?
-* [How can I use the Kedro IPython extension in a notebook where launching a new kernel is not an option](../notebooks_and_ipython/kedro_and_notebooks.md#exploring-the-project-with-the-kedro-ipython-extension)?
+* [How can I use the Kedro IPython extension in a notebook where launching a new kernel is not an option](../notebooks_and_ipython/kedro_and_notebooks.md#exploring-the-project-with-the-kedroipython-extension)?
 
 ## Kedro project development
 

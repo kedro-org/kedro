@@ -273,16 +273,26 @@ You can display an interactive visualisation of your pipeline directly in your n
 
  You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 
+Here is example debugging workflow after discovering a node in your pipeline is failing unexpectedly:
+
+1. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#loadnode-line-magic).
+2. Run the populated cells to examine the node's behaviour in isolation.
+3. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
+
 <details>
-<summary>Click to see an example.</summary>
+<summary>Click to see this workflow in action.</summary>
 
 ![jupyter_ipython_debug_command](../meta/images/jupyter_ipython_debug_command.gif)
 
 </details>
 
+``` {note}
+The `%load_node` line magic is currently only availble for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
+```
+
 ---
 
-You can set up the debugger to run automatically when an exception occurs by using the [`%pdb` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
+You can also set up the debugger to run automatically when an exception occurs by using the [`%pdb` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
 
 <details>
 <summary>Click to see an example.</summary>

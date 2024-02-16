@@ -235,9 +235,16 @@ You can load the contents of a node in your project into a series of cells using
 
 Ensure you use the name of your node as defined in the pipeline, not the name of the node function. The line magic will load your node's inputs, imports, and body:
 
-<!--insert gif-->
+<details>
+<summary>Click to see an example.</summary>
 
-To be able to access your node's inputs, make sure they are explicitely deginied in your project's catalog.
+![jupyter_ipython_load_node](../meta/images/jupyter_ipython_load_node.gif)
+
+</details>
+
+---
+
+To be able to access your node's inputs, make sure they are explicitly defined in your project's catalog.
 
 You can then run the generated cells to recreate how the node would run in your pipeline. You can use this to explore your node's inputs, behaviour, and outputs in isolation, or for [debugging](#debugging-a-kedro-project-within-a-notebook).
 

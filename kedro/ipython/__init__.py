@@ -118,7 +118,7 @@ def reload_kedro(
     context = session.load_context()
     catalog = context.catalog
 
-    get_ipython().push(  # type: ignore[attr-defined, no-untyped-call]
+    get_ipython().push(
         variables={
             "context": context,
             "catalog": catalog,
@@ -133,7 +133,7 @@ def reload_kedro(
     )
 
     for line_magic in load_entry_points("line_magic"):
-        register_line_magic(needs_local_scope(line_magic))  # type: ignore[no-untyped-call]
+        register_line_magic(needs_local_scope(line_magic))
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore[attr-defined]
 
 
@@ -239,7 +239,7 @@ def magic_load_node(args: str) -> None:
         _print_cells(cells)
 
 
-def _create_cell_with_text(text: str, is_jupyter=True) -> None:
+def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
     if is_jupyter:
         from ipylab import JupyterFrontEnd
 
@@ -252,7 +252,7 @@ def _create_cell_with_text(text: str, is_jupyter=True) -> None:
         get_ipython().set_next_input(text)
 
 
-def _print_cells(cells):
+def _print_cells(cells: list[str]) -> None:
     for cell in cells:
         Console().print("")
         Console().print(Syntax(cell, "python", theme="monokai", line_numbers=False))

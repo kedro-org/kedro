@@ -10,6 +10,8 @@ The example adds a notebook to experiment with the retired [`pandas-iris` starte
 
 We will assume the example project is called `iris`, but you can call it whatever you choose.
 
+## Loading the project with `kedro jupyter notebook`
+
 Navigate to the project directory (`cd iris`) and issue the following command in the terminal to launch Jupyter:
 
 ```bash
@@ -32,12 +34,10 @@ We recommend that you save your notebook in the `notebooks` folder of your Kedro
 
 ### What does `kedro jupyter notebook` do?
 
-The `kedro jupyter notebook` command launches a notebook with a kernel that is [slightly customised](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs) but almost identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html).
-
-This custom kernel automatically makes the following Kedro variables available:
+The `kedro jupyter notebook` command launches a notebook with a customised kernel that has been extended to make the following project variables available:
 
 * `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
-* `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
+* `context` (type `KedroContext`): [Kedro project context](../api/kedro.framework.context.rst) that provides access to Kedro's library components
 * `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
@@ -45,22 +45,30 @@ This custom kernel automatically makes the following Kedro variables available:
 If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook`.
 ```
 
-## How to explore a Kedro project in a notebook
+## Loading the project with the `kedro.ipython` extension
+
+A quick way to explore the `catalog`, `context`, `pipelines`, and `session` variables in your project within a IPython compatible environment, such as Databricks notebooks, Google Colab, and more, is to use the `kedro.ipython` extension.
+This is tool-independent and useful in situations where launching a Jupyter interactive environment is not possible. You can use the [`%load_ext` line magic](https://ipython.readthedocs.io/en/stable/config/extensions/index.html#using-extensions) to explicitly load the Kedro IPython extension:
+```ipython
+In [1]: %load_ext kedro.ipython
+```
+
+If you have launched your interactive environment from outside your Kedro project, you will need to run a second line magic to set the project path.
+This is so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
+
+```ipython
+In [2]: %reload_kedro <project_root>
+```
+The Kedro IPython extension remembers the project path so that future calls to `%reload_kedro` do not need to specify it:
+
+```ipython
+In [1]: %load_ext kedro.ipython
+In [2]: %reload_kedro <project_root>
+In [3]: %reload_kedro
+```
+
+## Exploring the Kedro project in a notebook
 Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](/api/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
-
-### `%run_viz` line magic
-
-``` {note}
-If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz) for the project, run `pip install kedro-viz` in your terminal from within the project directory.
-```
-
-You can display an interactive visualisation of your pipeline directly in your notebook using the `run-viz` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) from within a cell:
-
-```python
-%run_viz
-```
-
-![View your project's Kedro Viz inside a notebook](../meta/images/run_viz_in_notebook.png)
 
 ### `catalog`
 
@@ -195,9 +203,13 @@ You can also specify the following optional arguments for `session.run`:
 
 You can execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do more than one run, you'll have to run `%reload_kedro` line magic to get a new `session`.
 
-#### `%reload_kedro` line magic
+## Kedro line magics
 
-You can use `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) within your Jupyter notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+[Line magics](https://ipython.readthedocs.io/en/stable/interactive/magics.html) are commands that provide a concise way of performing tasks in an interactive session. Kedro provides several line magic commands to simplify working with Kedro projects in interactive environments.
+
+### `%reload_kedro` line magic
+
+You can use `%reload_kedro` line magic within your Jupyter notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
 You don't need to restart the kernel for the `catalog`, `context`, `pipelines` and `session` variables.
 
@@ -209,16 +221,74 @@ You don't need to restart the kernel for the `catalog`, `context`, `pipelines` a
 
 For more details, run `%reload_kedro?`.
 
-#### Line magic function `%reload_kedro` not found.
-If you start your Jupyter instance with `kedro jupyter notebook/lab/setup` command, this command should be available whenever you start a notebook with the Kedro kernel.
+### `%load_node` line magic
+
+``` {note}
+This is still an experimental feature and is currently only availble for Jupyter Notebook (>7.0) and Jupyter Lab. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580)
+```
+
+You can load the contents of a node in your project into a series of cells using the `%load_node` line magic.
+
+```ipython
+%load_node <my-node-name>
+```
+
+Ensure you use the name of your node as defined in the pipeline, not the name of the node function. The line magic will load your node's inputs, imports, and body:
+
+<details>
+<summary>Click to see an example.</summary>
+
+![jupyter_ipython_load_node](../meta/images/jupyter_ipython_load_node.gif)
+
+</details>
+
+---
+
+To be able to access your node's inputs, make sure they are explicitly defined in your project's catalog.
+
+You can then run the generated cells to recreate how the node would run in your pipeline. You can use this to explore your node's inputs, behaviour, and outputs in isolation, or for [debugging](#debugging-a-kedro-project-within-a-notebook).
+
+### `%run_viz` line magic
+
+``` {note}
+If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz) for the project, run `pip install kedro-viz` in your terminal from within the project directory.
+```
+
+You can display an interactive visualisation of your pipeline directly in your notebook using the `%run_viz` line magic from within a cell:
+
+```python
+%run_viz
+```
+
+![View your project's Kedro Viz inside a notebook](../meta/images/run_viz_in_notebook.png)
 
 To fix this, you just need to start your notebook with one of the `kedro jupyter` command. Alternatively, you can always include an extra line at the top of your notebook
 `%load_ext kedro.ipython`, this get run automatically if your kernel is set up properly.
 
-After running this command, you should see `%reload_kedro` and `%load_node` are available to use.
+ You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint. Alternatively, use the command with no arguments after an error occurs to load the stack trace and begin debugging.
+
+ The follow sequence occurs when `%debug` runs after an error occurs:
+ - The stack trace of the last unhandled exception loads.
+ - The program stops at the point where the exception occurred.
+ - An interactive shell where the user can navigate through the stack trace opens.
 
 
-## How to use tags to convert functions from Jupyter notebooks into Kedro nodes
+Here is example debugging workflow after discovering a node in your pipeline is failing:
+1. Inspect the logs to find the name of the failing node. We can see below the problematic node is `split_data_node`.
+
+<details>
+<summary>Click to the pipeline failure logs.</summary>
+
+![pipeline_error_logs](../meta/images/pipeline_error_logs.png)
+
+</details>
+
+2. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#kedro-line-magics).
+3. Run the populated cells to examine the node's behaviour in isolation.
+4. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
+
+<details>
+<summary>Click to see this workflow in action.</summary>
 
 You can use the notebook to write experimental code for your Kedro project. If you later want to convert functions you've written to Kedro nodes, you can do this using `node` tags to export them to a Python file. Say you have the following code in your notebook:
 
@@ -227,11 +297,13 @@ def some_action():
     print("This function came from `notebooks/my_notebook.ipynb`")
 ```
 
-1. Enable tags toolbar: `View` menu -> `Cell Toolbar` -> `Tags`
-![Enable the tags toolbar graphic](../meta/images/jupyter_notebook_workflow_activating_tags.png)
+``` {note}
+The `%load_node` line magic is currently only availble for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
+```
 
-2. Add the `node` tag to the cell containing your function
-![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
+---
+
+You can also set up the debugger to run automatically when an exception occurs by using the [`%pdb` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
 
 
 3. Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
@@ -245,26 +317,6 @@ To ensure that a Jupyter kernel always points to the correct Python executable, 
 
 You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
 
-### Managed services
-
-If you work within a managed Jupyter service such as a Databricks notebook you may be unable to execute `kedro jupyter notebook`. You can explicitly load the Kedro IPython extension with the `%load_ext` line magic:
-
-```ipython
-In [1]: %load_ext kedro.ipython
-```
-
-If you launch your Jupyter instance from outside your Kedro project, you will need to run a second line magic to set the project path so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
-
-```ipython
-In [2]: %reload_kedro <project_root>
-```
-The Kedro IPython extension remembers the project path so that future calls to `%reload_kedro` do not need to specify it:
-
-```ipython
-In [1]: %load_ext kedro.ipython
-In [2]: %reload_kedro <project_root>
-In [3]: %reload_kedro
-```
 
 ### IPython, JupyterLab and other Jupyter clients
 

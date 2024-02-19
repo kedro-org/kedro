@@ -63,7 +63,7 @@ test = [
     "jupyter~=1.0",
     "kedro-datasets",
     "moto==1.3.7; python_version < '3.10'",
-    "moto==5.0.1; python_version >= '3.10'",
+    "moto==5.0.2; python_version >= '3.10'",
     "mypy~=1.0",
     "pandas~=2.0",
     "pip-tools>=6.5",

@@ -12,6 +12,7 @@ import sys
 import typing
 import warnings
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any, Callable
 
 from IPython.core.getipython import get_ipython
@@ -33,10 +34,10 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
 from kedro.pipeline.node import Node
 from kedro.utils import _is_databricks
-import inspect
-from kedro.pipeline.node import Node, node
 
 logger = logging.getLogger(__name__)
+
+FunctionParameters = MappingProxyType
 
 
 def load_ipython_extension(ipython: Any) -> None:
@@ -47,9 +48,9 @@ def load_ipython_extension(ipython: Any) -> None:
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
     ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
-    logger.info("Registered line magic 'reload_kedro'")
+    logger.info("Registered line magic '%reload_kedro'")
     ipython.register_magic_function(magic_load_node, magic_name="load_node")
-    logger.info("Registered line magic 'load_node'")
+    logger.info("Registered line magic '%load_node'")
 
     if _find_kedro_project(Path.cwd()) is None:
         logger.warning(
@@ -228,6 +229,7 @@ def magic_load_node(args: str) -> None:
 
     parameters = parse_argstring(magic_load_node, args)
     node_name = parameters.node
+
     cells = _load_node(node_name, pipelines)
 
     run_environment = _guess_run_environment()
@@ -241,6 +243,33 @@ def magic_load_node(args: str) -> None:
         _create_cell_with_text(combined_cell, is_jupyter=False)
     else:
         _print_cells(cells)
+
+
+class NodeBoundArguments(inspect.BoundArguments):
+    """Similar to inspect.BoundArguments"""
+
+    def __init__(self, signature, arguments) -> None:
+        super().__init__(signature, arguments)
+
+    @property
+    def input_params_dict(self):
+        """A mapping of {variable name: dataset_name}"""
+        var_positional_arg_name = self._find_var_positional_arg()
+        inputs_params_dict = {}
+        for param, dataset_name in self.arguments.items():
+            if param == var_positional_arg_name:
+                # If the argument is *args, use the dataset name instead
+                inputs_params_dict[dataset_name] = dataset_name
+            else:
+                inputs_params_dict[param] = dataset_name
+        return inputs_params_dict
+
+    def _find_var_positional_arg(self) -> str | None:
+        """Find the name of the VAR_POSITIONAL argument( *args), if any."""
+        for k, v in self.signature.parameters.items():
+            if v.kind == inspect.Parameter.VAR_POSITIONAL:
+                return k
+        return None
 
 
 def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
@@ -280,7 +309,10 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
     node = _find_node(node_name, pipelines)
     node_func = node.func
 
-    node_inputs = _prepare_node_inputs(node)
+    node_bound_arguments = _get_node_bound_arguments(node)
+
+    inputs_params_mapping = _prepare_node_inputs(node_bound_arguments)
+    node_inputs = _format_node_inputs_text(inputs_params_mapping)
     imports = _prepare_imports(node_func)
     function_definition = _prepare_function_body(node_func)
     function_call = _prepare_function_call(node_func)
@@ -326,20 +358,35 @@ def _prepare_imports(node_func: Callable) -> str:
         raise FileNotFoundError(f"Could not find {node_func.__name__}")
 
 
-def _prepare_node_inputs(node: Node) -> str:
+def _get_node_bound_arguments(node) -> NodeBoundArguments:
     node_func = node.func
-    signature = inspect.signature(node_func)
-
     node_inputs = node.inputs
-    func_params = list(signature.parameters)
 
+    args, kwargs = Node._process_inputs_for_bind(node_inputs)
+    signature = inspect.signature(node_func)
+    bound_arguments = signature.bind(*args, **kwargs)
+    return NodeBoundArguments(bound_arguments.signature, bound_arguments.arguments)
+
+
+def _prepare_node_inputs(node_bound_arguments: NodeBoundArguments) -> str:
+    # Remove the *args. For example {'first_arg':'a', 'args': ('b','c')}
+    # will be loaded as follow:
+    # first_arg = catalog.load("a")
+    # b = catalog.load("b") # It doesn't have an arg name, so use the dataset name instead.
+    # c = catalog.load("c")
+    return node_bound_arguments.input_params_dict
+
+
+def _format_node_inputs_text(input_params_dict: dict[str, str] | None) -> str:
     statements = [
         "# Prepare necessary inputs for debugging",
         "# All debugging inputs must be defined in your project catalog",
     ]
+    if not input_params_dict:
+        return
 
-    for node_input, func_param in zip(node_inputs, func_params):
-        statements.append(f'{func_param} = catalog.load("{node_input}")')
+    for func_param, dataset_name in input_params_dict.items():
+        statements.append(f'{func_param} = catalog.load("{dataset_name}")')
 
     input_statements = "\n".join(statements)
     return input_statements
@@ -363,7 +410,7 @@ def _prepare_function_call(node_func: Callable) -> str:
     return body
 
 
-def _format_function(func_name, bind: inspect.BoundArguments):
+def _format_function(func_name, bind: inspect.BoundArguments) -> str:
     args = bind.args
     kwargs = bind.kwargs
 

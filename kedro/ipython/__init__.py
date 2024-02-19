@@ -252,7 +252,7 @@ class NodeBoundArguments(inspect.BoundArguments):
         super().__init__(signature, arguments)
 
     @property
-    def input_params_dict(self):
+    def input_params_dict(self) -> dict[str, str] | None:
         """A mapping of {variable name: dataset_name}"""
         var_positional_arg_name = self._find_var_positional_arg()
         inputs_params_dict = {}
@@ -309,16 +309,17 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
     node = _find_node(node_name, pipelines)
     node_func = node.func
 
-    node_bound_arguments = _get_node_bound_arguments(node)
-
-    inputs_params_mapping = _prepare_node_inputs(node_bound_arguments)
-    node_inputs_cell = _format_node_inputs_text(inputs_params_mapping)
     imports_cell = _prepare_imports(node_func)
     function_definition_cell = _prepare_function_body(node_func)
-    function_call_cell = _prepare_function_call(node_func)
+
+    node_bound_arguments = _get_node_bound_arguments(node)
+    inputs_params_mapping = _prepare_node_inputs(node_bound_arguments)
+    node_inputs_cell = _format_node_inputs_text(inputs_params_mapping)
+    function_call_cell = _prepare_function_call(node_func, node_bound_arguments)
 
     cells: list[str] = []
-    cells.append(node_inputs_cell)
+    if node_inputs_cell:
+        cells.append(node_inputs_cell)
     cells.append(imports_cell)
     cells.append(function_definition_cell)
     cells.append(function_call_cell)
@@ -368,7 +369,9 @@ def _get_node_bound_arguments(node) -> NodeBoundArguments:
     return NodeBoundArguments(bound_arguments.signature, bound_arguments.arguments)
 
 
-def _prepare_node_inputs(node_bound_arguments: NodeBoundArguments) -> str:
+def _prepare_node_inputs(
+    node_bound_arguments: NodeBoundArguments,
+) -> dict[str, str] | None:
     # Remove the *args. For example {'first_arg':'a', 'args': ('b','c')}
     # will be loaded as follow:
     # first_arg = catalog.load("a")
@@ -377,13 +380,13 @@ def _prepare_node_inputs(node_bound_arguments: NodeBoundArguments) -> str:
     return node_bound_arguments.input_params_dict
 
 
-def _format_node_inputs_text(input_params_dict: dict[str, str] | None) -> str:
+def _format_node_inputs_text(input_params_dict: dict[str, str] | None) -> str | None:
     statements = [
         "# Prepare necessary inputs for debugging",
         "# All debugging inputs must be defined in your project catalog",
     ]
     if not input_params_dict:
-        return
+        return None
 
     for func_param, dataset_name in input_params_dict.items():
         statements.append(f'{func_param} = catalog.load("{dataset_name}")')
@@ -398,22 +401,17 @@ def _prepare_function_body(func: Callable) -> str:
     return body
 
 
-def _prepare_function_call(node_func: Callable) -> str:
+def _prepare_function_call(node_func: Callable, node_bound_arguments) -> str:
     """Prepare the text for the function call."""
     func_name = node_func.__name__
-    signature = inspect.signature(node_func)
-    func_params = list(signature.parameters)
+    args = node_bound_arguments.input_params_dict
+    kwargs = node_bound_arguments.kwargs
 
     # Construct the statement of func_name(a=1,b=2,c=3)
-    func_args = ", ".join(func_params)
-    body = f"""{func_name}({func_args})"""
+    args_str_literal = [f"{node_input}" for node_input in args]
+    kwargs_str_literal = [
+        f"{node_input}={dataset_name}" for node_input, dataset_name in kwargs.items()
+    ]
+    func_params = ", ".join(args_str_literal + kwargs_str_literal)
+    body = f"""{func_name}({func_params})"""
     return body
-
-
-def _format_function(func_name, bind: inspect.BoundArguments) -> str:
-    args = bind.args
-    kwargs = bind.kwargs
-
-    kwarg_str = [f"{k}={v}" for k, v in kwargs.items()]
-    params = ", ".join(args + kwargs)
-    return f"{func_name}({params})"

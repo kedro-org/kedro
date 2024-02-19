@@ -259,7 +259,8 @@ class NodeBoundArguments(inspect.BoundArguments):
         for param, dataset_name in self.arguments.items():
             if param == var_positional_arg_name:
                 # If the argument is *args, use the dataset name instead
-                inputs_params_dict[dataset_name] = dataset_name
+                for arg in dataset_name:
+                    inputs_params_dict[arg] = arg
             else:
                 inputs_params_dict[param] = dataset_name
         return inputs_params_dict

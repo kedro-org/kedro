@@ -312,16 +312,16 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
     node_bound_arguments = _get_node_bound_arguments(node)
 
     inputs_params_mapping = _prepare_node_inputs(node_bound_arguments)
-    node_inputs = _format_node_inputs_text(inputs_params_mapping)
-    imports = _prepare_imports(node_func)
-    function_definition = _prepare_function_body(node_func)
-    function_call = _prepare_function_call(node_func)
+    node_inputs_cell = _format_node_inputs_text(inputs_params_mapping)
+    imports_cell = _prepare_imports(node_func)
+    function_definition_cell = _prepare_function_body(node_func)
+    function_call_cell = _prepare_function_call(node_func)
 
     cells: list[str] = []
-    cells.append(node_inputs)
-    cells.append(imports)
-    cells.append(function_definition)
-    cells.append(function_call)
+    cells.append(node_inputs_cell)
+    cells.append(imports_cell)
+    cells.append(function_definition_cell)
+    cells.append(function_call_cell)
     return cells
 
 

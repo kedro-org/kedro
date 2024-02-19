@@ -283,7 +283,7 @@ Here is example debugging workflow after discovering a node in your pipeline is 
 
 </details>
 
-2. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#loadnode-line-magic).
+2. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#load-node-line-magic).
 3. Run the populated cells to examine the node's behaviour in isolation.
 4. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
 

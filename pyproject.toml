@@ -91,7 +91,7 @@ docs = [
     "sphinx_rtd_theme==2.0.0",
     # Regression on sphinx-autodoc-typehints 1.21
     # that creates some problematic docstrings
-    "sphinx-autodoc-typehints==1.25.3",
+    "sphinx-autodoc-typehints==2.0.0",
     "sphinx_copybutton==0.5.2",
     "sphinx-notfound-page",
     "ipykernel>=5.3, <7.0",

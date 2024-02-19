@@ -262,8 +262,7 @@ You can display an interactive visualisation of your pipeline directly in your n
 
 ![View your project's Kedro Viz inside a notebook](../meta/images/run_viz_in_notebook.png)
 
-To fix this, you just need to start your notebook with one of the `kedro jupyter` command. Alternatively, you can always include an extra line at the top of your notebook
-`%load_ext kedro.ipython`, this get run automatically if your kernel is set up properly.
+## Debugging a Kedro project within a notebook
 
  You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint. Alternatively, use the command with no arguments after an error occurs to load the stack trace and begin debugging.
 
@@ -272,6 +271,7 @@ To fix this, you just need to start your notebook with one of the `kedro jupyter
  - The program stops at the point where the exception occurred.
  - An interactive shell where the user can navigate through the stack trace opens.
 
+ You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 
 Here is example debugging workflow after discovering a node in your pipeline is failing:
 1. Inspect the logs to find the name of the failing node. We can see below the problematic node is `split_data_node`.
@@ -290,12 +290,9 @@ Here is example debugging workflow after discovering a node in your pipeline is 
 <details>
 <summary>Click to see this workflow in action.</summary>
 
-You can use the notebook to write experimental code for your Kedro project. If you later want to convert functions you've written to Kedro nodes, you can do this using `node` tags to export them to a Python file. Say you have the following code in your notebook:
+![jupyter_ipython_debug_command](../meta/images/jupyter_ipython_debug_command.gif)
 
-```ipython
-def some_action():
-    print("This function came from `notebooks/my_notebook.ipynb`")
-```
+</details>
 
 ``` {note}
 The `%load_node` line magic is currently only availble for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
@@ -305,10 +302,32 @@ The `%load_node` line magic is currently only availble for Jupyter Notebook (>7.
 
 You can also set up the debugger to run automatically when an exception occurs by using the [`%pdb` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
 
+<details>
+<summary>Click to see an example.</summary>
 
-3. Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
-4. From your terminal, run `kedro jupyter convert notebooks/my_notebook.ipynb` from the Kedro project directory. The output is a Python file `src/<package_name>/nodes/my_notebook.py` containing the `some_action` function definition
-5. The `some_action` function can now be used in your Kedro pipelines
+ ![jupyter_ipython_pdb_command](../meta/images/jupyter_ipython_pdb_command.gif)
+
+</details>
+
+---
+
+Some examples of the possible commands that can be used to interact with the ipdb shell are as follows:
+
+| Command           | Description                                           |
+| ----------------- | ----------------------------------------------------- |
+| `list`            | Show the current location in the file                 |
+| `h(elp)`          | Show a list of commands, or find help on a specific command |
+| `q(uit)`          | Quit the debugger and the program                     |
+| `c(ontinue)`      | Quit the debugger, continue in the program             |
+| `n(ext)`          | Go to the next step of the program                     |
+| `<enter>`         | Repeat the previous command                            |
+| `p(rint)`         | Print variables                                       |
+| `s(tep)`          | Step into a subroutine                                |
+| `r(eturn)`        | Return out of a subroutine                            |
+| `b(reak)`         | Insert a breakpoint                                   |
+| `a(rgs)`          | Print the argument list of the current function        |
+
+For more information, use the `help` command in the debugger, or take at the [ipdb repository](https://github.com/gotcha/ipdb) for guidance.
 
 ## Useful to know (for advanced users)
 Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.

@@ -33,6 +33,8 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
 from kedro.pipeline.node import Node
 from kedro.utils import _is_databricks
+import inspect
+from kedro.pipeline.node import Node, node
 
 logger = logging.getLogger(__name__)
 
@@ -225,7 +227,8 @@ def magic_load_node(args: str) -> None:
     """
 
     parameters = parse_argstring(magic_load_node, args)
-    cells = _load_node(parameters.node, pipelines)
+    node_name = parameters.node
+    cells = _load_node(node_name, pipelines)
 
     run_environment = _guess_run_environment()
     if run_environment == "jupyter":
@@ -358,3 +361,12 @@ def _prepare_function_call(node_func: Callable) -> str:
     func_args = ", ".join(func_params)
     body = f"""{func_name}({func_args})"""
     return body
+
+
+def _format_function(func_name, bind: inspect.BoundArguments):
+    args = bind.args
+    kwargs = bind.kwargs
+
+    kwarg_str = [f"{k}={v}" for k, v in kwargs.items()]
+    params = ", ".join(args + kwargs)
+    return f"{func_name}({params})"

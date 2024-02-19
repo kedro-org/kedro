@@ -274,10 +274,18 @@ You can display an interactive visualisation of your pipeline directly in your n
  You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 
 Here is example debugging workflow after discovering a node in your pipeline is failing unexpectedly:
+1. Inspect the logs to find the name of the failing node. We can see below the the problematic node is `split_data_node`.
 
-1. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#loadnode-line-magic).
-2. Run the populated cells to examine the node's behaviour in isolation.
-3. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
+<details>
+<summary>Click to the pipeline failure logs.</summary>
+
+![pipeline_error_logs](../meta/images/pipeline_error_logs.png)
+
+</details>
+
+2. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#loadnode-line-magic).
+3. Run the populated cells to examine the node's behaviour in isolation.
+4. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
 
 <details>
 <summary>Click to see this workflow in action.</summary>

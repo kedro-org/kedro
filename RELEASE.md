@@ -9,6 +9,7 @@
 * Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
 * Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
 * Enable read-the-docs search when user presses Command/Ctrl + K.
+* Added new JSON Schema that works with Kedro versions 0.19.*
 
 ## Breaking changes to the API
 

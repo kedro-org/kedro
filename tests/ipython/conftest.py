@@ -106,6 +106,26 @@ def dummy_node():
 
 
 @pytest.fixture
+def dummy_node_empty_input():
+    return node(
+        func=dummy_function,
+        inputs=["", ""],
+        outputs=[None],
+        name="dummy_node_empty_input",
+    )
+
+
+@pytest.fixture
+def dummy_node_dict_input():
+    return node(
+        func=dummy_function,
+        inputs=dict(dummy_input="dummy_input", my_input="extra_input"),
+        outputs=["dummy_output"],
+        name="dummy_node_empty_input",
+    )
+
+
+@pytest.fixture
 def lambda_node():
     return node(
         func=lambda x: x,

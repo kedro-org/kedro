@@ -364,6 +364,26 @@ import logging.config  # noqa Dummy import"""
         result = _prepare_node_inputs(node_bound_arguments)
         assert result == expected
 
+    def test_prepare_node_inputs_when_input_is_empty(
+        self,
+        dummy_node_empty_input,
+    ):
+        expected = {"dummy_input": "", "my_input": ""}
+
+        node_bound_arguments = _get_node_bound_arguments(dummy_node_empty_input)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
+    def test_prepare_node_inputs_with_dict_input(
+        self,
+        dummy_node_dict_input,
+    ):
+        expected = {"dummy_input": "dummy_input", "my_input": "extra_input"}
+
+        node_bound_arguments = _get_node_bound_arguments(dummy_node_dict_input)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
     def test_prepare_function_body(self, dummy_function_defintion):
         result = _prepare_function_body(dummy_function)
         assert result == dummy_function_defintion

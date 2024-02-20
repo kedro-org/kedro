@@ -99,7 +99,7 @@
               },
               "checkpoint": {
                 "pattern": "object",
-                "description": "Optional checkpoint configuration. Accepts a dictionary\nwith the corresponding dataset definition including ``filepath``\n(unlike ``dataset`` argument). Checkpoint configuration is\ndescribed here:\nhttps://kedro.readthedocs.io/en/0.18.0/data/kedro_io.html#checkpoint-configuration\nCredentials for the checkpoint can be explicitly specified\nin this configuration."
+                "description": "Optional checkpoint configuration. Accepts a dictionary\nwith the corresponding dataset definition including ``filepath``\n(unlike ``dataset`` argument). Checkpoint configuration is\ndescribed here:\nhttps://kedro.readthedocs.io/en/0.19.0/data/kedro_io.html#checkpoint-configuration\nCredentials for the checkpoint can be explicitly specified\nin this configuration."
               },
               "filepath_arg": {
                 "type": "string",

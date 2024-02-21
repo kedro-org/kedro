@@ -68,7 +68,7 @@ In [3]: %reload_kedro
 ```
 
 ## Exploring the Kedro project in a notebook
-Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant {doc}`API documentation </api/kedro>` or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
+Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant {doc}`API documentation </api/kedro>` or use the Python {py:func}`dir` function, for example `dir(catalog)`.
 
 ### `catalog`
 
@@ -205,7 +205,7 @@ You can execute one *successful* run per session, as there's a one-to-one mappin
 
 ## Kedro line magics
 
-[Line magics](https://ipython.readthedocs.io/en/stable/interactive/magics.html) are commands that provide a concise way of performing tasks in an interactive session. Kedro provides several line magic commands to simplify working with Kedro projects in interactive environments.
+{external+ipython:doc}`Line magics <interactive/magics>` are commands that provide a concise way of performing tasks in an interactive session. Kedro provides several line magic commands to simplify working with Kedro projects in interactive environments.
 
 ### `%reload_kedro` line magic
 

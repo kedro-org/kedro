@@ -384,6 +384,21 @@ import logging.config  # noqa Dummy import"""
         result = _prepare_node_inputs(node_bound_arguments)
         assert result == expected
 
+    def test_prepare_node_inputs_with_variable_length_args(
+        self,
+        dummy_node_with_variable_length,
+    ):
+        expected = {
+            "dummy_input": "dummy_input",
+            "my_input": "extra_input",
+            "first": "first",
+            "second": "second",
+        }
+
+        node_bound_arguments = _get_node_bound_arguments(dummy_node_with_variable_length)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
     def test_prepare_function_body(self, dummy_function_defintion):
         result = _prepare_function_body(dummy_function)
         assert result == dummy_function_defintion

@@ -264,7 +264,21 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
             ds_config = data_catalog._resolve_config(
                 ds_name, matched_pattern, ds_config_copy
             )
-
-            explicit_datasets[ds_name] = ds_config
+            # Dataset factory config contains absolute paths
+            ds_config_trimmed = _trim_filepath(
+                project_path=str(context.project_path) + "/", config=ds_config
+            )
+            explicit_datasets[ds_name] = ds_config_trimmed
 
     secho(yaml.dump(explicit_datasets))
+
+
+def _trim_filepath(project_path: str, config: dict) -> dict:
+    """Trim the filepaths in the config dictionary, make them relative to the project path."""
+    conf_keys_with_path = ["filepath", "path", "filename"]
+    for key, value in config.items():
+        if isinstance(value, dict):
+            config[key] = _trim_filepath(project_path, value)
+        if key in conf_keys_with_path:
+            config[key] = str(value).replace(project_path, "", 1)
+    return config

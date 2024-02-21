@@ -248,7 +248,7 @@ def magic_load_node(args: str) -> None:
 class NodeBoundArguments(inspect.BoundArguments):
     """Similar to inspect.BoundArguments"""
 
-    def __init__(self, signature, arguments) -> None:
+    def __init__(self, signature: inspect.Signature, arguments: dict) -> None:
         super().__init__(signature, arguments)
 
     @property
@@ -360,7 +360,7 @@ def _prepare_imports(node_func: Callable) -> str:
         raise FileNotFoundError(f"Could not find {node_func.__name__}")
 
 
-def _get_node_bound_arguments(node) -> NodeBoundArguments:
+def _get_node_bound_arguments(node: Node) -> NodeBoundArguments:
     node_func = node.func
     node_inputs = node.inputs
 
@@ -402,7 +402,9 @@ def _prepare_function_body(func: Callable) -> str:
     return body
 
 
-def _prepare_function_call(node_func: Callable, node_bound_arguments) -> str:
+def _prepare_function_call(
+    node_func: Callable, node_bound_arguments: NodeBoundArguments
+) -> str:
     """Prepare the text for the function call."""
     func_name = node_func.__name__
     args = node_bound_arguments.input_params_dict

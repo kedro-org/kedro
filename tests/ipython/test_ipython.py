@@ -7,6 +7,7 @@ import kedro.ipython
 from kedro.framework.project import pipelines
 from kedro.ipython import (
     _find_node,
+    _format_node_inputs_text,
     _get_node_bound_arguments,
     _load_node,
     _prepare_function_body,
@@ -395,7 +396,9 @@ import logging.config  # noqa Dummy import"""
             "second": "second",
         }
 
-        node_bound_arguments = _get_node_bound_arguments(dummy_node_with_variable_length)
+        node_bound_arguments = _get_node_bound_arguments(
+            dummy_node_with_variable_length
+        )
         result = _prepare_node_inputs(node_bound_arguments)
         assert result == expected
 
@@ -464,3 +467,41 @@ import logging.config  # noqa Dummy import"""
         load_ipython_extension(ipython)
         ipython.magic("load_node dummy_node")
         spy.assert_called_once()
+
+
+class TestFormatNodeInputsText:
+    def test_format_node_inputs_text_empty_input(self):
+        # Test with empty input_params_dict
+        input_params_dict = {}
+        expected_output = None
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_single_input(self):
+        # Test with a single input
+        input_params_dict = {"input1": "dataset1"}
+        expected_output = (
+            "# Prepare necessary inputs for debugging\n"
+            "# All debugging inputs must be defined in your project catalog\n"
+            'input1 = catalog.load("dataset1")'
+        )
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_multiple_inputs(self):
+        # Test with multiple inputs
+        input_params_dict = {
+            "input1": "dataset1",
+            "input2": "dataset2",
+            "input3": "dataset3",
+        }
+        expected_output = (
+            "# Prepare necessary inputs for debugging\n"
+            "# All debugging inputs must be defined in your project catalog\n"
+            'input1 = catalog.load("dataset1")\n'
+            'input2 = catalog.load("dataset2")\n'
+            'input3 = catalog.load("dataset3")'
+        )
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_no_catalog_load(self):
+        # Test with no catalog.load() statements if input_params_dict is None
+        assert _format_node_inputs_text(None) is None

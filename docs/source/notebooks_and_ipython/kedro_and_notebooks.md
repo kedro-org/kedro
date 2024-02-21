@@ -264,14 +264,15 @@ You can display an interactive visualisation of your pipeline directly in your n
 
 ## Debugging a Kedro project within a notebook
 
- You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint. Alternatively, use the command with no arguments after an error occurs to load the stack trace and begin debugging.
+You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint. Alternatively, use the command with no arguments after an error occurs to load the stack trace and begin debugging.
 
- The follow sequence occurs when `%debug` runs after an error occurs:
- - The stack trace of the last unhandled exception loads.
- - The program stops at the point where the exception occurred.
- - An interactive shell where the user can navigate through the stack trace opens.
+The following sequence occurs when `%debug` runs after an error occurs:
 
- You can then inspect the value of expressions and arguments, or add breakpoints to the code.
+- The stack trace of the last unhandled exception loads.
+- The program stops at the point where the exception occurred.
+- An interactive shell where the user can navigate through the stack trace opens.
+
+You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 
 Here is example debugging workflow after discovering a node in your pipeline is failing:
 1. Inspect the logs to find the name of the failing node. We can see below the problematic node is `split_data_node`.

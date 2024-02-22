@@ -224,7 +224,7 @@ For more details, run `%reload_kedro?`.
 ### `%load_node` line magic
 
 ``` {note}
-This is still an experimental feature and is currently only availble for Jupyter Notebook (>7.0) and Jupyter Lab. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580)
+This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0) and Jupyter Lab. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
 ```
 
 You can load the contents of a node in your project into a series of cells using the `%load_node` line magic.
@@ -256,7 +256,7 @@ If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz
 
 You can display an interactive visualisation of your pipeline directly in your notebook using the `%run_viz` line magic from within a cell:
 
-```python
+```ipython
 %run_viz
 ```
 
@@ -296,7 +296,7 @@ Here is example debugging workflow after discovering a node in your pipeline is 
 </details>
 
 ``` {note}
-The `%load_node` line magic is currently only availble for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
+The `%load_node` line magic is currently only available for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
 ```
 
 ---

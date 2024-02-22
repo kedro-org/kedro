@@ -104,6 +104,7 @@ exclude_patterns = [
     "modules.rst",
     "source",
     "kedro_docs_style_guide.md",
+    "inspect.BoundArguments.apply_defaults"
 ]
 
 

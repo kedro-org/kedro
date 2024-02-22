@@ -36,10 +36,10 @@ We recommend that you save your notebook in the `notebooks` folder of your Kedro
 
 The `kedro jupyter notebook` command launches a notebook with a customised kernel that has been extended to make the following project variables available:
 
-* `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
-* `context` (type `KedroContext`): [Kedro project context](../api/kedro.framework.context.rst) that provides access to Kedro's library components
-* `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
+* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
+* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
+* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
 ``` {note}
 If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook`.
@@ -68,11 +68,11 @@ In [3]: %reload_kedro
 ```
 
 ## Exploring the Kedro project in a notebook
-Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](/api/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
+Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant {doc}`API documentation </api/kedro>` or use the Python {py:func}`dir` function, for example `dir(catalog)`.
 
 ### `catalog`
 
-`catalog` can be used to explore your project's [Data Catalog](../data/data_catalog.md) using methods such as `catalog.list`, `catalog.load` and `catalog.save`.
+`catalog` can be used to explore your project's [Data Catalog](../data/data_catalog.md) using methods such as {py:meth}`catalog.list <kedro.io.DataCatalog.list>`, {py:meth}`catalog.load <kedro.io.DataCatalog.load>` and {py:meth}`catalog.save <kedro.io.DataCatalog.save>`.
 
 For example, add the following to a cell in your notebook to run `catalog.list`:
 
@@ -147,7 +147,7 @@ You should see output like this, according to your username and path:
 PosixPath('/Users/username/kedro_projects/iris')
 ```
 
-You can find out more about the `context` in the [API documentation](/api/kedro.framework.context.KedroContext).
+You can find out more in the API documentation of {py:class}`~kedro.framework.context.KedroContext`.
 
 ### `pipelines`
 
@@ -191,7 +191,7 @@ You can also specify the following optional arguments for `session.run`:
 | Argument name   | Accepted types   | Description                                                                                                                                          |
 | --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `tags`          | `Iterable[str]`  | Construct the pipeline using nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags  |
-| `runner`        | `AbstractRunner` | An instance of Kedro [AbstractRunner](/api/kedro.runner.AbstractRunner). Can be an instance of a [ParallelRunner](/api/kedro.runner.ParallelRunner)          |
+| `runner`        | `AbstractRunner` | An instance of Kedro {py:class}`~kedro.runner.AbstractRunner`. Can be an instance of a {py:class}`~kedro.runner.ParallelRunner`          |
 | `node_names`    | `Iterable[str]`  | Run nodes with specified names                                                                                                                  |
 | `from_nodes`    | `Iterable[str]`  | A list of node names which should be used as a starting point                                                                                        |
 | `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                            |
@@ -205,7 +205,7 @@ You can execute one *successful* run per session, as there's a one-to-one mappin
 
 ## Kedro line magics
 
-[Line magics](https://ipython.readthedocs.io/en/stable/interactive/magics.html) are commands that provide a concise way of performing tasks in an interactive session. Kedro provides several line magic commands to simplify working with Kedro projects in interactive environments.
+{external+ipython:doc}`Line magics <interactive/magics>` are commands that provide a concise way of performing tasks in an interactive session. Kedro provides several line magic commands to simplify working with Kedro projects in interactive environments.
 
 ### `%reload_kedro` line magic
 
@@ -264,14 +264,15 @@ You can display an interactive visualisation of your pipeline directly in your n
 
 ## Debugging a Kedro project within a notebook
 
- You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint. Alternatively, use the command with no arguments after an error occurs to load the stack trace and begin debugging.
+You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint. Alternatively, use the command with no arguments after an error occurs to load the stack trace and begin debugging.
 
- The follow sequence occurs when `%debug` runs after an error occurs:
- - The stack trace of the last unhandled exception loads.
- - The program stops at the point where the exception occurred.
- - An interactive shell where the user can navigate through the stack trace opens.
+The following sequence occurs when `%debug` runs after an error occurs:
 
- You can then inspect the value of expressions and arguments, or add breakpoints to the code.
+- The stack trace of the last unhandled exception loads.
+- The program stops at the point where the exception occurred.
+- An interactive shell where the user can navigate through the stack trace opens.
+
+You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 
 Here is example debugging workflow after discovering a node in your pipeline is failing:
 1. Inspect the logs to find the name of the failing node. We can see below the problematic node is `split_data_node`.

@@ -13,7 +13,7 @@ import typing
 import warnings
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Callable
+from typing import Any, Callable, OrderedDict
 
 from IPython.core.getipython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
@@ -248,7 +248,9 @@ def magic_load_node(args: str) -> None:
 class NodeBoundArguments(inspect.BoundArguments):
     """Similar to inspect.BoundArguments"""
 
-    def __init__(self, signature: inspect.Signature, arguments: dict) -> None:
+    def __init__(
+        self, signature: inspect.Signature, arguments: OrderedDict[str, Any]
+    ) -> None:
         super().__init__(signature, arguments)
 
     @property
@@ -411,7 +413,7 @@ def _prepare_function_call(
     kwargs = node_bound_arguments.kwargs
 
     # Construct the statement of func_name(a=1,b=2,c=3)
-    args_str_literal = [f"{node_input}" for node_input in args]
+    args_str_literal = [f"{node_input}" for node_input in args] if args else []
     kwargs_str_literal = [
         f"{node_input}={dataset_name}" for node_input, dataset_name in kwargs.items()
     ]

@@ -84,7 +84,7 @@ from kedro.io import DataCatalog
 class DataCatalogHooks:
     @property
     def _logger(self):
-        return logging.getLogger(self.__class__.__name__)
+        return logging.getLogger(__name__)
 
     @hook_impl
     def after_catalog_created(self, catalog: DataCatalog) -> None:

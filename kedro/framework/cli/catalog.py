@@ -16,6 +16,7 @@ from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import AbstractDataset
+from kedro.io.data_catalog import DataCatalog
 
 
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
@@ -231,8 +232,8 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    data_catalog = context.catalog
     catalog_config = context.config_loader["catalog"]
+    data_catalog = DataCatalog.from_config(catalog_config)
 
     explicit_datasets = {
         ds_name: ds_config
@@ -264,21 +265,6 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
             ds_config = data_catalog._resolve_config(
                 ds_name, matched_pattern, ds_config_copy
             )
-            # Dataset factory config contains absolute paths
-            ds_config_trimmed = _trim_filepath(
-                project_path=str(context.project_path) + "/", config=ds_config
-            )
-            explicit_datasets[ds_name] = ds_config_trimmed
+            explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))
-
-
-def _trim_filepath(project_path: str, config: dict) -> dict:
-    """Trim the filepaths in the config dictionary, make them relative to the project path."""
-    conf_keys_with_path = ["filepath", "path", "filename"]
-    for key, value in config.items():
-        if isinstance(value, dict):
-            config[key] = _trim_filepath(project_path, value)
-        if key in conf_keys_with_path:
-            config[key] = str(value).replace(project_path, "", 1)
-    return config

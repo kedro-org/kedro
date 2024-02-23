@@ -92,30 +92,24 @@ def fake_catalog_config_with_factories(fake_metadata):
     config = {
         "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataset",
-            "filepath": str(fake_metadata.project_path)
-            + "/"
-            + "data/01_raw/{factory_pattern}.pq",
+            "filepath": "data/01_raw/{factory_pattern}.pq",
         },
         "csv_{factory_pattern}": {
             "type": "pandas.CSVDataset",
-            "filepath": str(fake_metadata.project_path)
-            + "/"
-            + "data/01_raw/{factory_pattern}.csv",
+            "filepath": "data/01_raw/{factory_pattern}.csv",
         },
         "explicit_ds": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
         "{factory_pattern}_ds": {
             "type": "pandas.ParquetDataset",
-            "filepath": str(fake_metadata.project_path)
-            + "/"
-            + "data/01_raw/{factory_pattern}_ds.pq",
+            "filepath": "data/01_raw/{factory_pattern}_ds.pq",
         },
         "partitioned_{factory_pattern}": {
             "type": "partitions.PartitionedDataset",
-            "path": str(fake_metadata.project_path) + "/" + "data/01_raw",
+            "path": "data/01_raw",
             "dataset": "pandas.CSVDataset",
             "metadata": {
                 "my-plugin": {
-                    "path": str(fake_metadata.project_path) + "/" + "data/01_raw",
+                    "path": "data/01_raw",
                 }
             },
         },

@@ -104,9 +104,7 @@ exclude_patterns = [
     "modules.rst",
     "source",
     "kedro_docs_style_guide.md",
-    "inspect.py"
 ]
-
 
 type_targets = {
     "py:class": (

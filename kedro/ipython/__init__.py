@@ -245,7 +245,7 @@ def magic_load_node(args: str) -> None:
         _print_cells(cells)
 
 
-class NodeBoundArguments(inspect.BoundArguments):
+class _NodeBoundArguments(inspect.BoundArguments):
     """Similar to inspect.BoundArguments"""
 
     def __init__(
@@ -362,18 +362,18 @@ def _prepare_imports(node_func: Callable) -> str:
         raise FileNotFoundError(f"Could not find {node_func.__name__}")
 
 
-def _get_node_bound_arguments(node: Node) -> NodeBoundArguments:
+def _get_node_bound_arguments(node: Node) -> _NodeBoundArguments:
     node_func = node.func
     node_inputs = node.inputs
 
     args, kwargs = Node._process_inputs_for_bind(node_inputs)
     signature = inspect.signature(node_func)
     bound_arguments = signature.bind(*args, **kwargs)
-    return NodeBoundArguments(bound_arguments.signature, bound_arguments.arguments)
+    return _NodeBoundArguments(bound_arguments.signature, bound_arguments.arguments)
 
 
 def _prepare_node_inputs(
-    node_bound_arguments: NodeBoundArguments,
+    node_bound_arguments: _NodeBoundArguments,
 ) -> dict[str, str] | None:
     # Remove the *args. For example {'first_arg':'a', 'args': ('b','c')}
     # will be loaded as follow:
@@ -405,7 +405,7 @@ def _prepare_function_body(func: Callable) -> str:
 
 
 def _prepare_function_call(
-    node_func: Callable, node_bound_arguments: NodeBoundArguments
+    node_func: Callable, node_bound_arguments: _NodeBoundArguments
 ) -> str:
     """Prepare the text for the function call."""
     func_name = node_func.__name__

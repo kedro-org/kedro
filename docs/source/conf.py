@@ -106,7 +106,6 @@ exclude_patterns = [
     "kedro_docs_style_guide.md",
 ]
 
-
 type_targets = {
     "py:class": (
         "object",

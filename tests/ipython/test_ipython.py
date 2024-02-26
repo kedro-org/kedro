@@ -7,6 +7,8 @@ import kedro.ipython
 from kedro.framework.project import pipelines
 from kedro.ipython import (
     _find_node,
+    _format_node_inputs_text,
+    _get_node_bound_arguments,
     _load_node,
     _prepare_function_body,
     _prepare_imports,
@@ -199,13 +201,13 @@ class TestLoadIPythonExtension:
             "--conf-source=new_conf",
         ],
     )
-    def test_reload_kedro_magic_with_valid_arguments(self, mocker, args, ipython):
+    def test_line_magic_with_valid_arguments(self, mocker, args, ipython):
         mocker.patch("kedro.ipython._find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
 
         ipython.magic(f"reload_kedro {args}")
 
-    def test_reload_kedro_with_invalid_arguments(self, mocker, ipython):
+    def test_line_magic_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython._find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
         load_ipython_extension(ipython)
@@ -357,13 +359,48 @@ import logging.config  # noqa Dummy import"""
         self,
         dummy_node,
     ):
-        func_inputs = """# Prepare necessary inputs for debugging
-# All debugging inputs must be defined in your project catalog
-dummy_input = catalog.load("dummy_input")
-my_input = catalog.load("extra_input")"""
+        expected = {"dummy_input": "dummy_input", "my_input": "extra_input"}
 
-        result = _prepare_node_inputs(dummy_node)
-        assert result == func_inputs
+        node_bound_arguments = _get_node_bound_arguments(dummy_node)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
+    def test_prepare_node_inputs_when_input_is_empty(
+        self,
+        dummy_node_empty_input,
+    ):
+        expected = {"dummy_input": "", "my_input": ""}
+
+        node_bound_arguments = _get_node_bound_arguments(dummy_node_empty_input)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
+    def test_prepare_node_inputs_with_dict_input(
+        self,
+        dummy_node_dict_input,
+    ):
+        expected = {"dummy_input": "dummy_input", "my_input": "extra_input"}
+
+        node_bound_arguments = _get_node_bound_arguments(dummy_node_dict_input)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
+    def test_prepare_node_inputs_with_variable_length_args(
+        self,
+        dummy_node_with_variable_length,
+    ):
+        expected = {
+            "dummy_input": "dummy_input",
+            "my_input": "extra_input",
+            "first": "first",
+            "second": "second",
+        }
+
+        node_bound_arguments = _get_node_bound_arguments(
+            dummy_node_with_variable_length
+        )
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
 
     def test_prepare_function_body(self, dummy_function_defintion):
         result = _prepare_function_body(dummy_function)
@@ -430,3 +467,41 @@ my_input = catalog.load("extra_input")"""
         load_ipython_extension(ipython)
         ipython.magic("load_node dummy_node")
         spy.assert_called_once()
+
+
+class TestFormatNodeInputsText:
+    def test_format_node_inputs_text_empty_input(self):
+        # Test with empty input_params_dict
+        input_params_dict = {}
+        expected_output = None
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_single_input(self):
+        # Test with a single input
+        input_params_dict = {"input1": "dataset1"}
+        expected_output = (
+            "# Prepare necessary inputs for debugging\n"
+            "# All debugging inputs must be defined in your project catalog\n"
+            'input1 = catalog.load("dataset1")'
+        )
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_multiple_inputs(self):
+        # Test with multiple inputs
+        input_params_dict = {
+            "input1": "dataset1",
+            "input2": "dataset2",
+            "input3": "dataset3",
+        }
+        expected_output = (
+            "# Prepare necessary inputs for debugging\n"
+            "# All debugging inputs must be defined in your project catalog\n"
+            'input1 = catalog.load("dataset1")\n'
+            'input2 = catalog.load("dataset2")\n'
+            'input3 = catalog.load("dataset3")'
+        )
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_no_catalog_load(self):
+        # Test with no catalog.load() statements if input_params_dict is None
+        assert _format_node_inputs_text(None) is None

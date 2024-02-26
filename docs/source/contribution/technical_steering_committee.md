@@ -62,7 +62,6 @@ We look for commitment markers who can do the following:
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ivan Danov](https://github.com/idanov)                  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Jo Stichbury](https://github.com/stichbury)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Joel Schwarzmann](https://github.com/datajoely)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Juan Luis Cano](https://github.com/astrojuanlu)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
@@ -95,6 +94,7 @@ Former core team members with significant contributions include
 [Hamza Oza](https://github.com/hamzaoza),
 [Ignacio Paricio](https://github.com/ignacioparicio),
 [Jannic Holzer](https://github.com/jmholzer),
+[Jo Stichbury](https://github.com/stichbury),
 [Jiri Klein](https://github.com/jiriklein),
 [Kiyohito Kunii](https://github.com/921kiyo),
 [Laís Carvalho](https://github.com/laisbsc),

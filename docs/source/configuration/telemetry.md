@@ -19,13 +19,13 @@ which will prompt you for your consent the first time.
 ## Collected data fields:
 
 - **Hashed Username:** An anonymized representation of the user's computer username.
-- **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy.
+- **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy. Example Input: `kedro run --pipeline=ds --env=test` What we receive: `kedro run --pipeline ***** --env *****`
 - **Hashed Package Name:** An anonymized identifier of the project.
 - **Kedro Project Version:** The version of Kedro being used.
 - **Kedro-Telemetry Version:** The version of the Kedro-Telemetry plugin.
 - **Python Version:** The version of Python in use.
 - **Operating System:** The operating system on which Kedro is running.
-- **Tools Selected:** The tools chosen during the `kedro new` command execution, if applicable.
+- **Tools Selected and Example Pipeline:** The tools chosen and example pipeline inclusion during the `kedro new` command execution, if applicable.
 - **Number of Datasets, Nodes, and Pipelines:** Quantitative data about the project structure.
 
 For technical information on how the telemetry collection works, you can browse

@@ -16,6 +16,7 @@ from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import AbstractDataset
+from kedro.io.data_catalog import DataCatalog
 
 
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
@@ -231,8 +232,8 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    data_catalog = context.catalog
     catalog_config = context.config_loader["catalog"]
+    data_catalog = DataCatalog.from_config(catalog_config)
 
     explicit_datasets = {
         ds_name: ds_config
@@ -264,7 +265,6 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
             ds_config = data_catalog._resolve_config(
                 ds_name, matched_pattern, ds_config_copy
             )
-
             explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))

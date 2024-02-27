@@ -270,8 +270,8 @@ def configure_project(package_name: str) -> None:
     global PACKAGE_NAME  # noqa: PLW0603
     PACKAGE_NAME = package_name
 
-    if PACKAGE_NAME:
-        LOGGING.set_project_logging(PACKAGE_NAME)
+    # if PACKAGE_NAME:
+    #     LOGGING.set_project_logging(PACKAGE_NAME)
 
 
 def configure_logging(logging_config: dict[str, Any]) -> None:

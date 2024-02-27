@@ -32,6 +32,7 @@
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [MosaicMan](https://github.com/MosaicMan)
+* [Fazil](https://github.com/lordsoffallen)
 
 
 # Release 0.19.2

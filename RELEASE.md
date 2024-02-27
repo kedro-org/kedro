@@ -10,7 +10,7 @@
 
 ## Community contributions
 
-# Upcoming Release 0.19.3
+# Release 0.19.3
 
 ## Major features and improvements
 * Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.

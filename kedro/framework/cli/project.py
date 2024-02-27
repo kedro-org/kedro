@@ -196,6 +196,13 @@ def package(metadata: ProjectMetadata) -> None:
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
+@click.option(
+    "-v",
+    "verbose",
+    type=click.UNPROCESSED,
+    is_flag=True,
+    default="",
+)
 def run(  # noqa: PLR0913
     tags: str,
     env: str,
@@ -212,8 +219,13 @@ def run(  # noqa: PLR0913
     conf_source: str,
     params: dict[str, Any],
     namespace: str,
+    verbose: bool,
 ) -> None:
     """Run the pipeline."""
+    if verbose:
+        from kedro.framework.project import LOGGING
+        LOGGING.data["root"]["level"] = "DEBUG"
+        LOGGING.configure(LOGGING.data)
 
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)

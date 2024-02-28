@@ -32,14 +32,14 @@ def mock_pipelines(mocker):
 def fake_catalog_config():
     config = {
         "parquet_{factory_pattern}": {
-            "type": "pandas.ParquetDataset",
+            "type": "pandas-parquetdataset",
             "filepath": "data/01_raw/{factory_pattern}.pq",
         },
         "csv_{factory_pattern}": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": "data/01_raw/{factory_pattern}.csv",
         },
-        "csv_test": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "csv_test": {"type": "pandas-csvdataset", "filepath": "test.csv"},
     }
     return config
 
@@ -48,14 +48,14 @@ def fake_catalog_config():
 def fake_catalog_config_resolved():
     config = {
         "parquet_example": {
-            "type": "pandas.ParquetDataset",
+            "type": "pandas-parquetdataset",
             "filepath": "data/01_raw/example.pq",
         },
         "csv_example": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": "data/01_raw/example.csv",
         },
-        "csv_test": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "csv_test": {"type": "pandas-csvdataset", "filepath": "test.csv"},
     }
     return config
 
@@ -64,7 +64,7 @@ def fake_catalog_config_resolved():
 def fake_catalog_with_overlapping_factories():
     config = {
         "an_example_dataset": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": "dummy_filepath",
         },
         "an_example_{placeholder}": {
@@ -91,22 +91,22 @@ def fake_catalog_with_overlapping_factories():
 def fake_catalog_config_with_factories(fake_metadata):
     config = {
         "parquet_{factory_pattern}": {
-            "type": "pandas.ParquetDataset",
+            "type": "pandas-parquetdataset",
             "filepath": "data/01_raw/{factory_pattern}.pq",
         },
         "csv_{factory_pattern}": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": "data/01_raw/{factory_pattern}.csv",
         },
-        "explicit_ds": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "explicit_ds": {"type": "pandas-csvdataset", "filepath": "test.csv"},
         "{factory_pattern}_ds": {
-            "type": "pandas.ParquetDataset",
+            "type": "pandas-parquetdataset",
             "filepath": "data/01_raw/{factory_pattern}_ds.pq",
         },
         "partitioned_{factory_pattern}": {
             "type": "partitions.PartitionedDataset",
             "path": "data/01_raw",
-            "dataset": "pandas.CSVDataset",
+            "dataset": "pandas-csvdataset",
             "metadata": {
                 "my-plugin": {
                     "path": "data/01_raw",
@@ -121,18 +121,18 @@ def fake_catalog_config_with_factories(fake_metadata):
 def fake_catalog_config_with_factories_resolved():
     config = {
         "parquet_example": {
-            "type": "pandas.ParquetDataset",
+            "type": "pandas-parquetdataset",
             "filepath": "data/01_raw/example.pq",
         },
         "csv_example": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": "data/01_raw/example.csv",
         },
-        "explicit_ds": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "explicit_ds": {"type": "pandas-csvdataset", "filepath": "test.csv"},
         "partitioned_example": {
             "type": "partitions.PartitionedDataset",
             "path": "data/01_raw",
-            "dataset": "pandas.CSVDataset",
+            "dataset": "pandas-csvdataset",
             "metadata": {
                 "my-plugin": {
                     "path": "data/01_raw",
@@ -294,8 +294,8 @@ class TestCatalogListCommand:
         expected_dict = {
             f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets generated from factories": {
-                    "pandas.CSVDataset": ["csv_example"],
-                    "pandas.ParquetDataset": ["parquet_example"],
+                    "pandas-csvdataset": ["csv_example"],
+                    "pandas-parquetdataset": ["parquet_example"],
                 },
                 "Datasets mentioned in pipeline": {
                     "CSVDataset": ["csv_test"],
@@ -431,7 +431,7 @@ class TestCatalogCreateCommand:
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         catalog_config = {
-            "example_test_x": {"type": "pandas.CSVDataset", "filepath": "test.csv"}
+            "example_test_x": {"type": "pandas-csvdataset", "filepath": "test.csv"}
         }
         with data_catalog_file.open(mode="w") as catalog_file:
             yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)
@@ -596,7 +596,7 @@ class TestCatalogFactoryCommands:
 
         catalog_config = {
             "iris_data": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "test.csv",
             },
             "intermediate": {"type": "MemoryDataset"},

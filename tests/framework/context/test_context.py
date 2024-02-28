@@ -72,9 +72,9 @@ def base_config(tmp_path):
     trains_filepath = (tmp_path / "trains.csv").as_posix()
 
     return {
-        "trains": {"type": "pandas.CSVDataset", "filepath": trains_filepath},
+        "trains": {"type": "pandas-csvdataset", "filepath": trains_filepath},
         "cars": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": cars_filepath,
             "save_args": {"index": True},
         },
@@ -89,18 +89,18 @@ def local_config(tmp_path):
     horses_filepath = "horses.csv"
     return {
         "cars": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": cars_filepath,
             "save_args": {"index": False},
             "versioned": True,
         },
         "boats": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": boats_filepath,
             "versioned": True,
         },
         "horses": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": horses_filepath,
             "versioned": True,
         },

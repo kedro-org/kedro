@@ -48,7 +48,7 @@ def base_config(tmp_path):
     return {
         "trains": {"type": "MemoryDataset"},
         "cars": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": filepath,
             "save_args": {"index": True},
         },
@@ -60,7 +60,7 @@ def local_config(tmp_path):
     filepath = str(tmp_path / "cars.csv")
     return {
         "cars": {
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
             "filepath": filepath,
             "save_args": {"index": False},
         },
@@ -191,7 +191,7 @@ class TestOmegaConfigLoader:
 
         assert params["param1"] == 1
         assert catalog["trains"]["type"] == "MemoryDataset"
-        assert catalog["cars"]["type"] == "pandas.CSVDataset"
+        assert catalog["cars"]["type"] == "pandas-csvdataset"
         assert catalog["boats"]["type"] == "MemoryDataset"
         assert not catalog["cars"]["save_args"]["index"]
 
@@ -247,7 +247,7 @@ class TestOmegaConfigLoader:
 
         catalog = config_loader["catalog"]
         assert catalog.keys() == {"cars", "trains", "nested"}
-        assert catalog["cars"]["type"] == "pandas.CSVDataset"
+        assert catalog["cars"]["type"] == "pandas-csvdataset"
         assert catalog["cars"]["save_args"]["index"] is True
         assert catalog["nested"]["type"] == "MemoryDataset"
 
@@ -445,7 +445,7 @@ class TestOmegaConfigLoader:
 
         example_catalog = """
         example_iris_data:
-              type: pandas.CSVDataset
+              type: pandas-csvdataset
           filepath: data/01_raw/iris.csv
         """
 
@@ -742,12 +742,12 @@ class TestOmegaConfigLoader:
                 "type": "${_pandas.type}",
                 "filepath": "data/01_raw/companies.csv",
             },
-            "_pandas": {"type": "pandas.CSVDataset"},
+            "_pandas": {"type": "pandas-csvdataset"},
         }
         _write_yaml(base_catalog, catalog_config)
 
         conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
-        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
+        assert conf["catalog"]["companies"]["type"] == "pandas-csvdataset"
 
     def test_variable_interpolation_in_catalog_with_separate_templates_file(
         self, tmp_path
@@ -760,12 +760,12 @@ class TestOmegaConfigLoader:
             }
         }
         tmp_catalog = tmp_path / _BASE_ENV / "catalog_temp.yml"
-        template = {"_pandas": {"type": "pandas.CSVDataset"}}
+        template = {"_pandas": {"type": "pandas-csvdataset"}}
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(tmp_catalog, template)
 
         conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
-        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
+        assert conf["catalog"]["companies"]["type"] == "pandas-csvdataset"
 
     def test_custom_resolvers(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
@@ -818,7 +818,7 @@ class TestOmegaConfigLoader:
                 "filepath": "data/01_raw/companies.csv",
             },
         }
-        globals_config = {"x": 34, "dataset_type": "pandas.CSVDataset"}
+        globals_config = {"x": 34, "dataset_type": "pandas-csvdataset"}
         _write_yaml(base_params, param_config)
         _write_yaml(globals_params, globals_config)
         _write_yaml(base_catalog, catalog_config)
@@ -1013,7 +1013,7 @@ class TestOmegaConfigLoader:
         runtime_params = {
             "x": 45,
             "dataset": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
             },
         }
         param_config = {
@@ -1108,7 +1108,7 @@ class TestOmegaConfigLoader:
         }
         globals_config = {
             "dataset": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
             }
         }
         catalog_config = {
@@ -1254,14 +1254,14 @@ class TestOmegaConfigLoaderStandalone:
                 "type": "${_pandas.type}",
                 "filepath": "data/01_raw/companies.csv",
             },
-            "_pandas": {"type": "pandas.CSVDataset"},
+            "_pandas": {"type": "pandas-csvdataset"},
         }
         _write_yaml(base_catalog, catalog_config)
 
         conf = OmegaConfigLoader(
             str(tmp_path),
         )
-        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
+        assert conf["catalog"]["companies"]["type"] == "pandas-csvdataset"
 
     def test_variable_interpolation_in_catalog_with_separate_templates_file(
         self, tmp_path
@@ -1274,12 +1274,12 @@ class TestOmegaConfigLoaderStandalone:
             }
         }
         tmp_catalog = tmp_path / "catalog_temp.yml"
-        template = {"_pandas": {"type": "pandas.CSVDataset"}}
+        template = {"_pandas": {"type": "pandas-csvdataset"}}
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(tmp_catalog, template)
 
         conf = OmegaConfigLoader(str(tmp_path))
-        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
+        assert conf["catalog"]["companies"]["type"] == "pandas-csvdataset"
 
     def test_globals(self, tmp_path):
         globals_params = tmp_path / "globals.yml"
@@ -1307,7 +1307,7 @@ class TestOmegaConfigLoaderStandalone:
                 "filepath": "data/01_raw/companies.csv",
             },
         }
-        globals_config = {"x": 34, "dataset_type": "pandas.CSVDataset"}
+        globals_config = {"x": 34, "dataset_type": "pandas-csvdataset"}
         _write_yaml(base_params, param_config)
         _write_yaml(globals_params, globals_config)
         _write_yaml(base_catalog, catalog_config)
@@ -1387,7 +1387,7 @@ class TestOmegaConfigLoaderStandalone:
         runtime_params = {
             "x": 45,
             "dataset": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
             },
         }
         param_config = {
@@ -1441,7 +1441,7 @@ class TestOmegaConfigLoaderStandalone:
         }
         globals_config = {
             "dataset": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
             }
         }
         catalog_config = {

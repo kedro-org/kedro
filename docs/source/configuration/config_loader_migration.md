@@ -132,8 +132,8 @@ Suppose you are migrating a templated **catalog** file from using `TemplatedConf
 
 - datasets:
 + _datasets:
-    csv: "pandas.CSVDataset"
-    spark: "spark.SparkDataset"
+    csv: "pandas-csvdataset"
+    spark: "spark-sparkdataset"
 
 ```
 
@@ -175,8 +175,8 @@ bucket_name: "my_s3_bucket"
 key_prefix: "my/key/prefix/"
 
 datasets:
-    csv: "pandas.CSVDataset"
-    spark: "spark.SparkDataset"
+    csv: "pandas-csvdataset"
+    spark: "spark-sparkdataset"
 
 folders:
     raw: "01_raw"
@@ -222,7 +222,7 @@ The following example shows how you can rewrite your Jinja2 configuration to wor
 
 - {{ speed }}-cars:
 + "{speed}-cars":
-    type: pandas.CSVDataset
+    type: pandas-csvdataset
 -    filepath: s3://${bucket_name}/{{ speed }}-cars.csv
 +    filepath: s3://${bucket_name}/{speed}-cars.csv
     save_args:

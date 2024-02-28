@@ -66,17 +66,17 @@ HOOKS = (SparkHooks(),)
 
 We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
-* {class}`spark.DeltaTableDataset <kedro-datasets:kedro_datasets.spark.DeltaTableDataset>`
-* {class}`spark.SparkDataset <kedro-datasets:kedro_datasets.spark.SparkDataset>`
-* {class}`spark.SparkJDBCDataset <kedro-datasets:kedro_datasets.spark.SparkJDBCDataset>`
-* {class}`spark.SparkHiveDataset <kedro-datasets:kedro_datasets.spark.SparkHiveDataset>`
+* {class}`spark-deltatabledataset <kedro-datasets:kedro_datasets.spark-deltatabledataset>`
+* {class}`spark-sparkdataset <kedro-datasets:kedro_datasets.spark-sparkdataset>`
+* {class}`spark-sparkjdbcdataset <kedro-datasets:kedro_datasets.spark-sparkjdbcdataset>`
+* {class}`spark-sparkhivedataset <kedro-datasets:kedro_datasets.spark-sparkhivedataset>`
 
 
-The example below illustrates how to use `spark.SparkDataset` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
+The example below illustrates how to use `spark-sparkdataset` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
 
 ```yaml
 weather:
-  type: spark.SparkDataset
+  type: spark-sparkdataset
   filepath: s3a://your_bucket/data/01_raw/weather*
   file_format: csv
   load_args:
@@ -120,7 +120,7 @@ As a result, we end up with a catalog that looks like this:
 
 ```yaml
 temperature:
-  type: spark.SparkDataset
+  type: spark-sparkdataset
   filepath: data/01_raw/data.csv
   file_format: "csv"
   load_args:
@@ -131,7 +131,7 @@ temperature:
     header: True
 
 weather@spark:
-  type: spark.SparkDataset
+  type: spark-sparkdataset
   filepath: s3a://my_bucket/03_primary/weather
   file_format: "delta"
   save_args:
@@ -139,7 +139,7 @@ weather@spark:
     versionAsOf: 0
 
 weather@delta:
-  type: spark.DeltaTableDataset
+  type: spark-deltatabledataset
   filepath: s3a://my_bucket/03_primary/weather
 ```
 

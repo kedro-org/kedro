@@ -25,48 +25,48 @@ To use AWS Batch, ensure you have the following prerequisites in place:
 
 ```yaml
 companies:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: s3://<your-bucket>/companies.csv
 
 reviews:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: s3://<your-bucket>/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataset
+  type: pandas-exceldataset
   filepath: s3://<your-bucket>/shuttles.xlsx
 
 preprocessed_companies:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: s3://<your-bucket>/preprocessed_companies.csv
 
 preprocessed_shuttles:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: s3://<your-bucket>/preprocessed_shuttles.csv
 
 model_input_table:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: s3://<your-bucket>/model_input_table.csv
 
 regressor:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: s3://<your-bucket>/regressor.pickle
   versioned: true
 
 X_train:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: s3://<your-bucket>/X_train.pickle
 
 X_test:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: s3://<your-bucket>/X_test.pickle
 
 y_train:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: s3://<your-bucket>/y_train.pickle
 
 y_test:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: s3://<your-bucket>/y_test.pickle
 ```
 

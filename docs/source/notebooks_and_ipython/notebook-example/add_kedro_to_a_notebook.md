@@ -107,15 +107,15 @@ To start using the Data Catalog, you'll need a `catalog.yml` to define datasets 
 
 ```yaml
 companies:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/companies.csv
 
 reviews:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataset
+  type: pandas-exceldataset
   filepath: data/shuttles.xlsx
 ```
 

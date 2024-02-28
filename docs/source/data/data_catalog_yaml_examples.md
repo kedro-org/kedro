@@ -30,7 +30,7 @@ test_dataset:
 
 ```yaml
 test_dataset:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   ...
   save_args:
     index: False
@@ -41,7 +41,7 @@ test_dataset:
 
 ```yaml
 bikes:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/bikes.csv
 ```
 
@@ -49,7 +49,7 @@ bikes:
 
 ```yaml
 cars:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/company/cars.csv
   load_args:
     sep: ','
@@ -64,7 +64,7 @@ cars:
 
 ```yaml
 boats:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/company/boats.csv.gz
   load_args:
     sep: ','
@@ -78,7 +78,7 @@ boats:
 
 ```yaml
 motorbikes:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
   credentials: dev_s3
   load_args:
@@ -92,7 +92,7 @@ motorbikes:
 
 ```yaml
 airplanes:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/06_models/airplanes.pkl
   backend: pickle
 ```
@@ -103,7 +103,7 @@ The example includes the `project` value for the underlying filesystem class (`G
 
 ```yaml
 rockets:
-  type: pandas.ExcelDataset
+  type: pandas-exceldataset
   filepath: gcs://your_bucket/data/02_intermediate/company/motorbikes.xlsx
   fs_args:
     project: my-project
@@ -117,7 +117,7 @@ rockets:
 
 ```yaml
 trains:
-  type: pandas.ExcelDataset
+  type: pandas-exceldataset
   filepath: data/02_intermediate/company/trains.xlsx
   load_args:
     sheet_name: [Sheet1, Sheet2, Sheet3]
@@ -139,7 +139,7 @@ results_plot:
 
 ```yaml
 skateboards:
-  type: pandas.HDFDataset
+  type: pandas-hdfdataset
   filepath: data/02_intermediate/skateboards.hdf
   key: name
   load_args:
@@ -153,7 +153,7 @@ skateboards:
 
 ```yaml
 trucks:
-  type: pandas.ParquetDataset
+  type: pandas-parquetdataset
   filepath: data/02_intermediate/trucks.parquet
   load_args:
     columns: [name, gear, disp, wt]
@@ -171,7 +171,7 @@ trucks:
 
 ```yaml
 weather:
-  type: spark.SparkDataset
+  type: spark-sparkdataset
   filepath: s3a://your_bucket/data/01_raw/weather*
   credentials: dev_s3
   file_format: csv
@@ -188,7 +188,7 @@ weather:
 
 ```yaml
 scooters:
-  type: pandas.SQLTableDataset
+  type: pandas-sqltabledataset
   credentials: scooters_credentials
   table_name: scooters
   load_args:
@@ -203,16 +203,16 @@ scooters:
 
 ```yaml
 scooters_query:
-  type: pandas.SQLQueryDataset
+  type: pandas-sqlquery-dataset
   credentials: scooters_credentials
   sql: select * from cars where gear=4
   load_args:
     index_col: [name]
 ```
 
-When you use {class}`pandas.SQLTableDataset<kedro-datasets:kedro_datasets.pandas.SQLTableDataset>`, or {class}`pandas.SQLQueryDataset<kedro-datasets:kedro_datasets.pandas.SQLQueryDataset>` you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
+When you use {class}`pandas-sqltabledataset<kedro-datasets:kedro_datasets.pandas-sqltabledataset>`, or {class}`pandas-sqlquerydataset<kedro-datasets:kedro_datasets.pandas-sqlquerydataset>` you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
 
-`scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataset` only).
+`scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas-sqltabledataset` only).
 
 
 ## Load data from an API endpoint
@@ -221,7 +221,7 @@ This example uses US corn yield data from USDA.
 
 ```yaml
 us_corn_yield_data:
-  type: api.APIDataset
+  type: api-apidataset
   url: https://quickstats.nass.usda.gov
   credentials: usda_credentials
   params:
@@ -247,7 +247,7 @@ usda_credentials:
 
 ```yaml
 test:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: s3://your_bucket/test.csv # assume `test.csv` is uploaded to the MinIO server.
   credentials: dev_minio
 ```
@@ -272,7 +272,7 @@ The easiest way to setup MinIO is to run a Docker image. After the following com
 
 ```yaml
 ml_model:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: "abfs://models/ml_models.pickle"
   versioned: True
   credentials: dev_abs
@@ -293,7 +293,7 @@ This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip
 ```
 ```yaml
 cool_dataset:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: "sftp:///path/to/remote_cluster/cool_data.csv"
   credentials: cluster_credentials
 ```
@@ -316,7 +316,7 @@ You can see this in the following example:
 
 ```yaml
 _csv: &csv
-  type: spark.SparkDataset
+  type: spark-sparkdataset
   file_format: csv
   load_args:
     sep: ','
@@ -349,7 +349,7 @@ You can also nest reusable YAML syntax:
 
 ```yaml
 _csv: &csv
-  type: spark.SparkDataset
+  type: spark-sparkdataset
   file_format: csv
   load_args: &csv_load_args
     header: True
@@ -373,12 +373,12 @@ Define two `DataCatalog` entries for the same dataset in a common format (for ex
 
 ```yaml
 my_dataframe@spark:
-  type: spark.SparkDataset
+  type: spark-sparkdataset
   filepath: data/02_intermediate/data.parquet
   file_format: parquet
 
 my_dataframe@pandas:
-  type: pandas.ParquetDataset
+  type: pandas-parquetdataset
   filepath: data/02_intermediate/data.parquet
 ```
 
@@ -393,9 +393,9 @@ pipeline(
 )
 ```
 
-In this example, Kedro understands that `my_dataframe` is the same dataset in its `spark.SparkDataset` and `pandas.ParquetDataset` formats and resolves the node execution order.
+In this example, Kedro understands that `my_dataframe` is the same dataset in its `spark-sparkdataset` and `pandas-parquetdataset` formats and resolves the node execution order.
 
-In the pipeline, Kedro uses the `spark.SparkDataset` implementation for saving and `pandas.ParquetDataset`
+In the pipeline, Kedro uses the `spark-sparkdataset` implementation for saving and `pandas-parquetdataset`
 for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the second node receives a `pandas.Dataframe`.
 
 ## Create a Data Catalog YAML configuration file via the CLI

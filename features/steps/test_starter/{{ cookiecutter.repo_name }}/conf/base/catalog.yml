@@ -8,11 +8,11 @@
 # An example data set definition can look as follows:
 #
 #bikes:
-#  type: pandas.CSVDataset
+#  type: pandas-csvdataset
 #  filepath: "data/01_raw/bikes.csv"
 #
 #weather:
-#  type: spark.SparkDataset
+#  type: spark-sparkdataset
 #  filepath: s3a://your_bucket/data/01_raw/weather*
 #  file_format: csv
 #  credentials: dev_s3
@@ -24,7 +24,7 @@
 #    header: True
 #
 #scooters:
-#  type: pandas.SQLTableDataset
+#  type: pandas-sqltabledataset
 #  credentials: scooters_credentials
 #  table_name: scooters
 #  load_args:
@@ -43,5 +43,5 @@
 # template. Please feel free to remove it once you remove the example pipeline.
 
 example_iris_data:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/iris.csv

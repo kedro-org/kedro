@@ -22,7 +22,7 @@ class CachedDataset(AbstractDataset):
         >>>    type: CachedDataset
         >>>    versioned: true
         >>>    dataset:
-        >>>       type: pandas.CSVDataset
+        >>>       type: pandas-csvdataset
         >>>       filepath: example.csv
 
     Please note that if your dataset is versioned, this should be indicated in the wrapper

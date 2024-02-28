@@ -42,9 +42,9 @@ def dummy_dataframe():
 def sane_config(filepath):
     return {
         "catalog": {
-            "boats": {"type": "pandas.CSVDataset", "filepath": filepath},
+            "boats": {"type": "pandas-csvdataset", "filepath": filepath},
             "cars": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "s3://test_bucket/test_file.csv",
                 "credentials": "s3_credentials",
             },
@@ -77,11 +77,11 @@ def sane_config_with_tracking_ds(tmp_path):
     return {
         "catalog": {
             "boats": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": boat_path,
                 "versioned": True,
             },
-            "planes": {"type": "tracking.MetricsDataset", "filepath": plane_path},
+            "planes": {"type": "tracking-metricsdataset", "filepath": plane_path},
         },
     }
 
@@ -91,15 +91,15 @@ def config_with_dataset_factories():
     return {
         "catalog": {
             "{brand}_cars": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/01_raw/{brand}_cars.csv",
             },
             "audi_cars": {
-                "type": "pandas.ParquetDataset",
+                "type": "pandas-parquetdataset",
                 "filepath": "data/01_raw/audi_cars.pq",
             },
             "{type}_boats": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/01_raw/{type}_boats.csv",
             },
         },
@@ -113,7 +113,7 @@ def config_with_dataset_factories_nested():
             "{brand}_cars": {
                 "type": "kedro_datasets.partitions.PartitionedDataset",
                 "path": "data/01_raw",
-                "dataset": "pandas.CSVDataset",
+                "dataset": "pandas-csvdataset",
                 "metadata": {
                     "my-plugin": {
                         "brand": "{brand}",
@@ -132,7 +132,7 @@ def config_with_dataset_factories_nested():
 @pytest.fixture
 def config_with_dataset_factories_with_default(config_with_dataset_factories):
     config_with_dataset_factories["catalog"]["{default_dataset}"] = {
-        "type": "pandas.CSVDataset",
+        "type": "pandas-csvdataset",
         "filepath": "data/01_raw/{default_dataset}.csv",
     }
     return config_with_dataset_factories
@@ -141,7 +141,7 @@ def config_with_dataset_factories_with_default(config_with_dataset_factories):
 @pytest.fixture
 def config_with_dataset_factories_bad_pattern(config_with_dataset_factories):
     config_with_dataset_factories["catalog"]["{type}@planes"] = {
-        "type": "pandas.ParquetDataset",
+        "type": "pandas-parquetdataset",
         "filepath": "data/01_raw/{brand}_plane.pq",
     }
     return config_with_dataset_factories
@@ -152,23 +152,23 @@ def config_with_dataset_factories_only_patterns():
     return {
         "catalog": {
             "{default}": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/01_raw/{default}.csv",
             },
             "{namespace}_{dataset}": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/01_raw/{namespace}_{dataset}.pq",
             },
             "{country}_companies": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/01_raw/{country}_companies.csv",
             },
             "{dataset}s": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/01_raw/{dataset}s.csv",
             },
             "{user_default}": {
-                "type": "pandas.ExcelDataset",
+                "type": "pandas-exceldataset",
                 "filepath": "data/01_raw/{user_default}.xlsx",
             },
         },
@@ -476,11 +476,11 @@ class TestDataCatalogFromConfig:
             # In Python 3.7 call_args.args is not available thus we access the call
             # arguments with less meaningful index.
             # The 1st index returns a tuple, the 2nd index return the name of module.
-            assert call_args[0][0] == f"{prefix}pandas.CSVDataset"
+            assert call_args[0][0] == f"{prefix}pandas-csvdataset"
 
     def test_config_import_extras(self, sane_config):
         """Test kedro_datasets default path to the dataset class"""
-        sane_config["catalog"]["boats"]["type"] = "pandas.CSVDataset"
+        sane_config["catalog"]["boats"]["type"] = "pandas-csvdataset"
         assert DataCatalog.from_config(**sane_config)
 
     def test_config_missing_class(self, sane_config):
@@ -566,7 +566,7 @@ class TestDataCatalogFromConfig:
         pattern = "dependency issue"
 
         def dummy_load(obj_path, *args, **kwargs):
-            if obj_path == "kedro_datasets.pandas.CSVDataset":
+            if obj_path == "kedro_datasets.pandas-csvdataset":
                 raise AttributeError(pattern)
             if obj_path == "kedro_datasets.pandas.__all__":
                 return ["CSVDataset"]
@@ -596,7 +596,7 @@ class TestDataCatalogFromConfig:
             catalog = {
                 "ds_to_confirm": {
                     "type": "kedro_datasets.partitions.incremental_dataset.IncrementalDataset",
-                    "dataset": "pandas.CSVDataset",
+                    "dataset": "pandas-csvdataset",
                     "path": str(tmp_path),
                 }
             }
@@ -853,7 +853,7 @@ class TestDataCatalogDatasetFactories:
         extra_dataset_patterns = {
             "{default}": {"type": "MemoryDataset"},
             "{another}#csv": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/{another}.csv",
             },
         }
@@ -880,13 +880,13 @@ class TestDataCatalogDatasetFactories:
         catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
         assert catalog._dataset_patterns["{default}"] == {
             "filepath": "data/01_raw/{default}.csv",
-            "type": "pandas.CSVDataset",
+            "type": "pandas-csvdataset",
         }
 
         extra_dataset_patterns = {
             "{default}": {"type": "MemoryDataset"},
             "{another}#csv": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/{another}.csv",
             },
         }
@@ -901,11 +901,11 @@ class TestDataCatalogDatasetFactories:
         """Check that the runner default overwrites the user default if earlier in alphabet."""
         catalog_config = {
             "{dataset}s": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/01_raw/{dataset}s.csv",
             },
             "{a_default}": {
-                "type": "pandas.ExcelDataset",
+                "type": "pandas-exceldataset",
                 "filepath": "data/01_raw/{a_default}.xlsx",
             },
         }
@@ -913,7 +913,7 @@ class TestDataCatalogDatasetFactories:
         extra_dataset_patterns = {
             "{default}": {"type": "MemoryDataset"},
             "{another}#csv": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/{another}.csv",
             },
         }

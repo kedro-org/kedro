@@ -296,16 +296,16 @@ Outputs: v
 ```
 </details>
 
-To demonstrate this, let us save the intermediate output `n` using a `JSONDataset`.
+To demonstrate this, let us save the intermediate output `n` using a `jsondataset`.
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```python
-from kedro_datasets.pandas import JSONDataset
+from kedro_datasets.pandas import jsondataset
 from kedro.io import DataCatalog, MemoryDataset
 
-n_json = JSONDataset(filepath="./data/07_model_output/len.json")
+n_json = jsondataset(filepath="./data/07_model_output/len.json")
 io = DataCatalog(dict(xs=MemoryDataset([1, 2, 3]), n=n_json))
 ```
 </details>

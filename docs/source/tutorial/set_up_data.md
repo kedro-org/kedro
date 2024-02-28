@@ -28,11 +28,11 @@ Open `conf/base/catalog.yml` for the spaceflights project to inspect the content
 
 ```yaml
 companies:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/companies.csv
 
 reviews:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/reviews.csv
 ```
 </details> <br />
@@ -44,7 +44,7 @@ Likewise for the `xlsx` dataset:
 
 ```yaml
 shuttles:
-  type: pandas.ExcelDataset
+  type: pandas-exceldataset
   filepath: data/01_raw/shuttles.xlsx
   load_args:
     engine: openpyxl # Use modern Excel engine (the default since Kedro 0.18.0)

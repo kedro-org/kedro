@@ -124,14 +124,14 @@ Suppose you have one catalog file called `catalog.yml` containing entries with `
 
 ```yaml
 companies:
-  type: ${_pandas.type}
+  type: ${_pandas-type}
   filepath: data/01_raw/companies.csv
 ```
 
 and a file containing the template values called `catalog_globals.yml`:
 ```yaml
 _pandas:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
 ```
 
 Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the config pattern for catalogs, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
@@ -147,7 +147,7 @@ companies:
   type: ${_dataset_type}
   filepath: data/01_raw/companies.csv
 
-_dataset_type: pandas.CSVDataset
+_dataset_type: pandas-csvdataset
 ```
 
 ```python
@@ -160,7 +160,7 @@ conf_loader = OmegaConfigLoader(conf_source=conf_path)
 
 conf_catalog = conf_loader["catalog"]
 # conf_catalog["companies"]
-# Will result in: {'type': 'pandas.CSVDataset', 'filepath': 'data/01_raw/companies.csv'}
+# Will result in: {'type': 'pandas-csvdataset', 'filepath': 'data/01_raw/companies.csv'}
 ```
 
 ### How to use global variables with the `OmegaConfigLoader`
@@ -174,7 +174,7 @@ Suppose you have global variables located in the file `conf/base/globals.yml`:
 ```yaml
 my_global_value: 45
 dataset_type:
-  csv: pandas.CSVDataset
+  csv: pandas-csvdataset
 ```
 You can access these global variables in your catalog or parameters config files with a `globals` resolver like this:
 `conf/base/parameters.yml`:
@@ -213,7 +213,7 @@ kedro run --params random=3
 You can also specify a default value to be used in case the runtime parameter is not specified with the `kedro run` command. Consider this catalog entry:
 ```yaml
 companies:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: "${runtime_params:folder, 'data/01_raw'}/companies.csv"
 ```
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
@@ -257,7 +257,7 @@ types to the catalog entry.
 
 ```yaml
 my_polars_dataset:
-  type: polars.CSVDataset
+  type: polars-csvdataset
   filepath: data/01_raw/my_dataset.csv
   load_args:
     dtypes:

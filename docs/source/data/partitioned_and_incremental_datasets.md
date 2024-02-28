@@ -2,7 +2,7 @@
 
 ## Partitioned datasets
 
-Distributed systems play an increasingly important role in ETL data pipelines. They increase the processing throughput, enabling us to work with much larger volumes of input data. A situation may arise where your Kedro node needs to read the data from a directory full of uniform files of the same type like JSON or CSV. Tools like `PySpark` and the corresponding {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>` cater for such use cases but may not always be possible.
+Distributed systems play an increasingly important role in ETL data pipelines. They increase the processing throughput, enabling us to work with much larger volumes of input data. A situation may arise where your Kedro node needs to read the data from a directory full of uniform files of the same type like JSON or CSV. Tools like `PySpark` and the corresponding {class}`SparkDataset<kedro-datasets:kedro_datasets.spark-sparkdataset>` cater for such use cases but may not always be possible.
 
 This is why Kedro provides {class}`PartitionedDataset<kedro-datasets:kedro_datasets.partitions.PartitionedDataset>` with the following features:
 
@@ -25,7 +25,7 @@ You can use a `PartitionedDataset` in `catalog.yml` file like any other regular 
 my_partitioned_dataset:
   type: partitions.PartitionedDataset
   path: s3://my-bucket-name/path/to/folder  # path to the location of partitions
-  dataset: pandas.CSVDataset  # shorthand notation for the dataset which will handle individual partitions
+  dataset: pandas-csvdataset  # shorthand notation for the dataset which will handle individual partitions
   credentials: my_credentials
   load_args:
     load_arg1: value1
@@ -59,7 +59,7 @@ my_partitioned_dataset:
   type: partitions.PartitionedDataset
   path: s3://my-bucket-name/path/to/folder
   dataset:  # full dataset config notation
-    type: pandas.CSVDataset
+    type: pandas-csvdataset
     load_args:
       delimiter: ","
     save_args:
@@ -89,7 +89,7 @@ The dataset definition should be passed into the `dataset` argument of the `Part
 
 #### Shorthand notation
 
-Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [AbstractDataset](/api/kedro.io.AbstractDataset).
+Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas-csvdataset` or a fully qualified class path like `kedro_datasets.pandas-csvdataset`) or as a class object that is a subclass of the [AbstractDataset](/api/kedro.io.AbstractDataset).
 
 #### Full notation
 
@@ -110,11 +110,11 @@ Here is the full list of possible scenarios:
 
 | Top-level credentials | Underlying dataset credentials | Example `PartitionedDataset` definition                                                                                                                                    | Description                                                                                                                                                                                     |
 | --------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Undefined             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas.CSVDataset")`                                                                                  | Credentials are not passed to the underlying dataset or the filesystem                                                                                                                          |
-| Undefined             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": {"secret": True}})`                                       | Underlying dataset credentials are passed to the `CSVDataset` constructor, filesystem is instantiated without credentials                                                                       |
-| Specified             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas.CSVDataset", credentials={"secret": True})`                                                    | Top-level credentials are passed to the underlying `CSVDataset` constructor and the filesystem                                                                                                  |
-| Specified             | `None`                         | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": None}, credentials={"dataset_secret": True})`             | Top-level credentials are passed to the filesystem, `CSVDataset` is instantiated without credentials - this way you can stop the top-level credentials from propagating into the dataset config |
-| Specified             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": {"dataset_secret": True}}, credentials={"secret": True})` | Top-level credentials are passed to the filesystem, underlying dataset credentials are passed to the `CSVDataset` constructor                                                                   |
+| Undefined             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas-csvdataset")`                                                                                  | Credentials are not passed to the underlying dataset or the filesystem                                                                                                                          |
+| Undefined             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas-csvdataset", "credentials": {"secret": True}})`                                       | Underlying dataset credentials are passed to the `CSVDataset` constructor, filesystem is instantiated without credentials                                                                       |
+| Specified             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas-csvdataset", credentials={"secret": True})`                                                    | Top-level credentials are passed to the underlying `CSVDataset` constructor and the filesystem                                                                                                  |
+| Specified             | `None`                         | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas-csvdataset", "credentials": None}, credentials={"dataset_secret": True})`             | Top-level credentials are passed to the filesystem, `CSVDataset` is instantiated without credentials - this way you can stop the top-level credentials from propagating into the dataset config |
+| Specified             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas-csvdataset", "credentials": {"dataset_secret": True}}, credentials={"secret": True})` | Top-level credentials are passed to the filesystem, underlying dataset credentials are passed to the `CSVDataset` constructor                                                                   |
 
 ### Partitioned dataset load
 
@@ -173,7 +173,7 @@ Partition ID _does not_ represent the whole partition path, but only a part of i
 new_partitioned_dataset:
   type: partitions.PartitionedDataset
   path: s3://my-bucket-name
-  dataset: pandas.CSVDataset
+  dataset: pandas-csvdataset
   filename_suffix: ".csv"
 ```
 
@@ -321,7 +321,7 @@ Important notes about the confirmation operation:
 my_partitioned_dataset:
   type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
+  dataset: pandas-csvdataset
   checkpoint:
     # update the filepath and load_args, but keep the dataset type unchanged
     filepath: gcs://other-bucket/CHECKPOINT
@@ -338,7 +338,7 @@ Along with the standard dataset attributes, `checkpoint` config also accepts two
 my_partitioned_dataset:
   type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
+  dataset: pandas-csvdataset
   checkpoint:
     comparison_func: my_module.path.to.custom_comparison_function  # the path must be importable
 ```
@@ -349,7 +349,7 @@ my_partitioned_dataset:
 my_partitioned_dataset:
   type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
+  dataset: pandas-csvdataset
   checkpoint:
     force_checkpoint: 2020-01-01/data.csv
 ```
@@ -362,7 +362,7 @@ Specification of `force_checkpoint` is also supported via the shorthand notation
 my_partitioned_dataset:
   type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
+  dataset: pandas-csvdataset
   checkpoint: 2020-01-01/data.csv
 ```
 
@@ -374,6 +374,6 @@ If you need to force the partitioned dataset to load all available partitions, s
 my_partitioned_dataset:
   type: partitions.IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
+  dataset: pandas-csvdataset
   checkpoint: ""
 ```

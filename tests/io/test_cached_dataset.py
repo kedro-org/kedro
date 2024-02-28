@@ -11,7 +11,7 @@ YML_CONFIG = """
 test_ds:
   type: CachedDataset
   dataset:
-    type: kedro_datasets.pandas.CSVDataset
+    type: kedro_datasets.pandas-csvdataset
     filepath: example.csv
 """
 
@@ -20,7 +20,7 @@ test_ds:
   type: CachedDataset
   versioned: true
   dataset:
-    type: kedro_datasets.pandas.CSVDataset
+    type: kedro_datasets.pandas-csvdataset
     filepath: example.csv
 """
 
@@ -28,7 +28,7 @@ YML_CONFIG_VERSIONED_BAD = """
 test_ds:
   type: CachedDataset
   dataset:
-    type: kedro_datasets.pandas.CSVDataset
+    type: kedro_datasets.pandas-csvdataset
     filepath: example.csv
     versioned: true
 """

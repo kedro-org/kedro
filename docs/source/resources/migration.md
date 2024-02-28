@@ -52,7 +52,7 @@ The following `catalog.yml` entry changes from the following in 0.18.x code:
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas-csvdataset
   filepath: data/01_raw/companies.csv
   layer: raw
 ```
@@ -61,7 +61,7 @@ to this in 0.19.x:
 
 ```yaml
 companies:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/companies.csv
   metadata:
     kedro-viz:
@@ -78,7 +78,7 @@ For example the following `APIDataset` in `catalog.yml` changes from the followi
 
 ```yaml
 us_corn_yield_data:
-  type: api.APIDataSet
+  type: api-apidataset
   url: https://quickstats.nass.usda.gov
   credentials: usda_credentials
   params:
@@ -90,7 +90,7 @@ to this in 0.19.x:
 
 ```yaml
 us_corn_yield_data:
-  type: api.APIDataSet
+  type: api-apidataset
   url: https://quickstats.nass.usda.gov
   credentials: usda_credentials
   load_args:

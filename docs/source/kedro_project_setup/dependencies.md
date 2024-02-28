@@ -46,7 +46,7 @@ The [Data Catalog](../data/data_catalog.md) is your way of interacting with diff
 
 #### Install dependencies at a group-level
 
-Data types are broken into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of data types e.g.`pandas.CSVDataset`, `pandas.ParquetDataset` and more. You can install dependencies for an entire group of dependencies as follows:
+Data types are broken into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of data types e.g.`pandas-csvdataset`, `pandas-parquetdataset` and more. You can install dependencies for an entire group of dependencies as follows:
 
 ```bash
 pip install "kedro-datasets[<group>]"
@@ -59,7 +59,7 @@ This installs Kedro and dependencies related to the data type group. An example 
 To limit installation to dependencies specific to a data type:
 
 ```bash
-pip install "kedro-datasets[<group>.<dataset>]"
+pip install "kedro-datasets[<group>-<dataset>]"
 ```
 
-For example, your workflow might require use of the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas.ExcelDataset]"`.
+For example, your workflow might require use of the `pandas-exceldataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas-exceldataset]"`.

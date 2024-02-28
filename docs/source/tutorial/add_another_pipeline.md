@@ -120,7 +120,7 @@ The following definition in `conf/base/catalog.yml` registers the dataset that s
 
 ```yaml
 regressor:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/06_models/regressor.pickle
   versioned: true
 ```
@@ -264,12 +264,12 @@ First, add namespaces to the modelling component of the data science pipeline to
 
 ```yaml
 active_modelling_pipeline.regressor:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/06_models/regressor_active.pickle
   versioned: true
 
 candidate_modelling_pipeline.regressor:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/06_models/regressor_candidate.pickle
   versioned: true
 
@@ -518,6 +518,6 @@ kedro run --runner=ThreadRunner
 kedro run --runner=module.path.to.my.runner
 ```
 
-`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and {class}`Dask<kedro-datasets:kedro_datasets.dask.ParquetDataset>`.
+`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and {class}`Dask<kedro-datasets:kedro_datasets.dask-parquetdataset>`.
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).

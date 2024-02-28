@@ -17,15 +17,15 @@ The example below registers two `csv` datasets, and an `xlsx` dataset. The minim
 
 ```yaml
 companies:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/companies.csv
 
 reviews:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataset
+  type: pandas-exceldataset
   filepath: data/01_raw/shuttles.xlsx
   load_args:
     engine: openpyxl # Use modern Excel engine (the default since Kedro 0.18.0)
@@ -68,7 +68,7 @@ For example, to load or save a CSV on a local file system, using specified load/
 
 ```yaml
 cars:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/company/cars.csv
   load_args:
     sep: ','
@@ -121,7 +121,7 @@ and the Data Catalog is specified in `catalog.yml` as follows:
 
 ```yaml
 motorbikes:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
   credentials: dev_s3
   load_args:
@@ -137,7 +137,7 @@ Kedro enables dataset and ML model versioning through the `versioned` definition
 
 ```yaml
 cars:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/company/cars.csv
   versioned: True
 ```
@@ -171,12 +171,12 @@ To illustrate this, consider the following catalog entry for a dataset named `ca
 ```yaml
 cars:
   filepath: s3://my_bucket/cars.csv
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
  ```
 You can overwrite this catalog entry in `conf/local/catalog.yml` to point to a locally stored file instead:
 ```yaml
 cars:
   filepath: data/01_raw/cars.csv
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
 ```
 In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml` and rely on Kedro to detect which definition of `cars` dataset to use in your pipeline.

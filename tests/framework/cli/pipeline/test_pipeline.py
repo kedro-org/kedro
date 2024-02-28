@@ -187,7 +187,7 @@ class TestPipelineCreateCommand:
         conf_dir = fake_repo_path / settings.CONF_SOURCE / "base"
         catalog_dict = {
             "ds_from_pipeline": {
-                "type": "pandas.CSVDataset",
+                "type": "pandas-csvdataset",
                 "filepath": "data/01_raw/iris.csv",
             }
         }

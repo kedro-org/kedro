@@ -191,7 +191,7 @@ You should see output similar to the following:
 
 ## Preprocessed data registration
 
-Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format {class}`pandas.ParquetDataset<kedro-datasets:kedro_datasets.pandas.ParquetDataset>` because they are registered within the [Data Catalog](../resources/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format {class}`pandas-parquetdataset<kedro-datasets:kedro_datasets.pandas-parquetdataset>` because they are registered within the [Data Catalog](../resources/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
 
 
 <details>
@@ -199,11 +199,11 @@ Each of the nodes outputs a new dataset (`preprocessed_companies` and `preproces
 
 ```yaml
 preprocessed_companies:
-  type: pandas.ParquetDataset
+  type: pandas-parquetdataset
   filepath: data/02_intermediate/preprocessed_companies.pq
 
 preprocessed_shuttles:
-  type: pandas.ParquetDataset
+  type: pandas-parquetdataset
   filepath: data/02_intermediate/preprocessed_shuttles.pq
 ```
 </details>
@@ -289,7 +289,7 @@ The following entry in `conf/base/catalog.yml` saves the model input table datas
 
 ```yaml
 model_input_table:
-  type: pandas.ParquetDataset
+  type: pandas-parquetdataset
   filepath: data/03_primary/model_input_table.pq
 ```
 

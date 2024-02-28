@@ -95,25 +95,25 @@ To follow this tutorial, ensure you have the following:
 
 ```yaml
 example_iris_data:
-  type: pandas.CSVDataset
+  type: pandas-csvdataset
   filepath: data/01_raw/iris.csv
 example_train_x:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/05_model_input/example_train_x.pkl
 example_train_y:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/05_model_input/example_train_y.pkl
 example_test_x:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/05_model_input/example_test_x.pkl
 example_test_y:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/05_model_input/example_test_y.pkl
 example_model:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/06_models/example_model.pkl
 example_predictions:
-  type: pickle.PickleDataset
+  type: pickle-pickledataset
   filepath: data/07_model_output/example_predictions.pkl
 ```
 

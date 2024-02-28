@@ -245,14 +245,14 @@ class DataCatalog:
 
             >>> config = {
             >>>     "cars": {
-            >>>         "type": "pandas.CSVDataset",
+            >>>         "type": "pandas-csvdataset",
             >>>         "filepath": "cars.csv",
             >>>         "save_args": {
             >>>             "index": False
             >>>         }
             >>>     },
             >>>     "boats": {
-            >>>         "type": "pandas.CSVDataset",
+            >>>         "type": "pandas-csvdataset",
             >>>         "filepath": "s3://aws-bucket-name/boats.csv",
             >>>         "credentials": "boats_credentials",
             >>>         "save_args": {

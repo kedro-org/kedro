@@ -34,7 +34,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [MosaicMan](https://github.com/MosaicMan)
 * [Fazil](https://github.com/lordsoffallen)
 
-
 # Release 0.19.2
 
 ## Bug fixes and other changes
@@ -50,6 +49,11 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Changed input format for tools option obtained from --config file from numbers to short names.
 
 ## Documentation changes
+* Added documentation about `bootstrap_project` and `configure_project`.
+* Added documentation about `kedro run` and hook execution order.
+
+## Migration guide from Kedro 0.18.* to 0.19.*
+[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
 
 # Release 0.19.1
 

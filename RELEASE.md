@@ -51,50 +51,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 ## Documentation changes
 
-# Upcoming Release 0.19.3
-
-## Major features and improvements
-* Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
-* Add better IPython, VSCode Notebook support for `%load_node` and minimal support for Databricks.
-* Add full Kedro Node input syntax for `%load_node`.
-
-## Bug fixes and other changes
-* Updated CLI Command `kedro catalog resolve` to work with dataset factories that use `PartitionedDataset`.
-* Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
-* Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
-* Enable read-the-docs search when user presses Command/Ctrl + K.
-* Added new JSON Schema that works with Kedro versions 0.19.*
-
-## Breaking changes to the API
-
-## Documentation changes
-
-## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
-* [MosaicMan](https://github.com/MosaicMan)
-
-
-# Release 0.19.2
-
-## Bug fixes and other changes
-* Removed example pipeline requirements when examples are not selected in `tools`.
-* Allowed modern versions of JupyterLab and Jupyter Notebooks.
-* Removed setuptools dependency
-* Added `source_dir` explicitly in `pyproject.toml` for non-src layout project.
-* `MemoryDataset` entries are now included in free outputs.
-* Removed black dependency and replaced it functionality with `ruff format`.
-
-## Breaking changes to the API
-* Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
-* Changed input format for tools option obtained from --config file from numbers to short names.
-
-## Documentation changes
-* Added documentation about `bootstrap_project` and `configure_project`.
-* Added documentation about `kedro run` and hook execution order.
-
-## Migration guide from Kedro 0.18.* to 0.19.*
-[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
-
 # Release 0.19.1
 
 ## Bug fixes and other changes

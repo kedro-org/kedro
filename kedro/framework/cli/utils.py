@@ -68,8 +68,6 @@ def find_stylesheets() -> Iterable[str]:  # pragma: no cover
     css_path = Path(__file__).resolve().parents[1] / "html" / "_static" / "css"
     return (
         str(css_path / "copybutton.css"),
-        str(css_path / "qb1-sphinx-rtd.css"),
-        str(css_path / "theme-overrides.css"),
     )
 
 

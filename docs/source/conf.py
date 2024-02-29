@@ -523,8 +523,6 @@ def setup(app):
     app.connect("builder-inited", _add_jinja_filters)
     app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
-    # fix a bug with table wraps in Read the Docs Sphinx theme:
-    # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
 
 
 # (regex, restructuredText link replacement, object) list

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 import click
-from importlib_metadata import PackageMetadata
+from importlib.metadata import PackageMetadata
 from omegaconf import OmegaConf
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name

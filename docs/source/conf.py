@@ -14,7 +14,6 @@
 from __future__ import annotations
 
 import importlib
-import os
 import re
 import sys
 from inspect import getmembers, isclass, isfunction
@@ -202,7 +201,7 @@ pygments_style = "sphinx"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "kedro-sphinx-theme"
 here = Path(__file__).parent.absolute()
 
 # Theme options are theme-specific and customise the look and feel of a theme
@@ -492,36 +491,7 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PL
     remove_arrows_in_examples(lines)
 
 
-def env_override(default_appid):
-    build_version = os.getenv("READTHEDOCS_VERSION")
-
-    if build_version == "latest":
-        return os.environ["HEAP_APPID_QA"]
-    if build_version == "stable":
-        return os.environ["HEAP_APPID_PROD"]
-
-    return default_appid  # default to Development for local builds
-
-
-def _add_jinja_filters(app):
-    # https://github.com/crate/crate/issues/10833
-    from sphinx.builders.latex import LaTeXBuilder
-    from sphinx.builders.linkcheck import CheckExternalLinksBuilder
-
-    # LaTeXBuilder is used in the PDF docs build,
-    # and it doesn't have attribute 'templates'
-    if not (isinstance(app.builder, (LaTeXBuilder, CheckExternalLinksBuilder))):
-        app.builder.templates.environment.filters["env_override"] = env_override
-
-
-def _override_permalinks_icon(app):
-    # https://github.com/readthedocs/sphinx_rtd_theme/issues/98#issuecomment-1503211439
-    app.config.html_permalinks_icon = "¶"
-
-
 def setup(app):
-    app.connect("builder-inited", _add_jinja_filters)
-    app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
 
 

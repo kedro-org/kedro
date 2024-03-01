@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 import click
-from importlib.metadata import PackageMetadata
+from importlib_metadata import PackageMetadata
 from omegaconf import OmegaConf
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
@@ -245,7 +245,8 @@ def _pull_package(  # noqa: PLR0913
             )
         package_name = packages[0]
 
-        package_reqs = _get_all_library_reqs(library_meta)
+        # Type ignored because of https://github.com/pypa/build/pull/693
+        package_reqs = _get_all_library_reqs(library_meta)  # type: ignore[arg-type]
 
         if package_reqs:
             requirements_txt = metadata.project_path / "requirements.txt"

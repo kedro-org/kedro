@@ -385,6 +385,12 @@ class TestKedroCLI:
         assert result.exit_code == 0
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" not in result.output
+
+    def test_kedro_run_no_project(self, mocker, tmp_path):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
+        kedro_cli = KedroCLI(tmp_path)
+
+        result = CliRunner().invoke(kedro_cli, ["run"])
         assert (
             "You are not in a Kedro project! Project specific commands such as 'run' or "
             "'jupyter' are only available within a project directory." in result.output

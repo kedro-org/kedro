@@ -385,6 +385,15 @@ class TestKedroCLI:
         assert result.exit_code == 0
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" not in result.output
+        assert (
+            "You are not in a Kedro project! Project specific commands such as 'run' or "
+            "'jupyter' are only available within a project directory." in result.output
+        )
+
+        assert (
+            "Hint: Kedro is looking for a file called 'pyproject.toml, is one present in"
+            " your current working directory?" in result.output
+        )
 
     def test_kedro_cli_with_project(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])

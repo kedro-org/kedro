@@ -144,6 +144,7 @@ class KedroCLI(CommandCollection):
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
+            # When the CLI is run outside of a project, project_groups are not registered
             if not self.project_groups:
                 ORANGE = (255, 175, 0)
                 BRIGHT_BLACK = (128, 128, 128)

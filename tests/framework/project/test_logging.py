@@ -6,6 +6,7 @@ import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
+from kedro.logging import fmt_rich, has_rich_handler
 
 
 @pytest.fixture
@@ -144,3 +145,17 @@ def test_rich_traceback_disabled_on_databricks(
 
     rich_traceback_install.assert_not_called()
     rich_pretty_install.assert_called()
+
+
+def test_rich_format():
+    assert (
+        fmt_rich("Hello World!", "dark_orange")
+        == "[dark_orange]Hello World![/dark_orange]"
+    )
+
+
+def test_has_rich_handler():
+    test_logger = logging.getLogger("test_logger")
+    assert not has_rich_handler(test_logger)
+    test_logger.addHandler(RichHandler())
+    assert has_rich_handler(test_logger)

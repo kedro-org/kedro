@@ -65,6 +65,6 @@ def has_rich_handler(logger: logging.Logger) -> bool:
     return any(isinstance(handler, RichHandler) for handler in logger.handlers)
 
 
-def rich_color(value: str, color: str) -> str:
-    """Format string with rich color"""
-    return f"[{color}]{value}[/{color}]"
+def fmt_rich(value: str, markup: str) -> str:
+    """Format string with rich markup"""
+    return f"[{markup}]{value}[/{markup}]"

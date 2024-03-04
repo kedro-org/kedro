@@ -58,3 +58,13 @@ class RichHandler(rich.logging.RichHandler):
             # fixed on their side at some point, but until then we disable it.
             # See https://github.com/Textualize/rich/issues/2455
             rich.traceback.install(**traceback_install_kwargs)  # type: ignore[arg-type]
+
+
+def has_rich_handler(logger: logging.Logger) -> bool:
+    """Returns true if the logger has a RichHandler attached."""
+    return any(isinstance(handler, RichHandler) for handler in logger.handlers)
+
+
+def rich_color(value: str, color: str) -> str:
+    """Format string with rich color"""
+    return f"[{color}]{value}[/{color}]"

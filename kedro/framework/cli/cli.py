@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import importlib
 import sys
+import traceback
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Sequence
@@ -133,12 +134,15 @@ class KedroCLI(CommandCollection):
             )
         # click.core.main() method exits by default, we capture this and then
         # exit as originally intended
+
         except SystemExit as exc:
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
             # When the CLI is run outside of a project, project_groups are not registered
-            if not self.project_groups:
+            catch_exception = "click.exceptions.UsageError: No such command"
+            # click convert exception handles to error message
+            if catch_exception in traceback.format_exc() and not self.project_groups:
                 ORANGE = (255, 175, 0)
                 BRIGHT_BLACK = (128, 128, 128)
                 warn = click.style(

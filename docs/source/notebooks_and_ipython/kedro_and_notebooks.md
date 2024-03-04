@@ -227,13 +227,13 @@ For more details, run `%reload_kedro?`.
 This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VSCode Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
 ```
 You can load the contents of a node in your project into a series of cells using the `%load_node` line magic. To use `%load_node`, you need to fulfill two requirements:
-- The node need to have a name
+- The node needs to have a name
 - The node's inputs need to be persisted
 
-You can find [examples of creating node with name](../nodes_and_pipelines/nodes.md#how-to-create-a-node). By default, Kedro save data in memory. To persist the data, you can [register dataset in `DataCatalog`](../tutorial/create_a_pipeline.md#preprocessed-data-registration).
+You can find [examples of creating nodes with names](../nodes_and_pipelines/nodes.md#how-to-create-a-node). By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../tutorial/create_a_pipeline.md#preprocessed-data-registration).
 
 ``` {note}
-Node name need to be unique within the pipeline. With the absence of user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
+The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
 ```
 
 The line magic will load your node's inputs, imports, and body:

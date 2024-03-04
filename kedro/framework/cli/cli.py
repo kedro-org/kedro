@@ -8,13 +8,10 @@ import importlib
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Optional, Sequence
+from typing import Any, Sequence
 
 import click
 from black import find_project_root
-from click.core import Command, Context
-from rich.console import Console
-from rich.panel import Panel
 
 from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
@@ -112,6 +109,7 @@ class KedroCLI(CommandCollection):
             ("Global commands", self.global_groups),
             ("Project specific commands", self.project_groups),
         )
+        # print("KEDRO CLI************")
 
     def main(
         self,
@@ -146,6 +144,32 @@ class KedroCLI(CommandCollection):
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
+            if not self.project_groups:
+                ORANGE = (255, 175, 0)
+                BRIGHT_BLACK = (128, 128, 128)
+                warn = click.style(
+                    "\nYou are not in a Kedro project! ", fg=ORANGE, bold=True
+                )
+                result = (
+                    click.style("Project specific commands such as ")
+                    + click.style("'run' ", fg="cyan")
+                    + "or "
+                    + click.style("'jupyter' ", fg="cyan")
+                    + "are only available within a project directory."
+                )
+                message = warn + result
+                hint = (
+                    click.style(
+                        "\nHint: Kedro is looking for a file called ", fg=BRIGHT_BLACK
+                    )
+                    + click.style("'pyproject.toml", fg="magenta")
+                    + click.style(
+                        ", is one present in your current working directory?",
+                        fg=BRIGHT_BLACK,
+                    )
+                )
+                click.echo(message)
+                click.echo(hint)
             sys.exit(exc.code)
 
     @property
@@ -196,35 +220,6 @@ class KedroCLI(CommandCollection):
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
         return [*built_in, *plugins, user_defined]
-
-    def get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
-        """
-        Add more useful help message when command is not found. i.e. try to find where
-        the kedro project root is.
-        """
-        command = super().get_command(ctx, cmd_name)
-
-        if not command:
-            warn = "[orange1][b]You are not in a Kedro project[/]![/]"
-            result = "Project specific commands such as '[bright_cyan]run[/]' or \
-'[bright_cyan]jupyter[/]' are only available within a project directory."
-            if self._guessed_project_root:
-                solution = f"[bright_black][b]Hint:[/] [i]Kedro is looking for a file called \
-'[magenta]pyproject.toml[/]', Is this your working directory?[/]\
-\n{self._guessed_project_root}[/]"
-            else:
-                solution = "[bright_black][b]Hint:[/] [i]Kedro is looking for a file called \
-'[magenta]pyproject.toml[/]', is one present in your current working directory?[/][/]"
-            msg = f"{warn} {result}\n\n{solution}"
-            console = Console()
-            panel = Panel(
-                msg,
-                title=f"Command '{cmd_name}' not found",
-                expand=False,
-                border_style="dim",
-                title_align="left",
-            )
-            console.print("\n", panel, "\n")
 
 
 def main() -> None:  # pragma: no cover

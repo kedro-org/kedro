@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import click
-from black import find_project_root
 
 from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
@@ -96,20 +95,14 @@ class KedroCLI(CommandCollection):
 
     def __init__(self, project_path: Path):
         self._metadata = None  # running in package mode
-        self._guessed_project_root = None
         if _is_project(project_path):
             self._metadata = bootstrap_project(project_path)
-        else:
-            guessed_project_root, _ = find_project_root(None)
-            if _is_project(guessed_project_root):
-                self._guessed_project_root = guessed_project_root
         self._cli_hook_manager = get_cli_hook_manager()
 
         super().__init__(
             ("Global commands", self.global_groups),
             ("Project specific commands", self.project_groups),
         )
-        # print("KEDRO CLI************")
 
     def main(
         self,

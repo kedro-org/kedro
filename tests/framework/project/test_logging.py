@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
-from kedro.logging import fmt_rich, has_rich_handler, RichHandler
+from kedro.logging import RichHandler, fmt_rich, has_rich_handler
 
 
 @pytest.fixture

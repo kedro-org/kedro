@@ -30,7 +30,8 @@ from kedro.framework.cli.utils import (
     load_entry_points,
 )
 from kedro.framework.project import LOGGING  # noqa: F401
-from kedro.framework.startup import _is_project, bootstrap_project
+from kedro.framework.startup import bootstrap_project
+from kedro.utils import _is_project
 
 LOGO = rf"""
  _            _

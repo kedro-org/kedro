@@ -27,6 +27,7 @@ from kedro.framework.project import (
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.utils import _find_kedro_project
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
@@ -104,7 +105,9 @@ class KedroSession:
         save_on_close: bool = False,
         conf_source: str | None = None,
     ):
-        self._project_path = Path(project_path or Path.cwd()).resolve()
+        self._project_path = Path(
+            project_path or _find_kedro_project(Path.cwd()).resolve() or Path.cwd()
+        )
         self.session_id = session_id
         self.save_on_close = save_on_close
         self._package_name = package_name

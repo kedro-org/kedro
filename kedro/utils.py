@@ -46,8 +46,8 @@ def _is_project(project_path: Union[str, Path]) -> bool:
 
 
 def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
-    for parent_dir in current_dir.parents:
+    paths_to_check = [current_dir] + list(current_dir.parents)
+    for parent_dir in paths_to_check:
         if _is_project(parent_dir):
             return parent_dir
-
     return None

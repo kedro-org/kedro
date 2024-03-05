@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.4
 
 ## Major features and improvements
+* Kedro commands now work from any subdirectory within a Kedro project.
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.

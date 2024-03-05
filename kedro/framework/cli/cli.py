@@ -14,6 +14,7 @@ from typing import Any, Sequence
 import click
 
 from kedro import __version__ as version
+from kedro.framework.cli import BRIGHT_BLACK, ORANGE
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
 from kedro.framework.cli.jupyter import jupyter_cli
@@ -139,12 +140,10 @@ class KedroCLI(CommandCollection):
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
-            # When the CLI is run outside of a project, project_groups are not registered
+            # When CLI is run outside of a project, project_groups are not registered
             catch_exception = "click.exceptions.UsageError: No such command"
             # click convert exception handles to error message
             if catch_exception in traceback.format_exc() and not self.project_groups:
-                ORANGE = (255, 175, 0)
-                BRIGHT_BLACK = (128, 128, 128)
                 warn = click.style(
                     "\nKedro project not found in this directory. ",
                     fg=ORANGE,

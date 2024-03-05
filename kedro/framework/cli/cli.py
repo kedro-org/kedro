@@ -146,7 +146,9 @@ class KedroCLI(CommandCollection):
                 ORANGE = (255, 175, 0)
                 BRIGHT_BLACK = (128, 128, 128)
                 warn = click.style(
-                    "\nYou are not in a Kedro project! ", fg=ORANGE, bold=True
+                    "\nKedro project not found in this directory. ",
+                    fg=ORANGE,
+                    bold=True,
                 )
                 result = (
                     click.style("Project specific commands such as ")

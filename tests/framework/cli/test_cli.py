@@ -392,7 +392,7 @@ class TestKedroCLI:
 
         result = CliRunner().invoke(kedro_cli, ["run"])
         assert (
-            "You are not in a Kedro project! Project specific commands such as 'run' or "
+            "Kedro project not found in this directory. Project specific commands such as 'run' or "
             "'jupyter' are only available within a project directory." in result.output
         )
 

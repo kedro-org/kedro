@@ -85,20 +85,9 @@ test = [
     "types-toposort"
 ]
 docs = [
-    "docutils<0.21",
-    "sphinx>=5.3,<7.3",
-    "sphinx_rtd_theme==2.0.0",
-    # Regression on sphinx-autodoc-typehints 1.21
-    # that creates some problematic docstrings
-    "sphinx-autodoc-typehints==1.20.2",
-    "sphinx_copybutton==0.5.2",
-    "sphinx-notfound-page",
+    "kedro-sphinx-theme @ git+https://github.com/kedro-org/kedro-sphinx-theme@main",
     "ipykernel>=5.3, <7.0",
-    "myst-parser>=1.0,<2.1",
     "Jinja2<3.2.0",
-    "sphinx-last-updated-by-git",
-    "sphinx-favicon",
-    "sphinxcontrib-youtube",
 ]
 jupyter = [
     "ipylab>=1.0.0",

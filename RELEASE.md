@@ -1,23 +1,42 @@
-# Upcoming Release 0.19.3
+# Upcoming Release 0.19.4
+
+## Major features and improvements
+* Kedro commands now work from any subdirectory within a Kedro project.
+* Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`
+
+## Bug fixes and other changes
+* Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
+
+## Breaking changes to the API
+* Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.
+
+## Documentation changes
+
+## Community contributions
+
+# Release 0.19.3
 
 ## Major features and improvements
 * Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
 * Add better IPython, VSCode Notebook support for `%load_node` and minimal support for Databricks.
+* Add full Kedro Node input syntax for `%load_node`.
 
 ## Bug fixes and other changes
 * Updated CLI Command `kedro catalog resolve` to work with dataset factories that use `PartitionedDataset`.
 * Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
 * Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
-* Enable read-the-docs search when user presses Command/Ctrl + K.
+* Added new JSON Schema that works with Kedro versions 0.19.*
 
 ## Breaking changes to the API
 
 ## Documentation changes
+* Enable read-the-docs search when user presses Command/Ctrl + K.
+* Added documentation for `kedro-telemetry` and the data collected by it.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [MosaicMan](https://github.com/MosaicMan)
-
+* [Fazil](https://github.com/lordsoffallen)
 
 # Release 0.19.2
 

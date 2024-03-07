@@ -8,6 +8,7 @@ tasks:
       pip install -e /workspace/kedro[test]
       cd /workspace
       kedro new --name project -s spaceflights-pandas --checkout main
+      pip install -e project
       cd /workspace/kedro
       pre-commit install --install-hooks
 

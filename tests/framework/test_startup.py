@@ -10,10 +10,10 @@ from kedro import __version__ as kedro_version
 from kedro.framework.startup import (
     ProjectMetadata,
     _get_project_metadata,
-    _is_project,
     _validate_source_path,
     bootstrap_project,
 )
+from kedro.utils import _is_project
 
 
 class TestIsProject:

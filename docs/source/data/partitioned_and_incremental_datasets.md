@@ -38,7 +38,7 @@ Like any other dataset, `PartitionedDataset` can also be instantiated programmat
 
 ```python
 from kedro_datasets.pandas import CSVDataset
-from kedro.io import PartitionedDataset
+from kedro_datasets.partitions import PartitionedDataset
 
 my_credentials = {...}  # credentials dictionary
 

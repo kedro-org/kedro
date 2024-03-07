@@ -37,3 +37,7 @@ def dummy_function_with_loop(dummy_list):
     for x in dummy_list:
         continue
     return len(dummy_list)
+
+
+def dummy_function_with_variable_length(dummy_input, my_input, *args, **kwargs):
+    pass

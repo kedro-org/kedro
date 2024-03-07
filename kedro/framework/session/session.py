@@ -106,8 +106,8 @@ class KedroSession:
         conf_source: str | None = None,
     ):
         self._project_path = Path(
-            project_path or _find_kedro_project(Path.cwd()).resolve() or Path.cwd()
-        )
+            project_path or _find_kedro_project(Path.cwd()) or Path.cwd()
+        ).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
         self._package_name = package_name

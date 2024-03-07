@@ -47,7 +47,7 @@ deactivate
 ```
 
 
-### How to create a new virtual environment without using `venv`
+### How to create a new virtual environment using `conda`
 
  [The second, less popular option is to install Conda.](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) Than from your terminal:
 

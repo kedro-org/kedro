@@ -61,7 +61,7 @@ jobs:
           python -m pip install "uv==0.1.15"
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          uv pip install --system --upgrade pip
           make install-test-requirements
           make install-pre-commit
       - name: pip freeze

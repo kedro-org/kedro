@@ -732,3 +732,9 @@ def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
     )
     with pyproject_toml_path.open(mode="a") as file:
         file.write(project_toml_str)
+
+
+@given('I have changed the current working directory to "{dir}"')
+def change_dir(context, dir):
+    """Execute Kedro target."""
+    util.chdir(dir)

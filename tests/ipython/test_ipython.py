@@ -3,9 +3,12 @@ from pathlib import Path
 import pytest
 from IPython.core.error import UsageError
 
+import kedro.ipython
 from kedro.framework.project import pipelines
 from kedro.ipython import (
     _find_node,
+    _format_node_inputs_text,
+    _get_node_bound_arguments,
     _load_node,
     _prepare_function_body,
     _prepare_imports,
@@ -356,13 +359,48 @@ import logging.config  # noqa Dummy import"""
         self,
         dummy_node,
     ):
-        func_inputs = """# Prepare necessary inputs for debugging
-# All debugging inputs must be defined in your project catalog
-dummy_input = catalog.load("dummy_input")
-my_input = catalog.load("extra_input")"""
+        expected = {"dummy_input": "dummy_input", "my_input": "extra_input"}
 
-        result = _prepare_node_inputs(dummy_node)
-        assert result == func_inputs
+        node_bound_arguments = _get_node_bound_arguments(dummy_node)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
+    def test_prepare_node_inputs_when_input_is_empty(
+        self,
+        dummy_node_empty_input,
+    ):
+        expected = {"dummy_input": "", "my_input": ""}
+
+        node_bound_arguments = _get_node_bound_arguments(dummy_node_empty_input)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
+    def test_prepare_node_inputs_with_dict_input(
+        self,
+        dummy_node_dict_input,
+    ):
+        expected = {"dummy_input": "dummy_input", "my_input": "extra_input"}
+
+        node_bound_arguments = _get_node_bound_arguments(dummy_node_dict_input)
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
+
+    def test_prepare_node_inputs_with_variable_length_args(
+        self,
+        dummy_node_with_variable_length,
+    ):
+        expected = {
+            "dummy_input": "dummy_input",
+            "my_input": "extra_input",
+            "first": "first",
+            "second": "second",
+        }
+
+        node_bound_arguments = _get_node_bound_arguments(
+            dummy_node_with_variable_length
+        )
+        result = _prepare_node_inputs(node_bound_arguments)
+        assert result == expected
 
     def test_prepare_function_body(self, dummy_function_defintion):
         result = _prepare_function_body(dummy_function)
@@ -380,3 +418,90 @@ my_input = catalog.load("extra_input")"""
     def test_get_function_with_loop_body(self, dummy_function_with_loop_literal):
         result = _prepare_function_body(dummy_function_with_loop)
         assert result == dummy_function_with_loop_literal
+
+    def test_load_node_magic_with_valid_arguments(self, mocker, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node")
+        ipython.magic("load_node dummy_node")
+
+    def test_load_node_with_invalid_arguments(self, mocker, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node")
+        load_ipython_extension(ipython)
+
+        with pytest.raises(
+            UsageError, match=r"unrecognized arguments: --invalid_arg=dummy_node"
+        ):
+            ipython.magic("load_node --invalid_arg=dummy_node")
+
+    def test_load_node_with_jupyter(self, mocker, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
+        mocker.patch("kedro.ipython._guess_run_environment", return_value="jupyter")
+        spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
+        call = mocker.call
+
+        load_ipython_extension(ipython)
+        ipython.magic("load_node dummy_node")
+        calls = [call("cell1", is_jupyter=True), call("cell2", is_jupyter=True)]
+        spy.assert_has_calls(calls)
+
+    @pytest.mark.parametrize("run_env", ["ipython", "vscode"])
+    def test_load_node_with_ipython(self, mocker, ipython, run_env):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
+        mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)
+        spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
+
+        load_ipython_extension(ipython)
+        ipython.magic("load_node dummy_node")
+        spy.assert_called_once()
+
+    @pytest.mark.parametrize("run_env", ["databricks", "colab", "dummy"])
+    def test_load_node_with_other(self, mocker, ipython, run_env):
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
+        mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)
+        spy = mocker.spy(kedro.ipython, "_print_cells")
+
+        load_ipython_extension(ipython)
+        ipython.magic("load_node dummy_node")
+        spy.assert_called_once()
+
+
+class TestFormatNodeInputsText:
+    def test_format_node_inputs_text_empty_input(self):
+        # Test with empty input_params_dict
+        input_params_dict = {}
+        expected_output = None
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_single_input(self):
+        # Test with a single input
+        input_params_dict = {"input1": "dataset1"}
+        expected_output = (
+            "# Prepare necessary inputs for debugging\n"
+            "# All debugging inputs must be defined in your project catalog\n"
+            'input1 = catalog.load("dataset1")'
+        )
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_multiple_inputs(self):
+        # Test with multiple inputs
+        input_params_dict = {
+            "input1": "dataset1",
+            "input2": "dataset2",
+            "input3": "dataset3",
+        }
+        expected_output = (
+            "# Prepare necessary inputs for debugging\n"
+            "# All debugging inputs must be defined in your project catalog\n"
+            'input1 = catalog.load("dataset1")\n'
+            'input2 = catalog.load("dataset2")\n'
+            'input3 = catalog.load("dataset3")'
+        )
+        assert _format_node_inputs_text(input_params_dict) == expected_output
+
+    def test_format_node_inputs_text_no_catalog_load(self):
+        # Test with no catalog.load() statements if input_params_dict is None
+        assert _format_node_inputs_text(None) is None

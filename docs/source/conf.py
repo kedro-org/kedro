@@ -71,6 +71,8 @@ templates_path = ["_templates"]
 intersphinx_mapping = {
     "kedro-viz": ("https://docs.kedro.org/projects/kedro-viz/en/v6.6.1/", None),
     "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-2.0.0/", None),
+    "cpython": ("https://docs.python.org/3.8/", None),
+    "ipython": ("https://ipython.readthedocs.io/en/8.21.0/", None),
 }
 
 # The suffix(es) of source filenames.
@@ -103,7 +105,6 @@ exclude_patterns = [
     "source",
     "kedro_docs_style_guide.md",
 ]
-
 
 type_targets = {
     "py:class": (
@@ -523,10 +524,8 @@ def setup(app):
     app.connect("builder-inited", _add_jinja_filters)
     app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
-    app.add_css_file("css/qb1-sphinx-rtd.css")
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
-    app.add_css_file("css/theme-overrides.css")
 
 
 # (regex, restructuredText link replacement, object) list

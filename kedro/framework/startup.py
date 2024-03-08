@@ -34,17 +34,6 @@ def _version_mismatch_error(kedro_init_version: str) -> str:
     )
 
 
-def _is_project(project_path: Union[str, Path]) -> bool:
-    metadata_file = Path(project_path).expanduser().resolve() / _PYPROJECT
-    if not metadata_file.is_file():
-        return False
-
-    try:
-        return "[tool.kedro]" in metadata_file.read_text(encoding="utf-8")
-    except Exception:  # noqa: broad-except
-        return False
-
-
 def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     """Read project metadata from `<project_root>/pyproject.toml` config file,
     under the `[tool.kedro]` section.

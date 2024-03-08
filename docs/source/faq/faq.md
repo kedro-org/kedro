@@ -12,10 +12,11 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
 * {py:mod}`Where can I find the documentation for Kedro's datasets <kedro-datasets:kedro_datasets>`?
 
-## Working with Jupyter
+## Working with Notebooks
 
-* [How can I debug a Kedro project in a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md#debugging-with-debug-and-pdb)?
+* [How can I debug a Kedro project in a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md#debugging-a-kedro-project-within-a-notebook)?
 * [How do I connect a Kedro project kernel to other Jupyter clients like JupyterLab](../notebooks_and_ipython/kedro_and_notebooks.md#ipython-jupyterlab-and-other-jupyter-clients)?
+* [How can I use the Kedro IPython extension in a notebook where launching a new kernel is not an option](../notebooks_and_ipython/kedro_and_notebooks.md#loading-the-project-with-the-kedroipython-extension)?
 
 ## Kedro project development
 

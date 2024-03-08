@@ -110,8 +110,8 @@ def create_pipeline(
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE
     project_conf_path = metadata.project_path / conf_source
-
-    env = env or "base"
+    base_env = settings.CONFIG_LOADER_ARGS.get("base_env", "base")
+    env = env or base_env
     if not skip_config and not (project_conf_path / env).exists():
         raise KedroCliError(
             f"Unable to locate environment '{env}'. "
@@ -152,8 +152,8 @@ def delete_pipeline(
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE
     project_conf_path = metadata.project_path / conf_source
-
-    env = env or "base"
+    base_env = settings.CONFIG_LOADER_ARGS.get("base_env", "base")
+    env = env or base_env
     if not (project_conf_path / env).exists():
         raise KedroCliError(
             f"Unable to locate environment '{env}'. "

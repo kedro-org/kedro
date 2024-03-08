@@ -26,6 +26,15 @@ class AbstractConfigLoader(UserDict):
         self.env = env
         self.runtime_params = runtime_params or {}
 
+    # From Python 3.12 __getitem__ isn't called in UserDict.get()
+    # Use the version from 3.11 and prior
+    def get(self, key, default=None):
+        "D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
 
 class BadConfigException(Exception):
     """Raised when a configuration file cannot be loaded, for instance

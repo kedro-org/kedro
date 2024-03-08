@@ -424,27 +424,24 @@ class TestOmegaConfigLoader:
             ]
         }
 
-        # Use a mocked function to keep track of function calls
-        with mocker.patch(
-            "omegaconf.OmegaConf.load", wraps=OmegaConf.load
-        ) as mocked_load:
-            catalog = OmegaConfigLoader(
-                conf_source=str(tmp_path),
-                base_env=_BASE_ENV,
-                env="dev",
-                config_patterns=catalog_patterns,
-            )["catalog"]
-            expected_catalog = {
-                "env": "dev",
-                "common": "common",
-                "dev_specific": "wiz",
-                "user1_c2": True,
-            }
-            assert catalog == expected_catalog
+        load_spy = mocker.spy(OmegaConf, "load")
+        catalog = OmegaConfigLoader(
+            conf_source=str(tmp_path),
+            base_env=_BASE_ENV,
+            env="dev",
+            config_patterns=catalog_patterns,
+        )["catalog"]
+        expected_catalog = {
+            "env": "dev",
+            "common": "common",
+            "dev_specific": "wiz",
+            "user1_c2": True,
+        }
+        assert catalog == expected_catalog
 
-            # Assert any specific config file was only loaded once
-            expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
-            mocked_load.assert_called_once_with(expected_path)
+        # Assert any specific config file was only loaded once
+        expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
+        load_spy.assert_called_once_with(expected_path)
 
     def test_yaml_parser_error(self, tmp_path):
         conf_path = tmp_path / _BASE_ENV

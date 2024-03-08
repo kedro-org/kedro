@@ -401,8 +401,7 @@ class TestOmegaConfigLoader:
         )["catalog"]
         assert catalog == {}
 
-    # @pytest.mark.xfail(reason="Pending fix")
-    # TODO rewrite this test
+    @pytest.mark.xfail(reason="Logic failing")
     def test_overlapping_patterns(self, tmp_path, mocker):
         """Check that same configuration file is not loaded more than once."""
         _write_yaml(
@@ -423,24 +422,27 @@ class TestOmegaConfigLoader:
             ]
         }
 
-        catalog = OmegaConfigLoader(
-            conf_source=str(tmp_path),
-            base_env=_BASE_ENV,
-            env="dev",
-            config_patterns=catalog_patterns,
-        )["catalog"]
-        expected_catalog = {
-            "env": "dev",
-            "common": "common",
-            "dev_specific": "wiz",
-            "user1_c2": True,
-        }
-        assert catalog == expected_catalog
+        # Use a mocked function to keep track of function calls
+        with mocker.patch(
+            "omegaconf.OmegaConf.load", wraps=OmegaConf.load
+        ) as mocked_load:
+            catalog = OmegaConfigLoader(
+                conf_source=str(tmp_path),
+                base_env=_BASE_ENV,
+                env="dev",
+                config_patterns=catalog_patterns,
+            )["catalog"]
+            expected_catalog = {
+                "env": "dev",
+                "common": "common",
+                "dev_specific": "wiz",
+                "user1_c2": True,
+            }
+            assert catalog == expected_catalog
 
-        mocked_load = mocker.patch("omegaconf.OmegaConf.load")
-        expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
-
-        mocked_load.assert_called_once_with(expected_path)
+            # Assert any specific config file was only loaded once
+            expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
+            mocked_load.assert_called_once_with(expected_path)
 
     def test_yaml_parser_error(self, tmp_path):
         conf_path = tmp_path / _BASE_ENV

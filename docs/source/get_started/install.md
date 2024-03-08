@@ -24,7 +24,7 @@ We strongly recommend utilizing `venv` as your virtual environment manager if yo
 The recommended approach. If you use Python 3, you should already have the `venv` module installed with the standard library. Create a directory for working with your project and navigate to it. For example:
 
 ```bash
-mkdir kedro-environment && cd kedro-environment
+mkdir your-kedro-project && cd your-kedro-project
 ```
 
 Next, create a new virtual environment in this directory with `venv`:

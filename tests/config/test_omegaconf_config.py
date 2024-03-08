@@ -179,7 +179,7 @@ class TestOmegaConfigLoader:
 
         assert params["param1"] == 1
         assert catalog["trains"]["type"] == "MemoryDataset"
-        assert missing_conf == None
+        assert missing_conf is None
 
     @use_config_dir
     def test_load_local_config_overrides_base(self, tmp_path):

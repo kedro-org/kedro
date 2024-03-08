@@ -4,7 +4,7 @@ This module contains a logging handler class which produces coloured logs and tr
 
 import logging
 import sys
-from functools import cache
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -61,7 +61,8 @@ class RichHandler(rich.logging.RichHandler):
             rich.traceback.install(**traceback_install_kwargs)  # type: ignore[arg-type]
 
 
-@cache
+# @cache is supported from 3.9 onwards
+@lru_cache(maxsize=None)
 def has_rich_handler(logger: logging.Logger) -> bool:
     """Returns true if the logger has a RichHandler attached."""
     return any(isinstance(handler, RichHandler) for handler in logger.handlers)

@@ -28,7 +28,7 @@ class AbstractConfigLoader(UserDict):
 
     # From Python 3.12 __getitem__ isn't called in UserDict.get()
     # Use the version from 3.11 and prior
-    def get(self, key, default=None):
+    def get(self, key: str, default: Any = None) -> Any:
         "D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."
         try:
             return self[key]

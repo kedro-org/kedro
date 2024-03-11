@@ -271,10 +271,10 @@ class KedroCliError(click.exceptions.ClickException):
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
         elif self.VERBOSE_EXISTS:
-            etype, value, _ = sys.exc_info()
+            etype, value, tb = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             cookiecutter_exception = ""
-            for ex_line in traceback.format_exception(value):
+            for ex_line in traceback.format_exception(etype, value, tb):
                 if self.COOKIECUTTER_EXCEPTIONS_PREFIX in ex_line:
                     cookiecutter_exception = ex_line
                     break

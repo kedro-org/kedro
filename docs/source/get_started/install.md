@@ -49,7 +49,7 @@ deactivate
 
 ### How to create a new virtual environment using `conda`
 
- [Another popular option is to use Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/). After you install it, execute this from your terminal:
+[Another popular option is to use Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/). After you install it, execute this from your terminal:
 
 ```bash
 conda create --name kedro-environment python=3.10 -y

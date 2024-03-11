@@ -1,7 +1,7 @@
 # Advanced configuration
 The documentation on [configuration](./configuration_basics.md) describes how to satisfy most common requirements of standard Kedro project configuration:
 
-By default, Kedro is set up to use the [OmegaConfigLoader](/api/kedro.config.OmegaConfigLoader) class.
+By default, Kedro is set up to use the {py:class}`~kedro.config.OmegaConfigLoader` class.
 
 ## Advanced configuration for Kedro projects
 This page also contains a set of guidance for advanced configuration requirements of standard Kedro projects:
@@ -20,7 +20,7 @@ This page also contains a set of guidance for advanced configuration requirement
 
 
 ### How to use a custom configuration loader
-You can implement a custom configuration loader by extending the [`AbstractConfigLoader`](/api/kedro.config.AbstractConfigLoader) class:
+You can implement a custom configuration loader by extending the {py:class}`~kedro.config.AbstractConfigLoader` class:
 
 ```python
 from kedro.config import AbstractConfigLoader
@@ -281,7 +281,7 @@ CONFIG_LOADER_ARGS = {
 }
 ```
 ### How to load credentials through environment variables
-The [`OmegaConfigLoader`](/api/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `OmegaConfigLoader` and the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
+The {py:class}`~kedro.config.OmegaConfigLoader` enables you to load credentials from environment variables. To achieve this you have to use the `OmegaConfigLoader` and the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
 You can use the `oc.env` resolver to access credentials from environment variables in your `credentials.yml`:
 
 ```yaml

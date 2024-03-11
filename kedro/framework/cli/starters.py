@@ -67,6 +67,11 @@ by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
 """
 EXAMPLE_ARG_HELP = "Enter y to enable, n to disable the example pipeline."
 
+TELEMETRY_ARG_HELP = """Allow or not allow Kedro to collect usage analytics.
+We cannot see nor store information contained into a Kedro project. Opt in with "yes"
+and out with "no".
+"""
+
 
 @define(order=True)
 class KedroStarterSpec:
@@ -261,6 +266,7 @@ def starter() -> None:
 @click.option("--tools", "-t", "selected_tools", help=TOOLS_ARG_HELP)
 @click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
 @click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
+@click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP)
 def new(  # noqa: PLR0913
     config_path: str,
     starter_alias: str,
@@ -269,6 +275,7 @@ def new(  # noqa: PLR0913
     checkout: str,
     directory: str,
     example_pipeline: str,  # This will be True or False
+    telemetry_consent: str,  # This will be True or False
     **kwargs: Any,
 ) -> None:
     """Create a new kedro project."""
@@ -280,6 +287,7 @@ def new(  # noqa: PLR0913
         "checkout": checkout,
         "directory": directory,
         "example": example_pipeline,
+        "telemetry_consent": telemetry_consent,
     }
     _validate_flag_inputs(flag_inputs)
     starters_dict = _get_starters_dict()
@@ -343,7 +351,7 @@ def new(  # noqa: PLR0913
         template_path=template_path,
     )
 
-    _create_project(project_template, cookiecutter_args)
+    _create_project(project_template, cookiecutter_args, telemetry_consent)
 
     # If not a starter, print tools and example selection
     if not starter_alias:
@@ -876,7 +884,9 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
     return selected
 
 
-def _create_project(template_path: str, cookiecutter_args: dict[str, Any]) -> None:
+def _create_project(
+    template_path: str, cookiecutter_args: dict[str, Any], telemetry_consent: str
+) -> None:
     """Creates a new kedro project using cookiecutter.
 
     Args:
@@ -893,6 +903,10 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]) -> No
 
     try:
         result_path = cookiecutter(template=template_path, **cookiecutter_args)
+
+        if telemetry_consent is not None:
+            with open(result_path + "/.telemetry", "w") as telemetry_file:
+                telemetry_file.write("consent: false")
     except Exception as exc:
         raise KedroCliError(
             "Failed to generate project when running cookiecutter."

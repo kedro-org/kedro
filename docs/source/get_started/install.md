@@ -13,7 +13,7 @@
 
 ## Create a virtual environment for your Kedro project
 
-We strongly recommend utilizing `venv` as your virtual environment manager if you don't already use it.
+We strongly recommend using `venv` as your virtual environment manager if you don't already use it.
 
 ``` {tip}
 [Read more about virtual environments for Python projects](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).

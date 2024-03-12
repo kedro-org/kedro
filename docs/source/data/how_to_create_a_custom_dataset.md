@@ -15,7 +15,7 @@ In this example, we use a [Kaggle dataset of Pokémon images and types](https://
 
 We assume that you have already [installed Kedro](../get_started/install.md). Now [create a project](../get_started/new_project.md) (feel free to name your project as you like, but here we will assume the project's repository name is `kedro-pokemon`).
 
-Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
+Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types/) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
 
 The dataset will use [Pillow](https://pillow.readthedocs.io/en/stable/) for generic image processing functionality, to ensure that it can work with a range of different image formats, not just PNG.
 

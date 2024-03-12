@@ -14,7 +14,7 @@ The latest versions of [Kedro](https://github.com/kedro-org/kedro), [Kedro-Viz](
 When finding a security vulnerability in [Kedro](https://github.com/kedro-org/kedro), [Kedro-Viz](https://github.com/kedro-org/kedro-viz/), [Kedro Starters](https://github.com/kedro-org/kedro-starters) or any of the official [Kedro plugins](https://github.com/kedro-org/kedro-plugins), perform the following actions:
 
 - [Open an issue](https://github.com/kedro-org/kedro/issues/new?assignees=&labels=Issue%3A%20Bug%20Report%20%F0%9F%90%9E&template=bug-report.md&title=%28security%29%20Security%20Vulnerability) on the Kedro repository. Ensure that you use `(security) Security Vulnerability` as the title and _do not_ mention any vulnerability details in the issue post.
-- Send a notification [email](....) to `...` that contains, at a minimum:
+- Send a notification [email](mailto:kedro-framework@mckinsey.com) to the Kedro Framework maintainers that contains, at a minimum:
   - The link to the filed issue stub.
   - Your GitHub handle.
   - Detailed information about the security vulnerability, evidence that supports the relevance of the finding and any reproducibility instructions for independent confirmation.

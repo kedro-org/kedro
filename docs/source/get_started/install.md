@@ -13,15 +13,43 @@
 
 ## Create a virtual environment for your Kedro project
 
-We strongly recommend [installing `conda` as your virtual environment manager](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) if you don't already use it.
+We strongly recommend using `venv` as your virtual environment manager if you don't already use it.
 
 ``` {tip}
 [Read more about virtual environments for Python projects](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 ```
 
+### How to create a new virtual environment using `venv`
+
+The recommended approach. If you use Python 3, you should already have the `venv` module installed with the standard library. Create a directory for working with your project and navigate to it. For example:
+
+```bash
+mkdir your-kedro-project && cd your-kedro-project
+```
+
+Next, create a new virtual environment in this directory with `venv`:
+
+```bash
+python -m venv .venv
+```
+
+Activate this virtual environment:
+
+```bash
+source .venv/bin/activate # macOS / Linux
+.\.venv\Scripts\activate  # Windows
+```
+
+To exit the environment:
+
+```bash
+deactivate
+```
+
+
 ### How to create a new virtual environment using `conda`
 
-The recommended approach. From your terminal:
+[Another popular option is to use Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/). After you install it, execute this from your terminal:
 
 ```bash
 conda create --name kedro-environment python=3.10 -y
@@ -52,68 +80,6 @@ To exit `kedro-environment`:
 ```bash
 conda deactivate
 ```
-
-### How to create a new virtual environment without using `conda`
-
-Depending on your preferred Python installation, you can create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`.
-
-<details>
-<summary><b>Click to expand instructions for <code>venv</code></b></summary>
-
-If you use Python 3, you should already have the `venv` module installed with the standard library. Create a directory for working with your project and navigate to it. For example:
-
-```bash
-mkdir kedro-environment && cd kedro-environment
-```
-
-Next, create a new virtual environment in this directory with `venv`:
-
-```bash
-python -m venv .venv
-```
-
-Activate this virtual environment:
-
-```bash
-source .venv/bin/activate # macOS / Linux
-.\.venv\Scripts\activate  # Windows
-```
-
-To exit the environment:
-
-```bash
-deactivate
-```
-</details>
-
-<details>
-<summary><b>Click to expand instructions for <code>pipenv</code></b></summary>
-
-Install `pipenv` as follows:
-
-```bash
-pip install pipenv
-```
-
-Create a directory for working with your project and navigate to it. For example:
-
-```bash
-mkdir kedro-environment && cd kedro-environment
-```
-
-To start a session with the correct virtual environment activated:
-
-```bash
-pipenv shell
-```
-
-To exit the shell session:
-
-```bash
-exit
-```
-
-</details>
 
 
 ## How to install Kedro using `pip`

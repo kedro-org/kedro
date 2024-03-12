@@ -403,7 +403,6 @@ class TestOmegaConfigLoader:
         )["catalog"]
         assert catalog == {}
 
-    # @pytest.mark.xfail(reason="Logic failing")
     def test_overlapping_patterns(self, tmp_path, mocker):
         """Check that same configuration file is not loaded more than once."""
         _write_yaml(

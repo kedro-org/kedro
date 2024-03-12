@@ -32,7 +32,8 @@ from kedro.framework.cli.utils import (
     load_entry_points,
 )
 from kedro.framework.project import LOGGING  # noqa: F401
-from kedro.framework.startup import _is_project, bootstrap_project
+from kedro.framework.startup import bootstrap_project
+from kedro.utils import _find_kedro_project, _is_project
 
 LOGO = rf"""
  _            _
@@ -226,5 +227,7 @@ def main() -> None:  # pragma: no cover
     commands to `kedro`'s before invoking the CLI.
     """
     _init_plugins()
-    cli_collection = KedroCLI(project_path=Path.cwd())
+    cli_collection = KedroCLI(
+        project_path=_find_kedro_project(Path.cwd()) or Path.cwd()
+    )
     cli_collection()

@@ -23,7 +23,6 @@ from kedro.framework.cli.starters import (
     _parse_yes_no_to_bool,
     _validate_tool_selection,
 )
-from kedro.framework.cli.utils import KedroCliError
 
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
 
@@ -494,7 +493,6 @@ class TestNewFromUserPromptsInvalid:
     def test_cookiecutter_exception_if_no_verbose(self, fake_kedro_cli):
         """Check if original cookiecutter exception present in the output if no verbose
         flag provided."""
-        KedroCliError.VERBOSE_EXISTS = True
         Path("new-kedro-project").mkdir()
         result = CliRunner().invoke(
             fake_kedro_cli, ["new"], input=_make_cli_prompt_input()

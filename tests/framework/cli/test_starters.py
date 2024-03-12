@@ -491,8 +491,8 @@ class TestNewFromUserPromptsInvalid:
         assert "directory already exists" in result.output
 
     def test_cookiecutter_exception_if_no_verbose(self, fake_kedro_cli):
-        """Check if original cookiecutter exception present in the output if no verbose
-        flag provided."""
+        """Check if the original cookiecutter exception is present in the output
+        if no verbose flag is provided."""
         Path("new-kedro-project").mkdir()
         result = CliRunner().invoke(
             fake_kedro_cli, ["new"], input=_make_cli_prompt_input()

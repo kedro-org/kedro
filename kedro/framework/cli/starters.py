@@ -351,6 +351,12 @@ def new(  # noqa: PLR0913
         template_path=template_path,
     )
 
+    if telemetry_consent is not None:
+        _validate_input_with_regex_pattern("yes_no", telemetry_consent)
+        telemetry_consent = (
+            "true" if _parse_yes_no_to_bool(telemetry_consent) else "false"
+        )
+
     _create_project(project_template, cookiecutter_args, telemetry_consent)
 
     # If not a starter, print tools and example selection
@@ -906,7 +912,7 @@ def _create_project(
 
         if telemetry_consent is not None:
             with open(result_path + "/.telemetry", "w") as telemetry_file:
-                telemetry_file.write("consent: false")
+                telemetry_file.write("consent: " + telemetry_consent)
     except Exception as exc:
         raise KedroCliError(
             "Failed to generate project when running cookiecutter."

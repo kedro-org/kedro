@@ -9,7 +9,7 @@ If you are a contributor and would like to submit a new dataset, you must extend
 
 ## Scenario
 
-In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
+In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types/) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
 
 ## Project setup
 

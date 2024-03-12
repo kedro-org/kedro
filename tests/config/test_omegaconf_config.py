@@ -424,7 +424,6 @@ class TestOmegaConfigLoader:
             ]
         }
 
-        load_spy = mocker.spy(OmegaConf, "load")
         catalog = OmegaConfigLoader(
             conf_source=str(tmp_path),
             base_env=_BASE_ENV,

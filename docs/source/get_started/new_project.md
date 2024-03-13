@@ -116,7 +116,7 @@ kedro new --name=testproject --tools=lint,docs,pyspark --example=n
 
 The `--telemetry` flag offers the option to register consent to have user analytics collected in the moment of the creation of the project. This option bypasses the prompt to collect analytics that would otherwise appear on the moment the `kedro` command is invoked for the first time inside the project. In case the `--telemetry` flag is not used, the user will be prompted to accept or reject analytics collection as usual.
 
-When creating your new Kedro project, use the values `yes` or `no` to register consent to have user analytics collected for this specific project. 
+When creating your new Kedro project, use the values `yes` or `no` to register consent to have user analytics collected for this specific project.
 
 ## Run the new project
 

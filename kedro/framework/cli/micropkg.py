@@ -244,6 +244,7 @@ def _pull_package(  # noqa: PLR0913
                 f"got {packages}"
             )
         package_name = packages[0]
+        
         # Type ignored because of https://github.com/pypa/build/pull/693
         package_reqs = _get_all_library_reqs(library_meta)  # type: ignore[arg-type]
 

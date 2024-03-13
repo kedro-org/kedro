@@ -403,8 +403,8 @@ class TestOmegaConfigLoader:
         )["catalog"]
         assert catalog == {}
 
-    def test_overlapping_patterns(self, tmp_path, mocker):
-        """Check that same configuration file is not loaded more than once."""
+    def test_overlapping_patterns(self, tmp_path):
+        """Check that configuration is loaded correctly from overlapping patterns."""
         _write_yaml(
             tmp_path / _BASE_ENV / "catalog0.yml",
             {"env": _BASE_ENV, "common": "common"},

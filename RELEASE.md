@@ -11,6 +11,7 @@
 * Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.
 
 ## Documentation changes
+* Add mentions about correct usage of `configure_project` with `multiprocessing`.
 
 ## Community contributions
 

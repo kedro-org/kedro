@@ -245,7 +245,7 @@ def _pull_package(  # noqa: PLR0913
             )
         package_name = packages[0]
 
-        package_reqs = _get_all_library_reqs(library_meta)
+        package_reqs = _get_all_library_reqs(library_meta)  # type: ignore[arg-type]
 
         if package_reqs:
             requirements_txt = metadata.project_path / "requirements.txt"

@@ -1562,3 +1562,119 @@ class TestConvertToolNamesToNumbers:
         selected_tools = "lint,test,tests"
         result = _convert_tool_short_names_to_numbers(selected_tools)
         assert result == ["1", "2"]
+
+
+@pytest.mark.usefixtures("chdir_to_tmp")
+class TestTelemetryCLIFlag:
+    @pytest.mark.parametrize(
+        "input",
+        ["yes", "YES", "y", "Y", "yEs"],
+    )
+    def test_flag_value_is_yes(self, fake_kedro_cli, input):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "--name",
+                "New Kedro Project",
+                "--tools",
+                "none",
+                "--example",
+                "no",
+                "--telemetry",
+                input,
+            ],
+        )
+
+        repo_name = "new-kedro-project"
+        assert result.exit_code == 0
+
+        telemetry_file_path = Path(repo_name + "/.telemetry")
+        assert telemetry_file_path.exists()
+
+        with open(telemetry_file_path) as file:
+            file_content = file.read()
+            target_string = "consent: true"
+
+        assert target_string in file_content
+        _clean_up_project(Path("./" + repo_name))
+
+    @pytest.mark.parametrize(
+        "input",
+        ["no", "NO", "n", "N", "No"],
+    )
+    def test_flag_value_is_no(self, fake_kedro_cli, input):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "--name",
+                "New Kedro Project",
+                "--tools",
+                "none",
+                "--example",
+                "no",
+                "--telemetry",
+                input,
+            ],
+        )
+
+        repo_name = "new-kedro-project"
+        assert result.exit_code == 0
+
+        telemetry_file_path = Path(repo_name + "/.telemetry")
+        assert telemetry_file_path.exists()
+
+        with open(telemetry_file_path) as file:
+            file_content = file.read()
+            target_string = "consent: false"
+
+        assert target_string in file_content
+        _clean_up_project(Path("./" + repo_name))
+
+    def test_flag_value_is_invalid(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "--name",
+                "New Kedro Project",
+                "--tools",
+                "none",
+                "--example",
+                "no",
+                "--telemetry",
+                "wrong",
+            ],
+        )
+
+        repo_name = "new-kedro-project"
+        assert result.exit_code == 1
+
+        assert (
+            "'wrong' is an invalid value for example pipeline. It must contain only y, n, YES, or NO (case insensitive)."
+            in result.output
+        )
+
+        telemetry_file_path = Path(repo_name + "/.telemetry")
+        assert not telemetry_file_path.exists()
+
+    def test_flag_is_absent(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "--name",
+                "New Kedro Project",
+                "--tools",
+                "none",
+                "--example",
+                "no",
+            ],
+        )
+
+        repo_name = "new-kedro-project"
+        assert result.exit_code == 0
+
+        telemetry_file_path = Path(repo_name + "/.telemetry")
+        assert not telemetry_file_path.exists()

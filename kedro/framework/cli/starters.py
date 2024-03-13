@@ -274,8 +274,8 @@ def new(  # noqa: PLR0913
     project_name: str,
     checkout: str,
     directory: str,
-    example_pipeline: str,  # This will be True or False
-    telemetry_consent: str,  # This will be True or False
+    example_pipeline: str,
+    telemetry_consent: str,
     **kwargs: Any,
 ) -> None:
     """Create a new kedro project."""
@@ -891,7 +891,7 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
 
 
 def _create_project(
-    template_path: str, cookiecutter_args: dict[str, Any], telemetry_consent: str
+    template_path: str, cookiecutter_args: dict[str, Any], telemetry_consent: str | None
 ) -> None:
     """Creates a new kedro project using cookiecutter.
 

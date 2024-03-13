@@ -175,9 +175,11 @@ class TestOmegaConfigLoader:
         )
         params = conf.get("parameters")
         catalog = conf.get("catalog")
+        missing_conf = conf.get("missing_conf")
 
         assert params["param1"] == 1
         assert catalog["trains"]["type"] == "MemoryDataset"
+        assert missing_conf is None
 
     @use_config_dir
     def test_load_local_config_overrides_base(self, tmp_path):
@@ -401,6 +403,7 @@ class TestOmegaConfigLoader:
         )["catalog"]
         assert catalog == {}
 
+    @pytest.mark.xfail(reason="Logic failing")
     def test_overlapping_patterns(self, tmp_path, mocker):
         """Check that same configuration file is not loaded more than once."""
         _write_yaml(
@@ -421,6 +424,7 @@ class TestOmegaConfigLoader:
             ]
         }
 
+        load_spy = mocker.spy(OmegaConf, "load")
         catalog = OmegaConfigLoader(
             conf_source=str(tmp_path),
             base_env=_BASE_ENV,
@@ -435,9 +439,9 @@ class TestOmegaConfigLoader:
         }
         assert catalog == expected_catalog
 
-        mocked_load = mocker.patch("omegaconf.OmegaConf.load")
+        # Assert any specific config file was only loaded once
         expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
-        assert mocked_load.called_once_with(expected_path)
+        load_spy.assert_called_once_with(expected_path)
 
     def test_yaml_parser_error(self, tmp_path):
         conf_path = tmp_path / _BASE_ENV

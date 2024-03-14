@@ -76,7 +76,7 @@ def _validate_datasets_exist(
         for non_existent_input in non_existent:
             possible_matches += difflib.get_close_matches(non_existent_input, existing)
 
-        error_msg = f"Failed to map these inputs onto the nodes provided: {', '.join(sorted(non_existent))}"
+        error_msg = f"Failed to map datasets and/or parameters onto the nodes provided: {', '.join(sorted(non_existent))}"
         suggestions = f" - did you mean one of these instead: {', '.join(possible_matches)}" if possible_matches else ""
         raise ModularPipelineError(error_msg + suggestions)
 

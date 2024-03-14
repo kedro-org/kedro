@@ -222,7 +222,7 @@ class TestPipelineHelper:
     ):  # noqa: PLR0913
         raw_pipeline = modular_pipeline([node(func, inputs, outputs)])
 
-        with pytest.raises(ModularPipelineError, match=r"Failed to map datasets") as e:
+        with pytest.raises(ModularPipelineError, match=r"Failed to map datasets and/or parameters") as e:
             pipeline(
                 raw_pipeline, namespace="PREFIX", inputs=inputs_map, outputs=outputs_map
             )
@@ -378,11 +378,11 @@ class TestPipelineHelper:
             ]
         )
 
-        pattern = r"Failed to map datasets and/or parameters: params:beta"
+        pattern = r"Failed to map datasets and/or parameters onto the nodes provided: params:beta"
         with pytest.raises(ModularPipelineError, match=pattern):
             pipeline(raw_pipeline, parameters={"beta": "gamma"})
 
-        pattern = r"Failed to map datasets and/or parameters: parameters"
+        pattern = r"Failed to map datasets and/or parameters onto the nodes provided: parameters"
         with pytest.raises(ModularPipelineError, match=pattern):
             pipeline(raw_pipeline, parameters={"parameters": "some_yaml_dataset"})
 
@@ -394,7 +394,7 @@ class TestPipelineHelper:
             ]
         )
 
-        pattern = "Inputs should be free inputs to the pipeline"
+        pattern = "Inputs must not be outputs from another node"
         with pytest.raises(ModularPipelineError, match=pattern):
             pipeline(raw_pipeline, inputs={"AA": "CC"})
 

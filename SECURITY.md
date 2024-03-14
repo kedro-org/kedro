@@ -25,7 +25,7 @@ the veracity of the reported issue.
 A Kedro maintainer will, after validating the report:
 
 - Acknowledge the bug
-- Mark the issue as with a `Blocker📛` priority
+- Mark the issue with a `Blocker📛` priority
 - Open a draft [GitHub Security Advisory](https://docs.github.com/en/code-security/security-advisories/creating-a-security-advisory)
   to discuss the vulnerability details in private.
 

@@ -437,6 +437,38 @@ class TestOmegaConfigLoader:
         }
         assert catalog == expected_catalog
 
+    def test_overlapping_patterns_in_same_env(self, tmp_path, mocker):
+        """Check that configuration files that match several patterns are only loaded once in each env."""
+        _write_yaml(
+            tmp_path / _BASE_ENV / "catalog0.yml",
+            {"env": "base", "common": "common"},
+        )
+        _write_yaml(tmp_path / _BASE_ENV / "user1" / "catalog2.yml", {"user1_c2": True})
+
+        catalog_patterns = {
+            "catalog": [
+                "catalog*",
+                "user1/catalog*",
+                "*/catalog2*",
+            ]
+        }
+
+        load_spy = mocker.spy(OmegaConf, "load")
+        catalog = OmegaConfigLoader(
+            conf_source=str(tmp_path),
+            base_env=_BASE_ENV,
+            config_patterns=catalog_patterns,
+        )["catalog"]
+        expected_catalog = {
+            "env": "base",
+            "common": "common",
+            "user1_c2": True,
+        }
+        assert catalog == expected_catalog
+
+        # Assert load is only called once for each file
+        assert load_spy.call_count == 2
+
     def test_yaml_parser_error(self, tmp_path):
         conf_path = tmp_path / _BASE_ENV
         conf_path.mkdir(parents=True, exist_ok=True)

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import difflib
 from typing import AbstractSet, Iterable
 
 from kedro.pipeline.node import Node
@@ -52,7 +53,7 @@ def _validate_inputs_outputs(
     free_inputs = {_strip_transcoding(i) for i in pipe.inputs()}
 
     if not inputs <= free_inputs:
-        raise ModularPipelineError("Inputs should be free inputs to the pipeline")
+        raise ModularPipelineError("Inputs must not be outputs from another node")
 
     if outputs & free_inputs:
         raise ModularPipelineError("Outputs can't contain free inputs to the pipeline")
@@ -64,16 +65,20 @@ def _validate_datasets_exist(
     parameters: AbstractSet[str],
     pipe: Pipeline,
 ) -> None:
+    """Validate that inputs, parameters and outputs map correctly onto the provided nodes."""
     inputs = {_strip_transcoding(k) for k in inputs}
     outputs = {_strip_transcoding(k) for k in outputs}
 
     existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
     non_existent = (inputs | outputs | parameters) - existing
     if non_existent:
-        raise ModularPipelineError(
-            f"Failed to map datasets and/or parameters: "
-            f"{', '.join(sorted(non_existent))}"
-        )
+        possible_matches = []
+        for non_existent_input in non_existent:
+            possible_matches += difflib.get_close_matches(non_existent_input, existing)
+
+        error_msg = f"Failed to map these inputs onto the nodes provided: {', '.join(sorted(non_existent))}"
+        suggestions = f" - did you mean one of these instead: {', '.join(possible_matches)}" if possible_matches else ""
+        raise ModularPipelineError(error_msg + suggestions)
 
 
 def _get_dataset_names_mapping(

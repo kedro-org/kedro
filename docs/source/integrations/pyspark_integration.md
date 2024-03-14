@@ -242,7 +242,7 @@ The `assign` copy mode ensures that the `MemoryDataset` will be assigned the Spa
 
 ## Tips for maximising concurrency using `ThreadRunner`
 
-Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the [ThreadRunner](/api/kedro.runner.ThreadRunner):
+Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the {py:class}`~kedro.runner.ThreadRunner`:
 
 ```bash
 kedro run --runner=ThreadRunner

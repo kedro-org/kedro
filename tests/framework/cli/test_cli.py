@@ -691,6 +691,7 @@ class TestRunCommand:
             "Key `node-names` in provided configuration is not valid. \n\nDid you mean one of "
             "these?\n    node_names\n    to_nodes\n    namespace" in result.stdout
         )
+        KedroCliError.VERBOSE_EXISTS = True
 
     @mark.parametrize(
         "fake_run_config_with_params,expected",

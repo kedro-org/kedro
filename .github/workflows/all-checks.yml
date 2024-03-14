@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, ubuntu-latest ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       os: ${{ matrix.os }}
@@ -36,7 +36,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, ubuntu-latest ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
     uses: ./.github/workflows/e2e-tests.yml
     with:
       os: ${{ matrix.os }}
@@ -59,7 +59,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, ubuntu-latest ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
     uses: ./.github/workflows/pip-compile.yml
     with:
       os: ${{ matrix.os }}

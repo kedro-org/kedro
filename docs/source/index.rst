@@ -80,6 +80,7 @@ Welcome to Kedro's award-winning documentation!
    configuration/index.md
    data/index.md
    nodes_and_pipelines/index.md
+   configuration/telemetry.md
 
 .. toctree::
    :maxdepth: 2

@@ -386,6 +386,21 @@ class TestKedroCLI:
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" not in result.output
 
+    def test_kedro_run_no_project(self, mocker, tmp_path):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
+        kedro_cli = KedroCLI(tmp_path)
+
+        result = CliRunner().invoke(kedro_cli, ["run"])
+        assert (
+            "Kedro project not found in this directory. Project specific commands such as 'run' or "
+            "'jupyter' are only available within a project directory." in result.output
+        )
+
+        assert (
+            "Hint: Kedro is looking for a file called 'pyproject.toml, is one present in"
+            " your current working directory?" in result.output
+        )
+
     def test_kedro_cli_with_project(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
@@ -676,6 +691,7 @@ class TestRunCommand:
             "Key `node-names` in provided configuration is not valid. \n\nDid you mean one of "
             "these?\n    node_names\n    to_nodes\n    namespace" in result.stdout
         )
+        KedroCliError.VERBOSE_EXISTS = True
 
     @mark.parametrize(
         "fake_run_config_with_params,expected",

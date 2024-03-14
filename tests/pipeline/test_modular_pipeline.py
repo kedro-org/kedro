@@ -217,16 +217,67 @@ class TestPipelineHelper:
             ),
         ],
     )
-    def test_missing_dataset_name(
+    def test_missing_dataset_name_no_suggestion(
         self, func, inputs, outputs, inputs_map, outputs_map, expected_missing
     ):  # noqa: PLR0913
         raw_pipeline = modular_pipeline([node(func, inputs, outputs)])
 
-        with pytest.raises(ModularPipelineError, match=r"Failed to map datasets and/or parameters") as e:
+        with pytest.raises(
+            ModularPipelineError, match=r"Failed to map datasets and/or parameters"
+        ) as e:
             pipeline(
                 raw_pipeline, namespace="PREFIX", inputs=inputs_map, outputs=outputs_map
             )
         assert ", ".join(expected_missing) in str(e.value)
+        assert " - did you mean one of these instead: " not in str(e.value)
+
+    @pytest.mark.parametrize(
+        "func, inputs, outputs, inputs_map, outputs_map, expected_missing, expected_suggestion",
+        [
+            # Testing inputs
+            (identity, "IN", "OUT", {"I": "in"}, {}, ["I"], ["IN"]),
+            (
+                biconcat,
+                ["IN1", "IN2"],
+                "OUT",
+                {"IN": "input"},
+                {},
+                ["IN"],
+                ["IN1", "IN2"],
+            ),
+            # Testing outputs
+            (identity, "IN", "OUT", {}, {"OUT_": "output"}, ["OUT_"], ["OUT"]),
+            (
+                identity,
+                "IN",
+                ["OUT1", "OUT2"],
+                {},
+                {"OUT": "out"},
+                ["OUT"],
+                ["OUT1", "OUT2"],
+            ),
+        ],
+    )
+    def test_missing_dataset_with_suggestion(
+        self,
+        func,
+        inputs,
+        outputs,
+        inputs_map,
+        outputs_map,
+        expected_missing,
+        expected_suggestion,
+    ):
+        raw_pipeline = modular_pipeline([node(func, inputs, outputs)])
+
+        with pytest.raises(
+            ModularPipelineError, match=r"Failed to map datasets and/or parameters"
+        ) as e:
+            pipeline(
+                raw_pipeline, namespace="PREFIX", inputs=inputs_map, outputs=outputs_map
+            )
+        assert ", ".join(expected_missing) in str(e.value)
+        assert ", ".join(expected_suggestion) in str(e.value)
 
     def test_node_properties_preserved(self):
         """

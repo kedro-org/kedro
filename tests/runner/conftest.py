@@ -15,6 +15,10 @@ def identity(arg):
     return arg
 
 
+def first_arg(*args):
+    return args[0]
+
+
 def sink(arg):
     pass
 
@@ -36,7 +40,7 @@ def return_not_serialisable(arg):
     return lambda x: x
 
 
-def multi_input_list_output(arg1, arg2):
+def multi_input_list_output(arg1, arg2, arg3=None):
     return [arg1, arg2]
 
 
@@ -80,6 +84,9 @@ def persistent_dataset_catalog():
             "ds0_B": persistent_dataset,
             "ds2_A": persistent_dataset,
             "ds2_B": persistent_dataset,
+            "dsX": persistent_dataset,
+            "dsY": persistent_dataset,  # TODO: names?
+            "params:p": MemoryDataset(1),
         }
     )
 
@@ -148,21 +155,31 @@ def unfinished_outputs_pipeline():
 
 @pytest.fixture
 def two_branches_crossed_pipeline():
-    """A ``Pipeline`` with an X-shape (two branches with one common node)"""
+    r"""A ``Pipeline`` with an X-shape (two branches with one common node):
+
+    (node1_A)   (node1_B)
+           \     /
+           (node2)
+           /     \
+      (node3_A) (node3_B)
+         /         \
+    (node4_A)     (node4_B)
+
+    """
     return pipeline(
         [
-            node(identity, "ds0_A", "ds1_A", name="node1_A"),
-            node(identity, "ds0_B", "ds1_B", name="node1_B"),
+            node(first_arg, "ds0_A", "ds1_A", name="node1_A"),
+            node(first_arg, "ds0_B", "ds1_B", name="node1_B"),
             node(
                 multi_input_list_output,
                 ["ds1_A", "ds1_B"],
                 ["ds2_A", "ds2_B"],
                 name="node2",
             ),
-            node(identity, "ds2_A", "ds3_A", name="node3_A"),
-            node(identity, "ds2_B", "ds3_B", name="node3_B"),
-            node(identity, "ds3_A", "ds4_A", name="node4_A"),
-            node(identity, "ds3_B", "ds4_B", name="node4_B"),
+            node(first_arg, "ds2_A", "ds3_A", name="node3_A"),
+            node(first_arg, "ds2_B", "ds3_B", name="node3_B"),
+            node(first_arg, "ds3_A", "ds4_A", name="node4_A"),
+            node(first_arg, "ds3_B", "ds4_B", name="node4_B"),
         ]
     )
 
@@ -173,5 +190,83 @@ def pipeline_with_memory_datasets():
         [
             node(func=identity, inputs="Input1", outputs="MemOutput1", name="node1"),
             node(func=identity, inputs="Input2", outputs="MemOutput2", name="node2"),
+        ]
+    )
+
+
+@pytest.fixture
+def pipeline_asymmetric():
+    r"""
+
+    (node1)
+         \
+      (node3)  (node2)
+           \    /
+           (node4)
+
+    """
+    return pipeline(
+        [
+            node(first_arg, ["ds0_A"], ["_ds1"], name="node1"),
+            node(first_arg, ["ds0_B"], ["_ds2"], name="node2"),
+            node(first_arg, ["_ds1"], ["_ds3"], name="node3"),
+            node(first_arg, ["_ds2", "_ds3"], ["_ds4"], name="node4"),
+        ]
+    )
+
+
+@pytest.fixture
+def pipeline_triangular():
+    r"""
+
+    (node1)
+      |  \
+      |  (node2)
+      |  /
+    (node3)
+
+    """
+    return pipeline(
+        [
+            node(first_arg, ["ds0_A"], ["_ds1_A"], name="node1"),
+            node(first_arg, ["_ds1_A"], ["ds2_A"], name="node2"),
+            node(first_arg, ["ds2_A", "_ds1_A"], ["_ds3_A"], name="node3"),
+        ]
+    )
+
+
+@pytest.fixture
+def empty_pipeline():
+    return pipeline([])
+
+
+@pytest.fixture(
+    params=[(), ("dsX",), ("params:p",)],
+    ids=[
+        "no_extras",
+        "extra_persistent_ds",
+        "extra_param",
+    ],
+)
+def two_branches_crossed_pipeline_variable_inputs(request):
+    """A ``Pipeline`` with an X-shape (two branches with one common node).
+    Non-persistent datasets (other than parameters) are prefixed with an underscore.
+    """
+    extra_inputs = list(request.param)
+
+    return pipeline(
+        [
+            node(first_arg, ["ds0_A"] + extra_inputs, "_ds1_A", name="node1_A"),
+            node(first_arg, ["ds0_B"] + extra_inputs, "_ds1_B", name="node1_B"),
+            node(
+                multi_input_list_output,
+                ["_ds1_A", "_ds1_B"] + extra_inputs,
+                ["ds2_A", "ds2_B"],
+                name="node2",
+            ),
+            node(first_arg, ["ds2_A"] + extra_inputs, "_ds3_A", name="node3_A"),
+            node(first_arg, ["ds2_B"] + extra_inputs, "_ds3_B", name="node3_B"),
+            node(first_arg, ["_ds3_A"] + extra_inputs, "_ds4_A", name="node4_A"),
+            node(first_arg, ["_ds3_B"] + extra_inputs, "_ds4_B", name="node4_B"),
         ]
     )

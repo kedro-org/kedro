@@ -74,7 +74,7 @@ test = [
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest>=7.2,<9.0",
-    "s3fs>=2021.4, <2024.3",  # Upper bound set arbitrarily, to be reassessed in early 2024
+    "s3fs>=2021.4, <2024.4",  # Upper bound set arbitrarily, to be reassessed in early 2024
     "semver",
     "trufflehog~=2.1",
     # mypy related dependencies

@@ -18,7 +18,7 @@ from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
 from kedro.runner.runner import (
-    find_all_required_nodes,
+    _find_all_required_nodes,
     find_nodes_to_resume_from,
 )
 from tests.runner.conftest import exception_fn, identity, sink, source
@@ -491,7 +491,7 @@ class TestResumeLogicBehaviour:
         test_pipeline = request.getfixturevalue(pipeline_name)
 
         remaining_nodes = test_pipeline.only_nodes(*remaining_node_names).nodes
-        required_nodes = find_all_required_nodes(
+        required_nodes = _find_all_required_nodes(
             test_pipeline, remaining_nodes, persistent_dataset_catalog
         )
         resume_node_names = find_nodes_to_resume_from(

@@ -237,17 +237,19 @@ def find_nodes_to_resume_from(
         the run.
 
     """
-    all_nodes_that_need_to_run = find_all_required_nodes(
+    all_nodes_that_need_to_run = _find_all_required_nodes(
         pipeline, unfinished_nodes, catalog
     )
 
     # Find which of the remaining nodes would need to run first (in topo sort)
-    persistent_ancestors = find_initial_node_group(pipeline, all_nodes_that_need_to_run)
+    persistent_ancestors = _find_initial_node_group(
+        pipeline, all_nodes_that_need_to_run
+    )
 
     return {n.name for n in persistent_ancestors}
 
 
-def find_all_required_nodes(
+def _find_all_required_nodes(
     pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: DataCatalog
 ) -> set[Node]:
     """Breadth-first search approach to finding the complete set of
@@ -351,7 +353,7 @@ def _enumerate_nodes_with_outputs(
     return parent_pipeline.nodes
 
 
-def find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[Node]:
+def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[Node]:
     """Given a collection of ``Node``s in a ``Pipeline``,
     find the initial group of ``Node``s to be run (in topological order).
 

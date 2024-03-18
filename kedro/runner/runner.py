@@ -268,7 +268,7 @@ def _find_all_required_nodes(
 
     """
     nodes_to_run = set(unfinished_nodes)
-    initial_nodes = _nodes_with_external_inputs(pipeline, unfinished_nodes)
+    initial_nodes = _nodes_with_external_inputs(unfinished_nodes)
 
     queue, visited = deque(initial_nodes), set(initial_nodes)
     while queue:
@@ -288,14 +288,11 @@ def _find_all_required_nodes(
     return set(nodes_to_run)
 
 
-def _nodes_with_external_inputs(
-    pipeline: Pipeline, nodes_of_interest: Iterable[Node]
-) -> set[Node]:
-    """For given ``Node``s in a ``Pipeline``, find their
-    subset which depends on external inputs of the ``Pipeline``.
+def _nodes_with_external_inputs(nodes_of_interest: Iterable[Node]) -> set[Node]:
+    """For given ``Node``s , find their subset which depends on
+    external inputs of the ``Pipeline`` they constitute.
 
     Args:
-        pipeline: the ``Pipeline`` to search for nodes in.
         nodes_of_interest: the ``Node``s to analyze.
 
     Returns:
@@ -303,7 +300,7 @@ def _nodes_with_external_inputs(
         of nodes of interest.
 
     """
-    p_nodes_of_interest = pipeline.only_nodes(*(n.name for n in nodes_of_interest))
+    p_nodes_of_interest = Pipeline(nodes_of_interest)
     p_nodes_with_external_inputs = p_nodes_of_interest.only_nodes_with_inputs(
         *p_nodes_of_interest.inputs()
     )

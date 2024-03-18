@@ -252,6 +252,14 @@ def duplicate_output_list_node():
     return identity, "A", ["A", "A"]
 
 
+def bad_input_variable_name():
+    return lambda x: None, {"a": 1, "b": "B"}, {"a": "A", "b": "B"}
+
+
+def bad_output_variable_name():
+    return lambda x: None, {"a": "A", "b": "B"}, {"a": "A", "b": 2}
+
+
 @pytest.mark.parametrize(
     "func, expected",
     [
@@ -274,6 +282,11 @@ def duplicate_output_list_node():
             r"Failed to create node identity"
             r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
+        ),
+        (bad_input_variable_name, "names of variables used as inputs to the function "),
+        (
+            bad_output_variable_name,
+            "names of variables used as outputs of the function ",
         ),
     ],
 )

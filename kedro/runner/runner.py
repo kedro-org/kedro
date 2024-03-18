@@ -215,7 +215,7 @@ class AbstractRunner(ABC):
                 f"There are {len(remaining_nodes)} nodes that have not run.\n"
                 "You can resume the pipeline run from the nearest nodes with "
                 "persisted inputs by adding the following "
-                f"argument to your previous command: {postfix}"
+                f"argument to your previous command:\n{postfix}"
             )
 
 
@@ -251,8 +251,9 @@ def find_all_required_nodes(
     pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: DataCatalog
 ) -> set[Node]:
     """Breadth-first search approach to finding the complete set of
-    persistent ancestors of an iterable of ``Node``s. Persistent
-    ancestors exclusively have persisted ``Dataset``s or parameters as inputs.
+    ``Node``s which need to run to cover all unfinished nodes,
+    including any additional nodes that should be re-run if their outputs
+    are not persisted.
 
     Args:
         pipeline: the ``Pipeline`` to find ancestors in.
@@ -272,7 +273,7 @@ def find_all_required_nodes(
         current_node = queue.popleft()
         nodes_to_run.add(current_node)
         non_persistent_inputs = _enumerate_non_persistent_inputs(current_node, catalog)
-        # Look for the nodes that produce non-persistent inputs (if they exist)
+        # Look for the nodes that produce non-persistent inputs (if those exist)
         for node in _enumerate_nodes_with_outputs(pipeline, non_persistent_inputs):
             if node in visited:
                 continue
@@ -367,7 +368,6 @@ def find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[N
     """
     node_names = set(n.name for n in nodes)
     if len(node_names) == 0:
-        # TODO: or raise?
         return []
     sub_pipeline = pipeline.only_nodes(*node_names)
     initial_nodes = sub_pipeline.grouped_nodes[0]

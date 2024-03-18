@@ -85,7 +85,7 @@ def persistent_dataset_catalog():
             "ds2_A": persistent_dataset,
             "ds2_B": persistent_dataset,
             "dsX": persistent_dataset,
-            "dsY": persistent_dataset,  # TODO: names?
+            "dsY": persistent_dataset,
             "params:p": MemoryDataset(1),
         }
     )

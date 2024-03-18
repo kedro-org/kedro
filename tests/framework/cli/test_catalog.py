@@ -28,12 +28,18 @@ def mock_pipelines(mocker):
     return mocker.patch("kedro.framework.cli.catalog.pipelines", dummy_pipelines)
 
 
+@pytest.fixture()
+def fake_credentials_config(tmp_path):
+    return {"db_connection": {"con": "foo"}}
+
+
 @pytest.fixture
 def fake_catalog_config():
     config = {
         "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataset",
             "filepath": "data/01_raw/{factory_pattern}.pq",
+            "credentials": "db_connection",
         },
         "csv_{factory_pattern}": {
             "type": "pandas.CSVDataset",
@@ -50,6 +56,7 @@ def fake_catalog_config_resolved():
         "parquet_example": {
             "type": "pandas.ParquetDataset",
             "filepath": "data/01_raw/example.pq",
+            "credentials": {"con": "foo"},
         },
         "csv_example": {
             "type": "pandas.CSVDataset",
@@ -271,13 +278,16 @@ class TestCatalogListCommand:
         mocker,
         mock_pipelines,
         fake_catalog_config,
+        fake_credentials_config,
     ):
         """Test that datasets generated from factory patterns in the catalog
         are resolved correctly under the correct dataset classes.
         """
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
-        mocked_context.catalog = DataCatalog.from_config(fake_catalog_config)
+        mocked_context.catalog = DataCatalog.from_config(
+            catalog=fake_catalog_config, credentials=fake_credentials_config
+        )
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
             "datasets",
@@ -526,11 +536,17 @@ class TestCatalogFactoryCommands:
         mock_pipelines,
         fake_catalog_config,
         fake_catalog_config_resolved,
+        fake_credentials_config,
     ):
         """Test that datasets factories are correctly resolved to the explicit datasets in the pipeline."""
         mocked_context = fake_load_context.return_value
-        mocked_context.config_loader = {"catalog": fake_catalog_config}
-        mocked_context.catalog = DataCatalog.from_config(fake_catalog_config)
+        mocked_context.config_loader = {
+            "catalog": fake_catalog_config,
+            "credentials": fake_credentials_config,
+        }
+        mocked_context.catalog = DataCatalog.from_config(
+            catalog=fake_catalog_config, credentials=fake_credentials_config
+        )
         placeholder_ds = mocked_context.catalog._dataset_patterns.keys()
         pipeline_datasets = {"csv_example", "parquet_example", "explicit_dataset"}
 

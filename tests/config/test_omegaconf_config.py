@@ -403,9 +403,8 @@ class TestOmegaConfigLoader:
         )["catalog"]
         assert catalog == {}
 
-    @pytest.mark.xfail(reason="Logic failing")
-    def test_overlapping_patterns(self, tmp_path, mocker):
-        """Check that same configuration file is not loaded more than once."""
+    def test_overlapping_patterns(self, tmp_path):
+        """Check that configuration is loaded correctly from overlapping patterns."""
         _write_yaml(
             tmp_path / _BASE_ENV / "catalog0.yml",
             {"env": _BASE_ENV, "common": "common"},
@@ -424,7 +423,6 @@ class TestOmegaConfigLoader:
             ]
         }
 
-        load_spy = mocker.spy(OmegaConf, "load")
         catalog = OmegaConfigLoader(
             conf_source=str(tmp_path),
             base_env=_BASE_ENV,
@@ -439,9 +437,31 @@ class TestOmegaConfigLoader:
         }
         assert catalog == expected_catalog
 
-        # Assert any specific config file was only loaded once
-        expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
-        load_spy.assert_called_once_with(expected_path)
+    def test_overlapping_patterns_in_same_env(self, tmp_path, mocker):
+        """Check that configuration files that match several patterns are only loaded once in each env."""
+        _write_yaml(tmp_path / _BASE_ENV / "user1" / "catalog.yml", {"user1_c2": True})
+
+        catalog_patterns = {
+            "catalog": [
+                "catalog*",
+                "user1/catalog*",
+                "*/catalog2*",
+            ]
+        }
+
+        load_spy = mocker.spy(OmegaConf, "load")
+        catalog = OmegaConfigLoader(
+            conf_source=str(tmp_path),
+            base_env=_BASE_ENV,
+            config_patterns=catalog_patterns,
+        )["catalog"]
+        expected_catalog = {
+            "user1_c2": True,
+        }
+        assert catalog == expected_catalog
+
+        # Assert load is only called once
+        load_spy.assert_called_once()
 
     def test_yaml_parser_error(self, tmp_path):
         conf_path = tmp_path / _BASE_ENV

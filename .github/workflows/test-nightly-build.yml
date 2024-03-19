@@ -1,10 +1,9 @@
-name: Run nightly tests on Kedro - testing
+name: Test - Run nightly tests on Kedro
 
 on:
-  workflow_dispatch:
-  schedule:
-    # Run every day at midnight (UTC time)
-    - cron: '0 0 * * *'
+  pull_request:
+    branches:
+      - "develop"
 
 jobs:
   kedro-main-test:

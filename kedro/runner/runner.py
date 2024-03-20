@@ -198,7 +198,7 @@ class AbstractRunner(ABC):
 
         postfix = ""
         if done_nodes:
-            start_node_names = find_nodes_to_resume_from(
+            start_node_names = _find_nodes_to_resume_from(
                 pipeline=pipeline,
                 unfinished_nodes=remaining_nodes,
                 catalog=catalog,
@@ -219,7 +219,7 @@ class AbstractRunner(ABC):
             )
 
 
-def find_nodes_to_resume_from(
+def _find_nodes_to_resume_from(
     pipeline: Pipeline, unfinished_nodes: Collection[Node], catalog: DataCatalog
 ) -> set[str]:
     """Given a collection of unfinished nodes in a pipeline using
@@ -237,14 +237,10 @@ def find_nodes_to_resume_from(
         the run.
 
     """
-    all_nodes_that_need_to_run = _find_all_required_nodes(
-        pipeline, unfinished_nodes, catalog
-    )
+    nodes_to_be_run = _find_all_required_nodes(pipeline, unfinished_nodes, catalog)
 
     # Find which of the remaining nodes would need to run first (in topo sort)
-    persistent_ancestors = _find_initial_node_group(
-        pipeline, all_nodes_that_need_to_run
-    )
+    persistent_ancestors = _find_initial_node_group(pipeline, nodes_to_be_run)
 
     return {n.name for n in persistent_ancestors}
 
@@ -258,13 +254,13 @@ def _find_all_required_nodes(
     are not persisted.
 
     Args:
-        pipeline: the ``Pipeline`` to find ancestors in.
-        children: the iterable containing ``Node``s to find ancestors of.
+        pipeline: the ``Pipeline`` to analyze.
+        unfinished_nodes: the iterable of ``Node``s which have not finished yet.
         catalog: the ``DataCatalog`` of the run.
 
     Returns:
-        A set containing first persistent ancestors of the given
-        ``Node``s.
+        A set containing all input unfinished ``Node``s and all remaining
+        ``Node``s that need to run in case their outputs are not persisted.
 
     """
     nodes_to_run = set(unfinished_nodes)
@@ -283,14 +279,15 @@ def _find_all_required_nodes(
             queue.append(node)
 
     # Make sure no downstream tasks are skipped
-    nodes_to_run = pipeline.from_nodes(*(n.name for n in nodes_to_run)).nodes
+    nodes_to_run = set(pipeline.from_nodes(*(n.name for n in nodes_to_run)).nodes)
 
-    return set(nodes_to_run)
+    return nodes_to_run
 
 
 def _nodes_with_external_inputs(nodes_of_interest: Iterable[Node]) -> set[Node]:
     """For given ``Node``s , find their subset which depends on
-    external inputs of the ``Pipeline`` they constitute.
+    external inputs of the ``Pipeline`` they constitute. External inputs
+    are pipeline inputs not produced by other ``Node``s in the ``Pipeline``.
 
     Args:
         nodes_of_interest: the ``Node``s to analyze.
@@ -324,8 +321,10 @@ def _enumerate_non_persistent_inputs(node: Node, catalog: DataCatalog) -> set[st
     for node_input in node.inputs:
         if node_input.startswith("params:"):
             continue
-        if node_input not in catalog_datasets or isinstance(
-            catalog_datasets[node_input], MemoryDataset
+
+        if (
+            node_input not in catalog_datasets
+            or catalog_datasets[node_input]._EPHEMERAL
         ):
             non_persistent_inputs.add(node_input)
 

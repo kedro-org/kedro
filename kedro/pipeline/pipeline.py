@@ -11,8 +11,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 from typing import Any, Iterable
 
-from toposort import CircularDependencyError as ToposortCircleError
-from toposort import toposort
+from graphlib import CycleError, TopologicalSorter
 
 import kedro
 from kedro.pipeline.node import Node, _to_list
@@ -884,6 +883,26 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
         )
 
 
+def _group_toposorted(
+    toposorted: Iterable[Node], deps: dict[Node, set[Node]]
+) -> list[list[Node]]:
+    """Group already toposorted nodes into independent toposorted groups"""
+    processed: set[Node] = set()
+    groups = []
+    group = []
+    for x in toposorted:
+        if set(deps.get(x, set())) <= processed:
+            group.append(x)
+        elif group:
+            processed |= set(group)
+            groups.append(sorted(group))
+            group = [x]
+
+    if group:
+        groups.append(sorted(group))
+    return groups
+
+
 def _topologically_sorted(node_dependencies: dict[Node, set[Node]]) -> list[list[Node]]:
     """Topologically group and sort (order) nodes such that no node depends on
     a node that appears in the same or a later group.
@@ -897,22 +916,14 @@ def _topologically_sorted(node_dependencies: dict[Node, set[Node]]) -> list[list
         be executed first (no dependencies), second set are nodes that should be
         executed on the second step, etc.
     """
-
-    def _circle_error_message(error_data: dict[Any, set]) -> str:
-        """Error messages provided by the toposort library will
-        refer to indices that are used as an intermediate step.
-        This method can be used to replace that message with
-        one that refers to the nodes' string representations.
-        """
-        circular = [str(node) for node in error_data.keys()]
-        return f"Circular dependencies exist among these items: {circular}"
-
     try:
         # Sort it so it has consistent order when run with SequentialRunner
-        result = [sorted(dependencies) for dependencies in toposort(node_dependencies)]
+        sorter = TopologicalSorter(node_dependencies)
+        toposorted = _group_toposorted(sorter.static_order(), node_dependencies)
+        result = [sorted(dependencies) for dependencies in toposorted]
         return result
-    except ToposortCircleError as exc:
-        message = _circle_error_message(exc.data)
+    except CycleError as exc:
+        message = f"Circular dependencies exist among these items: {exc.args[1]}"
         raise CircularDependencyError(message) from exc
 
 

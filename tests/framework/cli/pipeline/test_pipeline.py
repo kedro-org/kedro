@@ -74,7 +74,7 @@ class TestPipelineCreateCommand:
         assert actual_configs == expected_configs
 
         # tests
-        test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_dir = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         expected_files = {"__init__.py", "test_pipeline.py"}
         actual_files = {f.name for f in test_dir.iterdir()}
         assert actual_files == expected_files
@@ -168,7 +168,7 @@ class TestPipelineCreateCommand:
         conf_dirs = list((fake_repo_path / settings.CONF_SOURCE).rglob(PIPELINE_NAME))
         assert not conf_dirs  # no configs created for the pipeline
 
-        test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_dir = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         assert test_dir.is_dir()
 
     def test_catalog_and_params(
@@ -223,14 +223,9 @@ class TestPipelineCreateCommand:
 
         # create __init__.py in tests
         tests_init = (
-            fake_repo_path
-            / "src"
-            / "tests"
-            / "pipelines"
-            / PIPELINE_NAME
-            / "__init__.py"
+            fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME / "__init__.py"
         )
-        tests_init.parent.mkdir(parents=True)
+        tests_init.parent.mkdir(parents=True, exist_ok=True)
         tests_init.touch()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]

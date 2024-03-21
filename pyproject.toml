@@ -81,8 +81,7 @@ test = [
     "pandas-stubs",
     "types-PyYAML",
     "types-cachetools",
-    "types-toml",
-    "types-toposort"
+    "types-toml"
 ]
 docs = [
     "docutils<0.21",

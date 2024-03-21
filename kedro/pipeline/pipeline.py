@@ -162,7 +162,17 @@ class Pipeline:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
         self._nodes = tagged_nodes
-        self._toposorted_nodes = _toposort(self.node_dependencies)
+        self._toposorter = TopologicalSorter(self.node_dependencies)
+
+        # test for circular dependencies without executing the toposort for efficiency
+        try:
+            self._toposorter.prepare()
+        except CycleError as exc:
+            message = f"Circular dependencies exist among these items: {exc.args[1]}"
+            raise CircularDependencyError(message) from exc
+
+        self._toposorted_nodes: list[Node] = []
+        self._toposorted_groups: list[list[Node]] = []
 
     def __repr__(self) -> str:  # pragma: no cover
         """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""
@@ -347,6 +357,9 @@ class Pipeline:
             The list of all pipeline nodes in topological order.
 
         """
+        if not self._toposorted_nodes:
+            self._toposorted_nodes = [n for group in self.grouped_nodes for n in group]
+
         return list(self._toposorted_nodes)
 
     @property
@@ -360,7 +373,13 @@ class Pipeline:
 
         """
 
-        return _group_toposorted(self._toposorted_nodes, self.node_dependencies)
+        if not self._toposorted_groups and self._toposorter:
+            while self._toposorter:
+                group = sorted(self._toposorter.get_ready())
+                self._toposorted_groups.append(group)
+                self._toposorter.done(*group)
+
+        return [list(group) for group in self._toposorted_groups]
 
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified
@@ -881,47 +900,6 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
             f"Please specify a transcoding option or "
             f"rename the datasets."
         )
-
-
-def _group_toposorted(
-    toposorted: Iterable[Node], deps: dict[Node, set[Node]]
-) -> list[list[Node]]:
-    """Group already toposorted nodes into independent toposorted groups"""
-    processed: set[Node] = set()
-    groups = []
-    group = []
-    for x in toposorted:
-        if set(deps.get(x, set())) <= processed:
-            group.append(x)
-        elif group:
-            processed |= set(group)
-            groups.append(sorted(group))
-            group = [x]
-
-    if group:
-        groups.append(sorted(group))
-    return groups
-
-
-def _toposort(node_dependencies: dict[Node, set[Node]]) -> list[Node]:
-    """Topologically sort (order) nodes such that no node depends on
-    a node that appears earlier in the list.
-
-    Raises:
-        CircularDependencyError: When it is not possible to topologically order
-            provided nodes.
-
-    Returns:
-        The list of nodes in order of execution.
-    """
-    try:
-        sorter = TopologicalSorter(node_dependencies)
-        # Ensure stable toposort by sorting the nodes in a group
-        groups = _group_toposorted(sorter.static_order(), node_dependencies)
-        return [n for group in groups for n in group]
-    except CycleError as exc:
-        message = f"Circular dependencies exist among these items: {exc.args[1]}"
-        raise CircularDependencyError(message) from exc
 
 
 class CircularDependencyError(Exception):

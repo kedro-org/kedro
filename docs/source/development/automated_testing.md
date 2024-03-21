@@ -29,15 +29,15 @@ pip install pytest
 
 ### Create a `/tests` directory
 
-Now that `pytest` is installed, you will need a place to put your tests. Create a `/tests` folder in the `/src` directory of your project.
+Now that `pytest` is installed, you will need a place to put your tests. Create a `/tests` folder in the root directory of your project.
 
 ```bash
-mkdir <project_root>/src/tests
+mkdir <project_root>/tests
 ```
 
 ### Test directory structure
 
-The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `/src/<package_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. See an example `/src` folder below.
+The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `/src/<package_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. See an example `/tests` folder below.
 
 ```
 src
@@ -49,12 +49,12 @@ src
 │           │   nodes.py
 │           │   ...
 │
-└───tests
-│   └───pipelines
-│       └───dataprocessing
-│           │   ...
-│           │   test_nodes.py
-│           │   ...
+tests
+└───pipelines
+│   └───dataprocessing
+│       │   ...
+│       │   test_nodes.py
+│       │   ...
 ```
 
 ### Create an example test

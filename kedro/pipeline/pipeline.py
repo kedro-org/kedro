@@ -139,7 +139,7 @@ class Pipeline:
 
         nodes_chain = list(
             chain.from_iterable(
-                [[n] if isinstance(n, Node) else n.nodes for n in nodes_list]
+                [[n] if isinstance(n, Node) else n._nodes for n in nodes_list]
             )
         )
         _validate_transcoded_inputs_outputs(nodes_chain)
@@ -163,7 +163,7 @@ class Pipeline:
             for output in node.outputs:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
-        self._nodes = tagged_nodes
+        self._nodes: list[Node] = tagged_nodes
         self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -171,7 +171,7 @@ class Pipeline:
         max_nodes_to_display = 10
 
         nodes_reprs = [repr(node) for node in self.nodes[:max_nodes_to_display]]
-        if len(self.nodes) > max_nodes_to_display:
+        if len(self._nodes) > max_nodes_to_display:
             nodes_reprs.append("...")
         sep = ",\n"
         nodes_reprs_str = f"[\n{sep.join(nodes_reprs)}\n]" if nodes_reprs else "[]"
@@ -181,7 +181,7 @@ class Pipeline:
     def __add__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes + other.nodes))
+        return Pipeline(set(self._nodes + other._nodes))
 
     def __radd__(self, other: Any) -> Pipeline:
         if isinstance(other, int) and other == 0:
@@ -191,17 +191,17 @@ class Pipeline:
     def __sub__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes) - set(other.nodes))
+        return Pipeline(set(self._nodes) - set(other._nodes))
 
     def __and__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes) & set(other.nodes))
+        return Pipeline(set(self._nodes) & set(other._nodes))
 
     def __or__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes + other.nodes))
+        return Pipeline(set(self._nodes + other._nodes))
 
     def all_inputs(self) -> set[str]:
         """All inputs for all nodes in the pipeline.
@@ -210,7 +210,7 @@ class Pipeline:
             All node input names as a Set.
 
         """
-        return set.union(set(), *(node.inputs for node in self.nodes))
+        return set.union(set(), *(node.inputs for node in self._nodes))
 
     def all_outputs(self) -> set[str]:
         """All outputs of all nodes in the pipeline.
@@ -219,7 +219,7 @@ class Pipeline:
             All node outputs.
 
         """
-        return set.union(set(), *(node.outputs for node in self.nodes))
+        return set.union(set(), *(node.outputs for node in self._nodes))
 
     def _remove_intermediates(self, datasets: set[str]) -> set[str]:
         intermediate = {_strip_transcoding(i) for i in self.all_inputs()} & {
@@ -417,7 +417,7 @@ class Pipeline:
         """
         nodes = [
             n
-            for n in self.nodes
+            for n in self._nodes
             if n.namespace and n.namespace.startswith(node_namespace)
         ]
         if not nodes:
@@ -675,8 +675,10 @@ class Pipeline:
                 nodes of the current one such that only nodes containing *any*
                 of the tags provided are being copied.
         """
+
         unique_tags = set(tags)
-        nodes = [node for node in self.nodes if unique_tags & node.tags]
+        nodes = [node for node in self._nodes if unique_tags & node.tags]
+
         return Pipeline(nodes)
 
     def filter(  # noqa: PLR0913
@@ -760,11 +762,11 @@ class Pipeline:
         # would give different outcomes depending on the order of filter methods:
         # only_nodes and then from_inputs would give node1, while only_nodes and then
         # from_inputs would give node1 and node3.
-        filtered_pipeline = Pipeline(self.nodes)
+        filtered_pipeline = Pipeline(self._nodes)
         for subset_pipeline in subset_pipelines:
             filtered_pipeline &= subset_pipeline
 
-        if not filtered_pipeline.nodes:
+        if not filtered_pipeline._nodes:
             raise ValueError(
                 "Pipeline contains no nodes after applying all provided filters"
             )
@@ -779,7 +781,7 @@ class Pipeline:
         Returns:
             New ``Pipeline`` object with nodes tagged.
         """
-        nodes = [n.tag(tags) for n in self.nodes]
+        nodes = [n.tag(tags) for n in self._nodes]
         return Pipeline(nodes)
 
     def to_json(self) -> str:
@@ -816,7 +818,7 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]) -> None
         if isinstance(each, Node):
             _check_node(each)
         elif isinstance(each, Pipeline):
-            for node in each.nodes:
+            for node in each._nodes:
                 _check_node(node, pipeline_=each)
 
     if duplicates:

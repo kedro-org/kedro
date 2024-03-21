@@ -143,7 +143,10 @@ class Pipeline:
         _validate_transcoded_inputs_outputs(nodes_chain)
         _tags = set(_to_list(tags))
 
-        tagged_nodes = [n.tag(_tags) for n in nodes_chain]
+        if _tags:
+            tagged_nodes = [n.tag(_tags) for n in nodes_chain]
+        else:
+            tagged_nodes = nodes_chain
 
         self._nodes_by_name = {node.name: node for node in tagged_nodes}
         _validate_unique_outputs(tagged_nodes)

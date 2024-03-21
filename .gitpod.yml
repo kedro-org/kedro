@@ -7,7 +7,8 @@ tasks:
       make sign-off
       pip install -e /workspace/kedro[test]
       cd /workspace
-      yes project | kedro new -s pandas-iris --checkout main
+      kedro new --name project -s spaceflights-pandas --checkout main
+      pip install -e project
       cd /workspace/kedro
       pre-commit install --install-hooks
 

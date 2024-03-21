@@ -1,10 +1,10 @@
 # Nodes
 
-In this section, we introduce the concept of a node, for which the relevant API documentation is [kedro.pipeline.node](/kedro.pipeline.node).
+In this section, we introduce the concept of a node, for which the relevant API documentation is [kedro.pipeline.node](/api/kedro.pipeline.node).
 
 Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end (E2E) production workflows.
 
-You must first import libraries from Kedro and other standard tools to run the code snippets demonstrated below.
+You must first import libraries from Kedro and other standard tools to run the code snippets below.
 
 ```python
 from kedro.pipeline import *
@@ -145,7 +145,7 @@ Alternatively, you can also make use of a helper function that creates the mappi
 
 ## How to tag a node
 
-Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tag=ds` will only run nodes that have a `ds` tag attached.
+Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tags=ds` will only run nodes that have a `ds` tag attached.
 
 To tag a node, you can simply specify the `tags` argument:
 
@@ -158,7 +158,7 @@ Moreover, you can [tag all nodes in a `Pipeline`](./pipeline_introduction.md#how
 To run a pipeline using a tag:
 
 ```bash
-kedro run --tag=pipeline_tag
+kedro run --tags=pipeline_tag
 ```
 
 This will run only the nodes found within the pipeline tagged with `pipeline_tag`.
@@ -184,24 +184,30 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 ## How to use generator functions in a node
 
+```{warning}
+This documentation section uses the `pandas-iris` starter that is unavailable in Kedro version 0.19.0 and beyond. The latest version of Kedro that supports `pandas-iris` is Kedro 0.18.14: install that or an earlier version to work through this example `pip install kedro==0.18.14`).
+
+To check the version installed, type `kedro -V` in your terminal window.
+```
+
 [Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255) and are a special kind of function in Python that returns lazy iterators. They are often used for lazy-loading or lazy-saving of data, which can be particularly useful when dealing with large datasets that do not fit entirely into memory. In the context of Kedro, generator functions can be used in nodes to efficiently process and handle such large datasets.
 
 ### Set up the project
 
-To demonstrate the use of generator functions in Kedro nodes, first, set up a Kedro project using the `pandas-iris` starter. If you haven't already created a Kedro project, you can follow the [get started guide](../get_started/new_project.md#create-a-new-project-containing-example-code) to create it.
+Set up a Kedro project using the legacy `pandas-iris` starter. Create the project with this command, assuming Kedro version 0.18.14:
 
-Create the project with this command:
 ```bash
-kedro new -s pandas-iris
+kedro new --starter=pandas-iris --checkout=0.18.14
 ```
 
 ### Loading data with generators
+
 To use generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
 
 You need to add a new dataset in your `catalog.yml` as follows:
 ```diff
 + X_test:
-+  type: pandas.CSVDataSet
++  type: pandas.CSVDataset
 +  filepath: data/05_model_input/X_test.csv
 +  load_args:
 +    chunksize: 10
@@ -286,7 +292,7 @@ def report_accuracy(y_pred: pd.Series, y_test: pd.Series):
 </details>
 
 
-The `ChunkWiseCSVDataset` is a variant of the `pandas.CSVDataSet` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
+The `ChunkWiseCSVDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
 
 ```python
 import pandas as pd
@@ -294,10 +300,10 @@ import pandas as pd
 from kedro.io.core import (
     get_filepath_str,
 )
-from kedro.extras.datasets.pandas import CSVDataSet
+from kedro_datasets.pandas import CSVDataset
 
 
-class ChunkWiseCSVDataset(CSVDataSet):
+class ChunkWiseCSVDataset(CSVDataset):
     """``ChunkWiseCSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem. It uses pandas to handle the CSV file.
     """

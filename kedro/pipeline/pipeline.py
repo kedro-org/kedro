@@ -9,7 +9,7 @@ import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Iterable
+from typing import Any, Iterable
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -71,7 +71,7 @@ class ConfirmNotUniqueError(Exception):
     pass
 
 
-class Pipeline:  # noqa: too-many-public-methods
+class Pipeline:
     """A ``Pipeline`` defined as a collection of ``Node`` objects. This class
     treats nodes as part of a graph representation and provides inputs,
     outputs and execution order.
@@ -134,39 +134,39 @@ class Pipeline:  # noqa: too-many-public-methods
                 "'nodes' argument of 'Pipeline' is None. It must be an "
                 "iterable of nodes and/or pipelines instead."
             )
-        nodes = list(nodes)  # in case it's a generator
-        _validate_duplicate_nodes(nodes)
+        nodes_list = list(nodes)  # in case it's a generator
+        _validate_duplicate_nodes(nodes_list)
 
-        nodes = list(
+        nodes_chain = list(
             chain.from_iterable(
-                [[n] if isinstance(n, Node) else n._nodes for n in nodes]
+                [[n] if isinstance(n, Node) else n._nodes for n in nodes_list]
             )
         )
-        _validate_transcoded_inputs_outputs(nodes)
+        _validate_transcoded_inputs_outputs(nodes_chain)
         _tags = set(_to_list(tags))
 
-        nodes = [n.tag(_tags) for n in nodes]
+        tagged_nodes = [n.tag(_tags) for n in nodes_chain]
 
-        self._nodes_by_name = {node.name: node for node in nodes}
-        _validate_unique_outputs(nodes)
-        _validate_unique_confirms(nodes)
+        self._nodes_by_name = {node.name: node for node in tagged_nodes}
+        _validate_unique_outputs(tagged_nodes)
+        _validate_unique_confirms(tagged_nodes)
 
         # input -> nodes with input
         self._nodes_by_input: dict[str, set[Node]] = defaultdict(set)
-        for node in nodes:
+        for node in tagged_nodes:
             for input_ in node.inputs:
                 self._nodes_by_input[_strip_transcoding(input_)].add(node)
 
         # output -> node with output
         self._nodes_by_output: dict[str, Node] = {}
-        for node in nodes:
+        for node in tagged_nodes:
             for output in node.outputs:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
-        self._nodes: list[Node] = nodes
+        self._nodes: list[Node] = tagged_nodes
         self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""
         max_nodes_to_display = 10
 
@@ -178,27 +178,27 @@ class Pipeline:  # noqa: too-many-public-methods
         constructor_repr = f"({nodes_reprs_str})"
         return f"{self.__class__.__name__}{constructor_repr}"
 
-    def __add__(self, other):
+    def __add__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self._nodes + other._nodes))
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> Pipeline:
         if isinstance(other, int) and other == 0:
             return self
         return self.__add__(other)
 
-    def __sub__(self, other):
+    def __sub__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self._nodes) - set(other._nodes))
 
-    def __and__(self, other):
+    def __and__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self._nodes) & set(other._nodes))
 
-    def __or__(self, other):
+    def __or__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self._nodes + other._nodes))
@@ -250,7 +250,7 @@ class Pipeline:  # noqa: too-many-public-methods
         """
         return self._remove_intermediates(self.all_outputs())
 
-    def data_sets(self) -> set[str]:
+    def datasets(self) -> set[str]:
         """The names of all data sets used by the ``Pipeline``,
         including inputs and outputs.
 
@@ -260,8 +260,8 @@ class Pipeline:  # noqa: too-many-public-methods
         """
         return self.all_outputs() | self.all_inputs()
 
-    def _transcode_compatible_names(self):
-        return {_strip_transcoding(ds) for ds in self.data_sets()}
+    def _transcode_compatible_names(self) -> set[str]:
+        return {_strip_transcoding(ds) for ds in self.datasets()}
 
     def describe(self, names_only: bool = True) -> str:
         """Obtain the order of execution and expected free input variables in
@@ -300,7 +300,7 @@ class Pipeline:  # noqa: too-many-public-methods
 
         """
 
-        def set_to_string(set_of_strings):
+        def set_to_string(set_of_strings: set[str]) -> str:
             """Convert set to a string but return 'None' in case of an empty
             set.
             """
@@ -442,10 +442,10 @@ class Pipeline:  # noqa: too-many-public-methods
             Set of ``Nodes`` that use the given datasets as inputs.
         """
         missing = sorted(
-            datasets - self.data_sets() - self._transcode_compatible_names()
+            datasets - self.datasets() - self._transcode_compatible_names()
         )
         if missing:
-            raise ValueError(f"Pipeline does not contain data_sets named {missing}")
+            raise ValueError(f"Pipeline does not contain datasets named {missing}")
 
         relevant_nodes = set()
         for input_ in datasets:
@@ -473,10 +473,10 @@ class Pipeline:  # noqa: too-many-public-methods
             Set of ``Nodes`` that output to the given datasets.
         """
         missing = sorted(
-            datasets - self.data_sets() - self._transcode_compatible_names()
+            datasets - self.datasets() - self._transcode_compatible_names()
         )
         if missing:
-            raise ValueError(f"Pipeline does not contain data_sets named {missing}")
+            raise ValueError(f"Pipeline does not contain datasets named {missing}")
 
         relevant_nodes = set()
         for output in datasets:
@@ -675,19 +675,21 @@ class Pipeline:  # noqa: too-many-public-methods
                 nodes of the current one such that only nodes containing *any*
                 of the tags provided are being copied.
         """
-        tags = set(tags)
-        nodes = (node for node in self._nodes if tags & node.tags)
+
+        unique_tags = set(tags)
+        nodes = [node for node in self._nodes if unique_tags & node.tags]
+
         return Pipeline(nodes)
 
     def filter(  # noqa: PLR0913
         self,
-        tags: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        node_names: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-        node_namespace: str = None,
+        tags: Iterable[str] | None = None,
+        from_nodes: Iterable[str] | None = None,
+        to_nodes: Iterable[str] | None = None,
+        node_names: Iterable[str] | None = None,
+        from_inputs: Iterable[str] | None = None,
+        to_outputs: Iterable[str] | None = None,
+        node_namespace: str | None = None,
     ) -> Pipeline:
         """Creates a new ``Pipeline`` object with the nodes that meet all of the
         specified filtering conditions.
@@ -733,7 +735,7 @@ class Pipeline:  # noqa: too-many-public-methods
         """
         # Use [node_namespace] so only_nodes_with_namespace can follow the same
         # *filter_args pattern as the other filtering methods, which all take iterables.
-        node_namespace = [node_namespace] if node_namespace else None
+        node_namespace_iterable = [node_namespace] if node_namespace else None
 
         filter_methods = {
             self.only_nodes_with_tags: tags,
@@ -742,7 +744,7 @@ class Pipeline:  # noqa: too-many-public-methods
             self.only_nodes: node_names,
             self.from_inputs: from_inputs,
             self.to_outputs: to_outputs,
-            self.only_nodes_with_namespace: node_namespace,
+            self.only_nodes_with_namespace: node_namespace_iterable,
         }
 
         subset_pipelines = {
@@ -782,7 +784,7 @@ class Pipeline:  # noqa: too-many-public-methods
         nodes = [n.tag(tags) for n in self._nodes]
         return Pipeline(nodes)
 
-    def to_json(self):
+    def to_json(self) -> str:
         """Return a json representation of the pipeline."""
         transformed = [
             {
@@ -801,11 +803,11 @@ class Pipeline:  # noqa: too-many-public-methods
         return json.dumps(pipeline_versioned)
 
 
-def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
+def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]) -> None:
     seen_nodes: set[str] = set()
     duplicates: dict[Pipeline | None, set[str]] = defaultdict(set)
 
-    def _check_node(node_: Node, pipeline_: Pipeline = None):
+    def _check_node(node_: Node, pipeline_: Pipeline | None = None) -> None:
         name = node_.name
         if name in seen_nodes:
             duplicates[pipeline_].add(name)
@@ -837,8 +839,8 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
 
 
 def _validate_unique_outputs(nodes: list[Node]) -> None:
-    outputs = chain.from_iterable(node.outputs for node in nodes)
-    outputs = map(_strip_transcoding, outputs)
+    outputs_chain = chain.from_iterable(node.outputs for node in nodes)
+    outputs = map(_strip_transcoding, outputs_chain)
     duplicates = [key for key, value in Counter(outputs).items() if value > 1]
     if duplicates:
         raise OutputNotUniqueError(
@@ -848,8 +850,8 @@ def _validate_unique_outputs(nodes: list[Node]) -> None:
 
 
 def _validate_unique_confirms(nodes: list[Node]) -> None:
-    confirms = chain.from_iterable(node.confirms for node in nodes)
-    confirms = map(_strip_transcoding, confirms)
+    confirms_chain = chain.from_iterable(node.confirms for node in nodes)
+    confirms = map(_strip_transcoding, confirms_chain)
     duplicates = [key for key, value in Counter(confirms).items() if value > 1]
     if duplicates:
         raise ConfirmNotUniqueError(
@@ -884,7 +886,7 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
         )
 
 
-def _topologically_sorted(node_dependencies) -> list[list[Node]]:
+def _topologically_sorted(node_dependencies: dict[Node, set[Node]]) -> list[list[Node]]:
     """Topologically group and sort (order) nodes such that no node depends on
     a node that appears in the same or a later group.
 
@@ -898,7 +900,7 @@ def _topologically_sorted(node_dependencies) -> list[list[Node]]:
         executed on the second step, etc.
     """
 
-    def _circle_error_message(error_data: dict[str, str]) -> str:
+    def _circle_error_message(error_data: dict[Any, set]) -> str:
         """Error messages provided by the toposort library will
         refer to indices that are used as an intermediate step.
         This method can be used to replace that message with

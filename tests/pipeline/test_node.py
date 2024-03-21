@@ -187,7 +187,7 @@ class TestNodeComparisons:
         pattern = "'<' not supported between instances of 'Node' and 'str'"
 
         with pytest.raises(TypeError, match=pattern):
-            n < "hello"  # pylint: disable=pointless-statement
+            n < "hello"
 
     def test_different_input_list_order_not_equal(self):
         first = node(biconcat, ["input1", "input2"], "output1", name="A")
@@ -252,6 +252,14 @@ def duplicate_output_list_node():
     return identity, "A", ["A", "A"]
 
 
+def bad_input_variable_name():
+    return lambda x: None, {"a": 1, "b": "B"}, {"a": "A", "b": "B"}
+
+
+def bad_output_variable_name():
+    return lambda x: None, {"a": "A", "b": "B"}, {"a": "A", "b": 2}
+
+
 @pytest.mark.parametrize(
     "func, expected",
     [
@@ -266,14 +274,19 @@ def duplicate_output_list_node():
         (
             duplicate_output_dict_node,
             r"Failed to create node identity"
-            r"\(\[A\]\) -> \[A,A\] due to "
+            r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
         ),
         (
             duplicate_output_list_node,
             r"Failed to create node identity"
-            r"\(\[A\]\) -> \[A,A\] due to "
+            r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
+        ),
+        (bad_input_variable_name, "names of variables used as inputs to the function "),
+        (
+            bad_output_variable_name,
+            "names of variables used as outputs of the function ",
         ),
     ],
 )
@@ -368,6 +381,15 @@ class TestTag:
         tagged_node = node(identity, "input", "output", tags="hello").tag("world")
         assert "hello" in tagged_node.tags
         assert "world" in tagged_node.tags
+
+    @pytest.mark.parametrize("bad_tag", ["tag,with,comma", "tag with space"])
+    def test_invalid_tag(self, bad_tag):
+        pattern = (
+            f"'{bad_tag}' is not a valid node tag. It must contain only "
+            f"letters, digits, hyphens, underscores and/or fullstops."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            node(identity, ["in"], ["out"], tags=bad_tag)
 
 
 class TestNames:

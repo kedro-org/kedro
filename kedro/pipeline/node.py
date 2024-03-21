@@ -22,13 +22,13 @@ class Node:
     def __init__(  # noqa: PLR0913
         self,
         func: Callable,
-        inputs: None | str | list[str] | dict[str, str],
-        outputs: None | str | list[str] | dict[str, str],
+        inputs: str | list[str] | dict[str, str] | None,
+        outputs: str | list[str] | dict[str, str] | None,
         *,
-        name: str = None,
+        name: str | None = None,
         tags: str | Iterable[str] | None = None,
         confirms: str | list[str] | None = None,
-        namespace: str = None,
+        namespace: str | None = None,
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -42,7 +42,7 @@ class Node:
                 function. When dict[str, str] is provided, variable names
                 will be mapped to function argument names.
             outputs: The name or the list of the names of variables used
-                as outputs to the function. The number of names should match
+                as outputs of the function. The number of names should match
                 the number of outputs returned by the provided function.
                 When dict[str, str] is provided, variable names will be mapped
                 to the named outputs the function returns.
@@ -67,7 +67,6 @@ class Node:
                 and/or fullstops.
 
         """
-
         if not callable(func):
             raise ValueError(
                 _node_error_message(
@@ -83,6 +82,16 @@ class Node:
                 )
             )
 
+        for _input in _to_list(inputs):
+            if not isinstance(_input, str):
+                raise ValueError(
+                    _node_error_message(
+                        f"names of variables used as inputs to the function "
+                        f"must be of 'String' type, but {_input} from {inputs} "
+                        f"is '{type(_input)}'."
+                    )
+                )
+
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
                 _node_error_message(
@@ -90,6 +99,16 @@ class Node:
                     f"not '{type(outputs).__name__}'."
                 )
             )
+
+        for _output in _to_list(outputs):
+            if not isinstance(_output, str):
+                raise ValueError(
+                    _node_error_message(
+                        f"names of variables used as outputs of the function "
+                        f"must be of 'String' type, but {_output} from {outputs} "
+                        f"is '{type(_output)}'."
+                    )
+                )
 
         if not inputs and not outputs:
             raise ValueError(
@@ -100,7 +119,10 @@ class Node:
 
         self._func = func
         self._inputs = inputs
-        self._outputs = outputs
+        # The type of _outputs is picked up as possibly being None, however the checks above prevent that
+        # ever being the case. Mypy doesn't get that though, so it complains about the assignment of outputs to
+        # _outputs with different types.
+        self._outputs: str | list[str] | dict[str, str] = outputs  # type: ignore[assignment]
         if name and not re.match(r"[\w\.-]+$", name):
             raise ValueError(
                 f"'{name}' is not a valid node name. It must contain only "
@@ -109,12 +131,18 @@ class Node:
         self._name = name
         self._namespace = namespace
         self._tags = set(_to_list(tags))
+        for tag in self._tags:
+            if not re.match(r"[\w\.-]+$", tag):
+                raise ValueError(
+                    f"'{tag}' is not a valid node tag. It must contain only "
+                    f"letters, digits, hyphens, underscores and/or fullstops."
+                )
 
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
         self._confirms = confirms
 
-    def _copy(self, **overwrite_params):
+    def _copy(self, **overwrite_params: Any) -> Node:
         """
         Helper function to copy the node, replacing some values.
         """
@@ -128,15 +156,15 @@ class Node:
             "confirms": self._confirms,
         }
         params.update(overwrite_params)
-        return Node(**params)
+        return Node(**params)  # type: ignore[arg-type]
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
     @property
-    def _unique_key(self):
-        def hashable(value):
+    def _unique_key(self) -> tuple[Any, Any] | Any | tuple:
+        def hashable(value: Any) -> tuple[Any, Any] | Any | tuple:
             if isinstance(value, dict):
                 # we sort it because a node with inputs/outputs
                 # {"arg1": "a", "arg2": "b"} is equivalent to
@@ -146,24 +174,24 @@ class Node:
                 return tuple(value)
             return value
 
-        return (self.name, hashable(self._inputs), hashable(self._outputs))
+        return self.name, hashable(self._inputs), hashable(self._outputs)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Node):
             return NotImplemented
         return self._unique_key == other._unique_key
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         if not isinstance(other, Node):
             return NotImplemented
         return self._unique_key < other._unique_key
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self._unique_key)
 
-    def __str__(self):
-        def _set_to_str(xset):
-            return f"[{','.join(xset)}]"
+    def __str__(self) -> str:
+        def _set_to_str(xset: set | list[str]) -> str:
+            return f"[{';'.join(xset)}]"
 
         out_str = _set_to_str(self.outputs) if self._outputs else "None"
         in_str = _set_to_str(self.inputs) if self._inputs else "None"
@@ -171,13 +199,13 @@ class Node:
         prefix = self._name + ": " if self._name else ""
         return prefix + f"{self._func_name}({in_str}) -> {out_str}"
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return (
             f"Node({self._func_name}, {repr(self._inputs)}, {repr(self._outputs)}, "
             f"{repr(self._name)})"
         )
 
-    def __call__(self, **kwargs) -> dict[str, Any]:
+    def __call__(self, **kwargs: Any) -> dict[str, Any]:
         return self.run(inputs=kwargs)
 
     @property
@@ -201,7 +229,7 @@ class Node:
         return self._func
 
     @func.setter
-    def func(self, func: Callable):
+    def func(self, func: Callable) -> None:
         """Sets the underlying function of the node.
         Useful if user wants to decorate the function in a node's Hook implementation.
 
@@ -300,7 +328,7 @@ class Node:
         """
         return _to_list(self._confirms)
 
-    def run(self, inputs: dict[str, Any] = None) -> dict[str, Any]:
+    def run(self, inputs: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results
         in a dictionary.
 
@@ -353,10 +381,15 @@ class Node:
 
         # purposely catch all exceptions
         except Exception as exc:
-            self._logger.error("Node '%s' failed with error: \n%s", str(self), str(exc))
+            self._logger.error(
+                "Node %s failed with error: \n%s",
+                str(self),
+                str(exc),
+                extra={"markup": True},
+            )
             raise exc
 
-    def _run_with_no_inputs(self, inputs: dict[str, Any]):
+    def _run_with_no_inputs(self, inputs: dict[str, Any]) -> Any:
         if inputs:
             raise ValueError(
                 f"Node {str(self)} expected no inputs, "
@@ -366,7 +399,7 @@ class Node:
 
         return self._func()
 
-    def _run_with_one_input(self, inputs: dict[str, Any], node_input: str):
+    def _run_with_one_input(self, inputs: dict[str, Any], node_input: str) -> Any:
         if len(inputs) != 1 or node_input not in inputs:
             raise ValueError(
                 f"Node {str(self)} expected one input named '{node_input}', "
@@ -376,7 +409,7 @@ class Node:
 
         return self._func(inputs[node_input])
 
-    def _run_with_list(self, inputs: dict[str, Any], node_inputs: list[str]):
+    def _run_with_list(self, inputs: dict[str, Any], node_inputs: list[str]) -> Any:
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs) != set(inputs.keys()):
             raise ValueError(
@@ -387,7 +420,9 @@ class Node:
         # Ensure the function gets the inputs in the correct order
         return self._func(*(inputs[item] for item in node_inputs))
 
-    def _run_with_dict(self, inputs: dict[str, Any], node_inputs: dict[str, str]):
+    def _run_with_dict(
+        self, inputs: dict[str, Any], node_inputs: dict[str, str]
+    ) -> Any:
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs.values()) != set(inputs.keys()):
             raise ValueError(
@@ -399,15 +434,17 @@ class Node:
         kwargs = {arg: inputs[alias] for arg, alias in node_inputs.items()}
         return self._func(**kwargs)
 
-    def _outputs_to_dictionary(self, outputs):
-        def _from_dict():
+    def _outputs_to_dictionary(self, outputs: Any) -> dict[str, Any]:
+        def _from_dict() -> dict[str, Any]:
             result, iterator = outputs, None
             # generator functions are lazy and we need a peek into their first output
             if inspect.isgenerator(outputs):
                 (result,), iterator = spy(outputs)
 
-            keys = list(self._outputs.keys())
-            names = list(self._outputs.values())
+            # The type of _outputs is picked up as possibly not being a dict, but _from_dict is only called when
+            # it is a dictionary and so the calls to .keys and .values will work even though Mypy doesn't pick that up.
+            keys = list(self._outputs.keys())  # type: ignore[union-attr]
+            names = list(self._outputs.values())  # type: ignore[union-attr]
             if not isinstance(result, dict):
                 raise ValueError(
                     f"Failed to save outputs of node {self}.\n"
@@ -428,7 +465,7 @@ class Node:
                 result = tuple(result[k] for k in keys)
             return dict(zip(names, result))
 
-        def _from_list():
+        def _from_list() -> dict:
             result, iterator = outputs, None
             # generator functions are lazy and we need a peek into their first output
             if inspect.isgenerator(outputs):
@@ -461,7 +498,9 @@ class Node:
             return _from_dict()
         return _from_list()
 
-    def _validate_inputs(self, func, inputs):
+    def _validate_inputs(
+        self, func: Callable, inputs: None | str | list[str] | dict[str, str]
+    ) -> None:
         # inspect does not support built-in Python functions written in C.
         # Thus we only validate func if it is not built-in.
         if not inspect.isbuiltin(func):
@@ -479,7 +518,7 @@ class Node:
                     f"but got {inputs}"
                 ) from exc
 
-    def _validate_unique_outputs(self):
+    def _validate_unique_outputs(self) -> None:
         cnt = Counter(self.outputs)
         diff = {k for k in cnt if cnt[k] > 1}
         if diff:
@@ -488,7 +527,7 @@ class Node:
                 f"output(s) {diff}.\nNode outputs must be unique."
             )
 
-    def _validate_inputs_dif_than_outputs(self):
+    def _validate_inputs_dif_than_outputs(self) -> None:
         common_in_out = set(self.inputs).intersection(set(self.outputs))
         if common_in_out:
             raise ValueError(
@@ -498,7 +537,9 @@ class Node:
             )
 
     @staticmethod
-    def _process_inputs_for_bind(inputs: None | str | list[str] | dict[str, str]):
+    def _process_inputs_for_bind(
+        inputs: str | list[str] | dict[str, str] | None,
+    ) -> tuple[list[str], dict[str, str]]:
         # Safeguard that we do not mutate list inputs
         inputs = copy.copy(inputs)
         args: list[str] = []
@@ -512,7 +553,7 @@ class Node:
         return args, kwargs
 
 
-def _node_error_message(msg) -> str:
+def _node_error_message(msg: str) -> str:
     return (
         f"Invalid Node definition: {msg}\n"
         f"Format should be: node(function, inputs, outputs)"
@@ -521,13 +562,13 @@ def _node_error_message(msg) -> str:
 
 def node(  # noqa: PLR0913
     func: Callable,
-    inputs: None | str | list[str] | dict[str, str],
-    outputs: None | str | list[str] | dict[str, str],
+    inputs: str | list[str] | dict[str, str] | None,
+    outputs: str | list[str] | dict[str, str] | None,
     *,
-    name: str = None,
+    name: str | None = None,
     tags: str | Iterable[str] | None = None,
     confirms: str | list[str] | None = None,
-    namespace: str = None,
+    namespace: str | None = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.
@@ -595,7 +636,9 @@ def node(  # noqa: PLR0913
     )
 
 
-def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: dict[str, str]):
+def _dict_inputs_to_list(
+    func: Callable[[Any], Any], inputs: dict[str, str]
+) -> list[str]:
     """Convert a dict representation of the node inputs to a list, ensuring
     the appropriate order for binding them to the node's function.
     """
@@ -603,7 +646,7 @@ def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: dict[str, str]):
     return [*sig.args, *sig.kwargs.values()]
 
 
-def _to_list(element: None | str | Iterable[str] | dict[str, str]) -> list[str]:
+def _to_list(element: str | Iterable[str] | dict[str, str] | None) -> list[str]:
     """Make a list out of node inputs/outputs.
 
     Returns:

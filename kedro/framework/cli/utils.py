@@ -10,11 +10,12 @@ import subprocess
 import sys
 import textwrap
 import traceback
+import typing
 from collections import defaultdict
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import IO, Any, Iterable, Sequence
 
 import click
 import importlib_metadata
@@ -39,7 +40,7 @@ ENTRY_POINT_GROUPS = {
 logger = logging.getLogger(__name__)
 
 
-def call(cmd: list[str], **kwargs):  # pragma: no cover
+def call(cmd: list[str], **kwargs: Any) -> None:  # pragma: no cover
     """Run a subprocess command and raise if it fails.
 
     Args:
@@ -50,12 +51,14 @@ def call(cmd: list[str], **kwargs):  # pragma: no cover
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
     click.echo(" ".join(shlex.quote(c) for c in cmd))
-    code = subprocess.run(cmd, **kwargs).returncode  # noqa: PLW1510
+    code = subprocess.run(cmd, **kwargs).returncode  # noqa: PLW1510, S603
     if code:
         raise click.exceptions.Exit(code=code)
 
 
-def python_call(module: str, arguments: Iterable[str], **kwargs):  # pragma: no cover
+def python_call(
+    module: str, arguments: Iterable[str], **kwargs: Any
+) -> None:  # pragma: no cover
     """Run a subprocess command that invokes a Python module."""
     call([sys.executable, "-m", module] + list(arguments), **kwargs)
 
@@ -63,17 +66,15 @@ def python_call(module: str, arguments: Iterable[str], **kwargs):  # pragma: no 
 def find_stylesheets() -> Iterable[str]:  # pragma: no cover
     """Fetch all stylesheets used in the official Kedro documentation"""
     css_path = Path(__file__).resolve().parents[1] / "html" / "_static" / "css"
-    return (
-        str(css_path / "copybutton.css"),
-        str(css_path / "qb1-sphinx-rtd.css"),
-        str(css_path / "theme-overrides.css"),
-    )
+    return (str(css_path / "copybutton.css"),)
 
 
-def forward_command(group, name=None, forward_help=False):
+def forward_command(
+    group: Any, name: str | None = None, forward_help: bool = False
+) -> Any:
     """A command that receives the rest of the command line as 'args'."""
 
-    def wrapit(func):
+    def wrapit(func: Any) -> Any:
         func = click.argument("args", nargs=-1, type=click.UNPROCESSED)(func)
         func = command_with_verbosity(
             group,
@@ -102,7 +103,7 @@ def _suggest_cli_command(
         suggestion = "\n\nDid you mean this?"
     else:
         suggestion = "\n\nDid you mean one of these?\n"
-    suggestion += textwrap.indent("\n".join(matches), " " * 4)  # type: ignore
+    suggestion += textwrap.indent("\n".join(matches), " " * 4)
     return suggestion
 
 
@@ -124,7 +125,7 @@ class CommandCollection(click.CommandCollection):
         ]
         self._dedupe_commands(sources)
         super().__init__(
-            sources=sources,
+            sources=sources,  # type: ignore[arg-type]
             help="\n\n".join(help_texts),
             context_settings=CONTEXT_SETTINGS,
         )
@@ -132,36 +133,38 @@ class CommandCollection(click.CommandCollection):
         self.callback = sources[0].callback
 
     @staticmethod
-    def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]):
+    def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]) -> None:
         """Deduplicate commands by keeping the ones from the last source
         in the list.
         """
         seen_names: set[str] = set()
         for cli_collection in reversed(cli_collections):
             for cmd_group in reversed(cli_collection.sources):
-                cmd_group.commands = {  # type: ignore
+                cmd_group.commands = {  # type: ignore[attr-defined]
                     cmd_name: cmd
-                    for cmd_name, cmd in cmd_group.commands.items()  # type: ignore
+                    for cmd_name, cmd in cmd_group.commands.items()  # type: ignore[attr-defined]
                     if cmd_name not in seen_names
                 }
-                seen_names |= cmd_group.commands.keys()  # type: ignore
+                seen_names |= cmd_group.commands.keys()  # type: ignore[attr-defined]
 
         # remove empty command groups
         for cli_collection in cli_collections:
             cli_collection.sources = [
                 cmd_group
                 for cmd_group in cli_collection.sources
-                if cmd_group.commands  # type: ignore
+                if cmd_group.commands  # type: ignore[attr-defined]
             ]
 
     @staticmethod
-    def _merge_same_name_collections(groups: Sequence[click.MultiCommand]):
+    def _merge_same_name_collections(
+        groups: Sequence[click.MultiCommand],
+    ) -> list[click.CommandCollection]:
         named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
         helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
-            named_groups[group.name].append(group)
+            named_groups[group.name].append(group)  # type: ignore[index]
             if group.help:
-                helps[group.name].append(group.help)
+                helps[group.name].append(group.help)  # type: ignore[index]
 
         return [
             click.CommandCollection(
@@ -175,7 +178,9 @@ class CommandCollection(click.CommandCollection):
             if cli_list
         ]
 
-    def resolve_command(self, ctx: click.core.Context, args: list):
+    def resolve_command(
+        self, ctx: click.core.Context, args: list
+    ) -> tuple[str | None, click.Command | None, list[str]]:
         try:
             return super().resolve_command(ctx, args)
         except click.exceptions.UsageError as exc:
@@ -188,7 +193,7 @@ class CommandCollection(click.CommandCollection):
 
     def format_commands(
         self, ctx: click.core.Context, formatter: click.formatting.HelpFormatter
-    ):
+    ) -> None:
         for title, cli in self.groups:
             for group in cli:
                 if group.sources:
@@ -226,11 +231,11 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
     raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
-def _update_verbose_flag(ctx, param, value):  # noqa: unused-argument
+def _update_verbose_flag(ctx: click.Context, param: Any, value: bool) -> None:
     KedroCliError.VERBOSE_ERROR = value
 
 
-def _click_verbose(func):
+def _click_verbose(func: Any) -> Any:
     """Click option for enabling verbose mode."""
     return click.option(
         "--verbose",
@@ -241,10 +246,10 @@ def _click_verbose(func):
     )(func)
 
 
-def command_with_verbosity(group: click.core.Group, *args, **kwargs):
+def command_with_verbosity(group: click.core.Group, *args: Any, **kwargs: Any) -> Any:
     """Custom command decorator with verbose flag added."""
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         func = _click_verbose(func)
         func = group.command(*args, **kwargs)(func)
         return func
@@ -259,24 +264,34 @@ class KedroCliError(click.exceptions.ClickException):
     """
 
     VERBOSE_ERROR = False
+    VERBOSE_EXISTS = True
+    COOKIECUTTER_EXCEPTIONS_PREFIX = "cookiecutter.exceptions"
 
-    def show(self, file=None):
-        if file is None:
-            # noqa: protected-access
-            file = click._compat.get_text_stderr()
+    def show(self, file: IO | None = None) -> None:
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
+        elif self.VERBOSE_EXISTS:
+            etype, value, tb = sys.exc_info()
+            formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            cookiecutter_exception = ""
+            for ex_line in traceback.format_exception(etype, value, tb):
+                if self.COOKIECUTTER_EXCEPTIONS_PREFIX in ex_line:
+                    cookiecutter_exception = ex_line
+                    break
+            click.secho(
+                f"{cookiecutter_exception}{formatted_exception}Run with --verbose to see the full exception",
+                fg="yellow",
+            )
         else:
             etype, value, _ = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             click.secho(
-                f"{formatted_exception}Run with --verbose to see the full exception",
+                f"{formatted_exception}",
                 fg="yellow",
             )
-        click.secho(f"Error: {self.message}", fg="red", file=file)
 
 
-def _clean_pycache(path: Path):
+def _clean_pycache(path: Path) -> None:
     """Recursively clean all __pycache__ folders from `path`.
 
     Args:
@@ -288,13 +303,12 @@ def _clean_pycache(path: Path):
         shutil.rmtree(each, ignore_errors=True)
 
 
-def split_string(ctx, param, value):  # noqa: unused-argument
+def split_string(ctx: click.Context, param: Any, value: str) -> list[str]:
     """Split string by comma."""
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-# noqa: unused-argument,missing-param-doc,missing-type-doc
-def split_node_names(ctx, param, to_split: str) -> list[str]:
+def split_node_names(ctx: click.Context, param: Any, to_split: str) -> list[str]:
     """Split string by comma, ignoring commas enclosed by square parentheses.
     This avoids splitting the string of nodes names on commas included in
     default node names, which have the pattern
@@ -329,7 +343,7 @@ def split_node_names(ctx, param, to_split: str) -> list[str]:
     return result
 
 
-def env_option(func_=None, **kwargs):
+def env_option(func_: Any | None = None, **kwargs: Any) -> Any:
     """Add `--env` CLI option to a function."""
     default_args = {"type": str, "default": None, "help": ENV_HELP}
     kwargs = {**default_args, **kwargs}
@@ -343,22 +357,24 @@ def _check_module_importable(module_name: str) -> None:
     except ImportError as exc:
         raise KedroCliError(
             f"Module '{module_name}' not found. Make sure to install required project "
-            f"dependencies by running the 'pip install -r src/requirements.txt' command first."
+            f"dependencies by running the 'pip install -r requirements.txt' command first."
         ) from exc
 
 
-def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
+def _get_entry_points(name: str) -> Any:
     """Get all kedro related entry points"""
-    return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
+    return importlib_metadata.entry_points().select(  # type: ignore[no-untyped-call]
+        group=ENTRY_POINT_GROUPS[name]
+    )
 
 
-def _safe_load_entry_point(  # noqa: inconsistent-return-statements
-    entry_point,
-):
+def _safe_load_entry_point(
+    entry_point: Any,
+) -> Any:
     """Load entrypoint safely, if fails it will just skip the entrypoint."""
     try:
         return entry_point.load()
-    except Exception as exc:  # noqa: broad-except
+    except Exception as exc:
         logger.warning(
             "Failed to load %s commands from %s. Full exception: %s",
             entry_point.module,
@@ -390,109 +406,93 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def _config_file_callback(ctx, param, value):  # noqa: unused-argument
+@typing.no_type_check
+def _config_file_callback(ctx: click.Context, param: Any, value: Any) -> Any:
     """CLI callback that replaces command line options
     with values specified in a config file. If command line
     options are passed, they override config file values.
     """
-    # for performance reasons
-    import anyconfig  # noqa: import-outside-toplevel
 
     ctx.default_map = ctx.default_map or {}
     section = ctx.info_name
 
     if value:
-        config = anyconfig.load(value)[section]
+        config = OmegaConf.to_container(OmegaConf.load(value))[section]
+        for key, value in config.items():
+            _validate_config_file(key)
         ctx.default_map.update(config)
 
     return value
 
 
-def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
-    """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
-    ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
+def _validate_config_file(key: str) -> None:
+    """Validate the keys provided in the config file against the accepted keys."""
+    from kedro.framework.cli.project import run
+
+    run_args = [click_arg.name for click_arg in run.params]
+    run_args.remove("config")
+    if key not in run_args:
+        KedroCliError.VERBOSE_EXISTS = False
+        message = _suggest_cli_command(key, run_args)  # type: ignore[arg-type]
+        raise KedroCliError(
+            f"Key `{key}` in provided configuration is not valid. {message}"
+        )
+
+
+def _split_params(ctx: click.Context, param: Any, value: Any) -> Any:
+    if isinstance(value, dict):
+        return value
+    dot_list = []
+    for item in split_string(ctx, param, value):
+        equals_idx = item.find("=")
+        if equals_idx == -1:
+            # If an equals sign is not found, fail with an error message.
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: "
+                f"Item `{item}` must contain a key and a value separated by `=`."
+            )
+        # Split the item into key and value
+        key, _, val = item.partition("=")
+        key = key.strip()
+        if not key:
+            # If the key is empty after stripping whitespace, fail with an error message.
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: Parameter key "
+                f"cannot be an empty string."
+            )
+        # Add "key=value" pair to dot_list.
+        dot_list.append(f"{key}={val}")
+
+    conf = OmegaConf.from_dotlist(dot_list)
+    return OmegaConf.to_container(conf)
+
+
+def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str, str]:
+    """Split and format the string coming from the --load-versions
+    flag in kedro run, e.g.:
+    "dataset1:time1,dataset2:time2" -> {"dataset1": "time1", "dataset2": "time2"}
+
+    Args:
+        value: the string with the contents of the --load-versions flag.
+
+    Returns:
+        A dictionary with the formatted load versions data.
     """
-    if param.name == "load_version":
-        _deprecate_options(ctx, param, value)
+    if not value:
+        return {}
+
+    lv_tuple = tuple(chain.from_iterable(value.split(",") for value in [value]))
 
     load_versions_dict = {}
-    for load_version in value:
+    for load_version in lv_tuple:
         load_version = load_version.strip()  # noqa: PLW2901
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:  # noqa: PLR2004
             raise KedroCliError(
-                f"Expected the form of 'load_version' to be "
+                f"Expected the form of 'load_versions' to be "
                 f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
                 f"found {load_version} instead"
             )
         load_versions_dict[load_version_list[0]] = load_version_list[1]
 
     return load_versions_dict
-
-
-def _split_params(ctx, param, value):
-    if isinstance(value, dict):
-        return value
-    dot_list = []
-    for item in split_string(ctx, param, value):
-        equals_idx = item.find("=")
-        colon_idx = item.find(":")
-        if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
-            # For cases where key-value pair is separated by = and the value contains a colon
-            # which should not be replaced by =
-            pass
-        else:
-            item = item.replace(":", "=", 1)  # noqa: PLW2901
-        items = item.split("=", 1)
-        if len(items) != 2:  # noqa: PLR2004
-            ctx.fail(
-                f"Invalid format of `{param.name}` option: "
-                f"Item `{items[0]}` must contain "
-                f"a key and a value separated by `:` or `=`."
-            )
-        key = items[0].strip()
-        if not key:
-            ctx.fail(
-                f"Invalid format of `{param.name}` option: Parameter key "
-                f"cannot be an empty string."
-            )
-        dot_list.append(item)
-    conf = OmegaConf.from_dotlist(dot_list)
-    return OmegaConf.to_container(conf)
-
-
-def _split_load_versions(ctx, param, value):
-    lv_tuple = _get_values_as_tuple([value])
-    return _reformat_load_versions(ctx, param, lv_tuple) if value else {}
-
-
-def _get_values_as_tuple(values: Iterable[str]) -> tuple[str, ...]:
-    return tuple(chain.from_iterable(value.split(",") for value in values))
-
-
-def _deprecate_options(ctx, param, value):
-    deprecated_flag = {
-        "node_names": "--node",
-        "tag": "--tag",
-        "load_version": "--load-version",
-    }
-    new_flag = {
-        "node_names": "--nodes",
-        "tag": "--tags",
-        "load_version": "--load-versions",
-    }
-    shorthand_flag = {
-        "node_names": "-n",
-        "tag": "-t",
-        "load_version": "-lv",
-    }
-    if value:
-        deprecation_message = (
-            f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
-            "and will not be available from Kedro 0.19.0. "
-            f"Use the flag '{new_flag[param.name]}' instead. Shorthand "
-            f"'{shorthand_flag[param.name]}' will be updated to use "
-            f"'{new_flag[param.name]}' in Kedro 0.19.0."
-        )
-        click.secho(deprecation_message, fg="red")
-    return value

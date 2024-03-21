@@ -1,21 +1,21 @@
 # Advanced: Tutorial to create a custom dataset
 
-[Kedro supports many datasets](/kedro_datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
+{py:mod}`Kedro supports many datasets <kedro-datasets:kedro_datasets>` out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## AbstractDataset
 
-If you are a contributor and would like to submit a new dataset, you must extend the [`AbstractDataset` interface](/kedro.io.AbstractDataset) or [`AbstractVersionedDataset` interface](/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
+If you are a contributor and would like to submit a new dataset, you must extend the [`AbstractDataset` interface](/api/kedro.io.AbstractDataset) or [`AbstractVersionedDataset` interface](/api/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
 
 
 ## Scenario
 
-In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataSet` to read and save image data.
+In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types/) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
 
 ## Project setup
 
 We assume that you have already [installed Kedro](../get_started/install.md). Now [create a project](../get_started/new_project.md) (feel free to name your project as you like, but here we will assume the project's repository name is `kedro-pokemon`).
 
-Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
+Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
 
 The dataset will use [Pillow](https://pillow.readthedocs.io/en/stable/) for generic image processing functionality, to ensure that it can work with a range of different image formats, not just PNG.
 
@@ -29,7 +29,7 @@ Consult the [Pillow documentation](https://pillow.readthedocs.io/en/stable/insta
 
 ## The anatomy of a dataset
 
-At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataset](/kedro.io.AbstractDataset) and provide an implementation for the following abstract methods:
+At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataset](/api/kedro.io.AbstractDataset) and provide an implementation for the following abstract methods:
 
 * `_load`
 * `_save`
@@ -38,7 +38,9 @@ At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDatase
 `AbstractDataset` is generically typed with an input data type for saving data, and an output data type for loading data.
 This typing is optional however, and defaults to `Any` type.
 
-Here is an example skeleton for `ImageDataSet`:
+The `_EPHEMERAL` boolean attribute in `AbstractDataset` indicates if a dataset is persistent. For example, in the case of [MemoryDataset](/api/kedro.io.MemoryDataset), which is not persistent, it is set to True. By default, `_EPHEMERAL` is set to False.
+
+Here is an example skeleton for `ImageDataset`:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -51,17 +53,17 @@ import numpy as np
 from kedro.io import AbstractDataset
 
 
-class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
-    """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
+class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
+    """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
     ::
 
-        >>> ImageDataSet(filepath='/img/file/path.png')
+        >>> ImageDataset(filepath='/img/file/path.png')
     """
 
     def __init__(self, filepath: str):
-        """Creates a new instance of ImageDataSet to load / save image data at the given filepath.
+        """Creates a new instance of ImageDataset to load / save image data at the given filepath.
 
         Args:
             filepath: The location of the image file to load / save data.
@@ -86,14 +88,12 @@ class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
 ```
 </details>
 
-Create a subfolder called `extras` in `src/kedro_pokemon/`, and a `datasets` subfolder within that, to store the dataset definition `image_dataset.py` and mimic the structure inside Kedro's own codebase (including `__init__.py` to make Python treat those directories containing the file as packages that you can import from):
+Create a subfolder called `datasets` in `src/kedro_pokemon/` to store the dataset definition `image_dataset.py`, adding `__init__.py` to make Python treat the directory as a package that you can import from:
 
 ```
-src/kedro_pokemon/extras
+src/kedro_pokemon/datasets
 ├── __init__.py
-└── datasets
-    ├── __init__.py
-    └── image_dataset.py
+└── image_dataset.py
 ```
 
 ## Implement the `_load` method with `fsspec`
@@ -117,9 +117,9 @@ from kedro.io import AbstractDataset
 from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
-class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
+class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
     def __init__(self, filepath: str):
-        """Creates a new instance of ImageDataSet to load / save image data for given filepath.
+        """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
         Args:
             filepath: The location of the image file to load / save data.
@@ -152,7 +152,7 @@ To test this out, let's add a dataset to the data catalog to load Pikachu's imag
 # in conf/base/catalog.yml
 
 pikachu:
-  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
+  type: kedro_pokemon.datasets.image_dataset.ImageDataset
   filepath: data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   # Note: the duplicated `images` path is part of the original Kaggle dataset
 ```
@@ -174,7 +174,7 @@ Similarly, we can implement the `_save` method as follows:
 
 
 ```python
-class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
+class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
@@ -198,7 +198,7 @@ You can open the file to verify that the data was written back correctly.
 The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset.
 
 ```python
-class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
+class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes the attributes of the dataset."""
         return dict(filepath=self._filepath, protocol=self._protocol)
@@ -206,7 +206,7 @@ class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
 
 ## The complete example
 
-Here is the full implementation of our basic `ImageDataSet`:
+Here is the full implementation of our basic `ImageDataset`:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -223,17 +223,17 @@ from kedro.io import AbstractDataset
 from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
-class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
-    """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
+class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
+    """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
     ::
 
-        >>> ImageDataSet(filepath='/img/file/path.png')
+        >>> ImageDataset(filepath='/img/file/path.png')
     """
 
     def __init__(self, filepath: str):
-        """Creates a new instance of ImageDataSet to load / save image data for given filepath.
+        """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
         Args:
             filepath: The location of the image file to load / save data.
@@ -269,18 +269,18 @@ class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
 
 ## Integration with `PartitionedDataset`
 
-Currently, the `ImageDataSet` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
+Currently, the `ImageDataset` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-Kedro's [`PartitionedDataset`](/kedro.io.PartitionedDataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+Kedro's {class}`PartitionedDataset<kedro-datasets:kedro_datasets.partitions.PartitionedDataset>` is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
 
-To use `PartitionedDataset` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataset` loads all PNG files from the data directory using `ImageDataSet`:
+To use `PartitionedDataset` with `ImageDataset` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataset` loads all PNG files from the data directory using `ImageDataset`:
 
 ```yaml
 # in conf/base/catalog.yml
 
 pokemon:
-  type: PartitionedDataset
-  dataset: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
+  type: partitions.PartitionedDataset
+  dataset: kedro_pokemon.datasets.image_dataset.ImageDataset
   path: data/01_raw/pokemon-images-and-types/images/images
   filename_suffix: ".png"
 ```
@@ -309,12 +309,12 @@ Versioning doesn't work with `PartitionedDataset`. You can't use both of them at
 ```
 
 To add versioning support to the new dataset we need to extend the
- [AbstractVersionedDataset](/kedro.io.AbstractVersionedDataset) to:
+ [AbstractVersionedDataset](/api/kedro.io.AbstractVersionedDataset) to:
 
 * Accept a `version` keyword argument as part of the constructor
 * Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively
 
-The following amends the full implementation of our basic `ImageDataSet`. It now loads and saves data to and from a versioned subfolder (`data/01_raw/pokemon-images-and-types/images/images/pikachu.png/<version>/pikachu.png` with `version` being a datetime-formatted string `YYYY-MM-DDThh.mm.ss.sssZ` by default):
+The following amends the full implementation of our basic `ImageDataset`. It now loads and saves data to and from a versioned subfolder (`data/01_raw/pokemon-images-and-types/images/images/pikachu.png/<version>/pikachu.png` with `version` being a datetime-formatted string `YYYY-MM-DDThh.mm.ss.sssZ` by default):
 
 
 <details>
@@ -332,17 +332,17 @@ from kedro.io import AbstractVersionedDataset
 from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
-class ImageDataSet(AbstractVersionedDataset[np.ndarray, np.ndarray]):
-    """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
+class ImageDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
+    """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
     ::
 
-        >>> ImageDataSet(filepath='/img/file/path.png')
+        >>> ImageDataset(filepath='/img/file/path.png')
     """
 
     def __init__(self, filepath: str, version: Version = None):
-        """Creates a new instance of ImageDataSet to load / save image data for given filepath.
+        """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
         Args:
             filepath: The location of the image file to load / save data.
@@ -385,7 +385,7 @@ class ImageDataSet(AbstractVersionedDataset[np.ndarray, np.ndarray]):
 ```
 </details>
 
-The difference between the original `ImageDataSet` and the versioned `ImageDataSet` is as follows:
+The difference between the original `ImageDataset` and the versioned `ImageDataset` is as follows:
 
 <!-- Generated by saving the original and versioned examples to a file and running `diff original.py versioned.py -U -1` -->
 <details>
@@ -405,19 +405,19 @@ The difference between the original `ImageDataSet` and the versioned `ImageDataS
 +from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
--class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
-+class ImageDataSet(AbstractVersionedDataset[np.ndarray, np.ndarray]):
-     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
+-class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
++class ImageDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
+     """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
      Example:
      ::
 
-         >>> ImageDataSet(filepath='/img/file/path.png')
+         >>> ImageDataset(filepath='/img/file/path.png')
      """
 
 -    def __init__(self, filepath: str):
 +    def __init__(self, filepath: str, version: Version = None):
-         """Creates a new instance of ImageDataSet to load / save image data for given filepath.
+         """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
          Args:
              filepath: The location of the image file to load / save data.
@@ -470,7 +470,7 @@ To test the code, you need to enable versioning support in the data catalog:
 # in conf/base/catalog.yml
 
 pikachu:
-  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
+  type: kedro_pokemon.datasets.image_dataset.ImageDataset
   filepath: data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   versioned: true
 ```
@@ -509,14 +509,14 @@ Inspect the content of the data directory to find a new version of the data, wri
 
 ## Thread-safety
 
-Kedro datasets should work with the [SequentialRunner](/kedro.runner.SequentialRunner) and the [ParallelRunner](/kedro.runner.ParallelRunner), so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
+Kedro datasets should work with the [SequentialRunner](/api/kedro.runner.SequentialRunner) and the [ParallelRunner](/api/kedro.runner.ParallelRunner), so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
-There is one dataset that is an exception: [SparkDataSet](/kedro_datasets.spark.SparkDataSet). [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that uses Spark, use [ThreadRunner](/kedro.runner.ThreadRunner) instead.
+There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/api/kedro.runner.ParallelRunner). For parallelism within a Kedro project that uses Spark, use [ThreadRunner](/api/kedro.runner.ThreadRunner) instead.
 
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an IPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 
 ```python
-dataset = context.catalog._data_sets["pokemon"]
+dataset = context.catalog._datasets["pokemon"]
 from multiprocessing.reduction import ForkingPickler
 
 # the following call shouldn't throw any errors
@@ -531,7 +531,7 @@ If your use case requires them, Kedro allows you to pass `credentials` and files
 # in conf/base/catalog.yml
 
 pikachu:
-  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
+  type: kedro_pokemon.datasets.image_dataset.ImageDataset
   filepath: s3://data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   credentials: <your_credentials>
   fs_args:
@@ -544,7 +544,7 @@ These parameters are then passed to the dataset constructor so you can use them 
 import fsspec
 
 
-class ImageDataSet(AbstractVersionedDataset):
+class ImageDataset(AbstractVersionedDataset):
     def __init__(
         self,
         filepath: str,
@@ -552,7 +552,7 @@ class ImageDataSet(AbstractVersionedDataset):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ):
-        """Creates a new instance of ImageDataSet to load / save image data for given filepath.
+        """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
         Args:
             filepath: The location of the image file to load / save data.
@@ -569,8 +569,7 @@ class ImageDataSet(AbstractVersionedDataset):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset constructor, see the [SparkDataSet](/kedro_datasets.spark.SparkDataSet) implementation.
-
+We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset constructor, see the implementation of the {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`.
 
 ## How to contribute a custom dataset implementation
 
@@ -582,7 +581,7 @@ To contribute your custom dataset:
 
 1. Add your dataset package to `kedro-plugins/kedro-datasets/kedro_datasets/`.
 
-For example, in our `ImageDataSet` example, the directory structure should be:
+For example, in our `ImageDataset` example, the directory structure should be:
 
 ```
 kedro-plugins/kedro-datasets/kedro_datasets/image

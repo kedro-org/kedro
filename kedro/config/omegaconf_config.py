@@ -6,11 +6,12 @@ from __future__ import annotations
 import io
 import logging
 import mimetypes
+import typing
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
 import fsspec
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, OmegaConf
 from omegaconf.errors import InterpolationResolutionError, UnsupportedInterpolationType
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
@@ -50,9 +51,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         >>> conf_path = str(project_path / settings.CONF_SOURCE)
         >>> conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
         >>>
-        >>> conf_logging = conf_loader["logging"]
-        >>> logging.config.dictConfig(conf_logging)  # set logging conf
-        >>>
         >>> conf_catalog = conf_loader["catalog"]
         >>> conf_params = conf_loader["parameters"]
 
@@ -79,13 +77,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def __init__(  # noqa: PLR0913
         self,
         conf_source: str,
-        env: str = None,
-        runtime_params: dict[str, Any] = None,
+        env: str | None = None,
+        runtime_params: dict[str, Any] | None = None,
         *,
-        config_patterns: dict[str, list[str]] = None,
-        base_env: str = "base",
-        default_run_env: str = "local",
-        custom_resolvers: dict[str, Callable] = None,
+        config_patterns: dict[str, list[str]] | None = None,
+        base_env: str | None = None,
+        default_run_env: str | None = None,
+        custom_resolvers: dict[str, Callable] | None = None,
+        merge_strategy: dict[str, str] | None = None,
     ):
         """Instantiates a ``OmegaConfigLoader``.
 
@@ -104,14 +103,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
             custom_resolvers: A dictionary of custom resolvers to be registered. For more information,
              see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
         """
-        self.base_env = base_env
-        self.default_run_env = default_run_env
+        self.base_env = base_env or ""
+        self.default_run_env = default_run_env or ""
+        self.merge_strategy = merge_strategy or {}
 
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
-            "logging": ["logging*", "logging*/**", "**/logging*"],
             "globals": ["globals.yml"],
         }
         self.config_patterns.update(config_patterns or {})
@@ -146,13 +145,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
         except MissingConfigException:
             self._globals = {}
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         if key == "globals":
             # Update the cached value at self._globals since it is used by the globals resolver
             self._globals = value
         super().__setitem__(key, value)
 
-    def __getitem__(self, key) -> dict[str, Any]:  # noqa: PLR0912
+    def __getitem__(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -176,7 +175,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._register_runtime_params_resolver()
 
         if key in self:
-            return super().__getitem__(key)
+            return super().__getitem__(key)  # type: ignore[no-any-return]
 
         if key not in self.config_patterns:
             raise KeyError(
@@ -197,7 +196,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
         try:
-            base_config = self.load_and_merge_dir_config(
+            base_config = self.load_and_merge_dir_config(  # type: ignore[no-untyped-call]
                 base_path, patterns, key, processed_files, read_environment_variables
             )
         except UnsupportedInterpolationType as exc:
@@ -217,7 +216,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
         try:
-            env_config = self.load_and_merge_dir_config(
+            env_config = self.load_and_merge_dir_config(  # type: ignore[no-untyped-call]
                 env_path, patterns, key, processed_files, read_environment_variables
             )
         except UnsupportedInterpolationType as exc:
@@ -228,17 +227,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
             else:
                 raise exc
 
-        # Destructively merge the two env dirs. The chosen env will override base.
-        common_keys = config.keys() & env_config.keys()
-        if common_keys:
-            sorted_keys = ", ".join(sorted(common_keys))
-            msg = (
-                "Config from path '%s' will override the following "
-                "existing top-level config keys: %s"
+        merging_strategy = self.merge_strategy.get(key)
+        if merging_strategy == "soft":
+            resulting_config = self._soft_merge(config, env_config)
+        elif merging_strategy == "destructive" or not merging_strategy:
+            resulting_config = self._destructive_merge(config, env_config, env_path)
+        else:
+            raise ValueError(
+                f"Merging strategy {merging_strategy} not supported. The accepted merging "
+                f"strategies are `soft` and `destructive`."
             )
-            _config_logger.debug(msg, env_path, sorted_keys)
-
-        config.update(env_config)
 
         if not processed_files and key != "globals":
             raise MissingConfigException(
@@ -246,14 +244,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
             )
 
-        return config
+        return resulting_config  # type: ignore[no-any-return]
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return (
             f"OmegaConfigLoader(conf_source={self.conf_source}, env={self.env}, "
             f"config_patterns={self.config_patterns})"
         )
 
+    @typing.no_type_check
     def load_and_merge_dir_config(  # noqa: PLR0913
         self,
         conf_path: str,
@@ -313,8 +312,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     self._resolve_environment_variables(config)
                 config_per_file[config_filepath] = config
             except (ParserError, ScannerError) as exc:
-                line = exc.problem_mark.line  # type: ignore
-                cursor = exc.problem_mark.column  # type: ignore
+                line = exc.problem_mark.line
+                cursor = exc.problem_mark.column
                 raise ParserError(
                     f"Invalid YAML or JSON file {Path(conf_path, config_filepath.name).as_posix()},"
                     f" unable to read line {line}, position {cursor}."
@@ -343,7 +342,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             if not k.startswith("_")
         }
 
-    def _is_valid_config_path(self, path):
+    def _is_valid_config_path(self, path: Path) -> bool:
         """Check if given path is a file path and file type is yaml or json."""
         posix_path = path.as_posix()
         return self._fs.isfile(str(posix_path)) and path.suffix in [
@@ -352,7 +351,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             ".json",
         ]
 
-    def _register_globals_resolver(self):
+    def _register_globals_resolver(self) -> None:
         """Register the globals resolver"""
         OmegaConf.register_new_resolver(
             "globals",
@@ -360,14 +359,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
             replace=True,
         )
 
-    def _register_runtime_params_resolver(self):
+    def _register_runtime_params_resolver(self) -> None:
         OmegaConf.register_new_resolver(
             "runtime_params",
             self._get_runtime_value,
             replace=True,
         )
 
-    def _get_globals_value(self, variable, default_value=_NO_VALUE):
+    def _get_globals_value(self, variable: str, default_value: Any = _NO_VALUE) -> Any:
         """Return the globals values to the resolver"""
         if variable.startswith("_"):
             raise InterpolationResolutionError(
@@ -384,7 +383,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 f"Globals key '{variable}' not found and no default value provided."
             )
 
-    def _get_runtime_value(self, variable, default_value=_NO_VALUE):
+    def _get_runtime_value(self, variable: str, default_value: Any = _NO_VALUE) -> Any:
         """Return the runtime params values to the resolver"""
         runtime_oc = OmegaConf.create(self.runtime_params)
         interpolated_value = OmegaConf.select(
@@ -398,7 +397,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             )
 
     @staticmethod
-    def _register_new_resolvers(resolvers: dict[str, Callable]):
+    def _register_new_resolvers(resolvers: dict[str, Callable]) -> None:
         """Register custom resolvers"""
         for name, resolver in resolvers.items():
             if not OmegaConf.has_resolver(name):
@@ -407,7 +406,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 OmegaConf.register_new_resolver(name=name, resolver=resolver)
 
     @staticmethod
-    def _check_duplicates(seen_files_to_keys: dict[Path, set[Any]]):
+    def _check_duplicates(seen_files_to_keys: dict[Path, set[Any]]) -> None:
         duplicates = []
 
         filepaths = list(seen_files_to_keys.keys())
@@ -434,7 +433,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise ValueError(f"{dup_str}")
 
     @staticmethod
-    def _resolve_environment_variables(config: dict[str, Any]) -> None:
+    def _resolve_environment_variables(config: DictConfig) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
         them in-place, clearing the resolver after the operation is complete if
         it was not registered beforehand.
@@ -449,16 +448,38 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             OmegaConf.resolve(config)
 
-    def _is_hidden(self, path: str):
+    @staticmethod
+    def _destructive_merge(
+        config: dict[str, Any], env_config: dict[str, Any], env_path: str
+    ) -> dict[str, Any]:
+        # Destructively merge the two env dirs. The chosen env will override base.
+        common_keys = config.keys() & env_config.keys()
+        if common_keys:
+            sorted_keys = ", ".join(sorted(common_keys))
+            msg = (
+                "Config from path '%s' will override the following "
+                "existing top-level config keys: %s"
+            )
+            _config_logger.debug(msg, env_path, sorted_keys)
+
+        config.update(env_config)
+        return config
+
+    @staticmethod
+    def _soft_merge(config: dict[str, Any], env_config: dict[str, Any]) -> Any:
+        # Soft merge the two env dirs. The chosen env will override base if keys clash.
+        return OmegaConf.to_container(OmegaConf.merge(config, env_config))
+
+    def _is_hidden(self, path_str: str) -> bool:
         """Check if path contains any hidden directory or is a hidden file"""
-        path = Path(path)
+        path = Path(path_str)
         conf_path = Path(self.conf_source).resolve().as_posix()
         if self._protocol == "file":
             path = path.resolve()
-        path = path.as_posix()
-        if path.startswith(conf_path):
-            path = path.replace(conf_path, "")
-        parts = path.split(self._fs.sep)  # filesystem specific separator
+        posix_path = path.as_posix()
+        if posix_path.startswith(conf_path):
+            posix_path = posix_path.replace(conf_path, "")
+        parts = posix_path.split(self._fs.sep)  # filesystem specific separator
         HIDDEN = "."
         # Check if any component (folder or file) starts with a dot (.)
         return any(part.startswith(HIDDEN) for part in parts)

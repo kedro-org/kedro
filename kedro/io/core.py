@@ -6,6 +6,7 @@ from __future__ import annotations
 import abc
 import copy
 import logging
+import os
 import re
 import warnings
 from collections import namedtuple
@@ -20,7 +21,6 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
-from kedro import KedroDeprecationWarning
 from kedro.utils import load_obj
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
@@ -29,13 +29,6 @@ VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-DataSetError: type[DatasetError]
-DataSetNotFoundError: type[DatasetNotFoundError]
-DataSetAlreadyExistsError: type[DatasetAlreadyExistsError]
-AbstractDataSet: type[AbstractDataset]
-AbstractVersionedDataSet: type[AbstractVersionedDataset]
 
 
 class DatasetError(Exception):
@@ -120,13 +113,20 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             # param2 will be True by default
     """
 
+    """
+    Datasets are persistent by default. User-defined datasets that
+    are not made to be persistent, such as instances of `MemoryDataset`,
+    need to change the `_EPHEMERAL` attribute to 'True'.
+    """
+    _EPHEMERAL = False
+
     @classmethod
     def from_config(
         cls: type,
         name: str,
         config: dict[str, Any],
-        load_version: str = None,
-        save_version: str = None,
+        load_version: str | None = None,
+        save_version: str | None = None,
     ) -> AbstractDataset:
         """Create a data set instance using the configuration provided.
 
@@ -159,7 +159,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from exc
 
         try:
-            data_set = class_obj(**config)  # type: ignore
+            dataset = class_obj(**config)
         except TypeError as err:
             raise DatasetError(
                 f"\n{err}.\nDataset '{name}' must only contain arguments valid for the "
@@ -170,7 +170,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 f"\n{err}.\nFailed to instantiate dataset '{name}' "
                 f"of type '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
-        return data_set
+        return dataset
 
     @property
     def _logger(self) -> logging.Logger:
@@ -227,8 +227,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
 
-    def __str__(self):
-        def _to_str(obj, is_root=False):
+    def __str__(self) -> str:
+        def _to_str(obj: Any, is_root: bool = False) -> str:
             """Returns a string representation where
             1. The root level (i.e. the Dataset.__init__ arguments) are
             formatted like Dataset(key=value).
@@ -319,7 +319,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def _release(self) -> None:
         pass
 
-    def _copy(self, **overwrite_params) -> AbstractDataset:
+    def _copy(self, **overwrite_params: Any) -> AbstractDataset:
         dataset_copy = copy.deepcopy(self)
         for name, value in overwrite_params.items():
             setattr(dataset_copy, name, value)
@@ -354,23 +354,22 @@ _CONSISTENCY_WARNING = (
     "intermediate data sets where possible to avoid this warning."
 )
 
-# `kedro_datasets` is probed before `kedro.extras.datasets`,
-# hence the KedroDeprecationWarning will not be shown
-# if the dataset is available in the former
-_DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", ""]
+_DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", ""]
 
 
 def parse_dataset_definition(
-    config: dict[str, Any], load_version: str = None, save_version: str = None
+    config: dict[str, Any],
+    load_version: str | None = None,
+    save_version: str | None = None,
 ) -> tuple[type[AbstractDataset], dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
         config: Data set config dictionary. It *must* contain the `type` key
-            with fully qualified class name.
+            with fully qualified class name or the class object.
         load_version: Version string to be used for ``load`` operation if
-                the data set is versioned. Has no effect on the data set
-                if versioning was not enabled.
+            the data set is versioned. Has no effect on the data set
+            if versioning was not enabled.
         save_version: Version string to be used for ``save`` operation if
             the data set is versioned. Has no effect on the data set
             if versioning was not enabled.
@@ -387,14 +386,15 @@ def parse_dataset_definition(
     if "type" not in config:
         raise DatasetError("'type' is missing from dataset catalog configuration")
 
-    class_obj = config.pop("type")
-    if isinstance(class_obj, str):
-        if len(class_obj.strip(".")) != len(class_obj):
+    dataset_type = config.pop("type")
+    class_obj = None
+    if isinstance(dataset_type, str):
+        if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
                 "'type' class path does not support relative "
                 "paths or paths ending with a dot."
             )
-        class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
+        class_paths = (prefix + dataset_type for prefix in _DEFAULT_PACKAGES)
 
         for class_path in class_paths:
             tmp = _load_obj(class_path)
@@ -402,10 +402,10 @@ def parse_dataset_definition(
                 class_obj = tmp
                 break
         else:
-            raise DatasetError(
-                f"Class '{class_obj}' not found or one of its dependencies "
-                f"has not been installed."
-            )
+            raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
+
+    if not class_obj:
+        class_obj = dataset_type
 
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(
@@ -433,8 +433,9 @@ def parse_dataset_definition(
     return class_obj, config
 
 
-def _load_obj(class_path: str) -> object | None:
+def _load_obj(class_path: str) -> Any | None:
     mod_path, _, class_name = class_path.rpartition(".")
+    # Check if the module exists
     try:
         available_classes = load_obj(f"{mod_path}.__all__")
     # ModuleNotFoundError: When `load_obj` can't find `mod_path` (e.g `kedro.io.pandas`)
@@ -443,26 +444,24 @@ def _load_obj(class_path: str) -> object | None:
     #                 `__all__` attribute -- either because it's a custom or a kedro.io dataset
     except (ModuleNotFoundError, AttributeError, ValueError):
         available_classes = None
-
     try:
         class_obj = load_obj(class_path)
-    except (ModuleNotFoundError, ValueError):
-        return None
-    except AttributeError as exc:
+    except (ModuleNotFoundError, ValueError, AttributeError) as exc:
+        # If it's available, module exist but dependencies are missing
         if available_classes and class_name in available_classes:
             raise DatasetError(
-                f"{exc} Please see the documentation on how to "
+                f"{exc}. Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
-                f"https://kedro.readthedocs.io/en/stable/"
-                f"kedro_project_setup/dependencies.html"
+                f"https://docs.kedro.org/en/stable/kedro_project_setup/"
+                f"dependencies.html#install-dependencies-related-to-the-data-catalog"
             ) from exc
         return None
 
     return class_obj
 
 
-def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
-    filepath = Path(filepath)
+def _local_exists(local_filepath: str) -> bool:  # SKIP_IF_NO_SPARK
+    filepath = Path(local_filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
@@ -516,8 +515,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self,
         filepath: PurePosixPath,
         version: Version | None,
-        exists_function: Callable[[str], bool] = None,
-        glob_function: Callable[[str], list[str]] = None,
+        exists_function: Callable[[str], bool] | None = None,
+        glob_function: Callable[[str], list[str]] | None = None,
     ):
         """Creates a new instance of ``AbstractVersionedDataset``.
 
@@ -546,26 +545,26 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.
         pattern = str(self._get_versioned_path("*"))
-        version_paths = sorted(self._glob_function(pattern), reverse=True)
+        try:
+            version_paths = sorted(self._glob_function(pattern), reverse=True)
+        except Exception as exc:
+            message = (
+                f"Did not find any versions for {self}. This could be "
+                f"due to insufficient permission. Exception: {exc}"
+            )
+            raise VersionNotFoundError(message) from exc
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
-        protocol = getattr(self, "_protocol", None)
         if not most_recent:
-            if protocol in CLOUD_PROTOCOLS:
-                message = (
-                    f"Did not find any versions for {self}. This could be "
-                    f"due to insufficient permission."
-                )
-            else:
-                message = f"Did not find any versions for {self}"
+            message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
         return PurePath(most_recent).parent.name
 
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
     @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
-    def _fetch_latest_save_version(self) -> str:  # noqa: no-self-use
+    def _fetch_latest_save_version(self) -> str:
         """Generate and cache the current save version"""
         return generate_timestamp()
 
@@ -574,7 +573,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         if not self._version:
             return None
         if self._version.load:
-            return self._version.load
+            return self._version.load  # type: ignore[no-any-return]
         return self._fetch_latest_load_version()
 
     def _get_load_path(self) -> PurePosixPath:
@@ -583,14 +582,14 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             return self._filepath
 
         load_version = self.resolve_load_version()
-        return self._get_versioned_path(load_version)  # type: ignore
+        return self._get_versioned_path(load_version)  # type: ignore[arg-type]
 
     def resolve_save_version(self) -> str | None:
         """Compute the version the dataset should be saved with."""
         if not self._version:
             return None
         if self._version.save:
-            return self._version.save
+            return self._version.save  # type: ignore[no-any-return]
         return self._fetch_latest_save_version()
 
     def _get_save_path(self) -> PurePosixPath:
@@ -599,7 +598,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             return self._filepath
 
         save_version = self.resolve_save_version()
-        versioned_path = self._get_versioned_path(save_version)  # type: ignore
+        versioned_path = self._get_versioned_path(save_version)  # type: ignore[arg-type]
 
         if self._exists_function(str(versioned_path)):
             raise DatasetError(
@@ -612,7 +611,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:  # noqa: useless-parent-delegation
+    def load(self) -> _DO:
         return super().load()
 
     def save(self, data: _DI) -> None:
@@ -709,7 +708,9 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
     return options
 
 
-def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, str]:
+def get_protocol_and_path(
+    filepath: str | os.PathLike, version: Version | None = None
+) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 
     .. warning::
@@ -725,7 +726,7 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, 
     Raises:
         DatasetError: when protocol is http(s) and version is not None.
     """
-    options_dict = _parse_filepath(filepath)
+    options_dict = _parse_filepath(str(filepath))
     path = options_dict["path"]
     protocol = options_dict["protocol"]
 
@@ -740,48 +741,26 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, 
     return protocol, path
 
 
-def get_filepath_str(path: PurePath, protocol: str) -> str:
+def get_filepath_str(raw_path: PurePath, protocol: str) -> str:
     """Returns filepath. Returns full filepath (with protocol) if protocol is HTTP(s).
 
     Args:
-        path: filepath without protocol.
+        raw_path: filepath without protocol.
         protocol: protocol.
 
     Returns:
         Filepath string.
     """
-    path = path.as_posix()
+    path = raw_path.as_posix()
     if protocol in HTTP_PROTOCOLS:
         path = "".join((protocol, PROTOCOL_DELIMITER, path))
     return path
 
 
-def validate_on_forbidden_chars(**kwargs):
+def validate_on_forbidden_chars(**kwargs: Any) -> None:
     """Validate that string values do not include white-spaces or ;"""
     for key, value in kwargs.items():
         if " " in value or ";" in value:
             raise DatasetError(
                 f"Neither white-space nor semicolon are allowed in '{key}'."
             )
-
-
-_DEPRECATED_CLASSES = {
-    "DataSetError": DatasetError,
-    "DataSetNotFoundError": DatasetNotFoundError,
-    "DataSetAlreadyExistsError": DatasetAlreadyExistsError,
-    "AbstractDataSet": AbstractDataset,
-    "AbstractVersionedDataSet": AbstractVersionedDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

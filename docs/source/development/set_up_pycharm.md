@@ -61,7 +61,7 @@ Specify the **Run / Debug Configuration** name in the **Name** field, and edit t
 ![](../meta/images/pycharm_edit_py_run_config.png)
 
 ```{note}
-**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/logging.md#default-framework-side-logging-configuration).
+**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/index.md).
 ```
 
 To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar (if that toolbar is not visible, you can enable it by going to **View > Toolbar**). Click the green triangle:
@@ -72,7 +72,7 @@ You may also select **Run** from the toolbar and execute from there. <br />
 
 ![](../meta/images/pycharm_conf_run_dropdown.png)
 
-For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (e.g., `test`, `package`, `build-docs` etc.).
+For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (e.g., `jupyter`, `package`, `registry` etc.).
 
 
 ## Debugging
@@ -163,7 +163,7 @@ You can enable the Kedro catalog validation schema in your PyCharm IDE to enable
 
 ![](../meta/images/pycharm_edit_schema_mapping.png)
 
-Add a new mapping using the "+" button in the top left of the window and select the name you want for it. Enter this URL `https://raw.githubusercontent.com/kedro-org/kedro/develop/static/jsonschema/kedro-catalog-0.18.json` in the "Schema URL" field and select "JSON Schema Version 7" in the "Schema version" field.
+Add a new mapping using the "+" button in the top left of the window and select the name you want for it. Enter this URL `https://raw.githubusercontent.com/kedro-org/kedro/develop/static/jsonschema/kedro-catalog-0.19.json` in the "Schema URL" field and select "JSON Schema Version 7" in the "Schema version" field.
 
 Add the following file path pattern to the mapping: `conf/**/*catalog*`.
 

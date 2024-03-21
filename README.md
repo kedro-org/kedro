@@ -1,13 +1,13 @@
 ![Kedro Logo Banner - Light](https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-dark.png#gh-dark-mode-only)
 ![Kedro Logo Banner - Dark](https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-light.png#gh-light-mode-only)
-[![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro/)
+[![Python version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)
 [![Slack Organisation](https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack)](https://slack.kedro.org)
 [![Slack Archive](https://img.shields.io/badge/slack-archive-blueviolet.svg?label=Kedro%20Slack%20)](https://linen-slack.kedro.org/)
-![CircleCI - Main Branch](https://img.shields.io/circleci/build/github/kedro-org/kedro/main?label=main)
-![Develop Branch Build](https://img.shields.io/circleci/build/github/kedro-org/kedro/develop?label=develop)
+![GitHub Actions Workflow Status - Main](https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main)
+![GitHub Actions Workflow Status - Develop](https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?branch=develop&label=develop)
 [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://docs.kedro.org/)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/6711/badge)](https://bestpractices.coreinfrastructure.org/projects/6711)
 [![Monthly downloads](https://static.pepy.tech/badge/kedro/month)](https://pepy.tech/project/kedro)
@@ -37,15 +37,21 @@ conda install -c conda-forge kedro
 
 Our [Get Started guide](https://docs.kedro.org/en/stable/get_started/install.html) contains full installation instructions, and includes how to set up Python virtual environments.
 
+### Installation from source
+To access the latest Kedro version before its official release, install it from the `main` branch.
+```
+pip install git+https://github.com/kedro-org/kedro@main
+```
+
 ## What are the main features of Kedro?
 
-| Feature              | What is this?                                                                                                                                                                                                                                                                                                                                                                                  |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Project Template     | A standard, modifiable and easy-to-use project template based on [Cookiecutter Data Science](https://github.com/drivendata/cookiecutter-data-science/).                                                                                                                                                                                                                                        |
-| Data Catalog         | A series of lightweight data connectors used to save and load data across many different file formats and file systems, including local and network file systems, cloud object stores, and HDFS. The Data Catalog also includes data and model versioning for file-based systems.                                                                                                              |
-| Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/kedro-org/kedro-viz).                                                                                                                                                                                                                                  |
-| Coding Standards     | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`flake8`](https://github.com/PyCQA/flake8), [`isort`](https://github.com/PyCQA/isort) and [`black`](https://github.com/psf/black) and make use of the standard Python logging library. |
-| Flexible Deployment  | Deployment strategies that include single or distributed-machine deployment as well as additional support for deploying on Argo, Prefect, Kubeflow, AWS Batch and Databricks.                                                                                                                                                                                                                  |
+| Feature              | What is this?                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Project Template     | A standard, modifiable and easy-to-use project template based on [Cookiecutter Data Science](https://github.com/drivendata/cookiecutter-data-science/).                                                                                                                                                                                                                                            |
+| Data Catalog         | A series of lightweight data connectors used to save and load data across many different file formats and file systems, including local and network file systems, cloud object stores, and HDFS. The Data Catalog also includes data and model versioning for file-based systems.                                                                                                                  |
+| Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/kedro-org/kedro-viz).                                                                                                                                                                                                                                      |
+| Coding Standards     | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`ruff`](https://github.com/astral-sh/ruff) and make use of the standard Python logging library. |
+| Flexible Deployment  | Deployment strategies that include single or distributed-machine deployment as well as additional support for deploying on Argo, Prefect, Kubeflow, AWS Batch and Databricks.                                                                                                                                                                                                                      |
 
 ## How do I use Kedro?
 
@@ -93,3 +99,7 @@ We keep a list of [technical FAQs in the Kedro documentation](https://docs.kedro
 ## How can I cite Kedro?
 
 If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/kedro-org/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files).
+
+## Python version support policy
+* The core [Kedro Framework](https://github.com/kedro-org/kedro) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from Kedro. This is not considered a breaking change.
+* The [Kedro Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package follows the [NEP 29](https://numpy.org/neps/nep-0029-deprecation_policy.html) Python version support policy. This means that `kedro-datasets` generally drops Python version support before `kedro`. This is because `kedro-datasets` has a lot of dependencies that follow NEP 29 and the more conservative version support approach of the Kedro Framework makes it hard to manage those dependencies properly.

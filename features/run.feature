@@ -22,7 +22,7 @@ Feature: Run Project
     And the logs should show that "report_accuracy" was run
 
   Scenario: Run default python entry point without example code
-    Given I have prepared a config file
+    Given I have prepared a config file without starter
     And I have run a non-interactive kedro new without starter
     When I execute the kedro command "run"
     Then I should get an error exit code
@@ -57,6 +57,14 @@ Feature: Run Project
   Scenario: Run kedro run with extra parameters
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
-    When I execute the kedro command "run --params extra1:1,extra2:value2"
+    When I execute the kedro command "run --params extra1=1,extra2=value2"
+    Then I should get a successful exit code
+    And the logs should show that 4 nodes were run
+
+  Scenario: Run kedro run from within a sub-directory
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter "default"
+    And I have changed the current working directory to "data"
+    When I execute the kedro command "run"
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run

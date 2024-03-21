@@ -42,49 +42,6 @@ Once the plugin is installed, you can run it as follows:
 kedro to_json
 ```
 
-## Extend starter aliases
-It is possible to extend the list of starter aliases built into Kedro. This means that a [custom Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter) can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`.
-
-You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
-
-Example for a non-git repository starter:
-```python
-# plugin.py
-starters = [
-    KedroStarterSpec(
-        alias="test_plugin_starter",
-        template_path="your_local_directory/starter_folder",
-    )
-]
-```
-
-Example for a git repository starter:
-```python
-# plugin.py
-starters = [
-    KedroStarterSpec(
-        alias="test_plugin_starter",
-        template_path="https://github.com/kedro-org/kedro-starters/",
-        directory="pandas-iris",
-    )
-]
-```
-
-The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. For an example, see the [pandas-iris starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris).
-
-In your `pyproject.toml`, you need to register the specifications to `kedro.starters`:
-
-```toml
-[project.entry-points."kedro.starters"]
-starter = "plugin:starters"
-```
-
-After that you can use this starter with `kedro new --starter=test_plugin_starter`.
-
-```{note}
-If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.12`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
-```
-
 ## Working with `click`
 
 Commands must be provided as [`click` `Groups`](https://click.palletsprojects.com/en/7.x/api/#click.Group)
@@ -145,7 +102,7 @@ from kedro.framework.hooks import hook_impl
 
 class MyHooks:
     @hook_impl
-    def after_catalog_created(self, catalog):  # pylint: disable=unused-argument
+    def after_catalog_created(self, catalog):
         logging.info("Reached after_catalog_created hook")
 
 
@@ -158,7 +115,7 @@ hooks = MyHooks()
 
 ## CLI Hooks
 
-You can also develop Hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI Hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI Hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
+You can also develop Hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI Hooks, please visit [kedro.framework.cli.hooks](/api/kedro.framework.cli.hooks). To register CLI Hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
 
 
 ```toml

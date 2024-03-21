@@ -1,7 +1,11 @@
 """A collection of CLI commands for working with Kedro catalog."""
+from __future__ import annotations
+
 import copy
 from collections import defaultdict
 from itertools import chain
+from pathlib import Path
+from typing import Any
 
 import click
 import yaml
@@ -11,30 +15,25 @@ from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
+from kedro.io import AbstractDataset
+from kedro.io.data_catalog import DataCatalog
 
 
-def _create_session(package_name: str, **kwargs):
+def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     kwargs.setdefault("save_on_close", False)
-    try:
-        return KedroSession.create(package_name, **kwargs)
-    except Exception as exc:
-        raise KedroCliError(
-            f"Unable to instantiate Kedro session.\nError: {exc}"
-        ) from exc
+    return KedroSession.create(**kwargs)
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
-def catalog_cli():  # pragma: no cover
+def catalog_cli() -> None:  # pragma: no cover
     pass
 
 
 @catalog_cli.group()
-def catalog():
+def catalog() -> None:
     """Commands for working with catalog."""
 
 
-# noqa: too-many-locals,protected-access
 @catalog.command("list")
 @env_option
 @click.option(
@@ -47,7 +46,7 @@ def catalog():
     callback=split_string,
 )
 @click.pass_obj
-def list_datasets(metadata: ProjectMetadata, pipeline, env):
+def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     """Show datasets per type."""
     title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
@@ -57,9 +56,14 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    data_catalog = context.catalog
-    datasets_meta = data_catalog._data_sets
-    catalog_ds = set(data_catalog.list())
+    try:
+        data_catalog = context.catalog
+        datasets_meta = data_catalog._datasets
+        catalog_ds = set(data_catalog.list())
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro Catalog.\nError: {exc}"
+        ) from exc
 
     target_pipelines = pipeline or pipelines.keys()
 
@@ -67,7 +71,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            pipeline_ds = pl_obj.data_sets()
+            pipeline_ds = pl_obj.datasets()
         else:
             existing_pls = ", ".join(sorted(pipelines.keys()))
             raise KedroCliError(
@@ -111,11 +115,13 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     secho(yaml.dump(result))
 
 
-def _map_type_to_datasets(datasets, datasets_meta):
+def _map_type_to_datasets(
+    datasets: set[str], datasets_meta: dict[str, AbstractDataset]
+) -> dict:
     """Build dictionary with a dataset type as a key and list of
     datasets of the specific type as a value.
     """
-    mapping = defaultdict(list)
+    mapping = defaultdict(list)  # type: ignore[var-annotated]
     for dataset in datasets:
         is_param = dataset.startswith("params:") or dataset == "parameters"
         if not is_param:
@@ -136,7 +142,7 @@ def _map_type_to_datasets(datasets, datasets_meta):
     help="Name of a pipeline.",
 )
 @click.pass_obj
-def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
+def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> None:
     """Create Data Catalog YAML configuration with missing datasets.
 
     Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
@@ -160,13 +166,13 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
 
     pipe_datasets = {
         ds_name
-        for ds_name in pipeline.data_sets()
+        for ds_name in pipeline.datasets()
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 
     catalog_datasets = {
         ds_name
-        for ds_name in context.catalog._data_sets.keys()  # noqa: protected-access
+        for ds_name in context.catalog._datasets.keys()
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 
@@ -185,7 +191,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
         click.echo("All datasets are already configured.")
 
 
-def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
+def _add_missing_datasets_to_catalog(missing_ds: list[str], catalog_path: Path) -> None:
     if catalog_path.is_file():
         catalog_config = yaml.safe_load(catalog_path.read_text()) or {}
     else:
@@ -204,7 +210,7 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
 @catalog.command("rank")
 @env_option
 @click.pass_obj
-def rank_catalog_factories(metadata: ProjectMetadata, env):
+def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     """List all dataset factories in the catalog, ranked by priority by which they are matched."""
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
@@ -219,14 +225,18 @@ def rank_catalog_factories(metadata: ProjectMetadata, env):
 @catalog.command("resolve")
 @env_option
 @click.pass_obj
-def resolve_patterns(metadata: ProjectMetadata, env):
-    """Resolve catalog factories against pipeline datasets"""
+def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
+    """Resolve catalog factories against pipeline datasets. Note that this command is runner
+    agnostic and thus won't take into account any default dataset creation defined in the runner."""
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    data_catalog = context.catalog
     catalog_config = context.config_loader["catalog"]
+    credentials_config = context.config_loader.get("credentials", None)
+    data_catalog = DataCatalog.from_config(
+        catalog=catalog_config, credentials=credentials_config
+    )
 
     explicit_datasets = {
         ds_name: ds_config
@@ -240,7 +250,7 @@ def resolve_patterns(metadata: ProjectMetadata, env):
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            datasets.update(pl_obj.data_sets())
+            datasets.update(pl_obj.datasets())
 
     for ds_name in datasets:
         is_param = ds_name.startswith("params:") or ds_name == "parameters"
@@ -258,14 +268,6 @@ def resolve_patterns(metadata: ProjectMetadata, env):
             ds_config = data_catalog._resolve_config(
                 ds_name, matched_pattern, ds_config_copy
             )
-
-            ds_config["filepath"] = _trim_filepath(
-                str(context.project_path) + "/", ds_config["filepath"]
-            )
             explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))
-
-
-def _trim_filepath(project_path: str, file_path: str):
-    return file_path.replace(project_path, "", 1)

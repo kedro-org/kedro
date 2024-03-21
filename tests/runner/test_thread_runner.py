@@ -14,10 +14,6 @@ from tests.runner.conftest import exception_fn, identity, return_none, sink, sou
 
 
 class TestValidThreadRunner:
-    def test_create_default_data_set(self):
-        data_set = ThreadRunner().create_default_data_set("")
-        assert isinstance(data_set, MemoryDataset)
-
     def test_thread_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
@@ -37,6 +33,11 @@ class TestValidThreadRunner:
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == ("42", "42", "42")
+
+    def test_does_not_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
+        catalog.add_feed_dict({"A": 42})
+        ThreadRunner().run(fan_out_fan_in, catalog)
+        assert "Using synchronous mode for loading and saving data." not in caplog.text
 
 
 class TestMaxWorkers:

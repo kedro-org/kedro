@@ -1,4 +1,3 @@
-# pylint: disable=import-outside-toplevel
 import logging
 import sys
 from pathlib import Path
@@ -6,33 +5,34 @@ from pathlib import Path
 import pytest
 import yaml
 
-from kedro.framework.project import LOGGING, configure_logging
+from kedro.framework.project import LOGGING, configure_logging, configure_project
 
 
 @pytest.fixture
-def default_logging_config():
+def default_logging_config_with_project():
     logging_config = {
         "version": 1,
         "disable_existing_loggers": False,
         "handlers": {
             "rich": {"class": "kedro.logging.RichHandler", "rich_tracebacks": True}
         },
-        "loggers": {"kedro": {"level": "INFO"}},
+        "loggers": {"kedro": {"level": "INFO"}, "test_project": {"level": "INFO"}},
         "root": {"handlers": ["rich"]},
     }
     return logging_config
-
-
-@pytest.fixture(autouse=True)
-def reset_logging(default_logging_config):
-    yield
-    configure_logging(default_logging_config)
 
 
 def test_default_logging_config(default_logging_config):
     assert LOGGING.data == default_logging_config
     assert "rich" in {handler.name for handler in logging.getLogger().handlers}
     assert logging.getLogger("kedro").level == logging.INFO
+
+
+def test_project_logging_in_default_logging_config(default_logging_config_with_project):
+    configure_project("test_project")
+    assert LOGGING.data == default_logging_config_with_project
+    assert logging.getLogger("kedro").level == logging.INFO
+    assert logging.getLogger("test_project").level == logging.INFO
 
 
 def test_environment_variable_logging_config(monkeypatch, tmp_path):

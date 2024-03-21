@@ -916,7 +916,9 @@ def _toposort(node_dependencies: dict[Node, set[Node]]) -> list[Node]:
     """
     try:
         sorter = TopologicalSorter(node_dependencies)
-        return list(sorter.static_order())
+        # Ensure stable toposort by sorting the nodes in a group
+        groups = _group_toposorted(sorter.static_order(), node_dependencies)
+        return [n for group in groups for n in group]
     except CycleError as exc:
         message = f"Circular dependencies exist among these items: {exc.args[1]}"
         raise CircularDependencyError(message) from exc

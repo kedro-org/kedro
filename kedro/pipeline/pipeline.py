@@ -5,7 +5,6 @@ produced outputs and execution order.
 """
 from __future__ import annotations
 
-import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
@@ -163,7 +162,7 @@ class Pipeline:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
         self._nodes = tagged_nodes
-        self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
+        self._toposorted_nodes = _toposort(self.node_dependencies)
 
     def __repr__(self) -> str:  # pragma: no cover
         """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""
@@ -348,7 +347,7 @@ class Pipeline:
             The list of all pipeline nodes in topological order.
 
         """
-        return list(chain.from_iterable(self._topo_sorted_nodes))
+        return list(self._toposorted_nodes)
 
     @property
     def grouped_nodes(self) -> list[list[Node]]:
@@ -360,7 +359,8 @@ class Pipeline:
             The pipeline nodes in topologically ordered groups.
 
         """
-        return copy.copy(self._topo_sorted_nodes)
+
+        return _group_toposorted(self._toposorted_nodes, self.node_dependencies)
 
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified
@@ -903,25 +903,20 @@ def _group_toposorted(
     return groups
 
 
-def _topologically_sorted(node_dependencies: dict[Node, set[Node]]) -> list[list[Node]]:
-    """Topologically group and sort (order) nodes such that no node depends on
-    a node that appears in the same or a later group.
+def _toposort(node_dependencies: dict[Node, set[Node]]) -> list[Node]:
+    """Topologically sort (order) nodes such that no node depends on
+    a node that appears earlier in the list.
 
     Raises:
         CircularDependencyError: When it is not possible to topologically order
             provided nodes.
 
     Returns:
-        The list of node sets in order of execution. First set is nodes that should
-        be executed first (no dependencies), second set are nodes that should be
-        executed on the second step, etc.
+        The list of nodes in order of execution.
     """
     try:
-        # Sort it so it has consistent order when run with SequentialRunner
         sorter = TopologicalSorter(node_dependencies)
-        toposorted = _group_toposorted(sorter.static_order(), node_dependencies)
-        result = [sorted(dependencies) for dependencies in toposorted]
-        return result
+        return list(sorter.static_order())
     except CycleError as exc:
         message = f"Circular dependencies exist among these items: {exc.args[1]}"
         raise CircularDependencyError(message) from exc

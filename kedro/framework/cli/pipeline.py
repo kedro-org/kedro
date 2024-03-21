@@ -108,6 +108,7 @@ def create_pipeline(
 ) -> None:  # noqa: unused-argument
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
+    project_root = metadata.project_path / metadata.project_name
     conf_source = settings.CONF_SOURCE
     project_conf_path = metadata.project_path / conf_source
     base_env = settings.CONFIG_LOADER_ARGS.get("base_env", "base")
@@ -131,7 +132,7 @@ def create_pipeline(
     click.secho(f"Using pipeline template at: '{template_path}'")
 
     result_path = _create_pipeline(name, template_path, package_dir / "pipelines")
-    _copy_pipeline_tests(name, result_path, package_dir)
+    _copy_pipeline_tests(name, result_path, project_root)
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
 

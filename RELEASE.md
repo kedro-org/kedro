@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Improved error message when passing wrong value to node.
+* Improved performance of pipeline operations by using non-toposorted nodes in internal code.
 * Cookiecutter errors are shown in short format without the `--verbose` flag.
 * Kedro commands now work from any subdirectory within a Kedro project.
 * Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`.
@@ -159,7 +160,6 @@ We are grateful to every community member who made a PR to Kedro that's found it
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
 * Updated `OmegaConfigLoader` to handle paths containing dots outside of `conf_source`.
-* Improved performance of pipeline operations by not topologically sorting nodes in non-user-facing code.
 * Made `settings.py` optional.
 
 ## Documentation changes

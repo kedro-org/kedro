@@ -235,7 +235,8 @@ class KedroContext:
             save_version=save_version,
         )
 
-        feed_dict = self._get_feed_dict()
+        params = self.params
+        feed_dict = {"parameters": params, "params": params}
         catalog.add_feed_dict(feed_dict)
         _validate_transcoded_datasets(catalog)
         self._hook_manager.hook.after_catalog_created(
@@ -247,35 +248,6 @@ class KedroContext:
             load_versions=load_versions,
         )
         return catalog
-
-    def _get_feed_dict(self) -> dict[str, Any]:
-        """Get parameters and return the feed dictionary."""
-        params = self.params
-        feed_dict = {"parameters": params}
-
-        def _add_param_to_feed_dict(param_name: str, param_value: Any) -> None:
-            """This recursively adds parameter paths to the `feed_dict`,
-            whenever `param_value` is a dictionary itself, so that users can
-            specify specific nested parameters in their node inputs.
-
-            Example:
-
-                >>> param_name = "a"
-                >>> param_value = {"b": 1}
-                >>> _add_param_to_feed_dict(param_name, param_value)
-                >>> assert feed_dict["params:a"] == {"b": 1}
-                >>> assert feed_dict["params:a.b"] == 1
-            """
-            key = f"params:{param_name}"
-            feed_dict[key] = param_value
-            if isinstance(param_value, dict):
-                for key, val in param_value.items():
-                    _add_param_to_feed_dict(f"{param_name}.{key}", val)
-
-        for param_name, param_value in params.items():
-            _add_param_to_feed_dict(param_name, param_value)
-
-        return feed_dict
 
     def _get_config_credentials(self) -> dict[str, Any]:
         """Getter for credentials specified in credentials directory."""

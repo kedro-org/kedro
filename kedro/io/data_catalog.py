@@ -12,6 +12,7 @@ import logging
 import re
 from typing import Any, Dict
 
+from omegaconf import OmegaConf
 from parse import parse
 
 from kedro.io.core import (
@@ -416,6 +417,8 @@ class DataCatalog:
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
+        if ":" in dataset_name:
+            dataset_name, _ = dataset_name.split(":", 1)
         matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
         if dataset_name in self._datasets or matched_pattern:
             return True
@@ -477,6 +480,10 @@ class DataCatalog:
             >>>
             >>> df = io.load("cars")
         """
+        query = None
+        if ":" in name:
+            name, query = name.split(":", 1)
+
         load_version = Version(version, None) if version else None
         dataset = self._get_dataset(name, version=load_version)
 
@@ -488,6 +495,13 @@ class DataCatalog:
         )
 
         result = dataset.load()
+        if query and isinstance(result, dict):
+            result = OmegaConf.select(OmegaConf.create(result), query)
+            result = (
+                OmegaConf.to_container(result)
+                if OmegaConf.is_config(result)
+                else result
+            )
 
         return result
 

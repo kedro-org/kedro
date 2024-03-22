@@ -107,7 +107,7 @@ class TestMicropkgPullCommand:
         pipeline_name = alias or PIPELINE_NAME
         destination = destination or Path()
         source_dest = fake_package_path / destination / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        test_dest = fake_repo_path / "tests" / destination / pipeline_name
         config_env = env or "base"
         params_config = (
             fake_repo_path
@@ -178,7 +178,7 @@ class TestMicropkgPullCommand:
         pipeline_name = alias or pipeline_name
         destination = destination or Path()
         source_dest = fake_package_path / destination / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        test_dest = fake_repo_path / "tests" / destination / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -225,7 +225,7 @@ class TestMicropkgPullCommand:
         assert "pulled and unpacked" in result.output
 
         source_dest = fake_package_path / destination / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        test_dest = fake_repo_path / "tests" / destination / pipeline_name
         config_env = "base"
         params_config = (
             fake_repo_path
@@ -274,7 +274,7 @@ class TestMicropkgPullCommand:
         assert "pulled and unpacked" in result.output
 
         source_dest = fake_package_path / destination / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        test_dest = fake_repo_path / "tests" / destination / pipeline_name
         config_env = "base"
         params_config = (
             fake_repo_path
@@ -464,7 +464,7 @@ class TestMicropkgPullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
+        test_dest = fake_repo_path / "tests" / pipeline_name
         config_env = env or "base"
         params_config = (
             fake_repo_path
@@ -525,7 +525,7 @@ class TestMicropkgPullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
+        test_dest = fake_repo_path / "tests" / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -623,7 +623,7 @@ class TestMicropkgPullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
+        test_dest = fake_repo_path / "tests" / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path

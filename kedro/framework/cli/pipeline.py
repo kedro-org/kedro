@@ -313,20 +313,21 @@ def _get_artifacts_to_package(
 ) -> tuple[Path, Path, Path]:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = project_metadata.source_dir / project_metadata.package_name
+    project_root = project_metadata.project_path
     project_conf_path = project_metadata.project_path / settings.CONF_SOURCE
     artifacts = (
         Path(package_dir, *module_path.split(".")),
-        Path(package_dir.parent, "tests", *module_path.split(".")),
+        Path(project_root, "tests", *module_path.split(".")),
         project_conf_path / env,
     )
     return artifacts
 
 
 def _copy_pipeline_tests(
-    pipeline_name: str, result_path: Path, package_dir: Path
+    pipeline_name: str, result_path: Path, project_root: Path
 ) -> None:
     tests_source = result_path / "tests"
-    tests_target = package_dir.parent / "tests" / "pipelines" / pipeline_name
+    tests_target = project_root.parent / "tests" / "pipelines" / pipeline_name
     try:
         _sync_dirs(tests_source, tests_target)
     finally:

@@ -18,7 +18,7 @@ PIPELINE_NAME = "my_pipeline"
 @pytest.fixture(params=["base"])
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-    tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+    tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
     conf_path = fake_repo_path / settings.CONF_SOURCE / request.param
     # old conf structure for 'pipeline delete' command backward compatibility
     old_conf_path = conf_path / "parameters"
@@ -233,8 +233,9 @@ class TestPipelineCreateCommand:
 
         assert result.exit_code == 0
         assert "__init__.py': SKIPPED" in result.output
+        assert "test_pipeline.py': SKIPPED" in result.output
         assert f"parameters_{PIPELINE_NAME}.yml': SKIPPED" in result.output
-        assert result.output.count("SKIPPED") == 2  # only 2 files skipped
+        assert result.output.count("SKIPPED") == 3  # only 2 files skipped
 
     def test_failed_copy(
         self, fake_project_cli, fake_metadata, fake_package_path, mocker
@@ -335,7 +336,7 @@ class TestPipelineDeleteCommand:
         )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         conf_path = fake_repo_path / settings.CONF_SOURCE / expected_conf
         params_path = conf_path / f"parameters_{PIPELINE_NAME}.yml"
         # old params structure for 'pipeline delete' command backward compatibility
@@ -370,7 +371,7 @@ class TestPipelineDeleteCommand:
             ["pipeline", "delete", "-y", PIPELINE_NAME],
             obj=fake_metadata,
         )
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE
@@ -461,7 +462,7 @@ class TestPipelineDeleteCommand:
         )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE
@@ -501,7 +502,7 @@ class TestPipelineDeleteCommand:
             obj=fake_metadata,
         )
 
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE

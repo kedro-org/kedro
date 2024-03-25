@@ -15,7 +15,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar, Union, Type, Dict
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -465,6 +465,52 @@ def _local_exists(local_filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
+class DataDictDataset(AbstractDataset):
+
+    def __init__(
+        self,
+        dataset: Union[str, Type[AbstractVersionedDataset], Dict[str, Any]],
+        filepath: str,
+    ):
+        try:
+            self._data_dict = None
+            self._filepath = filepath
+            dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
+            self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
+            if VERSION_KEY in self._dataset_config:
+                raise DatasetError(
+                    f"'{self.__class__.__name__}' does not support versioning of the "
+                    f"underlying dataset. Please remove '{VERSIONED_FLAG_KEY}' flag from "
+                    f"the dataset definition."
+                )
+        except Exception as e:
+            raise DatasetError(f"Failed to instantiate data dictionary. Error: {e}")
+
+    @property
+    def data_dict(self) -> Union[None | Type[AbstractDataset]]:
+        if self._data_dict is None:
+            self._data_dict = self._dataset_type(self._filepath, **self._dataset_config)
+        return self._data_dict
+
+    def _load(self) -> Any:
+        return self.data_dict.load()
+
+    def _save(self, data: Any):
+        return self.data_dict.save(data)
+
+    def _describe(self):
+        return self.data_dict._describe()
+
+    def _exists(self):
+        return self.data_dict._exists()
+
+    def describe(self):
+        return self._describe()
+
+    def exists(self):
+        return self._exists()
+
+
 class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     """
     ``AbstractVersionedDataset`` is the base class for all versioned data set
@@ -537,6 +583,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._glob_function = glob_function or iglob
         # 1 entry for load version, 1 for save version
         self._version_cache = Cache(maxsize=2)  # type: Cache
+        self._data_dict = None
 
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
@@ -661,6 +708,13 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
             )
             raise DatasetError(message) from exc
+
+    @property
+    def data_dict(self) -> Dict[str, str]:
+        if isinstance(self._data_dict, dict):
+            if self._data_dict:
+                self._data_dict = DataDictDataset(**self._data_dict)
+        return self._data_dict
 
     def _release(self) -> None:
         super()._release()

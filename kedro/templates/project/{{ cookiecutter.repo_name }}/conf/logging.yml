@@ -11,7 +11,6 @@ formatters:
 handlers:
   console:
     class: logging.StreamHandler
-    level: INFO
     formatter: simple
     stream: ext://sys.stdout
 
@@ -32,12 +31,13 @@ handlers:
     # See https://docs.kedro.org/en/stable/logging/logging.html#project-side-logging-configuration
     # tracebacks_show_locals: False
 
-loggers:
-  kedro:
-    level: INFO
+# loggers:
+#   kedro:
+#     level: INFO
 
-  {{ cookiecutter.python_package }}:
-    level: INFO
+#   {{ cookiecutter.python_package }}:
+#     level: INFO
 
 root:
   handlers: [rich, info_file_handler]
+  level: INFO

@@ -376,7 +376,7 @@ class Pipeline:
 
         """
 
-        if not self._toposorted_groups and self._toposorter:
+        if not self._toposorted_groups:
             while self._toposorter:
                 group = sorted(self._toposorter.get_ready())
                 self._toposorted_groups.append(group)

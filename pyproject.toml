@@ -70,7 +70,7 @@ test = [
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pyproj~=3.0",
-    "pytest-cov~=3.0",
+    "pytest-cov>=3,<6",
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest>=7.2,<9.0",

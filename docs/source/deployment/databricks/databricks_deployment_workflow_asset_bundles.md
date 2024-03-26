@@ -1,4 +1,4 @@
-# Use Asset Bundles to deploy a kedro project
+# Use asset bundles to deploy a kedro project
 
 Databricks jobs are a way to execute code on Databricks clusters, allowing you to run data processing tasks, ETL jobs, or machine learning workflows. In this guide, we explain how to package and run a Kedro project as a job on Databricks.
 
@@ -7,7 +7,7 @@ Databricks jobs are a way to execute code on Databricks clusters, allowing you t
 ## Prerequisites
 
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
-- [`conda` installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine in order to create a virtual environment with a specific version of Python (>= 3.7 is required). If you have Python >= 3.7 installed, you can use other software to create a virtual environment.
+- [`conda` installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine to create a virtual environment with a specific version of Python (>= 3.7 is required). If you have Python >= 3.7 installed, you can use other software to create a virtual environment.
 
 ## Set up your project for deployment to Databricks
 
@@ -153,7 +153,7 @@ Because you are no longer using the default entry-point for Kedro, you will not 
 A Kedro project's configuration and data do not get included when it is packaged. They must be stored somewhere accessible to allow your packaged project to run.
 ```
 
-Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data  to a location accessible to Databricks. In this guide, we will store the data on the Databricks File System (DBFS).
+Your packaged Kedro project needs access to data and configuration to run. Therefore, you will need to upload your project's data  to a location accessible to Databricks. In this guide, we will store the data on the Databricks File System (DBFS).
 
 The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
@@ -189,7 +189,7 @@ You should see the contents of the project's `data/` directory printed to your t
 
 
 #### 1. Create the bundle
- 
+
 Create a folder called `assets` in the root directory containing the file `batch-inference-workflow-asset.yml`:
 ```yaml
 common_permissions: &permissions
@@ -284,8 +284,7 @@ This will:
 3. Upload all the files to `/Workspace/Users/your_user/.bundle/databricks_iris/dev/files` including `conf`
 4. Create the job
 
-You can execute now the project with 
+You can execute now the project with
 ```bash
 databricks bundle run -t dev databricks_iris
 ```
-

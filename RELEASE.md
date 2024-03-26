@@ -6,6 +6,9 @@
 * Kedro commands now work from any subdirectory within a Kedro project.
 * Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`
 * Adds the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
+* Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
+* Improve the performance of `Pipeline` object creation and summing.
+
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.

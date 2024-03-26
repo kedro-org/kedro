@@ -62,4 +62,4 @@ To limit installation to dependencies specific to a data type:
 pip install "kedro-datasets[<group>.<dataset>]"
 ```
 
-For example, your workflow might require use of the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas.ExcelDataset]"`.
+For example, your workflow might require use of the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas-exceldataset]"`.

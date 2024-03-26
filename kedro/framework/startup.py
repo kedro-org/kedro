@@ -144,10 +144,12 @@ def _add_src_to_path(source_dir: Path, project_path: Path) -> None:
         os.environ["PYTHONPATH"] = f"{str(source_dir)}{sep}{python_path}"
 
 
-def bootstrap_project(project_path: Path) -> ProjectMetadata:
+def bootstrap_project(project_path: str | Path) -> ProjectMetadata:
     """Run setup required at the beginning of the workflow
     when running in project mode, and return project metadata.
     """
+
+    project_path = Path(project_path).resolve()
     metadata = _get_project_metadata(project_path)
     _add_src_to_path(metadata.source_dir, project_path)
     configure_project(metadata.package_name)

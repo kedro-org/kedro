@@ -240,7 +240,7 @@ bundle:
 variables:
   existing_cluster_id:
     description: The ID of an existing cluster for development
-    default: replace_your_job_id
+    default: replace_your_cluster_id
   environment:
     description: The environment to run the job in
     default: dev

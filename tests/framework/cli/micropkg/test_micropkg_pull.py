@@ -464,7 +464,7 @@ class TestMicropkgPullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / pipeline_name
-        test_dest = fake_repo_path / "tests" / pipeline_name
+        test_dest = fake_repo_path / "tests" / "pipelines" / pipeline_name
         config_env = env or "base"
         params_config = (
             fake_repo_path

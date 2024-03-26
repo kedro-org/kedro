@@ -233,9 +233,8 @@ class TestPipelineCreateCommand:
 
         assert result.exit_code == 0
         assert "__init__.py': SKIPPED" in result.output
-        assert "test_pipeline.py': SKIPPED" in result.output
         assert f"parameters_{PIPELINE_NAME}.yml': SKIPPED" in result.output
-        assert result.output.count("SKIPPED") == 3  # only 2 files skipped
+        assert result.output.count("SKIPPED") == 2  # only 2 files skipped
 
     def test_failed_copy(
         self, fake_project_cli, fake_metadata, fake_package_path, mocker

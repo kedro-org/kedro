@@ -123,7 +123,7 @@ You should see the contents of the project's `data/` directory printed to your t
 ## Modify spark hook
 To enable remote execution let's modify `src/databricks_iris/hooks.py`. For more details please review [How to integrate Databricks Connect and Kedro](https://kedro.org/blog/how-to-integrate-kedro-and-databricks-connect)
 
-```yaml
+```python
 import configparser
 import os
 from pathlib import Path
@@ -163,7 +163,7 @@ def set_databricks_creds():
 ## Run the project
 Now you can run the project in the remote environment with
 
-```yaml
+```bash
 kedro run
 ```
 ## Modify your project and test the changes
@@ -177,7 +177,7 @@ The `databricks-iris` starter uses a default 80-20 ratio of training data to tes
 Open the file `<project_root>/conf/base/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes.
 ### Re-run your project
 
-```yaml
+```bash
 kedro run
 ```
 

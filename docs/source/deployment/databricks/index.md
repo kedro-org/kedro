@@ -19,7 +19,7 @@ If you're in the early stages of learning Kedro, or your project requires consta
 
 **I want to deploy a packaged Kedro project to Databricks**
 
-The workflow documented in ["Use a Databricks job to deploy a Kedro project"](./databricks_deployment_workflow.md) is the go-to choice when dealing with complex project requirements that need a high degree of structure and reproducibility. It's your best bet for a production setup, given its support for CI/CD, automated/scheduled runs and other advanced use cases. It might not be the ideal choice for projects requiring quick iterations due to its relatively rigid nature.
+The workflow documented in ["Use databricks asset bundles and jobs to deploy a Kedro project"](./databricks_deployment_workflow.md) is the go-to choice when dealing with complex project requirements that need a high degree of structure and reproducibility. It's your best bet for a production setup, given its support for CI/CD, automated/scheduled runs and other advanced use cases. It might not be the ideal choice for projects requiring quick iterations due to its relatively rigid nature.
 
 ---
 Here's a flowchart to guide your choice of workflow:

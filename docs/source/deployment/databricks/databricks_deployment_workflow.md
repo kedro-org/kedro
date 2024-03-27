@@ -1,4 +1,4 @@
-# Use asset bundles to deploy a kedro project
+# Use databricks asset bundles and jobs to deploy a Kedro project
 
 Databricks jobs are a way to execute code on Databricks clusters, allowing you to run data processing tasks, ETL jobs, or machine learning workflows. In this guide, we explain how to package and run a Kedro project as a job on Databricks.
 
@@ -184,13 +184,13 @@ You should see the contents of the project's `data/` directory printed to your t
 08_reporting
 ```
 
-### Create Asset bundles files
+### Create asset bundles files
 
 
 
 #### 1. Create the bundle
 
-Create a folder called `assets` in the root directory containing the file `batch-inference-workflow-asset.yml`:
+Create a folder called `assets` in the root directory containing the file `batch-inference-workflow-asset.yml`, this name is just an example:
 ```yaml
 common_permissions: &permissions
   permissions:
@@ -226,7 +226,7 @@ resources:
         timezone_id: UTC
       <<: *permissions
 ```
-This file defines a sample job using kedro as package
+This file provides a template for a job utilizing Kedro as a package, and it allows for multiple definitions per job. For instance, you could have one definition per pipeline.
 
 #### 2. Create the bundle’s configuration file
 
@@ -256,8 +256,6 @@ targets:
     workspace:
       host: replace_your_host
     run_as:
-      # This runs as your_user@mail.com in production. We could also use a service principal here
-      # using service_principal_name (see https://docs.databricks.com/dev-tools/bundles/permissions.html).
       user_name: your_user@mail.com
     variables:
       environment: base
@@ -279,12 +277,18 @@ databricks bundle deploy -t dev
 ```
 
 This will:
-1. Create the wheel
-2. Upload the wheel to `/Workspace/Users/your_user/.bundle/databricks_iris/dev/artifacts/.internal/databricks_iris-0.1-py3-none-any.whl`
-3. Upload all the files to `/Workspace/Users/your_user/.bundle/databricks_iris/dev/files` including `conf`
-4. Create the job
+1. Create the wheel of your kedro project: `databricks_iris-0.1-py3-none-any.whl`
+2. Create a notebook containing the code to be used by a job to execute the kedro project. You can see it in `<project_root>/.databricks/bundle/dev/.internal/notebook_iris-databricks-job_kedro_run.py`
+3. Upload the wheel to `/Workspace/Users/your_user/.bundle/databricks_iris/dev/artifacts/.internal/`
+4. Upload all the files of the root directory to `/Workspace/Users/your_user/.bundle/databricks_iris/dev/files` including `conf`
+5. Create the job using the notebook from 2.
 
 You can execute now the project with
 ```bash
 databricks bundle run -t dev databricks_iris
+```
+and you can destroy all resources with:
+
+```bash
+databricks bundle destroy --auto-approve -t dev --force-lock
 ```

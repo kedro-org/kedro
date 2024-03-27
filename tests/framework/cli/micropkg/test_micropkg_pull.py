@@ -82,7 +82,7 @@ class TestMicropkgPullCommand:
         config_path = (
             fake_repo_path / settings.CONF_SOURCE / "base" / "pipelines" / PIPELINE_NAME
         )
-        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         # Make sure the files actually deleted before pulling from the sdist file.
         assert not source_path.exists()
         assert not test_path.exists()
@@ -107,7 +107,7 @@ class TestMicropkgPullCommand:
         pipeline_name = alias or PIPELINE_NAME
         destination = destination or Path()
         source_dest = fake_package_path / destination / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        test_dest = fake_repo_path / "tests" / destination / pipeline_name
         config_env = env or "base"
         params_config = (
             fake_repo_path
@@ -151,7 +151,7 @@ class TestMicropkgPullCommand:
         call_micropkg_package(fake_project_cli, fake_metadata, alias=pipeline_name)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         source_params_config = (
             fake_repo_path
             / settings.CONF_SOURCE
@@ -178,7 +178,7 @@ class TestMicropkgPullCommand:
         pipeline_name = alias or pipeline_name
         destination = destination or Path()
         source_dest = fake_package_path / destination / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        test_dest = fake_repo_path / "tests" / destination / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -225,7 +225,7 @@ class TestMicropkgPullCommand:
         assert "pulled and unpacked" in result.output
 
         source_dest = fake_package_path / destination / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        test_dest = fake_repo_path / "tests" / destination / pipeline_name
         config_env = "base"
         params_config = (
             fake_repo_path
@@ -274,7 +274,7 @@ class TestMicropkgPullCommand:
         assert "pulled and unpacked" in result.output
 
         source_dest = fake_package_path / destination / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        test_dest = fake_repo_path / "tests" / destination / pipeline_name
         config_env = "base"
         params_config = (
             fake_repo_path
@@ -431,7 +431,7 @@ class TestMicropkgPullCommand:
         but `tests` directory is missing from the sdist file.
         """
         call_pipeline_create(fake_project_cli, fake_metadata)
-        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         shutil.rmtree(test_path)
         assert not test_path.exists()
         call_micropkg_package(fake_project_cli, fake_metadata)
@@ -464,7 +464,7 @@ class TestMicropkgPullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
+        test_dest = fake_repo_path / "tests" / "pipelines" / pipeline_name
         config_env = env or "base"
         params_config = (
             fake_repo_path
@@ -504,7 +504,7 @@ class TestMicropkgPullCommand:
         call_pipeline_delete(fake_project_cli, fake_metadata)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         # Make sure the files actually deleted before pulling from the sdist file.
         assert not source_path.exists()
         assert not test_path.exists()
@@ -525,7 +525,7 @@ class TestMicropkgPullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
+        test_dest = fake_repo_path / "tests" / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -566,7 +566,7 @@ class TestMicropkgPullCommand:
         call_pipeline_delete(fake_project_cli, fake_metadata)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         source_params_config = (
             fake_repo_path
             / settings.CONF_SOURCE
@@ -623,7 +623,7 @@ class TestMicropkgPullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
+        test_dest = fake_repo_path / "tests" / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path

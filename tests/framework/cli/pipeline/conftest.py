@@ -72,7 +72,7 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
                 if dirpath.is_dir() and not any(dirpath.iterdir()):
                     dirpath.rmdir()
 
-        tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
+        tests = fake_repo_path / "tests" / "pipelines" / pipeline
         if tests.is_dir():
             shutil.rmtree(str(tests))
 

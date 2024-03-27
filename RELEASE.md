@@ -11,6 +11,7 @@
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
 * Updated CLI command `kedro catalog resolve` to read credentials properly.
+* Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
 
 ## Breaking changes to the API
 * Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.

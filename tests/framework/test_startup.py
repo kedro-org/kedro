@@ -65,7 +65,6 @@ class TestGetProjectMetadata:
             _get_project_metadata(self.project_path)
 
     def test_toml_invalid_format(self, tmp_path):
-        print(type(tmp_path), "DEBG!")
         """Test for loading context from an invalid path."""
         toml_path = tmp_path / "pyproject.toml"
         toml_path.write_text("!!")  # Invalid TOML

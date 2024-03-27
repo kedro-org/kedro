@@ -285,7 +285,7 @@ This will:
 
 You can execute now the project with
 ```bash
-databricks bundle run -t dev databricks_iris
+databricks bundle run -t dev iris-databricks-job
 ```
 and you can destroy all resources with:
 

@@ -228,6 +228,36 @@ resources:
 ```
 This file provides a template for a job utilizing Kedro as a package, and it allows for multiple definitions per job. For instance, you could have one definition per pipeline.
 
+
+In this example, an existing cluster ID is being utilized, which can facilitate fast iteration. However, for a productive deployment, a job cluster is required. To enable ephemeral clusters, the YAML file needs to be modified to use a `job_cluster_key` instead of an `existing_cluster_id`.
+
+```yaml
+jobs:
+    iris-databricks-job:
+      name: "iris-databricks"
+      job_clusters:
+        - job_cluster_key: job_cluster
+          new_cluster:
+              #Azure nodes
+              node_type_id: Standard_DS3_v2
+              spark_version: 14.3.x-scala2.12
+      tasks:
+        - task_key: kedro_run
+          job_cluster_key: job_cluster
+          python_wheel_task:
+            package_name: databricks_iris
+            entry_point: databricks_run
+            named_parameters:
+              --conf-source: /Workspace${workspace.file_path}/conf
+              --package-name: databricks_iris
+              --env: ${var.environment}
+          libraries:
+            - whl: ../dist/*.whl
+      schedule:
+        quartz_cron_expression: "0 0 11 * * ?" # daily at 11am
+        timezone_id: UTC
+      <<: *permissions
+```
 #### 2. Create the bundle’s configuration file
 
 

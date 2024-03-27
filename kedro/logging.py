@@ -4,6 +4,7 @@ This module contains a logging handler class which produces coloured logs and tr
 
 import logging
 import sys
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -58,3 +59,15 @@ class RichHandler(rich.logging.RichHandler):
             # fixed on their side at some point, but until then we disable it.
             # See https://github.com/Textualize/rich/issues/2455
             rich.traceback.install(**traceback_install_kwargs)  # type: ignore[arg-type]
+
+
+# @cache is supported from 3.9 onwards
+@lru_cache(maxsize=None)
+def has_rich_handler(logger: logging.Logger) -> bool:
+    """Returns true if the logger has a RichHandler attached."""
+    return any(isinstance(handler, RichHandler) for handler in logger.handlers)
+
+
+def fmt_rich(value: str, markup: str) -> str:
+    """Format string with rich markup"""
+    return f"[{markup}]{value}[/{markup}]"

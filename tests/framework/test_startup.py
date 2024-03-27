@@ -65,12 +65,13 @@ class TestGetProjectMetadata:
             _get_project_metadata(self.project_path)
 
     def test_toml_invalid_format(self, tmp_path):
+        print(type(tmp_path), "DEBG!")
         """Test for loading context from an invalid path."""
         toml_path = tmp_path / "pyproject.toml"
         toml_path.write_text("!!")  # Invalid TOML
         pattern = "Failed to parse 'pyproject.toml' file"
         with pytest.raises(RuntimeError, match=re.escape(pattern)):
-            _get_project_metadata(str(tmp_path))
+            _get_project_metadata(tmp_path)
 
     def test_valid_toml_file(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)

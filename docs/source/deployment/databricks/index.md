@@ -13,17 +13,13 @@ To avoid the overhead of setting up and syncing a local development environment 
 **I want a hybrid workflow model combining local IDE with Databricks**
 
 
-The workflow documented in ["Use an IDE, dbx and Databricks Repos to develop a Kedro project"](./databricks_ide_development_workflow.md) is for those that prefer to work in a local IDE.
+The workflow documented in ["Use Databricks Connect to develop a Kedro project"](./databricks_ide_development_workflow.md) is for those that prefer to work in a local IDE.
 
 If you're in the early stages of learning Kedro, or your project requires constant testing and adjustments, choose this workflow. You can use your IDE's capabilities for faster, error-free development, while testing on Databricks. Later you can make the transition into a production deployment with this approach, although you may prefer to switch to use [job-based deployment](./databricks_deployment_workflow.md) and fully optimise your workflow for production.
 
 **I want to deploy a packaged Kedro project to Databricks**
 
 The workflow documented in ["Use a Databricks job to deploy a Kedro project"](./databricks_deployment_workflow.md) is the go-to choice when dealing with complex project requirements that need a high degree of structure and reproducibility. It's your best bet for a production setup, given its support for CI/CD, automated/scheduled runs and other advanced use cases. It might not be the ideal choice for projects requiring quick iterations due to its relatively rigid nature.
-
-**I want to deploy a packaged Kedro project to Databricks using Asset Bundles**
-
-Deploying a packaged Kedro project to Databricks using Asset Bundles offers a streamlined workflow for managing complex CI/CD processes. The documented workflow outlined in ["Use Asset Bundles to deploy a Kedro project"](./databricks_deployment_workflow_asset_bundles.md) serves as the preferred approach, providing a robust solution for deploying and managing assets efficiently within a Databricks environment.
 
 ---
 Here's a flowchart to guide your choice of workflow:
@@ -35,11 +31,11 @@ Here's a flowchart to guide your choice of workflow:
 %   A[Start] --> B{Do you prefer developing your projects in notebooks?}
 %   B -->|Yes| C[Use a Databricks workspace to develop a Kedro project]
 %   B -->|No| D{Are you a beginner with Kedro?}
-%   D -->|Yes| E[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
+%   D -->|Yes| E[Use Databricks Connect to develop a Kedro project]
 %   D -->|No| F{Do you have advanced project requirements<br>e.g. CI/CD, scheduling, production-ready, complex pipelines, etc.?}
 %   F -->|Yes| G{Is rapid development needed for your project needs?}
-%   F -->|No| H[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
-%   G -->|Yes| I[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
+%   F -->|No| H[Use Databricks Connect to develop a Kedro project]
+%   G -->|Yes| I[Use Databricks Connect to develop a Kedro project]
 %   G -->|No| J[Use a Databricks job to deploy a Kedro project]
 
 
@@ -51,7 +47,6 @@ Remember, the best choice of workflow is the one that aligns best with your proj
 
 databricks_notebooks_development_workflow.md
 databricks_ide_development_workflow.md
-databricks_deployment_workflow_asset_bundles
 databricks_deployment_workflow
 databricks_visualisation
 ```

@@ -270,8 +270,8 @@ def _find_all_required_nodes(
     while queue:
         current_node = queue.popleft()
         nodes_to_run.add(current_node)
+        # Look for parent nodes which produce non-persistent inputs (if those exist)
         non_persistent_inputs = _enumerate_non_persistent_inputs(current_node, catalog)
-        # Look for the nodes that produce non-persistent inputs (if those exist)
         for node in _enumerate_nodes_with_outputs(pipeline, non_persistent_inputs):
             if node in visited:
                 continue

@@ -1,5 +1,5 @@
 install:
-	pip install -e .
+	uv pip install --system "kedro @ ."
 
 clean:
 	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
@@ -31,22 +31,21 @@ secret-scan:
 	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
 
 build-docs:
-	pip install -e ".[docs]"
+	uv pip install --system "kedro[docs] @ ."
 	./docs/build-docs.sh "docs"
 
 show-docs:
 	open docs/build/html/index.html
 
 linkcheck:
-	pip install -e ".[docs]"
+	uv pip install --system "kedro[docs] @ ."
 	./docs/build-docs.sh "linkcheck"
 
 package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
-	python -m pip install -U "pip>=21.2"
-	pip install .[test]
+	uv pip install --system "kedro[test] @ ."
 
 install-pre-commit:
 	pre-commit install --install-hooks

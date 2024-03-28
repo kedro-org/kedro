@@ -60,3 +60,11 @@ Feature: Run Project
     When I execute the kedro command "run --params extra1=1,extra2=value2"
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run
+
+  Scenario: Run kedro run from within a sub-directory
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter "default"
+    And I have changed the current working directory to "data"
+    When I execute the kedro command "run"
+    Then I should get a successful exit code
+    And the logs should show that 4 nodes were run

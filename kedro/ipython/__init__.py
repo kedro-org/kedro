@@ -31,9 +31,9 @@ from kedro.framework.project import (
     pipelines,
 )
 from kedro.framework.session import KedroSession
-from kedro.framework.startup import _is_project, bootstrap_project
+from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
-from kedro.utils import _is_databricks
+from kedro.utils import _find_kedro_project, _is_databricks
 
 logger = logging.getLogger(__name__)
 
@@ -184,15 +184,6 @@ def _remove_cached_modules(package_name: str) -> None:  # pragma: no cover
     # define a name that was defined by the old version, the old definition remains.
     for module in to_remove:
         del sys.modules[module]
-
-
-def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
-    while current_dir != current_dir.parent:
-        if _is_project(current_dir):
-            return current_dir
-        current_dir = current_dir.parent
-
-    return None
 
 
 def _guess_run_environment() -> str:  # pragma: no cover

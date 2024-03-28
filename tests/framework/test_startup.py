@@ -275,6 +275,19 @@ class TestValidateSourcePath:
         with pytest.raises(NotADirectoryError, match=pattern):
             _validate_source_path(source_path, tmp_path.resolve())
 
+    @pytest.mark.parametrize(
+        "source_dir", [".", "src", "./src", "src/nested", "src/nested/nested"]
+    )
+    def test_symlink_source_path(self, tmp_path, source_dir):
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+
+        fake_path = tmp_path / "../" / ".path_does_not_exist"
+        fake_path.symlink_to(source_path)
+
+        _validate_source_path(fake_path, tmp_path.resolve())
+        os.remove(fake_path)
+
 
 class TestBootstrapProject:
     def test_bootstrap_project(self, monkeypatch, tmp_path):

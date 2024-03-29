@@ -237,7 +237,9 @@ def _find_nodes_to_resume_from(
         the run.
 
     """
-    nodes_to_be_run = _find_all_required_nodes(pipeline, unfinished_nodes, catalog)
+    nodes_to_be_run = _find_all_nodes_for_resumed_pipeline(
+        pipeline, unfinished_nodes, catalog
+    )
 
     # Find which of the remaining nodes would need to run first (in topo sort)
     persistent_ancestors = _find_initial_node_group(pipeline, nodes_to_be_run)
@@ -245,7 +247,7 @@ def _find_nodes_to_resume_from(
     return {n.name for n in persistent_ancestors}
 
 
-def _find_all_required_nodes(
+def _find_all_nodes_for_resumed_pipeline(
     pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: DataCatalog
 ) -> set[Node]:
     """Breadth-first search approach to finding the complete set of

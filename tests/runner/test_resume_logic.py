@@ -6,7 +6,7 @@ from kedro.io import (
 )
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner.runner import (
-    _find_all_required_nodes,
+    _find_all_nodes_for_resumed_pipeline,
     _find_nodes_to_resume_from,
 )
 
@@ -146,13 +146,13 @@ class TestResumeLogicBehaviour:
         test_pipeline = request.getfixturevalue(pipeline_name)
 
         remaining_nodes = test_pipeline.only_nodes(*remaining_node_names).nodes
-        required_nodes = _find_all_required_nodes(
+        required_nodes = _find_all_nodes_for_resumed_pipeline(
             test_pipeline, remaining_nodes, persistent_dataset_catalog
         )
         resume_node_names = _find_nodes_to_resume_from(
             test_pipeline, remaining_nodes, persistent_dataset_catalog
         )
 
-        assert set(required_nodes) == set(
-            test_pipeline.from_nodes(*resume_node_names).nodes
+        assert set(n.name for n in required_nodes) == set(
+            n.name for n in test_pipeline.from_nodes(*resume_node_names).nodes
         )

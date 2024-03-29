@@ -221,9 +221,31 @@ def pipeline_triangular():
 
     (node1)
       |  \
-      |  (node2)
+      |  [node2]
       |  /
-    (node3)
+    [node3*]
+
+    """
+    return pipeline(
+        [
+            node(first_arg, ["ds0_A"], ["_ds1_A"], name="node1"),
+            node(first_arg, ["_ds1_A"], ["ds2_A"], name="node2"),
+            node(first_arg, ["ds2_A", "_ds1_A"], ["_ds3_A"], name="node3"),
+        ]
+    )
+
+
+@pytest.fixture
+def pipeline_triangular2():
+    r"""
+
+    (node1)
+      |  \
+      |  [node1b]
+      |   |
+      |  [node2]
+      |  /
+    [node3 +]
 
     """
     return pipeline(

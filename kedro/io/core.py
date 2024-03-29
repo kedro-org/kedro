@@ -15,7 +15,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar, Optional
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -119,6 +119,29 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     need to change the `_EPHEMERAL` attribute to 'True'.
     """
     _EPHEMERAL = False
+
+    def __init__(
+        self,
+        *args,
+        custom_args: Optional[Any] = None,
+        **kwargs
+    ):
+        """
+        Initialize an instance of the AbstractDataset class.
+
+        Args:
+            *args: Positional arguments passed to the superclass's __init__ method.
+            custom_args: An optional argument that allows for passing custom
+                data or configurations specific to the instantiation of this
+                dataset instance. This can be any type of data structure or value
+                and its interpretation is left to the implementation of the
+                subclass. Defaults to None. Particularly useful for writing hooks,
+                such as a hook to save the dataset (i.e. predictions, visualizations)
+                in an experiment-specific directory (i.e. mlruns/<experiment_hash>)
+            **kwargs: Keyword arguments passed to the superclass's __init__ method.
+        """
+        super().__init__(*args, **kwargs)
+        self._custom_args = custom_args
 
     @classmethod
     def from_config(

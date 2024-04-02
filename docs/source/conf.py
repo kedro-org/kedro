@@ -243,7 +243,7 @@ linkcheck_ignore = [
     "https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.flake8",
 ]
 
-# Remove settings to fix Client Error 429
+# Comment out settings to fix Client Rate Limit Error 429
 # linkcheck_retries = 5
 # linkcheck_rate_limit_timeout = 2.0
 

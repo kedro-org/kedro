@@ -42,9 +42,6 @@ class ParallelRunnerManager(SyncManager):
     """
 
 
-ParallelRunnerManager.register("MemoryDataset", MemoryDataset)
-
-
 def _bootstrap_subprocess(
     package_name: str, logging_config: dict[str, Any] | None = None
 ) -> None:

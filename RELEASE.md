@@ -7,6 +7,7 @@
 * Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`.
 * Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
 * Improved the performance of `Pipeline` object creation and summing.
+* Improved suggestions to resume failed pipeline runs.
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
@@ -19,6 +20,9 @@
 ## Documentation changes
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [ondrejzacha](https://github.com/ondrejzacha)
 
 # Release 0.19.3
 

@@ -245,8 +245,7 @@ linkcheck_ignore = [
 
 # retry before render a link broken (fix for "too many requests")
 linkcheck_retries = 5
-linkcheck_rate_limit_timeout = 2.0
-linkcheck_workers = 1
+linkcheck_rate_limit_timeout = 5.0
 
 html_context = {
     "display_github": True,

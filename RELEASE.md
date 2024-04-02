@@ -8,6 +8,7 @@
 * Adds the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
 * Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
 * Improve the performance of `Pipeline` object creation and summing.
+* Improve suggestions to resume failed pipeline runs.
 
 
 ## Bug fixes and other changes
@@ -20,6 +21,9 @@
 ## Documentation changes
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [ondrejzacha](https://github.com/ondrejzacha)
 
 # Release 0.19.3
 

@@ -329,8 +329,9 @@ tree .
 └── parameters.yml
 ```
 
+Consider the following `parameters.yml` file and example Python script:
+
 ```yaml
-# parameters.yml
 learning_rate: 0.01
 train_test_ratio: 0.7
 ```
@@ -342,8 +343,13 @@ config_loader = OmegaConfigLoader(conf_source=".")
 # Optionally, you can also use environments
 # config_loader = OmegaConfigLoader(conf_source=".", base_env="base", default_run_env="local")
 
->>> config_loader["parameters"]
-{'learning_rate': 0.01, 'train_test_ratio': 0.7}
+print(config_loader["parameters"])
+```
+
+If you run it from the same directory where `parameters.yml` placed it gives the following output:
+
+```console
+{'learning_rate': 0.01, 'train_test_ratio': 0.7}}
 ```
 
 For the full list of features, please refer to [configuration_basics](./configuration_basics.md) and [advanced_configuration](./advanced_configuration.md)
@@ -351,8 +357,9 @@ For the full list of features, please refer to [configuration_basics](./configur
 ### How to use Custom Resolvers with `OmegaConfigLoader`
 You can register custom resolvers to use non-primitive types for parameters.
 
+Consider the following `parameters.yml` file an example of Python script for registering a custom resolver:
+
 ```yaml
-# parameters.yml
 polars_float64: "${polars: Float64}"
 today: "${today:}"
 ```
@@ -368,6 +375,12 @@ custom_resolvers = {"polars": lambda x: getattr(pl, x),
 
 # Register custom resolvers
 config_loader = OmegaConfigLoader(conf_source=".", custom_resolvers=custom_resolvers)
->>> print(config_loader["parameters"])
+
+print(config_loader["parameters"])
+```
+
+If you run it from the same directory where `parameters.yml` placed it gives the following output:
+
+```console
 {'polars_float64': Float64, 'today': datetime.date(2023, 11, 23)}
 ```

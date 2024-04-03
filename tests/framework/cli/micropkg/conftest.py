@@ -53,7 +53,7 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
             if each.is_file():
                 each.unlink()
 
-        tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
+        tests = fake_repo_path / "tests" / "pipelines" / pipeline
         if tests.is_dir():
             shutil.rmtree(str(tests))
 

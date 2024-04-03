@@ -6,7 +6,7 @@ When you create a project, you then introduce additional dependencies for the ta
 
 ## Declare project-specific dependencies
 
-When you create a new Kedro project, Kedro generates a `requirements.txt` file in the root directory of the project. The file contains the core dependencies and those related to the tools you choose to include in the project. Specifying the project's exact dependencies in a `requirements.txt` file makes it easier to run the project in the future, and avoids version conflicts downstream. 
+When you create a new Kedro project, Kedro generates a `requirements.txt` file in the root directory of the project. The file contains the core dependencies and those related to the tools you choose to include in the project. Specifying the project's exact dependencies in a `requirements.txt` file makes it easier to run the project in the future, and avoids version conflicts downstream.
 
 
 ## Install project-specific dependencies

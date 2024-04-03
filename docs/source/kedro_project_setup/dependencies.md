@@ -6,7 +6,7 @@ When you create a project, you then introduce additional dependencies for the ta
 
 ## Declare project-specific dependencies
 
-You can specify a project's exact dependencies in the `requirements.txt` file to make it easier for you and others to run your project in the future, and to avoid version conflicts downstream. When you create a new Kedro project, a `requirements.txt` file is generated in the root directory of the project. This file contains the core dependencies and dependecies related to the tools chosen during the project creation process.
+When you create a new Kedro project, Kedro generates a `requirements.txt` file in the root directory of the project. The file contains the core dependencies and those related to the tools you choose to include in the project. Specifying the project's exact dependencies in a `requirements.txt` file makes it easier to run the project in the future, and avoids version conflicts downstream. 
 
 
 ## Install project-specific dependencies
@@ -39,7 +39,7 @@ To limit installation to dependencies specific to a data type:
 pip install "kedro-datasets[<group>-<dataset>]"
 ```
 
-For example, your workflow might require use of the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas-exceldataset]"`.
+For example, your workflow might require the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas-exceldataset]"`.
 
 ```{note}
 From `kedro-datasets` version 3.0.0 onwards, the names of the optional dataset-level dependencies have been normalised to follow [PEP 685](https://peps.python.org/pep-0685/). The '.' character has been replaced with a '-' character and the names are in lowercase. For example, if you had `kedro-datasets[pandas.ExcelDataset]` in your requirements file, it would have to be changed to `kedro-datasets[pandas-exceldataset]`.
@@ -47,7 +47,7 @@ From `kedro-datasets` version 3.0.0 onwards, the names of the optional dataset-l
 
 
 ## Reproducible environments
-In order to make sure that the project dependencies and the transitive dependencies are pinned to specific versions, you can use [`pip-tools`](https://pypi.org/project/pip-tools/) to compile the `requirements.txt` file into a `requirements.lock` file.
+To ensure that the project dependencies and the transitive dependencies are pinned to specific versions, use [`pip-tools`](https://pypi.org/project/pip-tools/) to compile `requirements.txt` file into a `requirements.lock` file.
 To install `pip-tools` in your virtual environment, run the following command:
 
 ```bash
@@ -68,4 +68,4 @@ to use `pip`'s Hash Checking Mode or `--upgrade-package` to update specific pack
 The `requirements.txt` file contains "source" requirements, while `requirements.lock` contains the compiled version of those and requires no manual updates.
 ```
 
-To further update the project requirements, modify the `requirements.txt` file (not `requirements.lock`) and re-run the `pip-compile` command above.
+To further update the project requirements, update the `requirements.txt` file (not `requirements.lock`) and re-run the `pip-compile` command above.

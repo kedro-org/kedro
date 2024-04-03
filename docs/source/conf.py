@@ -245,7 +245,7 @@ linkcheck_ignore = [
 ]
 
 # Comment out settings to fix Client Rate Limit Error 429
-# linkcheck_retries = 5
+linkcheck_retries = 5
 # linkcheck_rate_limit_timeout = 2.0
 
 html_context = {

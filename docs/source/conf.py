@@ -239,12 +239,11 @@ linkcheck_ignore = [
     "https://opensource.org/license/apache2-0-php/",
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
     "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors",
-    # temporarily, until the file actually exists in `main`
-    "https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.flake8",
+    "https://www.quora.com/What-is-thread-safety-in-Python",  # "403 Client Error: Forbidden for url"
 ]
 
 # Comment out settings to fix Client Rate Limit Error 429
-# linkcheck_retries = 5
+linkcheck_retries = 3
 # linkcheck_rate_limit_timeout = 2.0
 
 html_context = {

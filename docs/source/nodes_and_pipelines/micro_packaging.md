@@ -20,15 +20,15 @@ When you package your micro-package, such as a modular pipeline for example, Ked
 ├── conf
 │   └── base
 │       └── parameters_{{pipeline_name*}}  <-- All parameter file(s)
+├── tests
+│   ├── init__.py
+│   └── pipelines
+│       └── {{pipeline_name}}              <-- Pipeline tests
 └── src
-    ├── my_project
-    │   ├── __init__.py
-    │   └── pipelines
-    │       └── {{pipeline_name}}    <-- Pipeline folder
-    └── tests
+    └── my_project
         ├── __init__.py
         └── pipelines
-            └── {{pipeline_name}}    <-- Pipeline tests
+            └── {{pipeline_name}}          <-- Pipeline folder
 ```
 
 Kedro will also include any requirements found in `src/<package_name>/pipelines/<micropkg_name>/requirements.txt` in the micro-package tar file. These requirements will later be taken into account when pulling a micro-package via `kedro micropkg pull`.

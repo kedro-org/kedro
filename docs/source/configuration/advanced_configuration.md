@@ -349,7 +349,7 @@ print(config_loader["parameters"])
 If you run it from the same directory where `parameters.yml` placed it gives the following output:
 
 ```console
-{'learning_rate': 0.01, 'train_test_ratio': 0.7}}
+{'learning_rate': 0.01, 'train_test_ratio': 0.7}
 ```
 
 For the full list of features, please refer to [configuration_basics](./configuration_basics.md) and [advanced_configuration](./advanced_configuration.md)

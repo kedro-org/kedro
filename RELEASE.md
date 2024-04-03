@@ -13,6 +13,7 @@
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
 * Updated CLI command `kedro catalog resolve` to read credentials properly.
+* Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
 * Updated ``.gitignore`` to prevent pushing Mlflow local runs folder to a remote forge when using mlflow and git.
 
 ## Breaking changes to the API

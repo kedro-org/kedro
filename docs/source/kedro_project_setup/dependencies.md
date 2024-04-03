@@ -65,7 +65,5 @@ to use `pip`'s Hash Checking Mode or `--upgrade-package` to update specific pack
 [Check out the `pip-tools` documentation](https://pypi.org/project/pip-tools/) for more information.
 
 ```{note}
-The `requirements.txt` file contains "source" requirements, while `requirements.lock` contains the compiled version of those and requires no manual updates.
+The `requirements.txt` file contains "source" requirements, while `requirements.lock` contains the compiled version of those and requires no manual updates. If you need to update the dependencies, update the `requirements.txt` file and re-run the `pip-compile` command.
 ```
-
-To further update the project requirements, update the `requirements.txt` file (not `requirements.lock`) and re-run the `pip-compile` command above.

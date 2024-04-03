@@ -7,13 +7,14 @@
 * Kedro commands now work from any subdirectory within a Kedro project.
 * Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`.
 * Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
-* Improve the performance of `Pipeline` object creation and summing.
-* Improve suggestions to resume failed pipeline runs.
+* Improved the performance of `Pipeline` object creation and summing.
+* Improved suggestions to resume failed pipeline runs.
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
 * Updated CLI command `kedro catalog resolve` to read credentials properly.
 * Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
+* Updated ``.gitignore`` to prevent pushing Mlflow local runs folder to a remote forge when using mlflow and git.
 
 ## Breaking changes to the API
 * Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.

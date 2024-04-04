@@ -25,6 +25,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [ondrejzacha](https://github.com/ondrejzacha)
+* [Puneet Saini](https://github.com/puneeter)
 
 # Release 0.19.3
 

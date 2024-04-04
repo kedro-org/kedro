@@ -27,6 +27,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [ondrejzacha](https://github.com/ondrejzacha)
+* [doxenix](https://github.com/doxenix)
 
 # Release 0.19.3
 

@@ -22,12 +22,14 @@
 * Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.
 
 ## Documentation changes
+* Add missing description for `merge_strategy` argument in OmegaConfigLoader.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [ondrejzacha](https://github.com/ondrejzacha)
 * [doxenix](https://github.com/doxenix)
+* [Puneet](https://github.com/puneeter)
 
 # Release 0.19.3
 

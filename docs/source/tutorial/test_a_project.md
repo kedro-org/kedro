@@ -313,8 +313,6 @@ class TestDataSciencePipeline:
 
 Ensure you have `pytest` installed. Please see our [automated testing documentation](../development/automated_testing.md) for more information on getting set up with pytest.
 
-<!-- confirmation time -->
-
 To run your tests, run `pytest` from within your project's root directory.
 
 ```bash
@@ -334,4 +332,4 @@ tests/pipelines/test_data_science.py ..                                         
 ============================== 2 passed in 4.38s ===============================
 ```
 
-This output indicates that one test ran successfully in the file `src/tests/test_run.py`.
+This output indicates that both tests ran successfully in the file `tests/pipelines/test_data_science.py`.

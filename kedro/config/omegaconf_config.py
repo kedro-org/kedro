@@ -317,7 +317,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 line = exc.problem_mark.line
                 cursor = exc.problem_mark.column
                 raise ParserError(
-                    f"Invalid YAML or JSON file {Path(conf_path, config_filepath.name).as_posix()},"
+                    f"Invalid YAML or JSON file {Path(config_filepath).as_posix()},"
                     f" unable to read line {line}, position {cursor}."
                 ) from exc
 

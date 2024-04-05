@@ -152,7 +152,7 @@ When we put this together, we get the following test:
 # A complete version is available under the testing best practices section.
 
 import pandas as pd
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
 
@@ -286,7 +286,7 @@ After incorporating these testing practices, our test file `test_data_science.py
 import pandas as pd
 import pytest
 
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 from spaceflights.pipelines.data_science import create_pipeline
 from spaceflights.pipelines.data_science.nodes import split_data

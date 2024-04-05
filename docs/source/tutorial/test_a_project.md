@@ -17,7 +17,7 @@ This section does not cover:
 
 ## Writing tests for Kedro nodes: Unit testing
 
-We define our node functions as [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output value follows solely from its input values, without any observable side effects such as changes to state or mutable data. When testing these functions we check that for a given set of input values, a node will produce the expected output. This type of test is referred to as a unit test.
+Kedro expects nodes functions to be  [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output value follows solely from its input values, without any observable side effects such as changes to state or mutable data. Testing these functions checks that a node will behave as expected - for a given set of input values, a node will produce the expected output. This type of test is referred to as a unit test.
 
 Let us explore what this looks like in practice. Consider the node function `split_data` defined in the data science pipeline:
 
@@ -25,7 +25,7 @@ Let us explore what this looks like in practice. Consider the node function `spl
 <summary><b>Click to expand</b></summary>
 
 ```python
-def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
+def split_data(data: pd.DataFrame, parameters: dict) -> Tuple:
     """Splits data into features and targets training and test sets.
 
     Args:
@@ -67,15 +67,21 @@ from spaceflights.pipelines.data_science.nodes import split_data
     def test_split_data():
         # Arrange
         dummy_data = pd.DataFrame(
-        {"engines": [1, 2, 3],
-         "crew": [4, 5, 6],
-         "passenger_capacity": [5, 6, 7],
-         "price": [120, 290, 30]})
+            {
+                "engines": [1, 2, 3],
+                "crew": [4, 5, 6],
+                "passenger_capacity": [5, 6, 7],
+                "price": [120, 290, 30],
+            }
+        )
 
-        dummy_parameters = {"model_options":
-                     {"test_size": 0.2,
-                      "random_state": 3,
-                      "features": ["engines", "passenger_capacity", "crew"]}}
+        parameters = {
+            "model_options": {
+                "test_size": 0.2,
+                "random_state": 3,
+                "features": ["engines", "passenger_capacity", "crew"],
+            }
+        }
 
         # Act
         X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters["model_options"])
@@ -148,27 +154,38 @@ When we put this together, we get the following test:
 import pandas as pd
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.runner import SequentialRunner
-from spaceflights.pipelines.data_science import create_pipeline
+from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
 
     def test_data_science_pipeline():
         # Arrange pipeline
-        pipeline = create_pipeline()
+        pipeline = create_ds_pipeline()
 
         # Arrange data catalog
         catalog = DataCatalog()
 
         dummy_data = pd.DataFrame(
-        {"engines": [1, 2, 3],
-         "crew": [4, 5, 6],
-         "passenger_capacity": [5, 6, 7],
-         "price": [120, 290, 30]})
-        catalog.add("model_input_table", MemoryDataset(dummy_data))
+            {
+                "engines": [1, 2, 3],
+                "crew": [4, 5, 6],
+                "passenger_capacity": [5, 6, 7],
+                "price": [120, 290, 30],
+            }
+        )
 
-        dummy_parameters = {"model_options":
-                     {"test_size": 0.2,
-                      "random_state": 3,
-                      "features": ["engines", "passenger_capacity", "crew"]}}
-        catalog.add_feed_dict({"params:model_options" : dummy_parameters["model_options"]})
+        duummy_parameters = {
+            "model_options": {
+                "test_size": 0.2,
+                "random_state": 3,
+                "features": ["engines", "passenger_capacity", "crew"],
+            }
+        }
+
+        catalog.add_feed_dict(
+            {
+                "model_input_table" : dummy_data,
+                "params:model_options": dummy_parameters["model_options"],
+            }
+        )
 
         # Act
         output = SequentialRunner().run(pipeline, catalog)
@@ -216,18 +233,23 @@ import pytest
 @pytest.fixture
 def dummy_data():
     return pd.DataFrame(
-        {"engines": [1, 2, 3],
-         "crew": [4, 5, 6],
-         "passenger_capacity": [5, 6, 7],
-         "price": [120, 290, 30]})
+        {
+            "engines": [1, 2, 3],
+            "crew": [4, 5, 6],
+            "passenger_capacity": [5, 6, 7],
+            "price": [120, 290, 30],
+        }
+    )
 
 @pytest.fixture
 def dummy_parameters():
-    parameters = {"model_options":
-                     {"test_size": 0.2,
-                      "random_state": 3,
-                      "features": ["engines", "passenger_capacity", "crew"]}
-                 }
+    parameters = {
+        "model_options": {
+            "test_size": 0.2,
+            "random_state": 3,
+            "features": ["engines", "passenger_capacity", "crew"],
+        }
+    }
     return parameters
 ```
 
@@ -236,7 +258,7 @@ def dummy_parameters():
 We can then access these through the test arguments.
 
 ```python
-def test_split_data(self, dummy_data, dummy_parameters):
+def test_split_data(dummy_data, dummy_parameters):
         ...
 ```
 
@@ -272,24 +294,31 @@ from spaceflights.pipelines.data_science.nodes import split_data
 @pytest.fixture
 def dummy_data():
     return pd.DataFrame(
-        {"engines": [1, 2, 3],
-         "crew": [4, 5, 6],
-         "passenger_capacity": [5, 6, 7],
-         "price": [120, 290, 30]})
+        {
+            "engines": [1, 2, 3],
+            "crew": [4, 5, 6],
+            "passenger_capacity": [5, 6, 7],
+            "price": [120, 290, 30],
+        }
+    )
 
 @pytest.fixture
 def dummy_parameters():
-    parameters = {"model_options":
-                     {"test_size": 0.2,
-                      "random_state": 3,
-                      "features": ["engines", "passenger_capacity", "crew"]}
-                 }
+    parameters = {
+        "model_options": {
+            "test_size": 0.2,
+            "random_state": 3,
+            "features": ["engines", "passenger_capacity", "crew"],
+        }
+    }
     return parameters
 
 
 class TestDataScienceNodes:
     def test_split_data(self, dummy_data, dummy_parameters):
-        X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters["model_options"])
+        X_train, X_test, y_train, y_test = split_data(
+            dummy_data, dummy_parameters["model_options"]
+        )
         assert len(X_train) == 2
         assert len(y_train) == 2
         assert len(X_test) == 1
@@ -297,10 +326,18 @@ class TestDataScienceNodes:
 
 class TestDataSciencePipeline:
     def test_data_science_pipeline(self, dummy_data, dummy_parameters):
-        pipeline = create_pipeline().from_nodes("split_data_node").to_nodes("evaluate_model_node")
+        pipeline = (
+            create_ds_pipeline()
+            .from_nodes("split_data_node")
+            .to_nodes("evaluate_model_node")
+        )
         catalog = DataCatalog()
-        catalog.add("model_input_table", MemoryDataset(dummy_data))
-        catalog.add_feed_dict({"params:model_options" : dummy_parameters["model_options"]})
+        catalog.add_feed_dict(
+            {
+                "model_input_table" : dummy_data,
+                "params:model_options": dummy_parameters["model_options"],
+            }
+        )
 
         output = SequentialRunner().run(pipeline, catalog)
         assert len(output) == 0

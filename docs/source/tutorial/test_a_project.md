@@ -17,7 +17,7 @@ This section does not cover:
 
 ## Writing tests for Kedro nodes: Unit testing
 
-We define our node functions as [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output value follows solely from its input values, without any observable side effects such as changes to state or mutable data. When testing these functions we check that for a given set of input values, a node will produce the expected output. This type of test is referred to as a unit test. 
+We define our node functions as [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output value follows solely from its input values, without any observable side effects such as changes to state or mutable data. When testing these functions we check that for a given set of input values, a node will produce the expected output. This type of test is referred to as a unit test.
 
 Let us explore what this looks like in practice. Consider the node function `split_data` defined in the data science pipeline:
 
@@ -50,7 +50,7 @@ The function takes a pandas DataFrame and dictionary of parameters as input, and
 2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
 3. Assert: Ensure that the length of the outputs are the same as the expected lengths
 
-Cleanup is not required for this test. Remember to import the function being tested and any necessary modules at the top of the file. 
+Cleanup is not required for this test. Remember to import the function being tested and any necessary modules at the top of the file.
 
 When we put these steps together, we have the following test:
 
@@ -58,7 +58,7 @@ When we put these steps together, we have the following test:
 <summary><b>Click to expand</b></summary>
 
 ```python
-# NOTE: This example test is yet to be refactored. 
+# NOTE: This example test is yet to be refactored.
 # A complete version is available under the testing best practices section.
 
 import pandas as pd
@@ -142,7 +142,7 @@ When we put this together, we get the following test:
 <summary><b>Click to expand</b></summary>
 
 ```python
-# NOTE: This example test is yet to be refactored. 
+# NOTE: This example test is yet to be refactored.
 # A complete version is available under the testing best practices section.
 
 import pandas as pd
@@ -153,8 +153,8 @@ from spaceflights.pipelines.data_science import create_pipeline
     def test_data_science_pipeline():
         # Arrange pipeline
         pipeline = create_pipeline()
-        
-        # Arrange data catalog 
+
+        # Arrange data catalog
         catalog = DataCatalog()
 
         dummy_data = pd.DataFrame(
@@ -163,7 +163,7 @@ from spaceflights.pipelines.data_science import create_pipeline
          "passenger_capacity": [5, 6, 7],
          "price": [120, 290, 30]})
         catalog.add("model_input_table", MemoryDataset(dummy_data))
-        
+
         dummy_parameters = {"model_options":
                      {"test_size": 0.2,
                       "random_state": 3,
@@ -172,7 +172,7 @@ from spaceflights.pipelines.data_science import create_pipeline
 
         # Act
         output = SequentialRunner().run(pipeline, catalog)
-        
+
         # Assert
         assert len(output) == 0
 

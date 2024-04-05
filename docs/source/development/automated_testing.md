@@ -96,6 +96,17 @@ Tests should be named as descriptively as possible, especially if you are workin
 
 You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using all of the features of `pytest`, see the [project documentation](https://docs.pytest.org/).
 
+### Specify `pythonpath` in `pyproject.toml`
+
+Specify your source directory in `pyproject.toml` for pytest to properly discover your Kedro project. This is necessary due to the nested directory structure.
+
+```toml
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
+```
+
 ### Run your tests
 
 To run your tests, run `pytest` from within your project's root directory.
@@ -112,7 +123,7 @@ If you created the example test in the previous section, you should see the foll
 ...
 collected 1 item
 
-src/tests/test_run.py .                                                  [100%]
+tests/test_run.py .                                                  [100%]
 
 ============================== 1 passed in 0.38s ===============================
 ```

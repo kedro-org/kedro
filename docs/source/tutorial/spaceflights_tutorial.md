@@ -15,6 +15,7 @@ tutorial_template
 set_up_data
 create_a_pipeline
 add_another_pipeline
+test_a_project
 package_a_project
 spaceflights_tutorial_faqs
 ```

@@ -307,12 +307,15 @@ class TestOmegaConfigLoader:
         assert re.search(pattern_nested_local, str(exc.value))
 
     @use_config_dir
-    def test_bad_config_syntax(self, tmp_path):
-        conf_path = tmp_path / _BASE_ENV
-        conf_path.mkdir(parents=True, exist_ok=True)
-        (conf_path / "catalog.yml").write_text("bad:\nconfig")
+    @pytest.mark.parametrize("config_path", ["catalog.yml", "subfolder/catalog.yml"])
+    def test_bad_config_syntax(self, tmp_path: Path, config_path):
+        conf_env_path = tmp_path / _BASE_ENV
+        conf_env_path.mkdir(parents=True, exist_ok=True)
+        conf_path = conf_env_path / config_path
+        conf_path.parent.mkdir(parents=True, exist_ok=True)
+        (conf_env_path / config_path).write_text("bad:\nconfig")
 
-        pattern = f"Invalid YAML or JSON file {conf_path.as_posix()}"
+        pattern = f"Invalid YAML or JSON file {conf_env_path.as_posix()}"
         with pytest.raises(ParserError, match=re.escape(pattern)):
             OmegaConfigLoader(
                 str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV

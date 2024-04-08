@@ -26,7 +26,7 @@ dependencies = [
     "more_itertools>=8.14.0",
     "omegaconf>=2.1.1",
     "parse>=1.19.0",
-    "pluggy>=1.0, <1.4.0",
+    "pluggy>=1.0, <1.5.0", # Conservative pin as pluggy broke previously.
     "pre-commit-hooks",
     "PyYAML>=4.2,<7.0",
     "rich>=12.0,<14.0",
@@ -65,7 +65,6 @@ test = [
     "kedro-datasets",
     "mypy~=1.0",
     "pandas~=2.0",
-    "pluggy>=1.0, <1.4", # pluggy 1.4 hide imports inside function and causing mocking issue
     "pre-commit>=2.9.2, <4.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors

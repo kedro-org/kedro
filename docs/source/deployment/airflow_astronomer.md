@@ -116,7 +116,7 @@ RUN pip install --user dist/new_kedro_project-0.1-py3-none-any.whl
 4. Navigate to `kedro-airflow-spaceflights` folder and launch the local Airflow cluster with Astronomer
 
 ```shell
-cd kedro-airflow-spaceflights 
+cd kedro-airflow-spaceflights
 astro dev start
 ```
 

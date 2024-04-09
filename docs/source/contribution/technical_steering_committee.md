@@ -65,7 +65,7 @@ We look for commitment markers who can do the following:
 | [Joel Schwarzmann](https://github.com/datajoely)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Juan Luis Cano](https://github.com/astrojuanlu)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Marcin Zabłocki](https://github.com/marrrcin)           | [GetInData \| Part of Xebia](https://getindata.com)                                     |
+| [Marcin Zabłocki](https://github.com/marrrcin)           | [Printify, Inc.](https://printify.com/)  |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nero Okwa](https://github.com/NeroOkwa)                 | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |

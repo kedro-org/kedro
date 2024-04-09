@@ -38,7 +38,7 @@ To follow this tutorial, ensure you have the following:
     cp conf/base/catalog.yml conf/airflow/catalog.yml
     ```
 
-3. Open `conf/airflow/catalog.yml` to see the list of Datasets used in the project. Note that additional temporary datasets (X_train, X_test, y_train, y_test) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our Data Catalog:
+3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional temporary datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`:
 
 ```yaml
 X_train:

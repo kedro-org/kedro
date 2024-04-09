@@ -98,7 +98,7 @@ In this section, we'll start by setting up a new blank Airflow project using Ast
     astro dev init
     ```
 
-2. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run our Kedro project there, we need to copy several items from the previous section into it: 
+2. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run our Kedro project there, we need to copy several items from the previous section into it:
 - the `/data` folder from Step 1, containing sample input datasets for our pipeline. This folder will also store the output results.
 - the `/conf` folder from Steps 2-4, which includes our DataCatalog, Parameters, and Logging customisation files. These files will be used by Kedro during its execution in the Airflow container.
 - the `.whl` file from Step 5, which we will install in the Airflow Docker container to execute our project node by node.

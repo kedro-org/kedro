@@ -58,7 +58,7 @@ y_test:
   filepath: data/02_intermediate/y_test.csv
 ```
 
-In the example here we assume that all Airflow tasks share one disk, but for distributed environment you would need to use non-local filepaths.
+In the example here we assume that all Airflow tasks share one disk, but for distributed environments you would need to use non-local file paths.
 
 4. Open `conf/logging.yml` and modify the `root: handlers` section to `[console]` at the end of the file. By default, Kedro use the rich library to enhance log output with sophisticated formatting. However, some deployment systems, including Airflow, may encounter difficulties with the rich format. Therefore, we're adjusting the logging to a simpler console version. For more information on logging in Kedro, you can refer to the [Kedro docs](https://docs.kedro.org/en/stable/logging/index.html).
 

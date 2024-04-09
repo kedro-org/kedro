@@ -3,6 +3,7 @@ implementations.
 """
 from __future__ import annotations
 
+import copy
 import inspect
 import itertools as it
 import logging
@@ -17,6 +18,7 @@ from concurrent.futures import (
 )
 from typing import Any, Collection, Iterable, Iterator
 
+import pandas as pd
 from more_itertools import interleave
 from pluggy import PluginManager
 
@@ -491,7 +493,11 @@ def _run_node_sequential(
 
     for name in node.inputs:
         hook_manager.hook.before_dataset_loaded(dataset_name=name, node=node)
-        inputs[name] = catalog.load(name)
+        data = catalog.load(name)
+        if isinstance(data, pd.Series):
+            inputs[name] = copy.deepcopy(data)
+        else:
+            inputs[name] = data
         hook_manager.hook.after_dataset_loaded(
             dataset_name=name, data=inputs[name], node=node
         )

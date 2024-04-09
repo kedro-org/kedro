@@ -105,7 +105,7 @@ This step should produce a .py file called `new_kedro_project_dag.py` located at
     cp new-kedro-project/dags/new_kedro_project_dag.py kedro-airflow-spaceflights/dags/
     ```
 
-3. Add few lines to the `Dockerfile` to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml` to enable custom logging in Kedro and to install the .whl file of our prepared Kedro project into the Airflow container:
+3. Add a few lines to the `Dockerfile` to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml` to enable custom logging in Kedro and to install the .whl file of our prepared Kedro project into the Airflow container:
 
 ```Dockerfile
 ENV KEDRO_LOGGING_CONFIG="conf/logging.yml"

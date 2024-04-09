@@ -30,7 +30,7 @@ To follow this tutorial, ensure you have the following:
     kedro new --example=yes --name=new-kedro-project --tools=log
     ```
 
-2. Navigate to your project's directory, create a new `conf/airflow` directory for Airflow-specific configurations, and copy the `catalog.yml` file from `conf/base` to `conf/airflow`. This setup allows you to customize the Data Catalog for use with Airflow:
+2. Navigate to your project's directory, create a new `conf/airflow` directory for Airflow-specific configurations, and copy the `catalog.yml` file from `conf/base` to `conf/airflow`. This setup allows you to customise the `DataCatalog` for use with Airflow:
 
     ```shell
     cd new-kedro-project

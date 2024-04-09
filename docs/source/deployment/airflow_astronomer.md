@@ -22,7 +22,7 @@ To follow this tutorial, ensure you have the following:
 * `kedro>=0.19` installed
 * [`kedro-airflow>=0.8`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) installed. We will use this plugin to convert the Kedro pipeline into an Airflow DAG.
 
-### Create, prepare and package example kedro project
+### Create, prepare and package example Kedro project
 
 1. To create a new Kedro project, select the `example=yes` option to include example code. Additionally, to implement custom logging, select `tools=log`. Proceed with the default project name, but feel free to add any other tools as desired:
 

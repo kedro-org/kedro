@@ -86,7 +86,7 @@ This step should produce a .py file called `new_kedro_project_dag.py` located at
 ### Deployment process with Astro Airflow
 
 
-1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of Kedro project. Let's call it `kedro-airflow-spaceflights`
+1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
 
     ```shell
     cd ..

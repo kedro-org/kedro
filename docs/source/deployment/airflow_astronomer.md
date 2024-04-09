@@ -24,6 +24,8 @@ To follow this tutorial, ensure you have the following:
 
 ### Create, prepare and package example Kedro project
 
+In this section, we will initiate a new Kedro project equipped with an example pipeline code designed to solve a typical data science task: predicting Spaceflights prices. We will customise this project to ensure compatibility with Airflow, which includes enriching the Kedro DataCatalog with datasets previously stored only in memory and simplifying logging through custom settings. Following these modifications, we'll package the project for installation in an Airflow Docker container and generate an Airflow DAG that mirrors our Kedro pipelines.
+
 1. To create a new Kedro project, select the `example=yes` option to include example code. Additionally, to implement custom logging, select `tools=log`. Proceed with the default project name, but feel free to add any other tools as desired:
 
     ```shell
@@ -85,6 +87,7 @@ This step should produce a .py file called `new_kedro_project_dag.py` located at
 
 ### Deployment process with Astro Airflow
 
+In this section, we'll start by setting up a new blank Airflow project using Astro. We'll then copy the files prepared in the previous section from our Kedro project. Next, we'll customize the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, we will run and explore the Airflow cluster.
 
 1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
 
@@ -95,11 +98,15 @@ This step should produce a .py file called `new_kedro_project_dag.py` located at
     astro dev init
     ```
 
-2. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run our Kedro project there, we need to copy several items from the previous sections into it: the `/data` folder from Step 1, the `/conf` folder from Steps 2-4, the `.whl` file from Step 5, and the Airflow DAG from Step 6:
+2. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run our Kedro project there, we need to copy several items from the previous section into it: 
+- the `/data` folder from Step 1, containing sample input datasets for our pipeline. This folder will also store the output results.
+- the `/conf` folder from Steps 2-4, which includes our DataCatalog, Parameters, and Logging customisation files. These files will be used by Kedro during its execution in the Airflow container.
+- the `.whl` file from Step 5, which we will install in the Airflow Docker container to execute our project node by node.
+- the Airflow DAG from Step 6 for deployment in the Airflow cluster.
     ```shell
     cd ..
-    cp -r new-kedro-project/conf kedro-airflow-spaceflights/conf
     cp -r new-kedro-project/data kedro-airflow-spaceflights/data
+    cp -r new-kedro-project/conf kedro-airflow-spaceflights/conf
     mkdir -p kedro-airflow-spaceflights/dist/
     cp new-kedro-project/dist/new_kedro_project-0.1-py3-none-any.whl kedro-airflow-spaceflights/dist/
     cp new-kedro-project/dags/new_kedro_project_dag.py kedro-airflow-spaceflights/dags/

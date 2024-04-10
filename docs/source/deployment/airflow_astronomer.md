@@ -19,6 +19,7 @@ Each node will be executed within a new Kedro session, which implies that `Memor
 To follow this tutorial, ensure you have the following:
 
 * The [Astro CLI installed](https://docs.astronomer.io/astro/install-cli)
+* A container service like [Docker Desktop](https://docs.docker.com/get-docker/) (v18.09 or higher)
 * `kedro>=0.19` installed
 * [`kedro-airflow>=0.8`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) installed. We will use this plugin to convert the Kedro pipeline into an Airflow DAG.
 
@@ -89,6 +90,8 @@ This step should produce a .py file called `new_kedro_project_dag.py` located at
 
 In this section, we'll start by setting up a new blank Airflow project using Astro. We'll then copy the files prepared in the previous section from our Kedro project. Next, we'll customise the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, we will run and explore the Airflow cluster.
 
+0. To complete this section, you have to install both the [Astro CLI](https://docs.astronomer.io/astro/install-cli) and [Docker Desktop](https://docs.docker.com/get-docker/).
+
 1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
 
     ```shell
@@ -112,7 +115,7 @@ In this section, we'll start by setting up a new blank Airflow project using Ast
     cp new-kedro-project/dags/new_kedro_project_dag.py kedro-airflow-spaceflights/dags/
     ```
 
-3. Add a few lines to the `Dockerfile` to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml` to enable custom logging in Kedro and to install the .whl file of our prepared Kedro project into the Airflow container:
+3. Add a few lines to the `Dockerfile` located in the `kedro-airflow-spaceflights` folder to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml` to enable custom logging in Kedro and to install the .whl file of our prepared Kedro project into the Airflow container:
 
 ```Dockerfile
 ENV KEDRO_LOGGING_CONFIG="conf/logging.yml"

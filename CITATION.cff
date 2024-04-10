@@ -48,7 +48,9 @@ authors:
   given-names: Merel
 - family-names: Zabłocki
   given-names: Marcin
+- family-names: Khaustova
+  given-names: Elena
 title: Kedro
-version: 0.19.3
-date-released: 2024-02-27
+version: 0.19.4
+date-released: 2024-04-11
 url: https://github.com/kedro-org/kedro

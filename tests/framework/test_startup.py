@@ -10,10 +10,10 @@ from kedro import __version__ as kedro_version
 from kedro.framework.startup import (
     ProjectMetadata,
     _get_project_metadata,
-    _is_project,
     _validate_source_path,
     bootstrap_project,
 )
+from kedro.utils import _is_project
 
 
 class TestIsProject:
@@ -70,7 +70,7 @@ class TestGetProjectMetadata:
         toml_path.write_text("!!")  # Invalid TOML
         pattern = "Failed to parse 'pyproject.toml' file"
         with pytest.raises(RuntimeError, match=re.escape(pattern)):
-            _get_project_metadata(str(tmp_path))
+            _get_project_metadata(tmp_path)
 
     def test_valid_toml_file(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
@@ -274,6 +274,19 @@ class TestValidateSourcePath:
         pattern = re.escape(f"Source path '{source_path}' cannot be found.")
         with pytest.raises(NotADirectoryError, match=pattern):
             _validate_source_path(source_path, tmp_path.resolve())
+
+    @pytest.mark.parametrize(
+        "source_dir", [".", "src", "./src", "src/nested", "src/nested/nested"]
+    )
+    def test_symlink_source_path(self, tmp_path, source_dir):
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+
+        fake_path = tmp_path / "../" / ".path_does_not_exist"
+        fake_path.symlink_to(source_path)
+
+        _validate_source_path(fake_path, tmp_path.resolve())
+        os.remove(fake_path)
 
 
 class TestBootstrapProject:

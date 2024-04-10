@@ -5,14 +5,12 @@ produced outputs and execution order.
 """
 from __future__ import annotations
 
-import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
 from typing import Any, Iterable
 
-from toposort import CircularDependencyError as ToposortCircleError
-from toposort import toposort
+from graphlib import CycleError, TopologicalSorter
 
 import kedro
 from kedro.pipeline.node import Node, _to_list
@@ -145,7 +143,10 @@ class Pipeline:
         _validate_transcoded_inputs_outputs(nodes_chain)
         _tags = set(_to_list(tags))
 
-        tagged_nodes = [n.tag(_tags) for n in nodes_chain]
+        if _tags:
+            tagged_nodes = [n.tag(_tags) for n in nodes_chain]
+        else:
+            tagged_nodes = nodes_chain
 
         self._nodes_by_name = {node.name: node for node in tagged_nodes}
         _validate_unique_outputs(tagged_nodes)
@@ -164,7 +165,17 @@ class Pipeline:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
         self._nodes = tagged_nodes
-        self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
+        self._toposorter = TopologicalSorter(self.node_dependencies)
+
+        # test for circular dependencies without executing the toposort for efficiency
+        try:
+            self._toposorter.prepare()
+        except CycleError as exc:
+            message = f"Circular dependencies exist among these items: {exc.args[1]}"
+            raise CircularDependencyError(message) from exc
+
+        self._toposorted_nodes: list[Node] = []
+        self._toposorted_groups: list[list[Node]] = []
 
     def __repr__(self) -> str:  # pragma: no cover
         """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""
@@ -181,7 +192,7 @@ class Pipeline:
     def __add__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes + other.nodes))
+        return Pipeline(set(self._nodes + other._nodes))
 
     def __radd__(self, other: Any) -> Pipeline:
         if isinstance(other, int) and other == 0:
@@ -191,17 +202,17 @@ class Pipeline:
     def __sub__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes) - set(other.nodes))
+        return Pipeline(set(self._nodes) - set(other._nodes))
 
     def __and__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes) & set(other.nodes))
+        return Pipeline(set(self._nodes) & set(other._nodes))
 
     def __or__(self, other: Any) -> Pipeline:
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes + other.nodes))
+        return Pipeline(set(self._nodes + other._nodes))
 
     def all_inputs(self) -> set[str]:
         """All inputs for all nodes in the pipeline.
@@ -210,7 +221,7 @@ class Pipeline:
             All node input names as a Set.
 
         """
-        return set.union(set(), *(node.inputs for node in self.nodes))
+        return set.union(set(), *(node.inputs for node in self._nodes))
 
     def all_outputs(self) -> set[str]:
         """All outputs of all nodes in the pipeline.
@@ -219,7 +230,7 @@ class Pipeline:
             All node outputs.
 
         """
-        return set.union(set(), *(node.outputs for node in self.nodes))
+        return set.union(set(), *(node.outputs for node in self._nodes))
 
     def _remove_intermediates(self, datasets: set[str]) -> set[str]:
         intermediate = {_strip_transcoding(i) for i in self.all_inputs()} & {
@@ -349,7 +360,10 @@ class Pipeline:
             The list of all pipeline nodes in topological order.
 
         """
-        return list(chain.from_iterable(self._topo_sorted_nodes))
+        if not self._toposorted_nodes:
+            self._toposorted_nodes = [n for group in self.grouped_nodes for n in group]
+
+        return list(self._toposorted_nodes)
 
     @property
     def grouped_nodes(self) -> list[list[Node]]:
@@ -361,7 +375,14 @@ class Pipeline:
             The pipeline nodes in topologically ordered groups.
 
         """
-        return copy.copy(self._topo_sorted_nodes)
+
+        if not self._toposorted_groups:
+            while self._toposorter:
+                group = sorted(self._toposorter.get_ready())
+                self._toposorted_groups.append(group)
+                self._toposorter.done(*group)
+
+        return [list(group) for group in self._toposorted_groups]
 
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified
@@ -417,7 +438,7 @@ class Pipeline:
         """
         nodes = [
             n
-            for n in self.nodes
+            for n in self._nodes
             if n.namespace and n.namespace.startswith(node_namespace)
         ]
         if not nodes:
@@ -676,7 +697,7 @@ class Pipeline:
                 of the tags provided are being copied.
         """
         unique_tags = set(tags)
-        nodes = [node for node in self.nodes if unique_tags & node.tags]
+        nodes = [node for node in self._nodes if unique_tags & node.tags]
         return Pipeline(nodes)
 
     def filter(  # noqa: PLR0913
@@ -760,7 +781,7 @@ class Pipeline:
         # would give different outcomes depending on the order of filter methods:
         # only_nodes and then from_inputs would give node1, while only_nodes and then
         # from_inputs would give node1 and node3.
-        filtered_pipeline = Pipeline(self.nodes)
+        filtered_pipeline = Pipeline(self._nodes)
         for subset_pipeline in subset_pipelines:
             filtered_pipeline &= subset_pipeline
 
@@ -779,7 +800,7 @@ class Pipeline:
         Returns:
             New ``Pipeline`` object with nodes tagged.
         """
-        nodes = [n.tag(tags) for n in self.nodes]
+        nodes = [n.tag(tags) for n in self._nodes]
         return Pipeline(nodes)
 
     def to_json(self) -> str:
@@ -791,7 +812,7 @@ class Pipeline:
                 "outputs": list(n.outputs),
                 "tags": list(n.tags),
             }
-            for n in self.nodes
+            for n in self._nodes
         ]
         pipeline_versioned = {
             "kedro_version": kedro.__version__,
@@ -882,38 +903,6 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
             f"Please specify a transcoding option or "
             f"rename the datasets."
         )
-
-
-def _topologically_sorted(node_dependencies: dict[Node, set[Node]]) -> list[list[Node]]:
-    """Topologically group and sort (order) nodes such that no node depends on
-    a node that appears in the same or a later group.
-
-    Raises:
-        CircularDependencyError: When it is not possible to topologically order
-            provided nodes.
-
-    Returns:
-        The list of node sets in order of execution. First set is nodes that should
-        be executed first (no dependencies), second set are nodes that should be
-        executed on the second step, etc.
-    """
-
-    def _circle_error_message(error_data: dict[Any, set]) -> str:
-        """Error messages provided by the toposort library will
-        refer to indices that are used as an intermediate step.
-        This method can be used to replace that message with
-        one that refers to the nodes' string representations.
-        """
-        circular = [str(node) for node in error_data.keys()]
-        return f"Circular dependencies exist among these items: {circular}"
-
-    try:
-        # Sort it so it has consistent order when run with SequentialRunner
-        result = [sorted(dependencies) for dependencies in toposort(node_dependencies)]
-        return result
-    except ToposortCircleError as exc:
-        message = _circle_error_message(exc.data)
-        raise CircularDependencyError(message) from exc
 
 
 class CircularDependencyError(Exception):

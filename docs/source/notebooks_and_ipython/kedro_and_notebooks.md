@@ -41,8 +41,10 @@ The `kedro jupyter notebook` command launches a notebook with a customised kerne
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
+In addtion, it also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
+
 ``` {note}
-If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook`.
+If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook` or run `%load_ext kedro.ipython` in a notebook cell.
 ```
 
 ## Loading the project with the `kedro.ipython` extension
@@ -226,14 +228,21 @@ For more details, run `%reload_kedro?`.
 ``` {note}
 This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VSCode Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
 ```
+You can load the contents of a node in your project into a series of cells using the `%load_node` line magic. To use `%load_node`, the node you want to load needs to fulfil two requirements:
+- The node needs to have a name
+- The node's inputs need to be persisted
 
-You can load the contents of a node in your project into a series of cells using the `%load_node` line magic.
+The [section about creating nodes with names](../nodes_and_pipelines/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../tutorial/create_a_pipeline.md#preprocessed-data-registration).
+
+``` {note}
+The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
+```
+
+The line magic will load your node's inputs, imports, and body:
 
 ```ipython
 %load_node <my-node-name>
 ```
-
-Ensure you use the name of your node as defined in the pipeline, not the name of the node function. The line magic will load your node's inputs, imports, and body:
 
 <details>
 <summary>Click to see an example.</summary>

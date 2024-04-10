@@ -12,7 +12,7 @@ The following tutorial shows how to deploy an example [Spaceflights Kedro projec
 
 The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted into a [DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html) for orchestration purpose. This approach mirrors the principles of [running Kedro in a distributed environment](distributed.md).
 
-Each node will be executed within a new Kedro session, which implies that MemoryDatasets cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [Data Catalog](https://docs.kedro.org/en/stable/data/index.html) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
+Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/data/index.html) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
 
 ### Prerequisites
 
@@ -24,7 +24,7 @@ To follow this tutorial, ensure you have the following:
 
 ### Create, prepare and package example Kedro project
 
-In this section, we will initiate a new Kedro project equipped with an example pipeline code designed to solve a typical data science task: predicting Spaceflights prices. We will customise this project to ensure compatibility with Airflow, which includes enriching the Kedro DataCatalog with datasets previously stored only in memory and simplifying logging through custom settings. Following these modifications, we'll package the project for installation in an Airflow Docker container and generate an Airflow DAG that mirrors our Kedro pipelines.
+In this section, we will create a new Kedro project equipped with an example pipeline designed to solve a typical data science task: predicting spaceflights prices. We will customise this project to ensure compatibility with Airflow, which includes enriching the Kedro `DataCatalog` with datasets previously stored only in memory and simplifying logging through custom settings. Following these modifications, we'll package the project for installation in an Airflow Docker container and generate an Airflow DAG that mirrors our Kedro pipeline.
 
 1. To create a new Kedro project, select the `example=yes` option to include example code. Additionally, to implement custom logging, select `tools=log`. Proceed with the default project name, but feel free to add any other tools as desired:
 
@@ -40,7 +40,7 @@ In this section, we will initiate a new Kedro project equipped with an example p
     cp conf/base/catalog.yml conf/airflow/catalog.yml
     ```
 
-3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional temporary datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`:
+3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`:
 
 ```yaml
 X_train:
@@ -87,7 +87,7 @@ This step should produce a .py file called `new_kedro_project_dag.py` located at
 
 ### Deployment process with Astro Airflow
 
-In this section, we'll start by setting up a new blank Airflow project using Astro. We'll then copy the files prepared in the previous section from our Kedro project. Next, we'll customize the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, we will run and explore the Airflow cluster.
+In this section, we'll start by setting up a new blank Airflow project using Astro. We'll then copy the files prepared in the previous section from our Kedro project. Next, we'll customise the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, we will run and explore the Airflow cluster.
 
 1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
 
@@ -100,7 +100,7 @@ In this section, we'll start by setting up a new blank Airflow project using Ast
 
 2. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run our Kedro project there, we need to copy several items from the previous section into it:
 - the `/data` folder from Step 1, containing sample input datasets for our pipeline. This folder will also store the output results.
-- the `/conf` folder from Steps 2-4, which includes our DataCatalog, Parameters, and Logging customisation files. These files will be used by Kedro during its execution in the Airflow container.
+- the `/conf` folder from Steps 2-4, which includes our `DataCatalog`, parameters, and customised logging files. These files will be used by Kedro during its execution in the Airflow container.
 - the `.whl` file from Step 5, which we will install in the Airflow Docker container to execute our project node by node.
 - the Airflow DAG from Step 6 for deployment in the Airflow cluster.
     ```shell

@@ -131,8 +131,10 @@ def _install_project_requirements(context):
         .splitlines()
     )
     install_reqs = [req for req in install_reqs if "{" not in req and "#" not in req]
-    if sys.version_info > (3, 8):
+    # For Python versions 3.9 and above we use the new dataset dependency format introduced in `kedro-datasets` 3.0.0
+    if sys.version_info.minor > 8:
         install_reqs.append("kedro-datasets[pandas-csvdataset]")
+    # For Python 3.8 we use the older `kedro-datasets` dependency format
     else:
         install_reqs.append("kedro-datasets[pandas.CSVDataset]")
     call([context.pip, "install", *install_reqs], env=context.env)

@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import venv
 from pathlib import Path
@@ -130,6 +131,9 @@ def _install_project_requirements(context):
         .splitlines()
     )
     install_reqs = [req for req in install_reqs if "{" not in req and "#" not in req]
-    install_reqs.append("kedro-datasets[pandas-csvdataset]")
-    call([context.pip, "install", "-U", *install_reqs], env=context.env)
+    if sys.version_info > (3, 8):
+        install_reqs.append("kedro-datasets[pandas-csvdataset]")
+    else:
+        install_reqs.append("kedro-datasets[pandas.CSVDataset]")
+    call([context.pip, "install", *install_reqs], env=context.env)
     return context

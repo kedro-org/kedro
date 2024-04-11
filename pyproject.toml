@@ -62,7 +62,8 @@ test = [
     "jupyterlab_server>=2.11.1",
     "jupyterlab>=3,<5",
     "jupyter~=1.0",
-    "kedro-datasets",
+    "kedro-datasets; python_version >= '3.9'",
+    "kedro-datasets<2.0.0; python_version < '3.9'",
     "mypy~=1.0",
     "pandas~=2.0",
     "pluggy>=1.0, <1.4", # pluggy 1.4 hide imports inside function and causing mocking issue

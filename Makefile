@@ -46,7 +46,7 @@ package: clean install
 
 install-test-requirements:
 	python -m pip install -U "pip>=21.2"
-	pip install .[test]
+	pip install -U .[test]
 
 install-pre-commit:
 	pre-commit install --install-hooks

@@ -3,7 +3,8 @@ ipython>=8.10
 jupyterlab>=3.0
 notebook
 kedro~={{ cookiecutter.kedro_version}}
-kedro-datasets[pandas-csvdataset]
+kedro-datasets[pandas-csvdataset]; python_version >= "3.9"
+kedro-datasets[pandas.CSVDataset]<2.0.0; python_version < '3.9'
 kedro-telemetry>=0.3.1
 pytest-cov~=3.0
 pytest-mock>=1.7.1, <2.0

@@ -41,16 +41,13 @@ authors:
   given-names: Joel
 - family-names: Sorokin
   given-names: Dmitry
-- family-names: Stichbury
-  given-names: Jo
-  orcid: https://orcid.org/0000-0002-7474-4024
 - family-names: Theisen
   given-names: Merel
 - family-names: Zabłocki
   given-names: Marcin
-- family-names: Khaustova
-  given-names: Elena
+- family-names: Brugman
+  given-names: Simon
 title: Kedro
 version: 0.19.4
-date-released: 2024-04-11
+date-released: 2024-04-12
 url: https://github.com/kedro-org/kedro

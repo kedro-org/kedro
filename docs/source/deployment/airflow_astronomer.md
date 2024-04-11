@@ -86,7 +86,7 @@ kedro airflow create --target-dir=dags/ --env=airflow
 
 This step should produce a .py file called `new_kedro_project_dag.py` located at `dags/`.
 
-### Deployment process with Astro Airflow
+### Deployment process with Astro CLI Airflow
 
 In this section, we'll start by setting up a new blank Airflow project using Astro. We'll then copy the files prepared in the previous section from our Kedro project. Next, we'll customise the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, we will run and explore the Airflow cluster.
 
@@ -149,6 +149,30 @@ docker cp  d36ef786892a:/usr/local/airflow/data/ ./data/
 ```shell
 astro dev stop
 ```
+
+### Deployment to Astro Cloud
+
+You can easily deploy and run your project on Astro Cloud, the cloud infrastructure provided by Astronomer, by following these steps:
+
+1. Log in to your account on the [Astronomer portal](https://www.astronomer.io/) and create a new deployment if you don't already have one:
+![](../meta/images/astronomer_new_deployment.png)
+
+2. Use the Astro CLI to log in to your Astro Cloud account:
+```shell
+astro auth
+```
+You will be redirected to enter your login credentials in your browser. Successful login indicates that your terminal is now linked with your Astro Cloud account:
+
+![](../meta/images/astronomer_connected.png)
+
+3. To deploy your local project to the cloud, navigate to the `kedro-airflow-spaceflights` folder and run:
+```shell
+astro deploy
+```
+
+4. At the end of the deployment process, a link will be provided. Use this link to manage and monitor your project in the cloud:
+
+![](../meta/images/astronomer_cloud_deployment.png)
 
 ## How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
 

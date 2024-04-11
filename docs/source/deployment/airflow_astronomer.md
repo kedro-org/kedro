@@ -4,7 +4,7 @@ Apache Airflow is a popular open-source workflow management platform. It is a su
 
 ## How to run a Kedro pipeline on Apache Airflow with Astronomer
 
-The following tutorial shows how to deploy an example [Spaceflights Kedro project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) on [Apache Airflow](https://airflow.apache.org/) with [Astro CLI](https://docs.astronomer.io/astro/cli/overview), a command-line tool created by [Astronomer](https://www.astronomer.io/) that streamlines the creation of local Airflow projects.
+The following tutorial shows how to deploy an example [Spaceflights Kedro project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) on [Apache Airflow](https://airflow.apache.org/) with [Astro CLI](https://docs.astronomer.io/astro/cli/overview), a command-line tool created by [Astronomer](https://www.astronomer.io/) that streamlines the creation of local Airflow projects. We will guide you through deploying it locally first, and then transitioning to Astro Cloud.
 
 [Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster easily in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
 
@@ -86,7 +86,7 @@ kedro airflow create --target-dir=dags/ --env=airflow
 
 This step should produce a .py file called `new_kedro_project_dag.py` located at `dags/`.
 
-### Deployment process with Astro CLI Airflow
+### Deployment process with Astro CLI
 
 In this section, we'll start by setting up a new blank Airflow project using Astro. We'll then copy the files prepared in the previous section from our Kedro project. Next, we'll customise the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, we will run and explore the Airflow cluster.
 

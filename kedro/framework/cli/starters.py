@@ -773,7 +773,7 @@ def _make_cookiecutter_args_and_fetch_template(
 
     tools = config["tools"]
     example_pipeline = config["example_pipeline"]
-    starter_path = "git+https://github.com/kedro-org/kedro-starters/tree/normalize-kedro-datasets-naming"
+    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
@@ -916,16 +916,33 @@ def _create_project(
         raise KedroCliError(
             "Failed to generate project when running cookiecutter."
         ) from exc
-
+        
     _clean_pycache(Path(result_path))
     extra_context = cookiecutter_args["extra_context"]
     project_name = extra_context.get("project_name", "New Kedro Project")
+    
+    replace_string_in_files(result_path, "shuttles@csv", "shuttles_csv_data@csv")
+    replace_string_in_files(result_path, "shuttles@excel", "shuttles_excel_data@excel")
 
     # Print success message
     click.secho(
         "\nCongratulations!"
         f"\nYour project '{project_name}' has been created in the directory \n{result_path}\n"
     )
+
+
+def replace_string_in_files(root_dir, old_string, new_string):
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        for filename in filenames:
+            file_path = os.path.join(dirpath, filename)
+            try:
+                with open(file_path, 'r') as file:
+                    content = file.read()
+                updated_content = content.replace(old_string, new_string)
+                with open(file_path, 'w') as file:
+                    file.write(updated_content)
+            except Exception as e:
+                print(f"Error processing file {file_path}: {e}")
 
 
 class _Prompt:

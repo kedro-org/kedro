@@ -773,7 +773,7 @@ def _make_cookiecutter_args_and_fetch_template(
 
     tools = config["tools"]
     example_pipeline = config["example_pipeline"]
-    starter_path = "git+https://github.com/kedro-org/kedro-starters/pull/212"
+    starter_path = "git+https://github.com/kedro-org/kedro-starters/tree/normalize-kedro-datasets-naming"
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"

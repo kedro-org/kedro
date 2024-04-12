@@ -41,24 +41,12 @@ In this section, you will create a new Kedro project equipped with an example pi
     cp conf/base/catalog.yml conf/airflow/catalog.yml
     ```
 
-3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`:
+3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`. Instead of repeating similar code for each dataset, you can use [Dataset Factories](https://docs.kedro.org/en/stable/data/kedro_dataset_factories.html), a special syntax that allows defining a catch-all pattern to overwrite the default MemoryDataset creation. Add this code to the end of the file:
 
 ```yaml
-X_train:
+{IntermediateDataset}:
   type: pandas.CSVDataset
-  filepath: data/02_intermediate/X_train.csv
-
-X_test:
-  type: pandas.CSVDataset
-  filepath: data/02_intermediate/X_test.csv
-
-y_train:
-  type: pandas.CSVDataset
-  filepath: data/02_intermediate/y_train.csv
-
-y_test:
-  type: pandas.CSVDataset
-  filepath: data/02_intermediate/y_test.csv
+  filepath: data/02_intermediate/{IntermediateDataset}.csv
 ```
 
 In the example here we assume that all Airflow tasks share one disk, but for distributed environments you would need to use non-local file paths.
@@ -114,6 +102,8 @@ In this section, you will start by setting up a new blank Airflow project using 
     cp new-kedro-project/dist/new_kedro_project-0.1-py3-none-any.whl kedro-airflow-spaceflights/dist/
     cp new-kedro-project/dags/new_kedro_project_dag.py kedro-airflow-spaceflights/dags/
     ```
+
+Feel free to completely copy `new-kedro-project` into `kedro-airflow-spaceflights` if your project requires frequent updates, DAG recreation, and repackaging. This approach allows you to work with kedro and astro projects in a single folder, eliminating the need to copy kedro files for each development iteration. However, be aware that both projects will share common files such as `requirements.txt`, `README.md`, and `.gitignore`.
 
 3. Add a few lines to the `Dockerfile` located in the `kedro-airflow-spaceflights` folder to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml` to enable custom logging in Kedro and to install the .whl file of our prepared Kedro project into the Airflow container:
 

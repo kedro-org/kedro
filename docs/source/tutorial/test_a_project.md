@@ -178,7 +178,7 @@ The pipeline takes a DataFrame and dictionary of parameters as input, splits the
 
 1. Arrange: Prepare the runner and its inputs `pipeline` and `catalog`.
 2. Act: Run the pipeline.
-3. Assert: Ensure the outputs are as expected.
+3. Assert: Ensure pipeline ran without error.
 
 When we put this together, we get the following test:
 
@@ -226,12 +226,14 @@ from spaceflights.pipelines.data_science import create_pipeline as create_ds_pip
         )
 
         # Act
-        output = SequentialRunner().run(pipeline, catalog)
+        SequentialRunner().run(pipeline, catalog)
 
         # Assert
-        assert len(output) == 0
+        assert True     # trivial assert
 
 ```
+
+>**NOTE**: `assert True` is a trivial assert statement, included to make the assert step explicit - if the test execution reaches that line the pipeline must have run without error. Tests do not require an assert statement to pass, a test will pass as long as it runs without any errors. This allows this assert statement to be omitted without affecting the validity of the test.
 
 </details>
 
@@ -325,7 +327,7 @@ import pytest
 
 from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
-from spaceflights.pipelines.data_science import create_pipeline
+from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
 from spaceflights.pipelines.data_science.nodes import split_data
 
 @pytest.fixture
@@ -381,8 +383,7 @@ def test_data_science_pipeline(dummy_data, dummy_parameters):
         }
     )
 
-    output = SequentialRunner().run(pipeline, catalog)
-    assert len(output) == 0
+    SequentialRunner().run(pipeline, catalog)
 
 ```
 

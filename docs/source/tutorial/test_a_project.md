@@ -266,7 +266,7 @@ tests
 
 ### Using fixtures
 
-In our tests, we can see that `dummy_data` and `dummy_parameters` have been defined twice with the same values. Instead, we can define these outside of our tests as [pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html#fixture):
+In our tests, we can see that `dummy_data` and `dummy_parameters` have been defined thrice with (mostly) the same values. Instead, we can define these outside of our tests as [pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html#fixture):
 
 <details>
 

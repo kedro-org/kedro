@@ -257,7 +257,6 @@ tests
     |    test_data_science_pipeline.py
 ```
 
-Within `test_data_science.py` you can use [test classes](https://docs.pytest.org/en/7.1.x/getting-started.html#group-multiple-tests-in-a-class) to further organise your tests.
 
 ### Using fixtures
 
@@ -352,40 +351,38 @@ def dummy_parameters():
     return parameters
 
 
-class TestDataScienceNodes:
-    def test_split_data(self, dummy_data, dummy_parameters):
-        X_train, X_test, y_train, y_test = split_data(
-            dummy_data, dummy_parameters["model_options"]
-        )
-        assert len(X_train) == 2
-        assert len(y_train) == 2
-        assert len(X_test) == 1
-        assert len(y_test) == 1
+def test_split_data(dummy_data, dummy_parameters):
+    X_train, X_test, y_train, y_test = split_data(
+        dummy_data, dummy_parameters["model_options"]
+    )
+    assert len(X_train) == 2
+    assert len(y_train) == 2
+    assert len(X_test) == 1
+    assert len(y_test) == 1
 
-    def test_split_data_missing_price(self, dummy_data, dummy_parameters):
-        dummy_data_missing_price = dummy_data.drop(columns="price")
-        with pytest.raises(KeyError) as e_info:
-            X_train, X_test, y_train, y_test = split_data(dummy_data_missing_price, dummy_parameters["model_options"])
+def test_split_data_missing_price(dummy_data, dummy_parameters):
+    dummy_data_missing_price = dummy_data.drop(columns="price")
+    with pytest.raises(KeyError) as e_info:
+        X_train, X_test, y_train, y_test = split_data(dummy_data_missing_price, dummy_parameters["model_options"])
 
-        assert "price" in str(e_info.value)
+    assert "price" in str(e_info.value)
 
-class TestDataSciencePipeline:
-    def test_data_science_pipeline(self, dummy_data, dummy_parameters):
-        pipeline = (
-            create_ds_pipeline()
-            .from_nodes("split_data_node")
-            .to_nodes("evaluate_model_node")
-        )
-        catalog = DataCatalog()
-        catalog.add_feed_dict(
-            {
-                "model_input_table" : dummy_data,
-                "params:model_options": dummy_parameters["model_options"],
-            }
-        )
+def test_data_science_pipeline(dummy_data, dummy_parameters):
+    pipeline = (
+        create_ds_pipeline()
+        .from_nodes("split_data_node")
+        .to_nodes("evaluate_model_node")
+    )
+    catalog = DataCatalog()
+    catalog.add_feed_dict(
+        {
+            "model_input_table" : dummy_data,
+            "params:model_options": dummy_parameters["model_options"],
+        }
+    )
 
-        output = SequentialRunner().run(pipeline, catalog)
-        assert len(output) == 0
+    output = SequentialRunner().run(pipeline, catalog)
+    assert len(output) == 0
 
 ```
 

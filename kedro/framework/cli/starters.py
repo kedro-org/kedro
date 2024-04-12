@@ -95,7 +95,7 @@ class KedroStarterSpec:
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
-_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git@normalize-kedro-datasets-naming"
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),

@@ -348,6 +348,16 @@ class TestDataSciencePipeline:
 
 ## Run your tests
 
+First, confirm that your project has been installed locally. This can be done by navigating to the project root and running the following command:
+
+```bash
+pip install -e .
+```
+
+This step allows pytest to accurately resolve the import statements in your test files.
+
+>**NOTE**: The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
+
 Ensure you have `pytest` installed. Please see our [automated testing documentation](../development/automated_testing.md) for more information on getting set up with pytest.
 
 To run your tests, run `pytest` from within your project's root directory.

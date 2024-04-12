@@ -19,6 +19,17 @@ There are many testing frameworks available for Python. One of the most popular 
 
 Let's look at how you can start working with `pytest` in your Kedro project.
 
+### Prerequisite: Install your Kedro project
+
+Before getting started with `pytest`, it is important to ensure you have installed your project locally. This allows you to test different parts of your project by importing them into your test files.
+
+To install your project, navigate to your project root and run the following command:
+
+```bash
+pip install -e .
+```
+
+>**NOTE**: The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
 ### Install `pytest`
 
 Install `pytest` as you would install other packages with `pip`, making sure your [project's virtual environment is active](../get_started/install.md#create-a-virtual-environment-for-your-kedro-project).
@@ -96,16 +107,6 @@ Tests should be named as descriptively as possible, especially if you are workin
 
 You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using all of the features of `pytest`, see the [project documentation](https://docs.pytest.org/).
 
-### Specify `pythonpath` in `pyproject.toml`
-
-Specify your source directory in `pyproject.toml` for pytest to properly discover your Kedro project. This is necessary due to the nested directory structure.
-
-```toml
-[tool.pytest.ini_options]
-pythonpath = [
-  "src"
-]
-```
 
 ### Run your tests
 

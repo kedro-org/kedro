@@ -51,7 +51,7 @@ We also have legacy documentation pages for the following deployment targets, bu
 
 single_machine
 distributed
-airflow_astronomer
+airflow
 amazon_sagemaker
 amazon_emr_serverless
 aws_step_functions

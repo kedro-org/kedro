@@ -25,7 +25,7 @@ Let us explore what this looks like in practice. Consider the node function `spl
 <summary><b>Click to expand</b></summary>
 
 ```python
-def split_data(data: pd.DataFrame, parameters: dict) -> Tuple:
+def split_data(data: pd.DataFrame, parameters: dict[str, Any]) -> Tuple:
     """Splits data into features and targets training and test sets.
 
     Args:
@@ -75,7 +75,7 @@ from spaceflights.pipelines.data_science.nodes import split_data
             }
         )
 
-        parameters = {
+        dummy_parameters = {
             "model_options": {
                 "test_size": 0.2,
                 "random_state": 3,
@@ -95,6 +95,44 @@ from spaceflights.pipelines.data_science.nodes import split_data
 
 </details>
 
+
+This test is an example of positive testing - it tests that a valid input produces the expected output. The inverse, testing that an invalid output will be appropriately rejected, is called negative testing and is equally as important.
+
+Using the same steps as above, we can write the following test:
+
+```python
+# NOTE: This example test is yet to be refactored.
+# A complete version is available under the testing best practices section.
+
+import pandas as pd
+from spaceflights.pipelines.data_science.nodes import split_data
+
+    def test_split_data_missing_price():
+        # Arrange
+        dummy_data = pd.DataFrame(
+            {
+                "engines": [1, 2, 3],
+                "crew": [4, 5, 6],
+                "passenger_capacity": [5, 6, 7],
+                # Note the missing price data
+            }
+        )
+
+        dummy_parameters = {
+            "model_options": {
+                "test_size": 0.2,
+                "random_state": 3,
+                "features": ["engines", "passenger_capacity", "crew"],
+            }
+        }
+
+        with pytest.raises(KeyError) as e_info:
+            # Act
+            X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters["model_options"])
+
+        # Assert
+        assert "price" in str(e_info.value)
+```
 
 ## Writing tests for Kedro pipelines: Integration testing
 
@@ -323,6 +361,13 @@ class TestDataScienceNodes:
         assert len(y_train) == 2
         assert len(X_test) == 1
         assert len(y_test) == 1
+
+    def test_split_data_missing_price(self, dummy_data, dummy_parameters):
+        dummy_data_missing_price = dummy_data.drop(columns="price")
+        with pytest.raises(KeyError) as e_info:
+            X_train, X_test, y_train, y_test = split_data(dummy_data_missing_price, dummy_parameters["model_options"])
+
+        assert "price" in str(e_info.value)
 
 class TestDataSciencePipeline:
     def test_data_science_pipeline(self, dummy_data, dummy_parameters):

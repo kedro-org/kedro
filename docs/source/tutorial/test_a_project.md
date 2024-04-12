@@ -17,7 +17,7 @@ This section does not cover:
 
 ## Writing tests for Kedro nodes: Unit testing
 
-Kedro expects nodes functions to be  [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output follows solely from its inputs, without any observable side effects. Testing these functions checks that a node will behave as expected - for a given set of input values, a node will produce the expected outpu. These tests are referred to as unit tests.
+Kedro expects nodes functions to be  [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output follows solely from its inputs, without any observable side effects. Testing these functions checks that a node will behave as expected - for a given set of input values, a node will produce the expected output. These tests are referred to as unit tests.
 
 Let us explore what this looks like in practice. Consider the node function `split_data` defined in the data science pipeline:
 
@@ -96,7 +96,7 @@ from spaceflights.pipelines.data_science.nodes import split_data
 </details>
 
 
-This test is an example of positive testing - it tests that a valid input produces the expected output. The inverse, testing that an invalid output will be appropriately rejected, is called negative testing and is just as important.
+This test is an example of positive testing - it tests that a valid input produces the expected output. The inverse, testing that an invalid output will be appropriately rejected, is called negative testing and is equally as important.
 
 Using the same steps as above, we can write the following test:
 
@@ -140,7 +140,7 @@ from spaceflights.pipelines.data_science.nodes import split_data
 
 ## Writing tests for Kedro pipelines: Integration testing
 
-Writing tests for each node ensures each node will behave as expected when run individually. In addition, we must also consider how nodes in a pipeline interact with each other - this is called integration testing. Integration testing combines individual units as a group and checks whether they communicate, share data, and work together as expected. Let us look at this in practice.
+Writing tests for each node ensures each node will behave as expected when run individually. However, we must also consider how nodes in a pipeline interact with each other - this is called integration testing. Integration testing combines individual units as a group and checks whether they communicate, share data, and work together as expected. Let us look at this in practice.
 
 Consider the data science pipeline as a whole:
 
@@ -266,7 +266,7 @@ tests
 
 ### Using fixtures
 
-In our tests, we can see that `dummy_data` and `dummy_parameters` have been defined thrice with (mostly) the same values. Instead, we can define these outside of our tests as [pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html#fixture):
+In our tests, we can see that `dummy_data` and `dummy_parameters` have been defined three times with (mostly) the same values. Instead, we can define these outside of our tests as [pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html#fixture):
 
 <details>
 

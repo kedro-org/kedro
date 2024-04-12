@@ -100,6 +100,9 @@ This test is an example of positive testing - it tests that a valid input produc
 
 Using the same steps as above, we can write the following test:
 
+<details>
+<summary><b>Click to expand</b></summary>
+
 ```python
 # NOTE: This example test is yet to be refactored.
 # A complete version is available under the testing best practices section.
@@ -133,6 +136,7 @@ from spaceflights.pipelines.data_science.nodes import split_data
         # Assert
         assert "price" in str(e_info.value)
 ```
+</details>
 
 ## Writing tests for Kedro pipelines: Integration testing
 

@@ -84,7 +84,7 @@ test = [
     "types-toml"
 ]
 docs = [
-    "docutils<0.21",
+    "docutils<0.22",
     "sphinx>=5.3,<7.3",
     "sphinx_rtd_theme==2.0.0",
     # Regression on sphinx-autodoc-typehints 1.21

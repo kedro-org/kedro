@@ -916,13 +916,12 @@ def _create_project(
         raise KedroCliError(
             "Failed to generate project when running cookiecutter."
         ) from exc
-        
+
     _clean_pycache(Path(result_path))
     extra_context = cookiecutter_args["extra_context"]
     project_name = extra_context.get("project_name", "New Kedro Project")
-    
-    replace_string_in_files(result_path, "shuttles@csv", "shuttles_csv_data@csv")
-    replace_string_in_files(result_path, "shuttles@excel", "shuttles_excel_data@excel")
+
+    replace_string_in_files(result_path, "shuttles@excel", "shuttles_excel")
 
     # Print success message
     click.secho(
@@ -936,13 +935,13 @@ def replace_string_in_files(root_dir, old_string, new_string):
         for filename in filenames:
             file_path = os.path.join(dirpath, filename)
             try:
-                with open(file_path, 'r') as file:
+                with open(file_path) as file:
                     content = file.read()
                 updated_content = content.replace(old_string, new_string)
-                with open(file_path, 'w') as file:
+                with open(file_path, "w") as file:
                     file.write(updated_content)
             except Exception as e:
-                print(f"Error processing file {file_path}: {e}")
+                print(f"Error processing file {file_path}: {e}")  # noqa: T201
 
 
 class _Prompt:

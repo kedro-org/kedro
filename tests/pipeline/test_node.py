@@ -244,6 +244,10 @@ def input_same_as_output_node():
     return biconcat, ["A", "B"], {"a": "A"}
 
 
+def transcoded_input_same_as_output_node():
+    return identity, "A@excel", {"a": "A@csv"}
+
+
 def duplicate_output_dict_node():
     return identity, "A", {"a": "A", "b": "A"}
 
@@ -269,7 +273,11 @@ def bad_output_variable_name():
         (no_input_or_output_node, r"it must have some 'inputs' or 'outputs'"),
         (
             input_same_as_output_node,
-            r"A node cannot have the same inputs and outputs: {\'A\'}",
+            r"A node cannot have the same inputs and outputs even if they are transcoded: {\'A\'}",
+        ),
+        (
+            transcoded_input_same_as_output_node,
+            r"A node cannot have the same inputs and outputs even if they are transcoded: {\'A\'}",
         ),
         (
             duplicate_output_dict_node,

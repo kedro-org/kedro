@@ -136,7 +136,8 @@ class Pipeline:
         try:
             self._toposorter.prepare()
         except CycleError as exc:
-            message = f"Circular dependencies exist among these items: {exc.args[1]}"
+            loop = list(set(exc.args[1]))
+            message = f"Circular dependencies exist among the following {len(loop)} item(s): {loop}"
             raise CircularDependencyError(message) from exc
 
         self._toposorted_nodes: list[Node] = []

@@ -29,9 +29,7 @@ To install your project, navigate to your project root and run the following com
 pip install -e .
 ```
 
-:::{note}
-The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
-:::
+>**NOTE**: The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
 ### Install `pytest`
 
 Install `pytest` as you would install other packages with `pip`, making sure your [project's virtual environment is active](../get_started/install.md#create-a-virtual-environment-for-your-kedro-project).

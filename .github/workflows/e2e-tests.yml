@@ -56,15 +56,12 @@ jobs:
           Move-Item .\winutils.exe C:\hadoop\bin
           echo "HADOOP_HOME=C:\hadoop" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
           echo "PATH=$env:HADOOP_HOME\bin;$env:PATH" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
-      - name: Install uv
-        run: |
-          python -m pip install "uv==0.1.32"
       - name: Install dependencies
         run: |
-          uv pip install --system --upgrade pip
-          make install-test-requirements
+          pip install --upgrade pip
+          pip install -U .[test]
           make install-pre-commit
       - name: pip freeze
-        run: uv pip freeze --system
+        run: pip freeze
       - name: Run e2e tests
         run: make e2e-tests

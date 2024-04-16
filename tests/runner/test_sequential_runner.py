@@ -252,18 +252,18 @@ class TestSequentialRunnerRelease:
         fake_dataset_instance.confirm.assert_called_once_with()
 
 
-@pytest.mark.parametrize(
-    "failing_node_names,expected_pattern",
-    [
-        (["node1_A", "node1_B"], r"No nodes ran."),
-        (["node2"], r"(node1_A,node1_B|node1_B,node1_A)"),
-        (["node3_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node3_A", "node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node2", "node4_A"], r"(node1_A,node1_B|node1_B,node1_A)"),
-    ],
-)
 class TestSuggestResumeScenario:
+    @pytest.mark.parametrize(
+        "failing_node_names,expected_pattern",
+        [
+            (["node1_A", "node1_B"], r"No nodes ran."),
+            (["node2"], r"(node1_A,node1_B|node1_B,node1_A)"),
+            (["node3_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+            (["node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+            (["node3_A", "node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+            (["node2", "node4_A"], r"(node1_A,node1_B|node1_B,node1_A)"),
+        ],
+    )
     def test_suggest_resume_scenario(
         self,
         caplog,
@@ -281,6 +281,44 @@ class TestSuggestResumeScenario:
         with pytest.raises(Exception):
             SequentialRunner().run(
                 two_branches_crossed_pipeline,
+                persistent_dataset_catalog,
+                hook_manager=_create_hook_manager(),
+            )
+        assert re.search(expected_pattern, caplog.text)
+
+    @pytest.mark.parametrize(
+        "failing_node_names,expected_pattern",
+        [
+            (["node1_A", "node1_B"], r"No nodes ran."),
+            (["node2"], r'"node1_A,node1_B"'),
+            (["node3_A"], r'"node3_A,node3_B"'),
+            (["node4_A"], r'"node3_A,node3_B"'),
+            (["node3_A", "node4_A"], r'"node3_A,node3_B"'),
+            (["node2", "node4_A"], r'"node1_A,node1_B"'),
+        ],
+    )
+    def test_stricter_suggest_resume_scenario(
+        self,
+        caplog,
+        two_branches_crossed_pipeline_variable_inputs,
+        persistent_dataset_catalog,
+        failing_node_names,
+        expected_pattern,
+    ):
+        """
+        Stricter version of previous test.
+        Covers pipelines where inputs are shared across nodes.
+        """
+        test_pipeline = two_branches_crossed_pipeline_variable_inputs
+
+        nodes = {n.name: n for n in test_pipeline.nodes}
+        for name in failing_node_names:
+            test_pipeline -= modular_pipeline([nodes[name]])
+            test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
+
+        with pytest.raises(Exception, match="test exception"):
+            SequentialRunner().run(
+                test_pipeline,
                 persistent_dataset_catalog,
                 hook_manager=_create_hook_manager(),
             )

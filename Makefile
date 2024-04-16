@@ -31,7 +31,7 @@ secret-scan:
 	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
 
 build-docs:
-	uv pip install --system "kedro[docs] @ ."
+	uv pip install --system -e ".[docs]"
 	./docs/build-docs.sh "docs"
 
 show-docs:

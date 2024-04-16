@@ -12,12 +12,12 @@ This section explains the following:
 This section does not cover:
 
 * Automating your tests - instead read our [automated testing documentation](../development/automated_testing.md).
-* More advanced features of testing, including [mocking](https://realpython.com/python-mock-library/#what-is-mocking) and [parametrizing tests](https://docs.pytest.org/en/7.1.x/example/parametrize.html).
+* More advanced features of testing, including [mocking](https://realpython.com/python-mock-library/#what-is-mocking) and [parameterising tests](https://docs.pytest.org/en/7.1.x/example/parametrize.html).
 
 
 ## Writing tests for Kedro nodes: Unit testing
 
-Kedro expects nodes functions to be  [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output follows solely from its inputs, without any observable side effects. Testing these functions checks that a node will behave as expected - for a given set of input values, a node will produce the expected output. These tests are referred to as unit tests.
+Kedro expects node functions to be [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output follows solely from its inputs, without any observable side effects. Testing these functions checks that a node will behave as expected - for a given set of input values, a node will produce the expected output. These tests are referred to as unit tests.
 
 Let us explore what this looks like in practice. Consider the node function `split_data` defined in the data science pipeline:
 
@@ -44,7 +44,7 @@ def split_data(data: pd.DataFrame, parameters: dict[str, Any]) -> Tuple:
 
 </details>
 
-The function takes a pandas DataFrame and dictionary of parameters as input, and splits the input data into 4 different data objects as per the parameters provided. We recommend following [pytest's anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into 4  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
+The function takes a pandas DataFrame and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [pytest's anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
 
 1. Arrange: Prepare the inputs `data` and `parameters`.
 2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
@@ -178,7 +178,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 </details>
 
-The pipeline takes a DataFrame and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and evaluate a regression model. With an integration test, we can validate that this sequence of nodes runs as expected. As we did with our unit tests, we break this down into several steps:
+The pipeline takes a pandas `DataFrame` and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and evaluate a regression model. With an integration test, we can validate that this sequence of nodes runs as expected. As we did with our unit tests, we break this down into several steps:
 
 1. Arrange: Prepare the runner and its inputs `pipeline` and `catalog`.
 2. Act: Run the pipeline.

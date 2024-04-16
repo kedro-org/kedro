@@ -64,6 +64,7 @@ jobs:
           uv pip install --system --upgrade pip
           make install-test-requirements
           make install-pre-commit
+          pip install behave
       - name: pip freeze
         run: uv pip freeze --system
       - name: Run e2e tests

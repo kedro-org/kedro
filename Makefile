@@ -18,7 +18,7 @@ show-coverage:
 	open htmlcov/index.html
 
 e2e-tests:
-	behave --tags=-skip
+	behave --verbose --tags=-skip
 
 e2e-tests-fast: export BEHAVE_LOCAL_ENV=TRUE
 e2e-tests-fast:

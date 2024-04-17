@@ -6,7 +6,7 @@
 * Cookiecutter errors are shown in short format without the `--verbose` flag.
 * Kedro commands now work from any subdirectory within a Kedro project.
 * Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`
-* Adds the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
+* Added the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
 * Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
 * Improved the performance of `Pipeline` object creation and summing.
 * Improved suggestions to resume failed pipeline runs.
@@ -24,7 +24,8 @@
 * Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.
 
 ## Documentation changes
-* Add missing description for `merge_strategy` argument in OmegaConfigLoader.
+* Added missing description for `merge_strategy` argument in OmegaConfigLoader.
+* Added documentation on best practices for testing nodes and pipelines.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

@@ -316,7 +316,7 @@ def test_split_data(dummy_data, dummy_parameters):
 
 ### Pipeline slicing
 
-In the test `test_data_science_pipeline` we test the that outputs of the data science pipeline are those that are expected. However, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../nodes_and_pipelines/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
+In the test `test_data_science_pipeline` we test the data science pipeline, as currently defined, can be run successfully. However, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../nodes_and_pipelines/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
 
 ```python
     def test_data_science_pipeline(self):

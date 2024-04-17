@@ -6,10 +6,10 @@ labels: 'Component: Documentation'
 ---
 
 ## Description
-<!-- Short description of the improvement suggestion. -->
+<!-- Short description of the improvement suggestion -->
 
 ### Documentation page (if applicable)
 <!-- https://docs.kedro.org/en/stable/... -->
 
 ## Context
-<!-- Extra context. -->
+<!-- Extra context -->

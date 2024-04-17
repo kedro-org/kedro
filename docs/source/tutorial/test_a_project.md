@@ -44,7 +44,7 @@ def split_data(data: pd.DataFrame, parameters: dict[str, Any]) -> Tuple:
 
 </details>
 
-The function takes a pandas DataFrame and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [pytest's anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
+The function takes a pandas `DataFrame` and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [pytest's anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
 
 1. Arrange: Prepare the inputs `data` and `parameters`.
 2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
@@ -100,7 +100,7 @@ from spaceflights.pipelines.data_science.nodes import split_data
 
 This test is an example of positive testing - it tests that a valid input produces the expected output. The inverse, testing that an invalid output will be appropriately rejected, is called negative testing and is equally as important.
 
-Using the same steps as above, we can write the following test:
+Using the same steps as above, we can write the following test to validate an error is thrown when price data is not available:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -136,7 +136,7 @@ from spaceflights.pipelines.data_science.nodes import split_data
             X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters["model_options"])
 
         # Assert
-        assert "price" in str(e_info.value)
+        assert "price" in str(e_info.value) # checks that the error is about the missing price data
 ```
 </details>
 
@@ -278,6 +278,7 @@ tests
 In our tests, we can see that `dummy_data` and `dummy_parameters` have been defined three times with (mostly) the same values. Instead, we can define these outside of our tests as [pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html#fixture):
 
 <details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 import pytest
@@ -441,4 +442,4 @@ tests/pipelines/test_data_science.py ..                                         
 ============================== 2 passed in 4.38s ===============================
 ```
 
-This output indicates that both tests ran successfully in the file `tests/pipelines/test_data_science.py`.
+This output indicates that all tests ran successfully in the file `tests/pipelines/test_data_science.py`.

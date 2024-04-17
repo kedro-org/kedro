@@ -269,7 +269,8 @@ src
 tests
 |   ...
 └───pipelines
-    |    test_data_science_pipeline.py
+│   └───data_science
+│       │   test_data_science_pipeline.py
 ```
 
 

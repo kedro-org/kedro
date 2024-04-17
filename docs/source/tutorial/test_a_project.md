@@ -50,7 +50,9 @@ The function takes a pandas DataFrame and dictionary of parameters as input, and
 2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
 3. Assert: Ensure that the length of the outputs are the same as the expected lengths
 
-Cleanup is not required for this test. Remember to import the function being tested and any necessary modules at the top of the file.
+The cleanup step becomes necessary in a test when any of the previous steps make modifications that may influence other tests - e.g. by modifying a file used as input for several tests. This is not the case for the example tests below, and so the cleanup step is omitted.
+
+Remember to import the function being tested and any necessary modules at the top of the file.
 
 When we put these steps together, we have the following test:
 

@@ -180,11 +180,15 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 </details>
 
-The pipeline takes a pandas `DataFrame` and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and evaluate a regression model. With an integration test, we can validate that this sequence of nodes runs as expected. As we did with our unit tests, we break this down into several steps:
+The pipeline takes a pandas `DataFrame` and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and evaluate a regression model. With an integration test, we can validate that this sequence of nodes runs as expected.
 
-1. Arrange: Prepare the runner and its inputs `pipeline` and `catalog`.
+From earlier in this tutorial we know a successful pipeline run will conclude with the message `Pipeline execution completed successfully.` being logged. To validate this is being logged in our tests we make use of pytest's [`caplog`](https://docs.pytest.org/en/7.1.x/how-to/logging.html#caplog-fixture) feature to capture logs generated during the execution.
+
+As we did with our unit tests, we break this down into several steps:
+
+1. Arrange: Prepare the runner and its inputs `pipeline` and `catalog`, and any additional test setup.
 2. Act: Run the pipeline.
-3. Assert: Ensure pipeline ran without error.
+3. Assert: Ensure a successful run message was logged.
 
 When we put this together, we get the following test:
 
@@ -195,12 +199,13 @@ When we put this together, we get the following test:
 # NOTE: This example test is yet to be refactored.
 # A complete version is available under the testing best practices section.
 
+import logging
 import pandas as pd
 from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
 
-    def test_data_science_pipeline():
+    def test_data_science_pipeline(caplog):    # Note: caplog is passed as an argument
         # Arrange pipeline
         pipeline = create_ds_pipeline()
 
@@ -231,15 +236,17 @@ from spaceflights.pipelines.data_science import create_pipeline as create_ds_pip
             }
         )
 
+        # Arrange the log testing setup
+        caplog.set_level(logging.DEBUG, logger="kedro") # Ensure all logs produced by Kedro are captured
+        successful_run_msg = "Pipeline execution completed successfully."
+
         # Act
         SequentialRunner().run(pipeline, catalog)
 
         # Assert
-        assert True     # trivial assert
+        assert successful_run_msg in caplog.text
 
 ```
-
->**NOTE**: `assert True` is a trivial assert statement, included to make the assert step explicit - if the test execution reaches that line the pipeline must have run without error. Tests do not require an assert statement to pass, a test will pass as long as it runs without any errors. This allows this assert statement to be omitted without affecting the validity of the test.
 
 </details>
 
@@ -328,6 +335,7 @@ After incorporating these testing practices, our test file `test_data_science.py
 ```python
 # tests/pipelines/test_data_science_pipeline.py
 
+import logging
 import pandas as pd
 import pytest
 
@@ -375,7 +383,7 @@ def test_split_data_missing_price(dummy_data, dummy_parameters):
 
     assert "price" in str(e_info.value)
 
-def test_data_science_pipeline(dummy_data, dummy_parameters):
+def test_data_science_pipeline(caplog, dummy_data, dummy_parameters):
     pipeline = (
         create_ds_pipeline()
         .from_nodes("split_data_node")
@@ -389,7 +397,12 @@ def test_data_science_pipeline(dummy_data, dummy_parameters):
         }
     )
 
+    caplog.set_level(logging.DEBUG, logger="kedro")
+    successful_run_msg = "Pipeline execution completed successfully."
+
     SequentialRunner().run(pipeline, catalog)
+
+    assert successful_run_msg in caplog.text
 
 ```
 

@@ -19,6 +19,17 @@ There are many testing frameworks available for Python. One of the most popular 
 
 Let's look at how you can start working with `pytest` in your Kedro project.
 
+### Prerequisite: Install your Kedro project
+
+Before getting started with `pytest`, it is important to ensure you have installed your project locally. This allows you to test different parts of your project by importing them into your test files.
+
+To install your project, navigate to your project root and run the following command:
+
+```bash
+pip install -e .
+```
+
+>**NOTE**: The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
 ### Install `pytest`
 
 Install `pytest` as you would install other packages with `pip`, making sure your [project's virtual environment is active](../get_started/install.md#create-a-virtual-environment-for-your-kedro-project).
@@ -29,15 +40,15 @@ pip install pytest
 
 ### Create a `/tests` directory
 
-Now that `pytest` is installed, you will need a place to put your tests. Create a `/tests` folder in the `/src` directory of your project.
+Now that `pytest` is installed, you will need a place to put your tests. Create a `/tests` folder in the root directory of your project.
 
 ```bash
-mkdir <project_root>/src/tests
+mkdir <project_root>/tests
 ```
 
 ### Test directory structure
 
-The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `/src/<package_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. See an example `/src` folder below.
+The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `/src/<package_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. See an example `/tests` folder below.
 
 ```
 src
@@ -49,12 +60,12 @@ src
 │           │   nodes.py
 │           │   ...
 │
-└───tests
-│   └───pipelines
-│       └───dataprocessing
-│           │   ...
-│           │   test_nodes.py
-│           │   ...
+tests
+└───pipelines
+│   └───dataprocessing
+│       │   ...
+│       │   test_nodes.py
+│       │   ...
 ```
 
 ### Create an example test
@@ -96,6 +107,7 @@ Tests should be named as descriptively as possible, especially if you are workin
 
 You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using all of the features of `pytest`, see the [project documentation](https://docs.pytest.org/).
 
+
 ### Run your tests
 
 To run your tests, run `pytest` from within your project's root directory.
@@ -112,7 +124,7 @@ If you created the example test in the previous section, you should see the foll
 ...
 collected 1 item
 
-src/tests/test_run.py .                                                  [100%]
+tests/test_run.py .                                                  [100%]
 
 ============================== 1 passed in 0.38s ===============================
 ```

@@ -331,13 +331,23 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
     For more information on the pipeline registry and autodiscovery, see
     https://kedro.readthedocs.io/en/stable/nodes_and_pipelines/pipeline_registry.html
 
+    Args:
+        raise_errors: If ``True``, raise an error upon failed discovery.
+
     Returns:
         A generated mapping from pipeline names to ``Pipeline`` objects.
+
+    Raises:
+        ImportError: When a module does not expose a ``create_pipeline``
+            function, the ``create_pipeline`` function does not return a
+            ``Pipeline`` object, or if the module import fails up front.
+            If ``raise_errors`` is ``False``, see Warns section instead.
 
     Warns:
         UserWarning: When a module does not expose a ``create_pipeline``
             function, the ``create_pipeline`` function does not return a
             ``Pipeline`` object, or if the module import fails up front.
+            If ``raise_errors`` is ``True``, see Raises section instead.
     """
     pipeline_obj = None
 

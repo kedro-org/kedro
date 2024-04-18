@@ -99,8 +99,10 @@ def _get_dataset_names_mapping(
             the same as they are named in the provided pipeline.
             When dict[str, str] is provided, current names will be
             mapped to new names in the resultant pipeline.
+
     Returns:
         A dictionary that maps the old dataset names to the provided ones.
+
     Examples:
         >>> _get_dataset_names_mapping("dataset_name")
         {"dataset_name": "dataset_name"}  # a str name will stay the same
@@ -138,8 +140,10 @@ def _get_param_names_mapping(
             the same as they are named in the provided pipeline.
             When dict[str, str] is provided, current names will be
             mapped to new names in the resultant pipeline.
+
     Returns:
         A dictionary that maps the old parameter names to the provided ones.
+
     Examples:
         >>> _get_param_names_mapping("param_name")
         {"params:param_name": "params:param_name"}  # a str name will stay the same

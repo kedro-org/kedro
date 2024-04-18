@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.5
 
 ## Major features and improvements
+* Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behavior is still to raise a warning for each failing pipeline.
 
 ## Bug fixes and other changes
 
@@ -25,7 +26,7 @@
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
 * Updated CLI command `kedro catalog resolve` to read credentials properly.
 * Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
-* Updated ``.gitignore`` to prevent pushing Mlflow local runs folder to a remote forge when using mlflow and git.
+* Updated ``.gitignore`` to prevent pushing MLflow local runs folder to a remote forge when using MLflow and Git.
 * Fixed error handling message for malformed yaml/json files in OmegaConfigLoader.
 * Fixed a bug in `node`-creation allowing self-dependencies when using transcoding, that is datasets named like `name@format`.
 * Improved error message when passing wrong value to node.

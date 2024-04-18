@@ -319,7 +319,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
+def find_pipelines(raise_errors=False) -> dict[str, Pipeline]:  # noqa: PLR0912
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.
@@ -346,6 +346,12 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
     try:
         pipeline_module = importlib.import_module(pipeline_module_name)
     except Exception as exc:
+        if raise_errors:
+            raise ImportError(
+                f"An error occurred while importing the "
+                f"'{pipeline_module_name}' module."
+            ) from exc
+
         if str(exc) != f"No module named '{pipeline_module_name}'":
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
@@ -378,7 +384,13 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
-        except:  # noqa: E722
+        except Exception as exc:
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the "
+                    f"'{pipeline_module_name}' module."
+                ) from exc
+
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()

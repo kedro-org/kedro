@@ -346,13 +346,13 @@ def find_pipelines(raise_errors=False) -> dict[str, Pipeline]:  # noqa: PLR0912
     try:
         pipeline_module = importlib.import_module(pipeline_module_name)
     except Exception as exc:
-        if raise_errors:
-            raise ImportError(
-                f"An error occurred while importing the "
-                f"'{pipeline_module_name}' module."
-            ) from exc
-
         if str(exc) != f"No module named '{pipeline_module_name}'":
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the "
+                    f"'{pipeline_module_name}' module."
+                ) from exc
+
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()

@@ -1,16 +1,25 @@
-# Upcoming Release 0.19.4
+# Upcoming Release 0.19.5
 
 ## Major features and improvements
-* Clarified docs around using custom resolvers without a full Kedro project.
-* Improved error message when passing wrong value to node.
-* Cookiecutter errors are shown in short format without the `--verbose` flag.
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Documentation changes
+
+## Community contributions
+
+# Release 0.19.4
+
+## Major features and improvements
 * Kedro commands now work from any subdirectory within a Kedro project.
 * Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`
-* Adds the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
-* Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
+* Added the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
 * Improved the performance of `Pipeline` object creation and summing.
 * Improved suggestions to resume failed pipeline runs.
-
+* Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
+* Cookiecutter errors are shown in short format without the `--verbose` flag.
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
@@ -18,12 +27,16 @@
 * Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
 * Updated ``.gitignore`` to prevent pushing Mlflow local runs folder to a remote forge when using mlflow and git.
 * Fixed error handling message for malformed yaml/json files in OmegaConfigLoader.
+* Fixed a bug in `node`-creation allowing self-dependencies when using transcoding, that is datasets named like `name@format`.
+* Improved error message when passing wrong value to node.
 
 ## Breaking changes to the API
 * Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.
 
 ## Documentation changes
-* Add missing description for `merge_strategy` argument in OmegaConfigLoader.
+* Added missing description for `merge_strategy` argument in OmegaConfigLoader.
+* Added documentation on best practices for testing nodes and pipelines.
+* Clarified docs around using custom resolvers without a full Kedro project.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

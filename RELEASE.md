@@ -1,4 +1,4 @@
-# Upcoming Release 0.19.5
+# Upcoming Release 0.19.6
 
 ## Major features and improvements
 
@@ -7,9 +7,18 @@
 ## Breaking changes to the API
 
 ## Documentation changes
-* Updated the documentation for deploying a Kedro project with Astronomer Airflow.
 
 ## Community contributions
+
+
+# Release 0.19.5
+
+## Bug fixes and other changes
+* Fixed breaking import issue when working on a project with `kedro-viz` on python 3.8.
+
+## Documentation changes
+* Updated the documentation for deploying a Kedro project with Astronomer Airflow.
+* Used `kedro-sphinx-theme` for documentation.
 
 # Release 0.19.4
 

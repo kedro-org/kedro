@@ -15,7 +15,8 @@ from graphlib import CycleError, TopologicalSorter
 import kedro
 from kedro.pipeline.node import Node, _to_list
 
-from ._transcoding import TRANSCODING_SEPARATOR, _strip_transcoding  # noqa: F401
+from ._transcoding import _strip_transcoding
+from ._transcoding import TRANSCODING_SEPARATOR  # noqa: F401 for 0.19.x backward compatibility
 
 
 class OutputNotUniqueError(Exception):

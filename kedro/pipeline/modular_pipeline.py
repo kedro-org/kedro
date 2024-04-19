@@ -6,9 +6,12 @@ import difflib
 from typing import AbstractSet, Iterable
 
 from kedro.pipeline.node import Node
-from kedro.pipeline.pipeline import Pipeline
-
-from ._transcoding import TRANSCODING_SEPARATOR, _strip_transcoding, _transcode_split
+from kedro.pipeline.pipeline import (
+    TRANSCODING_SEPARATOR,
+    Pipeline,
+    _strip_transcoding,
+    _transcode_split,
+)
 
 
 class ModularPipelineError(Exception):

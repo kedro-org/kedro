@@ -13,8 +13,6 @@ from warnings import warn
 
 from more_itertools import spy, unzip
 
-from ._transcoding import _strip_transcoding
-
 
 class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
@@ -530,6 +528,8 @@ class Node:
             )
 
     def _validate_inputs_dif_than_outputs(self) -> None:
+        from kedro.pipeline.pipeline import _strip_transcoding
+
         common_in_out = set(map(_strip_transcoding, self.inputs)).intersection(
             set(map(_strip_transcoding, self.outputs))
         )

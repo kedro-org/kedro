@@ -7,6 +7,7 @@
 ## Breaking changes to the API
 
 ## Documentation changes
+* Updated the documentation for deploying a Kedro project with Astronomer Airflow.
 
 ## Community contributions
 

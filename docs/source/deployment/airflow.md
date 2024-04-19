@@ -44,9 +44,9 @@ In this section, you will create a new Kedro project equipped with an example pi
 3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`. Instead of repeating similar code for each dataset, you can use [Dataset Factories](https://docs.kedro.org/en/stable/data/kedro_dataset_factories.html), a special syntax that allows defining a catch-all pattern to overwrite the default `MemoryDataset` creation. Add this code to the end of the file:
 
 ```yaml
-{IntermediateDataset}:
+{base_dataset}:
   type: pandas.CSVDataset
-  filepath: data/02_intermediate/{IntermediateDataset}.csv
+  filepath: data/02_intermediate/{base_dataset}.csv
 ```
 
 In the example here we assume that all Airflow tasks share one disk, but for distributed environments you would need to use non-local file paths.
@@ -80,9 +80,9 @@ This step should produce a `.py` file called `new_kedro_project_dag.py` located 
 
 In this section, you will start by setting up a new blank Airflow project using Astro and then copy the files prepared in the previous section from the Kedro project. Next, you will need to customise the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, you will be able to run and explore the Airflow cluster.
 
-0. To complete this section, you have to install both the [Astro CLI](https://docs.astronomer.io/astro/install-cli) and [Docker Desktop](https://docs.docker.com/get-docker/).
+1. To complete this section, you have to install both the [Astro CLI](https://docs.astronomer.io/astro/install-cli) and [Docker Desktop](https://docs.docker.com/get-docker/).
 
-1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
+2. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
 
     ```shell
     cd ..
@@ -91,7 +91,7 @@ In this section, you will start by setting up a new blank Airflow project using 
     astro dev init
     ```
 
-2. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run the Kedro project there, you need to copy several items from the previous section into it:
+3. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run the Kedro project there, you need to copy several items from the previous section into it:
 - the `/data` folder from Step 1, containing sample input datasets for our pipeline. This folder will also store the output results.
 - the `/conf` folder from Steps 2-4, which includes our `DataCatalog`, parameters, and customised logging files. These files will be used by Kedro during its execution in the Airflow container.
 - the `.whl` file from Step 5, which you will need to install in the Airflow Docker container to execute our project node by node.
@@ -107,7 +107,7 @@ In this section, you will start by setting up a new blank Airflow project using 
 
 Feel free to completely copy `new-kedro-project` into `kedro-airflow-spaceflights` if your project requires frequent updates, DAG recreation, and repackaging. This approach allows you to work with kedro and astro projects in a single folder, eliminating the need to copy kedro files for each development iteration. However, be aware that both projects will share common files such as `requirements.txt`, `README.md`, and `.gitignore`.
 
-3. Add a few lines to the `Dockerfile` located in the `kedro-airflow-spaceflights` folder to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml` to enable custom logging in Kedro and to install the .whl file of our prepared Kedro project into the Airflow container:
+4. Add a few lines to the `Dockerfile` located in the `kedro-airflow-spaceflights` folder to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml` to enable custom logging in Kedro and to install the .whl file of our prepared Kedro project into the Airflow container:
 
 ```Dockerfile
 ENV KEDRO_LOGGING_CONFIG="conf/logging.yml"
@@ -115,18 +115,18 @@ ENV KEDRO_LOGGING_CONFIG="conf/logging.yml"
 RUN pip install --user dist/new_kedro_project-0.1-py3-none-any.whl
 ```
 
-4. Navigate to `kedro-airflow-spaceflights` folder and launch the local Airflow cluster with Astronomer
+5. Navigate to `kedro-airflow-spaceflights` folder and launch the local Airflow cluster with Astronomer
 
 ```shell
 cd kedro-airflow-spaceflights
 astro dev start
 ```
 
-5. Visit the Airflow Webserver UI at its default address, http://localhost:8080, using the default login credentials: username and password both set to `admin`. There, you'll find a list of all DAGs. Navigate to the `new-kedro-project` DAG, and then press the `Trigger DAG` play button to initiate it. You can then observe the steps of your project as they run successfully:
+6. Visit the Airflow Webserver UI at its default address, http://localhost:8080, using the default login credentials: username and password both set to `admin`. There, you'll find a list of all DAGs. Navigate to the `new-kedro-project` DAG, and then press the `Trigger DAG` play button to initiate it. You can then observe the steps of your project as they run successfully:
 
 ![](../meta/images/kedro_airflow_dag_run.png)
 
-6. The Kedro project was run inside an Airflow Docker container, and the results are stored there as well. To copy these results to your host, first identify the relevant Docker containers by listing them:
+7. The Kedro project was run inside an Airflow Docker container, and the results are stored there as well. To copy these results to your host, first identify the relevant Docker containers by listing them:
 ```shell
 docker ps
 ```
@@ -137,7 +137,7 @@ docker cp  d36ef786892a:/usr/local/airflow/data/ ./data/
 ```
 
 
-7. To stop the Astro Airflow environment, you can use the command:
+8. To stop the Astro Airflow environment, you can use the command:
 ```shell
 astro dev stop
 ```

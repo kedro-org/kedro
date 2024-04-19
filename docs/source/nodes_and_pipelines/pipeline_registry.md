@@ -51,7 +51,9 @@ Under the hood, the `find_pipelines()` function traverses the `src/<package_name
 2. Calling the `create_pipeline()` function exposed by the `<package_name>.pipelines.<pipeline_name>` module
 3. Validating that the constructed object is a [`Pipeline`](/api/kedro.pipeline.Pipeline)
 
-If any of these steps fail, `find_pipelines()` raises an appropriate warning and skips the current pipeline but continues traversal.
+By default, if any of these steps fail, `find_pipelines()` (or `find_pipelines(raise_errors=False)`) raises an appropriate warning and skips the current pipeline but continues traversal. During development, this enables you to run your project with some pipelines, even if other pipelines are broken or works in progress.
+
+If you specify `find_pipelines(raise_errors=True)`, the autodiscovery process will fail upon the first error. In production, this ensures errors are caught up front, and pipelines do not get excluded accidentally.
 
 The mapping returned by `find_pipelines()` can be modified, meaning you are not limited to the pipelines returned by each of the `create_pipeline()` functions found above. For example, to add a data engineering pipeline that isn't part of the default pipeline, add it to the dictionary *after* constructing the default pipeline:
 

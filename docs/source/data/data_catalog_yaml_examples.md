@@ -398,6 +398,41 @@ In this example, Kedro understands that `my_dataframe` is the same dataset in it
 In the pipeline, Kedro uses the `spark.SparkDataset` implementation for saving and `pandas.ParquetDataset`
 for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the second node receives a `pandas.Dataframe`.
 
+### Incorrect use of transcoding
+
+Transcoding is always stripped when resolving nodes order and validating pipelines for cycles. So at the level of the
+pipeline datasets `my_dataframe@spark` and `my_dataframe@pandas` are treated as one `my_dataframe` dataset thought at
+the level of catalog they are different. Thus, it is important to avoid creating cycles.
+
+TODO: check how transcoding is used at the level of catalog. Check provided examples and errors raising.
+
+```python
+pipeline(
+    [
+        node(func=my_func1, inputs="my_dataframe@pandas", outputs="my_dataframe@spark"),
+    ]
+)
+```
+
+```python
+pipeline(
+    [
+        node(func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
+        node(func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
+    ]
+)
+```
+
+```python
+pipeline(
+    [
+        node(func=my_func1, inputs="my_dataframe@spark", outputs="spark_output"),
+        node(func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
+        node(func=my_func3, inputs="my_dataframe@pandas", outputs="pandas_output"),
+    ]
+)
+```
+
 ## Create a Data Catalog YAML configuration file via the CLI
 
 You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).

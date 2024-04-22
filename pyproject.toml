@@ -80,7 +80,7 @@ test = [
     "types-toml"
 ]
 docs = [
-    "kedro-sphinx-theme @ git+https://github.com/kedro-org/kedro-sphinx-theme@main",
+    "kedro-sphinx-theme==2024.4.0",
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
 ]

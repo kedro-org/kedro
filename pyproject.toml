@@ -65,7 +65,7 @@ test = [
     "kedro-datasets<2.0.0; python_version < '3.9'",
     "mypy~=1.0",
     "pandas~=2.0",
-    "pluggy>=1.0, <1.4", # pluggy 1.4 hide imports inside function and causing mocking issue
+    "pluggy>=1.0, <1.6", # pluggy 1.4 hide imports inside function and causing mocking issue
     "pre-commit>=2.9.2, <4.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <4.0",

@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          make install-test-requirements
+          pip install -U .[test]
           make install-pre-commit
       - name: pip freeze
         run: pip freeze

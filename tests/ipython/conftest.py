@@ -111,7 +111,7 @@ def dummy_node_empty_input():
     return node(
         func=dummy_function,
         inputs=["", ""],
-        outputs=[None],
+        outputs=None,
         name="dummy_node_empty_input",
     )
 

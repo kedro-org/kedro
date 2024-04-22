@@ -256,7 +256,7 @@ Enter the following in your `settings.json` file:
 ```json
 {
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/kedro-org/kedro/develop/static/jsonschema/kedro-catalog-0.18.json": "conf/**/*catalog*"
+    "https://raw.githubusercontent.com/kedro-org/kedro/develop/static/jsonschema/kedro-catalog-0.19.json": "conf/**/*catalog*"
   }
 }
 ```

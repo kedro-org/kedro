@@ -1,8 +1,10 @@
 """This module provides metadata for a Kedro project."""
+from __future__ import annotations
+
 import os
 import sys
 from pathlib import Path
-from typing import NamedTuple, Union
+from typing import NamedTuple
 
 import toml
 
@@ -34,18 +36,7 @@ def _version_mismatch_error(kedro_init_version: str) -> str:
     )
 
 
-def _is_project(project_path: Union[str, Path]) -> bool:
-    metadata_file = Path(project_path).expanduser().resolve() / _PYPROJECT
-    if not metadata_file.is_file():
-        return False
-
-    try:
-        return "[tool.kedro]" in metadata_file.read_text(encoding="utf-8")
-    except Exception:  # noqa: broad-except
-        return False
-
-
-def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
+def _get_project_metadata(project_path: Path) -> ProjectMetadata:
     """Read project metadata from `<project_root>/pyproject.toml` config file,
     under the `[tool.kedro]` section.
 
@@ -61,7 +52,6 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     Returns:
         A named tuple that contains project metadata.
     """
-    project_path = Path(project_path).expanduser().resolve()
     pyproject_toml = project_path / _PYPROJECT
 
     if not pyproject_toml.is_file():
@@ -155,10 +145,12 @@ def _add_src_to_path(source_dir: Path, project_path: Path) -> None:
         os.environ["PYTHONPATH"] = f"{str(source_dir)}{sep}{python_path}"
 
 
-def bootstrap_project(project_path: Path) -> ProjectMetadata:
+def bootstrap_project(project_path: str | Path) -> ProjectMetadata:
     """Run setup required at the beginning of the workflow
     when running in project mode, and return project metadata.
     """
+
+    project_path = Path(project_path).expanduser().resolve()
     metadata = _get_project_metadata(project_path)
     _add_src_to_path(metadata.source_dir, project_path)
     configure_project(metadata.package_name)

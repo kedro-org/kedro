@@ -400,11 +400,12 @@ for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the seco
 
 ### Incorrect use of transcoding
 
-Transcoding is always stripped when resolving nodes order and validating pipelines for cycles. So at the level of the
+Transcoding is always stripped when resolving nodes order and validating pipelines for cycles. Thus, at the level of the
 pipeline datasets `my_dataframe@spark` and `my_dataframe@pandas` are treated as one `my_dataframe` dataset thought at
-the level of catalog they are different. Thus, it is important to avoid creating cycles.
+the level of data catalog they are different as the original name (without stripping) is used. Therefore, it is important
+to avoid creating cycles.
 
-TODO: check how transcoding is used at the level of catalog. Check provided examples and errors raising.
+TODO: Check provided examples and errors raising.
 
 ```python
 pipeline(

@@ -215,19 +215,26 @@ class _ProjectPipelines(MutableMapping):
 
 class _ProjectLogging(UserDict):
     def __init__(self) -> None:
-        """Initialise project logging. The path to logging configuration is given in
-        environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
-        path = os.environ.get(
-            "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml"
-        )
+        """Initialize project logging. The path to logging configuration is given in
+        environment variable KEDRO_LOGGING_CONFIG (defaults to conf/logging.yml)."""
+        # Check if a user-specified path is set in the environment variable
+        user_logging_path = os.environ.get("KEDRO_LOGGING_CONFIG")
+
+        # Check if the default logging configuration exists
+        default_logging_path = Path("conf/logging.yml")
+        if not default_logging_path.exists():
+            default_logging_path = Path(__file__).parent / "default_logging.yml"
+
+        # Use the user-specified path if available; otherwise, use the default path
+        path = user_logging_path if user_logging_path else default_logging_path
         logging_config = Path(path).read_text(encoding="utf-8")
+
+        # Load and apply the logging configuration
         self.configure(yaml.safe_load(logging_config))
 
     def configure(self, logging_config: dict[str, Any]) -> None:
-        """Configure project logging using ``logging_config`` (e.g. from project
-        logging.yml). We store this in the UserDict data so that it can be reconfigured
-        in _bootstrap_subprocess.
-        """
+        """Configure project logging using `logging_config` (e.g., from project logging.yml).
+        Store this in the UserDict data so that it can be reconfigured in _bootstrap_subprocess."""
         logging.config.dictConfig(logging_config)
         self.data = logging_config
 

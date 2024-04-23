@@ -49,7 +49,8 @@ class Node:
                 When dict[str, str] is provided, variable names will be mapped
                 to the named outputs the function returns.
             name: Optional node name to be used when displaying the node in
-                logs or any other visualisations.
+                logs or any other visualisations. Node name must contain only
+                letters, digits, hyphens, underscores and/or fullstops.
             tags: Optional set of tags to be applied to the node.
             confirms: Optional name or the list of the names of the datasets
                 that should be confirmed. This will result in calling

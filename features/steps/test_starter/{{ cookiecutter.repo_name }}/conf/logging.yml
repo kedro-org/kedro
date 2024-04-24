@@ -31,4 +31,4 @@ loggers:
     level: INFO
 
 root:
-  handlers: [rich, console]
+  handlers: [rich]

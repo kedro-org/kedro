@@ -371,7 +371,7 @@ You might come across a situation where you would like to read the same file usi
 
 ### How to use transcoding
 
-Consider an example Parquet file. Parquet files can not only be loaded via the `ParquetDataset` using `pandas`, but also directly by the `SparkDataset`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
+Consider an example Parquet file. Parquet files can be loaded with both the `ParquetDataset` using `pandas`, and the `SparkDataset` directly. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
 
 To load the same file as both a `ParquetDataset` and a `SparkDataset`, define two `DataCatalog` entries for the same dataset in your `conf/base/catalog.yml`:
 
@@ -386,7 +386,7 @@ my_dataframe@pandas:
   filepath: data/02_intermediate/data.parquet
 ```
 
- When using transcoding you must ensure the filepaths defined for each catalog entry share the same format (e.g. CSV, JSON, Parquet). These entries can then be used in the pipeline as follows:
+ When using transcoding you must ensure the filepaths defined for each catalog entry share the same format (for example: CSV, JSON, Parquet). These entries can then be used in the pipeline as follows:
 
 ```python
 pipeline(
@@ -460,7 +460,7 @@ pipeline(
 )
 ```
 
-In this example, the only dependency exists between the nodes `my_func3_node` and `my_func2_node`. However, hidden dependencies are created when this pipeline is resolved. This can be seen more clearly when we remove the transcoding notation.
+In this example, there is a single dependency between the nodes `my_func3_node` and `my_func2_node`. However, when this pipeline is resolved there are some hidden dependencies that will restrict the node execution order. We can expose them by removing the transcoding notation:
 
 ```python
 resolved_pipeline(

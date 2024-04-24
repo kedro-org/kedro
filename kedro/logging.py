@@ -1,8 +1,9 @@
 import logging
-import click
 import sys
 from pathlib import Path
 from typing import Any
+
+import click
 
 try:
     import rich.logging

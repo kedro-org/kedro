@@ -1,21 +1,21 @@
-"""
-This module contains a logging handler class which produces coloured logs and tracebacks.
-"""
-
 import logging
 import sys
 from pathlib import Path
 from typing import Any
 
 import click
-import rich.logging
-import rich.pretty
-import rich.traceback
+
+try:
+    import rich.logging
+    import rich.pretty
+    import rich.traceback
+except ImportError:
+    rich = None
 
 from kedro.utils import _is_databricks
 
 
-class RichHandler(rich.logging.RichHandler):
+class RichHandler(logging.StreamHandler if rich is None else rich.logging.RichHandler):
     """Identical to rich's logging handler but with a few extra behaviours:
     * warnings issued by the `warnings` module are redirected to logging
     * pretty printing is enabled on the Python REPL (including IPython and Jupyter)
@@ -30,6 +30,10 @@ class RichHandler(rich.logging.RichHandler):
     """
 
     def __init__(self, *args: Any, **kwargs: Any):
+        if rich is None:
+            super().__init__(stream=sys.stdout)
+            return
+
         super().__init__(*args, **kwargs)
         logging.captureWarnings(True)
         rich.pretty.install()

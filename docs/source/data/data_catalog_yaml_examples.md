@@ -404,7 +404,7 @@ for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the seco
 
 ### How *not* to use transcoding
 
-Kedro pipelines automatically resolve the node execution order and check to ensure there are no circular dependencies in the pipeline. During this process the transcoding notation `@...` is stripped, and the datasets `my_dataframe@spark` and `my_dataframe@pandas` are treated as one `my_dataframe` dataset. Thus, it is important to avoid creating cycles and false dependencies when using transcoding.
+Kedro pipelines automatically resolve the node execution order and check to ensure there are no circular dependencies in the pipeline. It is during this process that the transcoded datasets are resolved and the transcoding notation `@...` is stripped. This means within the pipeline the datasets `my_dataframe@spark` and `my_dataframe@pandas` are considered to be one `my_dataframe` dataset. The DataCatalog, however, treats transcoded entries as separate datasets, as they are only resolved as part of the pipeline resolution process. This results in differences between your defined pipeline in `pipeline.py` and the resolved pipeline that is run by Kedro, and these differences may lead to unintended behaviours. Thus, it is important to be aware of this when using transcoding.
 
 Below are some examples where transcoding may produce unwanted side effects.
 
@@ -446,7 +446,7 @@ When this pipeline is resolved, both nodes are defined as returning the same out
 kedro.pipeline.pipeline.OutputNotUniqueError: Output(s) ['my_dataframe'] are returned by more than one nodes. Node outputs must be unique.
 ```
 
-#### Creating pipelines with false dependencies
+#### Creating pipelines with hidden dependencies
 
 Consider the following pipeline:
 
@@ -460,10 +460,10 @@ pipeline(
 )
 ```
 
-In this example, the only dependency exists between the nodes `my_func3_node` and `my_func2_node`. However, false dependencies are created when this pipeline is resolved. This can be seen more clearly when we remove the transcoding notation.
+In this example, the only dependency exists between the nodes `my_func3_node` and `my_func2_node`. However, hidden dependencies are created when this pipeline is resolved. This can be seen more clearly when we remove the transcoding notation.
 
 ```python
-pipeline(
+resolved_pipeline(
     [
         node(name="my_func1_node", func=my_func1, inputs="my_dataframe", outputs="spark_output"),
         node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe"),
@@ -472,7 +472,7 @@ pipeline(
 )
 ```
 
-When the node order is resolved, the node `my_func1_node` becomes falsely dependent on the node `my_func2_node`. This pipeline will still run without any errors, but one should be careful about creating false dependencies as they can decrease performance, for example, when using the `ParallelRunner`.
+When the node order is resolved, we can see that the node `my_func1_node` is treated as dependent on the node `my_func2_node`. This pipeline will still run without any errors, but one should be careful about creating hidden dependencies as they can decrease performance, for example, when using the `ParallelRunner`.
 
 ## Create a Data Catalog YAML configuration file via the CLI
 

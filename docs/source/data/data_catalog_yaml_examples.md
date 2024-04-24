@@ -365,7 +365,7 @@ airplanes:
 
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
-## Transcode dataset: Read the same file using two different datasets
+## Transcoding datasets: Read the same file using different datasets
 
 You might come across a situation where you would like to read the same file using two different dataset implementations (known as transcoding). For example, Parquet files can not only be loaded via the `ParquetDataset` using `pandas`, but also directly by `SparkDataset`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
 

@@ -10,7 +10,7 @@ try:
     import rich.pretty
     import rich.traceback
 except ImportError:
-    rich = None
+    rich: Any = None
 
 from kedro.utils import _is_databricks
 

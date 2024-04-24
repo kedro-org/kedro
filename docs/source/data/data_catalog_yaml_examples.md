@@ -400,9 +400,9 @@ for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the seco
 
 ### Incorrect use of transcoding
 
-Transcoding is always stripped when resolving nodes order and validating pipelines for cycles. Thus, at the level of the
-pipeline datasets `my_dataframe@spark` and `my_dataframe@pandas` are treated as one `my_dataframe` dataset thought at
-the level of data catalog they are different as the original name (without stripping) is used. Therefore, it is important
+Transcoding is always stripped when resolving nodes order and validating pipelines for cycles. So the level of the
+pipeline datasets `my_dataframe@spark` and `my_dataframe@pandas` are treated as one `my_dataframe` dataset. Thought at
+the level of data catalog they are different as the original name (without stripping) is used. Thus, it is important
 to avoid creating cycles and false dependencies. Consider the next three examples that we recommend to avoid when using
 transcoding.
 
@@ -436,8 +436,8 @@ pipeline(
 kedro.pipeline.pipeline.OutputNotUniqueError: Output(s) ['my_dataframe'] are returned by more than one nodes. Node outputs must be unique.
 ```
 
-The following example showcases creating a false dependency so that the third node will depend on the first and second
-but not only on the second node, as it may seem. Although this pipeline will be executed without errors, one should be
+The following example showcases creating a false dependency. The third node depends on the first and second
+but not just on the second node, as it may seem. Although this pipeline will be executed without errors, one should be
 careful about creating false dependencies as they can decrease performance, for example, when using a `ParallelRunner`.
 
 ```python

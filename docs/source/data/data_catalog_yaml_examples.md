@@ -365,15 +365,15 @@ airplanes:
 
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
-## Read the same file using different datasets using transcoding
+## Read the same file using different datasets with transcoding
 
 You might come across a situation where you would like to read the same file using two different `Dataset` implementations. You can achieve this by using transcoding to define separate `DataCalatlog` entries that point to the same `filepath`.
 
 ### How to use transcoding
 
-Consider an example Parquet file. Parquet files can be loaded with both the `ParquetDataset` using `pandas`, and the `SparkDataset` directly. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
+Consider an example with Parquet files. Parquet files can be loaded with both the `pandas.ParquetDataset`, and the `spark.SparkDataset` directly. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
 
-To load the same file as both a `ParquetDataset` and a `SparkDataset`, define two `DataCatalog` entries for the same dataset in your `conf/base/catalog.yml`:
+To load the same file as both a `pandas.ParquetDataset` and a `spark.SparkDataset`, define two `DataCatalog` entries for the same dataset in your `conf/base/catalog.yml`:
 
 ```yaml
 my_dataframe@spark:

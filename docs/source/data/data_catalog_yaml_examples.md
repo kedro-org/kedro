@@ -367,7 +367,7 @@ In this example, the default `csv` configuration is inserted into `airplanes` an
 
 ## Read the same file using different datasets with transcoding
 
-You might come across a situation where you would like to read the same file using two different `Dataset` implementations. You can achieve this by using transcoding to define separate `DataCalatlog` entries that point to the same `filepath`.
+You might come across a situation where you would like to read the same file using two different `Dataset` implementations. You can achieve this by using transcoding to define separate `DataCatalog` entries that point to the same `filepath`.
 
 ### How to use transcoding
 

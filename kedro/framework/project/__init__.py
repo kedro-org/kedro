@@ -215,7 +215,7 @@ class _ProjectPipelines(MutableMapping):
 
 class _ProjectLogging(UserDict):
     def __init__(self) -> None:
-        """Initialize project logging. The path to logging configuration is given in
+        """Initialise project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to conf/logging.yml)."""
 
         # Check if a user path is set in the environment variable

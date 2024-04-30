@@ -217,7 +217,8 @@ class _ProjectLogging(UserDict):
     def __init__(self) -> None:
         """Initialize project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to conf/logging.yml)."""
-        # Check if a user-specified path is set in the environment variable
+
+        # Check if a user path is set in the environment variable
         user_logging_path = os.environ.get("KEDRO_LOGGING_CONFIG")
 
         # Check if the default logging configuration exists
@@ -225,7 +226,7 @@ class _ProjectLogging(UserDict):
         if not default_logging_path.exists():
             default_logging_path = Path(__file__).parent / "default_logging.yml"
 
-        # Use the user-specified path if available; otherwise, use the default path
+        # Use the user path if available, otherwise, use the default path
         if user_logging_path and Path(user_logging_path).exists():
             path = Path(user_logging_path)
         else:

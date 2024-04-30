@@ -226,10 +226,13 @@ class _ProjectLogging(UserDict):
             default_logging_path = Path(__file__).parent / "default_logging.yml"
 
         # Use the user-specified path if available; otherwise, use the default path
-        path = user_logging_path if user_logging_path else default_logging_path
-        logging_config = Path(path).read_text(encoding="utf-8")
+        if user_logging_path and Path(user_logging_path).exists():
+            path = Path(user_logging_path)
+        else:
+            path = default_logging_path
 
         # Load and apply the logging configuration
+        logging_config = Path(path).read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
 
     def configure(self, logging_config: dict[str, Any]) -> None:

@@ -9,8 +9,9 @@ try:
     import rich.logging
     import rich.pretty
     import rich.traceback
+    RICH = True
 except ImportError:
-    rich: Any = None
+    RICH = False
 
 from kedro.utils import _is_databricks
 

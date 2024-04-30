@@ -236,8 +236,10 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
 
     def configure(self, logging_config: dict[str, Any]) -> None:
-        """Configure project logging using `logging_config` (e.g., from project logging.yml).
-        Store this in the UserDict data so that it can be reconfigured in _bootstrap_subprocess."""
+        """Configure project logging using ``logging_config`` (e.g. from project
+        logging.yml). We store this in the UserDict data so that it can be reconfigured
+        in _bootstrap_subprocess.
+        """
         logging.config.dictConfig(logging_config)
         self.data = logging_config
 

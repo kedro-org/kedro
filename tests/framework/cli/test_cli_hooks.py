@@ -74,7 +74,7 @@ def fake_plugin_distribution(mocker):
         version="0.1",
     )
     mocker.patch(
-        "pluggy._manager.importlib.metadata.distributions",
+        "importlib.metadata.distributions",
         return_value=[fake_distribution],
     )
     return fake_distribution

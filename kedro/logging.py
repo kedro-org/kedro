@@ -31,7 +31,7 @@ class RichHandler(logging.StreamHandler if rich is None else rich.logging.RichHa
     """
 
     def __init__(self, *args: Any, **kwargs: Any):
-        if rich is None:
+        if RICH is False:
             super().__init__(stream=sys.stdout)
             return
 

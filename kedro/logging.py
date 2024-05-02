@@ -9,6 +9,7 @@ try:
     import rich.logging
     import rich.pretty
     import rich.traceback
+
     RICH = True
 except ImportError:
     RICH = False

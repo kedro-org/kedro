@@ -44,7 +44,7 @@ If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will use th
 
 ## How to use custom `CONF_SOURCE` with logging
 
-The path to the logging configuration file is impacted by the [`CONF_SOURCE`](../configuration/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project. This setting determines where Kedro looks for configuration files, including `logging.yml`. 
+The path to the logging configuration file is impacted by the [`CONF_SOURCE`](../configuration/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project. This setting determines where Kedro looks for configuration files, including `logging.yml`.
 
 By default, Kedro expects the logging configuration file to be located in the `conf` directory. If `CONF_SOURCE` is customized to a different directory, ensure that your `logging.yml` file is also relocated to this new directory, or update the `KEDRO_LOGGING_CONFIG` environment variable to point to the new location of your logging configuration.
 

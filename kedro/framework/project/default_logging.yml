@@ -2,7 +2,27 @@ version: 1
 
 disable_existing_loggers: False
 
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
 handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+  info_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: simple
+    filename: info.log
+    maxBytes: 10485760 # 10MB
+    backupCount: 20
+    encoding: utf8
+    delay: True
+
   rich:
     class: kedro.logging.RichHandler
     rich_tracebacks: True
@@ -15,4 +35,4 @@ loggers:
     level: INFO
 
 root:
-  handlers: [rich]
+  handlers: [rich, console]

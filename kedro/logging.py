@@ -17,7 +17,7 @@ except ImportError:
 from kedro.utils import _is_databricks
 
 
-class RichHandler(logging.StreamHandler if rich is None else rich.logging.RichHandler):
+class RichHandler(logging.StreamHandler if RICH is False else rich.logging.RichHandler):
     """Identical to rich's logging handler but with a few extra behaviours:
     * warnings issued by the `warnings` module are redirected to logging
     * pretty printing is enabled on the Python REPL (including IPython and Jupyter)

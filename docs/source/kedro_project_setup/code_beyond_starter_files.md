@@ -9,7 +9,7 @@ read and collaborate on as your codebase grows.
 Those files also sometimes make new users think that Kedro requires code
 to be located only in those starter files, which is not true.
 
-This section elaborates what are the Kedro requirements in terms of organizing code
+This section elaborates what are the Kedro requirements in terms of organising code
 in files and modules.
 It also provides examples of common scenarios such as sharing utilities between
 pipelines and using Kedro in a monorepo setup.
@@ -54,8 +54,8 @@ and serve only illustrative purposes.
 ### Sharing utilities between pipelines
 
 Oftentimes you have utilities that have to be imported by multiple `pipelines`.
-To keep them as part of a Kedro project, **create a module (e.g. `utils`) at the same
-level as the `pipelines` folder**, and organize the functionalities there:
+To keep them as part of a Kedro project, **create a module (for example, `utils`) at the same
+level as the `pipelines` folder**, and organise the functionalities there:
 
 ```text
 ├── conf
@@ -93,8 +93,8 @@ which is to `cd` to the root of Kedro project and do `pip install -e .`.
 
 The way a Kedro project is generated may build an impression that it should
 only be acting as a root of a `git` repo. This is not true: just like you can combine
-multiple Python packages in a single repo, you can combine multiple Kedro projects,
-or a Kedro project with other parts of your project's software stack.
+multiple Python packages in a single repo, you can combine multiple Kedro projects.
+Or a Kedro project with other parts of your project's software stack.
 
 ```{note}
 A practice of combining multiple, often unrelated software components in a single version
@@ -107,11 +107,11 @@ are well separable from the Kedro project.
 Let's use **a recommendation tool for production equipment operators** as an example.
 It would imply three parts:
 
-| **#** | **Part**                                                                                                     | **Considerations**                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1     | An ML model, or more precisely, a workflow to prepare the data, train an estimator, ship it to some registry | <ul> <li>Here Kedro fits well, as it allows to develop those pipelines in a modular and extensible way.</li> </ul>                                                                                                                                                                                                                                                                                                    |
-| 2     | An optimizer that leverages the ML model and implements domain business logic to derive recommendations      | <ul> <li>A good design consideration might be to make it independent of the UI framework.</li> </ul>                                                                                                                                                                                                                                                                                                                  |
-| 3     | User interface (UI) application                                                                              | <ul> <li>This can be e.g., a [`plotly`](https://plotly.com/python/) or [`streamlit`](https://streamlit.io/) dashboard.</li> <li>Or even a full-fledged front-end app leveraging JS framework like [`React`](https://react.dev/).</li> <li>Regardless, this component may know how to access the ML model, but it should probably not know anything about how it was trained and was Kedro involved or not.</li> </ul> |
+| **#** | **Part**                                                                                                     | **Considerations**                                                                                                                                                                                                                                                                                                                                                                                               |
+|-------|--------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1     | An ML model, or more precisely, a workflow to prepare the data, train an estimator, ship it to some registry | <ul> <li>Here Kedro fits well, as it allows to develop those pipelines in a modular and extensible way.</li> </ul>                                                                                                                                                                                                                                                                                               |
+| 2     | An optimiser that leverages the ML model and implements domain business logic to derive recommendations      | <ul> <li>A good design consideration might be to make it independent of the UI framework.</li> </ul>                                                                                                                                                                                                                                                                                                             |
+| 3     | User interface (UI) application                                                                              | <ul> <li>This can be a [`plotly`](https://plotly.com/python/) or [`streamlit`](https://streamlit.io/) dashboard.</li> <li>Or even a full-fledged front-end app leveraging JS framework like [`React`](https://react.dev/).</li> <li>Regardless, this component may know how to access the ML model, but it should probably not know anything about how it was trained and was Kedro involved or not.</li> </ul>  |
 
 A suggested solution in this case would be a **monorepo** design. Below is an example:
 

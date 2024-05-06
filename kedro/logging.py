@@ -9,15 +9,14 @@ try:
     import rich.logging
     import rich.pretty
     import rich.traceback
-
-    RICH = True
 except ImportError:
-    RICH = False
+    pass
+
 
 from kedro.utils import _is_databricks
 
 
-class RichHandler(logging.StreamHandler if RICH is False else rich.logging.RichHandler):
+class RichHandler(rich.logging.RichHandler):
     """Identical to rich's logging handler but with a few extra behaviours:
     * warnings issued by the `warnings` module are redirected to logging
     * pretty printing is enabled on the Python REPL (including IPython and Jupyter)
@@ -32,10 +31,6 @@ class RichHandler(logging.StreamHandler if RICH is False else rich.logging.RichH
     """
 
     def __init__(self, *args: Any, **kwargs: Any):
-        if RICH is False:
-            super().__init__(stream=sys.stdout)
-            return
-
         super().__init__(*args, **kwargs)
         logging.captureWarnings(True)
         rich.pretty.install()

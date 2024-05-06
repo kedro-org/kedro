@@ -217,9 +217,14 @@ class _ProjectLogging(UserDict):
     def __init__(self) -> None:
         """Initialise project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
-        path = os.environ.get(
-            "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml"
-        )
+        if importlib.util.find_spec("rich") is not None:
+            path = os.environ.get(
+                "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "rich_logging.yml"
+            )
+        else:
+            path = os.environ.get(
+                "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml"
+            )
         logging_config = Path(path).read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
 

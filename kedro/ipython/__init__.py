@@ -5,6 +5,7 @@ local scope.
 
 from __future__ import annotations
 
+import importlib
 import inspect
 import logging
 import os
@@ -18,8 +19,12 @@ from typing import Any, Callable, OrderedDict
 from IPython.core.getipython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
-from rich.console import Console
-from rich.syntax import Syntax
+
+try:
+    from rich.console import Console
+    from rich.syntax import Syntax
+except ImportError:
+    pass
 
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import CONF_SOURCE_HELP, PARAMS_ARG_HELP
@@ -281,8 +286,12 @@ def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
 
 def _print_cells(cells: list[str]) -> None:
     for cell in cells:
-        Console().print("")
-        Console().print(Syntax(cell, "python", theme="monokai", line_numbers=False))
+        if importlib.util.find_spec("rich") is not None:
+            Console().print("")
+            Console().print(Syntax(cell, "python", theme="monokai", line_numbers=False))
+        else:
+            print("")  # noqa: T201
+            print(cell)  # noqa: T201
 
 
 def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:

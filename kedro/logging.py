@@ -4,14 +4,9 @@ from pathlib import Path
 from typing import Any
 
 import click
-
-try:
-    import rich.logging
-    import rich.pretty
-    import rich.traceback
-except ImportError:
-    pass
-
+import rich.logging
+import rich.pretty
+import rich.traceback
 
 from kedro.utils import _is_databricks
 

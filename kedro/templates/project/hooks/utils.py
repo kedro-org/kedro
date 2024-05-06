@@ -149,7 +149,7 @@ def _remove_pyspark_viz_starter_files(is_viz: bool, python_package_name: str) ->
         _remove_dir(pipelines_path / pipeline_subdir)
 
     # Remove all test files from tests/pipelines/
-    test_pipeline_path = current_dir / "tests/pipelines/test_data_science.py"
+    test_pipeline_path = current_dir / "tests/pipelines/data_science/test_pipeline.py"
     _remove_file(test_pipeline_path)
 
 

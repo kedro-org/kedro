@@ -244,12 +244,24 @@ def input_same_as_output_node():
     return biconcat, ["A", "B"], {"a": "A"}
 
 
+def transcoded_input_same_as_output_node():
+    return identity, "A@excel", {"a": "A@csv"}
+
+
 def duplicate_output_dict_node():
     return identity, "A", {"a": "A", "b": "A"}
 
 
 def duplicate_output_list_node():
     return identity, "A", ["A", "A"]
+
+
+def bad_input_variable_name():
+    return lambda x: None, {"a": 1, "b": "B"}, {"a": "A", "b": "B"}
+
+
+def bad_output_variable_name():
+    return lambda x: None, {"a": "A", "b": "B"}, {"a": "A", "b": 2}
 
 
 @pytest.mark.parametrize(
@@ -261,7 +273,11 @@ def duplicate_output_list_node():
         (no_input_or_output_node, r"it must have some 'inputs' or 'outputs'"),
         (
             input_same_as_output_node,
-            r"A node cannot have the same inputs and outputs: {\'A\'}",
+            r"A node cannot have the same inputs and outputs even if they are transcoded: {\'A\'}",
+        ),
+        (
+            transcoded_input_same_as_output_node,
+            r"A node cannot have the same inputs and outputs even if they are transcoded: {\'A\'}",
         ),
         (
             duplicate_output_dict_node,
@@ -274,6 +290,11 @@ def duplicate_output_list_node():
             r"Failed to create node identity"
             r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
+        ),
+        (bad_input_variable_name, "names of variables used as inputs to the function "),
+        (
+            bad_output_variable_name,
+            "names of variables used as outputs of the function ",
         ),
     ],
 )

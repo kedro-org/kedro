@@ -9,13 +9,13 @@ If you are a contributor and would like to submit a new dataset, you must extend
 
 ## Scenario
 
-In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
+In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types/) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
 
 ## Project setup
 
 We assume that you have already [installed Kedro](../get_started/install.md). Now [create a project](../get_started/new_project.md) (feel free to name your project as you like, but here we will assume the project's repository name is `kedro-pokemon`).
 
-Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
+Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
 
 The dataset will use [Pillow](https://pillow.readthedocs.io/en/stable/) for generic image processing functionality, to ensure that it can work with a range of different image formats, not just PNG.
 

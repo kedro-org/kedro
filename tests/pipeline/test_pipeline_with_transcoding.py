@@ -4,8 +4,12 @@ import pytest
 
 import kedro
 from kedro.pipeline import node
+from kedro.pipeline._transcoding import _strip_transcoding
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
-from kedro.pipeline.pipeline import OutputNotUniqueError, _strip_transcoding
+from kedro.pipeline.pipeline import (
+    CircularDependencyError,
+    OutputNotUniqueError,
+)
 
 
 # Different dummy func based on the number of arguments
@@ -174,6 +178,16 @@ class TestInvalidPipeline:
                 [
                     node(identity, "A", "B@pandas", name="node1"),
                     node(identity, "A", "B@spark", name="node2"),
+                ]
+            )
+
+    def test_transcoding_loop(self):
+        with pytest.raises(CircularDependencyError, match="node1"):
+            modular_pipeline(
+                [
+                    node(identity, "A@pandas", "B@pandas", name="node1"),
+                    node(identity, "B@spark", "C@spark", name="node2"),
+                    node(identity, "C@spark", "A@spark", name="node3"),
                 ]
             )
 

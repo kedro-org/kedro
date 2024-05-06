@@ -64,6 +64,7 @@ def python_call(
 
 
 def find_stylesheets() -> Iterable[str]:  # pragma: no cover
+    # TODO: Deprecate this function in favour of kedro-sphinx-theme
     """Fetch all stylesheets used in the official Kedro documentation"""
     css_path = Path(__file__).resolve().parents[1] / "html" / "_static" / "css"
     return (str(css_path / "copybutton.css"),)
@@ -265,15 +266,21 @@ class KedroCliError(click.exceptions.ClickException):
 
     VERBOSE_ERROR = False
     VERBOSE_EXISTS = True
+    COOKIECUTTER_EXCEPTIONS_PREFIX = "cookiecutter.exceptions"
 
     def show(self, file: IO | None = None) -> None:
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
         elif self.VERBOSE_EXISTS:
-            etype, value, _ = sys.exc_info()
+            etype, value, tb = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            cookiecutter_exception = ""
+            for ex_line in traceback.format_exception(etype, value, tb):
+                if self.COOKIECUTTER_EXCEPTIONS_PREFIX in ex_line:
+                    cookiecutter_exception = ex_line
+                    break
             click.secho(
-                f"{formatted_exception}Run with --verbose to see the full exception",
+                f"{cookiecutter_exception}{formatted_exception}Run with --verbose to see the full exception",
                 fg="yellow",
             )
         else:

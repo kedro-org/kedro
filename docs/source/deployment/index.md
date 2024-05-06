@@ -25,7 +25,7 @@ If your pipeline is sizeable, you may want to run it across separate machines, s
 
 This following pages provide information for deployment to, or integration with, the following:
 
-* [Airflow](airflow_astronomer.md)
+* [Airflow](airflow.md)
 * [Amazon SageMaker](amazon_sagemaker.md)
 * [Amazon EMR Serverless](amazon_emr_serverless.md)
 * [AWS Step functions](aws_step_functions.md)
@@ -51,7 +51,7 @@ We also have legacy documentation pages for the following deployment targets, bu
 
 single_machine
 distributed
-airflow_astronomer
+airflow
 amazon_sagemaker
 amazon_emr_serverless
 aws_step_functions

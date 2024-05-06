@@ -13,6 +13,8 @@ from warnings import warn
 
 from more_itertools import spy, unzip
 
+from ._transcoding import _strip_transcoding
+
 
 class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
@@ -528,11 +530,13 @@ class Node:
             )
 
     def _validate_inputs_dif_than_outputs(self) -> None:
-        common_in_out = set(self.inputs).intersection(set(self.outputs))
+        common_in_out = set(map(_strip_transcoding, self.inputs)).intersection(
+            set(map(_strip_transcoding, self.outputs))
+        )
         if common_in_out:
             raise ValueError(
                 f"Failed to create node {self}.\n"
-                f"A node cannot have the same inputs and outputs: "
+                f"A node cannot have the same inputs and outputs even if they are transcoded: "
                 f"{common_in_out}"
             )
 

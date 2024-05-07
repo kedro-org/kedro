@@ -144,3 +144,36 @@ def test_rich_traceback_disabled_on_databricks(
 
     rich_traceback_install.assert_not_called()
     rich_pretty_install.assert_called()
+
+
+def always_true_exists(path):
+    """Returns True for the default logging config path."""
+    return str(path) == "conf/logging.yml"
+
+
+def mock_read_text(path, encoding):
+    """Returns dummy logging config."""
+    dummy_logging_config = {
+        "version": 1,
+        "loggers": {"kedro": {"level": "INFO"}}
+    }
+    return yaml.dump(dummy_logging_config)
+
+
+def test_default_logging_info_emission(capsys, monkeypatch):
+    # Unset environment variable for KEDRO_LOGGING_CONFIG and mock paths
+    monkeypatch.delenv("KEDRO_LOGGING_CONFIG", raising=False)
+    monkeypatch.setattr(Path, "exists", always_true_exists)
+    monkeypatch.setattr(Path, "read_text", mock_read_text)
+
+    from kedro.framework.project import _ProjectLogging
+    LOGGING = _ProjectLogging()
+
+    captured = capsys.readouterr()
+    expected_messages = [
+        "Using `conf/logging.yml` as logging",
+    ]
+
+    # Assert that all parts of the message are in the output
+    for message in expected_messages:
+        assert message in captured.out, f"Expected '{message}' to be in logs"

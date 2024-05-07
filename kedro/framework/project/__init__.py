@@ -231,8 +231,7 @@ class _ProjectLogging(UserDict):
             path = Path(user_logging_path)
         else:
             path = default_logging_path
-            logger = logging.getLogger(__name__)
-            logger.warning(
+            warnings.warn(
                 "Using `conf/logging.yml` as logging configuration. You can change this by setting the "
                 "KEDRO_LOGGING_CONFIG environment variable accordingly."
             )

@@ -153,10 +153,7 @@ def always_true_exists(path):
 
 def mock_read_text(path, encoding):
     """Returns dummy logging config."""
-    dummy_logging_config = {
-        "version": 1,
-        "loggers": {"kedro": {"level": "INFO"}}
-    }
+    dummy_logging_config = {"version": 1, "loggers": {"kedro": {"level": "INFO"}}}
     return yaml.dump(dummy_logging_config)
 
 
@@ -167,6 +164,7 @@ def test_default_logging_info_emission(capsys, monkeypatch):
     monkeypatch.setattr(Path, "read_text", mock_read_text)
 
     from kedro.framework.project import _ProjectLogging
+
     _ProjectLogging()
 
     captured = capsys.readouterr()

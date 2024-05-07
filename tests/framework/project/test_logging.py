@@ -167,7 +167,7 @@ def test_default_logging_info_emission(capsys, monkeypatch):
     monkeypatch.setattr(Path, "read_text", mock_read_text)
 
     from kedro.framework.project import _ProjectLogging
-    LOGGING = _ProjectLogging()
+    _ProjectLogging()
 
     captured = capsys.readouterr()
     expected_messages = [

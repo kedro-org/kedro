@@ -144,7 +144,7 @@ class DataCatalog:
         dataset_patterns: Patterns | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-        default_pattern=None,
+        default_pattern: Patterns | None = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -385,10 +385,10 @@ class DataCatalog:
         if dataset_name not in self._datasets and matched_pattern:
             # If the dataset is a patterned dataset, materialise it and add it to
             # the catalog
-            if matched_pattern in self._dataset_patterns:
-                config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
-            else:
-                config_copy = copy.deepcopy(self._default_pattern[matched_pattern])
+            config_copy = copy.deepcopy(
+                self._dataset_patterns.get(matched_pattern)
+                or self._default_pattern.get(matched_pattern)
+            )
             dataset_config = self._resolve_config(
                 dataset_name, matched_pattern, config_copy
             )

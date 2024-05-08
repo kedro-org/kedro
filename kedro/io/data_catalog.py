@@ -388,6 +388,7 @@ class DataCatalog:
             config_copy = copy.deepcopy(
                 self._dataset_patterns.get(matched_pattern)
                 or self._default_pattern.get(matched_pattern)
+                or {}
             )
             dataset_config = self._resolve_config(
                 dataset_name, matched_pattern, config_copy

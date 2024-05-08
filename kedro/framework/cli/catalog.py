@@ -92,6 +92,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
                 ds_config_copy = copy.deepcopy(
                     data_catalog._dataset_patterns.get(matched_pattern)
                     or data_catalog._default_pattern.get(matched_pattern)
+                    or {}
                 )
 
                 ds_config = data_catalog._resolve_config(
@@ -268,6 +269,7 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
             ds_config_copy = copy.deepcopy(
                 data_catalog._dataset_patterns.get(matched_pattern)
                 or data_catalog._default_pattern.get(matched_pattern)
+                or {}
             )
 
             ds_config = data_catalog._resolve_config(

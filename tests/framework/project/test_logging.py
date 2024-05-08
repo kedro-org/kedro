@@ -146,29 +146,31 @@ def test_rich_traceback_disabled_on_databricks(
     rich_pretty_install.assert_called()
 
 
-def always_true_exists(path):
-    """Returns True for the default logging config path."""
-    return str(path) == "conf/logging.yml"
+def test_default_logging_info_emission(monkeypatch, capsys):
+    # Expected path and logging configuration
+    expected_path = Path("conf/logging.yml")
+    dummy_logging_config = yaml.dump(
+        {"version": 1, "loggers": {"kedro": {"level": "INFO"}}}
+    )
 
-
-def mock_read_text(path, encoding):
-    """Returns dummy logging config."""
-    dummy_logging_config = {"version": 1, "loggers": {"kedro": {"level": "INFO"}}}
-    return yaml.dump(dummy_logging_config)
-
-
-def test_default_logging_info_emission(capsys, monkeypatch):
     # Setup environment and path mocks
     monkeypatch.delenv("KEDRO_LOGGING_CONFIG", raising=False)
-    monkeypatch.setattr(Path, "exists", always_true_exists)
-    monkeypatch.setattr(Path, "read_text", mock_read_text)
+    monkeypatch.setattr(Path, "exists", lambda x: x == expected_path)
+    monkeypatch.setattr(
+        Path,
+        "read_text",
+        lambda x, encoding="utf-8": dummy_logging_config
+        if x == expected_path
+        else FileNotFoundError("File not found"),
+    )
 
     from kedro.framework.project import _ProjectLogging
 
     _ProjectLogging()
 
     captured = capsys.readouterr()
-    expected_message = "Using `conf/logging.yml` as logging"
+
+    expected_message = f"Using `{expected_path}` as logging"
     assert (
         expected_message in captured.out
-    ), f"Expected '{expected_message}' to be in logs"
+    ), f"Expected message not found in logs: {captured.out}"

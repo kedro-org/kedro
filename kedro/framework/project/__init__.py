@@ -224,15 +224,15 @@ class _ProjectLogging(UserDict):
         # Check if the default logging configuration exists
         default_logging_path = Path("conf/logging.yml")
         if not default_logging_path.exists():
-            path = os.environ.get(
+            default_logging_path = os.environ.get(
                 "KEDRO_LOGGING_CONFIG",
                 Path(__file__).parent
                 / (
-                "rich_logging.yml"
-                if importlib.util.find_spec("rich")
-                else "default_logging.yml"
-            ),
-        )
+                    "rich_logging.yml"
+                    if importlib.util.find_spec("rich")
+                    else "default_logging.yml"
+                ),
+            )
 
         # Use the user path if available, otherwise, use the default path
         if user_logging_path and Path(user_logging_path).exists():

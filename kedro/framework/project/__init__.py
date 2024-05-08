@@ -237,13 +237,11 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
 
         # Log info about the logging configuration
-        if not user_logging_path and path.resolve() == (
-            Path("conf/logging.yml").resolve()
-        ):
+        if not user_logging_path and default_logging_path == Path("conf/logging.yml"):
             logger = logging.getLogger(__name__)
             logger.info(
-                "Using `conf/logging.yml` as logging configuration. "
-                "You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
+                f"Using `{path}` as logging configuration. "
+                f"You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
             )
 
     def configure(self, logging_config: dict[str, Any]) -> None:

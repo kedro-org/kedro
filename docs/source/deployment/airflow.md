@@ -191,8 +191,16 @@ dev_s3:
 s3fs
 ```
 
-6. Archive your `conf` folder into a `conf.zip` file and upload it to `s3://your_S3_bucket` for later use in the Airflow container.
-7. Follow steps 5-6 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section
+6. Archive your `conf` folder into a `conf.zip` file and upload it to `s3://your_S3_bucket` for later use in the Airflow container. This file will be unzipped into the `plugins` folder within the MWAA Airflow container.
+7. Follow steps 5-6 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section to package your Kedro project and generate an Airflow DAG.
+8. Modify the DAG file `new_kedro_project_dag.py` located in the `dags/` folder by adding `, conf_source="plugins/conf"` to the Kedro session creation in the Kedro operator execution function. This change is necessary because your Kedro configuration folder will be stored in the `plugins/conf` folder, not the root directory:
+```shell
+    def execute(self, context):
+        configure_project(self.package_name)
+        with KedroSession.create(project_path=self.project_path,
+                                 env=self.env, conf_source="plugins/conf") as session:
+            session.run(self.pipeline_name, node_names=[self.node_name])
+```
 
 ### Deployment on AWAA
 1. Upload your `new_kedro_project-0.1-py3-none-any.whl` from `new-kedro-project/dist` to a new S3 bucket and [provide public access to that file](https://repost.aws/knowledge-center/read-access-objects-s3-bucket). Use the `Copy URL` button in AWS Console to retrieve the public URL for file access, it will look like `https://your_new_public_s3_bucket.s3.eu-west-1.amazonaws.com/new_kedro_project-0.1-py3-none-any.whl`.

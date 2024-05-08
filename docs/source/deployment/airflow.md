@@ -170,7 +170,7 @@ astro deploy
 
 ### Kedro project preparation
 MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it easier to set up, operate, and scale Apache Airflow in the cloud. Deploying a Kedro pipeline to MWAA is similar to Astronomer, but there are some key differences: you need to store your project data in an AWS S3 bucket and make necessary changes to your Data Catalog. Additionally, you must configure how you upload your Kedro configuration, install your Kedro package, and set up the necessary environment variables.
-1. Complete steps 1-4 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section. 
+1. Complete steps 1-4 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section.
 2. Your project's data should not reside in the working directory of the Airflow container. Instead, [create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html) and [upload your data folder from the new-kedro-project folder to your S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html).
 3. Modify the Data Catalog to reference data in your S3 bucket by updating the filepath and add credentials line for each Dataset in the `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the filepath as shown below:
 ```shell
@@ -195,7 +195,7 @@ s3fs
 7. Follow steps 5-6 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section
 
 ### Deployment on AWAA
-1. Upload your `new_kedro_project-0.1-py3-none-any.whl` from `new-kedro-project/dist` to a new S3 bucket and [provide public access to that file](https://repost.aws/knowledge-center/read-access-objects-s3-bucket). Use the `Copy URL` button in AWS Console to retrieve the public URL for file access, it will look like `https://your_new_public_s3_bucket.s3.eu-west-1.amazonaws.com/new_kedro_project-0.1-py3-none-any.whl`. 
+1. Upload your `new_kedro_project-0.1-py3-none-any.whl` from `new-kedro-project/dist` to a new S3 bucket and [provide public access to that file](https://repost.aws/knowledge-center/read-access-objects-s3-bucket). Use the `Copy URL` button in AWS Console to retrieve the public URL for file access, it will look like `https://your_new_public_s3_bucket.s3.eu-west-1.amazonaws.com/new_kedro_project-0.1-py3-none-any.whl`.
 2. Create a new `requirements.txt` file listing dependencies required for the Airflow container, including a link to the Kedro wheel file from Step 1, and upload it to `s3://your_S3_bucket`.
 ```shell
 new_kedro_project @ https://your_new_public_s3_bucket.s3.eu-west-1.amazonaws.com/new_kedro_project-0.1-py3-none-any.whl
@@ -204,7 +204,7 @@ new_kedro_project @ https://your_new_public_s3_bucket.s3.eu-west-1.amazonaws.com
 4. Create an empty `startup.sh` file for container startup commands. Set an environment variable for custom Kedro logging:
 ```shell
 export KEDRO_LOGGING_CONFIG="plugins/conf/logging.yml"
-``` 
+```
 5. Set up a new [AWS MWAA environment](https://docs.aws.amazon.com/mwaa/latest/userguide/create-environment.html) using the following settings:
 ```shell
 S3 Bucket:

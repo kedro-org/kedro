@@ -144,6 +144,7 @@ class DataCatalog:
         dataset_patterns: Patterns | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
+        default_pattern=None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -190,6 +191,7 @@ class DataCatalog:
         self._dataset_patterns = dataset_patterns or {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
+        self._default_pattern = default_pattern or {}
 
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -281,6 +283,7 @@ class DataCatalog:
         credentials = copy.deepcopy(credentials) or {}
         save_version = save_version or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
+        user_default = {}
 
         for ds_name, ds_config in catalog.items():
             ds_config = _resolve_credentials(  # noqa: PLW2901
@@ -295,6 +298,12 @@ class DataCatalog:
                     ds_name, ds_config, load_versions.get(ds_name), save_version
                 )
         sorted_patterns = cls._sort_patterns(dataset_patterns)
+        if sorted_patterns:
+            # If the last pattern is a catch-all pattern, pop it and set it as the default
+            if cls._specificity(list(sorted_patterns.keys())[-1]) == 0:
+                last_pattern = sorted_patterns.popitem()
+                user_default = {last_pattern[0]: last_pattern[1]}
+
         missing_keys = [
             key
             for key in load_versions.keys()
@@ -311,6 +320,7 @@ class DataCatalog:
             dataset_patterns=sorted_patterns,
             load_versions=load_versions,
             save_version=save_version,
+            default_pattern=user_default,
         )
 
     @staticmethod
@@ -369,11 +379,16 @@ class DataCatalog:
         version: Version | None = None,
         suggest: bool = True,
     ) -> AbstractDataset:
-        matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
+        matched_pattern = self._match_pattern(
+            self._dataset_patterns, dataset_name
+        ) or self._match_pattern(self._default_pattern, dataset_name)
         if dataset_name not in self._datasets and matched_pattern:
             # If the dataset is a patterned dataset, materialise it and add it to
             # the catalog
-            config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
+            if matched_pattern in self._dataset_patterns:
+                config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
+            else:
+                config_copy = copy.deepcopy(self._default_pattern[matched_pattern])
             dataset_config = self._resolve_config(
                 dataset_name, matched_pattern, config_copy
             )
@@ -385,7 +400,7 @@ class DataCatalog:
             )
             if (
                 self._specificity(matched_pattern) == 0
-                and matched_pattern != "{default}"
+                and matched_pattern in self._default_pattern
             ):
                 self._logger.warning(
                     "Config from the dataset factory pattern '%s' in the catalog will be used to "
@@ -721,7 +736,7 @@ class DataCatalog:
         Returns:
             Copy of the current object.
         """
-        if extra_dataset_patterns:
+        if not self._default_pattern and extra_dataset_patterns:
             unsorted_dataset_patterns = {
                 **self._dataset_patterns,
                 **extra_dataset_patterns,
@@ -734,6 +749,7 @@ class DataCatalog:
             dataset_patterns=dataset_patterns,
             load_versions=self._load_versions,
             save_version=self._save_version,
+            default_pattern=self._default_pattern,
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]

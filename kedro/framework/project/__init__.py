@@ -227,9 +227,9 @@ class _ProjectLogging(UserDict):
             default_logging_path = Path(
                 os.environ.get(
                     "KEDRO_LOGGING_CONFIG",
-                    "rich_logging.yml"
+                    Path(__file__).parent / "rich_logging.yml"
                     if importlib.util.find_spec("rich")
-                    else "default_logging.yml",
+                    else Path(__file__).parent / "default_logging.yml",
                 )
             )
 

@@ -286,9 +286,9 @@ def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
 
 def _print_cells(cells: list[str]) -> None:
     for cell in cells:
-        if importlib.util.find_spec("rich") is not None:
-            Console().print("")
-            Console().print(Syntax(cell, "python", theme="monokai", line_numbers=False))
+        if rich_console is not None:
+            rich_console.Console().print("")
+            rich_console.Console().print(rich_syntax.Syntax(cell, "python", theme="monokai", line_numbers=False))
         else:
             print("")  # noqa: T201
             print(cell)  # noqa: T201

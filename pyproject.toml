@@ -129,7 +129,7 @@ omit = [
     "kedro/runner/parallel_runner.py",
     "*/site-packages/*",
 ]
-exclude_also = ["raise NotImplementedError"]
+exclude_also = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
 addopts="""

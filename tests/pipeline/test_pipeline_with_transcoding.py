@@ -4,11 +4,11 @@ import pytest
 
 import kedro
 from kedro.pipeline import node
+from kedro.pipeline._transcoding import _strip_transcoding
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     OutputNotUniqueError,
-    _strip_transcoding,
 )
 
 

@@ -13,6 +13,8 @@ from warnings import warn
 
 from more_itertools import spy, unzip
 
+from ._transcoding import _strip_transcoding
+
 
 class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
@@ -42,7 +44,7 @@ class Node:
                 function. When dict[str, str] is provided, variable names
                 will be mapped to function argument names.
             outputs: The name or the list of the names of variables used
-                as outputs to the function. The number of names should match
+                as outputs of the function. The number of names should match
                 the number of outputs returned by the provided function.
                 When dict[str, str] is provided, variable names will be mapped
                 to the named outputs the function returns.
@@ -67,7 +69,6 @@ class Node:
                 and/or fullstops.
 
         """
-
         if not callable(func):
             raise ValueError(
                 _node_error_message(
@@ -83,6 +84,16 @@ class Node:
                 )
             )
 
+        for _input in _to_list(inputs):
+            if not isinstance(_input, str):
+                raise ValueError(
+                    _node_error_message(
+                        f"names of variables used as inputs to the function "
+                        f"must be of 'String' type, but {_input} from {inputs} "
+                        f"is '{type(_input)}'."
+                    )
+                )
+
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
                 _node_error_message(
@@ -90,6 +101,16 @@ class Node:
                     f"not '{type(outputs).__name__}'."
                 )
             )
+
+        for _output in _to_list(outputs):
+            if not isinstance(_output, str):
+                raise ValueError(
+                    _node_error_message(
+                        f"names of variables used as outputs of the function "
+                        f"must be of 'String' type, but {_output} from {outputs} "
+                        f"is '{type(_output)}'."
+                    )
+                )
 
         if not inputs and not outputs:
             raise ValueError(
@@ -509,11 +530,13 @@ class Node:
             )
 
     def _validate_inputs_dif_than_outputs(self) -> None:
-        common_in_out = set(self.inputs).intersection(set(self.outputs))
+        common_in_out = set(map(_strip_transcoding, self.inputs)).intersection(
+            set(map(_strip_transcoding, self.outputs))
+        )
         if common_in_out:
             raise ValueError(
                 f"Failed to create node {self}.\n"
-                f"A node cannot have the same inputs and outputs: "
+                f"A node cannot have the same inputs and outputs even if they are transcoded: "
                 f"{common_in_out}"
             )
 

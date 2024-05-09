@@ -48,7 +48,7 @@ pytest~=7.2
 
 # Kedro dependencies and datasets to work with different data formats (including CSV, Excel, and Parquet)
 kedro~=0.19.0
-kedro-datasets[pandas.CSVDataset, pandas.ExcelDataset, pandas.ParquetDataset]>=1.1
+kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset]>=3.0
 kedro-telemetry>=0.3.1
 kedro-viz~=6.0 # Visualise pipelines
 

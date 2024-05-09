@@ -13,7 +13,7 @@
             "IncrementalDataset",
             "MemoryDataset",
             "LambdaDataset",
-            "PartitionedDataset",
+            "partitions.PartitionedDataset",
             "api.APIDataset",
             "biosequence.BioSequenceDataset",
             "dask.ParquetDataset",

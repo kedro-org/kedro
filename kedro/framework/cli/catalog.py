@@ -233,7 +233,10 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
     context = session.load_context()
 
     catalog_config = context.config_loader["catalog"]
-    data_catalog = DataCatalog.from_config(catalog_config)
+    credentials_config = context.config_loader.get("credentials", None)
+    data_catalog = DataCatalog.from_config(
+        catalog=catalog_config, credentials=credentials_config
+    )
 
     explicit_datasets = {
         ds_name: ds_config

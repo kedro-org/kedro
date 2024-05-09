@@ -230,7 +230,7 @@ model_options:
   random_state: "${runtime_params:random, ${globals:my_global_value}}"
 ```
 
-and this `globals.yaml` file:
+and this `globals.yml` file:
 
 ```yaml
 my_global_value: 4
@@ -241,7 +241,7 @@ This will allow you to pass a runtime parameter named `random` through the CLI t
 kedro run --params random=3
 ```
 
-If the `random` parameter is not passed through the CLI `--params` option with `kedro run`, then `my_global_value` from `globals.yaml` is used for the `model_options.random_state`.
+If the `random` parameter is not passed through the CLI `--params` option with `kedro run`, then `my_global_value` from `globals.yml` is used for the `model_options.random_state`.
 
 ### How to use resolvers in the `OmegaConfigLoader`
 Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s

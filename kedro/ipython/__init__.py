@@ -21,10 +21,10 @@ from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
 try:
-    from rich.console import Console
-    from rich.syntax import Syntax
+    import rich.console as rich_console
+    import rich.syntax as rich_syntax
 except ImportError:
-    pass
+    rich_console = rich_syntax = None
 
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import CONF_SOURCE_HELP, PARAMS_ARG_HELP

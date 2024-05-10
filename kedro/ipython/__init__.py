@@ -23,7 +23,7 @@ from IPython.core.magic_arguments import argument, magic_arguments, parse_argstr
 try:
     import rich.console as rich_console
     import rich.syntax as rich_syntax
-except ImportError:
+except ImportError: # pragma: no cover
     pass
 
 from kedro.framework.cli import load_entry_points

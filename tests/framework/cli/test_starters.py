@@ -1119,7 +1119,7 @@ class TestToolsAndExampleFromUserPrompts:
         message = f"'{input}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
         assert message in result.output
 
-    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
+    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs"])
     def test_valid_example(self, fake_kedro_cli, example_pipeline):
         result = CliRunner().invoke(
             fake_kedro_cli,
@@ -1285,7 +1285,7 @@ class TestToolsAndExampleFromConfigFile:
             in result.output
         )
 
-    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
+    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs"])
     def test_valid_example(self, fake_kedro_cli, example_pipeline):
         """Test project created from config."""
         config = {

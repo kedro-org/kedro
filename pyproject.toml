@@ -53,7 +53,7 @@ dynamic = ["readme", "version"]
 [project.optional-dependencies]
 test = [
     "behave==1.2.6",
-    "coverage>=7.2.0",
+    "coverage[toml]",
     "import-linter==2.0",
     "ipylab>=1.0.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
@@ -88,7 +88,7 @@ jupyter = [
     "ipylab>=1.0.0",
     "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
 ]
-all = ["kedro[test,docs,jupyter]"]
+all = [ "kedro[test,docs,jupyter]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"
@@ -129,7 +129,7 @@ omit = [
     "kedro/runner/parallel_runner.py",
     "*/site-packages/*",
 ]
-exclude_also = ["raise NotImplementedError"]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
 addopts="""

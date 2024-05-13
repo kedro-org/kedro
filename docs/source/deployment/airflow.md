@@ -176,7 +176,7 @@ MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it e
 ```shell
 companies:
   type: pandas.CSVDataset
-  filepath: s3://your_S3_bucket/data/01_raw/companies.csv
+  filepath: s3://<your_S3_bucket>/data/01_raw/companies.csv
   credentials: dev_s3
 ```
 4. [Set up AWS credentials](https://docs.aws.amazon.com/keyspaces/latest/devguide/access.credentials.html) to provide read and write access to your S3 bucket. Update `new-kedro-project/conf/local/credentials.yml` with your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
@@ -193,7 +193,7 @@ s3fs
 
 6. Archive your `conf` folder into a `conf.zip` file and upload it to `s3://your_S3_bucket` for later use in the Airflow container. This file will be unzipped into the `plugins` folder within the MWAA Airflow container.
 7. Follow steps 5-6 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section to package your Kedro project and generate an Airflow DAG.
-8. Modify the DAG file `new_kedro_project_dag.py` located in the `dags/` folder by adding `, conf_source="plugins/conf"` to the Kedro session creation in the Kedro operator execution function. This change is necessary because your Kedro configuration folder will be stored in the `plugins/conf` folder, not the root directory:
+8. Update the DAG file `new_kedro_project_dag.py` located in the `dags/` folder by adding `conf_source="plugins/conf"` to the arguments of `KedroSession.create()` in the Kedro operator execution function. This change is necessary because your Kedro configuration folder will be stored in the `plugins/conf` folder, not the root directory:
 ```shell
     def execute(self, context):
         configure_project(self.package_name)

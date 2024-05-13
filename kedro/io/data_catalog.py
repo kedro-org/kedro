@@ -356,6 +356,13 @@ class DataCatalog:
                 pattern,
             ),
         )
+        catch_all = [
+            pattern for pattern in sorted_keys if cls._specificity(pattern) == 0
+        ]
+        if len(catch_all) > 1:
+            raise DatasetError(
+                f"Multiple catch-all patterns found in the catalog: {', '.join(catch_all)}"
+            )
         return {key: dataset_patterns[key] for key in sorted_keys}
 
     @staticmethod

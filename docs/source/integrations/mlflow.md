@@ -1,51 +1,44 @@
-# Using Kedro and MLflow
+# How to add MLflow to your Kedro workflow
 
 MLflow is an open-source platform for managing the end-to-end machine learning lifecycle.
 It provides tools for tracking experiments, packaging code into reproducible runs, and sharing and deploying models.
-MLflow also supports multiple machine learning frameworks, including TensorFlow, PyTorch, and scikit-learn.
+MLflow supports machine learning frameworks such as TensorFlow, PyTorch, and scikit-learn.
 
-MLflow is an excellent companion for your Kedro projects because it allows you to easily track and manage your machine learning experiments and models.
-By integrating MLflow with Kedro, you can seamlessly log metrics, parameters, and artifacts from your Kedro pipeline runs to MLflow,
-making it easy to compare and reproduce results.
-Additionally, MLflow's model registry and deployment tools make it easy to share and deploy your Kedro models with others.
+Adding MLflow to a Kedro project enables you to track and manage your machine learning experiments and models.
+For example, you can log metrics, parameters, and artifacts from your Kedro pipeline runs to MLflow, then compare and reproduce the results. When collaborating with others on a Kedro project, MLflow's model registry and deployment tools make it easy to share and deploy machine learning models.
 
-## Preparation
+## Prerequisites
 
-You will need
+You will need the following:
 
-- A working Kedro project.
-- The MLflow client properly installed in your project: `pip install mlflow`.
-- (Recommended) An MLflow Tracking Server, which will allow you to quickly inspect the runs with a user-friendly web interface.
+- A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas-viz` starter.
+- The MLflow client installed into the same virtual environment: `pip install mlflow`.
 
-For the Kedro project, the examples in this document assume the `spaceflights-pandas-viz` starter.
 
-The MLflow Tracking Server is optional, but highly recommended,
-even if you're working locally on a solo project.
-This document will assume that you have a running Tracking Server,
-whether it's a local one run by yourself or a remote one running on another machine or provided by a cloud vendor.
+We recommend use of an [MLflow tracking server](https://mlflow.org/docs/latest/tracking/server.html), that enables you to inspect runs through a web interface. This is optional, but strongly recommended, even if you're working locally on a solo project. This documentation assumes that you have a tracking server, whether it's a local one run by yourself or a remote one running on another machine or provided by a cloud vendor.
 You will need to configure your client properly,
 either by setting the `MLFLOW_TRACKING_URI` environment variable
 or by using the {external+mlflow:py:func}`mlflow.set_tracking_uri` function.
-Read {external+mlflow:doc}`the official MLflow Tracking Server 5 minute overview <getting-started/tracking-server-overview/index>`
+Read {external+mlflow:doc}`the official MLflow tracking server 5 minute overview <getting-started/tracking-server-overview/index>`
 for a list of available options,
-and {external+mlflow:ref}`the MLflow Tracking Server documentation <logging_to_a_tracking_server>`
+and {external+mlflow:ref}`the MLflow tracking server documentation <logging_to_a_tracking_server>`
 for detailed configuration instructions.
 
 ## Use cases
 
 There are different use cases for which you might want to use MLflow,
-many of which are already covered by the [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/) plugin.
-In this document you will learn how to implement them yourself in a simplified form,
+some of which are already covered by the [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/) plugin.
+This page explains how to implement them yourself in a simplified form,
 and also how `kedro-mlflow` can do the hard work for you.
 
-### Simple tracking of Kedro runs in MLflow using hooks
+### Simple tracking of Kedro runs in MLflow using Hooks
 
-Even though MLflow works best when working with machine learning and AI pipelines,
-you can track your regular Kedro runs as experiments in MLflow even if they have nothing to do with ML.
+Although MLflow works best when working with machine learning (ML) and AI pipelines,
+you can track your regular Kedro runs as experiments in MLflow even if they do not use ML.
 
-One possible way of doing it is using the {py:meth}`~kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run` hook
-to log the `run_params` passed to the hook.
-Here is how such an implementation would look like:
+One possible way of doing it is using the {py:meth}`~kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run` Hook
+to log the `run_params` passed to the Hook.
+An implementation would look as follows:
 
 ```python
 import typing as t
@@ -70,8 +63,7 @@ class MLflowHooks:
 
 Notice that there is also extra code to mark the run as failed if there is any error.
 
-After enabling this custom hook, you can execute `kedro run`
-and you will see something like this in the logs:
+After enabling this custom Hook, you can execute `kedro run`, and see something like this in the logs:
 
 ```
 [05/06/24 12:43:30] INFO     Kedro project spaceflights-mlflow             session.py:324
@@ -79,7 +71,7 @@ and you will see something like this in the logs:
 ...
 ```
 
-And if you open your Tracking Server UI you will observe a result similar to this:
+If you open your tracking server UI you will observe a result like this:
 
 ```{image} ../meta/images/simple-mlflow-tracking1.png
 :alt: Simple MLflow tracking
@@ -94,14 +86,12 @@ And if you open your Tracking Server UI you will observe a result similar to thi
 ```
 
 Notice that these "parameters" do not include the Kedro parameters as defined in `parameters*.yml`.
-To log the actual Kedro parameters, you can continue writing a custom hook
+To log the actual Kedro parameters, you can continue writing a custom Hook
 or use the `kedro-mlflow` plugin instead, as described in the following section.
 
 ### Complete tracking of Kedro runs in MLflow using `kedro-mlflow`
 
-You could make the code snippet above more complex.
-However, at some point you might want to leverage all the work that the `kedro-mlflow` plugin
-can already do for you.
+You could make the code snippet above more complex, but you are likely to reach a point where it is easier to take advantage of the work that the `kedro-mlflow` plugin can do for you.
 
 To start using `kedro-mlflow`, the only required step is to install it:
 
@@ -109,7 +99,7 @@ To start using `kedro-mlflow`, the only required step is to install it:
 pip install kedro-mlflow
 ```
 
-In modern versions of Kedro, this will already register the `kedro-mlflow` hooks for you.
+In recent versions of Kedro, this will already register the `kedro-mlflow` Hooks for you.
 
 :::{note}
 If you implemented your custom `MLflowHooks` as described in the previous section,
@@ -135,7 +125,7 @@ like the one described in the previous section.
 ### Tracking Kedro in MLflow using the Python API
 
 If you are running Kedro programmatically using the Python API,
-you can easily log your runs using the MLflow "fluent" API.
+you can log your runs using the MLflow "fluent" API.
 
 For example, taking the {doc}`lifecycle management example </kedro_project_setup/session>`
 as a starting point:
@@ -157,15 +147,15 @@ with KedroSession.create() as session:
         session.run()
 ```
 
-Notice that, if you want more flexibility or to log extra parameters,
+If you want more flexibility or to log extra parameters,
 you might need to run the Kedro pipelines manually yourself.
 
-### Simple artifact tracking in MLflow using hooks
+### Simple artifact tracking in MLflow using Hooks
 
 MLflow also helps you store "artifacts" associated with a run,
 which include compressed model weights, images, and other typically large files.
 
-For example, you can use the {py:meth}`~kedro.framework.hooks.specs.DatasetSpecs.before_dataset_saved` hook
+For example, you can use the {py:meth}`~kedro.framework.hooks.specs.DatasetSpecs.before_dataset_saved` Hook
 to store a pickled version of the data, as follows:
 
 ```python
@@ -192,7 +182,7 @@ class ArtifactTrackingHooks:
                 mlflow.log_artifact(file_path)
 ```
 
-Which will result in something like this:
+Resulting in something like this:
 
 ```{image} ../meta/images/mlflow-pickle-artifact.png
 :alt: Tracking artifacts as pickles in MLflow
@@ -206,11 +196,10 @@ prevents you from fully using MLflow native preview capabilities.
 ### Artifact tracking in MLflow using `kedro-mlflow`
 
 Again, `kedro-mlflow` provides some out-of-the-box artifact tracking capabilities
-that connect your Kedro project with your MLflow deployment.
+that connect your Kedro project with your MLflow deployment, such as `MlflowArtifactDataset`,
+which can be used to wrap any of your existing Kedro datasets.
 
-To that end, introduces a special `MlflowArtifactDataset`
-that can be used to wrap any of your existing Kedro datasets.
-This has the advantage that the preview capabilities of the MLflow UI can be used.
+Use of this dataset has the advantage that the preview capabilities of the MLflow UI can be used.
 
 :::{warning}
 This will work for datasets that are outputs of a node,
@@ -240,9 +229,8 @@ Check out {external+kedro-mlflow:doc}`the official kedro-mlflow documentation on
 for more information.
 
 ### Model registry in MLflow using `kedro-mlflow`
-
-Finally, if your Kedro pipeline trains a machine learning model, you can track those models in MLflow
-so that you can easily manage and deploy them.
+If your Kedro pipeline trains a machine learning model, you can track those models in MLflow
+so that you can manage and deploy them.
 The `kedro-mlflow` plugin introduces a special artifact, `MlflowModelTrackingDataset`,
 that you can use to load and save your models as MLflow artifacts.
 
@@ -258,10 +246,10 @@ you can modify it as follows:
 +  flavor: mlflow.sklearn
 ```
 
-The `kedro-mlflow` hook will log the model as part of the run
+The `kedro-mlflow` Hook will log the model as part of the run
 in {external+mlflow:doc}`the standard MLflow Model format <models>`.
 
-If, additionally, you want to _register_ it
+If you also want to _register_ it
 (hence store it in the MLflow Model Registry)
 you can add a `registered_model_name` parameter:
 

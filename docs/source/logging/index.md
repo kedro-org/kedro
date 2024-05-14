@@ -42,6 +42,17 @@ After setting the environment variable, any subsequent Kedro commands use the lo
 If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will use the [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml).
 ```
 
+## Custom `CONF_SOURCE` with logging
+
+When you customise the [`CONF_SOURCE`](../configuration/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project, it determines where Kedro looks for configuration files, including the logging configuration file. However, changing `CONF_SOURCE` does not automatically update the path to `logging.yml`. To use a custom location or filename for the logging configuration, you must explicitly set the `KEDRO_LOGGING_CONFIG` environment variable.
+
+By default, Kedro looks for a file named `logging.yml` in the `conf` directory. If you move or rename your logging configuration file after changing `CONF_SOURCE`, specify the new path using the `KEDRO_LOGGING_CONFIG` environment variable:
+```bash
+export KEDRO_LOGGING_CONFIG=<project_root>/custom_config_folder/custom_logging_name.yml
+```
+
+Please note that adjusting `CONF_SOURCE` or renaming `logging.yml` without updating the logging configuration accordingly can lead to Kedro not locating the file, which will result in the default logging settings being used instead.
+
 ### How to show DEBUG level messages
 To see `DEBUG` level messages, change the level of logging in your project-specific logging configuration file (`logging.yml`). We provide a `logging.yml` template:
 

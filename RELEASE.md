@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* User defined catch-all dataset factory patterns now override the default pattern provided by the runner.
 
 ## Breaking changes to the API
 

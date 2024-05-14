@@ -173,6 +173,8 @@ class DataCatalog:
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
+            default_pattern: A dictionary of the default catch-all pattern that overrides the default
+                pattern provided through the runners.
 
         Example:
         ::
@@ -361,7 +363,7 @@ class DataCatalog:
         ]
         if len(catch_all) > 1:
             raise DatasetError(
-                f"Multiple catch-all patterns found in the catalog: {', '.join(catch_all)}"
+                f"Multiple catch-all patterns found in the catalog: {', '.join(catch_all)}. Only one catch-all pattern is allowed, remove the extras."
             )
         return {key: dataset_patterns[key] for key in sorted_keys}
 

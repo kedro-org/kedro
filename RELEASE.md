@@ -52,10 +52,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Clarified docs around using custom resolvers without a full Kedro project.
 
 ## Community contributions
-
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [ondrejzacha](https://github.com/ondrejzacha)
-* [doxenix](https://github.com/doxenix)
 * [Puneet](https://github.com/puneeter)
 
 # Release 0.19.3

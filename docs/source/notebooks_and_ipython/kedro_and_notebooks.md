@@ -199,8 +199,7 @@ You can also specify the following optional arguments for `session.run`:
 | `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                            |
 | `from_inputs`   | `Iterable[str]`  | A list of dataset names which should be used as a starting point                                                                                     |
 | `to_outputs`    | `Iterable[str]`  | A list of dataset names which should be used as an end point                                                                                         |
-| `load_versions` | `Dict[str, str]` | A mapping of a dataset name to a specific dataset version (timestamp) for loading. Applies to versioned datasets
-                                |
+| `load_versions` | `Dict[str, str]` | A mapping of a dataset name to a specific dataset version (timestamp) for loading. Applies to versioned datasets                                     |
 | `pipeline_name` | `str`            | Name of the modular pipeline to run. Must be one of those returned by the `register_pipelines` function in `src/<package_name>/pipeline_registry.py` |
 
 You can execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do more than one run, you'll have to run `%reload_kedro` line magic to get a new `session`.

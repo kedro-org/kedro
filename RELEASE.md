@@ -7,8 +7,11 @@
 ## Breaking changes to the API
 
 ## Documentation changes
+* Improved documentation for custom starters
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [doxenix](https://github.com/doxenix)
 
 
 # Release 0.19.5
@@ -49,8 +52,8 @@
 * Clarified docs around using custom resolvers without a full Kedro project.
 
 ## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
 
+Many thanks to the following Kedroids for contributing PRs to this release:
 * [ondrejzacha](https://github.com/ondrejzacha)
 * [doxenix](https://github.com/doxenix)
 * [Puneet](https://github.com/puneeter)

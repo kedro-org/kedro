@@ -7,8 +7,11 @@
 ## Breaking changes to the API
 
 ## Documentation changes
+* Improved documentation for custom starters
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [doxenix](https://github.com/doxenix)
 
 
 # Release 0.19.5
@@ -50,7 +53,6 @@
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
-
 * [ondrejzacha](https://github.com/ondrejzacha)
 * [Puneet](https://github.com/puneeter)
 

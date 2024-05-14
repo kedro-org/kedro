@@ -225,7 +225,7 @@ You can use dataset factories to define a catch-all pattern which will overwrite
 ```yaml
 "{default_dataset}":
   type: pandas.CSVDataset
-  filepath: data/{a_default_dataset}.csv
+  filepath: data/{default_dataset}.csv
 
 ```
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
@@ -317,9 +317,9 @@ shuttles:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{name}.pq
 
-"{a_default}":
+"{default}":
   type: pandas.ParquetDataset
-  filepath: data/03_primary/{a_default}.pq
+  filepath: data/03_primary/{default}.pq
 ```
 </details>
 

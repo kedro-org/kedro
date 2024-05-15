@@ -151,10 +151,6 @@ def config_with_dataset_factories_bad_pattern(config_with_dataset_factories):
 def config_with_dataset_factories_only_patterns():
     return {
         "catalog": {
-            "{default}": {
-                "type": "pandas.CSVDataset",
-                "filepath": "data/01_raw/{default}.csv",
-            },
             "{namespace}_{dataset}": {
                 "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{namespace}_{dataset}.pq",
@@ -173,6 +169,14 @@ def config_with_dataset_factories_only_patterns():
             },
         },
     }
+
+
+@pytest.fixture
+def config_with_dataset_factories_only_patterns_no_default(
+    config_with_dataset_factories_only_patterns,
+):
+    del config_with_dataset_factories_only_patterns["catalog"]["{user_default}"]
+    return config_with_dataset_factories_only_patterns
 
 
 @pytest.fixture
@@ -841,15 +845,37 @@ class TestDataCatalogDatasetFactories:
             "{country}_companies",
             "{namespace}_{dataset}",
             "{dataset}s",
-            "{default}",
             "{user_default}",
         ]
-        assert list(catalog._dataset_patterns.keys()) == sorted_keys_expected
+        assert (
+            list(catalog._dataset_patterns.keys())
+            + list(catalog._default_pattern.keys())
+            == sorted_keys_expected
+        )
 
-    def test_sorting_order_with_default_and_other_dataset_through_extra_pattern(
-        self, config_with_dataset_factories_only_patterns
+    def test_multiple_catch_all_patterns_not_allowed(
+        self, config_with_dataset_factories
     ):
-        """Check that the sorted order of the patterns is correct according to parsing rules when a default dataset is added through extra patterns (this would happen via the runner)."""
+        """Check that multiple catch-all patterns are not allowed"""
+        config_with_dataset_factories["catalog"]["{default1}"] = {
+            "filepath": "data/01_raw/{default1}.csv",
+            "type": "pandas.CSVDataset",
+        }
+        config_with_dataset_factories["catalog"]["{default2}"] = {
+            "filepath": "data/01_raw/{default2}.xlsx",
+            "type": "pandas.ExcelDataset",
+        }
+
+        with pytest.raises(
+            DatasetError, match="Multiple catch-all patterns found in the catalog"
+        ):
+            DataCatalog.from_config(**config_with_dataset_factories)
+
+    def test_sorting_order_with_other_dataset_through_extra_pattern(
+        self, config_with_dataset_factories_only_patterns_no_default
+    ):
+        """Check that the sorted order of the patterns is correct according to parsing rules when a default dataset
+        is added through extra patterns (this would happen via the runner) and user default is not present"""
         extra_dataset_patterns = {
             "{default}": {"type": "MemoryDataset"},
             "{another}#csv": {
@@ -857,7 +883,9 @@ class TestDataCatalogDatasetFactories:
                 "filepath": "data/{another}.csv",
             },
         }
-        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
+        catalog = DataCatalog.from_config(
+            **config_with_dataset_factories_only_patterns_no_default
+        )
         catalog_with_default = catalog.shallow_copy(
             extra_dataset_patterns=extra_dataset_patterns
         )
@@ -867,38 +895,13 @@ class TestDataCatalogDatasetFactories:
             "{namespace}_{dataset}",
             "{dataset}s",
             "{default}",
-            "{user_default}",
         ]
         assert (
             list(catalog_with_default._dataset_patterns.keys()) == sorted_keys_expected
         )
 
-    def test_runner_default_overwrites_user_default(
-        self, config_with_dataset_factories_only_patterns
-    ):
-        """Check that the runner default overwrites the user default."""
-        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
-        assert catalog._dataset_patterns["{default}"] == {
-            "filepath": "data/01_raw/{default}.csv",
-            "type": "pandas.CSVDataset",
-        }
-
-        extra_dataset_patterns = {
-            "{default}": {"type": "MemoryDataset"},
-            "{another}#csv": {
-                "type": "pandas.CSVDataset",
-                "filepath": "data/{another}.csv",
-            },
-        }
-        catalog_with_runner_default = catalog.shallow_copy(
-            extra_dataset_patterns=extra_dataset_patterns
-        )
-        assert catalog_with_runner_default._dataset_patterns["{default}"] == {
-            "type": "MemoryDataset"
-        }
-
-    def test_user_default_overwrites_runner_default_alphabetically(self):
-        """Check that the runner default overwrites the user default if earlier in alphabet."""
+    def test_user_default_overwrites_runner_default(self):
+        """Check that the user default overwrites the runner default when both are present"""
         catalog_config = {
             "{dataset}s": {
                 "type": "pandas.CSVDataset",
@@ -921,13 +924,13 @@ class TestDataCatalogDatasetFactories:
             extra_dataset_patterns=extra_dataset_patterns
         )
         sorted_keys_expected = [
-            "{another}#csv",
             "{dataset}s",
             "{a_default}",
-            "{default}",
         ]
+        assert "{a_default}" in catalog_with_runner_default._default_pattern
         assert (
             list(catalog_with_runner_default._dataset_patterns.keys())
+            + list(catalog_with_runner_default._default_pattern.keys())
             == sorted_keys_expected
         )
 

@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 FunctionParameters = MappingProxyType
 
-RICH = True if importlib.util.find_spec("rich") is not None else False
+RICH_INSTALLED = True if importlib.util.find_spec("rich") is not None else False
 
 
 def load_ipython_extension(ipython: Any) -> None:
@@ -288,7 +288,7 @@ def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
 
 def _print_cells(cells: list[str]) -> None:
     for cell in cells:
-        if RICH is True:
+        if RICH_INSTALLED is True:
             rich_console.Console().print("")
             rich_console.Console().print(
                 rich_syntax.Syntax(cell, "python", theme="monokai", line_numbers=False)

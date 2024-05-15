@@ -241,3 +241,21 @@ Customise the configuration loader arguments in `settings.py` as follows if your
 ```python
 CONFIG_LOADER_ARGS = {"default_run_env": "base"}
 ```
+
+### How to use Kedro without the rich library
+
+If you prefer not to have the `rich` library in your Kedro project, you have the option to uninstall it. However, it's important to note that versions of the `cookiecutter` library above 2.3 have a dependency on rich. You will need to downgrade `cookiecutter` to a version below 2.3 to have Kedro work without `rich`.
+
+To uninstall the rich library, run:
+
+```bash
+pip uninstall rich
+```
+
+To downgrade cookiecutter to a version that does not require rich, you can specify a version below 2.3. For example:
+
+```bash
+pip install cookiecutter==2.2.0
+```
+
+These changes will affect the visual appearance and formatting of Kedro's logging, prompts, and the output of the `kedro ipython` command. While using a version of `cookiecutter` below 2.3, the appearance of the prompts will be plain even with `rich` installed.

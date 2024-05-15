@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.6
 
 ## Major features and improvements
+* It is now possible to uninstall the `rich` library from Kedro and have it maintain functionality.
 
 ## Bug fixes and other changes
 * User defined catch-all dataset factory patterns now override the default pattern provided by the runner.

@@ -218,6 +218,31 @@ companies:
 ```
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 
+#### How to use `globals` and `runtime_params`
+
+As mentioned above, `runtime_params` are not designed to override `globals` configuration. This is done to avoid unexplicit overrides and to simplify parameter resolutions. Thus, `globals` has only one entry point - the `yaml` file.
+
+However, you can use `globals` and `runtime_params` by specifying `globals` as a default value to be used in case the runtime parameter is not passed.
+
+Consider this `parameters.yml`:
+```yaml
+model_options:
+  random_state: "${runtime_params:random, ${globals:my_global_value}}"
+```
+
+and this `globals.yml` file:
+
+```yaml
+my_global_value: 4
+```
+
+This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters:
+```bash
+kedro run --params random=3
+```
+
+If the `random` parameter is not passed through the CLI `--params` option with `kedro run`, then `my_global_value` from `globals.yml` is used for the `model_options.random_state`.
+
 ### How to use resolvers in the `OmegaConfigLoader`
 Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s
 resolvers functionality](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#resolvers). You use resolvers to define custom

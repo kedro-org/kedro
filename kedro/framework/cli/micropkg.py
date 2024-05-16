@@ -124,7 +124,7 @@ def micropkg_cli() -> None:  # pragma: no cover
 
 @micropkg_cli.group()
 def micropkg() -> None:
-    """Commands for working with micro-packages. DeprecationWarning: micropackaging is deprecated
+    """(DEPRECATED) Commands for working with micro-packages. DeprecationWarning: micro-packaging is deprecated
     and will not be available from Kedro 0.20.0."""
 
 

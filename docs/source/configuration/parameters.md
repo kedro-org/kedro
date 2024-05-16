@@ -66,7 +66,7 @@ node(
 )
 ```
 
-In both cases, under the hood parameters are added to the Data Catalog through the method `add_feed_dict()` in [`DataCatalog`](/api/kedro.io.DataCatalog), where they live as `MemoryDataset`s. This method is also what the `KedroContext` class uses when instantiating the catalog.
+In both cases, under the hood parameters are added to the Data Catalog through the method {py:meth}`add_feed_dict() <kedro.io.DataCatalog.add_feed_dict>` in {py:class}`~kedro.io.DataCatalog`, where they live as `MemoryDataset`s. This method is also what the {py:class}`~kedro.framework.context.KedroContext` class uses when instantiating the catalog.
 
 ```{note}
 You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
@@ -110,7 +110,7 @@ The `kedro.framework.context.KedroContext` class uses the approach above to load
 
 ## How to specify parameters at runtime
 
-Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/api/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes.
+Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to {py:class}`~kedro.framework.context.KedroContext` parameters and made available to pipeline nodes.
 
 Each key-value pair is split on the first equals sign. The following example is a valid command:
 

@@ -135,7 +135,6 @@ type_targets = {
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.framework.context.context.KedroContext",
-        "kedro.framework.hooks.specs.DataCatalogSpecs.after_data_catalog_created",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",
         "Path",

@@ -56,7 +56,7 @@ The Hook implementation should have the same name as the specification. The Hook
 
 To declare a Hook implementation, use the `@hook_impl` decorator.
 
-For example, the full signature of the {py:meth}` after_data_catalog_created() <kedro.framework.hooks.specs.DataCatalogSpecs.after_data_catalog_created>` Hook specification is:
+For example, the full signature of the {py:meth}` after_catalog_created() <kedro.framework.hooks.specs.DataCatalogSpecs.after_catalog_created>` Hook specification is:
 
 ```python
 @hook_spec

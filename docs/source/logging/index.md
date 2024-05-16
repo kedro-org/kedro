@@ -194,3 +194,21 @@ You must provide a value for both `COLUMNS` and `LINES` even if you only wish to
 ## How to enable rich logging in Jupyter
 
 Rich also formats the logs in JupyterLab and Jupyter Notebook. The size of the output console does not adapt to your window but can be controlled through the `JUPYTER_COLUMNS` and `JUPYTER_LINES` environment variables. The default values (115 and 100 respectively) should be suitable for most users, but if you require a different output console size then you should alter the values of `JUPYTER_COLUMNS` and `JUPYTER_LINES`.
+
+### How to use logging without the rich library
+
+If you prefer not to have the `rich` library in your Kedro project, you have the option to uninstall it. However, it's important to note that versions of the `cookiecutter` library above 2.3 have a dependency on rich. You will need to downgrade `cookiecutter` to a version below 2.3 to have Kedro work without `rich`.
+
+To uninstall the rich library, run:
+
+```bash
+pip uninstall rich
+```
+
+To downgrade cookiecutter to a version that does not require rich, you can specify a version below 2.3. For example:
+
+```bash
+pip install cookiecutter==2.2.0
+```
+
+These changes will affect the visual appearance and formatting of Kedro's logging, prompts, and the output of the `kedro ipython` command. While using a version of `cookiecutter` below 2.3, the appearance of the prompts will be plain even with `rich` installed.

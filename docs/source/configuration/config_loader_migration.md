@@ -1,5 +1,5 @@
 # Migration guide for config loaders
-The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and were removed in Kedro `0.19.0`. To use that release or later, you must adopt the [`OmegaConfigLoader`](/api/kedro.config.OmegaConfigLoader).
+The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and were removed in Kedro `0.19.0`. To use that release or later, you must adopt the {py:class}`~kedro.config.OmegaConfigLoader`.
 This migration guide outlines the primary distinctions between the old loaders and the `OmegaConfigLoader`, providing step-by-step instructions on updating your code base to utilise the new class effectively.
 
 ## `ConfigLoader` to `OmegaConfigLoader`

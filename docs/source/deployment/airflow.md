@@ -169,10 +169,10 @@ astro deploy
 ## How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)
 
 ### Kedro project preparation
-MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it easier to set up, operate, and scale Apache Airflow in the cloud. Deploying a Kedro pipeline to MWAA is similar to Astronomer, but there are some key differences: you need to store your project data in an AWS S3 bucket and make necessary changes to your Data Catalog. Additionally, you must configure how you upload your Kedro configuration, install your Kedro package, and set up the necessary environment variables.
+MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it easier to set up, operate, and scale Apache Airflow in the cloud. Deploying a Kedro pipeline to MWAA is similar to Astronomer, but there are some key differences: you need to store your project data in an AWS S3 bucket and make necessary changes to your `DataCatalog`. Additionally, you must configure how you upload your Kedro configuration, install your Kedro package, and set up the necessary environment variables.
 1. Complete steps 1-4 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section.
 2. Your project's data should not reside in the working directory of the Airflow container. Instead, [create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html) and [upload your data folder from the new-kedro-project folder to your S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html).
-3. Modify the Data Catalog to reference data in your S3 bucket by updating the filepath and add credentials line for each Dataset in the `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the filepath as shown below:
+3. Modify the `DataCatalog` to reference data in your S3 bucket by updating the filepath and add credentials line for each dataset in `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the filepath as shown below:
 ```shell
 companies:
   type: pandas.CSVDataset
@@ -186,7 +186,7 @@ dev_s3:
     aws_access_key_id: *********************
     aws_secret_access_key: ******************************************
 ```
-5. Add `s3fs` to your project’s `requirements.txt` in `new-kedro-project` to facilitate communication with AWS S3. Some libraries could cause dependency conflicts in the Airflow environment, so make sure to minimise the list and avoid using `kedro-viz` and `pytest`.
+5. Add `s3fs` to your project’s `requirements.txt` in `new-kedro-project` to facilitate communication with AWS S3. Some libraries could cause dependency conflicts in the Airflow environment, so make sure to minimise the requirements list and avoid using `kedro-viz` and `pytest`.
 ```shell
 s3fs
 ```
@@ -202,7 +202,7 @@ s3fs
 ```
 
 ### Deployment on AWAA
-1. Archive your three files: `new_kedro_project-0.1-py3-none-any.wh`l and `conf-new_kedro_project.tar.gz` located in `new-kedro-project/dist`, and `logging.yml` located in `new-kedro-project/conf/` into a file called `plugins.zip` and upload it to `s3://your_S3_bucket`. This archive will be later unpacked to the `/plugins` folder in the working directory of the Airflow container.
+1. Archive your three files: `new_kedro_project-0.1-py3-none-any.whl` and `conf-new_kedro_project.tar.gz` located in `new-kedro-project/dist`, and `logging.yml` located in `new-kedro-project/conf/` into a file called `plugins.zip` and upload it to `s3://your_S3_bucket`. This archive will be later unpacked to the `/plugins` folder in the working directory of the Airflow container.
 2. Create a new `requirements.txt` file, add the command to install your Kedro project archived in the previous step, and upload it to `s3://your_S3_bucket`:
 ```shell
 ./plugins/new_kedro_project-0.1-py3-none-any.whl

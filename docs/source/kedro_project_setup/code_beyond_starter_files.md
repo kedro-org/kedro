@@ -86,7 +86,7 @@ from my_project.utils.dictionary_utils import find_common_keys
 For imports like this to be displayed in IDE properly, it is required to perform an editable
 installation of the Kedro project to your virtual environment.
 This is done via `pip install -e <root-of-kedro-project>`, the easiest way to achieve
-which is to `cd` to the root of Kedro project and do `pip install -e .`.
+this is to `cd` to the root of your Kedro project and run `pip install -e .`.
 ```
 
 ### Kedro project in a monorepo setup

@@ -48,7 +48,7 @@ This being the only constraint means that you can, for example:
 
 This section provides examples of how you can handle some common cases of adding more
 code to or around your Kedro project.
-**Provided implementations are by no means the only ways to achieve target scenarios**,
+The provided examples are by no means the only ways to achieve the target scenarios,
 and serve only illustrative purposes.
 
 ### Sharing utilities between pipelines

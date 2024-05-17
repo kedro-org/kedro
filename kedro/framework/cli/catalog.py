@@ -87,10 +87,12 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
         for ds_name in default_ds:
             matched_pattern = data_catalog._match_pattern(
                 data_catalog._dataset_patterns, ds_name
-            )
+            ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
             if matched_pattern:
                 ds_config_copy = copy.deepcopy(
-                    data_catalog._dataset_patterns[matched_pattern]
+                    data_catalog._dataset_patterns.get(matched_pattern)
+                    or data_catalog._default_pattern.get(matched_pattern)
+                    or {}
                 )
 
                 ds_config = data_catalog._resolve_config(
@@ -215,7 +217,10 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    catalog_factories = context.catalog._dataset_patterns
+    catalog_factories = {
+        **context.catalog._dataset_patterns,
+        **context.catalog._default_pattern,
+    }
     if catalog_factories:
         click.echo(yaml.dump(list(catalog_factories.keys())))
     else:
@@ -259,10 +264,12 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
 
         matched_pattern = data_catalog._match_pattern(
             data_catalog._dataset_patterns, ds_name
-        )
+        ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
         if matched_pattern:
             ds_config_copy = copy.deepcopy(
-                data_catalog._dataset_patterns[matched_pattern]
+                data_catalog._dataset_patterns.get(matched_pattern)
+                or data_catalog._default_pattern.get(matched_pattern)
+                or {}
             )
 
             ds_config = data_catalog._resolve_config(

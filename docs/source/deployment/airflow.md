@@ -218,7 +218,7 @@ This archive will be later unpacked to the `/plugins` folder in the working dire
 ```shell
 ./plugins/new_kedro_project-0.1-py3-none-any.whl
 ```
-Libraries from `requirements.txt` will be installed during container initialization.
+Libraries from `requirements.txt` will be installed during container initialisation.
 
 3. Upload `new_kedro_project_airflow_dag.py` from the `new-kedro-project/dags` to `s3://your_S3_bucket/dags`.
 4. Create an empty `startup.sh` file for container startup commands. Set an environment variable for custom Kedro logging:

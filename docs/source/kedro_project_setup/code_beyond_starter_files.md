@@ -72,7 +72,7 @@ level as the `pipelines` folder**, and organise the functionalities there:
     │       ├── __init__.py             <-- Required to import from it
     │       ├── pandas_utils.py         <-- Put a file with utility functions here
     │       ├── dictionary_utils.py     <-- Or a few files
-    │       ├── visualization_utils     <-- Or sub-modules to organize even more utilities
+    │       ├── visualisation_utils     <-- Or sub-modules to organise even more utilities
     └── tests
 ```
 

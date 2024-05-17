@@ -7,6 +7,9 @@
 
 ## Breaking changes to the API
 
+## Upcoming deprecations for Kedro 0.20.0
+* All micro-packaging commands (`kedro micropkg pull`, `kedro micropkg package`) are deprecated and will be removed in Kedro 0.20.0.
+
 ## Documentation changes
 * Improved documentation for custom starters
 

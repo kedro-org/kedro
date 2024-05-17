@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.6
 
 ## Major features and improvements
+* Added a `--telemetry` flag to `kedro run`, allowing consent to data usage to be granted or revoked at the same time the command is run.
 
 ## Bug fixes and other changes
 * User defined catch-all dataset factory patterns now override the default pattern provided by the runner.

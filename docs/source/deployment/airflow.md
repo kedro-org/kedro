@@ -202,11 +202,18 @@ s3fs
 ```
 
 ### Deployment on AWAA
-1. Archive your three files: `new_kedro_project-0.1-py3-none-any.whl` and `conf-new_kedro_project.tar.gz` located in `new-kedro-project/dist`, and `logging.yml` located in `new-kedro-project/conf/` into a file called `plugins.zip` and upload it to `s3://your_S3_bucket`. This archive will be later unpacked to the `/plugins` folder in the working directory of the Airflow container.
-2. Create a new `requirements.txt` file, add the command to install your Kedro project archived in the previous step, and upload it to `s3://your_S3_bucket`:
+1. Archive your three files: `new_kedro_project-0.1-py3-none-any.whl` and `conf-new_kedro_project.tar.gz` located in `new-kedro-project/dist`, and `logging.yml` located in `new-kedro-project/conf/` into a file called `plugins.zip` and upload it to `s3://your_S3_bucket`.
+```shell
+zip -j plugins.zip dist/new_kedro_project-0.1-py3-none-any.whl dist/conf-new_kedro_project.tar.gz conf/logging.yml
+```
+This archive will be later unpacked to the `/plugins` folder in the working directory of the Airflow container.
+
+2. Create a new `requirements.txt` file, add the path where your Kedro project will be unpacked in the Airflow container, and upload `requirements.txt` to `s3://your_S3_bucket`:
 ```shell
 ./plugins/new_kedro_project-0.1-py3-none-any.whl
 ```
+Libraries from `requirements.txt` will be installed during container initialization.
+
 3. Upload `new_kedro_project_airflow_dag.py` from the `new-kedro-project/dags` to `s3://your_S3_bucket/dags`.
 4. Create an empty `startup.sh` file for container startup commands. Set an environment variable for custom Kedro logging:
 ```shell

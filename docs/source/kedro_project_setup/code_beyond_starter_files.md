@@ -28,7 +28,7 @@ Other than that, **Kedro does not impose any constraints on where you should kee
 
 ```{note}
 You actually can make Kedro look for pipeline registry in a different place by modifying the
-`__main__.py` file of your project, but such advanced customizations are not in scope of this article.
+`__main__.py` file of your project, but such advanced customisations are not in scope for this section.
 ```
 
 This being the only constraint means that you can, for example:

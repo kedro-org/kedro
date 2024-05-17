@@ -1,6 +1,6 @@
 # The pipeline registry
 
-Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This, in turn, populates the `pipelines` variable in [`kedro.framework.project`](/api/kedro.framework.project) that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`](/api/kedro.pipeline.Pipeline) objects. For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) could define the following `register_pipelines()` function that exposes the data processing pipeline, the data science pipeline, and a third, default pipeline that combines both of the aforementioned pipelines:
+Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This, in turn, populates the `pipelines` variable in {py:mod}`~kedro.framework.project` that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to {py:class}`~kedro.pipeline.Pipeline` objects. For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) could define the following `register_pipelines()` function that exposes the data processing pipeline, the data science pipeline, and a third, default pipeline that combines both of the aforementioned pipelines:
 
 ```python
 import spaceflights.pipelines.data_processing as dp
@@ -31,7 +31,7 @@ The order in which you add the pipelines together is not significant (`data_scie
 
 ## Pipeline autodiscovery
 
-In the above example, you need to update the `register_pipelines()` function whenever you create a pipeline that should be returned as part of the project's pipelines. Since Kedro 0.18.3, you can achieve the same result with less code using [`find_pipelines()`](/api/kedro.framework.project.find_pipelines). The [updated pipeline registry](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) contains no project-specific code:
+In the above example, you need to update the `register_pipelines()` function whenever you create a pipeline that should be returned as part of the project's pipelines. Since Kedro 0.18.3, you can achieve the same result with less code using {py:meth}` find_pipelines() <kedro.framework.project.find_pipelines>`. The [updated pipeline registry](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) contains no project-specific code:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -45,11 +45,11 @@ def register_pipelines() -> Dict[str, Pipeline]:
     return pipelines
 ```
 
-Under the hood, the `find_pipelines()` function traverses the `src/<package_name>/pipelines/` directory and returns a mapping from pipeline directory name to [`Pipeline`](/api/kedro.pipeline.Pipeline) object by:
+Under the hood, the `find_pipelines()` function traverses the `src/<package_name>/pipelines/` directory and returns a mapping from pipeline directory name to {py:class}`~kedro.pipeline.Pipeline` object by:
 
 1. Importing the `<package_name>.pipelines.<pipeline_name>` module
 2. Calling the `create_pipeline()` function exposed by the `<package_name>.pipelines.<pipeline_name>` module
-3. Validating that the constructed object is a [`Pipeline`](/api/kedro.pipeline.Pipeline)
+3. Validating that the constructed object is a {py:class}`~kedro.pipeline.Pipeline`
 
 If any of these steps fail, `find_pipelines()` raises an appropriate warning and skips the current pipeline but continues traversal.
 

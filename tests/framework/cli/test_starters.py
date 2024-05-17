@@ -1323,7 +1323,7 @@ class TestToolsAndExampleFromConfigFile:
 
         assert result.exit_code != 0
         assert (
-            f"'{bad_input}' is an invalid value for example pipeline." in result.output
+            f"'{bad_input}' is an invalid value for example pipeline" in result.output
         )
         assert (
             "It must contain only y, n, YES, or NO (case insensitive).\n"
@@ -1661,7 +1661,7 @@ class TestTelemetryCLIFlag:
         assert result.exit_code == 1
 
         assert (
-            "'wrong' is an invalid value for example pipeline. It must contain only y, n, YES, or NO (case insensitive)."
+            "'wrong' is an invalid value for example pipeline or telemetry consent. It must contain only y, n, YES, or NO (case insensitive)."
             in result.output
         )
 

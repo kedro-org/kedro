@@ -32,17 +32,19 @@ You actually can make Kedro look for pipeline registry in a different place by m
 ```
 
 This being the only constraint means that you can, for example:
-* Add `utils.py` file to a pipeline folder and import utilities defined by multiple
-  functions in `nodes.py`.
+* Add `utils.py` file to a pipeline folder and import utilities used by multiple
+  functions in `nodes.py` from there.
+* [Share modules between pipelines](#sharing-modules-between-pipelines).
+  Those could be utility functionalities, or your standalone module responsible for
+  the domain logic of the industry you work at.
+* [Use Kedro in a monorepo setup](#kedro-project-in-a-monorepo-setup) if there are
+  software components independent of Kedro that you want to keep together in the version control system.
 * Delete or rename a default `nodes.py` file, split it into multiple files or modules.
-* Instead of having a single `pipeline.py` in your pipeline folder, split it, for example, 
+* Instead of having a single `pipeline.py` in your pipeline folder, split it, for example,
   into `historical_pipeline.py` and `inference_pipeline.py`.
 * Instead of registering many pipelines in `register_pipelines()` function one by one,
   create a few `tp.Dict[str, Pipeline]` objects in different places of the project
   and then make `register_pipelines()` return a union of those.
-* Store code that has nothing to do with Kedro `Pipeline` and `Node` concepts, or should
-  be reused by multiple pipelines of your project, in a module at the same level as the
-  `pipelines` folder of your project. This scenario is covered in more detail below.
 
 ## Common codebase extension scenarios
 
@@ -51,9 +53,9 @@ code to or around your Kedro project.
 The provided examples are by no means the only ways to achieve the target scenarios,
 and serve only as illustrative purposes.
 
-### Sharing utilities between pipelines
+### Sharing modules between pipelines
 
-Oftentimes you have utilities that have to be imported by multiple `pipelines`.
+Oftentimes you have machinery that has to be imported by multiple `pipelines`.
 To keep them as part of a Kedro project, **create a module (for example, `utils`) at the same
 level as the `pipelines` folder**, and organise the functionalities there:
 

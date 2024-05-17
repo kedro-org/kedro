@@ -497,3 +497,38 @@ def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str
         load_versions_dict[load_version_list[0]] = load_version_list[1]
 
     return load_versions_dict
+
+
+def validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
+    VALIDATION_PATTERNS = {
+        "yes_no": {
+            "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
+            "error_message": f"'{input}' is an invalid value for example pipeline or telemetry consent. It must contain only y, n, YES, or NO (case insensitive).",
+        },
+        "project_name": {
+            "regex": r"^[\w -]{2,}$",
+            "error_message": f"'{input}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
+        },
+        "tools": {
+            "regex": r"""^(
+                all|none|                        # A: "all" or "none" or
+                (\ *\d+                          # B: any number of spaces followed by one or more digits
+                (\ *-\ *\d+)?                    # C: zero or one instances of: a hyphen followed by one or more digits, spaces allowed
+                (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
+                \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
+                $""",
+            "error_message": f"'{input}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
+        },
+    }
+
+    if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], input, flags=re.X):
+        click.secho(
+            VALIDATION_PATTERNS[pattern_name]["error_message"],
+            fg="red",
+            err=True,
+        )
+        sys.exit(1)
+
+
+def parse_yes_no_to_bool(value: str) -> Any:
+    return value.strip().lower() in ["y", "yes"] if value is not None else None

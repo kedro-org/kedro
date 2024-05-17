@@ -2,17 +2,23 @@
 
 Apache Airflow is a popular open-source workflow management platform. It is a suitable engine to orchestrate and execute a pipeline authored with Kedro, because workflows in Airflow are modelled and organised as [DAGs](https://en.wikipedia.org/wiki/Directed_acyclic_graph).
 
+## Introduction and strategy
+
+The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted to an [Airflow DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html). This approach mirrors the principles of [running Kedro in a distributed environment](distributed.md).
+
+Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/data/index.html) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
+
+This guide provides instructions on running a Kedro pipeline on different Airflow platforms. You can jump to the specific sections by clicking the links below, how to run a Kedro pipeline on:
+
+- [Apache Airflow with Astronomer](#how-to-run-a-kedro-pipeline-on-apache-airflow-with-astronomer)
+- [Amazon AWS Managed Workflows for Apache Airflow (MWAA)](#how-to-run-a-kedro-pipeline-on-amazon-aws-managed-workflows-for-apache-airflow-mwaa)
+- [Apache Airflow using a Kubernetes cluster](#how-to-run-a-kedro-pipeline-on-apache-airflow-using-a-kubernetes-cluster)
+
 ## How to run a Kedro pipeline on Apache Airflow with Astronomer
 
 The following tutorial shows how to deploy an example [Spaceflights Kedro project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) on [Apache Airflow](https://airflow.apache.org/) with [Astro CLI](https://docs.astronomer.io/astro/cli/overview), a command-line tool created by [Astronomer](https://www.astronomer.io/) that streamlines the creation of local Airflow projects. You will deploy it locally first, and then transition to Astro Cloud.
 
 [Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
-
-### Strategy
-
-The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted to an [Airflow DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html). This approach mirrors the principles of [running Kedro in a distributed environment](distributed.md).
-
-Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/data/index.html) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
 
 ### Prerequisites
 

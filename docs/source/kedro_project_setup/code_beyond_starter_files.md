@@ -35,7 +35,7 @@ This being the only constraint means that you can, for example:
 * Add `utils.py` file to a pipeline folder and import utilities defined by multiple
   functions in `nodes.py`.
 * Delete or rename a default `nodes.py` file, split it into multiple files or modules.
-* Instead of having a single `pipeline.py` in your pipeline folder, split it
+* Instead of having a single `pipeline.py` in your pipeline folder, split it, for example, 
   into `historical_pipeline.py` and `inference_pipeline.py`.
 * Instead of registering many pipelines in `register_pipelines()` function one by one,
   create a few `tp.Dict[str, Pipeline]` objects in different places of the project

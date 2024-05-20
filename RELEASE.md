@@ -1,15 +1,28 @@
-# Upcoming Release 0.19.5
+# Upcoming Release 0.19.6
 
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* User defined catch-all dataset factory patterns now override the default pattern provided by the runner.
 
 ## Breaking changes to the API
 
 ## Documentation changes
-* Updated the documentation for deploying a Kedro project with Astronomer Airflow.
+* Improved documentation for custom starters
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [doxenix](https://github.com/doxenix)
+
+
+# Release 0.19.5
+
+## Bug fixes and other changes
+* Fixed breaking import issue when working on a project with `kedro-viz` on python 3.8.
+
+## Documentation changes
+* Updated the documentation for deploying a Kedro project with Astronomer Airflow.
+* Used `kedro-sphinx-theme` for documentation.
 
 # Release 0.19.4
 
@@ -41,7 +54,6 @@
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
-
 * [ondrejzacha](https://github.com/ondrejzacha)
 * [Puneet](https://github.com/puneeter)
 

@@ -11,7 +11,13 @@ kedro new --starter=<path-to-starter>
 ```
 
 ```{note}
-`path-to-starter` could be a local directory or a VCS repository, as long as [Cookiecutter](https://cookiecutter.readthedocs.io/en/stable/usage.html) supports it.
+`path-to-starter` could be the path to a local directory, a URL to a remote VCS repository supported by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
+```
+
+If you want to use `--starter` as remote VCS repository, run:
+
+```bash
+kedro new --starter git+https://github.com/kedro-org/kedro-starters.git --directory spaceflights-pandas
 ```
 
 ## Starter aliases
@@ -79,5 +85,11 @@ kedro new --config=my_kedro_project.yml --starter=spaceflights-pandas
 
 This option is useful when the starter requires more configuration than the default mode requires.
 
-## Create a starter
+## Create a custom starter
 You can build your own starters for reuse within a project or team, as described in the [how to create a Kedro starter](../starters/create_a_starter.md) documentation.
+
+To create a project from a custom starter, run:
+
+```bash
+kedro new --starter=<path-to-starter> --directory <directory>
+```

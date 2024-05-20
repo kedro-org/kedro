@@ -109,7 +109,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.19.4
+v0.19.5
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -472,9 +472,9 @@ kedro ipython
 
 The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
-* `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
-* `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
-* `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
+* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
+* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
+* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
 To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined.

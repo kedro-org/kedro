@@ -499,7 +499,7 @@ def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str
     return load_versions_dict
 
 
-def validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
+def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
     VALIDATION_PATTERNS = {
         "yes_no": {
             "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
@@ -530,5 +530,5 @@ def validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
         sys.exit(1)
 
 
-def parse_yes_no_to_bool(value: str) -> Any:
+def _parse_yes_to_bool(value: str) -> Any:
     return value.strip().lower() in ["y", "yes"] if value is not None else None

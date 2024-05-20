@@ -30,8 +30,8 @@ from kedro.framework.cli.utils import (
     _get_entry_points,
     _safe_load_entry_point,
     command_with_verbosity,
-    parse_yes_no_to_bool,
-    validate_input_with_regex_pattern,
+    _parse_yes_to_bool,
+    _validate_input_with_regex_pattern,
 )
 
 TOOLS_ARG_HELP = """
@@ -319,9 +319,9 @@ def new(  # noqa: PLR0913
     )
 
     if telemetry_consent is not None:
-        validate_input_with_regex_pattern("yes_no", telemetry_consent)
+        _validate_input_with_regex_pattern("yes_no", telemetry_consent)
         telemetry_consent = (
-            "true" if parse_yes_no_to_bool(telemetry_consent) else "false"
+            "true" if _parse_yes_to_bool(telemetry_consent) else "false"
         )
 
     _create_project(project_template, cookiecutter_args, telemetry_consent)
@@ -423,11 +423,11 @@ def _get_prompts_required_and_clear_from_CLI_provided(
         del prompts_required["tools"]
 
     if project_name is not None:
-        validate_input_with_regex_pattern("project_name", project_name)
+        _validate_input_with_regex_pattern("project_name", project_name)
         del prompts_required["project_name"]
 
     if example_pipeline is not None:
-        validate_input_with_regex_pattern("yes_no", example_pipeline)
+        _validate_input_with_regex_pattern("yes_no", example_pipeline)
         del prompts_required["example_pipeline"]
 
     return prompts_required
@@ -538,7 +538,7 @@ def _get_extra_context(  # noqa: PLR0913
     if project_name is not None:
         extra_context["project_name"] = project_name
     if example_pipeline is not None:
-        extra_context["example_pipeline"] = str(parse_yes_no_to_bool(example_pipeline))
+        extra_context["example_pipeline"] = str(_parse_yes_to_bool(example_pipeline))
 
     # set defaults for required fields, will be used mostly for starters
     extra_context.setdefault("kedro_version", version)
@@ -630,13 +630,13 @@ def _fetch_validate_parse_config_from_file(
 
     _validate_config_file_against_prompts(config, prompts_required)
 
-    validate_input_with_regex_pattern(
+    _validate_input_with_regex_pattern(
         "project_name", config.get("project_name", "New Kedro Project")
     )
 
     example_pipeline = config.get("example_pipeline", "no")
-    validate_input_with_regex_pattern("yes_no", example_pipeline)
-    config["example_pipeline"] = str(parse_yes_no_to_bool(example_pipeline))
+    _validate_input_with_regex_pattern("yes_no", example_pipeline)
+    config["example_pipeline"] = str(_parse_yes_to_bool(example_pipeline))
 
     tools_short_names = config.get("tools", "none").lower()
     _validate_selected_tools(tools_short_names)
@@ -689,7 +689,7 @@ def _fetch_validate_parse_config_from_user_prompts(
         _validate_tool_selection(tools_numbers)
         config["tools"] = _convert_tool_numbers_to_readable_names(tools_numbers)
     if "example_pipeline" in config:
-        example_pipeline_bool = parse_yes_no_to_bool(config["example_pipeline"])
+        example_pipeline_bool = _parse_yes_to_bool(config["example_pipeline"])
         config["example_pipeline"] = str(example_pipeline_bool)
 
     return config

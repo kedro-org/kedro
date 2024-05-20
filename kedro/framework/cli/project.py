@@ -11,15 +11,15 @@ import click
 from kedro.framework.cli.utils import (
     _check_module_importable,
     _config_file_callback,
+    _parse_yes_to_bool,
     _split_load_versions,
     _split_params,
+    _validate_input_with_regex_pattern,
     call,
     env_option,
     forward_command,
-    _parse_yes_to_bool,
     split_node_names,
     split_string,
-    _validate_input_with_regex_pattern,
 )
 from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
@@ -224,9 +224,7 @@ def run(  # noqa: PLR0913
     """Run the pipeline."""
     if telemetry_consent is not None:
         _validate_input_with_regex_pattern("yes_no", telemetry_consent)
-        telemetry_consent = (
-            "true" if _parse_yes_to_bool(telemetry_consent) else "false"
-        )
+        telemetry_consent = "true" if _parse_yes_to_bool(telemetry_consent) else "false"
 
         project_path = str(_find_kedro_project(Path.cwd()))
 

@@ -28,10 +28,10 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _get_entry_points,
-    _safe_load_entry_point,
-    command_with_verbosity,
     _parse_yes_to_bool,
+    _safe_load_entry_point,
     _validate_input_with_regex_pattern,
+    command_with_verbosity,
 )
 
 TOOLS_ARG_HELP = """
@@ -320,9 +320,7 @@ def new(  # noqa: PLR0913
 
     if telemetry_consent is not None:
         _validate_input_with_regex_pattern("yes_no", telemetry_consent)
-        telemetry_consent = (
-            "true" if _parse_yes_to_bool(telemetry_consent) else "false"
-        )
+        telemetry_consent = "true" if _parse_yes_to_bool(telemetry_consent) else "false"
 
     _create_project(project_template, cookiecutter_args, telemetry_consent)
 

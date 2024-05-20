@@ -12,6 +12,7 @@
 
 ## Documentation changes
 * Improved documentation for custom starters
+* Added a new section on deploying Kedro project on AWS Airflow MWAA
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

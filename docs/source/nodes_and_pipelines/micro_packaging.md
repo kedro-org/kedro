@@ -1,5 +1,9 @@
 # Micro-packaging
 
+```{warning}
+_Micro-packaging is deprecated and will be removed from Kedro version 0.20.0._
+```
+
 Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond. A micro-package can be any part of Python code in a Kedro project including pipelines and utility functions.
 
 ## Package a micro-package

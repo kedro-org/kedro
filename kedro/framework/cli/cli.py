@@ -15,14 +15,8 @@ import click
 
 from kedro import __version__ as version
 from kedro.framework.cli import BRIGHT_BLACK, ORANGE
-from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
-from kedro.framework.cli.jupyter import jupyter_cli
-from kedro.framework.cli.micropkg import micropkg_cli
-from kedro.framework.cli.pipeline import pipeline_cli
-from kedro.framework.cli.project import project_group
-from kedro.framework.cli.registry import registry_cli
-from kedro.framework.cli.starters import create_cli
+from kedro.framework.cli.lazy_group import LazyGroup
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     ENTRY_POINT_GROUPS,
@@ -45,7 +39,24 @@ v{version}
 """
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
+@click.group(
+    cls=LazyGroup,
+    lazy_subcommands={
+        "registry": "kedro.framework.cli.registry.registry",
+        "catalog": "kedro.framework.cli.catalog.catalog",
+        "ipython": "kedro.framework.cli.project.ipython",
+        "run": "kedro.framework.cli.project.run",
+        "micropkg": "kedro.framework.cli.micropkg.micropkg",
+        "package": "kedro.framework.cli.project.package",
+        "jupyter": "kedro.framework.cli.jupyter.jupyter",
+        "pipeline": "kedro.framework.cli.pipeline.pipeline",
+        "new": "kedro.framework.cli.starters.new",
+        "starters": "kedro.framework.cli.starters.starter",
+        #   "project_group": "kedro.framework.cli.project.project_group",
+    },
+    context_settings=CONTEXT_SETTINGS,
+    name="Kedro",
+)
 @click.version_option(version, "--version", "-V", help="Show version and exit")
 def cli() -> None:  # pragma: no cover
     """Kedro is a CLI for creating and using Kedro projects. For more
@@ -125,7 +136,6 @@ class KedroCLI(CommandCollection):
         self._cli_hook_manager.hook.before_command_run(
             project_metadata=self._metadata, command_args=args
         )
-
         try:
             super().main(
                 args=args,
@@ -178,7 +188,7 @@ class KedroCLI(CommandCollection):
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
         """
-        return [cli, create_cli, *load_entry_points("global")]
+        return [cli, *load_entry_points("global")]
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
@@ -193,12 +203,12 @@ class KedroCLI(CommandCollection):
             return []
 
         built_in = [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            micropkg_cli,
-            project_group,
-            registry_cli,
+            # catalog_cli,
+            # jupyter_cli,
+            # pipeline_cli,
+            # micropkg_cli,
+            # project_group,
+            # registry_cli,
         ]
 
         plugins = load_entry_points("project")

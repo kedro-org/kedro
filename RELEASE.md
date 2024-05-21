@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.6
 
 ## Major features and improvements
+* It is now possible to use Kedro without having `rich` installed.
 * Added a `--telemetry` flag to `kedro run`, allowing consent to data usage to be granted or revoked at the same time the command is run.
 
 ## Bug fixes and other changes

@@ -1,0 +1,18 @@
+version: 1
+
+disable_existing_loggers: False
+
+handlers:
+  rich:
+    class: kedro.logging.RichHandler
+    rich_tracebacks: True
+    # Advance options for customisation.
+    # See https://docs.kedro.org/en/stable/logging/logging.html#project-side-logging-configuration
+    # tracebacks_show_locals: False
+
+loggers:
+  kedro:
+    level: INFO
+
+root:
+  handlers: [rich]

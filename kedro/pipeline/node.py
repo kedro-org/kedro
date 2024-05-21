@@ -13,7 +13,7 @@ from warnings import warn
 
 from more_itertools import spy, unzip
 
-from ._transcoding import _strip_transcoding
+from .transcoding import _strip_transcoding
 
 
 class Node:

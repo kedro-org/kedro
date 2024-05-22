@@ -1,6 +1,7 @@
 User-agent: *
 Disallow: /
 Allow: /en/stable/
+Allow: /en/0.19.6/
 Allow: /en/0.19.5/
 Allow: /en/0.19.4/
 Allow: /en/0.19.3/
@@ -11,5 +12,6 @@ Allow: /en/0.18.14/
 Allow: /en/0.17.7/
 Allow: /projects/kedro-viz/en/stable/
 Allow: /projects/kedro-datasets/en/kedro-datasets-3.0.0/
+Allow: */sitemap.xml
 
 Sitemap: https://docs.kedro.org/sitemap.xml

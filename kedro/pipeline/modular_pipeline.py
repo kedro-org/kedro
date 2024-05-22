@@ -8,7 +8,7 @@ from typing import AbstractSet, Iterable
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
-from ._transcoding import TRANSCODING_SEPARATOR, _strip_transcoding, _transcode_split
+from .transcoding import TRANSCODING_SEPARATOR, _strip_transcoding, _transcode_split
 
 
 class ModularPipelineError(Exception):
@@ -227,7 +227,6 @@ def pipeline(  # noqa: PLR0913
     if not any([inputs, outputs, parameters, namespace]):
         return pipe
 
-    # noqa: protected-access
     inputs = _get_dataset_names_mapping(inputs)
     outputs = _get_dataset_names_mapping(outputs)
     parameters = _get_param_names_mapping(parameters)

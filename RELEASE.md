@@ -1,15 +1,34 @@
-# Upcoming Release 0.19.5
+# Upcoming Release 0.19.6
 
 ## Major features and improvements
-* Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behavior is still to raise a warning for each failing pipeline.
+* Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behaviour is still to raise a warning for each failing pipeline.
+* It is now possible to use Kedro without having `rich` installed.
 
 ## Bug fixes and other changes
+* User defined catch-all dataset factory patterns now override the default pattern provided by the runner.
 
 ## Breaking changes to the API
 
+## Upcoming deprecations for Kedro 0.20.0
+* All micro-packaging commands (`kedro micropkg pull`, `kedro micropkg package`) are deprecated and will be removed in Kedro 0.20.0.
+
 ## Documentation changes
+* Improved documentation for custom starters
+* Added a new section on deploying Kedro project on AWS Airflow MWAA
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [doxenix](https://github.com/doxenix)
+
+
+# Release 0.19.5
+
+## Bug fixes and other changes
+* Fixed breaking import issue when working on a project with `kedro-viz` on python 3.8.
+
+## Documentation changes
+* Updated the documentation for deploying a Kedro project with Astronomer Airflow.
+* Used `kedro-sphinx-theme` for documentation.
 
 # Release 0.19.4
 
@@ -41,7 +60,6 @@
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
-
 * [ondrejzacha](https://github.com/ondrejzacha)
 * [Puneet](https://github.com/puneeter)
 

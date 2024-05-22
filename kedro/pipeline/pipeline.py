@@ -15,7 +15,23 @@ from graphlib import CycleError, TopologicalSorter
 import kedro
 from kedro.pipeline.node import Node, _to_list
 
-from ._transcoding import _strip_transcoding
+from .transcoding import _strip_transcoding
+
+
+def __getattr__(name: str) -> Any:
+    if name == "TRANSCODING_SEPARATOR":
+        import warnings
+
+        from kedro.pipeline.transcoding import TRANSCODING_SEPARATOR
+
+        warnings.warn(
+            f"{repr(name)} has been moved to 'kedro.pipeline.transcoding', "
+            f"and the alias will be removed in Kedro 0.20.0",
+            kedro.KedroDeprecationWarning,
+            stacklevel=2,
+        )
+        return TRANSCODING_SEPARATOR
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 class OutputNotUniqueError(Exception):

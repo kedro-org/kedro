@@ -1,4 +1,16 @@
-# Upcoming Release 0.19.6
+# Upcoming Release 0.19.7
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Documentation changes
+
+## Community contributions
+
+# Release 0.19.6
 
 ## Major features and improvements
 * Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behaviour is still to raise a warning for each failing pipeline.
@@ -15,12 +27,11 @@
 
 ## Documentation changes
 * Improved documentation for custom starters
-* Added a new section on deploying Kedro project on AWS Airflow MWAA
+* Added a new docs section on deploying Kedro project on AWS Airflow MWAA
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [doxenix](https://github.com/doxenix)
-
 
 # Release 0.19.5
 

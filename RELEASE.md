@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behaviour is still to raise a warning for each failing pipeline.
 * It is now possible to use Kedro without having `rich` installed.
+* Added a `--telemetry` flag to `kedro run`, allowing consent to data usage to be granted or revoked at the same time the command is run.
 
 ## Bug fixes and other changes
 * User defined catch-all dataset factory patterns now override the default pattern provided by the runner.

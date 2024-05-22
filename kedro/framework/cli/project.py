@@ -11,8 +11,10 @@ import click
 from kedro.framework.cli.utils import (
     _check_module_importable,
     _config_file_callback,
+    _parse_yes_to_bool,
     _split_load_versions,
     _split_params,
+    _validate_input_with_regex_pattern,
     call,
     env_option,
     forward_command,
@@ -22,7 +24,7 @@ from kedro.framework.cli.utils import (
 from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
-from kedro.utils import load_obj
+from kedro.utils import _find_kedro_project, load_obj
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
 requirements.txt and run 'pip install -r requirements.txt'."""
@@ -59,6 +61,10 @@ param_group.param1:value1."""
 INPUT_FILE_HELP = """Name of the requirements file to compile."""
 OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
 CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
+TELEMETRY_ARG_HELP = """Allow or not allow Kedro to collect usage analytics.
+We cannot see nor store information contained into a Kedro project. Opt in with "yes"
+and out with "no".
+"""
 
 
 @click.group(name="Kedro")
@@ -196,6 +202,7 @@ def package(metadata: ProjectMetadata) -> None:
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
+@click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP)
 def run(  # noqa: PLR0913
     tags: str,
     env: str,
@@ -212,8 +219,17 @@ def run(  # noqa: PLR0913
     conf_source: str,
     params: dict[str, Any],
     namespace: str,
+    telemetry_consent: str,
 ) -> None:
     """Run the pipeline."""
+    if telemetry_consent is not None:
+        _validate_input_with_regex_pattern("yes_no", telemetry_consent)
+        telemetry_consent = "true" if _parse_yes_to_bool(telemetry_consent) else "false"
+
+        project_path = str(_find_kedro_project(Path.cwd()))
+
+        with open(project_path + "/.telemetry", "w") as telemetry_file:
+            telemetry_file.write("consent: " + telemetry_consent)
 
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)

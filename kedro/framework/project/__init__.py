@@ -347,7 +347,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
+def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: PLR0912
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.
@@ -359,13 +359,23 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
     For more information on the pipeline registry and autodiscovery, see
     https://kedro.readthedocs.io/en/stable/nodes_and_pipelines/pipeline_registry.html
 
+    Args:
+        raise_errors: If ``True``, raise an error upon failed discovery.
+
     Returns:
         A generated mapping from pipeline names to ``Pipeline`` objects.
+
+    Raises:
+        ImportError: When a module does not expose a ``create_pipeline``
+            function, the ``create_pipeline`` function does not return a
+            ``Pipeline`` object, or if the module import fails up front.
+            If ``raise_errors`` is ``False``, see Warns section instead.
 
     Warns:
         UserWarning: When a module does not expose a ``create_pipeline``
             function, the ``create_pipeline`` function does not return a
             ``Pipeline`` object, or if the module import fails up front.
+            If ``raise_errors`` is ``True``, see Raises section instead.
     """
     pipeline_obj = None
 
@@ -375,6 +385,12 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         pipeline_module = importlib.import_module(pipeline_module_name)
     except Exception as exc:
         if str(exc) != f"No module named '{pipeline_module_name}'":
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the "
+                    f"'{pipeline_module_name}' module."
+                ) from exc
+
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()
@@ -406,7 +422,13 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
-        except:  # noqa: E722
+        except Exception as exc:
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the "
+                    f"'{pipeline_module_name}' module."
+                ) from exc
+
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()

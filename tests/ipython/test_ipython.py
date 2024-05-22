@@ -457,9 +457,20 @@ import logging.config  # noqa Dummy import"""
         ipython.magic("load_node dummy_node")
         spy.assert_called_once()
 
-    @pytest.mark.parametrize("run_env", ["databricks", "colab", "dummy"])
-    def test_load_node_with_other(self, mocker, ipython, run_env):
+    @pytest.mark.parametrize(
+        "run_env, rich_installed",
+        [
+            ("databricks", True),
+            ("databricks", False),
+            ("colab", True),
+            ("colab", False),
+            ("dummy", True),
+            ("dummy", False),
+        ],
+    )
+    def test_load_node_with_other(self, mocker, ipython, run_env, rich_installed):
         mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.RICH_INSTALLED", rich_installed)
         mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
         mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)
         spy = mocker.spy(kedro.ipython, "_print_cells")

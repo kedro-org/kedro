@@ -20,9 +20,9 @@ from kedro.framework.cli.starters import (
     _fetch_validate_parse_config_from_user_prompts,
     _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
-    _parse_yes_no_to_bool,
     _validate_tool_selection,
 )
+from kedro.framework.cli.utils import _parse_yes_to_bool
 
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
 
@@ -103,7 +103,7 @@ def _get_expected_files(tools: str, example_pipeline: str):
         "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each tool
     tools_list = _parse_tools_input(tools)
-    example_pipeline_bool = _parse_yes_no_to_bool(example_pipeline)
+    example_pipeline_bool = _parse_yes_to_bool(example_pipeline)
     expected_files = FILES_IN_TEMPLATE_WITH_NO_TOOLS
 
     for tool in tools_list:
@@ -1119,7 +1119,7 @@ class TestToolsAndExampleFromUserPrompts:
         message = f"'{input}' is an invalid range for project tools.\nPlease ensure range values go from smaller to larger."
         assert message in result.output
 
-    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
+    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "   yEs   "])
     def test_valid_example(self, fake_kedro_cli, example_pipeline):
         result = CliRunner().invoke(
             fake_kedro_cli,
@@ -1285,7 +1285,7 @@ class TestToolsAndExampleFromConfigFile:
             in result.output
         )
 
-    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "    yeS   "])
+    @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "   yEs   "])
     def test_valid_example(self, fake_kedro_cli, example_pipeline):
         """Test project created from config."""
         config = {
@@ -1323,7 +1323,7 @@ class TestToolsAndExampleFromConfigFile:
 
         assert result.exit_code != 0
         assert (
-            f"'{bad_input}' is an invalid value for example pipeline." in result.output
+            f"'{bad_input}' is an invalid value for example pipeline" in result.output
         )
         assert (
             "It must contain only y, n, YES, or NO (case insensitive).\n"
@@ -1482,18 +1482,18 @@ class TestParseYesNoToBools:
         "input",
         ["yes", "YES", "y", "Y", "yEs"],
     )
-    def parse_yes_no_to_bool_responds_true(self, input):
-        assert _parse_yes_no_to_bool(input) is True
+    def _parse_yes_to_bool_responds_true(self, input):
+        assert _parse_yes_to_bool(input) is True
 
     @pytest.mark.parametrize(
         "input",
         ["no", "NO", "n", "N", "No", ""],
     )
-    def parse_yes_no_to_bool_responds_false(self, input):
-        assert _parse_yes_no_to_bool(input) is False
+    def _parse_yes_to_bool_responds_false(self, input):
+        assert _parse_yes_to_bool(input) is False
 
-    def parse_yes_no_to_bool_responds_none(self):
-        assert _parse_yes_no_to_bool(None) is None
+    def _parse_yes_to_bool_responds_none(self):
+        assert _parse_yes_to_bool(None) is None
 
 
 class TestValidateSelection:
@@ -1661,7 +1661,7 @@ class TestTelemetryCLIFlag:
         assert result.exit_code == 1
 
         assert (
-            "'wrong' is an invalid value for example pipeline. It must contain only y, n, YES, or NO (case insensitive)."
+            "'wrong' is an invalid value for example pipeline or telemetry consent. It must contain only y, n, YES, or NO (case insensitive)."
             in result.output
         )
 

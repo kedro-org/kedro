@@ -234,6 +234,7 @@ linkcheck_ignore = [
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
+    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/rich_logging.yml",
     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",

@@ -46,7 +46,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
 * Updated CLI command `kedro catalog resolve` to read credentials properly.
 * Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
-* Updated ``.gitignore`` to prevent pushing Mlflow local runs folder to a remote forge when using mlflow and git.
+* Updated ``.gitignore`` to prevent pushing MLflow local runs folder to a remote forge when using MLflow and Git.
 * Fixed error handling message for malformed yaml/json files in OmegaConfigLoader.
 * Fixed a bug in `node`-creation allowing self-dependencies when using transcoding, that is datasets named like `name@format`.
 * Improved error message when passing wrong value to node.

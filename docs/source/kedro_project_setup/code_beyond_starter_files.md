@@ -20,7 +20,7 @@ The only technical constraint for arranging code in the project is that `pipelin
 and `settings.py` files must be located in `<your_project>/src/<your_project>` directory, which is where
 they are created by default.
 
-`pipeline_registry.py` must have a `register_pipelines()` function that returns a `tp.Dict[str, Pipeline]`
+`pipeline_registry.py` must have a `register_pipelines()` function that returns a `dict[str, Pipeline]`
 mapping from pipeline name to a corresponding `Pipeline` object.
 
 Other than that, **Kedro does not impose any constraints on where you should keep files with
@@ -38,7 +38,7 @@ This being the only constraint means that you can, for example:
 * Instead of having a single `pipeline.py` in your pipeline folder, split it, for example,
   into `historical_pipeline.py` and `inference_pipeline.py`.
 * Instead of registering many pipelines in `register_pipelines()` function one by one,
-  create a few `tp.Dict[str, Pipeline]` objects in different places of the project
+  create a few `dict[str, Pipeline]` objects in different places of the project
   and then make `register_pipelines()` return a union of those.
 
 ## Common codebase extension scenarios

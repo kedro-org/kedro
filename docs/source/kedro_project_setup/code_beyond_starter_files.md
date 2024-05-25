@@ -43,7 +43,7 @@ This being the only constraint means that you can, for example:
   and then make `register_pipelines()` return a union of those.
 
   ```{note}
-  While Kedro features a [`find_pipelines()` functionality for autodiscovery of pipelines](../nodes_and_pipelines/pipeline_registry.md#pipeline-autodiscovery),
+  While Kedro features [`find_pipelines()` functionality for autodiscovery of pipelines](../nodes_and_pipelines/pipeline_registry.md#pipeline-autodiscovery),
   for large projects you may want a finer control and register pipelines manually.
   ```
 

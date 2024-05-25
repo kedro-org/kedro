@@ -35,8 +35,9 @@ This being the only constraint means that you can, for example:
 * [Use Kedro in a monorepo setup](#kedro-project-in-a-monorepo-setup) if there are
   software components independent of Kedro that you want to keep together in the version control system.
 * Delete or rename a default `nodes.py` file, split it into multiple files or modules.
-* Instead of having a single `pipeline.py` in your pipeline folder, split it, for example,
-  into `historical_pipeline.py` and `inference_pipeline.py`.
+* If you have multiple large `Pipeline` objects defined in a single `pipeline.py`,
+  split them into separate `.py` files. For example, in `data_processing` pipeline
+  you may want to have `cleaning_pipeline.py` and `merging_pipeline.py`.
 * Instead of registering many pipelines in `register_pipelines()` function one by one,
   create a few `dict[str, Pipeline]` objects in different places of the project
   and then make `register_pipelines()` return a union of those.

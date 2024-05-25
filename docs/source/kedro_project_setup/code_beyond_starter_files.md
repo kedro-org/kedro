@@ -115,14 +115,16 @@ A suggested solution in this case would be a **monorepo** design. Below is an ex
 ```text
 └── repo_root
     ├── packages
-    │   ├── kedro_project               <-- A Kedro project for ML model training.
+    │   ├── kedro_project          <-- A Kedro project for ML model training.
     │   │   ├── conf
     │   │   ├── data
     │   │   ├── notebooks
     │   │   ├── ...
-    │   ├── optimizer                   <-- Standalone package.
-    │   └── dashboard                   <-- Standalone package, may import `optimizer`, but should not know anything about model training pipeline.
-    ├── requirements.txt                <-- Linters, code formatters... Not dependencies of packages.
-    ├── pyproject.toml                  <-- Settings for those, like `[tool.isort]`.
+    │   ├── optimizer              <-- Standalone package.
+    │   └── dashboard              <-- Standalone package, may import `optimizer`, but should not know anything about model training pipeline.
+    ├── ...
+    ├── ... Examples of what you may want in the repo root:
+    ├── requirements.txt           <-- Linters, code formatters... Not dependencies of packages.
+    ├── ruff.toml                  <-- Or configs for other tools that you want to share between packages.
     └── ...
 ```

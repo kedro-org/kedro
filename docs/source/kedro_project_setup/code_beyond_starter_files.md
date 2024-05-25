@@ -42,6 +42,11 @@ This being the only constraint means that you can, for example:
   create a few `dict[str, Pipeline]` objects in different places of the project
   and then make `register_pipelines()` return a union of those.
 
+  ```{note}
+  While Kedro features a [`find_pipelines()` functionality for autodiscovery of pipelines](../nodes_and_pipelines/pipeline_registry.md#pipeline-autodiscovery),
+  for large projects you may want a finer control and register pipelines manually.
+  ```
+
 ## Common codebase extension scenarios
 
 This section provides examples of how you can handle some common cases of adding more

@@ -30,8 +30,8 @@ This being the only constraint means that you can, for example:
 * Add `utils.py` file to a pipeline folder and import utilities used by multiple
   functions in `nodes.py` from there.
 * [Share modules between pipelines](#sharing-modules-between-pipelines).
-  Those could be utility functionalities, or your standalone module responsible for
-  the domain logic of the industry you work at.
+  Those could be utility functionalities, or a standalone module responsible for
+  the domain-specific logic.
 * [Use Kedro in a monorepo setup](#kedro-project-in-a-monorepo-setup) if there are
   software components independent of Kedro that you want to keep together in the version control system.
 * Delete or rename a default `nodes.py` file, split it into multiple files or modules.

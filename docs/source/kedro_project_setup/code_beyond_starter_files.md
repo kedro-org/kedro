@@ -17,19 +17,14 @@ pipelines and using Kedro in a monorepo setup.
 ## Where does Kedro look for code to be located
 
 The only technical constraint for arranging code in the project is that `pipeline_registry.py`
-file must be located in `<your_project>/src/<your_project>` directory, which is where
-it is created by default.
+and `settings.py` files must be located in `<your_project>/src/<your_project>` directory, which is where
+they are created by default.
 
-This file must have a `register_pipelines()` function that returns a `tp.Dict[str, Pipeline]`
-mapping from pipeline name to corresponding `Pipeline` object.
+`pipeline_registry.py` must have a `register_pipelines()` function that returns a `tp.Dict[str, Pipeline]`
+mapping from pipeline name to a corresponding `Pipeline` object.
 
 Other than that, **Kedro does not impose any constraints on where you should keep files with
 `Pipeline`s, `Node`s, or functions wrapped by `node`**.
-
-```{note}
-You actually can make Kedro look for pipeline registry in a different place by modifying the
-`__main__.py` file of your project, but such advanced customisations are not in scope for this section.
-```
 
 This being the only constraint means that you can, for example:
 * Add `utils.py` file to a pipeline folder and import utilities used by multiple

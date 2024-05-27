@@ -32,7 +32,7 @@
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [doxenix](https://github.com/doxenix)
-
+* [cleeeks](https://github.com/cleeeks)
 # Release 0.19.5
 
 ## Bug fixes and other changes

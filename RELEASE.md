@@ -1,4 +1,4 @@
-# Upcoming Release 0.19.6
+# Upcoming Release 0.19.7
 
 ## Major features and improvements
 
@@ -10,6 +10,30 @@
 
 ## Community contributions
 
+# Release 0.19.6
+
+## Major features and improvements
+* Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behaviour is still to raise a warning for each failing pipeline.
+* It is now possible to use Kedro without having `rich` installed.
+* Updated custom logging behavior: `conf/logging.yml` will be used if it exists and `KEDRO_LOGGING_CONFIG` is not set; otherwise, `default_logging.yml` will be used.
+
+## Bug fixes and other changes
+* User defined catch-all dataset factory patterns now override the default pattern provided by the runner.
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.20.0
+* All micro-packaging commands (`kedro micropkg pull`, `kedro micropkg package`) are deprecated and will be removed in Kedro 0.20.0.
+
+## Documentation changes
+* Improved documentation for custom starters
+* Added a new docs section on deploying Kedro project on AWS Airflow MWAA
+* Detailed instructions on using `globals` and `runtime_params` with the `OmegaConfigLoader`
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [doxenix](https://github.com/doxenix)
+* [cleeeks](https://github.com/cleeeks)
 
 # Release 0.19.5
 
@@ -35,7 +59,7 @@
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
 * Updated CLI command `kedro catalog resolve` to read credentials properly.
 * Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
-* Updated ``.gitignore`` to prevent pushing Mlflow local runs folder to a remote forge when using mlflow and git.
+* Updated ``.gitignore`` to prevent pushing MLflow local runs folder to a remote forge when using MLflow and Git.
 * Fixed error handling message for malformed yaml/json files in OmegaConfigLoader.
 * Fixed a bug in `node`-creation allowing self-dependencies when using transcoding, that is datasets named like `name@format`.
 * Improved error message when passing wrong value to node.
@@ -50,7 +74,6 @@
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
-
 * [ondrejzacha](https://github.com/ondrejzacha)
 * [Puneet](https://github.com/puneeter)
 

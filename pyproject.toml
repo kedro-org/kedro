@@ -25,7 +25,7 @@ dependencies = [
     "more_itertools>=8.14.0",
     "omegaconf>=2.1.1",
     "parse>=1.19.0",
-    "pluggy>=1.0, <1.4.0",
+    "pluggy>=1.0",
     "pre-commit-hooks",
     "PyYAML>=4.2,<7.0",
     "rich>=12.0,<14.0",
@@ -65,13 +65,13 @@ test = [
     "kedro-datasets<2.0.0; python_version < '3.9'",
     "mypy~=1.0",
     "pandas~=2.0",
-    "pluggy>=1.0, <1.4", # pluggy 1.4 hide imports inside function and causing mocking issue
+    "pluggy>=1.0",
     "pre-commit>=2.9.2, <4.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest>=7.2,<9.0",
-    "s3fs>=2021.4, <2024.4",  # Upper bound set arbitrarily, to be reassessed in early 2024
+    "s3fs>=2021.4, <2024.6",  # Upper bound set arbitrarily, to be reassessed in early 2024
     "trufflehog~=2.1",
     # mypy related dependencies
     "pandas-stubs",

@@ -35,6 +35,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How do I specify additional configuration environments](../configuration/configuration_basics.md#how-to-specify-additional-configuration-environments)?
 * [How do I change the default overriding configuration environment](../configuration/configuration_basics.md#how-to-change-the-default-overriding-environment)?
 * [How do I use only one configuration environment](../configuration/configuration_basics.md#how-to-use-only-one-configuration-environment)?
+* [How do I use Kedro without the rich library](../configuration/configuration_basics.md#how-to-use-kedro-without-the-rich-library)?
 
 ### Advanced topics
 

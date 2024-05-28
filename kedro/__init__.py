@@ -6,7 +6,7 @@ configuration and pipeline assembly.
 import sys
 import warnings
 
-__version__ = "0.19.5"
+__version__ = "0.19.6"
 
 
 class KedroDeprecationWarning(DeprecationWarning):

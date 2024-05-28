@@ -216,12 +216,40 @@ class _ProjectPipelines(MutableMapping):
 class _ProjectLogging(UserDict):
     def __init__(self) -> None:
         """Initialise project logging. The path to logging configuration is given in
-        environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
-        path = os.environ.get(
-            "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml"
-        )
+        environment variable KEDRO_LOGGING_CONFIG (defaults to conf/logging.yml)."""
+
+        # Check if a user path is set in the environment variable
+        user_logging_path = os.environ.get("KEDRO_LOGGING_CONFIG")
+
+        # Check if the default logging configuration exists
+        default_logging_path = Path("conf/logging.yml")
+        if not default_logging_path.exists():
+            default_logging_path = Path(
+                os.environ.get(
+                    "KEDRO_LOGGING_CONFIG",
+                    Path(__file__).parent / "rich_logging.yml"
+                    if importlib.util.find_spec("rich")
+                    else Path(__file__).parent / "default_logging.yml",
+                )
+            )
+
+        # Use the user path if available, otherwise, use the default path
+        if user_logging_path and Path(user_logging_path).exists():
+            path = Path(user_logging_path)
+        else:
+            path = default_logging_path
+
+        # Load and apply the logging configuration
         logging_config = Path(path).read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
+
+        # Log info about the logging configuration
+        if not user_logging_path and default_logging_path == Path("conf/logging.yml"):
+            logger = logging.getLogger(__name__)
+            logger.info(
+                f"Using `{path}` as logging configuration. "
+                f"You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
+            )
 
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
@@ -319,7 +347,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
+def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: PLR0912
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.
@@ -331,13 +359,23 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
     For more information on the pipeline registry and autodiscovery, see
     https://kedro.readthedocs.io/en/stable/nodes_and_pipelines/pipeline_registry.html
 
+    Args:
+        raise_errors: If ``True``, raise an error upon failed discovery.
+
     Returns:
         A generated mapping from pipeline names to ``Pipeline`` objects.
+
+    Raises:
+        ImportError: When a module does not expose a ``create_pipeline``
+            function, the ``create_pipeline`` function does not return a
+            ``Pipeline`` object, or if the module import fails up front.
+            If ``raise_errors`` is ``False``, see Warns section instead.
 
     Warns:
         UserWarning: When a module does not expose a ``create_pipeline``
             function, the ``create_pipeline`` function does not return a
             ``Pipeline`` object, or if the module import fails up front.
+            If ``raise_errors`` is ``True``, see Raises section instead.
     """
     pipeline_obj = None
 
@@ -347,6 +385,12 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         pipeline_module = importlib.import_module(pipeline_module_name)
     except Exception as exc:
         if str(exc) != f"No module named '{pipeline_module_name}'":
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the "
+                    f"'{pipeline_module_name}' module."
+                ) from exc
+
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()
@@ -378,7 +422,13 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
-        except:  # noqa: E722
+        except Exception as exc:
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the "
+                    f"'{pipeline_module_name}' module."
+                ) from exc
+
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()

@@ -159,3 +159,33 @@ def test_has_rich_handler():
     assert not has_rich_handler(test_logger)
     test_logger.addHandler(RichHandler())
     assert has_rich_handler(test_logger)
+
+
+    def test_default_logging_info_emission(monkeypatch, capsys):
+    # Expected path and logging configuration
+    expected_path = Path("conf/logging.yml")
+    dummy_logging_config = yaml.dump(
+        {"version": 1, "loggers": {"kedro": {"level": "INFO"}}}
+    )
+
+    # Setup environment and path mocks
+    monkeypatch.delenv("KEDRO_LOGGING_CONFIG", raising=False)
+    monkeypatch.setattr(Path, "exists", lambda x: x == expected_path)
+    monkeypatch.setattr(
+        Path,
+        "read_text",
+        lambda x, encoding="utf-8": dummy_logging_config
+        if x == expected_path
+        else FileNotFoundError("File not found"),
+    )
+
+    from kedro.framework.project import _ProjectLogging
+
+    _ProjectLogging()
+
+    captured = capsys.readouterr()
+
+    expected_message = f"Using `{expected_path}`"
+    assert (
+        expected_message in captured.out
+    ), f"Expected message not found in logs: {captured.out}"

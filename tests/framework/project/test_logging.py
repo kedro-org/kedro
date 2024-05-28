@@ -161,7 +161,7 @@ def test_has_rich_handler():
     assert has_rich_handler(test_logger)
 
 
-    def test_default_logging_info_emission(monkeypatch, capsys):
+def test_default_logging_info_emission(monkeypatch, capsys):
     # Expected path and logging configuration
     expected_path = Path("conf/logging.yml")
     dummy_logging_config = yaml.dump(

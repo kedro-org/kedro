@@ -18,7 +18,7 @@ which will prompt you for your consent the first time.
 
 ## Collected data fields:
 
-- **Unique user identifier(UUID):** The UUID is a randomly generated anonymous identifier, stored within an OS-specific configuration folder for Kedro, named 'telemetry.conf'. If a UUID does not already exist, the telemetry plugin generates a new one, stores it, and then uses this UUID in subsequent telemetry events.
+- **Unique user identifier(UUID):** The UUID is a randomly generated anonymous identifier, stored within an OS-specific configuration folder for Kedro, named `telemetry.toml`. If a UUID does not already exist, the telemetry plugin generates a new one, stores it, and then uses this UUID in subsequent telemetry events.
 - **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy. Example Input: `kedro run --pipeline=ds --env=test` What we receive: `kedro run --pipeline ***** --env *****`
 - **Hashed Package Name:** An anonymized identifier of the project.
 - **Kedro Project Version:** The version of Kedro being used.

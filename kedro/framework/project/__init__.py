@@ -217,39 +217,31 @@ class _ProjectLogging(UserDict):
     def __init__(self) -> None:
         """Initialise project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to conf/logging.yml)."""
-
-        # Check if a user path is set in the environment variable
+        logger = logging.getLogger(__name__)
         user_logging_path = os.environ.get("KEDRO_LOGGING_CONFIG")
+        project_logging_path = Path("conf/logging.yml")
+        default_logging_path = Path(
+            Path(__file__).parent / "rich_logging.yml"
+            if importlib.util.find_spec("rich")
+            else Path(__file__).parent / "default_logging.yml",
+        )
+        msg = ""
+        if user_logging_path:
+            path = user_logging_path
 
-        # Check if the default logging configuration exists
-        default_logging_path = Path("conf/logging.yml")
-        if not default_logging_path.exists():
-            default_logging_path = Path(
-                os.environ.get(
-                    "KEDRO_LOGGING_CONFIG",
-                    Path(__file__).parent / "rich_logging.yml"
-                    if importlib.util.find_spec("rich")
-                    else Path(__file__).parent / "default_logging.yml",
-                )
-            )
-
-        # Use the user path if available, otherwise, use the default path
-        if user_logging_path and Path(user_logging_path).exists():
-            path = Path(user_logging_path)
+        elif project_logging_path.exists():
+            path = project_logging_path
+            msg = "You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
         else:
+            # Fallback to the framework default loggings
             path = default_logging_path
+
+        msg = f"Using `{path}` as logging configuration. " + msg
+        logger.info(msg)
 
         # Load and apply the logging configuration
         logging_config = Path(path).read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
-
-        # Log info about the logging configuration
-        if not user_logging_path and default_logging_path == Path("conf/logging.yml"):
-            logger = logging.getLogger(__name__)
-            logger.info(
-                f"Using `{path}` as logging configuration. "
-                f"You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
-            )
 
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project

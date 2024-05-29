@@ -225,7 +225,9 @@ class _ProjectLogging(UserDict):
             if importlib.util.find_spec("rich")
             else Path(__file__).parent / "default_logging.yml",
         )
+        path: str | Path
         msg = ""
+
         if user_logging_path:
             path = user_logging_path
 
@@ -236,12 +238,12 @@ class _ProjectLogging(UserDict):
             # Fallback to the framework default loggings
             path = default_logging_path
 
-        msg = f"Using `{path}` as logging configuration. " + msg
-        logger.info(msg)
+        msg = f"Using '{str(path)}' as logging configuration. " + msg
 
         # Load and apply the logging configuration
         logging_config = Path(path).read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
+        logger.info(msg)
 
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project

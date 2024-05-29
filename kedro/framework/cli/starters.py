@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 import click
+import requests
 import yaml
 from attrs import define, field
 from importlib_metadata import EntryPoints
@@ -95,7 +96,30 @@ class KedroStarterSpec:
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
-_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+
+def _kedro_and_starters_version_identical() -> bool:
+    response = requests.get(
+        "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+        timeout=10,
+    )
+    http_success: int = 200
+
+    if response.status_code == http_success:
+        latest_release = response.json()
+    else:
+        raise RuntimeError(
+            f"Error fetching release information: {response.status_code}"
+        )
+    return True if version == latest_release["tag_name"] else False
+
+
+_STARTERS_REPO = (
+    "git+https://github.com/kedro-org/kedro-starters.git"
+    if _kedro_and_starters_version_identical()
+    else "https://github.com/kedro-org/kedro-starters.git@main"
+)
+
+
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
@@ -773,7 +797,11 @@ def _make_cookiecutter_args_and_fetch_template(
 
     tools = config["tools"]
     example_pipeline = config["example_pipeline"]
-    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
+    starter_path = (
+        "git+https://github.com/kedro-org/kedro-starters.git"
+        if _kedro_and_starters_version_identical()
+        else "https://github.com/kedro-org/kedro-starters.git@main"
+    )
 
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.

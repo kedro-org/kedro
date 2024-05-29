@@ -102,14 +102,15 @@ def _kedro_and_starters_version_identical() -> bool:
         "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
         timeout=10,
     )
-    http_success: int = 200
+    http_success = 200
 
     if response.status_code == http_success:
         latest_release = response.json()
     else:
         raise RuntimeError(
-            f"Error fetching release information: {response.status_code}"
+            f"Error fetching kedro-starters latest release version: {response.status_code}"
         )
+
     return True if version == latest_release["tag_name"] else False
 
 

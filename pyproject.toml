@@ -77,6 +77,7 @@ test = [
     "pandas-stubs",
     "types-PyYAML",
     "types-cachetools",
+    "types-requests",
     "types-toml"
 ]
 docs = [

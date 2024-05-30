@@ -111,13 +111,16 @@ def _suggest_cli_command(
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: tuple[str, Sequence[click.MultiCommand]]):
+    def __init__(
+        self, *groups: tuple[str, Sequence[click.MultiCommand]], lazy_groups=None
+    ):
+        # print("GROUPS", groups)
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
             for title, cli_list in groups
         ]
+        self.lazy_group = lazy_groups
         sources = list(chain.from_iterable(cli_list for _, cli_list in self.groups))
-
         help_texts = [
             cli.help
             for cli_collection in sources
@@ -178,6 +181,28 @@ class CommandCollection(click.CommandCollection):
             for group_name, cli_list in named_groups.items()
             if cli_list
         ]
+
+    def main(
+        self,
+        args,
+        prog_name,
+        complete_var,
+        standalone_mode,
+        **extra,
+    ):
+        i = 0
+        while args[0] not in self.list_commands(None) and i < len(self.lazy_group):
+            loaded_ep = _safe_load_entry_point(self.lazy_group[i])
+            self.add_source(loaded_ep)
+            i += 1
+
+        return super().main(
+            args=args,
+            prog_name=prog_name,
+            complete_var=complete_var,
+            standalone_mode=standalone_mode,
+            **extra,
+        )
 
     def resolve_command(
         self, ctx: click.core.Context, args: list

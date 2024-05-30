@@ -105,6 +105,7 @@ class KedroCLI(CommandCollection):
         super().__init__(
             ("Global commands", self.global_groups),
             ("Project specific commands", self.project_groups),
+            lazy_groups=list(self.lazy_global_groups) + list(self.lazy_project_groups),
         )
 
     def main(
@@ -173,12 +174,22 @@ class KedroCLI(CommandCollection):
             sys.exit(exc.code)
 
     @property
+    def lazy_global_groups(self):
+        eps = _get_entry_points("global")
+        return eps
+
+    @property
+    def lazy_project_groups(self):
+        eps = _get_entry_points("project")
+        return eps
+
+    @property
     def global_groups(self) -> Sequence[click.MultiCommand]:
         """Property which loads all global command groups from plugins and
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
         """
-        return [cli, create_cli, *load_entry_points("global")]
+        return [cli, create_cli]
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
@@ -201,7 +212,7 @@ class KedroCLI(CommandCollection):
             registry_cli,
         ]
 
-        plugins = load_entry_points("project")
+        # plugins = load_entry_points("project")
 
         try:
             project_cli = importlib.import_module(f"{self._metadata.package_name}.cli")
@@ -209,7 +220,7 @@ class KedroCLI(CommandCollection):
         except ModuleNotFoundError:
             # return only built-in commands and commands from plugins
             # (plugins can override built-in commands)
-            return [*built_in, *plugins]
+            return [*built_in]
 
         # fail badly if cli.py exists, but has no `cli` in it
         if not hasattr(project_cli, "cli"):
@@ -219,7 +230,7 @@ class KedroCLI(CommandCollection):
         user_defined = project_cli.cli
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
-        return [*built_in, *plugins, user_defined]
+        return [*built_in, user_defined]
 
 
 def main() -> None:  # pragma: no cover

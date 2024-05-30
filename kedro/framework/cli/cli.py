@@ -105,7 +105,7 @@ class KedroCLI(CommandCollection):
         super().__init__(
             ("Global commands", self.global_groups),
             ("Project specific commands", self.project_groups),
-            lazy_groups=list(self.lazy_global_groups) + list(self.lazy_project_groups),
+            plugin_groups=self.plugin_groups,
         )
 
     def main(
@@ -174,13 +174,8 @@ class KedroCLI(CommandCollection):
             sys.exit(exc.code)
 
     @property
-    def lazy_global_groups(self):
-        eps = _get_entry_points("global")
-        return eps
-
-    @property
-    def lazy_project_groups(self):
-        eps = _get_entry_points("project")
+    def plugin_groups(self):
+        eps = list(_get_entry_points("global")) + list(_get_entry_points("project"))
         return eps
 
     @property
@@ -211,8 +206,6 @@ class KedroCLI(CommandCollection):
             project_group,
             registry_cli,
         ]
-
-        # plugins = load_entry_points("project")
 
         try:
             project_cli = importlib.import_module(f"{self._metadata.package_name}.cli")

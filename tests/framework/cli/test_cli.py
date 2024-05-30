@@ -1,5 +1,4 @@
 from collections import namedtuple
-from itertools import cycle
 from os import rename
 from pathlib import Path
 
@@ -319,12 +318,7 @@ class TestKedroCLI:
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            side_effect=cycle([ModuleNotFoundError()]),
-        )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        print(kedro_cli.project_groups)
         assert len(kedro_cli.project_groups) == 6
         assert kedro_cli.project_groups == [
             catalog_cli,
@@ -381,6 +375,8 @@ class TestKedroCLI:
         assert kedro_cli.global_groups == [cli, create_cli]
 
         result = CliRunner().invoke(kedro_cli, [])
+
+        print(result)
 
         assert result.exit_code == 0
         assert "Global commands from Kedro" in result.output

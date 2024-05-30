@@ -105,7 +105,7 @@ class KedroCLI(CommandCollection):
         super().__init__(
             ("Global commands", self.global_groups),
             ("Project specific commands", self.project_groups),
-            plugin_groups=self.plugin_groups,
+            plugin_entry_points=self.plugin_groups,
         )
 
     def main(

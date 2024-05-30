@@ -112,13 +112,15 @@ class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
     def __init__(
-        self, *groups: tuple[str, Sequence[click.MultiCommand]], plugin_groups=None
+        self,
+        *groups: tuple[str, Sequence[click.MultiCommand]],
+        plugin_entry_points=[],
     ):
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
             for title, cli_list in groups
         ]
-        self.plugin_groups = plugin_groups
+        self.lazy_groups = plugin_entry_points
         sources = list(chain.from_iterable(cli_list for _, cli_list in self.groups))
         help_texts = [
             cli.help
@@ -190,8 +192,12 @@ class CommandCollection(click.CommandCollection):
         **extra: Any,
     ):
         i = 0
-        while args[0] not in self.list_commands(None) and i < len(self.plugin_groups):
-            loaded_ep = _safe_load_entry_point(self.plugin_groups[i])
+        while (
+            args
+            and i < len(self.lazy_groups)
+            and args[0] not in self.list_commands(None)
+        ):
+            loaded_ep = _safe_load_entry_point(self.lazy_groups[i])
             self.add_source(loaded_ep)
             i += 1
 

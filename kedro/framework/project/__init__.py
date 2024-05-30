@@ -347,6 +347,27 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
+def _get_pipeline_obj(pipeline_name: str, raise_errors: bool = False) -> Pipeline | None:
+    pipeline_obj = None
+    pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+    try:
+        pipeline_module = importlib.import_module(pipeline_module_name)
+        pipeline_obj = _create_pipeline(pipeline_module)
+    except Exception as exc:
+        if raise_errors:
+            raise ImportError(
+                f"An error occurred while importing the "
+                f"'{pipeline_module_name}' module."
+            ) from exc
+
+        warnings.warn(
+            IMPORT_ERROR_MESSAGE.format(
+                module=pipeline_module_name, tb_exc=traceback.format_exc()
+            )
+        )
+    return pipeline_obj
+
+
 def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: PLR0912
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
@@ -419,24 +440,67 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
         if pipeline_name.startswith("."):
             continue
 
-        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
-        try:
-            pipeline_module = importlib.import_module(pipeline_module_name)
-        except Exception as exc:
-            if raise_errors:
-                raise ImportError(
-                    f"An error occurred while importing the "
-                    f"'{pipeline_module_name}' module."
-                ) from exc
+        pipeline_obj = _get_pipeline_obj(pipeline_name, raise_errors)
 
-            warnings.warn(
-                IMPORT_ERROR_MESSAGE.format(
-                    module=pipeline_module_name, tb_exc=traceback.format_exc()
-                )
-            )
-            continue
-
-        pipeline_obj = _create_pipeline(pipeline_module)
         if pipeline_obj is not None:
             pipelines_dict[pipeline_name] = pipeline_obj
     return pipelines_dict
+
+
+def from_config(config_entry: dict[str, str], raise_errors: bool = False) -> Pipeline:
+    """Create a ``Pipeline`` object from a config entry.
+
+    Args:
+        config_entry: Config entry dictionary.
+        raise_errors: If ``True``, raise an error upon failed discovery.
+
+    Returns:
+        A generated ``Pipeline`` object. Similar to a modular pipeline
+        normally defined in the pipeline registry.
+
+    Raises:
+        ImportError: When a module does not expose a ``create_pipeline``
+            function, the ``create_pipeline`` function does not return a
+            ``Pipeline`` object, or if the module import fails up front.
+            If ``raise_errors`` is ``False``, see Warns section instead.
+
+    Warns:
+        UserWarning: When a module does not expose a ``create_pipeline``
+            function, the ``create_pipeline`` function does not return a
+            ``Pipeline`` object, or if the module import fails up front.
+            If ``raise_errors`` is ``True``, see Raises section instead.
+
+    Examples:
+        pipelines.yml:
+            processing:
+              pipe:
+                - data_processing
+
+        pipline_registry.py:
+        >>> from typing import Dict
+        >>> from kedro.framework.project import find_pipelines, from_config
+        >>> from kedro.config.omegaconf_config import OmegaConfigLoader
+        >>> from kedro.framework.project import settings
+        >>> def register_pipelines() -> Dict[str, Pipeline]:
+        >>>     conf_path = str(Path(__file__).parents[2] / settings.CONF_SOURCE)
+        >>>     conf_loader = OmegaConfigLoader(conf_path, env="base")
+        >>>     processing_pipeline = from_config(conf_loader["pipelines"].get("processing"))
+        >>>     pipelines["processing"] = processing_pipeline
+        >>>     return pipelines
+    """
+    pipelines_dict = {"__default__": pipeline([])}
+    for pipeline_name in config_entry["pipe"]:
+
+        pipeline_obj = _get_pipeline_obj(pipeline_name, raise_errors)
+
+        if pipeline_obj is not None:
+            pipelines_dict[pipeline_name] = pipeline_obj
+    config_pipeline = pipeline(
+        pipe=sum(pipelines_dict.values()),
+        inputs=config_entry.get("inputs", None),
+        outputs=config_entry.get("outputs", None),
+        parameters=config_entry.get("parameters", None),
+        tags=config_entry.get("tags", None),
+        namespace=config_entry.get("namespace", None)
+    )
+    return config_pipeline

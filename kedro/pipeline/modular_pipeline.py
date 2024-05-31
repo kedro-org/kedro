@@ -24,7 +24,7 @@ def _is_all_parameters(name: str) -> bool:
 
 
 def _is_single_parameter(name: str) -> bool:
-    return name.startswith("params:")
+    return name.startswith("params:") or name.startswith("**params:")
 
 
 def _is_parameter(name: str) -> bool:
@@ -72,6 +72,7 @@ def _validate_datasets_exist(
 
     existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
     non_existent = (inputs | outputs | parameters) - existing
+    non_existent = {ds for ds in non_existent if not ds.startswith("**")}
     if non_existent:
         sorted_non_existent = sorted(non_existent)
         possible_matches = []
@@ -123,7 +124,11 @@ def _get_dataset_names_mapping(
 
 def _normalize_param_name(name: str) -> str:
     """Make sure that a param name has a `params:` prefix before passing to the node"""
-    return name if name.startswith("params:") else f"params:{name}"
+    return (
+        name
+        if name.startswith("params:") or name.startswith("**params:")
+        else f"params:{name}"
+    )
 
 
 def _get_param_names_mapping(

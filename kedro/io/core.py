@@ -11,7 +11,7 @@ import re
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
-from functools import partial
+from functools import partial, wraps
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
@@ -175,6 +175,64 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
+
+    @classmethod
+    def _load_wrapper(cls, load_func):
+        @wraps(load_func)
+        def load(self):
+            self._logger.debug("Loading %s", str(self))
+
+            try:
+                return load_func(self)
+            except DatasetError:
+                raise
+            except Exception as exc:
+                # This exception handling is by design as the composed data sets
+                # can throw any type of exception.
+                message = (
+                    f"Failed while loading data from data set {str(self)}.\n{str(exc)}"
+                )
+                raise DatasetError(message) from exc
+
+        load.__annotations__["return"] = load_func.__annotations__["return"]
+        return load
+
+    @classmethod
+    def _save_wrapper(cls, save_func):
+        @wraps(save_func)
+        def save(self, data):
+            if data is None:
+                raise DatasetError("Saving 'None' to a 'Dataset' is not allowed")
+
+            try:
+                self._logger.debug("Saving %s", str(self))
+                save_func(self, data)
+            except DatasetError:
+                raise
+            except (FileNotFoundError, NotADirectoryError):
+                raise
+            except Exception as exc:
+                message = (
+                    f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
+                )
+                raise DatasetError(message) from exc
+
+        save.__annotations__["data"] = save_func.__annotations__["data"]
+        save.__annotations__["return"] = save_func.__annotations__["return"]
+        return save
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+
+        if hasattr(cls, "load") and not getattr(
+            cls.load, "__isabstractmethod__", False
+        ):
+            cls.load = cls._load_wrapper(cls.load)
+
+        if hasattr(cls, "save") and not getattr(
+            cls.save, "__isabstractmethod__", False
+        ):
+            cls.save = cls._save_wrapper(cls.save)
 
     def load(self) -> _DO:
         """Loads data by delegation to the provided load method.
@@ -633,6 +691,40 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def load(self) -> _DO:
         return super().load()
+
+    @classmethod
+    def _save_wrapper(cls, save_func):
+        @wraps(save_func)
+        def save(self, data):
+            self._version_cache.clear()
+            save_version = (
+                self.resolve_save_version()
+            )  # Make sure last save version is set
+            try:
+                super()._save_wrapper(save_func)(self, data)
+            except (FileNotFoundError, NotADirectoryError) as err:
+                # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
+                _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"
+                raise DatasetError(
+                    f"Cannot save versioned dataset '{self._filepath.name}' to "
+                    f"'{self._filepath.parent.as_posix()}' because a file with the same "
+                    f"name already exists in the directory. This is likely because "
+                    f"versioning was enabled on a dataset already saved previously. Either "
+                    f"remove '{self._filepath.name}' from the directory or manually "
+                    f"convert it into a versioned dataset by placing it in a versioned "
+                    f"directory (e.g. with default versioning format "
+                    f"'{self._filepath.as_posix()}/{_default_version}/{self._filepath.name}"
+                    f"')."
+                ) from err
+
+            load_version = self.resolve_load_version()
+            if load_version != save_version:
+                warnings.warn(
+                    _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
+                )
+                self._version_cache.clear()
+
+        return save
 
     def save(self, data: _DI) -> None:
         self._version_cache.clear()

@@ -106,9 +106,13 @@ class CachedDataset(AbstractDataset):
 
         return data
 
+    load = _load
+
     def _save(self, data: Any) -> None:
         self._dataset.save(data)
         self._cache.save(data)
+
+    save = _save
 
     def _exists(self) -> bool:
         return self._cache.exists() or self._dataset.exists()

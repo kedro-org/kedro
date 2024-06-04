@@ -67,9 +67,13 @@ class MemoryDataset(AbstractDataset):
         data = _copy_with_mode(self._data, copy_mode=copy_mode)
         return data
 
+    load = _load
+
     def _save(self, data: Any) -> None:
         copy_mode = self._copy_mode or _infer_copy_mode(data)
         self._data = _copy_with_mode(data, copy_mode=copy_mode)
+
+    save = _save
 
     def _exists(self) -> bool:
         return self._data is not _EMPTY

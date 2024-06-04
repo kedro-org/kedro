@@ -98,8 +98,14 @@ TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
 
 def _kedro_and_starters_version_identical() -> bool:
+    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+    headers = {}
+    if GITHUB_TOKEN:
+        headers["Authorization"] = f"token {GITHUB_TOKEN}"
+
     response = requests.get(
         "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+        headers=headers,
         timeout=10,
     )
     http_success = 200

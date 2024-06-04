@@ -94,7 +94,7 @@ When you run the cell:
 ```
 
 #### Search datasets with regex
-If you do not remember the exact name of a dataset, you can provide regular expression to search datasets.
+If you do not remember the exact name of a dataset, you can provide a regular expression to search datasets.
 ```ipython
 catalog.list("example*")
 ```
@@ -102,12 +102,7 @@ catalog.list("example*")
 When you run the cell:
 
 ```ipython
-['example_iris_data',
- 'parameters',
- 'params:example_test_data_ratio',
- 'params:example_num_train_iter',
- 'params:example_learning_rate'
-]
+['example_iris_data']
 ```
 Next try the following for `catalog.load`:
 

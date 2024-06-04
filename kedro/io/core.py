@@ -72,6 +72,7 @@ _DO = TypeVar("_DO")
 
 class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     """``AbstractDataset`` is the base class for all data set implementations.
+
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
     If a specific dataset implementation cannot be used in conjunction with
@@ -546,7 +547,9 @@ def _local_exists(local_filepath: str) -> bool:  # SKIP_IF_NO_SPARK
 class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     """
     ``AbstractVersionedDataset`` is the base class for all versioned data set
-    implementations. All data sets that implement versioning should extend this
+    implementations.
+
+    All data sets that implement versioning should extend this
     abstract class and implement the methods marked as abstract.
 
     Example:

@@ -64,8 +64,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package)
-  * [`kedro micropkg pull <package_name>`](#pull-a-micro-package)
+  * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package) (deprecated from version 0.20.0)
+  * [`kedro micropkg pull <package_name>`](#pull-a-micro-package) (deprecated from version 0.20.0)
   * [`kedro package`](#deploy-the-project)
   * [`kedro pipeline create <pipeline_name>`](#create-a-new-modular-pipeline-in-your-project)
   * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
@@ -109,7 +109,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.19.5
+v0.19.6
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -335,6 +335,10 @@ See [the Python documentation for further information about packaging](https://p
 ### Pull a micro-package
 Since Kedro 0.17.7 you can pull a micro-package into your Kedro project as follows:
 
+```{warning}
+_This command is deprecated and will be removed from Kedro in version 0.20.0._
+```
+
 ```bash
 kedro micropkg pull <link-to-micro-package-sdist-file>
 ```
@@ -366,6 +370,10 @@ kedro pipeline create <pipeline_name>
 ##### Package a micro-package
 The following command packages all the files related to a micro-package, e.g. a modular pipeline, into a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions):
 
+```{warning}
+_This command is deprecated and will be removed from Kedro in version 0.20.0._
+```
+
 ```bash
 kedro micropkg package <package_module_path>
 ```
@@ -374,6 +382,10 @@ Further information is available in the [micro-packaging documentation](../nodes
 
 ##### Pull a micro-package in your project
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
+
+```{warning}
+_This command is deprecated and will be removed from Kedro in version 0.20.0._
+```
 
 ```bash
 kedro micropkg pull <package_name> (or path to a sdist file)

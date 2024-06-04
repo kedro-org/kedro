@@ -12,17 +12,35 @@ For example, you can log metrics, parameters, and artifacts from your Kedro pipe
 You will need the following:
 
 - A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas-viz` starter.
-- The MLflow client installed into the same virtual environment: `pip install mlflow`.
+- The MLflow client installed into the same virtual environment. For the purposes of this tutorial,
+  you can use MLflow {external+mlflow:doc}`in its simplest configuration <tracking>`.
 
+To set yourself up, create a new Kedro project:
 
-We recommend use of an [MLflow tracking server](https://mlflow.org/docs/latest/tracking/server.html), that enables you to inspect runs through a web interface. This is optional, but strongly recommended, even if you're working locally on a solo project. This documentation assumes that you have a tracking server, whether it's a local one run by yourself or a remote one running on another machine or provided by a cloud vendor.
-You will need to configure your client properly,
-either by setting the `MLFLOW_TRACKING_URI` environment variable
-or by using the {external+mlflow:py:func}`mlflow.set_tracking_uri` function.
-Read {external+mlflow:doc}`the official MLflow tracking server 5 minute overview <getting-started/tracking-server-overview/index>`
-for a list of available options,
-and {external+mlflow:ref}`the MLflow tracking server documentation <logging_to_a_tracking_server>`
-for detailed configuration instructions.
+```
+$ kedro new --starter=spaceflights-pandas-viz --name spaceflights-mlflow
+$ cd spaceflights-mlflow
+$ python -m venv && source .venv/bin/activate
+(.venv) $ pip install -r requirements.txt
+```
+
+And then launch the UI locally from the root of your directory as follows:
+
+```
+(.venv) $ pip install mlflow
+(.venv) $ mlflow ui --backend-store-uri ./mlflow_runs
+```
+
+This will make MLflow record metadata and artifacts for each run
+to a local directory called `mlflow_runs`.
+
+:::{note}
+If you want to use a more sophisticated setup,
+have a look at the documentation of
+[MLflow tracking server](https://mlflow.org/docs/latest/tracking/server.html),
+{external+mlflow:doc}`the official MLflow tracking server 5 minute overview <getting-started/tracking-server-overview/index>`,
+and {external+mlflow:ref}`the MLflow tracking server documentation <logging_to_a_tracking_server>`.
+:::
 
 ## Use cases
 

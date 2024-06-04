@@ -163,7 +163,12 @@ NUMBER_TO_TOOLS_NAME = {
 
 
 def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
-    if flag_inputs.get("checkout") and not flag_inputs.get("starter"):
+    version_tag = r"^\d+(\.\d+)*$"
+    if (
+        flag_inputs.get("checkout")
+        and not flag_inputs.get("starter")
+        and not re.match(str(flag_inputs.get("starter")), version_tag)
+    ):
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
     if flag_inputs.get("directory") and not flag_inputs.get("starter"):

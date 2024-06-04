@@ -12,6 +12,7 @@ For example, you can log metrics, parameters, and artifacts from your Kedro pipe
 You will need the following:
 
 - A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas-viz` starter.
+  If you're unfamiliar with the Spaceflights project, check out [our tutorial](/tutorial/spaceflights_tutorial).
 - The MLflow client installed into the same virtual environment. For the purposes of this tutorial,
   you can use MLflow {external+mlflow:doc}`in its simplest configuration <tracking>`.
 
@@ -111,6 +112,8 @@ and will have no effect for datasets that are free inputs (hence are only loaded
 For example, if you modify the a `matplotlib.MatplotlibWriter` dataset like this:
 
 ```diff
+ # conf/base/catalog.yml
+
  dummy_confusion_matrix:
 -  type: matplotlib.MatplotlibWriter
 -  filepath: data/08_reporting/dummy_confusion_matrix.png

@@ -1,11 +1,11 @@
 # How to add MLflow to your Kedro workflow
 
-MLflow is an open-source platform for managing the end-to-end machine learning lifecycle.
+[MLflow](https://mlflow.org/) is an open-source platform for managing the end-to-end machine learning lifecycle.
 It provides tools for tracking experiments, packaging code into reproducible runs, and sharing and deploying models.
 MLflow supports machine learning frameworks such as TensorFlow, PyTorch, and scikit-learn.
 
 Adding MLflow to a Kedro project enables you to track and manage your machine learning experiments and models.
-For example, you can log metrics, parameters, and artifacts from your Kedro pipeline runs to MLflow, then compare and reproduce the results. When collaborating with others on a Kedro project, MLflow's model registry and deployment tools make it easy to share and deploy machine learning models.
+For example, you can log metrics, parameters, and artifacts from your Kedro pipeline runs to MLflow, then compare and reproduce the results. When collaborating with others on a Kedro project, MLflow's model registry and deployment tools help you to share and deploy machine learning models.
 
 ## Prerequisites
 

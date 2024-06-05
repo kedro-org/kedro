@@ -529,6 +529,30 @@ class TestLegacyLoadAndSave:
         with pytest.raises(DatasetError, match=pattern):
             my_legacy_dataset.save(None)
 
+    def test_saving_invalid_data(self, my_legacy_dataset, dummy_data):
+        pattern = r"Failed while saving data to data set"
+        with pytest.raises(DatasetError, match=pattern):
+            my_legacy_dataset.save(pd.DataFrame())
+
+    @pytest.mark.parametrize(
+        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
+    def test_save_version_warning(
+        self, my_legacy_versioned_dataset, load_version, save_version, dummy_data
+    ):
+        """Check the warning when saving to the path that differs from
+        the subsequent load path."""
+        pattern = (
+            f"Save version '{save_version}' did not match "
+            f"load version '{load_version}' for "
+            r"MyLegacyVersionedDataset\(.+\)"
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            my_legacy_versioned_dataset.save(dummy_data)
+
     def test_versioning_existing_dataset(
         self, my_legacy_dataset, my_legacy_versioned_dataset, dummy_data
     ):

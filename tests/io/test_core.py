@@ -310,9 +310,17 @@ class TestCoreFunctions:
         dataset, _ = parse_dataset_definition(config)
         assert dataset is LambdaDataset
 
-    def test_test_parse_dataset_definition_with_python_class_type(self):
+    def test_parse_dataset_definition_with_python_class_type(self):
         config = {"type": MyDataset}
         parse_dataset_definition(config)
+
+    def test_load_and_save_are_wrapped_once(self):
+        assert not getattr(
+            MyOtherVersionedDataset.load.__wrapped__, "__loadwrapped__", False
+        )
+        assert not getattr(
+            MyOtherVersionedDataset.save.__wrapped__, "__savewrapped__", False
+        )
 
 
 class TestAbstractVersionedDataset:

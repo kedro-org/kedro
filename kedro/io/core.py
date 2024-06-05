@@ -196,6 +196,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 raise DatasetError(message) from exc
 
         load.__annotations__["return"] = load_func.__annotations__.get("return")
+        load.__loadwrapped__ = True
         return load
 
     @classmethod
@@ -218,16 +219,25 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
         save.__annotations__["data"] = save_func.__annotations__.get("data", Any)
         save.__annotations__["return"] = save_func.__annotations__.get("return")
+        save.__savewrapped__ = True
         return save
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
 
         if hasattr(cls, "load") and not cls.load.__qualname__.startswith("Abstract"):
-            cls.load = cls._load_wrapper(cls.load)
+            cls.load = cls._load_wrapper(
+                cls.load
+                if not getattr(cls.load, "__loadwrapped__", False)
+                else cls.load.__wrapped__
+            )
 
         if hasattr(cls, "save") and not cls.save.__qualname__.startswith("Abstract"):
-            cls.save = cls._save_wrapper(cls.save)
+            cls.save = cls._save_wrapper(
+                cls.save
+                if not getattr(cls.save, "__savewrapped__", False)
+                else cls.save.__wrapped__
+            )
 
     def load(self) -> _DO:
         """Loads data by delegation to the provided load method.

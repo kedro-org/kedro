@@ -2,6 +2,7 @@
 """
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 
@@ -18,6 +19,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
     _convert_tool_short_names_to_numbers,
     _fetch_validate_parse_config_from_user_prompts,
+    _get_latest_starters_version,
     _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
@@ -1687,3 +1689,49 @@ class TestTelemetryCLIFlag:
 
         telemetry_file_path = Path(repo_name + "/.telemetry")
         assert not telemetry_file_path.exists()
+
+
+@pytest.fixture
+def mock_env_vars(mocker):
+    """Fixture to mock environment variables"""
+    mocker.patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}, clear=True)
+
+
+class TestGetLatestStartersVersion:
+    @pytest.fixture(autouse=True)
+    def setup_class(self, mock_env_vars, requests_mock):
+        self.requests_mock = requests_mock
+
+    def test_get_latest_starters_version(self):
+        latest_version = "1.2.3"
+
+        self.requests_mock.get(
+            "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+            json={"tag_name": latest_version},
+            status_code=200,
+        )
+
+        result = _get_latest_starters_version()
+
+        assert result == latest_version
+        assert os.getenv("STARTERS_VERSION") == latest_version
+
+    def test_get_latest_starters_version_with_env_set(self, mocker):
+        expected_version = "1.2.3"
+        mocker.patch.dict(os.environ, {"STARTERS_VERSION": expected_version})
+
+        result = _get_latest_starters_version()
+
+        assert result == expected_version
+
+    def test_get_latest_starters_version_error(self):
+        self.requests_mock.get(
+            "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+            status_code=403,
+        )
+
+        with pytest.raises(
+            RuntimeError,
+            match="Error fetching kedro-starters latest release version: 403",
+        ):
+            _get_latest_starters_version()

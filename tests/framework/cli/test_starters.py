@@ -2,6 +2,7 @@
 """
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 from pathlib import Path
@@ -1724,25 +1725,21 @@ class TestGetLatestStartersVersion:
 
         assert result == expected_version
 
-    def test_get_latest_starters_version_error(self, mock_env_vars, requests_mock):
-        requests_mock.get(
-            "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
-            exc=RuntimeError("Error message"),
-        )
-
-        with pytest.raises(RuntimeError, match="Error message"):
-            _get_latest_starters_version()
-
-    def test_get_latest_starters_version_request_exception(
-        self, mock_env_vars, requests_mock
+    def test_get_latest_starters_version_error(
+        self, mock_env_vars, requests_mock, caplog
     ):
         """Test _get_latest_starters_version when the request raises an exception"""
-        requests_mock.get(
-            "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
-            exc=requests.exceptions.RequestException("Request failed"),
-        )
+        with caplog.at_level(logging.ERROR):
+            # Mock the request to raise a RequestException
+            requests_mock.get(
+                "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+                exc=requests.exceptions.RequestException("Request failed"),
+            )
 
-        with pytest.raises(
-            RuntimeError, match="Error fetching kedro-starters latest release version"
-        ):
-            _get_latest_starters_version()
+            result = _get_latest_starters_version()
+
+            assert result == ""
+            assert (
+                "Error fetching kedro-starters latest release version: Request failed"
+                in caplog.text
+            )

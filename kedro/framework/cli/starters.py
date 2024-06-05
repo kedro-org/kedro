@@ -5,6 +5,7 @@ projects.
 """
 from __future__ import annotations
 
+import logging
 import os
 import re
 import shutil
@@ -113,9 +114,8 @@ def _get_latest_starters_version() -> str:
             response.raise_for_status()  # Raise an HTTPError for bad status codes
             latest_release = response.json()
         except requests.exceptions.RequestException as e:
-            raise RuntimeError(
-                f"Error fetching kedro-starters latest release version: {e}"
-            )
+            logging.error(f"Error fetching kedro-starters latest release version: {e}")
+            return ""
 
         os.environ["STARTERS_VERSION"] = latest_release["tag_name"]
         return str(latest_release["tag_name"])
@@ -812,11 +812,7 @@ def _make_cookiecutter_args_and_fetch_template(
 
     tools = config["tools"]
     example_pipeline = config["example_pipeline"]
-    starter_path = (
-        "git+https://github.com/kedro-org/kedro-starters.git"
-        if _kedro_and_starters_version_identical()
-        else "https://github.com/kedro-org/kedro-starters.git@main"
-    )
+    starter_path = _STARTERS_REPO
 
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.

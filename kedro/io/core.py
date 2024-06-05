@@ -195,7 +195,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 )
                 raise DatasetError(message) from exc
 
-        load.__annotations__["return"] = load_func.__annotations__["return"]
+        load.__annotations__["return"] = load_func.__annotations__.get("return")
         return load
 
     @classmethod
@@ -218,8 +218,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 )
                 raise DatasetError(message) from exc
 
-        save.__annotations__["data"] = save_func.__annotations__["data"]
-        save.__annotations__["return"] = save_func.__annotations__["return"]
+        save.__annotations__["data"] = save_func.__annotations__.get("data", Any)
+        save.__annotations__["return"] = save_func.__annotations__.get("return")
         return save
 
     def __init_subclass__(cls, **kwargs) -> None:

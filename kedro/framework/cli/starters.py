@@ -113,7 +113,9 @@ def _get_latest_starters_version() -> str:
             response.raise_for_status()  # Raise an HTTPError for bad status codes
             latest_release = response.json()
         except requests.exceptions.RequestException as e:
-            raise RuntimeError(f"Error fetching kedro-starters latest release version: {e}")
+            raise RuntimeError(
+                f"Error fetching kedro-starters latest release version: {e}"
+            )
 
         os.environ["STARTERS_VERSION"] = latest_release["tag_name"]
         return str(latest_release["tag_name"])

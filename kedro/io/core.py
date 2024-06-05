@@ -178,9 +178,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return logging.getLogger(__name__)
 
     @classmethod
-    def _load_wrapper(cls, load_func):
+    def _load_wrapper(cls, load_func: Callable[[], _DO]) -> Callable[[], _DO]:
         @wraps(load_func)
-        def load(self):
+        def load(self) -> _DO:
             self._logger.debug("Loading %s", str(self))
 
             try:
@@ -196,13 +196,13 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 raise DatasetError(message) from exc
 
         load.__annotations__["return"] = load_func.__annotations__.get("return")
-        load.__loadwrapped__ = True
+        load.__loadwrapped__ = True  # type: ignore[attr-defined]
         return load
 
     @classmethod
-    def _save_wrapper(cls, save_func):
+    def _save_wrapper(cls, save_func: Callable[[_DI], None]) -> Callable[[_DI], None]:
         @wraps(save_func)
-        def save(self, data):
+        def save(self, data: _DI) -> None:
             if data is None:
                 raise DatasetError("Saving 'None' to a 'Dataset' is not allowed")
 
@@ -219,24 +219,24 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
         save.__annotations__["data"] = save_func.__annotations__.get("data", Any)
         save.__annotations__["return"] = save_func.__annotations__.get("return")
-        save.__savewrapped__ = True
+        save.__savewrapped__ = True  # type: ignore[attr-defined]
         return save
 
-    def __init_subclass__(cls, **kwargs) -> None:
+    def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
 
         if hasattr(cls, "load") and not cls.load.__qualname__.startswith("Abstract"):
-            cls.load = cls._load_wrapper(
+            cls.load = cls._load_wrapper(  # type: ignore[method-assign]
                 cls.load
                 if not getattr(cls.load, "__loadwrapped__", False)
-                else cls.load.__wrapped__
+                else cls.load.__wrapped__  # type: ignore[attr-defined]
             )
 
         if hasattr(cls, "save") and not cls.save.__qualname__.startswith("Abstract"):
-            cls.save = cls._save_wrapper(
+            cls.save = cls._save_wrapper(  # type: ignore[method-assign]
                 cls.save
                 if not getattr(cls.save, "__savewrapped__", False)
-                else cls.save.__wrapped__
+                else cls.save.__wrapped__  # type: ignore[attr-defined]
             )
 
     def load(self) -> _DO:
@@ -698,9 +698,9 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         return super().load()
 
     @classmethod
-    def _save_wrapper(cls, save_func):
+    def _save_wrapper(cls, save_func: Callable[[_DI], None]) -> Callable[[_DI], None]:
         @wraps(save_func)
-        def save(self, data):
+        def save(self, data: _DI) -> None:
             self._version_cache.clear()
             save_version = (
                 self.resolve_save_version()

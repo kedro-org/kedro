@@ -225,14 +225,10 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
 
-        if hasattr(cls, "load") and not getattr(
-            cls.load, "__isabstractmethod__", False
-        ):
+        if hasattr(cls, "load") and not cls.load.__qualname__.startswith("Abstract"):
             cls.load = cls._load_wrapper(cls.load)
 
-        if hasattr(cls, "save") and not getattr(
-            cls.save, "__isabstractmethod__", False
-        ):
+        if hasattr(cls, "save") and not cls.save.__qualname__.startswith("Abstract"):
             cls.save = cls._save_wrapper(cls.save)
 
     def load(self) -> _DO:

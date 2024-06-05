@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path
 
 import pytest
+import requests
 import toml
 import yaml
 from click.testing import CliRunner
@@ -1730,4 +1731,18 @@ class TestGetLatestStartersVersion:
         )
 
         with pytest.raises(RuntimeError, match="Error message"):
+            _get_latest_starters_version()
+
+    def test_get_latest_starters_version_request_exception(
+        self, mock_env_vars, requests_mock
+    ):
+        """Test _get_latest_starters_version when the request raises an exception"""
+        requests_mock.get(
+            "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+            exc=requests.exceptions.RequestException("Request failed"),
+        )
+
+        with pytest.raises(
+            RuntimeError, match="Error fetching kedro-starters latest release version"
+        ):
             _get_latest_starters_version()

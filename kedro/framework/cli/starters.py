@@ -104,19 +104,17 @@ def _get_latest_starters_version() -> str:
         if GITHUB_TOKEN:
             headers["Authorization"] = f"token {GITHUB_TOKEN}"
 
-        response = requests.get(
-            "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
-            headers=headers,
-            timeout=10,
-        )
-        http_success = 200
-
-        if response.status_code == http_success:
-            latest_release = response.json()
-        else:
-            raise RuntimeError(
-                f"Error fetching kedro-starters latest release version: {response.status_code}"
+        try:
+            response = requests.get(
+                "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+                headers=headers,
+                timeout=10,
             )
+            response.raise_for_status()  # Raise an HTTPError for bad status codes
+            latest_release = response.json()
+        except requests.exceptions.RequestException as e:
+            raise RuntimeError(f"Error fetching kedro-starters latest release version: {e}")
+
         os.environ["STARTERS_VERSION"] = latest_release["tag_name"]
         return str(latest_release["tag_name"])
     else:

@@ -97,27 +97,35 @@ KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
 
-def _kedro_and_starters_version_identical() -> bool:
-    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-    headers = {}
-    if GITHUB_TOKEN:
-        headers["Authorization"] = f"token {GITHUB_TOKEN}"
+def _get_latest_starters_version() -> str:
+    if "STARTERS_VERSION" not in os.environ:
+        GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+        headers = {}
+        if GITHUB_TOKEN:
+            headers["Authorization"] = f"token {GITHUB_TOKEN}"
 
-    response = requests.get(
-        "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
-        headers=headers,
-        timeout=10,
-    )
-    http_success = 200
-
-    if response.status_code == http_success:
-        latest_release = response.json()
-    else:
-        raise RuntimeError(
-            f"Error fetching kedro-starters latest release version: {response.status_code}"
+        response = requests.get(
+            "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+            headers=headers,
+            timeout=10,
         )
+        http_success = 200
 
-    return True if version == latest_release["tag_name"] else False
+        if response.status_code == http_success:
+            latest_release = response.json()
+        else:
+            raise RuntimeError(
+                f"Error fetching kedro-starters latest release version: {response.status_code}"
+            )
+        os.environ["STARTERS_VERSION"] = latest_release["tag_name"]
+        return str(latest_release["tag_name"])
+    else:
+        return str(os.getenv("STARTERS_VERSION"))
+
+
+def _kedro_and_starters_version_identical() -> bool:
+    starters_version = _get_latest_starters_version()
+    return True if version == starters_version else False
 
 
 _STARTERS_REPO = (
@@ -169,12 +177,7 @@ NUMBER_TO_TOOLS_NAME = {
 
 
 def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
-    version_tag = r"^\d+(\.\d+)*$"
-    if (
-        flag_inputs.get("checkout")
-        and not flag_inputs.get("starter")
-        and not re.match(str(flag_inputs.get("starter")), version_tag)
-    ):
+    if flag_inputs.get("checkout") and not flag_inputs.get("starter"):
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
     if flag_inputs.get("directory") and not flag_inputs.get("starter"):

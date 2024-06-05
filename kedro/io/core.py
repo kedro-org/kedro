@@ -278,9 +278,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         try:
             self._logger.debug("Saving %s", str(self))
             self._save(data)
-        except DatasetError:
-            raise
-        except (FileNotFoundError, NotADirectoryError):
+        except (DatasetError, FileNotFoundError, NotADirectoryError):
             raise
         except Exception as exc:
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"

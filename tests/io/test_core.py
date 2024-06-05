@@ -432,3 +432,44 @@ class TestAbstractVersionedDataset:
 
         my_versioned_dataset._release()
         assert my_versioned_dataset._version_cache.currsize == 0
+
+
+class MyLegacyDataset(AbstractDataset):
+    def __init__(self, filepath="", save_args=None, fs_args=None, var=None):
+        self._filepath = PurePosixPath(filepath)
+        self.save_args = save_args
+        self.fs_args = fs_args
+        self.var = var
+
+    def _describe(self):
+        return {"filepath": self._filepath, "var": self.var}
+
+    def _exists(self) -> bool:
+        return Path(self._filepath.as_posix()).exists()
+
+    def _load(self):
+        return pd.read_csv(self._filepath)
+
+    # load = _load
+
+    def _save(self, data: str) -> None:
+        with open(self._filepath, mode="w") as file:
+            file.write(data)
+
+    # save = _save
+
+
+@pytest.fixture
+def my_legacy_dataset(filepath_versioned, save_args, fs_args):
+    return MyLegacyDataset(
+        filepath=filepath_versioned, save_args=save_args, fs_args=fs_args
+    )
+
+
+class TestLegacyDataset:
+    def test_saving_none(self, my_legacy_dataset):
+        """Check the error when attempting to save the dataset without
+        providing the data"""
+        pattern = r"Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
+            my_legacy_dataset.save(None)

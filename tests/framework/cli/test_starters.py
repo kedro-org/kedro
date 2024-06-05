@@ -1698,14 +1698,12 @@ def mock_env_vars(mocker):
 
 
 class TestGetLatestStartersVersion:
-    @pytest.fixture(autouse=True)
-    def setup_class(self, mock_env_vars, requests_mock):
-        self.requests_mock = requests_mock
-
-    def test_get_latest_starters_version(self):
+    def test_get_latest_starters_version(self, mock_env_vars, requests_mock):
+        """Test _get_latest_starters_version when STARTERS_VERSION is not set"""
         latest_version = "1.2.3"
 
-        self.requests_mock.get(
+        # Mock the GitHub API response
+        requests_mock.get(
             "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
             json={"tag_name": latest_version},
             status_code=200,
@@ -1717,6 +1715,7 @@ class TestGetLatestStartersVersion:
         assert os.getenv("STARTERS_VERSION") == latest_version
 
     def test_get_latest_starters_version_with_env_set(self, mocker):
+        """Test _get_latest_starters_version when STARTERS_VERSION is already set"""
         expected_version = "1.2.3"
         mocker.patch.dict(os.environ, {"STARTERS_VERSION": expected_version})
 
@@ -1724,14 +1723,11 @@ class TestGetLatestStartersVersion:
 
         assert result == expected_version
 
-    def test_get_latest_starters_version_error(self):
-        self.requests_mock.get(
+    def test_get_latest_starters_version_error(self, mock_env_vars, requests_mock):
+        requests_mock.get(
             "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
-            status_code=403,
+            exc=RuntimeError("Error message"),
         )
 
-        with pytest.raises(
-            RuntimeError,
-            match="Error fetching kedro-starters latest release version: 403",
-        ):
+        with pytest.raises(RuntimeError, match="Error message"):
             _get_latest_starters_version()

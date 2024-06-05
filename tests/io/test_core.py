@@ -459,6 +459,54 @@ class MyLegacyDataset(AbstractDataset):
     # save = _save
 
 
+class MyLegacyVersionedDataset(AbstractVersionedDataset[str, str]):
+    def __init__(  # noqa: PLR0913
+        self,
+        filepath: str,
+        version: Version = None,
+    ) -> None:
+        _fs_args: dict[Any, Any] = {}
+        _fs_args.setdefault("auto_mkdir", True)
+        protocol, path = get_protocol_and_path(filepath, version)
+
+        self._protocol = protocol
+        self._fs = fsspec.filesystem(self._protocol, **_fs_args)
+
+        super().__init__(
+            filepath=PurePosixPath(path),
+            version=version,
+            exists_function=self._fs.exists,
+            glob_function=self._fs.glob,
+        )
+
+    def _describe(self) -> dict[str, Any]:
+        return dict(filepath=self._filepath, version=self._version)
+
+    def _load(self) -> str:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+
+        with self._fs.open(load_path, mode="r") as fs_file:
+            return fs_file.read()
+
+    # load = _load
+
+    def _save(self, data: str) -> None:
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+        with self._fs.open(save_path, mode="w") as fs_file:
+            fs_file.write(data)
+
+    # save = _save
+
+    def _exists(self) -> bool:
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DatasetError:
+            return False
+
+        return self._fs.exists(load_path)
+
+
 @pytest.fixture
 def my_legacy_dataset(filepath_versioned, save_args, fs_args):
     return MyLegacyDataset(
@@ -466,10 +514,37 @@ def my_legacy_dataset(filepath_versioned, save_args, fs_args):
     )
 
 
-class TestLegacyDataset:
+@pytest.fixture
+def my_legacy_versioned_dataset(filepath_versioned, load_version, save_version):
+    return MyLegacyVersionedDataset(
+        filepath=filepath_versioned, version=Version(load_version, save_version)
+    )
+
+
+class TestLegacyLoadAndSave:
     def test_saving_none(self, my_legacy_dataset):
         """Check the error when attempting to save the dataset without
         providing the data"""
         pattern = r"Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
             my_legacy_dataset.save(None)
+
+    def test_versioning_existing_dataset(
+        self, my_legacy_dataset, my_legacy_versioned_dataset, dummy_data
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset."""
+        my_legacy_dataset.save(dummy_data)
+        assert my_legacy_dataset.exists()
+        assert my_legacy_dataset._filepath == my_legacy_versioned_dataset._filepath
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{my_legacy_versioned_dataset._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DatasetError, match=pattern):
+            my_legacy_versioned_dataset.save(dummy_data)
+
+        # Remove non-versioned dataset and try again
+        Path(my_legacy_dataset._filepath.as_posix()).unlink()
+        my_legacy_versioned_dataset.save(dummy_data)
+        assert my_legacy_versioned_dataset.exists()

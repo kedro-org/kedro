@@ -1701,7 +1701,7 @@ def mock_env_vars(mocker):
 
 class TestGetLatestStartersVersion:
     def test_get_latest_starters_version(self, mock_env_vars, requests_mock):
-        """Test _get_latest_starters_version when STARTERS_VERSION is not set"""
+        """Test _get_latest_starters_version when KEDRO_STARTERS_VERSION is not set"""
         latest_version = "1.2.3"
 
         # Mock the GitHub API response
@@ -1714,12 +1714,12 @@ class TestGetLatestStartersVersion:
         result = _get_latest_starters_version()
 
         assert result == latest_version
-        assert os.getenv("STARTERS_VERSION") == latest_version
+        assert os.getenv("KEDRO_STARTERS_VERSION") == latest_version
 
     def test_get_latest_starters_version_with_env_set(self, mocker):
-        """Test _get_latest_starters_version when STARTERS_VERSION is already set"""
+        """Test _get_latest_starters_version when KEDRO_STARTERS_VERSION is already set"""
         expected_version = "1.2.3"
-        mocker.patch.dict(os.environ, {"STARTERS_VERSION": expected_version})
+        mocker.patch.dict(os.environ, {"KEDRO_STARTERS_VERSION": expected_version})
 
         result = _get_latest_starters_version()
 

@@ -99,7 +99,7 @@ TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
 
 def _get_latest_starters_version() -> str:
-    if "STARTERS_VERSION" not in os.environ:
+    if "KEDRO_STARTERS_VERSION" not in os.environ:
         GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
         headers = {}
         if GITHUB_TOKEN:
@@ -117,10 +117,10 @@ def _get_latest_starters_version() -> str:
             logging.error(f"Error fetching kedro-starters latest release version: {e}")
             return ""
 
-        os.environ["STARTERS_VERSION"] = latest_release["tag_name"]
+        os.environ["KEDRO_STARTERS_VERSION"] = latest_release["tag_name"]
         return str(latest_release["tag_name"])
     else:
-        return str(os.getenv("STARTERS_VERSION"))
+        return str(os.getenv("KEDRO_STARTERS_VERSION"))
 
 
 def _kedro_and_starters_version_identical() -> bool:

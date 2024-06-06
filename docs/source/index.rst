@@ -84,13 +84,19 @@ Welcome to Kedro's award-winning documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Integrations
+
+   integrations/pyspark_integration.md
+   integrations/mlflow.md
+
+.. toctree::
+   :maxdepth: 2
    :caption: Advanced usage
 
    kedro_project_setup/index.md
    extend_kedro/index.md
    hooks/index.md
    logging/index.md
-   integrations/pyspark_integration.md
    development/index.md
    deployment/index.md
 

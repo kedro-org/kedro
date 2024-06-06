@@ -194,6 +194,7 @@ my_param: "${globals: nonexistent_global, 23}"
 If there are duplicate keys in the globals files in your base and runtime environments, the values in the runtime environment
 overwrite the values in your base environment.
 
+(runtime-params)=
 ### How to override configuration with runtime parameters with the `OmegaConfigLoader`
 
 Kedro allows you to [specify runtime parameters for the `kedro run` command with the `--params` CLI option](parameters.md#how-to-specify-parameters-at-runtime). These runtime parameters

@@ -90,6 +90,13 @@ def forward_command(
     return wrapit
 
 
+def _partial_match(plugin_names: str, command_name: str):
+    for plugin_name in plugin_names:
+        if command_name in plugin_name:
+            return plugin_name
+    return None
+
+
 def _suggest_cli_command(
     original_command_name: str, existing_command_names: Iterable[str]
 ) -> str:
@@ -114,7 +121,7 @@ class CommandCollection(click.CommandCollection):
     def __init__(
         self,
         *groups: tuple[str, Sequence[click.MultiCommand]],
-        plugin_entry_points=[],
+        plugin_entry_points={},
     ):
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
@@ -191,15 +198,9 @@ class CommandCollection(click.CommandCollection):
         standalone_mode: bool = True,
         **extra: Any,
     ):
-        i = 0
-        while (
-            args
-            and i < len(self.lazy_groups)
-            and args[0] not in self.list_commands(None)
-        ):
-            loaded_ep = _safe_load_entry_point(self.lazy_groups[i])
-            self.add_source(loaded_ep)
-            i += 1
+        # Load plugins if the command is not found in the current sources
+        if args is not None and args[0] not in self.list_commands(None):
+            self._load_plugins(args[0])
 
         return super().main(
             args=args,
@@ -208,6 +209,24 @@ class CommandCollection(click.CommandCollection):
             standalone_mode=standalone_mode,
             **extra,
         )
+
+    def _load_plugins(self, command_name: str) -> None:
+        """Load plugins if the command is not found in the current sources."""
+        ep_names = list(self.lazy_groups.keys())
+        part_match = _partial_match(ep_names, command_name)
+        if part_match:
+            # Try to smartly load the plugin if there is partial match
+            loaded_ep = _safe_load_entry_point(self.lazy_groups[part_match])
+            self.add_source(loaded_ep)
+            if command_name in self.list_commands(None):
+                return
+        # Load all plugins
+        for ep in self.lazy_groups.values():
+            if command_name in self.list_commands(None):
+                return
+            loaded_ep = _safe_load_entry_point(ep)
+            self.add_source(loaded_ep)
+        return
 
     def resolve_command(
         self, ctx: click.core.Context, args: list

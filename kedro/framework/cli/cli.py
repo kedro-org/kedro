@@ -176,7 +176,8 @@ class KedroCLI(CommandCollection):
     @property
     def plugin_groups(self):
         eps = list(_get_entry_points("global")) + list(_get_entry_points("project"))
-        return eps
+        entry_point_dict = {ep.name: ep for ep in eps}
+        return entry_point_dict
 
     @property
     def global_groups(self) -> Sequence[click.MultiCommand]:

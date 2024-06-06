@@ -181,7 +181,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     @classmethod
     def _load_wrapper(cls, load_func: Callable[[Self], _DO]) -> Callable[[Self], _DO]:
         @wraps(load_func)
-        def load(self: Self) -> _DO:
+        def load(self) -> _DO:
             self._logger.debug("Loading %s", str(self))
 
             try:
@@ -205,7 +205,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         cls, save_func: Callable[[Self, _DI], None]
     ) -> Callable[[Self, _DI], None]:
         @wraps(save_func)
-        def save(self: Self, data: _DI) -> None:
+        def save(self, data: _DI) -> None:
             if data is None:
                 raise DatasetError("Saving 'None' to a 'Dataset' is not allowed")
 
@@ -705,7 +705,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         cls, save_func: Callable[[Self, _DI], None]
     ) -> Callable[[Self, _DI], None]:
         @wraps(save_func)
-        def save(self: Self, data: _DI) -> None:
+        def save(self, data: _DI) -> None:
             self._version_cache.clear()
             save_version = (
                 self.resolve_save_version()

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import click
+from importlib_metadata import EntryPoint
 
 from kedro import __version__ as version
 from kedro.framework.cli import BRIGHT_BLACK, ORANGE
@@ -174,7 +175,7 @@ class KedroCLI(CommandCollection):
             sys.exit(exc.code)
 
     @property
-    def plugin_groups(self):
+    def plugin_groups(self) -> dict[str, EntryPoint]:
         eps = list(_get_entry_points("global")) + list(_get_entry_points("project"))
         entry_point_dict = {ep.name: ep for ep in eps}
         return entry_point_dict

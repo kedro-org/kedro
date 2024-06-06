@@ -90,7 +90,7 @@ def forward_command(
     return wrapit
 
 
-def _partial_match(plugin_names: str, command_name: str):
+def _partial_match(plugin_names: list[str], command_name: str) -> str | None:
     for plugin_name in plugin_names:
         if command_name in plugin_name:
             return plugin_name
@@ -121,7 +121,7 @@ class CommandCollection(click.CommandCollection):
     def __init__(
         self,
         *groups: tuple[str, Sequence[click.MultiCommand]],
-        plugin_entry_points={},
+        plugin_entry_points: dict[str, importlib_metadata.EntryPoint] = {},
     ):
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
@@ -197,9 +197,9 @@ class CommandCollection(click.CommandCollection):
         complete_var: Any | None = None,
         standalone_mode: bool = True,
         **extra: Any,
-    ):
+    ) -> Any:
         # Load plugins if the command is not found in the current sources
-        if args is not None and args[0] not in self.list_commands(None):
+        if args and args[0] not in self.list_commands(None):
             self._load_plugins(args[0])
 
         return super().main(
@@ -218,11 +218,11 @@ class CommandCollection(click.CommandCollection):
             # Try to smartly load the plugin if there is partial match
             loaded_ep = _safe_load_entry_point(self.lazy_groups[part_match])
             self.add_source(loaded_ep)
-            if command_name in self.list_commands(None):
+            if command_name in self.list_commands(None):  # type: ignore[arg-type]
                 return
         # Load all plugins
         for ep in self.lazy_groups.values():
-            if command_name in self.list_commands(None):
+            if command_name in self.list_commands(None):  # type: ignore[arg-type]
                 return
             loaded_ep = _safe_load_entry_point(ep)
             self.add_source(loaded_ep)

@@ -20,6 +20,7 @@ from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
+from typing_extensions import Self
 
 from kedro.utils import load_obj
 
@@ -178,9 +179,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return logging.getLogger(__name__)
 
     @classmethod
-    def _load_wrapper(cls, load_func: Callable[[], _DO]) -> Callable[[], _DO]:
+    def _load_wrapper(cls, load_func: Callable[[Self], _DO]) -> Callable[[Self], _DO]:
         @wraps(load_func)
-        def load(self) -> _DO:
+        def load(self: Self) -> _DO:
             self._logger.debug("Loading %s", str(self))
 
             try:
@@ -200,9 +201,11 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return load
 
     @classmethod
-    def _save_wrapper(cls, save_func: Callable[[_DI], None]) -> Callable[[_DI], None]:
+    def _save_wrapper(
+        cls, save_func: Callable[[Self, _DI], None]
+    ) -> Callable[[Self, _DI], None]:
         @wraps(save_func)
-        def save(self, data: _DI) -> None:
+        def save(self: Self, data: _DI) -> None:
             if data is None:
                 raise DatasetError("Saving 'None' to a 'Dataset' is not allowed")
 
@@ -226,14 +229,14 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         super().__init_subclass__(**kwargs)
 
         if hasattr(cls, "load") and not cls.load.__qualname__.startswith("Abstract"):
-            cls.load = cls._load_wrapper(  # type: ignore[method-assign]
+            cls.load = cls._load_wrapper(  # type: ignore[assignment]
                 cls.load
                 if not getattr(cls.load, "__loadwrapped__", False)
                 else cls.load.__wrapped__  # type: ignore[attr-defined]
             )
 
         if hasattr(cls, "save") and not cls.save.__qualname__.startswith("Abstract"):
-            cls.save = cls._save_wrapper(  # type: ignore[method-assign]
+            cls.save = cls._save_wrapper(  # type: ignore[assignment]
                 cls.save
                 if not getattr(cls.save, "__savewrapped__", False)
                 else cls.save.__wrapped__  # type: ignore[attr-defined]
@@ -698,9 +701,11 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         return super().load()
 
     @classmethod
-    def _save_wrapper(cls, save_func: Callable[[_DI], None]) -> Callable[[_DI], None]:
+    def _save_wrapper(
+        cls, save_func: Callable[[Self, _DI], None]
+    ) -> Callable[[Self, _DI], None]:
         @wraps(save_func)
-        def save(self, data: _DI) -> None:
+        def save(self: Self, data: _DI) -> None:
             self._version_cache.clear()
             save_version = (
                 self.resolve_save_version()

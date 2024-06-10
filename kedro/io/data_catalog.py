@@ -288,6 +288,12 @@ class DataCatalog:
         user_default = {}
 
         for ds_name, ds_config in catalog.items():
+            if not isinstance(ds_config, dict):
+                raise DatasetError(
+                    f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
+                    "If this is a variable intended for interpolation, make sure it is preceded by an underscore."
+                )
+
             ds_config = _resolve_credentials(  # noqa: PLW2901
                 ds_config, credentials
             )

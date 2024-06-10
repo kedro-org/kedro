@@ -519,6 +519,15 @@ class TestDataCatalogFromConfig:
         with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**sane_config)
 
+    def test_config_invalid_dataset_config(self, sane_config):
+        sane_config["catalog"]["invalid_entry"] = "some string"
+        pattern = (
+            r"Catalog entry 'invalid_entry' is not a valid dataset configuration. "
+            r"If this is a variable intended for interpolation, make sure it is preceded by an underscore."
+        )
+        with pytest.raises(DatasetError, match=pattern):
+            DataCatalog.from_config(**sane_config)
+
     def test_empty_config(self):
         """Test empty config"""
         assert DataCatalog.from_config(None)

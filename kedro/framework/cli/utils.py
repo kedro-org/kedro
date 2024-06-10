@@ -199,7 +199,7 @@ class CommandCollection(click.CommandCollection):
         **extra: Any,
     ) -> Any:
         # Load plugins if the command is not found in the current sources
-        if args and args[0] not in self.list_commands(None):
+        if args and args[0] not in self.list_commands(None):  # type: ignore[arg-type]
             self._load_plugins(args[0])
 
         return super().main(

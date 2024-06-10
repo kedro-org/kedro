@@ -425,7 +425,7 @@ kedro jupyter lab
 You can use any other Jupyter client to connect to a Kedro project kernel such as the [Qt Console](https://qtconsole.readthedocs.io/), which can be launched using the `spaceflights` kernel as follows:
 
 ```bash
-jupyter qtconsole --kernel=kedro_iris
+jupyter qtconsole --kernel=spaceflights
 ```
 
 This will automatically load the Kedro IPython in a console that supports graphical features such as embedded figures:

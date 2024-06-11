@@ -6,6 +6,9 @@
 
 ## Breaking changes to the API
 
+## Upcoming deprecations for Kedro 0.20.0
+* The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 0.20.0.
+
 ## Documentation changes
 
 ## Community contributions

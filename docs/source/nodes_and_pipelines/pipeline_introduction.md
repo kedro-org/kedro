@@ -133,7 +133,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 Here it was shown that pipeline creation function have few optional parameters, you can use:
 - tags on a pipeline level to apply them for all nodes inside of pipeline
-- namespace, inputs, outputs and parameters to reuse pipelines. More about that you can find [here](namespaces_and_modularity.md)
+- namespace, inputs, outputs and parameters to reuse pipelines. More about that you can find [here](modular_pipelines.md)
 
 ## Key Pipeline methods and operations
 

@@ -6,9 +6,9 @@ Technically {py:class}`~kedro.pipeline.Pipeline` is a python class that could be
 
 Most important about kedro pipelines:
 - [How to create a simple pipeline](#how-to-create-a-simple-pipeline)
-- [Create a new blank pipeline with kedro pipeline create command](#how-to-create-a-new-blank-pipeline-in-your-kedro-project)
-- [Pipelinecreation structure](#pipeline-creation-structure)
-- [Pipeline methods and operations](#pipeline-methods-and-operations)
+- [Create a new blank pipeline with kedro pipeline create command](#create-a-new-blank-pipeline-with-the-kedro-pipeline-create-command)
+- [Pipeline creation structure](#pipeline-creation-structure)
+- [Key Pipeline methods and operations](#key-pipeline-methods-and-operations)
 - [Bad pipelines - rules](#bad-pipelines)
 - [Custom new pipeline templates](#custom-new-pipeline-templates)
 

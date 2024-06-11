@@ -2,7 +2,7 @@
 
 Sometimes it is desirable to run a subset, or a 'slice' of a pipeline's nodes. In this page, we illustrate the programmatic options that Kedro provides. You can also use the [Kedro CLI to pass parameters to `kedro run`](../development/commands_reference.md#run-the-project) command and slice a pipeline.
 
-Let's look again at the example pipeline from the [pipeline introduction documentation](./pipeline_introduction.md#how-to-build-a-pipeline), which computes the variance of a set of numbers:
+Let's look again at the example pipeline from the [pipeline introduction documentation](./pipeline_introduction.md#how-to-create-a-simple-pipeline), which computes the variance of a set of numbers:
 
 <details>
 <summary><b>Click to expand</b></summary>

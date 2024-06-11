@@ -522,8 +522,9 @@ class TestDataCatalogFromConfig:
     def test_config_invalid_dataset_config(self, sane_config):
         sane_config["catalog"]["invalid_entry"] = "some string"
         pattern = (
-            r"Catalog entry 'invalid_entry' is not a valid dataset configuration. "
-            r"If this is a variable intended for interpolation, make sure it is preceded by an underscore."
+            "Catalog entry 'invalid_entry' is not a valid dataset configuration. "
+            "\nHint: If this catalog entry is intended for variable interpolation, "
+            "make sure that the key is preceded by an underscore."
         )
         with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**sane_config)

@@ -291,7 +291,8 @@ class DataCatalog:
             if not isinstance(ds_config, dict):
                 raise DatasetError(
                     f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
-                    "If this is a variable intended for interpolation, make sure it is preceded by an underscore."
+                    "\nHint: If this catalog entry is intended for variable interpolation, "
+                    "make sure that the key is preceded by an underscore."
                 )
 
             ds_config = _resolve_credentials(  # noqa: PLW2901

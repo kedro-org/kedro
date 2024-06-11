@@ -52,7 +52,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Nodes and pipelines
 
-* [How do I create a modular pipeline](../nodes_and_pipelines/modular_pipelines.md#how-do-i-create-a-modular-pipeline)?
+* [How can I reuse my pipelines](../nodes_and_pipelines/modular_pipelines.md)?
 
 * [Can I use generator functions in a node](../nodes_and_pipelines/nodes.md#how-to-use-generator-functions-in-a-node)?
 

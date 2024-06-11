@@ -4,7 +4,7 @@ In many typical Kedro projects, a single (“main”) pipeline increases in comp
 
 ## How to reuse your pipelines
 
-If you want to create a new pipeline that performs the same tasks as your existing pipeline (e.g., `data_science`), you can use the same `pipeline()` creation function as described in [previous manual](). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
+If you want to create a new pipeline that performs the same tasks as your existing pipeline (e.g., `data_science`), you can use the same `pipeline()` creation function as described in [previous manual](pipeline_introduction.md). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
@@ -19,18 +19,18 @@ This means you can easily create multiple pipelines based on the `data_science` 
 
 ## What is a Namespace
 
-If you need to try different options for training your model, constantly overwriting your outputs for each new pipeline can become tedious. Each model's results (outputs) should be saved in new objects, which can be annoying to manage manually. Namespaces are a perfect solution for this. By setting a namespace="namespace_name" parameter for each new pipeline (based on an existing pipeline), you achieve automatic output and node isolation. This is done by adding a "namespace_name." prefix to each pipeline node and output dataset. Your pipeline creation code will look like this:
+If you need to try different options for training your model, constantly overwriting your outputs for each new pipeline can become tedious. Each model's results (outputs) should be saved in new objects, which can be annoying to manage manually. Namespaces are a perfect solution for this. By setting a `namespace="namespace_name"` parameter for each new pipeline (based on an existing pipeline), you achieve automatic output and node isolation. This is done by adding a namespace_namenamespace_name.` prefix to each pipeline node and output dataset. Your pipeline creation code will look like this:
 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
     return pipeline(
     [data_science], # A name of existing pipeline
-    inputs = {"old_input__df_name" : "new_input_df_name"},
+    inputs = {"old_input_df_name" : "new_input_df_name"},
     parameters = {"params: test_size1": "params: test_size2"},
     namespace = "alternative_approach",
     )
 ```
-* You can use kedro run --namespace=<namespace> to run only the specific namespace
+* You can use `kedro run --namespace = namespace_name` to run only the specific namespace
 * [Kedro-Viz](https://demo.kedro.org) accelerates development by rendering namespaced pipelines as collapsible 'super nodes'.
 
 ## How to share your pipelines
@@ -169,7 +169,7 @@ final_pipeline = (
 `parameters` references will not be namespaced, but `params:` references will.
 ```
 
-## Example: How to use a modular pipeline with different parameters
+## Example: How to reuse a pipeline with different parameters
 
  Mapping parameter values is very similar to the way we map inputs and outputs.
 

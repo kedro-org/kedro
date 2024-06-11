@@ -9,7 +9,7 @@ Most important about kedro pipelines:
 - [Create a new blank pipeline with kedro pipeline create command](#how-to-create-a-new-blank-pipeline-in-your-kedro-project)
 - [Pipelinecreation structure](#pipeline-creation-structure)
 - [Pipeline methods and operations](#pipeline-methods-and-operations)
-- [Bad pipelines - rules](#bad-pipelines-rules)
+- [Bad pipelines - rules](#bad-pipelines)
 - [Custom new pipeline templates](#custom-new-pipeline-templates)
 
 ## How to create a simple pipeline
@@ -75,9 +75,9 @@ After running this command, a new pipeline with boilerplate folders and files wi
 
 ```
 
-If you want to do the reverse and remove that pipeline, you can use ``kedro pipeline delete <pipeline_name>`` to do so.
+If you want to do the reverse and remove that pipeline, you can use `kedro pipeline delete <pipeline_name>` to do so or have a look to all [project-specific CLI commands list](../development/commands_reference.md#kedro-commands).
 ```{note}
-For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information and also visit the [project-specific CLI commands list](../development/commands_reference.md#kedro-commands).
+For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
 ```
 
 ## Pipeline creation structure
@@ -113,7 +113,6 @@ def variance(m, m2):
 ```python
 # src/my_project/pipelines/{{pipeline_name}}/pipelines.py
 from kedro.pipeline import Pipeline, pipeline, node
-# Added node to import because we want to create nodes here
 
 from .nodes import mean, mean_sos, variance
 # Import node functions from nodes.py located in the same folder
@@ -127,14 +126,14 @@ def create_pipeline(**kwargs) -> Pipeline:
         node(variance, ["m", "m2"], "v", name="variance_node"),
     ], # A list of nodes and pipelines combined into a new pipeline
     tags = "tag3", # Optional, each pipeline node will be tagged
-    namespaces = "", # Optional
+    namespace = "", # Optional
     inputs = {}, # Optional
     outputs = {}, # Optional
     parameters = {}, # Optional
 ```
 Here it was shown that pipeline creation function have few optional parameters, you can use:
 - tags on a pipeline level to apply them for all nodes inside of pipeline
-- namespaces, inputs, outputs and parameters to reuse pipelines. More about that you can find here
+- namespace, inputs, outputs and parameters to reuse pipelines. More about that you can find [here](namespaces_and_modularity.md)
 
 ## Key Pipeline methods and operations
 
@@ -267,8 +266,6 @@ A pipelines can usually readily resolve its dependencies. In some cases, resolut
 
 In this case, we have a pipeline consisting of a single node with no input and output:
 
-<details>
-<summary><b>Click to expand</b></summary>
 
 ```python
 try:
@@ -284,7 +281,6 @@ Invalid Node definition: it must have some `inputs` or `outputs`.
 Format should be: node(function, inputs, outputs)
 ```
 
-</details>
 
 ### Pipeline with circular dependencies
 
@@ -292,8 +288,6 @@ For every two variables where the first depends on the second, there must not be
 
 The first node captures the relationship of how to calculate `y` from `x` and the second captures the relationship of how to calculate `x` knowing `y`. The pair of nodes cannot co-exist in the same pipeline:
 
-<details>
-<summary><b>Click to expand</b></summary>
 
 ```python
 try:
@@ -312,7 +306,6 @@ The output is as follows:
 ```console
 Circular dependencies exist among these items: ['first node: <lambda>([x]) -> [y]', 'second node: <lambda>([y]) -> [x]']
 ```
-</details>
 
 ### Pipeline nodes named with the dot notation
 Nodes named with dot notation may behave strangely.
@@ -342,8 +335,7 @@ separate folder and pointing to them with the `--template` flag.
 
 #### Creating custom templates
 
-It is your responsibility to create functional Cookiecutter templates for custom modular pipelines. Please ensure you understand the
-basic structure of a modular pipeline. Your template should render to a valid, importable Python module containing a
+It is your responsibility to create functional Cookiecutter templates for custom pipelines. Please ensure you understand the basic structure of a pipeline. Your template should render to a valid, importable Python module containing a
 `create_pipeline` function at the top level that returns a `Pipeline` object. You will also need appropriate
 `config` and `tests` subdirectories that will be copied to the project `config` and `tests` directories when the pipeline is created.
 The `config` and `tests` directories need to follow the same layout as in the default template and cannot

@@ -5,7 +5,7 @@
 
 nodes
 pipeline_introduction
-namespaces
+namespaces_and_modularity
 pipeline_registry
 micro_packaging
 run_a_pipeline

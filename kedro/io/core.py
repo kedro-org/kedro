@@ -156,8 +156,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             raise DatasetError(
                 f"An exception occurred when parsing config "
                 f"for dataset '{name}':\n{str(exc)}."
-                f"\nHint: If this catalog entry is intended for variable interpolation, "
-                f"make sure that the top level key is preceded by an underscore."
             ) from exc
 
         try:
@@ -386,7 +384,11 @@ def parse_dataset_definition(
     config = copy.deepcopy(config)
 
     if "type" not in config:
-        raise DatasetError("'type' is missing from dataset catalog configuration")
+        raise DatasetError(
+            "'type' is missing from dataset catalog configuration."
+            "\nHint: If this catalog entry is intended for variable interpolation, "
+            "make sure that the top level key is preceded by an underscore."
+        )
 
     dataset_type = config.pop("type")
     class_obj = None

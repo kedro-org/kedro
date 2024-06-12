@@ -225,7 +225,7 @@ For more details, run `%reload_kedro?`.
 ### `%load_node` line magic
 
 ``` {note}
-This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VSCode Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
+This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VS Code Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
 ```
 You can load the contents of a node in your project into a series of cells using the `%load_node` line magic. To use `%load_node`, the node you want to load needs to fulfil two requirements:
 - The node needs to have a name

@@ -6,7 +6,7 @@ This page also explains how to use line magic to display a Kedro-Viz visualisati
 
 ## Example project
 
-The example adds a notebook to experiment with the  [`spaceflight-pandas-viz` starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflight-pandas-viz). As an alternative, you can follow the example using a different starter or just add a notebook to your own project.
+The example adds a notebook to experiment with the  [`spaceflight-pandas-viz` starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz). As an alternative, you can follow the example using a different starter or just add a notebook to your own project.
 
 We will assume the example project is called `spaceflights`, but you can call it whatever you choose.
 

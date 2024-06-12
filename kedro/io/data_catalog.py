@@ -754,7 +754,7 @@ class DataCatalog:
             dataset_patterns = self._sort_patterns(unsorted_dataset_patterns)
         else:
             dataset_patterns = self._dataset_patterns
-        return DataCatalog(
+        return self.__class__(
             datasets=self._datasets,
             dataset_patterns=dataset_patterns,
             load_versions=self._load_versions,

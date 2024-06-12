@@ -11,7 +11,7 @@ At this stage, you should be able to see the `conda` environment that you have c
 ![](../meta/images/vscode_setup_interpreter.png)
 
 ## Kedro VS Code Extension
-[Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) support 0.19+ versions of Kedro project. It supports features like go-to definition, find references and hovers etc.
+[Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate around your Kedro project by finding the definition of your datasets, find references to them in your code, and more.
 
 ![Kedro VS Code gif](https://github.com/kedro-org/vscode-kedro/blob/main/assets/lsp-go-to-definition.gif?raw=true)
 ## Advanced: For those using `venv` / `virtualenv`

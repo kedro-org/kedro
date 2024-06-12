@@ -81,7 +81,7 @@ To exit `kedro-environment`:
 conda deactivate
 ```
 ### Optional: Setup Kedro with IDE
-Working in IDEs can be a great productivity boost.
+Working in an IDE can be a great productivity boost.
 
 For VS Code Users: Checkout [Set up Visual Studio Code](../development/set_up_vscode.md) and [Kedro VS Code Extension](../development/set_up_vscode.md#kedro-vscode-extension)
 For PyCharm Users: Checkout [Set up PyCharm](../development/set_up_pycharm.md)

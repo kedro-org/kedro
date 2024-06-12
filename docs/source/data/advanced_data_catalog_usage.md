@@ -22,7 +22,7 @@ from kedro_datasets.pandas import (
     ParquetDataset,
 )
 
-io = DataCatalog(
+catalog =  DataCatalog(
     {
         "bikes": CSVDataset(filepath="../data/01_raw/bikes.csv"),
         "cars": CSVDataset(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
@@ -45,7 +45,7 @@ When using `SQLTableDataset` or `SQLQueryDataset` you must provide a `con` key c
 To review the `DataCatalog`:
 
 ```python
-io.list()
+catalog.list()
 ```
 
 ## How to load datasets programmatically
@@ -53,7 +53,7 @@ io.list()
 To access each dataset by its name:
 
 ```python
-cars = io.load("cars")  # data is now loaded as a DataFrame in 'cars'
+cars = catalog.load("cars")  # data is now loaded as a DataFrame in 'cars'
 gear = cars["gear"].values
 ```
 
@@ -78,9 +78,9 @@ To save data using an API similar to that used to load data:
 from kedro.io import MemoryDataset
 
 memory = MemoryDataset(data=None)
-io.add("cars_cache", memory)
-io.save("cars_cache", "Memory can store anything.")
-io.load("cars_cache")
+catalog.add("cars_cache", memory)
+catalog.save("cars_cache", "Memory can store anything.")
+catalog.load("cars_cache")
 ```
 
 ### How to save data to a SQL database for querying
@@ -96,10 +96,10 @@ try:
 except FileNotFoundError:
     pass
 
-io.save("cars_table", cars)
+catalog.save("cars_table", cars)
 
 # rank scooters by their mpg
-ranked = io.load("scooters_query")[["brand", "mpg"]]
+ranked = catalog.load("scooters_query")[["brand", "mpg"]]
 ```
 
 ### How to save data in Parquet
@@ -107,7 +107,7 @@ ranked = io.load("scooters_query")[["brand", "mpg"]]
 To save the processed data in Parquet format:
 
 ```python
-io.save("ranked", ranked)
+catalog.save("ranked", ranked)
 ```
 
 ```{warning}
@@ -163,15 +163,15 @@ version = Version(
 test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
-io = DataCatalog({"test_dataset": test_dataset})
+catalog =  DataCatalog({"test_dataset": test_dataset})
 
 # save the dataset to data/01_raw/test.csv/<version>/test.csv
-io.save("test_dataset", data1)
+catalog.save("test_dataset", data1)
 # save the dataset into a new file data/01_raw/test.csv/<version>/test.csv
-io.save("test_dataset", data2)
+catalog.save("test_dataset", data2)
 
 # load the latest version from data/test.csv/*/test.csv
-reloaded = io.load("test_dataset")
+reloaded = catalog.load("test_dataset")
 assert data2.equals(reloaded)
 ```
 
@@ -187,17 +187,17 @@ version = Version(
 test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
-io = DataCatalog({"test_dataset": test_dataset})
+catalog =  DataCatalog({"test_dataset": test_dataset})
 
 # save the dataset to data/01_raw/test.csv/my_exact_version/test.csv
-io.save("test_dataset", data1)
+catalog.save("test_dataset", data1)
 # load from data/01_raw/test.csv/my_exact_version/test.csv
-reloaded = io.load("test_dataset")
+reloaded = catalog.load("test_dataset")
 assert data1.equals(reloaded)
 
 # raises DatasetError since the path
 # data/01_raw/test.csv/my_exact_version/test.csv already exists
-io.save("test_dataset", data2)
+catalog.save("test_dataset", data2)
 ```
 
 We do not recommend passing exact load or save versions, since it might lead to inconsistencies between operations. For example, if versions for load and save operations do not match, a save operation would result in a `UserWarning`.
@@ -220,11 +220,11 @@ version = Version(
 test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
-io = DataCatalog({"test_dataset": test_dataset})
+catalog =  DataCatalog({"test_dataset": test_dataset})
 
-io.save("test_dataset", data1)  # emits a UserWarning due to version inconsistency
+catalog.save("test_dataset", data1)  # emits a UserWarning due to version inconsistency
 
 # raises DatasetError since the data/01_raw/test.csv/exact_load_version/test.csv
 # file does not exist
-reloaded = io.load("test_dataset")
+reloaded = catalog.load("test_dataset")
 ```

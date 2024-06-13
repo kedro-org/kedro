@@ -155,7 +155,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         except Exception as exc:
             raise DatasetError(
                 f"An exception occurred when parsing config "
-                f"for dataset '{name}':\n{str(exc)}."
+                f"for dataset '{name}':\n{str(exc)}"
             ) from exc
 
         try:
@@ -406,7 +406,21 @@ def parse_dataset_definition(
                 class_obj = tmp
                 break
         else:
-            raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
+            hint = ""
+            if "DataSet" in dataset_type:
+                hint = (
+                    "Hint: If you are trying to use a dataset from `kedro-datasets`>=2.0.0, "
+                    "make sure that the dataset name uses the `Dataset` spelling instead of `DataSet`."
+                )
+            else:
+                hint = (
+                    "Hint: If you are trying to use a dataset from `kedro-datasets`, "
+                    "make sure that the package is installed in your current environment. "
+                    "You can do so by running `pip install kedro-datasets`."
+                )
+            raise DatasetError(
+                f"Class '{dataset_type}' not found, is this a typo?" f"\n{hint}"
+            )
 
     if not class_obj:
         class_obj = dataset_type

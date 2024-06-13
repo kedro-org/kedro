@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Updated error message for invalid catalog entries.
 
 ## Breaking changes to the API
 

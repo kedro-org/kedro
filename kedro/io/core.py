@@ -416,7 +416,9 @@ def parse_dataset_definition(
                 hint = (
                     "Hint: If you are trying to use a dataset from `kedro-datasets`, "
                     "make sure that the package is installed in your current environment. "
-                    "You can do so by running `pip install kedro-datasets`."
+                    "You can do so by running `pip install kedro-datasets` or "
+                    "`pip install kedro-datasets[<dataset-group>]` to install `kedro-datasets` along with "
+                    "related dependencies for the specific dataset group."
                 )
             raise DatasetError(
                 f"Class '{dataset_type}' not found, is this a typo?" f"\n{hint}"

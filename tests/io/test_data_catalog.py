@@ -493,7 +493,20 @@ class TestDataCatalogFromConfig:
 
         pattern = (
             "An exception occurred when parsing config for dataset 'boats':\n"
-            "Class 'kedro.io.CSVDatasetInvalid' not found"
+            "Class 'kedro.io.CSVDatasetInvalid' not found, is this a typo?"
+        )
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            DataCatalog.from_config(**sane_config)
+
+    def test_config_incorrect_spelling(self, sane_config):
+        """Check hint if the type uses the old DataSet spelling"""
+        sane_config["catalog"]["boats"]["type"] = "pandas.CSVDataSet"
+
+        pattern = (
+            "An exception occurred when parsing config for dataset 'boats':\n"
+            "Class 'pandas.CSVDataSet' not found, is this a typo?"
+            "\nHint: If you are trying to use a dataset from `kedro-datasets`>=2.0.0,"
+            " make sure that the dataset name uses the `Dataset` spelling instead of `DataSet`."
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)

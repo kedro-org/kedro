@@ -4,6 +4,7 @@
 
 ## Bug fixes and other changes
 * Updated error message for invalid catalog entries.
+* Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
 
 ## Breaking changes to the API
 

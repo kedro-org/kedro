@@ -1743,3 +1743,122 @@ class TestGetLatestStartersVersion:
                 "Error fetching kedro-starters latest release version: Request failed"
                 in caplog.text
             )
+
+
+class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
+    @pytest.fixture
+    def config(self):
+        return {
+            "tools": [],
+            "example_pipeline": "False",
+            "output_dir": "/my/output/dir",
+        }
+
+    def test_kedro_version_match_starters_true(self, config, mocker):
+        mocker.patch(
+            "kedro.framework.cli.starters._kedro_and_starters_version_identical",
+            return_value=True,
+        )
+
+        config["tools"] = ["PySpark", "Kedro Viz"]
+        checkout = ""
+        directory = "my-directory"
+        template_path = "my/template/path"
+
+        expected_args = {
+            "output_dir": "/my/output/dir",
+            "no_input": True,
+            "extra_context": config,
+            "checkout": version,
+            "directory": "spaceflights-pyspark-viz",
+        }
+        expected_path = "git+https://github.com/kedro-org/kedro-starters.git"
+
+        result_args, result_path = _make_cookiecutter_args_and_fetch_template(
+            config, checkout, directory, template_path
+        )
+
+        assert result_args == expected_args
+        assert result_path == expected_path
+
+    def test_kedro_version_match_starters_false(self, config, mocker):
+        mocker.patch(
+            "kedro.framework.cli.starters._kedro_and_starters_version_identical",
+            return_value=False,
+        )
+
+        config["tools"] = ["PySpark", "Kedro Viz"]
+        checkout = "my-checkout"
+        directory = "my-directory"
+        template_path = "my/template/path"
+
+        expected_args = {
+            "output_dir": "/my/output/dir",
+            "no_input": True,
+            "extra_context": config,
+            "checkout": "main",
+            "directory": "spaceflights-pyspark-viz",
+        }
+        expected_path = "git+https://github.com/kedro-org/kedro-starters.git"
+
+        result_args, result_path = _make_cookiecutter_args_and_fetch_template(
+            config, checkout, directory, template_path
+        )
+
+        assert result_args == expected_args
+        assert result_path == expected_path
+
+    def test_no_tools_and_example_pipeline(self, config, mocker):
+        mocker.patch(
+            "kedro.framework.cli.starters._kedro_and_starters_version_identical",
+            return_value=False,
+        )
+
+        config["tools"] = []
+        config["example_pipeline"] = "True"
+        checkout = ""
+        directory = ""
+        template_path = "my/template/path"
+
+        expected_args = {
+            "output_dir": "/my/output/dir",
+            "no_input": True,
+            "extra_context": config,
+            "checkout": "main",
+            "directory": "spaceflights-pandas",
+        }
+        expected_path = "git+https://github.com/kedro-org/kedro-starters.git"
+
+        result_args, result_path = _make_cookiecutter_args_and_fetch_template(
+            config, checkout, directory, template_path
+        )
+
+        assert result_args == expected_args
+        assert result_path == expected_path
+
+    def test_no_tools_no_example_pipeline(self, config, mocker):
+        mocker.patch(
+            "kedro.framework.cli.starters._kedro_and_starters_version_identical",
+            return_value=False,
+        )
+
+        config["tools"] = []
+        config["example_pipeline"] = "False"
+        checkout = ""
+        directory = ""
+        template_path = "my/template/path"
+
+        expected_args = {
+            "output_dir": "/my/output/dir",
+            "no_input": True,
+            "extra_context": config,
+            "checkout": "main",
+        }
+        expected_path = "my/template/path"
+
+        result_args, result_path = _make_cookiecutter_args_and_fetch_template(
+            config, checkout, directory, template_path
+        )
+
+        assert result_args == expected_args
+        assert result_path == expected_path

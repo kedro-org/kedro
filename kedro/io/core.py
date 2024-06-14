@@ -408,7 +408,7 @@ def parse_dataset_definition(
         else:
             hint = ""
             if "DataSet" in dataset_type:
-                hint = (
+                hint = (  # pragma: no cover # To remove when we drop support for python 3.8
                     "Hint: If you are trying to use a dataset from `kedro-datasets`>=2.0.0, "
                     "make sure that the dataset name uses the `Dataset` spelling instead of `DataSet`."
                 )

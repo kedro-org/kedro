@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.7
 
 ## Major features and improvements
+* Exposed `load` and `save` publicly for each dataset in the core `kedro` library, and enabled other datasets to do the same. If a dataset doesn't expose `load` or `save` publicly, Kedro will fall back to using `_load` or `_save`, respectively.
 
 ## Bug fixes and other changes
 * Updated error message for invalid catalog entries.

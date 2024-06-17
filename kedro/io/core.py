@@ -93,10 +93,10 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>
-        >>>     def _load(self) -> pd.DataFrame:
+        >>>     def load(self) -> pd.DataFrame:
         >>>         return pd.read_csv(self._filepath)
         >>>
-        >>>     def _save(self, df: pd.DataFrame) -> None:
+        >>>     def save(self, df: pd.DataFrame) -> None:
         >>>         df.to_csv(str(self._filepath))
         >>>
         >>>     def _exists(self) -> bool:
@@ -571,11 +571,11 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>
-        >>>     def _load(self) -> pd.DataFrame:
+        >>>     def load(self) -> pd.DataFrame:
         >>>         load_path = self._get_load_path()
         >>>         return pd.read_csv(load_path)
         >>>
-        >>>     def _save(self, df: pd.DataFrame) -> None:
+        >>>     def save(self, df: pd.DataFrame) -> None:
         >>>         save_path = self._get_save_path()
         >>>         df.to_csv(str(save_path))
         >>>

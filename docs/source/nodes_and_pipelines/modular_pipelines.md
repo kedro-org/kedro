@@ -1,4 +1,4 @@
-# Pipeline reusage with namespaces
+# Reuse pipelines with namespaces
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend you separate your code into different pipelines (modules) that are logically isolated and can be reused.
 
@@ -47,7 +47,10 @@ Pipelines are shareable between Kedro codebases via [micro-packaging](micro_pack
 
 * A pipeline **might** have external dependencies specified in a local `requirements.txt` file.
 * Pipeline specific dependencies are scooped up during the [micro-packaging](micro_packaging.md) process.
-* These dependencies are _not_ currently installed by the [`kedro install`](../development/commands_reference.md#install-all-package-dependencies) command, and must be manually installed.
+* These dependencies need to be manually installed using `pip`:
+```bash
+pip install -r requirements.txt
+```
 
 ## Example: Combining disconnected pipelines
 

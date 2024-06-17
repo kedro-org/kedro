@@ -6,8 +6,9 @@ from pathlib import Path
 import click
 from click.testing import CliRunner
 from omegaconf import OmegaConf
-from pytest import fixture, mark, raises
+from pytest import fixture, mark, raises, warns
 
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli
@@ -244,6 +245,13 @@ class TestCliUtils:
         with raises(KedroCliError):
             non_existent_file = str(requirements_file) + "-nonexistent"
             get_pkg_version(non_existent_file, "pandas")
+
+    def test_get_pkg_version_deprecated(self, requirements_file):
+        with warns(
+            KedroDeprecationWarning,
+            match=r"\`get_pkg_version\(\)\` has been deprecated",
+        ):
+            _ = get_pkg_version(requirements_file, "pandas")
 
     def test_clean_pycache(self, tmp_path, mocker):
         """Test `clean_pycache` utility function"""

@@ -9,7 +9,7 @@ If you want to create a new pipeline that performs the same tasks as your existi
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
     return pipeline(
-    [data_science], # A name of existing pipeline
+    [data_science], # Name of an existing pipeline
     inputs = {"old_input__df_name" : "new_input_df_name"},
     outputs = {"old_output_df_name" : "new_output_df_name"},
     parameters = {"params: test_size1": "params: test_size2"},
@@ -19,7 +19,7 @@ This means you can easily create multiple pipelines based on the `data_science` 
 
 ## What is a Namespace
 
-If you need to try different options for training your model, constantly overwriting your outputs for each new pipeline can become tedious. Each model's results (outputs) should be saved in new objects, which can be annoying to manage manually. Namespaces are a perfect solution for this. By setting a `namespace="namespace_name"` parameter for each new pipeline (based on an existing pipeline), you achieve automatic output and node isolation. This is done by adding a namespace_namenamespace_name.` prefix to each pipeline node and output dataset. Your pipeline creation code will look like this:
+If you need to try different options for training your model, constantly overwriting your outputs for each new pipeline can become tedious. Each model's results (outputs) should be saved in new objects, which can be annoying to manage manually. Namespaces are a perfect solution for this. By setting a `namespace="namespace_name"` parameter for each new pipeline (based on an existing pipeline), you achieve automatic output and node isolation. This is done by adding a `namespace_name` prefix to each pipeline node and output dataset. Your pipeline creation code will look like this:
 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
@@ -37,7 +37,7 @@ def create_new_pipeline(**kwargs) -> Pipeline:
 
 Pipelines are shareable between Kedro codebases via [micro-packaging](micro_packaging.md), but you must follow a couple of rules to ensure portability:
 
-* A pipeline that you want to share needs to be separated in terms of its folder structure. `kedro pipeline create` command make this easy.
+* A pipeline that you want to share needs to be separated in terms of its folder structure. `kedro pipeline create` command makes this easy.
 * Pipelines should **not** depend on the main Python package, as this would break portability to another project.
 * Catalog references are not packaged when sharing/consuming pipelines, i.e. the `catalog.yml` file is not packaged.
 * Kedro will only look for top-level configuration in `conf/`; placing a configuration folder within the pipeline folder will have no effect.

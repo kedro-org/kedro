@@ -75,9 +75,9 @@ After running this command, a new pipeline with boilerplate folders and files wi
 
 ```
 
-If you want to do the reverse and remove that pipeline, you can use `kedro pipeline delete <pipeline_name>` to do so or have a look to all [project-specific CLI commands list](../development/commands_reference.md#kedro-commands).
+If you want to delete an existing pipeline, you can use `kedro pipeline delete <pipeline_name>` to do so. 
 ```{note}
-For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
+To see the full list of available CLI options, you can run `kedro pipeline create --help` for more information.
 ```
 
 ## Pipeline creation structure
@@ -94,9 +94,9 @@ def create_pipeline(**kwargs) -> Pipeline:
 Here, you are creating a function that returns a `Pipeline` class instance with the help of the `pipeline` function. We recommend putting your pipeline creation code into a function because it allows to achieve:
 - Modularity: you can easily reuse this logic across different parts of your project.
 - Parameterisation: with `create_pipeline(**kwargs)` you can pass different parameters to the pipeline creation function, enabling dynamic pipeline creation
-- Testing: you can write unit tests for the create_pipeline function to ensure that it correctly constructs the pipeline
+- Testing: you can write unit tests for the `create_pipeline()` function to ensure that it correctly constructs the pipeline
 
-Before filling `pipeline.py` with nodes, we recommend storing all node functions in `nodes.py`. From our previous example, we should put:
+Before filling `pipeline.py` with nodes, we recommend storing all node functions in `nodes.py`. From our previous example, we should add the functions `mean()`, `mean_sos()` and `variance()` into `nodes.py`:
 
 ```python
 # src/my_project/pipelines/{{pipeline_name}}/nodes.py

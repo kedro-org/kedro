@@ -4,7 +4,7 @@ In many typical Kedro projects, a single (“main”) pipeline increases in comp
 
 ## How to reuse your pipelines
 
-If you want to create a new pipeline that performs the same tasks as your existing pipeline (e.g., `data_science`), you can use the same `pipeline()` creation function as described in [previous manual](pipeline_introduction.md). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
+If you want to create a new pipeline that performs the same tasks as your existing pipeline (e.g., `data_science`), you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](pipeline_introduction.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
@@ -24,12 +24,18 @@ If you need to try different options for training your model, constantly overwri
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
     return pipeline(
-    [data_science], # A name of existing pipeline
-    inputs = {"old_input_df_name" : "new_input_df_name"},
-    parameters = {"params: test_size1": "params: test_size2"},
-    namespace = "alternative_approach",
+        [data_science],  # Name of the existing pipeline
+        inputs={"old_input_df_name": "new_input_df_name"},  # Mapping old input to new input
+        parameters={"params:test_size1": "params:test_size2"},  # Updating parameters
+        namespace="alternative_approach",  # Setting the namespace name
     )
 ```
+In this example:
+* The `data_science` pipeline is reused and namespaced under `alternative_approach`.
+* The inputs and parameters are mapped to new names/values.
+* The namespace parameter ensures that all nodes and outputs in this pipeline are prefixed with `alternative_approach`, isolating them from other pipelines.
+
+Namespace methods:
 * You can use `kedro run --namespace = namespace_name` to run only the specific namespace
 * [Kedro-Viz](https://demo.kedro.org) accelerates development by rendering namespaced pipelines as collapsible 'super nodes'.
 

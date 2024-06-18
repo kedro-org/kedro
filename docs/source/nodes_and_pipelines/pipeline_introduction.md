@@ -6,6 +6,7 @@ To benefit from Kedro's automatic dependency resolution, you can chain your node
 
 - [How to create a simple pipeline](#how-to-create-a-simple-pipeline)
 - [How to use key pipeline methods and operations](#how-to-use-key-pipeline-methods-and-operations)
+- [How to tag a pipeline](#how-to-tag-a-pipeline)
 - [How to avoid creating bad pipelines](#how-to-avoid-creating-bad-pipelines)
 - [How to create a new blank pipeline using the `kedro pipeline create` command](#how-to-create-a-new-blank-pipeline-using-the-kedro-pipeline-create-command)
 - [How to structure your pipeline creation](#how-to-structure-your-pipeline-creation)
@@ -37,6 +38,14 @@ variance_pipeline = pipeline(
     ]
 )
 ```
+
+Kedro determines the order of execution of these nodes based on the inputs and outputs specified for each node. In this example:
+1. The first node computes the length of `xs` and outputs it as `n`.
+2. The second node calculates the mean using `xs` and `n`, and outputs it as `m`.
+3. The third node computes the mean sum of squares (mean_sos) using `xs` and `n`, and outputs it as `m2`.
+4. The fourth node calculates the variance using the mean (`m`) and mean sum of squares (`m2`), and outputs it as `v`.
+
+Kedro's dependency resolution ensures that each node runs only after its required inputs are available from the outputs of previous nodes. This way, the nodes are executed in the correct order automatically, based on the defined dependencies.
 
 
 ## How to use key pipeline methods and operations
@@ -160,6 +169,25 @@ Out[8]: {'v'}
 ```
 
 
+## How to tag a pipeline
+
+You can also tag your pipeline by providing the `tags` argument, which will tag all of the pipeline's nodes. In the following example, both nodes are tagged with `pipeline_tag`.
+
+```python
+pipeline = pipeline(
+    [node(..., name="node1"), node(..., name="node2")], tags="pipeline_tag"
+)
+```
+
+You can combine pipeline tagging with node tagging. In the following example, `node1` and `node2` are tagged with `pipeline_tag`, while `node2` also has a `node_tag`.
+
+```python
+pipeline = pipeline(
+    [node(..., name="node1"), node(..., name="node2", tags="node_tag")],
+    tags="pipeline_tag",
+)
+```
+
 ## How to avoid creating bad pipelines
 
 A pipelines can usually readily resolve its dependencies. In some cases, resolution is not possible. In this case, the pipeline is not well-formed.
@@ -225,8 +253,7 @@ We recommend use of characters like `_` instead of `.` as name separators.
 
 ## How to create a new blank pipeline using the `kedro pipeline create` command
 
-When managing your Kedro project, we recommend organising your pipelines separately to achieve modularity. This approach allows for easy copying and reuse of pipelines within and between projects. Simply put: one pipeline, one folder. To help with that, you can use the following command (the pipeline name must adhere to [Python convention](https://realpython.com/python-pep8/#naming-conventions)):
-
+When managing your Kedro project, we recommend grouping related tasks into individual pipelines to achieve modularity. A project typically contains many tasks, and organising frequently executed tasks together into separate pipelines helps maintain order and efficiency. Each pipeline should ideally be organised in its own folder, promoting easy copying and reuse within and between projects. Simply put: one pipeline, one folder. To assist with this, you can use the following command (the pipeline name must adhere to [Python naming conventions](https://realpython.com/python-pep8/#naming-conventions)):
 
 ```bash
 kedro pipeline create <pipeline_name>

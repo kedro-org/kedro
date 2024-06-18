@@ -153,7 +153,7 @@ To tag a node, you can simply specify the `tags` argument:
 node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tags="node_tag")
 ```
 
-Moreover, you can [tag all nodes in a `Pipeline`](./pipeline_introduction.md#pipeline-creation-structure). If the pipeline definition contains the `tags=` argument, Kedro will attach the corresponding tag to every node within that pipeline.
+Moreover, you can [tag all nodes in a `Pipeline`](./pipeline_introduction.md#how-to-tag-a-pipeline). If the pipeline definition contains the `tags=` argument, Kedro will attach the corresponding tag to every node within that pipeline.
 
 To run a pipeline using a tag:
 

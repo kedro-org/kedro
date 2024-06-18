@@ -4,6 +4,7 @@
 
 ## Bug fixes and other changes
 * Updated error message for invalid catalog entries.
+* Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
 
 ## Breaking changes to the API
 

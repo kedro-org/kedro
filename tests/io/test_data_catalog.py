@@ -427,10 +427,20 @@ class TestDataCatalog:
         ],
     )
     def test_bad_confirm(self, data_catalog, dataset_name, error_pattern):
-        """Test confirming a non existent dataset or one that
+        """Test confirming a non-existent dataset or one that
         does not have `confirm` method"""
         with pytest.raises(DatasetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
+
+    def test_shallow_copy_returns_correct_class_type(
+        self,
+    ):
+        class MyDataCatalog(DataCatalog):
+            pass
+
+        data_catalog = MyDataCatalog()
+        copy = data_catalog.shallow_copy()
+        assert isinstance(copy, MyDataCatalog)
 
 
 class TestDataCatalogFromConfig:

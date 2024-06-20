@@ -1,18 +1,24 @@
-# Pipelines
+# Pipeline objects
 
 We previously introduced [Nodes](./nodes.md) as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.
 
 To benefit from Kedro's automatic dependency resolution, you can chain your nodes into a {py:class}`~kedro.pipeline.Pipeline`, which is a list of nodes that use a shared set of variables. That class could be created using {py:class}`~kedro.pipeline.modular_pipeline.pipeline` method, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
 
-- [How to create a simple pipeline](#how-to-create-a-simple-pipeline)
-- [How to use key pipeline methods and operations](#how-to-use-key-pipeline-methods-and-operations)
+- [How to build a pipeline](#how-to-build-a-pipeline)
+- [How to use `describe` to discover what nodes are part of the pipeline](#how-to-use-describe-to-discover-what-nodes-are-part-of-the-pipeline)
+- [How to merge multiple pipelines](#how-to-merge-multiple-pipelines)
+- [How to receive information about the nodes in a pipeline](#how-to-receive-information-about-the-nodes-in-a-pipeline)
+- [How to receive information about pipeline inputs and outputs](#how-to-receive-information-about-pipeline-inputs-and-outputs)
 - [How to tag a pipeline](#how-to-tag-a-pipeline)
 - [How to avoid creating bad pipelines](#how-to-avoid-creating-bad-pipelines)
-- [How to create a new blank pipeline using the `kedro pipeline create` command](#how-to-create-a-new-blank-pipeline-using-the-kedro-pipeline-create-command)
-- [How to structure your pipeline creation](#how-to-structure-your-pipeline-creation)
-- [How to use custom new pipeline templates](#how-to-use-custom-new-pipeline-templates)
+- [How to store pipeline code in a kedro project](#how-to-store-pipeline-code-in-a-kedro-project)
 
-## How to create a simple pipeline
+
+
+
+
+
+## How to build a pipeline
 
 In the following example, we construct a simple pipeline that computes the variance of a set of numbers. In practice, pipelines can use more complicated node definitions, and the variables they use usually correspond to entire datasets:
 
@@ -48,14 +54,7 @@ Kedro determines the order of execution of these nodes based on the inputs and o
 Kedro's dependency resolution ensures that each node runs only after its required inputs are available from the outputs of previous nodes. This way, the nodes are executed in the correct order automatically, based on the defined dependencies.
 
 
-## How to use key pipeline methods and operations
-
-- [How to use `describe` to discover what nodes are part of the pipeline](#how-to-use-describe-to-discover-what-nodes-are-part-of-the-pipeline)
-- [How to merge multiple pipelines](#how-to-merge-multiple-pipelines)
-- [How to receive information about the nodes in a pipeline](#how-to-receive-information-about-the-nodes-in-a-pipeline)
-- [How to receive information about pipeline inputs and outputs](#how-to-receive-information-about-pipeline-inputs-and-outputs)
-
-### How to use `describe` to discover what nodes are part of the pipeline
+## How to use `describe` to discover what nodes are part of the pipeline
 
 ```python
 print(variance_pipeline.describe())
@@ -77,7 +76,7 @@ Outputs: v
 ##################################
 ```
 
-### How to merge multiple pipelines
+## How to merge multiple pipelines
 
 You can merge multiple pipelines as shown below. Note that, in this case, `pipeline_de` and `pipeline_ds` are expanded to a list of their underlying nodes and these are merged together:
 
@@ -112,7 +111,7 @@ Outputs: None
 ```
 
 
-### How to receive information about the nodes in a pipeline
+## How to receive information about the nodes in a pipeline
 
 Pipelines provide access to their nodes in a topological order to enable custom functionality, e.g. pipeline visualisation. Each node has information about its inputs and outputs:
 
@@ -144,7 +143,7 @@ You should see the following:
 ["xs"]
 ```
 
-### How to receive information about pipeline inputs and outputs
+## How to receive information about pipeline inputs and outputs
 
 In a similar way to the above, you can use `inputs()` and `outputs()` to check the inputs and outputs of a pipeline:
 
@@ -251,129 +250,6 @@ This is because `.` has a special meaning internally and indicates a namespace p
 We recommend use of characters like `_` instead of `.` as name separators.
 
 
-## How to create a new blank pipeline using the `kedro pipeline create` command
+## How to store pipeline code in a kedro project
 
 When managing your Kedro project, we recommend grouping related tasks into individual pipelines to achieve modularity. A project typically contains many tasks, and organising frequently executed tasks together into separate pipelines helps maintain order and efficiency. Each pipeline should ideally be organised in its own folder, promoting easy copying and reuse within and between projects. Simply put: one pipeline, one folder. To assist with this, Kedro introduces the concept of [Modular Pipelines](./modular_pipelines), which are described in the next section.
-
-```bash
-kedro pipeline create <pipeline_name>
-```
-
-After running this command, a new pipeline with boilerplate folders and files will be created in your project. For your convenience, Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters file and appropriate `tests` structure. It also adds the appropriate `__init__.py` files. You can see the generated folder structure below:
-
-
-```text
-├── conf
-│   └── base
-│       └── parameters_{{pipeline_name}}.yml  <-- Pipeline-specific parameters
-└── src
-    ├── my_project
-    │   ├── __init__.py
-    │   └── pipelines
-    │       ├── __init__.py
-    │       └── {{pipeline_name}}      <-- This folder defines the pipeline
-    │           ├── __init__.py        <-- So that Python treats this pipeline as a module
-    │           ├── nodes.py           <-- To declare your nodes
-    │           └── pipeline.py        <-- To structure the pipeline itself
-    └── tests
-        ├── __init__.py
-        └── pipelines
-            ├── __init__.py
-            └── {{pipeline_name}}      <-- Pipeline-specific tests
-                ├── __init__.py
-                └── test_pipeline.py
-
-```
-
-If you want to delete an existing pipeline, you can use `kedro pipeline delete <pipeline_name>` to do so.
-```{note}
-To see the full list of available CLI options, you can run `kedro pipeline create --help` for more information.
-```
-
-## How to structure your pipeline creation
-
-After creating the pipeline with `kedro pipeline create`, you will find template code in `pipeline.py` that you need to fill with your actual pipeline code:
-
-```python
-# src/my_project/pipelines/{{pipeline_name}}/pipeline.py
-from kedro.pipeline import Pipeline, pipeline
-
-def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline([])
-```
-Here, you are creating a function that returns a `Pipeline` class instance with the help of the `pipeline` function. We recommend putting your pipeline creation code into a function because it allows to achieve:
-- Modularity: you can easily reuse this logic across different parts of your project.
-- Parameterisation: with `create_pipeline(**kwargs)` you can pass different parameters to the pipeline creation function, enabling dynamic pipeline creation
-- Testing: you can write unit tests for the `create_pipeline()` function to ensure that it correctly constructs the pipeline
-
-Before filling `pipeline.py` with nodes, we recommend storing all node functions in `nodes.py`. From our previous example, we should add the functions `mean()`, `mean_sos()` and `variance()` into `nodes.py`:
-
-```python
-# src/my_project/pipelines/{{pipeline_name}}/nodes.py
-def mean(xs, n):
-    return sum(xs) / n
-
-def mean_sos(xs, n):
-    return sum(x**2 for x in xs) / n
-
-def variance(m, m2):
-    return m2 - m * m
-```
-
-Then we can assemble a pipeline from those nodes as follows:
-
-```python
-# src/my_project/pipelines/{{pipeline_name}}/pipelines.py
-from kedro.pipeline import Pipeline, pipeline, node
-
-from .nodes import mean, mean_sos, variance
-# Import node functions from nodes.py located in the same folder
-
-def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
-        [
-            node(len, "xs", "n"),
-            node(mean, ["xs", "n"], "m", name="mean_node", tags="tag1"),
-            node(mean_sos, ["xs", "n"], "m2", name="mean_sos", tags=["tag1", "tag2"]),
-            node(variance, ["m", "m2"], "v", name="variance_node"),
-        ],  # A list of nodes and pipelines combined into a new pipeline
-        tags="tag3",  # Optional, each pipeline node will be tagged
-        namespace="",  # Optional
-        inputs={},  # Optional
-        outputs={},  # Optional
-        parameters={},  # Optional
-    )
-```
-Here it was shown that pipeline creation function have few optional parameters, you can use:
-- tags on a pipeline level to apply them for all nodes inside of pipeline
-- namespace, inputs, outputs and parameters to reuse pipelines. More about that you can find [here](modular_pipelines.md)
-
-
-## How to use custom new pipeline templates
-
-If you want to generate a pipeline with a custom Cookiecutter template, you can save it in `<project_root>/templates/pipeline`.
-The `kedro pipeline create` command will pick up the custom template in your project as the default. You can also specify the path to your custom
-Cookiecutter pipeline template with the `--template` flag like this:
-```bash
-kedro pipeline create <pipeline_name> --template <path_to_template>
-```
-A template folder passed to `kedro pipeline create` using the `--template` argument will take precedence over any local templates.
-Kedro supports having a single pipeline template in your project. If you need to have multiple pipeline templates, consider saving them in a
-separate folder and pointing to them with the `--template` flag.
-
-### Creating custom templates
-
-It is your responsibility to create functional Cookiecutter templates for custom pipelines. Please ensure you understand the basic structure of a pipeline. Your template should render to a valid, importable Python module containing a
-`create_pipeline` function at the top level that returns a `Pipeline` object. You will also need appropriate
-`config` and `tests` subdirectories that will be copied to the project `config` and `tests` directories when the pipeline is created.
-The `config` and `tests` directories need to follow the same layout as in the default template and cannot
-be customised, although the contents of the parameters and actual test file can be changed. File and folder names or structure
-do not matter beyond that and can be customised according to your needs. You can use [the
-default template that Kedro](https://github.com/kedro-org/kedro/tree/main/kedro/templates/pipeline) uses as a starting point.
-
-Pipeline templates are rendered using [Cookiecutter](https://cookiecutter.readthedocs.io/), and must also contain a `cookiecutter.json`
-See the [`cookiecutter.json` file in the Kedro default template](https://github.com/kedro-org/kedro/tree/main/kedro/templates/pipeline/cookiecutter.json) for an example.
-It is important to note that if you are embedding your custom pipeline template within a
-Kedro starter template, you must tell Cookiecutter not to render this template when creating a new project from the starter. To do this,
-you must add [`_copy_without_render: ["templates"]`](https://cookiecutter.readthedocs.io/en/stable/advanced/copy_without_render.html) to the `cookiecutter.json` file for the starter
-and not the `cookiecutter.json` for the pipeline template.

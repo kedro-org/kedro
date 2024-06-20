@@ -21,31 +21,15 @@ from kedro.framework.cli.utils import (
 from kedro.framework.project import validate_settings
 from kedro.framework.startup import ProjectMetadata
 
-CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
-including sub-folders."""
-
-OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
-overwrite its contents."""
-
-
-class JupyterCommandGroup(click.Group):
-    """A custom class for ordering the `kedro jupyter` command groups"""
-
-    def list_commands(self, ctx: click.Context) -> list[str]:
-        """List commands according to a custom order"""
-        return ["setup", "notebook", "lab", "convert"]
-
 
 @click.group(name="Kedro")
 def jupyter_cli() -> None:  # pragma: no cover
     pass
 
 
-@jupyter_cli.group(cls=JupyterCommandGroup)
+@jupyter_cli.group()
 def jupyter() -> None:
-    """Open Jupyter Notebook / Lab with project specific variables loaded, or
-    convert notebooks into Kedro code.
-    """
+    """Open Jupyter Notebook / Lab with project specific variables loaded."""
 
 
 @forward_command(jupyter, "setup", forward_help=True)

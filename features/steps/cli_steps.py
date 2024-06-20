@@ -711,18 +711,6 @@ def check_dependency_in_reqs(context: behave.runner.Context, dependency: str):
     assert dependency in reqs_path.read_text()
 
 
-@then("Code cell with node tag should be converted into kedro node")
-def check_cell_conversion(context: behave.runner.Context):
-    converted_file = (
-        context.root_project_dir
-        / "src"
-        / context.package_name
-        / "nodes"
-        / "hello_world.py"
-    )
-    assert "Hello World!" in converted_file.read_text()
-
-
 @given("I have micro-packaging settings in pyproject.toml")
 def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
     pyproject_toml_path = context.root_project_dir / "pyproject.toml"

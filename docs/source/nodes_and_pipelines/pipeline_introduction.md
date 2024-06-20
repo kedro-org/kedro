@@ -253,7 +253,7 @@ We recommend use of characters like `_` instead of `.` as name separators.
 
 ## How to create a new blank pipeline using the `kedro pipeline create` command
 
-When managing your Kedro project, we recommend grouping related tasks into individual pipelines to achieve modularity. A project typically contains many tasks, and organising frequently executed tasks together into separate pipelines helps maintain order and efficiency. Each pipeline should ideally be organised in its own folder, promoting easy copying and reuse within and between projects. Simply put: one pipeline, one folder. To assist with this, you can use the following command (the pipeline name must adhere to [Python naming conventions](https://realpython.com/python-pep8/#naming-conventions)):
+When managing your Kedro project, we recommend grouping related tasks into individual pipelines to achieve modularity. A project typically contains many tasks, and organising frequently executed tasks together into separate pipelines helps maintain order and efficiency. Each pipeline should ideally be organised in its own folder, promoting easy copying and reuse within and between projects. Simply put: one pipeline, one folder. To assist with this, Kedro introduces the concept of [Modular Pipelines](./modular_pipelines), which are described in the next section.
 
 ```bash
 kedro pipeline create <pipeline_name>

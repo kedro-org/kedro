@@ -10,7 +10,7 @@ If you want to create a new pipeline that performs the same tasks as your existi
 def create_new_pipeline(**kwargs) -> Pipeline:
     return pipeline(
     [data_science], # Name of an existing pipeline
-    inputs = {"old_input__df_name" : "new_input_df_name"},
+    inputs = {"old_input_df_name" : "new_input_df_name"},
     outputs = {"old_output_df_name" : "new_output_df_name"},
     parameters = {"params: test_size1": "params: test_size2"},
     )

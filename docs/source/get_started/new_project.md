@@ -49,7 +49,7 @@ Select the tools by number, or `all` or follow the default to add `none`.
 
 ### Project examples
 
-Finally, the CLI offers the option to include starter example code in the project:
+The CLI offers the option to include starter example code in the project:
 
 ```text
 Would you like to include an example pipeline? :
@@ -112,6 +112,11 @@ You can also enter this in a single line as follows:
 kedro new --name=testproject --tools=lint,docs,pyspark --example=n
 ```
 
+### Telemetry consent
+
+The `--telemetry` flag offers the option to register consent to have user analytics collected in the moment of the creation of the project. This option bypasses the prompt to collect analytics that would otherwise appear on the moment the `kedro` command is invoked for the first time inside the project. In case the `--telemetry` flag is not used, the user will be prompted to accept or reject analytics collection as usual.
+
+When creating your new Kedro project, use the values `yes` or `no` to register consent to have user analytics collected for this specific project. Selecting `yes` means you consent to your data being collected, whereas `no` means you do not consent and no data will be collected.
 
 ## Run the new project
 

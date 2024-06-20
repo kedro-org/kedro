@@ -106,6 +106,8 @@ class TestCLITools:
                 "-t",
                 "--example",
                 "-e",
+                "--telemetry",
+                "-tc",
                 "--starter",
                 "-s",
                 "--name",

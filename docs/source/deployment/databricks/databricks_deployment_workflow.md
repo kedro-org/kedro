@@ -1,4 +1,4 @@
-# Use databricks asset bundles and jobs to deploy a Kedro project
+# Use Databricks Asset Bundles and jobs to deploy a Kedro project
 
 Databricks jobs are a way to execute code on Databricks clusters, allowing you to run data processing tasks, ETL jobs, or machine learning workflows. In this guide, we explain how to package and run a Kedro project as a job on Databricks.
 

@@ -18,7 +18,7 @@ PIPELINE_NAME = "my_pipeline"
 @pytest.fixture(params=["base"])
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-    tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+    tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
     conf_path = fake_repo_path / settings.CONF_SOURCE / request.param
     # old conf structure for 'pipeline delete' command backward compatibility
     old_conf_path = conf_path / "parameters"
@@ -74,7 +74,7 @@ class TestPipelineCreateCommand:
         assert actual_configs == expected_configs
 
         # tests
-        test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_dir = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         expected_files = {"__init__.py", "test_pipeline.py"}
         actual_files = {f.name for f in test_dir.iterdir()}
         assert actual_files == expected_files
@@ -168,7 +168,7 @@ class TestPipelineCreateCommand:
         conf_dirs = list((fake_repo_path / settings.CONF_SOURCE).rglob(PIPELINE_NAME))
         assert not conf_dirs  # no configs created for the pipeline
 
-        test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_dir = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         assert test_dir.is_dir()
 
     def test_catalog_and_params(
@@ -223,14 +223,9 @@ class TestPipelineCreateCommand:
 
         # create __init__.py in tests
         tests_init = (
-            fake_repo_path
-            / "src"
-            / "tests"
-            / "pipelines"
-            / PIPELINE_NAME
-            / "__init__.py"
+            fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME / "__init__.py"
         )
-        tests_init.parent.mkdir(parents=True)
+        tests_init.parent.mkdir(parents=True, exist_ok=True)
         tests_init.touch()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
@@ -340,7 +335,7 @@ class TestPipelineDeleteCommand:
         )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         conf_path = fake_repo_path / settings.CONF_SOURCE / expected_conf
         params_path = conf_path / f"parameters_{PIPELINE_NAME}.yml"
         # old params structure for 'pipeline delete' command backward compatibility
@@ -375,7 +370,7 @@ class TestPipelineDeleteCommand:
             ["pipeline", "delete", "-y", PIPELINE_NAME],
             obj=fake_metadata,
         )
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE
@@ -466,7 +461,7 @@ class TestPipelineDeleteCommand:
         )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE
@@ -506,7 +501,7 @@ class TestPipelineDeleteCommand:
             obj=fake_metadata,
         )
 
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE

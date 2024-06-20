@@ -41,6 +41,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [doxenix](https://github.com/doxenix)
 * [cleeeks](https://github.com/cleeeks)
+* [bpmeek](https://github.com/bpmeek)
 
 # Release 0.19.5
 

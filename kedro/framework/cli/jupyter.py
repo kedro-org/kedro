@@ -22,20 +22,12 @@ from kedro.framework.project import validate_settings
 from kedro.framework.startup import ProjectMetadata
 
 
-class JupyterCommandGroup(click.Group):
-    """A custom class for ordering the `kedro jupyter` command groups"""
-
-    def list_commands(self, ctx: click.Context) -> list[str]:
-        """List commands according to a custom order"""
-        return ["setup", "notebook", "lab"]
-
-
 @click.group(name="Kedro")
 def jupyter_cli() -> None:  # pragma: no cover
     pass
 
 
-@jupyter_cli.group(cls=JupyterCommandGroup)
+@jupyter_cli.group()
 def jupyter() -> None:
     """Open Jupyter Notebook / Lab with project specific variables loaded."""
 

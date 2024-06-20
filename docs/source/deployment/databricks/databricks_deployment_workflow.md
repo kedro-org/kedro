@@ -40,7 +40,7 @@ The following commands will create a new `conda` environment, activate it, and t
 In your local development environment, create a virtual environment for this tutorial using `conda`:
 
 ```bash
-conda create --name databricks-iris python=3.10
+conda create --name databricks-iris python=3.10 -y
 ```
 
 Once it is created, activate it:
@@ -54,6 +54,7 @@ With your `conda` environment activated, install Kedro:
 ```bash
 pip install kedro
 ```
+**This tutorial was created with kedro 0.19.6**
 
 Install databricks CLI depending on your system [Databricks CLI](https://docs.databricks.com/en/dev-tools/cli/install.html):
 
@@ -73,19 +74,15 @@ Install databricks CLI depending on your system [Databricks CLI](https://docs.da
 Create a Kedro project by using the following command in your local environment:
 
 ```bash
-kedro new --starter=databricks-iris
+kedro new --starter=databricks-iris --name iris --telemetry no
 ```
 
-This command creates a new Kedro project using the `databricks-iris` starter template. Name your new project `databricks-iris` for consistency with the rest of this guide.
 
- ```{note}
- If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
- ```
+```bash
+Congratulations!
+Your project 'iris' has been created in the directory
+```
 
-create a file `.telemetry` in the root
- ```yaml
-consent: false
- ```
 ### Create an entry point for Databricks
 
 The default entry point of a Kedro project uses a Click command line interface (CLI), which is not compatible with Databricks. To run your project as a Databricks job, you must define a new entry point specifically for use on Databricks.
@@ -162,7 +159,7 @@ There are several ways to upload data to DBFS: you can use the [DBFS API](https:
 - **Upload your project's data**: at the command line in your local environment, use the following Databricks CLI commands to upload your project's locally stored data and configuration to DBFS:
 
 ```bash
-databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris-databricks/data
+databricks fs cp --recursive data/ dbfs:/FileStore/iris-databricks/data
 ```
 
 The `--recursive` flag ensures that the entire folder and its contents are uploaded. You can list the contents of the destination folder in DBFS using the following command:
@@ -190,7 +187,7 @@ You should see the contents of the project's `data/` directory printed to your t
 
 #### 1. Create the bundle
 
-Create a folder called `assets` in the root directory containing the file `batch-inference-workflow-asset.yml`, this name is just an example:
+Create a folder called `assets` in the root directory containing the file `assets/batch-inference-workflow-asset.yml`, this name is just an example:
 ```yaml
 common_permissions: &permissions
   permissions:
@@ -208,16 +205,16 @@ artifacts:
 resources:
   jobs:
     iris-databricks-job: #used to run job from CLI
-      name: "iris-databricks"
+      name: "iris-databricks" #name of the job in databricks
       tasks:
         - task_key: kedro_run
           existing_cluster_id: ${var.existing_cluster_id}
           python_wheel_task:
-            package_name: databricks_iris
+            package_name: iris #<package_name>
             entry_point: databricks_run
             named_parameters:
               --conf-source: /Workspace${workspace.file_path}/conf
-              --package-name: databricks_iris
+              --package-name: iris #<package_name>
               --env: ${var.environment}
           libraries:
             - whl: ../dist/*.whl
@@ -229,12 +226,12 @@ resources:
 This file provides a template for a job utilizing Kedro as a package, and it allows for multiple definitions per job. For instance, you could have one definition per pipeline.
 
 
-In this example, an existing cluster ID is being utilized, which can facilitate fast iteration. However, for a productive deployment, a job cluster is required. To enable ephemeral clusters, the YAML file needs to be modified to use a `job_cluster_key` instead of an `existing_cluster_id`.
+In this example, an existing cluster ID is being utilized, which can facilitate fast iteration. However, for a productive deployment, a job cluster is required. To enable ephemeral clusters, the YAML file (`assets/batch-inference-workflow-asset.yml`) needs to be modified to use a `job_cluster_key` instead of an `existing_cluster_id`.
 
 ```yaml
 jobs:
-    iris-databricks-job:
-      name: "iris-databricks"
+    iris-databricks-job: #used to run job from CLI
+      name: "iris-databricks"  #name of the job in databricks
       job_clusters:
         - job_cluster_key: job_cluster
           new_cluster:
@@ -245,11 +242,11 @@ jobs:
         - task_key: kedro_run
           job_cluster_key: job_cluster
           python_wheel_task:
-            package_name: databricks_iris
+            package_name: iris #<package_name>
             entry_point: databricks_run
             named_parameters:
               --conf-source: /Workspace${workspace.file_path}/conf
-              --package-name: databricks_iris
+              --package-name: iris #<package_name>
               --env: ${var.environment}
           libraries:
             - whl: ../dist/*.whl
@@ -270,7 +267,7 @@ bundle:
 variables:
   existing_cluster_id:
     description: The ID of an existing cluster for development
-    default: replace_your_cluster_id
+    default: <replace_your_cluster_id>
   environment:
     description: The environment to run the job in
     default: dev
@@ -284,20 +281,20 @@ targets:
     default: true
     mode: development
     workspace:
-      host: replace_your_host
+      host: <replace_your_host>
     run_as:
-      user_name: your_user@mail.com
+      user_name: <your_user@mail.com>
     variables:
       environment: base
 
   prod:
     mode: production
     workspace:
-      host: replace_your_host
+      host: <replace_your_host>
     run_as:
       # This runs as your_user@mail.com in production. We could also use a service principal here
       # using service_principal_name (see https://docs.databricks.com/dev-tools/bundles/permissions.html).
-      user_name: your_user@mail.com
+      user_name: <your_user@mail.com>
 ```
 ### Deploy and run the job
 
@@ -307,10 +304,10 @@ databricks bundle deploy -t dev
 ```
 
 This will:
-1. Create the wheel of your kedro project: `databricks_iris-0.1-py3-none-any.whl`
-2. Create a notebook containing the code to be used by a job to execute the kedro project. You can see it in `<project_root>/.databricks/bundle/dev/.internal/notebook_iris-databricks-job_kedro_run.py`
-3. Upload the wheel to `/Workspace/Users/your_user/.bundle/databricks_iris/dev/artifacts/.internal/`
-4. Upload all the files of the root directory to `/Workspace/Users/your_user/.bundle/databricks_iris/dev/files` including `conf`
+1. Create the wheel of your kedro project: `iris-0.1-py3-none-any.whl`
+2. Create a notebook containing the code to be used by a job to execute the kedro project. You can see it locally in `.databricks/bundle/dev/.internal/notebook_iris-databricks-job_kedro_run.py`
+3. Upload the wheel to `/Workspace/Users/<your_user@mail.com>/.bundle/databricks_iris/dev/artifacts/.internal/`
+4. Upload all the files of the root directory to `/Workspace/Users/<your_user@mail.com>/.bundle/databricks_iris/dev/files` including `conf`
 5. Create the job using the notebook from 2.
 
 You can execute now the project with

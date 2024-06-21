@@ -167,12 +167,12 @@ class KedroContext:
 
     project_path: Path = field(init=True, converter=_expand_full_path)
     config_loader: AbstractConfigLoader = field(init=True)
-    _package_name: str = field(init=True)
-    _hook_manager: PluginManager = field(init=True)
+    env: str | None = field(init=True, default=None)
+    _package_name: str = field(init=True, default="")
+    _hook_manager: PluginManager | None = field(init=True, default=None)
     _extra_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
-    env: str | None = field(init=True, default=None)
 
     @property
     def catalog(self) -> DataCatalog:

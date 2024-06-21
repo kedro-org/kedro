@@ -37,15 +37,6 @@ Namespace methods:
 * You can use `kedro run --namespace = namespace_name` to run only the specific namespace
 * [Kedro-Viz](https://demo.kedro.org) accelerates development by rendering namespaced pipelines as collapsible 'super nodes'.
 
-## How to share your pipelines
-
-Pipelines are shareable between Kedro codebases via [micro-packaging](micro_packaging.md), but you must follow a couple of rules to ensure portability:
-
-* A pipeline that you want to share needs to be separated in terms of its folder structure. `kedro pipeline create` command makes this easy.
-* Pipelines should **not** depend on the main Python package, as this would break portability to another project.
-* Catalog references are not packaged when sharing/consuming pipelines, i.e. the `catalog.yml` file is not packaged.
-* Kedro will only look for top-level configuration in `conf/`; placing a configuration folder within the pipeline folder will have no effect.
-* We recommend that you document the configuration required (parameters and catalog) in the local `README.md` file for any downstream consumers.
 
 ## Providing pipeline specific dependencies
 

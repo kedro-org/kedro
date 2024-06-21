@@ -52,8 +52,8 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Nodes and pipelines
 
-* [How can I reuse my pipelines](../nodes_and_pipelines/modular_pipelines.md)?
-
+* [How can I create a new blank pipeline using the `kedro pipeline create` command](../nodes_and_pipelines/modular_pipelines.md#how-to-create-a-new-blank-pipeline-using-the-kedro-pipeline-create-command)?
+* [How can I reuse my pipelines with namespaces](../nodes_and_pipelines/namespaces.md)?
 * [Can I use generator functions in a node](../nodes_and_pipelines/nodes.md#how-to-use-generator-functions-in-a-node)?
 
 ## What is data engineering convention?

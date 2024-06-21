@@ -6,7 +6,7 @@ Kedro supports this concept of modular pipelines with the following tools:
 - [How to create a new blank pipeline using the `kedro pipeline create` command](#how-to-create-a-new-blank-pipeline-using-the-kedro-pipeline-create-command)
 - [How to structure your pipeline creation](#how-to-structure-your-pipeline-creation)
 - [How to use custom new pipeline templates](#how-to-use-custom-new-pipeline-templates)
-
+- [How to share your pipelines](#how-to-share-your-pipelines)
 
 ## How to create a new blank pipeline using the `kedro pipeline create` command
 
@@ -28,7 +28,7 @@ After running this command, a new pipeline with boilerplate folders and files wi
     │   ├── __init__.py
     │   └── pipelines
     │       ├── __init__.py
-    │       └── {{pipeline_name}}      <-- This folder defines the pipeline
+    │       └── {{pipeline_name}}      <-- This folder defines the modular pipeline
     │           ├── __init__.py        <-- So that Python treats this pipeline as a module
     │           ├── nodes.py           <-- To declare your nodes
     │           └── pipeline.py        <-- To structure the pipeline itself
@@ -58,10 +58,7 @@ from kedro.pipeline import Pipeline, pipeline
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline([])
 ```
-Here, you are creating a function that returns a `Pipeline` class instance with the help of the `pipeline` function. We recommend putting your pipeline creation code into a function because it allows to achieve:
-- Modularity: you can easily reuse this logic across different parts of your project.
-- Parameterisation: with `create_pipeline(**kwargs)` you can pass different parameters to the pipeline creation function, enabling dynamic pipeline creation
-- Testing: you can write unit tests for the `create_pipeline()` function to ensure that it correctly constructs the pipeline
+Here, you are creating a `create_pipeline()` function that returns a `Pipeline` class instance with the help of the `pipeline` function. You should keep the function name as `create_pipeline()` because this allows kedro to [automatically discover the pipeline](pipeline_registry.md#pipeline-autodiscovery). Otherwise, the pipeline would need to be [registered manually](pipeline_registry.md#the-pipeline-registry).
 
 Before filling `pipeline.py` with nodes, we recommend storing all node functions in `nodes.py`. From our previous example, we should add the functions `mean()`, `mean_sos()` and `variance()` into `nodes.py`:
 
@@ -134,3 +131,16 @@ It is important to note that if you are embedding your custom pipeline template 
 Kedro starter template, you must tell Cookiecutter not to render this template when creating a new project from the starter. To do this,
 you must add [`_copy_without_render: ["templates"]`](https://cookiecutter.readthedocs.io/en/stable/advanced/copy_without_render.html) to the `cookiecutter.json` file for the starter
 and not the `cookiecutter.json` for the pipeline template.
+
+
+## How to share your pipelines
+
+> **Warning:** Micro-packaging is deprecated and will be removed from Kedro version 0.20.0.
+
+Pipelines are shareable between Kedro codebases via [micro-packaging](micro_packaging.md), but you must follow a couple of rules to ensure portability:
+
+* A pipeline that you want to share needs to be separated in terms of its folder structure. `kedro pipeline create` command makes this easy.
+* Pipelines should **not** depend on the main Python package, as this would break portability to another project.
+* Catalog references are not packaged when sharing/consuming pipelines, i.e. the `catalog.yml` file is not packaged.
+* Kedro will only look for top-level configuration in `conf/`; placing a configuration folder within the pipeline folder will have no effect.
+* We recommend that you document the configuration required (parameters and catalog) in the local `README.md` file for any downstream consumers.

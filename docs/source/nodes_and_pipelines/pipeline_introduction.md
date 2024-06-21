@@ -51,7 +51,7 @@ Kedro determines the order of execution of these nodes based on the inputs and o
 3. The third node computes the mean sum of squares (mean_sos) using `xs` and `n`, and outputs it as `m2`.
 4. The fourth node calculates the variance using the mean (`m`) and mean sum of squares (`m2`), and outputs it as `v`.
 
-Kedro's dependency resolution ensures that each node runs only after its required inputs are available from the outputs of previous nodes. This way, the nodes are executed in the correct order automatically, based on the defined dependencies.
+Kedro's dependency resolution algorithm ensures that each node runs only after its required inputs are available from the outputs of previous nodes. This way, the nodes are executed in the correct order automatically, based on the defined dependencies.
 
 
 ## How to use `describe` to discover what nodes are part of the pipeline

@@ -807,43 +807,37 @@ def _make_cookiecutter_args_and_fetch_template(
 
     kedro_version_match_starters = _kedro_and_starters_version_identical()
 
-    if checkout:
-        cookiecutter_args["checkout"] = checkout
     if directory:
         cookiecutter_args["directory"] = directory
 
     tools = config["tools"]
     example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
+    checkout_version = version if kedro_version_match_starters else "main"
 
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
         # Ensures we use the same tag version of kedro for kedro-starters
-        cookiecutter_args["checkout"] = (
-            version if kedro_version_match_starters else "main"
-        )
+        cookiecutter_args["checkout"] = checkout_version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-        cookiecutter_args["checkout"] = (
-            version if kedro_version_match_starters else "main"
-        )
+        cookiecutter_args["checkout"] = checkout_version
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        cookiecutter_args["checkout"] = checkout_version
     elif example_pipeline == "True":
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
-        cookiecutter_args["checkout"] = (
-            version if kedro_version_match_starters else "main"
-        )
+        cookiecutter_args["checkout"] = checkout_version
     else:
         # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path
-        if not kedro_version_match_starters:
-            cookiecutter_args["checkout"] = "main"
-
+        cookiecutter_args["checkout"] = (
+            checkout if checkout and kedro_version_match_starters else "main"
+        )
     return cookiecutter_args, starter_path
 
 

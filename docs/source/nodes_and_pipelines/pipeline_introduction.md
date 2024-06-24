@@ -56,6 +56,8 @@ Kedro's dependency resolution algorithm ensures that each node runs only after i
 
 ## How to use `describe` to discover what nodes are part of the pipeline
 
+You can use the `describe` method to get an overview of the nodes in your pipeline and their execution order.
+
 ```python
 print(variance_pipeline.describe())
 ```

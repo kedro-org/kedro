@@ -2,15 +2,15 @@
 
 ## How to reuse your pipelines
 
-If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your existing pipeline (e.g., `data_science`), you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
+If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your existing pipeline (e.g., `data_science` pipeline from our [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline)), you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
     return pipeline(
-    [data_science], # Name of an existing pipeline
-    inputs = {"old_input_df_name" : "new_input_df_name"},
-    outputs = {"old_output_df_name" : "new_output_df_name"},
-    parameters = {"params: test_size1": "params: test_size2"},
+    [data_science], # Name of the existing pipeline
+    inputs = {"old_input_df_name" : "new_input_df_name"},  # Mapping old input to new input
+    outputs = {"old_output_df_name" : "new_output_df_name"},  # Mapping old output to new output
+    parameters = {"params: test_size1": "params: test_size2"},  # Updating parameters
     )
 ```
 This means you can easily create multiple pipelines based on the `data_science` pipeline to test different approaches with various input datasets and model training parameters.
@@ -31,7 +31,7 @@ def create_new_pipeline(**kwargs) -> Pipeline:
 In this example:
 * The `data_science` pipeline is reused and namespaced under `alternative_approach`.
 * The inputs and parameters are mapped to new names/values.
-* The namespace parameter ensures that all nodes and outputs in this pipeline are prefixed with `alternative_approach`, isolating them from other pipelines.
+* The namespace parameter ensures that all nodes and outputs in this pipeline are prefixed with `alternative_approach.`, isolating them from other pipelines.
 
 Namespace methods:
 * You can use `kedro run --namespace = namespace_name` to run only the specific namespace

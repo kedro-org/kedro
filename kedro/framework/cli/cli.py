@@ -51,8 +51,7 @@ v{version}
         "jupyter": "kedro.framework.cli.jupyter.jupyter",
         "pipeline": "kedro.framework.cli.pipeline.pipeline",
         "new": "kedro.framework.cli.starters.new",
-        "starters": "kedro.framework.cli.starters.starter",
-        #   "project_group": "kedro.framework.cli.project.project_group",
+        "starter": "kedro.framework.cli.starters.starter",
     },
     context_settings=CONTEXT_SETTINGS,
     name="Kedro",
@@ -202,15 +201,6 @@ class KedroCLI(CommandCollection):
         if not self._metadata:
             return []
 
-        built_in = [
-            # catalog_cli,
-            # jupyter_cli,
-            # pipeline_cli,
-            # micropkg_cli,
-            # project_group,
-            # registry_cli,
-        ]
-
         plugins = load_entry_points("project")
 
         try:
@@ -219,7 +209,7 @@ class KedroCLI(CommandCollection):
         except ModuleNotFoundError:
             # return only built-in commands and commands from plugins
             # (plugins can override built-in commands)
-            return [*built_in, *plugins]
+            return [*plugins]
 
         # fail badly if cli.py exists, but has no `cli` in it
         if not hasattr(project_cli, "cli"):
@@ -229,7 +219,7 @@ class KedroCLI(CommandCollection):
         user_defined = project_cli.cli
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
-        return [*built_in, *plugins, user_defined]
+        return [*plugins, user_defined]
 
 
 def main() -> None:  # pragma: no cover

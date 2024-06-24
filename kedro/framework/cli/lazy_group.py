@@ -1,5 +1,7 @@
 import importlib
+
 import click
+
 
 class LazyGroup(click.Group):
     def __init__(self, *args, lazy_subcommands=None, **kwargs):

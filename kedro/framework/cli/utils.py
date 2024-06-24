@@ -11,6 +11,7 @@ import sys
 import textwrap
 import traceback
 import typing
+import warnings
 from collections import defaultdict
 from importlib import import_module
 from itertools import chain
@@ -20,6 +21,8 @@ from typing import IO, Any, Iterable, Sequence
 import click
 import importlib_metadata
 from omegaconf import OmegaConf
+
+from kedro import KedroDeprecationWarning
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
@@ -218,6 +221,10 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
         KedroCliError: If the file specified in ``reqs_path`` does not exist
             or ``package_name`` was not found in that file.
     """
+    warnings.warn(
+        "`get_pkg_version()` has been deprecated and will be removed in Kedro 0.20.0",
+        KedroDeprecationWarning,
+    )
     reqs_path = Path(reqs_path).absolute()
     if not reqs_path.is_file():
         raise KedroCliError(f"Given path '{reqs_path}' is not a regular file.")
@@ -497,38 +504,3 @@ def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str
         load_versions_dict[load_version_list[0]] = load_version_list[1]
 
     return load_versions_dict
-
-
-def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
-    VALIDATION_PATTERNS = {
-        "yes_no": {
-            "regex": r"(?i)^\s*(y|yes|n|no)\s*$",
-            "error_message": f"'{input}' is an invalid value for example pipeline or telemetry consent. It must contain only y, n, YES, or NO (case insensitive).",
-        },
-        "project_name": {
-            "regex": r"^[\w -]{2,}$",
-            "error_message": f"'{input}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
-        },
-        "tools": {
-            "regex": r"""^(
-                all|none|                        # A: "all" or "none" or
-                (\ *\d+                          # B: any number of spaces followed by one or more digits
-                (\ *-\ *\d+)?                    # C: zero or one instances of: a hyphen followed by one or more digits, spaces allowed
-                (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
-                \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
-                $""",
-            "error_message": f"'{input}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
-        },
-    }
-
-    if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], input, flags=re.X):
-        click.secho(
-            VALIDATION_PATTERNS[pattern_name]["error_message"],
-            fg="red",
-            err=True,
-        )
-        sys.exit(1)
-
-
-def _parse_yes_to_bool(value: str) -> Any:
-    return value.strip().lower() in ["y", "yes"] if value is not None else None

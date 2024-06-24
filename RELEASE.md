@@ -1,9 +1,27 @@
-# Upcoming Release 0.19.6
+# Upcoming Release 0.19.7
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* Updated error message for invalid catalog entries.
+* Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
+* Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.20.0
+* The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 0.20.0.
+
+## Documentation changes
+
+## Community contributions
+
+# Release 0.19.6
 
 ## Major features and improvements
 * Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behaviour is still to raise a warning for each failing pipeline.
 * It is now possible to use Kedro without having `rich` installed.
-* Added a `--telemetry` flag to `kedro run`, allowing consent to data usage to be granted or revoked at the same time the command is run.
+* Updated custom logging behavior: `conf/logging.yml` will be used if it exists and `KEDRO_LOGGING_CONFIG` is not set; otherwise, `default_logging.yml` will be used.
 
 ## Bug fixes and other changes
 * User defined catch-all dataset factory patterns now override the default pattern provided by the runner.
@@ -15,12 +33,13 @@
 
 ## Documentation changes
 * Improved documentation for custom starters
-* Added a new section on deploying Kedro project on AWS Airflow MWAA
+* Added a new docs section on deploying Kedro project on AWS Airflow MWAA
+* Detailed instructions on using `globals` and `runtime_params` with the `OmegaConfigLoader`
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [doxenix](https://github.com/doxenix)
-
+* [cleeeks](https://github.com/cleeeks)
 
 # Release 0.19.5
 

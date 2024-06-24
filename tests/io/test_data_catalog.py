@@ -1,5 +1,6 @@
 import logging
 import re
+import sys
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -426,10 +427,20 @@ class TestDataCatalog:
         ],
     )
     def test_bad_confirm(self, data_catalog, dataset_name, error_pattern):
-        """Test confirming a non existent dataset or one that
+        """Test confirming a non-existent dataset or one that
         does not have `confirm` method"""
         with pytest.raises(DatasetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
+
+    def test_shallow_copy_returns_correct_class_type(
+        self,
+    ):
+        class MyDataCatalog(DataCatalog):
+            pass
+
+        data_catalog = MyDataCatalog()
+        copy = data_catalog.shallow_copy()
+        assert isinstance(copy, MyDataCatalog)
 
 
 class TestDataCatalogFromConfig:
@@ -493,7 +504,24 @@ class TestDataCatalogFromConfig:
 
         pattern = (
             "An exception occurred when parsing config for dataset 'boats':\n"
-            "Class 'kedro.io.CSVDatasetInvalid' not found"
+            "Class 'kedro.io.CSVDatasetInvalid' not found, is this a typo?"
+        )
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            DataCatalog.from_config(**sane_config)
+
+    @pytest.mark.skipif(
+        sys.version_info < (3, 9),
+        reason="for python 3.8 kedro-datasets version 1.8 is used which has the old spelling",
+    )
+    def test_config_incorrect_spelling(self, sane_config):
+        """Check hint if the type uses the old DataSet spelling"""
+        sane_config["catalog"]["boats"]["type"] = "pandas.CSVDataSet"
+
+        pattern = (
+            "An exception occurred when parsing config for dataset 'boats':\n"
+            "Class 'pandas.CSVDataSet' not found, is this a typo?"
+            "\nHint: If you are trying to use a dataset from `kedro-datasets`>=2.0.0,"
+            " make sure that the dataset name uses the `Dataset` spelling instead of `DataSet`."
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
@@ -515,6 +543,16 @@ class TestDataCatalogFromConfig:
         pattern = (
             r"Dataset 'boats' must only contain arguments valid for "
             r"the constructor of '.*CSVDataset'"
+        )
+        with pytest.raises(DatasetError, match=pattern):
+            DataCatalog.from_config(**sane_config)
+
+    def test_config_invalid_dataset_config(self, sane_config):
+        sane_config["catalog"]["invalid_entry"] = "some string"
+        pattern = (
+            "Catalog entry 'invalid_entry' is not a valid dataset configuration. "
+            "\nHint: If this catalog entry is intended for variable interpolation, "
+            "make sure that the key is preceded by an underscore."
         )
         with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**sane_config)

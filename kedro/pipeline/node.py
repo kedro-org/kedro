@@ -702,7 +702,8 @@ def _unpack_params(
             _func_arguments = [arg for arg in inspect.signature(func).parameters]
             for param in _func_arguments[idx:]:
                 new_inputs.append(f"params:{dict_root}.{param}")
-            continue
+else:
+     new_inputs.append(_input)
         new_inputs.append(_input)
     if use_new:
         return new_inputs

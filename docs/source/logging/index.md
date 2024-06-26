@@ -42,6 +42,17 @@ After setting the environment variable, any subsequent Kedro commands use the lo
 If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will use the [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml).
 ```
 
+One can also customise logging at the runtime and redefine the logging configuration provided in the `logging.yml`.
+In the example below we change a logging level to `WARNING` for the `kedro.io.data_catalog` component, so the setting is only applied to the `kedro.io.data_catalog` logger and for the rest of the components the default settings provided via `logging.yml` are remained unchanged.
+The same can be done for higher/lower-level components without affecting the top-level.
+
+```python
+import logging
+
+
+logging.getLogger("kedro.io.data_catalog").setLevel(logging.WARNING)
+```
+
 ## Custom `CONF_SOURCE` with logging
 
 When you customise the [`CONF_SOURCE`](../configuration/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project, it determines where Kedro looks for configuration files, including the logging configuration file. However, changing `CONF_SOURCE` does not automatically update the path to `logging.yml`. To use a custom location or filename for the logging configuration, you must explicitly set the `KEDRO_LOGGING_CONFIG` environment variable.

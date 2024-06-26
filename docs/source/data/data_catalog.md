@@ -39,10 +39,10 @@ The dataset configuration in `catalog.yml` is defined as follows:
 The rest of the keys are dataset properties and vary depending on the implementation.
 To get the extensive list of dataset properties, refer to {py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` and navigate to the `__init__` method of the target dataset.
 3. Some dataset properties can be further configured depending on the libraries underlying the dataset implementation.
-In the example below, the configuration of the `load_args` property is defined by the pandas option for loading CSV files, while the configuration of the `save_args` property is defined by the snowpark `saveAsTable` method.
+In the example below, the configuration of the `load_args` property is defined by the `pandas` option for loading CSV files, while the configuration of the `save_args` property is defined by the `snowpark` `saveAsTable` method.
 To get the extensive list of dataset properties parameters, refer to {py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` and navigate to the target property in the `__init__` definition for the dataset.
 
-The example below configures two datasets - [pandas.CSVDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.CSVDataset.html) and [snowflake.SnowparkTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.snowflake.SnowparkTableDataset.html).
+The example below showcases the configuration of two datasets - `shuttles` of type [pandas.CSVDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.CSVDataset.html) and `weather` of type [snowflake.SnowparkTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.snowflake.SnowparkTableDataset.html).
 
 ```yaml
 shuttles: # Dataset name

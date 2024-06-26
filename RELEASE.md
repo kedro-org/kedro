@@ -13,6 +13,7 @@
 * The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 0.20.0.
 
 ## Documentation changes
+* Improved documentation for configuring dataset parameters in the data catalog
 
 ## Community contributions
 

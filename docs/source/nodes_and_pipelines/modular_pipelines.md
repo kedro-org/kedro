@@ -10,7 +10,7 @@ Kedro supports this concept of modular pipelines with the following tools:
 
 ## How to create a new blank pipeline using the `kedro pipeline create` command
 
-To assist with creating a new pipeline that supports the modularity concept, you can use the following command (the pipeline name must adhere to [Python naming conventions](https://realpython.com/python-pep8/#naming-conventions)):
+ To create a new modular pipeline, use the following:
 
 ```bash
 kedro pipeline create <pipeline_name>
@@ -115,7 +115,7 @@ A template folder passed to `kedro pipeline create` using the `--template` argum
 Kedro supports having a single pipeline template in your project. If you need to have multiple pipeline templates, consider saving them in a
 separate folder and pointing to them with the `--template` flag.
 
-### Creating custom templates
+### Creating custom pipeline templates
 
 It is your responsibility to create functional Cookiecutter templates for custom pipelines. Please ensure you understand the basic structure of a pipeline. Your template should render to a valid, importable Python module containing a
 `create_pipeline` function at the top level that returns a `Pipeline` object. You will also need appropriate

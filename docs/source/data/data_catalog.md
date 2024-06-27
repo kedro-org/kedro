@@ -39,7 +39,8 @@ The dataset configuration in `catalog.yml` is defined as follows:
 The rest of the keys are dataset parameters and vary depending on the implementation.
 To get the extensive list of dataset parameters, see {py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` and navigate to the `__init__` method of the target dataset.
 3. Some dataset parameters can be further configured depending on the libraries underlying the dataset implementation.
-In the example below, the configuration of the `load_args` parameter is defined by the `pandas` option for loading CSV files, while the configuration of the `save_args` parameter is defined by the `snowpark` `saveAsTable` method.
+In the example below, a configuration of the `shuttles` dataset includes the `load_args` parameter which is defined by the `pandas` option for loading CSV files.
+While the `save_args` parameter in a configuration of the `weather` dataset is defined by the `snowpark` `saveAsTable` method.
 To get the extensive list of dataset parameters, see {py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` and navigate to the target parameter in the `__init__` definition for the dataset.
 For those parameters we provide a reference to the underlying library configuration parameters. For example, under the `load_args` parameter section for [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) you can find a reference to the [pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) method defining the full set of the parameters accepted.
 

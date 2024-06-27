@@ -34,12 +34,10 @@ class SharedMemoryDataset(AbstractDataset):
             raise AttributeError()
         return getattr(self.shared_memory_dataset, name)  # pragma: no cover
 
-    def _load(self) -> Any:
+    def load(self) -> Any:
         return self.shared_memory_dataset.load()
 
-    load = _load
-
-    def _save(self, data: Any) -> None:
+    def save(self, data: Any) -> None:
         """Calls save method of a shared MemoryDataset in SyncManager."""
         try:
             self.shared_memory_dataset.save(data)
@@ -53,8 +51,6 @@ class SharedMemoryDataset(AbstractDataset):
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
             raise exc  # pragma: no cover
-
-    save = _save
 
     def _describe(self) -> dict[str, Any]:
         """SharedMemoryDataset doesn't have any constructor argument to return."""

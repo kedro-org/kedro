@@ -58,13 +58,9 @@ class MyDataset(AbstractDataset):
     def _load(self):
         return pd.read_csv(self._filepath)
 
-    load = _load
-
     def _save(self, data: str) -> None:
         with open(self._filepath, mode="w") as file:
             file.write(data)
-
-    save = _save
 
 
 class MyVersionedDataset(AbstractVersionedDataset[str, str]):
@@ -96,15 +92,11 @@ class MyVersionedDataset(AbstractVersionedDataset[str, str]):
         with self._fs.open(load_path, mode="r") as fs_file:
             return fs_file.read()
 
-    load = _load
-
     def _save(self, data: str) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, mode="w") as fs_file:
             fs_file.write(data)
-
-    save = _save
 
     def _exists(self) -> bool:
         try:
@@ -143,15 +135,11 @@ class MyLocalVersionedDataset(AbstractVersionedDataset[str, str]):
         with self._fs.open(load_path, mode="r") as fs_file:
             return fs_file.read()
 
-    load = _load
-
     def _save(self, data: str) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, mode="w") as fs_file:
             fs_file.write(data)
-
-    save = _save
 
     def _exists(self) -> bool:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -458,13 +446,9 @@ class MyLegacyDataset(AbstractDataset):
     def _load(self):
         return pd.read_csv(self._filepath)
 
-    # load = _load
-
     def _save(self, data: str) -> None:
         with open(self._filepath, mode="w") as file:
             file.write(data)
-
-    # save = _save
 
 
 class MyLegacyVersionedDataset(AbstractVersionedDataset[str, str]):
@@ -496,15 +480,11 @@ class MyLegacyVersionedDataset(AbstractVersionedDataset[str, str]):
         with self._fs.open(load_path, mode="r") as fs_file:
             return fs_file.read()
 
-    # load = _load
-
     def _save(self, data: str) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, mode="w") as fs_file:
             fs_file.write(data)
-
-    # save = _save
 
     def _exists(self) -> bool:
         try:

@@ -178,6 +178,33 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
+    def __str__(self) -> str:
+        def _to_str(obj: Any, is_root: bool = False) -> str:
+            """Returns a string representation where
+            1. The root level (i.e. the Dataset.__init__ arguments) are
+            formatted like Dataset(key=value).
+            2. Dictionaries have the keys alphabetically sorted recursively.
+            3. None values are not shown.
+            """
+
+            fmt = "{}={}" if is_root else "'{}': {}"  # 1
+
+            if isinstance(obj, dict):
+                sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
+
+                text = ", ".join(
+                    fmt.format(key, _to_str(value))  # 2
+                    for key, value in sorted_dict
+                    if value is not None  # 3
+                )
+
+                return text if is_root else "{" + text + "}"  # 1
+
+            # not a dictionary
+            return str(obj)
+
+        return f"{type(self).__name__}({_to_str(self._describe(), True)})"
+
     @classmethod
     def _load_wrapper(cls, load_func: Callable[[Self], _DO]) -> Callable[[Self], _DO]:
         @wraps(load_func)
@@ -228,6 +255,12 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
 
+        if hasattr(cls, "_load") and not cls._load.__qualname__.startswith("Abstract"):
+            cls.load = cls._load  # type: ignore[method-assign]
+
+        if hasattr(cls, "_save") and not cls._save.__qualname__.startswith("Abstract"):
+            cls.save = cls._save  # type: ignore[method-assign]
+
         if hasattr(cls, "load") and not cls.load.__qualname__.startswith("Abstract"):
             cls.load = cls._load_wrapper(  # type: ignore[assignment]
                 cls.load
@@ -242,6 +275,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 else cls.save.__wrapped__  # type: ignore[attr-defined]
             )
 
+    @abc.abstractmethod
     def load(self) -> _DO:
         """Loads data by delegation to the provided load method.
 
@@ -252,21 +286,12 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             DatasetError: When underlying load method raises error.
 
         """
+        raise NotImplementedError(
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
+            f"it must implement the 'load' method"
+        )
 
-        self._logger.debug("Loading %s", str(self))
-
-        try:
-            return self._load()
-        except DatasetError:
-            raise
-        except Exception as exc:
-            # This exception handling is by design as the composed data sets
-            # can throw any type of exception.
-            message = (
-                f"Failed while loading data from data set {str(self)}.\n{str(exc)}"
-            )
-            raise DatasetError(message) from exc
-
+    @abc.abstractmethod
     def save(self, data: _DI) -> None:
         """Saves data by delegation to the provided save method.
 
@@ -277,59 +302,11 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             DatasetError: when underlying save method raises error.
             FileNotFoundError: when save method got file instead of dir, on Windows.
             NotADirectoryError: when save method got file instead of dir, on Unix.
+
         """
-
-        if data is None:
-            raise DatasetError("Saving 'None' to a 'Dataset' is not allowed")
-
-        try:
-            self._logger.debug("Saving %s", str(self))
-            self._save(data)
-        except (DatasetError, FileNotFoundError, NotADirectoryError):
-            raise
-        except Exception as exc:
-            message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
-            raise DatasetError(message) from exc
-
-    def __str__(self) -> str:
-        def _to_str(obj: Any, is_root: bool = False) -> str:
-            """Returns a string representation where
-            1. The root level (i.e. the Dataset.__init__ arguments) are
-            formatted like Dataset(key=value).
-            2. Dictionaries have the keys alphabetically sorted recursively.
-            3. None values are not shown.
-            """
-
-            fmt = "{}={}" if is_root else "'{}': {}"  # 1
-
-            if isinstance(obj, dict):
-                sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
-
-                text = ", ".join(
-                    fmt.format(key, _to_str(value))  # 2
-                    for key, value in sorted_dict
-                    if value is not None  # 3
-                )
-
-                return text if is_root else "{" + text + "}"  # 1
-
-            # not a dictionary
-            return str(obj)
-
-        return f"{type(self).__name__}({_to_str(self._describe(), True)})"
-
-    @abc.abstractmethod
-    def _load(self) -> _DO:
         raise NotImplementedError(
             f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
-            f"it must implement the '_load' method"
-        )
-
-    @abc.abstractmethod
-    def _save(self, data: _DI) -> None:
-        raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
-            f"it must implement the '_save' method"
+            f"it must implement the 'save' method"
         )
 
     @abc.abstractmethod
@@ -698,7 +675,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         return self._filepath / version / self._filepath.name
 
     def load(self) -> _DO:
-        return super().load()
+        return super().load()  # type: ignore[safe-super]
 
     @classmethod
     def _save_wrapper(
@@ -740,7 +717,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._version_cache.clear()
         save_version = self.resolve_save_version()  # Make sure last save version is set
         try:
-            super().save(data)
+            super().save(data)  # type: ignore[safe-super]
         except (FileNotFoundError, NotADirectoryError) as err:
             # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
             _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"

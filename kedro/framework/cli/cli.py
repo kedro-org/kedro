@@ -39,23 +39,7 @@ v{version}
 """
 
 
-@click.group(
-    cls=LazyGroup,
-    lazy_subcommands={
-        "registry": "kedro.framework.cli.registry.registry",
-        "catalog": "kedro.framework.cli.catalog.catalog",
-        "ipython": "kedro.framework.cli.project.ipython",
-        "run": "kedro.framework.cli.project.run",
-        "micropkg": "kedro.framework.cli.micropkg.micropkg",
-        "package": "kedro.framework.cli.project.package",
-        "jupyter": "kedro.framework.cli.jupyter.jupyter",
-        "pipeline": "kedro.framework.cli.pipeline.pipeline",
-        "new": "kedro.framework.cli.starters.new",
-        "starter": "kedro.framework.cli.starters.starter",
-    },
-    context_settings=CONTEXT_SETTINGS,
-    name="Kedro",
-)
+@click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 @click.version_option(version, "--version", "-V", help="Show version and exit")
 def cli() -> None:  # pragma: no cover
     """Kedro is a CLI for creating and using Kedro projects. For more
@@ -93,6 +77,39 @@ def info() -> None:
             )
     else:
         click.echo("No plugins installed")
+
+
+@click.group(
+    context_settings=CONTEXT_SETTINGS,
+    cls=LazyGroup,
+    name="Kedro",
+    lazy_subcommands={
+        "registry": "kedro.framework.cli.registry.registry",
+        "catalog": "kedro.framework.cli.catalog.catalog",
+        "ipython": "kedro.framework.cli.project.ipython",
+        "run": "kedro.framework.cli.project.run",
+        "micropkg": "kedro.framework.cli.micropkg.micropkg",
+        "package": "kedro.framework.cli.project.package",
+        "jupyter": "kedro.framework.cli.jupyter.jupyter",
+        "pipeline": "kedro.framework.cli.pipeline.pipeline",
+    },
+)
+def project_group():
+    pass
+
+
+@click.group(
+    context_settings=CONTEXT_SETTINGS,
+    name="Kedro",
+    cls=LazyGroup,
+    lazy_subcommands={
+        "new": "kedro.framework.cli.starters.new",
+        "starter": "kedro.framework.cli.starters.starter",
+        "info": "kedro.framework.cli.cli.info",
+    },
+)
+def global_group():
+    pass
 
 
 def _init_plugins() -> None:
@@ -187,7 +204,7 @@ class KedroCLI(CommandCollection):
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
         """
-        return [cli, *load_entry_points("global")]
+        return [cli, global_group, *load_entry_points("global")]
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
@@ -209,7 +226,7 @@ class KedroCLI(CommandCollection):
         except ModuleNotFoundError:
             # return only built-in commands and commands from plugins
             # (plugins can override built-in commands)
-            return [*plugins]
+            return [*plugins, project_group]
 
         # fail badly if cli.py exists, but has no `cli` in it
         if not hasattr(project_cli, "cli"):
@@ -219,7 +236,7 @@ class KedroCLI(CommandCollection):
         user_defined = project_cli.cli
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
-        return [*plugins, user_defined]
+        return [user_defined, *plugins, project_group]
 
 
 def main() -> None:  # pragma: no cover

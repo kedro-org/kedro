@@ -127,6 +127,12 @@ class _FrozenDatasets:
             msg += "Please use DataCatalog.add() instead."
         raise AttributeError(msg)
 
+    def _ipython_key_completions_(self):
+        return list(self.__dict__.keys())
+
+    def __getitem__(self, key: str):
+        return self.__dict__[key]
+
 
 class DataCatalog:
     """``DataCatalog`` stores instances of ``AbstractDataset`` implementations

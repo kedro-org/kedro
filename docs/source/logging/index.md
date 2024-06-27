@@ -44,11 +44,13 @@ If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will use th
 
 ### Change the verbosity of specific parts of Kedro
 
-One can also customise logging at the runtime and redefine the logging configuration provided in the `logging.yml`.
+You can also customise logging at the runtime and redefine the logging configuration provided in the `logging.yml` when using jupyter notebook.
 In the example below we change a logging level to `WARNING` for the `kedro.io.data_catalog` component logger specifically, the logging for the rest of the components will remain unchanged.
 The same can be done for higher/lower-level components without affecting the top-level.
 
-```python
+Add the following to a cell in your notebook:
+
+```ipython
 import logging
 
 

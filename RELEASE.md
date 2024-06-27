@@ -15,6 +15,8 @@
 ## Documentation changes
 * Improved documentation for configuring dataset parameters in the data catalog
 
+Extended documentation with an example of logging customisation at runtime
+
 ## Community contributions
 
 # Release 0.19.6

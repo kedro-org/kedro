@@ -43,6 +43,10 @@ In the example below, the configuration of the `load_args` parameter is defined 
 To get the extensive list of dataset parameters, refer to {py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` and navigate to the target parameter in the `__init__` definition for the dataset.
 For those parameters we provide a reference to the underlying library configuration parameters. For example, under the `load_args` parameter section for [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) you may find a reference to the [pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) method defining the full set of the parameters accepted.
 
+```{note}
+Kedro datasets make every intention to not make any assumptions and delegate any of the `load_args` / `save_args` directly to the underlying implementation.
+```
+
 The example below showcases the configuration of two datasets - `shuttles` of type [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) and `weather` of type [snowflake.SnowparkTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.snowflake.SnowparkTableDataset.html).
 
 ```yaml

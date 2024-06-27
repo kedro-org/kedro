@@ -674,9 +674,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:
-        return super().load()  # type: ignore[safe-super]
-
     @classmethod
     def _save_wrapper(
         cls, save_func: Callable[[Self, _DI], None]
@@ -712,32 +709,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 self._version_cache.clear()
 
         return save
-
-    def save(self, data: _DI) -> None:
-        self._version_cache.clear()
-        save_version = self.resolve_save_version()  # Make sure last save version is set
-        try:
-            super().save(data)  # type: ignore[safe-super]
-        except (FileNotFoundError, NotADirectoryError) as err:
-            # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
-            _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"
-            raise DatasetError(
-                f"Cannot save versioned dataset '{self._filepath.name}' to "
-                f"'{self._filepath.parent.as_posix()}' because a file with the same "
-                f"name already exists in the directory. This is likely because "
-                f"versioning was enabled on a dataset already saved previously. Either "
-                f"remove '{self._filepath.name}' from the directory or manually "
-                f"convert it into a versioned dataset by placing it in a versioned "
-                f"directory (e.g. with default versioning format "
-                f"'{self._filepath.as_posix()}/{_default_version}/{self._filepath.name}"
-                f"')."
-            ) from err
-
-        load_version = self.resolve_load_version()
-        if load_version != save_version:
-            warnings.warn(
-                _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
-            )
 
     def exists(self) -> bool:
         """Checks whether a data set's output already exists by calling

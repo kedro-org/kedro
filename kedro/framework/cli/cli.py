@@ -94,7 +94,7 @@ def info() -> None:
         "pipeline": "kedro.framework.cli.pipeline.pipeline",
     },
 )
-def project_group() -> None:
+def project_commands() -> None:
     pass
 
 
@@ -105,10 +105,9 @@ def project_group() -> None:
     lazy_subcommands={
         "new": "kedro.framework.cli.starters.new",
         "starter": "kedro.framework.cli.starters.starter",
-        "info": "kedro.framework.cli.cli.info",
     },
 )
-def global_group() -> None:
+def global_commands() -> None:
     pass
 
 
@@ -204,7 +203,7 @@ class KedroCLI(CommandCollection):
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
         """
-        return [cli, global_group, *load_entry_points("global")]
+        return [cli, global_commands, *load_entry_points("global")]
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
@@ -226,7 +225,7 @@ class KedroCLI(CommandCollection):
         except ModuleNotFoundError:
             # return only built-in commands and commands from plugins
             # (plugins can override built-in commands)
-            return [*plugins, project_group]
+            return [*plugins, project_commands]
 
         # fail badly if cli.py exists, but has no `cli` in it
         if not hasattr(project_cli, "cli"):
@@ -236,7 +235,7 @@ class KedroCLI(CommandCollection):
         user_defined = project_cli.cli
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
-        return [user_defined, *plugins, project_group]
+        return [user_defined, *plugins, project_commands]
 
 
 def main() -> None:  # pragma: no cover

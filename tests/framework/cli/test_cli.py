@@ -11,14 +11,13 @@ from pytest import fixture, mark, raises, warns
 from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
-from kedro.framework.cli.catalog import catalog_cli
-from kedro.framework.cli.cli import KedroCLI, _init_plugins, cli
-from kedro.framework.cli.jupyter import jupyter_cli
-from kedro.framework.cli.micropkg import micropkg_cli
-from kedro.framework.cli.pipeline import pipeline_cli
-from kedro.framework.cli.project import project_group
-from kedro.framework.cli.registry import registry_cli
-from kedro.framework.cli.starters import create_cli
+from kedro.framework.cli.cli import (
+    KedroCLI,
+    _init_plugins,
+    cli,
+    global_commands,
+    project_commands,
+)
 from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
@@ -333,15 +332,8 @@ class TestKedroCLI:
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         print(kedro_cli.project_groups)
-        assert len(kedro_cli.project_groups) == 6
-        assert kedro_cli.project_groups == [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            micropkg_cli,
-            project_group,
-            registry_cli,
-        ]
+        assert len(kedro_cli.project_groups) == 1
+        assert kedro_cli.project_groups == [project_commands]
 
     def test_project_commands_no_project(self, mocker, tmp_path):
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
@@ -371,22 +363,23 @@ class TestKedroCLI:
             return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        assert len(kedro_cli.project_groups) == 7
+        assert len(kedro_cli.project_groups) == 2
         assert kedro_cli.project_groups == [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            micropkg_cli,
-            project_group,
-            registry_cli,
+            # catalog_cli,
+            # jupyter_cli,
+            # pipeline_cli,
+            # micropkg_cli,
+            # project_group,
+            # registry_cli,
             cli,
+            global_commands,
         ]
 
     def test_kedro_cli_no_project(self, mocker, tmp_path):
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
         kedro_cli = KedroCLI(tmp_path)
         assert len(kedro_cli.global_groups) == 2
-        assert kedro_cli.global_groups == [cli, create_cli]
+        assert kedro_cli.global_groups == [cli, global_commands]
 
         result = CliRunner().invoke(kedro_cli, [])
 
@@ -422,16 +415,17 @@ class TestKedroCLI:
         kedro_cli = KedroCLI(fake_metadata.project_path)
 
         assert len(kedro_cli.global_groups) == 2
-        assert kedro_cli.global_groups == [cli, create_cli]
-        assert len(kedro_cli.project_groups) == 7
+        assert kedro_cli.global_groups == [cli, global_commands]
+        assert len(kedro_cli.project_groups) == 2
         assert kedro_cli.project_groups == [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            micropkg_cli,
-            project_group,
-            registry_cli,
+            # catalog_cli,
+            # jupyter_cli,
+            # pipeline_cli,
+            # micropkg_cli,
+            # project_group,
+            # registry_cli,
             cli,
+            project_commands,
         ]
 
         result = CliRunner().invoke(kedro_cli, [])

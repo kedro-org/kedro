@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import importlib
+from typing import Any
 
 import click
 
 
 class LazyGroup(click.Group):
-    def __init__(self, *args, lazy_subcommands: dict[str, str] | None = None, **kwargs):
+    def __init__(
+        self,
+        *args: Any,
+        lazy_subcommands: dict[str, str] | None = None,
+        **kwargs: Any,
+    ):
         super().__init__(*args, **kwargs)
         # lazy_subcommands is a map of the form:
         #
@@ -19,9 +25,9 @@ class LazyGroup(click.Group):
         lazy = sorted(self.lazy_subcommands.keys())
         return base + lazy
 
-    def get_command(
+    def get_command(  # type: ignore[override]
         self, ctx: click.Context, cmd_name: str
-    ) -> click.BaseCommand | click.Command | None:  # type: ignore[override]
+    ) -> click.BaseCommand | click.Command | None:
         if cmd_name in self.lazy_subcommands:
             return self._lazy_load(cmd_name)
         return super().get_command(ctx, cmd_name)

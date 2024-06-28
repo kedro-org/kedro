@@ -372,7 +372,7 @@ class TestKedroCLI:
             # project_group,
             # registry_cli,
             cli,
-            global_commands,
+            project_commands,
         ]
 
     def test_kedro_cli_no_project(self, mocker, tmp_path):
@@ -403,28 +403,16 @@ class TestKedroCLI:
         )
 
     def test_kedro_cli_with_project(self, mocker, fake_metadata):
-        Module = namedtuple("Module", ["cli"])
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
-        )
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
 
         assert len(kedro_cli.global_groups) == 2
         assert kedro_cli.global_groups == [cli, global_commands]
-        assert len(kedro_cli.project_groups) == 2
+        assert len(kedro_cli.project_groups) == 1
         assert kedro_cli.project_groups == [
-            # catalog_cli,
-            # jupyter_cli,
-            # pipeline_cli,
-            # micropkg_cli,
-            # project_group,
-            # registry_cli,
-            cli,
             project_commands,
         ]
 

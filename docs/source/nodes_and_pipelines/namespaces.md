@@ -93,7 +93,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         [base_data_science], # Creating a new data_science_2 pipeline based on base_data_science pipeline
         parameters={"params:model_options": "params:model_options_2"}, # Using a new set of parameters to train model
         namespace = "ds_2", # With that namespace, "ds_2." prefix will be added to inputs, outputs, params, and node names
-        inputs={"model_input_table"}, # I need to list all pipeline inputs here even if I don't want to change them
+        inputs={"model_input_table"}, # Inputs remain the same, without namespace prefix
     )
 ```
 
@@ -143,9 +143,10 @@ If we want to make all pipelines in this example fully namespaced, we should:
 Modify the `data_processing` pipeline by adding to the `pipeline()` creation function in `src/project_name/pipelines/data_processing/pipeline.py` with the following code:
 ```python
         namespace="data_processing",
-        inputs={"companies", "shuttles", "reviews"},
+        inputs={"companies", "shuttles", "reviews"},  # Inputs remain the same, without namespace prefix
+        outputs={"model_input_table"},  # Outputs remain the same, without namespace prefix
 ```
-Modify the `data_science` pipeline by adding namespace and inputs the same way as it was in `data_science_2` pipeline, but the input will be prefixed with `data_processing.`, because we added a namespace for data processing in the previous step:
+Modify the `data_science` pipeline by adding namespace and inputs the same way as it was in `data_science_2` pipeline:
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
@@ -153,18 +154,8 @@ def create_pipeline(**kwargs) -> Pipeline:
         [base_data_science],
         parameters={"params:model_options": "params:model_options_1"},
         namespace="ds_1",
-        inputs={"data_processing.model_input_table"},
+        inputs={"model_input_table"},
     )
-```
-
-The same input modification should be done for the `base_data_science` pipeline:
-```python
-inputs=["data_processing.model_input_table", "params:model_options"],
-```
-
-And the `data_science_2` pipeline:
-```python
-inputs={"data_processing.model_input_table"},
 ```
 
 After executing the pipeline with `kedro run`, the visualization with `kedro viz run` after collapsing will look like this:

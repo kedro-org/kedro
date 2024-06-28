@@ -14,7 +14,7 @@ def create_new_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-This means you can easily create multiple pipelines based on the `existing_pipeline` pipeline to test different approaches with various input datasets and model training parameters. For example, for the `data_science` pipeline from our [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline), you can restructure the `src/project_name/pipelines/data_science/pipeline.py` file by separating the `data_science` pipeline creation code into a separate `base_data_science` Pipeline object, then reusing it inside the `create_pipeline()` function:
+This means you can create multiple pipelines based on the `existing_pipeline` pipeline to test different approaches with various input datasets and model training parameters. For example, for the `data_science` pipeline from our [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline), you can restructure the `src/project_name/pipelines/data_science/pipeline.py` file by separating the `data_science` pipeline creation code into a separate `base_data_science` pipeline object, then reusing it inside the `create_pipeline()` function:
 
 ```python
 #src/project_name/pipelines/data_science/pipeline.py
@@ -53,7 +53,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-To use a new set of parameters, we need to previously save them inside `conf/base/parameters.yml` of our kedro project. I copied `model_options` from `conf/base/parameters_data_science.yml` and slightly modified it to try new model training parameters: test size and different features set, and called it `model_options_1`:
+To use a new set of parameters, you should create a second parameters file to ovewrite parameters specified in  `conf/base/parameters.yml`. To overwrite the parameter `model_options`, create a file  `conf/base/parameters_data_science.yml` and add a parameter called `model_options_1`:
 
 ```python
 #conf/base/parameters.yml
@@ -136,7 +136,7 @@ We can collapse all namespaced pipelines (in our case, it's only `data_science_2
 > Tip: You can use `kedro run --namespace = namespace_name` to run only the specific namespace
 
 
-### How make all pipelines in this example fully namespaced
+### How to namespace all pipelines in a project
 
 If we want to make all pipelines in this example fully namespaced, we should:
 
@@ -158,7 +158,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-After executing the pipeline with `kedro run`, the visualization with `kedro viz run` after collapsing will look like this:
+After executing the pipeline with `kedro run`, the visualisation with `kedro viz run` after collapsing will look like this:
 
 ![namespaces collapsed all](../meta/images/namespaces_collapsed_all.png)
 

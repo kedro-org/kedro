@@ -10,7 +10,7 @@ Kedro supports this concept of modular pipelines with the following tools:
 
 ## How to create a new blank pipeline using the `kedro pipeline create` command
 
- To create a new modular pipeline, use the following:
+ To create a new modular pipeline, use the following command:
 
 ```bash
 kedro pipeline create <pipeline_name>

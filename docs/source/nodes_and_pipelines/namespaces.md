@@ -2,41 +2,174 @@
 
 ## How to reuse your pipelines
 
-If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your existing pipeline (e.g., `data_science` pipeline from our [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline)), you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
+If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your `existing_pipeline`, you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
     return pipeline(
-    [data_science], # Name of the existing pipeline
+    [existing_pipeline], # Name of the existing pipeline
     inputs = {"old_input_df_name" : "new_input_df_name"},  # Mapping old input to new input
     outputs = {"old_output_df_name" : "new_output_df_name"},  # Mapping old output to new output
-    parameters = {"params: test_size1": "params: test_size2"},  # Updating parameters
+    parameters = {"params: model_options": "params: new_model_options"},  # Updating parameters
     )
 ```
-This means you can easily create multiple pipelines based on the `data_science` pipeline to test different approaches with various input datasets and model training parameters.
 
-## What is a Namespace
-
-If you need to try different options for training your model, constantly overwriting your outputs for each new pipeline can become tedious. Each model's results (outputs) should be saved in new objects, which can be annoying to manage manually. Namespaces are a perfect solution for this. By setting a `namespace="namespace_name"` parameter for each new pipeline (based on an existing pipeline), you achieve automatic output and node isolation. This is done by adding a `namespace_name` prefix to each pipeline node and output dataset. Your pipeline creation code will look like this:
+This means you can easily create multiple pipelines based on the `existing_pipeline` pipeline to test different approaches with various input datasets and model training parameters. For example, for the `data_science` pipeline from our [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline), you can restructure the `src/project_name/pipelines/data_science/pipeline.py` file by separating the `data_science` pipeline creation code into a separate `base_data_science` Pipeline object, then reusing it inside the `create_pipeline()` function:
 
 ```python
-def create_new_pipeline(**kwargs) -> Pipeline:
+#src/project_name/pipelines/data_science/pipeline.py
+
+from kedro.pipeline import Pipeline, node, pipeline
+from .nodes import evaluate_model, split_data, train_model
+
+base_data_science = pipeline(
+        [
+            node(
+                func=split_data,
+                inputs=["model_input_table", "params:model_options"],
+                outputs=["X_train", "X_test", "y_train", "y_test"],
+                name="split_data_node",
+            ),
+            node(
+                func=train_model,
+                inputs=["X_train", "y_train"],
+                outputs="regressor",
+                name="train_model_node",
+            ),
+            node(
+                func=evaluate_model,
+                inputs=["regressor", "X_test", "y_test"],
+                outputs=None,
+                name="evaluate_model_node",
+            ),
+        ]
+    )  # Creating a base data science pipeline that will be reused with different model training parameters
+
+
+def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
-        [data_science],  # Name of the existing pipeline
-        inputs={"old_input_df_name": "new_input_df_name"},  # Mapping old input to new input
-        parameters={"params:test_size1": "params:test_size2"},  # Updating parameters
-        namespace="alternative_approach",  # Setting the namespace name
+        [base_data_science],  # Creating a new data_science pipeline based on base_data_science pipeline
+        parameters={"params:model_options": "params:model_options_1"},  # Using a new set of parameters to train model
     )
 ```
-In this example:
-* The `data_science` pipeline is reused and namespaced under `alternative_approach`.
-* The inputs and parameters are mapped to new names/values.
-* The namespace parameter ensures that all nodes and outputs in this pipeline are prefixed with `alternative_approach.`, isolating them from other pipelines.
 
-Namespace methods:
-* You can use `kedro run --namespace = namespace_name` to run only the specific namespace
-* [Kedro-Viz](https://demo.kedro.org) accelerates development by rendering namespaced pipelines as collapsible 'super nodes'.
+To use a new set of parameters, we need to previously save them inside `conf/base/parameters.yml` of our kedro project. I copied `model_options` from `conf/base/parameters_data_science.yml` and slightly modified it to try new model training parameters: test size and different features set, and called it `model_options_1`:
 
+```python
+#conf/base/parameters.yml
+model_options_1:
+  test_size: 0.15
+  random_state: 3
+  features:
+    - passenger_capacity
+    - crew
+    - d_check_complete
+    - moon_clearance_complete
+    - company_rating
+```
+
+> **Warning**: In Kedro, you cannot run pipelines with the same node names. In this example, both pipelines have nodes with the same names, so it's impossible to execute them together. However, `base_data_science` is not registered and will not be executed with the `kedro run` command. The `data_science` pipeline created inside the `create_pipeline()` function, based on `base_data_science`, will be executed during `kedro run` because it will be autodiscovered by Kedro.
+
+If you want to execute `base_data_science` and `data_science` pipelines together or reuse `base_data_science` a few more times, you need to modify the node names. The easiest way to do this is by using namespaces.
+
+## What is a namespace
+
+A namespace is a way to isolate nodes, inputs, outputs, and parameters inside your pipeline. If you put `namespace="namespace_name"` attribute inside the `pipeline()` creation function, it will add the `namespace_name.` prefix to all nodes, inputs, outputs, and parameters inside your new pipeline.
+
+Let's extend our previous example and try to reuse the `base_data_science` pipeline one more time by creating another pipeline based on it. First, we should use the `kedro pipeline create` command to create a new blank pipeline named `data_science_2`:
+
+```python
+kedro pipeline create data_science_2
+```
+Then, we need to modify the `src/project_name/pipelines/data_science_2/pipeline.py` file to create a pipeline in a similar way to the example above. We will import `base_data_science` from the code above and use a namespace to isolate our nodes:
+
+```python
+#src/project_name/pipelines/data_science_2/pipeline.py
+from kedro.pipeline import Pipeline, pipeline
+from ..data_science.pipeline import base_data_science  # Import pipeline to create a new one based on it
+
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
+        [base_data_science], # Creating a new data_science_2 pipeline based on base_data_science pipeline
+        parameters={"params:model_options": "params:model_options_2"}, # Using a new set of parameters to train model
+        namespace = "ds_2", # With that namespace, "ds_2." prefix will be added to inputs, outputs, params, and node names
+        inputs={"model_input_table"}, # I need to list all pipeline inputs here even if I don't want to change them
+    )
+```
+
+To use a new set of parameters, copy `model_options` from `conf/base/parameters_data_science.yml` to `conf/base/parameters_data_science_2.yml` and modify it slightly to try new model training parameters, such as test size and a different feature set. Call it `model_options_2`:
+
+```python
+#conf/base/parameters.yml
+model_options_2:
+  test_size: 0.3
+  random_state: 3
+  features:
+    - d_check_complete
+    - moon_clearance_complete
+    - iata_approved
+    - company_rating
+```
+
+In this example, all nodes inside the `data_science_2` pipeline will be prefixed with `ds_2`: `ds_2.split_data`, `ds_2.train_model`, `ds_2.evaluate_model`. Parameters will be used from `model_options_2` because we overwrite `model_options` with them. The input for that pipeline will be `model_input_table` as it was previously, because we mentioned that in the inputs parameter (without that, the input would be modified to `ds_2.model_input_table`, but we don't have that table in the pipeline).
+
+Since the node names are unique now, we can run the project with:
+
+```python
+kedro run
+```
+
+Logs show that `data_science` and `data_science_2` pipelines were executed successfully with different R2 results. Now, we can see how Kedro-viz renders namespaced pipelines in collapsible "super nodes":
+
+```python
+kedro viz run
+```
+
+After running viz, we can see two equal pipelines: `data_science` and `data_science_2`:
+
+![namespaces uncollapsed](../meta/images/namespaces_uncollapsed.png)
+
+We can collapse all namespaced pipelines (in our case, it's only `data_science_2`) with a special button and see that the `data_science_2` pipeline was collapsed into one super node called `Ds 2`:
+
+![namespaces collapsed](../meta/images/namespaces_collapsed.png)
+
+> Tip: You can use `kedro run --namespace = namespace_name` to run only the specific namespace
+
+
+### How make all pipelines in this example fully namespaced
+
+If we want to make all pipelines in this example fully namespaced, we should:
+
+Modify the `data_processing` pipeline by adding to the `pipeline()` creation function in `src/project_name/pipelines/data_processing/pipeline.py` with the following code:
+```python
+        namespace="data_processing",
+        inputs={"companies", "shuttles", "reviews"},
+```
+Modify the `data_science` pipeline by adding namespace and inputs the same way as it was in `data_science_2` pipeline, but the input will be prefixed with `data_processing.`, because we added a namespace for data processing in the previous step:
+
+```python
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
+        [base_data_science],
+        parameters={"params:model_options": "params:model_options_1"},
+        namespace="ds_1",
+        inputs={"data_processing.model_input_table"},
+    )
+```
+
+The same input modification should be done for the `base_data_science` pipeline:
+```python
+inputs=["data_processing.model_input_table", "params:model_options"],
+```
+
+And the `data_science_2` pipeline:
+```python
+inputs={"data_processing.model_input_table"},
+```
+
+After executing the pipeline with `kedro run`, the visualization with `kedro viz run` after collapsing will look like this:
+
+![namespaces collapsed all](../meta/images/namespaces_collapsed_all.png)
 
 ## Providing pipeline specific dependencies
 

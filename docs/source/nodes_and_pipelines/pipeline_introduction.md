@@ -4,6 +4,8 @@ We previously introduced [Nodes](./nodes.md) as building blocks that represent t
 
 To benefit from Kedro's automatic dependency resolution, you can chain your nodes into a {py:class}`~kedro.pipeline.Pipeline`, which is a list of nodes that use a shared set of variables. That class can be created using the {py:class}`~kedro.pipeline.modular_pipeline.pipeline` method, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
 
+The following sections explain how to create and use Kedro pipelines:
+
 - [How to build a pipeline](#how-to-build-a-pipeline)
 - [How to use `describe` to discover what nodes are part of the pipeline](#how-to-use-describe-to-discover-what-nodes-are-part-of-the-pipeline)
 - [How to merge multiple pipelines](#how-to-merge-multiple-pipelines)

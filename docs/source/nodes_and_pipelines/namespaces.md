@@ -146,7 +146,7 @@ Modify the `data_processing` pipeline by adding to the `pipeline()` creation fun
         inputs={"companies", "shuttles", "reviews"},  # Inputs remain the same, without namespace prefix
         outputs={"model_input_table"},  # Outputs remain the same, without namespace prefix
 ```
-Modify the `data_science` pipeline by adding namespace and inputs the same way as it was in `data_science_2` pipeline:
+Modify the `data_science` pipeline by adding namespace and inputs in the same way as it was done in `data_science_2` pipeline:
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:

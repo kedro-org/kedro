@@ -94,7 +94,7 @@ def info() -> None:
         "pipeline": "kedro.framework.cli.pipeline.pipeline",
     },
 )
-def project_group():
+def project_group() -> None:
     pass
 
 
@@ -108,7 +108,7 @@ def project_group():
         "info": "kedro.framework.cli.cli.info",
     },
 )
-def global_group():
+def global_group() -> None:
     pass
 
 

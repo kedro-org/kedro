@@ -19,8 +19,10 @@ class LazyGroup(click.Group):
         lazy = sorted(self.lazy_subcommands.keys())
         return base + lazy
 
-    def get_command(self, ctx: click.Context, cmd_name: str) -> click.BaseCommand | click.Command | None:  # type: ignore[override]
-        if cmd_name in self.lazy_subcommands: 
+    def get_command(
+        self, ctx: click.Context, cmd_name: str
+    ) -> click.BaseCommand | click.Command | None:  # type: ignore[override]
+        if cmd_name in self.lazy_subcommands:
             return self._lazy_load(cmd_name)
         return super().get_command(ctx, cmd_name)
 

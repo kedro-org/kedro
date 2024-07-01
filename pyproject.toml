@@ -30,6 +30,7 @@ dependencies = [
     "PyYAML>=4.2,<7.0",
     "rich>=12.0,<14.0",
     "rope>=0.21,<2.0",  # subject to LGPLv3 license
+    "kedro-telemetry>=0.3.1",
     "toml>=0.10.0",
     "graphlib_backport>=1.0.0; python_version < '3.9'",
 ]

@@ -6,7 +6,7 @@ from collections import namedtuple
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.cli import KedroCLI, cli
+from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl, get_cli_hook_manager, manager
 from kedro.framework.startup import ProjectMetadata
 
@@ -83,7 +83,7 @@ def fake_plugin_distribution(mocker):
 class TestKedroCLIHooks:
     @pytest.mark.parametrize(
         "command, exit_code",
-        [("-V", 0), ("info", 2), ("pipeline list", 2), ("starter", 0)],
+        [("-V", 0), ("info", 0), ("pipeline list", 2), ("starter", 0)],
     )
     def test_kedro_cli_should_invoke_cli_hooks_from_plugin(
         self,
@@ -97,7 +97,7 @@ class TestKedroCLIHooks:
     ):
         caplog.set_level(logging.DEBUG, logger="kedro")
 
-        Module = namedtuple("Module", ["cli"])
+        # Module = namedtuple("Module", ["cli"])
         mocker.patch(
             "kedro.framework.cli.cli._is_project",
             return_value=True,
@@ -106,10 +106,10 @@ class TestKedroCLIHooks:
             "kedro.framework.cli.cli.bootstrap_project",
             return_value=fake_metadata,
         )
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
+        # mocker.patch(
+        #     "kedro.framework.cli.cli.importlib.import_module",
+        #     return_value=Module(cli=cli),
+        # )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         result = CliRunner().invoke(kedro_cli, [command])
         assert (
@@ -121,8 +121,7 @@ class TestKedroCLIHooks:
             f"Before command `{command}` run for project {fake_metadata}"
             in result.output
         )
-
-        # 'pipeline list' and 'info' aren't actually in the click structure and
+        # 'pipeline list' isn't actually in the click structure and
         # return exit code 2 ('invalid usage of some shell built-in command')
         assert (
             f"After command `{command}` run for project {fake_metadata} (exit: {exit_code})"

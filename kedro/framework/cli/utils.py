@@ -120,14 +120,13 @@ class CommandCollection(click.CommandCollection):
             for title, cli_list in groups
         ]
         sources = list(chain.from_iterable(cli_list for _, cli_list in self.groups))
-
         help_texts = [
             cli.help
             for cli_collection in sources
             for cli in cli_collection.sources
             if cli.help
         ]
-        self._dedupe_commands(sources)
+        # self._dedupe_commands(sources)
         super().__init__(
             sources=sources,  # type: ignore[arg-type]
             help="\n\n".join(help_texts),
@@ -136,28 +135,28 @@ class CommandCollection(click.CommandCollection):
         self.params = sources[0].params
         self.callback = sources[0].callback
 
-    @staticmethod
-    def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]) -> None:
-        """Deduplicate commands by keeping the ones from the last source
-        in the list.
-        """
-        seen_names: set[str] = set()
-        for cli_collection in reversed(cli_collections):
-            for cmd_group in reversed(cli_collection.sources):
-                cmd_group.commands = {  # type: ignore[attr-defined]
-                    cmd_name: cmd
-                    for cmd_name, cmd in cmd_group.commands.items()  # type: ignore[attr-defined]
-                    if cmd_name not in seen_names
-                }
-                seen_names |= cmd_group.commands.keys()  # type: ignore[attr-defined]
+    # @staticmethod
+    # def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]) -> None:
+    #     """Deduplicate commands by keeping the ones from the last source
+    #     in the list.
+    #     """
+    #     seen_names: set[str] = set()
+    #     for cli_collection in reversed(cli_collections):
+    #         for cmd_group in reversed(cli_collection.sources):
+    #             cmd_group.commands = {  # type: ignore[attr-defined]
+    #                 cmd_name: cmd
+    #                 for cmd_name, cmd in cmd_group.commands.items()  # type: ignore[attr-defined]
+    #                 if cmd_name not in seen_names
+    #             }
+    #             seen_names |= cmd_group.commands.keys()  # type: ignore[attr-defined]
 
-        # remove empty command groups
-        for cli_collection in cli_collections:
-            cli_collection.sources = [
-                cmd_group
-                for cmd_group in cli_collection.sources
-                if cmd_group.commands  # type: ignore[attr-defined]
-            ]
+    #     # remove empty command groups
+    #     for cli_collection in cli_collections:
+    #         cli_collection.sources = [
+    #             cmd_group
+    #             for cmd_group in cli_collection.sources
+    #             if cmd_group.commands  # type: ignore[attr-defined]
+    #         ]
 
     @staticmethod
     def _merge_same_name_collections(
@@ -169,7 +168,6 @@ class CommandCollection(click.CommandCollection):
             named_groups[group.name].append(group)  # type: ignore[index]
             if group.help:
                 helps[group.name].append(group.help)  # type: ignore[index]
-
         return [
             click.CommandCollection(
                 name=group_name,

@@ -105,7 +105,7 @@ class _FrozenDatasets:
         """Return a _FrozenDatasets instance from some datasets collections.
         Each collection could either be another _FrozenDatasets or a dictionary.
         """
-        self._original_names = set()
+        self._original_names: set[str] = set()
         for collection in datasets_collections:
             if isinstance(collection, _FrozenDatasets):
                 self.__dict__.update(collection.__dict__)

@@ -813,12 +813,17 @@ def _make_cookiecutter_args_and_fetch_template(
     tools = config["tools"]
     example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
-    checkout_version = version if kedro_version_match_starters else "main"
-
+    
+    if checkout:
+        checkout_version = checkout
+    elif kedro_version_match_starters:
+        checkout_version = version
+    else:
+        checkout_version = "main"
+    
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-        # Ensures we use the same tag version of kedro for kedro-starters
         cookiecutter_args["checkout"] = checkout_version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.

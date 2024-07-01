@@ -7,10 +7,10 @@ If you want to create a new pipeline that performs similar tasks with different 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
     return pipeline(
-    [existing_pipeline], # Name of the existing pipeline
-    inputs = {"old_input_df_name" : "new_input_df_name"},  # Mapping old input to new input
-    outputs = {"old_output_df_name" : "new_output_df_name"},  # Mapping old output to new output
-    parameters = {"params: model_options": "params: new_model_options"},  # Updating parameters
+       [existing_pipeline], # Name of the existing Pipeline object
+       inputs = {"old_input_df_name" : "new_input_df_name"},  # Mapping existing Pipeline input to new input
+       outputs = {"old_output_df_name" : "new_output_df_name"},  # Mapping existing Pipeline output to new output
+       parameters = {"params: model_options": "params: new_model_options"},  # Updating parameters
     )
 ```
 
@@ -76,6 +76,9 @@ If you want to execute `base_data_science` and `data_science` pipelines together
 
 A namespace is a way to isolate nodes, inputs, outputs, and parameters inside your pipeline. If you put `namespace="namespace_name"` attribute inside the `pipeline()` creation function, it will add the `namespace_name.` prefix to all nodes, inputs, outputs, and parameters inside your new pipeline.
 
+> If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `pipeline()` creation function like this:
+> `inputs={"input_that_should_not_be_prefixed"}`
+
 Let's extend our previous example and try to reuse the `base_data_science` pipeline one more time by creating another pipeline based on it. First, we should use the `kedro pipeline create` command to create a new blank pipeline named `data_science_2`:
 
 ```python
@@ -91,8 +94,8 @@ from ..data_science.pipeline import base_data_science  # Import pipeline to crea
 def create_pipeline() -> Pipeline:
     return pipeline(
         [base_data_science], # Creating a new data_science_2 pipeline based on base_data_science pipeline
-        parameters={"params:model_options": "params:model_options_2"}, # Using a new set of parameters to train model
         namespace = "ds_2", # With that namespace, "ds_2." prefix will be added to inputs, outputs, params, and node names
+        parameters={"params:model_options": "params:model_options_2"}, # Using a new set of parameters to train model
         inputs={"model_input_table"}, # Inputs remain the same, without namespace prefix
     )
 ```
@@ -152,8 +155,8 @@ Modify the `data_science` pipeline by adding namespace and inputs in the same wa
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [base_data_science],
-        parameters={"params:model_options": "params:model_options_1"},
         namespace="ds_1",
+        parameters={"params:model_options": "params:model_options_1"},
         inputs={"model_input_table"},
     )
 ```
@@ -162,14 +165,6 @@ After executing the pipeline with `kedro run`, the visualisation with `kedro viz
 
 ![namespaces collapsed all](../meta/images/namespaces_collapsed_all.png)
 
-## Providing pipeline specific dependencies
-
-* A pipeline **might** have external dependencies specified in a local `requirements.txt` file.
-* Pipeline specific dependencies are scooped up during the [micro-packaging](micro_packaging.md) process.
-* These dependencies need to be manually installed using `pip`:
-```bash
-pip install -r requirements.txt
-```
 
 ## Example: Combining disconnected pipelines
 

@@ -133,6 +133,16 @@ you must add [`_copy_without_render: ["templates"]`](https://cookiecutter.readth
 and not the `cookiecutter.json` for the pipeline template.
 
 
+## Providing pipeline specific dependencies
+
+* A pipeline **might** have external dependencies specified in a local `requirements.txt` file.
+* Pipeline specific dependencies are scooped up during the [micro-packaging](micro_packaging.md) process.
+* These dependencies need to be manually installed using `pip`:
+```bash
+pip install -r requirements.txt
+```
+
+
 ## How to share your pipelines
 
 > **Warning:** Micro-packaging is deprecated and will be removed from Kedro version 0.20.0.

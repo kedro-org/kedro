@@ -13,8 +13,8 @@
 * The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 0.20.0.
 
 ## Documentation changes
-
-Extended documentation with an example of logging customisation at runtime
+* Improved documentation for configuring dataset parameters in the data catalog
+* Extended documentation with an example of logging customisation at runtime
 
 ## Community contributions
 

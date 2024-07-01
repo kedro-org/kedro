@@ -2,7 +2,7 @@
 
 ## How to reuse your pipelines
 
-If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your `existing_pipeline`, you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
+If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your existing_pipeline, you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
@@ -88,7 +88,7 @@ Then, we need to modify the `src/project_name/pipelines/data_science_2/pipeline.
 from kedro.pipeline import Pipeline, pipeline
 from ..data_science.pipeline import base_data_science  # Import pipeline to create a new one based on it
 
-def create_pipeline(**kwargs) -> Pipeline:
+def create_pipeline() -> Pipeline:
     return pipeline(
         [base_data_science], # Creating a new data_science_2 pipeline based on base_data_science pipeline
         parameters={"params:model_options": "params:model_options_2"}, # Using a new set of parameters to train model

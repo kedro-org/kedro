@@ -7,7 +7,7 @@ If you want to create a new pipeline that performs similar tasks with different 
 ```python
 def create_new_pipeline(**kwargs) -> Pipeline:
     return pipeline(
-       [existing_pipeline], # Name of the existing Pipeline object
+       existing_pipeline, # Name of the existing Pipeline object
        inputs = {"old_input_df_name" : "new_input_df_name"},  # Mapping existing Pipeline input to new input
        outputs = {"old_output_df_name" : "new_output_df_name"},  # Mapping existing Pipeline output to new output
        parameters = {"params: model_options": "params: new_model_options"},  # Updating parameters
@@ -93,7 +93,7 @@ from ..data_science.pipeline import base_data_science  # Import pipeline to crea
 
 def create_pipeline() -> Pipeline:
     return pipeline(
-        [base_data_science], # Creating a new data_science_2 pipeline based on base_data_science pipeline
+        base_data_science, # Creating a new data_science_2 pipeline based on base_data_science pipeline
         namespace = "ds_2", # With that namespace, "ds_2." prefix will be added to inputs, outputs, params, and node names
         parameters={"params:model_options": "params:model_options_2"}, # Using a new set of parameters to train model
         inputs={"model_input_table"}, # Inputs remain the same, without namespace prefix
@@ -154,7 +154,7 @@ Modify the `data_science` pipeline by adding namespace and inputs in the same wa
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
-        [base_data_science],
+        base_data_science,
         namespace="ds_1",
         parameters={"params:model_options": "params:model_options_1"},
         inputs={"model_input_table"},

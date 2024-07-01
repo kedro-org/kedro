@@ -5,7 +5,7 @@
 If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your existing_pipeline, you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
 
 ```python
-def create_new_pipeline(**kwargs) -> Pipeline:
+def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
        existing_pipeline, # Name of the existing Pipeline object
        inputs = {"old_input_df_name" : "new_input_df_name"},  # Mapping existing Pipeline input to new input

@@ -129,10 +129,10 @@ class _FrozenDatasets:
             msg += "Please use DataCatalog.add() instead."
         raise AttributeError(msg)
 
-    def _ipython_key_completions_(self):
+    def _ipython_key_completions_(self) -> list[str]:
         return list(self._original_names)
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> AbstractDataset:
         return self.__dict__[_sub_nonword_chars(key)]
 
 

@@ -207,6 +207,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
     @classmethod
     def _load_wrapper(cls, load_func: Callable[[Self], _DO]) -> Callable[[Self], _DO]:
+        """Decorate `load_func` with logging and error handling code."""
+
         @wraps(load_func)
         def load(self: Self) -> _DO:
             self._logger.debug("Loading %s", str(self))
@@ -231,6 +233,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def _save_wrapper(
         cls, save_func: Callable[[Self, _DI], None]
     ) -> Callable[[Self, _DI], None]:
+        """Decorate `save_func` with logging and error handling code."""
+
         @wraps(save_func)
         def save(self: Self, data: _DI) -> None:
             if data is None:
@@ -253,6 +257,11 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return save
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Decorate the `load` and `save` methods provided by the class.
+
+        If `_load` or `_save` are defined, alias them as a prerequisite.
+
+        """
         super().__init_subclass__(**kwargs)
 
         if hasattr(cls, "_load") and not cls._load.__qualname__.startswith("Abstract"):
@@ -678,6 +687,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _save_wrapper(
         cls, save_func: Callable[[Self, _DI], None]
     ) -> Callable[[Self, _DI], None]:
+        """Decorate `save_func` with logging and error handling code."""
+
         @wraps(save_func)
         def save(self: Self, data: _DI) -> None:
             self._version_cache.clear()

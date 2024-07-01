@@ -1796,7 +1796,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
             "output_dir": "/my/output/dir",
             "no_input": True,
             "extra_context": config,
-            "checkout": "main",
+            "checkout": "my-checkout",
             "directory": "spaceflights-pyspark-viz",
         }
         expected_path = "git+https://github.com/kedro-org/kedro-starters.git"

@@ -132,7 +132,7 @@ class _FrozenDatasets:
     def _ipython_key_completions_(self) -> list[str]:
         return list(self._original_names)
 
-    def __getitem__(self, key: str) -> AbstractDataset:
+    def __getitem__(self, key: str) -> Any:
         return self.__dict__[_sub_nonword_chars(key)]
 
 

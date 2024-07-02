@@ -442,6 +442,30 @@ class TestDataCatalog:
         copy = data_catalog.shallow_copy()
         assert isinstance(copy, MyDataCatalog)
 
+    def test_key_completions(self, data_catalog_from_config):
+        """Test catalog.datasets key completions"""
+        assert isinstance(data_catalog_from_config.datasets["boats"], CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets["cars"], CSVDataset)
+        data_catalog_from_config.add_feed_dict(
+            {
+                "params:model_options": [1, 2, 4],
+                "params:model_options.random_state": [0, 42, 67],
+            }
+        )
+        assert isinstance(
+            data_catalog_from_config.datasets["params:model_options"], MemoryDataset
+        )
+        assert isinstance(
+            data_catalog_from_config.datasets["params__model_options.random_state"],
+            MemoryDataset,
+        )
+        assert set(data_catalog_from_config.datasets._ipython_key_completions_()) == {
+            "boats",
+            "cars",
+            "params:model_options",
+            "params:model_options.random_state",
+        }
+
 
 class TestDataCatalogFromConfig:
     def test_from_sane_config(self, data_catalog_from_config, dummy_dataframe):

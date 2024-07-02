@@ -105,27 +105,35 @@ class _FrozenDatasets:
         """Return a _FrozenDatasets instance from some datasets collections.
         Each collection could either be another _FrozenDatasets or a dictionary.
         """
+        self._original_names: set[str] = set()
         for collection in datasets_collections:
             if isinstance(collection, _FrozenDatasets):
                 self.__dict__.update(collection.__dict__)
+                self._original_names.update(collection._original_names)
             else:
                 # Non-word characters in dataset names are replaced with `__`
                 # for easy access to transcoded/prefixed datasets.
-                self.__dict__.update(
-                    {
-                        _sub_nonword_chars(dataset_name): dataset
-                        for dataset_name, dataset in collection.items()
-                    }
-                )
+                for dataset_name, dataset in collection.items():
+                    self.__dict__[_sub_nonword_chars(dataset_name)] = dataset
+                    self._original_names.add(dataset_name)
 
     # Don't allow users to add/change attributes on the fly
     def __setattr__(self, key: str, value: Any) -> None:
+        if key == "_original_names":
+            super().__setattr__(key, value)
+            return
         msg = "Operation not allowed! "
         if key in self.__dict__:
             msg += "Please change datasets through configuration."
         else:
             msg += "Please use DataCatalog.add() instead."
         raise AttributeError(msg)
+
+    def _ipython_key_completions_(self) -> list[str]:
+        return list(self._original_names)
+
+    def __getitem__(self, key: str) -> Any:
+        return self.__dict__[_sub_nonword_chars(key)]
 
 
 class DataCatalog:

@@ -49,21 +49,21 @@ class LambdaDataset(AbstractDataset):
 
         return descr
 
-    def _save(self, data: Any) -> None:
-        if not self.__save:
-            raise DatasetError(
-                "Cannot save to data set. No 'save' function "
-                "provided when LambdaDataset was created."
-            )
-        self.__save(data)
-
-    def _load(self) -> Any:
+    def load(self) -> Any:
         if not self.__load:
             raise DatasetError(
                 "Cannot load data set. No 'load' function "
                 "provided when LambdaDataset was created."
             )
         return self.__load()
+
+    def save(self, data: Any) -> None:
+        if not self.__save:
+            raise DatasetError(
+                "Cannot save to data set. No 'save' function "
+                "provided when LambdaDataset was created."
+            )
+        self.__save(data)
 
     def _exists(self) -> bool:
         if not self.__exists:

@@ -98,7 +98,7 @@ class CachedDataset(AbstractDataset):
             "cache": self._cache._describe(),
         }
 
-    def _load(self) -> Any:
+    def load(self) -> Any:
         data = self._cache.load() if self._cache.exists() else self._dataset.load()
 
         if not self._cache.exists():
@@ -106,7 +106,7 @@ class CachedDataset(AbstractDataset):
 
         return data
 
-    def _save(self, data: Any) -> None:
+    def save(self, data: Any) -> None:
         self._dataset.save(data)
         self._cache.save(data)
 

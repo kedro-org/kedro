@@ -289,6 +289,13 @@ class DataCatalog:
         user_default = {}
 
         for ds_name, ds_config in catalog.items():
+            if not isinstance(ds_config, dict):
+                raise DatasetError(
+                    f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
+                    "\nHint: If this catalog entry is intended for variable interpolation, "
+                    "make sure that the key is preceded by an underscore."
+                )
+
             ds_config = _resolve_credentials(  # noqa: PLW2901
                 ds_config, credentials
             )
@@ -755,7 +762,7 @@ class DataCatalog:
             dataset_patterns = self._sort_patterns(unsorted_dataset_patterns)
         else:
             dataset_patterns = self._dataset_patterns
-        return DataCatalog(
+        return self.__class__(
             datasets=self._datasets,
             dataset_patterns=dataset_patterns,
             load_versions=self._load_versions,

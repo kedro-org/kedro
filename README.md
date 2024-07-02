@@ -86,6 +86,14 @@ Find out more about how Kedro can answer your use cases from the [product FAQs o
 
 The [Kedro product team](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html#kedro-maintainers) and a number of [open source contributors from across the world](https://github.com/kedro-org/kedro/releases) maintain Kedro.
 
+## Get support
+
+To get support, we recommend you to join our [Slack workspace](https://slack.kedro.org/) and write a message in the `#questions` channel. Alternatively, you can [open an issue](https://github.com/kedro-org/kedro/issues/new?assignees=&labels=Issue%3A+Bug+Report&template=bug-report.md) on GitHub directly.
+
+## Suggest a new idea
+
+We use [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) to discuss about possible ideas for improvement, new features, feature requests, and such. If you have a suggestion, feel free to [open a new discussion](https://github.com/kedro-org/kedro/discussions/new?category=idea).
+
 ## Can I contribute?
 
 Yes! We welcome all kinds of contributions. Check out our [guide to contributing to Kedro](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).

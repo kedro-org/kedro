@@ -1,11 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Slack organisation
-    about: Come chat with the community!
+  - name: Suggest a new feature
+    about: Feature request, enhancement idea, new functionality? Open a discussion!
+    url: https://github.com/kedro-org/kedro/discussions/new?category=idea
+  - name: Ask for help
+    about: Come chat with the community in Slack!
     url: https://slack.kedro.org/
-  - name: Documentation
-    url: https://kedro.readthedocs.io/en/stable/
-    about: To learn more about how Kedro works
-  - name: Website
-    url: https://kedro.org/
-    about: Learn about features, project examples and our demo

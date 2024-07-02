@@ -74,15 +74,11 @@ def info() -> None:
             plugin_entry_points[module_name].add(plugin_entry_point)
 
     click.echo()
-    if plugin_versions:
-        click.echo("Installed plugins:")
-        for plugin_name, plugin_version in sorted(plugin_versions.items()):
-            entrypoints_str = ",".join(sorted(plugin_entry_points[plugin_name]))
-            click.echo(
-                f"{plugin_name}: {plugin_version} (entry points:{entrypoints_str})"
-            )
-    else:
-        click.echo("No plugins installed")
+    # plugin_versions now always include kedro-telemetry as it was moved to core kedro dependency
+    click.echo("Installed plugins:")
+    for plugin_name, plugin_version in sorted(plugin_versions.items()):
+        entrypoints_str = ",".join(sorted(plugin_entry_points[plugin_name]))
+        click.echo(f"{plugin_name}: {plugin_version} (entry points:{entrypoints_str})")
 
 
 def _init_plugins() -> None:

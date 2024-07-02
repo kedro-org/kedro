@@ -24,6 +24,7 @@
 * Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behaviour is still to raise a warning for each failing pipeline.
 * It is now possible to use Kedro without having `rich` installed.
 * Updated custom logging behavior: `conf/logging.yml` will be used if it exists and `KEDRO_LOGGING_CONFIG` is not set; otherwise, `default_logging.yml` will be used.
+* Can use unpacking with parameter dictionaries.
 
 ## Bug fixes and other changes
 * User defined catch-all dataset factory patterns now override the default pattern provided by the runner.
@@ -42,6 +43,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [doxenix](https://github.com/doxenix)
 * [cleeeks](https://github.com/cleeeks)
+* [bpmeek](https://github.com/bpmeek)
 
 # Release 0.19.5
 

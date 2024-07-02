@@ -117,6 +117,8 @@ class Node:
                 _node_error_message("it must have some 'inputs' or 'outputs'.")
             )
 
+        inputs = _unpack_params(func, inputs)
+
         self._validate_inputs(func, inputs)
 
         self._func = func
@@ -681,3 +683,28 @@ def _get_readable_func_name(func: Callable) -> str:
         name = "<partial>"
 
     return name
+
+
+def _unpack_params(
+    func: Callable, inputs: None | str | list[str] | dict[str, str]
+) -> None | str | list[str] | dict[str, str]:
+    """Iterate over Node inputs to see if they need to be unpacked.
+
+    Returns:
+        Either original inputs if no input was unpacked or a list of inputs if an input was unpacked.
+    """
+    use_new = False
+    new_inputs = []
+    for idx, _input in enumerate(_to_list(inputs)):
+        if _input.startswith("**"):
+            use_new = True
+            dict_root = _input.split(":")[-1]
+            _func_arguments = [arg for arg in inspect.signature(func).parameters]
+            for param in _func_arguments[idx:]:
+                new_inputs.append(f"params:{dict_root}.{param}")
+else:
+     new_inputs.append(_input)
+        new_inputs.append(_input)
+    if use_new:
+        return new_inputs
+    return inputs

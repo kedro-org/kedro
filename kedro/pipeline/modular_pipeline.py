@@ -24,7 +24,7 @@ def _is_all_parameters(name: str) -> bool:
 
 
 def _is_single_parameter(name: str) -> bool:
-    return name.startswith("params:")
+    return name.startswith("params:") or name.startswith("**params:")
 
 
 def _is_parameter(name: str) -> bool:
@@ -72,6 +72,7 @@ def _validate_datasets_exist(
 
     existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
     non_existent = (inputs | outputs | parameters) - existing
+    non_existent = {ds for ds in non_existent if not ds.startswith("**")}
     if non_existent:
         sorted_non_existent = sorted(non_existent)
         possible_matches = []
@@ -123,7 +124,11 @@ def _get_dataset_names_mapping(
 
 def _normalize_param_name(name: str) -> str:
     """Make sure that a param name has a `params:` prefix before passing to the node"""
-    return name if name.startswith("params:") else f"params:{name}"
+    return (
+        name
+        if name.startswith("params:") or name.startswith("**params:")
+        else f"params:{name}"
+    )
 
 
 def _get_param_names_mapping(
@@ -251,6 +256,11 @@ def pipeline(  # noqa: PLR0913
         base_name, transcode_suffix = _transcode_split(name)
         return TRANSCODING_SEPARATOR.join((mapping[base_name], transcode_suffix))
 
+    def _matches_unpackable(name: str) -> bool:
+        param_base = name.split(".")[0]
+        matches = [True for key, value in mapping.items() if f"**{param_base}" in key]
+        return any(matches)
+
     def _rename(name: str) -> str:
         rules = [
             # if name mapped to new name, update with new name
@@ -259,6 +269,8 @@ def pipeline(  # noqa: PLR0913
             (_is_all_parameters, lambda n: n),
             # if transcode base is mapped to a new name, update with new base
             (_is_transcode_base_in_mapping, _map_transcode_base),
+            # if name refers to dictionary to be unpacked, leave as is
+            (lambda n: _matches_unpackable(name), lambda n: n),
             # if name refers to a single parameter and a namespace is given, apply prefix
             (lambda n: bool(namespace) and _is_single_parameter(n), _prefix_param),
             # if namespace given for a dataset, prefix name using that namespace

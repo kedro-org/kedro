@@ -63,3 +63,8 @@ This function uses `configure_project`, and additionally reads metadata from `py
 ### `configure_project`
 
 This function reads `settings.py` and `pipeline_registry.py` and registers the configuration before Kedro's run starts. If you have a packaged Kedro project, you only need to run `configure_project` before executing your pipeline.
+
+#### ValueError: Pacakge name not found
+> ValueError: Pacakge name not found. Make sure you have configured the project using 'bootstrap_project'. This should happen automatically if you are using Kedro comman line interface.
+
+If you are using `multiprocessing`, you need to be careful about this. Depending on your Operating System, you may have [different default](https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods). If the processes are `spawn`, Python will re-import all the modules in each process and thus you need to run `configure_project` again at the start of the new process. For example, this is how Kedro handle this in `ParallelRunner`(https://github.com/kedro-org/kedro/blob/9e883e6a0ba40e3db4497b234dcb3801258e8396/kedro/runner/parallel_runner.py#L84-L85)

@@ -5,6 +5,7 @@ projects.
 """
 from __future__ import annotations
 
+import logging
 import os
 import re
 import shutil
@@ -17,6 +18,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 import click
+import requests
 import yaml
 from attrs import define, field
 from importlib_metadata import EntryPoints
@@ -95,7 +97,44 @@ class KedroStarterSpec:
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
-_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+
+def _get_latest_starters_version() -> str:
+    if "KEDRO_STARTERS_VERSION" not in os.environ:
+        GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+        headers = {}
+        if GITHUB_TOKEN:
+            headers["Authorization"] = f"token {GITHUB_TOKEN}"
+
+        try:
+            response = requests.get(
+                "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+                headers=headers,
+                timeout=10,
+            )
+            response.raise_for_status()  # Raise an HTTPError for bad status codes
+            latest_release = response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error fetching kedro-starters latest release version: {e}")
+            return ""
+
+        os.environ["KEDRO_STARTERS_VERSION"] = latest_release["tag_name"]
+        return str(latest_release["tag_name"])
+    else:
+        return str(os.getenv("KEDRO_STARTERS_VERSION"))
+
+
+def _kedro_and_starters_version_identical() -> bool:
+    starters_version = _get_latest_starters_version()
+    return True if version == starters_version else False
+
+
+_STARTERS_REPO = (
+    "git+https://github.com/kedro-org/kedro-starters.git"
+    if _kedro_and_starters_version_identical()
+    else "https://github.com/kedro-org/kedro-starters.git@main"
+)
+
+
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
@@ -766,8 +805,8 @@ def _make_cookiecutter_args_and_fetch_template(
         "extra_context": config,
     }
 
-    if checkout:
-        cookiecutter_args["checkout"] = checkout
+    kedro_version_match_starters = _kedro_and_starters_version_identical()
+
     if directory:
         cookiecutter_args["directory"] = directory
 
@@ -775,26 +814,35 @@ def _make_cookiecutter_args_and_fetch_template(
     example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
+    if checkout:
+        checkout_version = checkout
+    elif kedro_version_match_starters:
+        checkout_version = version
+    else:
+        checkout_version = "main"
+
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-        # Ensures we use the same tag version of kedro for kedro-starters
-        cookiecutter_args["checkout"] = version
+        cookiecutter_args["checkout"] = checkout_version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-        cookiecutter_args["checkout"] = version
+        cookiecutter_args["checkout"] = checkout_version
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        cookiecutter_args["checkout"] = checkout_version
     elif example_pipeline == "True":
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
-        cookiecutter_args["checkout"] = version
+        cookiecutter_args["checkout"] = checkout_version
     else:
         # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path
-
+        cookiecutter_args["checkout"] = (
+            checkout if checkout and kedro_version_match_starters else "main"
+        )
     return cookiecutter_args, starter_path
 
 

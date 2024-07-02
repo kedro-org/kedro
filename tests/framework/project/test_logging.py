@@ -181,7 +181,7 @@ def test_has_rich_handler():
         else FileNotFoundError("File not found"),
     )
 
-    
+
 def test_environment_variable_logging_config2(monkeypatch, tmp_path, caplog):
     config_path = (Path(tmp_path) / "conf" / "logging.yml").absolute()
     config_path.parent.mkdir(parents=True)

@@ -2,7 +2,7 @@
 
 ## How to reuse your pipelines
 
-If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your existing_pipeline, you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
+If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your `existing_pipeline`, you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
@@ -136,7 +136,7 @@ We can collapse all namespaced pipelines (in our case, it's only `data_science_2
 
 ![namespaces collapsed](../meta/images/namespaces_collapsed.png)
 
-> Tip: You can use `kedro run --namespace = namespace_name` to run only the specific namespace
+> Tip: You can use `kedro run --namespace=namespace_name` to run only the specific namespace
 
 
 ### How to namespace all pipelines in a project

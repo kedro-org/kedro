@@ -45,7 +45,7 @@ base_data_science = pipeline(
         ]
     )  # Creating a base data science pipeline that will be reused with different model training parameters
 
-
+# data_science pipeline creation function
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [base_data_science],  # Creating a new data_science pipeline based on base_data_science pipeline

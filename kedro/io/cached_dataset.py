@@ -94,8 +94,8 @@ class CachedDataset(AbstractDataset):
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "dataset": self._dataset._describe(),
-            "cache": self._cache._describe(),
+            "dataset": self._dataset.pretty_repr(self._dataset._describe()),
+            "cache": self._cache.pretty_repr(self._cache._describe()),
         }
 
     def _load(self) -> Any:

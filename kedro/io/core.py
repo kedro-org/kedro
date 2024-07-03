@@ -229,7 +229,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             raise DatasetError(message) from exc
 
     def __str__(self) -> str:
-        def _to_str(obj: Any, is_root: bool = False) -> str:
+        def _to_str(obj: Any) -> str:
             """Returns a string representation where
             1. The root level (i.e. the Dataset.__init__ arguments) are
             formatted like Dataset(key=value).
@@ -237,29 +237,31 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             3. None values are not shown.
             """
 
-            fmt = "{}={}" if is_root else "'{}': {}"  # 1
-
             if isinstance(obj, dict):
-                sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
+                str_keys = []
+                for arg_name in sorted(obj, key=lambda key: str(key)):
+                    if obj[arg_name] is not None:
+                        str_keys.append(
+                            f"{arg_name}={pprint.pformat(obj[arg_name], compact=True)}"
+                        )
 
-                text = ", ".join(
-                    fmt.format(key, _to_str(value))  # 2
-                    for key, value in sorted_dict
-                    if value is not None  # 3
-                )
-
-                return text if is_root else "{" + text + "}"  # 1
+                return ", ".join(str_keys)
 
             # not a dictionary
             return str(obj)
 
-        return f"{type(self).__name__}({_to_str(self._describe(), True)})"
+        return f"{type(self).__name__}({_to_str(self._describe())})"
 
-    def __repr__(self):
-        return (
-            f"{type(self).__module__}.{type(self).__name__}"
-            f"({pprint.pformat(self._describe(), compact=True, width=300)})"
-        )
+    def __repr__(self) -> str:
+        str_keys = []
+        object_description = self._describe()
+        for arg_name in sorted(object_description, key=lambda key: str(key)):
+            if object_description[arg_name] is not None:
+                str_keys.append(
+                    f"{arg_name}={pprint.pformat(object_description[arg_name], compact=True)}"
+                )
+
+        return f"{type(self).__module__}.{type(self).__name__}({', '.join(str_keys)})"
 
     @abc.abstractmethod
     def _load(self) -> _DO:

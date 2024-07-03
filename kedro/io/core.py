@@ -7,6 +7,7 @@ import abc
 import copy
 import logging
 import os
+import pprint
 import re
 import warnings
 from collections import namedtuple
@@ -253,6 +254,12 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             return str(obj)
 
         return f"{type(self).__name__}({_to_str(self._describe(), True)})"
+
+    def __repr__(self):
+        return (
+            f"{type(self).__module__}.{type(self).__name__}"
+            f"({pprint.pformat(self._describe(), compact=True, width=300)})"
+        )
 
     @abc.abstractmethod
     def _load(self) -> _DO:

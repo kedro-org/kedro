@@ -228,7 +228,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
 
-    def pretty_repr(self, object_description: dict[str, Any]):
+    def _pretty_repr(self, object_description: dict[str, Any]) -> str:
         str_keys = []
         for arg_name in sorted(object_description, key=lambda key: str(key)):
             if object_description[arg_name] is not None:
@@ -239,7 +239,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return f"{type(self).__module__}.{type(self).__name__}({', '.join(str_keys)})"
 
     def __repr__(self) -> str:
-        return self.pretty_repr(self._describe())
+        return self._pretty_repr(self._describe())
 
     @abc.abstractmethod
     def _load(self) -> _DO:

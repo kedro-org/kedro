@@ -228,30 +228,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
 
-    def __str__(self) -> str:
-        def _to_str(obj: Any) -> str:
-            """Returns a string representation where
-            1. The root level (i.e. the Dataset.__init__ arguments) are
-            formatted like Dataset(key=value).
-            2. Dictionaries have the keys alphabetically sorted recursively.
-            3. None values are not shown.
-            """
-
-            if isinstance(obj, dict):
-                str_keys = []
-                for arg_name in sorted(obj, key=lambda key: str(key)):
-                    if obj[arg_name] is not None:
-                        str_keys.append(
-                            f"{arg_name}={pprint.pformat(obj[arg_name], compact=True)}"
-                        )
-
-                return ", ".join(str_keys)
-
-            # not a dictionary
-            return str(obj)
-
-        return f"{type(self).__name__}({_to_str(self._describe())})"
-
     def __repr__(self) -> str:
         str_keys = []
         object_description = self._describe()

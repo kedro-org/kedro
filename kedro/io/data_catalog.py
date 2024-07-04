@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import difflib
 import logging
+import pprint
 import re
 from typing import Any, Dict
 
@@ -135,6 +136,22 @@ class _FrozenDatasets:
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[_sub_nonword_chars(key)]
 
+    def __repr__(self) -> str:
+        datasets_repr = {}
+        params_repr = {}
+        for ds_name in self._original_names:
+            if ds_name == "parameters" or ds_name.startswith("params:"):
+                params_repr[ds_name] = self.__dict__[
+                    _sub_nonword_chars(ds_name)
+                ].__repr__()
+            else:
+                datasets_repr[ds_name] = self.__dict__[
+                    _sub_nonword_chars(ds_name)
+                ].__repr__()
+
+        datasets_repr.update(params_repr)
+        return pprint.pformat(datasets_repr, compact=True)
+
 
 class DataCatalog:
     """``DataCatalog`` stores instances of ``AbstractDataset`` implementations
@@ -205,6 +222,9 @@ class DataCatalog:
 
         if feed_dict:
             self.add_feed_dict(feed_dict)
+
+    def __repr__(self) -> str:
+        return self.datasets.__repr__()
 
     @property
     def _logger(self) -> logging.Logger:

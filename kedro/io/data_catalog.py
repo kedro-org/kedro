@@ -150,7 +150,7 @@ class _FrozenDatasets:
                 ].__repr__()
 
         datasets_repr.update(params_repr)
-        return pprint.pformat(datasets_repr, compact=True)
+        return pprint.pformat(datasets_repr, compact=True, sort_dicts=False)
 
 
 class DataCatalog:

@@ -185,7 +185,6 @@ def test_default_logging_info_emission(monkeypatch, capsys):
     _ProjectLogging()
 
     captured = capsys.readouterr()
-    print(captured.out)
     expected_message = f"Using '{expected_path}'"
     assert (
         expected_message in captured.out

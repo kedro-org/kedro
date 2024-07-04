@@ -233,7 +233,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
     def __repr__(self) -> str:
         return pprint.pformat(
-            self._pretty_repr(self._describe()), compact=True, sort_dicts=False
+            self._pretty_repr(self._describe()), compact=True, depth=3, sort_dicts=False
         )
 
     @abc.abstractmethod

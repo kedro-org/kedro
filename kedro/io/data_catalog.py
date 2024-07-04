@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import difflib
 import logging
+import pprint
 import re
 from typing import Any, Dict
 
@@ -105,7 +106,7 @@ class _FrozenDatasets:
         """Return a _FrozenDatasets instance from some datasets collections.
         Each collection could either be another _FrozenDatasets or a dictionary.
         """
-        self._original_names: set[str] = set()
+        self._original_names: dict[str, str] = {}
         for collection in datasets_collections:
             if isinstance(collection, _FrozenDatasets):
                 self.__dict__.update(collection.__dict__)
@@ -115,7 +116,7 @@ class _FrozenDatasets:
                 # for easy access to transcoded/prefixed datasets.
                 for dataset_name, dataset in collection.items():
                     self.__dict__[_sub_nonword_chars(dataset_name)] = dataset
-                    self._original_names.add(dataset_name)
+                    self._original_names[dataset_name] = ""
 
     # Don't allow users to add/change attributes on the fly
     def __setattr__(self, key: str, value: Any) -> None:
@@ -130,10 +131,18 @@ class _FrozenDatasets:
         raise AttributeError(msg)
 
     def _ipython_key_completions_(self) -> list[str]:
-        return list(self._original_names)
+        return list(self._original_names.keys())
 
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[_sub_nonword_chars(key)]
+
+    def __repr__(self) -> str:
+        datasets_repr = {}
+        for ds_name in self._original_names.keys():
+            ds = self.__dict__[_sub_nonword_chars(ds_name)]
+            datasets_repr[ds_name] = ds._pretty_repr(ds._describe())
+
+        return pprint.pformat(datasets_repr, compact=True, depth=3, sort_dicts=False)
 
 
 class DataCatalog:
@@ -205,6 +214,9 @@ class DataCatalog:
 
         if feed_dict:
             self.add_feed_dict(feed_dict)
+
+    def __repr__(self) -> str:
+        return self.datasets.__repr__()
 
     @property
     def _logger(self) -> logging.Logger:

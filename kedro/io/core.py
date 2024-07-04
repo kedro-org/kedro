@@ -7,6 +7,7 @@ import abc
 import copy
 import logging
 import os
+import pprint
 import re
 import warnings
 from collections import namedtuple
@@ -227,32 +228,13 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
 
-    def __str__(self) -> str:
-        def _to_str(obj: Any, is_root: bool = False) -> str:
-            """Returns a string representation where
-            1. The root level (i.e. the Dataset.__init__ arguments) are
-            formatted like Dataset(key=value).
-            2. Dictionaries have the keys alphabetically sorted recursively.
-            3. None values are not shown.
-            """
+    def _pretty_repr(self, object_description: dict[str, Any]) -> dict[str, Any]:
+        return {f"{type(self).__module__}.{type(self).__name__}": object_description}
 
-            fmt = "{}={}" if is_root else "'{}': {}"  # 1
-
-            if isinstance(obj, dict):
-                sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
-
-                text = ", ".join(
-                    fmt.format(key, _to_str(value))  # 2
-                    for key, value in sorted_dict
-                    if value is not None  # 3
-                )
-
-                return text if is_root else "{" + text + "}"  # 1
-
-            # not a dictionary
-            return str(obj)
-
-        return f"{type(self).__name__}({_to_str(self._describe(), True)})"
+    def __repr__(self) -> str:
+        return pprint.pformat(
+            self._pretty_repr(self._describe()), compact=True, sort_dicts=False
+        )
 
     @abc.abstractmethod
     def _load(self) -> _DO:

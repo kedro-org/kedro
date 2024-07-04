@@ -20,7 +20,7 @@ dependencies = [
     "dynaconf>=3.1.2,<4.0",
     "fsspec>=2021.4",
     "gitpython>=3.0",
-    "importlib-metadata>=3.6,<8.0; python_version >= '3.8'",
+    "importlib-metadata>=3.6,<9.0",
     "importlib_resources>=1.3,<7.0",  # The `files()` API was introduced in `importlib_resources` 1.3 and Python 3.9.
     "kedro-telemetry>=0.3.1",
     "more_itertools>=8.14.0",

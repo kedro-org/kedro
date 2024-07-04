@@ -138,18 +138,11 @@ class _FrozenDatasets:
 
     def __repr__(self) -> str:
         datasets_repr = {}
-        params_repr = {}
         for ds_name in self._original_names.keys():
-            if ds_name == "parameters" or ds_name.startswith("params:"):
-                params_repr[ds_name] = self.__dict__[
-                    _sub_nonword_chars(ds_name)
-                ].__repr__()
-            else:
-                datasets_repr[ds_name] = self.__dict__[
-                    _sub_nonword_chars(ds_name)
-                ].__repr__()
+            datasets_repr[ds_name] = self.__dict__[
+                _sub_nonword_chars(ds_name)
+            ].__repr__()
 
-        datasets_repr.update(params_repr)
         return pprint.pformat(datasets_repr, compact=True, sort_dicts=False)
 
 

@@ -24,7 +24,7 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
-from kedro.logging import fmt_rich, has_rich_handler
+from kedro.logging import _format_rich, _has_rich_handler
 
 Patterns = Dict[str, Dict[str, Any]]
 
@@ -508,7 +508,9 @@ class DataCatalog:
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            fmt_rich(name, "dark_orange") if has_rich_handler(self._logger) else name,
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
             type(dataset).__name__,
             extra={"markup": True},
         )
@@ -550,7 +552,9 @@ class DataCatalog:
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            fmt_rich(name, "dark_orange") if has_rich_handler(self._logger) else name,
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
             type(dataset).__name__,
             extra={"markup": True},
         )

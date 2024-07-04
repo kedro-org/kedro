@@ -233,7 +233,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         for arg_name in sorted(object_description, key=lambda key: str(key)):
             if object_description[arg_name] is not None:
                 str_keys.append(
-                    f"{arg_name}={pprint.pformat(object_description[arg_name], compact=True)}"
+                    f"{arg_name}={pprint.pformat(object_description[arg_name], compact=True, depth=2, width=500)}"
                 )
 
         return f"{type(self).__module__}.{type(self).__name__}({', '.join(str_keys)})"

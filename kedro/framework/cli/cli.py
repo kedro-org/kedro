@@ -16,12 +16,12 @@ import click
 from kedro import __version__ as version
 from kedro.framework.cli import BRIGHT_BLACK, ORANGE
 from kedro.framework.cli.hooks import get_cli_hook_manager
-from kedro.framework.cli.lazy_group import LazyGroup
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     ENTRY_POINT_GROUPS,
     CommandCollection,
     KedroCliError,
+    LazyGroup,
     _get_entry_points,
     load_entry_points,
 )
@@ -95,7 +95,7 @@ def info() -> None:
     },
 )
 def project_commands() -> None:
-    pass
+    pass  # pragma: no cover
 
 
 @click.group(
@@ -108,7 +108,7 @@ def project_commands() -> None:
     },
 )
 def global_commands() -> None:
-    pass
+    pass  # pragma: no cover
 
 
 def _init_plugins() -> None:

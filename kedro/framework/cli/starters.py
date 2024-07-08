@@ -22,6 +22,7 @@ import requests
 import yaml
 from attrs import define, field
 from importlib_metadata import EntryPoints
+from packaging.version import parse
 
 import kedro
 from kedro import __version__ as version
@@ -123,14 +124,14 @@ def _get_latest_starters_version() -> str:
         return str(os.getenv("KEDRO_STARTERS_VERSION"))
 
 
-def _kedro_and_starters_version_identical() -> bool:
+def _kedro_version_equal_or_lower_to_starters(version: str) -> bool:
     starters_version = _get_latest_starters_version()
-    return True if version == starters_version else False
+    return parse(version) <= parse(starters_version)
 
 
 _STARTERS_REPO = (
     "git+https://github.com/kedro-org/kedro-starters.git"
-    if _kedro_and_starters_version_identical()
+    if _kedro_version_equal_or_lower_to_starters(version)
     else "https://github.com/kedro-org/kedro-starters.git@main"
 )
 
@@ -805,7 +806,7 @@ def _make_cookiecutter_args_and_fetch_template(
         "extra_context": config,
     }
 
-    kedro_version_match_starters = _kedro_and_starters_version_identical()
+    kedro_version_match_starters = _kedro_version_equal_or_lower_to_starters(version)
 
     if directory:
         cookiecutter_args["directory"] = directory

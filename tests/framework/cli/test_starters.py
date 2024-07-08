@@ -22,6 +22,7 @@ from kedro.framework.cli.starters import (
     _convert_tool_short_names_to_numbers,
     _fetch_validate_parse_config_from_user_prompts,
     _get_latest_starters_version,
+    _kedro_version_equal_or_lower_to_starters,
     _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
@@ -1745,6 +1746,41 @@ class TestGetLatestStartersVersion:
             )
 
 
+class TestStartersVersionComparison:
+    def test_kedro_version_equal_or_lower_to_starters_equal(self, mocker):
+        """Test when version is equal to starters_version"""
+        mocker.patch(
+            "kedro.framework.cli.starters._get_latest_starters_version",
+            return_value="1.2.3",
+        )
+        version = "1.2.3"
+
+        result = _kedro_version_equal_or_lower_to_starters(version)
+        assert result is True
+
+    def test_kedro_version_equal_or_lower_to_starters_lower(self, mocker):
+        """Test when version is lower than starters_version"""
+        mocker.patch(
+            "kedro.framework.cli.starters._get_latest_starters_version",
+            return_value="1.3.0",
+        )
+        version = "1.2.3"
+
+        result = _kedro_version_equal_or_lower_to_starters(version)
+        assert result is True
+
+    def test_kedro_version_equal_or_lower_to_starters_higher(self, mocker):
+        """Test when version is higher than starters_version"""
+        mocker.patch(
+            "kedro.framework.cli.starters._get_latest_starters_version",
+            return_value="1.2.3",
+        )
+        version = "1.2.4"
+
+        result = _kedro_version_equal_or_lower_to_starters(version)
+        assert result is False
+
+
 class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
     @pytest.fixture
     def config(self):
@@ -1756,7 +1792,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
 
     def test_kedro_version_match_starters_true(self, config, mocker):
         mocker.patch(
-            "kedro.framework.cli.starters._kedro_and_starters_version_identical",
+            "kedro.framework.cli.starters._kedro_version_equal_or_lower_to_starters",
             return_value=True,
         )
 
@@ -1783,7 +1819,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
 
     def test_kedro_version_match_starters_false(self, config, mocker):
         mocker.patch(
-            "kedro.framework.cli.starters._kedro_and_starters_version_identical",
+            "kedro.framework.cli.starters._kedro_version_equal_or_lower_to_starters",
             return_value=False,
         )
 
@@ -1810,7 +1846,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
 
     def test_no_tools_and_example_pipeline(self, config, mocker):
         mocker.patch(
-            "kedro.framework.cli.starters._kedro_and_starters_version_identical",
+            "kedro.framework.cli.starters._kedro_version_equal_or_lower_to_starters",
             return_value=False,
         )
 
@@ -1838,7 +1874,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
 
     def test_no_tools_no_example_pipeline(self, config, mocker):
         mocker.patch(
-            "kedro.framework.cli.starters._kedro_and_starters_version_identical",
+            "kedro.framework.cli.starters._kedro_version_equal_or_lower_to_starters",
             return_value=False,
         )
 

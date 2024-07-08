@@ -126,7 +126,6 @@ class CommandCollection(click.CommandCollection):
             for cli in cli_collection.sources
             if cli.help
         ]
-        # self._dedupe_commands(sources)
         super().__init__(
             sources=sources,  # type: ignore[arg-type]
             help="\n\n".join(help_texts),
@@ -134,29 +133,6 @@ class CommandCollection(click.CommandCollection):
         )
         self.params = sources[0].params
         self.callback = sources[0].callback
-
-    # @staticmethod
-    # def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]) -> None:
-    #     """Deduplicate commands by keeping the ones from the last source
-    #     in the list.
-    #     """
-    #     seen_names: set[str] = set()
-    #     for cli_collection in reversed(cli_collections):
-    #         for cmd_group in reversed(cli_collection.sources):
-    #             cmd_group.commands = {  # type: ignore[attr-defined]
-    #                 cmd_name: cmd
-    #                 for cmd_name, cmd in cmd_group.commands.items()  # type: ignore[attr-defined]
-    #                 if cmd_name not in seen_names
-    #             }
-    #             seen_names |= cmd_group.commands.keys()  # type: ignore[attr-defined]
-
-    #     # remove empty command groups
-    #     for cli_collection in cli_collections:
-    #         cli_collection.sources = [
-    #             cmd_group
-    #             for cmd_group in cli_collection.sources
-    #             if cmd_group.commands  # type: ignore[attr-defined]
-    #         ]
 
     @staticmethod
     def _merge_same_name_collections(
@@ -505,6 +481,8 @@ def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str
 
 
 class LazyGroup(click.Group):
+    """A click Group that supports lazy loading of subcommands."""
+
     def __init__(
         self,
         *args: Any,
@@ -537,5 +515,5 @@ class LazyGroup(click.Group):
         # do the import
         mod = import_module(modname)
         # get the Command object from that module
-        cmd_object = getattr(mod, cmd_object_name)  # type: ignore[no-any-return]
-        return cmd_object
+        cmd_object = getattr(mod, cmd_object_name)
+        return cmd_object  # type: ignore[no-any-return]

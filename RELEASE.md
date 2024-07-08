@@ -7,7 +7,7 @@
 * Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
 * Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
 * Implemented key completion support for accessing datasets in the `DataCatalog`.
-
+* Implemented dataset and `DataCatalog` pretty printing.
 
 ## Breaking changes to the API
 

@@ -535,7 +535,7 @@ class LazyGroup(click.Group):
         import_path = self.lazy_subcommands[cmd_name]
         modname, cmd_object_name = import_path.rsplit(".", 1)
         # do the import
-        mod = importlib.import_module(modname)
+        mod = import_module(modname)
         # get the Command object from that module
         cmd_object = getattr(mod, cmd_object_name)
         return cmd_object

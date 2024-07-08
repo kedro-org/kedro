@@ -92,7 +92,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Major features and improvements
 * Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
 * Add official support for Python 3.12.
-* Add better IPython, VSCode Notebook support for `%load_node` and minimal support for Databricks.
+* Add better IPython, VS Code Notebook support for `%load_node` and minimal support for Databricks.
 * Add full Kedro Node input syntax for `%load_node`.
 
 ## Bug fixes and other changes

@@ -1,0 +1,56 @@
+extends: capitalization
+message: "'%s' should use sentence-style capitalization."
+level: warning
+scope: heading
+match: $sentence
+exceptions:
+  - Kedro
+  - Kedro-Viz
+  - Airflow
+  - Amazon
+  - Amazon Web Services
+  - AWS Step Functions
+  - AWS Systems Manager
+  - Azure
+  - Azure App Service
+  - Azure App Service Plan
+  - Azure Blob Storage
+  - Azure Event Hub
+  - CI/CD
+  - DataCatalog
+  - Data Catalog
+  - Docker
+  - Docker Compose
+  - Docker Swarm
+  - Dockerfile
+  - GitHub
+  - GitHub Actions
+  - Google
+  - Google Analytics
+  - Google Cloud
+  - Google Cloud Functions
+  - GraphQL
+  - Hook
+  - Hooks
+  - IDs
+  - Jenkins
+  - JFrog
+  - JFrog Artifactory
+  - Jira
+  - Kafka
+  - Kubernetes
+  - Kubernetes Engine
+  - Kubernetes Pod
+  - Kubernetes Service
+  - Lambda
+  - Linux
+  - MySQL
+  - Python
+  - QuantumBlack
+  - QuantumBlack Labs
+  - Red Hat
+  - Redis
+  - Slack
+  - Ubuntu
+  - Unix
+  - URLs

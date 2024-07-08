@@ -72,26 +72,6 @@ Then re-run the pipeline:
 $ kedro run
 ```
 
-The output should look similar to the following:
-
-```
-...
-[01/25/23 21:38:23] INFO     Loading data from 'example_iris_data' (CSVDataSet)...                                                                                                                                                                                    data_catalog.py:343
-                    INFO     Loading example_iris_data consumed 0.99MiB memory                                                                                                                                                                                                hooks.py:67
-                    INFO     Loading data from 'parameters' (MemoryDataSet)...                                                                                                                                                                                        data_catalog.py:343
-                    INFO     Loading parameters consumed 0.48MiB memory                                                                                                                                                                                                       hooks.py:67
-                    INFO     Running node: split: split_data([example_iris_data,parameters]) -> [X_train,X_test,y_train,y_test]                                                                                                                                               node.py:327
-                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                                                                                                                                                                              data_catalog.py:382
-                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                                                                                                                                                                               data_catalog.py:382
-                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                                                                                                                                                                              data_catalog.py:382
-                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                                                                                                                                                                               data_catalog.py:382
-                    INFO     Completed 1 out of 3 tasks                                                                                                                                                                                                           sequential_runner.py:85
-                    INFO     Loading data from 'X_train' (MemoryDataSet)...                                                                                                                                                                                           data_catalog.py:343
-                    INFO     Loading X_train consumed 0.49MiB memory                                                                                                                                                                                                          hooks.py:67
-                    INFO     Loading data from 'X_test' (MemoryDataSet)...
-...
-```
-
 ## Add data validation
 
 This example adds data validation to node inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).
@@ -116,7 +96,6 @@ import great_expectations as ge
 
 
 class DataValidationHooks:
-
     # Map expectation to dataset
     DATASET_EXPECTATION_MAPPING = {
         "companies": "raw_companies_dataset_expectation",
@@ -164,7 +143,7 @@ class DataValidationHooks:
             )
 ```
 
-* Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
+* Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
 
 `Great Expectations` example report:
 
@@ -207,7 +186,6 @@ import great_expectations as ge
 
 
 class DataValidationHooks:
-
     # Map checkpoint to dataset
     DATASET_CHECKPOINT_MAPPING = {
         "companies": "raw_companies_dataset_checkpoint",
@@ -264,7 +242,7 @@ This example adds observability to your pipeline using [statsd](https://statsd.r
 pip install statsd
 ```
 
-* Implement `before_node_run` and `after_node_run` Hooks to collect metrics (DataSet size and node execution time):
+* Implement `before_node_run` and `after_node_run` Hooks to collect metrics (Dataset size and node execution time):
 
 ```python
 # src/<package_name>/hooks.py
@@ -298,7 +276,7 @@ class PipelineMonitoringHooks:
         self._client.incr("run")
 ```
 
-* Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
+* Register the Hook implementation, as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
 
 `Grafana` example page:
 
@@ -365,7 +343,7 @@ class ModelTrackingHooks:
         mlflow.end_run()
 ```
 
-* Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
+* Register the Hook implementation, as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
 
 `MLflow` example page:
 
@@ -390,7 +368,7 @@ class NodeInputReplacementHook:
     @hook_impl
     def before_node_run(
         self, node: Node, catalog: DataCatalog
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Replace `first_input` for `my_node`"""
         if node.name == "my_node":
             # return the string filepath to the `first_input` dataset
@@ -409,4 +387,4 @@ In the example above, the `before_node_run` hook implementation must return data
 ```
 
 
-To apply the changes once you have implemented a new hook, you must register it, as described in the [hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro), and then run Kedro.
+Once you have implemented a new Hook you must register it as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro), and then run Kedro.

@@ -15,6 +15,7 @@ tutorial_template
 set_up_data
 create_a_pipeline
 add_another_pipeline
+test_a_project
 package_a_project
 spaceflights_tutorial_faqs
 ```
@@ -24,14 +25,20 @@ spaceflights_tutorial_faqs
 
 Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="https://unsplash.com/s/photos/spaceship">Unsplash</a>
 
+## Watch the video
+
+```{eval-rst}
+..  youtube:: YBY2Lcz7Gw4
+    :width: 100%
+```
 
 ## Get help
-If you hit an issue with the tutorial:
+If you encounter an issue with the tutorial:
 
 * Check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already.
-* Use [Kedro-Viz](../visualisation/kedro-viz_visualisation) to visualise your project to better understand how the datasets, nodes and pipelines fit together.
+* Use {doc}`Kedro-Viz<kedro-viz:kedro-viz_visualisation>` to visualise your project and better understand how the datasets, nodes and pipelines fit together.
 * Use the [#questions channel](https://slack.kedro.org/) on our Slack channel to ask the community for help.
-* Search the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro).
+* Search the [searchable archive of Slack discussions](https://linen-slack.kedro.org/).
 
 ## Terminology
 

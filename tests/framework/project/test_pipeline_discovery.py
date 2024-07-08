@@ -88,6 +88,37 @@ def test_find_pipelines_skips_modules_without_create_pipelines_function(
     [(x, x) for x in [set(), {"my_pipeline"}]],
     indirect=True,
 )
+def test_find_pipelines_skips_hidden_modules(
+    mock_package_name_with_pipelines, pipeline_names
+):
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    pipeline_dir = pipelines_dir / ".ipynb_checkpoints"
+    pipeline_dir.mkdir()
+    (pipeline_dir / "__init__.py").write_text(
+        textwrap.dedent(
+            """
+            from __future__ import annotations
+
+            from kedro.pipeline import Pipeline, node, pipeline
+
+
+            def create_pipeline(**kwargs) -> Pipeline:
+                return pipeline([node(lambda: 1, None, "simple_pipeline")])
+            """
+        )
+    )
+
+    configure_project(mock_package_name_with_pipelines)
+    pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
+    indirect=True,
+)
 def test_find_pipelines_skips_modules_with_unexpected_return_value_type(
     mock_package_name_with_pipelines, pipeline_names
 ):
@@ -146,12 +177,16 @@ def test_find_pipelines_skips_regular_files_within_the_pipelines_folder(
 
 
 @pytest.mark.parametrize(
-    "mock_package_name_with_pipelines,pipeline_names",
-    [(x, x) for x in [set(), {"my_pipeline"}]],
-    indirect=True,
+    "mock_package_name_with_pipelines,pipeline_names,raise_errors",
+    [
+        (x, x, raise_errors)
+        for x in [set(), {"my_pipeline"}]
+        for raise_errors in [True, False]
+    ],
+    indirect=["mock_package_name_with_pipelines", "pipeline_names"],
 )
 def test_find_pipelines_skips_modules_that_cause_exceptions_upon_import(
-    mock_package_name_with_pipelines, pipeline_names
+    mock_package_name_with_pipelines, pipeline_names, raise_errors
 ):
     # Create a module that will result in errors when we try to load it.
     pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
@@ -160,12 +195,14 @@ def test_find_pipelines_skips_modules_that_cause_exceptions_upon_import(
     (pipeline_dir / "__init__.py").write_text("I walk a lonely road...")
 
     configure_project(mock_package_name_with_pipelines)
-    with pytest.warns(
-        UserWarning, match=r"An error occurred while importing the '\S+' module."
+    with getattr(pytest, "raises" if raise_errors else "warns")(
+        ImportError if raise_errors else UserWarning,
+        match=r"An error occurred while importing the '\S+' module.",
     ):
-        pipelines = find_pipelines()
-    assert set(pipelines) == pipeline_names | {"__default__"}
-    assert sum(pipelines.values()).outputs() == pipeline_names
+        pipelines = find_pipelines(raise_errors=raise_errors)
+    if not raise_errors:
+        assert set(pipelines) == pipeline_names | {"__default__"}
+        assert sum(pipelines.values()).outputs() == pipeline_names
 
 
 @pytest.mark.parametrize(
@@ -195,12 +232,16 @@ def test_find_pipelines_handles_simplified_project_structure(
 
 
 @pytest.mark.parametrize(
-    "mock_package_name_with_pipelines,pipeline_names",
-    [(x, x) for x in [set(), {"my_pipeline"}]],
-    indirect=True,
+    "mock_package_name_with_pipelines,pipeline_names,raise_errors",
+    [
+        (x, x, raise_errors)
+        for x in [set(), {"my_pipeline"}]
+        for raise_errors in [True, False]
+    ],
+    indirect=["mock_package_name_with_pipelines", "pipeline_names"],
 )
 def test_find_pipelines_skips_unimportable_pipeline_module(
-    mock_package_name_with_pipelines, pipeline_names
+    mock_package_name_with_pipelines, pipeline_names, raise_errors
 ):
     (Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py").write_text(
         textwrap.dedent(
@@ -217,12 +258,14 @@ def test_find_pipelines_skips_unimportable_pipeline_module(
     )
 
     configure_project(mock_package_name_with_pipelines)
-    with pytest.warns(
-        UserWarning, match=r"An error occurred while importing the '\S+' module."
+    with getattr(pytest, "raises" if raise_errors else "warns")(
+        ImportError if raise_errors else UserWarning,
+        match=r"An error occurred while importing the '\S+' module.",
     ):
-        pipelines = find_pipelines()
-    assert set(pipelines) == pipeline_names | {"__default__"}
-    assert sum(pipelines.values()).outputs() == pipeline_names
+        pipelines = find_pipelines(raise_errors=raise_errors)
+    if not raise_errors:
+        assert set(pipelines) == pipeline_names | {"__default__"}
+        assert sum(pipelines.values()).outputs() == pipeline_names
 
 
 @pytest.mark.parametrize(

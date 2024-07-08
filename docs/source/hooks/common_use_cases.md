@@ -2,7 +2,7 @@
 
 ## Use Hooks to extend a node's behaviour
 
-You can use the [`before_node_run` and `after_node_run` Hooks](/kedro.framework.hooks.specs.NodeSpecs) to add extra behavior before and after a node's execution. Furthermore, you can apply extra behavior to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes, based on their tags or namespaces: for example, suppose we want to add the following extra behavior to a node:
+You can use the [`before_node_run` and `after_node_run` Hooks](/api/kedro.framework.hooks.specs.NodeSpecs) to add extra behavior before and after a node's execution. Furthermore, you can apply extra behavior to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes, based on their tags or namespaces: for example, suppose we want to add the following extra behavior to a node:
 
 ```python
 from kedro.pipeline.node import Node
@@ -143,13 +143,13 @@ These credentials will be used to access these datasets in the data catalog:
 
 ```yaml
 weather:
- type: spark.SparkDataSet
+ type: spark.SparkDataset
  filepath: s3a://your_bucket/data/01_raw/weather*
  file_format: csv
  credentials: s3_creds
 
 cars:
- type: pandas.CSVDataSet
+ type: pandas.CSVDataset
  filepath: https://your_data_store.blob.core.windows.net/data/01_raw/cars.csv
  file_format: csv
  credentials: abs_creds
@@ -189,7 +189,7 @@ class AzureSecretsHook:
         }
 ```
 
-Finally, [register the hook](./introduction.md#registering-your-hook-implementations-with-kedro) in your `settings.py` file:
+Finally, [register the Hook](./introduction.md#registering-the-hook-implementation-with-kedro) in `settings.py`:
 
 ```python
 from my_project.hooks import AzureSecretsHook
@@ -199,4 +199,92 @@ HOOKS = (AzureSecretsHook(),)
 
 ```{note}
 Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
+```
+
+## Use Hooks to read `metadata` from `DataCatalog`
+Use the `after_catalog_created` Hook to access `metadata` to extend Kedro.
+
+```python
+class MetadataHook:
+    @hook_impl
+    def after_catalog_created(
+        self,
+        catalog: DataCatalog,
+    ):
+        for dataset_name, dataset in catalog.datasets.__dict__.items():
+            print(f"{dataset_name} metadata: \n  {str(dataset.metadata)}")
+```
+
+## Use Hooks to debug your pipeline
+You can use Hooks to launch a [post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](../hooks/introduction.md) when an error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
+
+### Debugging a node
+
+To start a debugging session when an error is raised within your `node` that is not caught, implement the `on_node_error` [Hook specification](/api/kedro.framework.hooks):
+
+```python
+import pdb
+import sys
+import traceback
+
+from kedro.framework.hooks import hook_impl
+
+
+class PDBNodeDebugHook:
+    """A hook class for creating a post mortem debugging with the PDB debugger
+    whenever an error is triggered within a node. The local scope from when the
+    exception occured is available within this debugging session.
+    """
+
+    @hook_impl
+    def on_node_error(self):
+        _, _, traceback_object = sys.exc_info()
+
+        #  Print the traceback information for debugging ease
+        traceback.print_tb(traceback_object)
+
+        # Drop you into a post mortem debugging session
+        pdb.post_mortem(traceback_object)
+```
+
+You can then register this `PDBNodeDebugHook` in your project's `settings.py`:
+
+```python
+HOOKS = (PDBNodeDebugHook(),)
+```
+
+### Debugging a pipeline
+
+To start a debugging session when an error is raised within your `pipeline` that is not caught, implement the `on_pipeline_error` [Hook specification](/api/kedro.framework.hooks):
+
+```python
+import pdb
+import sys
+import traceback
+
+from kedro.framework.hooks import hook_impl
+
+
+class PDBPipelineDebugHook:
+    """A hook class for creating a post mortem debugging with the PDB debugger
+    whenever an error is triggered within a pipeline. The local scope from when the
+    exception occured is available within this debugging session.
+    """
+
+    @hook_impl
+    def on_pipeline_error(self):
+        # We don't need the actual exception since it is within this stack frame
+        _, _, traceback_object = sys.exc_info()
+
+        #  Print the traceback information for debugging ease
+        traceback.print_tb(traceback_object)
+
+        # Drop you into a post mortem debugging session
+        pdb.post_mortem(traceback_object)
+```
+
+You can then register this `PDBPipelineDebugHook` in your project's `settings.py`:
+
+```python
+HOOKS = (PDBPipelineDebugHook(),)
 ```

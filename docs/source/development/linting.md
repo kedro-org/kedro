@@ -9,61 +9,63 @@ Linting tools check your code for errors such as a missing bracket or line inden
 As a project grows and goes through various stages of development it becomes important to maintain code quality. Using a consistent format and linting your code ensures that it is consistent, readable, and easy to debug and maintain.
 
 ## Set up Python tools
-There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use
-[`black`](https://github.com/psf/black), [`flake8`](https://github.com/PyCQA/flake8), and
-[`isort`](https://github.com/PyCQA/isort) to format and lint your Kedro projects.
-- **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
-check for styling inconsistencies and reformat your files in place.
-[You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
-- **`flake8`** is a wrapper around [`pep8`](https://pypi.org/project/pep8/),
-[`pyflakes`](https://pypi.org/project/pyflakes/), and [`mccabe`](https://pypi.org/project/mccabe/) which can lint code and format it with respect to [PEP 8](https://peps.python.org/pep-0008/),
-and check the [cyclomatic complexity](https://www.ibm.com/docs/en/raa/6.1?topic=metrics-cyclomatic-complexity) of your code base.
-[You can read more in the `flake8` documentation](https://flake8.pycqa.org/en/latest/).
-- **`isort`** is a Python library used to reformat code by sorting imports alphabetically and automatically separating them into sections by
-type. [You can read more in the `isort` documentation](https://pycqa.github.io/isort/).
+
+There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use [`ruff`](https://beta.ruff.rs).
+
+**`ruff`** is a fast linter and formatter that replaces `flake8`, `pylint`, `pyupgrade`, `isort`, `black` and [more](https://beta.ruff.rs/docs/rules/).
+  - It helps to make your code compliant to [PEP 8](https://peps.python.org/pep-0008/).
+  - It reformats code and sorts imports alphabetically and automatically separating them into sections by
+type.
 
 ### Install the tools
-Install `black`, `flake8`, and `isort` by adding the following lines to your project's `src/requirements.txt`
+Install `ruff` by adding the following lines to your project's `requirements.txt`
 file:
 ```text
-black # Used for formatting code
-flake8 # Used for linting and formatting
-isort # Used for formatting code (sorting module imports)
+ruff # Used for linting, formatting and sorting module imports
 ```
+
 To install all the project-specific dependencies, including the linting tools, navigate to the root directory of the
 project and run:
+
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
+
 Alternatively, you can individually install the linting tools using the following shell commands:
+
 ```bash
-pip install black
-pip install flake8
-pip install isort
+pip install ruff
 ```
-#### Configure `flake8`
 
-Store your `flake8` configuration in a file named `setup.cfg` within your project root. The Kedro starters use the [following configuration](https://github.com/kedro-org/kedro-starters/blob/main/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/setup.cfg):
+#### Configure `ruff`
 
-```text
-[flake8]
-max-line-length=88
-extend-ignore=E203
+`ruff` read configurations from `pyproject.toml` within your project root. You can enable different rule sets within the `[tool.ruff]` section. For example, the rule set `F` is equivalent to `Pyflakes`.
+
+To start with `ruff`, we recommend adding this section to enable a few basic rules sets.
+```toml
+[tool.ruff]
+select = [
+    "F",  # Pyflakes
+    "E",  # Pycodestyle
+    "W",  # Pycodestyle
+    "UP",  # pyupgrade
+    "I",  # isort
+    "PL", # Pylint
+]
+```
+
+```{note}
+It is a good practice to [split your line when it is too long](https://beta.ruff.rs/docs/rules/line-too-long/), so it can be read easily even in a small screen. `ruff` treats this slightly different from `black`, when using together we recommend to disable this rule, i.e. `E501` to avoid conflicts.
 ```
 
 ### Run the tools
+
 Use the following commands to run lint checks:
 ```bash
-black --check <project_root>
-isort --profile black --check <project_root>
+ruff format --check <project_root>
+ruff check <project_root>
 ```
-You can also have `black` and `isort` automatically format your code by omitting the `--check` flag. Since `isort` and
-`black` both format your imports, adding `--profile black` to the `isort` run helps avoid potential conflicts.
-
-Use the following to invoke `flake8`:
-```bash
-flake8 <project_root>
-```
+You can also have `ruff format` automatically format your code by omitting the `--check` flag.
 
 ## Automated formatting and linting with `pre-commit` hooks
 
@@ -72,42 +74,44 @@ These hooks are run before committing your code to your repositories to automati
 making code reviews easier and less time-consuming.
 
 ### Install `pre-commit`
-You can install `pre-commit` along with other dependencies by including it in the `src/requirements.txt` file of your
+
+You can install `pre-commit` along with other dependencies by including it in the `requirements.txt` file of your
 Kedro project by adding the following line:
+
 ```text
 pre-commit
 ```
 You can also install `pre-commit` using the following command:
+
 ```bash
 pip install pre-commit
 ```
+
 ### Add `pre-commit` configuration file
+
 Create a file named `.pre-commit-config.yaml` in your Kedro project root directory. You can add entries for the hooks
 you want to run before each `commit`.
-Below is a sample `YAML` file with entries for `black`,`flake8`, and `isort`:
+Below is a sample `YAML` file with entries for `ruff`:
+
 ```yaml
 repos:
-  - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: '' # Replace with latest version, for example 'v0.1.8'
     hooks:
-      - id: isort
-        name: isort (python)
-        args: ["--profile", "black"]
-
-  - repo: https://github.com/pycqa/flake8
-    rev: ''  # pick a git hash / tag to point to
-    hooks:
-      - id: flake8
-
-  - repo: https://github.com/psf/black
-    rev: 22.8.0
-    hooks:
-      - id: black
-        language_version: python3.9
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
 ```
+
+See GitHub for [the latest configuration for ruff's pre-commit](https://github.com/astral-sh/ruff-pre-commit).
+
 ### Install git hook scripts
+
 Run the following command to complete installation:
+
 ```bash
 pre-commit install
 ```
+
 This enables `pre-commit` hooks to run automatically every time you execute `git commit`.

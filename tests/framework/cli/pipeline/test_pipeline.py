@@ -1,13 +1,12 @@
-import os
 import shutil
 from pathlib import Path
 
 import pytest
 import yaml
 from click.testing import CliRunner
+from kedro_datasets.pandas import CSVDataset
 from pandas import DataFrame
 
-from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.cli.pipeline import _sync_dirs
 from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
@@ -19,15 +18,18 @@ PIPELINE_NAME = "my_pipeline"
 @pytest.fixture(params=["base"])
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-    tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = fake_repo_path / settings.CONF_SOURCE / request.param / "parameters"
+    tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
+    conf_path = fake_repo_path / settings.CONF_SOURCE / request.param
+    # old conf structure for 'pipeline delete' command backward compatibility
+    old_conf_path = conf_path / "parameters"
 
-    for path in (source_path, tests_path, conf_path):
+    for path in (source_path, tests_path, conf_path, old_conf_path):
         path.mkdir(parents=True, exist_ok=True)
 
-    (conf_path / f"{PIPELINE_NAME}.yml").touch()
     (tests_path / "test_pipe.py").touch()
     (source_path / "pipe.py").touch()
+    (conf_path / f"parameters_{PIPELINE_NAME}.yml").touch()
+    (old_conf_path / f"{PIPELINE_NAME}.yml").touch()
 
     yield
     mocker.stopall()
@@ -44,7 +46,7 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
-    def test_create_pipeline(  # pylint: disable=too-many-locals
+    def test_create_pipeline(
         self, fake_repo_path, fake_project_cli, fake_metadata, env, fake_package_path
     ):
         """Test creation of a pipeline"""
@@ -67,15 +69,87 @@ class TestPipelineCreateCommand:
         # config
         conf_env = env or "base"
         conf_dir = (fake_repo_path / settings.CONF_SOURCE / conf_env).resolve()
-        actual_configs = list(conf_dir.glob(f"**/{PIPELINE_NAME}.yml"))
-        expected_configs = [conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"]
+        actual_configs = list(conf_dir.glob(f"**/*{PIPELINE_NAME}.yml"))
+        expected_configs = [conf_dir / f"parameters_{PIPELINE_NAME}.yml"]
         assert actual_configs == expected_configs
 
         # tests
-        test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_dir = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         expected_files = {"__init__.py", "test_pipeline.py"}
         actual_files = {f.name for f in test_dir.iterdir()}
         assert actual_files == expected_files
+
+    @pytest.mark.parametrize("env", [None, "local"])
+    def test_create_pipeline_template(
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
+        env,
+        fake_package_path,
+        fake_local_template_dir,
+    ):
+        pipelines_dir = fake_package_path / "pipelines"
+        assert pipelines_dir.is_dir()
+
+        assert not (pipelines_dir / PIPELINE_NAME).exists()
+
+        cmd = ["pipeline", "create", PIPELINE_NAME]
+        cmd += ["-e", env] if env else []
+        result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
+
+        assert (
+            f"Using pipeline template at: '{fake_repo_path / 'templates'}"
+            in result.output
+        )
+        assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
+        assert f"Location: '{pipelines_dir / PIPELINE_NAME}'" in result.output
+        assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
+
+        # Dummy pipeline rendered correctly
+        assert (pipelines_dir / PIPELINE_NAME / f"pipeline_{PIPELINE_NAME}.py").exists()
+
+        assert result.exit_code == 0
+
+    @pytest.mark.parametrize("env", [None, "local"])
+    def test_create_pipeline_template_command_line_override(
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
+        env,
+        fake_package_path,
+        fake_local_template_dir,
+    ):
+        pipelines_dir = fake_package_path / "pipelines"
+        assert pipelines_dir.is_dir()
+
+        assert not (pipelines_dir / PIPELINE_NAME).exists()
+
+        # Rename the local template dir to something else so we know the command line flag is taking precedence
+        try:
+            # Can skip if already there but copytree has a dirs_exist_ok flag in >python 3.8 only
+            shutil.copytree(fake_local_template_dir, fake_repo_path / "local_templates")
+        except FileExistsError:
+            pass
+
+        cmd = ["pipeline", "create", PIPELINE_NAME]
+        cmd += ["-t", str(fake_repo_path / "local_templates/pipeline")]
+        cmd += ["-e", env] if env else []
+        result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
+
+        assert (
+            f"Using pipeline template at: '{fake_repo_path / 'local_templates'}"
+            in result.output
+        )
+        assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
+        assert f"Location: '{pipelines_dir / PIPELINE_NAME}'" in result.output
+        assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
+
+        # Dummy pipeline rendered correctly
+        assert (pipelines_dir / PIPELINE_NAME / f"pipeline_{PIPELINE_NAME}.py").exists()
+
+        assert result.exit_code == 0
 
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline_skip_config(
@@ -92,12 +166,12 @@ class TestPipelineCreateCommand:
         assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
 
         conf_dirs = list((fake_repo_path / settings.CONF_SOURCE).rglob(PIPELINE_NAME))
-        assert conf_dirs == []  # no configs created for the pipeline
+        assert not conf_dirs  # no configs created for the pipeline
 
-        test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_dir = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         assert test_dir.is_dir()
 
-    def test_catalog_and_params(  # pylint: disable=too-many-locals
+    def test_catalog_and_params(
         self, fake_repo_path, fake_project_cli, fake_metadata, fake_package_path
     ):
         """Test that catalog and parameter configs generated in pipeline
@@ -113,25 +187,24 @@ class TestPipelineCreateCommand:
         conf_dir = fake_repo_path / settings.CONF_SOURCE / "base"
         catalog_dict = {
             "ds_from_pipeline": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/iris.csv",
             }
         }
-        catalog_file = conf_dir / "catalog" / f"{PIPELINE_NAME}.yml"
-        catalog_file.parent.mkdir()
+        catalog_file = conf_dir / f"catalog_{PIPELINE_NAME}.yml"
         with catalog_file.open("w") as f:
             yaml.dump(catalog_dict, f)
 
         # write pipeline parameters
-        params_file = conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"
+        params_file = conf_dir / f"parameters_{PIPELINE_NAME}.yml"
         assert params_file.is_file()
         params_dict = {"params_from_pipeline": {"p1": [1, 2, 3], "p2": None}}
         with params_file.open("w") as f:
             yaml.dump(params_dict, f)
 
-        with KedroSession.create(PACKAGE_NAME) as session:
+        with KedroSession.create() as session:
             ctx = session.load_context()
-        assert isinstance(ctx.catalog._data_sets["ds_from_pipeline"], CSVDataSet)
+        assert isinstance(ctx.catalog._datasets["ds_from_pipeline"], CSVDataset)
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)
         assert ctx.params["params_from_pipeline"] == params_dict["params_from_pipeline"]
 
@@ -143,22 +216,16 @@ class TestPipelineCreateCommand:
                 fake_repo_path
                 / settings.CONF_SOURCE
                 / "base"
-                / dirname
-                / f"{PIPELINE_NAME}.yml"
+                / f"{dirname}_{PIPELINE_NAME}.yml"
             )
             path.parent.mkdir(exist_ok=True)
             path.touch()
 
         # create __init__.py in tests
         tests_init = (
-            fake_repo_path
-            / "src"
-            / "tests"
-            / "pipelines"
-            / PIPELINE_NAME
-            / "__init__.py"
+            fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME / "__init__.py"
         )
-        tests_init.parent.mkdir(parents=True)
+        tests_init.parent.mkdir(parents=True, exist_ok=True)
         tests_init.touch()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
@@ -166,7 +233,7 @@ class TestPipelineCreateCommand:
 
         assert result.exit_code == 0
         assert "__init__.py': SKIPPED" in result.output
-        assert f"parameters{os.sep}{PIPELINE_NAME}.yml': SKIPPED" in result.output
+        assert f"parameters_{PIPELINE_NAME}.yml': SKIPPED" in result.output
         assert result.output.count("SKIPPED") == 2  # only 2 files skipped
 
     def test_failed_copy(
@@ -268,18 +335,16 @@ class TestPipelineDeleteCommand:
         )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        params_path = (
-            fake_repo_path
-            / settings.CONF_SOURCE
-            / expected_conf
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
-        )
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
+        conf_path = fake_repo_path / settings.CONF_SOURCE / expected_conf
+        params_path = conf_path / f"parameters_{PIPELINE_NAME}.yml"
+        # old params structure for 'pipeline delete' command backward compatibility
+        old_params_path = conf_path / "parameters" / f"{PIPELINE_NAME}.yml"
 
         assert f"Deleting '{source_path}': OK" in result.output
         assert f"Deleting '{tests_path}': OK" in result.output
         assert f"Deleting '{params_path}': OK" in result.output
+        assert f"Deleting '{old_params_path}': OK" in result.output
 
         assert f"Pipeline '{PIPELINE_NAME}' was successfully deleted." in result.output
         assert (
@@ -289,6 +354,7 @@ class TestPipelineDeleteCommand:
 
         assert not source_path.exists()
         assert not tests_path.exists()
+        assert not params_path.exists()
         assert not params_path.exists()
 
     def test_delete_pipeline_skip(
@@ -304,13 +370,12 @@ class TestPipelineDeleteCommand:
             ["pipeline", "delete", "-y", PIPELINE_NAME],
             obj=fake_metadata,
         )
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
 
         assert f"Deleting '{source_path}'" not in result.output
@@ -396,13 +461,12 @@ class TestPipelineDeleteCommand:
         )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
 
         assert "The following paths will be removed:" in result.output
@@ -437,13 +501,12 @@ class TestPipelineDeleteCommand:
             obj=fake_metadata,
         )
 
-        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
 
         assert "The following paths will be removed:" in result.output

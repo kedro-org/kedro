@@ -1,16 +1,15 @@
-"""
-This module contains a logging handler class which produces coloured logs and tracebacks.
-"""
-
 import logging
-import os
 import sys
+from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import click
 import rich.logging
 import rich.pretty
 import rich.traceback
+
+from kedro.utils import _is_databricks
 
 
 class RichHandler(rich.logging.RichHandler):
@@ -27,7 +26,7 @@ class RichHandler(rich.logging.RichHandler):
     https://rich.readthedocs.io/en/stable/reference/traceback.html#rich.traceback.install
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         logging.captureWarnings(True)
         rich.pretty.install()
@@ -51,8 +50,19 @@ class RichHandler(rich.logging.RichHandler):
                 else:
                     traceback_install_kwargs[key_prefix_removed] = value
 
-        if self.rich_tracebacks and "DATABRICKS_RUNTIME_VERSION" not in os.environ:
+        if self.rich_tracebacks and not _is_databricks():
             # Rich traceback handling does not work on databricks. Hopefully this will be
             # fixed on their side at some point, but until then we disable it.
             # See https://github.com/Textualize/rich/issues/2455
-            rich.traceback.install(**traceback_install_kwargs)
+            rich.traceback.install(**traceback_install_kwargs)  # type: ignore[arg-type]
+
+
+@lru_cache(maxsize=None)
+def _has_rich_handler(logger: logging.Logger) -> bool:
+    """Returns true if the logger has a RichHandler attached."""
+    return any(isinstance(handler, RichHandler) for handler in logger.handlers)
+
+
+def _format_rich(value: str, markup: str) -> str:
+    """Format string with rich markup"""
+    return f"[{markup}]{value}[/{markup}]"

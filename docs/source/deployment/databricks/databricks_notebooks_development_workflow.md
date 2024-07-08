@@ -4,7 +4,7 @@ This guide demonstrates a workflow for developing Kedro projects on Databricks u
 
 This method of developing a Kedro project for use on Databricks is ideal for developers who prefer developing their projects in notebooks rather than an in an IDE. It also avoids the overhead of setting up and syncing a local environment with Databricks. If you want to take advantage of the powerful features of an IDE to develop your project, consider following the [guide for developing a Kedro project for Databricks using your local environment](./databricks_ide_development_workflow.md).
 
-In this guide, you will store your project's code in a repository on [GitHub](https://github.com/). Databricks integrates with many [Git providers](https://docs.databricks.com/repos/index.html#supported-git-providers), including GitLab and Azure Devops. The steps  to create a Git repository and sync it with Databricks also generally apply to these Git providers, though the exact details may vary.
+In this guide, you will store your project's code in a repository on [GitHub](https://github.com/). Databricks integrates with many [Git providers](https://docs.databricks.com/repos/index.html#supported-git-providers), including GitLab and Azure DevOps. The steps  to create a Git repository and sync it with Databricks also generally apply to these Git providers, though the exact details may vary.
 
 ## What this page covers
 
@@ -19,7 +19,7 @@ This tutorial introduces a Kedro project development workflow using only the Dat
 
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
-- Python >= 3.7 installed.
+- Python >= 3.8 installed.
 - Git installed.
 - A [GitHub](https://github.com/) account.
 - A Python environment management system installed, [venv](https://docs.python.org/3/library/venv.html), [virtualenv](https://virtualenv.pypa.io/en/latest/) or [Conda](https://docs.conda.io/en/latest/) are popular choices.
@@ -55,6 +55,10 @@ kedro new --starter=databricks-iris
 ```
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
+
+ ```{note}
+ If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
+ ```
 
 ### Create a GitHub repository
 
@@ -213,7 +217,7 @@ Create **four new cells** inside your notebook. You will fill these cells with c
 1. Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. Add the following code to the first new cell to install the dependencies:
 
 ```ipython
-%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/src/requirements.txt"
+%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/requirements.txt"
 ```
 
 2. To run your project in your notebook, you must load the Kedro IPython extension. Add the following code to the second new cell to load the IPython extension:
@@ -263,7 +267,7 @@ Now that your project has run successfully once, you can make changes using the 
 
 The `databricks-iris` starter uses a default 80-20 ratio of training data to test data when training the classifier. You will edit this ratio to 70-30 and re-run your project to view the different result.
 
-In the Databricks workspace, click on the `Repos` tab in the side bar and navigate to `<databricks_username>/iris-databricks/conf/base/`. Open the the file `parameters.yml` by double-clicking it. This will take you to a built-in file editor. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7`, your changes will automatically be saved.
+In the Databricks workspace, click on the `Repos` tab in the side bar and navigate to `<databricks_username>/iris-databricks/conf/base/`. Open the file `parameters.yml` by double-clicking it. This will take you to a built-in file editor. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7`, your changes will automatically be saved.
 
 ![Databricks edit file](../../meta/images/databricks_edit_file.png)
 

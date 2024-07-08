@@ -10,7 +10,29 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro helps you build production-ready data and analytics pipelines"
-requires-python = ">=3.7, <3.11"
+requires-python = ">=3.8"
+dependencies = [
+    "attrs>=21.3",
+    "build>=0.7.0",
+    "cachetools>=4.1",
+    "click>=4.0",
+    "cookiecutter>=2.1.1,<3.0",
+    "dynaconf>=3.1.2,<4.0",
+    "fsspec>=2021.4",
+    "gitpython>=3.0",
+    "importlib-metadata>=3.6,<9.0",
+    "importlib_resources>=1.3,<7.0",  # The `files()` API was introduced in `importlib_resources` 1.3 and Python 3.9.
+    "more_itertools>=8.14.0",
+    "omegaconf>=2.1.1",
+    "parse>=1.19.0",
+    "pluggy>=1.0",
+    "pre-commit-hooks",
+    "PyYAML>=4.2,<7.0",
+    "rich>=12.0,<14.0",
+    "rope>=0.21,<2.0",  # subject to LGPLv3 license
+    "toml>=0.10.0",
+    "graphlib_backport>=1.0.0; python_version < '3.9'",
+]
 keywords = [
     "pipelines",
     "machine learning",
@@ -21,12 +43,52 @@ keywords = [
 license = {text = "Apache Software License (Apache 2.0)"}
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
-dynamic = ["readme", "version", "dependencies", "optional-dependencies"]
+dynamic = ["readme", "version"]
+
+[project.optional-dependencies]
+test = [
+    "behave==1.2.6",
+    "coverage[toml]",
+    "import-linter==2.0",
+    "ipylab>=1.0.0",
+    "ipython>=7.31.1, <8.0; python_version < '3.8'",
+    "ipython~=8.10; python_version >= '3.8'",
+    "jupyterlab_server>=2.11.1",
+    "jupyterlab>=3,<5",
+    "jupyter~=1.0",
+    "kedro-datasets; python_version >= '3.9'",
+    "kedro-datasets<2.0.0; python_version < '3.9'",
+    "mypy~=1.0",
+    "pandas~=2.0",
+    "pluggy>=1.0",
+    "pre-commit>=2.9.2, <4.0",  # The hook `mypy` requires pre-commit version 2.9.2.
+    "pytest-cov~=3.0",
+    "pytest-mock>=1.7.1, <4.0",
+    "pytest-xdist[psutil]~=2.2.1",
+    "pytest>=7.2,<9.0",
+    "s3fs>=2021.4",
+    "trufflehog~=2.1",
+    # mypy related dependencies
+    "pandas-stubs",
+    "types-PyYAML",
+    "types-cachetools",
+    "types-toml"
+]
+docs = [
+    "kedro-sphinx-theme==2024.4.0",
+    "ipykernel>=5.3, <7.0",
+    "Jinja2<3.2.0",
+]
+jupyter = [
+    "ipylab>=1.0.0",
+    "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
+]
+all = [ "kedro[test,docs,jupyter]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"
@@ -43,45 +105,16 @@ zip-safe = false
 [tool.setuptools.packages.find]
 include = ["kedro*"]
 
+[tool.setuptools.package-data]
+kedro = ["py.typed"]
+
 [tool.setuptools.dynamic]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}
-dependencies = {file = "dependency/requirements.txt"}
 
-[tool.black]
-exclude = "/templates/|^features/steps/test_starter"
-
-[tool.isort]
-profile = "black"
-
-[tool.pylint]
-[tool.pylint.master]
-ignore = "CVS"
-ignore-patterns = "kedro/templates/*"
-load-plugins = [
-    "pylint.extensions.docparams",
-    "pylint.extensions.no_self_use"
-]
-extension-pkg-whitelist = "cv2"
-unsafe-load-any-extension = false
-[tool.pylint.messages_control]
-disable = [
-    "ungrouped-imports",
-    "duplicate-code"
-]
-enable = ["useless-suppression"]
-[tool.pylint.refactoring]
-max-nested-blocks = 5
-[tool.pylint.format]
-indent-after-paren=4
-indent-string="    "
-[tool.pylint.miscellaneous]
-notes = [
-    "FIXME",
-    "XXX"
-]
-[tool.pylint.design]
-min-public-methods = 1
+[tool.ruff.format]
+exclude = ["**/templates", "features/steps/test_starter"]
+docstring-code-format = true
 
 [tool.coverage.report]
 fail_under = 100
@@ -92,14 +125,15 @@ omit = [
     "kedro/extras/extensions/ipython.py",
     "kedro/framework/cli/hooks/specs.py",
     "kedro/framework/hooks/specs.py",
-    "kedro/extras/datasets/tensorflow/*",
-    "kedro/extras/datasets/holoviews/*",
-    "tests/*"
+    "tests/*",
+    "kedro/runner/parallel_runner.py",
+    "*/site-packages/*",
 ]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
 addopts="""
+--cov-context test  \
 --cov-config pyproject.toml \
 --cov-report xml:coverage.xml \
 --cov-report term-missing \
@@ -128,7 +162,6 @@ layers = [
     "framework.context",
     "framework.project",
     "runner",
-    "extras.datasets",
     "io",
     "pipeline",
     "config"
@@ -156,7 +189,6 @@ forbidden_modules = [
     "kedro.runner",
     "kedro.io",
     "kedro.pipeline",
-    "kedro.extras.datasets"
 ]
 
 [[tool.importlinter.contracts]]
@@ -166,7 +198,6 @@ source_modules = [
     "kedro.runner",
     "kedro.io",
     "kedro.pipeline",
-    "kedro.extras.datasets"
 ]
 forbidden_modules = [
     "kedro.config"
@@ -175,3 +206,30 @@ ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
     "kedro.framework.session.session -> kedro.config"
 ]
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+select = [
+    "F",   # Pyflakes
+    "W",   # pycodestyle
+    "E",   # pycodestyle
+    "I",   # isort
+    "UP",  # pyupgrade
+    "PL",  # Pylint
+    "T201", # Print Statement
+    "S", # flake8-bandit
+]
+ignore = ["E501"]
+
+[tool.ruff.isort]
+known-first-party = ["kedro"]
+
+[tool.ruff.per-file-ignores]
+"{tests,docs}/*" = ["PLR2004","PLR0913"]
+"{tests,docs,tools,static,features,docs}/*" = ["T201", "S101", "S108"]  # Check print statement for kedro/ only
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = ['misc']
+exclude = ['^kedro/templates/', '^docs/', '^features/steps/test_starter/']

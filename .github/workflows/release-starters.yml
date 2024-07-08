@@ -1,0 +1,22 @@
+name: Trigger kedro-starters Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  trigger-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Latest Release Version
+        id: get_version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Trigger release in kedro-starters
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GA_STARTERS_RELEASE }}
+          repository: kedro-org/kedro-starters
+          event-type: release-triggered
+          client-payload: '{"version": "${{ steps.get_version.outputs.version }}"}'

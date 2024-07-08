@@ -1,9 +1,11 @@
 """Behave environment setup commands."""
-# pylint: disable=unused-argument
+# noqa: unused-argument
 from __future__ import annotations
 
 import os
 import shutil
+import subprocess
+import sys
 import tempfile
 import venv
 from pathlib import Path
@@ -13,6 +15,7 @@ from features.steps.sh_run import run
 _PATHS_TO_REMOVE: set[Path] = set()
 
 FRESH_VENV_TAG = "fresh_venv"
+MINOR_PYTHON_38_VERSION = 8
 
 
 def call(cmd, env):
@@ -56,7 +59,6 @@ def _setup_context_with_venv(context, venv_dir):
     context.pip = str(bin_dir / "pip")
     context.python = str(bin_dir / "python")
     context.kedro = str(bin_dir / "kedro")
-    context.requirements_path = Path("dependency/requirements.txt").resolve()
 
     # clone the environment, remove any condas and venvs and insert our venv
     context.env = os.environ.copy()
@@ -94,35 +96,47 @@ def _create_tmp_dir() -> Path:
 
 
 def _setup_minimal_env(context):
-    kedro_install_venv_dir = _create_new_venv()
-    context.kedro_install_venv_dir = kedro_install_venv_dir
-    context = _setup_context_with_venv(context, kedro_install_venv_dir)
-    call(
-        [
-            context.python,
-            "-m",
-            "pip",
-            "install",
-            "-U",
-            "pip>=21.2",
-            "setuptools>=65.5.1",
-            "wheel",
-        ],
-        env=context.env,
-    )
-    call([context.python, "-m", "pip", "install", "."], env=context.env)
-    return context
+    if os.environ.get("BEHAVE_LOCAL_ENV"):
+        output = subprocess.check_output(
+            ["which", "kedro"]  # noqa: S603, S607
+        )  # equivalent run "which kedro"
+        output = output.strip().decode("utf8")
+        kedro_install_venv_dir = Path(output).parent.parent
+        context.kedro_install_venv_dir = kedro_install_venv_dir
+        context = _setup_context_with_venv(context, kedro_install_venv_dir)
+        return context
+    else:
+        kedro_install_venv_dir = _create_new_venv()
+        context.kedro_install_venv_dir = kedro_install_venv_dir
+        context = _setup_context_with_venv(context, kedro_install_venv_dir)
+
+        call(
+            [
+                context.python,
+                "-m",
+                "pip",
+                "install",
+                "-U",
+                "pip>=21.2",
+            ],
+            env=context.env,
+        )
+        call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
+        return context
 
 
 def _install_project_requirements(context):
     install_reqs = (
-        Path(
-            "kedro/templates/project/{{ cookiecutter.repo_name }}/src/requirements.txt"
-        )
+        Path("kedro/templates/project/{{ cookiecutter.repo_name }}/requirements.txt")
         .read_text(encoding="utf-8")
         .splitlines()
     )
-    install_reqs = [req for req in install_reqs if "{" not in req]
-    install_reqs.append(".[pandas.CSVDataSet]")
+    install_reqs = [req for req in install_reqs if "{" not in req and "#" not in req]
+    # For Python versions 3.9 and above we use the new dataset dependency format introduced in `kedro-datasets` 3.0.0
+    if sys.version_info.minor > MINOR_PYTHON_38_VERSION:
+        install_reqs.append("kedro-datasets[pandas-csvdataset]")
+    # For Python 3.8 we use the older `kedro-datasets` dependency format
+    else:
+        install_reqs.append("kedro-datasets[pandas.CSVDataset]")
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

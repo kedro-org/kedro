@@ -1,0 +1,10 @@
+[project]
+name = "test-plugin"
+description = "Dummy plugin with hook implementations and custom starters"
+version = "0.1"
+
+[project.entry-points."kedro.hooks"]
+test_plugin = "plugin:hooks"
+
+[project.entry-points."kedro.starters"]
+starter = "plugin:starters"

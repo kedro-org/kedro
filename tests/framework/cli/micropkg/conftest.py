@@ -35,7 +35,7 @@ def cleanup_micropackages(fake_repo_path, fake_package_path):
 def cleanup_pipelines(fake_repo_path, fake_package_path):
     pipes_path = fake_package_path / "pipelines"
     old_pipelines = {p.name for p in pipes_path.iterdir() if p.is_dir()}
-    requirements_txt = fake_repo_path / "src" / "requirements.txt"
+    requirements_txt = fake_repo_path / "requirements.txt"
     requirements = requirements_txt.read_text()
     yield
 
@@ -53,7 +53,7 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
             if each.is_file():
                 each.unlink()
 
-        tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
+        tests = fake_repo_path / "tests" / "pipelines" / pipeline
         if tests.is_dir():
             shutil.rmtree(str(tests))
 

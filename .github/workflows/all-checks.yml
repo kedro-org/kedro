@@ -1,0 +1,67 @@
+name: Run all checks on Kedro
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        default: ''
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - "docs/**"
+      - '**.md'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - "docs/**"
+      - '**.md'
+
+jobs:
+  unit-tests:
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
+    uses: ./.github/workflows/unit-tests.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
+  e2e-tests:
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
+
+  lint:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.11" ]
+    uses: ./.github/workflows/lint.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
+
+
+  pip-compile:
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
+    uses: ./.github/workflows/pip-compile.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}

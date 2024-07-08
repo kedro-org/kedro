@@ -14,11 +14,19 @@ The data processing pipeline prepares the data for model building by combining t
 * Two python files within `src/spaceflights/pipelines/data_processing`
     * `nodes.py` (for the node functions that form the data processing)
     * `pipeline.py` (to build the pipeline)
-* A yaml file: `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
+* A yaml file: `conf/base/parameters_data_processing.yml` to define the parameters used when running the pipeline
 * `__init__.py` files in the required folders to ensure that Python can import the pipeline
 
 ```{note}
 Kedro provides the `kedro pipeline create` command to add the skeleton code for a new pipeline. If you are writing a project from scratch and want to add a new pipeline, run the following from the terminal: `kedro pipeline create <pipeline_name>`. You do **not** need to do this in the spaceflights example as it is already supplied by the starter project.
+```
+### Watch the video
+
+The [hands-on video course](../course/index.md#learn-kedro-with-hands-on-video) walks through data exploration and data processing for the spaceflights data. There are several videos in the playlist that cover the topic starting with the following:
+
+```{eval-rst}
+..  youtube:: bZD8N0yv3Fs
+    :width: 100%
 ```
 
 ## Data preprocessing node functions
@@ -135,13 +143,13 @@ You should see output similar to the below:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[08/09/22 16:43:11] INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+[08/09/22 16:43:11] INFO     Loading data from 'companies' (CSVDataset)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
-                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 1 tasks                                  sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                             runner.py:89
-                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
 
 ```
 </details>
@@ -152,48 +160,55 @@ You can run the `preprocess_shuttles` node similarly. To test both nodes togethe
 kedro run
 ```
 
+You can also run both nodes by naming each in turn, as follows:
+
+```bash
+kedro run --nodes=preprocess_companies_node,preprocess_shuttles_node
+```
+
 You should see output similar to the following:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```bash
-                    INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Loading data from 'companies' (CSVDataset)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
-                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 2 tasks                                  sequential_runner.py:85
-                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
+                    INFO     Loading data from 'shuttles' (ExcelDataset)...                  data_catalog.py:343
 [08/09/22 16:46:08] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
                              -> [preprocessed_shuttles]
-                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataSet)...       data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataset)...       data_catalog.py:382
                     INFO     Completed 2 out of 2 tasks                                  sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                             runner.py:89
-                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
-                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataSet)...    data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataset)...    data_catalog.py:343
 
 ```
 </details>
 
 ## Preprocessed data registration
 
-Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format [pandas.ParquetDataSet](/kedro_datasets.pandas.ParquetDataSet) because they are registered within the [Data Catalog](../resources/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format {class}`pandas.ParquetDataset<kedro-datasets:kedro_datasets.pandas.ParquetDataset>` because they are registered within the [Data Catalog](../resources/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```yaml
 preprocessed_companies:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_companies.pq
 
 preprocessed_shuttles:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_shuttles.pq
 ```
 </details>
 
-If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
+If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the {py:class}`~kedro.io.MemoryDataset` class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
 
 
 ## Create a table for model input
@@ -220,6 +235,7 @@ def create_model_input_table(
 
     """
     rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
+    rated_shuttles = rated_shuttles.drop("id", axis=1)
     model_input_table = rated_shuttles.merge(
         companies, left_on="company_id", right_on="id"
     )
@@ -273,7 +289,7 @@ The following entry in `conf/base/catalog.yml` saves the model input table datas
 
 ```yaml
 model_input_table:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/03_primary/model_input_table.pq
 ```
 
@@ -292,27 +308,27 @@ You should see output similar to the following:
 
 ```bash
 [08/09/22 17:01:10] INFO     Reached after_catalog_created hook                                     plugin.py:17
-                    INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Loading data from 'companies' (CSVDataset)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
-                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 3 tasks                                  sequential_runner.py:85
-                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
+                    INFO     Loading data from 'shuttles' (ExcelDataset)...                  data_catalog.py:343
 [08/09/22 17:01:25] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
                              -> [preprocessed_shuttles]
 
-                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataSet)...       data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataset)...       data_catalog.py:382
                     INFO     Completed 2 out of 3 tasks                                  sequential_runner.py:85
-                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataSet)...    data_catalog.py:343
-                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
-                    INFO     Loading data from 'reviews' (CSVDataSet)...                     data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataset)...    data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
+                    INFO     Loading data from 'reviews' (CSVDataset)...                     data_catalog.py:343
                     INFO     Running node: create_model_input_table_node:                            node.py:327
                              create_model_input_table([preprocessed_shuttles,preprocessed_companies,
                              reviews]) -> [model_input_table]
-[08/09/22 17:01:28] INFO     Saving data to 'model_input_table' (MemoryDataSet)...           data_catalog.py:382
+[08/09/22 17:01:28] INFO     Saving data to 'model_input_table' (MemoryDataset)...           data_catalog.py:382
 [08/09/22 17:01:29] INFO     Completed 3 out of 3 tasks                                  sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                             runner.py:89
-                    INFO     Loading data from 'model_input_table' (MemoryDataSet)...        data_catalog.py:343
+                    INFO     Loading data from 'model_input_table' (MemoryDataset)...        data_catalog.py:343
 ```
 </details>
 
@@ -327,12 +343,19 @@ pip install kedro-viz
 To start Kedro-Viz, enter the following in your terminal:
 
 ```bash
-kedro viz
+kedro viz run
 ```
 
-This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the [visualisation documentation](../visualisation/kedro-viz_visualisation) for more detail.
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
 
 To exit, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
+
+### Watch the video
+
+```{eval-rst}
+..  youtube:: KWqSzbHgNW4
+    :width: 100%
+```
 
 ## Checkpoint
 

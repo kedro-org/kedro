@@ -66,7 +66,7 @@ node(
 )
 ```
 
-In both cases, under the hood parameters are added to the Data Catalog through the method `add_feed_dict()` in [`DataCatalog`](/kedro.io.DataCatalog), where they live as `MemoryDataSet`s. This method is also what the `KedroContext` class uses when instantiating the catalog.
+In both cases, under the hood parameters are added to the Data Catalog through the method {py:meth}`add_feed_dict() <kedro.io.DataCatalog.add_feed_dict>` in {py:class}`~kedro.io.DataCatalog`, where they live as `MemoryDataset`s. This method is also what the {py:class}`~kedro.framework.context.KedroContext` class uses when instantiating the catalog.
 
 ```{note}
 You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
@@ -74,16 +74,14 @@ You can use `add_feed_dict()` to inject any other entries into your `DataCatalog
 
 ## How to load parameters in code
 
-Parameters project configuration can be loaded by any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
-
-The following examples all make use of the default `ConfigLoader` class.
+Parameters project configuration can be loaded by the configuration loader class, which is `OmegaConfigLoader` by default.
 
 ```python
-from kedro.config import ConfigLoader
+from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
 parameters = conf_loader["parameters"]
 ```
 
@@ -92,11 +90,11 @@ This loads configuration files from any subdirectories in `conf` that have a fil
 Calling `conf_loader[key]` in the example above will throw a `MissingConfigException` error if no configuration files match the given key. But if this is a valid workflow for your application, you can handle it as follows:
 
 ```python
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import OmegaConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
 
 try:
     parameters = conf_loader["parameters"]
@@ -112,13 +110,10 @@ The `kedro.framework.context.KedroContext` class uses the approach above to load
 
 ## How to specify parameters at runtime
 
-Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes.
+Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to {py:class}`~kedro.framework.context.KedroContext` parameters and made available to pipeline nodes.
 
-Each key-value pair is split on the first colon or equals sign. The following examples are both valid commands:
+Each key-value pair is split on the first equals sign. The following example is a valid command:
 
-```bash
-kedro run --params=param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
-```
 ```bash
 kedro run --params=param_key1=value1,param_key2=2.0
 ```
@@ -127,17 +122,10 @@ Values provided in the CLI take precedence and overwrite parameters specified in
 * Parameter keys are _always_ treated as strings.
 * Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
 
-If any extra parameter key and/or value contains spaces, wrap the whole option contents in quotes:
+If any extra parameter key or value contains spaces, wrap the whole option contents in quotes:
 
 ```bash
 kedro run --params="key1=value with spaces,key2=value"
 ```
 
-Since key-value pairs are split on the first colon or equals sign, values can contain colons/equals signs, but keys cannot. These are valid CLI commands:
-
-```bash
-kedro run --params=endpoint_url:https://endpoint.example.com
-```
-```bash
-kedro run --params=endpoint_url=https://endpoint.example.com
-```
+Since key-value pairs are split on the first equals sign, values can contain equals signs, but keys cannot.

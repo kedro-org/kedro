@@ -1,6 +1,6 @@
 import logging
+import multiprocessing
 import re
-import sys
 import time
 from typing import Any
 
@@ -10,7 +10,7 @@ from dynaconf.validator import Validator
 
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager, hook_impl
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
     _ProjectPipelines,
     _ProjectSettings,
@@ -18,7 +18,7 @@ from kedro.framework.project import (
     settings,
 )
 from kedro.framework.session import KedroSession
-from kedro.io import DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node, pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
@@ -30,8 +30,11 @@ from tests.framework.session.conftest import (
     assert_exceptions_equal,
 )
 
-SKIP_ON_WINDOWS = pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+# Window and MacOS(Python>3.7) default with `spawn` process which reload modules
+# and cause test fails
+SKIP_ON_WINDOWS_AND_MACOS = pytest.mark.skipif(
+    multiprocessing.get_start_method() == "spawn",
+    reason="Due to bug in parallel runner",
 )
 
 logger = logging.getLogger("tests.framework.session.conftest")
@@ -79,9 +82,9 @@ class TestCatalogHooks:
         assert len(relevant_records) == 1
         record = relevant_records[0]
         assert record.catalog is catalog
-        assert record.conf_creds == config_loader.get("credentials*")
+        assert record.conf_creds == config_loader["credentials"]
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
-            project_path=project_path, conf_dictionary=config_loader.get("catalog*")
+            project_path=project_path, conf_dictionary=config_loader["catalog"]
         )
         # save_version is only passed during a run, not on the property getter
         assert record.save_version is None
@@ -116,9 +119,9 @@ class TestCatalogHooks:
         # one for context.catalog, one for the run
         assert len(relevant_records) == 2
         record = relevant_records[1]
-        assert record.conf_creds == config_loader.get("credentials*")
+        assert record.conf_creds == config_loader["credentials"]
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
-            project_path=project_path, conf_dictionary=config_loader.get("catalog*")
+            project_path=project_path, conf_dictionary=config_loader["catalog"]
         )
         assert record.save_version is fake_save_version
         assert record.load_versions is None
@@ -233,10 +236,9 @@ class TestNodeHooks:
         # sanity check a couple of important parameters
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
 
-    @SKIP_ON_WINDOWS
+    @SKIP_ON_WINDOWS_AND_MACOS
     @pytest.mark.usefixtures("mock_broken_pipelines")
     def test_on_node_error_hook_parallel_runner(self, mock_session, logs_listener):
-
         with pytest.raises(ValueError, match="broken"):
             mock_session.run(
                 runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]
@@ -255,7 +257,7 @@ class TestNodeHooks:
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)
 
-    @SKIP_ON_WINDOWS
+    @SKIP_ON_WINDOWS_AND_MACOS
     @pytest.mark.usefixtures("mock_pipelines")
     def test_before_and_after_node_run_hooks_parallel_runner(
         self, mock_session, logs_listener, dummy_dataframe
@@ -286,7 +288,7 @@ class TestNodeHooks:
             assert set(record.outputs.keys()) <= {"planes", "ships"}
 
 
-class TestDataSetHooks:
+class TestDatasetHooks:
     @pytest.mark.usefixtures("mock_pipelines")
     def test_before_and_after_dataset_loaded_hooks_sequential_runner(
         self, mock_session, caplog, dummy_dataframe
@@ -323,7 +325,7 @@ class TestDataSetHooks:
         assert call_record.dataset_name == "cars"
         pd.testing.assert_frame_equal(call_record.data, dummy_dataframe)
 
-    @SKIP_ON_WINDOWS
+    @SKIP_ON_WINDOWS_AND_MACOS
     @pytest.mark.usefixtures("mock_settings")
     def test_before_and_after_dataset_loaded_hooks_parallel_runner(
         self, mock_session, logs_listener, dummy_dataframe
@@ -389,7 +391,7 @@ class TestDataSetHooks:
         assert call_record.dataset_name == "planes"
         assert call_record.data.to_dict() == dummy_dataframe.to_dict()
 
-    @SKIP_ON_WINDOWS
+    @SKIP_ON_WINDOWS_AND_MACOS
     def test_before_and_after_dataset_saved_hooks_parallel_runner(
         self, mock_session, logs_listener, dummy_dataframe
     ):
@@ -419,7 +421,7 @@ class TestDataSetHooks:
             assert record.data.to_dict() == dummy_dataframe.to_dict()
 
 
-class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
+class MockDatasetReplacement:
     pass
 
 
@@ -438,7 +440,7 @@ def mock_session_with_before_node_run_hooks(
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    return KedroSession.create(mock_package_name, tmp_path)
+    return KedroSession.create(tmp_path)
 
 
 @pytest.fixture
@@ -456,7 +458,7 @@ def mock_session_with_broken_before_node_run_hooks(
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    return KedroSession.create(mock_package_name, tmp_path)
+    return KedroSession.create(tmp_path)
 
 
 class TestBeforeNodeRunHookWithInputUpdates:
@@ -476,7 +478,7 @@ class TestBeforeNodeRunHookWithInputUpdates:
         assert isinstance(result["planes"], MockDatasetReplacement)
         assert isinstance(result["ships"], pd.DataFrame)
 
-    @SKIP_ON_WINDOWS
+    @SKIP_ON_WINDOWS_AND_MACOS
     def test_correct_input_update_parallel(
         self,
         mock_session_with_before_node_run_hooks,
@@ -506,7 +508,7 @@ class TestBeforeNodeRunHookWithInputUpdates:
         with pytest.raises(TypeError, match=re.escape(pattern)):
             mock_session_with_broken_before_node_run_hooks.run()
 
-    @SKIP_ON_WINDOWS
+    @SKIP_ON_WINDOWS_AND_MACOS
     def test_broken_input_update_parallel(
         self, mock_session_with_broken_before_node_run_hooks, dummy_dataframe
     ):
@@ -554,10 +556,10 @@ class LogCatalog(DataCatalog):
 
 @pytest.fixture
 def memory_catalog():
-    ds1 = MemoryDataSet({"data": 42})
-    ds2 = MemoryDataSet({"data": 42})
-    ds3 = MemoryDataSet({"data": 42})
-    ds4 = MemoryDataSet({"data": 42})
+    ds1 = MemoryDataset({"data": 42})
+    ds2 = MemoryDataset({"data": 42})
+    ds3 = MemoryDataset({"data": 42})
+    ds4 = MemoryDataset({"data": 42})
     return LogCatalog({"ds1": ds1, "ds2": ds2, "ds3": ds3, "ds4": ds4})
 
 
@@ -565,7 +567,7 @@ def memory_catalog():
 def hook_manager():
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
-    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+    _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
     return hook_manager
 
 

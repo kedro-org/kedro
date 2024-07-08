@@ -12,29 +12,28 @@ import pandas as pd
 import pytest
 import toml
 import yaml
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import MissingConfigException
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
     _is_relative_path,
-    _update_nested_dict,
-    _validate_layers_for_transcoding,
 )
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.project import (
     ValidationError,
     _ProjectSettings,
-    configure_project,
     pipelines,
 )
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
 
 MOCK_PACKAGE_NAME = "mock_package_name"
 
 
-class BadCatalog:  # pylint: disable=too-few-public-methods
+class BadCatalog:
     """
     Catalog class that doesn't subclass `DataCatalog`, for testing only.
     """
@@ -73,9 +72,9 @@ def base_config(tmp_path):
     trains_filepath = (tmp_path / "trains.csv").as_posix()
 
     return {
-        "trains": {"type": "pandas.CSVDataSet", "filepath": trains_filepath},
+        "trains": {"type": "pandas.CSVDataset", "filepath": trains_filepath},
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": cars_filepath,
             "save_args": {"index": True},
         },
@@ -90,19 +89,18 @@ def local_config(tmp_path):
     horses_filepath = "horses.csv"
     return {
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": cars_filepath,
             "save_args": {"index": False},
             "versioned": True,
         },
         "boats": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": boats_filepath,
             "versioned": True,
-            "layer": "raw",
         },
         "horses": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": horses_filepath,
             "versioned": True,
         },
@@ -121,15 +119,19 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     env_catalog = tmp_path / "conf" / str(env) / "catalog.yml"
     env_credentials = tmp_path / "conf" / str(env) / "credentials.yml"
     parameters = tmp_path / "conf" / "base" / "parameters.json"
-    db_config_path = tmp_path / "conf" / "base" / "db.ini"
     project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
+
+    # Create configurations
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
     _write_yaml(env_credentials, local_config)
     _write_json(parameters, project_parameters)
-    _write_dummy_ini(db_config_path)
 
     _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
+
+    # Create the necessary files in src/
+    (tmp_path / "src" / MOCK_PACKAGE_NAME).mkdir(parents=True, exist_ok=True)
+    (tmp_path / "src" / MOCK_PACKAGE_NAME / "__init__.py").write_text(" ")
 
 
 @pytest.fixture
@@ -188,17 +190,20 @@ def extra_params(request):
 
 
 @pytest.fixture
-def dummy_context(
-    tmp_path, prepare_project_dir, env, extra_params
-):  # pylint: disable=unused-argument
-    configure_project(MOCK_PACKAGE_NAME)
-    config_loader = ConfigLoader(str(tmp_path / "conf"), env=env)
+def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
+    bootstrap_project(tmp_path)
+
+    session = KedroSession.create(
+        project_path=tmp_path, env=env, extra_params=extra_params
+    )
+    context = session.load_context()
+    config_loader = context.config_loader
     context = KedroContext(
-        MOCK_PACKAGE_NAME,
-        str(tmp_path),
+        project_path=str(tmp_path),
         config_loader=config_loader,
-        hook_manager=_create_hook_manager(),
         env=env,
+        package_name=MOCK_PACKAGE_NAME,
+        hook_manager=_create_hook_manager(),
         extra_params=extra_params,
     )
 
@@ -211,9 +216,13 @@ class TestKedroContext:
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
+    def test_set_new_attribute(self, dummy_context):
+        dummy_context.mlflow = 1
+        assert dummy_context.mlflow == 1
+
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader
-        conf_catalog = config_loader.get("catalog*")
+        conf_catalog = config_loader["catalog"]
 
         # even though the raw configuration uses relative path
         assert conf_catalog["horses"]["filepath"] == "horses.csv"
@@ -221,23 +230,29 @@ class TestKedroContext:
         # the catalog and its dataset should be loaded using absolute path
         # based on the project path
         catalog = dummy_context._get_catalog()
-        ds_path = catalog._data_sets["horses"]._filepath
+        ds_path = catalog._datasets["horses"]._filepath
         assert PurePath(ds_path.as_posix()).is_absolute()
         assert (
-            ds_path.as_posix()
-            == (dummy_context._project_path / "horses.csv").as_posix()
+            ds_path.as_posix() == (dummy_context.project_path / "horses.csv").as_posix()
         )
 
-    def test_get_catalog_validates_layers(self, dummy_context, mocker):
-        mock_validate = mocker.patch(
-            "kedro.framework.context.context._validate_layers_for_transcoding"
+    def test_get_catalog_validates_transcoded_datasets(self, dummy_context, mocker):
+        mock_transcode_split = mocker.patch(
+            "kedro.framework.context.context._transcode_split"
         )
+        catalog = dummy_context.catalog
+        for dataset_name in catalog._datasets.keys():
+            mock_transcode_split.assert_any_call(dataset_name)
+
+        mock_validate = mocker.patch(
+            "kedro.framework.context.context._validate_transcoded_datasets"
+        )
+
         catalog = dummy_context.catalog
 
         mock_validate.assert_called_once_with(catalog)
 
     def test_catalog(self, dummy_context, dummy_dataframe):
-        assert dummy_context.catalog.layers == {"raw": {"boats"}}
         dummy_context.catalog.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.catalog.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
@@ -278,7 +293,7 @@ class TestKedroContext:
         indirect=True,
     )
     def test_params_missing(self, mocker, extra_params, dummy_context):
-        mock_config_loader = mocker.patch("kedro.config.ConfigLoader.get")
+        mock_config_loader = mocker.patch("kedro.config.OmegaConfigLoader.__getitem__")
         mock_config_loader.side_effect = MissingConfigException("nope")
         extra_params = extra_params or {}
 
@@ -414,79 +429,3 @@ def test_convert_paths_to_absolute_posix_converts_full_windows_path_to_posix(
     project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
-
-
-@pytest.mark.parametrize(
-    "layers",
-    [
-        {"raw": {"A"}, "interm": {"B", "C"}},
-        {"raw": {"A"}, "interm": {"B@2", "B@1"}},
-        {"raw": {"C@1"}, "interm": {"A", "B@1", "B@2", "B@3"}},
-    ],
-)
-def test_validate_layers(layers, mocker):
-    mock_catalog = mocker.MagicMock()
-    mock_catalog.layers = layers
-
-    _validate_layers_for_transcoding(mock_catalog)  # it shouldn't raise any error
-
-
-@pytest.mark.parametrize(
-    "layers,conflicting_datasets",
-    [
-        ({"raw": {"A", "B@1"}, "interm": {"B@2"}}, ["B@2"]),
-        ({"raw": {"A"}, "interm": {"B@1", "B@2"}, "prm": {"B@3"}}, ["B@3"]),
-        (
-            {
-                "raw": {"A@1"},
-                "interm": {"B@1", "B@2"},
-                "prm": {"B@3", "B@4"},
-                "other": {"A@2"},
-            },
-            ["A@2", "B@3", "B@4"],
-        ),
-    ],
-)
-def test_validate_layers_error(layers, conflicting_datasets, mocker):
-    mock_catalog = mocker.MagicMock()
-    mock_catalog.layers = layers
-    error_str = ", ".join(conflicting_datasets)
-
-    pattern = (
-        f"Transcoded datasets should have the same layer. "
-        f"Mismatch found for: {error_str}"
-    )
-    with pytest.raises(ValueError, match=re.escape(pattern)):
-        _validate_layers_for_transcoding(mock_catalog)
-
-
-@pytest.mark.parametrize(
-    "old_dict, new_dict, expected",
-    [
-        (
-            {
-                "a": 1,
-                "b": 2,
-                "c": {
-                    "d": 3,
-                },
-            },
-            {"c": {"d": 5, "e": 4}},
-            {
-                "a": 1,
-                "b": 2,
-                "c": {"d": 5, "e": 4},
-            },
-        ),
-        ({"a": 1}, {"b": 2}, {"a": 1, "b": 2}),
-        ({"a": 1, "b": 2}, {"b": 3}, {"a": 1, "b": 3}),
-        (
-            {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3}}},
-            {"a": {"a.c": {"a.c.b": 4}}},
-            {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3, "a.c.b": 4}}},
-        ),
-    ],
-)
-def test_update_nested_dict(old_dict: dict, new_dict: dict, expected: dict):
-    _update_nested_dict(old_dict, new_dict)  # _update_nested_dict change dict in place
-    assert old_dict == expected

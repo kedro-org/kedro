@@ -30,10 +30,9 @@ class TestMicropkgPackageCommand:
 
         expected_files = {
             f"{package_name}-{version}/{package_name}/__init__.py",
-            f"{package_name}-{version}/{package_name}/README.md",
             f"{package_name}-{version}/{package_name}/nodes.py",
             f"{package_name}-{version}/{package_name}/pipeline.py",
-            f"{package_name}-{version}/{package_name}/config/parameters/{package_name}.yml",
+            f"{package_name}-{version}/{package_name}/config/parameters_{package_name}.yml",
             f"{package_name}-{version}/tests/__init__.py",
             f"{package_name}-{version}/tests/test_pipeline.py",
         }
@@ -264,7 +263,6 @@ class TestMicropkgPackageCommand:
 
         expected_files = {
             f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/__init__.py",
-            f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/README.md",
             f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/nodes.py",
             f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/pipeline.py",
             f"{PIPELINE_NAME}-{version}/tests/__init__.py",
@@ -354,9 +352,9 @@ class TestMicropkgPackageCommand:
         assert (
             "retail-0.1/retail/config/parameters/retail/params1.yml" in sdist_contents
         )
-        assert "retail-0.1/retail/config/parameters/retail.yml" in sdist_contents
+        assert "retail-0.1/retail/config/parameters_retail.yml" in sdist_contents
         assert (
-            "retail-0.1/retail/config/parameters/retail_banking.yml"
+            "retail-0.1/retail/config/parameters_retail_banking.yml"
             not in sdist_contents
         )
 
@@ -424,7 +422,7 @@ class TestMicropkgPackageCommand:
             "retail-0.1/retail/config/parameters/retail/deep/params1.yml"
             in sdist_contents
         )
-        assert "retail-0.1/retail/config/parameters/retail.yml" in sdist_contents
+        assert "retail-0.1/retail/config/parameters_retail.yml" in sdist_contents
         assert "retail-0.1/retail/config/parameters/deep/retail.yml" in sdist_contents
         assert (
             "retail-0.1/retail/config/parameters/a/b/c/d/retail/params3.yml"
@@ -494,10 +492,9 @@ class TestMicropkgPackageCommand:
     "chdir_to_dummy_project", "cleanup_dist", "cleanup_pyproject_toml"
 )
 class TestMicropkgPackageFromManifest:
-    def test_micropkg_package_all(  # pylint: disable=too-many-locals
+    def test_micropkg_package_all(
         self, fake_repo_path, fake_project_cli, fake_metadata, tmp_path, mocker
     ):
-        # pylint: disable=import-outside-toplevel
         from kedro.framework.cli import micropkg
 
         spy = mocker.spy(micropkg, "_package_micropkg")
@@ -537,7 +534,6 @@ class TestMicropkgPackageFromManifest:
     def test_micropkg_package_all_empty_toml(
         self, fake_repo_path, fake_project_cli, fake_metadata, mocker
     ):
-        # pylint: disable=import-outside-toplevel
         from kedro.framework.cli import micropkg
 
         spy = mocker.spy(micropkg, "_package_micropkg")

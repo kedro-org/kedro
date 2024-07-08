@@ -6,7 +6,7 @@
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/dependency" # Location of package manifests
+    directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
     labels:

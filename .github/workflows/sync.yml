@@ -1,0 +1,26 @@
+name: Sync `main` and `develop`
+# This workflow merges commits from `main` branch to `develop` branch if the commits can be merged
+# cleanly, otherwise creates a PR for the maintainers to manually resolve the conflicts.
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # every 30 minutes
+  workflow_dispatch: # on button click
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TAGGING_TOKEN }}
+
+      - name: Set git email and name
+        run: |
+          git config --global user.email "kedro@kedro.com"
+          git config --global user.name "Kedro"
+
+      - name: Maybe merge to develop or raise a PR
+        run: ./tools/github_actions/merge.sh . "main" "develop" "${{ secrets.GH_TAGGING_TOKEN }}"

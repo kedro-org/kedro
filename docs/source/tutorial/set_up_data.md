@@ -28,11 +28,11 @@ Open `conf/base/catalog.yml` for the spaceflights project to inspect the content
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/reviews.csv
 ```
 </details> <br />
@@ -44,7 +44,7 @@ Likewise for the `xlsx` dataset:
 
 ```yaml
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: data/01_raw/shuttles.xlsx
   load_args:
     engine: openpyxl # Use modern Excel engine (the default since Kedro 0.18.0)
@@ -75,7 +75,7 @@ companies.head()
 <summary><b>Click to expand</b></summary>
 
 ```
-INFO     Loading data from 'companies' (CSVDataSet)
+INFO     Loading data from 'companies' (CSVDataset)
 Out[1]:
       id company_rating       company_location  total_fleet_count iata_approved
 0  35029           100%                   Niue                4.0             f
@@ -100,7 +100,7 @@ You should see output such as the following:
 <summary><b>Click to expand</b></summary>
 
 ```
-INFO     Loading data from 'shuttles' (ExcelDataSet)
+INFO     Loading data from 'shuttles' (ExcelDataset)
 Out[1]:
       id       shuttle_location shuttle_type engine_type  ... d_check_complete  moon_clearance_complete     price company_id
 0  63561                   Niue      Type V5     Quantum  ...                f                        f  $1,325.0      35029
@@ -116,11 +116,18 @@ When you have finished, close `ipython` session with `exit()`.
 
 ## Further information
 
+### Watch the video
+
+```{eval-rst}
+..  youtube:: rl2cncGxyts
+    :width: 100%
+```
+
 ### Custom data
 
-[Kedro supports numerous datasets](/kedro_datasets) out of the box, but you can also add support for any proprietary data format or filesystem.
+{py:mod}`Kedro supports numerous datasets <kedro-datasets:kedro_datasets>` out of the box, but you can also add support for any proprietary data format or filesystem.
 
-You can find further information about [how to add support for custom datasets](../extend_kedro/custom_datasets.md) in specific documentation covering advanced usage.
+You can find further information about [how to add support for custom datasets](../data/how_to_create_a_custom_dataset.md) in specific documentation covering advanced usage.
 
 ### Supported data locations
 

@@ -1,0 +1,5 @@
+# This is a boilerplate parameters config generated for pipeline '{{ cookiecutter.pipeline_name }}'
+# using Kedro {{ cookiecutter.kedro_version }}.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/{{ cookiecutter.kedro_version }}/configuration/parameters.html

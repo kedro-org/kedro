@@ -15,13 +15,13 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Iterable, Iterator
+from typing import Any, Collection, Iterable, Iterator
 
 from more_itertools import interleave
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -31,26 +31,33 @@ class AbstractRunner(ABC):
     implementations.
     """
 
-    def __init__(self, is_async: bool = False):
-        """Instantiates the runner classs.
+    def __init__(
+        self,
+        is_async: bool = False,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
+    ):
+        """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets on the Runner instances.
 
         """
         self._is_async = is_async
+        self._extra_dataset_patterns = extra_dataset_patterns
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(self.__module__)
 
     def run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
-        hook_manager: PluginManager = None,
-        session_id: str = None,
+        hook_manager: PluginManager | None = None,
+        session_id: str | None = None,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -71,25 +78,43 @@ class AbstractRunner(ABC):
 
         """
 
-        hook_manager = hook_manager or _NullPluginManager()
+        hook_or_null_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
 
-        unsatisfied = pipeline.inputs() - set(catalog.list())
+        # Check which datasets used in the pipeline are in the catalog or match
+        # a pattern in the catalog
+        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
+
+        # Check if there are any input datasets that aren't in the catalog and
+        # don't match a pattern in the catalog.
+        unsatisfied = pipeline.inputs() - set(registered_ds)
+
         if unsatisfied:
             raise ValueError(
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
 
-        free_outputs = pipeline.outputs() - set(catalog.list())
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())
-        for ds_name in unregistered_ds:
-            catalog.add(ds_name, self.create_default_data_set(ds_name))
+        # Identify MemoryDataset in the catalog
+        memory_datasets = {
+            ds_name
+            for ds_name, ds in catalog._datasets.items()
+            if isinstance(ds, MemoryDataset)
+        }
+
+        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
+        # in the catalog and include MemoryDataset.
+        free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
+
+        # Register the default dataset pattern with the catalog
+        catalog = catalog.shallow_copy(
+            extra_dataset_patterns=self._extra_dataset_patterns
+        )
 
         if self._is_async:
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
-        self._run(pipeline, catalog, hook_manager, session_id)
+        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
 
         self._logger.info("Pipeline execution completed successfully.")
 
@@ -125,7 +150,7 @@ class AbstractRunner(ABC):
 
         # We also need any missing datasets that are required to run the
         # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())
+        unregistered_ds = pipeline.datasets() - set(catalog.list())
         output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
         input_from_unregistered = to_rerun.inputs() & unregistered_ds
         to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)
@@ -138,7 +163,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: str = None,
+        session_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
         inputs have already been checked and normalized by run().
@@ -149,19 +174,6 @@ class AbstractRunner(ABC):
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
-        """
-        pass
-
-    @abstractmethod  # pragma: no cover
-    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
-        """Factory method for creating the default dataset for the runner.
-
-        Args:
-            ds_name: Name of the missing dataset.
-
-        Returns:
-            An instance of an implementation of ``AbstractDataSet`` to be
-            used for all unregistered datasets.
         """
         pass
 
@@ -186,17 +198,13 @@ class AbstractRunner(ABC):
 
         postfix = ""
         if done_nodes:
-            node_names = (n.name for n in remaining_nodes)
-            resume_p = pipeline.only_nodes(*node_names)
-            start_p = resume_p.only_nodes_with_inputs(*resume_p.inputs())
-
-            # find the nearest persistent ancestors of the nodes in start_p
-            start_p_persistent_ancestors = _find_persistent_ancestors(
-                pipeline, start_p.nodes, catalog
+            start_node_names = _find_nodes_to_resume_from(
+                pipeline=pipeline,
+                unfinished_nodes=remaining_nodes,
+                catalog=catalog,
             )
-
-            start_node_names = (n.name for n in start_p_persistent_ancestors)
-            postfix += f"  --from-nodes \"{','.join(start_node_names)}\""
+            start_nodes_str = ",".join(sorted(start_node_names))
+            postfix += f'  --from-nodes "{start_nodes_str}"'
 
         if not postfix:
             self._logger.warning(
@@ -204,81 +212,166 @@ class AbstractRunner(ABC):
             )
         else:
             self._logger.warning(
-                "There are %d nodes that have not run.\n"
+                f"There are {len(remaining_nodes)} nodes that have not run.\n"
                 "You can resume the pipeline run from the nearest nodes with "
                 "persisted inputs by adding the following "
-                "argument to your previous command:\n%s",
-                len(remaining_nodes),
-                postfix,
+                f"argument to your previous command:\n{postfix}"
             )
 
 
-def _find_persistent_ancestors(
-    pipeline: Pipeline, children: Iterable[Node], catalog: DataCatalog
-) -> set[Node]:
-    """Breadth-first search approach to finding the complete set of
-    persistent ancestors of an iterable of ``Node``s. Persistent
-    ancestors exclusively have persisted ``Dataset``s as inputs.
+def _find_nodes_to_resume_from(
+    pipeline: Pipeline, unfinished_nodes: Collection[Node], catalog: DataCatalog
+) -> set[str]:
+    """Given a collection of unfinished nodes in a pipeline using
+    a certain catalog, find the node names to pass to pipeline.from_nodes()
+    to cover all unfinished nodes, including any additional nodes
+    that should be re-run if their outputs are not persisted.
 
     Args:
-        pipeline: the ``Pipeline`` to find ancestors in.
-        children: the iterable containing ``Node``s to find ancestors of.
+        pipeline: the ``Pipeline`` to find starting nodes for.
+        unfinished_nodes: collection of ``Node``s that have not finished yet
         catalog: the ``DataCatalog`` of the run.
 
     Returns:
-        A set containing first persistent ancestors of the given
-        ``Node``s.
+        Set of node names to pass to pipeline.from_nodes() to continue
+        the run.
 
     """
-    ancestor_nodes_to_run = set()
-    queue, visited = deque(children), set(children)
-    while queue:
-        current_node = queue.popleft()
-        if _has_persistent_inputs(current_node, catalog):
-            ancestor_nodes_to_run.add(current_node)
-            continue
-        for parent in _enumerate_parents(pipeline, current_node):
-            if parent in visited:
-                continue
-            visited.add(parent)
-            queue.append(parent)
-    return ancestor_nodes_to_run
+    nodes_to_be_run = _find_all_nodes_for_resumed_pipeline(
+        pipeline, unfinished_nodes, catalog
+    )
+
+    # Find which of the remaining nodes would need to run first (in topo sort)
+    persistent_ancestors = _find_initial_node_group(pipeline, nodes_to_be_run)
+
+    return {n.name for n in persistent_ancestors}
 
 
-def _enumerate_parents(pipeline: Pipeline, child: Node) -> list[Node]:
-    """For a given ``Node``, returns a list containing the direct parents
-    of that ``Node`` in the given ``Pipeline``.
+def _find_all_nodes_for_resumed_pipeline(
+    pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: DataCatalog
+) -> set[Node]:
+    """Breadth-first search approach to finding the complete set of
+    ``Node``s which need to run to cover all unfinished nodes,
+    including any additional nodes that should be re-run if their outputs
+    are not persisted.
 
     Args:
-        pipeline: the ``Pipeline`` to search for direct parents in.
-        child: the ``Node`` to find parents of.
+        pipeline: the ``Pipeline`` to analyze.
+        unfinished_nodes: the iterable of ``Node``s which have not finished yet.
+        catalog: the ``DataCatalog`` of the run.
 
     Returns:
-        A list of all ``Node``s that are direct parents of ``child``.
+        A set containing all input unfinished ``Node``s and all remaining
+        ``Node``s that need to run in case their outputs are not persisted.
 
     """
-    parent_pipeline = pipeline.only_nodes_with_outputs(*child.inputs)
-    return parent_pipeline.nodes
+    nodes_to_run = set(unfinished_nodes)
+    initial_nodes = _nodes_with_external_inputs(unfinished_nodes)
+
+    queue, visited = deque(initial_nodes), set(initial_nodes)
+    while queue:
+        current_node = queue.popleft()
+        nodes_to_run.add(current_node)
+        # Look for parent nodes which produce non-persistent inputs (if those exist)
+        non_persistent_inputs = _enumerate_non_persistent_inputs(current_node, catalog)
+        for node in _enumerate_nodes_with_outputs(pipeline, non_persistent_inputs):
+            if node in visited:
+                continue
+            visited.add(node)
+            queue.append(node)
+
+    # Make sure no downstream tasks are skipped
+    nodes_to_run = set(pipeline.from_nodes(*(n.name for n in nodes_to_run)).nodes)
+
+    return nodes_to_run
 
 
-def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
-    """Check if a ``Node`` exclusively has persisted Datasets as inputs.
-    If at least one input is a ``MemoryDataset``, return False.
+def _nodes_with_external_inputs(nodes_of_interest: Iterable[Node]) -> set[Node]:
+    """For given ``Node``s , find their subset which depends on
+    external inputs of the ``Pipeline`` they constitute. External inputs
+    are pipeline inputs not produced by other ``Node``s in the ``Pipeline``.
+
+    Args:
+        nodes_of_interest: the ``Node``s to analyze.
+
+    Returns:
+        A set of ``Node``s that depend on external inputs
+        of nodes of interest.
+
+    """
+    p_nodes_of_interest = Pipeline(nodes_of_interest)
+    p_nodes_with_external_inputs = p_nodes_of_interest.only_nodes_with_inputs(
+        *p_nodes_of_interest.inputs()
+    )
+    return set(p_nodes_with_external_inputs.nodes)
+
+
+def _enumerate_non_persistent_inputs(node: Node, catalog: DataCatalog) -> set[str]:
+    """Enumerate non-persistent input datasets of a ``Node``.
 
     Args:
         node: the ``Node`` to check the inputs of.
         catalog: the ``DataCatalog`` of the run.
 
     Returns:
-        True if the ``Node`` being checked exclusively has inputs that
-        are not ``MemoryDataset``, else False.
+        Set of names of non-persistent inputs of given ``Node``.
 
     """
+    # We use _datasets because they pertain parameter name format
+    catalog_datasets = catalog._datasets
+    non_persistent_inputs: set[str] = set()
     for node_input in node.inputs:
-        # pylint: disable=protected-access
-        if isinstance(catalog._data_sets[node_input], MemoryDataset):
-            return False
-    return True
+        if node_input.startswith("params:"):
+            continue
+
+        if (
+            node_input not in catalog_datasets
+            or catalog_datasets[node_input]._EPHEMERAL
+        ):
+            non_persistent_inputs.add(node_input)
+
+    return non_persistent_inputs
+
+
+def _enumerate_nodes_with_outputs(
+    pipeline: Pipeline, outputs: Collection[str]
+) -> list[Node]:
+    """For given outputs, returns a list containing nodes that
+    generate them in the given ``Pipeline``.
+
+    Args:
+        pipeline: the ``Pipeline`` to search for nodes in.
+        outputs: the dataset names to find source nodes for.
+
+    Returns:
+        A list of all ``Node``s that are producing ``outputs``.
+
+    """
+    parent_pipeline = pipeline.only_nodes_with_outputs(*outputs)
+    return parent_pipeline.nodes
+
+
+def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[Node]:
+    """Given a collection of ``Node``s in a ``Pipeline``,
+    find the initial group of ``Node``s to be run (in topological order).
+
+    This can be used to define a sub-pipeline with the smallest possible
+    set of nodes to pass to --from-nodes.
+
+    Args:
+        pipeline: the ``Pipeline`` to search for initial ``Node``s in.
+        nodes: the ``Node``s to find initial group for.
+
+    Returns:
+        A list of initial ``Node``s to run given inputs (in topological order).
+
+    """
+    node_names = set(n.name for n in nodes)
+    if len(node_names) == 0:
+        return []
+    sub_pipeline = pipeline.only_nodes(*node_names)
+    initial_nodes = sub_pipeline.grouped_nodes[0]
+    return initial_nodes
 
 
 def run_node(
@@ -286,7 +379,7 @@ def run_node(
     catalog: DataCatalog,
     hook_manager: PluginManager,
     is_async: bool = False,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -324,15 +417,14 @@ def run_node(
     return node
 
 
-def _collect_inputs_from_hook(
+def _collect_inputs_from_hook(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> dict[str, Any]:
-    # pylint: disable=too-many-arguments
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
         node=node,
@@ -353,21 +445,19 @@ def _collect_inputs_from_hook(
                     f"'before_node_run' must return either None or a dictionary mapping "
                     f"dataset names to updated values, got '{response_type}' instead."
                 )
-            response = response or {}
-            additional_inputs.update(response)
+            additional_inputs.update(response or {})
 
     return additional_inputs
 
 
-def _call_node_run(
+def _call_node_run(  # noqa: PLR0913
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> dict[str, Any]:
-    # pylint: disable=too-many-arguments
     try:
         outputs = node.run(inputs)
     except Exception as exc:
@@ -395,7 +485,7 @@ def _run_node_sequential(
     node: Node,
     catalog: DataCatalog,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> Node:
     inputs = {}
 
@@ -420,7 +510,7 @@ def _run_node_sequential(
     items: Iterable = outputs.items()
     # if all outputs are iterators, then the node is a generator node
     if all(isinstance(d, Iterator) for d in outputs.values()):
-        # Python dictionaries are ordered so we are sure
+        # Python dictionaries are ordered, so we are sure
         # the keys and the chunk streams are in the same order
         # [a, b, c]
         keys = list(outputs.keys())
@@ -442,9 +532,9 @@ def _run_node_async(
     node: Node,
     catalog: DataCatalog,
     hook_manager: PluginManager,
-    session_id: str = None,
+    session_id: str | None = None,
 ) -> Node:
-    def _synchronous_dataset_load(dataset_name: str):
+    def _synchronous_dataset_load(dataset_name: str) -> Any:
         """Minimal wrapper to ensure Hooks are run synchronously
         within an asynchronous dataset load."""
         hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)

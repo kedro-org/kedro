@@ -1,0 +1,28 @@
+extends: existence
+message: "In general, use UK English spelling instead of '%s'."
+link: 'https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide'
+ignorecase: true
+level: warning
+tokens:
+  - '(?:\w+)zation'
+  - '(?:\w+)izing'
+  - '(?:\w+)izer'
+  - '(?:\w+)ized'
+  - '(?:\w+)ize'
+  - '(?:\w+)log'
+  - '(?:\w+)lor'
+  - '(?:\w+)lyze'
+exceptions:
+    - backlog
+    - blog
+    - capsize
+    - catalog
+    - Catalog
+    - DataCatalog
+    - dialog
+    - log
+    - maize
+    - prize
+    - seize
+    - size
+    - tailor

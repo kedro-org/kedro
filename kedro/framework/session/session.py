@@ -15,13 +15,11 @@ from typing import Any, Iterable
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import AbstractConfigLoader
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
-    configure_logging,
     pipelines,
     settings,
     validate_settings,
@@ -29,28 +27,29 @@ from kedro.framework.project import (
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.utils import _find_kedro_project
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
-    project_path = str(project_path)
+    path = str(project_path)
     try:
         res = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"],
-            cwd=project_path,
+            ["git", "rev-parse", "--short", "HEAD"],  # noqa: S603, S607
+            cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data: dict[str, Any] = {"commit_sha": res.decode().strip()}
         git_status_res = subprocess.check_output(
-            ["git", "status", "--short"],
-            cwd=project_path,
+            ["git", "status", "--short"],  # noqa: S603, S607
+            cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data["dirty"] = bool(git_status_res.decode().strip())
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         logger = logging.getLogger(__name__)
-        logger.debug("Unable to git describe %s", project_path)
+        logger.debug("Unable to git describe %s", path)
         logger.debug(traceback.format_exc())
         return {}
 
@@ -74,7 +73,6 @@ class KedroSessionError(Exception):
     pass
 
 
-# pylint: disable=too-many-instance-attributes
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
@@ -99,16 +97,17 @@ class KedroSession:
 
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         session_id: str,
-        package_name: str = None,
+        package_name: str | None = None,
         project_path: Path | str | None = None,
         save_on_close: bool = False,
         conf_source: str | None = None,
     ):
-        self._project_path = Path(project_path or Path.cwd()).resolve()
+        self._project_path = Path(
+            project_path or _find_kedro_project(Path.cwd()) or Path.cwd()
+        ).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
         self._package_name = package_name
@@ -117,7 +116,7 @@ class KedroSession:
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
-        _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+        _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
 
         self._conf_source = conf_source or str(
@@ -125,20 +124,17 @@ class KedroSession:
         )
 
     @classmethod
-    def create(  # pylint: disable=too-many-arguments
+    def create(  # noqa: PLR0913
         cls,
-        package_name: str = None,
         project_path: Path | str | None = None,
         save_on_close: bool = True,
-        env: str = None,
-        extra_params: dict[str, Any] = None,
+        env: str | None = None,
+        extra_params: dict[str, Any] | None = None,
         conf_source: str | None = None,
     ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
 
         Args:
-            package_name: Package name for the Kedro project the session is
-                created for. The package_name argument will be removed in Kedro `0.19.0`.
             project_path: Path to the project root directory. Default is
                 current working directory Path.cwd().
             save_on_close: Whether or not to save the session when it's closed.
@@ -155,7 +151,6 @@ class KedroSession:
         validate_settings()
 
         session = cls(
-            package_name=package_name,
             project_path=project_path,
             session_id=generate_timestamp(),
             save_on_close=save_on_close,
@@ -165,7 +160,6 @@ class KedroSession:
         # have to explicitly type session_data otherwise mypy will complain
         # possibly related to this: https://github.com/python/mypy/issues/1430
         session_data: dict[str, Any] = {
-            "package_name": session._package_name,
             "project_path": session._project_path,
             "session_id": session.session_id,
         }
@@ -183,40 +177,15 @@ class KedroSession:
 
         try:
             session_data["username"] = getpass.getuser()
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             logging.getLogger(__name__).debug(
                 "Unable to get username. Full exception: %s", exc
             )
 
-        session._store.update(session_data)
-
-        # We need ConfigLoader and env to setup logging correctly
-        session._setup_logging()
         session_data.update(**_describe_git(session._project_path))
         session._store.update(session_data)
 
         return session
-
-    def _get_logging_config(self) -> dict[str, Any]:
-        logging_config = self._get_config_loader()["logging"]
-        # turn relative paths in logging config into absolute path
-        # before initialising loggers
-        logging_config = _convert_paths_to_absolute_posix(
-            project_path=self._project_path, conf_dictionary=logging_config
-        )
-        return logging_config
-
-    def _setup_logging(self) -> None:
-        """Register logging specified in logging directory."""
-        try:
-            logging_config = self._get_logging_config()
-        except MissingConfigException:
-            self._logger.debug(
-                "No project logging configuration loaded; "
-                "Kedro's default logging configuration will be used."
-            )
-        else:
-            configure_logging(logging_config)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS
@@ -226,7 +195,7 @@ class KedroSession:
         store_args["session_id"] = self.session_id
 
         try:
-            return store_class(**store_args)
+            return store_class(**store_args)  # type: ignore[no-any-return]
         except TypeError as err:
             raise ValueError(
                 f"\n{err}.\nStore config must only contain arguments valid "
@@ -237,7 +206,7 @@ class KedroSession:
                 f"\n{err}.\nFailed to instantiate session store of type '{classpath}'."
             ) from err
 
-    def _log_exception(self, exc_type, exc_value, exc_tb):
+    def _log_exception(self, exc_type: Any, exc_value: Any, exc_tb: Any) -> None:
         type_ = [] if exc_type.__module__ == "builtins" else [exc_type.__module__]
         type_.append(exc_type.__qualname__)
 
@@ -262,7 +231,6 @@ class KedroSession:
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
         config_loader = self._get_config_loader()
-
         context_class = settings.CONTEXT_CLASS
         context = context_class(
             package_name=self._package_name,
@@ -272,52 +240,50 @@ class KedroSession:
             extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
-        self._hook_manager.hook.after_context_created(  # pylint: disable=no-member
-            context=context
-        )
+        self._hook_manager.hook.after_context_created(context=context)
 
-        return context
+        return context  # type: ignore[no-any-return]
 
-    def _get_config_loader(self) -> ConfigLoader:
+    def _get_config_loader(self) -> AbstractConfigLoader:
         """An instance of the config loader."""
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
 
         config_loader_class = settings.CONFIG_LOADER_CLASS
-        return config_loader_class(
+        return config_loader_class(  # type: ignore[no-any-return]
             conf_source=self._conf_source,
             env=env,
             runtime_params=extra_params,
             **settings.CONFIG_LOADER_ARGS,
         )
 
-    def close(self):
+    def close(self) -> None:
         """Close the current session and save its store to disk
         if `save_on_close` attribute is True.
         """
         if self.save_on_close:
             self._store.save()
 
-    def __enter__(self):
+    def __enter__(self) -> KedroSession:
         return self
 
-    def __exit__(self, exc_type, exc_value, tb_):
+    def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
         if exc_type:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def run(  # pylint: disable=too-many-arguments,too-many-locals
+    def run(  # noqa: PLR0913
         self,
-        pipeline_name: str = None,
-        tags: Iterable[str] = None,
-        runner: AbstractRunner = None,
-        node_names: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-        load_versions: dict[str, str] = None,
-        namespace: str = None,
+        pipeline_name: str | None = None,
+        tags: Iterable[str] | None = None,
+        runner: AbstractRunner | None = None,
+        node_names: Iterable[str] | None = None,
+        from_nodes: Iterable[str] | None = None,
+        to_nodes: Iterable[str] | None = None,
+        from_inputs: Iterable[str] | None = None,
+        to_outputs: Iterable[str] | None = None,
+        load_versions: dict[str, str] | None = None,
+        namespace: str | None = None,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -354,7 +320,6 @@ class KedroSession:
             These are returned in a dictionary, where the keys are defined
             by the node outputs.
         """
-        # pylint: disable=protected-access,no-member
         # Report project name
         self._logger.info("Kedro project %s", self._project_path.name)
 
@@ -417,7 +382,12 @@ class KedroSession:
         # Run the runner
         hook_manager = self._hook_manager
         runner = runner or SequentialRunner()
-        hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
+        if not isinstance(runner, AbstractRunner):
+            raise KedroSessionError(
+                "KedroSession expect an instance of Runner instead of a class."
+                "Have you forgotten the `()` at the end of the statement?"
+            )
+        hook_manager.hook.before_pipeline_run(
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 

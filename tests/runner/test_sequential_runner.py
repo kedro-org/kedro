@@ -7,7 +7,13 @@ import pandas as pd
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DatasetError, LambdaDataset
+from kedro.io import (
+    AbstractDataset,
+    DataCatalog,
+    DatasetError,
+    LambdaDataset,
+    MemoryDataset,
+)
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
@@ -29,6 +35,11 @@ class TestValidSequentialRunner:
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
+    def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
+        catalog.add_feed_dict({"A": 42})
+        SequentialRunner().run(fan_out_fan_in, catalog)
+        assert "Using synchronous mode for loading and saving data." in caplog.text
+
 
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSeqentialRunnerBranchlessPipeline:
@@ -39,7 +50,7 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert "E" in outputs
         assert len(outputs) == 1
 
-    def test_no_data_sets(self, is_async, branchless_pipeline):
+    def test_no_datasets(self, is_async, branchless_pipeline):
         catalog = DataCatalog({}, {"ds1": 42})
         outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
@@ -125,7 +136,7 @@ class TestSequentialRunnerBranchedPipeline:
             )
 
 
-class LoggingDataset(AbstractDataSet):
+class LoggingDataset(AbstractDataset):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name
@@ -236,23 +247,23 @@ class TestSequentialRunnerRelease:
     )
     def test_confirms(self, mocker, test_pipeline, is_async):
         fake_dataset_instance = mocker.Mock()
-        catalog = DataCatalog(data_sets={"ds1": fake_dataset_instance})
+        catalog = DataCatalog(datasets={"ds1": fake_dataset_instance})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
         fake_dataset_instance.confirm.assert_called_once_with()
 
 
-@pytest.mark.parametrize(
-    "failing_node_names,expected_pattern",
-    [
-        (["node1_A"], r"No nodes ran."),
-        (["node2"], r"(node1_A,node1_B|node1_B,node1_A)"),
-        (["node3_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node3_A", "node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node2", "node4_A"], r"(node1_A,node1_B|node1_B,node1_A)"),
-    ],
-)
 class TestSuggestResumeScenario:
+    @pytest.mark.parametrize(
+        "failing_node_names,expected_pattern",
+        [
+            (["node1_A", "node1_B"], r"No nodes ran."),
+            (["node2"], r"(node1_A,node1_B|node1_B,node1_A)"),
+            (["node3_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+            (["node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+            (["node3_A", "node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+            (["node2", "node4_A"], r"(node1_A,node1_B|node1_B,node1_A)"),
+        ],
+    )
     def test_suggest_resume_scenario(
         self,
         caplog,
@@ -274,3 +285,67 @@ class TestSuggestResumeScenario:
                 hook_manager=_create_hook_manager(),
             )
         assert re.search(expected_pattern, caplog.text)
+
+    @pytest.mark.parametrize(
+        "failing_node_names,expected_pattern",
+        [
+            (["node1_A", "node1_B"], r"No nodes ran."),
+            (["node2"], r'"node1_A,node1_B"'),
+            (["node3_A"], r'"node3_A,node3_B"'),
+            (["node4_A"], r'"node3_A,node3_B"'),
+            (["node3_A", "node4_A"], r'"node3_A,node3_B"'),
+            (["node2", "node4_A"], r'"node1_A,node1_B"'),
+        ],
+    )
+    def test_stricter_suggest_resume_scenario(
+        self,
+        caplog,
+        two_branches_crossed_pipeline_variable_inputs,
+        persistent_dataset_catalog,
+        failing_node_names,
+        expected_pattern,
+    ):
+        """
+        Stricter version of previous test.
+        Covers pipelines where inputs are shared across nodes.
+        """
+        test_pipeline = two_branches_crossed_pipeline_variable_inputs
+
+        nodes = {n.name: n for n in test_pipeline.nodes}
+        for name in failing_node_names:
+            test_pipeline -= modular_pipeline([nodes[name]])
+            test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
+
+        with pytest.raises(Exception, match="test exception"):
+            SequentialRunner().run(
+                test_pipeline,
+                persistent_dataset_catalog,
+                hook_manager=_create_hook_manager(),
+            )
+        assert re.search(expected_pattern, caplog.text)
+
+
+class TestMemoryDatasetBehaviour:
+    def test_run_includes_memory_datasets(self, pipeline_with_memory_datasets):
+        # Create a catalog with MemoryDataset entries and inputs for the pipeline
+        catalog = DataCatalog(
+            {
+                "Input1": LambdaDataset(load=lambda: "data1", save=lambda data: None),
+                "Input2": LambdaDataset(load=lambda: "data2", save=lambda data: None),
+                "MemOutput1": MemoryDataset(),
+                "MemOutput2": MemoryDataset(),
+            }
+        )
+
+        # Add a regular dataset to the catalog
+        catalog.add("RegularOutput", LambdaDataset(None, None, lambda: True))
+
+        # Run the pipeline
+        output = SequentialRunner().run(pipeline_with_memory_datasets, catalog)
+
+        # Check that MemoryDataset outputs are included in the run results
+        assert "MemOutput1" in output
+        assert "MemOutput2" in output
+        assert (
+            "RegularOutput" not in output
+        )  # This output is registered in DataCatalog and so should not be in free outputs

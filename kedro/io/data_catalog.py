@@ -1,4 +1,4 @@
-"""``DataCatalog`` stores instances of ``AbstractDataSet`` implementations to
+"""``DataCatalog`` stores instances of ``AbstractDataset`` implementations to
 provide ``load`` and ``save`` capabilities from anywhere in the program. To
 use a ``DataCatalog``, you need to instantiate it with a dictionary of data
 sets. Then it will act as a single point of reference for your calls,
@@ -10,12 +10,13 @@ import copy
 import difflib
 import logging
 import re
-from collections import defaultdict
-from typing import Any
+from typing import Any, Dict
+
+from parse import parse
 
 from kedro.io.core import (
-    AbstractDataSet,
-    AbstractVersionedDataSet,
+    AbstractDataset,
+    AbstractVersionedDataset,
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
@@ -23,15 +24,16 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
+from kedro.logging import _format_rich, _has_rich_handler
+
+Patterns = Dict[str, Dict[str, Any]]
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
 WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
-def _get_credentials(
-    credentials_name: str, credentials: dict[str, Any]
-) -> dict[str, Any]:
+def _get_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
     """Return a set of credentials from the provided credentials dict.
 
     Args:
@@ -82,16 +84,16 @@ def _resolve_credentials(
     return {k: _map_value(k, v) for k, v in config.items()}
 
 
-def _sub_nonword_chars(data_set_name: str) -> str:
+def _sub_nonword_chars(dataset_name: str) -> str:
     """Replace non-word characters in data set names since Kedro 0.16.2.
 
     Args:
-        data_set_name: The data set name registered in the data catalog.
+        dataset_name: The data set name registered in the data catalog.
 
     Returns:
         The name used in `DataCatalog.datasets`.
     """
-    return re.sub(WORDS_REGEX_PATTERN, "__", data_set_name)
+    return re.sub(WORDS_REGEX_PATTERN, "__", dataset_name)
 
 
 class _FrozenDatasets:
@@ -99,26 +101,28 @@ class _FrozenDatasets:
 
     def __init__(
         self,
-        *datasets_collections: _FrozenDatasets | dict[str, AbstractDataSet],
+        *datasets_collections: _FrozenDatasets | dict[str, AbstractDataset],
     ):
         """Return a _FrozenDatasets instance from some datasets collections.
         Each collection could either be another _FrozenDatasets or a dictionary.
         """
+        self._original_names: set[str] = set()
         for collection in datasets_collections:
             if isinstance(collection, _FrozenDatasets):
                 self.__dict__.update(collection.__dict__)
+                self._original_names.update(collection._original_names)
             else:
                 # Non-word characters in dataset names are replaced with `__`
                 # for easy access to transcoded/prefixed datasets.
-                self.__dict__.update(
-                    {
-                        _sub_nonword_chars(dataset_name): dataset
-                        for dataset_name, dataset in collection.items()
-                    }
-                )
+                for dataset_name, dataset in collection.items():
+                    self.__dict__[_sub_nonword_chars(dataset_name)] = dataset
+                    self._original_names.add(dataset_name)
 
     # Don't allow users to add/change attributes on the fly
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
+        if key == "_original_names":
+            super().__setattr__(key, value)
+            return
         msg = "Operation not allowed! "
         if key in self.__dict__:
             msg += "Please change datasets through configuration."
@@ -126,9 +130,15 @@ class _FrozenDatasets:
             msg += "Please use DataCatalog.add() instead."
         raise AttributeError(msg)
 
+    def _ipython_key_completions_(self) -> list[str]:
+        return list(self._original_names)
+
+    def __getitem__(self, key: str) -> Any:
+        return self.__dict__[_sub_nonword_chars(key)]
+
 
 class DataCatalog:
-    """``DataCatalog`` stores instances of ``AbstractDataSet`` implementations
+    """``DataCatalog`` stores instances of ``AbstractDataset`` implementations
     to provide ``load`` and ``save`` capabilities from anywhere in the
     program. To use a ``DataCatalog``, you need to instantiate it with
     a dictionary of data sets. Then it will act as a single point of reference
@@ -136,13 +146,16 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
-        data_sets: dict[str, AbstractDataSet] = None,
-        feed_dict: dict[str, Any] = None,
-        layers: dict[str, set[str]] = None,
+        datasets: dict[str, AbstractDataset] | None = None,
+        feed_dict: dict[str, Any] | None = None,
+        dataset_patterns: Patterns | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
+        default_pattern: Patterns | None = None,
     ) -> None:
-        """``DataCatalog`` stores instances of ``AbstractDataSet``
+        """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
         anywhere in the program. To use a ``DataCatalog``, you need to
         instantiate it with a dictionary of data sets. Then it will act as a
@@ -150,42 +163,61 @@ class DataCatalog:
         functions to the underlying data sets.
 
         Args:
-            data_sets: A dictionary of data set names and data set instances.
+            datasets: A dictionary of data set names and data set instances.
             feed_dict: A feed dict with data to be added in memory.
-            layers: A dictionary of data set layers. It maps a layer name
-                to a set of data set names, according to the
-                data engineering convention. For more details, see
-                https://docs.kedro.org/en/stable/resources/glossary.html#layers-data-engineering-convention
+            dataset_patterns: A dictionary of data set factory patterns
+                and corresponding data set configuration. When fetched from catalog configuration
+                these patterns will be sorted by:
+                1. Decreasing specificity (number of characters outside the curly brackets)
+                2. Decreasing number of placeholders (number of curly bracket pairs)
+                3. Alphabetically
+                A pattern of specificity 0 is a catch-all pattern and will overwrite the default
+                pattern provided through the runners if it comes before "default" in the alphabet.
+                Such an overwriting pattern will emit a warning. The `"{default}"` name will
+                not emit a warning.
+            load_versions: A mapping between data set names and versions
+                to load. Has no effect on data sets without enabled versioning.
+            save_version: Version string to be used for ``save`` operations
+                by all data sets with enabled versioning. It must: a) be a
+                case-insensitive string that conforms with operating system
+                filename limitations, b) always return the latest version when
+                sorted in lexicographical order.
+            default_pattern: A dictionary of the default catch-all pattern that overrides the default
+                pattern provided through the runners.
 
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(data_sets={'cars': cars})
+            >>> io = DataCatalog(datasets={'cars': cars})
         """
-        self._data_sets = dict(data_sets or {})
-        self.datasets = _FrozenDatasets(self._data_sets)
-        self.layers = layers
+        self._datasets = dict(datasets or {})
+        self.datasets = _FrozenDatasets(self._datasets)
+        # Keep a record of all patterns in the catalog.
+        # {dataset pattern name : dataset pattern body}
+        self._dataset_patterns = dataset_patterns or {}
+        self._load_versions = load_versions or {}
+        self._save_version = save_version
+        self._default_pattern = default_pattern or {}
 
-        # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
 
     @property
-    def _logger(self):
+    def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
     @classmethod
     def from_config(
-        cls: type,
+        cls,
         catalog: dict[str, dict[str, Any]] | None,
-        credentials: dict[str, dict[str, Any]] = None,
-        load_versions: dict[str, str] = None,
-        save_version: str = None,
+        credentials: dict[str, dict[str, Any]] | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
     ) -> DataCatalog:
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -194,13 +226,13 @@ class DataCatalog:
         Args:
             catalog: A dictionary whose keys are the data set names and
                 the values are dictionaries with the constructor arguments
-                for classes implementing ``AbstractDataSet``. The data set
+                for classes implementing ``AbstractDataset``. The data set
                 class to be loaded is specified with the key ``type`` and their
                 fully qualified class name. All ``kedro.io`` data set can be
                 specified by their class name only, i.e. their module name
                 can be omitted.
             credentials: A dictionary containing credentials for different
-                data sets. Use the ``credentials`` key in a ``AbstractDataSet``
+                data sets. Use the ``credentials`` key in a ``AbstractDataset``
                 to refer to the appropriate credentials as shown in the example
                 below.
             load_versions: A mapping between dataset names and versions
@@ -226,14 +258,14 @@ class DataCatalog:
 
             >>> config = {
             >>>     "cars": {
-            >>>         "type": "pandas.CSVDataSet",
+            >>>         "type": "pandas.CSVDataset",
             >>>         "filepath": "cars.csv",
             >>>         "save_args": {
             >>>             "index": False
             >>>         }
             >>>     },
             >>>     "boats": {
-            >>>         "type": "pandas.CSVDataSet",
+            >>>         "type": "pandas.CSVDataset",
             >>>         "filepath": "s3://aws-bucket-name/boats.csv",
             >>>         "credentials": "boats_credentials",
             >>>         "save_args": {
@@ -256,62 +288,209 @@ class DataCatalog:
             >>> df = catalog.load("cars")
             >>> catalog.save("boats", df)
         """
-        data_sets = {}
+        datasets = {}
+        dataset_patterns = {}
         catalog = copy.deepcopy(catalog) or {}
         credentials = copy.deepcopy(credentials) or {}
         save_version = save_version or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
+        user_default = {}
 
-        missing_keys = load_versions.keys() - catalog.keys()
+        for ds_name, ds_config in catalog.items():
+            if not isinstance(ds_config, dict):
+                raise DatasetError(
+                    f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
+                    "\nHint: If this catalog entry is intended for variable interpolation, "
+                    "make sure that the key is preceded by an underscore."
+                )
+
+            ds_config = _resolve_credentials(  # noqa: PLW2901
+                ds_config, credentials
+            )
+            if cls._is_pattern(ds_name):
+                # Add each factory to the dataset_patterns dict.
+                dataset_patterns[ds_name] = ds_config
+
+            else:
+                datasets[ds_name] = AbstractDataset.from_config(
+                    ds_name, ds_config, load_versions.get(ds_name), save_version
+                )
+        sorted_patterns = cls._sort_patterns(dataset_patterns)
+        if sorted_patterns:
+            # If the last pattern is a catch-all pattern, pop it and set it as the default
+            if cls._specificity(list(sorted_patterns.keys())[-1]) == 0:
+                last_pattern = sorted_patterns.popitem()
+                user_default = {last_pattern[0]: last_pattern[1]}
+
+        missing_keys = [
+            key
+            for key in load_versions.keys()
+            if not (key in catalog or cls._match_pattern(sorted_patterns, key))
+        ]
         if missing_keys:
             raise DatasetNotFoundError(
                 f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
             )
 
-        layers: dict[str, set[str]] = defaultdict(set)
-        for ds_name, ds_config in catalog.items():
-            ds_layer = ds_config.pop("layer", None)
-            if ds_layer is not None:
-                layers[ds_layer].add(ds_name)
+        return cls(
+            datasets=datasets,
+            dataset_patterns=sorted_patterns,
+            load_versions=load_versions,
+            save_version=save_version,
+            default_pattern=user_default,
+        )
 
-            ds_config = _resolve_credentials(ds_config, credentials)
-            data_sets[ds_name] = AbstractDataSet.from_config(
-                ds_name, ds_config, load_versions.get(ds_name), save_version
+    @staticmethod
+    def _is_pattern(pattern: str) -> bool:
+        """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
+        return "{" in pattern
+
+    @staticmethod
+    def _match_pattern(dataset_patterns: Patterns, dataset_name: str) -> str | None:
+        """Match a dataset name against patterns in a dictionary."""
+        matches = (
+            pattern
+            for pattern in dataset_patterns.keys()
+            if parse(pattern, dataset_name)
+        )
+        return next(matches, None)
+
+    @classmethod
+    def _sort_patterns(cls, dataset_patterns: Patterns) -> dict[str, dict[str, Any]]:
+        """Sort a dictionary of dataset patterns according to parsing rules.
+
+        In order:
+
+        1. Decreasing specificity (number of characters outside the curly brackets)
+        2. Decreasing number of placeholders (number of curly bracket pairs)
+        3. Alphabetically
+        """
+        sorted_keys = sorted(
+            dataset_patterns,
+            key=lambda pattern: (
+                -(cls._specificity(pattern)),
+                -pattern.count("{"),
+                pattern,
+            ),
+        )
+        catch_all = [
+            pattern for pattern in sorted_keys if cls._specificity(pattern) == 0
+        ]
+        if len(catch_all) > 1:
+            raise DatasetError(
+                f"Multiple catch-all patterns found in the catalog: {', '.join(catch_all)}. Only one catch-all pattern is allowed, remove the extras."
             )
+        return {key: dataset_patterns[key] for key in sorted_keys}
 
-        dataset_layers = layers or None
-        return cls(data_sets=data_sets, layers=dataset_layers)
+    @staticmethod
+    def _specificity(pattern: str) -> int:
+        """Helper function to check the length of exactly matched characters not inside brackets.
+
+        Example:
+        ::
+
+            >>> specificity("{namespace}.companies") = 10
+            >>> specificity("{namespace}.{dataset}") = 1
+            >>> specificity("france.companies") = 16
+        """
+        # Remove all the placeholders from the pattern and count the number of remaining chars
+        result = re.sub(r"\{.*?\}", "", pattern)
+        return len(result)
 
     def _get_dataset(
-        self, data_set_name: str, version: Version = None, suggest: bool = True
-    ) -> AbstractDataSet:
-        if data_set_name not in self._data_sets:
-            error_msg = f"Dataset '{data_set_name}' not found in the catalog"
+        self,
+        dataset_name: str,
+        version: Version | None = None,
+        suggest: bool = True,
+    ) -> AbstractDataset:
+        matched_pattern = self._match_pattern(
+            self._dataset_patterns, dataset_name
+        ) or self._match_pattern(self._default_pattern, dataset_name)
+        if dataset_name not in self._datasets and matched_pattern:
+            # If the dataset is a patterned dataset, materialise it and add it to
+            # the catalog
+            config_copy = copy.deepcopy(
+                self._dataset_patterns.get(matched_pattern)
+                or self._default_pattern.get(matched_pattern)
+                or {}
+            )
+            dataset_config = self._resolve_config(
+                dataset_name, matched_pattern, config_copy
+            )
+            dataset = AbstractDataset.from_config(
+                dataset_name,
+                dataset_config,
+                self._load_versions.get(dataset_name),
+                self._save_version,
+            )
+            if (
+                self._specificity(matched_pattern) == 0
+                and matched_pattern in self._default_pattern
+            ):
+                self._logger.warning(
+                    "Config from the dataset factory pattern '%s' in the catalog will be used to "
+                    "override the default dataset creation for '%s'",
+                    matched_pattern,
+                    dataset_name,
+                )
+
+            self.add(dataset_name, dataset)
+        if dataset_name not in self._datasets:
+            error_msg = f"Dataset '{dataset_name}' not found in the catalog"
 
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
-                matches = difflib.get_close_matches(
-                    data_set_name, self._data_sets.keys()
-                )
+                matches = difflib.get_close_matches(dataset_name, self._datasets.keys())
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
-
             raise DatasetNotFoundError(error_msg)
-
-        data_set = self._data_sets[data_set_name]
-        if version and isinstance(data_set, AbstractVersionedDataSet):
+        dataset = self._datasets[dataset_name]
+        if version and isinstance(dataset, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
-            data_set = data_set._copy(  # pylint: disable=protected-access
-                _version=version
-            )
+            dataset = dataset._copy(_version=version)
 
-        return data_set
+        return dataset
 
-    def load(self, name: str, version: str = None) -> Any:
+    def __contains__(self, dataset_name: str) -> bool:
+        """Check if an item is in the catalog as a materialised dataset or pattern"""
+        matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
+        if dataset_name in self._datasets or matched_pattern:
+            return True
+        return False
+
+    @classmethod
+    def _resolve_config(
+        cls,
+        dataset_name: str,
+        matched_pattern: str,
+        config: dict,
+    ) -> dict[str, Any]:
+        """Get resolved AbstractDataset from a factory config"""
+        result = parse(matched_pattern, dataset_name)
+        # Resolve the factory config for the dataset
+        if isinstance(config, dict):
+            for key, value in config.items():
+                config[key] = cls._resolve_config(dataset_name, matched_pattern, value)
+        elif isinstance(config, (list, tuple)):
+            config = [
+                cls._resolve_config(dataset_name, matched_pattern, value)
+                for value in config
+            ]
+        elif isinstance(config, str) and "}" in config:
+            try:
+                config = str(config).format_map(result.named)
+            except KeyError as exc:
+                raise DatasetError(
+                    f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the configuration "
+                    f"should be present in the dataset factory pattern."
+                ) from exc
+        return config
+
+    def load(self, name: str, version: str | None = None) -> Any:
         """Loads a registered data set.
 
         Args:
@@ -330,12 +509,12 @@ class DataCatalog:
         ::
 
             >>> from kedro.io import DataCatalog
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(data_sets={'cars': cars})
+            >>> io = DataCatalog(datasets={'cars': cars})
             >>>
             >>> df = io.load("cars")
         """
@@ -343,7 +522,12 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from '%s' (%s)...", name, type(dataset).__name__
+            "Loading data from %s (%s)...",
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
+            type(dataset).__name__,
+            extra={"markup": True},
         )
 
         result = dataset.load()
@@ -367,12 +551,12 @@ class DataCatalog:
 
             >>> import pandas as pd
             >>>
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(data_sets={'cars': cars})
+            >>> io = DataCatalog(datasets={'cars': cars})
             >>>
             >>> df = pd.DataFrame({'col1': [1, 2],
             >>>                    'col2': [4, 5],
@@ -381,7 +565,14 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to '%s' (%s)...", name, type(dataset).__name__)
+        self._logger.info(
+            "Saving data to %s (%s)...",
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
 
         dataset.save(data)
 
@@ -403,7 +594,7 @@ class DataCatalog:
             return False
         return dataset.exists()
 
-    def release(self, name: str):
+    def release(self, name: str) -> None:
         """Release any cached data associated with a data set
 
         Args:
@@ -417,14 +608,14 @@ class DataCatalog:
         dataset.release()
 
     def add(
-        self, data_set_name: str, data_set: AbstractDataSet, replace: bool = False
+        self, dataset_name: str, dataset: AbstractDataset, replace: bool = False
     ) -> None:
-        """Adds a new ``AbstractDataSet`` object to the ``DataCatalog``.
+        """Adds a new ``AbstractDataset`` object to the ``DataCatalog``.
 
         Args:
-            data_set_name: A unique data set name which has not been
+            dataset_name: A unique data set name which has not been
                 registered yet.
-            data_set: A data set object to be associated with the given data
+            dataset: A data set object to be associated with the given data
                 set name.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
@@ -436,31 +627,31 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> io = DataCatalog(data_sets={
-            >>>                   'cars': CSVDataSet(filepath="cars.csv")
+            >>> io = DataCatalog(datasets={
+            >>>                   'cars': CSVDataset(filepath="cars.csv")
             >>>                  })
             >>>
-            >>> io.add("boats", CSVDataSet(filepath="boats.csv"))
+            >>> io.add("boats", CSVDataset(filepath="boats.csv"))
         """
-        if data_set_name in self._data_sets:
+        if dataset_name in self._datasets:
             if replace:
-                self._logger.warning("Replacing dataset '%s'", data_set_name)
+                self._logger.warning("Replacing dataset '%s'", dataset_name)
             else:
                 raise DatasetAlreadyExistsError(
-                    f"Dataset '{data_set_name}' has already been registered"
+                    f"Dataset '{dataset_name}' has already been registered"
                 )
-        self._data_sets[data_set_name] = data_set
-        self.datasets = _FrozenDatasets(self.datasets, {data_set_name: data_set})
+        self._datasets[dataset_name] = dataset
+        self.datasets = _FrozenDatasets(self.datasets, {dataset_name: dataset})
 
     def add_all(
-        self, data_sets: dict[str, AbstractDataSet], replace: bool = False
+        self, datasets: dict[str, AbstractDataset], replace: bool = False
     ) -> None:
         """Adds a group of new data sets to the ``DataCatalog``.
 
         Args:
-            data_sets: A dictionary of dataset names and dataset
+            datasets: A dictionary of dataset names and dataset
                 instances.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
@@ -472,22 +663,22 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
+            >>> from kedro_datasets.pandas import CSVDataset, ParquetDataset
             >>>
-            >>> io = DataCatalog(data_sets={
-            >>>                   "cars": CSVDataSet(filepath="cars.csv")
+            >>> io = DataCatalog(datasets={
+            >>>                   "cars": CSVDataset(filepath="cars.csv")
             >>>                  })
             >>> additional = {
-            >>>     "planes": ParquetDataSet("planes.parq"),
-            >>>     "boats": CSVDataSet(filepath="boats.csv")
+            >>>     "planes": ParquetDataset("planes.parq"),
+            >>>     "boats": CSVDataset(filepath="boats.csv")
             >>> }
             >>>
             >>> io.add_all(additional)
             >>>
             >>> assert io.list() == ["cars", "planes", "boats"]
         """
-        for name, data_set in data_sets.items():
-            self.add(name, data_set, replace)
+        for name, dataset in datasets.items():
+            self.add(name, dataset, replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         """Adds instances of ``MemoryDataset``, containing the data provided
@@ -514,13 +705,13 @@ class DataCatalog:
             >>>
             >>> assert io.load("data").equals(df)
         """
-        for data_set_name in feed_dict:
-            if isinstance(feed_dict[data_set_name], AbstractDataSet):
-                data_set = feed_dict[data_set_name]
+        for dataset_name in feed_dict:
+            if isinstance(feed_dict[dataset_name], AbstractDataset):
+                dataset = feed_dict[dataset_name]
             else:
-                data_set = MemoryDataset(data=feed_dict[data_set_name])
+                dataset = MemoryDataset(data=feed_dict[dataset_name])
 
-            self.add(data_set_name, data_set, replace)
+            self.add(dataset_name, dataset, replace)
 
     def list(self, regex_search: str | None = None) -> list[str]:
         """
@@ -552,7 +743,7 @@ class DataCatalog:
         """
 
         if regex_search is None:
-            return list(self._data_sets.keys())
+            return list(self._datasets.keys())
 
         if not regex_search.strip():
             self._logger.warning("The empty string will not match any data sets")
@@ -565,18 +756,37 @@ class DataCatalog:
             raise SyntaxError(
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
-        return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
+        return [dset_name for dset_name in self._datasets if pattern.search(dset_name)]
 
-    def shallow_copy(self) -> DataCatalog:
+    def shallow_copy(
+        self, extra_dataset_patterns: Patterns | None = None
+    ) -> DataCatalog:
         """Returns a shallow copy of the current object.
 
         Returns:
             Copy of the current object.
         """
-        return DataCatalog(data_sets=self._data_sets, layers=self.layers)
+        if not self._default_pattern and extra_dataset_patterns:
+            unsorted_dataset_patterns = {
+                **self._dataset_patterns,
+                **extra_dataset_patterns,
+            }
+            dataset_patterns = self._sort_patterns(unsorted_dataset_patterns)
+        else:
+            dataset_patterns = self._dataset_patterns
+        return self.__class__(
+            datasets=self._datasets,
+            dataset_patterns=dataset_patterns,
+            load_versions=self._load_versions,
+            save_version=self._save_version,
+            default_pattern=self._default_pattern,
+        )
 
-    def __eq__(self, other):
-        return (self._data_sets, self.layers) == (other._data_sets, other.layers)
+    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
+        return (self._datasets, self._dataset_patterns) == (
+            other._datasets,
+            other._dataset_patterns,
+        )
 
     def confirm(self, name: str) -> None:
         """Confirm a dataset by its name.
@@ -588,9 +798,9 @@ class DataCatalog:
 
         """
         self._logger.info("Confirming dataset '%s'", name)
-        data_set = self._get_dataset(name)
+        dataset = self._get_dataset(name)
 
-        if hasattr(data_set, "confirm"):
-            data_set.confirm()  # type: ignore
+        if hasattr(dataset, "confirm"):
+            dataset.confirm()
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")

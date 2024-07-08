@@ -3,20 +3,17 @@
 from __future__ import annotations
 
 import copy
-import warnings
 from typing import Any
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 _EMPTY = object()
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-MemoryDataSet: AbstractDataSet
 
-
-class MemoryDataset(AbstractDataSet):
+class MemoryDataset(AbstractDataset):
     """``MemoryDataset`` loads and saves data from/to an in-memory
-    Python object.
+    Python object. The `_EPHEMERAL` attribute is set to True to
+    indicate MemoryDataset's non-persistence.
 
     Example:
     ::
@@ -26,20 +23,23 @@ class MemoryDataset(AbstractDataSet):
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
-        >>> data_set = MemoryDataset(data=data)
+        >>> dataset = MemoryDataset(data=data)
         >>>
-        >>> loaded_data = data_set.load()
+        >>> loaded_data = dataset.load()
         >>> assert loaded_data.equals(data)
         >>>
         >>> new_data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5]})
-        >>> data_set.save(new_data)
-        >>> reloaded_data = data_set.load()
+        >>> dataset.save(new_data)
+        >>> reloaded_data = dataset.load()
         >>> assert reloaded_data.equals(new_data)
 
     """
 
     def __init__(
-        self, data: Any = _EMPTY, copy_mode: str = None, metadata: dict[str, Any] = None
+        self,
+        data: Any = _EMPTY,
+        copy_mode: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``MemoryDataset`` pointing to the
         provided Python object.
@@ -55,6 +55,7 @@ class MemoryDataset(AbstractDataSet):
         self._data = _EMPTY
         self._copy_mode = copy_mode
         self.metadata = metadata
+        self._EPHEMERAL = True
         if data is not _EMPTY:
             self._save(data)
 
@@ -66,7 +67,7 @@ class MemoryDataset(AbstractDataSet):
         data = _copy_with_mode(self._data, copy_mode=copy_mode)
         return data
 
-    def _save(self, data: Any):
+    def _save(self, data: Any) -> None:
         copy_mode = self._copy_mode or _infer_copy_mode(data)
         self._data = _copy_with_mode(data, copy_mode=copy_mode)
 
@@ -93,15 +94,14 @@ def _infer_copy_mode(data: Any) -> str:
     Returns:
         One of "copy", "assign" or "deepcopy" as the copy mode to use.
     """
-    # pylint: disable=import-outside-toplevel
     try:
         import pandas as pd
     except ImportError:  # pragma: no cover
-        pd = None  # pragma: no cover
+        pd = None  # type: ignore[assignment]  # pragma: no cover
     try:
         import numpy as np
     except ImportError:  # pragma: no cover
-        np = None  # pragma: no cover
+        np = None  # type: ignore[assignment] # pragma: no cover
 
     if pd and isinstance(data, pd.DataFrame) or np and isinstance(data, np.ndarray):
         copy_mode = "copy"
@@ -140,16 +140,3 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
         )
 
     return copied_data
-
-
-def __getattr__(name):
-    if name == "MemoryDataSet":
-        alias = MemoryDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

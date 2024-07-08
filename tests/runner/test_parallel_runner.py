@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import importlib
-import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
 
@@ -9,7 +7,7 @@ import pytest
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
-    AbstractDataSet,
+    AbstractDataset,
     DataCatalog,
     DatasetError,
     LambdaDataset,
@@ -22,7 +20,6 @@ from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
     _run_node_synchronization,
-    _SharedMemoryDataset,
 )
 from tests.runner.conftest import (
     exception_fn,
@@ -34,21 +31,21 @@ from tests.runner.conftest import (
 )
 
 
-def test_deprecation():
-    class_name = "_SharedMemoryDataSet"
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
-        getattr(importlib.import_module("kedro.runner.parallel_runner"), class_name)
+class SingleProcessDataset(AbstractDataset):
+    def __init__(self):
+        self._SINGLE_PROCESS = True
+
+    def _load(self):
+        pass
+
+    def _save(self):
+        pass
+
+    def _describe(self):
+        pass
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 class TestValidParallelRunner:
-    def test_create_default_data_set(self):
-        # data_set is a proxy to a dataset in another process.
-        data_set = ParallelRunner().create_default_data_set("")
-        assert isinstance(data_set, _SharedMemoryDataset)
-
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
@@ -76,10 +73,12 @@ class TestValidParallelRunner:
         assert len(result["Z"]) == 3
         assert result["Z"] == ("42", "42", "42")
 
+    def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
+        catalog.add_feed_dict({"A": 42})
+        ParallelRunner().run(fan_out_fan_in, catalog)
+        assert "Using synchronous mode for loading and saving data." in caplog.text
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
+
 class TestMaxWorkers:
     @pytest.mark.parametrize("is_async", [False, True])
     @pytest.mark.parametrize(
@@ -103,7 +102,7 @@ class TestMaxWorkers:
         cpu_cores,
         user_specified_number,
         expected_number,
-    ):  # pylint: disable=too-many-arguments
+    ):  # noqa: PLR0913
         """
         The system has 2 cores, but we initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 processes.
@@ -136,17 +135,20 @@ class TestMaxWorkers:
         assert parallel_runner._max_workers == _MAX_WINDOWS_WORKERS
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
-    def test_task_validation(self, is_async, fan_out_fan_in, catalog):
+    def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise the lambda function."""
         catalog.add_feed_dict({"A": 42})
         pipeline = modular_pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
+
+    def test_task_dataset_validation(self, is_async, fan_out_fan_in, catalog):
+        """ParallelRunner cannot serialise datasets marked with `_SINGLE_PROCESS`."""
+        catalog.add("A", SingleProcessDataset())
+        with pytest.raises(AttributeError):
+            ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
 
     def test_task_exception(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(feed_dict={"A": 42})
@@ -172,7 +174,7 @@ class TestInvalidParallelRunner:
         with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_data_set_not_serialisable(self, is_async, fan_out_fan_in):
+    def test_dataset_not_serialisable(self, is_async, fan_out_fan_in):
         """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """
@@ -228,7 +230,7 @@ class TestInvalidParallelRunner:
             runner.run(fan_out_fan_in, catalog)
 
 
-class LoggingDataset(AbstractDataSet):
+class LoggingDataset(AbstractDataset):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name
@@ -249,15 +251,9 @@ class LoggingDataset(AbstractDataSet):
         return {}
 
 
-if not sys.platform.startswith("win"):
-    ParallelRunnerManager.register(  # pylint: disable=no-member
-        "LoggingDataset", LoggingDataset
-    )
+ParallelRunnerManager.register("LoggingDataset", LoggingDataset)
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):
@@ -267,7 +263,6 @@ class TestParallelRunnerRelease:
         pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        # pylint: disable=no-member
         catalog = DataCatalog(
             {
                 "in": runner._manager.LoggingDataset(log, "in", "stuff"),
@@ -291,7 +286,6 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        # pylint: disable=no-member
         catalog = DataCatalog(
             {
                 "first": runner._manager.LoggingDataset(log, "first"),
@@ -319,7 +313,7 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        # pylint: disable=no-member
+        # noqa: no-member
         catalog = DataCatalog(
             {"dataset": runner._manager.LoggingDataset(log, "dataset")}
         )

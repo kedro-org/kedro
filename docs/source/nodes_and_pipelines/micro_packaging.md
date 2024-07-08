@@ -1,12 +1,20 @@
 # Micro-packaging
 
+```{warning}
+_Micro-packaging is deprecated and will be removed from Kedro version 0.20.0._
+```
+
 Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond. A micro-package can be any part of Python code in a Kedro project including pipelines and utility functions.
 
 ## Package a micro-package
 
-You can package a micro-package by executing: `kedro micropkg package <micropkg_name>`
+You can package a micro-package by executing: `kedro micropkg package <micropkg_name>`.
 
-* This will generate a new [source distribution](https://docs.python.org/3/distutils/sourcedist.html) for this micro-package.
+`<micropkg_name>` should be a Python module path like what would be used in an `import` statement, for example
+
+`kedro micropkg package pipelines.data_processing`
+
+* This will generate a new source distribution for this micro-package.
 * By default, the tar file will be saved into `dist/` directory inside your project.
 * You can customise the target with the `--destination` (`-d`) option.
 
@@ -15,23 +23,22 @@ When you package your micro-package, such as a modular pipeline for example, Ked
 ```text
 ├── conf
 │   └── base
-│       └── parameters
-│           └── {{pipeline_name*}}  <-- All parameter file(s)
+│       └── parameters_{{pipeline_name*}}  <-- All parameter file(s)
+├── tests
+│   ├── init__.py
+│   └── pipelines
+│       └── {{pipeline_name}}              <-- Pipeline tests
 └── src
-    ├── my_project
-    │   ├── __init__.py
-    │   └── pipelines
-    │       └── {{pipeline_name}}    <-- Pipeline folder
-    └── tests
+    └── my_project
         ├── __init__.py
         └── pipelines
-            └── {{pipeline_name}}    <-- Pipeline tests
+            └── {{pipeline_name}}          <-- Pipeline folder
 ```
 
 Kedro will also include any requirements found in `src/<package_name>/pipelines/<micropkg_name>/requirements.txt` in the micro-package tar file. These requirements will later be taken into account when pulling a micro-package via `kedro micropkg pull`.
 
 ```{note}
-Kedro will not package the catalog config files even if those are present in `conf/<env>/catalog/<micropkg_name>.yml`.
+Kedro will not package the catalog config files even if those are present in `conf/<env>/catalog_<micropkg_name>.yml`.
 ```
 
 If you plan to publish your packaged micro-package to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your micro-package name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro micropkg package --alias <new_package_name> <micropkg_name>`.
@@ -67,7 +74,7 @@ You can pull a micro-package from a tar file by executing `kedro micropkg pull <
 * The `<package_name>` must either be a package name on PyPI or a path to the source distribution file.
 * Kedro will unpack the tar file, and install the files in following locations in your Kedro project:
   * All the micro-package code in `src/<package_name>/<micropkg_name>/`
-  * Configuration files in `conf/<env>/parameters/<micropkg_name>.yml`, where `<env>` defaults to `base`.
+  * Configuration files in `conf/<env>/parameters_<micropkg_name>.yml`, where `<env>` defaults to `base`.
   * To place parameters from a different config environment, run `kedro micropkg pull <micropkg_name> --env <env_name>`
   * Unit tests in `src/tests/<micropkg_name>`
 * Kedro will also parse any requirements packaged with the micro-package and add them to project level `requirements.in`.

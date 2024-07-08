@@ -66,16 +66,17 @@ HOOKS = (SparkHooks(),)
 
 We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
-* [spark.DeltaTableDataSet](/kedro_datasets.spark.DeltaTableDataSet)
-* [spark.SparkDataSet](/kedro_datasets.spark.SparkDataSet)
-* [spark.SparkJDBCDataSet](/kedro_datasets.spark.SparkJDBCDataSet)
-* [spark.SparkHiveDataSet](/kedro_datasets.spark.SparkHiveDataSet)
+* {class}`spark.DeltaTableDataset <kedro-datasets:kedro_datasets.spark.DeltaTableDataset>`
+* {class}`spark.SparkDataset <kedro-datasets:kedro_datasets.spark.SparkDataset>`
+* {class}`spark.SparkJDBCDataset <kedro-datasets:kedro_datasets.spark.SparkJDBCDataset>`
+* {class}`spark.SparkHiveDataset <kedro-datasets:kedro_datasets.spark.SparkHiveDataset>`
 
-The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
+
+The example below illustrates how to use `spark.SparkDataset` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
 
 ```yaml
 weather:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: s3a://your_bucket/data/01_raw/weather*
   file_format: csv
   load_args:
@@ -91,9 +92,9 @@ Or using the Python API:
 ```python
 import pyspark.sql
 from kedro.io import DataCatalog
-from kedro_datasets.spark import SparkDataSet
+from kedro_datasets.spark import SparkDataset
 
-spark_ds = SparkDataSet(
+spark_ds = SparkDataset(
     filepath="s3a://your_bucket/data/01_raw/weather*",
     file_format="csv",
     load_args={"header": True, "inferSchema": True},
@@ -110,16 +111,16 @@ assert isinstance(df, pyspark.sql.DataFrame)
 [Delta Lake](https://delta.io/) is an open-source project that enables building a Lakehouse architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
 To setup PySpark with Delta Lake, have a look at [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python).
 
-We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../data/data_catalog.md):
+We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding):
 
-* To create a Delta table, use a `SparkDataSet` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table and/or overwrite it.
-* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataSet` and perform the write operations within the node function.
+* To create a Delta table, use a `SparkDataset` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table or overwrite it.
+* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataset` and perform the write operations within the node function.
 
 As a result, we end up with a catalog that looks like this:
 
 ```yaml
 temperature:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/01_raw/data.csv
   file_format: "csv"
   load_args:
@@ -130,7 +131,7 @@ temperature:
     header: True
 
 weather@spark:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: s3a://my_bucket/03_primary/weather
   file_format: "delta"
   save_args:
@@ -138,11 +139,11 @@ weather@spark:
     versionAsOf: 0
 
 weather@delta:
-  type: spark.DeltaTableDataSet
+  type: spark.DeltaTableDataset
   filepath: s3a://my_bucket/03_primary/weather
 ```
 
-The `DeltaTableDataSet` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
+The `DeltaTableDataset` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
 
 
 ```{note}
@@ -169,7 +170,7 @@ pipeline(
 )
 ```
 
-`first_operation_complete` is a `MemoryDataSet` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node can simply not return anything:
+`first_operation_complete` is a `MemoryDataset` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node can simply not return anything:
 
 ```python
 pipeline(
@@ -188,11 +189,11 @@ The following diagram is the visual representation of the workflow explained abo
 This pattern of creating "dummy" datasets to preserve the data flow also applies to other "out of DAG" execution operations such as SQL operations within a node.
 ```
 
-## Use `MemoryDataSet` for intermediary `DataFrame`
+## Use `MemoryDataset` for intermediary `DataFrame`
 
-For nodes operating on `DataFrame` that doesn't need to perform Spark actions such as writing the `DataFrame` to storage, we recommend using the default `MemoryDataSet` to hold the `DataFrame`. In other words, there is no need to specify it in the `DataCatalog` or `catalog.yml`. This allows you to take advantage of Spark's optimiser and lazy evaluation.
+For nodes operating on `DataFrame` that doesn't need to perform Spark actions such as writing the `DataFrame` to storage, we recommend using the default `MemoryDataset` to hold the `DataFrame`. In other words, there is no need to specify it in the `DataCatalog` or `catalog.yml`. This allows you to take advantage of Spark's optimiser and lazy evaluation.
 
-## Use `MemoryDataSet` with `copy_mode="assign"` for non-`DataFrame` Spark objects
+## Use `MemoryDataset` with `copy_mode="assign"` for non-`DataFrame` Spark objects
 
 Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs and outputs in your pipeline. For example, suppose you have a `train_model` node to train a classifier using Spark ML's [`RandomForrestClassifier`](https://spark.apache.org/docs/latest/ml-classification-regression.html#random-forest-classifier) and a `predict` node to make predictions using this classifier. In this scenario, the `train_model` node will output a `RandomForestClassifier` object, which then becomes the input for the `predict` node. Below is the code for this pipeline:
 
@@ -233,15 +234,15 @@ To make the pipeline work, you will need to specify `example_classifier` as foll
 
 ```yaml
 example_classifier:
-  type: MemoryDataSet
+  type: MemoryDataset
   copy_mode: assign
 ```
 
-The `assign` copy mode ensures that the `MemoryDataSet` will be assigned the Spark object itself, not a [deep copy](https://docs.python.org/3/library/copy.html) version of it, since deep copy doesn't work with Spark object generally.
+The `assign` copy mode ensures that the `MemoryDataset` will be assigned the Spark object itself, not a [deep copy](https://docs.python.org/3/library/copy.html) version of it, since deep copy doesn't work with Spark object generally.
 
 ## Tips for maximising concurrency using `ThreadRunner`
 
-Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the [ThreadRunner](/kedro.runner.ThreadRunner):
+Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the {py:class}`~kedro.runner.ThreadRunner`:
 
 ```bash
 kedro run --runner=ThreadRunner
@@ -253,4 +254,4 @@ To further increase the concurrency level, if you are using Spark >= 0.8, you ca
 spark.scheduler.mode: FAIR
 ```
 
-For more information, please visit Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).
+For more information, see the Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).

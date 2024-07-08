@@ -1,3 +1,0 @@
-pip>=21.2
-setuptools>=65.5.1
-twine~=3.0

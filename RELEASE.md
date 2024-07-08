@@ -1,25 +1,332 @@
-# Upcoming Release 0.19.0
+# Upcoming Release 0.19.7
 
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
+* Updated error message for invalid catalog entries.
+* Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
+* Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
+* Implemented key completion support for accessing datasets in the `DataCatalog`.
+
 
 ## Breaking changes to the API
 
-## Migration guide from Kedro 0.18.* to 0.19.*
-
-# Upcoming Release 0.18.12
-
-## Major features and improvements
-
-## Bug fixes and other changes
+## Upcoming deprecations for Kedro 0.20.0
+* The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 0.20.0.
 
 ## Documentation changes
+* Improved documentation for configuring dataset parameters in the data catalog
+* Extended documentation with an example of logging customisation at runtime
+
+## Community contributions
+
+# Release 0.19.6
+
+## Major features and improvements
+* Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behaviour is still to raise a warning for each failing pipeline.
+* It is now possible to use Kedro without having `rich` installed.
+* Updated custom logging behavior: `conf/logging.yml` will be used if it exists and `KEDRO_LOGGING_CONFIG` is not set; otherwise, `default_logging.yml` will be used.
+
+## Bug fixes and other changes
+* User defined catch-all dataset factory patterns now override the default pattern provided by the runner.
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.20.0
+* All micro-packaging commands (`kedro micropkg pull`, `kedro micropkg package`) are deprecated and will be removed in Kedro 0.20.0.
+
+## Documentation changes
+* Improved documentation for custom starters
+* Added a new docs section on deploying Kedro project on AWS Airflow MWAA
+* Detailed instructions on using `globals` and `runtime_params` with the `OmegaConfigLoader`
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [doxenix](https://github.com/doxenix)
+* [cleeeks](https://github.com/cleeeks)
+
+# Release 0.19.5
+
+## Bug fixes and other changes
+* Fixed breaking import issue when working on a project with `kedro-viz` on python 3.8.
+
+## Documentation changes
+* Updated the documentation for deploying a Kedro project with Astronomer Airflow.
+* Used `kedro-sphinx-theme` for documentation.
+
+# Release 0.19.4
+
+## Major features and improvements
+* Kedro commands now work from any subdirectory within a Kedro project.
+* Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`
+* Added the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
+* Improved the performance of `Pipeline` object creation and summing.
+* Improved suggestions to resume failed pipeline runs.
+* Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
+* Cookiecutter errors are shown in short format without the `--verbose` flag.
+
+## Bug fixes and other changes
+* Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
+* Updated CLI command `kedro catalog resolve` to read credentials properly.
+* Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
+* Updated ``.gitignore`` to prevent pushing MLflow local runs folder to a remote forge when using MLflow and Git.
+* Fixed error handling message for malformed yaml/json files in OmegaConfigLoader.
+* Fixed a bug in `node`-creation allowing self-dependencies when using transcoding, that is datasets named like `name@format`.
+* Improved error message when passing wrong value to node.
+
+## Breaking changes to the API
+* Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.
+
+## Documentation changes
+* Added missing description for `merge_strategy` argument in OmegaConfigLoader.
+* Added documentation on best practices for testing nodes and pipelines.
+* Clarified docs around using custom resolvers without a full Kedro project.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [ondrejzacha](https://github.com/ondrejzacha)
+* [Puneet](https://github.com/puneeter)
+
+# Release 0.19.3
+
+## Major features and improvements
+* Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
+* Add official support for Python 3.12.
+* Add better IPython, VS Code Notebook support for `%load_node` and minimal support for Databricks.
+* Add full Kedro Node input syntax for `%load_node`.
+
+## Bug fixes and other changes
+* Updated CLI Command `kedro catalog resolve` to work with dataset factories that use `PartitionedDataset`.
+* Addressed arbitrary file write via archive extraction security vulnerability in micropackaging.
+* Added the `_EPHEMERAL` attribute to `AbstractDataset` and other Dataset classes that inherit from it.
+* Added new JSON Schema that works with Kedro versions 0.19.*
+
+## Breaking changes to the API
+
+## Documentation changes
+* Enable read-the-docs search when user presses Command/Ctrl + K.
+* Added documentation for `kedro-telemetry` and the data collected by it.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [MosaicMan](https://github.com/MosaicMan)
+* [Fazil](https://github.com/lordsoffallen)
+
+# Release 0.19.2
+
+## Bug fixes and other changes
+* Removed example pipeline requirements when examples are not selected in `tools`.
+* Allowed modern versions of JupyterLab and Jupyter Notebooks.
+* Removed setuptools dependency
+* Added `source_dir` explicitly in `pyproject.toml` for non-src layout project.
+* `MemoryDataset` entries are now included in free outputs.
+* Removed black dependency and replaced it functionality with `ruff format`.
+
+## Breaking changes to the API
+* Added logging about not using async mode in `SequentiallRunner` and `ParallelRunner`.
+* Changed input format for tools option obtained from --config file from numbers to short names.
+
+## Documentation changes
+* Added documentation about `bootstrap_project` and `configure_project`.
+* Added documentation about `kedro run` and hook execution order.
+
+## Migration guide from Kedro 0.18.* to 0.19.*
+[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+
+# Release 0.19.1
+
+## Bug fixes and other changes
+* Loosened pin for `kedro-telemetry` to fix dependency issues in `0.19.0`.
+
+## Migration guide from Kedro 0.18.* to 0.19.*
+[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+
+
+# Release 0.19.0
+
+## Major features and improvements
+* Dropped Python 3.7 support.
+* [Introduced project tools and example to the `kedro new` CLI flow](docs/source/get_started/new_project.md#project-tools).
+* The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
+* Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
+* [Added the functionality to choose a merging strategy for config files loaded with `OmegaConfigLoader`](docs/source/configuration/advanced_configuration.md#how-to-change-the-merge-strategy-used-by-omegaconfigloader).
+* Modified the mechanism of importing datasets, raise more explicit error when dependencies are missing.
+* Added validation for configuration file used to override run commands via the CLI.
+* Moved the default environment `base` and `local` from config loader to `_ProjectSettings`. This enables the use of config loader as a standalone class without affecting existing Kedro Framework users.
+
+## Bug fixes and other changes
+* Added a new field `tools` to `pyproject.toml` when a project is created.
+* Reduced `spaceflights` data to minimise waiting times during tutorial execution.
+* Added validation to node tags to be consistent with node names.
+* Removed `pip-tools` as a dependency.
+* Accepted path-like filepaths more broadly for datasets.
+* Removed support for defining the `layer` attribute at top-level within DataCatalog.
+* Bumped `kedro-datasets` to latest `2.0.0`.
+
+## Breaking changes to the API
+* Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
+* Renamed the `data_sets()` method in `Pipeline` and all references to it to `datasets()`.
+* Renamed all other uses of `data_set` and `data_sets` in the codebase to `dataset` and `datasets` respectively.
+* Remove deprecated `project_version` from `ProjectMetadata`.
+* Removed `package_name` argument from `KedroSession.create`.
+* Removed the `create_default_data_set()` method in the `Runner` in favour of using dataset factories to create default dataset instances.
+* Removed `layer` argument from the DataCatalog.
+
+### Datasets
+* Removed `kedro.extras.datasets` and tests.
+* Reduced constructor arguments for `APIDataset` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+* Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
+
+### CLI
+* Removed deprecated commands:
+   * `kedro docs`
+   * `kedro jupyter convert`
+   * `kedro activate-nbstripout`
+   * `kedro build-docs`
+   * `kedro build-reqs`
+   * `kedro lint`
+   * `kedro test`
+* Added the `--addons` flag to the `kedro new` command.
+* Added the `--name` flag to the `kedro new` command.
+* Removed `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
+
+### ConfigLoader
+* Made `OmegaConfigLoader` the default config loader.
+* Removed `ConfigLoader` and `TemplatedConfigLoader`.
+* `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.
+
+### Other
+* Removed deprecated `kedro.extras.ColorHandler`.
+* The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
+* Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
+* The default project template now has one `pyproject.toml` at the root of the project (containing both the packaging metadata and the Kedro build config).
+* The `requirements.txt` in the default project template moved to the root of the project as well (hence dependencies are now installed with `pip install -r requirements.txt` instead of `pip install -r src/requirements.txt`).
+* The `spaceflights` starter has been renamed to `spaceflights-pandas`.
+* The starters `pandas-iris`, `pyspark-iris`, `pyspark`, and `standalone-datacatalog` have been archived.
+
+## Migration guide from Kedro 0.18.* to 0.19.*
+[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+
+
+### Logging
+`logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
+
+## Community contributors
+We are grateful to every community member who made a PR to Kedro that's found its way into 0.19.0, and give particular thanks to those who contributed between 0.18.14 and this release, either as part of their ongoing Kedro community involvement or as part of Hacktoberfest 2023 🎃
+
+* [Jeroldine Akuye Oakley](https://github.com/JayOaks) 🎃
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) 🎃
+* [Mustapha Abdullahi](https://github.com/mustious)
+* [Adam Kells](https://github.com/adamkells)
+* [Ajay Gonepuri](https://github.com/HKABIG)
+
+# Release 0.18.14
+
+## Major features and improvements
+* Allowed using of custom cookiecutter templates for creating pipelines with `--template` flag for `kedro pipeline create` or via `template/pipeline` folder.
+* Allowed overriding of configuration keys with runtime parameters using the `runtime_params` resolver with `OmegaConfigLoader`.
+
+## Bug fixes and other changes
+* Updated dataset factories to resolve nested catalog config properly.
+* Updated `OmegaConfigLoader` to handle paths containing dots outside of `conf_source`.
+* Made `settings.py` optional.
+
+## Documentation changes
+* Added documentation to clarify execution order of hooks.
+* Added a notebook example for spaceflights to illustrate how to incrementally add Kedro features.
+* Moved documentation for the `standalone-datacatalog` starter into its [README file](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog).
+* Added new documentation about deploying a Kedro project with Amazon EMR.
+* Added new documentation about how to publish a Kedro-Viz project to make it shareable.
+* New TSC members added to the page and the organisation of each member is also now listed.
+* Plus some minor bug fixes and changes across the documentation.
+
+## Upcoming deprecations for Kedro 0.19.0
+* All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+* All dataset classes ending with `DataSet` are deprecated and will be removed in Kedro `0.19.0` and `kedro-datasets` `2.0.0`. Instead, use the updated class names ending with `Dataset`.
+* The starters `pandas-iris`, `pyspark-iris`, `pyspark`, and `standalone-datacatalog` are deprecated and will be archived in Kedro 0.19.0.
+* `PartitionedDataset` and `IncrementalDataset` have been moved to `kedro-datasets` and will be removed in Kedro `0.19.0`. Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Jason Hite](https://github.com/jasonmhite)
+* [IngerMathilde](https://github.com/IngerMathilde)
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
+* [Richard](https://github.com/CF-FHB-X)
+* [flpvvvv](https://github.com/flpvvvv)
+* [qheuristics](https://github.com/qheuristics)
+* [Miguel Ortiz](https://github.com/miguel-ortiz-marin)
+* [rxm7706](https://github.com/rxm7706)
+* [Iñigo Hidalgo](https://github.com/inigohidalgo)
+* [harmonys-qb](https://github.com/harmonys-qb)
+* [Yi Kuang](https://github.com/lvxhnat)
+* [Jens Lordén](https://github.com/Celsuss)
+
+# Release 0.18.13
+
+## Major features and improvements
+* Added support for Python 3.11. This includes tackling challenges like dependency pinning and test adjustments to ensure a smooth experience. Detailed migration tips are provided below for further context.
+* Added new `OmegaConfigLoader` features:
+  * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
+  * Added support for global variables to `OmegaConfigLoader`.
+* Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
+* Implemented a flat `conf/` structure for modular pipelines, and accordingly, updated the `kedro pipeline create` and `kedro catalog create` command.
+* Updated new Kedro project template and Kedro starters:
+  * Change Kedro starters and new Kedro projects to use `OmegaConfigLoader`.
+  * Converted `setup.py` in new Kedro project template and Kedro starters to `pyproject.toml` and moved flake8 configuration
+  to dedicated file `.flake8`.
+  * Updated the spaceflights starter to use the new flat `conf/` structure.
+
+## Bug fixes and other changes
+* Updated `OmegaConfigLoader` to ignore config from hidden directories like `.ipynb_checkpoints`.
+
+## Documentation changes
+* Revised the `data` section to restructure beginner and advanced pages about the Data Catalog and datasets.
+* Moved contributor documentation to the [GitHub wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).
+* Updated example of using generator functions in nodes.
+* Added migration guide from the `ConfigLoader` and the `TemplatedConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` and the `TemplatedConfigLoader` are deprecated and will be removed in the `0.19.0` release.
+
+## Migration Tips for Python 3.11:
+* PyTables on Windows: Users on Windows with Python >=3.8 should note we've pinned `pytables` to `3.8.0` due to compatibility issues.
+* Spark Dependency: We've set an upper version limit for `pyspark` at <3.4 due to breaking changes in 3.4.
+* Testing with Python 3.10: The latest `moto` version now supports parallel test execution for Python 3.10, resolving previous issues.
 
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+* Renamed abstract dataset classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 0.19.0. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+
+| Type                       | Deprecated Alias           | Location        |
+| -------------------------- | -------------------------- | --------------- |
+| `AbstractDataset`          | `AbstractDataSet`          | `kedro.io.core` |
+| `AbstractVersionedDataset` | `AbstractVersionedDataSet` | `kedro.io.core` |
+
+* Using the `layer` attribute at the top level is deprecated; it will be removed in Kedro version 0.19.0. Please move `layer` inside the `metadata` -> `kedro-viz` attributes.
+
+## Community contributions
+Thanks to [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) and [Jonathan Cohen](https://github.com/JonathanDCohen).
+
+# Release 0.18.12
+
+## Major features and improvements
+* Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
+* Activated all built-in resolvers by default for `OmegaConfigLoader` except for `oc.env`.
+* Added `kedro catalog rank` CLI command that ranks dataset factories in the catalog by matching priority.
+
+## Bug fixes and other changes
+* Consolidated dependencies and optional dependencies in `pyproject.toml`.
+* Made validation of unique node outputs much faster.
+* Updated `kedro catalog list` to show datasets generated with factories.
+
+## Documentation changes
+* Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
+
+## Community contributions
+Thanks to [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) and [Chris Schopp](https://github.com/cschopp-simwell).
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+* `ConfigLoader` and `TemplatedConfigLoader` will be deprecated. Please use `OmegaConfigLoader` instead.
 
 # Release 0.18.11
 
@@ -29,10 +336,15 @@
 ## Bug fixes and other changes
 * Reworked micropackaging workflow to use standard Python packaging practices.
 * Make `kedro micropkg package` accept `--verbose`.
+* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
 
 ## Documentation changes
 * Significant improvements to the documentation that covers working with Databricks and Kedro, including a new page for workspace-only development, and a guide to choosing the best workflow for your use case.
 * Updated documentation for deploying with Prefect for version 2.0.
+* Added documentation for developing a Kedro project using a Databricks workspace.
+
+## Breaking changes to the API
+* Logging is decoupled from `ConfigLoader`, use `KEDRO_LOGGING_CONFIG` to configure logging.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" and error classes starting with "DataSet" are deprecated and will be removed in 0.19.0. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
@@ -88,8 +400,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [tomasvanpottelbergh](https://github.com/tomasvanpottelbergh)
 * [https://github.com/debugger24](https://github.com/debugger24)
 
-## Upcoming deprecations for Kedro 0.19.0
-
 # Release 0.18.8
 
 ## Major features and improvements
@@ -117,6 +427,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [MaximeSteinmetz](https://github.com/MaximeSteinmetz)
 
+
 # Release 0.18.7
 
 ## Major features and improvements
@@ -128,6 +439,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Bug fixes and other changes
 * Added a guide and tooling for developing Kedro for Databricks.
 * Implemented missing dict-like interface for `_ProjectPipeline`.
+
 
 # Release 0.18.6
 
@@ -142,6 +454,7 @@ A regression introduced in Kedro version `0.18.5` caused the `Kedro-Viz` console
 * delete any erroneous session entries created with Kedro 0.18.5 from your session_store.db stored at `<project-path>/data/session_store.db`.
 
 Thanks to Kedroids tomohiko kato, [tsanikgr](https://github.com/tsanikgr) and [maddataanalyst](https://github.com/maddataanalyst) for very detailed reports about the bug.
+
 
 # Release 0.18.5
 
@@ -317,6 +630,7 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
+* `KedroContext` is now a attr's dataclass, `config_loader` is available as public attribute.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Updated [Databricks documentation](https://docs.kedro.org/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.
@@ -329,6 +643,7 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.
+
 
 # Release 0.18.0
 

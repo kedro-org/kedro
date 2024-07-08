@@ -18,7 +18,7 @@ class DataCatalogSpecs:
     """Namespace that defines all specifications for a data catalog's lifecycle hooks."""
 
     @hook_spec
-    def after_catalog_created(  # pylint: disable=too-many-arguments
+    def after_catalog_created(  # noqa: PLR0913
         self,
         catalog: DataCatalog,
         conf_catalog: dict[str, Any],
@@ -48,7 +48,7 @@ class NodeSpecs:
     """Namespace that defines all specifications for a node's lifecycle hooks."""
 
     @hook_spec
-    def before_node_run(  # pylint: disable=too-many-arguments
+    def before_node_run(  # noqa: PLR0913
         self,
         node: Node,
         catalog: DataCatalog,
@@ -76,7 +76,7 @@ class NodeSpecs:
         pass
 
     @hook_spec
-    def after_node_run(  # pylint: disable=too-many-arguments
+    def after_node_run(  # noqa: PLR0913
         self,
         node: Node,
         catalog: DataCatalog,
@@ -104,7 +104,7 @@ class NodeSpecs:
         pass
 
     @hook_spec
-    def on_node_error(  # pylint: disable=too-many-arguments
+    def on_node_error(  # noqa: PLR0913
         self,
         error: Exception,
         node: Node,
@@ -112,7 +112,7 @@ class NodeSpecs:
         inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
-    ):
+    ) -> None:
         """Hook to be invoked if a node run throws an uncaught error.
         The signature of this error hook should match the signature of ``before_node_run``
         along with the error that was raised.
@@ -211,7 +211,7 @@ class PipelineSpecs:
         run_params: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-    ):
+    ) -> None:
         """Hook to be invoked if a pipeline run throws an uncaught Exception.
         The signature of this error hook should match the signature of ``before_pipeline_run``
         along with the error that was raised.

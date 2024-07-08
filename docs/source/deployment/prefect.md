@@ -1,6 +1,6 @@
 # Prefect
 
-This page explains how to run your Kedro pipeline using [Prefect 2.0](https://www.prefect.io/products/core/), an open-source workflow management system.
+This page explains how to run your Kedro pipeline using [Prefect 2.0](https://www.prefect.io/opensource), an open-source workflow management system.
 
 The scope of this documentation is the deployment to a self hosted [Prefect Server](https://docs.prefect.io/2.10.17/host/), which is an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends Prefect 2.0. We will use an [Agent that dequeues submitted flow runs from a Work Queue](https://docs.prefect.io/2.10.17/tutorial/deployments/#why-workpools-and-workers).
 
@@ -40,7 +40,7 @@ Run a Prefect Server instance:
 prefect server start
 ```
 
-In a separate terminal, [create a work pool](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-pool-configuration) to organize the work and [create a work queue](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-queues) for your agent to pull from:
+In a separate terminal, [create a work pool](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-pool-configuration) to organise the work and [create a work queue](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-queues) for your agent to pull from:
 
 ```bash
 prefect work-pool create --type prefect-agent <work_pool_name>
@@ -69,7 +69,7 @@ from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-from kedro.io import DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline.node import Node
 from kedro.runner import run_node
 
@@ -163,9 +163,9 @@ def kedro_init(
     context = session.load_context()
     catalog = context.catalog
     logger.info("Registering datasets...")
-    unregistered_ds = pipeline.data_sets() - set(catalog.list())  # NOQA
+    unregistered_ds = pipeline.datasets() - set(catalog.list())
     for ds_name in unregistered_ds:
-        catalog.add(ds_name, MemoryDataSet())
+        catalog.add(ds_name, MemoryDataset())
     return {"catalog": catalog, "sess_id": session.session_id}
 
 

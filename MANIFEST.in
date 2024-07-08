@@ -1,8 +1,7 @@
 include README.md
 include LICENSE.md
-include dependency/requirements.txt
-include test_requirements.txt
 include kedro/framework/project/default_logging.yml
+include kedro/framework/project/rich_logging.yml
 include kedro/ipython/*.png
 include kedro/ipython/*.svg
-recursive-include templates *
+recursive-include kedro/templates *

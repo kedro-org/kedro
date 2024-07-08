@@ -1,0 +1,26 @@
+name: Auto-merge sync PR
+# This workflow automatically merges the PRs labelled "automerge". This is a part of syncing
+# of `develop` and `main` branches.
+
+on:
+  schedule:
+    - cron: '*/60 * * * *' # every 60 minutes
+  workflow_dispatch: # on button click
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TAGGING_TOKEN }}
+
+      - name: Set git email and name
+        run: |
+          git config --global user.email "kedro@kedro.com"
+          git config --global user.name "Kedro"
+
+      - name: Maybe merge automerge PR to `develop`
+        run: ./tools/github_actions/attempt_merge_pr.sh "merge-main-to-develop" "develop" ${{ secrets.GH_TAGGING_TOKEN }}

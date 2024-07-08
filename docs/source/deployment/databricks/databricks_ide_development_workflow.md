@@ -5,12 +5,16 @@ This guide demonstrates a workflow for developing Kedro projects on Databricks u
 By working in your local environment, you can take advantage of features within an IDE that are not available on Databricks notebooks:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
-- Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
+- Linters like [Ruff](https://docs.astral.sh/ruff) can be integrated to catch potential issues in your code.
 - Static type checkers like Mypy can check types in your code, helping to identify potential type-related issues early in the development process.
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
 
 If you prefer to develop a projects in notebooks rather than an in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
+
+``` {note}
+[Databricks now recommends](https://docs.databricks.com/en/archive/dev-tools/dbx/index.html) that you use now use Databricks asset bundles instead of dbx. This Kedro deployment documentation has not yet been updated but you may wish to consult [What are Databricks Asset Bundles?](https://docs.databricks.com/en/dev-tools/bundles/index.html) and [Migrate from dbx to bundles](https://docs.databricks.com/en/archive/dev-tools/dbx/dbx-migrate.html) for further information.
+```
 
 ## What this page covers
 
@@ -67,7 +71,7 @@ pip install kedro dbx --upgrade
 
 **Now, you must authenticate the Databricks CLI with your Databricks instance.**
 
-[Refer to the Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication) for a complete guide on how to authenticate your CLI. The key steps are:
+[Refer to the Databricks documentation](https://docs.databricks.com/en/dev-tools/cli/authentication.html) for a complete guide on how to authenticate your CLI. The key steps are:
 
 1. Create a personal access token for your user on your Databricks instance.
 2. Run `databricks configure --token`.
@@ -87,6 +91,10 @@ kedro new --starter=databricks-iris
 ```
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
+
+ ```{note}
+If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
+ ```
 
 ### Create a Repo on Databricks
 
@@ -142,9 +150,9 @@ Name the new folder `local`. In this guide, we have no local credentials to stor
 
 When run on Databricks, Kedro cannot access data stored in your project's directory. Therefore, you will need to upload your project's data to an accessible location. In this guide, we will store the data on the Databricks File System (DBFS).
 
-The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md#the-data-catalog) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
+The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
-There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI command to upload your locally stored data to DBFS:
+There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/archive/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI command to upload your locally stored data to DBFS:
 
 ```bash
 databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris-databricks/data
@@ -184,7 +192,7 @@ Open your newly-created notebook and create **four new cells** inside it. You wi
 1. Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. Add the following code to the first new cell to install the dependencies:
 
 ```ipython
-%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/src/requirements.txt"
+%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/requirements.txt"
 ```
 
 2. To run your project in your notebook, you must load the Kedro IPython extension. Add the following code to the second new cell to load the IPython extension:

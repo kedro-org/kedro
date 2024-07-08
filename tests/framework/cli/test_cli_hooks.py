@@ -74,7 +74,7 @@ def fake_plugin_distribution(mocker):
         version="0.1",
     )
     mocker.patch(
-        "pluggy._manager.importlib_metadata.distributions",
+        "importlib.metadata.distributions",
         return_value=[fake_distribution],
     )
     return fake_distribution
@@ -93,15 +93,11 @@ class TestKedroCLIHooks:
         mocker,
         fake_metadata,
         fake_plugin_distribution,
-        entry_points,  # pylint: disable=unused-argument
+        entry_points,
     ):
         caplog.set_level(logging.DEBUG, logger="kedro")
 
         Module = namedtuple("Module", ["cli"])
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
         mocker.patch(
             "kedro.framework.cli.cli._is_project",
             return_value=True,
@@ -109,6 +105,10 @@ class TestKedroCLIHooks:
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project",
             return_value=fake_metadata,
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         result = CliRunner().invoke(kedro_cli, [command])

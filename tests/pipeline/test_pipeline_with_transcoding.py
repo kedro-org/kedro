@@ -5,7 +5,11 @@ import pytest
 import kedro
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
-from kedro.pipeline.pipeline import OutputNotUniqueError, _strip_transcoding
+from kedro.pipeline.pipeline import (
+    CircularDependencyError,
+    OutputNotUniqueError,
+)
+from kedro.pipeline.transcoding import _strip_transcoding
 
 
 # Different dummy func based on the number of arguments
@@ -177,6 +181,16 @@ class TestInvalidPipeline:
                 ]
             )
 
+    def test_transcoding_loop(self):
+        with pytest.raises(CircularDependencyError, match="node1"):
+            modular_pipeline(
+                [
+                    node(identity, "A@pandas", "B@pandas", name="node1"),
+                    node(identity, "B@spark", "C@spark", name="node2"),
+                    node(identity, "C@spark", "A@spark", name="node3"),
+                ]
+            )
+
 
 class TestComplexPipelineWithTranscoding:
     """
@@ -287,7 +301,7 @@ class TestComplexPipelineWithTranscoding:
         assert _get_node_names(p1) == _get_node_names(p2)
 
     def test_only_nodes_with_inputs_inexistent_inputs(self, complex_pipeline):
-        pattern = r"Pipeline does not contain data_sets named \['Z'\]"
+        pattern = r"Pipeline does not contain datasets named \['Z'\]"
         with pytest.raises(ValueError, match=pattern):
             complex_pipeline.only_nodes_with_inputs("Z")
 
@@ -320,7 +334,7 @@ class TestComplexPipelineWithTranscoding:
         assert _get_node_names(p1) == _get_node_names(p2)
 
     def test_from_inputs_inexistent_inputs(self, complex_pipeline):
-        pattern = r"Pipeline does not contain data_sets named \['Z'\]"
+        pattern = r"Pipeline does not contain datasets named \['Z'\]"
         with pytest.raises(ValueError, match=pattern):
             complex_pipeline.from_inputs("Z")
 
@@ -342,7 +356,7 @@ class TestComplexPipelineWithTranscoding:
         assert _get_node_names(p1) == _get_node_names(p2)
 
     def test_only_nodes_with_outputs_inexistent_outputs(self, complex_pipeline):
-        pattern = r"Pipeline does not contain data_sets named \['Z'\]"
+        pattern = r"Pipeline does not contain datasets named \['Z'\]"
         with pytest.raises(ValueError, match=pattern):
             complex_pipeline.only_nodes_with_outputs("Z")
 
@@ -369,7 +383,7 @@ class TestComplexPipelineWithTranscoding:
         assert _get_node_names(p1) == _get_node_names(p2)
 
     def test_to_outputs_inexistent_outputs(self, complex_pipeline):
-        pattern = r"Pipeline does not contain data_sets named \['Z'\]"
+        pattern = r"Pipeline does not contain datasets named \['Z'\]"
         with pytest.raises(ValueError, match=pattern):
             complex_pipeline.to_outputs("Z")
 

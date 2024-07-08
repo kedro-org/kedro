@@ -1,0 +1,67 @@
+name: Run e2e-tests on Kedro
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        type: string
+      python-version:
+        type: string
+      branch:
+        type: string
+        default: ''
+
+env:
+  COLUMNS: 120
+  LINES: 25
+
+jobs:
+  e2e-tests:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Set up Python ${{inputs.python-version}}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{inputs.python-version}}
+      - name: Cache python packages for Linux
+        if: inputs.os == 'ubuntu-latest'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.os}}-python-${{inputs.python-version}}
+      - name: Cache python packages for Windows
+        if: inputs.os == 'windows-latest'
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{inputs.os}}-python-${{inputs.python-version}}
+      - name: Add MSBuild to PATH
+        if: inputs.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
+      - name: Install Microsoft Visual C++ Redistributable
+        if: inputs.os == 'windows-latest'
+        run: |
+          choco install vcredist-all
+      - name: Setup Hadoop binary
+        if: inputs.os == 'windows-latest'
+        run: |
+          Invoke-WebRequest "https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe?raw=true" -OutFile winutils.exe
+          Invoke-WebRequest "https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/hadoop.dll?raw=true" -OutFile hadoop.dll
+          Move-Item .\hadoop.dll C:\Windows\System32
+          New-Item -ItemType directory -Path C:\hadoop\bin
+          Move-Item .\winutils.exe C:\hadoop\bin
+          echo "HADOOP_HOME=C:\hadoop" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
+          echo "PATH=$env:HADOOP_HOME\bin;$env:PATH" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -U .[test]
+          make install-pre-commit
+      - name: pip freeze
+        run: pip freeze
+      - name: Run e2e tests
+        run: make e2e-tests

@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DatasetError, MemoryDataset
+from kedro.io import AbstractDataset, DataCatalog, DatasetError, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ThreadRunner
@@ -14,10 +14,6 @@ from tests.runner.conftest import exception_fn, identity, return_none, sink, sou
 
 
 class TestValidThreadRunner:
-    def test_create_default_data_set(self):
-        data_set = ThreadRunner().create_default_data_set("")
-        assert isinstance(data_set, MemoryDataset)
-
     def test_thread_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
@@ -38,6 +34,11 @@ class TestValidThreadRunner:
         assert "Z" in result
         assert result["Z"] == ("42", "42", "42")
 
+    def test_does_not_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
+        catalog.add_feed_dict({"A": 42})
+        ThreadRunner().run(fan_out_fan_in, catalog)
+        assert "Using synchronous mode for loading and saving data." not in caplog.text
+
 
 class TestMaxWorkers:
     @pytest.mark.parametrize(
@@ -55,7 +56,7 @@ class TestMaxWorkers:
         catalog,
         user_specified_number,
         expected_number,
-    ):  # pylint: disable=too-many-arguments
+    ):  # noqa: PLR0913
         """
         We initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 threads.
@@ -111,7 +112,7 @@ class TestInvalidThreadRunner:
             ThreadRunner().run(pipeline, catalog)
 
 
-class LoggingDataset(AbstractDataSet):
+class LoggingDataset(AbstractDataset):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name

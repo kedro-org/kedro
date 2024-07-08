@@ -17,56 +17,56 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 To use AWS Batch, ensure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
-- A `name` attribute is set for each [Kedro node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node=<node_name>`.
-- [All node input/output `DataSets` must be configured in `catalog.yml`](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
+- A `name` attribute is set for each Kedro {py:mod}`~kedro.pipeline.node`. Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --nodes=<node_name>`.
+- [All node input/output datasets must be configured in `catalog.yml`](../data/data_catalog_yaml_examples.md) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: s3://<your-bucket>/shuttles.xlsx
 
 preprocessed_companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/preprocessed_companies.csv
 
 preprocessed_shuttles:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/preprocessed_shuttles.csv
 
 model_input_table:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://<your-bucket>/model_input_table.csv
 
 regressor:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/regressor.pickle
   versioned: true
 
 X_train:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/X_train.pickle
 
 X_test:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/X_test.pickle
 
 y_train:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/y_train.pickle
 
 y_test:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: s3://<your-bucket>/y_test.pickle
 ```
 
@@ -160,7 +160,7 @@ class AWSBatchRunner(ThreadRunner):
         self._job_definition = job_definition
         self._client = boto3.client("batch")
 
-    def create_default_data_set(self, ds_name: str):
+    def create_default_dataset(self, ds_name: str):
         raise NotImplementedError("All datasets must be defined in the catalog")
 
     def _get_required_workers_count(self, pipeline: Pipeline):
@@ -169,7 +169,7 @@ class AWSBatchRunner(ThreadRunner):
 
         return super()._get_required_workers_count(pipeline)
 
-    def _run(  # pylint: disable=too-many-locals,useless-suppression
+    def _run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
@@ -229,7 +229,7 @@ Next you will want to add the implementation of the `_submit_job()` method refer
 
 * Correctly specified upstream dependencies
 * A unique job name
-* The corresponding command to run, namely `kedro run --node=<node_name>`.
+* The corresponding command to run, namely `kedro run --nodes=<node_name>`.
 
 Once submitted, the method tracks progress and surfaces any errors if the jobs end in `FAILED` state.
 
@@ -247,7 +247,7 @@ def _submit_job(
 
     job_name = f"kedro_{session_id}_{node.name}".replace(".", "-")
     depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
-    command = ["kedro", "run", "--node", node.name]
+    command = ["kedro", "run", "--nodes", node.name]
 
     response = self._client.submit_job(
         jobName=job_name,
@@ -297,7 +297,7 @@ def _track_batch_job(job_id: str, client: Any) -> None:
 
 #### Set up Batch-related configuration
 
-You'll need to set the Batch-related configuration that the runner will use. Add a `parameters.yml` file inside the `conf/aws_batch/` directory created as part of the prerequistes with the following keys:
+You'll need to set the Batch-related configuration that the runner will use. Add a `parameters.yml` file inside the `conf/aws_batch/` directory created as part of the prerequisites with the following keys:
 
 ```yaml
 aws_batch:

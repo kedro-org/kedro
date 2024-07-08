@@ -5,7 +5,7 @@ import re
 import shutil
 from pathlib import Path
 from textwrap import indent
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 import click
 
@@ -13,7 +13,6 @@ import kedro
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
-    _filter_deprecation_warnings,
     command_with_verbosity,
     env_option,
 )
@@ -42,7 +41,7 @@ class PipelineArtifacts(NamedTuple):
     pipeline_conf: Path
 
 
-def _assert_pkg_name_ok(pkg_name: str):
+def _assert_pkg_name_ok(pkg_name: str) -> None:
     """Check that python package name is in line with PEP8 requirements.
 
     Args:
@@ -56,7 +55,7 @@ def _assert_pkg_name_ok(pkg_name: str):
     if not re.match(r"^[a-zA-Z_]", pkg_name):
         message = base_message + " It must start with a letter or underscore."
         raise KedroCliError(message)
-    if len(pkg_name) < 2:
+    if len(pkg_name) < 2:  # noqa: PLR2004
         message = base_message + " It must be at least 2 characters long."
         raise KedroCliError(message)
     if not re.match(r"^\w+$", pkg_name[1:]):
@@ -66,20 +65,19 @@ def _assert_pkg_name_ok(pkg_name: str):
         raise KedroCliError(message)
 
 
-def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
+def _check_pipeline_name(ctx: click.Context, param: Any, value: str) -> str:  # noqa: unused-argument
     if value:
         _assert_pkg_name_ok(value)
     return value
 
 
-# pylint: disable=missing-function-docstring
 @click.group(name="Kedro")
-def pipeline_cli():  # pragma: no cover
+def pipeline_cli() -> None:  # pragma: no cover
     pass
 
 
 @pipeline_cli.group()
-def pipeline():
+def pipeline() -> None:
     """Commands for working with pipelines."""
 
 
@@ -90,25 +88,51 @@ def pipeline():
     is_flag=True,
     help="Skip creation of config files for the new pipeline(s).",
 )
+@click.option(
+    "template_path",
+    "-t",
+    "--template",
+    type=click.Path(file_okay=False, dir_okay=True, exists=True, path_type=Path),
+    help="Path to cookiecutter template to use for pipeline(s). Will override any local templates.",
+)
 @env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
 @click.pass_obj  # this will pass the metadata as first argument
 def create_pipeline(
-    metadata: ProjectMetadata, name, skip_config, env, **kwargs
-):  # pylint: disable=unused-argument
+    metadata: ProjectMetadata,
+    /,
+    name: str,
+    template_path: Path,
+    skip_config: bool,
+    env: str,
+    **kwargs: Any,
+) -> None:  # noqa: unused-argument
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
+    project_root = metadata.project_path / metadata.project_name
     conf_source = settings.CONF_SOURCE
     project_conf_path = metadata.project_path / conf_source
-
-    env = env or "base"
+    base_env = settings.CONFIG_LOADER_ARGS.get("base_env", "base")
+    env = env or base_env
     if not skip_config and not (project_conf_path / env).exists():
         raise KedroCliError(
             f"Unable to locate environment '{env}'. "
             f"Make sure it exists in the project configuration."
         )
 
-    result_path = _create_pipeline(name, package_dir / "pipelines")
-    _copy_pipeline_tests(name, result_path, package_dir)
+    # Precedence for template_path is: command line > project templates/pipeline dir > global default
+    # If passed on the CLI, click will verify that the path exists so no need to check again
+    if template_path is None:
+        # No path provided on the CLI, try `PROJECT_PATH/templates/pipeline`
+        template_path = Path(metadata.project_path / "templates" / "pipeline")
+
+        if not template_path.exists():
+            # and if that folder doesn't exist fall back to the global default
+            template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
+
+    click.secho(f"Using pipeline template at: '{template_path}'")
+
+    result_path = _create_pipeline(name, template_path, package_dir / "pipelines")
+    _copy_pipeline_tests(name, result_path, project_root)
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
 
@@ -123,14 +147,14 @@ def create_pipeline(
 )
 @click.pass_obj  # this will pass the metadata as first argument
 def delete_pipeline(
-    metadata: ProjectMetadata, name, env, yes, **kwargs
-):  # pylint: disable=unused-argument
+    metadata: ProjectMetadata, /, name: str, env: str, yes: bool, **kwargs: Any
+) -> None:  # noqa: unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE
     project_conf_path = metadata.project_path / conf_source
-
-    env = env or "base"
+    base_env = settings.CONFIG_LOADER_ARGS.get("base_env", "base")
+    env = env or base_env
     if not (project_conf_path / env).exists():
         raise KedroCliError(
             f"Unable to locate environment '{env}'. "
@@ -140,10 +164,14 @@ def delete_pipeline(
     pipeline_artifacts = _get_pipeline_artifacts(metadata, pipeline_name=name, env=env)
 
     files_to_delete = [
-        pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml"
+        pipeline_artifacts.pipeline_conf / filepath
         for confdir in ("parameters", "catalog")
-        if (pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml").is_file()
+        # Since we remove nesting in 'parameters' and 'catalog' folders,
+        # we want to also del the old project's structure for backward compatibility
+        for filepath in (Path(f"{confdir}_{name}.yml"), Path(confdir) / f"{name}.yml")
+        if (pipeline_artifacts.pipeline_conf / filepath).is_file()
     ]
+
     dirs_to_delete = [
         path
         for path in (pipeline_artifacts.pipeline_dir, pipeline_artifacts.pipeline_tests)
@@ -175,7 +203,7 @@ def delete_pipeline(
     )
 
 
-def _echo_deletion_warning(message: str, **paths: list[Path]):
+def _echo_deletion_warning(message: str, **paths: list[Path]) -> None:
     paths = {key: values for key, values in paths.items() if values}
 
     if paths:
@@ -187,18 +215,15 @@ def _echo_deletion_warning(message: str, **paths: list[Path]):
         click.echo(indent(paths_str, " " * 2))
 
 
-def _create_pipeline(name: str, output_dir: Path) -> Path:
-    with _filter_deprecation_warnings():
-        # pylint: disable=import-outside-toplevel
-        from cookiecutter.main import cookiecutter
+def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
+    from cookiecutter.main import cookiecutter
 
-    template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
 
     click.echo(f"Creating the pipeline '{name}': ", nl=False)
 
     try:
-        result_path = cookiecutter(
+        cookiecutter_result = cookiecutter(
             str(template_path),
             output_dir=str(output_dir),
             no_input=True,
@@ -210,7 +235,7 @@ def _create_pipeline(name: str, output_dir: Path) -> Path:
         raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
     click.secho("OK", fg="green")
-    result_path = Path(result_path)
+    result_path = Path(cookiecutter_result)
     message = indent(f"Location: '{result_path.resolve()}'", " " * 2)
     click.secho(message, bold=True)
 
@@ -219,7 +244,9 @@ def _create_pipeline(name: str, output_dir: Path) -> Path:
     return result_path
 
 
-def _sync_dirs(source: Path, target: Path, prefix: str = "", overwrite: bool = False):
+def _sync_dirs(
+    source: Path, target: Path, prefix: str = "", overwrite: bool = False
+) -> None:
     """Recursively copies `source` directory (or file) into `target` directory without
     overwriting any existing files/directories in the target using the following
     rules:
@@ -286,18 +313,21 @@ def _get_artifacts_to_package(
 ) -> tuple[Path, Path, Path]:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = project_metadata.source_dir / project_metadata.package_name
+    project_root = project_metadata.project_path
     project_conf_path = project_metadata.project_path / settings.CONF_SOURCE
     artifacts = (
         Path(package_dir, *module_path.split(".")),
-        Path(package_dir.parent, "tests", *module_path.split(".")),
+        Path(project_root, "tests", *module_path.split(".")),
         project_conf_path / env,
     )
     return artifacts
 
 
-def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Path):
+def _copy_pipeline_tests(
+    pipeline_name: str, result_path: Path, project_root: Path
+) -> None:
     tests_source = result_path / "tests"
-    tests_target = package_dir.parent / "tests" / "pipelines" / pipeline_name
+    tests_target = project_root.parent / "tests" / "pipelines" / pipeline_name
     try:
         _sync_dirs(tests_source, tests_target)
     finally:
@@ -306,7 +336,7 @@ def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Pat
 
 def _copy_pipeline_configs(
     result_path: Path, conf_path: Path, skip_config: bool, env: str
-):
+) -> None:
     config_source = result_path / "config"
     try:
         if not skip_config:
@@ -316,7 +346,7 @@ def _copy_pipeline_configs(
         shutil.rmtree(config_source)
 
 
-def _delete_artifacts(*artifacts: Path):
+def _delete_artifacts(*artifacts: Path) -> None:
     for artifact in artifacts:
         click.echo(f"Deleting '{artifact}': ", nl=False)
         try:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pprint
 import shutil
 from decimal import Decimal
 from fractions import Fraction
@@ -206,8 +207,12 @@ def dummy_data():
 class TestCoreFunctions:
     @pytest.mark.parametrize("var", [1, True] + FALSE_BUILTINS)
     def test_str_representation(self, var):
-        filepath = "."
-        assert str(MyDataset(var=var)) == f"MyDataset(filepath={filepath}, var={var})"
+        var_str = pprint.pformat(var)
+        filepath_str = pprint.pformat(PurePosixPath("."))
+        assert (
+            str(MyDataset(var=var))
+            == f"tests.io.test_core.MyDataset(filepath={filepath_str}, var={var_str})"
+        )
 
     def test_str_representation_none(self):
         assert str(MyDataset()) == "MyDataset(filepath=.)"

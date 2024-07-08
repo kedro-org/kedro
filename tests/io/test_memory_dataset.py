@@ -141,8 +141,14 @@ class TestMemoryDataset:
     @pytest.mark.parametrize(
         "input_data,expected",
         [
-            ("dummy_dataframe", "MemoryDataset(data=<DataFrame>)"),
-            ("dummy_numpy_array", "MemoryDataset(data=<ndarray>)"),
+            (
+                "dummy_dataframe",
+                "kedro.io.memory_dataset.MemoryDataset(data='<DataFrame>')",
+            ),
+            (
+                "dummy_numpy_array",
+                "kedro.io.memory_dataset.MemoryDataset(data='<ndarray>')",
+            ),
         ],
         indirect=["input_data"],
     )

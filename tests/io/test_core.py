@@ -342,7 +342,9 @@ class TestAbstractVersionedDataset:
 
     def test_no_versions(self, my_versioned_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for MyVersionedDataset\(.+\)"
+        pattern = (
+            r"Did not find any versions for tests.io.test_core.MyVersionedDataset\(.+\)"
+        )
         with pytest.raises(DatasetError, match=pattern):
             my_versioned_dataset.load()
 
@@ -377,7 +379,7 @@ class TestAbstractVersionedDataset:
         corresponding json file for a given save version already exists."""
         my_versioned_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for MyVersionedDataset\(.+\) must "
+            r"Save path \'.+\' for tests.io.test_core.MyVersionedDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -397,7 +399,7 @@ class TestAbstractVersionedDataset:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"MyVersionedDataset\(.+\)"
+            r"tests.io.test_core.MyVersionedDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             my_versioned_dataset.save(dummy_data)

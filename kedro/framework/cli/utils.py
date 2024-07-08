@@ -537,5 +537,5 @@ class LazyGroup(click.Group):
         # do the import
         mod = import_module(modname)
         # get the Command object from that module
-        cmd_object = getattr(mod, cmd_object_name)
+        cmd_object = getattr(mod, cmd_object_name)  # type: ignore[no-any-return]
         return cmd_object

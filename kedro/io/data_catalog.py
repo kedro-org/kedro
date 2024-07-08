@@ -144,7 +144,7 @@ class _FrozenDatasets:
                 _sub_nonword_chars(ds_name)
             ].__repr__()
 
-        return pprint.pformat(datasets_repr, compact=True, sort_dicts=False)
+        return pprint.pformat(datasets_repr, sort_dicts=False)
 
 
 class DataCatalog:

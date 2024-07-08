@@ -215,7 +215,10 @@ class TestCoreFunctions:
         )
 
     def test_str_representation_none(self):
-        assert str(MyDataset()) == "MyDataset(filepath=.)"
+        filepath_str = pprint.pformat(PurePosixPath("."))
+        assert (
+            str(MyDataset()) == f"tests.io.test_core.MyDataset(filepath={filepath_str})"
+        )
 
     def test_get_filepath_str(self):
         path = get_filepath_str(PurePosixPath("example.com/test.csv"), "http")

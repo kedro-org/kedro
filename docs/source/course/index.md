@@ -32,7 +32,7 @@ In short, you'll learn answers to the following:
 * What do you need to do to create a Kedro project?
 * How can you refactor a Jupyter notebook to a Kedro project?
 * How do you package Python code as a library?
-* How do you work with Kedro projects in VSCode?
+* How do you work with Kedro projects in VS Code?
 * What are namespaces and dataset factories?
 * What is needed to deploy a Kedro project using container solutions like Docker and open source orchestrators like Airflow?
 * What are Kedro plugins?

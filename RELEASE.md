@@ -6,6 +6,8 @@
 * Updated error message for invalid catalog entries.
 * Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
 * Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
+* Implemented key completion support for accessing datasets in the `DataCatalog`.
+
 
 ## Breaking changes to the API
 
@@ -90,7 +92,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Major features and improvements
 * Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
 * Add official support for Python 3.12.
-* Add better IPython, VSCode Notebook support for `%load_node` and minimal support for Databricks.
+* Add better IPython, VS Code Notebook support for `%load_node` and minimal support for Databricks.
 * Add full Kedro Node input syntax for `%load_node`.
 
 ## Bug fixes and other changes

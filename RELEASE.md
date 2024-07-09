@@ -7,7 +7,9 @@
 * Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
 * Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
 * Implemented key completion support for accessing datasets in the `DataCatalog`.
-* Implemented dataset and `DataCatalog` pretty printing.
+* Made [kedro-telemetry](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) a core dependency.
+* Implemented dataset pretty printing.
+* Implemented `DataCatalog` pretty printing.
 
 ## Breaking changes to the API
 
@@ -53,7 +55,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Documentation changes
 * Updated the documentation for deploying a Kedro project with Astronomer Airflow.
 * Used `kedro-sphinx-theme` for documentation.
-
+* Add mentions about correct usage of `configure_project` with `multiprocessing`.
+*
 # Release 0.19.4
 
 ## Major features and improvements
@@ -81,6 +84,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added missing description for `merge_strategy` argument in OmegaConfigLoader.
 * Added documentation on best practices for testing nodes and pipelines.
 * Clarified docs around using custom resolvers without a full Kedro project.
+
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

@@ -45,11 +45,11 @@ def test_dataset_describe():
         in str(LambdaDataset(None, None, None, _dummy_release))
     )
 
-    # __init__ keys alphabetically sorted, None values not shown
+    # __init__ keys remains in the provided order, None values not shown
     expected = (
-        "kedro.io.lambda_dataset.LambdaDataset(exists='<tests.io.test_lambda_dataset._dummy_exists>', "
-        "load='<tests.io.test_lambda_dataset._dummy_load>', "
-        "save='<tests.io.test_lambda_dataset._dummy_save>')"
+        "kedro.io.lambda_dataset.LambdaDataset(load='<tests.io.test_lambda_dataset._dummy_load>', "
+        "save='<tests.io.test_lambda_dataset._dummy_save>', "
+        "exists='<tests.io.test_lambda_dataset._dummy_exists>')"
     )
     actual = str(LambdaDataset(_dummy_load, _dummy_save, _dummy_exists, None))
     assert actual == expected

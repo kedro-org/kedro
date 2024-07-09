@@ -202,15 +202,15 @@ def _assert_requirements_ok(
         expected = {
             "optional-dependencies": {
                 "docs": [
-                    "docutils<0.18.0",
-                    "sphinx~=3.4.3",
-                    "sphinx_rtd_theme==0.5.1",
+                    "docutils<0.21",
+                    "sphinx>=5.3,<7.3",
+                    "sphinx_rtd_theme==2.0.0",
                     "nbsphinx==0.8.1",
-                    "sphinx-autodoc-typehints==1.11.1",
-                    "sphinx_copybutton==0.3.1",
+                    "sphinx-autodoc-typehints==1.20.2",
+                    "sphinx_copybutton==0.5.2",
                     "ipykernel>=5.3, <7.0",
-                    "Jinja2<3.1.0",
-                    "myst-parser~=0.17.2",
+                    "Jinja2<3.2.0",
+                    "myst-parser>=1.0,<2.1",
                 ]
             }
         }

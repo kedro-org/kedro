@@ -171,7 +171,7 @@ def create_config_file_without_starter(context):
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "tools": "1-5",
+        "tools": "lint, test, log, docs, data",
         "project_name": context.project_name,
         "example_pipeline": "no",
         "repo_name": context.project_name,
@@ -186,18 +186,16 @@ def create_config_file_without_starter(context):
 def create_config_file_with_tools(context, tools):
     """Behave step to create a temporary config file
     (given the existing temp directory) and store it in the context.
-    It takes a custom tools list and sets example prompt to `y`.
+    It takes a custom tools list and sets example prompt to `n`.
     """
-
-    tools_str = tools if tools != "none" else ""
 
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
     context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
-        "tools": tools_str,
-        "example_pipeline": "y",
+        "tools": tools,
+        "example_pipeline": "n",
         "project_name": context.project_name,
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
@@ -518,28 +516,30 @@ def check_created_project_structure_from_tools(context, tools):
         assert is_created(path), f"{path} does not exist"
 
     tools_list = (
-        tools.split(",") if tools != "all" else ["1", "2", "3", "4", "5", "6", "7"]
+        tools.split(",")
+        if tools != "all"
+        else ["lint", "test", "log", "docs", "data", "pyspark", "viz"]
     )
 
-    if "1" in tools_list:  # lint tool
+    if "lint" in tools_list:  # lint tool
         pass  # No files are added
 
-    if "2" in tools_list:  # test tool
+    if "test" in tools_list:  # test tool
         assert is_created("tests"), "tests directory does not exist"
 
-    if "3" in tools_list:  # log tool
+    if "log" in tools_list:  # log tool
         assert is_created("conf/logging.yml"), "logging configuration does not exist"
 
-    if "4" in tools_list:  # docs tool
+    if "docs" in tools_list:  # docs tool
         assert is_created("docs"), "docs directory does not exist"
 
-    if "5" in tools_list:  # data tool
+    if "data" in tools_list:  # data tool
         assert is_created("data"), "data directory does not exist"
 
-    if "6" in tools_list:  # PySpark tool
+    if "pyspark" in tools_list:  # PySpark tool
         assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
 
-    if "7" in tools_list:  # viz tool
+    if "viz" in tools_list:  # viz tool
         expected_reporting_path = Path(
             f"src/{context.package_name}/pipelines/reporting"
         )
@@ -558,7 +558,8 @@ def check_one_node_run(context, number):
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
     stdout = context.result.stdout
-    assert expected_log_line in stdout, (
+    clean_logs = util.clean_up_log(stdout)
+    assert expected_log_line in clean_logs, (
         "Expected the following message segment to be printed on stdout: "
         f"{expected_log_line},\nbut got {stdout}"
     )
@@ -599,7 +600,8 @@ def check_message_printed(context, msg):
     else:
         stdout = context.result.stdout
 
-    assert msg in stdout, (
+    clean_logs = util.clean_up_log(stdout)
+    assert msg in clean_logs, (
         "Expected the following message segment to be printed on stdout: "
         f"{msg},\nbut got {stdout}"
     )
@@ -713,18 +715,6 @@ def check_dependency_in_reqs(context: behave.runner.Context, dependency: str):
     assert dependency in reqs_path.read_text()
 
 
-@then("Code cell with node tag should be converted into kedro node")
-def check_cell_conversion(context: behave.runner.Context):
-    converted_file = (
-        context.root_project_dir
-        / "src"
-        / context.package_name
-        / "nodes"
-        / "hello_world.py"
-    )
-    assert "Hello World!" in converted_file.read_text()
-
-
 @given("I have micro-packaging settings in pyproject.toml")
 def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
     pyproject_toml_path = context.root_project_dir / "pyproject.toml"
@@ -770,3 +760,8 @@ def match_pattern_in_notebook(context, pattern):
     if pattern in notebook:
         return True
     raise ValueError(f"{pattern} is not found.")
+
+@given('I have changed the current working directory to "{dir}"')
+def change_dir(context, dir):
+    """Execute Kedro target."""
+    util.chdir(dir)

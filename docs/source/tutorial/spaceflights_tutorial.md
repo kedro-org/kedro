@@ -15,6 +15,7 @@ tutorial_template
 set_up_data
 create_a_pipeline
 add_another_pipeline
+test_a_project
 package_a_project
 spaceflights_tutorial_faqs
 ```
@@ -24,6 +25,12 @@ spaceflights_tutorial_faqs
 
 Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="https://unsplash.com/s/photos/spaceship">Unsplash</a>
 
+## Watch the video
+
+```{eval-rst}
+..  youtube:: YBY2Lcz7Gw4
+    :width: 100%
+```
 
 ## Get help
 If you encounter an issue with the tutorial:

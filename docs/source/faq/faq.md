@@ -12,10 +12,12 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
 * {py:mod}`Where can I find the documentation for Kedro's datasets <kedro-datasets:kedro_datasets>`?
 
-## Working with Jupyter
+## Working with Notebooks
 
-* [How can I convert functions from Jupyter Notebooks into Kedro nodes](../notebooks_and_ipython/kedro_and_notebooks.md#how-to-use-tags-to-convert-functions-from-jupyter-notebooks-into-kedro-nodes)?
+* [How can I debug a Kedro project in a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md#debugging-a-kedro-project-within-a-notebook)?
 * [How do I connect a Kedro project kernel to other Jupyter clients like JupyterLab](../notebooks_and_ipython/kedro_and_notebooks.md#ipython-jupyterlab-and-other-jupyter-clients)?
+* [How can I use the Kedro IPython extension in a notebook where launching a new kernel is not an option](../notebooks_and_ipython/kedro_and_notebooks.md#loading-the-project-with-the-kedroipython-extension)?
+* [How to fix Line magic function `%reload_kedro` not found?](../notebooks_and_ipython/kedro_and_notebooks.md#loading-the-project-with-kedro-jupyter-notebook)
 
 ## Kedro project development
 
@@ -33,6 +35,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How do I specify additional configuration environments](../configuration/configuration_basics.md#how-to-specify-additional-configuration-environments)?
 * [How do I change the default overriding configuration environment](../configuration/configuration_basics.md#how-to-change-the-default-overriding-environment)?
 * [How do I use only one configuration environment](../configuration/configuration_basics.md#how-to-use-only-one-configuration-environment)?
+* [How do I use Kedro without the rich library](../configuration/configuration_basics.md#how-to-use-kedro-without-the-rich-library)?
 
 ### Advanced topics
 
@@ -49,8 +52,8 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Nodes and pipelines
 
-* [How do I create a modular pipeline](../nodes_and_pipelines/modular_pipelines.md#how-do-i-create-a-modular-pipeline)?
-
+* [How can I create a new blank pipeline](../nodes_and_pipelines/modular_pipelines.md#how-to-create-a-new-blank-pipeline-using-the-kedro-pipeline-create-command)?
+* [How can I reuse my pipelines](../nodes_and_pipelines/namespaces.md)?
 * [Can I use generator functions in a node](../nodes_and_pipelines/nodes.md#how-to-use-generator-functions-in-a-node)?
 
 ## What is data engineering convention?

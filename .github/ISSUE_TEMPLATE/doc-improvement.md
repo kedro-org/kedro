@@ -8,7 +8,8 @@ labels: 'Component: Documentation'
 ## Description
 <!-- Short description of the improvement suggestion. -->
 
-## Context
-<!-- Extra context. -->
+### Documentation page (if applicable)
+<!-- https://docs.kedro.org/en/stable/... -->
 
-* Documentation page (if applicable): <!-- https://docs.kedro.org/en/stable/... -->
+## Context
+<!-- Extra context. -->

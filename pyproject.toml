@@ -20,9 +20,8 @@ dependencies = [
     "dynaconf>=3.1.2,<4.0",
     "fsspec>=2021.4",
     "gitpython>=3.0",
-    "importlib-metadata>=3.6,<8.0; python_version >= '3.8'",
+    "importlib-metadata>=3.6,<9.0",
     "importlib_resources>=1.3,<7.0",  # The `files()` API was introduced in `importlib_resources` 1.3 and Python 3.9.
-    "jmespath>=0.9.5",
     "more_itertools>=8.14.0",
     "omegaconf>=2.1.1",
     "parse>=1.19.0",
@@ -32,7 +31,7 @@ dependencies = [
     "rich>=12.0,<14.0",
     "rope>=0.21,<2.0",  # subject to LGPLv3 license
     "toml>=0.10.0",
-    "toposort>=1.5",  # Needs to be at least 1.5 to be able to raise CircularDependencyError
+    "graphlib_backport>=1.0.0; python_version < '3.9'",
 ]
 keywords = [
     "pipelines",
@@ -56,49 +55,40 @@ test = [
     "behave==1.2.6",
     "coverage[toml]",
     "import-linter==2.0",
+    "ipylab>=1.0.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
     "jupyterlab_server>=2.11.1",
     "jupyterlab>=3,<5",
     "jupyter~=1.0",
-    "kedro-datasets",
-    "moto==1.3.7; python_version < '3.10'",
-    "moto==4.2.13; python_version >= '3.10'",
+    "kedro-datasets; python_version >= '3.9'",
+    "kedro-datasets<2.0.0; python_version < '3.9'",
     "mypy~=1.0",
     "pandas~=2.0",
-    "pip-tools>=6.5",
+    "pluggy>=1.0",
     "pre-commit>=2.9.2, <4.0",  # The hook `mypy` requires pre-commit version 2.9.2.
-    "pyarrow>=1.0; python_version < '3.11'",
-    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pyproj~=3.0",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
-    "pytest~=7.2",
-    "s3fs>=2021.4, <2024.1",  # Upper bound set arbitrarily, to be reassessed in early 2024
-    "semver",
+    "pytest>=7.2,<9.0",
+    "s3fs>=2021.4",
     "trufflehog~=2.1",
     # mypy related dependencies
     "pandas-stubs",
     "types-PyYAML",
     "types-cachetools",
-    "types-toml",
-    "types-toposort"
+    "types-toml"
 ]
 docs = [
-    "docutils<0.21",
-    "sphinx>=5.3,<7.3",
-    "sphinx_rtd_theme==2.0.0",
-    # Regression on sphinx-autodoc-typehints 1.21
-    # that creates some problematic docstrings
-    "sphinx-autodoc-typehints==1.20.2",
-    "sphinx_copybutton==0.5.2",
-    "sphinx-notfound-page",
+    "kedro-sphinx-theme==2024.4.0",
     "ipykernel>=5.3, <7.0",
-    "myst-parser>=1.0,<2.1",
     "Jinja2<3.2.0",
 ]
-all = [ "kedro[test,docs]" ]
+jupyter = [
+    "ipylab>=1.0.0",
+    "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
+]
+all = [ "kedro[test,docs,jupyter]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

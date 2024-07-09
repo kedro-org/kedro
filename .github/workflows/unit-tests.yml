@@ -15,33 +15,33 @@ jobs:
     runs-on: ${{ inputs.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
       - name: Set up Python ${{inputs.python-version}}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{inputs.python-version}}
       - name: Cache python packages for Linux
         if: inputs.os == 'ubuntu-latest'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{inputs.os}}-python-${{inputs.python-version}}
       - name: Cache python packages for Windows
         if: inputs.os == 'windows-latest'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~\AppData\Local\pip\Cache
           key: ${{inputs.os}}-python-${{inputs.python-version}}
       - name: Add MSBuild to PATH
         if: inputs.os == 'windows-latest'
-        uses: microsoft/setup-msbuild@v1
+        uses: microsoft/setup-msbuild@v2
       - name: Install dependencies
         run: |
             make install-test-requirements
             make install-pre-commit
       - name: pip freeze
-        run: pip freeze
+        run: uv pip freeze --system
       - name: Run unit tests
         run: make test

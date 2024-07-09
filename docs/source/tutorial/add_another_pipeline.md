@@ -29,7 +29,7 @@ First, take a look at the functions for the data science nodes in `src/spaceflig
 
 ```python
 import logging
-from typing import Dict, Tuple
+from typing import dict, Tuple
 
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -37,7 +37,7 @@ from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
 
-def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
+def split_data(data: pd.DataFrame, parameters: dict[str, Any]) -> Tuple:
     """Splits data into features and targets training and test sets.
 
     Args:
@@ -519,6 +519,5 @@ kedro run --runner=module.path.to.my.runner
 ```
 
 `ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and {class}`Dask<kedro-datasets:kedro_datasets.dask.ParquetDataset>`.
-
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).

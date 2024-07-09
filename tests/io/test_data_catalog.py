@@ -1,5 +1,6 @@
 import logging
 import re
+import sys
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -151,10 +152,6 @@ def config_with_dataset_factories_bad_pattern(config_with_dataset_factories):
 def config_with_dataset_factories_only_patterns():
     return {
         "catalog": {
-            "{default}": {
-                "type": "pandas.CSVDataset",
-                "filepath": "data/01_raw/{default}.csv",
-            },
             "{namespace}_{dataset}": {
                 "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{namespace}_{dataset}.pq",
@@ -173,6 +170,14 @@ def config_with_dataset_factories_only_patterns():
             },
         },
     }
+
+
+@pytest.fixture
+def config_with_dataset_factories_only_patterns_no_default(
+    config_with_dataset_factories_only_patterns,
+):
+    del config_with_dataset_factories_only_patterns["catalog"]["{user_default}"]
+    return config_with_dataset_factories_only_patterns
 
 
 @pytest.fixture
@@ -422,10 +427,44 @@ class TestDataCatalog:
         ],
     )
     def test_bad_confirm(self, data_catalog, dataset_name, error_pattern):
-        """Test confirming a non existent dataset or one that
+        """Test confirming a non-existent dataset or one that
         does not have `confirm` method"""
         with pytest.raises(DatasetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
+
+    def test_shallow_copy_returns_correct_class_type(
+        self,
+    ):
+        class MyDataCatalog(DataCatalog):
+            pass
+
+        data_catalog = MyDataCatalog()
+        copy = data_catalog.shallow_copy()
+        assert isinstance(copy, MyDataCatalog)
+
+    def test_key_completions(self, data_catalog_from_config):
+        """Test catalog.datasets key completions"""
+        assert isinstance(data_catalog_from_config.datasets["boats"], CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets["cars"], CSVDataset)
+        data_catalog_from_config.add_feed_dict(
+            {
+                "params:model_options": [1, 2, 4],
+                "params:model_options.random_state": [0, 42, 67],
+            }
+        )
+        assert isinstance(
+            data_catalog_from_config.datasets["params:model_options"], MemoryDataset
+        )
+        assert isinstance(
+            data_catalog_from_config.datasets["params__model_options.random_state"],
+            MemoryDataset,
+        )
+        assert set(data_catalog_from_config.datasets._ipython_key_completions_()) == {
+            "boats",
+            "cars",
+            "params:model_options",
+            "params:model_options.random_state",
+        }
 
 
 class TestDataCatalogFromConfig:
@@ -489,7 +528,24 @@ class TestDataCatalogFromConfig:
 
         pattern = (
             "An exception occurred when parsing config for dataset 'boats':\n"
-            "Class 'kedro.io.CSVDatasetInvalid' not found"
+            "Class 'kedro.io.CSVDatasetInvalid' not found, is this a typo?"
+        )
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            DataCatalog.from_config(**sane_config)
+
+    @pytest.mark.skipif(
+        sys.version_info < (3, 9),
+        reason="for python 3.8 kedro-datasets version 1.8 is used which has the old spelling",
+    )
+    def test_config_incorrect_spelling(self, sane_config):
+        """Check hint if the type uses the old DataSet spelling"""
+        sane_config["catalog"]["boats"]["type"] = "pandas.CSVDataSet"
+
+        pattern = (
+            "An exception occurred when parsing config for dataset 'boats':\n"
+            "Class 'pandas.CSVDataSet' not found, is this a typo?"
+            "\nHint: If you are trying to use a dataset from `kedro-datasets`>=2.0.0,"
+            " make sure that the dataset name uses the `Dataset` spelling instead of `DataSet`."
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
@@ -511,6 +567,16 @@ class TestDataCatalogFromConfig:
         pattern = (
             r"Dataset 'boats' must only contain arguments valid for "
             r"the constructor of '.*CSVDataset'"
+        )
+        with pytest.raises(DatasetError, match=pattern):
+            DataCatalog.from_config(**sane_config)
+
+    def test_config_invalid_dataset_config(self, sane_config):
+        sane_config["catalog"]["invalid_entry"] = "some string"
+        pattern = (
+            "Catalog entry 'invalid_entry' is not a valid dataset configuration. "
+            "\nHint: If this catalog entry is intended for variable interpolation, "
+            "make sure that the key is preceded by an underscore."
         )
         with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**sane_config)
@@ -841,15 +907,37 @@ class TestDataCatalogDatasetFactories:
             "{country}_companies",
             "{namespace}_{dataset}",
             "{dataset}s",
-            "{default}",
             "{user_default}",
         ]
-        assert list(catalog._dataset_patterns.keys()) == sorted_keys_expected
+        assert (
+            list(catalog._dataset_patterns.keys())
+            + list(catalog._default_pattern.keys())
+            == sorted_keys_expected
+        )
 
-    def test_sorting_order_with_default_and_other_dataset_through_extra_pattern(
-        self, config_with_dataset_factories_only_patterns
+    def test_multiple_catch_all_patterns_not_allowed(
+        self, config_with_dataset_factories
     ):
-        """Check that the sorted order of the patterns is correct according to parsing rules when a default dataset is added through extra patterns (this would happen via the runner)."""
+        """Check that multiple catch-all patterns are not allowed"""
+        config_with_dataset_factories["catalog"]["{default1}"] = {
+            "filepath": "data/01_raw/{default1}.csv",
+            "type": "pandas.CSVDataset",
+        }
+        config_with_dataset_factories["catalog"]["{default2}"] = {
+            "filepath": "data/01_raw/{default2}.xlsx",
+            "type": "pandas.ExcelDataset",
+        }
+
+        with pytest.raises(
+            DatasetError, match="Multiple catch-all patterns found in the catalog"
+        ):
+            DataCatalog.from_config(**config_with_dataset_factories)
+
+    def test_sorting_order_with_other_dataset_through_extra_pattern(
+        self, config_with_dataset_factories_only_patterns_no_default
+    ):
+        """Check that the sorted order of the patterns is correct according to parsing rules when a default dataset
+        is added through extra patterns (this would happen via the runner) and user default is not present"""
         extra_dataset_patterns = {
             "{default}": {"type": "MemoryDataset"},
             "{another}#csv": {
@@ -857,7 +945,9 @@ class TestDataCatalogDatasetFactories:
                 "filepath": "data/{another}.csv",
             },
         }
-        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
+        catalog = DataCatalog.from_config(
+            **config_with_dataset_factories_only_patterns_no_default
+        )
         catalog_with_default = catalog.shallow_copy(
             extra_dataset_patterns=extra_dataset_patterns
         )
@@ -867,38 +957,13 @@ class TestDataCatalogDatasetFactories:
             "{namespace}_{dataset}",
             "{dataset}s",
             "{default}",
-            "{user_default}",
         ]
         assert (
             list(catalog_with_default._dataset_patterns.keys()) == sorted_keys_expected
         )
 
-    def test_runner_default_overwrites_user_default(
-        self, config_with_dataset_factories_only_patterns
-    ):
-        """Check that the runner default overwrites the user default."""
-        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
-        assert catalog._dataset_patterns["{default}"] == {
-            "filepath": "data/01_raw/{default}.csv",
-            "type": "pandas.CSVDataset",
-        }
-
-        extra_dataset_patterns = {
-            "{default}": {"type": "MemoryDataset"},
-            "{another}#csv": {
-                "type": "pandas.CSVDataset",
-                "filepath": "data/{another}.csv",
-            },
-        }
-        catalog_with_runner_default = catalog.shallow_copy(
-            extra_dataset_patterns=extra_dataset_patterns
-        )
-        assert catalog_with_runner_default._dataset_patterns["{default}"] == {
-            "type": "MemoryDataset"
-        }
-
-    def test_user_default_overwrites_runner_default_alphabetically(self):
-        """Check that the runner default overwrites the user default if earlier in alphabet."""
+    def test_user_default_overwrites_runner_default(self):
+        """Check that the user default overwrites the runner default when both are present"""
         catalog_config = {
             "{dataset}s": {
                 "type": "pandas.CSVDataset",
@@ -921,13 +986,13 @@ class TestDataCatalogDatasetFactories:
             extra_dataset_patterns=extra_dataset_patterns
         )
         sorted_keys_expected = [
-            "{another}#csv",
             "{dataset}s",
             "{a_default}",
-            "{default}",
         ]
+        assert "{a_default}" in catalog_with_runner_default._default_pattern
         assert (
             list(catalog_with_runner_default._dataset_patterns.keys())
+            + list(catalog_with_runner_default._default_pattern.keys())
             == sorted_keys_expected
         )
 

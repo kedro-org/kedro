@@ -1,19 +1,25 @@
-image:
-  file: .gitpod.Dockerfile
+image: gitpod/workspace-python-3.11
+
 tasks:
   - name: kedro
 
     init: |
       make sign-off
-      pip install -e /workspace/kedro[test]
+      pip install uv
+      uv venv
+      source .venv/bin/activate
+      uv pip install -e /workspace/kedro[test]
       cd /workspace
       kedro new --name project -s spaceflights-pandas --checkout main
+      uv pip install -e project
       cd /workspace/kedro
       pre-commit install --install-hooks
 
     command: |
       clear
+      source .venv/bin/activate
       kedro info
+
 
 github:
   prebuilds:

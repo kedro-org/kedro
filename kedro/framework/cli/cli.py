@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import importlib
 import sys
+import traceback
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Sequence
@@ -13,6 +14,7 @@ from typing import Any, Sequence
 import click
 
 from kedro import __version__ as version
+from kedro.framework.cli import BRIGHT_BLACK, ORANGE
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
 from kedro.framework.cli.jupyter import jupyter_cli
@@ -30,7 +32,8 @@ from kedro.framework.cli.utils import (
     load_entry_points,
 )
 from kedro.framework.project import LOGGING  # noqa: F401
-from kedro.framework.startup import _is_project, bootstrap_project
+from kedro.framework.startup import bootstrap_project
+from kedro.utils import _find_kedro_project, _is_project
 
 LOGO = rf"""
  _            _
@@ -133,10 +136,40 @@ class KedroCLI(CommandCollection):
             )
         # click.core.main() method exits by default, we capture this and then
         # exit as originally intended
+
         except SystemExit as exc:
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
+            # When CLI is run outside of a project, project_groups are not registered
+            catch_exception = "click.exceptions.UsageError: No such command"
+            # click convert exception handles to error message
+            if catch_exception in traceback.format_exc() and not self.project_groups:
+                warn = click.style(
+                    "\nKedro project not found in this directory. ",
+                    fg=ORANGE,
+                    bold=True,
+                )
+                result = (
+                    click.style("Project specific commands such as ")
+                    + click.style("'run' ", fg="cyan")
+                    + "or "
+                    + click.style("'jupyter' ", fg="cyan")
+                    + "are only available within a project directory."
+                )
+                message = warn + result
+                hint = (
+                    click.style(
+                        "\nHint: Kedro is looking for a file called ", fg=BRIGHT_BLACK
+                    )
+                    + click.style("'pyproject.toml", fg="magenta")
+                    + click.style(
+                        ", is one present in your current working directory?",
+                        fg=BRIGHT_BLACK,
+                    )
+                )
+                click.echo(message)
+                click.echo(hint)
             sys.exit(exc.code)
 
     @property
@@ -194,5 +227,7 @@ def main() -> None:  # pragma: no cover
     commands to `kedro`'s before invoking the CLI.
     """
     _init_plugins()
-    cli_collection = KedroCLI(project_path=Path.cwd())
+    cli_collection = KedroCLI(
+        project_path=_find_kedro_project(Path.cwd()) or Path.cwd()
+    )
     cli_collection()

@@ -4,7 +4,7 @@ Kedro has a few built-in mechanisms for you to extend its behaviour. This docume
 
 ## Use Case 1: How to add extra behaviour to Kedro's execution timeline
 
-The execution timeline of a Kedro pipeline can be thought of as a sequence of actions performed by various Kedro library components, such as the {py:mod}`datasets <kedro-datasets:kedro_datasets>`, [DataCatalog](/kedro.io.DataCatalog), [Pipeline](/kedro.pipeline.Pipeline), [Node](/kedro.pipeline.node.Node) and [KedroContext](/kedro.framework.context.KedroContext).
+The execution timeline of a Kedro pipeline can be thought of as a sequence of actions performed by various Kedro library components, such as the {py:mod}`datasets <kedro-datasets:kedro_datasets>`, {py:class}`~kedro.io.DataCatalog`, {py:class}`~kedro.pipeline.Pipeline`, {py:class}`~kedro.pipeline.node.Node` and {py:class}`~kedro.framework.context.KedroContext`.
 
 At different points in the lifecycle of these components, you might want to add extra behaviour: for example, you could add extra computation for profiling purposes _before_ and _after_ a node runs, or _before_ and _after_ the I/O actions of a dataset, namely the `load` and `save` actions.
 

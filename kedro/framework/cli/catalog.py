@@ -16,6 +16,7 @@ from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import AbstractDataset
+from kedro.io.data_catalog import DataCatalog
 
 
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
@@ -86,10 +87,12 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
         for ds_name in default_ds:
             matched_pattern = data_catalog._match_pattern(
                 data_catalog._dataset_patterns, ds_name
-            )
+            ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
             if matched_pattern:
                 ds_config_copy = copy.deepcopy(
-                    data_catalog._dataset_patterns[matched_pattern]
+                    data_catalog._dataset_patterns.get(matched_pattern)
+                    or data_catalog._default_pattern.get(matched_pattern)
+                    or {}
                 )
 
                 ds_config = data_catalog._resolve_config(
@@ -214,7 +217,10 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    catalog_factories = context.catalog._dataset_patterns
+    catalog_factories = {
+        **context.catalog._dataset_patterns,
+        **context.catalog._default_pattern,
+    }
     if catalog_factories:
         click.echo(yaml.dump(list(catalog_factories.keys())))
     else:
@@ -231,8 +237,11 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    data_catalog = context.catalog
     catalog_config = context.config_loader["catalog"]
+    credentials_config = context.config_loader.get("credentials", None)
+    data_catalog = DataCatalog.from_config(
+        catalog=catalog_config, credentials=credentials_config
+    )
 
     explicit_datasets = {
         ds_name: ds_config
@@ -255,23 +264,17 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
 
         matched_pattern = data_catalog._match_pattern(
             data_catalog._dataset_patterns, ds_name
-        )
+        ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
         if matched_pattern:
             ds_config_copy = copy.deepcopy(
-                data_catalog._dataset_patterns[matched_pattern]
+                data_catalog._dataset_patterns.get(matched_pattern)
+                or data_catalog._default_pattern.get(matched_pattern)
+                or {}
             )
 
             ds_config = data_catalog._resolve_config(
                 ds_name, matched_pattern, ds_config_copy
             )
-
-            ds_config["filepath"] = _trim_filepath(
-                str(context.project_path) + "/", ds_config["filepath"]
-            )
             explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))
-
-
-def _trim_filepath(project_path: str, file_path: str) -> str:
-    return file_path.replace(project_path, "", 1)

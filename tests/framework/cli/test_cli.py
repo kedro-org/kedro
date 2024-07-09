@@ -6,8 +6,9 @@ from pathlib import Path
 import click
 from click.testing import CliRunner
 from omegaconf import OmegaConf
-from pytest import fixture, mark, raises
+from pytest import fixture, mark, raises, warns
 
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli
@@ -245,6 +246,13 @@ class TestCliUtils:
             non_existent_file = str(requirements_file) + "-nonexistent"
             get_pkg_version(non_existent_file, "pandas")
 
+    def test_get_pkg_version_deprecated(self, requirements_file):
+        with warns(
+            KedroDeprecationWarning,
+            match=r"\`get_pkg_version\(\)\` has been deprecated",
+        ):
+            _ = get_pkg_version(requirements_file, "pandas")
+
     def test_clean_pycache(self, tmp_path, mocker):
         """Test `clean_pycache` utility function"""
         source = Path(tmp_path)
@@ -385,6 +393,21 @@ class TestKedroCLI:
         assert result.exit_code == 0
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" not in result.output
+
+    def test_kedro_run_no_project(self, mocker, tmp_path):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
+        kedro_cli = KedroCLI(tmp_path)
+
+        result = CliRunner().invoke(kedro_cli, ["run"])
+        assert (
+            "Kedro project not found in this directory. Project specific commands such as 'run' or "
+            "'jupyter' are only available within a project directory." in result.output
+        )
+
+        assert (
+            "Hint: Kedro is looking for a file called 'pyproject.toml, is one present in"
+            " your current working directory?" in result.output
+        )
 
     def test_kedro_cli_with_project(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
@@ -676,6 +699,7 @@ class TestRunCommand:
             "Key `node-names` in provided configuration is not valid. \n\nDid you mean one of "
             "these?\n    node_names\n    to_nodes\n    namespace" in result.stdout
         )
+        KedroCliError.VERBOSE_EXISTS = True
 
     @mark.parametrize(
         "fake_run_config_with_params,expected",

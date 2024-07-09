@@ -4,6 +4,11 @@ If you like to learn from video, you can follow our [hands-on course "Introducti
 
 The course is structured into sections and these are each broken into short videos that cover specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and get hands-on with the example. Along the way, you'll learn key Kedro concepts like datasets and the Kedro Data Catalog, nodes and pipelines, and configuration management.
 
+```{eval-rst}
+..  youtube:: DD7JuYKp6BA
+    :width: 100%
+```
+
 ## Who is this course for?
 
 This course is for data scientists, data engineers and machine learning engineers. You can be junior, mid-level or senior in your field of work. You're likely to be hands-on with projects, or a decision-maker who regularly makes design and implementation choices about Python data products.
@@ -27,7 +32,7 @@ In short, you'll learn answers to the following:
 * What do you need to do to create a Kedro project?
 * How can you refactor a Jupyter notebook to a Kedro project?
 * How do you package Python code as a library?
-* How do you work with Kedro projects in VSCode?
+* How do you work with Kedro projects in VS Code?
 * What are namespaces and dataset factories?
 * What is needed to deploy a Kedro project using container solutions like Docker and open source orchestrators like Airflow?
 * What are Kedro plugins?

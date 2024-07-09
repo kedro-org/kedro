@@ -38,7 +38,7 @@ Like any other dataset, `PartitionedDataset` can also be instantiated programmat
 
 ```python
 from kedro_datasets.pandas import CSVDataset
-from kedro.io import PartitionedDataset
+from kedro_datasets.partitions import PartitionedDataset
 
 my_credentials = {...}  # credentials dictionary
 
@@ -89,7 +89,7 @@ The dataset definition should be passed into the `dataset` argument of the `Part
 
 #### Shorthand notation
 
-Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [AbstractDataset](/kedro.io.AbstractDataset).
+Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the {py:class}`~kedro.io.AbstractDataset`.
 
 #### Full notation
 

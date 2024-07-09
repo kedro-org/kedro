@@ -110,3 +110,31 @@ def execute_notebook(notebook_filename):
     ) as f:
         nbformat.write(nb, f)
     print(f"Executed Notebook saved at {notebook_filename}")
+
+def clean_up_log(stdout: str) -> str:
+    """
+    Cleans up log output by removing duplicate lines, extra whitespaces,
+    and log levels (INFO, WARNING, ERROR) along with .py filenames.
+
+    Args:
+        stdout (str): The log output to be cleaned.
+
+    Returns:
+        str: Cleaned log output without unnecessary information.
+    """
+    cleaned_lines = []
+    already_extracted = set()
+
+    for line in stdout.split("\n"):
+        if any(word in line for word in ["WARNING", "INFO", "ERROR"]):
+            # Remove log levels and .py filenames
+            cleaned_line = re.sub(r"\b(INFO|WARNING|ERROR)\b|\s+\w+\.py:\d+", "", line)
+            cleaned_lines.append(cleaned_line.strip())
+            already_extracted.add(line)
+        elif line not in already_extracted:
+            cleaned_lines.append(line)
+
+    cleaned_output = "\n".join(cleaned_lines)
+    cleaned_output = re.sub(r"\s+", " ", cleaned_output)
+
+    return cleaned_output.strip()

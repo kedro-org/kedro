@@ -80,6 +80,14 @@ Welcome to Kedro's award-winning documentation!
    configuration/index.md
    data/index.md
    nodes_and_pipelines/index.md
+   configuration/telemetry.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Integrations
+
+   integrations/pyspark_integration.md
+   integrations/mlflow.md
 
 .. toctree::
    :maxdepth: 2
@@ -89,7 +97,6 @@ Welcome to Kedro's award-winning documentation!
    extend_kedro/index.md
    hooks/index.md
    logging/index.md
-   integrations/pyspark_integration.md
    development/index.md
    deployment/index.md
 
@@ -103,7 +110,7 @@ API documentation
 =================
 
 .. autosummary::
-   :toctree:
+   :toctree: api
    :caption: API documentation
    :template: autosummary/module.rst
    :recursive:

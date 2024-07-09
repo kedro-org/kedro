@@ -11,6 +11,7 @@ import sys
 import textwrap
 import traceback
 import typing
+import warnings
 from collections import defaultdict
 from importlib import import_module
 from itertools import chain
@@ -20,6 +21,8 @@ from typing import IO, Any, Iterable, Sequence
 import click
 import importlib_metadata
 from omegaconf import OmegaConf
+
+from kedro import KedroDeprecationWarning
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
@@ -64,13 +67,10 @@ def python_call(
 
 
 def find_stylesheets() -> Iterable[str]:  # pragma: no cover
+    # TODO: Deprecate this function in favour of kedro-sphinx-theme
     """Fetch all stylesheets used in the official Kedro documentation"""
     css_path = Path(__file__).resolve().parents[1] / "html" / "_static" / "css"
-    return (
-        str(css_path / "copybutton.css"),
-        str(css_path / "qb1-sphinx-rtd.css"),
-        str(css_path / "theme-overrides.css"),
-    )
+    return (str(css_path / "copybutton.css"),)
 
 
 def forward_command(
@@ -221,6 +221,10 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
         KedroCliError: If the file specified in ``reqs_path`` does not exist
             or ``package_name`` was not found in that file.
     """
+    warnings.warn(
+        "`get_pkg_version()` has been deprecated and will be removed in Kedro 0.20.0",
+        KedroDeprecationWarning,
+    )
     reqs_path = Path(reqs_path).absolute()
     if not reqs_path.is_file():
         raise KedroCliError(f"Given path '{reqs_path}' is not a regular file.")
@@ -269,15 +273,21 @@ class KedroCliError(click.exceptions.ClickException):
 
     VERBOSE_ERROR = False
     VERBOSE_EXISTS = True
+    COOKIECUTTER_EXCEPTIONS_PREFIX = "cookiecutter.exceptions"
 
     def show(self, file: IO | None = None) -> None:
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
         elif self.VERBOSE_EXISTS:
-            etype, value, _ = sys.exc_info()
+            etype, value, tb = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            cookiecutter_exception = ""
+            for ex_line in traceback.format_exception(etype, value, tb):
+                if self.COOKIECUTTER_EXCEPTIONS_PREFIX in ex_line:
+                    cookiecutter_exception = ex_line
+                    break
             click.secho(
-                f"{formatted_exception}Run with --verbose to see the full exception",
+                f"{cookiecutter_exception}{formatted_exception}Run with --verbose to see the full exception",
                 fg="yellow",
             )
         else:

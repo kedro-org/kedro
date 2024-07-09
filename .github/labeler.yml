@@ -1,3 +1,0 @@
-automerge:
-  - any:
-      - head-branch: ['merge-main-to-develop']

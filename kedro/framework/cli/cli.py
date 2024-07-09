@@ -81,7 +81,7 @@ def info() -> None:
             click.echo(
                 f"{plugin_name}: {plugin_version} (entry points:{entrypoints_str})"
             )
-    else:
+    else:  # pragma: no cover
         click.echo("No plugins installed")
 
 

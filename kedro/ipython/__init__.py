@@ -163,8 +163,10 @@ def _resolve_project_path(
     if path:
         project_path = Path(path).expanduser().resolve()
     else:
-        if local_namespace.get("context") and hasattr(
-            local_namespace["context"], "project_path"
+        if (
+            local_namespace
+            and local_namespace.get("context")
+            and hasattr(local_namespace["context"], "project_path")
         ):
             project_path = local_namespace["context"].project_path
         else:

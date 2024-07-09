@@ -54,7 +54,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Updated the documentation for deploying a Kedro project with Astronomer Airflow.
 * Used `kedro-sphinx-theme` for documentation.
 * Add mentions about correct usage of `configure_project` with `multiprocessing`.
-* 
+*
 # Release 0.19.4
 
 ## Major features and improvements

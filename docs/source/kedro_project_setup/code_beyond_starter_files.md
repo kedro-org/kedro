@@ -7,9 +7,9 @@ few boilerplate files: `nodes.py`, `pipeline.py`, `pipeline_registry.py`...
 While those may be sufficient for a small project, they quickly become large, hard to
 read and collaborate on as your codebase grows.
 Those files also sometimes make new users think that Kedro requires code
-to be located only in those starter files, which is not true.
+to be located in those exact starter files, which is not true.
 
-This section elaborates what are the Kedro requirements in terms of organising code
+This section elaborates on what the Kedro requirements are for organising your project code
 in files and modules.
 It also provides examples of common scenarios such as sharing utilities between
 pipelines and using Kedro in a monorepo setup.
@@ -17,7 +17,7 @@ pipelines and using Kedro in a monorepo setup.
 ## Where does Kedro look for code to be located
 
 The only technical constraint for arranging code in the project is that `pipeline_registry.py`
-and `settings.py` files must be located in `<your_project>/src/<your_project>` directory, which is where
+and `settings.py` files must be located in the `<your_project>/src/<your_project>` directory, which is where
 they are created by default.
 
 `pipeline_registry.py` must have a `register_pipelines()` function that returns a `dict[str, Pipeline]`
@@ -56,7 +56,7 @@ and serve only as illustrative purposes.
 
 ### Sharing modules between pipelines
 
-Oftentimes you have machinery that has to be imported by multiple `pipelines`.
+Oftentimes you have functions that have to be imported by multiple `pipelines`.
 To keep them as part of a Kedro project, **create a module (for example, `utils`) at the same
 level as the `pipelines` folder**, and organise the functionalities there:
 
@@ -86,7 +86,7 @@ from my_project.utils.dictionary_utils import find_common_keys
 ```
 
 ```{note}
-For imports like this to be displayed in IDE properly, it is required to perform an editable
+For imports like this to be displayed in an IDE properly, it is required to perform an editable
 installation of the Kedro project to your virtual environment.
 This is done via `pip install -e <root-of-kedro-project>`, the easiest way to achieve
 this is to `cd` to the root of your Kedro project and run `pip install -e .`.
@@ -116,7 +116,7 @@ This example consists of three parts:
 | 2     | An optimiser that leverages the ML model and implements domain business logic to derive recommendations      | <ul> <li>A good design consideration might be to make it independent of the UI framework.</li> </ul>                                                                                                                                                                                                                                                                                                             |
 | 3     | User interface (UI) application                                                                              | <ul> <li>This can be a [`plotly`](https://plotly.com/python/) or [`streamlit`](https://streamlit.io/) dashboard.</li> <li>Or even a full-fledged front-end app leveraging JS framework like [`React`](https://react.dev/).</li> <li>Regardless, this component may know how to access the ML model, but it should probably not know anything about how it was trained and was Kedro involved or not.</li> </ul>  |
 
-A suggested solution in this case would be a **monorepo** design. Below is an example:
+A suggested solution in this case would be a **monorepo** design. Below is an example of such a project structure:
 
 ```text
 └── repo_root

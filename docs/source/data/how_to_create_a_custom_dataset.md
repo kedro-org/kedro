@@ -4,18 +4,18 @@
 
 ## AbstractDataset
 
-If you are a contributor and would like to submit a new dataset, you must extend the [`AbstractDataset` interface](/kedro.io.AbstractDataset) or [`AbstractVersionedDataset` interface](/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
+If you are a contributor and would like to submit a new dataset, you must extend the {py:class}`~kedro.io.AbstractDataset` interface or {py:class}`~kedro.io.AbstractVersionedDataset` interface if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
 
 
 ## Scenario
 
-In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
+In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types/) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
 
 ## Project setup
 
 We assume that you have already [installed Kedro](../get_started/install.md). Now [create a project](../get_started/new_project.md) (feel free to name your project as you like, but here we will assume the project's repository name is `kedro-pokemon`).
 
-Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
+Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
 
 The dataset will use [Pillow](https://pillow.readthedocs.io/en/stable/) for generic image processing functionality, to ensure that it can work with a range of different image formats, not just PNG.
 
@@ -29,7 +29,7 @@ Consult the [Pillow documentation](https://pillow.readthedocs.io/en/stable/insta
 
 ## The anatomy of a dataset
 
-At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataset](/kedro.io.AbstractDataset) and provide an implementation for the following abstract methods:
+At the minimum, a valid Kedro dataset needs to subclass the base {py:class}`~kedro.io.AbstractDataset` and provide an implementation for the following abstract methods:
 
 * `_load`
 * `_save`
@@ -37,6 +37,8 @@ At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDatase
 
 `AbstractDataset` is generically typed with an input data type for saving data, and an output data type for loading data.
 This typing is optional however, and defaults to `Any` type.
+
+The `_EPHEMERAL` boolean attribute in `AbstractDataset` indicates if a dataset is persistent. For example, in the case of {py:class}`~kedro.io.MemoryDataset`, which is not persistent, it is set to True. By default, `_EPHEMERAL` is set to False.
 
 Here is an example skeleton for `ImageDataset`:
 
@@ -307,7 +309,7 @@ Versioning doesn't work with `PartitionedDataset`. You can't use both of them at
 ```
 
 To add versioning support to the new dataset we need to extend the
- [AbstractVersionedDataset](/kedro.io.AbstractVersionedDataset) to:
+ {py:class}`~kedro.io.AbstractVersionedDataset` to:
 
 * Accept a `version` keyword argument as part of the constructor
 * Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively
@@ -507,9 +509,9 @@ Inspect the content of the data directory to find a new version of the data, wri
 
 ## Thread-safety
 
-Kedro datasets should work with the [SequentialRunner](/kedro.runner.SequentialRunner) and the [ParallelRunner](/kedro.runner.ParallelRunner), so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
+Kedro datasets should work with the {py:class}`~kedro.runner.SequentialRunner` and the {py:class}`~kedro.runner.ParallelRunner`, so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
-There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that uses Spark, use [ThreadRunner](/kedro.runner.ThreadRunner) instead.
+There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro {py:class}`~kedro.runner.ParallelRunner`. For parallelism within a Kedro project that uses Spark, use {py:class}`~kedro.runner.ThreadRunner` instead.
 
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an IPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 

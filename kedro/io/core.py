@@ -113,6 +113,13 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             # param2 will be True by default
     """
 
+    """
+    Datasets are persistent by default. User-defined datasets that
+    are not made to be persistent, such as instances of `MemoryDataset`,
+    need to change the `_EPHEMERAL` attribute to 'True'.
+    """
+    _EPHEMERAL = False
+
     @classmethod
     def from_config(
         cls: type,
@@ -377,7 +384,11 @@ def parse_dataset_definition(
     config = copy.deepcopy(config)
 
     if "type" not in config:
-        raise DatasetError("'type' is missing from dataset catalog configuration")
+        raise DatasetError(
+            "'type' is missing from dataset catalog configuration."
+            "\nHint: If this catalog entry is intended for variable interpolation, "
+            "make sure that the top level key is preceded by an underscore."
+        )
 
     dataset_type = config.pop("type")
     class_obj = None
@@ -395,7 +406,23 @@ def parse_dataset_definition(
                 class_obj = tmp
                 break
         else:
-            raise DatasetError(f"Class '{dataset_type}' not found, is this a typo?")
+            hint = ""
+            if "DataSet" in dataset_type:
+                hint = (  # pragma: no cover # To remove when we drop support for python 3.8
+                    "Hint: If you are trying to use a dataset from `kedro-datasets`>=2.0.0, "
+                    "make sure that the dataset name uses the `Dataset` spelling instead of `DataSet`."
+                )
+            else:
+                hint = (
+                    "Hint: If you are trying to use a dataset from `kedro-datasets`, "
+                    "make sure that the package is installed in your current environment. "
+                    "You can do so by running `pip install kedro-datasets` or "
+                    "`pip install kedro-datasets[<dataset-group>]` to install `kedro-datasets` along with "
+                    "related dependencies for the specific dataset group."
+                )
+            raise DatasetError(
+                f"Class '{dataset_type}' not found, is this a typo?" f"\n{hint}"
+            )
 
     if not class_obj:
         class_obj = dataset_type

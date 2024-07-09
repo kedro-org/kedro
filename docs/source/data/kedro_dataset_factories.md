@@ -220,21 +220,16 @@ The matches are ranked according to the following criteria:
 
 ## How to override the default dataset creation with dataset factories
 
-You can use dataset factories to define a catch-all pattern which will overwrite the default [`MemoryDataset`](/kedro.io.MemoryDataset) creation.
+You can use dataset factories to define a catch-all pattern which will overwrite the default {py:class}`~kedro.io.MemoryDataset` creation.
 
 ```yaml
-"{a_default_dataset}":
+"{default_dataset}":
   type: pandas.CSVDataset
-  filepath: data/{a_default_dataset}.csv
+  filepath: data/{default_dataset}.csv
 
 ```
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
 as `pandas.CSVDataset`.
-
-```{note}
-Under the hood Kedro uses the pattern name "{default}" to generate the default datasets set in the runners. If you want to overwrite this pattern you should make sure you choose a name that comes
-before "default" in the alphabet for it to be resolved first.
-```
 
 ## CLI commands for dataset factories
 
@@ -322,9 +317,9 @@ shuttles:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{name}.pq
 
-"{a_default}":
+"{default}":
   type: pandas.ParquetDataset
-  filepath: data/03_primary/{a_default}.pq
+  filepath: data/03_primary/{default}.pq
 ```
 </details>
 

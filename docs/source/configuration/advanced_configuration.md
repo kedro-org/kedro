@@ -1,7 +1,7 @@
 # Advanced configuration
 The documentation on [configuration](./configuration_basics.md) describes how to satisfy most common requirements of standard Kedro project configuration:
 
-By default, Kedro is set up to use the [OmegaConfigLoader](/kedro.config.OmegaConfigLoader) class.
+By default, Kedro is set up to use the {py:class}`~kedro.config.OmegaConfigLoader` class.
 
 ## Advanced configuration for Kedro projects
 This page also contains a set of guidance for advanced configuration requirements of standard Kedro projects:
@@ -20,7 +20,7 @@ This page also contains a set of guidance for advanced configuration requirement
 
 
 ### How to use a custom configuration loader
-You can implement a custom configuration loader by extending the [`AbstractConfigLoader`](/kedro.config.AbstractConfigLoader) class:
+You can implement a custom configuration loader by extending the {py:class}`~kedro.config.AbstractConfigLoader` class:
 
 ```python
 from kedro.config import AbstractConfigLoader
@@ -194,6 +194,7 @@ my_param: "${globals: nonexistent_global, 23}"
 If there are duplicate keys in the globals files in your base and runtime environments, the values in the runtime environment
 overwrite the values in your base environment.
 
+(runtime-params)=
 ### How to override configuration with runtime parameters with the `OmegaConfigLoader`
 
 Kedro allows you to [specify runtime parameters for the `kedro run` command with the `--params` CLI option](parameters.md#how-to-specify-parameters-at-runtime). These runtime parameters
@@ -217,6 +218,31 @@ companies:
   filepath: "${runtime_params:folder, 'data/01_raw'}/companies.csv"
 ```
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
+
+#### How to use `globals` and `runtime_params`
+
+As mentioned above, `runtime_params` are not designed to override `globals` configuration. This is done to avoid unexplicit overrides and to simplify parameter resolutions. Thus, `globals` has only one entry point - the `yaml` file.
+
+However, you can use `globals` and `runtime_params` by specifying `globals` as a default value to be used in case the runtime parameter is not passed.
+
+Consider this `parameters.yml`:
+```yaml
+model_options:
+  random_state: "${runtime_params:random, ${globals:my_global_value}}"
+```
+
+and this `globals.yml` file:
+
+```yaml
+my_global_value: 4
+```
+
+This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters:
+```bash
+kedro run --params random=3
+```
+
+If the `random` parameter is not passed through the CLI `--params` option with `kedro run`, then `my_global_value` from `globals.yml` is used for the `model_options.random_state`.
 
 ### How to use resolvers in the `OmegaConfigLoader`
 Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s
@@ -281,7 +307,7 @@ CONFIG_LOADER_ARGS = {
 }
 ```
 ### How to load credentials through environment variables
-The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `OmegaConfigLoader` and the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
+The {py:class}`~kedro.config.OmegaConfigLoader` enables you to load credentials from environment variables. To achieve this you have to use the `OmegaConfigLoader` and the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
 You can use the `oc.env` resolver to access credentials from environment variables in your `credentials.yml`:
 
 ```yaml
@@ -329,8 +355,9 @@ tree .
 └── parameters.yml
 ```
 
+Consider the following `parameters.yml` file and example Python script:
+
 ```yaml
-# parameters.yml
 learning_rate: 0.01
 train_test_ratio: 0.7
 ```
@@ -342,7 +369,12 @@ config_loader = OmegaConfigLoader(conf_source=".")
 # Optionally, you can also use environments
 # config_loader = OmegaConfigLoader(conf_source=".", base_env="base", default_run_env="local")
 
->>> config_loader["parameters"]
+print(config_loader["parameters"])
+```
+
+If you run it from the same directory where `parameters.yml` placed it gives the following output:
+
+```console
 {'learning_rate': 0.01, 'train_test_ratio': 0.7}
 ```
 
@@ -351,8 +383,9 @@ For the full list of features, please refer to [configuration_basics](./configur
 ### How to use Custom Resolvers with `OmegaConfigLoader`
 You can register custom resolvers to use non-primitive types for parameters.
 
+Consider the following `parameters.yml` file an example of Python script for registering a custom resolver:
+
 ```yaml
-# parameters.yml
 polars_float64: "${polars: Float64}"
 today: "${today:}"
 ```
@@ -368,6 +401,12 @@ custom_resolvers = {"polars": lambda x: getattr(pl, x),
 
 # Register custom resolvers
 config_loader = OmegaConfigLoader(conf_source=".", custom_resolvers=custom_resolvers)
->>> print(config_loader["parameters"])
+
+print(config_loader["parameters"])
+```
+
+If you run it from the same directory where `parameters.yml` placed it gives the following output:
+
+```console
 {'polars_float64': Float64, 'today': datetime.date(2023, 11, 23)}
 ```

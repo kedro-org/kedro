@@ -1,5 +1,5 @@
 install:
-	pip install -e .
+	uv pip install --system -e .
 
 clean:
 	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
@@ -9,7 +9,7 @@ clean:
 
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
-	mypy kedro --strict --allow-any-generics
+	mypy kedro --strict --allow-any-generics --no-warn-unused-ignores
 test:
 	pytest --numprocesses 4 --dist loadfile
 
@@ -20,6 +20,10 @@ show-coverage:
 e2e-tests:
 	behave --tags=-skip
 
+e2e-tests-fast: export BEHAVE_LOCAL_ENV=TRUE
+e2e-tests-fast:
+	behave --tags=-skip --no-capture
+
 pip-compile:
 	pip-compile -q -o -
 
@@ -27,24 +31,22 @@ secret-scan:
 	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
 
 build-docs:
-	pip install -e ".[docs]"
+	uv pip install --system -e ".[docs]"
 	./docs/build-docs.sh "docs"
 
 show-docs:
 	open docs/build/html/index.html
 
 linkcheck:
-	pip install -e ".[docs]"
+	uv pip install --system "kedro[docs] @ ."
 	./docs/build-docs.sh "linkcheck"
 
 package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
-# pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
-# pip==23.3 breaks dependency resolution
-	python -m pip install -U "pip>=21.2,<23.2"
-	pip install .[test]
+	python -m pip install "uv==0.1.32"
+	uv pip install --system "kedro[test] @ ."
 
 install-pre-commit:
 	pre-commit install --install-hooks

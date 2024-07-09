@@ -115,7 +115,7 @@ hooks = MyHooks()
 
 ## CLI Hooks
 
-You can also develop Hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI Hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI Hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
+You can also develop Hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI Hooks, please visit our {py:mod}`~kedro.framework.cli.hooks` API documentation. To register CLI Hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
 
 
 ```toml
@@ -178,4 +178,4 @@ Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.
 - [kedro-vertexai](https://github.com/getindata/kedro-vertexai), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Vertex AI Pipelines service
 - [kedro-azureml](https://github.com/getindata/kedro-azureml), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Azure ML Pipelines service
 - [kedro-sagemaker](https://github.com/getindata/kedro-sagemaker), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Amazon SageMaker service
-- [kedro-partitioned](https://github.com/ProjetaAi/kedro-partitioned), by [Gabriel Daiha Alves](https://github.com/gabrieldaiha) and [Nickolas da Rocha Machado](https://github.com/nickolasrm), extends the functionality on processing partitioned data.
+- [kedro-partitioned](https://github.com/kedro-partitioned/kedro-partitioned), by [Gabriel Daiha Alves](https://github.com/gabrieldaiha) and [Nickolas da Rocha Machado](https://github.com/nickolasrm), extends the functionality on processing partitioned data.

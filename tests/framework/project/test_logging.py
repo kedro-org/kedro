@@ -6,6 +6,7 @@ import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
+from kedro.logging import RichHandler, _format_rich, _has_rich_handler
 
 
 @pytest.fixture
@@ -144,3 +145,37 @@ def test_rich_traceback_disabled_on_databricks(
 
     rich_traceback_install.assert_not_called()
     rich_pretty_install.assert_called()
+
+
+def test_rich_format():
+    assert (
+        _format_rich("Hello World!", "dark_orange")
+        == "[dark_orange]Hello World![/dark_orange]"
+    )
+
+
+def test_has_rich_handler():
+    test_logger = logging.getLogger("test_logger")
+    assert not _has_rich_handler(test_logger)
+    _has_rich_handler.cache_clear()
+    test_logger.addHandler(RichHandler())
+    assert _has_rich_handler(test_logger)
+
+
+def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):
+    config_path = (Path(tmp_path) / "conf" / "logging.yml").absolute()
+    config_path.parent.mkdir(parents=True)
+    logging_config = {"version": 1, "loggers": {"kedro": {"level": "DEBUG"}}}
+    with config_path.open("w", encoding="utf-8") as f:
+        yaml.dump(logging_config, f)
+    import os
+
+    from kedro.framework.project import _ProjectLogging
+
+    os.chdir(tmp_path)
+    LOGGING = _ProjectLogging()
+
+    assert LOGGING.data == logging_config
+    assert logging.getLogger("kedro").level == logging.DEBUG
+    expected_message = "You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
+    assert expected_message in "".join(caplog.messages).strip("\n")

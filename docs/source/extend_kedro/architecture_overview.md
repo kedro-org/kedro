@@ -30,10 +30,10 @@ As a data pipeline developer, you will interact with a Kedro project, which cons
 
 Kedro framework serves as the interface between a Kedro project and Kedro library components. The major building blocks of the Kedro framework include:
 
-* **[`Session`](/kedro.framework.session)** is responsible for managing the lifecycle of a Kedro run.
-* **[`Context`](/kedro.framework.context)** holds the configuration and Kedro's main functionality, and also serves as the main entry point for interactions with core library components.
-* **[`Hooks`](/kedro.framework.hooks)** defines all hook specifications available to extend Kedro.
-* **[`CLI`](/kedro.framework.cli)** defines built-in Kedro CLI commands and utilities to load custom CLI commands from plugins.
+* **{py:mod}`~kedro.framework.session`** is responsible for managing the lifecycle of a Kedro run.
+* **{py:mod}`~kedro.framework.context`** holds the configuration and Kedro's main functionality, and also serves as the main entry point for interactions with core library components.
+* **{py:mod}`~kedro.framework.hooks`** defines all hook specifications available to extend Kedro.
+* **{py:mod}`~kedro.framework.cli`** defines built-in Kedro CLI commands and utilities to load custom CLI commands from plugins.
 
 ## Kedro starter
 
@@ -43,10 +43,10 @@ You can use a [Kedro starter](../starters/starters.md) to generate a Kedro proje
 
 Kedro library consists of independent units, each responsible for one aspect of computation in a data pipeline:
 
-* **[`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)** provides utility to parse and load configuration defined in a Kedro project.
-* **[`Pipeline`](/kedro.pipeline)** provides a collection of abstractions to model data pipelines.
-* **[`Runner`](/kedro.runner)** provides an abstraction for different execution strategy of a data pipeline.
-* **[`I/O`](/kedro.io)** provides a collection of abstractions to handle I/O in a project, including `DataCatalog` and many `Dataset` implementations.
+* **{py:class}`~kedro.config.OmegaConfigLoader`** provides utility to parse and load configuration defined in a Kedro project.
+* **{py:mod}`~kedro.pipeline`** provides a collection of abstractions to model data pipelines.
+* **{py:mod}`~kedro.runner`** provides an abstraction for different execution strategy of a data pipeline.
+* **{py:mod}`~kedro.io`** provides a collection of abstractions to handle I/O in a project, including `DataCatalog` and many `Dataset` implementations.
 
 ## Kedro extension
 

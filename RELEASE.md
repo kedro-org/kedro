@@ -8,6 +8,7 @@
 * Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
 * Implemented key completion support for accessing datasets in the `DataCatalog`.
 * Made [kedro-telemetry](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) a core dependency.
+* Implemented dataset pretty printing.
 
 ## Breaking changes to the API
 

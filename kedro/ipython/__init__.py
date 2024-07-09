@@ -163,7 +163,9 @@ def _resolve_project_path(
     if path:
         project_path = Path(path).expanduser().resolve()
     else:
-        if local_namespace.get("context") and hasattr(local_namespace["context"], "project_path"):
+        if local_namespace.get("context") and hasattr(
+            local_namespace["context"], "project_path"
+        ):
             # breakpoint()
             project_path = local_namespace["context"].project_path
         else:
@@ -179,7 +181,7 @@ def _resolve_project_path(
         project_path
         and local_namespace
         and local_namespace.get("context")
-        and hasattr(local_namespace["context"], "project_path") # Avoid name collision
+        and hasattr(local_namespace["context"], "project_path")  # Avoid name collision
         and project_path != local_namespace["context"].project_path
     ):
         logger.info("Updating path to Kedro project: %s...", project_path)

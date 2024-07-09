@@ -23,7 +23,7 @@ To use Argo Workflows, ensure you have the following prerequisites in place:
 
 - [Argo Workflows is installed](https://github.com/argoproj/argo/blob/master/README.md#quickstart) on your Kubernetes cluster
 - [Argo CLI is installed](https://github.com/argoproj/argo/releases) on your machine
-- A `name` attribute is set for each [Kedro node](/api/kedro.pipeline.node) since it is used to build a DAG
+- A `name` attribute is set for each Kedro {py:mod}`~kedro.pipeline.node` since it is used to build a DAG
 - [All node input/output datasets must be configured in `catalog.yml`](../data/data_catalog_yaml_examples.md) and refer to an external location (e.g. AWS S3); you cannot use the `MemoryDataset` in your workflow
 
 ```{note}

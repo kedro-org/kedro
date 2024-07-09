@@ -72,6 +72,8 @@ intersphinx_mapping = {
     "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-2.0.0/", None),
     "cpython": ("https://docs.python.org/3.8/", None),
     "ipython": ("https://ipython.readthedocs.io/en/8.21.0/", None),
+    "mlflow": ("https://www.mlflow.org/docs/2.12.1/", None),
+    "kedro-mlflow": ("https://kedro-mlflow.readthedocs.io/en/0.12.2/", None),
 }
 
 # The suffix(es) of source filenames.
@@ -234,6 +236,7 @@ linkcheck_ignore = [
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
+    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/rich_logging.yml",
     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
@@ -520,3 +523,4 @@ except Exception as e:
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
 
 myst_heading_anchors = 5
+myst_enable_extensions = ["colon_fence"]

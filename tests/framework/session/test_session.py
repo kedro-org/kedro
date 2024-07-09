@@ -325,6 +325,11 @@ class TestKedroSession:
 
         expected_store["username"] = fake_username
 
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent",
+            return_value=False,
+        )
+
         assert session.store == expected_store
         assert session.load_context() is mock_context_class.return_value
         assert isinstance(session._get_config_loader(), OmegaConfigLoader)
@@ -361,6 +366,11 @@ class TestKedroSession:
         }
 
         expected_store["username"] = fake_username
+
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent",
+            return_value=False,
+        )
 
         assert session.store == expected_store
         assert session.load_context() is mock_context_class.return_value
@@ -754,11 +764,15 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
-    def test_run_non_existent_pipeline(self, fake_project, mock_runner):
+    def test_run_non_existent_pipeline(self, fake_project, mock_runner, mocker):
         pattern = (
             "Failed to find the pipeline named 'doesnotexist'. "
             "It needs to be generated and returned "
             "by the 'register_pipelines' function."
+        )
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent",
+            return_value=False,
         )
         with pytest.raises(ValueError, match=re.escape(pattern)):
             with KedroSession.create(fake_project) as session:
@@ -922,6 +936,10 @@ class TestKedroSession:
             },
         )
         mock_runner_class = mocker.patch("kedro.runner.SequentialRunner")
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent",
+            return_value=False,
+        )
 
         session = KedroSession.create(fake_project)
         with pytest.raises(

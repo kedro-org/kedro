@@ -166,7 +166,6 @@ def _resolve_project_path(
         if local_namespace.get("context") and hasattr(
             local_namespace["context"], "project_path"
         ):
-            # breakpoint()
             project_path = local_namespace["context"].project_path
         else:
             project_path = _find_kedro_project(Path.cwd())

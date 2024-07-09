@@ -743,9 +743,7 @@ def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
 @when("I execute the load_node magic command")
 def exec_magic_command(context):
     """Execute Kedro target."""
-    project_path = context.root_project_dir
     cmd = [context.python, "ipython_script.py"]
-    # breakpoint()
     context.result = run(
         cmd, env=context.env, cwd=str(context.root_project_dir), print_output=True
     )

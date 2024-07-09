@@ -9,6 +9,7 @@ import logging
 import os
 import pprint
 import re
+import sys
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -230,14 +231,14 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
     def _pretty_repr(self, object_description: dict[str, Any]) -> str:
         str_keys = []
-        for arg_name in sorted(object_description, key=lambda key: str(key)):
-            if object_description[arg_name] is not None:
+        for arg_name, arg_descr in object_description.items():
+            if arg_descr is not None:
                 descr = pprint.pformat(
-                    object_description[arg_name],
+                    arg_descr,
                     sort_dicts=False,
                     compact=True,
                     depth=2,
-                    width=500,
+                    width=sys.maxsize,
                 )
                 str_keys.append(f"{arg_name}={descr}")
 

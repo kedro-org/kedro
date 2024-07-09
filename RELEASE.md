@@ -53,7 +53,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Documentation changes
 * Updated the documentation for deploying a Kedro project with Astronomer Airflow.
 * Used `kedro-sphinx-theme` for documentation.
-
+* Add mentions about correct usage of `configure_project` with `multiprocessing`.
+*
 # Release 0.19.4
 
 ## Major features and improvements
@@ -81,6 +82,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added missing description for `merge_strategy` argument in OmegaConfigLoader.
 * Added documentation on best practices for testing nodes and pipelines.
 * Clarified docs around using custom resolvers without a full Kedro project.
+
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

@@ -18,13 +18,13 @@ This guide provides instructions on running a Kedro pipeline on different Airflo
 
 The following tutorial shows how to deploy an example [Spaceflights Kedro project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) on [Apache Airflow](https://airflow.apache.org/) with [Astro CLI](https://docs.astronomer.io/astro/cli/overview), a command-line tool created by [Astronomer](https://www.astronomer.io/) that streamlines the creation of local Airflow projects. You will deploy it locally first, and then transition to Astro Cloud.
 
-[Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
+[Astronomer](https://www.astronomer.io/) is a managed Airflow platform which allows users to spin up and run an Airflow cluster in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
 
 ### Prerequisites
 
 To follow this tutorial, ensure you have the following:
 
-* The [Astro CLI installed](https://docs.astronomer.io/astro/install-cli)
+* The [Astro CLI installed](https://www.astronomer.io/docs/astro/cli/install-cli)
 * A container service like [Docker Desktop](https://docs.docker.com/get-docker/) (v18.09 or higher)
 * `kedro>=0.19` installed
 * [`kedro-airflow>=0.8`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) installed. We will use this plugin to convert the Kedro pipeline into an Airflow DAG.
@@ -86,7 +86,7 @@ This step should produce a `.py` file called `new_kedro_project_airflow_dag.py` 
 
 In this section, you will start by setting up a new blank Airflow project using Astro and then copy the files prepared in the previous section from the Kedro project. Next, you will need to customise the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, you will be able to run and explore the Airflow cluster.
 
-1. To complete this section, you have to install both the [Astro CLI](https://docs.astronomer.io/astro/install-cli) and [Docker Desktop](https://docs.docker.com/get-docker/).
+1. To complete this section, you have to install both the [Astro CLI](https://www.astronomer.io/docs/astro/cli/install-cli) and [Docker Desktop](https://docs.docker.com/get-docker/).
 
 2. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
 

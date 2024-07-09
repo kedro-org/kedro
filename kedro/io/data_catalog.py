@@ -24,6 +24,7 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
+from kedro.logging import _format_rich, _has_rich_handler
 
 Patterns = Dict[str, Dict[str, Any]]
 
@@ -105,27 +106,35 @@ class _FrozenDatasets:
         """Return a _FrozenDatasets instance from some datasets collections.
         Each collection could either be another _FrozenDatasets or a dictionary.
         """
+        self._original_names: set[str] = set()
         for collection in datasets_collections:
             if isinstance(collection, _FrozenDatasets):
                 self.__dict__.update(collection.__dict__)
+                self._original_names.update(collection._original_names)
             else:
                 # Non-word characters in dataset names are replaced with `__`
                 # for easy access to transcoded/prefixed datasets.
-                self.__dict__.update(
-                    {
-                        _sub_nonword_chars(dataset_name): dataset
-                        for dataset_name, dataset in collection.items()
-                    }
-                )
+                for dataset_name, dataset in collection.items():
+                    self.__dict__[_sub_nonword_chars(dataset_name)] = dataset
+                    self._original_names.add(dataset_name)
 
     # Don't allow users to add/change attributes on the fly
     def __setattr__(self, key: str, value: Any) -> None:
+        if key == "_original_names":
+            super().__setattr__(key, value)
+            return
         msg = "Operation not allowed! "
         if key in self.__dict__:
             msg += "Please change datasets through configuration."
         else:
             msg += "Please use DataCatalog.add() instead."
         raise AttributeError(msg)
+
+    def _ipython_key_completions_(self) -> list[str]:
+        return list(self._original_names)
+
+    def __getitem__(self, key: str) -> Any:
+        return self.__dict__[_sub_nonword_chars(key)]
 
 
 class DataCatalog:
@@ -288,6 +297,13 @@ class DataCatalog:
         user_default = {}
 
         for ds_name, ds_config in catalog.items():
+            if not isinstance(ds_config, dict):
+                raise DatasetError(
+                    f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
+                    "\nHint: If this catalog entry is intended for variable interpolation, "
+                    "make sure that the key is preceded by an underscore."
+                )
+
             ds_config = _resolve_credentials(  # noqa: PLW2901
                 ds_config, credentials
             )
@@ -506,8 +522,10 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from [dark_orange]%s[/dark_orange] (%s)...",
-            name,
+            "Loading data from %s (%s)...",
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
             type(dataset).__name__,
             extra={"markup": True},
         )
@@ -548,8 +566,10 @@ class DataCatalog:
         dataset = self._get_dataset(name)
 
         self._logger.info(
-            "Saving data to [dark_orange]%s[/dark_orange] (%s)...",
-            name,
+            "Saving data to %s (%s)...",
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
             type(dataset).__name__,
             extra={"markup": True},
         )
@@ -754,7 +774,7 @@ class DataCatalog:
             dataset_patterns = self._sort_patterns(unsorted_dataset_patterns)
         else:
             dataset_patterns = self._dataset_patterns
-        return DataCatalog(
+        return self.__class__(
             datasets=self._datasets,
             dataset_patterns=dataset_patterns,
             load_versions=self._load_versions,

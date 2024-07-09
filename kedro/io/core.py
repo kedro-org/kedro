@@ -9,6 +9,7 @@ import logging
 import os
 import pprint
 import re
+import sys
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -237,7 +238,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                     sort_dicts=False,
                     compact=True,
                     depth=2,
-                    width=500,
+                    width=sys.maxsize,
                 )
                 str_keys.append(f"{arg_name}={descr}")
 

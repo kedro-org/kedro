@@ -334,6 +334,17 @@ class TestKedroCLI:
         # There is only one `LazyGroup` for project commands
         assert len(kedro_cli.project_groups) == 1
         assert kedro_cli.project_groups == [project_commands]
+        # Assert that the lazy commands are listed properly
+        assert kedro_cli.project_groups[0].list_commands(None) == [
+            "catalog",
+            "ipython",
+            "jupyter",
+            "micropkg",
+            "package",
+            "pipeline",
+            "registry",
+            "run",
+        ]
 
     def test_project_commands_no_project(self, mocker, tmp_path):
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)

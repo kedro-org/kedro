@@ -303,9 +303,6 @@ def create_project_with_starter(context, starter):
         cwd=context.temp_dir,
     )
 
-    # prevent telemetry from prompting for input during e2e tests
-    telemetry_file = context.root_project_dir / ".telemetry"
-    telemetry_file.write_text("consent: false", encoding="utf-8")
     assert res.returncode == OK_EXIT_CODE, res
 
 

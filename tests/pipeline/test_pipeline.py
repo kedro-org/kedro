@@ -4,14 +4,22 @@ from itertools import chain
 import pytest
 
 import kedro
+from kedro import KedroDeprecationWarning
 from kedro.pipeline import node
-from kedro.pipeline._transcoding import _strip_transcoding, _transcode_split
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
     OutputNotUniqueError,
 )
+from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
+
+
+def test_deprecation():
+    with pytest.warns(
+        KedroDeprecationWarning, match="'TRANSCODING_SEPARATOR' has been moved"
+    ):
+        from kedro.pipeline.pipeline import TRANSCODING_SEPARATOR  # noqa: F401
 
 
 class TestTranscodeHelpers:

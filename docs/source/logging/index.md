@@ -42,6 +42,21 @@ After setting the environment variable, any subsequent Kedro commands use the lo
 If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will use the [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml).
 ```
 
+### Change the verbosity of specific parts of Kedro
+
+You can also customise logging at runtime and redefine the logging configuration provided in the `logging.yml` when using jupyter notebook.
+The example below demonstrates how you can change the logging level from default `INFO` to `WARNING` for the `kedro.io.data_catalog` component logger specifically, the logging for the rest of the components will remain unchanged.
+The same can be done for higher/lower-level components without affecting the top-level.
+
+Add the following to a cell in your notebook:
+
+```ipython
+import logging
+
+
+logging.getLogger("kedro.io.data_catalog").setLevel(logging.WARNING)
+```
+
 ## Custom `CONF_SOURCE` with logging
 
 When you customise the [`CONF_SOURCE`](../configuration/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project, it determines where Kedro looks for configuration files, including the logging configuration file. However, changing `CONF_SOURCE` does not automatically update the path to `logging.yml`. To use a custom location or filename for the logging configuration, you must explicitly set the `KEDRO_LOGGING_CONFIG` environment variable.
@@ -194,3 +209,21 @@ You must provide a value for both `COLUMNS` and `LINES` even if you only wish to
 ## How to enable rich logging in Jupyter
 
 Rich also formats the logs in JupyterLab and Jupyter Notebook. The size of the output console does not adapt to your window but can be controlled through the `JUPYTER_COLUMNS` and `JUPYTER_LINES` environment variables. The default values (115 and 100 respectively) should be suitable for most users, but if you require a different output console size then you should alter the values of `JUPYTER_COLUMNS` and `JUPYTER_LINES`.
+
+### How to use logging without the rich library
+
+If you prefer not to have the `rich` library in your Kedro project, you have the option to uninstall it. However, it's important to note that versions of the `cookiecutter` library above 2.3 have a dependency on rich. You will need to downgrade `cookiecutter` to a version below 2.3 to have Kedro work without `rich`.
+
+To uninstall the rich library, run:
+
+```bash
+pip uninstall rich
+```
+
+To downgrade cookiecutter to a version that does not require rich, you can specify a version below 2.3. For example:
+
+```bash
+pip install cookiecutter==2.2.0
+```
+
+These changes will affect the visual appearance and formatting of Kedro's logging, prompts, and the output of the `kedro ipython` command. While using a version of `cookiecutter` below 2.3, the appearance of the prompts will be plain even with `rich` installed.

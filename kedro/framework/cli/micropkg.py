@@ -124,7 +124,8 @@ def micropkg_cli() -> None:  # pragma: no cover
 
 @micropkg_cli.group()
 def micropkg() -> None:
-    """Commands for working with micro-packages."""
+    """(DEPRECATED) Commands for working with micro-packages. DeprecationWarning: micro-packaging is deprecated
+    and will not be available from Kedro 0.20.0."""
 
 
 @command_with_verbosity(micropkg, "pull")
@@ -167,7 +168,13 @@ def pull_package(  # noqa: PLR0913
     all_flag: str,
     **kwargs: Any,
 ) -> None:
-    """Pull and unpack a modular pipeline and other micro-packages in your project."""
+    """(DEPRECATED) Pull and unpack a modular pipeline and other micro-packages in your project."""
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro micropkg pull' is deprecated and "
+        "will not be available from Kedro 0.20.0."
+    )
+    click.secho(deprecation_message, fg="red")
+
     if not package_path and not all_flag:
         click.secho(
             "Please specify a package path or add '--all' to pull all micro-packages in the "
@@ -341,7 +348,13 @@ def package_micropkg(  # noqa: PLR0913
     all_flag: str,
     **kwargs: Any,
 ) -> None:
-    """Package up a modular pipeline or micro-package as a Python source distribution."""
+    """(DEPRECATED) Package up a modular pipeline or micro-package as a Python source distribution."""
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro micropkg package' is deprecated and "
+        "will not be available from Kedro 0.20.0."
+    )
+    click.secho(deprecation_message, fg="red")
+
     if not module_path and not all_flag:
         click.secho(
             "Please specify a micro-package name or add '--all' to package all micro-packages in "

@@ -6,13 +6,20 @@ This page also explains how to use line magic to display a Kedro-Viz visualisati
 
 ## Example project
 
-The example adds a notebook to experiment with the retired [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris). As an alternative, you can follow the example using a different starter, such as [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) or just add a notebook to your own project.
+The example adds a notebook to experiment with the  [`spaceflight-pandas-viz` starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz). As an alternative, you can follow the example using a different starter or just add a notebook to your own project.
 
-We will assume the example project is called `iris`, but you can call it whatever you choose.
+We will assume the example project is called `spaceflights`, but you can call it whatever you choose.
+
+To create a project, you can run this command:
+```bash
+kedro new -n spaceflights --tools=viz --example=yes
+```
+
+You can find more options of `kedro new` from [Create a new Kedro Project](../get_started/new_project.md).
 
 ## Loading the project with `kedro jupyter notebook`
 
-Navigate to the project directory (`cd iris`) and issue the following command in the terminal to launch Jupyter:
+Navigate to the project directory (`cd spaceflights`) and issue the following command in the terminal to launch Jupyter:
 
 ```bash
 kedro jupyter notebook
@@ -85,36 +92,56 @@ catalog.list()
 When you run the cell:
 
 ```ipython
-['example_iris_data',
- 'parameters',
- 'params:example_test_data_ratio',
- 'params:example_num_train_iter',
- 'params:example_learning_rate'
+[
+    'companies',
+    'reviews',
+    'shuttles',
+    'preprocessed_companies',
+    'preprocessed_shuttles',
+    'model_input_table',
+    'regressor',
+    'metrics',
+    'companies_columns',
+    'shuttle_passenger_capacity_plot_exp',
+    'shuttle_passenger_capacity_plot_go',
+    'dummy_confusion_matrix',
+    'parameters',
+    'params:model_options',
+    'params:model_options.test_size',
+    'params:model_options.random_state',
+    'params:model_options.features'
 ]
+```
+
+#### Search datasets with regex
+If you do not remember the exact name of a dataset, you can provide a regular expression to search datasets.
+```ipython
+catalog.list("pre*")
+```
+
+When you run the cell:
+
+```ipython
+['preprocessed_companies', 'preprocessed_shuttles']
 ```
 Next try the following for `catalog.load`:
 
 ```ipython
-catalog.load("example_iris_data")
+catalog.load("shuttles")
 ```
 
 The output:
 
 ```ipython
-INFO     Loading data from 'example_iris_data' (CSVDataset)...
+[06/05/24 12:50:17] INFO     Loading data from reviews (CSVDataset)...
+Out[1]:
 
-     sepal_length  sepal_width  petal_length  petal_width    species
-0             5.1          3.5           1.4          0.2     setosa
-1             4.9          3.0           1.4          0.2     setosa
-2             4.7          3.2           1.3          0.2     setosa
-3             4.6          3.1           1.5          0.2     setosa
-4             5.0          3.6           1.4          0.2     setosa
-..            ...          ...           ...          ...        ...
-145           6.7          3.0           5.2          2.3  virginica
-146           6.3          2.5           5.0          1.9  virginica
-147           6.5          3.0           5.2          2.0  virginica
-148           6.2          3.4           5.4          2.3  virginica
-149           5.9          3.0           5.1          1.8  virginica
+       shuttle_id  review_scores_rating  review_scores_comfort  ...  review_scores_price  number_of_reviews  reviews_per_month
+0           45163                  91.0                   10.0  ...                  9.0                 26               0.77
+1           49438                  96.0                   10.0  ...                  9.0                 61               0.62
+2           10750                  97.0                   10.0  ...                 10.0                467               4.66
+3            4146                  95.0                   10.0  ...                  9.0                318               3.22
+
 ```
 
 Now try the following:
@@ -127,13 +154,26 @@ You should see this:
 ```ipython
 INFO     Loading data from 'parameters' (MemoryDataset)...
 
-{'example_test_data_ratio': 0.2,
- 'example_num_train_iter': 10000,
- 'example_learning_rate': 0.01}
+{
+    'model_options': {
+        'test_size': 0.2,
+        'random_state': 3,
+        'features': [
+            'engines',
+            'passenger_capacity',
+            'crew',
+            'd_check_complete',
+            'moon_clearance_complete',
+            'iata_approved',
+            'company_rating',
+            'review_scores_rating'
+        ]
+    }
+}
 ```
 
 ```{note}
-If you enable [versioning](../data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, e.g. `catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
+If you enable [versioning](../data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, e.g. `catalog.load("preprocessed_shuttles", version="2024-06-05T15.08.09.255Z")`.
 ```
 
 ### `context`
@@ -146,7 +186,7 @@ context.project_path
 You should see output like this, according to your username and path:
 
 ```ipython
-PosixPath('/Users/username/kedro_projects/iris')
+PosixPath('/Users/username/kedro_projects/spaceflights')
 ```
 
 You can find out more in the API documentation of {py:class}`~kedro.framework.context.KedroContext`.
@@ -163,10 +203,10 @@ The output will be a listing as follows:
 
 ```ipython
 {'__default__': Pipeline([
-Node(split_data, ['example_iris_data', 'parameters'], ['X_train', 'X_test', 'y_train', 'y_test'], 'split'),
-Node(make_predictions, ['X_train', 'X_test', 'y_train'], 'y_pred', 'make_predictions'),
-Node(report_accuracy, ['y_pred', 'y_test'], None, 'report_accuracy')
-])}
+Node(create_confusion_matrix, 'companies', 'dummy_confusion_matrix', None),
+Node(preprocess_companies, 'companies', ['preprocessed_companies', 'companies_columns'], 'preprocess_companies_node'),
+Node(preprocess_shuttles, 'shuttles', 'preprocessed_shuttles', 'preprocess_shuttles_node'),
+...
 ```
 
 You can use this to explore your pipelines and the nodes they contain:
@@ -177,7 +217,21 @@ pipelines["__default__"].all_outputs()
 Should give the output:
 
 ```ipython
-{'y_pred', 'X_test', 'y_train', 'X_train', 'y_test'}
+{
+    'X_train',
+    'regressor',
+    'shuttle_passenger_capacity_plot_exp',
+    'y_test',
+    'model_input_table',
+    'y_train',
+    'X_test',
+    'metrics',
+    'companies_columns',
+    'preprocessed_shuttles',
+    'preprocessed_companies',
+    'shuttle_passenger_capacity_plot_go',
+    'dummy_confusion_matrix'
+}
 ```
 
 ### `session`
@@ -225,7 +279,7 @@ For more details, run `%reload_kedro?`.
 ### `%load_node` line magic
 
 ``` {note}
-This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VSCode Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
+This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VS Code Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
 ```
 You can load the contents of a node in your project into a series of cells using the `%load_node` line magic. To use `%load_node`, the node you want to load needs to fulfil two requirements:
 - The node needs to have a name
@@ -368,10 +422,10 @@ Similarly, the following creates a custom Jupyter kernel that automatically load
 kedro jupyter lab
 ```
 
-You can use any other Jupyter client to connect to a Kedro project kernel such as the [Qt Console](https://qtconsole.readthedocs.io/), which can be launched using the `kedro_iris` kernel as follows:
+You can use any other Jupyter client to connect to a Kedro project kernel such as the [Qt Console](https://qtconsole.readthedocs.io/), which can be launched using the `spaceflights` kernel as follows:
 
 ```bash
-jupyter qtconsole --kernel=kedro_iris
+jupyter qtconsole --kernel=spaceflights
 ```
 
 This will automatically load the Kedro IPython in a console that supports graphical features such as embedded figures:

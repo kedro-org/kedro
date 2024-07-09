@@ -1,6 +1,6 @@
 # Nodes
 
-In this section, we introduce the concept of a node, for which the relevant API documentation is [kedro.pipeline.node](/api/kedro.pipeline.node).
+In this section, we introduce the concept of a node, for which the relevant API documentation is {py:mod}`~kedro.pipeline.node`.
 
 Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end (E2E) production workflows.
 
@@ -163,6 +163,9 @@ kedro run --tags=pipeline_tag
 
 This will run only the nodes found within the pipeline tagged with `pipeline_tag`.
 
+```{note}
+Node or tag names must ONLY contain letters, digits, hyphens, underscores and/or periods. Other symbols are not permitted.
+```
 
 ## How to run a node
 

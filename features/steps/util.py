@@ -111,6 +111,7 @@ def execute_notebook(notebook_filename):
         nbformat.write(nb, f)
     print(f"Executed Notebook saved at {notebook_filename}")
 
+
 def clean_up_log(stdout: str) -> str:
     """
     Cleans up log output by removing duplicate lines, extra whitespaces,

@@ -564,6 +564,15 @@ def check_correct_nodes_run(context, node):
         f"{expected_log_line},\nbut got {stdout}"
     )
 
+@then('the logs should show that load_node executed successfully')
+def check_load_node_run(context):
+    expected_log_line = "load_node executed successfully"
+    stdout = context.result.stdout
+    clean_logs = util.clean_up_log(stdout)
+    assert expected_log_line in clean_logs, (
+        "Expected the following message segment to be printed on stdout: "
+        f"{expected_log_line},\nbut got {stdout}"
+    )
 
 @then("I should get a successful exit code")
 def check_status_code(context):
@@ -728,38 +737,22 @@ def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
         file.write(project_toml_str)
 
 
-@given('I have executed the magic command "{command}"')
-@when('I execute the magic command "{command}"')
-def exec_magic_command(context, command):
+@given("I have executed the load_node magic command")
+@when("I execute the load_node magic command")
+def exec_magic_command(context):
     """Execute Kedro target."""
-    # split_command = command.split()
-    # cmd = [context.kedro] + split_command
-    curr_dir = Path(__file__).parent
-    run_notebook = context.root_project_dir / "notebooks" / "load_node.ipynb"
-    shutil.copyfile(
-        str(curr_dir / "test_notebook" / "load_node.ipynb"), str(run_notebook)
-    )
+    print("DEBUG***************")
+    project_path = context.root_project_dir
+    # context.result = run(context.python, env=context.env, cwd=str(context.root_project_dir))
 
-    print(run_notebook.exists())
-    util.execute_notebook(str(run_notebook))
-    with open(run_notebook) as f:
-        context.notebook = f.read()
+    # ip = get_ipython()
+    # ip.run_line_magic("load_ext", "kedro.ipython")
+    # ip.run_line_magic("reload_kedro", str(project_path.absolute()))
+    # ip.run_line_magic("load_node", "split_data_node")
+    # # ip.rl_next_input is what you see in the terminal input
+    # ip.run_cell(ip.rl_next_input)
+    # There is a print statement inserted in the function so we can assert from the log
 
-
-@then('the notebook should show "{pattern}"')
-def match_pattern_in_notebook(context, pattern):
-    """This is a very simple function to match pattern in an exeucted notebook.
-    Noted that the proper way to read a notebook is using `nbformat.read` and parse
-    the output corresponding. For now the test is simple and it tries to match a
-    specific keyword which is unlikely to collide. If you need to match generic
-    keywords it is better to parse the output as a JSON file instead of one big
-    string.
-    """
-    notebook = context.notebook
-
-    if pattern in notebook:
-        return True
-    raise ValueError(f"{pattern} is not found.")
 
 @given('I have changed the current working directory to "{dir}"')
 def change_dir(context, dir):

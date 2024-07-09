@@ -14,7 +14,6 @@
 from __future__ import annotations
 
 import importlib
-import os
 import re
 import sys
 from inspect import getmembers, isclass, isfunction
@@ -73,6 +72,8 @@ intersphinx_mapping = {
     "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-2.0.0/", None),
     "cpython": ("https://docs.python.org/3.8/", None),
     "ipython": ("https://ipython.readthedocs.io/en/8.21.0/", None),
+    "mlflow": ("https://www.mlflow.org/docs/2.12.1/", None),
+    "kedro-mlflow": ("https://kedro-mlflow.readthedocs.io/en/0.12.2/", None),
 }
 
 # The suffix(es) of source filenames.
@@ -202,7 +203,7 @@ pygments_style = "sphinx"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "kedro-sphinx-theme"
 here = Path(__file__).parent.absolute()
 
 # Theme options are theme-specific and customise the look and feel of a theme
@@ -235,6 +236,7 @@ linkcheck_ignore = [
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
+    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/rich_logging.yml",
     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
@@ -492,39 +494,8 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PL
     remove_arrows_in_examples(lines)
 
 
-def env_override(default_appid):
-    build_version = os.getenv("READTHEDOCS_VERSION")
-
-    if build_version == "latest":
-        return os.environ["HEAP_APPID_QA"]
-    if build_version == "stable":
-        return os.environ["HEAP_APPID_PROD"]
-
-    return default_appid  # default to Development for local builds
-
-
-def _add_jinja_filters(app):
-    # https://github.com/crate/crate/issues/10833
-    from sphinx.builders.latex import LaTeXBuilder
-    from sphinx.builders.linkcheck import CheckExternalLinksBuilder
-
-    # LaTeXBuilder is used in the PDF docs build,
-    # and it doesn't have attribute 'templates'
-    if not (isinstance(app.builder, (LaTeXBuilder, CheckExternalLinksBuilder))):
-        app.builder.templates.environment.filters["env_override"] = env_override
-
-
-def _override_permalinks_icon(app):
-    # https://github.com/readthedocs/sphinx_rtd_theme/issues/98#issuecomment-1503211439
-    app.config.html_permalinks_icon = "¶"
-
-
 def setup(app):
-    app.connect("builder-inited", _add_jinja_filters)
-    app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
-    # fix a bug with table wraps in Read the Docs Sphinx theme:
-    # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
 
 
 # (regex, restructuredText link replacement, object) list
@@ -552,3 +523,4 @@ except Exception as e:
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
 
 myst_heading_anchors = 5
+myst_enable_extensions = ["colon_fence"]

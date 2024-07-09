@@ -1,33 +1,89 @@
-# Upcoming Release 0.19.4
+# Upcoming Release 0.19.7
 
 ## Major features and improvements
-* Clarified docs around using custom resolvers without a full Kedro project.
-* Improved error message when passing wrong value to node.
-* Cookiecutter errors are shown in short format without the `--verbose` flag.
+
+## Bug fixes and other changes
+* Updated error message for invalid catalog entries.
+* Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
+* Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
+* Implemented key completion support for accessing datasets in the `DataCatalog`.
+
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.20.0
+* The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 0.20.0.
+
+## Documentation changes
+* Improved documentation for configuring dataset parameters in the data catalog
+* Extended documentation with an example of logging customisation at runtime
+
+## Community contributions
+
+# Release 0.19.6
+
+## Major features and improvements
+* Added `raise_errors` argument to `find_pipelines`. If `True`, the first pipeline for which autodiscovery fails will cause an error to be raised. The default behaviour is still to raise a warning for each failing pipeline.
+* It is now possible to use Kedro without having `rich` installed.
+* Updated custom logging behavior: `conf/logging.yml` will be used if it exists and `KEDRO_LOGGING_CONFIG` is not set; otherwise, `default_logging.yml` will be used.
+
+## Bug fixes and other changes
+* User defined catch-all dataset factory patterns now override the default pattern provided by the runner.
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.20.0
+* All micro-packaging commands (`kedro micropkg pull`, `kedro micropkg package`) are deprecated and will be removed in Kedro 0.20.0.
+
+## Documentation changes
+* Improved documentation for custom starters
+* Added a new docs section on deploying Kedro project on AWS Airflow MWAA
+* Detailed instructions on using `globals` and `runtime_params` with the `OmegaConfigLoader`
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [doxenix](https://github.com/doxenix)
+* [cleeeks](https://github.com/cleeeks)
+
+# Release 0.19.5
+
+## Bug fixes and other changes
+* Fixed breaking import issue when working on a project with `kedro-viz` on python 3.8.
+
+## Documentation changes
+* Updated the documentation for deploying a Kedro project with Astronomer Airflow.
+* Used `kedro-sphinx-theme` for documentation.
+
+# Release 0.19.4
+
+## Major features and improvements
 * Kedro commands now work from any subdirectory within a Kedro project.
 * Kedro CLI now provides a better error message when project commands are run outside of a project i.e. `kedro run`
-* Adds the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
-* Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
+* Added the `--telemetry` flag to `kedro new`, allowing the user to register consent to have user analytics collected at the same time as the project is created.
 * Improved the performance of `Pipeline` object creation and summing.
 * Improved suggestions to resume failed pipeline runs.
-
+* Dropped the dependency on `toposort` in favour of the built-in `graphlib` module.
+* Cookiecutter errors are shown in short format without the `--verbose` flag.
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro pipeline delete` to read the base environment from the project settings.
 * Updated CLI command `kedro catalog resolve` to read credentials properly.
 * Changed the path of where pipeline tests generated with `kedro pipeline create` from `<project root>/src/tests/pipelines/<pipeline name>` to `<project root>/tests/pipelines/<pipeline name>`.
-* Updated ``.gitignore`` to prevent pushing Mlflow local runs folder to a remote forge when using mlflow and git.
+* Updated ``.gitignore`` to prevent pushing MLflow local runs folder to a remote forge when using MLflow and Git.
 * Fixed error handling message for malformed yaml/json files in OmegaConfigLoader.
+* Fixed a bug in `node`-creation allowing self-dependencies when using transcoding, that is datasets named like `name@format`.
+* Improved error message when passing wrong value to node.
 
 ## Breaking changes to the API
 * Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.
 
 ## Documentation changes
-* Add missing description for `merge_strategy` argument in OmegaConfigLoader.
+* Added missing description for `merge_strategy` argument in OmegaConfigLoader.
+* Added documentation on best practices for testing nodes and pipelines.
+* Clarified docs around using custom resolvers without a full Kedro project.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
-
 * [ondrejzacha](https://github.com/ondrejzacha)
 * [Puneet](https://github.com/puneeter)
 
@@ -36,7 +92,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Major features and improvements
 * Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
 * Add official support for Python 3.12.
-* Add better IPython, VSCode Notebook support for `%load_node` and minimal support for Databricks.
+* Add better IPython, VS Code Notebook support for `%load_node` and minimal support for Databricks.
 * Add full Kedro Node input syntax for `%load_node`.
 
 ## Bug fixes and other changes

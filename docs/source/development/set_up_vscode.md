@@ -10,6 +10,10 @@ At this stage, you should be able to see the `conda` environment that you have c
 
 ![](../meta/images/vscode_setup_interpreter.png)
 
+## Kedro VS Code Extension
+[Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate around your Kedro project by finding the definition of your datasets, find references to them in your code, and more.
+
+![Kedro VS Code gif](https://github.com/kedro-org/vscode-kedro/blob/main/assets/lsp-go-to-definition.gif?raw=true)
 ## Advanced: For those using `venv` / `virtualenv`
 
 We're going to show you how to get your virtual environments to show up in your Python interpreter in VS Code. You do this by opening [`settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settings-file-locations) and adding the following:
@@ -107,7 +111,7 @@ PYTHONPATH=/path/to/project/src:$PYTHONPATH
 PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
 ```
 
-You can find [more information about setting up environmental variables in the VSCode documentation](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
+You can find [more information about setting up environmental variables in the VS Code documentation](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
 
 Click on the **Run and Debug** icon on the left activity bar (press `Cmd + Shift + D` for macOS). If there is no existing configuration, click on **create a launch.json file** else click on the dropdown arrow in the top-left (shown below) and click **Add Configuration** .
 ![](../meta/images/vscode_add_configuration.png)
@@ -249,7 +253,7 @@ You must [set a breakpoint in VS Code as described in the debugging section abov
 
 ## Configuring the Kedro catalog validation schema
 
-You can enable the Kedro catalog validation schema in your VSCode IDE to enable real-time validation, autocompletion and see information about the different fields in your `catalog` as you write it. To enable this, make sure you have the [YAML plugin](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) installed.
+You can enable the Kedro catalog validation schema in your VS Code to enable real-time validation, autocompletion and see information about the different fields in your `catalog` as you write it. To enable this, make sure you have the [YAML plugin](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) installed.
 
 Enter the following in your `settings.json` file:
 

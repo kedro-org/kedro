@@ -15,42 +15,23 @@ from graphlib import CycleError, TopologicalSorter
 import kedro
 from kedro.pipeline.node import Node, _to_list
 
-TRANSCODING_SEPARATOR = "@"
+from .transcoding import _strip_transcoding
 
 
-def _transcode_split(element: str) -> tuple[str, str]:
-    """Split the name by the transcoding separator.
-    If the transcoding part is missing, empty string will be put in.
+def __getattr__(name: str) -> Any:
+    if name == "TRANSCODING_SEPARATOR":
+        import warnings
 
-    Returns:
-        Node input/output name before the transcoding separator, if present.
-    Raises:
-        ValueError: Raised if more than one transcoding separator
-        is present in the name.
-    """
-    split_name = element.split(TRANSCODING_SEPARATOR)
+        from kedro.pipeline.transcoding import TRANSCODING_SEPARATOR
 
-    if len(split_name) > 2:  # noqa: PLR2004
-        raise ValueError(
-            f"Expected maximum 1 transcoding separator, found {len(split_name) - 1} "
-            f"instead: '{element}'."
+        warnings.warn(
+            f"{repr(name)} has been moved to 'kedro.pipeline.transcoding', "
+            f"and the alias will be removed in Kedro 0.20.0",
+            kedro.KedroDeprecationWarning,
+            stacklevel=2,
         )
-    if len(split_name) == 1:
-        split_name.append("")
-
-    return tuple(split_name)  # type: ignore
-
-
-def _strip_transcoding(element: str) -> str:
-    """Strip out the transcoding separator and anything that follows.
-
-    Returns:
-        Node input/output name before the transcoding separator, if present.
-    Raises:
-        ValueError: Raised if more than one transcoding separator
-        is present in the name.
-    """
-    return _transcode_split(element)[0]
+        return TRANSCODING_SEPARATOR
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 class OutputNotUniqueError(Exception):
@@ -171,7 +152,8 @@ class Pipeline:
         try:
             self._toposorter.prepare()
         except CycleError as exc:
-            message = f"Circular dependencies exist among these items: {exc.args[1]}"
+            loop = list(set(exc.args[1]))
+            message = f"Circular dependencies exist among the following {len(loop)} item(s): {loop}"
             raise CircularDependencyError(message) from exc
 
         self._toposorted_nodes: list[Node] = []

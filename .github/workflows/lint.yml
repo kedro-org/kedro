@@ -33,6 +33,6 @@ jobs:
             make install-test-requirements
             make install-pre-commit
       - name: pip freeze
-        run: pip freeze
+        run: uv pip freeze --system
       - name: Run linter
         run: make lint

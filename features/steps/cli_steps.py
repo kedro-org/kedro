@@ -554,7 +554,8 @@ def check_one_node_run(context, number):
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
     stdout = context.result.stdout
-    assert expected_log_line in stdout, (
+    clean_logs = util.clean_up_log(stdout)
+    assert expected_log_line in clean_logs, (
         "Expected the following message segment to be printed on stdout: "
         f"{expected_log_line},\nbut got {stdout}"
     )
@@ -595,7 +596,8 @@ def check_message_printed(context, msg):
     else:
         stdout = context.result.stdout
 
-    assert msg in stdout, (
+    clean_logs = util.clean_up_log(stdout)
+    assert msg in clean_logs, (
         "Expected the following message segment to be printed on stdout: "
         f"{msg},\nbut got {stdout}"
     )
@@ -707,18 +709,6 @@ def check_reqs_generated(context: behave.runner.Context):
 def check_dependency_in_reqs(context: behave.runner.Context, dependency: str):
     reqs_path = context.root_project_dir / "requirements.txt"
     assert dependency in reqs_path.read_text()
-
-
-@then("Code cell with node tag should be converted into kedro node")
-def check_cell_conversion(context: behave.runner.Context):
-    converted_file = (
-        context.root_project_dir
-        / "src"
-        / context.package_name
-        / "nodes"
-        / "hello_world.py"
-    )
-    assert "Hello World!" in converted_file.read_text()
 
 
 @given("I have micro-packaging settings in pyproject.toml")

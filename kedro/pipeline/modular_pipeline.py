@@ -6,12 +6,9 @@ import difflib
 from typing import AbstractSet, Iterable
 
 from kedro.pipeline.node import Node
-from kedro.pipeline.pipeline import (
-    TRANSCODING_SEPARATOR,
-    Pipeline,
-    _strip_transcoding,
-    _transcode_split,
-)
+from kedro.pipeline.pipeline import Pipeline
+
+from .transcoding import TRANSCODING_SEPARATOR, _strip_transcoding, _transcode_split
 
 
 class ModularPipelineError(Exception):
@@ -102,8 +99,10 @@ def _get_dataset_names_mapping(
             the same as they are named in the provided pipeline.
             When dict[str, str] is provided, current names will be
             mapped to new names in the resultant pipeline.
+
     Returns:
         A dictionary that maps the old dataset names to the provided ones.
+
     Examples:
         >>> _get_dataset_names_mapping("dataset_name")
         {"dataset_name": "dataset_name"}  # a str name will stay the same
@@ -141,8 +140,10 @@ def _get_param_names_mapping(
             the same as they are named in the provided pipeline.
             When dict[str, str] is provided, current names will be
             mapped to new names in the resultant pipeline.
+
     Returns:
         A dictionary that maps the old parameter names to the provided ones.
+
     Examples:
         >>> _get_param_names_mapping("param_name")
         {"params:param_name": "params:param_name"}  # a str name will stay the same
@@ -226,7 +227,6 @@ def pipeline(  # noqa: PLR0913
     if not any([inputs, outputs, parameters, namespace]):
         return pipe
 
-    # noqa: protected-access
     inputs = _get_dataset_names_mapping(inputs)
     outputs = _get_dataset_names_mapping(outputs)
     parameters = _get_param_names_mapping(parameters)

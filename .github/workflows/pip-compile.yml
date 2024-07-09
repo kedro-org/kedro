@@ -42,6 +42,6 @@ jobs:
         run: |
           make install-test-requirements
           make install-pre-commit
-          pip install "pip-tools>=6.5"
+          uv pip install --system "pip-tools>=6.5"
       - name: Run pip-compile
         run: make pip-compile

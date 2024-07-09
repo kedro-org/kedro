@@ -26,14 +26,10 @@ authors:
   given-names: Rashida
 - family-names: Katiyar
   given-names: Ankita
-- family-names: Kumar Pilla
-  given-names: Ravi
-- family-names: Merali
-  given-names: Ahdra
+- family-names: Pilla
+  given-names: Ravi Kumar
 - family-names: Nguyen
   given-names: Huong
-- family-names: Okwa
-  given-names: Nero
 - family-names: Cano Rodríguez
   given-names: Juan Luis
   orcid: https://orcid.org/0000-0002-2187-161X
@@ -41,14 +37,13 @@ authors:
   given-names: Joel
 - family-names: Sorokin
   given-names: Dmitry
-- family-names: Stichbury
-  given-names: Jo
-  orcid: https://orcid.org/0000-0002-7474-4024
 - family-names: Theisen
   given-names: Merel
 - family-names: Zabłocki
   given-names: Marcin
+- family-names: Brugman
+  given-names: Simon
 title: Kedro
-version: 0.19.3
-date-released: 2024-02-27
+version: 0.19.6
+date-released: 2024-05-23
 url: https://github.com/kedro-org/kedro

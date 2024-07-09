@@ -11,6 +11,7 @@ import sys
 import textwrap
 import traceback
 import typing
+import warnings
 from collections import defaultdict
 from importlib import import_module
 from itertools import chain
@@ -20,6 +21,8 @@ from typing import IO, Any, Iterable, Sequence
 import click
 import importlib_metadata
 from omegaconf import OmegaConf
+
+from kedro import KedroDeprecationWarning
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
@@ -64,6 +67,7 @@ def python_call(
 
 
 def find_stylesheets() -> Iterable[str]:  # pragma: no cover
+    # TODO: Deprecate this function in favour of kedro-sphinx-theme
     """Fetch all stylesheets used in the official Kedro documentation"""
     css_path = Path(__file__).resolve().parents[1] / "html" / "_static" / "css"
     return (str(css_path / "copybutton.css"),)
@@ -217,6 +221,10 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
         KedroCliError: If the file specified in ``reqs_path`` does not exist
             or ``package_name`` was not found in that file.
     """
+    warnings.warn(
+        "`get_pkg_version()` has been deprecated and will be removed in Kedro 0.20.0",
+        KedroDeprecationWarning,
+    )
     reqs_path = Path(reqs_path).absolute()
     if not reqs_path.is_file():
         raise KedroCliError(f"Given path '{reqs_path}' is not a regular file.")

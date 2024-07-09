@@ -45,6 +45,9 @@ def cli() -> None:  # pragma: no cover
     """Kedro is a CLI for creating and using Kedro projects. For more
     information, type ``kedro info``.
 
+    NOTE: If a command from a plugin conflicts with a built-in command from Kedro,
+    the command from the plugin will take precedence.
+
     """
     pass
 
@@ -203,7 +206,7 @@ class KedroCLI(CommandCollection):
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
         """
-        return [cli, *load_entry_points("global"), global_commands]
+        return [*load_entry_points("global"), cli, global_commands]
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:

@@ -331,7 +331,7 @@ class TestKedroCLI:
             side_effect=cycle([ModuleNotFoundError()]),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        print(kedro_cli.project_groups)
+        # There is only one `LazyGroup` for project commands
         assert len(kedro_cli.project_groups) == 1
         assert kedro_cli.project_groups == [project_commands]
 
@@ -363,14 +363,10 @@ class TestKedroCLI:
             return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
+        # The project group will now have two groups, the first from the project's cli.py and
+        # the second is the lazy project command group
         assert len(kedro_cli.project_groups) == 2
         assert kedro_cli.project_groups == [
-            # catalog_cli,
-            # jupyter_cli,
-            # pipeline_cli,
-            # micropkg_cli,
-            # project_group,
-            # registry_cli,
             cli,
             project_commands,
         ]
@@ -379,6 +375,7 @@ class TestKedroCLI:
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
         kedro_cli = KedroCLI(tmp_path)
         assert len(kedro_cli.global_groups) == 2
+        # The global groups will be the cli(group for info command) and the global commands (starter and new)
         assert kedro_cli.global_groups == [cli, global_commands]
 
         result = CliRunner().invoke(kedro_cli, [])

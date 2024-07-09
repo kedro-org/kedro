@@ -97,7 +97,6 @@ class TestKedroCLIHooks:
     ):
         caplog.set_level(logging.DEBUG, logger="kedro")
 
-        # Module = namedtuple("Module", ["cli"])
         mocker.patch(
             "kedro.framework.cli.cli._is_project",
             return_value=True,
@@ -106,10 +105,6 @@ class TestKedroCLIHooks:
             "kedro.framework.cli.cli.bootstrap_project",
             return_value=fake_metadata,
         )
-        # mocker.patch(
-        #     "kedro.framework.cli.cli.importlib.import_module",
-        #     return_value=Module(cli=cli),
-        # )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         result = CliRunner().invoke(kedro_cli, [command])
         assert (

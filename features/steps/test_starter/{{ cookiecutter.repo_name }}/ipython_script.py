@@ -1,6 +1,5 @@
 if __name__ == "__main__":
     from IPython.testing.globalipapp import get_ipython
-    print("!!!****!!!****")
     ip = get_ipython()
     ip.run_line_magic("load_ext", "kedro.ipython")
     # Assume cwd is project root

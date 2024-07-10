@@ -9,9 +9,6 @@ from pathlib import Path
 from time import sleep, time
 from typing import Any, Callable, Iterator
 
-import nbformat
-from nbconvert.preprocessors import ExecutePreprocessor
-
 
 @contextmanager
 def chdir(path: Path) -> Iterator:
@@ -86,30 +83,6 @@ def parse_csv(text: str) -> list[str]:
         List of string tokens
     """
     return re.findall(r"\"(.+?)\"\s*,?", text)
-
-
-def execute_notebook(notebook_filename):
-    with open(notebook_filename) as f:
-        nb = nbformat.read(f, as_version=4)
-
-    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    print(f"Executing Notebook {notebook_filename}")
-    try:
-        # Execute the notebook from the same directory
-        ep.preprocess(
-            nb, {"metadata": {"path": Path(notebook_filename).parent.resolve()}}
-        )
-    except Exception as e:
-        print(e)
-
-    with open(notebook_filename, "w", encoding="utf-8") as f:
-        nbformat.write(nb, f)
-
-    with open(
-        "/Users/Nok_Lam_Chan/dev/kedro/nok_debug.ipynb", "w", encoding="utf-8"
-    ) as f:
-        nbformat.write(nb, f)
-    print(f"Executed Notebook saved at {notebook_filename}")
 
 
 def clean_up_log(stdout: str) -> str:

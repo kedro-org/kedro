@@ -95,10 +95,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
             config_patterns: Regex patterns that specify the naming convention for configuration
                 files so they can be loaded. Can be customised by supplying config_patterns as
                 in `CONFIG_LOADER_ARGS` in `settings.py`.
-            base_env: Name of the base environment. Defaults to `"base"`.
+            base_env: Name of the base environment. When the ``OmegaConfigLoader`` is used directly
+                this defaults to `None`. Otherwise, the value will come from the `CONFIG_LOADER_ARGS` in the project
+                settings, where base_env defaults to `"base"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths.
-            default_run_env: Name of the default run environment. Defaults to `"local"`.
+            default_run_env: Name of the default run environment. When the ``OmegaConfigLoader`` is used directly
+                this defaults to `None`. Otherwise, the value will come from the `CONFIG_LOADER_ARGS` in the project
+                settings, where default_run_env defaults to `"local"`.
                 Can be overridden by supplying the `env` argument.
             custom_resolvers: A dictionary of custom resolvers to be registered. For more information,
              see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers

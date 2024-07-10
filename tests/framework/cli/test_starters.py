@@ -26,6 +26,7 @@ from kedro.framework.cli.starters import (
     _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
+    _select_checkout_branch_for_cookiecutter,
     _validate_tool_selection,
 )
 
@@ -1797,7 +1798,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
         )
 
         config["tools"] = ["PySpark", "Kedro Viz"]
-        checkout = ""
+        checkout = version
         directory = "my-directory"
         template_path = "my/template/path"
 
@@ -1852,7 +1853,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
 
         config["tools"] = []
         config["example_pipeline"] = "True"
-        checkout = ""
+        checkout = "main"
         directory = ""
         template_path = "my/template/path"
 
@@ -1880,7 +1881,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
 
         config["tools"] = []
         config["example_pipeline"] = "False"
-        checkout = ""
+        checkout = "main"
         directory = ""
         template_path = "my/template/path"
 
@@ -1898,3 +1899,31 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
 
         assert result_args == expected_args
         assert result_path == expected_path
+
+
+class TestSelectCheckoutBranch:
+    def test_select_checkout_branch_with_checkout(self):
+        checkout = "user_selected_branch"
+        result = _select_checkout_branch_for_cookiecutter(checkout)
+
+        assert result == checkout
+
+    def test_select_checkout_branch_kedro_version_equal_or_lower(self, mocker):
+        mocker.patch(
+            "kedro.framework.cli.starters._kedro_version_equal_or_lower_to_starters",
+            return_value=True,
+        )
+        checkout = None
+        result = _select_checkout_branch_for_cookiecutter(checkout)
+
+        assert result == version
+
+    def test_select_checkout_branch_main(self, mocker):
+        mocker.patch(
+            "kedro.framework.cli.starters._kedro_version_equal_or_lower_to_starters",
+            return_value=False,
+        )
+        checkout = None
+        result = _select_checkout_branch_for_cookiecutter(checkout)
+
+        assert result == "main"

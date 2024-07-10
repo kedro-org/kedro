@@ -129,11 +129,7 @@ def _kedro_version_equal_or_lower_to_starters(version: str) -> bool:
     return parse(version) <= parse(starters_version)
 
 
-_STARTERS_REPO = (
-    "git+https://github.com/kedro-org/kedro-starters.git"
-    if _kedro_version_equal_or_lower_to_starters(version)
-    else "https://github.com/kedro-org/kedro-starters.git@main"
-)
+_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 
 
 _OFFICIAL_STARTER_SPECS = [
@@ -342,10 +338,10 @@ def new(  # noqa: PLR0913
         # "directory" is an optional key for starters from plugins, so if the key is
         # not present we will use "None".
         directory = spec.directory  # type: ignore[assignment]
-        checkout = checkout or version
+        checkout = _select_checkout_branch_for_cookiecutter(checkout)
     elif starter_alias is not None:
         template_path = starter_alias
-        checkout = checkout or version
+        checkout = _select_checkout_branch_for_cookiecutter(checkout)
     else:
         template_path = str(TEMPLATE_PATH)
 
@@ -775,6 +771,15 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path) -> OrderedDic
     return cookiecutter_context.get("cookiecutter", {})  # type: ignore[no-any-return]
 
 
+def _select_checkout_branch_for_cookiecutter(checkout: str | None) -> str:
+    if checkout:
+        return checkout
+    elif _kedro_version_equal_or_lower_to_starters(version):
+        return version
+    else:
+        return "main"
+
+
 def _make_cookiecutter_args_and_fetch_template(
     config: dict[str, str],
     checkout: str,
@@ -806,8 +811,6 @@ def _make_cookiecutter_args_and_fetch_template(
         "extra_context": config,
     }
 
-    kedro_version_match_starters = _kedro_version_equal_or_lower_to_starters(version)
-
     if directory:
         cookiecutter_args["directory"] = directory
 
@@ -815,35 +818,24 @@ def _make_cookiecutter_args_and_fetch_template(
     example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
-    if checkout:
-        checkout_version = checkout
-    elif kedro_version_match_starters:
-        checkout_version = version
-    else:
-        checkout_version = "main"
+    cookiecutter_args["checkout"] = checkout
 
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-        cookiecutter_args["checkout"] = checkout_version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-        cookiecutter_args["checkout"] = checkout_version
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
-        cookiecutter_args["checkout"] = checkout_version
     elif example_pipeline == "True":
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
-        cookiecutter_args["checkout"] = checkout_version
     else:
         # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path
-        cookiecutter_args["checkout"] = (
-            checkout if checkout and kedro_version_match_starters else "main"
-        )
+
     return cookiecutter_args, starter_path
 
 

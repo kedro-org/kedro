@@ -17,6 +17,7 @@ def split_data(data: pd.DataFrame, example_test_data_ratio: float) -> dict[str, 
     The data and the parameters will be loaded and provided to your function
     automatically when the pipeline is executed and it is time to run this node.
     """
+    print("load_node executed successfully")
     data.columns = [
         "sepal_length",
         "sepal_width",

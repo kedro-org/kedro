@@ -302,6 +302,7 @@ def create_project_with_starter(context, starter):
         env=context.env,
         cwd=context.temp_dir,
     )
+
     assert res.returncode == OK_EXIT_CODE, res
 
 
@@ -561,6 +562,17 @@ def check_correct_nodes_run(context, node):
     )
 
 
+@then("the logs should show that load_node executed successfully")
+def check_load_node_run(context):
+    expected_log_line = "load_node executed successfully"
+    stdout = context.result.stdout
+    clean_logs = util.clean_up_log(stdout)
+    assert expected_log_line in clean_logs, (
+        "Expected the following message segment to be printed on stdout: "
+        f"{expected_log_line},\nbut got {stdout}"
+    )
+
+
 @then("I should get a successful exit code")
 def check_status_code(context):
     if context.result.returncode != OK_EXIT_CODE:
@@ -722,6 +734,16 @@ def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
     )
     with pyproject_toml_path.open(mode="a") as file:
         file.write(project_toml_str)
+
+
+@given("I have executed the load_node magic command")
+@when("I execute the load_node magic command")
+def exec_magic_command(context):
+    """Execute Kedro target."""
+    cmd = [context.python, "ipython_script.py"]
+    context.result = run(
+        cmd, env=context.env, cwd=str(context.root_project_dir), print_output=True
+    )
 
 
 @given('I have changed the current working directory to "{dir}"')

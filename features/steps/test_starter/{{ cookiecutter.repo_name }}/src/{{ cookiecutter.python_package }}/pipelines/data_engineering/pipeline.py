@@ -21,6 +21,7 @@ def create_pipeline(**kwargs):
                     test_x="example_test_x",
                     test_y="example_test_y",
                 ),
+                name="split_data_node"
             )
         ]
     )

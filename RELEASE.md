@@ -1,6 +1,7 @@
 # Upcoming Release 0.19.7
 
 ## Major features and improvements
+* Kedro commands are now lazily loaded to add performance gains when running Kedro commands.
 
 ## Bug fixes and other changes
 * Updated error message for invalid catalog entries.

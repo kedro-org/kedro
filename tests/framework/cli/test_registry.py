@@ -10,13 +10,13 @@ def yaml_dump_mock(mocker):
 @pytest.fixture
 def pipelines_dict():
     pipelines = {
-        "data_engineering": ["split_data (split_data)"],
+        "data_engineering": ["split_data_node (split_data)"],
         "data_science": [
             "train_model (train_model)",
             "predict (predict)",
             "report_accuracy (report_accuracy)",
         ],
-        "data_processing": ["data_processing.split_data (split_data)"],
+        "data_processing": ["data_processing.split_data_node (split_data)"],
     }
     pipelines["__default__"] = pipelines["data_engineering"] + pipelines["data_science"]
     return pipelines

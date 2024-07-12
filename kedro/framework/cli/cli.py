@@ -15,19 +15,13 @@ import click
 
 from kedro import __version__ as version
 from kedro.framework.cli import BRIGHT_BLACK, ORANGE
-from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
-from kedro.framework.cli.jupyter import jupyter_cli
-from kedro.framework.cli.micropkg import micropkg_cli
-from kedro.framework.cli.pipeline import pipeline_cli
-from kedro.framework.cli.project import project_group
-from kedro.framework.cli.registry import registry_cli
-from kedro.framework.cli.starters import create_cli
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     ENTRY_POINT_GROUPS,
     CommandCollection,
     KedroCliError,
+    LazyGroup,
     _get_entry_points,
     load_entry_points,
 )
@@ -50,6 +44,9 @@ v{version}
 def cli() -> None:  # pragma: no cover
     """Kedro is a CLI for creating and using Kedro projects. For more
     information, type ``kedro info``.
+
+    NOTE: If a command from a plugin conflicts with a built-in command from Kedro,
+    the command from the plugin will take precedence.
 
     """
     pass
@@ -83,6 +80,38 @@ def info() -> None:
             )
     else:  # pragma: no cover
         click.echo("No plugins installed")
+
+
+@click.group(
+    context_settings=CONTEXT_SETTINGS,
+    cls=LazyGroup,
+    name="Kedro",
+    lazy_subcommands={
+        "registry": "kedro.framework.cli.registry.registry",
+        "catalog": "kedro.framework.cli.catalog.catalog",
+        "ipython": "kedro.framework.cli.project.ipython",
+        "run": "kedro.framework.cli.project.run",
+        "micropkg": "kedro.framework.cli.micropkg.micropkg",
+        "package": "kedro.framework.cli.project.package",
+        "jupyter": "kedro.framework.cli.jupyter.jupyter",
+        "pipeline": "kedro.framework.cli.pipeline.pipeline",
+    },
+)
+def project_commands() -> None:
+    pass  # pragma: no cover
+
+
+@click.group(
+    context_settings=CONTEXT_SETTINGS,
+    name="Kedro",
+    cls=LazyGroup,
+    lazy_subcommands={
+        "new": "kedro.framework.cli.starters.new",
+        "starter": "kedro.framework.cli.starters.starter",
+    },
+)
+def global_commands() -> None:
+    pass  # pragma: no cover
 
 
 def _init_plugins() -> None:
@@ -125,7 +154,6 @@ class KedroCLI(CommandCollection):
         self._cli_hook_manager.hook.before_command_run(
             project_metadata=self._metadata, command_args=args
         )
-
         try:
             super().main(
                 args=args,
@@ -178,7 +206,7 @@ class KedroCLI(CommandCollection):
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
         """
-        return [cli, create_cli, *load_entry_points("global")]
+        return [*load_entry_points("global"), cli, global_commands]
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
@@ -192,15 +220,6 @@ class KedroCLI(CommandCollection):
         if not self._metadata:
             return []
 
-        built_in = [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            micropkg_cli,
-            project_group,
-            registry_cli,
-        ]
-
         plugins = load_entry_points("project")
 
         try:
@@ -209,7 +228,7 @@ class KedroCLI(CommandCollection):
         except ModuleNotFoundError:
             # return only built-in commands and commands from plugins
             # (plugins can override built-in commands)
-            return [*built_in, *plugins]
+            return [*plugins, project_commands]
 
         # fail badly if cli.py exists, but has no `cli` in it
         if not hasattr(project_cli, "cli"):
@@ -219,7 +238,7 @@ class KedroCLI(CommandCollection):
         user_defined = project_cli.cli
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
-        return [*built_in, *plugins, user_defined]
+        return [user_defined, *plugins, project_commands]
 
 
 def main() -> None:  # pragma: no cover

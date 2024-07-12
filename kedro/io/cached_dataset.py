@@ -96,9 +96,10 @@ class CachedDataset(AbstractDataset):
         return {"dataset": self._dataset._describe(), "cache": self._cache._describe()}
 
     def __repr__(self) -> str:
-        object_description = self._describe()
-        for dataset_name, dataset_descr in object_description.items():
-            object_description[dataset_name] = self._pretty_repr(dataset_descr)
+        object_description = {
+            "dataset": self._dataset._pretty_repr(self._dataset._describe()),
+            "cache": self._dataset._pretty_repr(self._cache._describe()),
+        }
         return self._pretty_repr(object_description)
 
     def _load(self) -> Any:

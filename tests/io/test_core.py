@@ -209,15 +209,18 @@ class TestCoreFunctions:
     def test_str_representation(self, var):
         var_str = pprint.pformat(var)
         filepath_str = pprint.pformat(PurePosixPath("."))
+        assert str(MyDataset(var=var)) == f"MyDataset(filepath=., var={var})"
         assert (
-            str(MyDataset(var=var))
+            repr(MyDataset(var=var))
             == f"tests.io.test_core.MyDataset(filepath={filepath_str}, var={var_str})"
         )
 
     def test_str_representation_none(self):
+        assert str(MyDataset()) == "MyDataset(filepath=.)"
         filepath_str = pprint.pformat(PurePosixPath("."))
         assert (
-            str(MyDataset()) == f"tests.io.test_core.MyDataset(filepath={filepath_str})"
+            repr(MyDataset())
+            == f"tests.io.test_core.MyDataset(filepath={filepath_str})"
         )
 
     def test_get_filepath_str(self):
@@ -342,9 +345,7 @@ class TestAbstractVersionedDataset:
 
     def test_no_versions(self, my_versioned_dataset):
         """Check the error if no versions are available for load."""
-        pattern = (
-            r"Did not find any versions for tests.io.test_core.MyVersionedDataset\(.+\)"
-        )
+        pattern = r"Did not find any versions for MyVersionedDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             my_versioned_dataset.load()
 
@@ -379,7 +380,7 @@ class TestAbstractVersionedDataset:
         corresponding json file for a given save version already exists."""
         my_versioned_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for tests.io.test_core.MyVersionedDataset\(.+\) must "
+            r"Save path \'.+\' for MyVersionedDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -399,7 +400,7 @@ class TestAbstractVersionedDataset:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"tests.io.test_core.MyVersionedDataset\(.+\)"
+            r"MyVersionedDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             my_versioned_dataset.save(dummy_data)

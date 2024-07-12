@@ -28,22 +28,44 @@ def test_dataset_describe():
     def _dummy_release():
         pass  # pragma: no cover
 
+    assert "LambdaDataset(load=<tests.io.test_lambda_dataset._dummy_load>)" in str(
+        LambdaDataset(_dummy_load, None)
+    )
     assert (
         "kedro.io.lambda_dataset.LambdaDataset(load='<tests.io.test_lambda_dataset._dummy_load>')"
-        in str(LambdaDataset(_dummy_load, None))
+        in repr(LambdaDataset(_dummy_load, None))
+    )
+    assert "LambdaDataset(save=<tests.io.test_lambda_dataset._dummy_save>)" in str(
+        LambdaDataset(None, _dummy_save)
     )
     assert (
         "kedro.io.lambda_dataset.LambdaDataset(save='<tests.io.test_lambda_dataset._dummy_save>')"
-        in str(LambdaDataset(None, _dummy_save))
+        in repr(LambdaDataset(None, _dummy_save))
+    )
+    assert "LambdaDataset(exists=<tests.io.test_lambda_dataset._dummy_exists>)" in str(
+        LambdaDataset(None, None, _dummy_exists)
     )
     assert (
         "kedro.io.lambda_dataset.LambdaDataset(exists='<tests.io.test_lambda_dataset._dummy_exists>')"
-        in str(LambdaDataset(None, None, _dummy_exists))
+        in repr(LambdaDataset(None, None, _dummy_exists))
+    )
+    assert (
+        "LambdaDataset(release=<tests.io.test_lambda_dataset._dummy_release>)"
+        in str(LambdaDataset(None, None, None, _dummy_release))
     )
     assert (
         "kedro.io.lambda_dataset.LambdaDataset(release='<tests.io.test_lambda_dataset._dummy_release>')"
-        in str(LambdaDataset(None, None, None, _dummy_release))
+        in repr(LambdaDataset(None, None, None, _dummy_release))
     )
+
+    # __init__ keys alphabetically sorted, None values not shown
+    expected = (
+        "LambdaDataset(exists=<tests.io.test_lambda_dataset._dummy_exists>, "
+        "load=<tests.io.test_lambda_dataset._dummy_load>, "
+        "save=<tests.io.test_lambda_dataset._dummy_save>)"
+    )
+    actual = str(LambdaDataset(_dummy_load, _dummy_save, _dummy_exists, None))
+    assert actual == expected
 
     # __init__ keys remains in the provided order, None values not shown
     expected = (
@@ -51,7 +73,7 @@ def test_dataset_describe():
         "save='<tests.io.test_lambda_dataset._dummy_save>', "
         "exists='<tests.io.test_lambda_dataset._dummy_exists>')"
     )
-    actual = str(LambdaDataset(_dummy_load, _dummy_save, _dummy_exists, None))
+    actual = repr(LambdaDataset(_dummy_load, _dummy_save, _dummy_exists, None))
     assert actual == expected
 
 
@@ -106,7 +128,7 @@ class TestLambdaDatasetSave:
         mocked_save.side_effect = FileExistsError(error_message)
 
         pattern = (
-            r"Failed while saving data to data set kedro.io.lambda_dataset.LambdaDataset\(.+\)\.\n"
+            r"Failed while saving data to data set LambdaDataset\(.+\)\.\n"
             + error_message
         )
         with pytest.raises(DatasetError, match=pattern):

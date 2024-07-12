@@ -267,7 +267,7 @@ class TestDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a data set
         from nonexistent source"""
-        pattern = r"Failed while loading data from data set kedro_datasets.pandas.csv_dataset.CSVDataset"
+        pattern = r"Failed while loading data from data set CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 

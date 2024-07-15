@@ -681,13 +681,15 @@ class DataCatalog:
             self.add(name, dataset, replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
-        """Adds instances of ``MemoryDataset``, containing the data provided
-        through feed_dict.
+        """This function adds datasets to the ``DataCatalog`` using the data provided through the `feed_dict`.
+
+        `feed_dict` dictionary key is used as a dataset name, and a value is used to create an instance of
+        ``MemoryDataset`` before adding to the ``DataCatalog`` for all the value types except of ``AbstractDataset``.
+        In the last case, the ``AbstractDataset`` is added as it is.
 
         Args:
-            feed_dict: A feed dict with data to be added in memory.
-            replace: Specifies whether to replace an existing dataset
-                with the same name is allowed.
+            feed_dict: A feed dict with data to be added to the ``DataCatalog``.
+            replace: Specifies whether to replace an existing dataset with the same name in the ``DataCatalog``.
 
         Example:
         ::
@@ -698,12 +700,12 @@ class DataCatalog:
             >>>                    'col2': [4, 5],
             >>>                    'col3': [5, 6]})
             >>>
-            >>> io = DataCatalog()
-            >>> io.add_feed_dict({
+            >>> catalog = DataCatalog()
+            >>> catalog.add_feed_dict({
             >>>     'data': df
             >>> }, replace=True)
             >>>
-            >>> assert io.load("data").equals(df)
+            >>> assert catalog.load("data").equals(df)
         """
         for dataset_name in feed_dict:
             if isinstance(feed_dict[dataset_name], AbstractDataset):

@@ -5,6 +5,7 @@ projects.
 """
 from __future__ import annotations
 
+import logging
 import os
 import re
 import shutil
@@ -17,9 +18,11 @@ from pathlib import Path
 from typing import Any, Callable
 
 import click
+import requests
 import yaml
 from attrs import define, field
 from importlib_metadata import EntryPoints
+from packaging.version import parse
 
 import kedro
 from kedro import __version__ as version
@@ -95,7 +98,40 @@ class KedroStarterSpec:
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
+
+def _get_latest_starters_version() -> str:
+    if "KEDRO_STARTERS_VERSION" not in os.environ:
+        GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+        headers = {}
+        if GITHUB_TOKEN:
+            headers["Authorization"] = f"token {GITHUB_TOKEN}"
+
+        try:
+            response = requests.get(
+                "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
+                headers=headers,
+                timeout=10,
+            )
+            response.raise_for_status()  # Raise an HTTPError for bad status codes
+            latest_release = response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error fetching kedro-starters latest release version: {e}")
+            return ""
+
+        os.environ["KEDRO_STARTERS_VERSION"] = latest_release["tag_name"]
+        return str(latest_release["tag_name"])
+    else:
+        return str(os.getenv("KEDRO_STARTERS_VERSION"))
+
+
+def _kedro_version_equal_or_lower_to_starters(version: str) -> bool:
+    starters_version = _get_latest_starters_version()
+    return parse(version) <= parse(starters_version)
+
+
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+
+
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
@@ -302,10 +338,10 @@ def new(  # noqa: PLR0913
         # "directory" is an optional key for starters from plugins, so if the key is
         # not present we will use "None".
         directory = spec.directory  # type: ignore[assignment]
-        checkout = checkout or version
+        checkout = _select_checkout_branch_for_cookiecutter(checkout)
     elif starter_alias is not None:
         template_path = starter_alias
-        checkout = checkout or version
+        checkout = _select_checkout_branch_for_cookiecutter(checkout)
     else:
         template_path = str(TEMPLATE_PATH)
 
@@ -735,6 +771,15 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path) -> OrderedDic
     return cookiecutter_context.get("cookiecutter", {})  # type: ignore[no-any-return]
 
 
+def _select_checkout_branch_for_cookiecutter(checkout: str | None) -> str:
+    if checkout:
+        return checkout
+    elif _kedro_version_equal_or_lower_to_starters(version):
+        return version
+    else:
+        return "main"
+
+
 def _make_cookiecutter_args_and_fetch_template(
     config: dict[str, str],
     checkout: str,
@@ -766,8 +811,6 @@ def _make_cookiecutter_args_and_fetch_template(
         "extra_context": config,
     }
 
-    if checkout:
-        cookiecutter_args["checkout"] = checkout
     if directory:
         cookiecutter_args["directory"] = directory
 
@@ -775,22 +818,20 @@ def _make_cookiecutter_args_and_fetch_template(
     example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
+    cookiecutter_args["checkout"] = checkout
+
     if "PySpark" in tools and "Kedro Viz" in tools:
         # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-        # Ensures we use the same tag version of kedro for kedro-starters
-        cookiecutter_args["checkout"] = version
     elif "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-        cookiecutter_args["checkout"] = version
     elif "Kedro Viz" in tools:
         # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
         cookiecutter_args["directory"] = "spaceflights-pandas-viz"
     elif example_pipeline == "True":
         # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
-        cookiecutter_args["checkout"] = version
     else:
         # Use the default template path for non PySpark, Viz or example options:
         starter_path = template_path

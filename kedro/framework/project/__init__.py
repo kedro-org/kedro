@@ -144,18 +144,17 @@ def _load_data_wrapper(func: Any) -> Any:
 
     return inner
 
-
-def _load_callable_wrapper(func):
-    """Wrap a method in _ProjectPipelines so that data is loaded on first access.
-    Taking inspiration from dynaconf.utils.functional.new_method_proxy
-    """
-
-    # pylint: disable=protected-access
-    def inner(self, *args, **kwargs):
-        self._load_callable()
-        return func(self, *args, **kwargs)
-
-    return inner
+    # def _load_callable_wrapper(func):
+    #     """Wrap a method in _ProjectPipelines so that data is loaded on first access.
+    #     Taking inspiration from dynaconf.utils.functional.new_method_proxy
+    #     """
+    #
+    pylint: disable = protected - access
+    # def inner(self, *args, **kwargs):
+    #     self._load_callable()
+    #     return func(self, *args, **kwargs)
+    #
+    # return inner
 
 
 class _ProjectPipelines(MutableMapping):
@@ -533,7 +532,7 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
     return pipelines_dict
 
 
-def find_run_command(package_name):
+def find_run_command(package_name):  # pragma: no cover
     from kedro.framework.cli.utils import (
         KedroCliError,
         load_entry_points,
@@ -560,7 +559,7 @@ def find_run_command(package_name):
     return project_cli.run
 
 
-def _find_run_command_in_plugins(plugins):
+def _find_run_command_in_plugins(plugins):  # pragma: no cover
     for group in plugins:
         if "run" in group.commands:
             return group.commands["run"]

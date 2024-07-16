@@ -681,11 +681,11 @@ class DataCatalog:
             self.add(name, dataset, replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
-        """This function adds datasets to the ``DataCatalog`` using the data provided through the `feed_dict`.
+        """Add datasets to the ``DataCatalog`` using the data provided through the `feed_dict`.
 
-        `feed_dict` dictionary key is used as a dataset name, and a value is used to create an instance of
-        ``MemoryDataset`` before adding to the ``DataCatalog`` for all the value types except of ``AbstractDataset``.
-        In the last case, the ``AbstractDataset`` is added as it is.
+        `feed_dict` keys are used as dataset names, and values can either be raw data or instances of
+        ``AbstractDataset``. In the former case, instances of ``MemoryDataset`` are automatically created before adding
+        to the ``DataCatalog``.
 
         Args:
             feed_dict: A feed dict with data to be added to the ``DataCatalog``.

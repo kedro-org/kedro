@@ -683,12 +683,13 @@ class DataCatalog:
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         """Add datasets to the ``DataCatalog`` using the data provided through the `feed_dict`.
 
-        `feed_dict` keys are used as dataset names, and values can either be raw data or instances of
-        ``AbstractDataset``. In the former case, instances of ``MemoryDataset`` are automatically created before adding
-        to the ``DataCatalog``.
+        `feed_dict` is a dictionary where the keys represent dataset names and the values can either be raw data or
+        Kedro datasets - instances of classes that inherit from ``AbstractDataset``. If raw data is provided,
+        it will be automatically wrapped in a ``MemoryDataset`` before being added to the ``DataCatalog``.
 
         Args:
-            feed_dict: A feed dict with data to be added to the ``DataCatalog``.
+            feed_dict: A dictionary with data to be added to the ``DataCatalog``. Keys are dataset names and
+                values can be raw data or instances of classes that inherit from ``AbstractDataset``.
             replace: Specifies whether to replace an existing dataset with the same name in the ``DataCatalog``.
 
         Example:

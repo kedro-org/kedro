@@ -687,9 +687,6 @@ class DataCatalog:
         ``MemoryDataset`` before adding to the ``DataCatalog`` for all the value types except of ``AbstractDataset``.
         In the last case, the ``AbstractDataset`` is added as it is.
 
-        Has `from_dict` alias, so it can be called using `from_dict` name instead.
-        Will be fully renamed to `from_dict` in the `0.20.0` version.
-
         Args:
             feed_dict: A feed dict with data to be added to the ``DataCatalog``.
             replace: Specifies whether to replace an existing dataset with the same name in the ``DataCatalog``.
@@ -724,9 +721,6 @@ class DataCatalog:
                 dataset = MemoryDataset(data=feed_dict[dataset_name])
 
             self.add(dataset_name, dataset, replace)
-
-    # Alias for add_feed_dict method
-    from_dict = add_feed_dict
 
     def list(self, regex_search: str | None = None) -> list[str]:
         """

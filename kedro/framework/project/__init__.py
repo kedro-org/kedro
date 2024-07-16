@@ -280,9 +280,6 @@ def configure_project(package_name: str) -> None:
     pipelines_module = f"{package_name}.pipeline_registry"
     pipelines.configure(pipelines_module)
 
-    # cli_module = f"{package_name}.cli"
-    # run.configure(cli_module)
-
     # Once the project is successfully configured once, store PACKAGE_NAME as a
     # global variable to make it easily accessible. This is used by validate_settings()
     # below, and also by ParallelRunner on Windows, as package_name is required every

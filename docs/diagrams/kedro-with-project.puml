@@ -1,0 +1,25 @@
+@startuml
+title "$ kedro\ndirectory without Kedro project"
+
+participant "$ kedro" as kedro
+participant "setup.py\nkedro = kedro.framework.cli:main" as entrypoint
+participant "Kedro Plugins\nentry_point = kedro.init" as init_plugins
+participant "Kedro CLI\nglobal commands\ninfo, new, docs, starter" as kedro_cli
+participant "Kedro Plugins\nentry_point = kedro.global_commands" as global_plugins
+participant "Current directory\npyproject.toml" as pyproject.toml
+participant "Kedro Plugins\nentry_point = kedro.project_commands" as project_plugins
+participant "Current directory\nKedro Project: cli.py" as kedro_project
+participant "Click" as click
+
+
+kedro->entrypoint: Python calls this
+entrypoint->init_plugins: load and run all installed
+entrypoint->kedro_cli: collect built-in commands
+entrypoint->global_plugins: load and collect global plugin commands
+entrypoint->pyproject.toml: check current dir for a Kedro project
+entrypoint->pyproject.toml: bootstrap the project
+entrypoint->entrypoint: add project metadata to the click cli context
+entrypoint->project_plugins: load and collect project plugin commands
+entrypoint->kedro_project: load and collect project cli commands
+entrypoint->click: combine all command collections and run click
+@enduml

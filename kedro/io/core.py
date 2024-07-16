@@ -230,14 +230,13 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             raise DatasetError(message) from exc
 
     def __str__(self) -> str:
+        # TODO: Replace with __repr__ implementation in 0.20.0 release.
         def _to_str(obj: Any, is_root: bool = False) -> str:
             """Returns a string representation where
             1. The root level (i.e. the Dataset.__init__ arguments) are
             formatted like Dataset(key=value).
             2. Dictionaries have the keys alphabetically sorted recursively.
             3. None values are not shown.
-
-            Will be removed in 0.20.0 release.
             """
 
             fmt = "{}={}" if is_root else "'{}': {}"  # 1

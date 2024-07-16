@@ -145,6 +145,19 @@ def _load_data_wrapper(func: Any) -> Any:
     return inner
 
 
+def _load_callable_wrapper(func):
+    """Wrap a method in _ProjectPipelines so that data is loaded on first access.
+    Taking inspiration from dynaconf.utils.functional.new_method_proxy
+    """
+
+    # pylint: disable=protected-access
+    def inner(self, *args, **kwargs):
+        self._load_callable()
+        return func(self, *args, **kwargs)
+
+    return inner
+
+
 class _ProjectPipelines(MutableMapping):
     """A read-only lazy dictionary-like object to hold the project pipelines.
     When configured, it stores the pipelines module.
@@ -262,12 +275,93 @@ class _ProjectLogging(UserDict):
             self.configure(self.data)
 
 
+# class _ProjectRun(Callable):
+#     def __init__(self) -> None:
+#         self._cli_module: Optional[str] = None
+#         self._is_callable_loaded = False
+#         self._callable: Optional[Callable] = None
+#
+#     @staticmethod
+#     def _get_run_callable(cli_module: str):
+#         from kedro.framework.cli.utils import (
+#             KedroCliError,
+#             load_entry_points,
+#         )  ### needs to go in here to avoid circular imports
+#
+#         def _find_run_command_in_plugins(plugins):
+#             for group in plugins:
+#                 if "run" in group.commands:
+#                     return group.commands["run"]
+#
+#         try:
+#             project_cli = importlib.import_module(cli_module)
+#             # fail gracefully if cli.py does not exist
+#         except ModuleNotFoundError as exc:
+#             if cli_module not in str(exc):
+#                 raise
+#             plugins = load_entry_points("project")
+#             run = _find_run_command_in_plugins(plugins) if plugins else None
+#             if run:
+#                 # use run command from installed plugin if it exists
+#                 return run
+#             # use run command from the framework project
+#             from kedro.framework.cli.project import run
+#
+#             return run
+#         # fail badly if cli.py exists, but has no `cli` in it
+#         if not hasattr(project_cli, "cli"):
+#             raise KedroCliError(f"Cannot load commands from {cli_module}")
+#         return project_cli.run
+#
+#     def _load_callable(self):
+#         if self._cli_module is None or self._is_callable_loaded:
+#             return
+#
+#         self._callable = self._get_run_callable(self._cli_module)
+#         self._is_callable_loaded = True
+#
+#         self.__signature__ = inspect.signature(self._callable.callback)
+#         self.__annotations__ = self._callable.callback.__annotations__
+#         with self._callable.make_context("run", []) as ctx:
+#             self.__doc__ = self._callable.get_help(ctx)
+#
+#     def configure(self, cli_module: Optional[str] = None) -> None:
+#         self._cli_module = cli_module
+#         self._is_callable_loaded = False
+#         self._callable = None
+#         # NEED ALL THREE OF THESE??
+#
+#     @_load_callable_wrapper
+#     def __call__(self, args: Optional[List[str]] = None, **kwargs):
+#         # This is what happens under the hood of click. The click context contains
+#         # a list of arguments (e.g. ["--pipeline", "ds"]) and default values of
+#         # arguments that are not supplied. We forward the context to the
+#         # invocation of run. Any **kwargs supplied (e.g. `pipeline="ds"` will
+#         # overwrite the arguments supplied by the context. Overall this means
+#         # that an instantiation of _Run can handle both arguments from the CLI
+#         # (when invoked from a packaged project through the main entry point) and
+#         # using a Python API.
+#         # NOTE args rather than *args. So do run(["-p", "ds"]), not run("-p", "ds").
+#         args = args or []
+#         logging.info(args)
+#         logging.info(kwargs)
+#         with self._callable.make_context("run", args) as ctx:
+#             return ctx.forward(self._callable, **kwargs)
+#
+#     # Presentation methods
+#     __repr__ = _load_callable_wrapper(repr)
+#     __str__ = _load_callable_wrapper(str)
+#     __doc__ = _load_callable_wrapper(__doc__)
+
+
 PACKAGE_NAME = None
 LOGGING = _ProjectLogging()
 
 settings = _ProjectSettings()
 
 pipelines = _ProjectPipelines()
+
+# run = _ProjectRun()
 
 
 def configure_project(package_name: str) -> None:
@@ -279,6 +373,9 @@ def configure_project(package_name: str) -> None:
 
     pipelines_module = f"{package_name}.pipeline_registry"
     pipelines.configure(pipelines_module)
+
+    # cli_module = f"{package_name}.cli"
+    # run.configure(cli_module)
 
     # Once the project is successfully configured once, store PACKAGE_NAME as a
     # global variable to make it easily accessible. This is used by validate_settings()
@@ -434,3 +531,36 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
         if pipeline_obj is not None:
             pipelines_dict[pipeline_name] = pipeline_obj
     return pipelines_dict
+
+
+def find_run_command(package_name):
+    from kedro.framework.cli.utils import (
+        KedroCliError,
+        load_entry_points,
+    )
+
+    try:
+        project_cli = importlib.import_module(f"{package_name}.cli")
+        # fail gracefully if cli.py does not exist
+    except ModuleNotFoundError as exc:
+        if f"{package_name}.cli" not in str(exc):
+            raise
+        plugins = load_entry_points("project")
+        run = _find_run_command_in_plugins(plugins) if plugins else None
+        if run:
+            # use run command from installed plugin if it exists
+            return run
+        # use run command from `kedro.framework.cli.project`
+        from kedro.framework.cli.project import run
+
+        return run
+    # fail badly if cli.py exists, but has no `cli` in it
+    if not hasattr(project_cli, "cli"):
+        raise KedroCliError(f"Cannot load commands from {package_name}.cli")
+    return project_cli.run
+
+
+def _find_run_command_in_plugins(plugins):
+    for group in plugins:
+        if "run" in group.commands:
+            return group.commands["run"]

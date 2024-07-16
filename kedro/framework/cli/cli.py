@@ -5,6 +5,7 @@ This module implements commands available from the kedro CLI.
 from __future__ import annotations
 
 import importlib
+import logging
 import sys
 import traceback
 from collections import defaultdict
@@ -37,6 +38,8 @@ LOGO = rf"""
 |_|\_\___|\__,_|_|  \___/
 v{version}
 """
+
+logger = logging.getLogger(__name__)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
@@ -199,6 +202,13 @@ class KedroCLI(CommandCollection):
                 click.echo(message)
                 click.echo(hint)
             sys.exit(exc.code)
+        except Exception as error:
+            logger.error(f"An error has occurred: {error}")
+            pass
+        finally:
+            self._cli_hook_manager.hook.after_command_run(
+                project_metadata=self._metadata, command_args=args, exit_code=0
+            )
 
     @property
     def global_groups(self) -> Sequence[click.MultiCommand]:

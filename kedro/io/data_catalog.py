@@ -694,29 +694,39 @@ class DataCatalog:
             self.add(name, dataset, replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
-        """Adds instances of ``MemoryDataset``, containing the data provided
-        through feed_dict.
+        """Add datasets to the ``DataCatalog`` using the data provided through the `feed_dict`.
+
+        `feed_dict` is a dictionary where the keys represent dataset names and the values can either be raw data or
+        Kedro datasets - instances of classes that inherit from ``AbstractDataset``. If raw data is provided,
+        it will be automatically wrapped in a ``MemoryDataset`` before being added to the ``DataCatalog``.
 
         Args:
-            feed_dict: A feed dict with data to be added in memory.
-            replace: Specifies whether to replace an existing dataset
-                with the same name is allowed.
+            feed_dict: A dictionary with data to be added to the ``DataCatalog``. Keys are dataset names and
+                values can be raw data or instances of classes that inherit from ``AbstractDataset``.
+            replace: Specifies whether to replace an existing dataset with the same name in the ``DataCatalog``.
 
         Example:
         ::
 
+            >>> from kedro_datasets.pandas import CSVDataset
             >>> import pandas as pd
             >>>
-            >>> df = pd.DataFrame({'col1': [1, 2],
-            >>>                    'col2': [4, 5],
-            >>>                    'col3': [5, 6]})
+            >>> df = pd.DataFrame({"col1": [1, 2],
+            >>>                    "col2": [4, 5],
+            >>>                    "col3": [5, 6]})
             >>>
-            >>> io = DataCatalog()
-            >>> io.add_feed_dict({
-            >>>     'data': df
+            >>> catalog = DataCatalog()
+            >>> catalog.add_feed_dict({
+            >>>     "data_df": df
             >>> }, replace=True)
             >>>
-            >>> assert io.load("data").equals(df)
+            >>> assert catalog.load("data_df").equals(df)
+            >>>
+            >>> csv_dataset = CSVDataset(filepath="test.csv")
+            >>> csv_dataset.save(df)
+            >>> catalog.add_feed_dict({"data_csv_dataset": csv_dataset})
+            >>>
+            >>> assert catalog.load("data_csv_dataset").equals(df)
         """
         for dataset_name in feed_dict:
             if isinstance(feed_dict[dataset_name], AbstractDataset):

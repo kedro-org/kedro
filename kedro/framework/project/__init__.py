@@ -436,7 +436,12 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
     return pipelines_dict
 
 
-def find_run_command(package_name):  # pragma: no cover
+def run(*args, **kwargs):  # pragma: no cover
+    run_command = _find_run_command(PACKAGE_NAME)
+    return run_command(*args, **kwargs)
+
+
+def _find_run_command(package_name):  # pragma: no cover
     from kedro.framework.cli.utils import (
         KedroCliError,
         load_entry_points,

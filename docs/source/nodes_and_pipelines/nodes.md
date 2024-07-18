@@ -74,6 +74,7 @@ A syntax describes function inputs and outputs. This syntax allows different Pyt
 | `None`                     | No input        | `def f()`                   | `f()`                                 |
 | `'a'`                      | Single input    | `def f(arg1)`               | `f(a)`                                |
 | `['a', 'b']`               | Multiple inputs | `def f(arg1, arg2)`         | `f(a, b)`                             |
+| `['a', 'b', 'c']`          | Variable inputs | `def f(arg1, *args)`.       | `f(arg1, arg2, arg3)`                 |
 | `dict(arg1='x', arg2='y')` | Keyword inputs  | `def f(arg1, arg2)`         | `f(arg1=x, arg2=y)`                   |
 
 ### Syntax for output variables
@@ -86,6 +87,9 @@ A syntax describes function inputs and outputs. This syntax allows different Pyt
 | `dict(key1='a', key2='b')` | Dictionary output | `return dict(key1=a, key2=b)`       |
 
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output must be provided).
+
+## `*args` node functions
+It is common to have functions that take an arbitrary number of inputs. For example, a function that combines multiple dataframes. You can use the *args argument in the node function, while simply declaring the names of the datasets in the node's inputs.
 
 ## `**kwargs`-only node functions
 

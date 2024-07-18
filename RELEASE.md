@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Kedro commands are now lazily loaded to add performance gains when running Kedro commands.
+* Can use unpacking with parameter dictionaries.
 
 ## Bug fixes and other changes
 * Updated error message for invalid catalog entries.
@@ -22,6 +23,8 @@
 * Extended documentation with an example of logging customisation at runtime
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [bpmeek](https://github.com/bpmeek/)
 
 # Release 0.19.6
 

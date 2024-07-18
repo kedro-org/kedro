@@ -24,6 +24,14 @@ def triconcat(input1: str, input2: str, input3: str):
     return input1 + input2 + input3  # pragma: no cover
 
 
+def dict_unpack():
+    return dict(input2="input2", input3="another node")
+
+
+def kwargs_input(**kwargs):
+    return kwargs
+
+
 @pytest.fixture
 def simple_tuple_node_list():
     return [
@@ -124,6 +132,47 @@ class TestValidNode:
             ["output1", "output2", "last node"],
         )
         assert dummy_node.inputs == ["input1", "input2", "another node"]
+
+    def test_inputs_unpack_str(self):
+        dummy_node = node(triconcat, inputs="**params:dict_unpack", outputs="output1")
+        assert dummy_node.inputs == [
+            "params:dict_unpack.input1",
+            "params:dict_unpack.input2",
+            "params:dict_unpack.input3",
+        ]
+
+    def test_inputs_unpack_list(self):
+        dummy_node = node(
+            triconcat,
+            inputs=["input1", "**params:dict_unpack"],
+            outputs=["output1", "output2", "last node"],
+        )
+        assert dummy_node.inputs == [
+            "input1",
+            "params:dict_unpack.input2",
+            "params:dict_unpack.input3",
+        ]
+
+    def test_inputs_unpack_dict(self):
+        dummy_node = node(
+            triconcat,
+            inputs={"input1": "**params:dict_unpack"},
+            outputs=["output1", "output2", "last node"],
+        )
+        assert dummy_node.inputs == [
+            "params:dict_unpack.input1",
+            "params:dict_unpack.input2",
+            "params:dict_unpack.input3",
+        ]
+
+    def test_kwargs_node_negative(self):
+        pattern = "parameter dictionary unpacking"
+        with pytest.raises(TypeError, match=pattern):
+            node(
+                kwargs_input,
+                inputs="**params:dict_unpack",
+                outputs="output1",
+            )
 
     def test_outputs_none(self):
         dummy_node = node(identity, "input", None)

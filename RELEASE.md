@@ -10,6 +10,7 @@
 * Implemented key completion support for accessing datasets in the `DataCatalog`.
 * Made [kedro-telemetry](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) a core dependency.
 * Implemented dataset pretty printing.
+* Implemented `DataCatalog` pretty printing.
 
 ## Breaking changes to the API
 

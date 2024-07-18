@@ -125,6 +125,14 @@ class TestCachedDataset:
         _ = pickle.dumps(cached_ds)
         assert caplog.records[0].message == f"{cached_ds}: clearing cache to pickle."
 
+    def test_repr(self):
+        assert (
+            repr(CachedDataset(MemoryDataset(42)))
+            == """kedro.io.cached_dataset.CachedDataset("""
+            """dataset="kedro.io.memory_dataset.MemoryDataset(data='<int>')", """
+            """cache='kedro.io.memory_dataset.MemoryDataset()')"""
+        )
+
     def test_str(self):
         assert (
             str(CachedDataset(MemoryDataset(42))) == "CachedDataset(cache={}, "

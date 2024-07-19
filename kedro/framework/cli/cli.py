@@ -40,6 +40,11 @@ v{version}
 """
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+handler = logging.StreamHandler(sys.stderr)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
@@ -159,6 +164,7 @@ class KedroCLI(CommandCollection):
         )
 
         hook_called = False
+        exit_code = 0
 
         try:
             super().main(
@@ -209,12 +215,17 @@ class KedroCLI(CommandCollection):
             sys.exit(exc.code)
         except Exception as error:
             logger.error(f"An error has occurred: {error}")
-            pass
+            exit_code = 1
+            self._cli_hook_manager.hook.after_command_run(
+                project_metadata=self._metadata, command_args=args, exit_code=1
+            )
+            hook_called = True
         finally:
             if not hook_called:
                 self._cli_hook_manager.hook.after_command_run(
                     project_metadata=self._metadata, command_args=args, exit_code=0
                 )
+            sys.exit(exit_code)
 
     @property
     def global_groups(self) -> Sequence[click.MultiCommand]:

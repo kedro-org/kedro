@@ -1,6 +1,7 @@
 """A collection of CLI commands for working with Kedro project."""
 from __future__ import annotations
 
+import importlib
 import os
 import sys
 from pathlib import Path
@@ -234,3 +235,34 @@ def run(  # noqa: PLR0913
             pipeline_name=pipeline,
             namespace=namespace,
         )
+
+
+def _find_run_command(package_name: str) -> Any:  # pragma: no cover
+    from kedro.framework.cli.utils import (
+        KedroCliError,
+        load_entry_points,
+    )
+
+    try:
+        project_cli = importlib.import_module(f"{package_name}.cli")
+        # fail gracefully if cli.py does not exist
+    except ModuleNotFoundError as exc:
+        if f"{package_name}.cli" not in str(exc):
+            raise
+        plugins = load_entry_points("project")
+        _run = _find_run_command_in_plugins(plugins) if plugins else None
+        if _run:
+            # use run command from installed plugin if it exists
+            return _run
+        # use run command from `kedro.framework.cli.project`
+        return run
+    # fail badly if cli.py exists, but has no `cli` in it
+    if not hasattr(project_cli, "cli"):
+        raise KedroCliError(f"Cannot load commands from {package_name}.cli")
+    return project_cli.run
+
+
+def _find_run_command_in_plugins(plugins: Any) -> Any:  # pragma: no cover
+    for group in plugins:
+        if "run" in group.commands:
+            return group.commands["run"]

@@ -22,7 +22,7 @@ def commands():
     pass
 
 
-@commands.command()
+@commands.command(name="to_json")
 @click.pass_obj
 def to_json(metadata):
     """Display the pipeline in JSON format"""
@@ -47,7 +47,6 @@ kedro to_json
 Commands must be provided as [`click` `Groups`](https://click.palletsprojects.com/en/7.x/api/#click.Group)
 
 The `click Group` will be merged into the main CLI Group. In the process, the options on the group are lost, as is any processing that was done as part of its callback function.
-
 
 ## Project context
 
@@ -78,7 +77,54 @@ Plugins may also add commands to the Kedro CLI, which supports two types of comm
 
 ## Suggested command convention
 
-We use the following command convention: `kedro <plugin-name> <command>`, with `kedro <plugin-name>` acting as a top-level command group. This is our suggested way of structuring your plugin bit it is not necessary for your plugin to work.
+We use the following command convention: `kedro <plugin-name> <command>`, with `kedro <plugin-name>` acting as a top-level command group. This is our suggested way of structuring your plugin but it is not necessary for your plugin to work.
+
+## Advanced: Lazy loading of plugin commands
+
+If you are developing a plugin with a large set of CLI commands or with certain large libraries that are slow to import for only a small subset of commands, you can consider using lazy loading of these commands to improve the performance of the plugin as well as the overall performance of Kedro CLI. To do this, you can follow [the instructions on the
+`click` documentation on lazy loading of commands](https://click.palletsprojects.com/en/8.1.x/complex/#lazily-loading-subcommands). From Kedro 0.19.7, the [Kedro commands themselves are declared as lazy loaded command groups](https://github.com/kedro-org/kedro/blob/main/kedro/framework/cli/cli.py) that you can use as a reference for the implementation.
+
+Consider the previous example of the `kedrojson` plugin. Suppose the plugin has two commands, `kedro to_json pipeline` and `kedro to_json node`. The `to_json pipeline` command is used more frequently than the `to_json node` command and the `to_json node` command requires a large library to be imported. In this case, you can define your commands to be lazily loaded with delayed imports as follows:
+
+In `kedrojson/plugin.py`:
+```python
+import click
+from kedro.framework.project import pipelines
+from kedro.framework.cli.utils import LazyGroup
+
+@click.group()
+def commands():
+    pass
+
+@commands.group(
+    name="to_json",
+    cls=LazyGroup,
+    lazy_subcommands={
+        "nodes": "kedrojson.plugin.nodes",
+        "pipelines": "kedrojson.plugin.pipelines"
+        }
+)
+def to_json():
+    """Convert Kedro nodes and pipelines to JSON"""
+    pass
+
+@click.command(name="nodes")
+def nodes():
+    """Convert Kedro nodes to JSON"""
+    import some_large_library
+    print("Converting nodes to JSON")
+    ...
+
+@click.command("pipelines")
+def pipelines():
+    """Convert Kedro pipelines to JSON"""
+    import another_large_library
+    print("Converting pipelines to JSON")
+    ...
+```
+
+The loading of the individual `nodes` and `pipelines` commands and subsequently the imports of the large libraries will be delayed until the respective commands are called.
+
 
 ## Hooks
 

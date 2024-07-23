@@ -34,10 +34,10 @@ class SharedMemoryDataset(AbstractDataset):
             raise AttributeError()
         return getattr(self.shared_memory_dataset, name)  # pragma: no cover
 
-    def load(self) -> Any:
+    def _load(self) -> Any:
         return self.shared_memory_dataset.load()
 
-    def save(self, data: Any) -> None:
+    def _save(self, data: Any) -> None:
         """Calls save method of a shared MemoryDataset in SyncManager."""
         try:
             self.shared_memory_dataset.save(data)

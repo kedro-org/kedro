@@ -59,7 +59,7 @@ class MemoryDataset(AbstractDataset):
         if data is not _EMPTY:
             self.save.__wrapped__(self, data)  # type: ignore[attr-defined]
 
-    def load(self) -> Any:
+    def _load(self) -> Any:
         if self._data is _EMPTY:
             raise DatasetError("Data for MemoryDataset has not been saved yet.")
 
@@ -67,7 +67,7 @@ class MemoryDataset(AbstractDataset):
         data = _copy_with_mode(self._data, copy_mode=copy_mode)
         return data
 
-    def save(self, data: Any) -> None:
+    def _save(self, data: Any) -> None:
         copy_mode = self._copy_mode or _infer_copy_mode(data)
         self._data = _copy_with_mode(data, copy_mode=copy_mode)
 

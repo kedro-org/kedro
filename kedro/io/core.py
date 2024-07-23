@@ -7,7 +7,9 @@ import abc
 import copy
 import logging
 import os
+import pprint
 import re
+import sys
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -179,6 +181,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return logging.getLogger(__name__)
 
     def __str__(self) -> str:
+        # TODO: Replace with __repr__ implementation in 0.20.0 release.
         def _to_str(obj: Any, is_root: bool = False) -> str:
             """Returns a string representation where
             1. The root level (i.e. the Dataset.__init__ arguments) are
@@ -283,6 +286,24 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 if not getattr(cls.save, "__savewrapped__", False)
                 else cls.save.__wrapped__  # type: ignore[attr-defined]
             )
+
+    def _pretty_repr(self, object_description: dict[str, Any]) -> str:
+        str_keys = []
+        for arg_name, arg_descr in object_description.items():
+            if arg_descr is not None:
+                descr = pprint.pformat(
+                    arg_descr,
+                    sort_dicts=False,
+                    compact=True,
+                    depth=2,
+                    width=sys.maxsize,
+                )
+                str_keys.append(f"{arg_name}={descr}")
+
+        return f"{type(self).__module__}.{type(self).__name__}({', '.join(str_keys)})"
+
+    def __repr__(self) -> str:
+        return self._pretty_repr(self._describe())
 
     @abc.abstractmethod
     def load(self) -> _DO:

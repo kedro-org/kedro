@@ -2,11 +2,16 @@
 
 ## Major features and improvements
 * Exposed `load` and `save` publicly for each dataset in the core `kedro` library, and enabled other datasets to do the same. If a dataset doesn't expose `load` or `save` publicly, Kedro will fall back to using `_load` or `_save`, respectively.
+* Kedro commands are now lazily loaded to add performance gains when running Kedro commands.
 
 ## Bug fixes and other changes
 * Updated error message for invalid catalog entries.
 * Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
 * Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
+* Implemented key completion support for accessing datasets in the `DataCatalog`.
+* Made [kedro-telemetry](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) a core dependency.
+* Implemented dataset pretty printing.
+* Implemented `DataCatalog` pretty printing.
 
 ## Breaking changes to the API
 
@@ -14,8 +19,8 @@
 * The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 0.20.0.
 
 ## Documentation changes
-
-Extended documentation with an example of logging customisation at runtime
+* Improved documentation for configuring dataset parameters in the data catalog
+* Extended documentation with an example of logging customisation at runtime
 
 ## Community contributions
 
@@ -52,7 +57,8 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Documentation changes
 * Updated the documentation for deploying a Kedro project with Astronomer Airflow.
 * Used `kedro-sphinx-theme` for documentation.
-
+* Add mentions about correct usage of `configure_project` with `multiprocessing`.
+*
 # Release 0.19.4
 
 ## Major features and improvements
@@ -81,6 +87,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added documentation on best practices for testing nodes and pipelines.
 * Clarified docs around using custom resolvers without a full Kedro project.
 
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [ondrejzacha](https://github.com/ondrejzacha)
@@ -91,7 +98,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Major features and improvements
 * Create the debugging line magic `%load_node` for Jupyter Notebook and Jupyter Lab.
 * Add official support for Python 3.12.
-* Add better IPython, VSCode Notebook support for `%load_node` and minimal support for Databricks.
+* Add better IPython, VS Code Notebook support for `%load_node` and minimal support for Databricks.
 * Add full Kedro Node input syntax for `%load_node`.
 
 ## Bug fixes and other changes

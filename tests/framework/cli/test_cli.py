@@ -11,14 +11,13 @@ from pytest import fixture, mark, raises, warns
 from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
-from kedro.framework.cli.catalog import catalog_cli
-from kedro.framework.cli.cli import KedroCLI, _init_plugins, cli
-from kedro.framework.cli.jupyter import jupyter_cli
-from kedro.framework.cli.micropkg import micropkg_cli
-from kedro.framework.cli.pipeline import pipeline_cli
-from kedro.framework.cli.project import project_group
-from kedro.framework.cli.registry import registry_cli
-from kedro.framework.cli.starters import create_cli
+from kedro.framework.cli.cli import (
+    KedroCLI,
+    _init_plugins,
+    cli,
+    global_commands,
+    project_commands,
+)
 from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
@@ -104,10 +103,13 @@ class TestCliCommands:
 
         entry_point.load.assert_not_called()
 
-    def test_info_no_plugins(self):
+    def test_info_only_kedro_telemetry_plugin_installed(self):
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0
-        assert "No plugins installed" in result.output
+
+        split_result = result.output.strip().split("\n")
+        assert "Installed plugins" in split_result[-2]
+        assert "kedro_telemetry" in split_result[-1]
 
     def test_help(self):
         """Check that `kedro --help` returns a valid help message."""
@@ -332,15 +334,19 @@ class TestKedroCLI:
             side_effect=cycle([ModuleNotFoundError()]),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        print(kedro_cli.project_groups)
-        assert len(kedro_cli.project_groups) == 6
-        assert kedro_cli.project_groups == [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            micropkg_cli,
-            project_group,
-            registry_cli,
+        # There is only one `LazyGroup` for project commands
+        assert len(kedro_cli.project_groups) == 1
+        assert kedro_cli.project_groups == [project_commands]
+        # Assert that the lazy commands are listed properly
+        assert kedro_cli.project_groups[0].list_commands(None) == [
+            "catalog",
+            "ipython",
+            "jupyter",
+            "micropkg",
+            "package",
+            "pipeline",
+            "registry",
+            "run",
         ]
 
     def test_project_commands_no_project(self, mocker, tmp_path):
@@ -371,22 +377,20 @@ class TestKedroCLI:
             return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        assert len(kedro_cli.project_groups) == 7
+        # The project group will now have two groups, the first from the project's cli.py and
+        # the second is the lazy project command group
+        assert len(kedro_cli.project_groups) == 2
         assert kedro_cli.project_groups == [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            micropkg_cli,
-            project_group,
-            registry_cli,
             cli,
+            project_commands,
         ]
 
     def test_kedro_cli_no_project(self, mocker, tmp_path):
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
         kedro_cli = KedroCLI(tmp_path)
         assert len(kedro_cli.global_groups) == 2
-        assert kedro_cli.global_groups == [cli, create_cli]
+        # The global groups will be the cli(group for info command) and the global commands (starter and new)
+        assert kedro_cli.global_groups == [cli, global_commands]
 
         result = CliRunner().invoke(kedro_cli, [])
 
@@ -410,28 +414,17 @@ class TestKedroCLI:
         )
 
     def test_kedro_cli_with_project(self, mocker, fake_metadata):
-        Module = namedtuple("Module", ["cli"])
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
         kedro_cli = KedroCLI(fake_metadata.project_path)
 
         assert len(kedro_cli.global_groups) == 2
-        assert kedro_cli.global_groups == [cli, create_cli]
-        assert len(kedro_cli.project_groups) == 7
+        assert kedro_cli.global_groups == [cli, global_commands]
+        assert len(kedro_cli.project_groups) == 1
         assert kedro_cli.project_groups == [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            micropkg_cli,
-            project_group,
-            registry_cli,
-            cli,
+            project_commands,
         ]
 
         result = CliRunner().invoke(kedro_cli, [])

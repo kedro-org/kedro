@@ -6,6 +6,7 @@ import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
+from kedro.logging import RichHandler, _format_rich, _has_rich_handler
 
 
 @pytest.fixture
@@ -35,10 +36,10 @@ def test_project_logging_in_default_logging_config(default_logging_config_with_p
     assert logging.getLogger("test_project").level == logging.INFO
 
 
-def test_environment_variable_logging_config(monkeypatch, tmp_path, caplog):
-    config_path = (Path(tmp_path) / "logging.yml").absolute()
-    monkeypatch.setenv("KEDRO_LOGGING_CONFIG", config_path)
-    logging_config = {"version": 1, "loggers": {"kedro": {"level": "DEBUG"}}}
+def test_environment_variable_logging_config(monkeypatch, tmp_path):
+    config_path = Path(tmp_path) / "logging.yml"
+    monkeypatch.setenv("KEDRO_LOGGING_CONFIG", config_path.absolute())
+    logging_config = {"version": 1, "loggers": {"kedro": {"level": "WARNING"}}}
     with config_path.open("w", encoding="utf-8") as f:
         yaml.dump(logging_config, f)
     from kedro.framework.project import _ProjectLogging
@@ -46,9 +47,7 @@ def test_environment_variable_logging_config(monkeypatch, tmp_path, caplog):
     LOGGING = _ProjectLogging()
 
     assert LOGGING.data == logging_config
-    assert logging.getLogger("kedro").level == logging.DEBUG
-    expected_message = f"Using '{config_path}'"
-    assert expected_message in "".join(caplog.messages).strip("\n")
+    assert logging.getLogger("kedro").level == logging.WARNING
 
 
 def test_configure_logging():
@@ -148,7 +147,22 @@ def test_rich_traceback_disabled_on_databricks(
     rich_pretty_install.assert_called()
 
 
-def test_environment_variable_logging_config2(monkeypatch, tmp_path, caplog):
+def test_rich_format():
+    assert (
+        _format_rich("Hello World!", "dark_orange")
+        == "[dark_orange]Hello World![/dark_orange]"
+    )
+
+
+def test_has_rich_handler():
+    test_logger = logging.getLogger("test_logger")
+    assert not _has_rich_handler(test_logger)
+    _has_rich_handler.cache_clear()
+    test_logger.addHandler(RichHandler())
+    assert _has_rich_handler(test_logger)
+
+
+def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):
     config_path = (Path(tmp_path) / "conf" / "logging.yml").absolute()
     config_path.parent.mkdir(parents=True)
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "DEBUG"}}}

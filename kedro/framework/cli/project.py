@@ -237,7 +237,7 @@ def run(  # noqa: PLR0913
         )
 
 
-def _find_run_command(package_name: str) -> Any:  # pragma: no cover
+def find_run_command(package_name: str) -> Any:  # pragma: no cover
     from kedro.framework.cli.utils import (
         KedroCliError,
         load_entry_points,

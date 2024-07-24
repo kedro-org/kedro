@@ -84,7 +84,7 @@ We use the following command convention: `kedro <plugin-name> <command>`, with `
 If you are developing a plugin with a large set of CLI commands or with certain large libraries that are slow to import but are used by a small subset of commands, consider using lazy loading of these commands. This can significantly improve the performance of the plugin as well as the overall performance of Kedro CLI. To do this, you can follow [the instructions on the
 `click` documentation on lazy loading of commands](https://click.palletsprojects.com/en/8.1.x/complex/#lazily-loading-subcommands). From Kedro 0.19.7, the [Kedro commands are declared as lazy loaded command groups](https://github.com/kedro-org/kedro/blob/main/kedro/framework/cli/cli.py) that you can use as a reference for the implementation.
 
-Consider the previous example of the `kedrojson` plugin. Suppose the plugin has two commands, `kedro to_json pipeline` and `kedro to_json node`. The `to_json pipeline` command is used more frequently than the `to_json node` command and the `to_json node` command requires a large library to be imported. In this case, you can define your commands to be lazily loaded with delayed imports as follows:
+Consider the previous example of the `kedrojson` plugin. Suppose the plugin has two commands, `kedro to_json pipelines` and `kedro to_json nodes`. The `to_json pipelines` command is used more frequently than the `to_json nodes` command and the `to_json nodes` command requires a large library to be imported. In this case, you can define your commands to be lazily loaded with delayed imports as follows:
 
 In `kedrojson/plugin.py`:
 ```python

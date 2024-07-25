@@ -7,6 +7,7 @@ import io
 import logging
 import mimetypes
 import typing
+from collections.abc import KeysView
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
@@ -264,8 +265,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"merge_strategy={self.merge_strategy})"
         )
 
-    def keys(self) -> list[str] | None:
-        return list(self.config_patterns)
+    def keys(self) -> KeysView:
+        return KeysView(self.config_patterns)
 
     @typing.no_type_check
     def load_and_merge_dir_config(  # noqa: PLR0913

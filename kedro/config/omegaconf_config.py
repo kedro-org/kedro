@@ -124,6 +124,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Deactivate oc.env built-in resolver for OmegaConf
         OmegaConf.clear_resolver("oc.env")
         # Register user provided custom resolvers
+        self._custom_resolvers = custom_resolvers
         if custom_resolvers:
             self._register_new_resolvers(custom_resolvers)
         # Register globals resolver
@@ -255,8 +256,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def __repr__(self) -> str:  # pragma: no cover
         return (
             f"OmegaConfigLoader(conf_source={self.conf_source}, env={self.env}, "
-            f"config_patterns={self.config_patterns})"
+            f"runtime_params={self.runtime_params}, "
+            f"config_patterns={self.config_patterns}"
+            f"base_env={self.base_env}), "
+            f"default_run_env={self.default_run_env}), "
+            f"custom_resolvers={self._custom_resolvers}), "
+            f"merge_strategy={self.merge_strategy})"
         )
+
+    def keys(self) -> list[str] | None:
+        return list(self.config_patterns)
 
     @typing.no_type_check
     def load_and_merge_dir_config(  # noqa: PLR0913

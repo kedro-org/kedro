@@ -77,6 +77,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Fixed error handling message for malformed yaml/json files in OmegaConfigLoader.
 * Fixed a bug in `node`-creation allowing self-dependencies when using transcoding, that is datasets named like `name@format`.
 * Improved error message when passing wrong value to node.
+* Fixed a bug when `OmegaConfigLoader` is printed, there is a few arguments missing.
 
 ## Breaking changes to the API
 * Methods `_is_project` and `_find_kedro_project` have been moved to `kedro.utils`. We recommend not using private methods in your code, but if you do, please update your code to use the new location.

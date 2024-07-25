@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import pprint
 import shutil
 from decimal import Decimal
@@ -222,6 +223,26 @@ class TestCoreFunctions:
             repr(MyDataset())
             == f"tests.io.test_core.MyDataset(filepath={filepath_str})"
         )
+
+    @pytest.mark.parametrize(
+        "describe_return",
+        [None, {"key_1": "val_1", 2: "val_2"}],
+    )
+    def test_repr_bad_describe(self, describe_return, caplog):
+        class BadDescribeDataset(MyDataset):
+            def _describe(self):
+                return describe_return
+
+        warning_message = (
+            "'tests.io.test_core.BadDescribeDataset' is a subclass of AbstractDataset and it must "
+            "implement the '_describe' method following the signature of AbstractDataset's '_describe'."
+        )
+
+        with caplog.at_level(logging.WARNING):
+            assert (
+                repr(BadDescribeDataset()) == "tests.io.test_core.BadDescribeDataset()"
+            )
+            assert warning_message in caplog.text
 
     def test_get_filepath_str(self):
         path = get_filepath_str(PurePosixPath("example.com/test.csv"), "http")

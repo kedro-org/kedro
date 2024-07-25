@@ -258,6 +258,14 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return f"{type(self).__name__}({_to_str(self._describe(), True)})"
 
     def _pretty_repr(self, object_description: dict[str, Any]) -> str:
+        if not isinstance(object_description, dict) or not all(
+            isinstance(key, str) for key in object_description.keys()
+        ):
+            self._logger.warning(
+                f"'{type(self).__module__}.{type(self).__name__}' is a subclass of AbstractDataset and it must "
+                f"implement the '_describe' method following the signature of AbstractDataset's '_describe'."
+            )
+            return f"{type(self).__module__}.{type(self).__name__}()"
         str_keys = []
         for arg_name, arg_descr in object_description.items():
             if arg_descr is not None:

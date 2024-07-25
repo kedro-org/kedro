@@ -257,7 +257,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return (
             f"OmegaConfigLoader(conf_source={self.conf_source}, env={self.env}, "
             f"runtime_params={self.runtime_params}, "
-            f"config_patterns={self.config_patterns}"
+            f"config_patterns={self.config_patterns}, "
             f"base_env={self.base_env}), "
             f"default_run_env={self.default_run_env}), "
             f"custom_resolvers={self._custom_resolvers}), "

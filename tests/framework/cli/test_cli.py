@@ -450,6 +450,22 @@ class TestKedroCLI:
         mock_sys_exit.assert_called_once_with(1)
         assert "An error has occurred: Test Exception" in result.output
 
+    @patch("sys.exit")
+    def test_main_hook_finally_block(self, mock_sys_exit, fake_metadata):
+        kedro_cli = KedroCLI(fake_metadata.project_path)
+        kedro_cli._cli_hook_manager.hook.after_command_run = MagicMock()
+
+        # No exception is raised, so it should go to the finally block and call the hook
+        with patch.object(click.CommandCollection, "main"):
+            result = CliRunner().invoke(kedro_cli, [])
+
+        kedro_cli._cli_hook_manager.hook.after_command_run.assert_called_once_with(
+            project_metadata=kedro_cli._metadata, command_args=[], exit_code=0
+        )
+
+        mock_sys_exit.assert_called_once_with(0)
+        assert "An error has occurred:" not in result.output
+
 
 @mark.usefixtures("chdir_to_dummy_project")
 class TestRunCommand:

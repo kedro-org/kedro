@@ -2,6 +2,7 @@ from collections import namedtuple
 from itertools import cycle
 from os import rename
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import click
 from click.testing import CliRunner
@@ -431,6 +432,23 @@ class TestKedroCLI:
         assert result.exit_code == 0
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" in result.output
+
+    @patch("sys.exit")
+    def test_main_hook_exception_handling(self, mock_sys_exit, fake_metadata):
+        kedro_cli = KedroCLI(fake_metadata.project_path)
+        kedro_cli._cli_hook_manager.hook.after_command_run = MagicMock()
+
+        with patch.object(
+            click.CommandCollection, "main", side_effect=Exception("Test Exception")
+        ):
+            result = CliRunner().invoke(kedro_cli, [])
+
+        kedro_cli._cli_hook_manager.hook.after_command_run.assert_called_once_with(
+            project_metadata=kedro_cli._metadata, command_args=[], exit_code=1
+        )
+
+        mock_sys_exit.assert_called_once_with(1)
+        assert "An error has occurred: Test Exception" in result.output
 
 
 @mark.usefixtures("chdir_to_dummy_project")

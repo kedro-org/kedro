@@ -1485,4 +1485,4 @@ class TestOmegaConfigLoaderStandalone:
 
     def test_keys_exist(self):
         conf = OmegaConfigLoader(conf_source="")
-        assert list(conf.keys()) == ["catalog","parameters","credentials","globals"]
+        assert list(conf.keys()) == ["catalog", "parameters", "credentials", "globals"]

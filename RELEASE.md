@@ -11,6 +11,8 @@
 * Made [kedro-telemetry](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) a core dependency.
 * Implemented dataset pretty printing.
 * Implemented `DataCatalog` pretty printing.
+* Fixed a bug when `OmegaConfigLoader` is printed, there are few missing arguments.
+* Fixed a bug when where iterating `OmegaConfigLoader`'s `keys` return empty dictionary.
 
 ## Breaking changes to the API
 

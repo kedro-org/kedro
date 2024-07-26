@@ -1482,3 +1482,7 @@ class TestOmegaConfigLoaderStandalone:
         conf = OmegaConfigLoader(tmp_path, runtime_params=runtime_params)
         # runtime params are resolved correctly in catalog using global default
         assert conf["catalog"]["companies"]["type"] == globals_config["dataset"]["type"]
+
+    def test_keys_exist(self):
+        conf = OmegaConfigLoader(conf_source="")
+        assert list(conf.keys()) == ["catalog", "parameters", "credentials", "globals"]

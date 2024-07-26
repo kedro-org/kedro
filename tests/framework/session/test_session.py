@@ -16,6 +16,7 @@ from omegaconf import OmegaConf
 from kedro import __version__ as kedro_version
 from kedro.config import AbstractConfigLoader, OmegaConfigLoader
 from kedro.framework.cli.utils import _split_params
+from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     LOGGING,
     ValidationError,
@@ -25,7 +26,7 @@ from kedro.framework.project import (
     _ProjectSettings,
 )
 from kedro.framework.session import KedroSession
-from kedro.framework.session.session import KedroContext, KedroSessionError
+from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
 

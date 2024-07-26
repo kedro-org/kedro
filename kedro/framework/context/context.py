@@ -13,12 +13,11 @@ from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
+from kedro.io import DataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
-
-    from kedro.io import DataCatalog
 
 
 def _is_relative_path(path_string: str) -> bool:

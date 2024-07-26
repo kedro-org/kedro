@@ -103,7 +103,7 @@ class _ProjectSettings(LazySettings):
     )
     _SESSION_STORE_CLASS = _IsSubclassValidator(
         "SESSION_STORE_CLASS",
-        default=_get_default_class("kedro.framework.session.session.BaseSessionStore"),
+        default=_get_default_class("kedro.framework.session.store.BaseSessionStore"),
     )
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())

@@ -214,14 +214,16 @@ ignore_imports = [
 line-length = 88
 show-fixes = true
 select = [
-    "F",   # Pyflakes
-    "W",   # pycodestyle
-    "E",   # pycodestyle
-    "I",   # isort
-    "UP",  # pyupgrade
-    "PL",  # Pylint
+    "F",    # Pyflakes
+    "W",    # pycodestyle
+    "E",    # pycodestyle
+    "I",    # isort
+    "UP",   # pyupgrade
+    "PL",   # Pylint
     "T201", # Print Statement
-    "S", # flake8-bandit
+    "S",    # flake8-bandit
+    "TCH",  # flake8-type-checking
+    "RUF",  # Ruff-specific rules
 ]
 ignore = ["E501"]
 

@@ -41,12 +41,12 @@ def _is_project(project_path: Union[str, Path]) -> bool:
 
     try:
         return "[tool.kedro]" in metadata_file.read_text(encoding="utf-8")
-    except Exception:  # noqa: broad-except
+    except Exception:
         return False
 
 
 def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
-    paths_to_check = [current_dir] + list(current_dir.parents)
+    paths_to_check = [current_dir, *list(current_dir.parents)]
     for parent_dir in paths_to_check:
         if _is_project(parent_dir):
             return parent_dir

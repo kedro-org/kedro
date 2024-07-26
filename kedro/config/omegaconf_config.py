@@ -306,7 +306,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         paths = []
         for pattern in patterns:
-            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix()):
+            for each in self._fs.glob(Path(f"{conf_path!s}/{pattern}").as_posix()):
                 if not self._is_hidden(each):
                     paths.append(Path(each))
 

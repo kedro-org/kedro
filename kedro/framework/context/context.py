@@ -127,13 +127,13 @@ def _validate_transcoded_datasets(catalog: DataCatalog) -> None:
     """Validates transcoded datasets are correctly named
 
     Args:
-        catalog (DataCatalog): The catalog object containing the
-        datasets to be validated.
+        catalog: The catalog object containing the datasets to be
+            validated.
 
     Raises:
         ValueError: If a dataset name does not conform to the expected
-        transcoding naming conventions,a ValueError is raised by the
-        `_transcode_split` function.
+            transcoding naming conventions,a ValueError is raised by the
+            `_transcode_split` function.
 
     """
     for dataset_name in catalog._datasets.keys():

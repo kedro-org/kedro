@@ -203,7 +203,7 @@ class DataCatalog:
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(datasets={'cars': cars})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
         """
         self._datasets = dict(datasets or {})
         self.datasets = _FrozenDatasets(self._datasets)
@@ -527,9 +527,9 @@ class DataCatalog:
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(datasets={'cars': cars})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
             >>>
-            >>> df = io.load("cars")
+            >>> df = catalog.load("cars")
         """
         load_version = Version(version, None) if version else None
         dataset = self._get_dataset(name, version=load_version)
@@ -569,12 +569,12 @@ class DataCatalog:
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(datasets={'cars': cars})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
             >>>
             >>> df = pd.DataFrame({'col1': [1, 2],
             >>>                    'col2': [4, 5],
             >>>                    'col3': [5, 6]})
-            >>> io.save("cars", df)
+            >>> catalog.save("cars", df)
         """
         dataset = self._get_dataset(name)
 
@@ -642,11 +642,11 @@ class DataCatalog:
 
             >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> io = DataCatalog(datasets={
+            >>> catalog = DataCatalog(datasets={
             >>>                   'cars': CSVDataset(filepath="cars.csv")
             >>>                  })
             >>>
-            >>> io.add("boats", CSVDataset(filepath="boats.csv"))
+            >>> catalog.add("boats", CSVDataset(filepath="boats.csv"))
         """
         if dataset_name in self._datasets:
             if replace:
@@ -678,7 +678,7 @@ class DataCatalog:
 
             >>> from kedro_datasets.pandas import CSVDataset, ParquetDataset
             >>>
-            >>> io = DataCatalog(datasets={
+            >>> catalog = DataCatalog(datasets={
             >>>                   "cars": CSVDataset(filepath="cars.csv")
             >>>                  })
             >>> additional = {
@@ -686,9 +686,9 @@ class DataCatalog:
             >>>     "boats": CSVDataset(filepath="boats.csv")
             >>> }
             >>>
-            >>> io.add_all(additional)
+            >>> catalog.add_all(additional)
             >>>
-            >>> assert io.list() == ["cars", "planes", "boats"]
+            >>> assert catalog.list() == ["cars", "planes", "boats"]
         """
         for name, dataset in datasets.items():
             self.add(name, dataset, replace)
@@ -756,13 +756,13 @@ class DataCatalog:
         Example:
         ::
 
-            >>> io = DataCatalog()
+            >>> catalog = DataCatalog()
             >>> # get data sets where the substring 'raw' is present
-            >>> raw_data = io.list(regex_search='raw')
+            >>> raw_data = catalog.list(regex_search='raw')
             >>> # get data sets which start with 'prm' or 'feat'
-            >>> feat_eng_data = io.list(regex_search='^(prm|feat)')
+            >>> feat_eng_data = catalog.list(regex_search='^(prm|feat)')
             >>> # get data sets which end with 'time_series'
-            >>> models = io.list(regex_search='.+time_series$')
+            >>> models = catalog.list(regex_search='.+time_series$')
         """
 
         if regex_search is None:

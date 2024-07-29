@@ -732,7 +732,7 @@ class DataCatalog:
             if isinstance(feed_dict[dataset_name], AbstractDataset):
                 dataset = feed_dict[dataset_name]
             else:
-                dataset = MemoryDataset(data=feed_dict[dataset_name])
+                dataset = MemoryDataset(data=feed_dict[dataset_name])  # type: ignore[abstract]
 
             self.add(dataset_name, dataset, replace)
 

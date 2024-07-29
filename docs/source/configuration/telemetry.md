@@ -10,7 +10,7 @@ Participation in this program is optional, and it is enabled by default. Kedro w
 The Kedro Project's telemetry has been reviewed and approved under the
 [Telemetry Data Collection and Usage Policy] of LF Projects, LLC.
 
-Kedro collects anonymous telemetry through [the Kedro-Telemetry plugin], 
+Kedro collects anonymous telemetry through [the Kedro-Telemetry plugin],
 which is installed as one of Kedro’s dependencies.
 
 [the Kedro-Telemetry plugin]: https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry

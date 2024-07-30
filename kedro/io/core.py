@@ -303,7 +303,17 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return f"{type(self).__module__}.{type(self).__name__}({', '.join(str_keys)})"
 
     def __repr__(self) -> str:
-        return self._pretty_repr(self._describe())
+        object_description = self._describe()
+        if isinstance(object_description, dict) and all(
+            isinstance(key, str) for key in object_description
+        ):
+            return self._pretty_repr(object_description)
+
+        self._logger.warning(
+            f"'{type(self).__module__}.{type(self).__name__}' is a subclass of AbstractDataset and it must "
+            f"implement the '_describe' method following the signature of AbstractDataset's '_describe'."
+        )
+        return f"{type(self).__module__}.{type(self).__name__}()"
 
     @abc.abstractmethod
     def load(self) -> _DO:

@@ -36,7 +36,7 @@ For technical information on how the telemetry collection works, you can browse
 To withdraw consent, you have a few options:
 
 1. **Set Environment Variables**:
-   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of these environment variables will disable telemetry for all Kedro projects in that environment and will override any consent specified in the `.telemetry` file of the specific project.
+   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of any of these environment variables will disable telemetry for all Kedro projects in that environment and will override any consent specified in the `.telemetry` file of the specific project.
 
 2. **CLI Option When Creating a New Project**:
    When creating a new project, you can use the command:
@@ -48,13 +48,13 @@ To withdraw consent, you have a few options:
 
    >*Note:* The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
 
-3. **Modify or Create the .telemetry File**:
+3. **Modify or Create the `.telemetry` file manually**:
    If the `.telemetry` file exists in the root folder of your Kedro project, set the `consent` variable to `false`. If the file does not exist, create it with the following content:
      ```yaml
      consent: false
      ```
 
-4. **Uninstall the Plugin**:
+4. **Uninstall the plugin**:
    Remove the `kedro-telemetry` plugin:
 
    ```console

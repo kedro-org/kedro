@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import pprint
 import shutil
 from decimal import Decimal
@@ -223,6 +224,26 @@ class TestCoreFunctions:
             == f"tests.io.test_core.MyDataset(filepath={filepath_str})"
         )
 
+    @pytest.mark.parametrize(
+        "describe_return",
+        [None, {"key_1": "val_1", 2: "val_2"}],
+    )
+    def test_repr_bad_describe(self, describe_return, caplog):
+        class BadDescribeDataset(MyDataset):
+            def _describe(self):
+                return describe_return
+
+        warning_message = (
+            "'tests.io.test_core.BadDescribeDataset' is a subclass of AbstractDataset and it must "
+            "implement the '_describe' method following the signature of AbstractDataset's '_describe'."
+        )
+
+        with caplog.at_level(logging.WARNING):
+            assert (
+                repr(BadDescribeDataset()) == "tests.io.test_core.BadDescribeDataset()"
+            )
+            assert warning_message in caplog.text
+
     def test_get_filepath_str(self):
         path = get_filepath_str(PurePosixPath("example.com/test.csv"), "http")
         assert isinstance(path, str)
@@ -309,9 +330,17 @@ class TestCoreFunctions:
         dataset, _ = parse_dataset_definition(config)
         assert dataset is LambdaDataset
 
-    def test_test_parse_dataset_definition_with_python_class_type(self):
+    def test_parse_dataset_definition_with_python_class_type(self):
         config = {"type": MyDataset}
         parse_dataset_definition(config)
+
+    def test_load_and_save_are_wrapped_once(self):
+        assert not getattr(
+            MyOtherVersionedDataset.load.__wrapped__, "__loadwrapped__", False
+        )
+        assert not getattr(
+            MyOtherVersionedDataset.save.__wrapped__, "__savewrapped__", False
+        )
 
 
 class TestAbstractVersionedDataset:
@@ -431,3 +460,135 @@ class TestAbstractVersionedDataset:
 
         my_versioned_dataset._release()
         assert my_versioned_dataset._version_cache.currsize == 0
+
+
+class MyLegacyDataset(AbstractDataset):
+    def __init__(self, filepath="", save_args=None, fs_args=None, var=None):
+        self._filepath = PurePosixPath(filepath)
+        self.save_args = save_args
+        self.fs_args = fs_args
+        self.var = var
+
+    def _describe(self):
+        return {"filepath": self._filepath, "var": self.var}
+
+    def _exists(self) -> bool:
+        return Path(self._filepath.as_posix()).exists()
+
+    def _load(self):
+        return pd.read_csv(self._filepath)
+
+    def _save(self, data: str) -> None:
+        with open(self._filepath, mode="w") as file:
+            file.write(data)
+
+
+class MyLegacyVersionedDataset(AbstractVersionedDataset[str, str]):
+    def __init__(  # noqa: PLR0913
+        self,
+        filepath: str,
+        version: Version = None,
+    ) -> None:
+        _fs_args: dict[Any, Any] = {}
+        _fs_args.setdefault("auto_mkdir", True)
+        protocol, path = get_protocol_and_path(filepath, version)
+
+        self._protocol = protocol
+        self._fs = fsspec.filesystem(self._protocol, **_fs_args)
+
+        super().__init__(
+            filepath=PurePosixPath(path),
+            version=version,
+            exists_function=self._fs.exists,
+            glob_function=self._fs.glob,
+        )
+
+    def _describe(self) -> dict[str, Any]:
+        return dict(filepath=self._filepath, version=self._version)
+
+    def _load(self) -> str:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+
+        with self._fs.open(load_path, mode="r") as fs_file:
+            return fs_file.read()
+
+    def _save(self, data: str) -> None:
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+        with self._fs.open(save_path, mode="w") as fs_file:
+            fs_file.write(data)
+
+    def _exists(self) -> bool:
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DatasetError:
+            return False
+
+        return self._fs.exists(load_path)
+
+
+@pytest.fixture
+def my_legacy_dataset(filepath_versioned, save_args, fs_args):
+    return MyLegacyDataset(
+        filepath=filepath_versioned, save_args=save_args, fs_args=fs_args
+    )
+
+
+@pytest.fixture
+def my_legacy_versioned_dataset(filepath_versioned, load_version, save_version):
+    return MyLegacyVersionedDataset(
+        filepath=filepath_versioned, version=Version(load_version, save_version)
+    )
+
+
+class TestLegacyLoadAndSave:
+    def test_saving_none(self, my_legacy_dataset):
+        """Check the error when attempting to save the dataset without
+        providing the data"""
+        pattern = r"Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
+            my_legacy_dataset.save(None)
+
+    def test_saving_invalid_data(self, my_legacy_dataset, dummy_data):
+        pattern = r"Failed while saving data to data set"
+        with pytest.raises(DatasetError, match=pattern):
+            my_legacy_dataset.save(pd.DataFrame())
+
+    @pytest.mark.parametrize(
+        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
+    def test_save_version_warning(
+        self, my_legacy_versioned_dataset, load_version, save_version, dummy_data
+    ):
+        """Check the warning when saving to the path that differs from
+        the subsequent load path."""
+        pattern = (
+            f"Save version '{save_version}' did not match "
+            f"load version '{load_version}' for "
+            r"MyLegacyVersionedDataset\(.+\)"
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            my_legacy_versioned_dataset.save(dummy_data)
+
+    def test_versioning_existing_dataset(
+        self, my_legacy_dataset, my_legacy_versioned_dataset, dummy_data
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset."""
+        my_legacy_dataset.save(dummy_data)
+        assert my_legacy_dataset.exists()
+        assert my_legacy_dataset._filepath == my_legacy_versioned_dataset._filepath
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{my_legacy_versioned_dataset._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DatasetError, match=pattern):
+            my_legacy_versioned_dataset.save(dummy_data)
+
+        # Remove non-versioned dataset and try again
+        Path(my_legacy_dataset._filepath.as_posix()).unlink()
+        my_legacy_versioned_dataset.save(dummy_data)
+        assert my_legacy_versioned_dataset.exists()

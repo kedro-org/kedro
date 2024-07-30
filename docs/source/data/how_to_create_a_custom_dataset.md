@@ -312,7 +312,7 @@ To add versioning support to the new dataset we need to extend the
  {py:class}`~kedro.io.AbstractVersionedDataset` to:
 
 * Accept a `version` keyword argument as part of the constructor
-* Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively
+* Adapt the `_load` and `_save` method to use the versioned data path obtained from `_get_load_path` and `_get_save_path` respectively
 
 The following amends the full implementation of our basic `ImageDataset`. It now loads and saves data to and from a versioned subfolder (`data/01_raw/pokemon-images-and-types/images/images/pikachu.png/<version>/pikachu.png` with `version` being a datetime-formatted string `YYYY-MM-DDThh.mm.ss.sssZ` by default):
 

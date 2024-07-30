@@ -484,7 +484,7 @@ class MyLegacyDataset(AbstractDataset):
 
 
 class MyLegacyVersionedDataset(AbstractVersionedDataset[str, str]):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         filepath: str,
         version: Version = None,

@@ -225,9 +225,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             except Exception as exc:
                 # This exception handling is by design as the composed data sets
                 # can throw any type of exception.
-                message = (
-                    f"Failed while loading data from data set {str(self)}.\n{str(exc)}"
-                )
+                message = f"Failed while loading data from data set {self!s}.\n{exc!s}"
                 raise DatasetError(message) from exc
 
         load.__annotations__["return"] = load_func.__annotations__.get("return")
@@ -251,9 +249,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             except (DatasetError, FileNotFoundError, NotADirectoryError):
                 raise
             except Exception as exc:
-                message = (
-                    f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
-                )
+                message = f"Failed while saving data to data set {self!s}.\n{exc!s}"
                 raise DatasetError(message) from exc
 
         save.__annotations__["data"] = save_func.__annotations__.get("data", Any)

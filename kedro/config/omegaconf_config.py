@@ -296,7 +296,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
             Resulting configuration dictionary.
 
         """
-        # noqa: too-many-locals
 
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(

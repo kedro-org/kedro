@@ -57,7 +57,7 @@ class MemoryDataset(AbstractDataset):
         self.metadata = metadata
         self._EPHEMERAL = True
         if data is not _EMPTY:
-            self._save(data)
+            self.save.__wrapped__(self, data)  # type: ignore[attr-defined]
 
     def _load(self) -> Any:
         if self._data is _EMPTY:

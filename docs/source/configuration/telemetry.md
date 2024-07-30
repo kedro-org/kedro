@@ -48,7 +48,7 @@ To withdraw consent, you have a few options:
 
    >*Note:* The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
 
-3. **Modify or Create the `.telemetry` File**:
+3. **Modify or Create the .telemetry File**:
    If the `.telemetry` file exists in the root folder of your Kedro project, set the `consent` variable to `false`. If the file does not exist, create it with the following content:
      ```yaml
      consent: false

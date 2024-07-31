@@ -40,11 +40,6 @@ v{version}
 """
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
-handler = logging.StreamHandler(sys.stderr)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")

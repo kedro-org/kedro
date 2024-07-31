@@ -81,6 +81,7 @@ class AbstractDataCatalog:
         self._dataset_patterns, self._default_pattern = self._get_patterns(
             config, credentials
         )
+        # Add datasets to catalog
 
     def __iter__(self):
         yield from self.datasets.values()
@@ -169,6 +170,7 @@ class AbstractDataCatalog:
             if cls._is_pattern(ds_name):
                 dataset_patterns[ds_name] = resolved_ds_config
             else:
+                # TODO: Move to another method - see __init__ - add datasets to catalog
                 cls.datasets[ds_name] = AbstractDataset.from_config(
                     ds_name,
                     resolved_ds_config,
@@ -182,17 +184,6 @@ class AbstractDataCatalog:
             if cls._specificity(list(sorted_patterns.keys())[-1]) == 0:
                 last_pattern = sorted_patterns.popitem()
                 user_default = {last_pattern[0]: last_pattern[1]}
-
-        missing_keys = [
-            key
-            for key in load_versions.keys()
-            if not (key in config or cls._match_pattern(sorted_patterns, key))
-        ]
-        if missing_keys:
-            raise DatasetNotFoundError(
-                f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
-                f"are not found in the catalog."
-            )
 
         return sorted_patterns, user_default
 
@@ -208,16 +199,6 @@ class AbstractDataCatalog:
         # and self.resolved_config with resolved config
         pass
 
-    @classmethod
-    def from_config(
-        cls,
-        config: dict[str, dict[str, Any]] | None,
-        credentials: dict[str, dict[str, Any]] | None = None,
-        **kwargs,
-    ) -> AbstractDataCatalog:
-        # Create a data catalog from configuration.
-        pass
-
     @abc.abstractmethod
     def get_dataset(self, dataset_name: str, **kwargs) -> Any:
         self.resolve_patterns(dataset_name, **kwargs)
@@ -230,27 +211,29 @@ class AbstractDataCatalog:
 
 
 class KedroDataCatalog(AbstractDataCatalog):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasets: dict[str, AbstractDataset] | None = None,
         config: dict[str, dict[str, Any]] | None = None,
+        credentials: dict[str, dict[str, Any]] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> None:
-        super().__init__(datasets, config)
+        super().__init__(datasets, config, credentials)
 
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
-    @classmethod
-    def from_config(
-        cls,
-        config: dict[str, dict[str, Any]] | None,
-        credentials: dict[str, dict[str, Any]] | None = None,
-        load_versions: dict[str, str] | None = None,
-        save_version: str | None = None,
-    ) -> KedroDataCatalog:
-        pass
+        missing_keys = [
+            key
+            for key in load_versions.keys()
+            if not (key in config or self._match_pattern(self._dataset_patterns, key))
+        ]
+        if missing_keys:
+            raise DatasetNotFoundError(
+                f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
+                f"are not found in the catalog."
+            )
 
     def resolve_patterns(
         self,

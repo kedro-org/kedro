@@ -40,6 +40,7 @@ v{version}
 """
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stderr))
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")

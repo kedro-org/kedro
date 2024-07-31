@@ -178,6 +178,7 @@ class KedroCLI(CommandCollection):
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
             hook_called = True
+            exit_code = exc.code
 
             # When CLI is run outside of a project, project_groups are not registered
             catch_exception = "click.exceptions.UsageError: No such command"
@@ -208,20 +209,20 @@ class KedroCLI(CommandCollection):
                 )
                 click.echo(message)
                 click.echo(hint)
-            sys.exit(exc.code)
+            # sys.exit(exc.code)
         except Exception as error:
             logger.error(f"An error has occurred: {error}")
-            exit_code = 1
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=1
             )
             hook_called = True
+            exit_code = 1
         finally:
             if not hook_called:
                 self._cli_hook_manager.hook.after_command_run(
                     project_metadata=self._metadata, command_args=args, exit_code=0
                 )
-            sys.exit(exit_code)
+        sys.exit(exit_code)
 
     @property
     def global_groups(self) -> Sequence[click.MultiCommand]:

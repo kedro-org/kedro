@@ -32,6 +32,7 @@ dependencies = [
     "rich>=12.0,<14.0",
     "rope>=0.21,<2.0",  # subject to LGPLv3 license
     "toml>=0.10.0",
+    "typing_extensions>=4.0",
     "graphlib_backport>=1.0.0; python_version < '3.9'",
 ]
 keywords = [
@@ -80,12 +81,13 @@ test = [
     "types-PyYAML",
     "types-cachetools",
     "types-requests",
-    "types-toml"
+    "types-toml",
 ]
 docs = [
-    "kedro-sphinx-theme==2024.4.0",
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
+    "kedro-sphinx-theme==2024.4.0",
+    "sphinx-notfound-page!=1.0.3",  # Required by kedro-sphinx-theme. 1.0.3 results in `AttributeError: 'tuple' object has no attribute 'default'`.
 ]
 jupyter = [
     "ipylab>=1.0.0",
@@ -207,7 +209,7 @@ forbidden_modules = [
 ]
 ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
-    "kedro.framework.session.session -> kedro.config"
+    "kedro.framework.session.session -> kedro.config",
 ]
 
 [tool.ruff]

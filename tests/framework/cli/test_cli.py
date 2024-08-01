@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import click
+import pytest
 from click.testing import CliRunner
 from omegaconf import OmegaConf
 from pytest import fixture, mark, raises, warns
@@ -23,6 +24,7 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
+    find_run_command,
     forward_command,
     get_pkg_version,
 )
@@ -275,6 +277,54 @@ class TestCliUtils:
             mocker.call(pycache2, ignore_errors=True),
         ]
         assert mocked_rmtree.mock_calls == expected_calls
+
+    def test_find_run_command_no_cli_in_module(self):
+        with pytest.raises(ModuleNotFoundError, match="No module named 'fake_project'"):
+            _ = find_run_command("fake_project")
+
+    def test_find_run_command_no_clipy(self, fake_metadata, mocker):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.utils.importlib.import_module", return_value=None
+        )
+        with raises(KedroCliError, match="Cannot load commands from"):
+            _ = find_run_command(fake_metadata.package_name)
+
+    def test_find_run_command_use_plugin_run(
+        self, fake_metadata, entry_points, entry_point, mocker
+    ):
+        entry_point.load.return_value = "plugins"
+        load_entry_points("project")
+
+        mocker.patch(
+            "kedro.framework.cli.utils._find_run_command_in_plugins",
+            return_value="plugin run",
+        )
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            side_effect=ModuleNotFoundError("dummy_package.cli"),
+        )
+        run = find_run_command(fake_metadata.package_name)
+        assert run == "plugin run"
+
+    def test_find_run_command_use_default_run(self, fake_metadata, mocker):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            side_effect=ModuleNotFoundError("dummy_package.cli"),
+        )
+        run = find_run_command(fake_metadata.package_name)
+        assert run.help == "Run the pipeline."
 
 
 class TestEntryPoints:

@@ -389,7 +389,7 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def find_run_command(package_name: str) -> Any:  # pragma: no cover
+def find_run_command(package_name: str) -> Any:
     """Find the run command to be executed.
        This is either the default run command defined in the Kedro framework or a run command defined by
        an installed plugin.
@@ -424,7 +424,7 @@ def find_run_command(package_name: str) -> Any:  # pragma: no cover
     return project_cli.run
 
 
-def _find_run_command_in_plugins(plugins: Any) -> Any:  # pragma: no cover
+def _find_run_command_in_plugins(plugins: Any) -> Any:
     for group in plugins:
         if "run" in group.commands:
             return group.commands["run"]

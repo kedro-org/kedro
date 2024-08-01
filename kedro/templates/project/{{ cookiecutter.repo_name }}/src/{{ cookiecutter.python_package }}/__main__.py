@@ -3,7 +3,7 @@ as `{{ cookiecutter.repo_name }}` and `python -m {{ cookiecutter.python_package 
 """
 from pathlib import Path
 
-from kedro.framework.cli.project import find_run_command
+from kedro.framework.cli.utils import find_run_command
 from kedro.framework.project import configure_project
 
 

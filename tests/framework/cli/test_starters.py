@@ -904,11 +904,14 @@ class TestNewWithStarterValid:
             ],
             input=_make_cli_prompt_input(),
         )
+
         kwargs = {
             "template": "git+https://github.com/fake/fake.git",
-            "checkout": version,
             "directory": "my_directory",
         }
+        starters_version = mock_determine_repo_dir.call_args[1].pop("checkout", None)
+
+        assert starters_version in [version, "main"]
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
 

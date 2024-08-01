@@ -18,6 +18,7 @@
 * Implemented key completion support for accessing datasets in the `DataCatalog`.
 * Implemented dataset pretty printing.
 * Implemented `DataCatalog` pretty printing.
+* Moved to an opt-out model for telemetry, enabling it by default without requiring prior consent.
 
 ## Bug fixes and other changes
 * Updated error message for invalid catalog entries.

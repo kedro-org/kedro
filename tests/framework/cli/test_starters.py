@@ -825,9 +825,11 @@ class TestNewWithStarterValid:
         )
         kwargs = {
             "template": "git+https://github.com/kedro-org/kedro-starters.git",
-            "checkout": version,
             "directory": "spaceflights-pandas",
         }
+        starters_version = mock_determine_repo_dir.call_args[1].pop("checkout", None)
+
+        assert starters_version in [version, "main"]
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
 

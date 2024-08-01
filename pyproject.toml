@@ -81,13 +81,13 @@ test = [
     "types-PyYAML",
     "types-cachetools",
     "types-requests",
-    "types-toml"
+    "types-toml",
 ]
 docs = [
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
     "kedro-datasets",
-    "kedro-sphinx-theme==2024.4.0"
+    "kedro-sphinx-theme==2024.4.0",
 ]
 jupyter = [
     "ipylab>=1.0.0",
@@ -209,7 +209,7 @@ forbidden_modules = [
 ]
 ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
-    "kedro.framework.session.session -> kedro.config"
+    "kedro.framework.session.session -> kedro.config",
 ]
 
 [tool.ruff]

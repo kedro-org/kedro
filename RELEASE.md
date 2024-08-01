@@ -1,17 +1,29 @@
-# Upcoming Release 0.19.7
+# Upcoming Release 0.19.8
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Documentation changes
+
+## Community contributions
+
+# Release 0.19.7
 
 ## Major features and improvements
 * Exposed `load` and `save` publicly for each dataset in the core `kedro` library, and enabled other datasets to do the same. If a dataset doesn't expose `load` or `save` publicly, Kedro will fall back to using `_load` or `_save`, respectively.
 * Kedro commands are now lazily loaded to add performance gains when running Kedro commands.
+* Implemented key completion support for accessing datasets in the `DataCatalog`.
+* Implemented dataset pretty printing.
+* Implemented `DataCatalog` pretty printing.
 
 ## Bug fixes and other changes
 * Updated error message for invalid catalog entries.
 * Updated error message for catalog entries when the dataset class is not found with hints on how to resolve the issue.
 * Fixed a bug in the `DataCatalog` `shallow_copy()` method to ensure it returns the type of the used catalog and doesn't cast it to `DataCatalog`.
-* Implemented key completion support for accessing datasets in the `DataCatalog`.
 * Made [kedro-telemetry](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) a core dependency.
-* Implemented dataset pretty printing.
-* Implemented `DataCatalog` pretty printing.
 * Fixed a bug when `OmegaConfigLoader` is printed, there are few missing arguments.
 * Fixed a bug when where iterating `OmegaConfigLoader`'s `keys` return empty dictionary.
 
@@ -25,6 +37,9 @@
 * Extended documentation with an example of logging customisation at runtime
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [nickolasrm](https://github.com/nickolasrm)
+* [yury-fedotov](https://github.com/yury-fedotov)
 
 # Release 0.19.6
 

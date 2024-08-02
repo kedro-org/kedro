@@ -65,6 +65,15 @@ def _resolve_credentials(
     return {k: _map_value(k, v) for k, v in config.items()}
 
 
+def validate_dataset_config(ds_name: str, ds_config: Any) -> None:
+    if not isinstance(ds_config, dict):
+        raise DatasetError(
+            f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
+            "\nHint: If this catalog entry is intended for variable interpolation, "
+            "make sure that the key is preceded by an underscore."
+        )
+
+
 class AbstractDataCatalog:
     datasets = None
 
@@ -81,7 +90,6 @@ class AbstractDataCatalog:
         self._dataset_patterns, self._default_pattern = self._get_patterns(
             config, credentials
         )
-        # Add datasets to catalog
 
     def __iter__(self):
         yield from self.datasets.values()
@@ -144,12 +152,27 @@ class AbstractDataCatalog:
         return {key: dataset_patterns[key] for key in sorted_keys}
 
     @classmethod
+    def _init_datasets(
+        cls,
+        config: dict[str, dict[str, Any]] | None,
+        credentials: dict[str, dict[str, Any]] | None,
+    ) -> None:
+        for ds_name, ds_config in config.items():
+            if not cls._is_pattern(ds_name):
+                validate_dataset_config(ds_name, ds_config)
+                resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
+                    ds_config, credentials
+                )
+                cls.datasets[ds_name] = AbstractDataset.from_config(
+                    ds_name,
+                    resolved_ds_config,
+                )
+
+    @classmethod
     def _get_patterns(
         cls,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
-        load_versions: dict[str, str] | None = None,
-        save_version: str | None = None,
     ) -> tuple[Patterns, Patterns]:
         dataset_patterns = {}
         config = copy.deepcopy(config) or {}
@@ -157,26 +180,12 @@ class AbstractDataCatalog:
         user_default = {}
 
         for ds_name, ds_config in config.items():
-            if not isinstance(ds_config, dict):
-                raise DatasetError(
-                    f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
-                    "\nHint: If this catalog entry is intended for variable interpolation, "
-                    "make sure that the key is preceded by an underscore."
-                )
-
-            resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
-                ds_config, credentials
-            )
             if cls._is_pattern(ds_name):
-                dataset_patterns[ds_name] = resolved_ds_config
-            else:
-                # TODO: Move to another method - see __init__ - add datasets to catalog
-                cls.datasets[ds_name] = AbstractDataset.from_config(
-                    ds_name,
-                    resolved_ds_config,
-                    load_versions.get(ds_name),
-                    save_version,
+                validate_dataset_config(ds_name, ds_config)
+                resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
+                    ds_config, credentials
                 )
+                dataset_patterns[ds_name] = resolved_ds_config
 
         sorted_patterns = cls._sort_patterns(dataset_patterns)
         if sorted_patterns:
@@ -211,6 +220,9 @@ class AbstractDataCatalog:
 
 
 class KedroDataCatalog(AbstractDataCatalog):
+    _save_version = None
+    _load_versions = None
+
     def __init__(  # noqa: PLR0913
         self,
         datasets: dict[str, AbstractDataset] | None = None,
@@ -224,6 +236,8 @@ class KedroDataCatalog(AbstractDataCatalog):
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
+        self._init_datasets(config, credentials)
+
         missing_keys = [
             key
             for key in load_versions.keys()
@@ -234,6 +248,25 @@ class KedroDataCatalog(AbstractDataCatalog):
                 f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
             )
+
+    @classmethod
+    def _init_datasets(
+        self,
+        config: dict[str, dict[str, Any]] | None,
+        credentials: dict[str, dict[str, Any]] | None,
+    ) -> None:
+        for ds_name, ds_config in config.items():
+            if not self._is_pattern(ds_name):
+                validate_dataset_config(ds_name, ds_config)
+                resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
+                    ds_config, credentials
+                )
+                self.datasets[ds_name] = AbstractDataset.from_config(
+                    ds_name,
+                    resolved_ds_config,
+                    self._load_versions.get(ds_name),
+                    self._save_version,
+                )
 
     def resolve_patterns(
         self,

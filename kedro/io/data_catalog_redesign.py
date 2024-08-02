@@ -48,7 +48,7 @@ def _get_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
 
 
 def _resolve_credentials(
-    config: dict[str, Any], credentials: dict[str, Any]
+    config: dict[str, Any], credentials: dict[str, Any] | None
 ) -> dict[str, Any]:
     """Return the dataset configuration where credentials are resolved using
     credentials dictionary provided.
@@ -93,10 +93,20 @@ class AbstractDataCatalog:
         self.config = config or {}
         self.resolved_ds_configs = {}
         self.datasets = datasets or {}
+        self._dataset_patterns = {}
+        self._default_pattern = {}
 
-        self._dataset_patterns, self._default_pattern = self._get_patterns(
-            config, credentials
-        )
+        # TODO: save resolved configs for two cases
+
+        if config:
+            self._dataset_patterns, self._default_pattern = self._get_patterns(
+                config, credentials
+            )
+            # Init datasets
+
+        # TODO: resolve patterns - old init from constructor
+        if datasets:
+            pass
 
     def __iter__(self):
         yield from self.datasets.values()
@@ -160,7 +170,7 @@ class AbstractDataCatalog:
 
     def _init_datasets(
         self,
-        config: dict[str, dict[str, Any]] | None,
+        config: dict[str, dict[str, Any]],
         credentials: dict[str, dict[str, Any]] | None,
     ) -> None:
         for ds_name, ds_config in config.items():
@@ -231,10 +241,30 @@ class AbstractDataCatalog:
         return config
 
     @abc.abstractmethod
-    def resolve_patterns(self, datasets: str | list[str], **kwargs):
-        # Logic to resolve patterns and extend self.datasets with resolved names
-        # and self.resolved_config with resolved config
-        pass
+    def resolve_patterns(
+        self, datasets: str | list[str], **kwargs
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        if isinstance(datasets, str):
+            datasets = [datasets]
+
+        # resolved_configs = []
+        #
+        # for dataset_name in datasets:
+        #     matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
+        #
+        #     if dataset_name not in self.datasets and matched_pattern:
+        #         # If the dataset is a patterned dataset, materialise it and add it to
+        #         # the catalog
+        #         # TODO: Check how to save all resolved datasets configurations
+        #         config_copy = copy.deepcopy(
+        #             self._dataset_patterns.get(matched_pattern)
+        #             or self._default_pattern.get(matched_pattern)
+        #             or {}
+        #         )
+        #
+        #         dataset_config = self._resolve_config(
+        #             dataset_name, matched_pattern, config_copy
+        #         )
 
     @abc.abstractmethod
     def get_dataset(self, dataset_name: str, suggest: bool = True, **kwargs) -> Any:

@@ -2,12 +2,19 @@ from __future__ import annotations
 
 import abc
 import copy
+import difflib
 import re
 from typing import Any
 
 from parse import parse
 
-from kedro.io.core import AbstractDataset, DatasetError, DatasetNotFoundError, Version
+from kedro.io.core import (
+    AbstractDataset,
+    AbstractVersionedDataset,
+    DatasetError,
+    DatasetNotFoundError,
+    Version,
+)
 
 Patterns = dict[str, dict[str, Any]]
 
@@ -151,19 +158,18 @@ class AbstractDataCatalog:
             )
         return {key: dataset_patterns[key] for key in sorted_keys}
 
-    @classmethod
     def _init_datasets(
-        cls,
+        self,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
     ) -> None:
         for ds_name, ds_config in config.items():
-            if not cls._is_pattern(ds_name):
+            if not self._is_pattern(ds_name):
                 validate_dataset_config(ds_name, ds_config)
                 resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
                     ds_config, credentials
                 )
-                cls.datasets[ds_name] = AbstractDataset.from_config(
+                self.datasets[ds_name] = AbstractDataset.from_config(
                     ds_name,
                     resolved_ds_config,
                 )
@@ -198,20 +204,55 @@ class AbstractDataCatalog:
 
     @classmethod
     def _resolve_config(
-        cls, dataset_name: str, matched_pattern: str, config: dict
+        cls,
+        dataset_name: str,
+        matched_pattern: str,
+        config: dict,
     ) -> dict[str, Any]:
-        # get resolved dataset config
-        pass
+        """Get resolved AbstractDataset from a factory config"""
+        result = parse(matched_pattern, dataset_name)
+        # Resolve the factory config for the dataset
+        if isinstance(config, dict):
+            for key, value in config.items():
+                config[key] = cls._resolve_config(dataset_name, matched_pattern, value)
+        elif isinstance(config, (list, tuple)):
+            config = [
+                cls._resolve_config(dataset_name, matched_pattern, value)
+                for value in config
+            ]
+        elif isinstance(config, str) and "}" in config:
+            try:
+                config = str(config).format_map(result.named)
+            except KeyError as exc:
+                raise DatasetError(
+                    f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the configuration "
+                    f"should be present in the dataset factory pattern."
+                ) from exc
+        return config
 
+    @abc.abstractmethod
     def resolve_patterns(self, datasets: str | list[str], **kwargs):
         # Logic to resolve patterns and extend self.datasets with resolved names
         # and self.resolved_config with resolved config
         pass
 
     @abc.abstractmethod
-    def get_dataset(self, dataset_name: str, **kwargs) -> Any:
+    def get_dataset(self, dataset_name: str, suggest: bool = True, **kwargs) -> Any:
         self.resolve_patterns(dataset_name, **kwargs)
-        # Specific dataset type logic
+
+        if dataset_name not in self.datasets:
+            error_msg = f"Dataset '{dataset_name}' not found in the catalog"
+
+            # Flag to turn on/off fuzzy-matching which can be time consuming and
+            # slow down plugins like `kedro-viz`
+            if suggest:
+                matches = difflib.get_close_matches(dataset_name, self.datasets.keys())
+                if matches:
+                    suggestions = ", ".join(matches)
+                    error_msg += f" - did you mean one of these instead: {suggestions}"
+            raise DatasetNotFoundError(error_msg)
+
+        return self.datasets[dataset_name]
 
     @abc.abstractmethod
     def get_dataset_config(self, dataset_name: str) -> dict:
@@ -249,7 +290,6 @@ class KedroDataCatalog(AbstractDataCatalog):
                 f"are not found in the catalog."
             )
 
-    @classmethod
     def _init_datasets(
         self,
         config: dict[str, dict[str, Any]] | None,
@@ -277,10 +317,16 @@ class KedroDataCatalog(AbstractDataCatalog):
         super().resolve_patterns(datasets)
         # KedroDataCatalog related logic
 
-    def get_dataset(self, dataset_name: str, **kwargs) -> AbstractDataset:
-        super().get_dataset(dataset_name, **kwargs)
-        dataset = self.datasets[dataset_name]
-        # Version related logic
+    def get_dataset(
+        self, dataset_name: str, suggest: bool = True, version: Version | None = None
+    ) -> AbstractDataset:
+        dataset = super().get_dataset(dataset_name, suggest)
+
+        if version and isinstance(dataset, AbstractVersionedDataset):
+            # we only want to return a similar-looking dataset,
+            # not modify the one stored in the current catalog
+            dataset = dataset._copy(_version=version)
+
         return dataset
 
     def get_dataset_config(self, dataset_name: str) -> dict:

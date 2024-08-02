@@ -278,31 +278,53 @@ class TestCliUtils:
         ]
         assert mocked_rmtree.mock_calls == expected_calls
 
-    def test_find_run_command_no_cli_in_module(self):
+    def test_find_run_command_non_existing_project(self):
         with pytest.raises(ModuleNotFoundError, match="No module named 'fake_project'"):
             _ = find_run_command("fake_project")
 
-    def test_find_run_command_no_clipy(self, fake_metadata, mocker):
+    def test_find_run_command_with_clipy(
+        self, fake_metadata, fake_repo_path, fake_project_cli, mocker
+    ):
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
+
+        mock_project_cli = MagicMock(spec=[fake_repo_path / "cli.py"])
+        mock_project_cli.cli = MagicMock(spec=["cli"])
+        mock_project_cli.run = MagicMock(spec=["run"])
         mocker.patch(
-            "kedro.framework.cli.utils.importlib.import_module", return_value=None
+            "kedro.framework.cli.utils.importlib.import_module",
+            return_value=mock_project_cli,
         )
+
+        run = find_run_command(fake_metadata.package_name)
+        assert run is mock_project_cli.run
+
+    def test_find_run_command_no_clipy(self, fake_metadata, fake_repo_path, mocker):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mock_project_cli = MagicMock(spec=[fake_repo_path / "cli.py"])
+        mocker.patch(
+            "kedro.framework.cli.utils.importlib.import_module",
+            return_value=mock_project_cli,
+        )
+
         with raises(KedroCliError, match="Cannot load commands from"):
             _ = find_run_command(fake_metadata.package_name)
 
     def test_find_run_command_use_plugin_run(
-        self, fake_metadata, entry_points, entry_point, mocker
+        self, fake_metadata, fake_repo_path, mocker
     ):
-        entry_point.load.return_value = "plugins"
-        load_entry_points("project")
-
+        mock_plugin = MagicMock(spec=["plugins"])
+        mock_command = MagicMock(name="run_command")
+        mock_plugin.commands = {"run": mock_command}
         mocker.patch(
-            "kedro.framework.cli.utils._find_run_command_in_plugins",
-            return_value="plugin run",
+            "kedro.framework.cli.utils.load_entry_points", return_value=[mock_plugin]
         )
+
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
@@ -311,8 +333,9 @@ class TestCliUtils:
             "kedro.framework.cli.cli.importlib.import_module",
             side_effect=ModuleNotFoundError("dummy_package.cli"),
         )
+
         run = find_run_command(fake_metadata.package_name)
-        assert run == "plugin run"
+        assert run == mock_command
 
     def test_find_run_command_use_default_run(self, fake_metadata, mocker):
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)

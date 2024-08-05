@@ -389,7 +389,7 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def find_run_command(package_name: str) -> Any:
+def find_run_command(package_name: str) -> Callable:
     """Find the run command to be executed.
        This is either the default run command defined in the Kedro framework or a run command defined by
        an installed plugin.

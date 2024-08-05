@@ -5,13 +5,13 @@ Kedro can capture anonymised telemetry.
 This data is collected with the sole purpose of improving Kedro by understanding feature usage.
 Importantly, we do not store personal information about you or sensitive data from your project,
 and this process is never utilized for marketing or promotional purposes.
-Participation in this program is optional, and Kedro will continue working as normal if you opt-out.
+Participation in this program is optional, and it is enabled by default. Kedro will continue working as normal if you opt-out.
 
 The Kedro Project's telemetry has been reviewed and approved under the
 [Telemetry Data Collection and Usage Policy] of LF Projects, LLC.
 
 Kedro collects anonymous telemetry through [the Kedro-Telemetry plugin],
-which will prompt you for your consent the first time.
+which is installed as one of Kedro’s dependencies.
 
 [the Kedro-Telemetry plugin]: https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry
 [Telemetry Data Collection and Usage Policy]: https://lfprojects.org/policies/telemetry-data-policy/
@@ -31,38 +31,33 @@ which will prompt you for your consent the first time.
 For technical information on how the telemetry collection works, you can browse
 [the source code of `kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry).
 
-## How do I consent to the use of Kedro-Telemetry?
-
-Kedro-Telemetry is a Python plugin. To install it:
-
-```console
-pip install kedro-telemetry
-```
-
-```{note}
-If you are using an official [Kedro project template](/starters/starters) then `kedro-telemetry` is included in the [project-level `requirements.txt`](/kedro_project_setup/dependencies) of the starter. `kedro-telemetry` is activated after you have a created a new project with a [Kedro project template](/starters/starters) and have run `kedro install` from the terminal.
-```
-
-When you next run the Kedro CLI you will be asked for consent to share usage analytics data for the purposes explained in the privacy notice, and a `.telemetry` YAML file will be created in the project root directory. The variable `consent` will be set according to your choice in the file, e.g. if you consent:
-
-```yaml
-consent: true
-```
-
-```{note}
-The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
-```
-
 ## How do I withdraw consent?
 
-To withdraw consent, you can change the `consent` variable to `false` in `.telemetry` YAML by editing the file in the following way:
+To withdraw consent, you have a few options:
 
-```yaml
-consent: false
-```
+1. **Set Environment Variables**:
+   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of any of these environment variables will disable telemetry for all Kedro projects in that environment and will override any consent specified in the `.telemetry` file of the specific project.
 
-Or you can uninstall the plugin:
+2. **CLI Option When Creating a New Project**:
+   When creating a new project, you can use the command:
 
-```console
-pip uninstall kedro-telemetry
-```
+   ```console
+   kedro new --telemetry=no
+   ```
+   This will create a new project with a `.telemetry` file in its root folder, containing `consent: false`. This file will be used when executing Kedro commands within that project folder. Note that telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
+
+   >*Note:* The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
+
+3. **Modify or Create the `.telemetry` file manually**:
+   If the `.telemetry` file exists in the root folder of your Kedro project, set the `consent` variable to `false`. If the file does not exist, create it with the following content:
+     ```yaml
+     consent: false
+     ```
+
+4. **Uninstall the plugin**:
+   Remove the `kedro-telemetry` plugin:
+
+   ```console
+   pip uninstall kedro-telemetry
+   ```
+   >*Note:* This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).

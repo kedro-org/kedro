@@ -486,7 +486,8 @@ def check_kedro_version(context):
     """Behave step to check validity of the kedro version."""
     CLI_flat_list = context.version_str.split()
     CLI_dictionary = {
-        CLI_flat_list[i]: CLI_flat_list[i + 1] for i in range(0, len(CLI_flat_list), 2)
+        CLI_flat_list[i]: CLI_flat_list[i + 1]
+        for i in range(0, len(CLI_flat_list) - 1, 2)
     }
     version_no = CLI_dictionary.get("version")
     assert version_no == kedro.__version__

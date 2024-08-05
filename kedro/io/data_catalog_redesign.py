@@ -81,7 +81,33 @@ def validate_dataset_config(ds_name: str, ds_config: Any) -> None:
         )
 
 
-class AbstractDataCatalog:
+def _resolve_config(
+    dataset_name: str,
+    matched_pattern: str,
+    config: dict,
+) -> dict[str, Any]:
+    """Get resolved AbstractDataset from a factory config"""
+    result = parse(matched_pattern, dataset_name)
+    # Resolve the factory config for the dataset
+    if isinstance(config, dict):
+        for key, value in config.items():
+            config[key] = _resolve_config(dataset_name, matched_pattern, value)
+    elif isinstance(config, (list, tuple)):
+        config = [
+            _resolve_config(dataset_name, matched_pattern, value) for value in config
+        ]
+    elif isinstance(config, str) and "}" in config:
+        try:
+            config = str(config).format_map(result.named)
+        except KeyError as exc:
+            raise DatasetError(
+                f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the configuration "
+                f"should be present in the dataset factory pattern."
+            ) from exc
+    return config
+
+
+class AbstractDataCatalog(abc.ABC):
     datasets = None
 
     def __init__(
@@ -90,26 +116,36 @@ class AbstractDataCatalog:
         config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
     ) -> None:
-        self.config = config or {}
+        self.config = {}
         self.resolved_ds_configs = {}
         self.datasets = datasets or {}
         self._dataset_patterns = {}
         self._default_pattern = {}
 
-        # TODO: save resolved configs for two cases
+        if datasets:
+            for ds_name in datasets:
+                self.resolved_ds_configs[ds_name] = {}
 
         if config:
             self._dataset_patterns, self._default_pattern = self._get_patterns(
                 config, credentials
             )
-            # Init datasets
-
-        # TODO: resolve patterns - old init from constructor
-        if datasets:
-            pass
+            self._update_ds_configs(config)
+            self._init_datasets(config, credentials)
 
     def __iter__(self):
         yield from self.datasets.values()
+
+    def _update_ds_configs(self, config: dict[str, dict[str, Any]]) -> None:
+        for ds_name, ds_config in config.items():
+            if ds_name in self._dataset_patterns:
+                self.resolved_ds_configs[ds_name] = _resolve_config(
+                    ds_name, ds_name, self._dataset_patterns[ds_name]
+                )
+            else:
+                self.resolved_ds_configs[ds_name] = _resolve_config(
+                    ds_name, ds_name, ds_config
+                )
 
     @staticmethod
     def _is_pattern(pattern: str) -> bool:
@@ -168,9 +204,16 @@ class AbstractDataCatalog:
             )
         return {key: dataset_patterns[key] for key in sorted_keys}
 
+    @abc.abstractmethod
+    def _init_dataset(self, ds_name: str, config: dict[str, Any]) -> None:
+        raise NotImplementedError(
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataCatalog and "
+            f"it must implement the '_init_dataset' method"
+        )
+
     def _init_datasets(
         self,
-        config: dict[str, dict[str, Any]],
+        config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
     ) -> None:
         for ds_name, ds_config in config.items():
@@ -179,10 +222,7 @@ class AbstractDataCatalog:
                 resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
                     ds_config, credentials
                 )
-                self.datasets[ds_name] = AbstractDataset.from_config(
-                    ds_name,
-                    resolved_ds_config,
-                )
+                self._init_dataset(ds_name, resolved_ds_config)
 
     @classmethod
     def _get_patterns(
@@ -212,82 +252,74 @@ class AbstractDataCatalog:
 
         return sorted_patterns, user_default
 
-    @classmethod
-    def _resolve_config(
-        cls,
-        dataset_name: str,
-        matched_pattern: str,
-        config: dict,
-    ) -> dict[str, Any]:
-        """Get resolved AbstractDataset from a factory config"""
-        result = parse(matched_pattern, dataset_name)
-        # Resolve the factory config for the dataset
-        if isinstance(config, dict):
-            for key, value in config.items():
-                config[key] = cls._resolve_config(dataset_name, matched_pattern, value)
-        elif isinstance(config, (list, tuple)):
-            config = [
-                cls._resolve_config(dataset_name, matched_pattern, value)
-                for value in config
-            ]
-        elif isinstance(config, str) and "}" in config:
-            try:
-                config = str(config).format_map(result.named)
-            except KeyError as exc:
-                raise DatasetError(
-                    f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the configuration "
-                    f"should be present in the dataset factory pattern."
-                ) from exc
-        return config
-
-    @abc.abstractmethod
     def resolve_patterns(
-        self, datasets: str | list[str], **kwargs
+        self, datasets: str | list[str], suggest: bool = True
     ) -> dict[str, Any] | list[dict[str, Any]]:
         if isinstance(datasets, str):
-            datasets = [datasets]
+            datasets_lst = [datasets]
+        else:
+            datasets_lst = datasets
 
-        # resolved_configs = []
-        #
-        # for dataset_name in datasets:
-        #     matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
-        #
-        #     if dataset_name not in self.datasets and matched_pattern:
-        #         # If the dataset is a patterned dataset, materialise it and add it to
-        #         # the catalog
-        #         # TODO: Check how to save all resolved datasets configurations
-        #         config_copy = copy.deepcopy(
-        #             self._dataset_patterns.get(matched_pattern)
-        #             or self._default_pattern.get(matched_pattern)
-        #             or {}
-        #         )
-        #
-        #         dataset_config = self._resolve_config(
-        #             dataset_name, matched_pattern, config_copy
-        #         )
+        resolved_configs = []
 
-    @abc.abstractmethod
-    def get_dataset(self, dataset_name: str, suggest: bool = True, **kwargs) -> Any:
-        self.resolve_patterns(dataset_name, **kwargs)
+        for ds_name in datasets_lst:
+            matched_pattern = self._match_pattern(self._dataset_patterns, ds_name)
+            if matched_pattern:
+                if ds_name not in self.datasets:
+                    # If the dataset is a patterned dataset, materialise it and add it to
+                    # the catalog
+                    config_copy = copy.deepcopy(
+                        self._dataset_patterns.get(matched_pattern)
+                        or self._default_pattern.get(matched_pattern)
+                        or {}
+                    )
+                    ds_config = _resolve_config(ds_name, matched_pattern, config_copy)
 
-        if dataset_name not in self.datasets:
-            error_msg = f"Dataset '{dataset_name}' not found in the catalog"
+                    if (
+                        self._specificity(matched_pattern) == 0
+                        and matched_pattern in self._default_pattern
+                    ):
+                        self._logger.warning(
+                            "Config from the dataset factory pattern '%s' in the catalog will be used to "
+                            "override the default dataset creation for '%s'",
+                            matched_pattern,
+                            ds_name,
+                        )
+                    resolved_configs.append(ds_config)
+                else:
+                    resolved_configs.append(self.resolved_ds_configs.get(ds_name, {}))
+            else:
+                resolved_configs.append(None)
+
+        if isinstance(datasets, str):
+            return resolved_configs[0]
+        else:
+            return resolved_configs
+
+    def get_dataset(self, ds_name: str, suggest: bool = True) -> Any:
+        ds_config = self.resolve_patterns(ds_name)
+
+        if ds_config is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
 
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
-                matches = difflib.get_close_matches(dataset_name, self.datasets.keys())
+                matches = difflib.get_close_matches(ds_name, self.datasets.keys())
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
             raise DatasetNotFoundError(error_msg)
+        elif ds_name not in self.datasets:
+            self._init_dataset(ds_name, ds_config)
+            self.resolved_ds_configs[ds_name] = ds_config
 
-        return self.datasets[dataset_name]
+        return self.datasets[ds_name]
 
-    @abc.abstractmethod
-    def get_dataset_config(self, dataset_name: str) -> dict:
-        # Logic to get dataset config from self.config and self._dataset_patterns, self._default_patterns
-        pass
+    def get_dataset_config(self, ds_name: str) -> dict | None:
+        if ds_name in self.resolved_ds_configs:
+            return self.resolved_ds_configs[ds_name]
+        return None
 
 
 class KedroDataCatalog(AbstractDataCatalog):
@@ -307,8 +339,6 @@ class KedroDataCatalog(AbstractDataCatalog):
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
-        self._init_datasets(config, credentials)
-
         missing_keys = [
             key
             for key in load_versions.keys()
@@ -320,32 +350,13 @@ class KedroDataCatalog(AbstractDataCatalog):
                 f"are not found in the catalog."
             )
 
-    def _init_datasets(
-        self,
-        config: dict[str, dict[str, Any]] | None,
-        credentials: dict[str, dict[str, Any]] | None,
-    ) -> None:
-        for ds_name, ds_config in config.items():
-            if not self._is_pattern(ds_name):
-                validate_dataset_config(ds_name, ds_config)
-                resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
-                    ds_config, credentials
-                )
-                self.datasets[ds_name] = AbstractDataset.from_config(
-                    ds_name,
-                    resolved_ds_config,
-                    self._load_versions.get(ds_name),
-                    self._save_version,
-                )
-
-    def resolve_patterns(
-        self,
-        datasets: str | list[str],
-        version: Version | None = None,
-        suggest: bool = True,
-    ) -> None:
-        super().resolve_patterns(datasets)
-        # KedroDataCatalog related logic
+    def _init_dataset(self, ds_name: str, config: dict[str, Any]):
+        self.datasets[ds_name] = AbstractDataset.from_config(
+            ds_name,
+            config,
+            self._load_versions.get(ds_name),
+            self._save_version,
+        )
 
     def get_dataset(
         self, dataset_name: str, suggest: bool = True, version: Version | None = None
@@ -358,7 +369,3 @@ class KedroDataCatalog(AbstractDataCatalog):
             dataset = dataset._copy(_version=version)
 
         return dataset
-
-    def get_dataset_config(self, dataset_name: str) -> dict:
-        # Logic to get dataset config from self.config and self._dataset_patterns, self._default_patterns
-        pass

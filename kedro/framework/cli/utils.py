@@ -17,7 +17,7 @@ from collections import defaultdict
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import IO, Any, Iterable, Sequence
+from typing import IO, Any, Callable, Iterable, Sequence
 
 import click
 import importlib_metadata
@@ -413,15 +413,15 @@ def find_run_command(package_name: str) -> Callable:
         run = _find_run_command_in_plugins(plugins) if plugins else None
         if run:
             # use run command from installed plugin if it exists
-            return run
+            return run  # type: ignore[no-any-return]
         # use run command from `kedro.framework.cli.project`
         from kedro.framework.cli.project import run
 
-        return run
+        return run  # type: ignore[no-any-return]
     # fail badly if cli.py exists, but has no `cli` in it
     if not hasattr(project_cli, "cli"):
         raise KedroCliError(f"Cannot load commands from {package_name}.cli")
-    return project_cli.run
+    return project_cli.run  # type: ignore[no-any-return]
 
 
 def _find_run_command_in_plugins(plugins: Any) -> Any:

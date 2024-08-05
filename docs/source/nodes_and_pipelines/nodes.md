@@ -89,7 +89,7 @@ A syntax describes function inputs and outputs. This syntax allows different Pyt
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output must be provided).
 
 ## `*args` node functions
-It is common to have functions that take an arbitrary number of inputs. For example, a function that combines multiple dataframes. You can use the *args argument in the node function, while simply declaring the names of the datasets in the node's inputs.
+It is common to have functions that take an arbitrary number of inputs, like a function that combines multiple dataframes. You can use the `*args` argument in the node function, while simply declaring the names of the datasets in the node's inputs.
 
 ## `**kwargs`-only node functions
 

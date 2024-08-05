@@ -130,13 +130,19 @@ class AbstractDataCatalog(abc.ABC):
             self._dataset_patterns, self._default_pattern = self._get_patterns(
                 config, credentials
             )
-            self._update_ds_configs(config)
+            self._update_ds_configs(config, credentials)
             self._init_datasets(config, credentials)
 
     def __iter__(self):
         yield from self.datasets.values()
 
-    def _update_ds_configs(self, config: dict[str, dict[str, Any]]) -> None:
+    def _update_ds_configs(
+        self,
+        config: dict[str, dict[str, Any]],
+        credentials: dict[str, dict[str, Any]] | None,
+    ) -> None:
+        config = copy.deepcopy(config) or {}
+        credentials = copy.deepcopy(credentials) or {}
         for ds_name, ds_config in config.items():
             if ds_name in self._dataset_patterns:
                 self.resolved_ds_configs[ds_name] = _resolve_config(
@@ -144,7 +150,7 @@ class AbstractDataCatalog(abc.ABC):
                 )
             else:
                 self.resolved_ds_configs[ds_name] = _resolve_config(
-                    ds_name, ds_name, ds_config
+                    ds_name, ds_name, _resolve_credentials(ds_config, credentials)
                 )
 
     @staticmethod
@@ -253,7 +259,7 @@ class AbstractDataCatalog(abc.ABC):
         return sorted_patterns, user_default
 
     def resolve_patterns(
-        self, datasets: str | list[str], suggest: bool = True
+        self, datasets: str | list[str]
     ) -> dict[str, Any] | list[dict[str, Any]]:
         if isinstance(datasets, str):
             datasets_lst = [datasets]
@@ -264,30 +270,29 @@ class AbstractDataCatalog(abc.ABC):
 
         for ds_name in datasets_lst:
             matched_pattern = self._match_pattern(self._dataset_patterns, ds_name)
-            if matched_pattern:
-                if ds_name not in self.datasets:
-                    # If the dataset is a patterned dataset, materialise it and add it to
-                    # the catalog
-                    config_copy = copy.deepcopy(
-                        self._dataset_patterns.get(matched_pattern)
-                        or self._default_pattern.get(matched_pattern)
-                        or {}
-                    )
-                    ds_config = _resolve_config(ds_name, matched_pattern, config_copy)
+            if matched_pattern and ds_name not in self.datasets:
+                # If the dataset is a patterned dataset, materialise it and add it to
+                # the catalog
+                config_copy = copy.deepcopy(
+                    self._dataset_patterns.get(matched_pattern)
+                    or self._default_pattern.get(matched_pattern)
+                    or {}
+                )
+                ds_config = _resolve_config(ds_name, matched_pattern, config_copy)
 
-                    if (
-                        self._specificity(matched_pattern) == 0
-                        and matched_pattern in self._default_pattern
-                    ):
-                        self._logger.warning(
-                            "Config from the dataset factory pattern '%s' in the catalog will be used to "
-                            "override the default dataset creation for '%s'",
-                            matched_pattern,
-                            ds_name,
-                        )
-                    resolved_configs.append(ds_config)
-                else:
-                    resolved_configs.append(self.resolved_ds_configs.get(ds_name, {}))
+                if (
+                    self._specificity(matched_pattern) == 0
+                    and matched_pattern in self._default_pattern
+                ):
+                    self._logger.warning(
+                        "Config from the dataset factory pattern '%s' in the catalog will be used to "
+                        "override the default dataset creation for '%s'",
+                        matched_pattern,
+                        ds_name,
+                    )
+                resolved_configs.append(ds_config)
+            elif ds_name in self.datasets:
+                resolved_configs.append(self.resolved_ds_configs.get(ds_name, {}))
             else:
                 resolved_configs.append(None)
 
@@ -334,14 +339,17 @@ class KedroDataCatalog(AbstractDataCatalog):
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> None:
-        super().__init__(datasets, config, credentials)
-
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
+        super().__init__(datasets, config, credentials)
+
+        # print(self.datasets)
+        # print(self.resolved_ds_configs)
+
         missing_keys = [
             key
-            for key in load_versions.keys()
+            for key in self._load_versions.keys()
             if not (key in config or self._match_pattern(self._dataset_patterns, key))
         ]
         if missing_keys:

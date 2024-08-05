@@ -71,7 +71,7 @@ class CachedDataset(AbstractDataset):
                 "The argument type of 'dataset' should be either a dict/YAML "
                 "representation of the dataset, or the actual dataset object."
             )
-        self._cache = MemoryDataset(copy_mode=copy_mode)
+        self._cache = MemoryDataset(copy_mode=copy_mode)  # type: ignore[abstract]
         self.metadata = metadata
 
     def _release(self) -> None:
@@ -93,10 +93,14 @@ class CachedDataset(AbstractDataset):
         return AbstractDataset.from_config("_cached", config)
 
     def _describe(self) -> dict[str, Any]:
-        return {
-            "dataset": self._dataset._describe(),
-            "cache": self._cache._describe(),
+        return {"dataset": self._dataset._describe(), "cache": self._cache._describe()}
+
+    def __repr__(self) -> str:
+        object_description = {
+            "dataset": self._dataset._pretty_repr(self._dataset._describe()),
+            "cache": self._dataset._pretty_repr(self._cache._describe()),
         }
+        return self._pretty_repr(object_description)
 
     def _load(self) -> Any:
         data = self._cache.load() if self._cache.exists() else self._dataset.load()

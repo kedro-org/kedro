@@ -371,8 +371,8 @@ def _prepare_imports(node_func: Callable) -> str:
             inside_bracket = False
             # Parse any line start with from or import statement
 
-            for line in file.readlines():
-                line = line.strip()
+            for _ in file.readlines():
+                line = _.strip()
                 if not inside_bracket:
                     # The common case
                     if line.startswith("from") or line.startswith("import"):

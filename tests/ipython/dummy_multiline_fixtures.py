@@ -1,4 +1,11 @@
+# ruff: noqa
 # multi-lines import
+from logging import (
+    INFO,
+    DEBUG,
+    WARN,
+    ERROR,
+)
 
 
 def dummy_multiline_import_function(dummy_input, my_input):

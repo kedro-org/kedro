@@ -205,8 +205,8 @@ class Node:
 
     def __repr__(self) -> str:  # pragma: no cover
         return (
-            f"Node({self._func_name}, {repr(self._inputs)}, {repr(self._outputs)}, "
-            f"{repr(self._name)})"
+            f"Node({self._func_name}, {self._inputs!r}, {self._outputs!r}, "
+            f"{self._name!r})"
         )
 
     def __call__(self, **kwargs: Any) -> dict[str, Any]:
@@ -396,7 +396,7 @@ class Node:
     def _run_with_no_inputs(self, inputs: dict[str, Any]) -> Any:
         if inputs:
             raise ValueError(
-                f"Node {str(self)} expected no inputs, "
+                f"Node {self!s} expected no inputs, "
                 f"but got the following {len(inputs)} input(s) instead: "
                 f"{sorted(inputs.keys())}."
             )
@@ -406,7 +406,7 @@ class Node:
     def _run_with_one_input(self, inputs: dict[str, Any], node_input: str) -> Any:
         if len(inputs) != 1 or node_input not in inputs:
             raise ValueError(
-                f"Node {str(self)} expected one input named '{node_input}', "
+                f"Node {self!s} expected one input named '{node_input}', "
                 f"but got the following {len(inputs)} input(s) instead: "
                 f"{sorted(inputs.keys())}."
             )
@@ -417,7 +417,7 @@ class Node:
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs) != set(inputs.keys()):
             raise ValueError(
-                f"Node {str(self)} expected {len(node_inputs)} input(s) {node_inputs}, "
+                f"Node {self!s} expected {len(node_inputs)} input(s) {node_inputs}, "
                 f"but got the following {len(inputs)} input(s) instead: "
                 f"{sorted(inputs.keys())}."
             )
@@ -430,7 +430,7 @@ class Node:
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs.values()) != set(inputs.keys()):
             raise ValueError(
-                f"Node {str(self)} expected {len(set(node_inputs.values()))} input(s) "
+                f"Node {self!s} expected {len(set(node_inputs.values()))} input(s) "
                 f"{sorted(set(node_inputs.values()))}, "
                 f"but got the following {len(inputs)} input(s) instead: "
                 f"{sorted(inputs.keys())}."
@@ -457,7 +457,7 @@ class Node:
                 )
             if set(keys) != set(result.keys()):
                 raise ValueError(
-                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"Failed to save outputs of node {self!s}.\n"
                     f"The node's output keys {set(result.keys())} "
                     f"do not match with the returned output's keys {set(keys)}."
                 )
@@ -477,14 +477,14 @@ class Node:
 
             if not isinstance(result, (list, tuple)):
                 raise ValueError(
-                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"Failed to save outputs of node {self!s}.\n"
                     f"The node definition contains a list of "
                     f"outputs {self._outputs}, whereas the node function "
                     f"returned a '{type(result).__name__}'."
                 )
             if len(result) != len(self._outputs):
                 raise ValueError(
-                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"Failed to save outputs of node {self!s}.\n"
                     f"The node function returned {len(result)} output(s), "
                     f"whereas the node definition contains {len(self._outputs)} "
                     f"output(s)."

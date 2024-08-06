@@ -64,7 +64,7 @@ class TestMicropkgPackageCommand:
         assert result.exit_code == 0
         result = CliRunner().invoke(
             fake_project_cli,
-            ["micropkg", "package", f"pipelines.{PIPELINE_NAME}"] + options,
+            ["micropkg", "package", f"pipelines.{PIPELINE_NAME}", *options],
             obj=fake_metadata,
         )
 

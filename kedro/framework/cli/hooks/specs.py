@@ -4,9 +4,12 @@ For more information about these specifications, please visit
 """
 from __future__ import annotations
 
-from kedro.framework.startup import ProjectMetadata
+from typing import TYPE_CHECKING
 
 from .markers import cli_hook_spec
+
+if TYPE_CHECKING:
+    from kedro.framework.startup import ProjectMetadata
 
 
 class CLICommandSpecs:

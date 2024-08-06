@@ -104,7 +104,7 @@ def _get_project_metadata(project_path: Path) -> ProjectMetadata:
     try:
         return ProjectMetadata(**metadata_dict)
     except TypeError as exc:
-        expected_keys = mandatory_keys + ["source_dir", "tools", "example_pipeline"]
+        expected_keys = [*mandatory_keys, "source_dir", "tools", "example_pipeline"]
         raise RuntimeError(
             f"Found unexpected keys in '{_PYPROJECT}'. Make sure "
             f"it only contains the following keys: {expected_keys}."
@@ -142,7 +142,7 @@ def _add_src_to_path(source_dir: Path, project_path: Path) -> None:
     python_path = os.getenv("PYTHONPATH", "")
     if str(source_dir) not in python_path:
         sep = os.pathsep if python_path else ""
-        os.environ["PYTHONPATH"] = f"{str(source_dir)}{sep}{python_path}"
+        os.environ["PYTHONPATH"] = f"{source_dir!s}{sep}{python_path}"
 
 
 def bootstrap_project(project_path: str | Path) -> ProjectMetadata:

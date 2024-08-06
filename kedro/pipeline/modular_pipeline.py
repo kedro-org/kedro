@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import copy
 import difflib
-from typing import AbstractSet, Iterable
+from typing import TYPE_CHECKING, AbstractSet, Iterable
 
-from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import Pipeline
 
 from .transcoding import TRANSCODING_SEPARATOR, _strip_transcoding, _transcode_split
+
+if TYPE_CHECKING:
+    from kedro.pipeline.node import Node
 
 
 class ModularPipelineError(Exception):

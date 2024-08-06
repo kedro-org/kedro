@@ -123,14 +123,14 @@ There are several ways to upload data to DBFS: you can use the [DBFS API](https:
 - **Upload your project's data and config**: at the command line in your local environment, use the following Databricks CLI commands to upload your project's locally stored data and configuration to DBFS:
 
 ```bash
-databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris-databricks/data
-databricks fs cp --recursive <project_root>/conf/ dbfs:/FileStore/iris-databricks/conf
+databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris_databricks/data
+databricks fs cp --recursive <project_root>/conf/ dbfs:/FileStore/iris_databricks/conf
 ```
 
 The `--recursive` flag ensures that the entire folder and its contents are uploaded. You can list the contents of the destination folder in DBFS using the following command:
 
 ```bash
-databricks fs ls dbfs:/FileStore/iris-databricks/data
+databricks fs ls dbfs:/FileStore/iris_databricks/data
 ```
 
 You should see the contents of the project's `data/` directory printed to your terminal:
@@ -202,7 +202,7 @@ Configure the job with the following settings:
 - In the `Parameters` field, enter the following runtime option:
 
 ```bash
-["--conf-source", "/dbfs/FileStore/iris-databricks/conf"]
+["--conf-source", "/dbfs/FileStore/iris_databricks/conf"]
 ```
 
 The final configuration for your job should look the same as the following:

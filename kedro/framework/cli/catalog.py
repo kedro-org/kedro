@@ -35,6 +35,80 @@ def catalog() -> None:
     """Commands for working with catalog."""
 
 
+@catalog.command("list_new")
+@env_option
+@click.option(
+    "--pipeline",
+    "-p",
+    type=str,
+    default="",
+    help="Name of the modular pipeline to run. If not set, "
+    "the project pipeline is run by default.",
+    callback=split_string,
+)
+@click.pass_obj
+def list_datasets_new(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
+    """Show datasets per type."""
+    title = "Datasets in '{}' pipeline"
+    not_mentioned = "Datasets not mentioned in pipeline"
+    mentioned = "Datasets mentioned in pipeline"
+    factories = "Datasets generated from factories"
+
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    try:
+        data_catalog = context.catalog_new
+        datasets_meta = data_catalog.datasets
+        catalog_ds = set(data_catalog.list())
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro Catalog.\nError: {exc}"
+        ) from exc
+
+    target_pipelines = pipeline or pipelines.keys()
+
+    result = {}
+    for pipe in target_pipelines:
+        pl_obj = pipelines.get(pipe)
+        if pl_obj:
+            pipeline_ds = pl_obj.datasets()
+        else:
+            existing_pls = ", ".join(sorted(pipelines.keys()))
+            raise KedroCliError(
+                f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
+            )
+
+        unused_ds = catalog_ds - pipeline_ds
+        default_ds = pipeline_ds - catalog_ds
+        used_ds = catalog_ds - unused_ds
+
+        # resolve any factory datasets in the pipeline
+        factory_ds_by_type = defaultdict(list)
+        resolved_configs = data_catalog.resolve_patterns(default_ds)
+        for ds_name, ds_config in zip(default_ds, resolved_configs):
+            if data_catalog.match_pattern(ds_name):
+                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
+                    ds_name
+                )
+
+        default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
+
+        unused_by_type = _map_type_to_datasets_new(unused_ds, datasets_meta)
+        used_by_type = _map_type_to_datasets_new(used_ds, datasets_meta)
+
+        if default_ds:
+            used_by_type["DefaultDataset"].extend(default_ds)
+
+        data = (
+            (mentioned, dict(used_by_type)),
+            (factories, dict(factory_ds_by_type)),
+            (not_mentioned, dict(unused_by_type)),
+        )
+        result[title.format(pipe)] = {key: value for key, value in data if value}
+    secho(yaml.dump(result))
+
+
 @catalog.command("list")
 @env_option
 @click.option(
@@ -120,6 +194,22 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 
 def _map_type_to_datasets(
     datasets: set[str], datasets_meta: dict[str, AbstractDataset]
+) -> dict:
+    """Build dictionary with a dataset type as a key and list of
+    datasets of the specific type as a value.
+    """
+    mapping = defaultdict(list)  # type: ignore[var-annotated]
+    for dataset in datasets:
+        is_param = dataset.startswith("params:") or dataset == "parameters"
+        if not is_param:
+            ds_type = datasets_meta[dataset].__class__.__name__
+            if dataset not in mapping[ds_type]:
+                mapping[ds_type].append(dataset)
+    return mapping
+
+
+def _map_type_to_datasets_new(
+    datasets: set[str], datasets_meta: dict[str, type]
 ) -> dict:
     """Build dictionary with a dataset type as a key and list of
     datasets of the specific type as a value.

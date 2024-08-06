@@ -22,7 +22,7 @@ We assume you know these concepts:
 
 We don't assume knowledge of software engineering in Python, so the course contains information about reusability principles, how to create a Python package, and how to use version control.
 
-Please note that we do expect users to have Git installed, as it is a prerequisite for the kedro-new flow, which is used when starting a new project.
+Please note that we do expect users to have Git installed, as it is a prerequisite for the `kedro new` flow, which is used when creating a new project.
 
 ## What you'll learn
 

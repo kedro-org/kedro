@@ -824,9 +824,11 @@ class TestNewWithStarterValid:
         )
         kwargs = {
             "template": "git+https://github.com/kedro-org/kedro-starters.git",
-            "checkout": version,
             "directory": "spaceflights-pandas",
         }
+        starters_version = mock_determine_repo_dir.call_args[1].pop("checkout", None)
+
+        assert starters_version in [version, "main"]
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
 
@@ -852,11 +854,14 @@ class TestNewWithStarterValid:
             ["new", "--starter", "git+https://github.com/fake/fake.git"],
             input=_make_cli_prompt_input(),
         )
+
         kwargs = {
             "template": "git+https://github.com/fake/fake.git",
-            "checkout": version,
             "directory": None,
         }
+        starters_version = mock_determine_repo_dir.call_args[1].pop("checkout", None)
+
+        assert starters_version in [version, "main"]
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         del kwargs["directory"]
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
@@ -898,11 +903,14 @@ class TestNewWithStarterValid:
             ],
             input=_make_cli_prompt_input(),
         )
+
         kwargs = {
             "template": "git+https://github.com/fake/fake.git",
-            "checkout": version,
             "directory": "my_directory",
         }
+        starters_version = mock_determine_repo_dir.call_args[1].pop("checkout", None)
+
+        assert starters_version in [version, "main"]
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
 

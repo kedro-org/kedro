@@ -111,15 +111,13 @@ def _resolve_config(
 
 
 class AbstractDataCatalog(abc.ABC):
-    datasets = None
-
     def __init__(
         self,
         datasets: dict[str, Any] | None = None,
         config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
     ) -> None:
-        self.config = {}
+        self.config = config or {}
         self.resolved_ds_configs = {}
         self.datasets = datasets or {}
         self._dataset_patterns = {}
@@ -360,9 +358,6 @@ class AbstractDataCatalog(abc.ABC):
 
 
 class KedroDataCatalog(AbstractDataCatalog):
-    _save_version = None
-    _load_versions = None
-
     def __init__(  # noqa: PLR0913
         self,
         datasets: dict[str, AbstractDataset] | None = None,
@@ -376,18 +371,13 @@ class KedroDataCatalog(AbstractDataCatalog):
 
         super().__init__(datasets, config, credentials)
 
-        # print(self.datasets)
-        # print("-")
-        # print(self.resolved_ds_configs)
-        # print("-")
-        # print(self._dataset_patterns)
-        # print("-")
-        # print(self._default_pattern)
+        self._validate_missing_keys()
 
+    def _validate_missing_keys(self) -> None:
         missing_keys = [
             key
             for key in self._load_versions.keys()
-            if not (key in config or self.match_pattern(key))
+            if not (key in self.config or self.match_pattern(key))
         ]
         if missing_keys:
             raise DatasetNotFoundError(

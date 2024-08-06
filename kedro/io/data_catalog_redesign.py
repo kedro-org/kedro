@@ -158,12 +158,11 @@ class AbstractDataCatalog(abc.ABC):
         """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
         return "{" in pattern
 
-    @staticmethod
-    def _match_pattern(dataset_patterns: Patterns, dataset_name: str) -> str | None:
+    def match_pattern(self, dataset_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary."""
         matches = (
             pattern
-            for pattern in dataset_patterns.keys()
+            for pattern in self._dataset_patterns.keys()
             if parse(pattern, dataset_name)
         )
         return next(matches, None)
@@ -269,7 +268,7 @@ class AbstractDataCatalog(abc.ABC):
         resolved_configs = []
 
         for ds_name in datasets_lst:
-            matched_pattern = self._match_pattern(self._dataset_patterns, ds_name)
+            matched_pattern = self.match_pattern(ds_name)
             if matched_pattern and ds_name not in self.datasets:
                 # If the dataset is a patterned dataset, materialise it and add it to
                 # the catalog
@@ -345,12 +344,17 @@ class KedroDataCatalog(AbstractDataCatalog):
         super().__init__(datasets, config, credentials)
 
         # print(self.datasets)
+        # print("-")
         # print(self.resolved_ds_configs)
+        # print("-")
+        # print(self._dataset_patterns)
+        # print("-")
+        # print(self._default_pattern)
 
         missing_keys = [
             key
             for key in self._load_versions.keys()
-            if not (key in config or self._match_pattern(self._dataset_patterns, key))
+            if not (key in config or self.match_pattern(key))
         ]
         if missing_keys:
             raise DatasetNotFoundError(

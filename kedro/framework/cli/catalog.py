@@ -17,6 +17,7 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from kedro.io import AbstractDataset
 from kedro.io.data_catalog import DataCatalog
+from kedro.io.data_catalog_redesign import KedroDataCatalog
 
 
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
@@ -225,6 +226,63 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
         click.echo(yaml.dump(list(catalog_factories.keys())))
     else:
         click.echo("There are no dataset factories in the catalog.")
+
+
+@catalog.command("resolve_new")
+@env_option
+@click.pass_obj
+def resolve_patterns_new(metadata: ProjectMetadata, env: str) -> None:
+    """Resolve catalog factories against pipeline datasets. Note that this command is runner
+    agnostic and thus won't take into account any default dataset creation defined in the runner."""
+
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    catalog_config = context.config_loader["catalog"]
+    credentials_config = context.config_loader.get("credentials", None)
+
+    data_catalog = KedroDataCatalog(
+        config=catalog_config, credentials=credentials_config
+    )
+
+    target_pipelines = pipelines.keys()
+    datasets = set()
+    for pipe in target_pipelines:
+        pl_obj = pipelines.get(pipe)
+        if pl_obj:
+            datasets.update(pl_obj.datasets())
+
+    datasets_lst = [
+        ds_name
+        for ds_name in datasets
+        if not (ds_name.startswith("params:") or ds_name == "parameters")
+        and (
+            ds_name in data_catalog.resolved_ds_configs
+            or data_catalog.match_pattern(ds_name)
+        )
+    ]
+
+    # Add datasets from catalog that are not used in target pipelines
+    for ds_name in data_catalog.resolved_ds_configs:
+        if not (ds_name in datasets or data_catalog.match_pattern(ds_name)):
+            datasets_lst.append(ds_name)
+
+    resolved_configs = data_catalog.resolve_patterns(datasets_lst)
+
+    # print("-" * 50)
+    # print(datasets_lst)
+    # print("-" * 50)
+    # print(resolved_configs)
+    # print("-" * 50)
+
+    secho(
+        yaml.dump(
+            {
+                ds_name: ds_config
+                for ds_name, ds_config in zip(datasets_lst, resolved_configs)
+            }
+        )
+    )
 
 
 @catalog.command("resolve")

@@ -10,13 +10,14 @@ from kedro.ipython import (
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
-from . import dummy_function_fixtures  # noqa It is needed for the inspect module
+from . import dummy_function_fixtures  # noqa: F401
 from .dummy_function_fixtures import (
     dummy_function,
     dummy_function_with_loop,
     dummy_function_with_variable_length,
     dummy_nested_function,
 )
+from .dummy_multiline_fixtures import dummy_multiline_import_function  # noqa: F401
 
 # Constants
 PACKAGE_NAME = "fake_package_name"

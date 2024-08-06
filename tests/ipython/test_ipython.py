@@ -356,6 +356,8 @@ import logging.config  # noqa Dummy import"""
         func_imports = """from logging import (
 INFO,
 DEBUG,
+WARN,
+ERROR,
 )"""
 
         result = _prepare_imports(dummy_multiline_import_function)

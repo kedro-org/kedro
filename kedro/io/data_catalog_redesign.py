@@ -335,6 +335,29 @@ class AbstractDataCatalog(abc.ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
+    def list(self, regex_search: str | None = None) -> list[str]:
+        """
+        List of all dataset names registered in the catalog.
+        This can be filtered by providing an optional regular expression
+        which will only return matching keys.
+        """
+
+        if regex_search is None:
+            return list(self.datasets.keys())
+
+        if not regex_search.strip():
+            self._logger.warning("The empty string will not match any data sets")
+            return []
+
+        try:
+            pattern = re.compile(regex_search, flags=re.IGNORECASE)
+
+        except re.error as exc:
+            raise SyntaxError(
+                f"Invalid regular expression provided: '{regex_search}'"
+            ) from exc
+        return [ds_name for ds_name in self.datasets if pattern.search(ds_name)]
+
 
 class KedroDataCatalog(AbstractDataCatalog):
     _save_version = None

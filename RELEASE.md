@@ -4,6 +4,7 @@
 
 ## Bug fixes and other changes
 * Moved `_find_run_command()` and `_find_run_command_in_plugins()` from `__main__.py` in the project template to the framework itself.
+* Fixed a bug where `%load_node` breaks with multi-lines import statements.
 
 ## Breaking changes to the API
 

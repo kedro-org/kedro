@@ -12,16 +12,14 @@ import shutil
 import stat
 import sys
 import tempfile
-from collections import OrderedDict
 from itertools import groupby
 from pathlib import Path
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 import click
 import requests
 import yaml
 from attrs import define, field
-from importlib_metadata import EntryPoints
 from packaging.version import parse
 
 import kedro
@@ -34,6 +32,11 @@ from kedro.framework.cli.utils import (
     _safe_load_entry_point,
     command_with_verbosity,
 )
+
+if TYPE_CHECKING:
+    from collections import OrderedDict
+
+    from importlib_metadata import EntryPoints
 
 TOOLS_ARG_HELP = """
 Select which tools you'd like to include. By default, none are included.\n
@@ -226,7 +229,7 @@ def _parse_yes_no_to_bool(value: str) -> Any:
 
 
 def _validate_selected_tools(selected_tools: str | None) -> None:
-    valid_tools = list(TOOLS_SHORTNAME_TO_NUMBER) + ["all", "none"]
+    valid_tools = [*list(TOOLS_SHORTNAME_TO_NUMBER), "all", "none"]
 
     if selected_tools is not None:
         tools = re.sub(r"\s", "", selected_tools).split(",")
@@ -973,7 +976,7 @@ def _create_project(
 class _Prompt:
     """Represent a single CLI prompt for `kedro new`"""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         try:
             self.title = kwargs["title"]
         except KeyError as exc:
@@ -988,7 +991,7 @@ class _Prompt:
     def __str__(self) -> str:
         title = self.title.strip().title()
         title = click.style(title + "\n" + "=" * len(title), bold=True)
-        prompt_lines = [title] + [self.text]
+        prompt_lines = [title, self.text]
         prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
         return f"\n{prompt_text}\n"
 
@@ -1002,7 +1005,6 @@ class _Prompt:
             sys.exit(1)
 
 
-# noqa: unused-argument
 def _remove_readonly(
     func: Callable, path: Path, excinfo: tuple
 ) -> None:  # pragma: no cover

@@ -15,6 +15,7 @@ from pluggy import PluginManager
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
+from kedro.io.data_catalog_redesign import AbstractDataCatalog, KedroDataCatalog
 from kedro.pipeline.transcoding import _transcode_split
 
 
@@ -137,6 +138,12 @@ def _validate_transcoded_datasets(catalog: DataCatalog) -> None:
         _transcode_split(dataset_name)
 
 
+def _validate_transcoded_datasets_new(catalog: AbstractDataCatalog) -> None:
+    """Validates transcoded datasets are correctly named"""
+    for dataset_name in catalog.datasets.keys():
+        _transcode_split(dataset_name)
+
+
 def _expand_full_path(project_path: str | Path) -> Path:
     return Path(project_path).expanduser().resolve()
 
@@ -187,6 +194,10 @@ class KedroContext:
         return self._get_catalog()
 
     @property
+    def catalog_new(self) -> AbstractDataCatalog:
+        return self._get_catalog_new()
+
+    @property
     def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
 
@@ -205,6 +216,42 @@ class KedroContext:
             params = OmegaConf.merge(params, self._extra_params)
 
         return OmegaConf.to_container(params) if OmegaConf.is_config(params) else params  # type: ignore[no-any-return]
+
+    def _get_catalog_new(
+        self,
+        save_version: str | None = None,
+        load_versions: dict[str, str] | None = None,
+    ) -> AbstractDataCatalog:
+        conf_catalog = self.config_loader["catalog"]
+        conf_catalog = _convert_paths_to_absolute_posix(
+            project_path=self.project_path, conf_dictionary=conf_catalog
+        )
+        conf_creds = self._get_config_credentials()
+
+        if isinstance(settings.DATA_CATALOG_CLASS_NEW, KedroDataCatalog):
+            catalog = settings.DATA_CATALOG_CLASS_NEW(
+                config=conf_catalog,
+                credentials=conf_creds,
+                load_versions=load_versions,
+                save_version=save_version,
+            )
+        else:
+            catalog = settings.DATA_CATALOG_CLASS_NEW(
+                config=conf_catalog,
+                credentials=conf_creds,
+            )
+        feed_dict = self._get_feed_dict()
+        catalog.add_from_dict(feed_dict)
+        _validate_transcoded_datasets_new(catalog)
+        self._hook_manager.hook.after_catalog_created_new(
+            catalog=catalog,
+            conf_catalog=conf_catalog,
+            conf_creds=conf_creds,
+            feed_dict=feed_dict,
+            save_version=save_version,
+            load_versions=load_versions,
+        )
+        return catalog
 
     def _get_catalog(
         self,

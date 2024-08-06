@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Any
 
 from kedro.framework.context import KedroContext
-from kedro.io import DataCatalog
+from kedro.io import AbstractDataCatalog, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -21,6 +21,32 @@ class DataCatalogSpecs:
     def after_catalog_created(  # noqa: PLR0913
         self,
         catalog: DataCatalog,
+        conf_catalog: dict[str, Any],
+        conf_creds: dict[str, Any],
+        feed_dict: dict[str, Any],
+        save_version: str,
+        load_versions: dict[str, str],
+    ) -> None:
+        """Hooks to be invoked after a data catalog is created.
+        It receives the ``catalog`` as well as
+        all the arguments for ``KedroContext._create_catalog``.
+
+        Args:
+            catalog: The catalog that was created.
+            conf_catalog: The config from which the catalog was created.
+            conf_creds: The credentials conf from which the catalog was created.
+            feed_dict: The feed_dict that was added to the catalog after creation.
+            save_version: The save_version used in ``save`` operations
+                for all datasets in the catalog.
+            load_versions: The load_versions used in ``load`` operations
+                for each dataset in the catalog.
+        """
+        pass
+
+    @hook_spec
+    def after_catalog_created_new(  # noqa: PLR0913
+        self,
+        catalog: AbstractDataCatalog,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
         feed_dict: dict[str, Any],

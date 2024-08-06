@@ -1,6 +1,6 @@
 # Create a new Kedro project
 
-There are several ways to create a new Kedro project. This page explains the flow to create a basic project using `kedro new` to output a project directory containing the basic files and subdirectories that make up a Kedro project.
+There are several ways to create a new Kedro project. This page explains the flow to create a basic project using `kedro new` to output a project directory containing the basic files and subdirectories that make up a Kedro project. Please note that users are expected to have [`Git`](https://git-scm.com/) installed, as it is a requirement for the `kedro new` flow.
 
 You can also create a new Kedro project with a starter that adds code for a common project use case. [Starters are explained separately](../starters/starters.md) and the [spaceflights tutorial](../tutorial/tutorial_template.md) illustrates their use.
 

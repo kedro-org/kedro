@@ -2,8 +2,10 @@ from collections import namedtuple
 from itertools import cycle
 from os import rename
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import click
+import pytest
 from click.testing import CliRunner
 from omegaconf import OmegaConf
 from pytest import fixture, mark, raises, warns
@@ -22,6 +24,7 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
+    find_run_command,
     forward_command,
     get_pkg_version,
 )
@@ -275,6 +278,77 @@ class TestCliUtils:
         ]
         assert mocked_rmtree.mock_calls == expected_calls
 
+    def test_find_run_command_non_existing_project(self):
+        with pytest.raises(ModuleNotFoundError, match="No module named 'fake_project'"):
+            _ = find_run_command("fake_project")
+
+    def test_find_run_command_with_clipy(
+        self, fake_metadata, fake_repo_path, fake_project_cli, mocker
+    ):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+
+        mock_project_cli = MagicMock(spec=[fake_repo_path / "cli.py"])
+        mock_project_cli.cli = MagicMock(spec=["cli"])
+        mock_project_cli.run = MagicMock(spec=["run"])
+        mocker.patch(
+            "kedro.framework.cli.utils.importlib.import_module",
+            return_value=mock_project_cli,
+        )
+
+        run = find_run_command(fake_metadata.package_name)
+        assert run is mock_project_cli.run
+
+    def test_find_run_command_no_clipy(self, fake_metadata, fake_repo_path, mocker):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mock_project_cli = MagicMock(spec=[fake_repo_path / "cli.py"])
+        mocker.patch(
+            "kedro.framework.cli.utils.importlib.import_module",
+            return_value=mock_project_cli,
+        )
+
+        with raises(KedroCliError, match="Cannot load commands from"):
+            _ = find_run_command(fake_metadata.package_name)
+
+    def test_find_run_command_use_plugin_run(
+        self, fake_metadata, fake_repo_path, mocker
+    ):
+        mock_plugin = MagicMock(spec=["plugins"])
+        mock_command = MagicMock(name="run_command")
+        mock_plugin.commands = {"run": mock_command}
+        mocker.patch(
+            "kedro.framework.cli.utils.load_entry_points", return_value=[mock_plugin]
+        )
+
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            side_effect=ModuleNotFoundError("dummy_package.cli"),
+        )
+
+        run = find_run_command(fake_metadata.package_name)
+        assert run == mock_command
+
+    def test_find_run_command_use_default_run(self, fake_metadata, mocker):
+        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch(
+            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            side_effect=ModuleNotFoundError("dummy_package.cli"),
+        )
+        run = find_run_command(fake_metadata.package_name)
+        assert run.help == "Run the pipeline."
+
 
 class TestEntryPoints:
     def test_project_groups(self, entry_points, entry_point):
@@ -431,6 +505,37 @@ class TestKedroCLI:
         assert result.exit_code == 0
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" in result.output
+
+    @patch("sys.exit")
+    def test_main_hook_exception_handling(self, fake_metadata):
+        kedro_cli = KedroCLI(fake_metadata.project_path)
+        kedro_cli._cli_hook_manager.hook.after_command_run = MagicMock()
+
+        with patch.object(
+            click.CommandCollection, "main", side_effect=Exception("Test Exception")
+        ):
+            result = CliRunner().invoke(kedro_cli, [])
+
+        kedro_cli._cli_hook_manager.hook.after_command_run.assert_called_once_with(
+            project_metadata=kedro_cli._metadata, command_args=[], exit_code=1
+        )
+
+        assert "An error has occurred: Test Exception" in result.output
+
+    @patch("sys.exit")
+    def test_main_hook_finally_block(self, fake_metadata):
+        kedro_cli = KedroCLI(fake_metadata.project_path)
+        kedro_cli._cli_hook_manager.hook.after_command_run = MagicMock()
+
+        # No exception is raised, so it should go to the finally block and call the hook
+        with patch.object(click.CommandCollection, "main"):
+            result = CliRunner().invoke(kedro_cli, [])
+
+        kedro_cli._cli_hook_manager.hook.after_command_run.assert_called_once_with(
+            project_metadata=kedro_cli._metadata, command_args=[], exit_code=0
+        )
+
+        assert "An error has occurred:" not in result.output
 
 
 @mark.usefixtures("chdir_to_dummy_project")

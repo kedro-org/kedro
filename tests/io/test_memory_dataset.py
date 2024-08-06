@@ -141,14 +141,38 @@ class TestMemoryDataset:
     @pytest.mark.parametrize(
         "input_data,expected",
         [
-            ("dummy_dataframe", "MemoryDataset(data=<DataFrame>)"),
-            ("dummy_numpy_array", "MemoryDataset(data=<ndarray>)"),
+            (
+                "dummy_dataframe",
+                "MemoryDataset(data=<DataFrame>)",
+            ),
+            (
+                "dummy_numpy_array",
+                "MemoryDataset(data=<ndarray>)",
+            ),
         ],
         indirect=["input_data"],
     )
     def test_str_representation(self, memory_dataset, input_data, expected):
         """Test string representation of the dataset"""
         assert expected in str(memory_dataset)
+
+    @pytest.mark.parametrize(
+        "input_data,expected",
+        [
+            (
+                "dummy_dataframe",
+                "kedro.io.memory_dataset.MemoryDataset(data='<DataFrame>')",
+            ),
+            (
+                "dummy_numpy_array",
+                "kedro.io.memory_dataset.MemoryDataset(data='<ndarray>')",
+            ),
+        ],
+        indirect=["input_data"],
+    )
+    def test_repr_representation(self, memory_dataset, input_data, expected):
+        """Test string representation of the dataset"""
+        assert expected in repr(memory_dataset)
 
     def test_exists(self, new_data):
         """Test `exists` method invocation"""

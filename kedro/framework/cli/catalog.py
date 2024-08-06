@@ -224,6 +224,65 @@ def _map_type_to_datasets_new(
     return mapping
 
 
+@catalog.command("create_new")
+@env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
+@click.option(
+    "--pipeline",
+    "-p",
+    "pipeline_name",
+    type=str,
+    required=True,
+    help="Name of a pipeline.",
+)
+@click.pass_obj
+def create_catalog_new(metadata: ProjectMetadata, pipeline_name: str, env: str) -> None:
+    """Create Data Catalog YAML configuration with missing datasets.
+
+    Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
+    file for each dataset in a registered pipeline if it is missing from
+    the ``DataCatalog``.
+
+    The catalog configuration will be saved to
+    `<conf_source>/<env>/catalog_<pipeline_name>.yml` file.
+    """
+    env = env or "base"
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    pipeline = pipelines.get(pipeline_name)
+    if not pipeline:
+        existing_pipelines = ", ".join(sorted(pipelines.keys()))
+        raise KedroCliError(
+            f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
+        )
+    pipeline_datasets = {
+        ds_name
+        for ds_name in pipeline.datasets()
+        if not ds_name.startswith("params:") and ds_name != "parameters"
+    }
+
+    data_catalog = context.catalog_new
+    catalog_datasets = {
+        ds_name
+        for ds_name in data_catalog.datasets.keys()
+        if not ds_name.startswith("params:") and ds_name != "parameters"
+    }
+
+    # Datasets that are missing in Data Catalog
+    missing_ds = sorted(pipeline_datasets - catalog_datasets)
+    if missing_ds:
+        catalog_path = (
+            context.project_path
+            / settings.CONF_SOURCE
+            / env
+            / f"catalog_{pipeline_name}.yml"
+        )
+        _add_missing_datasets_to_catalog(missing_ds, catalog_path)
+        click.echo(f"Data Catalog YAML configuration was created: {catalog_path}")
+    else:
+        click.echo("All datasets are already configured.")
+
+
 @catalog.command("create")
 @env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
 @click.option(

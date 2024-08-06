@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 import copy
 import difflib
+import logging
 import re
 from typing import Any
 
@@ -11,10 +12,12 @@ from parse import parse
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
+    DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
     Version,
 )
+from kedro.io.memory_dataset import MemoryDataset
 
 Patterns = dict[str, dict[str, Any]]
 
@@ -112,7 +115,7 @@ class AbstractDataCatalog(abc.ABC):
 
     def __init__(
         self,
-        datasets: dict[str, AbstractDataset] | None = None,
+        datasets: dict[str, Any] | None = None,
         config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
     ) -> None:
@@ -169,15 +172,7 @@ class AbstractDataCatalog(abc.ABC):
 
     @staticmethod
     def _specificity(pattern: str) -> int:
-        """Helper function to check the length of exactly matched characters not inside brackets.
-
-        Example:
-        ::
-
-            >>> specificity("{namespace}.companies") = 10
-            >>> specificity("{namespace}.{dataset}") = 1
-            >>> specificity("france.companies") = 16
-        """
+        """Helper function to check the length of exactly matched characters not inside brackets."""
         # Remove all the placeholders from the pattern and count the number of remaining chars
         result = re.sub(r"\{.*?\}", "", pattern)
         return len(result)
@@ -320,10 +315,25 @@ class AbstractDataCatalog(abc.ABC):
 
         return self.datasets[ds_name]
 
-    def get_dataset_config(self, ds_name: str) -> dict | None:
-        if ds_name in self.resolved_ds_configs:
-            return self.resolved_ds_configs[ds_name]
-        return None
+    @abc.abstractmethod
+    def add_from_dict(self, datasets: dict[str, Any], **kwargs) -> None:
+        raise NotImplementedError(
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataCatalog and "
+            f"it must implement the '_init_dataset' method"
+        )
+
+    def add(self, dataset_name: str, dataset: Any, **kwargs) -> None:
+        """Adds a new ``AbstractDataset`` object to the ``DataCatalog``."""
+        if dataset_name in self.datasets:
+            raise DatasetAlreadyExistsError(
+                f"Dataset '{dataset_name}' has already been registered"
+            )
+        self.datasets[dataset_name] = dataset
+        self.resolved_ds_configs[dataset_name] = {}
+
+    @property
+    def _logger(self) -> logging.Logger:
+        return logging.getLogger(__name__)
 
 
 class KedroDataCatalog(AbstractDataCatalog):
@@ -381,3 +391,26 @@ class KedroDataCatalog(AbstractDataCatalog):
             dataset = dataset._copy(_version=version)
 
         return dataset
+
+    def add(
+        self, dataset_name: str, dataset: AbstractDataset, replace: bool = False
+    ) -> None:
+        """Adds a new ``AbstractDataset`` object to the ``DataCatalog``."""
+        if dataset_name in self.datasets:
+            if replace:
+                self._logger.warning("Replacing dataset '%s'", dataset_name)
+            else:
+                raise DatasetAlreadyExistsError(
+                    f"Dataset '{dataset_name}' has already been registered"
+                )
+        self.datasets[dataset_name] = dataset
+        self.resolved_ds_configs[dataset_name] = {}
+
+    def add_from_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
+        for ds_name in datasets:
+            if isinstance(datasets[ds_name], AbstractDataset):
+                dataset = datasets[ds_name]
+            else:
+                dataset = MemoryDataset(data=datasets[ds_name])  # type: ignore[abstract]
+
+            self.add(ds_name, dataset, replace)

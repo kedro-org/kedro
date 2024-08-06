@@ -4,6 +4,8 @@ Kedro starters are a useful way to create a new project that contains code to ru
 
 A team may find it useful to build Kedro starters to create reusable projects that bootstrap a common base and can be extended.
 
+Please note that users are expected to have [`Git`](https://git-scm.com/) installed for the `kedro new` flow, which is used in this section.
+
 ## Install the `cookiecutter` package
 A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/) template that contains the boilerplate code for a Kedro project. First install `cookiecutter` as follows:
 

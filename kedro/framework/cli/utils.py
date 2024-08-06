@@ -64,7 +64,7 @@ def python_call(
     module: str, arguments: Iterable[str], **kwargs: Any
 ) -> None:  # pragma: no cover
     """Run a subprocess command that invokes a Python module."""
-    call([sys.executable, "-m", module] + list(arguments), **kwargs)
+    call([sys.executable, "-m", module, *list(arguments)], **kwargs)
 
 
 def find_stylesheets() -> Iterable[str]:  # pragma: no cover

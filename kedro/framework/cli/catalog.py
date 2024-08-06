@@ -255,7 +255,9 @@ def resolve_patterns_new(metadata: ProjectMetadata, env: str) -> None:
     datasets_lst = [
         ds_name
         for ds_name in datasets
+        # Excluding parameters
         if not (ds_name.startswith("params:") or ds_name == "parameters")
+        # Excluding free outputs
         and (
             ds_name in data_catalog.resolved_ds_configs
             or data_catalog.match_pattern(ds_name)
@@ -268,12 +270,6 @@ def resolve_patterns_new(metadata: ProjectMetadata, env: str) -> None:
             datasets_lst.append(ds_name)
 
     resolved_configs = data_catalog.resolve_patterns(datasets_lst)
-
-    # print("-" * 50)
-    # print(datasets_lst)
-    # print("-" * 50)
-    # print(resolved_configs)
-    # print("-" * 50)
 
     secho(
         yaml.dump(

@@ -56,7 +56,7 @@ class TestMaxWorkers:
         catalog,
         user_specified_number,
         expected_number,
-    ):  # noqa: PLR0913
+    ):
         """
         We initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 threads.

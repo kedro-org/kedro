@@ -71,7 +71,7 @@ class CachedDataset(AbstractDataset):
                 "The argument type of 'dataset' should be either a dict/YAML "
                 "representation of the dataset, or the actual dataset object."
             )
-        self._cache = MemoryDataset(copy_mode=copy_mode)
+        self._cache = MemoryDataset(copy_mode=copy_mode)  # type: ignore[abstract]
         self.metadata = metadata
 
     def _release(self) -> None:

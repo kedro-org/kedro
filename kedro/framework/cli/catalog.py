@@ -264,7 +264,7 @@ def create_catalog_new(metadata: ProjectMetadata, pipeline_name: str, env: str) 
     data_catalog = context.catalog_new
     catalog_datasets = {
         ds_name
-        for ds_name in data_catalog.datasets.keys()
+        for ds_name in data_catalog.list()
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 

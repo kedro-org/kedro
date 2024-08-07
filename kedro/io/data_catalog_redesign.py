@@ -140,8 +140,7 @@ class AbstractDataCatalog(abc.ABC):
 
     @datasets.setter
     def datasets(self, value: Any):
-        msg = "Operation not allowed! "
-        # TODO: specify message based on the case
+        msg = "Operation not allowed! Please change datasets through configuration."
         raise AttributeError(msg)
 
     @property
@@ -150,12 +149,17 @@ class AbstractDataCatalog(abc.ABC):
 
     @resolved_ds_configs.setter
     def resolved_ds_configs(self, value: Any):
-        msg = "Operation not allowed! "
-        # TODO: specify message based on the case
+        msg = "Operation not allowed! Please change datasets through configuration."
         raise AttributeError(msg)
 
     def __iter__(self):
         yield from self._datasets.values()
+
+    def __getitem__(self, ds_name: str) -> Any:
+        return self.get_dataset(ds_name)
+
+    def _ipython_key_completions_(self) -> list[str]:
+        return list(self._datasets.keys())
 
     def _update_ds_configs(
         self,

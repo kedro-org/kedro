@@ -117,15 +117,15 @@ class AbstractDataCatalog(abc.ABC):
         config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
     ) -> None:
-        self.config = config or {}
-        self.resolved_ds_configs = {}
-        self.datasets = datasets or {}
+        self._config = config or {}
+        self._resolved_ds_configs = {}
+        self._datasets = datasets or {}
         self._dataset_patterns = {}
         self._default_pattern = {}
 
         if datasets:
             for ds_name in datasets:
-                self.resolved_ds_configs[ds_name] = {}
+                self._resolved_ds_configs[ds_name] = {}
 
         if config:
             self._dataset_patterns, self._default_pattern = self._get_patterns(
@@ -134,8 +134,28 @@ class AbstractDataCatalog(abc.ABC):
             self._update_ds_configs(config, credentials)
             self._init_datasets(config, credentials)
 
+    @property
+    def datasets(self):
+        return copy.deepcopy(self._datasets)
+
+    @datasets.setter
+    def datasets(self, value: Any):
+        msg = "Operation not allowed! "
+        # TODO: specify message based on the case
+        raise AttributeError(msg)
+
+    @property
+    def resolved_ds_configs(self):
+        return copy.deepcopy(self._resolved_ds_configs)
+
+    @resolved_ds_configs.setter
+    def resolved_ds_configs(self, value: Any):
+        msg = "Operation not allowed! "
+        # TODO: specify message based on the case
+        raise AttributeError(msg)
+
     def __iter__(self):
-        yield from self.datasets.values()
+        yield from self._datasets.values()
 
     def _update_ds_configs(
         self,
@@ -146,11 +166,11 @@ class AbstractDataCatalog(abc.ABC):
         credentials = copy.deepcopy(credentials) or {}
         for ds_name, ds_config in config.items():
             if ds_name in self._dataset_patterns:
-                self.resolved_ds_configs[ds_name] = _resolve_config(
+                self._resolved_ds_configs[ds_name] = _resolve_config(
                     ds_name, ds_name, self._dataset_patterns[ds_name]
                 )
             else:
-                self.resolved_ds_configs[ds_name] = _resolve_config(
+                self._resolved_ds_configs[ds_name] = _resolve_config(
                     ds_name, ds_name, _resolve_credentials(ds_config, credentials)
                 )
 
@@ -262,7 +282,7 @@ class AbstractDataCatalog(abc.ABC):
 
         for ds_name in datasets_lst:
             matched_pattern = self.match_pattern(ds_name)
-            if matched_pattern and ds_name not in self.datasets:
+            if matched_pattern and ds_name not in self._datasets:
                 # If the dataset is a patterned dataset, materialise it and add it to
                 # the catalog
                 config_copy = copy.deepcopy(
@@ -283,8 +303,8 @@ class AbstractDataCatalog(abc.ABC):
                         ds_name,
                     )
                 resolved_configs.append(ds_config)
-            elif ds_name in self.datasets:
-                resolved_configs.append(self.resolved_ds_configs.get(ds_name, {}))
+            elif ds_name in self._datasets:
+                resolved_configs.append(self._resolved_ds_configs.get(ds_name, {}))
             else:
                 resolved_configs.append(None)
 
@@ -302,16 +322,16 @@ class AbstractDataCatalog(abc.ABC):
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
-                matches = difflib.get_close_matches(ds_name, self.datasets.keys())
+                matches = difflib.get_close_matches(ds_name, self._datasets.keys())
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
             raise DatasetNotFoundError(error_msg)
-        elif ds_name not in self.datasets:
+        elif ds_name not in self._datasets:
             self._init_dataset(ds_name, ds_config)
-            self.resolved_ds_configs[ds_name] = ds_config
+            self._resolved_ds_configs[ds_name] = ds_config
 
-        return self.datasets[ds_name]
+        return self._datasets[ds_name]
 
     @abc.abstractmethod
     def add_from_dict(self, datasets: dict[str, Any], **kwargs) -> None:
@@ -322,12 +342,12 @@ class AbstractDataCatalog(abc.ABC):
 
     def add(self, dataset_name: str, dataset: Any, **kwargs) -> None:
         """Adds a new ``AbstractDataset`` object to the ``DataCatalog``."""
-        if dataset_name in self.datasets:
+        if dataset_name in self._datasets:
             raise DatasetAlreadyExistsError(
                 f"Dataset '{dataset_name}' has already been registered"
             )
-        self.datasets[dataset_name] = dataset
-        self.resolved_ds_configs[dataset_name] = {}
+        self._datasets[dataset_name] = dataset
+        self._resolved_ds_configs[dataset_name] = {}
 
     @property
     def _logger(self) -> logging.Logger:
@@ -341,7 +361,7 @@ class AbstractDataCatalog(abc.ABC):
         """
 
         if regex_search is None:
-            return list(self.datasets.keys())
+            return list(self._datasets.keys())
 
         if not regex_search.strip():
             self._logger.warning("The empty string will not match any data sets")
@@ -354,7 +374,7 @@ class AbstractDataCatalog(abc.ABC):
             raise SyntaxError(
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
-        return [ds_name for ds_name in self.datasets if pattern.search(ds_name)]
+        return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
 
 
 class KedroDataCatalog(AbstractDataCatalog):
@@ -377,7 +397,7 @@ class KedroDataCatalog(AbstractDataCatalog):
         missing_keys = [
             key
             for key in self._load_versions.keys()
-            if not (key in self.config or self.match_pattern(key))
+            if not (key in self._config or self.match_pattern(key))
         ]
         if missing_keys:
             raise DatasetNotFoundError(
@@ -386,7 +406,7 @@ class KedroDataCatalog(AbstractDataCatalog):
             )
 
     def _init_dataset(self, ds_name: str, config: dict[str, Any]):
-        self.datasets[ds_name] = AbstractDataset.from_config(
+        self._datasets[ds_name] = AbstractDataset.from_config(
             ds_name,
             config,
             self._load_versions.get(ds_name),
@@ -409,15 +429,15 @@ class KedroDataCatalog(AbstractDataCatalog):
         self, dataset_name: str, dataset: AbstractDataset, replace: bool = False
     ) -> None:
         """Adds a new ``AbstractDataset`` object to the ``DataCatalog``."""
-        if dataset_name in self.datasets:
+        if dataset_name in self._datasets:
             if replace:
                 self._logger.warning("Replacing dataset '%s'", dataset_name)
             else:
                 raise DatasetAlreadyExistsError(
                     f"Dataset '{dataset_name}' has already been registered"
                 )
-        self.datasets[dataset_name] = dataset
-        self.resolved_ds_configs[dataset_name] = {}
+        self._datasets[dataset_name] = dataset
+        self._resolved_ds_configs[dataset_name] = {}
 
     def add_from_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
         for ds_name in datasets:

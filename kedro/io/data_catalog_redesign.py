@@ -166,6 +166,13 @@ class AbstractDataCatalog(abc.ABC):
     def __getitem__(self, ds_name: str) -> Any:
         return self.get_dataset(ds_name)
 
+    def __contains__(self, dataset_name: str) -> bool:
+        """Check if an item is in the catalog as a materialised dataset or pattern"""
+        matched_pattern = self.match_pattern(dataset_name)
+        if dataset_name in self._datasets or matched_pattern:
+            return True
+        return False
+
     def _ipython_key_completions_(self) -> list[str]:
         return list(self._datasets.keys())
 
@@ -249,9 +256,7 @@ class AbstractDataCatalog(abc.ABC):
         for ds_name, ds_config in config.items():
             if not self._is_pattern(ds_name):
                 validate_dataset_config(ds_name, ds_config)
-                resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
-                    ds_config, credentials
-                )
+                resolved_ds_config = _resolve_credentials(ds_config, credentials)
                 self._init_dataset(ds_name, resolved_ds_config)
 
     @classmethod
@@ -268,9 +273,7 @@ class AbstractDataCatalog(abc.ABC):
         for ds_name, ds_config in config.items():
             if cls._is_pattern(ds_name):
                 validate_dataset_config(ds_name, ds_config)
-                resolved_ds_config = _resolve_credentials(  # noqa: PLW2901
-                    ds_config, credentials
-                )
+                resolved_ds_config = _resolve_credentials(ds_config, credentials)
                 dataset_patterns[ds_name] = resolved_ds_config
 
         sorted_patterns = cls._sort_patterns(dataset_patterns)
@@ -418,6 +421,9 @@ class KedroDataCatalog(AbstractDataCatalog):
             )
 
     def _init_dataset(self, ds_name: str, config: dict[str, Any]):
+        # Add LazyAbstractDataset to store the configuration but not to init actual dataset
+        # Initialise actual dataset when load or save
+        # Add is_ds_init property
         self._datasets[ds_name] = AbstractDataset.from_config(
             ds_name,
             config,

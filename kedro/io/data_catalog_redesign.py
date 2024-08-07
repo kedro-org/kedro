@@ -152,6 +152,14 @@ class AbstractDataCatalog(abc.ABC):
         msg = "Operation not allowed! Please change datasets through configuration."
         raise AttributeError(msg)
 
+    @property
+    def dataset_patterns(self):
+        return self._dataset_patterns
+
+    @property
+    def default_pattern(self):
+        return self._default_pattern
+
     def __iter__(self):
         yield from self._datasets.values()
 

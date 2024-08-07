@@ -369,8 +369,8 @@ def rank_catalog_factories_new(metadata: ProjectMetadata, env: str) -> None:
     data_catalog = context.catalog_new
 
     catalog_factories = {
-        **data_catalog._dataset_patterns,
-        **data_catalog._default_pattern,
+        **data_catalog.dataset_patterns,
+        **data_catalog.default_pattern,
     }
     if catalog_factories:
         click.echo(yaml.dump(list(catalog_factories.keys())))

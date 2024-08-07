@@ -207,7 +207,7 @@ class KedroCLI(CommandCollection):
                 )
                 click.echo(message)
                 click.echo(hint)
-                sys.exit(exc.code)
+            sys.exit(exc.code)
         except Exception as error:
             logger.error(f"An error has occurred: {error}")
             self._cli_hook_manager.hook.after_command_run(

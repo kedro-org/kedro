@@ -4,8 +4,7 @@ from __future__ import annotations
 import copy
 from collections import defaultdict
 from itertools import chain
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import click
 import yaml
@@ -14,10 +13,14 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
-from kedro.framework.startup import ProjectMetadata
-from kedro.io import AbstractDataset
 from kedro.io.data_catalog import DataCatalog
 from kedro.io.data_catalog_redesign import KedroDataCatalog
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from kedro.framework.startup import ProjectMetadata
+    from kedro.io import AbstractDataset
 
 
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:

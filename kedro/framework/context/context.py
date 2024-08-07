@@ -13,7 +13,11 @@ from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import AbstractDataCatalog, DataCatalog, KedroDataCatalog
+from kedro.io import (
+    AbstractDataCatalog,
+    DataCatalog,
+    KedroDataCatalog,
+)
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:

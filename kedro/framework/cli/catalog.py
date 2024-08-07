@@ -267,7 +267,7 @@ def create_catalog_new(metadata: ProjectMetadata, pipeline_name: str, env: str) 
     data_catalog = context.catalog_new
     catalog_datasets = {
         ds_name
-        for ds_name in data_catalog.datasets.keys()
+        for ds_name in data_catalog.list()
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 
@@ -372,8 +372,8 @@ def rank_catalog_factories_new(metadata: ProjectMetadata, env: str) -> None:
     data_catalog = context.catalog_new
 
     catalog_factories = {
-        **data_catalog._dataset_patterns,
-        **data_catalog._default_pattern,
+        **data_catalog.dataset_patterns,
+        **data_catalog.default_pattern,
     }
     if catalog_factories:
         click.echo(yaml.dump(list(catalog_factories.keys())))
@@ -423,20 +423,17 @@ def resolve_patterns_new(metadata: ProjectMetadata, env: str) -> None:
         if pl_obj:
             datasets.update(pl_obj.datasets())
 
+    catalog_datasets = set(data_catalog.list())
     datasets_lst = [
         ds_name
         for ds_name in datasets
-        # Excluding parameters
+        # Excluding parameters and free outputs
         if not (ds_name.startswith("params:") or ds_name == "parameters")
-        # Excluding free outputs
-        and (
-            ds_name in data_catalog.resolved_ds_configs
-            or data_catalog.match_pattern(ds_name)
-        )
+        and (ds_name in catalog_datasets or data_catalog.match_pattern(ds_name))
     ]
 
     # Add datasets from catalog that are not used in target pipelines
-    for ds_name in data_catalog.resolved_ds_configs:
+    for ds_name in catalog_datasets:
         if not (ds_name in datasets or data_catalog.match_pattern(ds_name)):
             datasets_lst.append(ds_name)
 

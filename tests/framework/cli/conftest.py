@@ -132,7 +132,7 @@ def fake_project_cli(
     # It's safe to remove the new entries from path due to the python
     # module caching mechanism. Any `reload` on it will not work though.
     old_path = sys.path.copy()
-    sys.path = [str(fake_repo_path / "src")] + sys.path
+    sys.path = [str(fake_repo_path / "src"), *sys.path]
 
     import_module(PACKAGE_NAME)
     configure_project(PACKAGE_NAME)

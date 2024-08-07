@@ -4,14 +4,15 @@ For more information about these specifications, please visit
 """
 from __future__ import annotations
 
-from typing import Any
-
-from kedro.framework.context import KedroContext
-from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline
-from kedro.pipeline.node import Node
+from typing import TYPE_CHECKING, Any
 
 from .markers import hook_spec
+
+if TYPE_CHECKING:
+    from kedro.framework.context import KedroContext
+    from kedro.io import DataCatalog
+    from kedro.pipeline import Pipeline
+    from kedro.pipeline.node import Node
 
 
 class DataCatalogSpecs:

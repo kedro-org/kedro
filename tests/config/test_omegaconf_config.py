@@ -655,7 +655,7 @@ class TestOmegaConfigLoader:
                 "--exclude=local/*.yml",
                 "-czf",
                 f"{tmp_path}/tar_conf.tar.gz",
-                f"--directory={str(tmp_path.parent)}",
+                f"--directory={tmp_path.parent!s}",
                 f"{tmp_path.name}",
             ]
         )

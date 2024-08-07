@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import pickle
-from multiprocessing.managers import SyncManager
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from kedro.io.core import AbstractDataset, DatasetError
+
+if TYPE_CHECKING:
+    from multiprocessing.managers import SyncManager
 
 
 class SharedMemoryDataset(AbstractDataset):
@@ -47,7 +49,7 @@ class SharedMemoryDataset(AbstractDataset):
                 pickle.dumps(data)
             except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
                 raise DatasetError(
-                    f"{str(data.__class__)} cannot be serialised. ParallelRunner "
+                    f"{data.__class__!s} cannot be serialised. ParallelRunner "
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
             raise exc  # pragma: no cover

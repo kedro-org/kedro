@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import difflib
+import importlib
 import logging
 import re
 import shlex
@@ -16,7 +17,7 @@ from collections import defaultdict
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import IO, Any, Iterable, Sequence
+from typing import IO, Any, Callable, Iterable, Sequence
 
 import click
 import importlib_metadata
@@ -63,7 +64,7 @@ def python_call(
     module: str, arguments: Iterable[str], **kwargs: Any
 ) -> None:  # pragma: no cover
     """Run a subprocess command that invokes a Python module."""
-    call([sys.executable, "-m", module] + list(arguments), **kwargs)
+    call([sys.executable, "-m", module, *list(arguments)], **kwargs)
 
 
 def find_stylesheets() -> Iterable[str]:  # pragma: no cover
@@ -386,6 +387,47 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         if loaded_entry_point:
             entry_point_commands.append(loaded_entry_point)
     return entry_point_commands
+
+
+def find_run_command(package_name: str) -> Callable:
+    """Find the run command to be executed.
+       This is either the default run command defined in the Kedro framework or a run command defined by
+       an installed plugin.
+
+    Args:
+        package_name: The name of the package being run.
+
+    Raises:
+        KedroCliError: If the run command is not found.
+
+    Returns:
+        Run command to be executed.
+    """
+    try:
+        project_cli = importlib.import_module(f"{package_name}.cli")
+        # fail gracefully if cli.py does not exist
+    except ModuleNotFoundError as exc:
+        if f"{package_name}.cli" not in str(exc):
+            raise
+        plugins = load_entry_points("project")
+        run = _find_run_command_in_plugins(plugins) if plugins else None
+        if run:
+            # use run command from installed plugin if it exists
+            return run  # type: ignore[no-any-return]
+        # use run command from `kedro.framework.cli.project`
+        from kedro.framework.cli.project import run
+
+        return run  # type: ignore[no-any-return]
+    # fail badly if cli.py exists, but has no `cli` in it
+    if not hasattr(project_cli, "cli"):
+        raise KedroCliError(f"Cannot load commands from {package_name}.cli")
+    return project_cli.run  # type: ignore[no-any-return]
+
+
+def _find_run_command_in_plugins(plugins: Any) -> Any:
+    for group in plugins:
+        if "run" in group.commands:
+            return group.commands["run"]
 
 
 @typing.no_type_check

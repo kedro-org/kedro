@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import logging
 from collections import namedtuple
+from typing import TYPE_CHECKING
 
 import pytest
 from click.testing import CliRunner
 
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.cli.hooks import cli_hook_impl, get_cli_hook_manager, manager
-from kedro.framework.startup import ProjectMetadata
+
+if TYPE_CHECKING:
+    from kedro.framework.startup import ProjectMetadata
 
 logger = logging.getLogger(__name__)
 

@@ -219,7 +219,7 @@ class TestPipelineHelper:
     )
     def test_missing_dataset_name_no_suggestion(
         self, func, inputs, outputs, inputs_map, outputs_map, expected_missing
-    ):  # noqa: PLR0913
+    ):
         raw_pipeline = modular_pipeline([node(func, inputs, outputs)])
 
         with pytest.raises(

@@ -5,9 +5,11 @@ from __future__ import annotations
 import os
 import re
 from contextlib import contextmanager
-from pathlib import Path
 from time import sleep, time
-from typing import Any, Callable, Iterator
+from typing import TYPE_CHECKING, Any, Callable, Iterator
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @contextmanager

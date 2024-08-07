@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 import pytest
@@ -13,7 +12,6 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
-from kedro.framework.context.context import KedroContext
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
     _ProjectPipelines,
@@ -21,10 +19,15 @@ from kedro.framework.project import (
     configure_project,
 )
 from kedro.framework.session import KedroSession
-from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.node import Node, node
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from kedro.framework.context.context import KedroContext
+    from kedro.io import DataCatalog
+    from kedro.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 

@@ -10,13 +10,11 @@ import sys
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import AbstractConfigLoader
-from kedro.framework.context import KedroContext
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
@@ -24,10 +22,14 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
-from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import _find_kedro_project
+
+if TYPE_CHECKING:
+    from kedro.config import AbstractConfigLoader
+    from kedro.framework.context import KedroContext
+    from kedro.framework.session.store import BaseSessionStore
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:

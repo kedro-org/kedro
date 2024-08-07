@@ -147,7 +147,7 @@ def pipeline_with_dicts():
             node(triconcat, ["H", "I", "M"], "N", name="node1"),
             node(identity, "H", "I", name="node2"),
             node(identity, "F", {"M": "M", "N": "G"}, name="node3"),
-            node(identity, "E", {"O": "F", "P": "H"}, name="node4"),  # NOQA
+            node(identity, "E", {"O": "F", "P": "H"}, name="node4"),
             node(identity, {"input1": "D"}, None, name="node5"),
             node(identity, "C", "D", name="node6", tags=["foo"]),
             node(identity, "B", {"P": "C", "Q": "E"}, name="node7", tags=["foo"]),
@@ -160,7 +160,7 @@ def pipeline_with_dicts():
             {node(identity, "B", {"P": "C", "Q": "E"}, name="node7", tags=["foo"])},
             {
                 node(identity, "C", "D", name="node6", tags=["foo"]),
-                node(identity, "E", {"O": "F", "P": "H"}, name="node4"),  # NOQA
+                node(identity, "E", {"O": "F", "P": "H"}, name="node4"),
             },
             {
                 node(identity, {"input1": "D"}, None, name="node5"),

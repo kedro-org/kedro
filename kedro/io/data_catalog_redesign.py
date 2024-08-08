@@ -354,7 +354,7 @@ class AbstractDataCatalog(abc.ABC):
         )
 
     def add(self, ds_name: str, dataset: Any, **kwargs) -> None:
-        """Adds a new ``AbstractDataset`` object to the ``DataCatalog``."""
+        """Adds a new dataset object to the ``AbstractDataCatalog``."""
         if ds_name in self._datasets:
             raise DatasetAlreadyExistsError(
                 f"Dataset '{ds_name}' has already been registered"
@@ -444,7 +444,7 @@ class KedroDataCatalog(AbstractDataCatalog):
     def add(
         self, ds_name: str, dataset: AbstractDataset, replace: bool = False
     ) -> None:
-        """Adds a new ``AbstractDataset`` object to the ``DataCatalog``."""
+        """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""
         if ds_name in self._datasets:
             if replace:
                 self._logger.warning("Replacing dataset '%s'", ds_name)

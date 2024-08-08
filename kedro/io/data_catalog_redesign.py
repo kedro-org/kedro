@@ -85,20 +85,18 @@ def validate_dataset_config(ds_name: str, ds_config: Any) -> None:
 
 
 def _resolve_config(
-    dataset_name: str,
+    ds_name: str,
     matched_pattern: str,
     config: dict,
 ) -> dict[str, Any]:
     """Get resolved AbstractDataset from a factory config"""
-    result = parse(matched_pattern, dataset_name)
+    result = parse(matched_pattern, ds_name)
     # Resolve the factory config for the dataset
     if isinstance(config, dict):
         for key, value in config.items():
-            config[key] = _resolve_config(dataset_name, matched_pattern, value)
+            config[key] = _resolve_config(ds_name, matched_pattern, value)
     elif isinstance(config, (list, tuple)):
-        config = [
-            _resolve_config(dataset_name, matched_pattern, value) for value in config
-        ]
+        config = [_resolve_config(ds_name, matched_pattern, value) for value in config]
     elif isinstance(config, str) and "}" in config:
         try:
             config = str(config).format_map(result.named)
@@ -166,10 +164,10 @@ class AbstractDataCatalog(abc.ABC):
     def __getitem__(self, ds_name: str) -> Any:
         return self.get_dataset(ds_name)
 
-    def __contains__(self, dataset_name: str) -> bool:
+    def __contains__(self, ds_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
-        matched_pattern = self.match_pattern(dataset_name)
-        if dataset_name in self._datasets or matched_pattern:
+        matched_pattern = self.match_pattern(ds_name)
+        if ds_name in self._datasets or matched_pattern:
             return True
         return False
 
@@ -198,12 +196,12 @@ class AbstractDataCatalog(abc.ABC):
         """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
         return "{" in pattern
 
-    def match_pattern(self, dataset_name: str) -> str | None:
+    def match_pattern(self, ds_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary."""
         matches = (
             pattern
             for pattern in self._dataset_patterns.keys()
-            if parse(pattern, dataset_name)
+            if parse(pattern, ds_name)
         )
         return next(matches, None)
 
@@ -355,14 +353,14 @@ class AbstractDataCatalog(abc.ABC):
             f"it must implement the '_init_dataset' method"
         )
 
-    def add(self, dataset_name: str, dataset: Any, **kwargs) -> None:
-        """Adds a new ``AbstractDataset`` object to the ``DataCatalog``."""
-        if dataset_name in self._datasets:
+    def add(self, ds_name: str, dataset: Any, **kwargs) -> None:
+        """Adds a new dataset object to the ``AbstractDataCatalog``."""
+        if ds_name in self._datasets:
             raise DatasetAlreadyExistsError(
-                f"Dataset '{dataset_name}' has already been registered"
+                f"Dataset '{ds_name}' has already been registered"
             )
-        self._datasets[dataset_name] = dataset
-        self._resolved_ds_configs[dataset_name] = {}
+        self._datasets[ds_name] = dataset
+        self._resolved_ds_configs[ds_name] = {}
 
     @property
     def _logger(self) -> logging.Logger:
@@ -432,9 +430,9 @@ class KedroDataCatalog(AbstractDataCatalog):
         )
 
     def get_dataset(
-        self, dataset_name: str, suggest: bool = True, version: Version | None = None
+        self, ds_name: str, suggest: bool = True, version: Version | None = None
     ) -> AbstractDataset:
-        dataset = super().get_dataset(dataset_name, suggest)
+        dataset = super().get_dataset(ds_name, suggest)
 
         if version and isinstance(dataset, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,
@@ -444,18 +442,18 @@ class KedroDataCatalog(AbstractDataCatalog):
         return dataset
 
     def add(
-        self, dataset_name: str, dataset: AbstractDataset, replace: bool = False
+        self, ds_name: str, dataset: AbstractDataset, replace: bool = False
     ) -> None:
-        """Adds a new ``AbstractDataset`` object to the ``DataCatalog``."""
-        if dataset_name in self._datasets:
+        """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""
+        if ds_name in self._datasets:
             if replace:
-                self._logger.warning("Replacing dataset '%s'", dataset_name)
+                self._logger.warning("Replacing dataset '%s'", ds_name)
             else:
                 raise DatasetAlreadyExistsError(
-                    f"Dataset '{dataset_name}' has already been registered"
+                    f"Dataset '{ds_name}' has already been registered"
                 )
-        self._datasets[dataset_name] = dataset
-        self._resolved_ds_configs[dataset_name] = {}
+        self._datasets[ds_name] = dataset
+        self._resolved_ds_configs[ds_name] = {}
 
     def add_from_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
         for ds_name in datasets:

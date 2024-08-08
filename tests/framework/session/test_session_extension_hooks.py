@@ -2,7 +2,7 @@ import logging
 import multiprocessing
 import re
 import time
-from typing import Any
+from typing import Any, Optional
 
 import pandas as pd
 import pytest
@@ -548,7 +548,7 @@ def sample_node_multiple_outputs():
 
 
 class LogCatalog(DataCatalog):
-    def load(self, name: str, version: str = None) -> Any:
+    def load(self, name: str, version: Optional[str] = None) -> Any:
         dataset = super().load(name=name, version=version)
         logger.info("Catalog load")
         return dataset

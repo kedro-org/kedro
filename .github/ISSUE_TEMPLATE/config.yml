@@ -4,7 +4,7 @@ contact_links:
     about: Come chat with the community!
     url: https://slack.kedro.org/
   - name: Documentation
-    url: https://kedro.readthedocs.io/en/stable/
+    url: https://docs.kedro.org/en/stable/
     about: To learn more about how Kedro works
   - name: Website
     url: https://kedro.org/

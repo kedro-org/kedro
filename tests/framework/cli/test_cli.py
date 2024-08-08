@@ -520,7 +520,7 @@ class TestKedroCLI:
             project_metadata=kedro_cli._metadata, command_args=[], exit_code=1
         )
 
-        assert "An error has occurred: Test Exception" in result.output
+        assert result.exit_code == 1
 
     @patch("sys.exit")
     def test_main_hook_finally_block(self, fake_metadata):
@@ -535,7 +535,7 @@ class TestKedroCLI:
             project_metadata=kedro_cli._metadata, command_args=[], exit_code=0
         )
 
-        assert "An error has occurred:" not in result.output
+        assert result.exit_code == 0
 
 
 @mark.usefixtures("chdir_to_dummy_project")

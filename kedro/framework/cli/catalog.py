@@ -14,6 +14,7 @@ from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.io.data_catalog import DataCatalog
+from kedro.io.data_catalog_redesign import KedroDataCatalog
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -35,6 +36,80 @@ def catalog_cli() -> None:  # pragma: no cover
 @catalog_cli.group()
 def catalog() -> None:
     """Commands for working with catalog."""
+
+
+@catalog.command("list_new")
+@env_option
+@click.option(
+    "--pipeline",
+    "-p",
+    type=str,
+    default="",
+    help="Name of the modular pipeline to run. If not set, "
+    "the project pipeline is run by default.",
+    callback=split_string,
+)
+@click.pass_obj
+def list_datasets_new(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
+    """Show datasets per type."""
+    title = "Datasets in '{}' pipeline"
+    not_mentioned = "Datasets not mentioned in pipeline"
+    mentioned = "Datasets mentioned in pipeline"
+    factories = "Datasets generated from factories"
+
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    try:
+        data_catalog = context.catalog_new
+        datasets_meta = data_catalog.datasets
+        catalog_ds = set(data_catalog.list())
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro Catalog.\nError: {exc}"
+        ) from exc
+
+    target_pipelines = pipeline or pipelines.keys()
+
+    result = {}
+    for pipe in target_pipelines:
+        pl_obj = pipelines.get(pipe)
+        if pl_obj:
+            pipeline_ds = pl_obj.datasets()
+        else:
+            existing_pls = ", ".join(sorted(pipelines.keys()))
+            raise KedroCliError(
+                f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
+            )
+
+        unused_ds = catalog_ds - pipeline_ds
+        default_ds = pipeline_ds - catalog_ds
+        used_ds = catalog_ds - unused_ds
+
+        # resolve any factory datasets in the pipeline
+        factory_ds_by_type = defaultdict(list)
+        resolved_configs = data_catalog.resolve_patterns(default_ds)
+        for ds_name, ds_config in zip(default_ds, resolved_configs):
+            if data_catalog.match_pattern(ds_name):
+                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
+                    ds_name
+                )
+
+        default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
+
+        unused_by_type = _map_type_to_datasets_new(unused_ds, datasets_meta)
+        used_by_type = _map_type_to_datasets_new(used_ds, datasets_meta)
+
+        if default_ds:
+            used_by_type["DefaultDataset"].extend(default_ds)
+
+        data = (
+            (mentioned, dict(used_by_type)),
+            (factories, dict(factory_ds_by_type)),
+            (not_mentioned, dict(unused_by_type)),
+        )
+        result[title.format(pipe)] = {key: value for key, value in data if value}
+    secho(yaml.dump(result))
 
 
 @catalog.command("list")
@@ -136,6 +211,81 @@ def _map_type_to_datasets(
     return mapping
 
 
+def _map_type_to_datasets_new(
+    datasets: set[str], datasets_meta: dict[str, type]
+) -> dict:
+    """Build dictionary with a dataset type as a key and list of
+    datasets of the specific type as a value.
+    """
+    mapping = defaultdict(list)  # type: ignore[var-annotated]
+    for dataset in datasets:
+        is_param = dataset.startswith("params:") or dataset == "parameters"
+        if not is_param:
+            ds_type = datasets_meta[dataset].__class__.__name__
+            if dataset not in mapping[ds_type]:
+                mapping[ds_type].append(dataset)
+    return mapping
+
+
+@catalog.command("create_new")
+@env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
+@click.option(
+    "--pipeline",
+    "-p",
+    "pipeline_name",
+    type=str,
+    required=True,
+    help="Name of a pipeline.",
+)
+@click.pass_obj
+def create_catalog_new(metadata: ProjectMetadata, pipeline_name: str, env: str) -> None:
+    """Create Data Catalog YAML configuration with missing datasets.
+
+    Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
+    file for each dataset in a registered pipeline if it is missing from
+    the ``DataCatalog``.
+
+    The catalog configuration will be saved to
+    `<conf_source>/<env>/catalog_<pipeline_name>.yml` file.
+    """
+    env = env or "base"
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    pipeline = pipelines.get(pipeline_name)
+    if not pipeline:
+        existing_pipelines = ", ".join(sorted(pipelines.keys()))
+        raise KedroCliError(
+            f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
+        )
+    pipeline_datasets = {
+        ds_name
+        for ds_name in pipeline.datasets()
+        if not ds_name.startswith("params:") and ds_name != "parameters"
+    }
+
+    data_catalog = context.catalog_new
+    catalog_datasets = {
+        ds_name
+        for ds_name in data_catalog.list()
+        if not ds_name.startswith("params:") and ds_name != "parameters"
+    }
+
+    # Datasets that are missing in Data Catalog
+    missing_ds = sorted(pipeline_datasets - catalog_datasets)
+    if missing_ds:
+        catalog_path = (
+            context.project_path
+            / settings.CONF_SOURCE
+            / env
+            / f"catalog_{pipeline_name}.yml"
+        )
+        _add_missing_datasets_to_catalog(missing_ds, catalog_path)
+        click.echo(f"Data Catalog YAML configuration was created: {catalog_path}")
+    else:
+        click.echo("All datasets are already configured.")
+
+
 @catalog.command("create")
 @env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
 @click.option(
@@ -212,6 +362,25 @@ def _add_missing_datasets_to_catalog(missing_ds: list[str], catalog_path: Path) 
         yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)
 
 
+@catalog.command("rank_new")
+@env_option
+@click.pass_obj
+def rank_catalog_factories_new(metadata: ProjectMetadata, env: str) -> None:
+    """List all dataset factories in the catalog, ranked by priority by which they are matched."""
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+    data_catalog = context.catalog_new
+
+    catalog_factories = {
+        **data_catalog.dataset_patterns,
+        **data_catalog.default_pattern,
+    }
+    if catalog_factories:
+        click.echo(yaml.dump(list(catalog_factories.keys())))
+    else:
+        click.echo("There are no dataset factories in the catalog.")
+
+
 @catalog.command("rank")
 @env_option
 @click.pass_obj
@@ -228,6 +397,56 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
         click.echo(yaml.dump(list(catalog_factories.keys())))
     else:
         click.echo("There are no dataset factories in the catalog.")
+
+
+@catalog.command("resolve_new")
+@env_option
+@click.pass_obj
+def resolve_patterns_new(metadata: ProjectMetadata, env: str) -> None:
+    """Resolve catalog factories against pipeline datasets. Note that this command is runner
+    agnostic and thus won't take into account any default dataset creation defined in the runner."""
+
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    catalog_config = context.config_loader["catalog"]
+    credentials_config = context.config_loader.get("credentials", None)
+
+    data_catalog = KedroDataCatalog(
+        config=catalog_config, credentials=credentials_config
+    )
+
+    target_pipelines = pipelines.keys()
+    datasets = set()
+    for pipe in target_pipelines:
+        pl_obj = pipelines.get(pipe)
+        if pl_obj:
+            datasets.update(pl_obj.datasets())
+
+    catalog_datasets = set(data_catalog.list())
+    datasets_lst = [
+        ds_name
+        for ds_name in datasets
+        # Excluding parameters and free outputs
+        if not (ds_name.startswith("params:") or ds_name == "parameters")
+        and (ds_name in catalog_datasets or data_catalog.match_pattern(ds_name))
+    ]
+
+    # Add datasets from catalog that are not used in target pipelines
+    for ds_name in catalog_datasets:
+        if not (ds_name in datasets or data_catalog.match_pattern(ds_name)):
+            datasets_lst.append(ds_name)
+
+    resolved_configs = data_catalog.resolve_patterns(datasets_lst)
+
+    secho(
+        yaml.dump(
+            {
+                ds_name: ds_config
+                for ds_name, ds_config in zip(datasets_lst, resolved_configs)
+            }
+        )
+    )
 
 
 @catalog.command("resolve")

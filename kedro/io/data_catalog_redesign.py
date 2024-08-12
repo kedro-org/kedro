@@ -397,6 +397,48 @@ class AbstractDataCatalog(abc.ABC):
             f"it must implement the 'load' method"
         )
 
+    def save(self, name: str, data: Any) -> None:
+        """Save data to a registered data set.
+
+        Args:
+            name: A data set to be saved to.
+            data: A data object to be saved as configured in the registered
+                data set.
+
+        Raises:
+            DatasetNotFoundError: When a data set with the given name
+                has not yet been registered.
+
+        Example:
+        ::
+
+            >>> import pandas as pd
+            >>>
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>>
+            >>> cars = CSVDataset(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
+            >>>
+            >>> df = pd.DataFrame({'col1': [1, 2],
+            >>>                    'col2': [4, 5],
+            >>>                    'col3': [5, 6]})
+            >>> catalog.save("cars", df)
+        """
+        dataset = self.get_dataset(name)
+
+        self._logger.info(
+            "Saving data to %s (%s)...",
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
+
+        dataset.save(data)
+
 
 class KedroDataCatalog(AbstractDataCatalog):
     def __init__(  # noqa: PLR0913

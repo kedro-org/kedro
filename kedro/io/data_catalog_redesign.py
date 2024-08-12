@@ -182,13 +182,9 @@ class AbstractDataCatalog(abc.ABC):
         config = copy.deepcopy(config) or {}
         credentials = copy.deepcopy(credentials) or {}
         for ds_name, ds_config in config.items():
-            if ds_name in self._dataset_patterns:
-                self._resolved_ds_configs[ds_name] = _resolve_config(
-                    ds_name, ds_name, self._dataset_patterns[ds_name]
-                )
-            else:
-                self._resolved_ds_configs[ds_name] = _resolve_config(
-                    ds_name, ds_name, _resolve_credentials(ds_config, credentials)
+            if not self._is_pattern(ds_name):
+                self._resolved_ds_configs[ds_name] = _resolve_credentials(
+                    ds_config, credentials
                 )
 
     @staticmethod

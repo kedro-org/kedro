@@ -239,6 +239,7 @@ def _map_type_to_datasets_new(
 )
 @click.pass_obj
 def create_catalog_new(metadata: ProjectMetadata, pipeline_name: str, env: str) -> None:
+    # TODO: consider patterns? Currently datasets matching patterns are added as MemoryDataset
     """Create Data Catalog YAML configuration with missing datasets.
 
     Add ``MemoryDataset`` datasets to Data Catalog YAML configuration

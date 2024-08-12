@@ -442,6 +442,9 @@ class AbstractDataCatalog(abc.ABC):
     def release(self, name: str) -> None:
         pass
 
+    def confirm(self, name: str) -> None:
+        pass
+
 
 class KedroDataCatalog(AbstractDataCatalog):
     def __init__(  # noqa: PLR0913
@@ -573,3 +576,20 @@ class KedroDataCatalog(AbstractDataCatalog):
         """
         dataset = self.get_dataset(name)
         dataset.release()
+
+    def confirm(self, name: str) -> None:
+        """Confirm a dataset by its name.
+
+        Args:
+            name: Name of the dataset.
+        Raises:
+            DatasetError: When the dataset does not have `confirm` method.
+
+        """
+        self._logger.info("Confirming dataset '%s'", name)
+        dataset = self.get_dataset(name)
+
+        if hasattr(dataset, "confirm"):
+            dataset.confirm()
+        else:
+            raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")

@@ -439,6 +439,9 @@ class AbstractDataCatalog(abc.ABC):
 
         dataset.save(data)
 
+    def release(self, name: str) -> None:
+        pass
+
 
 class KedroDataCatalog(AbstractDataCatalog):
     def __init__(  # noqa: PLR0913
@@ -557,3 +560,16 @@ class KedroDataCatalog(AbstractDataCatalog):
         result = dataset.load()
 
         return result
+
+    def release(self, name: str) -> None:
+        """Release any cached data associated with a data set
+
+        Args:
+            name: A data set to be checked.
+
+        Raises:
+            DatasetNotFoundError: When a data set with the given name
+                has not yet been registered.
+        """
+        dataset = self.get_dataset(name)
+        dataset.release()

@@ -128,6 +128,7 @@ class AbstractDataCatalog(abc.ABC):
         self._datasets = datasets or {}
         self._dataset_patterns = {}
         self._default_pattern = {}
+        self._runtime_patterns = {}
 
         if datasets:
             for ds_name in datasets:
@@ -203,11 +204,10 @@ class AbstractDataCatalog(abc.ABC):
 
     def match_pattern(self, ds_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary."""
-        matches = (
-            pattern
-            for pattern in self._dataset_patterns.keys()
-            if parse(pattern, ds_name)
-        )
+        all_patterns = list(self._dataset_patterns.keys())
+        all_patterns.extend(list(self._default_pattern.keys()))
+        all_patterns.extend(list(self._runtime_patterns.keys()))
+        matches = (pattern for pattern in all_patterns if parse(pattern, ds_name))
         return next(matches, None)
 
     @staticmethod
@@ -348,8 +348,8 @@ class AbstractDataCatalog(abc.ABC):
                     error_msg += f" - did you mean one of these instead: {suggestions}"
             raise DatasetNotFoundError(error_msg)
         elif ds_name not in self._datasets:
-            self._init_dataset(ds_name, ds_config)
             self._resolved_ds_configs[ds_name] = ds_config
+            self._init_dataset(ds_name, ds_config)
 
         return self._datasets[ds_name]
 
@@ -395,6 +395,10 @@ class AbstractDataCatalog(abc.ABC):
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
         return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
+
+    def add_runtime_patterns(self, dataset_patterns: Patterns) -> None:
+        self._runtime_patterns = {**self._runtime_patterns, **dataset_patterns}
+        self._runtime_patterns = self._sort_patterns(self._runtime_patterns)
 
 
 class KedroDataCatalog(AbstractDataCatalog):

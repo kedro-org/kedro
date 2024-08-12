@@ -25,6 +25,14 @@ Patterns = dict[str, dict[str, Any]]
 CREDENTIALS_KEY = "credentials"
 
 
+class DatasetConfigurationNotFoundError(DatasetError):
+    """``DatasetConfigurationNotFoundError`` raised by ``DataCatalog`` class in case of
+    trying to get non-existing dataset configuration.
+    """
+
+    pass
+
+
 def _get_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
     """Return a set of credentials from the provided credentials dict.
 
@@ -121,6 +129,7 @@ class AbstractDataCatalog(abc.ABC):
         self._datasets = datasets or {}
         self._dataset_patterns = {}
         self._default_pattern = {}
+        self._runtime_patterns = {}
 
         if datasets:
             for ds_name in datasets:
@@ -131,7 +140,7 @@ class AbstractDataCatalog(abc.ABC):
                 config, credentials
             )
             self._update_ds_configs(config, credentials)
-            self._init_datasets(config, credentials)
+            self._init_datasets(config)
 
     @property
     def datasets(self):
@@ -183,13 +192,10 @@ class AbstractDataCatalog(abc.ABC):
         config = copy.deepcopy(config) or {}
         credentials = copy.deepcopy(credentials) or {}
         for ds_name, ds_config in config.items():
-            if ds_name in self._dataset_patterns:
-                self._resolved_ds_configs[ds_name] = _resolve_config(
-                    ds_name, ds_name, self._dataset_patterns[ds_name]
-                )
-            else:
-                self._resolved_ds_configs[ds_name] = _resolve_config(
-                    ds_name, ds_name, _resolve_credentials(ds_config, credentials)
+            if not self._is_pattern(ds_name):
+                validate_dataset_config(ds_name, ds_config)
+                self._resolved_ds_configs[ds_name] = _resolve_credentials(
+                    ds_config, credentials
                 )
 
     @staticmethod
@@ -199,11 +205,10 @@ class AbstractDataCatalog(abc.ABC):
 
     def match_pattern(self, ds_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary."""
-        matches = (
-            pattern
-            for pattern in self._dataset_patterns.keys()
-            if parse(pattern, ds_name)
-        )
+        all_patterns = list(self._dataset_patterns.keys())
+        all_patterns.extend(list(self._default_pattern.keys()))
+        all_patterns.extend(list(self._runtime_patterns.keys()))
+        matches = (pattern for pattern in all_patterns if parse(pattern, ds_name))
         return next(matches, None)
 
     @staticmethod
@@ -250,13 +255,15 @@ class AbstractDataCatalog(abc.ABC):
     def _init_datasets(
         self,
         config: dict[str, dict[str, Any]] | None,
-        credentials: dict[str, dict[str, Any]] | None,
     ) -> None:
-        for ds_name, ds_config in config.items():
+        for ds_name in config:
             if not self._is_pattern(ds_name):
-                validate_dataset_config(ds_name, ds_config)
-                resolved_ds_config = _resolve_credentials(ds_config, credentials)
-                self._init_dataset(ds_name, resolved_ds_config)
+                ds_resolved_config = self._resolved_ds_configs.get(ds_name, None)
+                if not ds_resolved_config:
+                    raise DatasetConfigurationNotFoundError(
+                        f"Dataset '{ds_name}' configuration is missing."
+                    )
+                self._init_dataset(ds_name, ds_resolved_config)
 
     @classmethod
     def _get_patterns(
@@ -342,8 +349,8 @@ class AbstractDataCatalog(abc.ABC):
                     error_msg += f" - did you mean one of these instead: {suggestions}"
             raise DatasetNotFoundError(error_msg)
         elif ds_name not in self._datasets:
-            self._init_dataset(ds_name, ds_config)
             self._resolved_ds_configs[ds_name] = ds_config
+            self._init_dataset(ds_name, ds_config)
 
         return self._datasets[ds_name]
 
@@ -351,7 +358,7 @@ class AbstractDataCatalog(abc.ABC):
     def add_from_dict(self, datasets: dict[str, Any], **kwargs) -> None:
         raise NotImplementedError(
             f"'{self.__class__.__name__}' is a subclass of AbstractDataCatalog and "
-            f"it must implement the '_init_dataset' method"
+            f"it must implement the 'add_from_dict' method"
         )
 
     def add(self, ds_name: str, dataset: Any, **kwargs) -> None:
@@ -444,6 +451,10 @@ class AbstractDataCatalog(abc.ABC):
 
     def confirm(self, name: str) -> None:
         pass
+
+    def add_runtime_patterns(self, dataset_patterns: Patterns) -> None:
+        self._runtime_patterns = {**self._runtime_patterns, **dataset_patterns}
+        self._runtime_patterns = self._sort_patterns(self._runtime_patterns)
 
 
 class KedroDataCatalog(AbstractDataCatalog):

@@ -239,6 +239,7 @@ def _map_type_to_datasets_new(
 )
 @click.pass_obj
 def create_catalog_new(metadata: ProjectMetadata, pipeline_name: str, env: str) -> None:
+    # TODO: consider patterns? Currently datasets matching patterns are shown as MemoryDataset
     """Create Data Catalog YAML configuration with missing datasets.
 
     Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
@@ -417,25 +418,25 @@ def resolve_patterns_new(metadata: ProjectMetadata, env: str) -> None:
     )
 
     target_pipelines = pipelines.keys()
-    datasets = set()
+    pipeline_datasets = set()
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            datasets.update(pl_obj.datasets())
+            pipeline_datasets.update(pl_obj.datasets())
 
     catalog_datasets = set(data_catalog.list())
     datasets_lst = [
-        ds_name
-        for ds_name in datasets
+        pp_ds_name
+        for pp_ds_name in pipeline_datasets
         # Excluding parameters and free outputs
-        if not (ds_name.startswith("params:") or ds_name == "parameters")
-        and (ds_name in catalog_datasets or data_catalog.match_pattern(ds_name))
+        if not (pp_ds_name.startswith("params:") or pp_ds_name == "parameters")
+        and (pp_ds_name in catalog_datasets or data_catalog.match_pattern(pp_ds_name))
     ]
 
     # Add datasets from catalog that are not used in target pipelines
-    for ds_name in catalog_datasets:
-        if not (ds_name in datasets or data_catalog.match_pattern(ds_name)):
-            datasets_lst.append(ds_name)
+    for cat_ds_name in catalog_datasets:
+        if cat_ds_name not in pipeline_datasets:
+            datasets_lst.append(cat_ds_name)
 
     resolved_configs = data_catalog.resolve_patterns(datasets_lst)
 

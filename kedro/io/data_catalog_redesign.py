@@ -18,6 +18,7 @@ from kedro.io.core import (
     Version,
 )
 from kedro.io.memory_dataset import MemoryDataset
+from kedro.logging import _format_rich, _has_rich_handler
 
 Patterns = dict[str, dict[str, Any]]
 
@@ -389,6 +390,13 @@ class AbstractDataCatalog(abc.ABC):
             ) from exc
         return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
 
+    @abc.abstractmethod
+    def load(self, name: str, **kwargs) -> Any:
+        raise NotImplementedError(
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataCatalog and "
+            f"it must implement the 'load' method"
+        )
+
 
 class KedroDataCatalog(AbstractDataCatalog):
     def __init__(  # noqa: PLR0913
@@ -463,3 +471,47 @@ class KedroDataCatalog(AbstractDataCatalog):
                 dataset = MemoryDataset(data=datasets[ds_name])  # type: ignore[abstract]
 
             self.add(ds_name, dataset, replace)
+
+    def load(self, name: str, version: str | None = None) -> Any:
+        """Loads a registered data set.
+
+        Args:
+            name: A data set to be loaded.
+            version: Optional argument for concrete data version to be loaded.
+                Works only with versioned datasets.
+
+        Returns:
+            The loaded data as configured.
+
+        Raises:
+            DatasetNotFoundError: When a data set with the given name
+                has not yet been registered.
+
+        Example:
+        ::
+
+            >>> from kedro.io import DataCatalog
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>>
+            >>> cars = CSVDataset(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
+            >>>
+            >>> df = catalog.load("cars")
+        """
+        load_version = Version(version, None) if version else None
+        dataset = self.get_dataset(name, version=load_version)
+
+        self._logger.info(
+            "Loading data from %s (%s)...",
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
+
+        result = dataset.load()
+
+        return result

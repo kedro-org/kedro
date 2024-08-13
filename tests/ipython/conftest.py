@@ -10,7 +10,7 @@ from kedro.ipython import (
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
-from . import dummy_function_fixtures  # noqa: F401
+from . import dummy_function_fixtures
 from .dummy_function_fixtures import (
     dummy_function,
     dummy_function_with_loop,

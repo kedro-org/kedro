@@ -13,7 +13,7 @@ from kedro.runner.runner import AbstractRunner, run_node
 if TYPE_CHECKING:
     from pluggy import PluginManager
 
-    from kedro.io import DataCatalog
+    from kedro.io import AbstractDataCatalog, DataCatalog
     from kedro.pipeline import Pipeline
 
 
@@ -47,7 +47,7 @@ class SequentialRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: DataCatalog | AbstractDataCatalog,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:

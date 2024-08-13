@@ -210,7 +210,7 @@ class AbstractRunner(ABC):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: DataCatalog | AbstractDataCatalog,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:
@@ -230,7 +230,7 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         done_nodes: Iterable[Node],
-        catalog: DataCatalog,
+        catalog: DataCatalog | AbstractDataCatalog,
     ) -> None:
         """
         Suggest a command to the user to resume a run after it fails.
@@ -269,7 +269,9 @@ class AbstractRunner(ABC):
 
 
 def _find_nodes_to_resume_from(
-    pipeline: Pipeline, unfinished_nodes: Collection[Node], catalog: DataCatalog
+    pipeline: Pipeline,
+    unfinished_nodes: Collection[Node],
+    catalog: DataCatalog | AbstractDataCatalog,
 ) -> set[str]:
     """Given a collection of unfinished nodes in a pipeline using
     a certain catalog, find the node names to pass to pipeline.from_nodes()
@@ -297,7 +299,9 @@ def _find_nodes_to_resume_from(
 
 
 def _find_all_nodes_for_resumed_pipeline(
-    pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: DataCatalog
+    pipeline: Pipeline,
+    unfinished_nodes: Iterable[Node],
+    catalog: DataCatalog | AbstractDataCatalog,
 ) -> set[Node]:
     """Breadth-first search approach to finding the complete set of
     ``Node``s which need to run to cover all unfinished nodes,
@@ -355,7 +359,9 @@ def _nodes_with_external_inputs(nodes_of_interest: Iterable[Node]) -> set[Node]:
     return set(p_nodes_with_external_inputs.nodes)
 
 
-def _enumerate_non_persistent_inputs(node: Node, catalog: DataCatalog) -> set[str]:
+def _enumerate_non_persistent_inputs(
+    node: Node, catalog: DataCatalog | AbstractDataCatalog
+) -> set[str]:
     """Enumerate non-persistent input datasets of a ``Node``.
 
     Args:
@@ -367,7 +373,10 @@ def _enumerate_non_persistent_inputs(node: Node, catalog: DataCatalog) -> set[st
 
     """
     # We use _datasets because they pertain parameter name format
-    catalog_datasets = catalog._datasets
+    if isinstance(catalog, DataCatalog):
+        catalog_datasets = catalog._datasets
+    else:
+        catalog_datasets = catalog.datasets
     non_persistent_inputs: set[str] = set()
     for node_input in node.inputs:
         if node_input.startswith("params:"):
@@ -425,7 +434,7 @@ def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[
 
 def run_node(
     node: Node,
-    catalog: DataCatalog,
+    catalog: DataCatalog | AbstractDataCatalog,
     hook_manager: PluginManager,
     is_async: bool = False,
     session_id: str | None = None,
@@ -468,7 +477,7 @@ def run_node(
 
 def _collect_inputs_from_hook(  # noqa: PLR0913
     node: Node,
-    catalog: DataCatalog,
+    catalog: DataCatalog | AbstractDataCatalog,
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
@@ -501,7 +510,7 @@ def _collect_inputs_from_hook(  # noqa: PLR0913
 
 def _call_node_run(  # noqa: PLR0913
     node: Node,
-    catalog: DataCatalog,
+    catalog: DataCatalog | AbstractDataCatalog,
     inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
@@ -532,7 +541,7 @@ def _call_node_run(  # noqa: PLR0913
 
 def _run_node_sequential(
     node: Node,
-    catalog: DataCatalog,
+    catalog: DataCatalog | AbstractDataCatalog,
     hook_manager: PluginManager,
     session_id: str | None = None,
 ) -> Node:
@@ -579,7 +588,7 @@ def _run_node_sequential(
 
 def _run_node_async(
     node: Node,
-    catalog: DataCatalog,
+    catalog: DataCatalog | AbstractDataCatalog,
     hook_manager: PluginManager,
     session_id: str | None = None,
 ) -> Node:

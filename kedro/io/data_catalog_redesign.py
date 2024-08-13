@@ -309,6 +309,7 @@ class AbstractDataCatalog(abc.ABC):
                 config_copy = copy.deepcopy(
                     self._dataset_patterns.get(matched_pattern)
                     or self._default_pattern.get(matched_pattern)
+                    or self._runtime_patterns.get(matched_pattern)
                     or {}
                 )
                 ds_config = _resolve_config(ds_name, matched_pattern, config_copy)

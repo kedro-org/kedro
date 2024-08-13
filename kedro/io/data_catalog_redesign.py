@@ -457,6 +457,9 @@ class AbstractDataCatalog(abc.ABC):
         self._runtime_patterns = {**self._runtime_patterns, **dataset_patterns}
         self._runtime_patterns = self._sort_patterns(self._runtime_patterns)
 
+    def exists(self, name: str) -> bool:
+        return True
+
 
 class KedroDataCatalog(AbstractDataCatalog):
     def __init__(  # noqa: PLR0913
@@ -605,3 +608,21 @@ class KedroDataCatalog(AbstractDataCatalog):
             dataset.confirm()
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
+
+    def exists(self, name: str) -> bool:
+        """Checks whether registered data set exists by calling its `exists()`
+        method. Raises a warning and returns False if `exists()` is not
+        implemented.
+
+        Args:
+            name: A data set to be checked.
+
+        Returns:
+            Whether the data set output exists.
+
+        """
+        try:
+            dataset = self.get_dataset(name)
+        except DatasetNotFoundError:
+            return False
+        return dataset.exists()

@@ -21,6 +21,7 @@ from kedro.framework.hooks.manager import (
 )
 from kedro.framework.project import settings
 from kedro.io import (
+    AbstractDataCatalog,
     DataCatalog,
     DatasetNotFoundError,
     MemoryDataset,
@@ -167,13 +168,18 @@ class ParallelRunner(AbstractRunner):
             )
 
     @classmethod
-    def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline) -> None:
+    def _validate_catalog(
+        cls, catalog: DataCatalog | AbstractDataCatalog, pipeline: Pipeline
+    ) -> None:
         """Ensure that all data sets are serialisable and that we do not have
         any non proxied memory data sets being used as outputs as their content
         will not be synchronized across threads.
         """
 
-        datasets = catalog._datasets
+        if isinstance(catalog, DataCatalog):
+            datasets = catalog._datasets
+        else:
+            datasets = catalog.datasets
 
         unserialisable = []
         for name, dataset in datasets.items():
@@ -212,7 +218,9 @@ class ParallelRunner(AbstractRunner):
                 f"MemoryDatasets"
             )
 
-    def _set_manager_datasets(self, catalog: DataCatalog, pipeline: Pipeline) -> None:
+    def _set_manager_datasets(
+        self, catalog: DataCatalog | AbstractDataCatalog, pipeline: Pipeline
+    ) -> None:
         for dataset in pipeline.datasets():
             try:
                 catalog.exists(dataset)

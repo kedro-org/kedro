@@ -18,6 +18,7 @@ from kedro.io.core import (
     Version,
 )
 from kedro.io.memory_dataset import MemoryDataset
+from kedro.logging import _format_rich, _has_rich_handler
 
 Patterns = dict[str, dict[str, Any]]
 
@@ -308,6 +309,7 @@ class AbstractDataCatalog(abc.ABC):
                 config_copy = copy.deepcopy(
                     self._dataset_patterns.get(matched_pattern)
                     or self._default_pattern.get(matched_pattern)
+                    or self._runtime_patterns.get(matched_pattern)
                     or {}
                 )
                 ds_config = _resolve_config(ds_name, matched_pattern, config_copy)
@@ -396,6 +398,61 @@ class AbstractDataCatalog(abc.ABC):
             ) from exc
         return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
 
+    @abc.abstractmethod
+    def load(self, name: str, **kwargs) -> Any:
+        raise NotImplementedError(
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataCatalog and "
+            f"it must implement the 'load' method"
+        )
+
+    def save(self, name: str, data: Any) -> None:
+        """Save data to a registered data set.
+
+        Args:
+            name: A data set to be saved to.
+            data: A data object to be saved as configured in the registered
+                data set.
+
+        Raises:
+            DatasetNotFoundError: When a data set with the given name
+                has not yet been registered.
+
+        Example:
+        ::
+
+            >>> import pandas as pd
+            >>>
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>>
+            >>> cars = CSVDataset(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
+            >>>
+            >>> df = pd.DataFrame({'col1': [1, 2],
+            >>>                    'col2': [4, 5],
+            >>>                    'col3': [5, 6]})
+            >>> catalog.save("cars", df)
+        """
+        dataset = self.get_dataset(name)
+
+        self._logger.info(
+            "Saving data to %s (%s)...",
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
+
+        dataset.save(data)
+
+    def release(self, name: str) -> None:
+        pass
+
+    def confirm(self, name: str) -> None:
+        pass
+
     def add_runtime_patterns(self, dataset_patterns: Patterns) -> None:
         self._runtime_patterns = {**self._runtime_patterns, **dataset_patterns}
         self._runtime_patterns = self._sort_patterns(self._runtime_patterns)
@@ -474,3 +531,77 @@ class KedroDataCatalog(AbstractDataCatalog):
                 dataset = MemoryDataset(data=datasets[ds_name])  # type: ignore[abstract]
 
             self.add(ds_name, dataset, replace)
+
+    def load(self, name: str, version: str | None = None) -> Any:
+        """Loads a registered data set.
+
+        Args:
+            name: A data set to be loaded.
+            version: Optional argument for concrete data version to be loaded.
+                Works only with versioned datasets.
+
+        Returns:
+            The loaded data as configured.
+
+        Raises:
+            DatasetNotFoundError: When a data set with the given name
+                has not yet been registered.
+
+        Example:
+        ::
+
+            >>> from kedro.io import DataCatalog
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>>
+            >>> cars = CSVDataset(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
+            >>>
+            >>> df = catalog.load("cars")
+        """
+        load_version = Version(version, None) if version else None
+        dataset = self.get_dataset(name, version=load_version)
+
+        self._logger.info(
+            "Loading data from %s (%s)...",
+            _format_rich(name, "dark_orange")
+            if _has_rich_handler(self._logger)
+            else name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
+
+        result = dataset.load()
+
+        return result
+
+    def release(self, name: str) -> None:
+        """Release any cached data associated with a data set
+
+        Args:
+            name: A data set to be checked.
+
+        Raises:
+            DatasetNotFoundError: When a data set with the given name
+                has not yet been registered.
+        """
+        dataset = self.get_dataset(name)
+        dataset.release()
+
+    def confirm(self, name: str) -> None:
+        """Confirm a dataset by its name.
+
+        Args:
+            name: Name of the dataset.
+        Raises:
+            DatasetError: When the dataset does not have `confirm` method.
+
+        """
+        self._logger.info("Confirming dataset '%s'", name)
+        dataset = self.get_dataset(name)
+
+        if hasattr(dataset, "confirm"):
+            dataset.confirm()
+        else:
+            raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")

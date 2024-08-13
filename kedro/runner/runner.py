@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any, Collection, Iterable, Iterator
 from more_itertools import interleave
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import AbstractDataCatalog, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 
 if TYPE_CHECKING:
@@ -54,6 +54,52 @@ class AbstractRunner(ABC):
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(self.__module__)
+
+    def run_new(
+        self,
+        pipeline: Pipeline,
+        catalog: AbstractDataCatalog,
+        hook_manager: PluginManager | None = None,
+        session_id: str | None = None,
+    ) -> dict[str, Any]:
+        hook_or_null_manager = hook_manager or _NullPluginManager()
+
+        # Check which datasets used in the pipeline are in the catalog or match
+        # a pattern in the catalog
+        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
+
+        # Check if there are any input datasets that aren't in the catalog and
+        # don't match a pattern in the catalog.
+        unsatisfied = pipeline.inputs() - set(registered_ds)
+
+        if unsatisfied:
+            raise ValueError(
+                f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
+            )
+
+        # Identify MemoryDataset in the catalog
+        memory_datasets = {
+            ds_name
+            for ds_name, ds in catalog.datasets.items()
+            if isinstance(ds, MemoryDataset)
+        }
+
+        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
+        # in the catalog and include MemoryDataset.
+        free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
+
+        # Register the default dataset pattern with the catalog
+        catalog.add_runtime_patterns(dataset_patterns=self._extra_dataset_patterns)
+
+        if self._is_async:
+            self._logger.info(
+                "Asynchronous mode is enabled for loading and saving data"
+            )
+        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
+
+        self._logger.info("Pipeline execution completed successfully.")
+
+        return {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
 
     def run(
         self,

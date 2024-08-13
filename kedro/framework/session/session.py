@@ -22,6 +22,7 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
+from kedro.io import AbstractDataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import _find_kedro_project
@@ -286,6 +287,7 @@ class KedroSession:
         to_outputs: Iterable[str] | None = None,
         load_versions: dict[str, str] | None = None,
         namespace: str | None = None,
+        new_catalog: bool | None = None,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -310,6 +312,8 @@ class KedroSession:
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
             namespace: The namespace of the nodes that is being run.
+            new_catalog: A boolean flag indicating whether KedroDataCatalog(AbstractDataCatalog)
+                should be used instead DataCatalog.
         Raises:
             ValueError: If the named or `__default__` pipeline is not
                 defined by `register_pipelines`.
@@ -376,10 +380,16 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(
-            save_version=save_version,
-            load_versions=load_versions,
-        )
+        if new_catalog:
+            catalog = context._get_catalog_new(
+                save_version=save_version,
+                load_versions=load_versions,
+            )
+        else:
+            catalog = context._get_catalog(
+                save_version=save_version,
+                load_versions=load_versions,
+            )
 
         # Run the runner
         hook_manager = self._hook_manager
@@ -394,9 +404,14 @@ class KedroSession:
         )
 
         try:
-            run_result = runner.run(
-                filtered_pipeline, catalog, hook_manager, session_id
-            )
+            if isinstance(catalog, AbstractDataCatalog):
+                run_result = runner.run_new(
+                    filtered_pipeline, catalog, hook_manager, session_id
+                )
+            else:
+                run_result = runner.run(
+                    filtered_pipeline, catalog, hook_manager, session_id
+                )
             self._run_called = True
         except Exception as error:
             hook_manager.hook.on_pipeline_error(

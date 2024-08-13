@@ -61,6 +61,7 @@ param_group.param1:value1."""
 INPUT_FILE_HELP = """Name of the requirements file to compile."""
 OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
 CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
+NEW_CATALOG_ARG_HELP = """Use KedroDataCatalog(AbstractDataCatalog) instead of DataCatalog to run project."""
 
 
 @click.group(name="Kedro")
@@ -198,6 +199,7 @@ def package(metadata: ProjectMetadata) -> None:
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
+@click.option("--new_catalog", "new_catalog", is_flag=True, help=NEW_CATALOG_ARG_HELP)
 def run(  # noqa: PLR0913
     tags: str,
     env: str,
@@ -214,6 +216,7 @@ def run(  # noqa: PLR0913
     conf_source: str,
     params: dict[str, Any],
     namespace: str,
+    new_catalog: bool,
 ) -> None:
     """Run the pipeline."""
 
@@ -235,4 +238,5 @@ def run(  # noqa: PLR0913
             load_versions=load_versions,
             pipeline_name=pipeline,
             namespace=namespace,
+            new_catalog=new_catalog,
         )

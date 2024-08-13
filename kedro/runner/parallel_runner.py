@@ -12,9 +12,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Iterable
-
-from pluggy import PluginManager
+from typing import TYPE_CHECKING, Any, Iterable
 
 from kedro.framework.hooks.manager import (
     _create_hook_manager,
@@ -28,9 +26,13 @@ from kedro.io import (
     MemoryDataset,
     SharedMemoryDataset,
 )
-from kedro.pipeline import Pipeline
-from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
+
+if TYPE_CHECKING:
+    from pluggy import PluginManager
+
+    from kedro.pipeline import Pipeline
+    from kedro.pipeline.node import Node
 
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61

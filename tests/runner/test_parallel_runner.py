@@ -102,7 +102,7 @@ class TestMaxWorkers:
         cpu_cores,
         user_specified_number,
         expected_number,
-    ):  # noqa: PLR0913
+    ):
         """
         The system has 2 cores, but we initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 processes.
@@ -198,7 +198,7 @@ class TestInvalidParallelRunner:
         pipeline = modular_pipeline([node(return_not_serialisable, "A", "B")])
         catalog.add_feed_dict(feed_dict={"A": 42})
         pattern = (
-            rf"{str(data.__class__)} cannot be serialised. ParallelRunner implicit "
+            rf"{data.__class__!s} cannot be serialised. ParallelRunner implicit "
             rf"memory datasets can only be used with serialisable data"
         )
 
@@ -313,7 +313,6 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        # noqa: no-member
         catalog = DataCatalog(
             {"dataset": runner._manager.LoggingDataset(log, "dataset")}
         )

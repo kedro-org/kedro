@@ -221,7 +221,6 @@ def _assert_requirements_ok(
         )
 
 
-# noqa: PLR0913
 def _assert_template_ok(
     result,
     tools="none",

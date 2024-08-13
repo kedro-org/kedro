@@ -60,7 +60,7 @@ def _bootstrap_subprocess(
 
 def _run_node_synchronization(  # noqa: PLR0913
     node: Node,
-    catalog: DataCatalog,
+    catalog: DataCatalog | AbstractDataCatalog,
     is_async: bool = False,
     session_id: str | None = None,
     package_name: str | None = None,
@@ -226,9 +226,19 @@ class ParallelRunner(AbstractRunner):
                 catalog.exists(dataset)
             except DatasetNotFoundError:
                 pass
-        for name, ds in catalog._datasets.items():
-            if isinstance(ds, SharedMemoryDataset):
-                ds.set_manager(self._manager)
+
+        if isinstance(catalog, DataCatalog):
+            for _, ds in catalog._datasets.items():
+                if isinstance(ds, SharedMemoryDataset):
+                    ds.set_manager(self._manager)
+        else:
+            # catalog.datasets returns deep copy of datasets dictionary.
+            # To set manager we expect modifying dataset in the catalog (as above).
+            # We temporarily use the following method which returns a reference
+            # to the dataset object, and we can modify it.
+            for ds_name, ds in catalog.datasets.items():
+                if isinstance(ds, SharedMemoryDataset):
+                    catalog[ds_name].set_manager(self._manager)
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
@@ -247,7 +257,7 @@ class ParallelRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: DataCatalog | AbstractDataCatalog,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:

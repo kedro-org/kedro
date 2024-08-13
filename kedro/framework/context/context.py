@@ -4,18 +4,20 @@ from __future__ import annotations
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 from warnings import warn
 
 from attrs import define, field
 from omegaconf import OmegaConf
-from pluggy import PluginManager
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import DataCatalog
+from kedro.io import DataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
+
+if TYPE_CHECKING:
+    from pluggy import PluginManager
 
 
 def _is_relative_path(path_string: str) -> bool:
@@ -124,13 +126,13 @@ def _validate_transcoded_datasets(catalog: DataCatalog) -> None:
     """Validates transcoded datasets are correctly named
 
     Args:
-        catalog (DataCatalog): The catalog object containing the
-        datasets to be validated.
+        catalog: The catalog object containing the datasets to be
+            validated.
 
     Raises:
         ValueError: If a dataset name does not conform to the expected
-        transcoding naming conventions,a ValueError is raised by the
-        `_transcode_split` function.
+            transcoding naming conventions,a ValueError is raised by the
+            `_transcode_split` function.
 
     """
     for dataset_name in catalog._datasets.keys():
@@ -197,7 +199,7 @@ class KedroContext:
         try:
             params = self.config_loader["parameters"]
         except MissingConfigException as exc:
-            warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
+            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
             params = {}
 
         if self._extra_params:

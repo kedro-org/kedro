@@ -6,13 +6,15 @@ from __future__ import annotations
 
 from collections import Counter
 from itertools import chain
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from pluggy import PluginManager
-
-from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner, run_node
+
+if TYPE_CHECKING:
+    from pluggy import PluginManager
+
+    from kedro.io import DataCatalog
+    from kedro.pipeline import Pipeline
 
 
 class SequentialRunner(AbstractRunner):

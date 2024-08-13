@@ -1,5 +1,4 @@
 """Behave environment setup commands."""
-# noqa: unused-argument
 from __future__ import annotations
 
 import os
@@ -65,7 +64,7 @@ def _setup_context_with_venv(context, venv_dir):
     path = context.env["PATH"].split(os.pathsep)
     path = [p for p in path if not (Path(p).parent / "pyvenv.cfg").is_file()]
     path = [p for p in path if not (Path(p).parent / "conda-meta").is_dir()]
-    path = [str(bin_dir)] + path
+    path = [str(bin_dir), *path]
     context.env["PATH"] = os.pathsep.join(path)
 
     # Create an empty pip.conf file and point pip to it

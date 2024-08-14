@@ -155,15 +155,20 @@ def test_rich_format():
     )
 
 
-def test_has_rich_handler():
+def test_has_rich_handler_true():
     test_logger = logging.getLogger("test_logger")
-    assert not _has_rich_handler(test_logger)
-    _has_rich_handler.cache_clear()
     if importlib.util.find_spec("rich"):
         from kedro.logging import RichHandler
 
         test_logger.addHandler(RichHandler())
         assert _has_rich_handler(test_logger)
+    else:
+        pass
+
+
+def test_has_rich_handler_false():
+    test_logger = logging.getLogger("test_logger")
+    assert not _has_rich_handler(test_logger)
 
 
 def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):

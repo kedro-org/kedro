@@ -2,6 +2,7 @@ import importlib
 import logging
 import sys
 from pathlib import Path
+from unittest import mock
 
 import pytest
 import yaml
@@ -157,10 +158,12 @@ def test_rich_format():
 
 def test_has_rich_handler():
     test_logger = logging.getLogger("test_logger")
-    assert not _has_rich_handler(test_logger)
+    with mock.patch("builtins.__import__", side_effect=ImportError):
+        assert not _has_rich_handler(test_logger)
     _has_rich_handler.cache_clear()
+
     if importlib.util.find_spec("rich"):
-        from kedro.logging import RichHandler
+        from rich.logging import RichHandler
 
         test_logger.addHandler(RichHandler())
         assert _has_rich_handler(test_logger)

@@ -1,3 +1,4 @@
+import importlib
 import logging
 import sys
 from pathlib import Path
@@ -6,7 +7,6 @@ import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
-from kedro.logging import RichHandler
 from kedro.utils import _format_rich, _has_rich_handler
 
 
@@ -159,8 +159,11 @@ def test_has_rich_handler():
     test_logger = logging.getLogger("test_logger")
     assert not _has_rich_handler(test_logger)
     _has_rich_handler.cache_clear()
-    test_logger.addHandler(RichHandler())
-    assert _has_rich_handler(test_logger)
+    if importlib.util.find_spec("rich"):
+        from kedro.logging import RichHandler
+
+        test_logger.addHandler(RichHandler())
+        assert _has_rich_handler(test_logger)
 
 
 def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):

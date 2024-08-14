@@ -8,11 +8,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Union
 
-try:
-    from kedro.logging import RichHandler
-except ImportError:
-    pass
-
 _PYPROJECT = "pyproject.toml"
 
 
@@ -91,7 +86,7 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
 def _has_rich_handler(logger: logging.Logger) -> bool:
     """Returns true if the logger has a RichHandler attached."""
     try:
-        importlib.util.find_spec("rich")
+        from rich.logging import RichHandler
     except ImportError:
         return False
     return any(isinstance(handler, RichHandler) for handler in logger.handlers)

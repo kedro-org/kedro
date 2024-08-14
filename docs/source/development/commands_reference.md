@@ -157,7 +157,6 @@ from kedro.framework.cli.project import (
     TAG_ARG_HELP,
     TO_NODES_HELP,
     TO_OUTPUTS_HELP,
-    project_group,
 )
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
@@ -177,7 +176,7 @@ def cli():
     """Command line tools for manipulating a Kedro project."""
 
 
-@project_group.command()
+@cli.command()
 @click.option(
     "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
 )

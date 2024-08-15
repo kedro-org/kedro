@@ -15,6 +15,7 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
+from multiprocessing import Lock
 from typing import TYPE_CHECKING, Any, Collection, Iterable, Iterator
 
 from more_itertools import interleave
@@ -27,6 +28,8 @@ if TYPE_CHECKING:
     from pluggy import PluginManager
 
     from kedro.pipeline.node import Node
+
+load_dataset_lock = Lock()
 
 
 class AbstractRunner(ABC):
@@ -494,7 +497,9 @@ def _run_node_sequential(
 
     for name in node.inputs:
         hook_manager.hook.before_dataset_loaded(dataset_name=name, node=node)
+        load_dataset_lock.acquire()
         inputs[name] = catalog.load(name)
+        load_dataset_lock.release()
         hook_manager.hook.after_dataset_loaded(
             dataset_name=name, data=inputs[name], node=node
         )

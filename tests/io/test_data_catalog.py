@@ -28,6 +28,7 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 
+
 @pytest.fixture
 def filepath(tmp_path):
     return (tmp_path / "some" / "dir" / "test.csv").as_posix()
@@ -464,7 +465,6 @@ class TestDataCatalog:
             "params:model_options",
             "params:model_options.random_state",
         }
-
 
 
 class TestDataCatalogFromConfig:

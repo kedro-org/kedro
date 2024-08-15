@@ -353,6 +353,39 @@ class TestOmegaConfigLoader:
             OmegaConfigLoader(str(tmp_path))["catalog"]
 
     @use_config_dir
+    def test_same_namespace_different_key_in_same_dir(self, tmp_path):
+        """Check no error if 2 files in the same config dir contain
+        the same top-level key but different subkeys"""
+
+        dup_yaml_1 = tmp_path / _BASE_ENV / "parameters_1.yml"
+        dup_yaml_2 = tmp_path / _BASE_ENV / "parameters_2.yml"
+        config_1 = {"namespace1": {"class1": {"key1": "value1_1", "key2": "value1_2"}}}
+        config_2 = {"namespace1": {"class2": {"key1": "value2_1", "key2": "value2_2"}}}
+
+        _write_yaml(dup_yaml_1, config_1)
+        _write_yaml(dup_yaml_2, config_2)
+
+        conf = OmegaConfigLoader(
+            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+        )["parameters"]
+        assert (
+            OmegaConf.select(OmegaConf.create(conf), ".namespace1.class1.key1")
+            == "value1_1"
+        )
+        assert (
+            OmegaConf.select(OmegaConf.create(conf), ".namespace1.class1.key2")
+            == "value1_2"
+        )
+        assert (
+            OmegaConf.select(OmegaConf.create(conf), ".namespace1.class2.key1")
+            == "value2_1"
+        )
+        assert (
+            OmegaConf.select(OmegaConf.create(conf), ".namespace1.class2.key2")
+            == "value2_2"
+        )
+
+    @use_config_dir
     def test_pattern_key_not_found(self, tmp_path):
         """Check the error if no config files satisfy a given pattern"""
         key = "non-existent-pattern"

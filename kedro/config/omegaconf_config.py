@@ -335,7 +335,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 ) from exc
 
         seen_file_to_keys = {
-            file: set(config.keys()) for file, config in config_per_file.items()
+            file: self._get_all_keys(config) for file, config in config_per_file.items()
         }
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
@@ -356,6 +356,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
             ).items()
             if not k.startswith("_")
         }
+
+    def _get_all_keys(self, cfg: dict | DictConfig, parent_key: str = ""):
+        keys = set()
+        if isinstance(cfg, DictConfig):
+            cfg = OmegaConf.to_container(cfg, resolve=False)
+        for k, v in cfg.items():
+            full_key = f"{parent_key}.{k}" if parent_key else k
+            if isinstance(v, (dict, DictConfig)):
+                keys.update(self._get_all_keys(v, full_key))
+            else:
+                keys.add(full_key)
+        return keys
 
     def _is_valid_config_path(self, path: Path) -> bool:
         """Check if given path is a file path and file type is yaml or json."""

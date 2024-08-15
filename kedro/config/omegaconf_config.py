@@ -343,7 +343,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if not aggregate_config:
             return {}
 
-        if key == "parameters":
+        # Only merge in runtime parameters ones for the base env
+        is_base_env = conf_path.endswith(self.base_env)
+        if key == "parameters" and is_base_env:
             # Merge with runtime parameters only for "parameters"
             return OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True

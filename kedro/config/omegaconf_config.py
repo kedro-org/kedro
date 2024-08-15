@@ -335,7 +335,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 ) from exc
 
         seen_file_to_keys = {
-            file: self._get_all_keys(config) for file, config in config_per_file.items()
+            file: self._get_all_keys(OmegaConf.to_container(config, resolve=False))
+            for file, config in config_per_file.items()
         }
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
@@ -357,20 +358,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
             if not k.startswith("_")
         }
 
-    def _get_all_keys(self, cfg: DictConfig, parent_key: str = "") -> set[str]:
+    def _get_all_keys(self, cfg: dict, parent_key: str = "") -> set[str]:
         keys: set[str] = set()
-        cfg_dict = OmegaConf.to_container(cfg, resolve=False)
 
-        if isinstance(cfg_dict, dict):
-            for k, v in cfg_dict.items():
-                k_str = str(k)
-                full_key = f"{parent_key}.{k_str}" if parent_key else k_str
-                if isinstance(v, DictConfig):
-                    keys.update(self._get_all_keys(v, full_key))
-                elif isinstance(v, dict):
-                    keys.update(self._get_all_keys(OmegaConf.create(v), full_key))
-                else:
-                    keys.add(full_key)
+        for k, v in cfg.items():
+            k_str = str(k)
+            full_key = f"{parent_key}.{k_str}" if parent_key else k_str
+            if isinstance(v, dict):
+                keys.update(self._get_all_keys(v, full_key))
+            else:
+                keys.add(full_key)
         return keys
 
     def _is_valid_config_path(self, path: Path) -> bool:

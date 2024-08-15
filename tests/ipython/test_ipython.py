@@ -20,7 +20,12 @@ from kedro.ipython import (
 )
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
-from .conftest import dummy_function, dummy_function_with_loop, dummy_nested_function
+from .conftest import (
+    dummy_function,
+    dummy_function_with_loop,
+    dummy_multiline_import_function,
+    dummy_nested_function,
+)
 
 
 class TestLoadKedroObjects:
@@ -338,13 +343,24 @@ import logging.config  # noqa Dummy import"""
             in str(excinfo.value)
         )
 
-    def test_prepare_imports(self, mocker, dummy_module_literal):
+    def test_prepare_imports(self, mocker):
         func_imports = """import logging  # noqa
 from logging import config  # noqa
 import logging as dummy_logging  # noqa
 import logging.config  # noqa Dummy import"""
 
         result = _prepare_imports(dummy_function)
+        assert result == func_imports
+
+    def test_prepare_imports_multiline(self, mocker):
+        func_imports = """from logging import (
+INFO,
+DEBUG,
+WARN,
+ERROR,
+)"""
+
+        result = _prepare_imports(dummy_multiline_import_function)
         assert result == func_imports
 
     def test_prepare_imports_func_not_found(self, mocker):

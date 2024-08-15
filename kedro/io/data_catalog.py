@@ -213,6 +213,7 @@ class DataCatalog:
         self._load_versions = load_versions or {}
         self._save_version = save_version
         self._default_pattern = default_pattern or {}
+        self._use_rich_markup = _has_rich_handler()
 
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -536,9 +537,7 @@ class DataCatalog:
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            _format_rich(name, "dark_orange")
-            if _has_rich_handler(self._logger)
-            else name,
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
             extra={"markup": True},
         )
@@ -580,9 +579,7 @@ class DataCatalog:
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            _format_rich(name, "dark_orange")
-            if _has_rich_handler(self._logger)
-            else name,
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
             extra={"markup": True},
         )

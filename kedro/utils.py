@@ -4,7 +4,6 @@ of kedro package.
 import importlib
 import logging
 import os
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Union
 
@@ -82,9 +81,10 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     return None
 
 
-@lru_cache(maxsize=None)
-def _has_rich_handler(logger: logging.Logger) -> bool:
+def _has_rich_handler(logger: logging.Logger = None) -> bool:
     """Returns true if the logger has a RichHandler attached."""
+    if not logger:
+        logger = logging.getLogger()  # User root by default
     try:
         from rich.logging import RichHandler
     except ImportError:

@@ -160,7 +160,6 @@ def test_has_rich_handler():
     test_logger = logging.getLogger("test_logger")
     with mock.patch("builtins.__import__", side_effect=ImportError):
         assert not _has_rich_handler(test_logger)
-    _has_rich_handler.cache_clear()
 
     if importlib.util.find_spec("rich"):
         from rich.logging import RichHandler

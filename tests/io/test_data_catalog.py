@@ -27,6 +27,7 @@ from kedro.io.core import (
     generate_timestamp,
     parse_dataset_definition,
 )
+from kedro.utils import _has_rich_handler
 
 
 @pytest.fixture
@@ -465,6 +466,9 @@ class TestDataCatalog:
             "params:model_options",
             "params:model_options.random_state",
         }
+
+    def test_logging_rich_markup(self, data_catalog):
+        assert _has_rich_handler()
 
 
 class TestDataCatalogFromConfig:

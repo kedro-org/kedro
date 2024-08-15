@@ -6,13 +6,14 @@
 ## Bug fixes and other changes
 * Moved `_find_run_command()` and `_find_run_command_in_plugins()` from `__main__.py` in the project template to the framework itself.
 * Fixed a bug where `%load_node` breaks with multi-lines import statements.
-* Fixed a bug where `OmegaConfigLoader` breaks when using same high level key in different files.
+* Fixed a bug where `OmegaConfigLoader` breaks when using different keys but same high-level key.
 
 ## Breaking changes to the API
 
 ## Documentation changes
 
 ## Community contributions
+* [Puneet](https://github.com/puneeter)
 
 # Release 0.19.7
 

@@ -949,6 +949,10 @@ class TestKedroSession:
             session.run(runner=mock_runner_class)
 
 
+    def test_logging_rich_markup(self, fake_project):
+        session = KedroSession.create(fake_project)
+        assert _has_rich_handler()
+
 @pytest.fixture
 def fake_project_with_logging_file_handler(fake_project):
     logging_config = {

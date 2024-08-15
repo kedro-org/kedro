@@ -5,7 +5,7 @@ import importlib
 import logging
 import os
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 _PYPROJECT = "pyproject.toml"
 
@@ -81,7 +81,7 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     return None
 
 
-def _has_rich_handler(logger: logging.Logger = None) -> bool:
+def _has_rich_handler(logger: Optional[logging.Logger] = None) -> bool:
     """Returns true if the logger has a RichHandler attached."""
     if not logger:
         logger = logging.getLogger()  # User root by default

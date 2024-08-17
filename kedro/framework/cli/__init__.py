@@ -1,5 +1,4 @@
-"""``kedro.framework.cli`` implements commands available from Kedro's CLI.
-"""
+"""``kedro.framework.cli`` implements commands available from Kedro's CLI."""
 
 # The constant need to be defined first otherwise it causes circular depdencies
 ORANGE = (255, 175, 0)

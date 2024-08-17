@@ -2,6 +2,7 @@
 For more information, please see
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#marking-hooks).
 """
+
 import pluggy
 
 CLI_HOOK_NAMESPACE = "kedro_cli"

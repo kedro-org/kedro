@@ -2,6 +2,7 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

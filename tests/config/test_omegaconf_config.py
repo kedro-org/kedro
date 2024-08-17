@@ -649,8 +649,8 @@ class TestOmegaConfigLoader:
 
     @use_config_dir
     def test_load_config_from_tar_file(self, tmp_path):
-        subprocess.run(  # noqa: PLW1510
-            [  # noqa: S603, S607
+        subprocess.run(  # noqa: PLW1510,S603
+            [  # noqa: S607
                 "tar",
                 "--exclude=local/*.yml",
                 "-czf",
@@ -1029,7 +1029,7 @@ class TestOmegaConfigLoader:
         # read successfully
         conf["parameters"]
 
-        mocker.patch.object(conf, "_is_hidden", return_value=False)  #
+        mocker.patch.object(conf, "_is_hidden", return_value=False)
         with pytest.raises(ValueError, match="Duplicate keys found in"):
             # fail because of reading the hidden files and get duplicate keys
             conf["parameters"]

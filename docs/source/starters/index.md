@@ -43,6 +43,12 @@ project_name: My First Kedro Project
 repo_name: testing-kedro
 python_package: test_kedro
 ```
+
+``` {note}
+When the `--config` flag is used together with `--name`, `--tools`, or `--example`, the values provided directly on the CLI will overwrite those specified in the configuration file.
+```
+
+
 **Use `kedro new` with a `--starter`** <br />
 You can create a new Kedro project with a [starter](./starters.md) that adds code for a common project use case.
 

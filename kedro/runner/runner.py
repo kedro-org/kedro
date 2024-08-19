@@ -15,7 +15,7 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from multiprocessing import Lock
+from threading import Lock
 from typing import TYPE_CHECKING, Any, Collection, Iterable, Iterator
 
 from more_itertools import interleave

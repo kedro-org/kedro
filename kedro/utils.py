@@ -2,9 +2,10 @@
 of kedro package.
 """
 import importlib
+import logging
 import os
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 _PYPROJECT = "pyproject.toml"
 
@@ -78,3 +79,19 @@ def _find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
         if _is_project(parent_dir):
             return parent_dir
     return None
+
+
+def _has_rich_handler(logger: Optional[logging.Logger] = None) -> bool:
+    """Returns true if the logger has a RichHandler attached."""
+    if not logger:
+        logger = logging.getLogger()  # User root by default
+    try:
+        from rich.logging import RichHandler
+    except ImportError:
+        return False
+    return any(isinstance(handler, RichHandler) for handler in logger.handlers)
+
+
+def _format_rich(value: str, markup: str) -> str:
+    """Format string with rich markup"""
+    return f"[{markup}]{value}[/{markup}]"

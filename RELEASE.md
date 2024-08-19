@@ -1,4 +1,12 @@
-# Upcoming Release 0.19.8
+# Upcoming Release
+
+## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Documentation changes
+## Community contributions
+
+# Release 0.19.8
 
 ## Major features and improvements
 * Made default run entrypoint in `__main__.py` work in interactive environments such as IPyhon and Databricks.
@@ -7,6 +15,7 @@
 * Moved `_find_run_command()` and `_find_run_command_in_plugins()` from `__main__.py` in the project template to the framework itself.
 * Fixed a bug where `%load_node` breaks with multi-lines import statements.
 * Fixed a regression where `rich` mark up logs stop showing since 0.19.7.
+
 ## Breaking changes to the API
 
 ## Documentation changes

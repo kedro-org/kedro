@@ -23,7 +23,7 @@ from kedro.framework.project import (
     validate_settings,
 )
 from kedro.io.core import generate_timestamp
-from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.runner import AbstractRunner, SequentialRunner, ThreadRunner
 from kedro.utils import _find_kedro_project
 
 if TYPE_CHECKING:
@@ -394,6 +394,10 @@ class KedroSession:
         )
 
         try:
+            # Solution 2
+            if isinstance(runner, ThreadRunner):
+                for ds in filtered_pipeline.datasets():
+                    _ = catalog._get_dataset(ds)
             run_result = runner.run(
                 filtered_pipeline, catalog, hook_manager, session_id
             )

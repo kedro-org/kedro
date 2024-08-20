@@ -3,6 +3,7 @@ a Directed Acyclic Graph, sequentially or in parallel. The ``Pipeline`` class
 offers quick access to input dependencies,
 produced outputs and execution order.
 """
+
 from __future__ import annotations
 
 import json

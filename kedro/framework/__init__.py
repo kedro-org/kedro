@@ -1,1 +1,1 @@
-"""``kedro.framework`` provides Kedro's framework components """
+"""``kedro.framework`` provides Kedro's framework components"""

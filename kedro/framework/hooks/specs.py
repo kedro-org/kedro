@@ -2,6 +2,7 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -49,7 +50,7 @@ class NodeSpecs:
     """Namespace that defines all specifications for a node's lifecycle hooks."""
 
     @hook_spec
-    def before_node_run(  # noqa: PLR0913
+    def before_node_run(
         self,
         node: Node,
         catalog: DataCatalog,

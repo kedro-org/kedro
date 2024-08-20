@@ -3,6 +3,7 @@
 This module implements commands available from the kedro CLI for creating
 projects.
 """
+
 from __future__ import annotations
 
 import logging

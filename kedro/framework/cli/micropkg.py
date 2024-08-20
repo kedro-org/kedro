@@ -1,4 +1,5 @@
 """A collection of CLI commands for working with Kedro micro-packages."""
+
 # ruff: noqa: I001
 from __future__ import annotations
 
@@ -410,7 +411,7 @@ def safe_extract(tar: tarfile.TarFile, path: Path) -> None:
         if not _is_within_directory(path, member_path):
             raise Exception("Failed to safely extract tar file.")
         safe_members.append(member)
-    tar.extractall(path, members=safe_members)  # nosec B202
+    tar.extractall(path, members=safe_members)  # noqa S202
     # The nosec is still required because bandit still flags this.
     # Related issue: https://github.com/PyCQA/bandit/issues/1038
 

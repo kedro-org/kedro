@@ -4,6 +4,7 @@ use a ``DataCatalog``, you need to instantiate it with a dictionary of data
 sets. Then it will act as a single point of reference for your calls,
 relaying load and save functions to the underlying data sets.
 """
+
 from __future__ import annotations
 
 import copy

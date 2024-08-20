@@ -1,4 +1,5 @@
 """This module implements Kedro session responsible for project lifecycle."""
+
 from __future__ import annotations
 
 import getpass
@@ -35,14 +36,14 @@ if TYPE_CHECKING:
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
     path = str(project_path)
     try:
-        res = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"],  # noqa: S603, S607
+        res = subprocess.check_output(  # noqa: S603
+            ["git", "rev-parse", "--short", "HEAD"],  # noqa: S607
             cwd=path,
             stderr=subprocess.STDOUT,
         )
         git_data: dict[str, Any] = {"commit_sha": res.decode().strip()}
-        git_status_res = subprocess.check_output(
-            ["git", "status", "--short"],  # noqa: S603, S607
+        git_status_res = subprocess.check_output(  # noqa: S603
+            ["git", "status", "--short"],  # noqa: S607
             cwd=path,
             stderr=subprocess.STDOUT,
         )
@@ -99,7 +100,7 @@ class KedroSession:
 
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         session_id: str,
         package_name: str | None = None,
@@ -126,7 +127,7 @@ class KedroSession:
         )
 
     @classmethod
-    def create(  # noqa: PLR0913
+    def create(
         cls,
         project_path: Path | str | None = None,
         save_on_close: bool = True,

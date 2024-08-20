@@ -1,5 +1,6 @@
 """``kedro.framework.project`` module provides utility to
 configure a Kedro project and access its settings."""
+
 from __future__ import annotations
 
 import importlib

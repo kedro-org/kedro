@@ -5,7 +5,7 @@ default_stages: [commit, manual]
 
 repos:
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.1.8
+      rev: v0.6.1
       hooks:
         - id: ruff
           name: "ruff on kedro/, tests/ and docs/"

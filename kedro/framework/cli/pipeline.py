@@ -1,4 +1,5 @@
 """A collection of CLI commands for working with Kedro pipelines."""
+
 from __future__ import annotations
 
 import re

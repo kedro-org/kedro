@@ -263,7 +263,7 @@ class TestOmegaConfigLoader:
         pattern = (
             r"Duplicate keys found in "
             r"(.*catalog\.yml and .*nested\.yml|.*nested\.yml and .*catalog\.yml)"
-            r"\: cars\.filepath, cars\.save_args\.index, cars\.type, trains\.type"
+            r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
             OmegaConfigLoader(
@@ -285,17 +285,17 @@ class TestOmegaConfigLoader:
         pattern_catalog_nested = (
             r"Duplicate keys found in "
             r"(.*catalog\.yml and .*nested\.yml|.*nested\.yml and .*catalog\.yml)"
-            r"\: cars\.filepath, cars\.save_args\.index, cars\.type, trains\.type"
+            r"\: cars, trains"
         )
         pattern_catalog_local = (
             r"Duplicate keys found in "
             r"(.*catalog\.yml and .*local\.yml|.*local\.yml and .*catalog\.yml)"
-            r"\: cars\.filepath, cars\.save_args\.index, cars\.type"
+            r"\: cars"
         )
         pattern_nested_local = (
             r"Duplicate keys found in "
             r"(.*nested\.yml and .*local\.yml|.*local\.yml and .*nested\.yml)"
-            r"\: cars\.filepath, cars\.save_args\.index, cars\.type"
+            r"\: cars"
         )
 
         with pytest.raises(ValueError) as exc:
@@ -347,7 +347,7 @@ class TestOmegaConfigLoader:
         pattern = (
             r"Duplicate keys found in "
             r"(.*catalog\.yml and .*catalog\.json|.*catalog\.json and .*catalog\.yml)"
-            r"\: cars\.filepath, cars\.save_args\.index, cars\.type, trains\.type"
+            r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
             OmegaConfigLoader(str(tmp_path))["catalog"]

@@ -334,10 +334,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     f" unable to read line {line}, position {cursor}."
                 ) from exc
 
-        seen_file_to_keys = {
-            file: self._get_all_keys(OmegaConf.to_container(config, resolve=False))
-            for file, config in config_per_file.items()
-        }
+        if key == "parameters":
+            seen_file_to_keys = {
+                file: self._get_all_keys(OmegaConf.to_container(config, resolve=False))
+                for file, config in config_per_file.items()
+            }
+        else:
+            seen_file_to_keys = {
+                file: set(config.keys()) for file, config in config_per_file.items()
+            }
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
 

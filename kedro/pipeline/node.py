@@ -1,6 +1,7 @@
 """This module provides user-friendly functions for creating nodes as parts
 of Kedro pipelines.
 """
+
 from __future__ import annotations
 
 import copy

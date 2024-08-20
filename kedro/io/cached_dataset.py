@@ -2,6 +2,7 @@
 This module contains ``CachedDataset``, a dataset wrapper which caches in memory the data saved,
 so that the user avoids io operations with slow storage media
 """
+
 from __future__ import annotations
 
 import logging

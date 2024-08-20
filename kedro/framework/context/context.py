@@ -1,4 +1,5 @@
 """This module provides context for Kedro project."""
+
 from __future__ import annotations
 
 import logging

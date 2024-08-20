@@ -366,11 +366,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def _get_all_keys(self, cfg: dict, parent_key: str = "") -> set[str]:
         keys: set[str] = set()
 
-        for k, v in cfg.items():
-            k_str = str(k)
-            full_key = f"{parent_key}.{k_str}" if parent_key else k_str
-            if isinstance(v, dict):
-                keys.update(self._get_all_keys(v, full_key))
+        for key, value in cfg.items():
+            key_str = str(key)
+            full_key = f"{parent_key}.{key_str}" if parent_key else key_str
+            if isinstance(value, dict):
+                keys.update(self._get_all_keys(value, full_key))
             else:
                 keys.add(full_key)
         return keys

@@ -118,7 +118,46 @@ Each key-value pair is split on the first equals sign. The following example is 
 kedro run --params=param_key1=value1,param_key2=2.0
 ```
 Values provided in the CLI take precedence and overwrite parameters specified in configuration files. By default, runtime parameters get merged destructively, meaning that any configuration for that key **besides that given in the runtime parameters** is discarded.
-[This section describes how to change the merging strategy](#how-to-change-the-merge-strategy-used-by-omegaconfigloader).
+[This section describes how to change the merging strategy](advanced_configuration.md#how-to-change-the-merge-strategy-used-by-omegaconfigloader).
+
+For example, if you have the following parameters in your `base` and `local` environments:
+
+```yml
+# base/parameters.yml
+model_options:
+  model_params:
+    learning_date: "2023-11-01"
+    training_date: "2023-11-01"
+    data_ratio: 14
+
+data_options:
+  step_size: 123123
+```
+
+```yml
+# local/parameters.yml
+features:
+    rate: 123
+```
+
+And you provide the following parameter at runtime:
+
+```bash
+kedro run --params="model_options.model_params.training_date=2011-11-11"
+```
+
+The final merged result will be:
+```yml
+model_options:
+  model_params:
+    training_date: "2011-11-11"
+
+data_options:
+  step_size: 123123
+
+features:
+    rate: 123
+```
 
 * Parameter keys are _always_ treated as strings.
 * Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.

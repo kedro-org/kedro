@@ -7,11 +7,13 @@ from .abstract_config import (
     BadConfigException,
     MissingConfigException,
 )
+from .config_resolver import ConfigResolver
 from .omegaconf_config import OmegaConfigLoader
 
 __all__ = [
     "AbstractConfigLoader",
     "BadConfigException",
+    "ConfigResolver",
     "MissingConfigException",
     "OmegaConfigLoader",
 ]

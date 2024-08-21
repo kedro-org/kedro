@@ -10,6 +10,7 @@
 ## Breaking changes to the API
 
 ## Documentation changes
+* Add clarifications in docs explaining how runtime parameter resolution works.
 
 ## Community contributions
 

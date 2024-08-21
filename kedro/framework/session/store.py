@@ -1,4 +1,5 @@
 """This module implements a dict-like store object used to persist Kedro sessions."""
+
 from __future__ import annotations
 
 import logging

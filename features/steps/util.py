@@ -1,5 +1,5 @@
-"""Common functions for e2e testing.
-"""
+"""Common functions for e2e testing."""
+
 from __future__ import annotations
 
 import os

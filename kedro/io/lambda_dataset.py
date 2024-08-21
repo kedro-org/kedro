@@ -2,6 +2,7 @@
 providing custom load, save, and exists methods without extending
 ``AbstractDataset``.
 """
+
 from __future__ import annotations
 
 from typing import Any, Callable
@@ -76,7 +77,7 @@ class LambdaDataset(AbstractDataset):
         else:
             self.__release()
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,

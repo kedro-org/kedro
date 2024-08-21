@@ -1,4 +1,5 @@
 """Utilities for use with click."""
+
 from __future__ import annotations
 
 import difflib
@@ -442,7 +443,7 @@ def _config_file_callback(ctx: click.Context, param: Any, value: Any) -> Any:
 
     if value:
         config = OmegaConf.to_container(OmegaConf.load(value))[section]
-        for key, value in config.items():
+        for key, value in config.items():  # noqa: PLR1704
             _validate_config_file(key)
         ctx.default_map.update(config)
 

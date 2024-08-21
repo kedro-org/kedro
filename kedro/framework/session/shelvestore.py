@@ -1,6 +1,7 @@
 """This module implements a dict-like store object used to persist Kedro sessions.
 This module is separated from store.py to ensure it's only imported when exported explicitly.
 """
+
 from __future__ import annotations
 
 import dbm

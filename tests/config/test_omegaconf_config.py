@@ -1068,7 +1068,9 @@ class TestOmegaConfigLoader:
         # runtime params are resolved correctly in catalog
         assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
 
-    def test_runtime_params_resolution_with_env(self, tmp_path):
+    def test_runtime_params_resolution_with_soft_merge_base_env(self, tmp_path):
+        """Test that runtime_params get softly merged with the base environment when soft merge is set
+        for parameter merge"""
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         prod_params = tmp_path / "prod" / "parameters.yml"
         runtime_params = {
@@ -1108,7 +1110,8 @@ class TestOmegaConfigLoader:
         # runtime parameters are resolved correctly across parameter files from different environments
         assert conf["parameters"] == expected_parameters
 
-    def test_runtime_params_resolution_with_env2(self, tmp_path):
+    def test_runtime_params_resolution_default_run_env(self, tmp_path):
+        """Test that runtime_params overwrite merge with the default run environment"""
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         prod_params = tmp_path / "prod" / "parameters.yml"
         runtime_params = {"data_shift": 3}

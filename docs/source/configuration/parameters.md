@@ -117,7 +117,8 @@ Each key-value pair is split on the first equals sign. The following example is 
 ```bash
 kedro run --params=param_key1=value1,param_key2=2.0
 ```
-Values provided in the CLI take precedence and overwrite parameters specified in configuration files.
+Values provided in the CLI take precedence and overwrite parameters specified in configuration files. By default, runtime parameters get merged destructively, meaning that any configuration for that key **besides that given in the runtime parameters** is discarded.
+[This section describes how to change the merging strategy](#how-to-change-the-merge-strategy-used-by-omegaconfigloader).
 
 * Parameter keys are _always_ treated as strings.
 * Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.

@@ -122,7 +122,7 @@ Values provided in the CLI take precedence and overwrite parameters specified in
 
 For example, if you have the following parameters in your `base` and `local` environments:
 
-```yml
+```yaml
 # base/parameters.yml
 model_options:
   model_params:
@@ -134,7 +134,7 @@ data_options:
   step_size: 123123
 ```
 
-```yml
+```yaml
 # local/parameters.yml
 features:
     rate: 123
@@ -147,7 +147,7 @@ kedro run --params="model_options.model_params.training_date=2011-11-11"
 ```
 
 The final merged result will be:
-```yml
+```yaml
 model_options:
   model_params:
     training_date: "2011-11-11"

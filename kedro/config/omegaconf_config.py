@@ -334,17 +334,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     f" unable to read line {line}, position {cursor}."
                 ) from exc
 
-        if key == "parameters":
-            seen_file_to_keys = {
-                file: self._get_all_keys(OmegaConf.to_container(config, resolve=False))
-                for file, config in config_per_file.items()
-            }
-        else:
-            seen_file_to_keys = {
-                file: set(config.keys()) for file, config in config_per_file.items()
-            }
         aggregate_config = config_per_file.values()
-        self._check_duplicates(seen_file_to_keys)
+        self._check_duplicates(key, config_per_file)
 
         if not aggregate_config:
             return {}
@@ -363,7 +354,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             if not k.startswith("_")
         }
 
-    def _get_all_keys(self, cfg: dict, parent_key: str = "") -> set[str]:
+    def _get_all_keys(self, cfg: Any, parent_key: str = "") -> set[str]:
         keys: set[str] = set()
 
         for key, value in cfg.items():
@@ -438,15 +429,24 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 _config_logger.debug(msg)
                 OmegaConf.register_new_resolver(name=name, resolver=resolver)
 
-    @staticmethod
-    def _check_duplicates(seen_files_to_keys: dict[Path, set[Any]]) -> None:
+    def _check_duplicates(self, key: str, config_per_file: dict[Path, Any]) -> None:
+        if key == "parameters":
+            seen_file_to_keys = {
+                file: self._get_all_keys(OmegaConf.to_container(config, resolve=False))
+                for file, config in config_per_file.items()
+            }
+        else:
+            seen_file_to_keys = {
+                file: set(config.keys()) for file, config in config_per_file.items()
+            }
+
         duplicates = []
 
-        filepaths = list(seen_files_to_keys.keys())
+        filepaths = list(seen_file_to_keys.keys())
         for i, filepath1 in enumerate(filepaths, 1):
-            config1 = seen_files_to_keys[filepath1]
+            config1 = seen_file_to_keys[filepath1]
             for filepath2 in filepaths[i:]:
-                config2 = seen_files_to_keys[filepath2]
+                config2 = seen_file_to_keys[filepath2]
 
                 combined_keys = config1 & config2
                 overlapping_keys = {

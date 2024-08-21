@@ -4,6 +4,7 @@ use a ``DataCatalog``, you need to instantiate it with a dictionary of data
 sets. Then it will act as a single point of reference for your calls,
 relaying load and save functions to the underlying data sets.
 """
+
 from __future__ import annotations
 
 import copy
@@ -25,7 +26,7 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
-from kedro.logging import _format_rich, _has_rich_handler
+from kedro.utils import _format_rich, _has_rich_handler
 
 Patterns = Dict[str, Dict[str, Any]]
 
@@ -55,7 +56,7 @@ def _get_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
         raise KeyError(
             f"Unable to find credentials '{credentials_name}': check your data "
             "catalog and credentials configuration. See "
-            "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
+            "https://docs.kedro.org/en/stable/api/kedro.io.DataCatalog.html "
             "for an example."
         ) from exc
 
@@ -213,6 +214,7 @@ class DataCatalog:
         self._load_versions = load_versions or {}
         self._save_version = save_version
         self._default_pattern = default_pattern or {}
+        self._use_rich_markup = _has_rich_handler()
 
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -536,9 +538,7 @@ class DataCatalog:
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            _format_rich(name, "dark_orange")
-            if _has_rich_handler(self._logger)
-            else name,
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
             extra={"markup": True},
         )
@@ -580,9 +580,7 @@ class DataCatalog:
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            _format_rich(name, "dark_orange")
-            if _has_rich_handler(self._logger)
-            else name,
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
             extra={"markup": True},
         )

@@ -23,7 +23,7 @@ logger.debug("Useful information for debugging")
 You can use Rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) in your logging calls:
 
 ```python
-log.error("[bold red blink]Important error message![/]", extra={"markup": True})
+logger.error("[bold red blink]Important error message![/]", extra={"markup": True})
 ```
 
 ## How to customise Kedro logging

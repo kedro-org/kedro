@@ -66,7 +66,7 @@ class MyDataset(AbstractDataset):
 
 
 class MyVersionedDataset(AbstractVersionedDataset[str, str]):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         filepath: str,
         version: Version = None,
@@ -110,7 +110,7 @@ class MyVersionedDataset(AbstractVersionedDataset[str, str]):
 
 
 class MyLocalVersionedDataset(AbstractVersionedDataset[str, str]):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         filepath: str,
         version: Version = None,
@@ -206,7 +206,7 @@ def dummy_data():
 
 
 class TestCoreFunctions:
-    @pytest.mark.parametrize("var", [1, True] + FALSE_BUILTINS)
+    @pytest.mark.parametrize("var", [1, True, *FALSE_BUILTINS])
     def test_str_representation(self, var):
         var_str = pprint.pformat(var)
         filepath_str = pprint.pformat(PurePosixPath("."))
@@ -292,7 +292,7 @@ class TestCoreFunctions:
         "input", [{"key1": "invalid value"}, {"key2": "invalid;value"}]
     )
     def test_validate_forbidden_chars(self, input):
-        key = list(input.keys())[0]
+        key = next(iter(input.keys()))
         expected_error_message = (
             f"Neither white-space nor semicolon are allowed in '{key}'."
         )
@@ -484,7 +484,7 @@ class MyLegacyDataset(AbstractDataset):
 
 
 class MyLegacyVersionedDataset(AbstractVersionedDataset[str, str]):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         filepath: str,
         version: Version = None,

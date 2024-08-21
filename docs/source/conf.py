@@ -478,7 +478,7 @@ def autolink_classes_and_methods(lines):
             lines[i] = re.sub(existing, rf"{replacement}", lines[i])
 
 
-def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
+def autodoc_process_docstring(app, what, name, obj, options, lines):
     try:
         # guarded method to make sure build never fails
         log_suggestions(lines, name)
@@ -488,7 +488,7 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PL
             style(
                 "Failed to check for class name mentions that can be "
                 f"converted to reStructuredText links in docstring of {name}. "
-                f"Error is: \n{str(e)}",
+                f"Error is: \n{e!s}",
                 fg="red",
             )
         )
@@ -517,7 +517,7 @@ except Exception as e:
         style(
             "Failed to create list of (regex, reStructuredText link "
             "replacement) for class names and method names in docstrings. "
-            f"Error is: \n{str(e)}",
+            f"Error is: \n{e!s}",
             fg="red",
         )
     )

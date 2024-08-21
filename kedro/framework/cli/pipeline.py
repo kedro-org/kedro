@@ -1,11 +1,12 @@
 """A collection of CLI commands for working with Kedro pipelines."""
+
 from __future__ import annotations
 
 import re
 import shutil
 from pathlib import Path
 from textwrap import indent
-from typing import Any, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import click
 
@@ -17,7 +18,9 @@ from kedro.framework.cli.utils import (
     env_option,
 )
 from kedro.framework.project import settings
-from kedro.framework.startup import ProjectMetadata
+
+if TYPE_CHECKING:
+    from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
@@ -65,7 +68,7 @@ def _assert_pkg_name_ok(pkg_name: str) -> None:
         raise KedroCliError(message)
 
 
-def _check_pipeline_name(ctx: click.Context, param: Any, value: str) -> str:  # noqa: unused-argument
+def _check_pipeline_name(ctx: click.Context, param: Any, value: str) -> str:
     if value:
         _assert_pkg_name_ok(value)
     return value
@@ -105,7 +108,7 @@ def create_pipeline(
     skip_config: bool,
     env: str,
     **kwargs: Any,
-) -> None:  # noqa: unused-argument
+) -> None:
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     project_root = metadata.project_path / metadata.project_name
@@ -148,7 +151,7 @@ def create_pipeline(
 @click.pass_obj  # this will pass the metadata as first argument
 def delete_pipeline(
     metadata: ProjectMetadata, /, name: str, env: str, yes: bool, **kwargs: Any
-) -> None:  # noqa: unused-argument
+) -> None:
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE

@@ -1,12 +1,12 @@
 """This module provides a set of classes which underpin the data loading and
 saving functionality provided by ``kedro.io``.
 """
+
 from __future__ import annotations
 
 import abc
 import copy
 import logging
-import os
 import pprint
 import re
 import sys
@@ -17,7 +17,7 @@ from functools import partial, wraps
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -25,6 +25,9 @@ from cachetools.keys import hashkey
 from typing_extensions import Self
 
 from kedro.utils import load_obj
+
+if TYPE_CHECKING:
+    import os
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
@@ -159,7 +162,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         except Exception as exc:
             raise DatasetError(
                 f"An exception occurred when parsing config "
-                f"for dataset '{name}':\n{str(exc)}"
+                f"for dataset '{name}':\n{exc!s}"
             ) from exc
 
         try:
@@ -223,9 +226,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             except Exception as exc:
                 # This exception handling is by design as the composed data sets
                 # can throw any type of exception.
-                message = (
-                    f"Failed while loading data from data set {str(self)}.\n{str(exc)}"
-                )
+                message = f"Failed while loading data from data set {self!s}.\n{exc!s}"
                 raise DatasetError(message) from exc
 
         load.__annotations__["return"] = load_func.__annotations__.get("return")
@@ -249,9 +250,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             except (DatasetError, FileNotFoundError, NotADirectoryError):
                 raise
             except Exception as exc:
-                message = (
-                    f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
-                )
+                message = f"Failed while saving data to data set {self!s}.\n{exc!s}"
                 raise DatasetError(message) from exc
 
         save.__annotations__["data"] = save_func.__annotations__.get("data", Any)
@@ -371,9 +370,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             self._logger.debug("Checking whether target of %s exists", str(self))
             return self._exists()
         except Exception as exc:
-            message = (
-                f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
-            )
+            message = f"Failed during exists check for data set {self!s}.\n{exc!s}"
             raise DatasetError(message) from exc
 
     def _exists(self) -> bool:
@@ -394,7 +391,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             self._logger.debug("Releasing %s", str(self))
             self._release()
         except Exception as exc:
-            message = f"Failed during release for data set {str(self)}.\n{str(exc)}"
+            message = f"Failed during release for data set {self!s}.\n{exc!s}"
             raise DatasetError(message) from exc
 
     def _release(self) -> None:
@@ -705,7 +702,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         if self._exists_function(str(versioned_path)):
             raise DatasetError(
-                f"Save path '{versioned_path}' for {str(self)} must not exist if "
+                f"Save path '{versioned_path}' for {self!s} must not exist if "
                 f"versioning is enabled."
             )
 
@@ -769,9 +766,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         except VersionNotFoundError:
             return False
         except Exception as exc:  # SKIP_IF_NO_SPARK
-            message = (
-                f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
-            )
+            message = f"Failed during exists check for data set {self!s}.\n{exc!s}"
             raise DatasetError(message) from exc
 
     def _release(self) -> None:

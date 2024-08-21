@@ -1,4 +1,5 @@
 """A collection of CLI commands for working with Kedro micro-packages."""
+
 # ruff: noqa: I001
 from __future__ import annotations
 
@@ -11,10 +12,9 @@ import tempfile
 import toml
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterable, Iterator, TYPE_CHECKING
 
 import click
-from importlib_metadata import PackageMetadata
 from omegaconf import OmegaConf
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
@@ -38,7 +38,10 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.startup import ProjectMetadata
+
+if TYPE_CHECKING:
+    from kedro.framework.startup import ProjectMetadata
+    from importlib_metadata import PackageMetadata
 
 _PYPROJECT_TOML_TEMPLATE = """
 [build-system]
@@ -107,7 +110,7 @@ class _EquivalentRequirement(Requirement):
         )
 
 
-def _check_module_path(ctx: click.core.Context, param: Any, value: str) -> str:  # noqa: unused-argument
+def _check_module_path(ctx: click.core.Context, param: Any, value: str) -> str:
     if value and not re.match(r"^[\w.]+$", value):
         message = (
             "The micro-package location you provided is not a valid Python module path"
@@ -116,7 +119,6 @@ def _check_module_path(ctx: click.core.Context, param: Any, value: str) -> str: 
     return value
 
 
-# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def micropkg_cli() -> None:  # pragma: no cover
     pass
@@ -379,7 +381,6 @@ def package_micropkg(  # noqa: PLR0913
 
 
 def _get_fsspec_filesystem(location: str, fs_args: str | None) -> Any:
-    # noqa: import-outside-toplevel
     import fsspec
 
     from kedro.io.core import get_protocol_and_path
@@ -389,7 +390,7 @@ def _get_fsspec_filesystem(location: str, fs_args: str | None) -> Any:
 
     try:
         return fsspec.filesystem(protocol, **fs_args_config)
-    except Exception as exc:  # noqa: broad-except
+    except Exception as exc:
         # Specified protocol is not supported by `fsspec`
         # or requires extra dependencies
         click.secho(str(exc), fg="red")
@@ -408,10 +409,9 @@ def safe_extract(tar: tarfile.TarFile, path: Path) -> None:
     for member in tar.getmembers():
         member_path = path / member.name
         if not _is_within_directory(path, member_path):
-            # noqa: broad-exception-raised
             raise Exception("Failed to safely extract tar file.")
         safe_members.append(member)
-    tar.extractall(path, members=safe_members)  # nosec B202
+    tar.extractall(path, members=safe_members)  # noqa S202
     # The nosec is still required because bandit still flags this.
     # Related issue: https://github.com/PyCQA/bandit/issues/1038
 

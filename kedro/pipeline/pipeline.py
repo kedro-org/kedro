@@ -3,6 +3,7 @@ a Directed Acyclic Graph, sequentially or in parallel. The ``Pipeline`` class
 offers quick access to input dependencies,
 produced outputs and execution order.
 """
+
 from __future__ import annotations
 
 import json
@@ -25,13 +26,13 @@ def __getattr__(name: str) -> Any:
         from kedro.pipeline.transcoding import TRANSCODING_SEPARATOR
 
         warnings.warn(
-            f"{repr(name)} has been moved to 'kedro.pipeline.transcoding', "
+            f"{name!r} has been moved to 'kedro.pipeline.transcoding', "
             f"and the alias will be removed in Kedro 0.20.0",
             kedro.KedroDeprecationWarning,
             stacklevel=2,
         )
         return TRANSCODING_SEPARATOR
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class OutputNotUniqueError(Exception):

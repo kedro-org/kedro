@@ -1,13 +1,14 @@
 """A collection of helper functions to integrate with Jupyter/IPython
 and CLI commands for working with Kedro catalog.
 """
+
 from __future__ import annotations
 
 import json
 import os
 import shutil
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import click
 
@@ -19,7 +20,9 @@ from kedro.framework.cli.utils import (
     python_call,
 )
 from kedro.framework.project import validate_settings
-from kedro.framework.startup import ProjectMetadata
+
+if TYPE_CHECKING:
+    from kedro.framework.startup import ProjectMetadata
 
 
 @click.group(name="Kedro")
@@ -34,7 +37,7 @@ def jupyter() -> None:
 
 @forward_command(jupyter, "setup", forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
-def setup(metadata: ProjectMetadata, /, args: Any, **kwargs: Any) -> None:  # noqa: unused-argument
+def setup(metadata: ProjectMetadata, /, args: Any, **kwargs: Any) -> None:
     """Initialise the Jupyter Kernel for a kedro project."""
     _check_module_importable("ipykernel")
     validate_settings()
@@ -53,7 +56,7 @@ def jupyter_notebook(
     env: str,
     args: Any,
     **kwargs: Any,
-) -> None:  # noqa: unused-argument
+) -> None:
     """Open Jupyter Notebook with project specific variables loaded."""
     _check_module_importable("notebook")
     validate_settings()
@@ -66,8 +69,11 @@ def jupyter_notebook(
 
     python_call(
         "jupyter",
-        ["notebook", f"--MultiKernelManager.default_kernel_name={kernel_name}"]
-        + list(args),
+        [
+            "notebook",
+            f"--MultiKernelManager.default_kernel_name={kernel_name}",
+            *list(args),
+        ],
     )
 
 
@@ -80,7 +86,7 @@ def jupyter_lab(
     env: str,
     args: Any,
     **kwargs: Any,
-) -> None:  # noqa: unused-argument
+) -> None:
     """Open Jupyter Lab with project specific variables loaded."""
     _check_module_importable("jupyterlab")
     validate_settings()
@@ -93,7 +99,7 @@ def jupyter_lab(
 
     python_call(
         "jupyter",
-        ["lab", f"--MultiKernelManager.default_kernel_name={kernel_name}"] + list(args),
+        ["lab", f"--MultiKernelManager.default_kernel_name={kernel_name}", *list(args)],
     )
 
 

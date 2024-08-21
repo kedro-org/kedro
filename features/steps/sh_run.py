@@ -27,6 +27,7 @@ def run(
     Example:
     ::
         "ls"
+
         "ls -la"
         "chmod 754 local/file"
 
@@ -90,7 +91,7 @@ class ChildTerminatingPopen(subprocess.Popen):
         """Terminate process and children."""
         try:
             proc = psutil.Process(self.pid)
-            procs = [proc] + proc.children(recursive=True)
+            procs = [proc, *proc.children(recursive=True)]
         except psutil.NoSuchProcess:
             pass
         else:

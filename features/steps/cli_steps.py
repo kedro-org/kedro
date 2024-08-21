@@ -342,7 +342,7 @@ def commit_changes_to_git(context):
 def exec_kedro_target(context, command):
     """Execute Kedro target."""
     split_command = command.split()
-    cmd = [context.kedro] + split_command
+    cmd = [context.kedro, *split_command]
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
@@ -378,7 +378,7 @@ def get_kedro_version_python(context):
 def exec_notebook(context, command):
     """Execute Kedro Jupyter target."""
     split_command = command.split()
-    cmd = [context.kedro, "jupyter"] + split_command
+    cmd = [context.kedro, "jupyter", *split_command]
 
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
@@ -484,7 +484,12 @@ def add_req(context: behave.runner.Context, dependency: str):
 @then("CLI should print the version in an expected format")
 def check_kedro_version(context):
     """Behave step to check validity of the kedro version."""
-    version_no = context.version_str.split()[-1]
+    CLI_flat_list = context.version_str.split()
+    CLI_dictionary = {
+        CLI_flat_list[i]: CLI_flat_list[i + 1]
+        for i in range(0, len(CLI_flat_list) - 1, 2)
+    }
+    version_no = CLI_dictionary.get("version")
     assert version_no == kedro.__version__
 
 
@@ -706,7 +711,7 @@ def check_docs_generated(context: behave.runner.Context):
         context.root_project_dir / "docs" / "build" / "html" / "index.html"
     ).read_text("utf-8")
     project_repo = context.project_name.replace("-", "_")
-    assert f"Welcome to project {project_repo}’s API docs!" in index_html, index_html
+    assert f"Welcome to project {project_repo}'s API docs!" in index_html, index_html
 
 
 @then("requirements should be generated")

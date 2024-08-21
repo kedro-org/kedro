@@ -1,6 +1,7 @@
 """A collection of helper functions to integrate with Jupyter/IPython
 and CLI commands for working with Kedro catalog.
 """
+
 from __future__ import annotations
 
 import json

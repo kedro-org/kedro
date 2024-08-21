@@ -12,9 +12,9 @@ from warnings import warn
 from attrs import define, field
 from omegaconf import OmegaConf
 
-from kedro.config import AbstractConfigLoader, MissingConfigException
+from kedro.config import AbstractConfigLoader, ConfigResolver, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import DataCatalog  # noqa: TCH001
+from kedro.io import DataCatalog, KedroDataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -123,7 +123,7 @@ def _convert_paths_to_absolute_posix(
     return conf_dictionary
 
 
-def _validate_transcoded_datasets(catalog: DataCatalog) -> None:
+def _validate_transcoded_datasets(catalog: DataCatalog | KedroDataCatalog) -> None:
     """Validates transcoded datasets are correctly named
 
     Args:
@@ -136,7 +136,7 @@ def _validate_transcoded_datasets(catalog: DataCatalog) -> None:
             `_transcode_split` function.
 
     """
-    for dataset_name in catalog._datasets.keys():
+    for dataset_name in catalog.list():
         _transcode_split(dataset_name)
 
 
@@ -188,6 +188,18 @@ class KedroContext:
 
         """
         return self._get_catalog()
+
+    @property
+    def catalog_new(self) -> KedroDataCatalog:
+        """Read-only property referring to Kedro's ``KedroDataCatalog`` for this context.
+
+        Returns:
+            DataCatalog defined in `catalog.yml`.
+        Raises:
+            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
+
+        """
+        return self._get_catalog_new()
 
     @property
     def params(self) -> dict[str, Any]:
@@ -249,6 +261,39 @@ class KedroContext:
             save_version=save_version,
             load_versions=load_versions,
         )
+        return catalog
+
+    def _get_catalog_new(
+        self,
+        save_version: str | None = None,
+        load_versions: dict[str, str] | None = None,
+    ) -> KedroDataCatalog:
+        conf_catalog = self.config_loader["catalog"]
+        conf_catalog = _convert_paths_to_absolute_posix(
+            project_path=self.project_path, conf_dictionary=conf_catalog
+        )
+        conf_creds = self._get_config_credentials()
+
+        config_resolver = ConfigResolver(config=conf_catalog, credentials=conf_creds)
+
+        catalog = settings.DATA_CATALOG_CLASS_NEW(
+            config=config_resolver.config,
+            load_versions=load_versions,
+            save_version=save_version,
+        )
+
+        feed_dict = self._get_feed_dict()
+        catalog.add_from_dict(feed_dict)
+        _validate_transcoded_datasets(catalog)
+        self._hook_manager.hook.after_catalog_created(
+            catalog=catalog,
+            conf_catalog=conf_catalog,
+            conf_creds=conf_creds,
+            feed_dict=feed_dict,
+            save_version=save_version,
+            load_versions=load_versions,
+        )
+
         return catalog
 
     def _get_feed_dict(self) -> dict[str, Any]:

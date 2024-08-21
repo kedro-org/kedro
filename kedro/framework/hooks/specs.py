@@ -11,7 +11,7 @@ from .markers import hook_spec
 
 if TYPE_CHECKING:
     from kedro.framework.context import KedroContext
-    from kedro.io import DataCatalog
+    from kedro.io import DataCatalog, KedroDataCatalog
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
@@ -22,7 +22,7 @@ class DataCatalogSpecs:
     @hook_spec
     def after_catalog_created(  # noqa: PLR0913
         self,
-        catalog: DataCatalog,
+        catalog: DataCatalog | KedroDataCatalog,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
         feed_dict: dict[str, Any],

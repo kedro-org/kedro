@@ -5,7 +5,7 @@ default_stages: [commit, manual]
 
 repos:
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.1.8
+      rev: v0.6.1
       hooks:
         - id: ruff
           name: "ruff on kedro/, tests/ and docs/"
@@ -17,7 +17,7 @@ repos:
           exclude: "^features/steps/test_starter|^kedro/templates/"
 
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v2.2.3
+      rev: v4.6.0
       hooks:
           - id: trailing-whitespace
           - id: end-of-file-fixer

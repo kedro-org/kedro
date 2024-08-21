@@ -682,8 +682,8 @@ class TestOmegaConfigLoader:
 
     @use_config_dir
     def test_load_config_from_tar_file(self, tmp_path):
-        subprocess.run(  # noqa: PLW1510
-            [  # noqa: S603, S607
+        subprocess.run(  # noqa: PLW1510,S603
+            [  # noqa: S607
                 "tar",
                 "--exclude=local/*.yml",
                 "-czf",
@@ -1062,7 +1062,7 @@ class TestOmegaConfigLoader:
         # read successfully
         conf["parameters"]
 
-        mocker.patch.object(conf, "_is_hidden", return_value=False)  #
+        mocker.patch.object(conf, "_is_hidden", return_value=False)
         with pytest.raises(ValueError, match="Duplicate keys found in"):
             # fail because of reading the hidden files and get duplicate keys
             conf["parameters"]
@@ -1100,6 +1100,89 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["my_param_default"] == 34
         # runtime params are resolved correctly in catalog
         assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
+
+    def test_runtime_params_resolution_with_soft_merge_base_env(self, tmp_path):
+        """Test that runtime_params get softly merged with the base environment when soft merge is set
+        for parameter merge"""
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        prod_params = tmp_path / "prod" / "parameters.yml"
+        runtime_params = {
+            "aaa": {
+                "bbb": {
+                    "abb": "2011-11-11",
+                }
+            }
+        }
+        param_config = {
+            "aaa": {
+                "bbb": {
+                    "aba": "2023-11-01",
+                    "abb": "2023-11-01",
+                    "abc": 14,
+                }
+            },
+            "xyz": {"asdf": 123123},
+        }
+        prod_param_config = {"def": {"gg": 123}}
+        _write_yaml(base_params, param_config)
+        _write_yaml(prod_params, prod_param_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="prod",
+            runtime_params=runtime_params,
+            merge_strategy={"parameters": "soft"},
+        )
+
+        expected_parameters = {
+            "aaa": {"bbb": {"aba": "2023-11-01", "abb": "2011-11-11", "abc": 14}},
+            "xyz": {"asdf": 123123},
+            "def": {"gg": 123},
+        }
+
+        # runtime parameters are resolved correctly across parameter files from different environments
+        assert conf["parameters"] == expected_parameters
+
+    def test_runtime_params_resolution_default_run_env(self, tmp_path):
+        """Test that runtime_params overwrite merge with the default run environment"""
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        prod_params = tmp_path / "prod" / "parameters.yml"
+        runtime_params = {"data_shift": 3}
+        param_config = {
+            "model_options": {
+                "test_size": 0.2,
+                "random_state": 3,
+                "features": ["engines"],
+            }
+        }
+        prod_param_config = {
+            "model_options": {
+                "test_size": 0.2,
+                "random_state": 3,
+                "features": ["engines"],
+            },
+            "data_shift": 1,
+        }
+        _write_yaml(base_params, param_config)
+        _write_yaml(prod_params, prod_param_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="prod",
+            runtime_params=runtime_params,
+        )
+
+        expected_parameters = {
+            "model_options": {
+                "test_size": 0.2,
+                "random_state": 3,
+                "features": ["engines"],
+            },
+            "data_shift": 3,
+        }
+
+        # runtime parameters are resolved correctly across parameter files from different environments
+        assert conf["parameters"] == expected_parameters
 
     def test_runtime_params_missing_default(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"

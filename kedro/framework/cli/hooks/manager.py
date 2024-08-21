@@ -1,4 +1,5 @@
 """This module defines a dedicated hook manager for hooks that extends Kedro CLI behaviour."""
+
 import logging
 
 from pluggy import PluginManager

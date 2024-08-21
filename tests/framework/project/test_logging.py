@@ -1,12 +1,14 @@
+import importlib
 import logging
 import sys
 from pathlib import Path
+from unittest import mock
 
 import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
-from kedro.logging import RichHandler, _format_rich, _has_rich_handler
+from kedro.utils import _format_rich, _has_rich_handler
 
 
 @pytest.fixture
@@ -156,10 +158,16 @@ def test_rich_format():
 
 def test_has_rich_handler():
     test_logger = logging.getLogger("test_logger")
-    assert not _has_rich_handler(test_logger)
-    _has_rich_handler.cache_clear()
-    test_logger.addHandler(RichHandler())
-    assert _has_rich_handler(test_logger)
+    with mock.patch("builtins.__import__", side_effect=ImportError):
+        assert not _has_rich_handler(test_logger)
+
+    if importlib.util.find_spec("rich"):
+        from rich.logging import RichHandler
+
+        test_logger.addHandler(RichHandler())
+        assert _has_rich_handler(test_logger)
+    else:
+        assert not _has_rich_handler(test_logger)
 
 
 def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):

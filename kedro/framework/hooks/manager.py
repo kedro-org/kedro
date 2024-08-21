@@ -1,6 +1,7 @@
 """This module provides an utility function to retrieve the global hook_manager singleton
 in a Kedro's execution process.
 """
+
 import logging
 from typing import Any, Iterable
 

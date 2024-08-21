@@ -214,7 +214,9 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 
 # html_extra_path used to define a path to robots.txt which is used by webcrawlers
 # to ignore or allow certain links.
-html_extra_path = [str(here / "robots.txt")]
+# We've decided to rely on RTD's default robots.txt, so we no longer need to specify a custom one,
+# see discussion at https://github.com/kedro-org/kedro/issues/3741
+# html_extra_path = [str(here / "robots.txt")]
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False

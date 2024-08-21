@@ -23,6 +23,10 @@
 * Add clarifications in docs explaining how runtime parameter resolution works.
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [cclauss](https://github.com/cclauss)
+* [eltociear](https://github.com/eltociear)
+* [ltalirz](https://github.com/ltalirz)
 
 # Release 0.19.7
 

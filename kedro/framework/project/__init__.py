@@ -118,6 +118,10 @@ class _ProjectSettings(LazySettings):
     _DATA_CATALOG_CLASS = _IsSubclassValidator(
         "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
     )
+    _DATA_CATALOG_CLASS_NEW = _IsSubclassValidator(
+        "DATA_CATALOG_CLASS_NEW",
+        default=_get_default_class("kedro.io.KedroDataCatalog"),
+    )
 
     def __init__(self, *args: Any, **kwargs: Any):
         kwargs.update(
@@ -131,6 +135,7 @@ class _ProjectSettings(LazySettings):
                 self._CONFIG_LOADER_CLASS,
                 self._CONFIG_LOADER_ARGS,
                 self._DATA_CATALOG_CLASS,
+                self._DATA_CATALOG_CLASS_NEW,
             ]
         )
         super().__init__(*args, **kwargs)

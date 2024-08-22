@@ -101,20 +101,20 @@ class KedroDataCatalog:
         config: dict[str, dict[str, Any]] | None,
     ) -> None:
         for ds_name, ds_config in config.items():
-            validate_dataset_config(ds_name, ds_config)
-            self._init_dataset(ds_name, ds_config)
+            self.init_dataset(ds_name, ds_config)
 
-    def _init_dataset(self, ds_name: str, config: dict[str, Any]):
+    def init_dataset(self, ds_name: str, ds_config: dict[str, Any]):
         # Add LazyAbstractDataset to store the configuration but not to init actual dataset
         # Initialise actual dataset when load or save
         # Add is_ds_init property
+        validate_dataset_config(ds_name, ds_config)
         if ds_name in self._datasets:
             raise DatasetAlreadyExistsError(
                 f"Dataset '{ds_name}' has already been registered"
             )
         self._datasets[ds_name] = AbstractDataset.from_config(
             ds_name,
-            config,
+            ds_config,
             self._load_versions.get(ds_name),
             self._save_version,
         )

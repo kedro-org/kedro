@@ -380,11 +380,13 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
+        config_resolver = None
         if new_catalog:
             catalog = context._get_catalog_new(
                 save_version=save_version,
                 load_versions=load_versions,
             )
+            config_resolver = context.config_resolver
         else:
             catalog = context._get_catalog(
                 save_version=save_version,
@@ -402,6 +404,14 @@ class KedroSession:
         hook_manager.hook.before_pipeline_run(
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
+
+        if new_catalog:
+            config_resolver.add_runtime_patterns(runner._extra_dataset_patterns)
+            pp_datasets = list(filtered_pipeline.datasets())
+            resolved_configs = config_resolver.resolve_patterns(pp_datasets)
+            for ds_name, ds_config in zip(pp_datasets, resolved_configs):
+                if ds_config is not None and config_resolver.match_pattern(ds_name):
+                    catalog.init_dataset(ds_name, ds_config)
 
         try:
             run_result = runner.run(

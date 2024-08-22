@@ -263,6 +263,18 @@ class KedroContext:
         )
         return catalog
 
+    @property
+    def config_resolver(self) -> ConfigResolver:
+        conf_catalog = self.config_loader["catalog"]
+        conf_catalog = _convert_paths_to_absolute_posix(
+            project_path=self.project_path, conf_dictionary=conf_catalog
+        )
+        conf_creds = self._get_config_credentials()
+
+        config_resolver = ConfigResolver(config=conf_catalog, credentials=conf_creds)
+
+        return config_resolver
+
     def _get_catalog_new(
         self,
         save_version: str | None = None,

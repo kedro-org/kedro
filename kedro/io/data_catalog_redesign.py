@@ -86,7 +86,7 @@ class KedroDataCatalog:
     def __iter__(self):
         yield from self._datasets.values()
 
-    def __getitem__(self, ds_name: str) -> Any:
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
         return self.get_dataset(ds_name)
 
     def __contains__(self, ds_name: str) -> bool:

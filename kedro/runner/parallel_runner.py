@@ -24,6 +24,7 @@ from kedro.framework.project import settings
 from kedro.io import (
     DataCatalog,
     DatasetNotFoundError,
+    KedroDataCatalog,
     MemoryDataset,
     SharedMemoryDataset,
 )
@@ -60,7 +61,7 @@ def _bootstrap_subprocess(
 
 def _run_node_synchronization(  # noqa: PLR0913
     node: Node,
-    catalog: DataCatalog,
+    catalog: DataCatalog | KedroDataCatalog,
     is_async: bool = False,
     session_id: str | None = None,
     package_name: str | None = None,
@@ -73,7 +74,7 @@ def _run_node_synchronization(  # noqa: PLR0913
 
     Args:
         node: The ``Node`` to run.
-        catalog: A ``DataCatalog`` containing the node's inputs and outputs.
+        catalog: A ``DataCatalog`` or ``KedroDataCatalog``containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
         session_id: The session id of the pipeline run.
@@ -168,13 +169,18 @@ class ParallelRunner(AbstractRunner):
             )
 
     @classmethod
-    def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline) -> None:
+    def _validate_catalog(
+        cls, catalog: DataCatalog | KedroDataCatalog, pipeline: Pipeline
+    ) -> None:
         """Ensure that all data sets are serialisable and that we do not have
         any non proxied memory data sets being used as outputs as their content
         will not be synchronized across threads.
         """
 
-        datasets = catalog._datasets
+        if isinstance(catalog, DataCatalog):
+            datasets = catalog._datasets
+        else:
+            datasets = catalog.datasets
 
         unserialisable = []
         for name, dataset in datasets.items():
@@ -213,15 +219,22 @@ class ParallelRunner(AbstractRunner):
                 f"MemoryDatasets"
             )
 
-    def _set_manager_datasets(self, catalog: DataCatalog, pipeline: Pipeline) -> None:
-        for dataset in pipeline.datasets():
-            try:
-                catalog.exists(dataset)
-            except DatasetNotFoundError:
-                pass
-        for name, ds in catalog._datasets.items():
-            if isinstance(ds, SharedMemoryDataset):
-                ds.set_manager(self._manager)
+    def _set_manager_datasets(
+        self, catalog: DataCatalog | KedroDataCatalog, pipeline: Pipeline
+    ) -> None:
+        if isinstance(catalog, DataCatalog):
+            for dataset in pipeline.datasets():
+                try:
+                    catalog.exists(dataset)
+                except DatasetNotFoundError:
+                    pass
+            for name, ds in catalog._datasets.items():
+                if isinstance(ds, SharedMemoryDataset):
+                    ds.set_manager(self._manager)
+        else:
+            for ds_name, ds in catalog.datasets.items():
+                if isinstance(ds, SharedMemoryDataset):
+                    catalog[ds_name].set_manager(self._manager)
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """

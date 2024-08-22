@@ -59,7 +59,8 @@ class KedroDataCatalog:
                 self._config[ds_name] = {}
 
         if config:
-            self._init_datasets(config)
+            for ds_name, ds_config in config.items():
+                self.init_dataset(ds_name, ds_config)
 
         self._validate_missing_keys()
 
@@ -96,13 +97,6 @@ class KedroDataCatalog:
     def _ipython_key_completions_(self) -> list[str]:
         return list(self._datasets.keys())
 
-    def _init_datasets(
-        self,
-        config: dict[str, dict[str, Any]] | None,
-    ) -> None:
-        for ds_name, ds_config in config.items():
-            self.init_dataset(ds_name, ds_config)
-
     def init_dataset(self, ds_name: str, ds_config: dict[str, Any]):
         # Add LazyAbstractDataset to store the configuration but not to init actual dataset
         # Initialise actual dataset when load or save
@@ -112,6 +106,7 @@ class KedroDataCatalog:
             raise DatasetAlreadyExistsError(
                 f"Dataset '{ds_name}' has already been registered"
             )
+        self._config[ds_name] = ds_config
         self._datasets[ds_name] = AbstractDataset.from_config(
             ds_name,
             ds_config,

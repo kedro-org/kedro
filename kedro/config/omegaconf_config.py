@@ -331,9 +331,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if not aggregate_config:
             return {}
 
-        # Only merge in runtime parameters ones for the base env
-        is_base_env = conf_path.endswith(self.base_env)
-        if key == "parameters" and is_base_env:
+        if key == "parameters":
             # Merge with runtime parameters only for "parameters"
             return OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
@@ -347,8 +345,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
             if not k.startswith("_")
         }
 
+    @staticmethod
     def _initialise_filesystem_and_protocol(
-        self, conf_source: str
+        conf_source: str,
     ) -> tuple[fsspec.AbstractFileSystem, str]:
         """Set up the file system based on the file type detected in conf_source."""
         file_mimetype, _ = mimetypes.guess_type(conf_source)

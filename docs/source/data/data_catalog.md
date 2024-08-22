@@ -150,7 +150,7 @@ test_dataset:
   type: ...
   fs_args:
     open_args_save:
-    mode: "a"
+      mode: "a"
 ```
 
 ```{note}

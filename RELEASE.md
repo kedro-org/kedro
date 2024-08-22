@@ -6,7 +6,6 @@
 ## Breaking changes to the API
 ## Documentation changes
 ## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
 * [Puneet](https://github.com/puneeter)
 
 # Release 0.19.8

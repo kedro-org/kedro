@@ -1,7 +1,9 @@
-# Upcoming Release
+# Release 0.19.9
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Fixed bug where using dataset factories breaks with `ThreadRunner`.
+
 ## Breaking changes to the API
 ## Documentation changes
 ## Community contributions

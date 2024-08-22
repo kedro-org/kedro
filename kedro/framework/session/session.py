@@ -412,7 +412,6 @@ class KedroSession:
             for ds_name, ds_config in zip(pp_datasets, resolved_configs):
                 if ds_config is not None and config_resolver.match_pattern(ds_name):
                     catalog.init_dataset(ds_name, ds_config)
-
         try:
             run_result = runner.run(
                 filtered_pipeline, catalog, hook_manager, session_id

@@ -258,10 +258,14 @@ def rank_catalog_factories(
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    catalog_factories = {
-        **context.catalog._dataset_patterns,
-        **context.catalog._default_pattern,
-    }
+    if new_catalog:
+        config_resolver = context.config_resolver
+        catalog_factories = config_resolver.list_patterns()
+    else:
+        catalog_factories = {
+            **context.catalog._dataset_patterns,
+            **context.catalog._default_pattern,
+        }
     if catalog_factories:
         click.echo(yaml.dump(list(catalog_factories.keys())))
     else:

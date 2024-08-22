@@ -52,6 +52,7 @@ class KedroDataCatalog:
         self._runtime_patterns = {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
+        self._use_rich_markup = _has_rich_handler()
 
         if datasets:
             for ds_name in datasets:
@@ -212,9 +213,7 @@ class KedroDataCatalog:
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            _format_rich(name, "dark_orange")
-            if _has_rich_handler(self._logger)
-            else name,
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
             extra={"markup": True},
         )
@@ -294,9 +293,7 @@ class KedroDataCatalog:
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            _format_rich(name, "dark_orange")
-            if _has_rich_handler(self._logger)
-            else name,
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
             extra={"markup": True},
         )

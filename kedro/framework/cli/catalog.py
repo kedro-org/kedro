@@ -14,13 +14,16 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
-from kedro.io.data_catalog import DataCatalog
+from kedro.io import DataCatalog
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from kedro.framework.startup import ProjectMetadata
     from kedro.io import AbstractDataset
+
+
+NEW_CATALOG_ARG_HELP = """Use KedroDataCatalog instead of DataCatalog to run project."""
 
 
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
@@ -49,8 +52,13 @@ def catalog() -> None:
     "the project pipeline is run by default.",
     callback=split_string,
 )
+@click.option(
+    "--new_catalog", "-n", "new_catalog", is_flag=True, help=NEW_CATALOG_ARG_HELP
+)
 @click.pass_obj
-def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
+def list_datasets(  # noqa: PLR0912
+    metadata: ProjectMetadata, pipeline: str, env: str, new_catalog: bool
+) -> None:
     """Show datasets per type."""
     title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
@@ -61,8 +69,14 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     context = session.load_context()
 
     try:
-        data_catalog = context.catalog
-        datasets_meta = data_catalog._datasets
+        if new_catalog:
+            data_catalog = context.catalog_new
+            datasets_meta = data_catalog.datasets
+            config_resolver = context.config_resolver
+        else:
+            data_catalog = context.catalog
+            datasets_meta = data_catalog._datasets
+            config_resolver = None
         catalog_ds = set(data_catalog.list())
     except Exception as exc:
         raise KedroCliError(
@@ -86,23 +100,32 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
         default_ds = pipeline_ds - catalog_ds
         used_ds = catalog_ds - unused_ds
 
-        # resolve any factory datasets in the pipeline
-        factory_ds_by_type = defaultdict(list)
-        for ds_name in default_ds:
-            matched_pattern = data_catalog._match_pattern(
-                data_catalog._dataset_patterns, ds_name
-            ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
-            if matched_pattern:
-                ds_config_copy = copy.deepcopy(
-                    data_catalog._dataset_patterns.get(matched_pattern)
-                    or data_catalog._default_pattern.get(matched_pattern)
-                    or {}
-                )
+        if new_catalog:
+            factory_ds_by_type = defaultdict(list)
+            resolved_configs = config_resolver.resolve_patterns(default_ds)
+            for ds_name, ds_config in zip(default_ds, resolved_configs):
+                if config_resolver.match_pattern(ds_name):
+                    factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
+                        ds_name
+                    )
+        else:
+            # resolve any factory datasets in the pipeline
+            factory_ds_by_type = defaultdict(list)
+            for ds_name in default_ds:
+                matched_pattern = data_catalog._match_pattern(
+                    data_catalog._dataset_patterns, ds_name
+                ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
+                if matched_pattern:
+                    ds_config_copy = copy.deepcopy(
+                        data_catalog._dataset_patterns.get(matched_pattern)
+                        or data_catalog._default_pattern.get(matched_pattern)
+                        or {}
+                    )
 
-                ds_config = data_catalog._resolve_config(
-                    ds_name, matched_pattern, ds_config_copy
-                )
-                factory_ds_by_type[ds_config["type"]].append(ds_name)
+                    ds_config = data_catalog._resolve_config(
+                        ds_name, matched_pattern, ds_config_copy
+                    )
+                    factory_ds_by_type[ds_config["type"]].append(ds_name)
 
         default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
 

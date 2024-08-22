@@ -14,7 +14,7 @@ from kedro.runner.runner import AbstractRunner, run_node
 if TYPE_CHECKING:
     from pluggy import PluginManager
 
-    from kedro.io import DataCatalog
+    from kedro.io import DataCatalog, KedroDataCatalog
     from kedro.pipeline import Pipeline
 
 
@@ -48,7 +48,7 @@ class SequentialRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: DataCatalog | KedroDataCatalog,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:
@@ -56,7 +56,7 @@ class SequentialRunner(AbstractRunner):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``DataCatalog`` from which to fetch data.
+            catalog: The ``DataCatalog`` or ``KedroDataCatalog`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 

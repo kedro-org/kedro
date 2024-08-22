@@ -52,6 +52,7 @@ class KedroDataCatalog:
         self._runtime_patterns = {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
+        self._use_rich_markup = _has_rich_handler()
 
         if datasets:
             for ds_name in datasets:
@@ -59,7 +60,8 @@ class KedroDataCatalog:
                 self._config[ds_name] = {}
 
         if config:
-            self._init_datasets(config)
+            for ds_name, ds_config in config.items():
+                self.init_dataset(ds_name, ds_config)
 
         self._validate_missing_keys()
 
@@ -84,7 +86,7 @@ class KedroDataCatalog:
     def __iter__(self):
         yield from self._datasets.values()
 
-    def __getitem__(self, ds_name: str) -> Any:
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
         return self.get_dataset(ds_name)
 
     def __contains__(self, ds_name: str) -> bool:
@@ -96,25 +98,19 @@ class KedroDataCatalog:
     def _ipython_key_completions_(self) -> list[str]:
         return list(self._datasets.keys())
 
-    def _init_datasets(
-        self,
-        config: dict[str, dict[str, Any]] | None,
-    ) -> None:
-        for ds_name, ds_config in config.items():
-            validate_dataset_config(ds_name, ds_config)
-            self._init_dataset(ds_name, ds_config)
-
-    def _init_dataset(self, ds_name: str, config: dict[str, Any]):
+    def init_dataset(self, ds_name: str, ds_config: dict[str, Any]):
         # Add LazyAbstractDataset to store the configuration but not to init actual dataset
         # Initialise actual dataset when load or save
         # Add is_ds_init property
+        validate_dataset_config(ds_name, ds_config)
         if ds_name in self._datasets:
             raise DatasetAlreadyExistsError(
                 f"Dataset '{ds_name}' has already been registered"
             )
+        self._config[ds_name] = ds_config
         self._datasets[ds_name] = AbstractDataset.from_config(
             ds_name,
-            config,
+            ds_config,
             self._load_versions.get(ds_name),
             self._save_version,
         )
@@ -217,9 +213,7 @@ class KedroDataCatalog:
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            _format_rich(name, "dark_orange")
-            if _has_rich_handler(self._logger)
-            else name,
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
             extra={"markup": True},
         )
@@ -299,9 +293,7 @@ class KedroDataCatalog:
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            _format_rich(name, "dark_orange")
-            if _has_rich_handler(self._logger)
-            else name,
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
             extra={"markup": True},
         )

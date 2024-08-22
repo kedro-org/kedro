@@ -170,8 +170,13 @@ def _map_type_to_datasets(
     required=True,
     help="Name of a pipeline.",
 )
+@click.option(
+    "--new_catalog", "-n", "new_catalog", is_flag=True, help=NEW_CATALOG_ARG_HELP
+)
 @click.pass_obj
-def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> None:
+def create_catalog(
+    metadata: ProjectMetadata, pipeline_name: str, env: str, new_catalog: bool
+) -> None:
     """Create Data Catalog YAML configuration with missing datasets.
 
     Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
@@ -184,6 +189,10 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
+    if new_catalog:
+        catalog = context.catalog_new
+    else:
+        catalog = context.catalog
 
     pipeline = pipelines.get(pipeline_name)
 
@@ -193,7 +202,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
             f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
         )
 
-    pipe_datasets = {
+    pipeline_datasets = {
         ds_name
         for ds_name in pipeline.datasets()
         if not ds_name.startswith("params:") and ds_name != "parameters"
@@ -201,12 +210,12 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
 
     catalog_datasets = {
         ds_name
-        for ds_name in context.catalog._datasets.keys()
+        for ds_name in catalog.list()
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 
     # Datasets that are missing in Data Catalog
-    missing_ds = sorted(pipe_datasets - catalog_datasets)
+    missing_ds = sorted(pipeline_datasets - catalog_datasets)
     if missing_ds:
         catalog_path = (
             context.project_path

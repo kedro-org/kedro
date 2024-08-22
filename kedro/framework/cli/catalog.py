@@ -262,12 +262,14 @@ def rank_catalog_factories(
         config_resolver = context.config_resolver
         catalog_factories = config_resolver.list_patterns()
     else:
-        catalog_factories = {
-            **context.catalog._dataset_patterns,
-            **context.catalog._default_pattern,
-        }
+        catalog_factories = list(
+            {
+                **context.catalog._dataset_patterns,
+                **context.catalog._default_pattern,
+            }.keys()
+        )
     if catalog_factories:
-        click.echo(yaml.dump(list(catalog_factories.keys())))
+        click.echo(yaml.dump(catalog_factories))
     else:
         click.echo("There are no dataset factories in the catalog.")
 

@@ -248,7 +248,12 @@ def _add_missing_datasets_to_catalog(missing_ds: list[str], catalog_path: Path) 
 @catalog.command("rank")
 @env_option
 @click.pass_obj
-def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
+@click.option(
+    "--new_catalog", "-n", "new_catalog", is_flag=True, help=NEW_CATALOG_ARG_HELP
+)
+def rank_catalog_factories(
+    metadata: ProjectMetadata, env: str, new_catalog: bool
+) -> None:
     """List all dataset factories in the catalog, ranked by priority by which they are matched."""
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()

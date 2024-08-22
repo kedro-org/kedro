@@ -498,7 +498,6 @@ def _run_node_sequential(
 
     for name in node.inputs:
         hook_manager.hook.before_dataset_loaded(dataset_name=name, node=node)
-        # Solution 1
         load_dataset_lock.acquire()
         inputs[name] = catalog.load(name)
         load_dataset_lock.release()

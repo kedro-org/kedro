@@ -1,16 +1,18 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
 ## Breaking changes to the API
 ## Documentation changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Puneet](https://github.com/puneeter)
 
 # Release 0.19.8
 
 ## Major features and improvements
 * Made default run entrypoint in `__main__.py` work in interactive environments such as IPyhon and Databricks.
-* Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 
 ## Bug fixes and other changes
 * Fixed a bug that caused tracebacks disappeared from CLI runs.
@@ -28,7 +30,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [cclauss](https://github.com/cclauss)
 * [eltociear](https://github.com/eltociear)
 * [ltalirz](https://github.com/ltalirz)
-* [Puneet](https://github.com/puneeter)
 
 # Release 0.19.7
 

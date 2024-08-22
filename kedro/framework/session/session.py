@@ -410,7 +410,7 @@ class KedroSession:
             pp_datasets = list(filtered_pipeline.datasets())
             resolved_configs = config_resolver.resolve_patterns(pp_datasets)
             for ds_name, ds_config in zip(pp_datasets, resolved_configs):
-                if ds_config is not None and config_resolver.match_pattern(ds_name):
+                if ds_name not in catalog and ds_config is not None:
                     catalog.init_dataset(ds_name, ds_config)
         try:
             run_result = runner.run(

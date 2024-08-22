@@ -29,6 +29,7 @@ from kedro.framework.session import KedroSession
 from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
+from kedro.utils import _has_rich_handler
 
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
@@ -947,6 +948,11 @@ class TestKedroSession:
         ):
             # Execute run with SequentialRunner class instead of SequentialRunner()
             session.run(runner=mock_runner_class)
+
+    def test_logging_rich_markup(self, fake_project):
+        # Make sure RichHandler is registered as root's handlers as in a Kedro Project.
+        KedroSession.create(fake_project)
+        assert _has_rich_handler()
 
 
 @pytest.fixture

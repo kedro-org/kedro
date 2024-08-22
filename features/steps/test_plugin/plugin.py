@@ -1,4 +1,5 @@
 """Dummy plugin with simple hook implementations."""
+
 import logging
 from pathlib import Path
 

@@ -2,6 +2,7 @@
 used to run the ``Pipeline`` in a sequential manner using a topological sort
 of provided nodes.
 """
+
 from __future__ import annotations
 
 from collections import Counter

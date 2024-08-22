@@ -1,4 +1,5 @@
 """A collection of CLI commands for working with registered Kedro pipelines."""
+
 from typing import Any
 
 import click

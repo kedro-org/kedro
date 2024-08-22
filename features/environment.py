@@ -1,4 +1,5 @@
 """Behave environment setup commands."""
+
 from __future__ import annotations
 
 import os
@@ -96,9 +97,8 @@ def _create_tmp_dir() -> Path:
 
 def _setup_minimal_env(context):
     if os.environ.get("BEHAVE_LOCAL_ENV"):
-        output = subprocess.check_output(
-            ["which", "kedro"]  # noqa: S603, S607
-        )  # equivalent run "which kedro"
+        # equivalent run "which kedro"
+        output = subprocess.check_output(["which", "kedro"])  # noqa: S603, S607
         output = output.strip().decode("utf8")
         kedro_install_venv_dir = Path(output).parent.parent
         context.kedro_install_venv_dir = kedro_install_venv_dir

@@ -2,6 +2,7 @@
 be used to run the ``Pipeline`` in parallel groups formed by toposort
 using threads.
 """
+
 from __future__ import annotations
 
 import warnings

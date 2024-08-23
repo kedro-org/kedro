@@ -99,10 +99,10 @@ The following protocols are available:
 
 This section explains the additional settings available within `catalog.yml`.
 
-### Load and save arguments
-The Kedro Data Catalog also accepts two different groups of `*_args` parameters that serve different purposes:
+### Load, save and filesystem arguments
+The Kedro Data Catalog also accepts different groups of `*_args` parameters that serve different purposes:
 
-* **`load_args` and `save_args`**: Configures how a third-party library loads/saves data from/to a file. In the spaceflights example above, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the equivalent output is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
+* **`load_args` and `save_args`**: Configure how a third-party library loads/saves data from/to a file. In the spaceflights example above, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the equivalent output is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
 
 For example, to load or save a CSV on a local file system, using specified load/save arguments:
 
@@ -142,6 +142,22 @@ test_dataset:
       mode: "rb"
       encoding: "utf-8"
 ```
+
+If you want to save a file in append mode instead of overwrite you can use the `open_args_save` `mode` parameter:
+
+```yaml
+test_dataset:
+  type: ...
+  fs_args:
+    open_args_save:
+      mode: "a"
+```
+
+```{note}
+Default load, save and filesystem arguments are defined inside the specific dataset implementations as `DEFAULT_LOAD_ARGS`, `DEFAULT_SAVE_ARGS`, and `DEFAULT_FS_ARGS` respectively.
+You can check those in {py:mod}`the dataset API documentation <kedro-datasets:kedro_datasets>`.
+```
+
 
 ### Dataset access credentials
 The Data Catalog also works with the `credentials.yml` file in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.

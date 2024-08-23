@@ -14,6 +14,7 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
+from kedro.io.core import is_parameter
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -149,12 +150,11 @@ def _map_type_to_datasets(
     datasets of the specific type as a value.
     """
     mapping = defaultdict(list)  # type: ignore[var-annotated]
-    for dataset in datasets:
-        is_param = dataset.startswith("params:") or dataset == "parameters"
-        if not is_param:
-            ds_type = datasets_meta[dataset].__class__.__name__
-            if dataset not in mapping[ds_type]:
-                mapping[ds_type].append(dataset)
+    for dataset_name in datasets:
+        if not is_parameter(dataset_name):
+            ds_type = datasets_meta[dataset_name].__class__.__name__
+            if dataset_name not in mapping[ds_type]:
+                mapping[ds_type].append(dataset_name)
     return mapping
 
 
@@ -201,15 +201,11 @@ def create_catalog(
         )
 
     pipeline_datasets = {
-        ds_name
-        for ds_name in pipeline.datasets()
-        if not ds_name.startswith("params:") and ds_name != "parameters"
+        ds_name for ds_name in pipeline.datasets() if not is_parameter(ds_name)
     }
 
     catalog_datasets = {
-        ds_name
-        for ds_name in catalog.list()
-        if not ds_name.startswith("params:") and ds_name != "parameters"
+        ds_name for ds_name in catalog.list() if not is_parameter(ds_name)
     }
 
     # Datasets that are missing in Data Catalog
@@ -288,7 +284,11 @@ def resolve_patterns(metadata: ProjectMetadata, env: str, new_catalog: bool) -> 
     if new_catalog:
         data_catalog = context.catalog_new
         config_resolver = context.config_resolver
-        explicit_datasets = data_catalog.config
+        explicit_datasets = {
+            ds_name: ds_config
+            for ds_name, ds_config in data_catalog.config.items()
+            if not is_parameter(ds_name)
+        }
     else:
         data_catalog = context.catalog
         config_resolver = None
@@ -309,8 +309,7 @@ def resolve_patterns(metadata: ProjectMetadata, env: str, new_catalog: bool) -> 
             pipeline_datasets.update(pl_obj.datasets())
 
     for ds_name in pipeline_datasets:
-        is_param = ds_name.startswith("params:") or ds_name == "parameters"
-        if ds_name in explicit_datasets or is_param:
+        if ds_name in explicit_datasets or is_parameter(ds_name):
             continue
 
         if new_catalog:

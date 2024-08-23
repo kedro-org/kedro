@@ -14,14 +14,12 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
-from kedro.io import DataCatalog
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from kedro.framework.startup import ProjectMetadata
     from kedro.io import AbstractDataset
-
 
 NEW_CATALOG_ARG_HELP = """Use KedroDataCatalog instead of DataCatalog to run project."""
 
@@ -277,51 +275,61 @@ def rank_catalog_factories(
 @catalog.command("resolve")
 @env_option
 @click.pass_obj
-def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
+@click.option(
+    "--new_catalog", "-n", "new_catalog", is_flag=True, help=NEW_CATALOG_ARG_HELP
+)
+def resolve_patterns(metadata: ProjectMetadata, env: str, new_catalog: bool) -> None:
     """Resolve catalog factories against pipeline datasets. Note that this command is runner
     agnostic and thus won't take into account any default dataset creation defined in the runner."""
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    catalog_config = context.config_loader["catalog"]
-    credentials_config = context.config_loader.get("credentials", None)
-    data_catalog = DataCatalog.from_config(
-        catalog=catalog_config, credentials=credentials_config
-    )
+    if new_catalog:
+        data_catalog = context.catalog_new
+        config_resolver = context.config_resolver
+        explicit_datasets = data_catalog.config
+    else:
+        data_catalog = context.catalog
+        config_resolver = None
+        catalog_config = context.config_loader["catalog"]
 
-    explicit_datasets = {
-        ds_name: ds_config
-        for ds_name, ds_config in catalog_config.items()
-        if not data_catalog._is_pattern(ds_name)
-    }
+        explicit_datasets = {
+            ds_name: ds_config
+            for ds_name, ds_config in catalog_config.items()
+            if not data_catalog._is_pattern(ds_name)
+        }
 
     target_pipelines = pipelines.keys()
-    datasets = set()
+    pipeline_datasets = set()
 
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            datasets.update(pl_obj.datasets())
+            pipeline_datasets.update(pl_obj.datasets())
 
-    for ds_name in datasets:
+    for ds_name in pipeline_datasets:
         is_param = ds_name.startswith("params:") or ds_name == "parameters"
         if ds_name in explicit_datasets or is_param:
             continue
 
-        matched_pattern = data_catalog._match_pattern(
-            data_catalog._dataset_patterns, ds_name
-        ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
-        if matched_pattern:
-            ds_config_copy = copy.deepcopy(
-                data_catalog._dataset_patterns.get(matched_pattern)
-                or data_catalog._default_pattern.get(matched_pattern)
-                or {}
-            )
+        if new_catalog:
+            ds_config = config_resolver.resolve_patterns(ds_name)
+        else:
+            ds_config = None
+            matched_pattern = data_catalog._match_pattern(
+                data_catalog._dataset_patterns, ds_name
+            ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
+            if matched_pattern:
+                ds_config_copy = copy.deepcopy(
+                    data_catalog._dataset_patterns.get(matched_pattern)
+                    or data_catalog._default_pattern.get(matched_pattern)
+                    or {}
+                )
+                ds_config = data_catalog._resolve_config(
+                    ds_name, matched_pattern, ds_config_copy
+                )
 
-            ds_config = data_catalog._resolve_config(
-                ds_name, matched_pattern, ds_config_copy
-            )
-            explicit_datasets[ds_name] = ds_config
+        explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))

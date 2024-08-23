@@ -329,6 +329,8 @@ def resolve_patterns(metadata: ProjectMetadata, env: str, new_catalog: bool) -> 
                     ds_name, matched_pattern, ds_config_copy
                 )
 
-        explicit_datasets[ds_name] = ds_config
+        # Exclude MemoryDatasets not set in the catalog explicitly
+        if ds_config is not None:
+            explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))

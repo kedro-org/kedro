@@ -3,7 +3,10 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 ## Breaking changes to the API
+
 ## Documentation changes
+* Add theme support for Kedro logo in README.
+
 ## Community contributions
 
 # Release 0.19.8

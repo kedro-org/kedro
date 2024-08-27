@@ -359,8 +359,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         keys: set[str] = set()
 
         for key, value in cfg.items():
-            key_str = str(key)
-            full_key = f"{parent_key}.{key_str}" if parent_key else key_str
+            full_key = f"{parent_key}.{key}" if parent_key else key
             if isinstance(value, dict):
                 keys.update(self._get_all_keys(value, full_key))
             else:
@@ -432,22 +431,22 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _check_duplicates(self, key: str, config_per_file: dict[Path, Any]) -> None:
         if key == "parameters":
-            seen_file_to_keys = {
+            seen_files_to_keys = {
                 file: self._get_all_keys(OmegaConf.to_container(config, resolve=False))
                 for file, config in config_per_file.items()
             }
         else:
-            seen_file_to_keys = {
+            seen_files_to_keys = {
                 file: set(config.keys()) for file, config in config_per_file.items()
             }
 
         duplicates = []
 
-        filepaths = list(seen_file_to_keys.keys())
+        filepaths = list(seen_files_to_keys.keys())
         for i, filepath1 in enumerate(filepaths, 1):
-            config1 = seen_file_to_keys[filepath1]
+            config1 = seen_files_to_keys[filepath1]
             for filepath2 in filepaths[i:]:
-                config2 = seen_file_to_keys[filepath2]
+                config2 = seen_files_to_keys[filepath2]
 
                 combined_keys = config1 & config2
                 overlapping_keys = {

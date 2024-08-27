@@ -88,6 +88,16 @@ def mock_runner(mocker):
 
 
 @pytest.fixture
+def mock_thread_runner(mocker):
+    mock_runner = mocker.patch(
+        "kedro.runner.thread_runner.ThreadRunner",
+        autospec=True,
+    )
+    mock_runner.__name__ = "MockThreadRunner`"
+    return mock_runner
+
+
+@pytest.fixture
 def mock_context_class(mocker):
     mock_cls = create_attrs_autospec(KedroContext)
     return mocker.patch(
@@ -689,6 +699,67 @@ class TestKedroSession:
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,
             run_result=mock_runner.run.return_value,
+            pipeline=mock_pipeline,
+            catalog=mock_catalog,
+        )
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
+    def test_run_thread_runner(
+        self,
+        fake_project,
+        fake_session_id,
+        fake_pipeline_name,
+        mock_context_class,
+        mock_thread_runner,
+        mocker,
+    ):
+        """Test running the project via the session"""
+
+        mock_hook = mocker.patch(
+            "kedro.framework.session.session._create_hook_manager"
+        ).return_value.hook
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_catalog = mock_context._get_catalog.return_value
+        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+
+        with KedroSession.create(fake_project) as session:
+            session.run(runner=mock_thread_runner, pipeline_name=fake_pipeline_name)
+
+        record_data = {
+            "session_id": fake_session_id,
+            "project_path": fake_project.as_posix(),
+            "env": mock_context.env,
+            "kedro_version": kedro_version,
+            "tags": None,
+            "from_nodes": None,
+            "to_nodes": None,
+            "node_names": None,
+            "from_inputs": None,
+            "to_outputs": None,
+            "load_versions": None,
+            "extra_params": {},
+            "pipeline_name": fake_pipeline_name,
+            "namespace": None,
+            "runner": mock_thread_runner.__name__,
+        }
+
+        mock_hook.before_pipeline_run.assert_called_once_with(
+            run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
+        )
+        mock_thread_runner.run.assert_called_once_with(
+            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
+        )
+        mock_hook.after_pipeline_run.assert_called_once_with(
+            run_params=record_data,
+            run_result=mock_thread_runner.run.return_value,
             pipeline=mock_pipeline,
             catalog=mock_catalog,
         )

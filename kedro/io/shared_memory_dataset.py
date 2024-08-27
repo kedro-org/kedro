@@ -57,3 +57,8 @@ class SharedMemoryDataset(AbstractDataset):
     def _describe(self) -> dict[str, Any]:
         """SharedMemoryDataset doesn't have any constructor argument to return."""
         return {}
+
+    def _exists(self) -> bool:
+        if not self.shared_memory_dataset:
+            return False
+        return self.shared_memory_dataset.exists()

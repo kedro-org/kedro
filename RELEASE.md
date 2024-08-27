@@ -5,7 +5,7 @@
 ## Breaking changes to the API
 
 ## Documentation changes
-* Add theme support for Kedro logo in README.
+* Fix logo on PyPI page.
 
 ## Community contributions
 

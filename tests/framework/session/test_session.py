@@ -705,6 +705,7 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
+    @pytest.mark.parametrize("match_pattern", [True, False])
     def test_run_thread_runner(
         self,
         fake_project,
@@ -713,12 +714,14 @@ class TestKedroSession:
         mock_context_class,
         mock_thread_runner,
         mocker,
+        match_pattern,
     ):
         """Test running the project via the session"""
 
         mock_hook = mocker.patch(
             "kedro.framework.session.session._create_hook_manager"
         ).return_value.hook
+
         mock_pipelines = mocker.patch(
             "kedro.framework.session.session.pipelines",
             return_value={
@@ -726,13 +729,15 @@ class TestKedroSession:
                 "__default__": mocker.Mock(),
             },
         )
-        mock_context = mock_context_class.return_value
-        mock_catalog = mock_context._get_catalog.return_value
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mocker.patch(
+            "kedro.io.data_catalog.DataCatalog._match_pattern",
+            return_value=match_pattern,
+        )
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_thread_runner, pipeline_name=fake_pipeline_name)
 
+        mock_context = mock_context_class.return_value
         record_data = {
             "session_id": fake_session_id,
             "project_path": fake_project.as_posix(),
@@ -750,6 +755,8 @@ class TestKedroSession:
             "namespace": None,
             "runner": mock_thread_runner.__name__,
         }
+        mock_catalog = mock_context._get_catalog.return_value
+        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         mock_hook.before_pipeline_run.assert_called_once_with(
             run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog

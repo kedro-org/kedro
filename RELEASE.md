@@ -5,6 +5,7 @@
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.
+* Fixed a bug where `SharedMemoryDataset.exists` would not call the underlying `MemoryDataset`.
 
 ## Breaking changes to the API
 * Removed `ShelveStore` to address a security vulnerability.

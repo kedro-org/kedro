@@ -5,7 +5,10 @@
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.
 
 ## Breaking changes to the API
+
 ## Documentation changes
+* Fix logo on PyPI page.
+
 ## Community contributions
 
 # Release 0.19.8

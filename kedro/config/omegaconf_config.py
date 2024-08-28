@@ -9,6 +9,7 @@ import logging
 import mimetypes
 import typing
 from collections.abc import KeysView
+from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
@@ -24,6 +25,17 @@ from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigExce
 _config_logger = logging.getLogger(__name__)
 
 _NO_VALUE = object()
+
+
+class MergeStrategies(Enum):
+    SOFT = auto()
+    DESTRUCTIVE = auto()
+
+
+MERGING_IMPLEMENTATIONS = {
+    MergeStrategies.SOFT: "_soft_merge",
+    MergeStrategies.DESTRUCTIVE: "_destructive_merge",
+}
 
 
 class OmegaConfigLoader(AbstractConfigLoader):
@@ -372,14 +384,19 @@ class OmegaConfigLoader(AbstractConfigLoader):
         env_path: str,
     ) -> Any:
         merging_strategy = self.merge_strategy.get(key, "destructive")
-        if merging_strategy == "soft":
-            return self._soft_merge(config, env_config)
-        elif merging_strategy == "destructive":
-            return self._destructive_merge(config, env_config, env_path)
-        else:
+        try:
+            strategy = MergeStrategies[merging_strategy.upper()]
+            # Get the corresponding merge function
+            merge_function_name = MERGING_IMPLEMENTATIONS[strategy]
+            merge_function = getattr(self, merge_function_name)
+
+            # Call the merge function
+            return merge_function(config, env_config, env_path)
+        except KeyError:
+            allowed_strategies = [strategy.name.lower() for strategy in MergeStrategies]
             raise ValueError(
                 f"Merging strategy {merging_strategy} not supported. The accepted merging "
-                f"strategies are `soft` and `destructive`."
+                f"strategies are {allowed_strategies}."
             )
 
     def _is_valid_config_path(self, path: Path) -> bool:
@@ -506,7 +523,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return config
 
     @staticmethod
-    def _soft_merge(config: dict[str, Any], env_config: dict[str, Any]) -> Any:
+    def _soft_merge(
+        config: dict[str, Any], env_config: dict[str, Any], env_path: str | None = None
+    ) -> Any:
         # Soft merge the two env dirs. The chosen env will override base if keys clash.
         return OmegaConf.to_container(OmegaConf.merge(config, env_config))
 

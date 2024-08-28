@@ -506,7 +506,7 @@ class TestKedroCLI:
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" in result.output
 
-    @patch("sys.exit")
+    # @patch("sys.exit")
     def test_main_hook_exception_handling(self, fake_metadata):
         kedro_cli = KedroCLI(fake_metadata.project_path)
         kedro_cli._cli_hook_manager.hook.after_command_run = MagicMock()
@@ -522,7 +522,7 @@ class TestKedroCLI:
 
         assert result.exit_code == 1
 
-    @patch("sys.exit")
+    # @patch("sys.exit")
     def test_main_hook_finally_block(self, fake_metadata):
         kedro_cli = KedroCLI(fake_metadata.project_path)
         kedro_cli._cli_hook_manager.hook.after_command_run = MagicMock()

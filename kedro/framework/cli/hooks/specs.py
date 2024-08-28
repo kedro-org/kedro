@@ -2,11 +2,15 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
+
 from __future__ import annotations
 
-from kedro.framework.startup import ProjectMetadata
+from typing import TYPE_CHECKING
 
 from .markers import cli_hook_spec
+
+if TYPE_CHECKING:
+    from kedro.framework.startup import ProjectMetadata
 
 
 class CLICommandSpecs:

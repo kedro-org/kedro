@@ -97,7 +97,7 @@ def magic_reload_kedro(
 ) -> None:
     """
     The `%reload_kedro` IPython line magic.
-    See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic
+    See https://docs.kedro.org/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic
     for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
@@ -360,10 +360,30 @@ def _prepare_imports(node_func: Callable) -> str:
     if python_file:
         import_statement = []
         with open(python_file) as file:
+            # Handle multiline imports, i.e.
+            # from lib import (
+            # a,
+            # b,
+            # c
+            # )
+            # This will not work with all edge cases but good enough with common cases that
+            # are formatted automatically by black, ruff etc.
+            inside_bracket = False
             # Parse any line start with from or import statement
-            for line in file.readlines():
-                if line.startswith("from") or line.startswith("import"):
-                    import_statement.append(line.strip())
+
+            for _ in file.readlines():
+                line = _.strip()
+                if not inside_bracket:
+                    # The common case
+                    if line.startswith("from") or line.startswith("import"):
+                        import_statement.append(line)
+                        if line.endswith("("):
+                            inside_bracket = True
+                # Inside multi-lines import, append everything.
+                else:
+                    import_statement.append(line)
+                    if line.endswith(")"):
+                        inside_bracket = False
 
         clean_imports = "\n".join(import_statement).strip()
         return clean_imports

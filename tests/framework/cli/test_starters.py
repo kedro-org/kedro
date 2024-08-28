@@ -1,5 +1,5 @@
-"""This module contains unit test for the cli command 'kedro new'
-"""
+"""This module contains unit test for the cli command 'kedro new'"""
+
 from __future__ import annotations
 
 import logging
@@ -221,7 +221,6 @@ def _assert_requirements_ok(
         )
 
 
-# noqa: PLR0913
 def _assert_template_ok(
     result,
     tools="none",

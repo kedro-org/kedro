@@ -1,6 +1,7 @@
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files of yaml or json type from specified paths through OmegaConf.
 """
+
 from __future__ import annotations
 
 import io
@@ -269,7 +270,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return KeysView(self.config_patterns)
 
     @typing.no_type_check
-    def load_and_merge_dir_config(  # noqa: PLR0913
+    def load_and_merge_dir_config(
         self,
         conf_path: str,
         patterns: Iterable[str],
@@ -296,7 +297,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
             Resulting configuration dictionary.
 
         """
-        # noqa: too-many-locals
 
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
@@ -306,7 +306,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         paths = []
         for pattern in patterns:
-            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix()):
+            for each in self._fs.glob(Path(f"{conf_path!s}/{pattern}").as_posix()):
                 if not self._is_hidden(each):
                     paths.append(Path(each))
 

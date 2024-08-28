@@ -214,7 +214,9 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 
 # html_extra_path used to define a path to robots.txt which is used by webcrawlers
 # to ignore or allow certain links.
-html_extra_path = [str(here / "robots.txt")]
+# We've decided to rely on RTD's default robots.txt, so we no longer need to specify a custom one,
+# see discussion at https://github.com/kedro-org/kedro/issues/3741
+# html_extra_path = [str(here / "robots.txt")]
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
@@ -476,7 +478,7 @@ def autolink_classes_and_methods(lines):
             lines[i] = re.sub(existing, rf"{replacement}", lines[i])
 
 
-def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
+def autodoc_process_docstring(app, what, name, obj, options, lines):
     try:
         # guarded method to make sure build never fails
         log_suggestions(lines, name)
@@ -486,7 +488,7 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PL
             style(
                 "Failed to check for class name mentions that can be "
                 f"converted to reStructuredText links in docstring of {name}. "
-                f"Error is: \n{str(e)}",
+                f"Error is: \n{e!s}",
                 fg="red",
             )
         )
@@ -515,7 +517,7 @@ except Exception as e:
         style(
             "Failed to create list of (regex, reStructuredText link "
             "replacement) for class names and method names in docstrings. "
-            f"Error is: \n{str(e)}",
+            f"Error is: \n{e!s}",
             fg="red",
         )
     )

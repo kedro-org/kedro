@@ -1,5 +1,5 @@
 """Behave environment setup commands."""
-# noqa: unused-argument
+
 from __future__ import annotations
 
 import os
@@ -65,7 +65,7 @@ def _setup_context_with_venv(context, venv_dir):
     path = context.env["PATH"].split(os.pathsep)
     path = [p for p in path if not (Path(p).parent / "pyvenv.cfg").is_file()]
     path = [p for p in path if not (Path(p).parent / "conda-meta").is_dir()]
-    path = [str(bin_dir)] + path
+    path = [str(bin_dir), *path]
     context.env["PATH"] = os.pathsep.join(path)
 
     # Create an empty pip.conf file and point pip to it
@@ -97,9 +97,8 @@ def _create_tmp_dir() -> Path:
 
 def _setup_minimal_env(context):
     if os.environ.get("BEHAVE_LOCAL_ENV"):
-        output = subprocess.check_output(
-            ["which", "kedro"]  # noqa: S603, S607
-        )  # equivalent run "which kedro"
+        # equivalent run "which kedro"
+        output = subprocess.check_output(["which", "kedro"])  # noqa: S603, S607
         output = output.strip().decode("utf8")
         kedro_install_venv_dir = Path(output).parent.parent
         context.kedro_install_venv_dir = kedro_install_venv_dir

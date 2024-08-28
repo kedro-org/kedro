@@ -2,16 +2,18 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
+
 from __future__ import annotations
 
-from typing import Any
-
-from kedro.framework.context import KedroContext
-from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline
-from kedro.pipeline.node import Node
+from typing import TYPE_CHECKING, Any
 
 from .markers import hook_spec
+
+if TYPE_CHECKING:
+    from kedro.framework.context import KedroContext
+    from kedro.io import DataCatalog
+    from kedro.pipeline import Pipeline
+    from kedro.pipeline.node import Node
 
 
 class DataCatalogSpecs:
@@ -48,7 +50,7 @@ class NodeSpecs:
     """Namespace that defines all specifications for a node's lifecycle hooks."""
 
     @hook_spec
-    def before_node_run(  # noqa: PLR0913
+    def before_node_run(
         self,
         node: Node,
         catalog: DataCatalog,

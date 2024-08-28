@@ -109,14 +109,14 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.19.7
+v0.19.8
 
 Kedro is a Python framework for
 creating reproducible, maintainable
 and modular data science code.
 
 Installed plugins:
-kedro_viz: 4.4.0 (hooks:global,line_magic)
+kedro_viz: 9.2.0 (hooks:global,line_magic)
 
 ```
 
@@ -157,7 +157,6 @@ from kedro.framework.cli.project import (
     TAG_ARG_HELP,
     TO_NODES_HELP,
     TO_OUTPUTS_HELP,
-    project_group,
 )
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
@@ -177,7 +176,7 @@ def cli():
     """Command line tools for manipulating a Kedro project."""
 
 
-@project_group.command()
+@cli.command()
 @click.option(
     "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
 )

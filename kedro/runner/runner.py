@@ -1,6 +1,7 @@
 """``AbstractRunner`` is the base class for all ``Pipeline`` runner
 implementations.
 """
+
 from __future__ import annotations
 
 import inspect
@@ -15,15 +16,18 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Collection, Iterable, Iterator
+from typing import TYPE_CHECKING, Any, Collection, Iterable, Iterator
 
 from more_itertools import interleave
-from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
-from kedro.pipeline.node import Node
+
+if TYPE_CHECKING:
+    from pluggy import PluginManager
+
+    from kedro.pipeline.node import Node
 
 
 class AbstractRunner(ABC):
@@ -404,7 +408,7 @@ def run_node(
             f"Async data loading and saving does not work with "
             f"nodes wrapping generator functions. Please make "
             f"sure you don't use `yield` anywhere "
-            f"in node {str(node)}."
+            f"in node {node!s}."
         )
 
     if is_async:

@@ -3,7 +3,10 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 ## Breaking changes to the API
+
 ## Documentation changes
+* Fix logo on PyPI page.
+
 ## Community contributions
 
 # Release 0.19.8

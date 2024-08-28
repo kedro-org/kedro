@@ -99,6 +99,10 @@ class ConfigResolver:
         self._ds_configs = self._get_ds_configs(config, credentials)
 
     @property
+    def config(self):
+        return copy.deepcopy(self._ds_configs)
+
+    @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 

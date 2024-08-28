@@ -722,13 +722,13 @@ class TestKedroSession:
             "kedro.framework.session.session._create_hook_manager"
         ).return_value.hook
 
-        mock_pipelines = mocker.patch(
-            "kedro.framework.session.session.pipelines",
-            return_value={
-                _FAKE_PIPELINE_NAME: mocker.Mock(),
-                "__default__": mocker.Mock(),
-            },
-        )
+        ds_mock = mocker.Mock(**{"datasets.return_value": ["ds_1", "ds_2"]})
+        filter_mock = mocker.Mock(**{"filter.return_value": ds_mock})
+        pipelines_ret = {
+            _FAKE_PIPELINE_NAME: filter_mock,
+            "__default__": filter_mock,
+        }
+        mocker.patch("kedro.framework.session.session.pipelines", pipelines_ret)
         mocker.patch(
             "kedro.io.data_catalog.DataCatalog._match_pattern",
             return_value=match_pattern,
@@ -756,7 +756,7 @@ class TestKedroSession:
             "runner": mock_thread_runner.__name__,
         }
         mock_catalog = mock_context._get_catalog.return_value
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mock_pipeline = filter_mock.filter()
 
         mock_hook.before_pipeline_run.assert_called_once_with(
             run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog

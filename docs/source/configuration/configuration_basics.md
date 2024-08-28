@@ -70,8 +70,9 @@ The loader recursively scans for configuration files inside the `conf` folder, f
 
 Kedro merges configuration information and returns a configuration dictionary according to the following rules:
 
-* If any two configuration files located inside the **same** environment path (such as `conf/base/`) contain the same top-level key, the configuration loader raises a `ValueError` indicating that duplicates are not allowed.
+* If any two configuration files (exception for parameters) located inside the **same** environment path (such as `conf/base/`) contain the same top-level key, the configuration loader raises a `ValueError` indicating that duplicates are not allowed.
 * If two configuration files contain the same top-level key but are in **different** environment paths (for example, one in `conf/base/`, another in `conf/local/`) then the last loaded path (`conf/local/`) takes precedence as the key value. `OmegaConfigLoader.__getitem__` does not raise any errors but a `DEBUG` level log message is emitted with information on the overridden keys.
+* If any two parameter configuration files contain the same top-level key, the configuration loader checks the sub-keys for duplicates. If there are any, it raises a `ValueError` indicating that duplicates are not allowed.
 
 When using any of the configuration loaders, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet)
 or [to enable templating in the catalog when using the `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader).

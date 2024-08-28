@@ -335,11 +335,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     f" unable to read line {line}, position {cursor}."
                 ) from exc
 
-        seen_file_to_keys = {
-            file: set(config.keys()) for file, config in config_per_file.items()
-        }
         aggregate_config = config_per_file.values()
-        self._check_duplicates(seen_file_to_keys)
+        self._check_duplicates(key, config_per_file)
 
         if not aggregate_config:
             return {}
@@ -357,6 +354,17 @@ class OmegaConfigLoader(AbstractConfigLoader):
             ).items()
             if not k.startswith("_")
         }
+
+    def _get_all_keys(self, cfg: Any, parent_key: str = "") -> set[str]:
+        keys: set[str] = set()
+
+        for key, value in cfg.items():
+            full_key = f"{parent_key}.{key}" if parent_key else key
+            if isinstance(value, dict):
+                keys.update(self._get_all_keys(value, full_key))
+            else:
+                keys.add(full_key)
+        return keys
 
     def _is_valid_config_path(self, path: Path) -> bool:
         """Check if given path is a file path and file type is yaml or json."""
@@ -421,8 +429,17 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 _config_logger.debug(msg)
                 OmegaConf.register_new_resolver(name=name, resolver=resolver)
 
-    @staticmethod
-    def _check_duplicates(seen_files_to_keys: dict[Path, set[Any]]) -> None:
+    def _check_duplicates(self, key: str, config_per_file: dict[Path, Any]) -> None:
+        if key == "parameters":
+            seen_files_to_keys = {
+                file: self._get_all_keys(OmegaConf.to_container(config, resolve=False))
+                for file, config in config_per_file.items()
+            }
+        else:
+            seen_files_to_keys = {
+                file: set(config.keys()) for file, config in config_per_file.items()
+            }
+
         duplicates = []
 
         filepaths = list(seen_files_to_keys.keys())

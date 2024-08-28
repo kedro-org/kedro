@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
 ## Breaking changes to the API
 
@@ -8,6 +9,7 @@
 * Fix logo on PyPI page.
 
 ## Community contributions
+* [Puneet](https://github.com/puneeter)
 
 # Release 0.19.8
 

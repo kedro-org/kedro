@@ -383,11 +383,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
         merging_strategy = self.merge_strategy.get(key, "destructive")
         try:
             strategy = MergeStrategies[merging_strategy.upper()]
-            # Get the corresponding merge function
+
+            # Get the corresponding merge function and call it
             merge_function_name = MERGING_IMPLEMENTATIONS[strategy]
             merge_function = getattr(self, merge_function_name)
-
-            # Call the merge function
             return merge_function(config, env_config, env_path)
         except KeyError:
             allowed_strategies = [strategy.name.lower() for strategy in MergeStrategies]

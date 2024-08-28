@@ -145,11 +145,15 @@ class ConfigResolver:
             )
         return {key: dataset_patterns[key] for key in sorted_keys}
 
-    def match_pattern(self, ds_name: str) -> str | None:
-        """Match a dataset name against patterns in a dictionary."""
+    def list_patterns(self) -> list[str]:
         all_patterns = list(self._dataset_patterns.keys())
         all_patterns.extend(list(self._default_pattern.keys()))
         all_patterns.extend(list(self._runtime_patterns.keys()))
+        return all_patterns
+
+    def match_pattern(self, ds_name: str) -> str | None:
+        """Match a dataset name against patterns in a dictionary."""
+        all_patterns = self.list_patterns()
         matches = (pattern for pattern in all_patterns if parse(pattern, ds_name))
         return next(matches, None)
 

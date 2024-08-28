@@ -407,7 +407,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 keys.add(full_key)
         return keys
 
-
     def _is_valid_config_path(self, path: Path) -> bool:
         """Check if given path is a file path and file type is yaml or json."""
         posix_path = path.as_posix()

@@ -61,4 +61,4 @@ class SharedMemoryDataset(AbstractDataset):
     def _exists(self) -> bool:
         if not self.shared_memory_dataset:
             return False
-        return self.shared_memory_dataset.exists()
+        return self.shared_memory_dataset.exists()  # type: ignore[no-any-return]

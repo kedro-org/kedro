@@ -3,6 +3,8 @@
 ## Major features and improvements
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
+* Fixed bug where using dataset factories breaks with `ThreadRunner`.
+
 ## Breaking changes to the API
 
 ## Documentation changes

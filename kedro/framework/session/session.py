@@ -380,13 +380,13 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        config_resolver = None
+        catalog_config_resolver = None
         if new_catalog:
             catalog = context._get_catalog_new(
                 save_version=save_version,
                 load_versions=load_versions,
             )
-            config_resolver = context.config_resolver
+            catalog_config_resolver = context.catalog_config_resolver
         else:
             catalog = context._get_catalog(
                 save_version=save_version,
@@ -406,19 +406,21 @@ class KedroSession:
         )
 
         if new_catalog:
-            config_resolver.add_runtime_patterns(runner._extra_dataset_patterns)
+            catalog_config_resolver.add_runtime_patterns(runner._extra_dataset_patterns)
             pp_datasets = list(filtered_pipeline.datasets())
-            resolved_configs = config_resolver.resolve_patterns(pp_datasets)
+            resolved_configs = catalog_config_resolver.resolve_dataset_patterns(
+                pp_datasets
+            )
             for ds_name, ds_config in zip(pp_datasets, resolved_configs):
                 if ds_name not in catalog and ds_config is not None:
                     catalog.init_dataset(ds_name, ds_config)
+        elif isinstance(runner, ThreadRunner):
+            for ds in filtered_pipeline.datasets():
+                if catalog._match_pattern(
+                    catalog._dataset_patterns, ds
+                ) or catalog._match_pattern(catalog._default_pattern, ds):
+                    _ = catalog._get_dataset(ds)
         try:
-            if isinstance(runner, ThreadRunner):
-                for ds in filtered_pipeline.datasets():
-                    if catalog._match_pattern(
-                        catalog._dataset_patterns, ds
-                    ) or catalog._match_pattern(catalog._default_pattern, ds):
-                        _ = catalog._get_dataset(ds)
             run_result = runner.run(
                 filtered_pipeline, catalog, hook_manager, session_id
             )

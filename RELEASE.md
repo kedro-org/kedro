@@ -1,4 +1,4 @@
-# Release 0.19.9
+# Upcoming Release
 
 ## Major features and improvements
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.

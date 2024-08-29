@@ -99,9 +99,9 @@ class KedroDataCatalog:
         return list(self._datasets.keys())
 
     def init_dataset(self, ds_name: str, ds_config: dict[str, Any]):
-        # Add LazyAbstractDataset to store the configuration but not to init actual dataset
+        # Add lazy loading feature to store the configuration but not to init actual dataset
         # Initialise actual dataset when load or save
-        # Add is_ds_init property
+        # Add is_init property
         validate_dataset_config(ds_name, ds_config)
         if ds_name in self._datasets:
             raise DatasetAlreadyExistsError(
@@ -151,6 +151,7 @@ class KedroDataCatalog:
                     f"Dataset '{ds_name}' has already been registered"
                 )
         self._datasets[ds_name] = dataset
+        # TODO: API to get configuration from dataset
         self._config[ds_name] = {}
 
     @property

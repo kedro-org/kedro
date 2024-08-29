@@ -85,7 +85,7 @@ def _resolve_config(
     return config
 
 
-class CatalogConfigResolver:
+class DataCatalogConfigResolver:
     def __init__(
         self,
         config: dict[str, dict[str, Any]],

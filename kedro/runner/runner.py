@@ -84,7 +84,7 @@ class AbstractRunner(ABC):
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
-        # Not sure if needed for DataCatalog
+        # Seems like it's not needed even for DataCatalog
         # catalog = catalog.shallow_copy()
 
         # Check which datasets used in the pipeline are in the catalog or match
@@ -101,11 +101,9 @@ class AbstractRunner(ABC):
             )
 
         # Identify MemoryDataset in the catalog
-        if isinstance(catalog, DataCatalog):
-            catalog_datasets = catalog._datasets
-        else:
-            catalog_datasets = catalog.datasets
-
+        catalog_datasets = (
+            catalog._datasets if isinstance(catalog, DataCatalog) else catalog.datasets
+        )
         # TODO: catalog.list() filter by kind
         memory_datasets = {
             ds_name
@@ -340,10 +338,9 @@ def _enumerate_non_persistent_inputs(
 
     """
     # We use _datasets because they pertain parameter name format
-    if isinstance(catalog, DataCatalog):
-        catalog_datasets = catalog._datasets
-    else:
-        catalog_datasets = catalog.datasets
+    catalog_datasets = (
+        catalog._datasets if isinstance(catalog, DataCatalog) else catalog.datasets
+    )
     non_persistent_inputs: set[str] = set()
     for node_input in node.inputs:
         if node_input.startswith("params:"):

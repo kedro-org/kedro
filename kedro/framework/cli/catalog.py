@@ -251,8 +251,7 @@ def rank_catalog_factories(
     context = session.load_context()
 
     if new_catalog:
-        config_resolver = context.config_resolver
-        catalog_factories = config_resolver.list_patterns()
+        catalog_factories = context.catalog_config_resolver.list_patterns()
     else:
         catalog_factories = list(
             {

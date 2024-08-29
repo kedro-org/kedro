@@ -188,10 +188,7 @@ def create_catalog(
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    if new_catalog:
-        catalog = context.catalog_new
-    else:
-        catalog = context.catalog
+    catalog = context.catalog_new if new_catalog else context.catalog
 
     pipeline = pipelines.get(pipeline_name)
 

@@ -10,8 +10,8 @@ Patterns = dict[str, dict[str, Any]]
 CREDENTIALS_KEY = "credentials"
 
 
-def _get_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
-    """Return a set of credentials from the provided credentials dict.
+def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
+    """Fetch the specified credentials from the provided credentials dictionary.
 
     Args:
         credentials_name: Credentials name.
@@ -51,56 +51,57 @@ def _resolve_credentials(
     """
     config = copy.deepcopy(config)
 
-    def _map_value(key: str, value: Any) -> Any:
+    def _resolve_value(key: str, value: Any) -> Any:
         if key == CREDENTIALS_KEY and isinstance(value, str):
-            return _get_credentials(value, credentials)
+            return _fetch_credentials(value, credentials)
         if isinstance(value, dict):
-            return {k: _map_value(k, v) for k, v in value.items()}
+            return {k: _resolve_value(k, v) for k, v in value.items()}
         return value
 
-    return {k: _map_value(k, v) for k, v in config.items()}
+    return {k: _resolve_value(k, v) for k, v in config.items()}
 
 
-def _resolve_config(
+def _resolve_dataset_config(
     ds_name: str,
-    matched_pattern: str,
+    pattern: str,
     config: dict,
 ) -> dict[str, Any]:
-    """Get resolved AbstractDataset from a factory config"""
-    result = parse(matched_pattern, ds_name)
+    """Resolve dataset configuration based on the provided pattern."""
+    resolved_vars = parse(pattern, ds_name)
     # Resolve the factory config for the dataset
     if isinstance(config, dict):
         for key, value in config.items():
-            config[key] = _resolve_config(ds_name, matched_pattern, value)
+            config[key] = _resolve_dataset_config(ds_name, pattern, value)
     elif isinstance(config, (list, tuple)):
-        config = [_resolve_config(ds_name, matched_pattern, value) for value in config]
+        config = [_resolve_dataset_config(ds_name, pattern, value) for value in config]
     elif isinstance(config, str) and "}" in config:
         try:
-            config = str(config).format_map(result.named)
+            config = config.format_map(resolved_vars.named)
         except KeyError as exc:
             raise KeyError(
-                f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the configuration "
+                f"Unable to resolve '{config}' from the pattern '{pattern}'. Keys used in the configuration "
                 f"should be present in the dataset factory pattern."
             ) from exc
     return config
 
 
-class ConfigResolver:
+class DataCatalogConfigResolver:
+    """Resolves dataset configurations based on patterns and credentials."""
+
     def __init__(
         self,
         config: dict[str, dict[str, Any]],
         credentials: dict[str, dict[str, Any]] | None = None,
     ):
-        self._runtime_patterns = {}
-        self._dataset_patterns, self._default_pattern = self._get_patterns(
+        self._runtime_patterns: Patterns = {}
+        self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )
-
-        self._ds_configs = self._get_ds_configs(config, credentials)
+        self._resolved_configs = self._init_configs(config, credentials)
 
     @property
-    def config(self):
-        return copy.deepcopy(self._ds_configs)
+    def config(self) -> dict[str, dict[str, Any]]:
+        return copy.deepcopy(self._resolved_configs)
 
     @property
     def _logger(self) -> logging.Logger:
@@ -112,18 +113,17 @@ class ConfigResolver:
         return "{" in pattern
 
     @staticmethod
-    def _specificity(pattern: str) -> int:
-        """Helper function to check the length of exactly matched characters not inside brackets."""
+    def _pattern_specificity(pattern: str) -> int:
+        """Calculate the specificity of a pattern based on characters outside curly brackets."""
         # Remove all the placeholders from the pattern and count the number of remaining chars
         result = re.sub(r"\{.*?\}", "", pattern)
         return len(result)
 
     @classmethod
-    def _sort_patterns(cls, dataset_patterns: Patterns) -> dict[str, dict[str, Any]]:
+    def _sort_patterns(cls, dataset_patterns: Patterns) -> Patterns:
         """Sort a dictionary of dataset patterns according to parsing rules.
 
         In order:
-
         1. Decreasing specificity (number of characters outside the curly brackets)
         2. Decreasing number of placeholders (number of curly bracket pairs)
         3. Alphabetically
@@ -131,13 +131,13 @@ class ConfigResolver:
         sorted_keys = sorted(
             dataset_patterns,
             key=lambda pattern: (
-                -(cls._specificity(pattern)),
+                -(cls._pattern_specificity(pattern)),
                 -pattern.count("{"),
                 pattern,
             ),
         )
         catch_all = [
-            pattern for pattern in sorted_keys if cls._specificity(pattern) == 0
+            pattern for pattern in sorted_keys if cls._pattern_specificity(pattern) == 0
         ]
         if len(catch_all) > 1:
             raise ValueError(
@@ -146,10 +146,12 @@ class ConfigResolver:
         return {key: dataset_patterns[key] for key in sorted_keys}
 
     def list_patterns(self) -> list[str]:
-        all_patterns = list(self._dataset_patterns.keys())
-        all_patterns.extend(list(self._default_pattern.keys()))
-        all_patterns.extend(list(self._runtime_patterns.keys()))
-        return all_patterns
+        """List al patterns available in the catalog."""
+        return (
+            list(self._dataset_patterns.keys())
+            + list(self._default_pattern.keys())
+            + list(self._runtime_patterns.keys())
+        )
 
     def match_pattern(self, ds_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary."""
@@ -158,57 +160,57 @@ class ConfigResolver:
         return next(matches, None)
 
     @classmethod
-    def _get_patterns(
+    def _extract_patterns(
         cls,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
     ) -> tuple[Patterns, Patterns]:
-        dataset_patterns = {}
+        """Extract and sort patterns from the configuration."""
         config = copy.deepcopy(config) or {}
         credentials = copy.deepcopy(credentials) or {}
+        dataset_patterns = {}
         user_default = {}
 
         for ds_name, ds_config in config.items():
             if cls._is_pattern(ds_name):
-                resolved_ds_config = _resolve_credentials(ds_config, credentials)
-                dataset_patterns[ds_name] = resolved_ds_config
+                resolved_config = _resolve_credentials(ds_config, credentials)
+                dataset_patterns[ds_name] = resolved_config
 
         sorted_patterns = cls._sort_patterns(dataset_patterns)
         if sorted_patterns:
             # If the last pattern is a catch-all pattern, pop it and set it as the default
-            if cls._specificity(list(sorted_patterns.keys())[-1]) == 0:
+            if cls._pattern_specificity(list(sorted_patterns.keys())[-1]) == 0:
                 last_pattern = sorted_patterns.popitem()
                 user_default = {last_pattern[0]: last_pattern[1]}
 
         return sorted_patterns, user_default
 
-    def _get_ds_configs(
+    def _init_configs(
         self,
         config: dict[str, dict[str, Any]],
         credentials: dict[str, dict[str, Any]] | None,
     ) -> dict[str, dict[str, Any]]:
+        """Initialize the dataset configuration with resolved credentials."""
         config = copy.deepcopy(config) or {}
         credentials = copy.deepcopy(credentials) or {}
-        ds_configs = {}
+        resolved_configs = {}
+
         for ds_name, ds_config in config.items():
             if not self._is_pattern(ds_name):
-                ds_configs[ds_name] = _resolve_credentials(ds_config, credentials)
+                resolved_configs[ds_name] = _resolve_credentials(ds_config, credentials)
 
-        return ds_configs
+        return resolved_configs
 
-    def resolve_patterns(
+    def resolve_dataset_patterns(
         self, datasets: str | list[str]
     ) -> dict[str, Any] | list[dict[str, Any]]:
-        if isinstance(datasets, str):
-            datasets_lst = [datasets]
-        else:
-            datasets_lst = datasets
-
+        """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
+        datasets_lst = [datasets] if isinstance(datasets, str) else datasets
         resolved_configs = []
 
         for ds_name in datasets_lst:
             matched_pattern = self.match_pattern(ds_name)
-            if matched_pattern and ds_name not in self._ds_configs:
+            if matched_pattern and ds_name not in self._resolved_configs:
                 # If the dataset is a patterned dataset, materialise it and add it to
                 # the catalog
                 config_copy = copy.deepcopy(
@@ -217,10 +219,12 @@ class ConfigResolver:
                     or self._runtime_patterns.get(matched_pattern)
                     or {}
                 )
-                ds_config = _resolve_config(ds_name, matched_pattern, config_copy)
+                ds_config = _resolve_dataset_config(
+                    ds_name, matched_pattern, config_copy
+                )
 
                 if (
-                    self._specificity(matched_pattern) == 0
+                    self._pattern_specificity(matched_pattern) == 0
                     and matched_pattern in self._default_pattern
                 ):
                     self._logger.warning(
@@ -230,16 +234,14 @@ class ConfigResolver:
                         ds_name,
                     )
                 resolved_configs.append(ds_config)
-            elif ds_name in self._ds_configs:
-                resolved_configs.append(self._ds_configs.get(ds_name))
+            elif ds_name in self._resolved_configs:
+                resolved_configs.append(self._resolved_configs.get(ds_name))
             else:
                 resolved_configs.append(None)
 
-        if isinstance(datasets, str):
-            return resolved_configs[0]
-        else:
-            return resolved_configs
+        return resolved_configs[0] if isinstance(datasets, str) else resolved_configs
 
     def add_runtime_patterns(self, dataset_patterns: Patterns) -> None:
+        """Add new runtime patterns and re-sort them."""
         self._runtime_patterns = {**self._runtime_patterns, **dataset_patterns}
         self._runtime_patterns = self._sort_patterns(self._runtime_patterns)

@@ -177,10 +177,9 @@ class ParallelRunner(AbstractRunner):
         will not be synchronized across threads.
         """
 
-        if isinstance(catalog, DataCatalog):
-            datasets = catalog._datasets
-        else:
-            datasets = catalog.datasets
+        datasets = (
+            catalog._datasets if isinstance(catalog, DataCatalog) else catalog.datasets
+        )
 
         unserialisable = []
         for name, dataset in datasets.items():
@@ -234,6 +233,7 @@ class ParallelRunner(AbstractRunner):
         else:
             for ds_name, ds in catalog.datasets.items():
                 if isinstance(ds, SharedMemoryDataset):
+                    # Here we modify datasets
                     catalog[ds_name].set_manager(self._manager)
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:

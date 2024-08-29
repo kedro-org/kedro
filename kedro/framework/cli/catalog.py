@@ -278,9 +278,10 @@ def resolve_patterns(metadata: ProjectMetadata, env: str, new_catalog: bool) -> 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
+    catalog_config_resolver = None
     if new_catalog:
         data_catalog = context.catalog_new
-        config_resolver = context.config_resolver
+        catalog_config_resolver = context.catalog_config_resolver
         explicit_datasets = {
             ds_name: ds_config
             for ds_name, ds_config in data_catalog.config.items()
@@ -288,7 +289,6 @@ def resolve_patterns(metadata: ProjectMetadata, env: str, new_catalog: bool) -> 
         }
     else:
         data_catalog = context.catalog
-        config_resolver = None
         catalog_config = context.config_loader["catalog"]
 
         explicit_datasets = {
@@ -310,7 +310,7 @@ def resolve_patterns(metadata: ProjectMetadata, env: str, new_catalog: bool) -> 
             continue
 
         if new_catalog:
-            ds_config = config_resolver.resolve_patterns(ds_name)
+            ds_config = catalog_config_resolver.resolve_dataset_patterns(ds_name)
         else:
             ds_config = None
             matched_pattern = data_catalog._match_pattern(

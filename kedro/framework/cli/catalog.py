@@ -68,14 +68,14 @@ def list_datasets(  # noqa: PLR0912
     context = session.load_context()
 
     try:
+        catalog_config_resolver = None
         if new_catalog:
             data_catalog = context.catalog_new
             datasets_meta = data_catalog.datasets
-            config_resolver = context.config_resolver
+            catalog_config_resolver = context.catalog_config_resolver
         else:
             data_catalog = context.catalog
             datasets_meta = data_catalog._datasets
-            config_resolver = None
         catalog_ds = set(data_catalog.list())
     except Exception as exc:
         raise KedroCliError(
@@ -99,17 +99,18 @@ def list_datasets(  # noqa: PLR0912
         default_ds = pipeline_ds - catalog_ds
         used_ds = catalog_ds - unused_ds
 
+        factory_ds_by_type = defaultdict(list)
         if new_catalog:
-            factory_ds_by_type = defaultdict(list)
-            resolved_configs = config_resolver.resolve_patterns(default_ds)
+            resolved_configs = catalog_config_resolver.resolve_dataset_patterns(
+                default_ds
+            )
             for ds_name, ds_config in zip(default_ds, resolved_configs):
-                if config_resolver.match_pattern(ds_name):
+                if catalog_config_resolver.match_pattern(ds_name):
                     factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
                         ds_name
                     )
         else:
             # resolve any factory datasets in the pipeline
-            factory_ds_by_type = defaultdict(list)
             for ds_name in default_ds:
                 matched_pattern = data_catalog._match_pattern(
                     data_catalog._dataset_patterns, ds_name

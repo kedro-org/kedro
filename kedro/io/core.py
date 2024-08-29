@@ -874,5 +874,5 @@ def validate_on_forbidden_chars(**kwargs: Any) -> None:
 
 
 def is_parameter(dataset_name: str) -> bool:
-    """Checks if dataset is a parameter."""
+    """Check if dataset is a parameter."""
     return dataset_name.startswith("params:") or dataset_name == "parameters"

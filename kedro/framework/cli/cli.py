@@ -210,7 +210,7 @@ class KedroCLI(CommandCollection):
                 project_metadata=self._metadata, command_args=args, exit_code=1
             )
             hook_called = True
-            traceback.print_exception()
+            traceback.print_exc()
             sys.exit(1)
         finally:
             if not hook_called:

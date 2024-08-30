@@ -9,9 +9,11 @@
 
 ## Documentation changes
 * Fix logo on PyPI page.
+* Minor language/styling updates.
 
 ## Community contributions
 * [Puneet](https://github.com/puneeter)
+* [ethanknights](https://github.com/ethanknights)
 
 # Release 0.19.8
 

@@ -201,13 +201,12 @@ class KedroCLI(CommandCollection):
                 )
                 click.echo(message)
                 click.echo(hint)
-                sys.exit(exc.code)
+            sys.exit(exc.code)
         except Exception:
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=1
             )
-            traceback.print_exc()
-            sys.exit(1)
+            raise
 
     @property
     def global_groups(self) -> Sequence[click.MultiCommand]:

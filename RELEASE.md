@@ -1,7 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
-* Made packaged kedro project return `session.run()` output when running it in the interactive environment.
+* Made packaged kedro project return `session.run()` output to be used when running it in the interactive environment.
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.

@@ -66,7 +66,7 @@ def _resolve_credentials(
 def _resolve_dataset_config(
     ds_name: str,
     pattern: str,
-    config: dict,
+    config: Any,
 ) -> dict[str, Any]:
     """Resolve dataset configuration based on the provided pattern."""
     resolved_vars = parse(pattern, ds_name)
@@ -201,6 +201,7 @@ class DataCatalogConfigResolver:
         credentials: dict[str, dict[str, Any]] | None,
     ) -> dict[str, dict[str, Any]]:
         """Initialize the dataset configuration with resolved credentials."""
+        # TODO: check if deep copies are required
         config = copy.deepcopy(config) or {}
         credentials = copy.deepcopy(credentials) or {}
         resolved_configs = {}

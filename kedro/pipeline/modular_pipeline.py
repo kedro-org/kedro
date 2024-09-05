@@ -1,4 +1,5 @@
 """Helper to integrate modular pipelines into a master pipeline."""
+
 from __future__ import annotations
 
 import copy

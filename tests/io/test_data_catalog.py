@@ -487,9 +487,9 @@ class TestDataCatalogFromConfig:
 
     def test_config_invalid_module(self, sane_config):
         """Check the error if the type points to nonexistent module"""
-        sane_config["catalog"]["boats"][
-            "type"
-        ] = "kedro.invalid_module_name.io.CSVDataset"
+        sane_config["catalog"]["boats"]["type"] = (
+            "kedro.invalid_module_name.io.CSVDataset"
+        )
 
         error_msg = "Class 'kedro.invalid_module_name.io.CSVDataset' not found"
         with pytest.raises(DatasetError, match=re.escape(error_msg)):

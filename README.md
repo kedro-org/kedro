@@ -1,5 +1,11 @@
-![Kedro Logo Banner - Light](https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-dark.png#gh-dark-mode-only)
-![Kedro Logo Banner - Dark](https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-light.png#gh-light-mode-only)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-light.png">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-dark.png">
+    <img src="https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-light.png" alt="Kedro">
+  </picture>
+</p>
+
 [![Python version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
@@ -51,13 +57,13 @@ pip install git+https://github.com/kedro-org/kedro@main
 | Data Catalog         | A series of lightweight data connectors used to save and load data across many different file formats and file systems, including local and network file systems, cloud object stores, and HDFS. The Data Catalog also includes data and model versioning for file-based systems.                                                                                                                  |
 | Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/kedro-org/kedro-viz).                                                                                                                                                                                                                                      |
 | Coding Standards     | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`ruff`](https://github.com/astral-sh/ruff) and make use of the standard Python logging library. |
-| Flexible Deployment  | Deployment strategies that include single or distributed-machine deployment as well as additional support for deploying on Argo, Prefect, Kubeflow, AWS Batch and Databricks.                                                                                                                                                                                                                      |
+| Flexible Deployment  | Deployment strategies that include single or distributed-machine deployment as well as additional support for deploying on Argo, Prefect, Kubeflow, AWS Batch, and Databricks.                                                                                                                                                                                                                      |
 
 ## How do I use Kedro?
 
 The [Kedro documentation](https://docs.kedro.org/en/stable/) first explains [how to install Kedro](https://docs.kedro.org/en/stable/get_started/install.html) and then introduces [key Kedro concepts](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html).
 
-You can then review the [spaceflights tutorial](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) to build a Kedro project for hands-on experience
+You can then review the [spaceflights tutorial](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) to build a Kedro project for hands-on experience.
 
 For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://docs.kedro.org/en/stable/visualisation/index.html).
 

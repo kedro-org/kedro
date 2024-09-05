@@ -2,6 +2,7 @@
 
 This module implements commands available from the kedro CLI.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -155,8 +156,6 @@ class KedroCLI(CommandCollection):
             project_metadata=self._metadata, command_args=args
         )
 
-        hook_called = False
-
         try:
             super().main(
                 args=args,
@@ -172,7 +171,6 @@ class KedroCLI(CommandCollection):
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
-            hook_called = True
 
             # When CLI is run outside of a project, project_groups are not registered
             catch_exception = "click.exceptions.UsageError: No such command"
@@ -203,18 +201,12 @@ class KedroCLI(CommandCollection):
                 )
                 click.echo(message)
                 click.echo(hint)
-                sys.exit(exc.code)
+            sys.exit(exc.code)
         except Exception:
             self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=1
             )
-            hook_called = True
             raise
-        finally:
-            if not hook_called:
-                self._cli_hook_manager.hook.after_command_run(
-                    project_metadata=self._metadata, command_args=args, exit_code=0
-                )
 
     @property
     def global_groups(self) -> Sequence[click.MultiCommand]:

@@ -1,5 +1,6 @@
 """``kedro.framework.project`` module provides utility to
 configure a Kedro project and access its settings."""
+
 from __future__ import annotations
 
 import importlib
@@ -304,7 +305,7 @@ def validate_settings() -> None:
     the settings module, dynaconf would silence any import error (e.g. missing
     dependency, missing/mislabelled pipeline), and users would instead get a cryptic
     error message ``Expected an instance of `ConfigLoader`, got `NoneType` instead``.
-    More info on the dynaconf issue: https://github.com/rochacbruno/dynaconf/issues/460
+    More info on the dynaconf issue: https://github.com/dynaconf/dynaconf/issues/460
     """
     if PACKAGE_NAME is None:
         raise ValueError(

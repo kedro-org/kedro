@@ -1,5 +1,5 @@
-"""This module contains unit test for the cli command 'kedro new'
-"""
+"""This module contains unit test for the cli command 'kedro new'"""
+
 from __future__ import annotations
 
 import logging

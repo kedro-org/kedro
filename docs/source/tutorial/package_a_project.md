@@ -145,7 +145,7 @@ main(
 This is equivalent to `python -m <package_name>` at the command line, and you can pass in all the arguments that correspond to the options described by `python -m <package_name> --help`.
 
 ```{note}
-If you run the packaged project in the interactive environment like ipython or Databricks you can also consume the output of the `main()`
+If you run the packaged project in the interactive environment like IPython or Databricks you can also consume the output of the `main()`
 which returns the `session.run()` output.
 ```
 

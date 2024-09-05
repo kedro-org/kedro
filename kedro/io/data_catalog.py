@@ -16,6 +16,7 @@ from typing import Any, Dict
 
 from parse import parse
 
+from kedro.io import DataCatalogConfigResolver
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -162,9 +163,10 @@ class DataCatalog:
         datasets: dict[str, AbstractDataset] | None = None,
         feed_dict: dict[str, Any] | None = None,
         dataset_patterns: Patterns | None = None,
+        default_pattern: Patterns | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-        default_pattern: Patterns | None = None,
+        config_resolver: DataCatalogConfigResolver = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -195,6 +197,8 @@ class DataCatalog:
                 sorted in lexicographical order.
             default_pattern: A dictionary of the default catch-all pattern that overrides the default
                 pattern provided through the runners.
+            config_resolver:
+
 
         Example:
         ::
@@ -206,14 +210,12 @@ class DataCatalog:
             >>>                   save_args={"index": False})
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
+        self._config_resolver = config_resolver or DataCatalogConfigResolver()
         self._datasets = dict(datasets or {})
+        self._datasets_config = self._config_resolver.config
         self.datasets = _FrozenDatasets(self._datasets)
-        # Keep a record of all patterns in the catalog.
-        # {dataset pattern name : dataset pattern body}
-        self._dataset_patterns = dataset_patterns or {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
-        self._default_pattern = default_pattern or {}
         self._use_rich_markup = _has_rich_handler()
 
         if feed_dict:
@@ -304,43 +306,26 @@ class DataCatalog:
             >>> catalog.save("boats", df)
         """
         datasets = {}
-        dataset_patterns = {}
-        catalog = copy.deepcopy(catalog) or {}
-        credentials = copy.deepcopy(credentials) or {}
+        config_resolver = DataCatalogConfigResolver(catalog, credentials)
         save_version = save_version or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
-        user_default = {}
 
-        for ds_name, ds_config in catalog.items():
-            if not isinstance(ds_config, dict):
-                raise DatasetError(
-                    f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
-                    "\nHint: If this catalog entry is intended for variable interpolation, "
-                    "make sure that the key is preceded by an underscore."
-                )
-
-            ds_config = _resolve_credentials(  # noqa: PLW2901
-                ds_config, credentials
-            )
-            if cls._is_pattern(ds_name):
-                # Add each factory to the dataset_patterns dict.
-                dataset_patterns[ds_name] = ds_config
-
-            else:
+        for ds_name in catalog:
+            if not config_resolver.is_pattern(ds_name):
                 datasets[ds_name] = AbstractDataset.from_config(
-                    ds_name, ds_config, load_versions.get(ds_name), save_version
+                    ds_name,
+                    config_resolver.config[ds_name],
+                    load_versions.get(ds_name),
+                    save_version,
                 )
-        sorted_patterns = cls._sort_patterns(dataset_patterns)
-        if sorted_patterns:
-            # If the last pattern is a catch-all pattern, pop it and set it as the default
-            if cls._specificity(list(sorted_patterns.keys())[-1]) == 0:
-                last_pattern = sorted_patterns.popitem()
-                user_default = {last_pattern[0]: last_pattern[1]}
 
         missing_keys = [
-            key
-            for key in load_versions.keys()
-            if not (key in catalog or cls._match_pattern(sorted_patterns, key))
+            ds_name
+            for ds_name in load_versions
+            if not (
+                ds_name in config_resolver.config
+                or config_resolver.match_pattern(ds_name)
+            )
         ]
         if missing_keys:
             raise DatasetNotFoundError(
@@ -350,10 +335,11 @@ class DataCatalog:
 
         return cls(
             datasets=datasets,
-            dataset_patterns=sorted_patterns,
+            dataset_patterns=config_resolver.dataset_patterns,
+            default_pattern=config_resolver.default_pattern,
             load_versions=load_versions,
             save_version=save_version,
-            default_pattern=user_default,
+            config_resolver=config_resolver,
         )
 
     @staticmethod
@@ -619,7 +605,11 @@ class DataCatalog:
         dataset.release()
 
     def add(
-        self, dataset_name: str, dataset: AbstractDataset, replace: bool = False
+        self,
+        dataset_name: str,
+        dataset: AbstractDataset,
+        dataset_config: dict[str, Any] | None = None,
+        replace: bool = False,
     ) -> None:
         """Adds a new ``AbstractDataset`` object to the ``DataCatalog``.
 
@@ -628,6 +618,7 @@ class DataCatalog:
                 registered yet.
             dataset: A data set object to be associated with the given data
                 set name.
+            dataset_config: A dictionary with dataset configuration.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
 
@@ -654,6 +645,8 @@ class DataCatalog:
                     f"Dataset '{dataset_name}' has already been registered"
                 )
         self._datasets[dataset_name] = dataset
+        if dataset_config is not None:
+            self._datasets_config[dataset_name] = dataset_config
         self.datasets = _FrozenDatasets(self.datasets, {dataset_name: dataset})
 
     def add_all(

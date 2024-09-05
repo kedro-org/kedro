@@ -92,7 +92,7 @@ class DataCatalogConfigResolver:
 
     def __init__(
         self,
-        config: dict[str, dict[str, Any]],
+        config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
     ):
         self._runtime_patterns: Patterns = {}
@@ -103,14 +103,22 @@ class DataCatalogConfigResolver:
 
     @property
     def config(self) -> dict[str, dict[str, Any]]:
-        return copy.deepcopy(self._resolved_configs)
+        return self._resolved_configs
+
+    @property
+    def dataset_patterns(self) -> Patterns:
+        return self._dataset_patterns
+
+    @property
+    def default_pattern(self) -> Patterns:
+        return self._default_pattern
 
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
     @staticmethod
-    def _is_pattern(pattern: str) -> bool:
+    def is_pattern(pattern: str) -> bool:
         """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
         return "{" in pattern
 
@@ -189,7 +197,7 @@ class DataCatalogConfigResolver:
 
     def _init_configs(
         self,
-        config: dict[str, dict[str, Any]],
+        config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
     ) -> dict[str, dict[str, Any]]:
         """Initialize the dataset configuration with resolved credentials."""

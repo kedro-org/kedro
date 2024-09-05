@@ -175,6 +175,24 @@ class DataCatalog:
     def __repr__(self) -> str:
         return self.datasets.__repr__()
 
+    def __iter__(self):
+        yield from self._datasets.values()
+
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
+        return self._get_dataset(ds_name)
+
+    def __contains__(self, dataset_name: str) -> bool:
+        """Check if an item is in the catalog as a materialised dataset or pattern"""
+        return dataset_name in self._datasets or self._config_resolver.match_pattern(
+            dataset_name
+        )
+
+    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
+        return (self._datasets, self._config_resolver.dataset_patterns) == (
+            other._datasets,
+            other._config_resolver._dataset_patterns,
+        )
+
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
@@ -329,12 +347,6 @@ class DataCatalog:
             dataset = dataset._copy(_version=version)
 
         return dataset
-
-    def __contains__(self, dataset_name: str) -> bool:
-        """Check if an item is in the catalog as a materialised dataset or pattern"""
-        return dataset_name in self._datasets or self._config_resolver.match_pattern(
-            dataset_name
-        )
 
     def load(self, name: str, version: str | None = None) -> Any:
         """Loads a registered data set.
@@ -621,7 +633,7 @@ class DataCatalog:
             raise SyntaxError(
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
-        return [dset_name for dset_name in self._datasets if pattern.search(dset_name)]
+        return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
 
     def shallow_copy(
         self, extra_dataset_patterns: Patterns | None = None
@@ -640,12 +652,6 @@ class DataCatalog:
             load_versions=self._load_versions,
             save_version=self._save_version,
             config_resolver=self._config_resolver,
-        )
-
-    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
-        return (self._datasets, self._config_resolver.dataset_patterns) == (
-            other._datasets,
-            other._config_resolver._dataset_patterns,
         )
 
     def confirm(self, name: str) -> None:

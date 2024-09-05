@@ -332,10 +332,9 @@ class DataCatalog:
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
-        matched_pattern = self._match_pattern(self._dataset_patterns, dataset_name)
-        if dataset_name in self._datasets or matched_pattern:
-            return True
-        return False
+        return dataset_name in self._datasets or self._config_resolver.match_pattern(
+            dataset_name
+        )
 
     def load(self, name: str, version: str | None = None) -> Any:
         """Loads a registered data set.

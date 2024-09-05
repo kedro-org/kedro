@@ -182,7 +182,7 @@ class DataCatalogConfigResolver:
         user_default = {}
 
         for ds_name, ds_config in config.items():
-            if cls._is_pattern(ds_name):
+            if cls.is_pattern(ds_name):
                 resolved_config = _resolve_credentials(ds_config, credentials)
                 dataset_patterns[ds_name] = resolved_config
 
@@ -206,12 +206,12 @@ class DataCatalogConfigResolver:
         resolved_configs = {}
 
         for ds_name, ds_config in config.items():
-            if not self._is_pattern(ds_name):
+            if not self.is_pattern(ds_name):
                 resolved_configs[ds_name] = _resolve_credentials(ds_config, credentials)
 
         return resolved_configs
 
-    def resolve_dataset_patterns(
+    def resolve_dataset_pattern(
         self, datasets: str | list[str]
     ) -> dict[str, Any] | list[dict[str, Any]]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""

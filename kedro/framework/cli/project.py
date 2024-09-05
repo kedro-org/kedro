@@ -215,7 +215,7 @@ def run(  # noqa: PLR0913
     conf_source: str,
     params: dict[str, Any],
     namespace: str,
-) -> None:
+) -> dict[str, Any]:
     """Run the pipeline."""
 
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
@@ -225,7 +225,7 @@ def run(  # noqa: PLR0913
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params
     ) as session:
-        session.run(
+        return session.run(
             tags=tuple_tags,
             runner=runner_obj(is_async=is_async),
             node_names=tuple_node_names,

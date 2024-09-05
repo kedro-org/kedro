@@ -40,7 +40,7 @@ Run a Prefect Server instance:
 prefect server start
 ```
 
-In a separate terminal, [create a work pool](https://docs-2.prefect.io/latest/concepts/work-pools/#work-pool-configuration) to organise the work and [create a work queue](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-queues) for your agent to pull from:
+In a separate terminal, [create a work pool](https://docs-2.prefect.io/latest/concepts/work-pools/#work-pool-configuration) to organise the work and [create a work queue](https://docs-2.prefect.io/latest/concepts/work-pools/#work-queues) for your agent to pull from:
 
 ```bash
 prefect work-pool create --type prefect-agent <work_pool_name>

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 from collections import defaultdict
 from itertools import chain
 from typing import TYPE_CHECKING, Any
@@ -245,36 +244,26 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
 
     explicit_datasets = {
         ds_name: ds_config
-        for ds_name, ds_config in catalog_config.items()
-        if not data_catalog._is_pattern(ds_name)
+        for ds_name, ds_config in data_catalog.datasets_config.items()
+        if not is_parameter(ds_name)
     }
 
     target_pipelines = pipelines.keys()
-    datasets = set()
+    pipeline_datasets = set()
 
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            datasets.update(pl_obj.datasets())
+            pipeline_datasets.update(pl_obj.datasets())
 
-    for ds_name in datasets:
-        is_param = ds_name.startswith("params:") or ds_name == "parameters"
-        if ds_name in explicit_datasets or is_param:
+    for ds_name in pipeline_datasets:
+        if ds_name in explicit_datasets or is_parameter(ds_name):
             continue
 
-        matched_pattern = data_catalog._match_pattern(
-            data_catalog._dataset_patterns, ds_name
-        ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
-        if matched_pattern:
-            ds_config_copy = copy.deepcopy(
-                data_catalog._dataset_patterns.get(matched_pattern)
-                or data_catalog._default_pattern.get(matched_pattern)
-                or {}
-            )
+        ds_config = data_catalog.config_resolver.resolve_dataset_pattern(ds_name)
 
-            ds_config = data_catalog._resolve_config(
-                ds_name, matched_pattern, ds_config_copy
-            )
+        # Exclude MemoryDatasets not set in the catalog explicitly
+        if ds_config is not None:
             explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))

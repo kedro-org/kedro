@@ -190,8 +190,12 @@ class DataCatalog:
         )
 
     @property
-    def config_resolver(self):
+    def config_resolver(self) -> DataCatalogConfigResolver:
         return self._config_resolver
+
+    @property
+    def datasets_config(self) -> dict[str, dict[str, Any]]:
+        return self._datasets_config
 
     @property
     def _logger(self) -> logging.Logger:

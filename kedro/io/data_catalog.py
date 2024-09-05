@@ -171,12 +171,6 @@ class DataCatalog:
     def __repr__(self) -> str:
         return self.datasets.__repr__()
 
-    def __iter__(self):
-        yield from self._datasets.values()
-
-    def __getitem__(self, ds_name: str) -> AbstractDataset:
-        return self._get_dataset(ds_name)
-
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
         return dataset_name in self._datasets or self._config_resolver.match_pattern(

@@ -1,6 +1,7 @@
 """``AbstractRunner`` is the base class for all ``Pipeline`` runner
 implementations.
 """
+
 from __future__ import annotations
 
 import inspect

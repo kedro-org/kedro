@@ -27,6 +27,7 @@ def run(
     Example:
     ::
         "ls"
+
         "ls -la"
         "chmod 754 local/file"
 

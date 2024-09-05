@@ -34,7 +34,7 @@ _Project: You want to construct a model that predicts the price for each trip to
 
 
 ### The notebook example
-The full example code is given below. To run this, you will need
+The full example code is given below. To run this, you will need:
 
 ```python
 import pandas as pd

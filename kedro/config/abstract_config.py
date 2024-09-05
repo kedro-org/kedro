@@ -1,6 +1,7 @@
 """This module provides ``kedro.abstract_config`` with the baseline
 class model for a `ConfigLoader` implementation.
 """
+
 from __future__ import annotations
 
 from collections import UserDict

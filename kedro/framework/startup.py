@@ -1,4 +1,5 @@
 """This module provides metadata for a Kedro project."""
+
 from __future__ import annotations
 
 import os

@@ -28,6 +28,11 @@ def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     return KedroSession.create(**kwargs)
 
 
+def is_parameter(dataset_name: str) -> bool:
+    """Check if dataset is a parameter."""
+    return dataset_name.startswith("params:") or dataset_name == "parameters"
+
+
 @click.group(name="Kedro")
 def catalog_cli() -> None:  # pragma: no cover
     pass
@@ -88,21 +93,15 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 
         # resolve any factory datasets in the pipeline
         factory_ds_by_type = defaultdict(list)
-        for ds_name in default_ds:
-            matched_pattern = data_catalog._match_pattern(
-                data_catalog._dataset_patterns, ds_name
-            ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
-            if matched_pattern:
-                ds_config_copy = copy.deepcopy(
-                    data_catalog._dataset_patterns.get(matched_pattern)
-                    or data_catalog._default_pattern.get(matched_pattern)
-                    or {}
-                )
 
-                ds_config = data_catalog._resolve_config(
-                    ds_name, matched_pattern, ds_config_copy
+        resolved_configs = data_catalog.config_resolver.resolve_dataset_pattern(
+            default_ds
+        )
+        for ds_name, ds_config in zip(default_ds, resolved_configs):
+            if data_catalog.config_resolver.match_pattern(ds_name):
+                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
+                    ds_name
                 )
-                factory_ds_by_type[ds_config["type"]].append(ds_name)
 
         default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
 
@@ -128,12 +127,11 @@ def _map_type_to_datasets(
     datasets of the specific type as a value.
     """
     mapping = defaultdict(list)  # type: ignore[var-annotated]
-    for dataset in datasets:
-        is_param = dataset.startswith("params:") or dataset == "parameters"
-        if not is_param:
-            ds_type = datasets_meta[dataset].__class__.__name__
-            if dataset not in mapping[ds_type]:
-                mapping[ds_type].append(dataset)
+    for dataset_name in datasets:
+        if not is_parameter(dataset_name):
+            ds_type = datasets_meta[dataset_name].__class__.__name__
+            if dataset_name not in mapping[ds_type]:
+                mapping[ds_type].append(dataset_name)
     return mapping
 
 

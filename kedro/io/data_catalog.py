@@ -12,9 +12,9 @@ import difflib
 import logging
 import pprint
 import re
-from typing import Any, Dict
+from typing import Any
 
-from kedro.io import DataCatalogConfigResolver
+from kedro.io.catalog_config_resolver import DataCatalogConfigResolver, Patterns
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -27,10 +27,6 @@ from kedro.io.core import (
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
-Patterns = Dict[str, Dict[str, Any]]
-
-CATALOG_KEY = "catalog"
-CREDENTIALS_KEY = "credentials"
 WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 

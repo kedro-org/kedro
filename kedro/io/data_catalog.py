@@ -190,6 +190,10 @@ class DataCatalog:
         )
 
     @property
+    def config_resolver(self):
+        return self._config_resolver
+
+    @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
@@ -315,7 +319,7 @@ class DataCatalog:
     ) -> AbstractDataset:
         ds_config = self._config_resolver.resolve_dataset_pattern(dataset_name)
 
-        if ds_config is not None:
+        if dataset_name not in self._datasets and ds_config is not None:
             ds = AbstractDataset.from_config(
                 dataset_name,
                 ds_config,

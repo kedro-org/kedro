@@ -397,7 +397,8 @@ class KedroSession:
         try:
             if isinstance(runner, ThreadRunner):
                 for ds in filtered_pipeline.datasets():
-                    _ = catalog._get_dataset(ds)
+                    if catalog.config_resolver.match_pattern(ds):
+                        _ = catalog._get_dataset(ds)
             run_result = runner.run(
                 filtered_pipeline, catalog, hook_manager, session_id
             )

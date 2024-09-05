@@ -154,7 +154,7 @@ from spaceflights.__main__ import main
 
 def run_kedro_pipeline():
    result = main(pipeline_name=<pipeline>)
-   do_something_about(<result>)
+   do_something_with(<result>)
 ```
 
 ### Docker, Airflow and other deployment targets

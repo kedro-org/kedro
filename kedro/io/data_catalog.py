@@ -631,26 +631,21 @@ class DataCatalog:
         Returns:
             Copy of the current object.
         """
-        if not self._default_pattern and extra_dataset_patterns:
-            unsorted_dataset_patterns = {
-                **self._dataset_patterns,
-                **extra_dataset_patterns,
-            }
-            dataset_patterns = self._sort_patterns(unsorted_dataset_patterns)
-        else:
-            dataset_patterns = self._dataset_patterns
+        if extra_dataset_patterns:
+            self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
         return self.__class__(
             datasets=self._datasets,
-            dataset_patterns=dataset_patterns,
+            dataset_patterns=self._config_resolver.dataset_patterns,
+            default_pattern=self._config_resolver.default_pattern,
             load_versions=self._load_versions,
             save_version=self._save_version,
-            default_pattern=self._default_pattern,
+            config_resolver=self._config_resolver,
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
-        return (self._datasets, self._dataset_patterns) == (
+        return (self._datasets, self._config_resolver.dataset_patterns) == (
             other._datasets,
-            other._dataset_patterns,
+            other._config_resolver._dataset_patterns,
         )
 
     def confirm(self, name: str) -> None:

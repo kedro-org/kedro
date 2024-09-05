@@ -197,7 +197,7 @@ class DataCatalog:
                 sorted in lexicographical order.
             default_pattern: A dictionary of the default catch-all pattern that overrides the default
                 pattern provided through the runners.
-            config_resolver:
+            config_resolver: An instance of DataCatalogConfigResolver to resolve dataset patterns and configurations.
 
 
         Example:
@@ -211,11 +211,15 @@ class DataCatalog:
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
         self._config_resolver = config_resolver or DataCatalogConfigResolver()
-        self._datasets = dict(datasets or {})
         self._datasets_config = self._config_resolver.config
-        self.datasets = _FrozenDatasets(self._datasets)
+        self._datasets = {}
+        self.datasets = {}
+
+        self.add_all(dict(datasets) or {}, datasets_configs=self._datasets_config)
+
         self._load_versions = load_versions or {}
         self._save_version = save_version
+
         self._use_rich_markup = _has_rich_handler()
 
         if feed_dict:
@@ -608,8 +612,8 @@ class DataCatalog:
         self,
         dataset_name: str,
         dataset: AbstractDataset,
-        dataset_config: dict[str, Any] | None = None,
         replace: bool = False,
+        dataset_config: dict[str, Any] | None = None,
     ) -> None:
         """Adds a new ``AbstractDataset`` object to the ``DataCatalog``.
 
@@ -618,9 +622,10 @@ class DataCatalog:
                 registered yet.
             dataset: A data set object to be associated with the given data
                 set name.
-            dataset_config: A dictionary with dataset configuration.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
+            dataset_config: A dictionary with dataset configuration.
+
 
         Raises:
             DatasetAlreadyExistsError: When a data set with the same name
@@ -645,12 +650,16 @@ class DataCatalog:
                     f"Dataset '{dataset_name}' has already been registered"
                 )
         self._datasets[dataset_name] = dataset
-        if dataset_config is not None:
-            self._datasets_config[dataset_name] = dataset_config
+        self._datasets_config[dataset_name] = (
+            dataset_config if dataset_config is not None else {}
+        )
         self.datasets = _FrozenDatasets(self.datasets, {dataset_name: dataset})
 
     def add_all(
-        self, datasets: dict[str, AbstractDataset], replace: bool = False
+        self,
+        datasets: dict[str, AbstractDataset],
+        replace: bool = False,
+        datasets_configs: dict[str, dict[str, Any]] | None = None,
     ) -> None:
         """Adds a group of new data sets to the ``DataCatalog``.
 
@@ -659,6 +668,7 @@ class DataCatalog:
                 instances.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
+            datasets_configs: A dictionary of dataset configurations.
 
         Raises:
             DatasetAlreadyExistsError: When a data set with the same name
@@ -681,8 +691,8 @@ class DataCatalog:
             >>>
             >>> assert catalog.list() == ["cars", "planes", "boats"]
         """
-        for name, dataset in datasets.items():
-            self.add(name, dataset, replace)
+        for ds_name, ds in datasets.items():
+            self.add(ds_name, ds, replace, datasets_configs.get(ds_name, {}))
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         """Add datasets to the ``DataCatalog`` using the data provided through the `feed_dict`.
@@ -719,13 +729,13 @@ class DataCatalog:
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
-        for dataset_name in feed_dict:
-            if isinstance(feed_dict[dataset_name], AbstractDataset):
-                dataset = feed_dict[dataset_name]
-            else:
-                dataset = MemoryDataset(data=feed_dict[dataset_name])  # type: ignore[abstract]
-
-            self.add(dataset_name, dataset, replace)
+        for ds_name, ds_data in feed_dict.items():
+            dataset = (
+                ds_data
+                if isinstance(ds_data, AbstractDataset)
+                else MemoryDataset(data=ds_data)
+            )  # type: ignore[abstract]
+            self.add(ds_name, dataset, replace)
 
     def list(self, regex_search: str | None = None) -> list[str]:
         """

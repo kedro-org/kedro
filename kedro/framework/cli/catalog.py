@@ -168,20 +168,16 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
             f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
         )
 
-    pipe_datasets = {
-        ds_name
-        for ds_name in pipeline.datasets()
-        if not ds_name.startswith("params:") and ds_name != "parameters"
+    pipeline_datasets = {
+        ds_name for ds_name in pipeline.datasets() if not is_parameter(ds_name)
     }
 
     catalog_datasets = {
-        ds_name
-        for ds_name in context.catalog._datasets.keys()
-        if not ds_name.startswith("params:") and ds_name != "parameters"
+        ds_name for ds_name in context.catalog.list() if not is_parameter(ds_name)
     }
 
     # Datasets that are missing in Data Catalog
-    missing_ds = sorted(pipe_datasets - catalog_datasets)
+    missing_ds = sorted(pipeline_datasets - catalog_datasets)
     if missing_ds:
         catalog_path = (
             context.project_path

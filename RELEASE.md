@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Made packaged Kedro projects return `session.run()` output to be used when running it in the interactive environment.
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.
@@ -9,9 +10,11 @@
 
 ## Documentation changes
 * Fix logo on PyPI page.
+* Minor language/styling updates.
 
 ## Community contributions
 * [Puneet](https://github.com/puneeter)
+* [ethanknights](https://github.com/ethanknights)
 
 # Release 0.19.8
 

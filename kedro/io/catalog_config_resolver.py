@@ -7,12 +7,14 @@ from typing import Any
 
 from parse import parse
 
-Patterns = dict[str, dict[str, Any]]
+Patterns = dict[str, dict[str, Any] | None]
 
 CREDENTIALS_KEY = "credentials"
 
 
-def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
+def _fetch_credentials(
+    credentials_name: str, credentials: dict[str, Any] | None
+) -> Any:
     """Fetch the specified credentials from the provided credentials dictionary.
 
     Args:
@@ -27,6 +29,8 @@ def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> An
             registered.
 
     """
+    if credentials is None:
+        return None
     try:
         return credentials[credentials_name]
     except KeyError as exc:
@@ -40,7 +44,7 @@ def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> An
 
 def _resolve_credentials(
     config: dict[str, Any], credentials: dict[str, Any] | None
-) -> dict[str, Any]:
+) -> dict[str, Any] | None:
     """Return the dataset configuration where credentials are resolved using
     credentials dictionary provided.
 
@@ -67,7 +71,7 @@ def _resolve_dataset_config(
     ds_name: str,
     pattern: str,
     config: Any,
-) -> dict[str, Any]:
+) -> Any:
     """Resolve dataset configuration based on the provided pattern."""
     resolved_vars = parse(pattern, ds_name)
     # Resolve the factory config for the dataset
@@ -102,7 +106,7 @@ class DataCatalogConfigResolver:
         self._resolved_configs = self._init_configs(config, credentials)
 
     @property
-    def config(self) -> dict[str, dict[str, Any]]:
+    def config(self) -> dict[str, dict[str, Any] | None]:
         return self._resolved_configs
 
     @property
@@ -183,8 +187,7 @@ class DataCatalogConfigResolver:
 
         for ds_name, ds_config in config.items():
             if cls.is_pattern(ds_name):
-                resolved_config = _resolve_credentials(ds_config, credentials)
-                dataset_patterns[ds_name] = resolved_config
+                dataset_patterns[ds_name] = _resolve_credentials(ds_config, credentials)
 
         sorted_patterns = cls._sort_patterns(dataset_patterns)
         if sorted_patterns:
@@ -199,7 +202,7 @@ class DataCatalogConfigResolver:
         self,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
-    ) -> dict[str, dict[str, Any]]:
+    ) -> dict[str, dict[str, Any] | None]:
         """Initialize the dataset configuration with resolved credentials."""
         # TODO: check if deep copies are required
         config = copy.deepcopy(config) or {}

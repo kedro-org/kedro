@@ -47,13 +47,15 @@ class _FrozenDatasets:
 
     def __init__(
         self,
-        *datasets_collections: _FrozenDatasets | dict[str, AbstractDataset],
+        *datasets_collections: _FrozenDatasets | dict[str, AbstractDataset] | None,
     ):
         """Return a _FrozenDatasets instance from some datasets collections.
         Each collection could either be another _FrozenDatasets or a dictionary.
         """
         self._original_names: dict[str, str] = {}
         for collection in datasets_collections:
+            if collection is None:
+                continue
             if isinstance(collection, _FrozenDatasets):
                 self.__dict__.update(collection.__dict__)
                 self._original_names.update(collection._original_names)
@@ -109,7 +111,7 @@ class DataCatalog:
         default_pattern: Patterns | None = None,  # Kept for interface compatibility
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-        config_resolver: DataCatalogConfigResolver = None,
+        config_resolver: DataCatalogConfigResolver | None = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -154,10 +156,10 @@ class DataCatalog:
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
         self._config_resolver = config_resolver or DataCatalogConfigResolver()
-        self._datasets = {}
-        self.datasets = {}
+        self._datasets: dict[str, AbstractDataset] = {}
+        self.datasets: _FrozenDatasets | None = None
 
-        self.add_all(dict(datasets) or {})
+        self.add_all(datasets or {})
 
         self._load_versions = load_versions or {}
         self._save_version = save_version
@@ -172,8 +174,9 @@ class DataCatalog:
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
-        return dataset_name in self._datasets or self._config_resolver.match_pattern(
-            dataset_name
+        return (
+            dataset_name in self._datasets
+            or self._config_resolver.match_pattern(dataset_name) is not None
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
@@ -267,6 +270,7 @@ class DataCatalog:
             >>> df = catalog.load("cars")
             >>> catalog.save("boats", df)
         """
+        catalog = catalog or {}
         datasets = {}
         config_resolver = DataCatalogConfigResolver(catalog, credentials)
         save_version = save_version or generate_timestamp()
@@ -276,7 +280,7 @@ class DataCatalog:
             if not config_resolver.is_pattern(ds_name):
                 datasets[ds_name] = AbstractDataset.from_config(
                     ds_name,
-                    config_resolver.config[ds_name],
+                    config_resolver.config[ds_name] or {},
                     load_versions.get(ds_name),
                     save_version,
                 )
@@ -315,7 +319,7 @@ class DataCatalog:
         if dataset_name not in self._datasets and ds_config is not None:
             ds = AbstractDataset.from_config(
                 dataset_name,
-                ds_config,
+                ds_config,  # type: ignore[arg-type]
                 self._load_versions.get(dataset_name),
                 self._save_version,
             )
@@ -571,7 +575,7 @@ class DataCatalog:
             dataset = (
                 ds_data
                 if isinstance(ds_data, AbstractDataset)
-                else MemoryDataset(data=ds_data)
+                else MemoryDataset(data=ds_data)  # type: ignore[abstract]
             )  # type: ignore[abstract]
             self.add(ds_name, dataset, replace)
 

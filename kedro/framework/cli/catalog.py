@@ -98,7 +98,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
         )
         for ds_name, ds_config in zip(default_ds, resolved_configs):
             if data_catalog.config_resolver.match_pattern(ds_name):
-                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
+                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(  # type: ignore[attr-defined]
                     ds_name
                 )
 

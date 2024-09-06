@@ -106,7 +106,7 @@ class ParallelRunner(AbstractRunner):
         self,
         max_workers: int | None = None,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
+        extra_dataset_patterns: dict[str, dict[str, Any] | None] | None = None,
     ):
         """
         Instantiates the runner by creating a Manager.
@@ -125,7 +125,9 @@ class ParallelRunner(AbstractRunner):
         Raises:
             ValueError: bad parameters passed
         """
-        default_dataset_pattern = {"{default}": {"type": "SharedMemoryDataset"}}
+        default_dataset_pattern: dict[str, dict[str, Any] | None] | None = {
+            "{default}": {"type": "SharedMemoryDataset"}
+        }
         self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
         super().__init__(
             is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns

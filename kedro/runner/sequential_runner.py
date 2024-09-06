@@ -40,7 +40,7 @@ class SequentialRunner(AbstractRunner):
 
         """
         default_dataset_pattern: dict[str, dict[str, Any] | None] | None = {
-            "{default}": {"type": "SharedMemoryDataset"}
+            "{default}": {"type": "MemoryDataset"}
         }
         self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
         super().__init__(

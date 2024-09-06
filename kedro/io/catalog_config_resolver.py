@@ -7,11 +7,11 @@ from __future__ import annotations
 import copy
 import logging
 import re
-from typing import Any
+from typing import Any, Dict
 
 from parse import parse
 
-Patterns = dict[str, dict[str, Any]]
+Patterns = Dict[str, Dict[str, Any]]
 
 CREDENTIALS_KEY = "credentials"
 

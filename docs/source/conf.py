@@ -127,6 +127,7 @@ type_targets = {
         "typing.Type",
         "typing.Set",
         "kedro.config.config.ConfigLoader",
+        "kedro.io.catalog_config_resolver.DataCatalogConfigResolver",
         "kedro.io.core.AbstractDataset",
         "kedro.io.core.AbstractVersionedDataset",
         "kedro.io.core.DatasetError",

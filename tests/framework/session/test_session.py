@@ -22,7 +22,6 @@ from kedro.framework.project import (
     ValidationError,
     Validator,
     _HasSharedParentClassValidator,
-    _IsSubclassValidator,
     _ProjectSettings,
 )
 from kedro.framework.session import KedroSession

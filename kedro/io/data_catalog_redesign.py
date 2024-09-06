@@ -6,6 +6,7 @@ import logging
 import re
 from typing import Any
 
+from kedro.io.catalog_config_resolver import DataCatalogConfigResolver
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -37,6 +38,7 @@ class KedroDataCatalog:
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> None:
+        self._config_resolver = DataCatalogConfigResolver()
         self._config = config or {}
         self._datasets = datasets or {}
         self._load_versions = load_versions or {}
@@ -227,7 +229,10 @@ class KedroDataCatalog:
 
         return dataset.load()
 
-    def add_from_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
+    def add_feed_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
+        # TODO: rename to add_from_dict after removing old catalog
+        # Consider changing to add memory datasets only, to simplify the method,
+        # adding AbstractDataset can be done via add() method
         for ds_name, ds_data in datasets.items():
             dataset = (
                 ds_data
@@ -235,3 +240,22 @@ class KedroDataCatalog:
                 else MemoryDataset(data=ds_data)
             )  # type: ignore[abstract]
             self.add(ds_name, dataset, replace)
+
+    # def shallow_copy(
+    #     self, extra_dataset_patterns: Patterns | None = None
+    # ) -> KedroDataCatalog:
+    #     """Returns a shallow copy of the current object.
+    #
+    #     Returns:
+    #         Copy of the current object.
+    #     """
+    #     if extra_dataset_patterns:
+    #         self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
+    #     return self.__class__(
+    #         datasets=self._datasets,
+    #         dataset_patterns=self._config_resolver.dataset_patterns,
+    #         default_pattern=self._config_resolver.default_pattern,
+    #         load_versions=self._load_versions,
+    #         save_version=self._save_version,
+    #         config_resolver=self._config_resolver,
+    #     )

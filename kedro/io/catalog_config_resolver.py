@@ -1,3 +1,7 @@
+"""``DataCatalogConfigResolver`` resolves dataset configurations and datasets'
+patterns based on catalog configuration and credentials provided.
+"""
+
 from __future__ import annotations
 
 import copy

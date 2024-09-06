@@ -14,7 +14,11 @@ import pprint
 import re
 from typing import Any
 
-from kedro.io.catalog_config_resolver import DataCatalogConfigResolver, Patterns
+from kedro.io.catalog_config_resolver import (
+    CREDENTIALS_KEY,  # noqa: F401
+    DataCatalogConfigResolver,
+    Patterns,
+)
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,

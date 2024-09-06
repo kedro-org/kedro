@@ -11,7 +11,7 @@ from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
-from kedro.runner.runner import AbstractRunner, run_node
+from kedro.runner.runner import AbstractRunner, decrement_and_release_datasets, run_node
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -143,18 +143,4 @@ class ThreadRunner(AbstractRunner):
                         "Completed %d out of %d tasks", len(done_nodes), len(nodes)
                     )
 
-                    # Decrement load counts, and release any datasets we
-                    # have finished with.
-                    for dataset in node.inputs:
-                        load_counts[dataset] -= 1
-                        if (
-                            load_counts[dataset] < 1
-                            and dataset not in pipeline.inputs()
-                        ):
-                            catalog.release(dataset)
-                    for dataset in node.outputs:
-                        if (
-                            load_counts[dataset] < 1
-                            and dataset not in pipeline.outputs()
-                        ):
-                            catalog.release(dataset)
+                    decrement_and_release_datasets(node, catalog, load_counts, pipeline)

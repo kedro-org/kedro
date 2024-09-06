@@ -9,7 +9,7 @@ from collections import Counter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
-from kedro.runner.runner import AbstractRunner, run_node
+from kedro.runner.runner import AbstractRunner, decrement_and_release_datasets, run_node
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -81,15 +81,8 @@ class SequentialRunner(AbstractRunner):
                 self._suggest_resume_scenario(pipeline, done_nodes, catalog)
                 raise
 
-            # decrement load counts and release any data sets we've finished with
-            for dataset in node.inputs:
-                load_counts[dataset] -= 1
-                if load_counts[dataset] < 1 and dataset not in pipeline.inputs():
-                    catalog.release(dataset)
-            for dataset in node.outputs:
-                if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
-                    catalog.release(dataset)
+            decrement_and_release_datasets(node, catalog, load_counts, pipeline)
 
             self._logger.info(
-                "Completed %d out of %d tasks", exec_index + 1, len(nodes)
+                "Completed %d out of %d tasks", len(done_nodes), len(nodes)
             )

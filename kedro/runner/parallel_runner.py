@@ -27,7 +27,7 @@ from kedro.io import (
     MemoryDataset,
     SharedMemoryDataset,
 )
-from kedro.runner.runner import AbstractRunner, run_node
+from kedro.runner.runner import AbstractRunner, decrement_and_release_datasets, run_node
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -317,19 +317,4 @@ class ParallelRunner(AbstractRunner):
                     node = future.result()
                     done_nodes.add(node)
 
-                    # Decrement load counts, and release any datasets we
-                    # have finished with. This is particularly important
-                    # for the shared, default datasets we created above.
-                    for dataset in node.inputs:
-                        load_counts[dataset] -= 1
-                        if (
-                            load_counts[dataset] < 1
-                            and dataset not in pipeline.inputs()
-                        ):
-                            catalog.release(dataset)
-                    for dataset in node.outputs:
-                        if (
-                            load_counts[dataset] < 1
-                            and dataset not in pipeline.outputs()
-                        ):
-                            catalog.release(dataset)
+                    decrement_and_release_datasets(node, catalog, load_counts, pipeline)

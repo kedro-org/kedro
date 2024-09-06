@@ -27,7 +27,6 @@ from kedro.pipeline import Pipeline
 if TYPE_CHECKING:
     from pluggy import PluginManager
 
-    from kedro.io.catalog_config_resolver import Patterns
     from kedro.pipeline.node import Node
 
 
@@ -39,7 +38,7 @@ class AbstractRunner(ABC):
     def __init__(
         self,
         is_async: bool = False,
-        extra_dataset_patterns: Patterns | None = None,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """Instantiates the runner class.
 

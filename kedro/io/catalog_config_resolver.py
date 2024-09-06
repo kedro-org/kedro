@@ -11,7 +11,7 @@ from typing import Any
 
 from parse import parse
 
-Patterns = dict[str, dict[str, Any] | None]
+Patterns = dict[str, dict[str, Any]]
 
 CREDENTIALS_KEY = "credentials"
 
@@ -47,8 +47,8 @@ def _fetch_credentials(
 
 
 def _resolve_credentials(
-    config: dict[str, Any], credentials: dict[str, Any] | None
-) -> dict[str, Any] | None:
+    config: dict[str, Any], credentials: dict[str, Any]
+) -> dict[str, Any]:
     """Return the dataset configuration where credentials are resolved using
     credentials dictionary provided.
 
@@ -110,7 +110,7 @@ class DataCatalogConfigResolver:
         self._resolved_configs = self._init_configs(config, credentials)
 
     @property
-    def config(self) -> dict[str, dict[str, Any] | None]:
+    def config(self) -> dict[str, dict[str, Any]]:
         return self._resolved_configs
 
     @property
@@ -206,7 +206,7 @@ class DataCatalogConfigResolver:
         self,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
-    ) -> dict[str, dict[str, Any] | None]:
+    ) -> dict[str, dict[str, Any]]:
         """Initialize the dataset configuration with resolved credentials."""
         # TODO: check if deep copies are required
         config = copy.deepcopy(config) or {}

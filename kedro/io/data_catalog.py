@@ -576,7 +576,7 @@ class DataCatalog:
                 ds_data
                 if isinstance(ds_data, AbstractDataset)
                 else MemoryDataset(data=ds_data)  # type: ignore[abstract]
-            )  # type: ignore[abstract]
+            )
             self.add(ds_name, dataset, replace)
 
     def list(self, regex_search: str | None = None) -> list[str]:

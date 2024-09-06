@@ -985,7 +985,9 @@ class TestDataCatalogDatasetFactories:
             "{dataset}s",
             "{a_default}",
         ]
-        assert "{a_default}" in catalog_with_runner_default.config_resolver.default_pattern
+        assert (
+            "{a_default}" in catalog_with_runner_default.config_resolver.default_pattern
+        )
         assert (
             list(catalog_with_runner_default.config_resolver.dataset_patterns.keys())
             + list(catalog_with_runner_default.config_resolver.default_pattern.keys())

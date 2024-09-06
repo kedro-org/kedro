@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 from collections import defaultdict
 from itertools import chain
 from typing import TYPE_CHECKING, Any
@@ -26,6 +25,11 @@ if TYPE_CHECKING:
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     kwargs.setdefault("save_on_close", False)
     return KedroSession.create(**kwargs)
+
+
+def is_parameter(dataset_name: str) -> bool:
+    """Check if dataset is a parameter."""
+    return dataset_name.startswith("params:") or dataset_name == "parameters"
 
 
 @click.group(name="Kedro")
@@ -88,21 +92,15 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 
         # resolve any factory datasets in the pipeline
         factory_ds_by_type = defaultdict(list)
-        for ds_name in default_ds:
-            matched_pattern = data_catalog._match_pattern(
-                data_catalog._dataset_patterns, ds_name
-            ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
-            if matched_pattern:
-                ds_config_copy = copy.deepcopy(
-                    data_catalog._dataset_patterns.get(matched_pattern)
-                    or data_catalog._default_pattern.get(matched_pattern)
-                    or {}
-                )
 
-                ds_config = data_catalog._resolve_config(
-                    ds_name, matched_pattern, ds_config_copy
+        resolved_configs = data_catalog.config_resolver.resolve_dataset_pattern(
+            default_ds
+        )
+        for ds_name, ds_config in zip(default_ds, resolved_configs):
+            if data_catalog.config_resolver.match_pattern(ds_name):
+                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(  # type: ignore[attr-defined]
+                    ds_name
                 )
-                factory_ds_by_type[ds_config["type"]].append(ds_name)
 
         default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
 
@@ -128,12 +126,11 @@ def _map_type_to_datasets(
     datasets of the specific type as a value.
     """
     mapping = defaultdict(list)  # type: ignore[var-annotated]
-    for dataset in datasets:
-        is_param = dataset.startswith("params:") or dataset == "parameters"
-        if not is_param:
-            ds_type = datasets_meta[dataset].__class__.__name__
-            if dataset not in mapping[ds_type]:
-                mapping[ds_type].append(dataset)
+    for dataset_name in datasets:
+        if not is_parameter(dataset_name):
+            ds_type = datasets_meta[dataset_name].__class__.__name__
+            if dataset_name not in mapping[ds_type]:
+                mapping[ds_type].append(dataset_name)
     return mapping
 
 
@@ -170,20 +167,16 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
             f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
         )
 
-    pipe_datasets = {
-        ds_name
-        for ds_name in pipeline.datasets()
-        if not ds_name.startswith("params:") and ds_name != "parameters"
+    pipeline_datasets = {
+        ds_name for ds_name in pipeline.datasets() if not is_parameter(ds_name)
     }
 
     catalog_datasets = {
-        ds_name
-        for ds_name in context.catalog._datasets.keys()
-        if not ds_name.startswith("params:") and ds_name != "parameters"
+        ds_name for ds_name in context.catalog.list() if not is_parameter(ds_name)
     }
 
     # Datasets that are missing in Data Catalog
-    missing_ds = sorted(pipe_datasets - catalog_datasets)
+    missing_ds = sorted(pipeline_datasets - catalog_datasets)
     if missing_ds:
         catalog_path = (
             context.project_path
@@ -221,12 +214,14 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    catalog_factories = {
-        **context.catalog._dataset_patterns,
-        **context.catalog._default_pattern,
-    }
+    catalog_factories = list(
+        {
+            **context.catalog.config_resolver.dataset_patterns,
+            **context.catalog.config_resolver.default_pattern,
+        }.keys()
+    )
     if catalog_factories:
-        click.echo(yaml.dump(list(catalog_factories.keys())))
+        click.echo(yaml.dump(catalog_factories))
     else:
         click.echo("There are no dataset factories in the catalog.")
 
@@ -250,35 +245,25 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
     explicit_datasets = {
         ds_name: ds_config
         for ds_name, ds_config in catalog_config.items()
-        if not data_catalog._is_pattern(ds_name)
+        if not data_catalog.config_resolver.is_pattern(ds_name)
     }
 
     target_pipelines = pipelines.keys()
-    datasets = set()
+    pipeline_datasets = set()
 
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            datasets.update(pl_obj.datasets())
+            pipeline_datasets.update(pl_obj.datasets())
 
-    for ds_name in datasets:
-        is_param = ds_name.startswith("params:") or ds_name == "parameters"
-        if ds_name in explicit_datasets or is_param:
+    for ds_name in pipeline_datasets:
+        if ds_name in explicit_datasets or is_parameter(ds_name):
             continue
 
-        matched_pattern = data_catalog._match_pattern(
-            data_catalog._dataset_patterns, ds_name
-        ) or data_catalog._match_pattern(data_catalog._default_pattern, ds_name)
-        if matched_pattern:
-            ds_config_copy = copy.deepcopy(
-                data_catalog._dataset_patterns.get(matched_pattern)
-                or data_catalog._default_pattern.get(matched_pattern)
-                or {}
-            )
+        ds_config = data_catalog.config_resolver.resolve_dataset_pattern(ds_name)
 
-            ds_config = data_catalog._resolve_config(
-                ds_name, matched_pattern, ds_config_copy
-            )
+        # Exclude MemoryDatasets not set in the catalog explicitly
+        if ds_config is not None:
             explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))

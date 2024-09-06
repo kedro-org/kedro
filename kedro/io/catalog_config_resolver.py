@@ -11,6 +11,8 @@ from typing import Any, Dict
 
 from parse import parse
 
+from kedro.io.core import DatasetError
+
 Patterns = Dict[str, Dict[str, Any]]
 
 CREDENTIALS_KEY = "credentials"
@@ -214,6 +216,12 @@ class DataCatalogConfigResolver:
         resolved_configs = {}
 
         for ds_name, ds_config in config.items():
+            if not isinstance(ds_config, dict):
+                raise DatasetError(
+                    f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
+                    "\nHint: If this catalog entry is intended for variable interpolation, "
+                    "make sure that the key is preceded by an underscore."
+                )
             if not self.is_pattern(ds_name):
                 resolved_configs[ds_name] = _resolve_credentials(ds_config, credentials)
 

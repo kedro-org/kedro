@@ -105,8 +105,8 @@ class DataCatalog:
         self,
         datasets: dict[str, AbstractDataset] | None = None,
         feed_dict: dict[str, Any] | None = None,
-        dataset_patterns: Patterns | None = None,
-        default_pattern: Patterns | None = None,
+        dataset_patterns: Patterns | None = None,  # Kept for interface compatibility
+        default_pattern: Patterns | None = None,  # Kept for interface compatibility
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
         config_resolver: DataCatalogConfigResolver = None,
@@ -115,7 +115,7 @@ class DataCatalog:
         implementations to provide ``load`` and ``save`` capabilities from
         anywhere in the program. To use a ``DataCatalog``, you need to
         instantiate it with a dictionary of data sets. Then it will act as a
-        single point of reference for your calls, relaying load and save
+        single point of reference for your calls, relaying load and save§
         functions to the underlying data sets.
 
         Args:
@@ -154,11 +154,10 @@ class DataCatalog:
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
         self._config_resolver = config_resolver or DataCatalogConfigResolver()
-        self._datasets_config = self._config_resolver.config
         self._datasets = {}
         self.datasets = {}
 
-        self.add_all(dict(datasets) or {}, datasets_configs=self._datasets_config)
+        self.add_all(dict(datasets) or {})
 
         self._load_versions = load_versions or {}
         self._save_version = save_version
@@ -180,16 +179,12 @@ class DataCatalog:
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         return (self._datasets, self._config_resolver.dataset_patterns) == (
             other._datasets,
-            other._config_resolver._dataset_patterns,
+            other._config_resolver.dataset_patterns,
         )
 
     @property
     def config_resolver(self) -> DataCatalogConfigResolver:
         return self._config_resolver
-
-    @property
-    def datasets_config(self) -> dict[str, dict[str, Any]]:
-        return self._datasets_config
 
     @property
     def _logger(self) -> logging.Logger:
@@ -324,7 +319,7 @@ class DataCatalog:
                 self._load_versions.get(dataset_name),
                 self._save_version,
             )
-            self.add(dataset_name, ds, dataset_config=ds_config)
+            self.add(dataset_name, ds)
         if dataset_name not in self._datasets:
             error_msg = f"Dataset '{dataset_name}' not found in the catalog"
 
@@ -464,7 +459,6 @@ class DataCatalog:
         dataset_name: str,
         dataset: AbstractDataset,
         replace: bool = False,
-        dataset_config: dict[str, Any] | None = None,
     ) -> None:
         """Adds a new ``AbstractDataset`` object to the ``DataCatalog``.
 
@@ -475,8 +469,6 @@ class DataCatalog:
                 set name.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
-            dataset_config: A dictionary with dataset configuration.
-
 
         Raises:
             DatasetAlreadyExistsError: When a data set with the same name
@@ -501,16 +493,12 @@ class DataCatalog:
                     f"Dataset '{dataset_name}' has already been registered"
                 )
         self._datasets[dataset_name] = dataset
-        self._datasets_config[dataset_name] = (
-            dataset_config if dataset_config is not None else {}
-        )
         self.datasets = _FrozenDatasets(self.datasets, {dataset_name: dataset})
 
     def add_all(
         self,
         datasets: dict[str, AbstractDataset],
         replace: bool = False,
-        datasets_configs: dict[str, dict[str, Any]] | None = None,
     ) -> None:
         """Adds a group of new data sets to the ``DataCatalog``.
 
@@ -519,7 +507,6 @@ class DataCatalog:
                 instances.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
-            datasets_configs: A dictionary of dataset configurations.
 
         Raises:
             DatasetAlreadyExistsError: When a data set with the same name
@@ -543,7 +530,7 @@ class DataCatalog:
             >>> assert catalog.list() == ["cars", "planes", "boats"]
         """
         for ds_name, ds in datasets.items():
-            self.add(ds_name, ds, replace, datasets_configs.get(ds_name, {}))
+            self.add(ds_name, ds, replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         """Add datasets to the ``DataCatalog`` using the data provided through the `feed_dict`.

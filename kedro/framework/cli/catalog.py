@@ -244,8 +244,8 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
 
     explicit_datasets = {
         ds_name: ds_config
-        for ds_name, ds_config in data_catalog.datasets_config.items()
-        if not is_parameter(ds_name)
+        for ds_name, ds_config in catalog_config.items()
+        if not data_catalog.config_resolver.is_pattern(ds_name)
     }
 
     target_pipelines = pipelines.keys()

@@ -1,3 +1,10 @@
+"""``KedroDataCatalog`` stores instances of ``AbstractDataset`` implementations to
+provide ``load`` and ``save`` capabilities from anywhere in the program. To
+use a ``KedroDataCatalog``, you need to instantiate it with a dictionary of data
+sets. Then it will act as a single point of reference for your calls,
+relaying load and save functions to the underlying data sets.
+"""
+
 from __future__ import annotations
 
 import copy
@@ -6,7 +13,7 @@ import logging
 import re
 from typing import Any
 
-from kedro.io.catalog_config_resolver import DataCatalogConfigResolver
+from kedro.io.catalog_config_resolver import DataCatalogConfigResolver, Patterns
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -14,6 +21,7 @@ from kedro.io.core import (
     DatasetError,
     DatasetNotFoundError,
     Version,
+    generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
@@ -33,26 +41,24 @@ def validate_dataset_config(ds_name: str, ds_config: Any) -> None:
 class KedroDataCatalog:
     def __init__(
         self,
-        datasets: dict[str, Any] | None = None,
-        config: dict[str, dict[str, Any]] | None = None,
+        datasets: dict[str, AbstractDataset] | None = None,
+        feed_dict: dict[str, Any] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
+        config_resolver: DataCatalogConfigResolver | None = None,
     ) -> None:
-        self._config_resolver = DataCatalogConfigResolver()
-        self._config = config or {}
+        self._config_resolver = config_resolver or DataCatalogConfigResolver()
         self._datasets = datasets or {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
+
         self._use_rich_markup = _has_rich_handler()
 
-        for ds_name in self._datasets:
-            # TODO: API to get configuration from dataset
-            self._config[ds_name] = {}
+        for ds_name, ds_config in self._config_resolver.config.items():
+            self._init_dataset(ds_name, ds_config)
 
-        for ds_name, ds_config in self._config.items():
-            self.init_dataset(ds_name, ds_config)
-
-        self._validate_missing_keys()
+        if feed_dict:
+            self.add_feed_dict(feed_dict)
 
     @property
     def datasets(self) -> dict[str, Any]:
@@ -65,14 +71,8 @@ class KedroDataCatalog:
         )
 
     @property
-    def config(self):
-        return copy.deepcopy(self._config)
-
-    @config.setter
-    def config(self, value: Any) -> dict[str, dict[str, Any]]:
-        raise AttributeError(
-            "Operation not allowed! Please change datasets through configuration."
-        )
+    def config_resolver(self) -> DataCatalogConfigResolver:
+        return self._config_resolver
 
     def __iter__(self):
         yield from self._datasets.values()
@@ -87,26 +87,65 @@ class KedroDataCatalog:
     def _ipython_key_completions_(self) -> list[str]:
         return list(self._datasets.keys())
 
-    def init_dataset(self, ds_name: str, ds_config: dict[str, Any]) -> None:
+    @classmethod
+    def from_config(
+        cls,
+        catalog: dict[str, dict[str, Any]] | None,
+        credentials: dict[str, dict[str, Any]] | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
+    ) -> KedroDataCatalog:
+        """Create a ``DataCatalog`` instance from configuration. This is a
+        factory method used to provide developers with a way to instantiate
+        ``DataCatalog`` with configuration parsed from configuration files.
+        """
+        catalog = catalog or {}
+        config_resolver = DataCatalogConfigResolver(catalog, credentials)
+        save_version = save_version or generate_timestamp()
+        load_versions = load_versions or {}
+
+        missing_keys = [
+            ds_name
+            for ds_name in load_versions
+            if not (
+                ds_name in config_resolver.config
+                or config_resolver.match_pattern(ds_name)
+            )
+        ]
+        if missing_keys:
+            raise DatasetNotFoundError(
+                f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
+                f"are not found in the catalog."
+            )
+
+        return cls(
+            load_versions=load_versions,
+            save_version=save_version,
+            config_resolver=config_resolver,
+        )
+
+    def _init_dataset(self, ds_name: str, ds_config: dict[str, Any]) -> None:
         # Add lazy loading feature to store the configuration but not to init actual dataset
         # Initialise actual dataset when load or save
         # Add is_init property
         validate_dataset_config(ds_name, ds_config)
-        if ds_name in self._datasets:
-            raise DatasetAlreadyExistsError(
-                f"Dataset '{ds_name}' has already been registered"
-            )
-        self._config[ds_name] = ds_config
-        self._datasets[ds_name] = AbstractDataset.from_config(
+        ds = AbstractDataset.from_config(
             ds_name,
             ds_config,
             self._load_versions.get(ds_name),
             self._save_version,
         )
 
+        self.add(ds_name, ds)
+
     def get_dataset(
-        self, ds_name: str, suggest: bool = True, version: Version | None = None
+        self, ds_name: str, version: Version | None = None, suggest: bool = True
     ) -> AbstractDataset:
+        ds_config = self._config_resolver.resolve_dataset_pattern(ds_name)
+
+        if ds_name not in self._datasets and ds_config is not None:
+            self._init_dataset(ds_name, ds_config)
+
         dataset = self._datasets.get(ds_name, None)
 
         if dataset is None:
@@ -127,6 +166,12 @@ class KedroDataCatalog:
 
         return dataset
 
+    def _get_dataset(
+        self, dataset_name: str, version: Version | None = None, suggest: bool = True
+    ) -> AbstractDataset:
+        # TODO: remove when removing old catalog
+        return self.get_dataset(dataset_name, version, suggest)
+
     def add(
         self, ds_name: str, dataset: AbstractDataset, replace: bool = False
     ) -> None:
@@ -139,8 +184,6 @@ class KedroDataCatalog:
                     f"Dataset '{ds_name}' has already been registered"
                 )
         self._datasets[ds_name] = dataset
-        # TODO: API to get configuration from dataset
-        self._config[ds_name] = {}
 
     @property
     def _logger(self) -> logging.Logger:
@@ -207,14 +250,6 @@ class KedroDataCatalog:
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
 
-    def _validate_missing_keys(self) -> None:
-        missing_keys = [key for key in self._load_versions if key not in self._config]
-        if missing_keys:
-            raise DatasetNotFoundError(
-                f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
-                f"are not found in the catalog."
-            )
-
     def load(self, name: str, version: str | None = None) -> Any:
         """Loads a registered data set."""
         load_version = Version(version, None) if version else None
@@ -229,8 +264,7 @@ class KedroDataCatalog:
 
         return dataset.load()
 
-    def add_feed_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
-        # TODO: rename to add_from_dict after removing old catalog
+    def add_from_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
         # Consider changing to add memory datasets only, to simplify the method,
         # adding AbstractDataset can be done via add() method
         for ds_name, ds_data in datasets.items():
@@ -241,21 +275,19 @@ class KedroDataCatalog:
             )  # type: ignore[abstract]
             self.add(ds_name, dataset, replace)
 
-    # def shallow_copy(
-    #     self, extra_dataset_patterns: Patterns | None = None
-    # ) -> KedroDataCatalog:
-    #     """Returns a shallow copy of the current object.
-    #
-    #     Returns:
-    #         Copy of the current object.
-    #     """
-    #     if extra_dataset_patterns:
-    #         self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
-    #     return self.__class__(
-    #         datasets=self._datasets,
-    #         dataset_patterns=self._config_resolver.dataset_patterns,
-    #         default_pattern=self._config_resolver.default_pattern,
-    #         load_versions=self._load_versions,
-    #         save_version=self._save_version,
-    #         config_resolver=self._config_resolver,
-    #     )
+    def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
+        # TODO: remove when removing old catalog
+        return self.add_from_dict(feed_dict, replace)
+
+    def shallow_copy(
+        self, extra_dataset_patterns: Patterns | None = None
+    ) -> KedroDataCatalog:
+        # TODO: remove when old catalog
+        """Returns a shallow copy of the current object.
+
+        Returns:
+            Copy of the current object.
+        """
+        if extra_dataset_patterns:
+            self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
+        return self

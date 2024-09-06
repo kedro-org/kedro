@@ -127,6 +127,7 @@ type_targets = {
         "typing.Type",
         "typing.Set",
         "kedro.config.config.ConfigLoader",
+        "kedro.io.catalog_config_resolver.DataCatalogConfigResolver",
         "kedro.io.core.AbstractDataset",
         "kedro.io.core.AbstractVersionedDataset",
         "kedro.io.core.DatasetError",
@@ -168,6 +169,7 @@ type_targets = {
         "D[k] if k in D, else d.  d defaults to None.",
         "None.  Update D from mapping/iterable E and F.",
         "Patterns",
+        "DataCatalogConfigResolver",
     ),
     "py:data": (
         "typing.Any",

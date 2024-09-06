@@ -31,7 +31,7 @@ class ThreadRunner(AbstractRunner):
         self,
         max_workers: int | None = None,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any] | None] | None = None,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """
         Instantiates the runner.
@@ -56,9 +56,7 @@ class ThreadRunner(AbstractRunner):
                 "node inputs and outputs asynchronously with threads. "
                 "Setting 'is_async' to False."
             )
-        default_dataset_pattern: dict[str, dict[str, Any] | None] | None = {
-            "{default}": {"type": "MemoryDataset"}
-        }
+        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
         self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
         super().__init__(
             is_async=False, extra_dataset_patterns=self._extra_dataset_patterns

@@ -7,11 +7,13 @@ from __future__ import annotations
 import copy
 import logging
 import re
-from typing import Any
+from typing import Any, Dict
 
 from parse import parse
 
-Patterns = dict[str, dict[str, Any] | None]
+from kedro.io.core import DatasetError
+
+Patterns = Dict[str, Dict[str, Any]]
 
 CREDENTIALS_KEY = "credentials"
 
@@ -47,8 +49,8 @@ def _fetch_credentials(
 
 
 def _resolve_credentials(
-    config: dict[str, Any], credentials: dict[str, Any] | None
-) -> dict[str, Any] | None:
+    config: dict[str, Any], credentials: dict[str, Any]
+) -> dict[str, Any]:
     """Return the dataset configuration where credentials are resolved using
     credentials dictionary provided.
 
@@ -110,7 +112,7 @@ class DataCatalogConfigResolver:
         self._resolved_configs = self._init_configs(config, credentials)
 
     @property
-    def config(self) -> dict[str, dict[str, Any] | None]:
+    def config(self) -> dict[str, dict[str, Any]]:
         return self._resolved_configs
 
     @property
@@ -206,7 +208,7 @@ class DataCatalogConfigResolver:
         self,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
-    ) -> dict[str, dict[str, Any] | None]:
+    ) -> dict[str, dict[str, Any]]:
         """Initialize the dataset configuration with resolved credentials."""
         # TODO: check if deep copies are required
         config = copy.deepcopy(config) or {}
@@ -214,6 +216,12 @@ class DataCatalogConfigResolver:
         resolved_configs = {}
 
         for ds_name, ds_config in config.items():
+            if not isinstance(ds_config, dict):
+                raise DatasetError(
+                    f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
+                    "\nHint: If this catalog entry is intended for variable interpolation, "
+                    "make sure that the key is preceded by an underscore."
+                )
             if not self.is_pattern(ds_name):
                 resolved_configs[ds_name] = _resolve_credentials(ds_config, credentials)
 

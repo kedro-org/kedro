@@ -14,7 +14,11 @@ import pprint
 import re
 from typing import Any
 
-from kedro.io.catalog_config_resolver import DataCatalogConfigResolver, Patterns
+from kedro.io.catalog_config_resolver import (
+    CREDENTIALS_KEY,  # noqa: F401
+    DataCatalogConfigResolver,
+    Patterns,
+)
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -27,6 +31,7 @@ from kedro.io.core import (
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
+CATALOG_KEY = "catalog"  # Kept to avoid the breaking change
 WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
@@ -576,7 +581,7 @@ class DataCatalog:
                 ds_data
                 if isinstance(ds_data, AbstractDataset)
                 else MemoryDataset(data=ds_data)  # type: ignore[abstract]
-            )  # type: ignore[abstract]
+            )
             self.add(ds_name, dataset, replace)
 
     def list(self, regex_search: str | None = None) -> list[str]:

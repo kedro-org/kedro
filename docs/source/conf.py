@@ -169,6 +169,7 @@ type_targets = {
         "D[k] if k in D, else d.  d defaults to None.",
         "None.  Update D from mapping/iterable E and F.",
         "Patterns",
+        "DataCatalogConfigResolver",
     ),
     "py:data": (
         "typing.Any",

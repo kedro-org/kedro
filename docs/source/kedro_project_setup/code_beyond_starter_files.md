@@ -71,18 +71,20 @@ level as the `pipelines` folder**, and organise the functionalities there:
     │   ├── pipeline_registry.py
     │   ├── settings.py
     │   ├── pipelines
-    │   └── utils                       <-- Create a module to store your utilities
-    │       ├── __init__.py             <-- Required to import from it
-    │       ├── pandas_utils.py         <-- Put a file with utility functions here
-    │       ├── dictionary_utils.py     <-- Or a few files
-    │       ├── visualisation_utils     <-- Or sub-modules to organise even more utilities
+    │   └── utils                   <-- Create a module to store your utilities
+    │       ├── __init__.py         <-- Required to import from it
+    │       ├── pandas.py           <-- Put a file with utility functions here
+    │       ├── dictionary.py       <-- Or a few files
+    │       ├── visualisation       <-- Or sub-modules to organise even more utilities
     └── tests
 ```
 
-Example of importing a function `find_common_keys` from `dictionary_utils.py` would be:
+Example of importing and using a function `find_common_keys` from `utils.dictionary` would be:
 
 ```python
-from my_project.utils.dictionary_utils import find_common_keys
+from my_project import utils
+
+utils.dictionary.find_common_keys(...)
 ```
 
 ```{note}

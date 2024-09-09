@@ -53,8 +53,10 @@ class _IsSubclassValidator(Validator):
             setting_value = getattr(settings, name)
             # Allow using new KedroDataCatalog
             if (
-                default_class == "kedro.io.data_catalog.DataCatalog"
-                and setting_value == "kedro.io.data_catalog_redesign.KedroDataCatalog"
+                f"{setting_value.__module__}.{setting_value.__qualname__}"
+                == "kedro.io.data_catalog_redesign.KedroDataCatalog"
+                and f"{default_class.__module__}.{default_class.__qualname__}"
+                == "kedro.io.data_catalog.DataCatalog"
             ):
                 continue
             if not issubclass(setting_value, default_class):

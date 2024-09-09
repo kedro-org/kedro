@@ -11,8 +11,9 @@ import copy
 import difflib
 import logging
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from kedro.io import DataCatalog
 from kedro.io.catalog_config_resolver import DataCatalogConfigResolver, Patterns
 from kedro.io.core import (
     AbstractDataset,
@@ -25,6 +26,9 @@ from kedro.io.core import (
 )
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
+
+if TYPE_CHECKING:
+    from types import UnionType
 
 CREDENTIALS_KEY = "credentials"
 
@@ -127,7 +131,6 @@ class KedroDataCatalog:
     def _init_dataset(self, ds_name: str, ds_config: dict[str, Any]) -> None:
         # Add lazy loading feature to store the configuration but not to init actual dataset
         # Initialise actual dataset when load or save
-        # Add is_init property
         validate_dataset_config(ds_name, ds_config)
         ds = AbstractDataset.from_config(
             ds_name,
@@ -291,3 +294,6 @@ class KedroDataCatalog:
         if extra_dataset_patterns:
             self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
         return self
+
+
+AbstractDataCatalog: UnionType = DataCatalog | KedroDataCatalog

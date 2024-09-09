@@ -14,7 +14,7 @@ from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import DataCatalog  # noqa: TCH001
+from kedro.io import AbstractDataCatalog, DataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -123,7 +123,7 @@ def _convert_paths_to_absolute_posix(
     return conf_dictionary
 
 
-def _validate_transcoded_datasets(catalog: DataCatalog) -> None:
+def _validate_transcoded_datasets(catalog: AbstractDataCatalog) -> None:
     """Validates transcoded datasets are correctly named
 
     Args:
@@ -178,13 +178,13 @@ class KedroContext:
     )
 
     @property
-    def catalog(self) -> DataCatalog:
-        """Read-only property referring to Kedro's ``DataCatalog`` for this context.
+    def catalog(self) -> AbstractDataCatalog:
+        """Read-only property referring to Kedro's ``AbstractDataCatalog`` for this context.
 
         Returns:
             DataCatalog defined in `catalog.yml`.
         Raises:
-            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
+            KedroContextError: Incorrect ``AbstractDataCatalog`` registered for the project.
 
         """
         return self._get_catalog()
@@ -213,13 +213,13 @@ class KedroContext:
         self,
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
-    ) -> DataCatalog:
-        """A hook for changing the creation of a DataCatalog instance.
+    ) -> AbstractDataCatalog:
+        """A hook for changing the creation of a AbstractDataCatalog instance.
 
         Returns:
             DataCatalog defined in `catalog.yml`.
         Raises:
-            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
+            KedroContextError: Incorrect ``AbstractDataCatalog`` registered for the project.
 
         """
         # '**/catalog*' reads modular pipeline configs

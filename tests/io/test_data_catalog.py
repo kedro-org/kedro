@@ -949,9 +949,9 @@ class TestDataCatalogDatasetFactories:
         )
         sorted_keys_expected = [
             "{country}_companies",
-            "{another}#csv",
             "{namespace}_{dataset}",
             "{dataset}s",
+            "{another}#csv",
             "{default}",
         ]
         assert (

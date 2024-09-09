@@ -18,9 +18,7 @@ Patterns = Dict[str, Dict[str, Any]]
 CREDENTIALS_KEY = "credentials"
 
 
-def _fetch_credentials(
-    credentials_name: str, credentials: dict[str, Any] | None
-) -> Any:
+def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
     """Fetch the specified credentials from the provided credentials dictionary.
 
     Args:
@@ -35,8 +33,6 @@ def _fetch_credentials(
             registered.
 
     """
-    if credentials is None:
-        return None
     try:
         return credentials[credentials_name]
     except KeyError as exc:

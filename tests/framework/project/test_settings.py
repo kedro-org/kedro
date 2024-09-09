@@ -7,7 +7,6 @@ import pytest
 from kedro.config import OmegaConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings, validate_settings
-from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io import DataCatalog
 
@@ -40,8 +39,8 @@ def mock_package_name_with_settings_file(tmpdir):
 
                 DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
 
-                from kedro.framework.session.shelvestore import ShelveStore
-                SESSION_STORE_CLASS = ShelveStore
+                from kedro.framework.session.store import BaseSessionStore
+                SESSION_STORE_CLASS = BaseSessionStore
                 SESSION_STORE_ARGS = {{
                     "path": "./sessions"
                 }}
@@ -103,7 +102,7 @@ def test_settings_after_configuring_project_shows_updated_values(
     configure_project(mock_package_name_with_settings_file)
     assert len(settings.HOOKS) == 1 and isinstance(settings.HOOKS[0], ProjectHooks)
     assert settings.DISABLE_HOOKS_FOR_PLUGINS.to_list() == ["kedro-viz"]
-    assert settings.SESSION_STORE_CLASS is ShelveStore
+    assert settings.SESSION_STORE_CLASS is BaseSessionStore
     assert settings.SESSION_STORE_ARGS == {"path": "./sessions"}
     assert settings.CONTEXT_CLASS is MyContext
     assert settings.CONF_SOURCE == "test_conf"

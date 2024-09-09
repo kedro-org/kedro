@@ -949,9 +949,9 @@ class TestDataCatalogDatasetFactories:
         )
         sorted_keys_expected = [
             "{country}_companies",
-            "{another}#csv",
             "{namespace}_{dataset}",
             "{dataset}s",
+            "{another}#csv",
             "{default}",
         ]
         assert (
@@ -984,13 +984,15 @@ class TestDataCatalogDatasetFactories:
         sorted_keys_expected = [
             "{dataset}s",
             "{a_default}",
+            "{another}#csv",
+            "{default}",
         ]
         assert (
-            "{a_default}" in catalog_with_runner_default.config_resolver.default_pattern
+            "{a_default}"
+            in catalog_with_runner_default.config_resolver._default_pattern
         )
         assert (
-            list(catalog_with_runner_default.config_resolver.dataset_patterns.keys())
-            + list(catalog_with_runner_default.config_resolver.default_pattern.keys())
+            catalog_with_runner_default.config_resolver.list_patterns()
             == sorted_keys_expected
         )
 

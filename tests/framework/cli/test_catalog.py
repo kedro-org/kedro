@@ -546,7 +546,7 @@ class TestCatalogFactoryCommands:
         mocked_context.catalog = DataCatalog.from_config(
             catalog=fake_catalog_config, credentials=fake_credentials_config
         )
-        placeholder_ds = mocked_context.catalog.config_resolver.dataset_patterns.keys()
+        placeholder_ds = mocked_context.catalog.config_resolver.list_patterns()
         pipeline_datasets = {"csv_example", "parquet_example", "explicit_dataset"}
 
         mocker.patch.object(

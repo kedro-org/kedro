@@ -16,7 +16,7 @@ from kedro.runner.runner import AbstractRunner, run_node
 if TYPE_CHECKING:
     from pluggy import PluginManager
 
-    from kedro.io import DataCatalog
+    from kedro.io import AbstractDataCatalog
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
@@ -43,7 +43,7 @@ class ThreadRunner(AbstractRunner):
             is_async: If True, set to False, because `ThreadRunner`
                 doesn't support loading and saving the node inputs and
                 outputs asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the AbstractDataCatalog
                 during the run. This is used to set the default datasets to MemoryDataset
                 for `ThreadRunner`.
 
@@ -87,7 +87,7 @@ class ThreadRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: AbstractDataCatalog,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:
@@ -95,7 +95,7 @@ class ThreadRunner(AbstractRunner):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``DataCatalog`` from which to fetch data.
+            catalog: The ``AbstractDataCatalog`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 

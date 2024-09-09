@@ -62,7 +62,7 @@ class KedroDataCatalog:
             self._init_dataset(ds_name, ds_config)
 
         if feed_dict:
-            self.add_feed_dict(feed_dict)
+            self.add_from_dict(feed_dict)
 
     @property
     def datasets(self) -> dict[str, Any]:
@@ -84,12 +84,19 @@ class KedroDataCatalog:
     def __getitem__(self, ds_name: str) -> AbstractDataset:
         return self.get_dataset(ds_name)
 
-    def __contains__(self, ds_name: str) -> bool:
-        """Check if an item is in the catalog"""
-        return ds_name in self._datasets
+    def __contains__(self, dataset_name: str) -> bool:
+        """Check if an item is in the catalog as a materialised dataset or pattern"""
+        return (
+            dataset_name in self._datasets
+            or self._config_resolver.match_pattern(dataset_name) is not None
+        )
 
     def _ipython_key_completions_(self) -> list[str]:
         return list(self._datasets.keys())
+
+    @property
+    def _logger(self) -> logging.Logger:
+        return logging.getLogger(__name__)
 
     @classmethod
     def from_config(
@@ -187,10 +194,6 @@ class KedroDataCatalog:
                     f"Dataset '{ds_name}' has already been registered"
                 )
         self._datasets[ds_name] = dataset
-
-    @property
-    def _logger(self) -> logging.Logger:
-        return logging.getLogger(__name__)
 
     def list(self, regex_search: str | None = None) -> list[str]:
         """
@@ -294,6 +297,24 @@ class KedroDataCatalog:
         if extra_dataset_patterns:
             self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
         return self
+
+    def exists(self, name: str) -> bool:
+        """Checks whether registered data set exists by calling its `exists()`
+        method. Raises a warning and returns False if `exists()` is not
+        implemented.
+
+        Args:
+            name: A data set to be checked.
+
+        Returns:
+            Whether the data set output exists.
+
+        """
+        try:
+            dataset = self._get_dataset(name)
+        except DatasetNotFoundError:
+            return False
+        return dataset.exists()
 
 
 AbstractDataCatalog: UnionType = DataCatalog | KedroDataCatalog

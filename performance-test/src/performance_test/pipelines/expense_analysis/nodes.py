@@ -1,10 +1,11 @@
+import os
 from time import sleep
 
 import pyspark.sql.functions as F
 from pyspark.sql.window import Window
 
-DATASET_LOAD_DELAY = 0
-FILE_SAVE_DELAY = 0
+DATASET_LOAD_DELAY = int(os.getenv("DATASET_LOAD_DELAY", 0))
+FILE_SAVE_DELAY = int(os.getenv("FILE_SAVE_DELAY", 0))
 
 def analyze_expenses_per_party(congress_expenses):
     """Calculate total expense per party."""

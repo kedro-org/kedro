@@ -1,3 +1,4 @@
+import os
 from time import sleep
 from typing import Dict
 
@@ -6,7 +7,7 @@ from kedro.pipeline import Pipeline
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
-HOOK_DELAY = 0
+HOOK_DELAY = int(os.getenv("HOOKS_DELAY", 0))
 
 class SparkHooks:
     @hook_impl

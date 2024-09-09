@@ -7,6 +7,7 @@
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.
 
 ## Breaking changes to the API
+* Removed `ShelveStore` to address a security vulnerability.
 
 ## Documentation changes
 * Fix logo on PyPI page.

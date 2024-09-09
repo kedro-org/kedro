@@ -1,9 +1,5 @@
 import logging
-from pathlib import Path
 
-import pytest
-
-from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
 
 FAKE_SESSION_ID = "fake_session_id"
@@ -48,42 +44,3 @@ class TestBaseStore:
             if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.DEBUG
         ]
         assert actual_debug_messages == expected_debug_messages
-
-
-@pytest.fixture
-def shelve_path(tmp_path):
-    return Path(tmp_path / "path" / "to" / "sessions")
-
-
-class TestShelveStore:
-    def test_empty(self, shelve_path):
-        shelve = ShelveStore(str(shelve_path), FAKE_SESSION_ID)
-        assert shelve == {}
-        assert shelve._location == shelve_path / FAKE_SESSION_ID / "store"
-        assert not shelve_path.exists()
-
-    def test_save(self, shelve_path):
-        assert not shelve_path.exists()
-
-        shelve = ShelveStore(str(shelve_path), FAKE_SESSION_ID)
-        shelve["shelve_path"] = shelve_path
-        shelve.save()
-
-        assert (shelve_path / FAKE_SESSION_ID).is_dir()
-
-        reloaded = ShelveStore(str(shelve_path), FAKE_SESSION_ID)
-        assert reloaded == {"shelve_path": shelve_path}
-
-    def test_update(self, shelve_path):
-        shelve = ShelveStore(str(shelve_path), FAKE_SESSION_ID)
-        shelve["shelve_path"] = shelve_path
-        shelve.save()
-
-        shelve.update(new_key="new_value")
-        del shelve["shelve_path"]
-        reloaded = ShelveStore(str(shelve_path), FAKE_SESSION_ID)
-        assert reloaded == {"shelve_path": shelve_path}  # changes not saved yet
-
-        shelve.save()
-        reloaded = ShelveStore(str(shelve_path), FAKE_SESSION_ID)
-        assert reloaded == {"new_key": "new_value"}

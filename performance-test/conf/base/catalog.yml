@@ -1,0 +1,7 @@
+congress_expenses:
+  type: spark.SparkDataset
+  filepath: data/gastos-deputados.csv
+  file_format: csv
+  load_args:
+    header: True
+    inferSchema: True

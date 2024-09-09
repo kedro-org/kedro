@@ -1,0 +1,43 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "performance_test"
+readme = "README.md"
+dynamic = [ "dependencies", "version",]
+
+[project.scripts]
+performance-test = "performance_test.__main__:main"
+
+[tool.kedro]
+package_name = "performance_test"
+project_name = "performance-test"
+kedro_init_version = "0.19.8"
+tools = [ "PySpark", "Linting",]
+example_pipeline = "False"
+source_dir = "src"
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+select = [ "F", "W", "E", "I", "UP", "PL", "T201",]
+ignore = [ "E501",]
+
+[project.entry-points."kedro.hooks"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.setuptools.dynamic.dependencies]
+file = "requirements.txt"
+
+[tool.setuptools.dynamic.version]
+attr = "performance_test.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false
+
+[tool.kedro_telemetry]
+project_id = "f041db02285d4cbba64cc480ca13ebed"

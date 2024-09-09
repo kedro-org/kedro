@@ -66,7 +66,7 @@ class KedroDataCatalog:
         return copy.deepcopy(self._datasets)
 
     @datasets.setter
-    def datasets(self, value: Any):
+    def datasets(self, value: Any) -> None:
         raise AttributeError(
             "Operation not allowed! Please change datasets through configuration."
         )
@@ -75,7 +75,7 @@ class KedroDataCatalog:
     def config_resolver(self) -> DataCatalogConfigResolver:
         return self._config_resolver
 
-    def __iter__(self):
+    def __iter__(self) -> AbstractDataset:
         yield from self._datasets.values()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
@@ -151,7 +151,7 @@ class KedroDataCatalog:
         ds_config = self._config_resolver.resolve_dataset_pattern(ds_name)
 
         if ds_name not in self._datasets and ds_config is not None:
-            self._init_dataset(ds_name, ds_config)
+            self._init_dataset(ds_name, ds_config)  # type: ignore[arg-type]
 
         dataset = self._datasets.get(ds_name, None)
 
@@ -274,8 +274,8 @@ class KedroDataCatalog:
             dataset = (
                 ds_data
                 if isinstance(ds_data, AbstractDataset)
-                else MemoryDataset(data=ds_data)
-            )  # type: ignore[abstract]
+                else MemoryDataset(data=ds_data)  # type: ignore[abstract]
+            )
             self.add(ds_name, dataset, replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
@@ -314,4 +314,4 @@ class KedroDataCatalog:
         return dataset.exists()
 
 
-AbstractDataCatalog: type = Union[DataCatalog, KedroDataCatalog]
+AbstractDataCatalog = Union[DataCatalog, KedroDataCatalog]

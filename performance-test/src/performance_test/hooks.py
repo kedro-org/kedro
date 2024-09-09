@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Dict
 
 from kedro.framework.hooks import hook_impl
@@ -5,6 +6,7 @@ from kedro.pipeline import Pipeline
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
+HOOK_DELAY = 0
 
 class SparkHooks:
     @hook_impl
@@ -23,6 +25,7 @@ class SparkHooks:
             .enableHiveSupport()
             .config(conf=spark_conf)
         )
+        sleep(HOOK_DELAY)
         _spark_session = spark_session_conf.getOrCreate()
         _spark_session.sparkContext.setLogLevel("WARN")
 

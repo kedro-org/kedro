@@ -40,4 +40,4 @@ where = [ "src",]
 namespaces = false
 
 [tool.kedro_telemetry]
-project_id = "f041db02285d4cbba64cc480ca13ebed"
+project_id = ""

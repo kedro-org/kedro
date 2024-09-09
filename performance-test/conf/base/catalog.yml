@@ -5,3 +5,30 @@ congress_expenses:
   load_args:
     header: True
     inferSchema: True
+
+expenses_per_party:
+  type: spark.SparkDataset
+  filepath: data/output/expenses_per_party.parquet
+  file_format: parquet
+  save_args:
+    sep: ','
+    header: True
+    mode: overwrite
+
+largest_expense_source:
+  type: spark.SparkDataset
+  filepath: data/output/largest_expense_source.parquet
+  file_format: parquet
+  save_args:
+    sep: ','
+    header: True
+    mode: overwrite
+
+top_spender_per_party:
+  type: spark.SparkDataset
+  filepath: data/output/top_spender_per_party.parquet
+  file_format: parquet
+  save_args:
+    sep: ','
+    header: True
+    mode: overwrite

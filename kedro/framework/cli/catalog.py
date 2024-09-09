@@ -214,12 +214,7 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    catalog_factories = list(
-        {
-            **context.catalog.config_resolver.dataset_patterns,
-            **context.catalog.config_resolver.default_pattern,
-        }.keys()
-    )
+    catalog_factories = context.catalog.config_resolver.list_patterns()
     if catalog_factories:
         click.echo(yaml.dump(catalog_factories))
     else:

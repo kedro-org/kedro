@@ -185,9 +185,9 @@ class DataCatalog:
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
-        return (self._datasets, self._config_resolver.dataset_patterns) == (
+        return (self._datasets, self._config_resolver.list_patterns()) == (
             other._datasets,
-            other._config_resolver.dataset_patterns,
+            other.config_resolver.list_patterns(),
         )
 
     @property
@@ -306,8 +306,8 @@ class DataCatalog:
 
         return cls(
             datasets=datasets,
-            dataset_patterns=config_resolver.dataset_patterns,
-            default_pattern=config_resolver.default_pattern,
+            dataset_patterns=config_resolver._dataset_patterns,
+            default_pattern=config_resolver._default_pattern,
             load_versions=load_versions,
             save_version=save_version,
             config_resolver=config_resolver,
@@ -641,8 +641,8 @@ class DataCatalog:
             self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
         return self.__class__(
             datasets=self._datasets,
-            dataset_patterns=self._config_resolver.dataset_patterns,
-            default_pattern=self._config_resolver.default_pattern,
+            dataset_patterns=self._config_resolver._dataset_patterns,
+            default_pattern=self._config_resolver._default_pattern,
             load_versions=self._load_versions,
             save_version=self._save_version,
             config_resolver=self._config_resolver,

@@ -116,14 +116,6 @@ class DataCatalogConfigResolver:
         return self._resolved_configs
 
     @property
-    def dataset_patterns(self) -> Patterns:
-        return self._dataset_patterns
-
-    @property
-    def default_pattern(self) -> Patterns:
-        return self._default_pattern
-
-    @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 

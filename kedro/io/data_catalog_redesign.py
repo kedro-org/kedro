@@ -11,7 +11,7 @@ import copy
 import difflib
 import logging
 import re
-from typing import TYPE_CHECKING, Any
+from typing import Any, Union
 
 from kedro.io import DataCatalog
 from kedro.io.catalog_config_resolver import DataCatalogConfigResolver, Patterns
@@ -26,9 +26,6 @@ from kedro.io.core import (
 )
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
-
-if TYPE_CHECKING:
-    from types import UnionType
 
 CREDENTIALS_KEY = "credentials"
 
@@ -317,4 +314,4 @@ class KedroDataCatalog:
         return dataset.exists()
 
 
-AbstractDataCatalog: UnionType = DataCatalog | KedroDataCatalog
+AbstractDataCatalog: type = Union[DataCatalog, KedroDataCatalog]

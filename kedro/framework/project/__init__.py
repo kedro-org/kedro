@@ -52,6 +52,7 @@ class _IsSubclassValidator(Validator):
         for name in self.names:
             setting_value = getattr(settings, name)
             # Allow using new KedroDataCatalog
+            # TODO: remove with the old catalog
             if (
                 f"{setting_value.__module__}.{setting_value.__qualname__}"
                 == "kedro.io.data_catalog_redesign.KedroDataCatalog"

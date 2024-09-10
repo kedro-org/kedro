@@ -105,7 +105,7 @@ class CatalogConfigResolver:
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )
-        self._resolved_configs = self._init_configs(config, credentials)
+        self._resolved_configs = self._resolve_config_credentials(config, credentials)
 
     @property
     def config(self) -> dict[str, dict[str, Any]]:
@@ -192,7 +192,7 @@ class CatalogConfigResolver:
 
         return sorted_patterns, user_default
 
-    def _init_configs(
+    def _resolve_config_credentials(
         self,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,

@@ -171,7 +171,7 @@ type_targets = {
         "None.  Update D from mapping/iterable E and F.",
         "Patterns",
         "CatalogConfigResolver",
-        "AbstractDataCatalog",
+        "BaseDataCatalog",
     ),
     "py:data": (
         "typing.Any",

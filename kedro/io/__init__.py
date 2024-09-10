@@ -15,14 +15,14 @@ from .core import (
     Version,
 )
 from .data_catalog import DataCatalog
-from .data_catalog_redesign import AbstractDataCatalog, KedroDataCatalog
+from .data_catalog_redesign import BaseDataCatalog, KedroDataCatalog
 from .lambda_dataset import LambdaDataset
 from .memory_dataset import MemoryDataset
 from .shared_memory_dataset import SharedMemoryDataset
 
 __all__ = [
     "AbstractDataset",
-    "AbstractDataCatalog",
+    "BaseDataCatalog",
     "AbstractVersionedDataset",
     "CachedDataset",
     "DataCatalog",

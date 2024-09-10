@@ -130,7 +130,7 @@ class TestSequentialRunnerBranchedPipeline:
 
     def test_unsatisfied_inputs(self, is_async, unfinished_outputs_pipeline, catalog):
         """ds1, ds2 and ds3 were not specified."""
-        with pytest.raises(ValueError, match=r"not found in the AbstractDataCatalog"):
+        with pytest.raises(ValueError, match=r"not found in the BaseDataCatalog"):
             SequentialRunner(is_async=is_async).run(
                 unfinished_outputs_pipeline, catalog
             )

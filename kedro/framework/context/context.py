@@ -14,7 +14,7 @@ from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import AbstractDataCatalog, DataCatalog  # noqa: TCH001
+from kedro.io import BaseDataCatalog, DataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -123,7 +123,7 @@ def _convert_paths_to_absolute_posix(
     return conf_dictionary
 
 
-def _validate_transcoded_datasets(catalog: AbstractDataCatalog) -> None:
+def _validate_transcoded_datasets(catalog: BaseDataCatalog) -> None:
     """Validates transcoded datasets are correctly named
 
     Args:
@@ -178,13 +178,13 @@ class KedroContext:
     )
 
     @property
-    def catalog(self) -> AbstractDataCatalog:
-        """Read-only property referring to Kedro's ``AbstractDataCatalog`` for this context.
+    def catalog(self) -> BaseDataCatalog:
+        """Read-only property referring to Kedro's ``BaseDataCatalog`` for this context.
 
         Returns:
             DataCatalog defined in `catalog.yml`.
         Raises:
-            KedroContextError: Incorrect ``AbstractDataCatalog`` registered for the project.
+            KedroContextError: Incorrect ``BaseDataCatalog`` registered for the project.
 
         """
         return self._get_catalog()
@@ -213,13 +213,13 @@ class KedroContext:
         self,
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
-    ) -> AbstractDataCatalog:
-        """A hook for changing the creation of a AbstractDataCatalog instance.
+    ) -> BaseDataCatalog:
+        """A hook for changing the creation of a BaseDataCatalog instance.
 
         Returns:
             DataCatalog defined in `catalog.yml`.
         Raises:
-            KedroContextError: Incorrect ``AbstractDataCatalog`` registered for the project.
+            KedroContextError: Incorrect ``BaseDataCatalog`` registered for the project.
 
         """
         # '**/catalog*' reads modular pipeline configs

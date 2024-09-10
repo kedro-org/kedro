@@ -318,4 +318,4 @@ class KedroDataCatalog:
         return dataset.exists()
 
 
-AbstractDataCatalog = Union[DataCatalog, KedroDataCatalog]
+BaseDataCatalog = Union[DataCatalog, KedroDataCatalog]

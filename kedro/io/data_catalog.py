@@ -285,7 +285,7 @@ class DataCatalog:
             if not config_resolver.is_pattern(ds_name):
                 datasets[ds_name] = AbstractDataset.from_config(
                     ds_name,
-                    config_resolver.config.get(ds_name),
+                    config_resolver.config.get(ds_name, {}),
                     load_versions.get(ds_name),
                     save_version,
                 )

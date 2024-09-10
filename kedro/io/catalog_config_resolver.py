@@ -18,81 +18,6 @@ Patterns = Dict[str, Dict[str, Any]]
 CREDENTIALS_KEY = "credentials"
 
 
-def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
-    """Fetch the specified credentials from the provided credentials dictionary.
-
-    Args:
-        credentials_name: Credentials name.
-        credentials: A dictionary with all credentials.
-
-    Returns:
-        The set of requested credentials.
-
-    Raises:
-        KeyError: When a data set with the given name has not yet been
-            registered.
-
-    """
-    try:
-        return credentials[credentials_name]
-    except KeyError as exc:
-        raise KeyError(
-            f"Unable to find credentials '{credentials_name}': check your data "
-            "catalog and credentials configuration. See "
-            "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
-            "for an example."
-        ) from exc
-
-
-def _resolve_credentials(
-    config: dict[str, Any], credentials: dict[str, Any]
-) -> dict[str, Any]:
-    """Return the dataset configuration where credentials are resolved using
-    credentials dictionary provided.
-
-    Args:
-        config: Original dataset config, which may contain unresolved credentials.
-        credentials: A dictionary with all credentials.
-
-    Returns:
-        The dataset config, where all the credentials are successfully resolved.
-    """
-    config = copy.deepcopy(config)
-
-    def _resolve_value(key: str, value: Any) -> Any:
-        if key == CREDENTIALS_KEY and isinstance(value, str):
-            return _fetch_credentials(value, credentials)
-        if isinstance(value, dict):
-            return {k: _resolve_value(k, v) for k, v in value.items()}
-        return value
-
-    return {k: _resolve_value(k, v) for k, v in config.items()}
-
-
-def _resolve_dataset_config(
-    ds_name: str,
-    pattern: str,
-    config: Any,
-) -> Any:
-    """Resolve dataset configuration based on the provided pattern."""
-    resolved_vars = parse(pattern, ds_name)
-    # Resolve the factory config for the dataset
-    if isinstance(config, dict):
-        for key, value in config.items():
-            config[key] = _resolve_dataset_config(ds_name, pattern, value)
-    elif isinstance(config, (list, tuple)):
-        config = [_resolve_dataset_config(ds_name, pattern, value) for value in config]
-    elif isinstance(config, str) and "}" in config:
-        try:
-            config = config.format_map(resolved_vars.named)
-        except KeyError as exc:
-            raise KeyError(
-                f"Unable to resolve '{config}' from the pattern '{pattern}'. Keys used in the configuration "
-                f"should be present in the dataset factory pattern."
-            ) from exc
-    return config
-
-
 class CatalogConfigResolver:
     """Resolves dataset configurations based on patterns and credentials."""
 
@@ -153,6 +78,84 @@ class CatalogConfigResolver:
             )
         return {key: dataset_patterns[key] for key in sorted_keys}
 
+    @staticmethod
+    def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
+        """Fetch the specified credentials from the provided credentials dictionary.
+
+        Args:
+            credentials_name: Credentials name.
+            credentials: A dictionary with all credentials.
+
+        Returns:
+            The set of requested credentials.
+
+        Raises:
+            KeyError: When a data set with the given name has not yet been
+                registered.
+
+        """
+        try:
+            return credentials[credentials_name]
+        except KeyError as exc:
+            raise KeyError(
+                f"Unable to find credentials '{credentials_name}': check your data "
+                "catalog and credentials configuration. See "
+                "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
+                "for an example."
+            ) from exc
+
+    @classmethod
+    def _resolve_credentials(
+        cls, config: dict[str, Any], credentials: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Return the dataset configuration where credentials are resolved using
+        credentials dictionary provided.
+
+        Args:
+            config: Original dataset config, which may contain unresolved credentials.
+            credentials: A dictionary with all credentials.
+
+        Returns:
+            The dataset config, where all the credentials are successfully resolved.
+        """
+        config = copy.deepcopy(config)
+
+        def _resolve_value(key: str, value: Any) -> Any:
+            if key == CREDENTIALS_KEY and isinstance(value, str):
+                return cls._fetch_credentials(value, credentials)
+            if isinstance(value, dict):
+                return {k: _resolve_value(k, v) for k, v in value.items()}
+            return value
+
+        return {k: _resolve_value(k, v) for k, v in config.items()}
+
+    @classmethod
+    def _resolve_dataset_config(
+        cls,
+        ds_name: str,
+        pattern: str,
+        config: Any,
+    ) -> Any:
+        """Resolve dataset configuration based on the provided pattern."""
+        resolved_vars = parse(pattern, ds_name)
+        # Resolve the factory config for the dataset
+        if isinstance(config, dict):
+            for key, value in config.items():
+                config[key] = cls._resolve_dataset_config(ds_name, pattern, value)
+        elif isinstance(config, (list, tuple)):
+            config = [
+                cls._resolve_dataset_config(ds_name, pattern, value) for value in config
+            ]
+        elif isinstance(config, str) and "}" in config:
+            try:
+                config = config.format_map(resolved_vars.named)
+            except KeyError as exc:
+                raise KeyError(
+                    f"Unable to resolve '{config}' from the pattern '{pattern}'. Keys used in the configuration "
+                    f"should be present in the dataset factory pattern."
+                ) from exc
+        return config
+
     def list_patterns(self) -> list[str]:
         """List al patterns available in the catalog."""
         return (
@@ -181,7 +184,9 @@ class CatalogConfigResolver:
 
         for ds_name, ds_config in config.items():
             if cls.is_pattern(ds_name):
-                dataset_patterns[ds_name] = _resolve_credentials(ds_config, credentials)
+                dataset_patterns[ds_name] = cls._resolve_credentials(
+                    ds_config, credentials
+                )
 
         sorted_patterns = cls._sort_patterns(dataset_patterns)
         if sorted_patterns:
@@ -211,7 +216,9 @@ class CatalogConfigResolver:
                     "make sure that the key is preceded by an underscore."
                 )
             if not self.is_pattern(ds_name):
-                resolved_configs[ds_name] = _resolve_credentials(ds_config, credentials)
+                resolved_configs[ds_name] = self._resolve_credentials(
+                    ds_config, credentials
+                )
 
         return resolved_configs
 
@@ -233,7 +240,7 @@ class CatalogConfigResolver:
                     or self._runtime_patterns.get(matched_pattern)
                     or {}
                 )
-                ds_config = _resolve_dataset_config(
+                ds_config = self._resolve_dataset_config(
                     ds_name, matched_pattern, config_copy
                 )
 

@@ -7,7 +7,6 @@ relaying load and save functions to the underlying data sets.
 
 from __future__ import annotations
 
-import copy
 import difflib
 import logging
 import pprint
@@ -279,7 +278,7 @@ class DataCatalog:
         datasets = {}
         config_resolver = CatalogConfigResolver(catalog, credentials)
         save_version = save_version or generate_timestamp()
-        load_versions = copy.deepcopy(load_versions) or {}
+        load_versions = load_versions or {}
 
         for ds_name in catalog:
             if not config_resolver.is_pattern(ds_name):

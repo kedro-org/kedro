@@ -185,8 +185,8 @@ class CatalogConfigResolver:
         credentials: dict[str, dict[str, Any]] | None,
     ) -> tuple[Patterns, Patterns]:
         """Extract and sort patterns from the configuration."""
-        config = copy.deepcopy(config) or {}
-        credentials = copy.deepcopy(credentials) or {}
+        config = config or {}
+        credentials = credentials or {}
         dataset_patterns = {}
         user_default = {}
 
@@ -211,9 +211,8 @@ class CatalogConfigResolver:
         credentials: dict[str, dict[str, Any]] | None,
     ) -> dict[str, dict[str, Any]]:
         """Initialize the dataset configuration with resolved credentials."""
-        # TODO: check if deep copies are required
-        config = copy.deepcopy(config) or {}
-        credentials = copy.deepcopy(credentials) or {}
+        config = config or {}
+        credentials = credentials or {}
         resolved_configs = {}
 
         for ds_name, ds_config in config.items():

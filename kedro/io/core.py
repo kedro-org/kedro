@@ -35,16 +35,16 @@ VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = (
-    "s3",
-    "s3n",
-    "oss",
-    "s3a",
-    "gcs",
-    "gs",
-    "adl",
     "abfs",
     "abfss",
+    "adl",
+    "gcs",
     "gdrive",
+    "gs",
+    "oss",
+    "s3",
+    "s3a",
+    "s3n",
 )
 
 

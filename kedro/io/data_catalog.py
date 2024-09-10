@@ -122,7 +122,7 @@ class DataCatalog:
         implementations to provide ``load`` and ``save`` capabilities from
         anywhere in the program. To use a ``DataCatalog``, you need to
         instantiate it with a dictionary of data sets. Then it will act as a
-        single point of reference for your calls, relaying load and save§
+        single point of reference for your calls, relaying load and save
         functions to the underlying data sets.
 
         Args:
@@ -285,7 +285,7 @@ class DataCatalog:
             if not config_resolver.is_pattern(ds_name):
                 datasets[ds_name] = AbstractDataset.from_config(
                     ds_name,
-                    config_resolver.config[ds_name],
+                    config_resolver.config.get(ds_name),
                     load_versions.get(ds_name),
                     save_version,
                 )

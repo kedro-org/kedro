@@ -45,7 +45,7 @@ class KedroDataCatalog:
         self._use_rich_markup = _has_rich_handler()
 
         for ds_name, ds_config in self._config_resolver.config.items():
-            self._init_dataset(ds_name, ds_config)
+            self._add_from_config(ds_name, ds_config)
 
         if feed_dict:
             self.add_from_dict(feed_dict)
@@ -136,7 +136,7 @@ class KedroDataCatalog:
                 "make sure that the key is preceded by an underscore."
             )
 
-    def _init_dataset(self, ds_name: str, ds_config: dict[str, Any]) -> None:
+    def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
         # Add lazy loading feature to store the configuration but not to init actual dataset
         # Initialise actual dataset when load or save
         self._validate_dataset_config(ds_name, ds_config)

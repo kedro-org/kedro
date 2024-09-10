@@ -113,9 +113,9 @@ class DataCatalog:
         datasets: dict[str, AbstractDataset] | None = None,
         feed_dict: dict[str, Any] | None = None,
         dataset_patterns: Patterns | None = None,  # Kept for interface compatibility
-        default_pattern: Patterns | None = None,  # Kept for interface compatibility
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
+        default_pattern: Patterns | None = None,  # Kept for interface compatibility
         config_resolver: CatalogConfigResolver | None = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
@@ -307,9 +307,9 @@ class DataCatalog:
         return cls(
             datasets=datasets,
             dataset_patterns=config_resolver._dataset_patterns,
-            default_pattern=config_resolver._default_pattern,
             load_versions=load_versions,
             save_version=save_version,
+            default_pattern=config_resolver._default_pattern,
             config_resolver=config_resolver,
         )
 

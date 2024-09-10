@@ -27,8 +27,6 @@ from kedro.io.core import (
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
-CREDENTIALS_KEY = "credentials"
-
 
 def validate_dataset_config(ds_name: str, ds_config: Any) -> None:
     if not isinstance(ds_config, dict):
@@ -86,6 +84,12 @@ class KedroDataCatalog:
         return (
             dataset_name in self._datasets
             or self._config_resolver.match_pattern(dataset_name) is not None
+        )
+
+    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
+        return (self._datasets, self._config_resolver.list_patterns()) == (
+            other.datasets,
+            other.config_resolver.list_patterns(),
         )
 
     def _ipython_key_completions_(self) -> list[str]:

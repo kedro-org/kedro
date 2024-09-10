@@ -103,9 +103,9 @@ class KedroDataCatalog:
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> KedroDataCatalog:
-        """Create a ``DataCatalog`` instance from configuration. This is a
+        """Create a ``KedroDataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
-        ``DataCatalog`` with configuration parsed from configuration files.
+        ``KedroDataCatalog`` with configuration parsed from configuration files.
         """
         catalog = catalog or {}
         config_resolver = DataCatalogConfigResolver(catalog, credentials)

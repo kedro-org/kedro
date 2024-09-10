@@ -14,7 +14,7 @@ import re
 from typing import Any, Union
 
 from kedro.io import DataCatalog
-from kedro.io.catalog_config_resolver import DataCatalogConfigResolver, Patterns
+from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -44,9 +44,9 @@ class KedroDataCatalog:
         feed_dict: dict[str, Any] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-        config_resolver: DataCatalogConfigResolver | None = None,
+        config_resolver: CatalogConfigResolver | None = None,
     ) -> None:
-        self._config_resolver = config_resolver or DataCatalogConfigResolver()
+        self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
@@ -70,7 +70,7 @@ class KedroDataCatalog:
         )
 
     @property
-    def config_resolver(self) -> DataCatalogConfigResolver:
+    def config_resolver(self) -> CatalogConfigResolver:
         return self._config_resolver
 
     def __iter__(self) -> AbstractDataset:
@@ -112,7 +112,7 @@ class KedroDataCatalog:
         ``KedroDataCatalog`` with configuration parsed from configuration files.
         """
         catalog = catalog or {}
-        config_resolver = DataCatalogConfigResolver(catalog, credentials)
+        config_resolver = CatalogConfigResolver(catalog, credentials)
         save_version = save_version or generate_timestamp()
         load_versions = load_versions or {}
 

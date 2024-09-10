@@ -1,4 +1,4 @@
-"""``DataCatalogConfigResolver`` resolves dataset configurations and datasets'
+"""``CatalogConfigResolver`` resolves dataset configurations and datasets'
 patterns based on catalog configuration and credentials provided.
 """
 
@@ -93,7 +93,7 @@ def _resolve_dataset_config(
     return config
 
 
-class DataCatalogConfigResolver:
+class CatalogConfigResolver:
     """Resolves dataset configurations based on patterns and credentials."""
 
     def __init__(

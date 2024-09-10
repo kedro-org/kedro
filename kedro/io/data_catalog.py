@@ -16,7 +16,7 @@ from typing import Any
 
 from kedro.io.catalog_config_resolver import (
     CREDENTIALS_KEY,  # noqa: F401
-    DataCatalogConfigResolver,
+    CatalogConfigResolver,
     Patterns,
 )
 from kedro.io.core import (
@@ -116,7 +116,7 @@ class DataCatalog:
         default_pattern: Patterns | None = None,  # Kept for interface compatibility
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-        config_resolver: DataCatalogConfigResolver | None = None,
+        config_resolver: CatalogConfigResolver | None = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -147,7 +147,7 @@ class DataCatalog:
                 sorted in lexicographical order.
             default_pattern: A dictionary of the default catch-all pattern that overrides the default
                 pattern provided through the runners.
-            config_resolver: An instance of DataCatalogConfigResolver to resolve dataset patterns and configurations.
+            config_resolver: An instance of CatalogConfigResolver to resolve dataset patterns and configurations.
 
 
         Example:
@@ -160,7 +160,7 @@ class DataCatalog:
             >>>                   save_args={"index": False})
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
-        self._config_resolver = config_resolver or DataCatalogConfigResolver()
+        self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets: dict[str, AbstractDataset] = {}
         self.datasets: _FrozenDatasets | None = None
 
@@ -191,7 +191,7 @@ class DataCatalog:
         )
 
     @property
-    def config_resolver(self) -> DataCatalogConfigResolver:
+    def config_resolver(self) -> CatalogConfigResolver:
         return self._config_resolver
 
     @property
@@ -277,7 +277,7 @@ class DataCatalog:
         """
         catalog = catalog or {}
         datasets = {}
-        config_resolver = DataCatalogConfigResolver(catalog, credentials)
+        config_resolver = CatalogConfigResolver(catalog, credentials)
         save_version = save_version or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
 

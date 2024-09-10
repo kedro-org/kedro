@@ -256,8 +256,8 @@ class CatalogConfigResolver:
                         ds_name,
                     )
                 resolved_configs.append(ds_config)
-
-            resolved_configs.append(self._resolved_configs.get(ds_name, None))
+            else:
+                resolved_configs.append(self._resolved_configs.get(ds_name, None))
 
         return resolved_configs[0] if isinstance(datasets, str) else resolved_configs
 

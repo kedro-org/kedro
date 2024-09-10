@@ -155,7 +155,7 @@ class KedroDataCatalog:
         ds_config = self._config_resolver.resolve_dataset_pattern(ds_name)
 
         if ds_name not in self._datasets and ds_config is not None:
-            self._init_dataset(ds_name, ds_config)  # type: ignore[arg-type]
+            self._add_from_config(ds_name, ds_config)  # type: ignore[arg-type]
 
         dataset = self._datasets.get(ds_name, None)
 

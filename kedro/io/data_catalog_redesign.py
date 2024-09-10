@@ -28,15 +28,6 @@ from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 
-def validate_dataset_config(ds_name: str, ds_config: Any) -> None:
-    if not isinstance(ds_config, dict):
-        raise DatasetError(
-            f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
-            "\nHint: If this catalog entry is intended for variable interpolation, "
-            "make sure that the key is preceded by an underscore."
-        )
-
-
 class KedroDataCatalog:
     def __init__(
         self,
@@ -136,10 +127,19 @@ class KedroDataCatalog:
             config_resolver=config_resolver,
         )
 
+    @staticmethod
+    def _validate_dataset_config(ds_name: str, ds_config: Any) -> None:
+        if not isinstance(ds_config, dict):
+            raise DatasetError(
+                f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
+                "\nHint: If this catalog entry is intended for variable interpolation, "
+                "make sure that the key is preceded by an underscore."
+            )
+
     def _init_dataset(self, ds_name: str, ds_config: dict[str, Any]) -> None:
         # Add lazy loading feature to store the configuration but not to init actual dataset
         # Initialise actual dataset when load or save
-        validate_dataset_config(ds_name, ds_config)
+        self._validate_dataset_config(ds_name, ds_config)
         ds = AbstractDataset.from_config(
             ds_name,
             ds_config,

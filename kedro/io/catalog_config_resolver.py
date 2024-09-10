@@ -170,6 +170,14 @@ class CatalogConfigResolver:
         matches = (pattern for pattern in all_patterns if parse(pattern, ds_name))
         return next(matches, None)
 
+    def _get_pattern_config(self, pattern: str) -> dict[str, Any]:
+        return (
+            self._dataset_patterns.get(pattern)
+            or self._default_pattern.get(pattern)
+            or self._runtime_patterns.get(pattern)
+            or {}
+        )
+
     @classmethod
     def _extract_patterns(
         cls,
@@ -232,16 +240,9 @@ class CatalogConfigResolver:
         for ds_name in datasets_lst:
             matched_pattern = self.match_pattern(ds_name)
             if matched_pattern and ds_name not in self._resolved_configs:
-                # If the dataset is a patterned dataset, materialise it and add it to
-                # the catalog
-                config_copy = copy.deepcopy(
-                    self._dataset_patterns.get(matched_pattern)
-                    or self._default_pattern.get(matched_pattern)
-                    or self._runtime_patterns.get(matched_pattern)
-                    or {}
-                )
+                pattern_config = self._get_pattern_config(matched_pattern)
                 ds_config = self._resolve_dataset_config(
-                    ds_name, matched_pattern, config_copy
+                    ds_name, matched_pattern, copy.deepcopy(pattern_config)
                 )
 
                 if (
@@ -255,10 +256,8 @@ class CatalogConfigResolver:
                         ds_name,
                     )
                 resolved_configs.append(ds_config)
-            elif ds_name in self._resolved_configs:
-                resolved_configs.append(self._resolved_configs.get(ds_name))
-            else:
-                resolved_configs.append(None)
+
+            resolved_configs.append(self._resolved_configs.get(ds_name, None))
 
         return resolved_configs[0] if isinstance(datasets, str) else resolved_configs
 

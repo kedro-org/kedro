@@ -7,7 +7,6 @@ relaying load and save functions to the underlying data sets.
 
 from __future__ import annotations
 
-import copy
 import difflib
 import logging
 import pprint
@@ -16,7 +15,7 @@ from typing import Any
 
 from kedro.io.catalog_config_resolver import (
     CREDENTIALS_KEY,  # noqa: F401
-    DataCatalogConfigResolver,
+    CatalogConfigResolver,
     Patterns,
 )
 from kedro.io.core import (
@@ -113,16 +112,16 @@ class DataCatalog:
         datasets: dict[str, AbstractDataset] | None = None,
         feed_dict: dict[str, Any] | None = None,
         dataset_patterns: Patterns | None = None,  # Kept for interface compatibility
-        default_pattern: Patterns | None = None,  # Kept for interface compatibility
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-        config_resolver: DataCatalogConfigResolver | None = None,
+        default_pattern: Patterns | None = None,  # Kept for interface compatibility
+        config_resolver: CatalogConfigResolver | None = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
         anywhere in the program. To use a ``DataCatalog``, you need to
         instantiate it with a dictionary of data sets. Then it will act as a
-        single point of reference for your calls, relaying load and save§
+        single point of reference for your calls, relaying load and save
         functions to the underlying data sets.
 
         Args:
@@ -147,7 +146,7 @@ class DataCatalog:
                 sorted in lexicographical order.
             default_pattern: A dictionary of the default catch-all pattern that overrides the default
                 pattern provided through the runners.
-            config_resolver: An instance of DataCatalogConfigResolver to resolve dataset patterns and configurations.
+            config_resolver: An instance of CatalogConfigResolver to resolve dataset patterns and configurations.
 
 
         Example:
@@ -160,7 +159,7 @@ class DataCatalog:
             >>>                   save_args={"index": False})
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
-        self._config_resolver = config_resolver or DataCatalogConfigResolver()
+        self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets: dict[str, AbstractDataset] = {}
         self.datasets: _FrozenDatasets | None = None
 
@@ -191,7 +190,7 @@ class DataCatalog:
         )
 
     @property
-    def config_resolver(self) -> DataCatalogConfigResolver:
+    def config_resolver(self) -> CatalogConfigResolver:
         return self._config_resolver
 
     @property
@@ -277,15 +276,15 @@ class DataCatalog:
         """
         catalog = catalog or {}
         datasets = {}
-        config_resolver = DataCatalogConfigResolver(catalog, credentials)
+        config_resolver = CatalogConfigResolver(catalog, credentials)
         save_version = save_version or generate_timestamp()
-        load_versions = copy.deepcopy(load_versions) or {}
+        load_versions = load_versions or {}
 
         for ds_name in catalog:
             if not config_resolver.is_pattern(ds_name):
                 datasets[ds_name] = AbstractDataset.from_config(
                     ds_name,
-                    config_resolver.config[ds_name],
+                    config_resolver.config.get(ds_name, {}),
                     load_versions.get(ds_name),
                     save_version,
                 )
@@ -307,9 +306,9 @@ class DataCatalog:
         return cls(
             datasets=datasets,
             dataset_patterns=config_resolver._dataset_patterns,
-            default_pattern=config_resolver._default_pattern,
             load_versions=load_versions,
             save_version=save_version,
+            default_pattern=config_resolver._default_pattern,
             config_resolver=config_resolver,
         )
 

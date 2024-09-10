@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from itertools import chain
+from itertools import chain, filterfalse
 from typing import TYPE_CHECKING, Any
 
 import click
@@ -126,11 +126,10 @@ def _map_type_to_datasets(
     datasets of the specific type as a value.
     """
     mapping = defaultdict(list)  # type: ignore[var-annotated]
-    for dataset_name in datasets:
-        if not is_parameter(dataset_name):
-            ds_type = datasets_meta[dataset_name].__class__.__name__
-            if dataset_name not in mapping[ds_type]:
-                mapping[ds_type].append(dataset_name)
+    for dataset_name in filterfalse(is_parameter, datasets):
+        ds_type = datasets_meta[dataset_name].__class__.__name__
+        if dataset_name not in mapping[ds_type]:
+            mapping[ds_type].append(dataset_name)
     return mapping
 
 
@@ -167,13 +166,9 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
             f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
         )
 
-    pipeline_datasets = {
-        ds_name for ds_name in pipeline.datasets() if not is_parameter(ds_name)
-    }
+    pipeline_datasets = set(filterfalse(is_parameter, pipeline.datasets()))
 
-    catalog_datasets = {
-        ds_name for ds_name in context.catalog.list() if not is_parameter(ds_name)
-    }
+    catalog_datasets = set(filterfalse(is_parameter, context.catalog.list()))
 
     # Datasets that are missing in Data Catalog
     missing_ds = sorted(pipeline_datasets - catalog_datasets)

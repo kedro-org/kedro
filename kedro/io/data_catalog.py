@@ -160,6 +160,12 @@ class DataCatalog:
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
+
+        # Kept to avoid breaking changes
+        if not config_resolver:
+            self._config_resolver._dataset_patterns = dataset_patterns or {}
+            self._config_resolver._default_pattern = default_pattern or {}
+
         self._datasets: dict[str, AbstractDataset] = {}
         self.datasets: _FrozenDatasets | None = None
 

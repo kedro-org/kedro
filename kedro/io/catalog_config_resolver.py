@@ -249,7 +249,7 @@ class CatalogConfigResolver:
                     matched_pattern,
                     ds_name,
                 )
-            return ds_config
+            return ds_config  # type: ignore[no-any-return]
 
         return self._resolved_configs.get(ds_name, {})
 

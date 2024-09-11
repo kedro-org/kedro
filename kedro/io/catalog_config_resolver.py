@@ -73,7 +73,7 @@ class CatalogConfigResolver:
             pattern for pattern in sorted_keys if cls._pattern_specificity(pattern) == 0
         ]
         if len(catch_all) > 1:
-            raise ValueError(
+            raise DatasetError(
                 f"Multiple catch-all patterns found in the catalog: {', '.join(catch_all)}. Only one catch-all pattern is allowed, remove the extras."
             )
         return {key: dataset_patterns[key] for key in sorted_keys}
@@ -150,7 +150,7 @@ class CatalogConfigResolver:
             try:
                 config = config.format_map(resolved_vars.named)
             except KeyError as exc:
-                raise KeyError(
+                raise DatasetError(
                     f"Unable to resolve '{config}' from the pattern '{pattern}'. Keys used in the configuration "
                     f"should be present in the dataset factory pattern."
                 ) from exc

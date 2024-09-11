@@ -229,36 +229,29 @@ class CatalogConfigResolver:
 
         return resolved_configs
 
-    def resolve_dataset_pattern(
-        self, datasets: str | list[str]
-    ) -> dict[str, Any] | list[dict[str, Any]]:
+    def resolve_dataset_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
-        datasets_lst = [datasets] if isinstance(datasets, str) else datasets
-        resolved_configs = []
+        matched_pattern = self.match_pattern(ds_name)
 
-        for ds_name in datasets_lst:
-            matched_pattern = self.match_pattern(ds_name)
-            if matched_pattern and ds_name not in self._resolved_configs:
-                pattern_config = self._get_pattern_config(matched_pattern)
-                ds_config = self._resolve_dataset_config(
-                    ds_name, matched_pattern, copy.deepcopy(pattern_config)
+        if matched_pattern and ds_name not in self._resolved_configs:
+            pattern_config = self._get_pattern_config(matched_pattern)
+            ds_config = self._resolve_dataset_config(
+                ds_name, matched_pattern, copy.deepcopy(pattern_config)
+            )
+
+            if (
+                self._pattern_specificity(matched_pattern) == 0
+                and matched_pattern in self._default_pattern
+            ):
+                self._logger.warning(
+                    "Config from the dataset factory pattern '%s' in the catalog will be used to "
+                    "override the default dataset creation for '%s'",
+                    matched_pattern,
+                    ds_name,
                 )
+            return ds_config
 
-                if (
-                    self._pattern_specificity(matched_pattern) == 0
-                    and matched_pattern in self._default_pattern
-                ):
-                    self._logger.warning(
-                        "Config from the dataset factory pattern '%s' in the catalog will be used to "
-                        "override the default dataset creation for '%s'",
-                        matched_pattern,
-                        ds_name,
-                    )
-                resolved_configs.append(ds_config)
-            else:
-                resolved_configs.append(self._resolved_configs.get(ds_name, None))
-
-        return resolved_configs[0] if isinstance(datasets, str) else resolved_configs
+        return self._resolved_configs.get(ds_name, {})
 
     def add_runtime_patterns(self, dataset_patterns: Patterns) -> None:
         """Add new runtime patterns and re-sort them."""

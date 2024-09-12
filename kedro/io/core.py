@@ -905,7 +905,10 @@ class CatalogProtocol(Protocol["_C"]):
         ...
 
     def _get_dataset(
-        self, ds_name: str, suggest: bool = True, version: Any = None
+        self,
+        dataset_name: str,
+        version: Any = None,
+        suggest: bool = True,
     ) -> AbstractDataset:
         """Retrieve a dataset by its name."""
         ...
@@ -918,7 +921,7 @@ class CatalogProtocol(Protocol["_C"]):
         """Save data to a registered dataset."""
         ...
 
-    def load(self, name: str, version: str | None = None) -> _DO:
+    def load(self, name: str, version: str | None = None) -> Any:
         """Load data from a registered dataset."""
         ...
 

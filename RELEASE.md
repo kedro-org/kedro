@@ -1,6 +1,8 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Refactored `kedro run` and `kedro catalog` commands.
+* Moved pattern resolution logic from `DataCatalog` to a separate component - `CatalogConfigResolver`. Updated `DataCatalog` to use `CatalogConfigResolver` internally.
 * Made packaged Kedro projects return `session.run()` output to be used when running it in the interactive environment.
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes

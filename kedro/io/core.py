@@ -887,7 +887,7 @@ _C = TypeVar("_C")
 
 
 @runtime_checkable
-class CatalogProtocol(Protocol["_C"]):
+class CatalogProtocol(Protocol[_C]):
     _datasets: dict[str, AbstractDataset]
 
     def __contains__(self, ds_name: str) -> bool:

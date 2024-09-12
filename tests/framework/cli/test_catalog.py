@@ -490,7 +490,6 @@ class TestCatalogFactoryCommands:
         mocked_context.catalog = DataCatalog.from_config(
             fake_catalog_with_overlapping_factories
         )
-        print("!!!!", mocked_context.catalog._dataset_patterns)
         result = CliRunner().invoke(
             fake_project_cli, ["catalog", "rank"], obj=fake_metadata
         )
@@ -547,7 +546,7 @@ class TestCatalogFactoryCommands:
         mocked_context.catalog = DataCatalog.from_config(
             catalog=fake_catalog_config, credentials=fake_credentials_config
         )
-        placeholder_ds = mocked_context.catalog._dataset_patterns.keys()
+        placeholder_ds = mocked_context.catalog.config_resolver.list_patterns()
         pipeline_datasets = {"csv_example", "parquet_example", "explicit_dataset"}
 
         mocker.patch.object(

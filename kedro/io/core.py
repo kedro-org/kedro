@@ -17,7 +17,15 @@ from functools import partial, wraps
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import TYPE_CHECKING, Any, Callable, Generic, Protocol, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    Protocol,
+    TypeVar,
+    runtime_checkable,
+)
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -875,7 +883,13 @@ def validate_on_forbidden_chars(**kwargs: Any) -> None:
             )
 
 
-class CatalogProtocol(Protocol):
+_C = TypeVar("_C")
+
+
+@runtime_checkable
+class CatalogProtocol(Protocol["_C"]):
+    _datasets: dict[str, AbstractDataset]
+
     def __contains__(self, ds_name: str) -> bool:
         """Check if a dataset is in the catalog."""
         ...
@@ -886,17 +900,17 @@ class CatalogProtocol(Protocol):
         ...
 
     @classmethod
-    def from_config(cls, catalog: dict[str, dict[str, Any]] | None) -> Any:
+    def from_config(cls, catalog: dict[str, dict[str, Any]] | None) -> _C:
         """Create a ``KedroDataCatalog`` instance from configuration."""
         ...
 
     def _get_dataset(
-        self, ds_name: str, suggest: bool = True, version: Any = None | None
-    ) -> Any:
+        self, ds_name: str, suggest: bool = True, version: Any = None
+    ) -> AbstractDataset:
         """Retrieve a dataset by its name."""
         ...
 
-    def list(self, regex_search: str = None | None) -> list[str]:
+    def list(self, regex_search: str | None = None) -> list[str]:
         """List all dataset names registered in the catalog."""
         ...
 
@@ -904,7 +918,7 @@ class CatalogProtocol(Protocol):
         """Save data to a registered dataset."""
         ...
 
-    def load(self, name: str, version: str = None | None) -> Any:
+    def load(self, name: str, version: str | None = None) -> _DO:
         """Load data from a registered dataset."""
         ...
 
@@ -932,8 +946,6 @@ class CatalogProtocol(Protocol):
         """Confirm a dataset by its name."""
         ...
 
-    def shallow_copy(
-        self, extra_dataset_patterns: Patterns | None = None
-    ) -> CatalogProtocol:
+    def shallow_copy(self, extra_dataset_patterns: Patterns | None = None) -> _C:
         """Returns a shallow copy of the current object."""
         ...

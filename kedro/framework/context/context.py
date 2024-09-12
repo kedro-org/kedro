@@ -14,7 +14,7 @@ from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import DataCatalog  # noqa: TCH001
+from kedro.io import CatalogProtocol, DataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -123,7 +123,7 @@ def _convert_paths_to_absolute_posix(
     return conf_dictionary
 
 
-def _validate_transcoded_datasets(catalog: DataCatalog) -> None:
+def _validate_transcoded_datasets(catalog: CatalogProtocol) -> None:
     """Validates transcoded datasets are correctly named
 
     Args:
@@ -178,7 +178,7 @@ class KedroContext:
     )
 
     @property
-    def catalog(self) -> DataCatalog:
+    def catalog(self) -> CatalogProtocol:
         """Read-only property referring to Kedro's ``DataCatalog`` for this context.
 
         Returns:
@@ -213,7 +213,7 @@ class KedroContext:
         self,
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
-    ) -> DataCatalog:
+    ) -> CatalogProtocol:
         """A hook for changing the creation of a DataCatalog instance.
 
         Returns:

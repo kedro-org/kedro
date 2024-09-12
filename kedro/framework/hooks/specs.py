@@ -11,7 +11,7 @@ from .markers import hook_spec
 
 if TYPE_CHECKING:
     from kedro.framework.context import KedroContext
-    from kedro.io import DataCatalog
+    from kedro.io import CatalogProtocol
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
@@ -22,7 +22,7 @@ class DataCatalogSpecs:
     @hook_spec
     def after_catalog_created(  # noqa: PLR0913
         self,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
         feed_dict: dict[str, Any],
@@ -53,7 +53,7 @@ class NodeSpecs:
     def before_node_run(
         self,
         node: Node,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
@@ -81,7 +81,7 @@ class NodeSpecs:
     def after_node_run(  # noqa: PLR0913
         self,
         node: Node,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         inputs: dict[str, Any],
         outputs: dict[str, Any],
         is_async: bool,
@@ -110,7 +110,7 @@ class NodeSpecs:
         self,
         error: Exception,
         node: Node,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
@@ -137,7 +137,7 @@ class PipelineSpecs:
 
     @hook_spec
     def before_pipeline_run(
-        self, run_params: dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self, run_params: dict[str, Any], pipeline: Pipeline, catalog: CatalogProtocol
     ) -> None:
         """Hook to be invoked before a pipeline runs.
 
@@ -174,7 +174,7 @@ class PipelineSpecs:
         run_params: dict[str, Any],
         run_result: dict[str, Any],
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
     ) -> None:
         """Hook to be invoked after a pipeline runs.
 
@@ -212,7 +212,7 @@ class PipelineSpecs:
         error: Exception,
         run_params: dict[str, Any],
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
     ) -> None:
         """Hook to be invoked if a pipeline run throws an uncaught Exception.
         The signature of this error hook should match the signature of ``before_pipeline_run``

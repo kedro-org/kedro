@@ -939,7 +939,7 @@ class CatalogProtocol(Protocol[_C]):
 
     def exists(self, name: str) -> bool:
         """Checks whether registered data set exists by calling its `exists()` method."""
-        pass
+        ...
 
     def release(self, name: str) -> None:
         """Release any cached data associated with a dataset."""

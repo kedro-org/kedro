@@ -132,7 +132,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The `catalog from which to fetch data.
+            catalog: The catalog from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be

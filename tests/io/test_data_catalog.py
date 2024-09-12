@@ -846,7 +846,7 @@ class TestDataCatalogDatasetFactories:
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
         assert "{brand}_cars" not in catalog._datasets
         assert "tesla_cars" not in catalog._datasets
-        assert "{brand}_cars" in catalog._dataset_patterns
+        assert "{brand}_cars" in catalog.config_resolver._dataset_patterns
 
         tesla_cars = catalog._get_dataset("tesla_cars")
         assert isinstance(tesla_cars, CSVDataset)
@@ -875,8 +875,8 @@ class TestDataCatalogDatasetFactories:
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
         assert "audi_cars" in catalog._datasets
         assert "{brand}_cars" not in catalog._datasets
-        assert "audi_cars" not in catalog._dataset_patterns
-        assert "{brand}_cars" in catalog._dataset_patterns
+        assert "audi_cars" not in catalog.config_resolver._dataset_patterns
+        assert "{brand}_cars" in catalog.config_resolver._dataset_patterns
 
     def test_explicit_entry_not_overwritten(self, config_with_dataset_factories):
         """Check that the existing catalog entry is not overwritten by config in pattern"""
@@ -909,11 +909,7 @@ class TestDataCatalogDatasetFactories:
             "{dataset}s",
             "{user_default}",
         ]
-        assert (
-            list(catalog._dataset_patterns.keys())
-            + list(catalog._default_pattern.keys())
-            == sorted_keys_expected
-        )
+        assert catalog.config_resolver.list_patterns() == sorted_keys_expected
 
     def test_multiple_catch_all_patterns_not_allowed(
         self, config_with_dataset_factories
@@ -953,13 +949,13 @@ class TestDataCatalogDatasetFactories:
         )
         sorted_keys_expected = [
             "{country}_companies",
-            "{another}#csv",
             "{namespace}_{dataset}",
             "{dataset}s",
+            "{another}#csv",
             "{default}",
         ]
         assert (
-            list(catalog_with_default._dataset_patterns.keys()) == sorted_keys_expected
+            catalog_with_default.config_resolver.list_patterns() == sorted_keys_expected
         )
 
     def test_user_default_overwrites_runner_default(self):
@@ -988,11 +984,15 @@ class TestDataCatalogDatasetFactories:
         sorted_keys_expected = [
             "{dataset}s",
             "{a_default}",
+            "{another}#csv",
+            "{default}",
         ]
-        assert "{a_default}" in catalog_with_runner_default._default_pattern
         assert (
-            list(catalog_with_runner_default._dataset_patterns.keys())
-            + list(catalog_with_runner_default._default_pattern.keys())
+            "{a_default}"
+            in catalog_with_runner_default.config_resolver._default_pattern
+        )
+        assert (
+            catalog_with_runner_default.config_resolver.list_patterns()
             == sorted_keys_expected
         )
 

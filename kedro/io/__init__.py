@@ -5,6 +5,7 @@ number of data sets. At the core of the library is the ``AbstractDataset`` class
 from __future__ import annotations
 
 from .cached_dataset import CachedDataset
+from .catalog_config_resolver import CatalogConfigResolver
 from .core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -23,6 +24,7 @@ __all__ = [
     "AbstractVersionedDataset",
     "CachedDataset",
     "DataCatalog",
+    "CatalogConfigResolver",
     "DatasetAlreadyExistsError",
     "DatasetError",
     "DatasetNotFoundError",

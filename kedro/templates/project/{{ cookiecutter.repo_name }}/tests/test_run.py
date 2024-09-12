@@ -28,6 +28,7 @@ def project_context(config_loader):
     return KedroContext(
         package_name="{{ cookiecutter.python_package }}",
         project_path=Path.cwd(),
+        env="local",
         config_loader=config_loader,
         hook_manager=_create_hook_manager(),
     )

@@ -179,12 +179,12 @@ class KedroContext:
 
     @property
     def catalog(self) -> CatalogProtocol:
-        """Read-only property referring to Kedro's ``DataCatalog`` for this context.
+        """Read-only property referring to Kedro's catalog` for this context.
 
         Returns:
-            DataCatalog defined in `catalog.yml`.
+            catalog defined in `catalog.yml`.
         Raises:
-            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
+            KedroContextError: Incorrect catalog registered for the project.
 
         """
         return self._get_catalog()
@@ -214,12 +214,12 @@ class KedroContext:
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
     ) -> CatalogProtocol:
-        """A hook for changing the creation of a DataCatalog instance.
+        """A hook for changing the creation of a catalog instance.
 
         Returns:
-            DataCatalog defined in `catalog.yml`.
+            catalog defined in `catalog.yml`.
         Raises:
-            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
+            KedroContextError: Incorrect catalog registered for the project.
 
         """
         # '**/catalog*' reads modular pipeline configs

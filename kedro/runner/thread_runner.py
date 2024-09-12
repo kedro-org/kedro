@@ -43,7 +43,7 @@ class ThreadRunner(AbstractRunner):
             is_async: If True, set to False, because `ThreadRunner`
                 doesn't support loading and saving the node inputs and
                 outputs asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the CatalogProtocol
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
                 during the run. This is used to set the default datasets to MemoryDataset
                 for `ThreadRunner`.
 
@@ -95,7 +95,7 @@ class ThreadRunner(AbstractRunner):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``CatalogProtocol`` from which to fetch data.
+            catalog: The catalog from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 

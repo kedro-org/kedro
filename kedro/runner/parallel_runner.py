@@ -73,7 +73,7 @@ def _run_node_synchronization(  # noqa: PLR0913
 
     Args:
         node: The ``Node`` to run.
-        catalog: A ``CatalogProtocol`` containing the node's inputs and outputs.
+        catalog: A catalog containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
         session_id: The session id of the pipeline run.
@@ -118,7 +118,7 @@ class ParallelRunner(AbstractRunner):
                 cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the CatalogProtocol
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
                 during the run. This is used to set the default datasets to SharedMemoryDataset
                 for `ParallelRunner`.
 
@@ -250,7 +250,7 @@ class ParallelRunner(AbstractRunner):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``CatalogProtocol`` from which to fetch data.
+            catalog: The `catalog from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 

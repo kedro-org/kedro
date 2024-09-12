@@ -34,7 +34,7 @@ class SequentialRunner(AbstractRunner):
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the CatalogProtocol
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
                 during the run. This is used to set the default datasets to MemoryDataset
                 for `SequentialRunner`.
 
@@ -56,7 +56,7 @@ class SequentialRunner(AbstractRunner):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``CatalogProtocol`` from which to fetch data.
+            catalog: The catalog from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 

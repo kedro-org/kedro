@@ -32,7 +32,7 @@ class KedroDataCatalog:
     def __init__(
         self,
         datasets: dict[str, AbstractDataset] | None = None,
-        data: dict[str, Any] | None = None,
+        raw_data: dict[str, Any] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
         config_resolver: CatalogConfigResolver | None = None,
@@ -46,7 +46,7 @@ class KedroDataCatalog:
 
         Args:
             datasets: A dictionary of data set names and data set instances.
-            data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
+            raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
                 Keys represent dataset names and the values are raw data.
             load_versions: A mapping between data set names and versions
                 to load. Has no effect on data sets without enabled versioning.
@@ -69,8 +69,8 @@ class KedroDataCatalog:
         for ds_name, ds_config in self._config_resolver.config.items():
             self._add_from_config(ds_name, ds_config)
 
-        if data:
-            self.add_from_dict(data)
+        if raw_data:
+            self.add_raw_data(raw_data)
 
     @property
     def datasets(self) -> dict[str, Any]:
@@ -159,8 +159,8 @@ class KedroDataCatalog:
             )
 
     def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
-        # Add lazy loading feature to store the configuration but not to init actual dataset
-        # Initialise actual dataset when load or save
+        # TODO: Add lazy loading feature to store the configuration but not to init actual dataset
+        # TODO: Initialise actual dataset when load or save
         self._validate_dataset_config(ds_name, ds_config)
         ds = AbstractDataset.from_config(
             ds_name,
@@ -177,7 +177,7 @@ class KedroDataCatalog:
         ds_config = self._config_resolver.resolve_dataset_pattern(ds_name)
 
         if ds_name not in self._datasets and ds_config is not None:
-            self._add_from_config(ds_name, ds_config)  # type: ignore[arg-type]
+            self._add_from_config(ds_name, ds_config)
 
         dataset = self._datasets.get(ds_name, None)
 
@@ -293,7 +293,7 @@ class KedroDataCatalog:
 
         return dataset.load()
 
-    def add_from_dict(self, data: dict[str, Any], replace: bool = False) -> None:
+    def add_raw_data(self, data: dict[str, Any], replace: bool = False) -> None:
         # This method was simplified to add memory datasets only, since
         # adding AbstractDataset can be done via add() method
         for ds_name, ds_data in data.items():
@@ -301,7 +301,7 @@ class KedroDataCatalog:
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         # TODO: remove when removing old catalog
-        return self.add_from_dict(feed_dict, replace)
+        return self.add_raw_data(feed_dict, replace)
 
     def shallow_copy(
         self, extra_dataset_patterns: Patterns | None = None

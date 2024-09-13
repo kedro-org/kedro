@@ -8,17 +8,12 @@ The TSC is responsible for the project's future development; you can read about 
 
 On this page we describe:
 
-- [Kedro's Technical Steering Committee](#kedros-technical-steering-committee)
-- [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
-- [Product development](#product-development)
-- [Community management](#community-management)
-- [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
-- [Current maintainers](#current-maintainers)
-- [Past maintainers](#past-maintainers)
-- [Application process](#application-process)
-- [Voting process](#voting-process)
-- [Other issues or proposals](#other-issues-or-proposals)
-- [Adding or removing maintainers](#adding-or-removing-maintainers)
+ - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
+ - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
+ - [Current maintainers](#current-maintainers)
+ - [Past maintainers](#past-maintainers)
+ - [Application process](#application-process)
+ - [Voting process](#voting-process)
 
 ## Responsibilities of a maintainer
 

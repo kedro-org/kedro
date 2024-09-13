@@ -32,9 +32,9 @@ class KedroDataCatalog:
         self,
         datasets: dict[str, AbstractDataset] | None = None,
         raw_data: dict[str, Any] | None = None,
+        config_resolver: CatalogConfigResolver | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-        config_resolver: CatalogConfigResolver | None = None,
     ) -> None:
         """``KedroDataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -47,6 +47,7 @@ class KedroDataCatalog:
             datasets: A dictionary of data set names and data set instances.
             raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
                 Keys represent dataset names and the values are raw data.
+            config_resolver: An instance of CatalogConfigResolver to resolve dataset patterns and configurations.
             load_versions: A mapping between data set names and versions
                 to load. Has no effect on data sets without enabled versioning.
             save_version: Version string to be used for ``save`` operations
@@ -54,9 +55,6 @@ class KedroDataCatalog:
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order..
-            config_resolver: An instance of CatalogConfigResolver to resolve dataset patterns and configurations.
-
-
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}

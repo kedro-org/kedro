@@ -94,7 +94,7 @@ class AbstractRunner(ABC):
 
         if unsatisfied:
             raise ValueError(
-                f"Pipeline input(s) {unsatisfied} not found in the BaseDataCatalog"
+                f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
             )
 
         # Identify MemoryDataset in the catalog

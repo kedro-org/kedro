@@ -68,7 +68,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The catalog from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
@@ -132,7 +132,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The catalog from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be
@@ -173,7 +173,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The `catalog from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
@@ -194,7 +194,7 @@ class AbstractRunner(ABC):
         Args:
             pipeline: the ``Pipeline`` of the run.
             done_nodes: the ``Node``s that executed successfully.
-            catalog: the catalog of the run.
+            catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
         """
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
@@ -233,7 +233,7 @@ def _find_nodes_to_resume_from(
     Args:
         pipeline: the ``Pipeline`` to find starting nodes for.
         unfinished_nodes: collection of ``Node``s that have not finished yet
-        catalog: the catalog of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         Set of node names to pass to pipeline.from_nodes() to continue
@@ -261,7 +261,7 @@ def _find_all_nodes_for_resumed_pipeline(
     Args:
         pipeline: the ``Pipeline`` to analyze.
         unfinished_nodes: the iterable of ``Node``s which have not finished yet.
-        catalog: the catalog of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         A set containing all input unfinished ``Node``s and all remaining
@@ -314,7 +314,7 @@ def _enumerate_non_persistent_inputs(node: Node, catalog: CatalogProtocol) -> se
 
     Args:
         node: the ``Node`` to check the inputs of.
-        catalog: the catalog of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         Set of names of non-persistent inputs of given ``Node``.
@@ -388,7 +388,7 @@ def run_node(
 
     Args:
         node: The ``Node`` to run.
-        catalog: A catalog containing the node's inputs and outputs.
+        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
         hook_manager: The ``PluginManager`` to activate hooks.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.

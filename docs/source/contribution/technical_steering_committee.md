@@ -8,12 +8,17 @@ The TSC is responsible for the project's future development; you can read about 
 
 On this page we describe:
 
-- [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
-- [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
-- [Current maintainers](#current-maintainers)
-- [Past maintainers](#past-maintainers)
-- [Application process](#application-process)
-- [Voting process](#voting-process)
+- [Kedro's Technical Steering Committee](#kedros-technical-steering-committee)
+  - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
+    - [Product development](#product-development)
+    - [Community management](#community-management)
+  - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
+  - [Current maintainers](#current-maintainers)
+  - [Past maintainers](#past-maintainers)
+  - [Application process](#application-process)
+  - [Voting process](#voting-process)
+    - [Other issues or proposals](#other-issues-or-proposals)
+    - [Adding or removing maintainers](#adding-or-removing-maintainers)
 
 ## Responsibilities of a maintainer
 
@@ -61,7 +66,7 @@ We look for commitment markers who can do the following:
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ivan Danov](https://github.com/idanov)                  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Joel Schwarzmann](https://github.com/datajoely)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Joel Schwarzmann](https://github.com/datajoely)         | [Aneira Health]([https://aneira.health)                                                 |
 | [Juan Luis Cano](https://github.com/astrojuanlu)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [Printify, Inc.](https://printify.com/)  |

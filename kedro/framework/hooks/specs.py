@@ -164,7 +164,7 @@ class PipelineSpecs:
                    }
 
             pipeline: The ``Pipeline`` that will be run.
-            catalog: The catalog to be used during the run.
+            catalog: An implemented instance of ``CatalogProtocol`` to be used during the run.
         """
         pass
 
@@ -202,7 +202,7 @@ class PipelineSpecs:
 
             run_result: The output of ``Pipeline`` run.
             pipeline: The ``Pipeline`` that was run.
-            catalog: The catalog used during the run.
+            catalog: An implemented instance of ``CatalogProtocol`` used during the run.
         """
         pass
 
@@ -242,7 +242,7 @@ class PipelineSpecs:
                    }
 
             pipeline: The ``Pipeline`` that will was run.
-            catalog: The catalog used during the run.
+            catalog: An implemented instance of ``CatalogProtocol`` used during the run.
         """
         pass
 

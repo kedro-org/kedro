@@ -233,7 +233,7 @@ def _find_nodes_to_resume_from(
     Args:
         pipeline: the ``Pipeline`` to find starting nodes for.
         unfinished_nodes: collection of ``Node``s that have not finished yet
-        catalog: the catalog of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         Set of node names to pass to pipeline.from_nodes() to continue
@@ -261,7 +261,7 @@ def _find_all_nodes_for_resumed_pipeline(
     Args:
         pipeline: the ``Pipeline`` to analyze.
         unfinished_nodes: the iterable of ``Node``s which have not finished yet.
-        catalog: the catalog of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         A set containing all input unfinished ``Node``s and all remaining
@@ -314,7 +314,7 @@ def _enumerate_non_persistent_inputs(node: Node, catalog: CatalogProtocol) -> se
 
     Args:
         node: the ``Node`` to check the inputs of.
-        catalog: the catalog of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         Set of names of non-persistent inputs of given ``Node``.

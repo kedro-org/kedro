@@ -9,6 +9,7 @@ from .catalog_config_resolver import CatalogConfigResolver
 from .core import (
     AbstractDataset,
     AbstractVersionedDataset,
+    CatalogProtocol,
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
@@ -25,6 +26,7 @@ __all__ = [
     "BaseDataCatalog",
     "AbstractVersionedDataset",
     "CachedDataset",
+    "CatalogProtocol",
     "DataCatalog",
     "CatalogConfigResolver",
     "DatasetAlreadyExistsError",

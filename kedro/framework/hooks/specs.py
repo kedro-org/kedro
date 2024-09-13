@@ -63,7 +63,7 @@ class NodeSpecs:
 
         Args:
             node: The ``Node`` to run.
-            catalog: A ``BaseDataCatalog`` containing the node's inputs and outputs.
+            catalog: A catalog containing the node's inputs and outputs.
             inputs: The dictionary of inputs dataset.
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
@@ -93,7 +93,7 @@ class NodeSpecs:
 
         Args:
             node: The ``Node`` that ran.
-            catalog: A ``BaseDataCatalog`` containing the node's inputs and outputs.
+            catalog: A catalog containing the node's inputs and outputs.
             inputs: The dictionary of inputs dataset.
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
@@ -122,7 +122,7 @@ class NodeSpecs:
         Args:
             error: The uncaught exception thrown during the node run.
             node: The ``Node`` to run.
-            catalog: A ``BaseDataCatalog`` containing the node's inputs and outputs.
+            catalog: A catalog containing the node's inputs and outputs.
             inputs: The dictionary of inputs dataset.
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
@@ -164,7 +164,7 @@ class PipelineSpecs:
                    }
 
             pipeline: The ``Pipeline`` that will be run.
-            catalog: The ``BaseDataCatalog`` to be used during the run.
+            catalog: The catalog to be used during the run.
         """
         pass
 
@@ -202,7 +202,7 @@ class PipelineSpecs:
 
             run_result: The output of ``Pipeline`` run.
             pipeline: The ``Pipeline`` that was run.
-            catalog: The ``BaseDataCatalog`` used during the run.
+            catalog: The catalog used during the run.
         """
         pass
 
@@ -242,7 +242,7 @@ class PipelineSpecs:
                    }
 
             pipeline: The ``Pipeline`` that will was run.
-            catalog: The ``BaseDataCatalog`` used during the run.
+            catalog: The catalog used during the run.
         """
         pass
 

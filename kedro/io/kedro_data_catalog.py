@@ -11,9 +11,8 @@ import copy
 import difflib
 import logging
 import re
-from typing import Any, Union
+from typing import Any
 
-from kedro.io import DataCatalog
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
     AbstractDataset,
@@ -333,6 +332,3 @@ class KedroDataCatalog:
         except DatasetNotFoundError:
             return False
         return dataset.exists()
-
-
-BaseDataCatalog = Union[DataCatalog, KedroDataCatalog]

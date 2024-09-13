@@ -252,6 +252,20 @@ class KedroDataCatalog:
 
         dataset.save(data)
 
+    def load(self, name: str, version: str | None = None) -> Any:
+        """Loads a registered dataset."""
+        load_version = Version(version, None) if version else None
+        dataset = self.get_dataset(name, version=load_version)
+
+        self._logger.info(
+            "Loading data from %s (%s)...",
+            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
+
+        return dataset.load()
+
     def release(self, name: str) -> None:
         """Release any cached data associated with a dataset
         Args:
@@ -277,20 +291,6 @@ class KedroDataCatalog:
             dataset.confirm()
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
-
-    def load(self, name: str, version: str | None = None) -> Any:
-        """Loads a registered dataset."""
-        load_version = Version(version, None) if version else None
-        dataset = self.get_dataset(name, version=load_version)
-
-        self._logger.info(
-            "Loading data from %s (%s)...",
-            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
-            type(dataset).__name__,
-            extra={"markup": True},
-        )
-
-        return dataset.load()
 
     def add_raw_data(self, data: dict[str, Any], replace: bool = False) -> None:
         # This method was simplified to add memory datasets only, since

@@ -1,8 +1,8 @@
 """``KedroDataCatalog`` stores instances of ``AbstractDataset`` implementations to
 provide ``load`` and ``save`` capabilities from anywhere in the program. To
-use a ``KedroDataCatalog``, you need to instantiate it with a dictionary of data
-sets. Then it will act as a single point of reference for your calls,
-relaying load and save functions to the underlying data sets.
+use a ``KedroDataCatalog``, you need to instantiate it with a dictionary of datasets.
+Then it will act as a single point of reference for your calls, relaying load and
+save functions to the underlying datasets.
 """
 
 from __future__ import annotations
@@ -207,7 +207,7 @@ class KedroDataCatalog:
             return list(self._datasets.keys())
 
         if not regex_search.strip():
-            self._logger.warning("The empty string will not match any data sets")
+            self._logger.warning("The empty string will not match any datasets")
             return []
 
         try:
@@ -219,7 +219,7 @@ class KedroDataCatalog:
         return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:
-        """Save data to a registered data set."""
+        """Save data to a registered dataset."""
         dataset = self.get_dataset(name)
 
         self._logger.info(
@@ -232,11 +232,11 @@ class KedroDataCatalog:
         dataset.save(data)
 
     def release(self, name: str) -> None:
-        """Release any cached data associated with a data set
+        """Release any cached data associated with a dataset
         Args:
-            name: A data set to be checked.
+            name: A dataset to be checked.
         Raises:
-            DatasetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
         """
         dataset = self.get_dataset(name)
@@ -258,7 +258,7 @@ class KedroDataCatalog:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
 
     def load(self, name: str, version: str | None = None) -> Any:
-        """Loads a registered data set."""
+        """Loads a registered dataset."""
         load_version = Version(version, None) if version else None
         dataset = self.get_dataset(name, version=load_version)
 
@@ -300,15 +300,15 @@ class KedroDataCatalog:
         return self
 
     def exists(self, name: str) -> bool:
-        """Checks whether registered data set exists by calling its `exists()`
+        """Checks whether registered dataset exists by calling its `exists()`
         method. Raises a warning and returns False if `exists()` is not
         implemented.
 
         Args:
-            name: A data set to be checked.
+            name: A dataset to be checked.
 
         Returns:
-            Whether the data set output exists.
+            Whether the dataset output exists.
 
         """
         try:

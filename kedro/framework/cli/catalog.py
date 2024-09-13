@@ -93,12 +93,12 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
         # resolve any factory datasets in the pipeline
         factory_ds_by_type = defaultdict(list)
 
-        resolved_configs = data_catalog.config_resolver.resolve_dataset_pattern(
-            default_ds
-        )
-        for ds_name, ds_config in zip(default_ds, resolved_configs):
+        for ds_name in default_ds:
             if data_catalog.config_resolver.match_pattern(ds_name):
-                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(  # type: ignore[attr-defined]
+                ds_config = data_catalog.config_resolver.resolve_dataset_pattern(
+                    ds_name
+                )
+                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
                     ds_name
                 )
 
@@ -253,7 +253,7 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
         ds_config = data_catalog.config_resolver.resolve_dataset_pattern(ds_name)
 
         # Exclude MemoryDatasets not set in the catalog explicitly
-        if ds_config is not None:
+        if ds_config:
             explicit_datasets[ds_name] = ds_config
 
     secho(yaml.dump(explicit_datasets))

@@ -55,7 +55,7 @@ class _IsSubclassValidator(Validator):
             # TODO: remove with the old catalog
             if (
                 f"{setting_value.__module__}.{setting_value.__qualname__}"
-                == "kedro.io.data_catalog_redesign.KedroDataCatalog"
+                == "kedro.io.kedro_data_catalog.KedroDataCatalog"
                 and f"{default_class.__module__}.{default_class.__qualname__}"
                 == "kedro.io.data_catalog.DataCatalog"
             ):

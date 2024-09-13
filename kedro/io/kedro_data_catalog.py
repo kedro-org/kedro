@@ -297,7 +297,7 @@ class KedroDataCatalog:
         # This method was simplified to add memory datasets only, since
         # adding AbstractDataset can be done via add() method
         for ds_name, ds_data in data.items():
-            self.add(ds_name, MemoryDataset(data=ds_data), replace)
+            self.add(ds_name, MemoryDataset(data=ds_data), replace)  # type: ignore[abstract]
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         # TODO: remove when removing old catalog

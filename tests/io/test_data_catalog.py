@@ -925,7 +925,7 @@ class TestDataCatalogDatasetFactories:
         }
 
         with pytest.raises(
-            ValueError, match="Multiple catch-all patterns found in the catalog"
+            DatasetError, match="Multiple catch-all patterns found in the catalog"
         ):
             DataCatalog.from_config(**config_with_dataset_factories)
 
@@ -1019,7 +1019,7 @@ class TestDataCatalogDatasetFactories:
             "Unable to resolve 'data/01_raw/{brand}_plane.pq' from the pattern '{type}@planes'. "
             "Keys used in the configuration should be present in the dataset factory pattern."
         )
-        with pytest.raises(KeyError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             catalog._get_dataset("jet@planes")
 
     def test_factory_config_versioned(

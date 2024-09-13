@@ -73,7 +73,7 @@ def _run_node_synchronization(  # noqa: PLR0913
 
     Args:
         node: The ``Node`` to run.
-        catalog: A catalog containing the node's inputs and outputs.
+        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
         session_id: The session id of the pipeline run.

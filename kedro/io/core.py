@@ -929,10 +929,6 @@ class CatalogProtocol(Protocol[_C]):
         """Add a new dataset to the catalog."""
         ...
 
-    def add_all(self, datasets: dict[str, Any], replace: bool = False) -> None:
-        """Add a new dataset to the catalog."""
-        ...
-
     def add_feed_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
         """Add datasets to the catalog using the data provided through the `feed_dict`."""
         ...

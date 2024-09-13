@@ -173,6 +173,7 @@ type_targets = {
         "Patterns",
         "CatalogConfigResolver",
         "CatalogProtocol",
+        "KedroDataCatalog",
     ),
     "py:data": (
         "typing.Any",

@@ -32,11 +32,33 @@ class KedroDataCatalog:
     def __init__(
         self,
         datasets: dict[str, AbstractDataset] | None = None,
-        feed_dict: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
         config_resolver: CatalogConfigResolver | None = None,
     ) -> None:
+        """``KedroDataCatalog`` stores instances of ``AbstractDataset``
+        implementations to provide ``load`` and ``save`` capabilities from
+        anywhere in the program. To use a ``KedroDataCatalog``, you need to
+        instantiate it with a dictionary of data sets. Then it will act as a
+        single point of reference for your calls, relaying load and save
+        functions to the underlying data sets.
+
+        Args:
+            datasets: A dictionary of data set names and data set instances.
+            data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
+                Keys represent dataset names and the values are raw data.
+            load_versions: A mapping between data set names and versions
+                to load. Has no effect on data sets without enabled versioning.
+            save_version: Version string to be used for ``save`` operations
+                by all data sets with enabled versioning. It must: a) be a
+                case-insensitive string that conforms with operating system
+                filename limitations, b) always return the latest version when
+                sorted in lexicographical order..
+            config_resolver: An instance of CatalogConfigResolver to resolve dataset patterns and configurations.
+
+
+        """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
         self._load_versions = load_versions or {}
@@ -47,8 +69,8 @@ class KedroDataCatalog:
         for ds_name, ds_config in self._config_resolver.config.items():
             self._add_from_config(ds_name, ds_config)
 
-        if feed_dict:
-            self.add_from_dict(feed_dict)
+        if data:
+            self.add_from_dict(data)
 
     @property
     def datasets(self) -> dict[str, Any]:
@@ -271,16 +293,11 @@ class KedroDataCatalog:
 
         return dataset.load()
 
-    def add_from_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
-        # Consider changing to add memory datasets only, to simplify the method,
+    def add_from_dict(self, data: dict[str, Any], replace: bool = False) -> None:
+        # This method was simplified to add memory datasets only, since
         # adding AbstractDataset can be done via add() method
-        for ds_name, ds_data in datasets.items():
-            dataset = (
-                ds_data
-                if isinstance(ds_data, AbstractDataset)
-                else MemoryDataset(data=ds_data)  # type: ignore[abstract]
-            )
-            self.add(ds_name, dataset, replace)
+        for ds_name, ds_data in data.items():
+            self.add(ds_name, MemoryDataset(data=ds_data), replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         # TODO: remove when removing old catalog

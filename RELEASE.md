@@ -7,6 +7,8 @@
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.
+* Made credentials loading consistent between `KedroContext._get_catalog()` and `resolve_patterns` so that both us
+e `_get_config_credentials()`
 
 ## Breaking changes to the API
 * Removed `ShelveStore` to address a security vulnerability.
@@ -18,6 +20,7 @@
 ## Community contributions
 * [Puneet](https://github.com/puneeter)
 * [ethanknights](https://github.com/ethanknights)
+* [MigQ2](https://github.com/MigQ2)
 
 # Release 0.19.8
 

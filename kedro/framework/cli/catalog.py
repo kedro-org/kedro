@@ -227,7 +227,7 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
     context = session.load_context()
 
     catalog_config = context.config_loader["catalog"]
-    credentials_config = context.config_loader.get("credentials", None)
+    credentials_config = context._get_config_credentials()
     data_catalog = DataCatalog.from_config(
         catalog=catalog_config, credentials=credentials_config
     )

@@ -101,7 +101,7 @@ class KedroDataCatalog:
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         return (self._datasets, self._config_resolver.list_patterns()) == (
-            other.datasets,
+            other._datasets,
             other.config_resolver.list_patterns(),
         )
 

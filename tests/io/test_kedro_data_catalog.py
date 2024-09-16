@@ -155,3 +155,7 @@ class TestKedroDataCatalog:
         pattern = f"Invalid regular expression provided: '{escaped_regex}'"
         with pytest.raises(SyntaxError, match=pattern):
             multi_catalog.list("((")
+
+    def test_eq(self, multi_catalog, data_catalog):
+        assert multi_catalog == multi_catalog.shallow_copy()
+        assert multi_catalog != data_catalog

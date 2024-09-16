@@ -6,6 +6,7 @@ from kedro.io import (
     DatasetError,
     DatasetNotFoundError,
     KedroDataCatalog,
+    LambdaDataset,
     MemoryDataset,
 )
 
@@ -78,3 +79,33 @@ class TestKedroDataCatalog:
         assert memory_catalog.load("ds1") == 0
         assert isinstance(memory_catalog.load("ds2"), list)
         assert memory_catalog.load("ds3") == 1
+
+    def test_exists(self, data_catalog, dummy_dataframe):
+        """Test `exists` method invocation"""
+        assert not data_catalog.exists("test")
+        data_catalog.save("test", dummy_dataframe)
+        assert data_catalog.exists("test")
+
+    def test_exists_not_implemented(self, caplog):
+        """Test calling `exists` on the data set, which didn't implement it"""
+        catalog = KedroDataCatalog(datasets={"test": LambdaDataset(None, None)})
+        result = catalog.exists("test")
+
+        log_record = caplog.records[0]
+        assert log_record.levelname == "WARNING"
+        assert (
+            "'exists()' not implemented for 'LambdaDataset'. "
+            "Assuming output does not exist." in log_record.message
+        )
+        assert result is False
+
+    def test_exists_invalid(self, data_catalog):
+        """Check the error when calling `exists` on invalid data set"""
+        assert not data_catalog.exists("wrong_key")
+
+    def test_release_unregistered(self, data_catalog):
+        """Check the error when calling `release` on unregistered data set"""
+        pattern = r"Dataset \'wrong_key\' not found in the catalog"
+        with pytest.raises(DatasetNotFoundError, match=pattern) as e:
+            data_catalog.release("wrong_key")
+        assert "did you mean" not in str(e.value)

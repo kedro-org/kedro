@@ -7,6 +7,7 @@
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.
+* Fixed template projects example tests.
 
 ## Breaking changes to the API
 * Removed `ShelveStore` to address a security vulnerability.
@@ -18,6 +19,7 @@
 ## Community contributions
 * [Puneet](https://github.com/puneeter)
 * [ethanknights](https://github.com/ethanknights)
+* [Manezki](https://github.com/Manezki)
 
 # Release 0.19.8
 

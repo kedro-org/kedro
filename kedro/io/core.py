@@ -901,7 +901,7 @@ class CatalogProtocol(Protocol[_C]):
 
     @classmethod
     def from_config(cls, catalog: dict[str, dict[str, Any]] | None) -> _C:
-        """Create a ``KedroDataCatalog`` instance from configuration."""
+        """Create a catalog instance from configuration."""
         ...
 
     def _get_dataset(

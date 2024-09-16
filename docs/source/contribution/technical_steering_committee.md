@@ -8,12 +8,12 @@ The TSC is responsible for the project's future development; you can read about 
 
 On this page we describe:
 
- - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
- - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
- - [Current maintainers](#current-maintainers)
- - [Past maintainers](#past-maintainers)
- - [Application process](#application-process)
- - [Voting process](#voting-process)
+- [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
+- [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
+- [Current maintainers](#current-maintainers)
+- [Past maintainers](#past-maintainers)
+- [Application process](#application-process)
+- [Voting process](#voting-process)
 
 ## Responsibilities of a maintainer
 

@@ -1,4 +1,7 @@
+import re
+
 import pytest
+from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from pandas.testing import assert_frame_equal
 
 from kedro.io import (
@@ -26,6 +29,13 @@ def memory_catalog():
 @pytest.fixture
 def conflicting_feed_dict():
     return {"ds1": 0, "ds3": 1}
+
+
+@pytest.fixture
+def multi_catalog():
+    csv = CSVDataset(filepath="abc.csv")
+    parq = ParquetDataset(filepath="xyz.parq")
+    return KedroDataCatalog({"abc": csv, "xyz": parq})
 
 
 class TestKedroDataCatalog:
@@ -109,3 +119,39 @@ class TestKedroDataCatalog:
         with pytest.raises(DatasetNotFoundError, match=pattern) as e:
             data_catalog.release("wrong_key")
         assert "did you mean" not in str(e.value)
+
+    def test_release_unregistered_typo(self, data_catalog):
+        """Check the error when calling `release` on mistyped data set"""
+        pattern = (
+            "Dataset 'text' not found in the catalog"
+            " - did you mean one of these instead: test"
+        )
+        with pytest.raises(DatasetNotFoundError, match=re.escape(pattern)):
+            data_catalog.release("text")
+
+    def test_multi_catalog_list(self, multi_catalog):
+        """Test data catalog which contains multiple data sets"""
+        entries = multi_catalog.list()
+        assert "abc" in entries
+        assert "xyz" in entries
+
+    @pytest.mark.parametrize(
+        "pattern,expected",
+        [
+            ("^a", ["abc"]),
+            ("a|x", ["abc", "xyz"]),
+            ("^(?!(a|x))", []),
+            ("def", []),
+            ("", []),
+        ],
+    )
+    def test_multi_catalog_list_regex(self, multi_catalog, pattern, expected):
+        """Test that regex patterns filter data sets accordingly"""
+        assert multi_catalog.list(regex_search=pattern) == expected
+
+    def test_multi_catalog_list_bad_regex(self, multi_catalog):
+        """Test that bad regex is caught accordingly"""
+        escaped_regex = r"\(\("
+        pattern = f"Invalid regular expression provided: '{escaped_regex}'"
+        with pytest.raises(SyntaxError, match=pattern):
+            multi_catalog.list("((")

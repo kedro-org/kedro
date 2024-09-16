@@ -83,6 +83,9 @@ class KedroDataCatalog:
     def config_resolver(self) -> CatalogConfigResolver:
         return self._config_resolver
 
+    def __repr__(self) -> str:
+        return self._datasets.__repr__()
+
     def __iter__(self) -> AbstractDataset:
         yield from self._datasets.values()
 

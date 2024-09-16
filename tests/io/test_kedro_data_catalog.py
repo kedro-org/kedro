@@ -6,12 +6,25 @@ from kedro.io import (
     DatasetError,
     DatasetNotFoundError,
     KedroDataCatalog,
+    MemoryDataset,
 )
 
 
 @pytest.fixture
 def data_catalog(dataset):
     return KedroDataCatalog(datasets={"test": dataset})
+
+
+@pytest.fixture
+def memory_catalog():
+    ds1 = MemoryDataset({"data": 42})
+    ds2 = MemoryDataset([1, 2, 3, 4, 5])
+    return KedroDataCatalog({"ds1": ds1, "ds2": ds2})
+
+
+@pytest.fixture
+def conflicting_feed_dict():
+    return {"ds1": 0, "ds3": 1}
 
 
 class TestKedroDataCatalog:
@@ -57,3 +70,11 @@ class TestKedroDataCatalog:
         pattern = r"Dataset 'test' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.save("test", dummy_dataframe)
+
+    def test_feed_dict(self, memory_catalog, conflicting_feed_dict):
+        """Test feed dict overriding some of the data sets"""
+        assert "data" in memory_catalog.load("ds1")
+        memory_catalog.add_feed_dict(conflicting_feed_dict, replace=True)
+        assert memory_catalog.load("ds1") == 0
+        assert isinstance(memory_catalog.load("ds2"), list)
+        assert memory_catalog.load("ds3") == 1

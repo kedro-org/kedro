@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from kedro_datasets.pandas import CSVDataset
 
 
 @pytest.fixture
@@ -21,3 +22,13 @@ def input_data(request):
 @pytest.fixture
 def new_data():
     return pd.DataFrame({"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]})
+
+
+@pytest.fixture
+def filepath(tmp_path):
+    return (tmp_path / "some" / "dir" / "test.csv").as_posix()
+
+
+@pytest.fixture
+def dataset(filepath):
+    return CSVDataset(filepath=filepath, save_args={"index": False})

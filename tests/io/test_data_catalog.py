@@ -30,16 +30,6 @@ from kedro.io.core import (
 
 
 @pytest.fixture
-def filepath(tmp_path):
-    return (tmp_path / "some" / "dir" / "test.csv").as_posix()
-
-
-@pytest.fixture
-def dummy_dataframe():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-
-@pytest.fixture
 def sane_config(filepath):
     return {
         "catalog": {
@@ -178,11 +168,6 @@ def config_with_dataset_factories_only_patterns_no_default(
 ):
     del config_with_dataset_factories_only_patterns["catalog"]["{user_default}"]
     return config_with_dataset_factories_only_patterns
-
-
-@pytest.fixture
-def dataset(filepath):
-    return CSVDataset(filepath=filepath, save_args={"index": False})
 
 
 @pytest.fixture

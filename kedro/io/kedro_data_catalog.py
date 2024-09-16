@@ -90,7 +90,7 @@ class KedroDataCatalog:
         yield from self._datasets.values()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
-        return self.get_dataset(ds_name)
+        return copy.deepcopy(self.get_dataset(ds_name))
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""

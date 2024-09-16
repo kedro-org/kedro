@@ -32,3 +32,20 @@ def filepath(tmp_path):
 @pytest.fixture
 def dataset(filepath):
     return CSVDataset(filepath=filepath, save_args={"index": False})
+
+
+@pytest.fixture
+def sane_config(filepath):
+    return {
+        "catalog": {
+            "boats": {"type": "pandas.CSVDataset", "filepath": filepath},
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "s3://test_bucket/test_file.csv",
+                "credentials": "s3_credentials",
+            },
+        },
+        "credentials": {
+            "s3_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
+        },
+    }

@@ -30,23 +30,6 @@ from kedro.io.core import (
 
 
 @pytest.fixture
-def sane_config(filepath):
-    return {
-        "catalog": {
-            "boats": {"type": "pandas.CSVDataset", "filepath": filepath},
-            "cars": {
-                "type": "pandas.CSVDataset",
-                "filepath": "s3://test_bucket/test_file.csv",
-                "credentials": "s3_credentials",
-            },
-        },
-        "credentials": {
-            "s3_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
-        },
-    }
-
-
-@pytest.fixture
 def sane_config_with_nested_creds(sane_config):
     sane_config["catalog"]["cars"]["credentials"] = {
         "client_kwargs": {"credentials": "other_credentials"},

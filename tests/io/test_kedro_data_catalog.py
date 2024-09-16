@@ -38,6 +38,11 @@ def multi_catalog():
     return KedroDataCatalog({"abc": csv, "xyz": parq})
 
 
+@pytest.fixture
+def data_catalog_from_config(sane_config):
+    return KedroDataCatalog.from_config(**sane_config)
+
+
 class TestKedroDataCatalog:
     def test_save_and_load(self, data_catalog, dummy_dataframe):
         """Test saving and reloading the data set"""
@@ -159,3 +164,20 @@ class TestKedroDataCatalog:
     def test_eq(self, multi_catalog, data_catalog):
         assert multi_catalog == multi_catalog.shallow_copy()
         assert multi_catalog != data_catalog
+
+    def test_datasets_on_init(self, data_catalog_from_config):
+        """Check datasets are loaded correctly on construction"""
+        assert isinstance(data_catalog_from_config["boats"], CSVDataset)
+        assert isinstance(data_catalog_from_config["cars"], CSVDataset)
+
+    def test_datasets_on_add(self, data_catalog_from_config):
+        """Check datasets are updated correctly after adding"""
+        data_catalog_from_config.add("new_dataset", CSVDataset(filepath="some_path"))
+        assert isinstance(data_catalog_from_config["new_dataset"], CSVDataset)
+        assert isinstance(data_catalog_from_config["boats"], CSVDataset)
+
+    def test_adding_datasets_not_allowed(self, data_catalog_from_config):
+        """Check error if user tries to update the datasets attribute"""
+        pattern = r"'KedroDataCatalog' object does not support item assignment"
+        with pytest.raises(TypeError, match=pattern):
+            data_catalog_from_config["new_dataset"] = None

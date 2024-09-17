@@ -134,7 +134,7 @@ omit = [
     "kedro/runner/parallel_runner.py",
     "*/site-packages/*",
 ]
-exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
+exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:", "class CatalogProtocol"]
 
 [tool.pytest.ini_options]
 addopts="""

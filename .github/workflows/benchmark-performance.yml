@@ -21,37 +21,37 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11' 
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install asv  # Install ASV
-      
+
       - name: Run ASV benchmarks
         run: |
           cd kedro
           asv machine --machine=github-actions
           asv run -v --machine=github-actions
-      
+
       - name: Set git email and name
         run: |
           git config --global user.email "kedro@kedro.com"
           git config --global user.name "Kedro"
-      
+
       - name: Checkout target repository
         uses: actions/checkout@v4
         with:
           repository: kedro-org/kedro-benchmark-results
-          token: ${{ secrets.GH_TAGGING_TOKEN }}  
+          token: ${{ secrets.GH_TAGGING_TOKEN }}
           ref: 'main'
           path: "kedro-benchmark-results"
 
       - name: Copy files to target repository
         run: |
           cp -r /home/runner/work/kedro/kedro/kedro/.asv /home/runner/work/kedro/kedro/kedro-benchmark-results/
-      
-      - name: Commit and Push changes to kedro-org/kedro-benchmark-results 
+
+      - name: Commit and Push changes to kedro-org/kedro-benchmark-results
         run: |
           cd kedro-benchmark-results
           git add .

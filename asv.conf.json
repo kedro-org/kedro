@@ -4,7 +4,7 @@
     "project_url": "https://kedro.org/",
     "repo": ".",
     "install_command": ["pip install -e ."],
-    "branches": ["main"], 
+    "branches": ["main"],
     "environment_type": "virtualenv",
     "show_commit_url": "http://github.com/kedro-org/kedro/commit/",
     "results_dir": ".asv/results",

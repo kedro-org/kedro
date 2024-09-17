@@ -1,6 +1,12 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Implemented `KedroDataCatalog` repeating `DataCatalog` functionality with a few API enhancements:
+  * Removed `_FrozenDatasets` and access datasets as properties;
+  * Added get dataset by name feature: dedicated function and access by key;
+  * Added iterate over the datasets feature;
+  * `add_feed_dict()` was simplified and renamed to `add_raw_data()`;
+  * Datasets' initialisation was moved out from `from_config()` method to the constructor.
 * Implemented `Protocol` abstraction for the current `DataCatalog` and adding new catalog implementations.
 * Refactored `kedro run` and `kedro catalog` commands.
 * Moved pattern resolution logic from `DataCatalog` to a separate component - `CatalogConfigResolver`. Updated `DataCatalog` to use `CatalogConfigResolver` internally.

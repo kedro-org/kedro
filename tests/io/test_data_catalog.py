@@ -30,64 +30,6 @@ from kedro.io.core import (
 
 
 @pytest.fixture
-def filepath(tmp_path):
-    return (tmp_path / "some" / "dir" / "test.csv").as_posix()
-
-
-@pytest.fixture
-def dummy_dataframe():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-
-@pytest.fixture
-def sane_config(filepath):
-    return {
-        "catalog": {
-            "boats": {"type": "pandas.CSVDataset", "filepath": filepath},
-            "cars": {
-                "type": "pandas.CSVDataset",
-                "filepath": "s3://test_bucket/test_file.csv",
-                "credentials": "s3_credentials",
-            },
-        },
-        "credentials": {
-            "s3_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
-        },
-    }
-
-
-@pytest.fixture
-def sane_config_with_nested_creds(sane_config):
-    sane_config["catalog"]["cars"]["credentials"] = {
-        "client_kwargs": {"credentials": "other_credentials"},
-        "key": "secret",
-    }
-    sane_config["credentials"]["other_credentials"] = {
-        "client_kwargs": {
-            "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
-            "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
-        }
-    }
-    return sane_config
-
-
-@pytest.fixture
-def sane_config_with_tracking_ds(tmp_path):
-    boat_path = (tmp_path / "some" / "dir" / "test.csv").as_posix()
-    plane_path = (tmp_path / "some" / "dir" / "metrics.json").as_posix()
-    return {
-        "catalog": {
-            "boats": {
-                "type": "pandas.CSVDataset",
-                "filepath": boat_path,
-                "versioned": True,
-            },
-            "planes": {"type": "tracking.MetricsDataset", "filepath": plane_path},
-        },
-    }
-
-
-@pytest.fixture
 def config_with_dataset_factories():
     return {
         "catalog": {
@@ -181,11 +123,6 @@ def config_with_dataset_factories_only_patterns_no_default(
 
 
 @pytest.fixture
-def dataset(filepath):
-    return CSVDataset(filepath=filepath, save_args={"index": False})
-
-
-@pytest.fixture
 def multi_catalog():
     csv = CSVDataset(filepath="abc.csv")
     parq = ParquetDataset(filepath="xyz.parq")
@@ -218,13 +155,6 @@ class BadDataset(AbstractDataset):  # pragma: no cover
 
     def _describe(self):
         return {}
-
-
-@pytest.fixture
-def bad_config(filepath):
-    return {
-        "bad": {"type": "tests.io.test_data_catalog.BadDataset", "filepath": filepath}
-    }
 
 
 @pytest.fixture

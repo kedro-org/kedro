@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Implemented `Protocol` abstraction for the current `DataCatalog` and adding new catalog implementations.
 * Refactored `kedro run` and `kedro catalog` commands.
 * Moved pattern resolution logic from `DataCatalog` to a separate component - `CatalogConfigResolver`. Updated `DataCatalog` to use `CatalogConfigResolver` internally.
 * Made packaged Kedro projects return `session.run()` output to be used when running it in the interactive environment.

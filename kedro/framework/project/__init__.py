@@ -20,6 +20,7 @@ import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
+from kedro.io import CatalogProtocol
 from kedro.pipeline import Pipeline, pipeline
 
 if TYPE_CHECKING:
@@ -56,6 +57,25 @@ class _IsSubclassValidator(Validator):
                     f"Invalid value '{setting_value.__module__}.{setting_value.__qualname__}' "
                     f"received for setting '{name}'. It must be a subclass of "
                     f"'{default_class.__module__}.{default_class.__qualname__}'."
+                )
+
+
+class _ImplementsCatalogProtocolValidator(Validator):
+    """A validator to check if the supplied setting value is a subclass of the default class"""
+
+    def validate(
+        self, settings: dynaconf.base.Settings, *args: Any, **kwargs: Any
+    ) -> None:
+        super().validate(settings, *args, **kwargs)
+
+        protocol = CatalogProtocol
+        for name in self.names:
+            setting_value = getattr(settings, name)
+            if not isinstance(setting_value(), protocol):
+                raise ValidationError(
+                    f"Invalid value '{setting_value.__module__}.{setting_value.__qualname__}' "
+                    f"received for setting '{name}'. It must implement "
+                    f"'{protocol.__module__}.{protocol.__qualname__}'."
                 )
 
 
@@ -115,8 +135,9 @@ class _ProjectSettings(LazySettings):
     _CONFIG_LOADER_ARGS = Validator(
         "CONFIG_LOADER_ARGS", default={"base_env": "base", "default_run_env": "local"}
     )
-    _DATA_CATALOG_CLASS = _IsSubclassValidator(
-        "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
+    _DATA_CATALOG_CLASS = _ImplementsCatalogProtocolValidator(
+        "DATA_CATALOG_CLASS",
+        default=_get_default_class("kedro.io.DataCatalog"),
     )
 
     def __init__(self, *args: Any, **kwargs: Any):

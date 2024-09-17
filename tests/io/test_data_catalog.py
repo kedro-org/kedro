@@ -30,22 +30,6 @@ from kedro.io.core import (
 
 
 @pytest.fixture
-def sane_config_with_tracking_ds(tmp_path):
-    boat_path = (tmp_path / "some" / "dir" / "test.csv").as_posix()
-    plane_path = (tmp_path / "some" / "dir" / "metrics.json").as_posix()
-    return {
-        "catalog": {
-            "boats": {
-                "type": "pandas.CSVDataset",
-                "filepath": boat_path,
-                "versioned": True,
-            },
-            "planes": {"type": "tracking.MetricsDataset", "filepath": plane_path},
-        },
-    }
-
-
-@pytest.fixture
 def config_with_dataset_factories():
     return {
         "catalog": {

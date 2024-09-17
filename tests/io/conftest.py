@@ -49,3 +49,25 @@ def sane_config(filepath):
             "s3_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
         },
     }
+
+
+@pytest.fixture
+def sane_config_with_nested_creds(sane_config):
+    sane_config["catalog"]["cars"]["credentials"] = {
+        "client_kwargs": {"credentials": "other_credentials"},
+        "key": "secret",
+    }
+    sane_config["credentials"]["other_credentials"] = {
+        "client_kwargs": {
+            "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
+            "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+        }
+    }
+    return sane_config
+
+
+@pytest.fixture
+def bad_config(filepath):
+    return {
+        "bad": {"type": "tests.io.test_data_catalog.BadDataset", "filepath": filepath}
+    }

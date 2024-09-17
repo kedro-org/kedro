@@ -30,21 +30,6 @@ from kedro.io.core import (
 
 
 @pytest.fixture
-def sane_config_with_nested_creds(sane_config):
-    sane_config["catalog"]["cars"]["credentials"] = {
-        "client_kwargs": {"credentials": "other_credentials"},
-        "key": "secret",
-    }
-    sane_config["credentials"]["other_credentials"] = {
-        "client_kwargs": {
-            "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
-            "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
-        }
-    }
-    return sane_config
-
-
-@pytest.fixture
 def sane_config_with_tracking_ds(tmp_path):
     boat_path = (tmp_path / "some" / "dir" / "test.csv").as_posix()
     plane_path = (tmp_path / "some" / "dir" / "metrics.json").as_posix()
@@ -186,13 +171,6 @@ class BadDataset(AbstractDataset):  # pragma: no cover
 
     def _describe(self):
         return {}
-
-
-@pytest.fixture
-def bad_config(filepath):
-    return {
-        "bad": {"type": "tests.io.test_data_catalog.BadDataset", "filepath": filepath}
-    }
 
 
 @pytest.fixture

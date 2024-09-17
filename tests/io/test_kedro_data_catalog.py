@@ -178,6 +178,12 @@ class TestKedroDataCatalog:
 
     def test_adding_datasets_not_allowed(self, data_catalog_from_config):
         """Check error if user tries to update the datasets attribute"""
-        pattern = r"'KedroDataCatalog' object does not support item assignment"
-        with pytest.raises(TypeError, match=pattern):
+        pattern = r"Operation not allowed! Please use KedroDataCatalog.add\(\) instead."
+        with pytest.raises(AttributeError, match=pattern):
             data_catalog_from_config["new_dataset"] = None
+
+        pattern = (
+            r"Operation not allowed! Please change datasets through configuration."
+        )
+        with pytest.raises(AttributeError, match=pattern):
+            data_catalog_from_config["boats"] = None

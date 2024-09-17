@@ -92,6 +92,14 @@ class KedroDataCatalog:
     def __getitem__(self, ds_name: str) -> AbstractDataset:
         return copy.deepcopy(self.get_dataset(ds_name))
 
+    def __setitem__(self, key: str, value: Any) -> None:
+        msg = "Operation not allowed!"
+        if key in self:
+            msg = f"{msg} Please change datasets through configuration."
+        else:
+            msg = f"{msg} Please use KedroDataCatalog.add() instead."
+        raise AttributeError(msg)
+
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
         return (

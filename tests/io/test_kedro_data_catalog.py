@@ -1,3 +1,4 @@
+import logging
 import re
 
 import pytest
@@ -182,8 +183,88 @@ class TestKedroDataCatalog:
         with pytest.raises(AttributeError, match=pattern):
             data_catalog_from_config["new_dataset"] = None
 
-        pattern = (
-            r"Operation not allowed! Please change datasets through configuration."
-        )
+    def test_mutating_datasets_not_allowed(self, data_catalog_from_config):
+        """Check error if user tries to update the datasets attribute"""
+        pattern = "Operation not allowed! Please change datasets through configuration."
         with pytest.raises(AttributeError, match=pattern):
             data_catalog_from_config["boats"] = None
+
+    def test_confirm(self, mocker, caplog):
+        """Confirm the dataset"""
+        with caplog.at_level(logging.INFO):
+            mock_ds = mocker.Mock()
+            data_catalog = KedroDataCatalog(datasets={"mocked": mock_ds})
+            data_catalog.confirm("mocked")
+            mock_ds.confirm.assert_called_once_with()
+            assert caplog.record_tuples == [
+                (
+                    "kedro.io.kedro_data_catalog",
+                    logging.INFO,
+                    "Confirming dataset 'mocked'",
+                )
+            ]
+
+    @pytest.mark.parametrize(
+        "dataset_name,error_pattern",
+        [
+            ("missing", "Dataset 'missing' not found in the catalog"),
+            ("test", "Dataset 'test' does not have 'confirm' method"),
+        ],
+    )
+    def test_bad_confirm(self, data_catalog, dataset_name, error_pattern):
+        """Test confirming a non-existent dataset or one that
+        does not have `confirm` method"""
+        with pytest.raises(DatasetError, match=re.escape(error_pattern)):
+            data_catalog.confirm(dataset_name)
+
+    def test_shallow_copy_returns_correct_class_type(
+        self,
+    ):
+        class MyDataCatalog(KedroDataCatalog):
+            pass
+
+        data_catalog = MyDataCatalog()
+        copy = data_catalog.shallow_copy()
+        assert isinstance(copy, MyDataCatalog)
+
+    @pytest.mark.parametrize(
+        "runtime_patterns,sorted_keys_expected",
+        [
+            (
+                {
+                    "{default}": {"type": "MemoryDataset"},
+                    "{another}#csv": {
+                        "type": "pandas.CSVDataset",
+                        "filepath": "data/{another}.csv",
+                    },
+                },
+                ["{another}#csv", "{default}"],
+            )
+        ],
+    )
+    def test_shallow_copy_adds_patterns(
+        self, data_catalog, runtime_patterns, sorted_keys_expected
+    ):
+        assert not data_catalog.config_resolver.list_patterns()
+        data_catalog = data_catalog.shallow_copy(runtime_patterns)
+        assert data_catalog.config_resolver.list_patterns() == sorted_keys_expected
+
+    def test_key_completions(self, data_catalog_from_config):
+        """Test catalog.datasets key completions"""
+        assert isinstance(data_catalog_from_config.datasets["boats"], CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets["cars"], CSVDataset)
+        data_catalog_from_config.add_feed_dict(
+            {
+                "params:model_options": [1, 2, 4],
+                "params:model_options.random_state": [0, 42, 67],
+            }
+        )
+        assert isinstance(
+            data_catalog_from_config.datasets["params:model_options"], MemoryDataset
+        )
+        assert set(data_catalog_from_config._ipython_key_completions_()) == {
+            "boats",
+            "cars",
+            "params:model_options",
+            "params:model_options.random_state",
+        }

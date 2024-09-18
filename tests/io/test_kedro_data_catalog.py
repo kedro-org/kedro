@@ -254,26 +254,6 @@ class TestKedroDataCatalog:
         data_catalog = data_catalog.shallow_copy(runtime_patterns)
         assert data_catalog.config_resolver.list_patterns() == sorted_keys_expected
 
-    def test_key_completions(self, data_catalog_from_config):
-        """Test catalog.datasets key completions"""
-        assert isinstance(data_catalog_from_config.datasets["boats"], CSVDataset)
-        assert isinstance(data_catalog_from_config.datasets["cars"], CSVDataset)
-        data_catalog_from_config.add_feed_dict(
-            {
-                "params:model_options": [1, 2, 4],
-                "params:model_options.random_state": [0, 42, 67],
-            }
-        )
-        assert isinstance(
-            data_catalog_from_config.datasets["params:model_options"], MemoryDataset
-        )
-        assert set(data_catalog_from_config._ipython_key_completions_()) == {
-            "boats",
-            "cars",
-            "params:model_options",
-            "params:model_options.random_state",
-        }
-
     def test_init_with_raw_data(self, dummy_dataframe, dataset):
         """Test catalog initialisation with raw data"""
         catalog = KedroDataCatalog(

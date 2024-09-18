@@ -71,7 +71,7 @@ class KedroDataCatalog:
 
     @property
     def datasets(self) -> dict[str, Any]:
-        return copy.deepcopy(self._datasets)
+        return copy.copy(self._datasets)
 
     @datasets.setter
     def datasets(self, value: Any) -> None:
@@ -90,7 +90,7 @@ class KedroDataCatalog:
         yield from self._datasets.values()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
-        return copy.deepcopy(self.get_dataset(ds_name))
+        return self.get_dataset(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
         msg = "Operation not allowed!"

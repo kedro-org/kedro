@@ -179,26 +179,20 @@ class TestKedroDataCatalog:
 
     def test_datasets_on_init(self, data_catalog_from_config):
         """Check datasets are loaded correctly on construction"""
-        assert isinstance(data_catalog_from_config["boats"], CSVDataset)
-        assert isinstance(data_catalog_from_config["cars"], CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets["boats"], CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets["cars"], CSVDataset)
 
     def test_datasets_on_add(self, data_catalog_from_config):
         """Check datasets are updated correctly after adding"""
         data_catalog_from_config.add("new_dataset", CSVDataset(filepath="some_path"))
-        assert isinstance(data_catalog_from_config["new_dataset"], CSVDataset)
-        assert isinstance(data_catalog_from_config["boats"], CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets["new_dataset"], CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets["boats"], CSVDataset)
 
     def test_adding_datasets_not_allowed(self, data_catalog_from_config):
         """Check error if user tries to update the datasets attribute"""
         pattern = r"Operation not allowed! Please use KedroDataCatalog.add\(\) instead."
         with pytest.raises(AttributeError, match=pattern):
-            data_catalog_from_config["new_dataset"] = None
-
-    def test_mutating_datasets_not_allowed(self, data_catalog_from_config):
-        """Check error if user tries to update the datasets attribute"""
-        pattern = "Operation not allowed! Please change datasets through configuration."
-        with pytest.raises(AttributeError, match=pattern):
-            data_catalog_from_config["boats"] = None
+            data_catalog_from_config.datasets = None
 
     def test_confirm(self, mocker, caplog):
         """Confirm the dataset"""
@@ -287,20 +281,11 @@ class TestKedroDataCatalog:
         )
         assert "ds" in catalog
         assert "df" in catalog
-        assert isinstance(catalog["ds"], CSVDataset)
-        assert isinstance(catalog["df"], MemoryDataset)
-
-    def test_set_datasets_not_allowed(self, data_catalog_from_config):
-        """Check error if user tries to modify datasets attribute"""
-        pattern = "Operation not allowed! Please change datasets through configuration."
-        with pytest.raises(AttributeError, match=pattern):
-            data_catalog_from_config.datasets = None
+        assert isinstance(catalog.datasets["ds"], CSVDataset)
+        assert isinstance(catalog.datasets["df"], MemoryDataset)
 
     def test_repr(self, data_catalog):
         assert data_catalog.__repr__() == str(data_catalog)
-
-    def test_iter(self, data_catalog):
-        assert list(data_catalog._datasets.values()) == [ds for ds in data_catalog]
 
     def test_missing_keys_from_load_versions(self, sane_config):
         """Test load versions include keys missing in the catalog"""
@@ -595,7 +580,7 @@ class TestKedroDataCatalog:
 
             # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
             actual_timestamp = datetime.strptime(
-                catalog["boats"].resolve_load_version(),
+                catalog.datasets["boats"].resolve_load_version(),
                 VERSION_FORMAT,
             )
             expected_timestamp = current_ts.replace(
@@ -642,11 +627,11 @@ class TestKedroDataCatalog:
 
             # Verify that saved version on tracking dataset is the same as on the CSV dataset
             csv_timestamp = datetime.strptime(
-                catalog["boats"].resolve_save_version(),
+                catalog.datasets["boats"].resolve_save_version(),
                 VERSION_FORMAT,
             )
             tracking_timestamp = datetime.strptime(
-                catalog["planes"].resolve_save_version(),
+                catalog.datasets["planes"].resolve_save_version(),
                 VERSION_FORMAT,
             )
 

@@ -76,7 +76,7 @@ class KedroDataCatalog:
     @datasets.setter
     def datasets(self, value: Any) -> None:
         raise AttributeError(
-            "Operation not allowed! Please change datasets through configuration."
+            "Operation not allowed! Please use KedroDataCatalog.add() instead."
         )
 
     @property
@@ -85,20 +85,6 @@ class KedroDataCatalog:
 
     def __repr__(self) -> str:
         return self._datasets.__repr__()
-
-    def __iter__(self) -> AbstractDataset:
-        yield from self._datasets.values()
-
-    def __getitem__(self, ds_name: str) -> AbstractDataset:
-        return self.get_dataset(ds_name)
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        msg = "Operation not allowed!"
-        if key in self:
-            msg = f"{msg} Please change datasets through configuration."
-        else:
-            msg = f"{msg} Please use KedroDataCatalog.add() instead."
-        raise AttributeError(msg)
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""

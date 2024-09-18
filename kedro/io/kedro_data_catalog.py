@@ -165,6 +165,25 @@ class KedroDataCatalog:
     def get_dataset(
         self, ds_name: str, version: Version | None = None, suggest: bool = True
     ) -> AbstractDataset:
+        """Get a dataset by name from an internal collection of datasets.
+
+        If a dataset is not in the collection but matches any pattern
+        it is instantiated and added to the collection first, then returned.
+
+        Args:
+            ds_name: A dataset name.
+            version: Optional argument for concrete dataset version to be loaded.
+                Works only with versioned datasets.
+            suggest: Optional argument whether to suggest fuzzy-matching datasets' names
+                in the DatasetNotFoundError message.
+
+        Returns:
+            An instance of AbstractDataset.
+
+        Raises:
+            DatasetNotFoundError: When a dataset with the given name
+                is not in the collection and do not match patterns.
+        """
         ds_config = self._config_resolver.resolve_dataset_pattern(ds_name)
 
         if ds_name not in self._datasets and ds_config:

@@ -54,7 +54,7 @@ class KedroDataCatalog:
                 by all data sets with enabled versioning. It must: a) be a
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
-                sorted in lexicographical order..
+                sorted in lexicographical order.
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
@@ -297,7 +297,7 @@ class KedroDataCatalog:
     def shallow_copy(
         self, extra_dataset_patterns: Patterns | None = None
     ) -> KedroDataCatalog:
-        # TODO: remove when old catalog
+        # TODO: remove when removing old catalog
         """Returns a shallow copy of the current object.
 
         Returns:

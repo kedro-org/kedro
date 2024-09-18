@@ -35,7 +35,7 @@ def dataset(filepath):
 
 
 @pytest.fixture
-def sane_config(filepath):
+def correct_config(filepath):
     return {
         "catalog": {
             "boats": {"type": "pandas.CSVDataset", "filepath": filepath},
@@ -52,18 +52,18 @@ def sane_config(filepath):
 
 
 @pytest.fixture
-def sane_config_with_nested_creds(sane_config):
-    sane_config["catalog"]["cars"]["credentials"] = {
+def correct_config_with_nested_creds(correct_config):
+    correct_config["catalog"]["cars"]["credentials"] = {
         "client_kwargs": {"credentials": "other_credentials"},
         "key": "secret",
     }
-    sane_config["credentials"]["other_credentials"] = {
+    correct_config["credentials"]["other_credentials"] = {
         "client_kwargs": {
             "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
             "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
         }
     }
-    return sane_config
+    return correct_config
 
 
 @pytest.fixture
@@ -74,7 +74,7 @@ def bad_config(filepath):
 
 
 @pytest.fixture
-def sane_config_with_tracking_ds(tmp_path):
+def correct_config_with_tracking_ds(tmp_path):
     boat_path = (tmp_path / "some" / "dir" / "test.csv").as_posix()
     plane_path = (tmp_path / "some" / "dir" / "metrics.json").as_posix()
     return {

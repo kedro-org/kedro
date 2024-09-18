@@ -99,9 +99,6 @@ class KedroDataCatalog:
             other.config_resolver.list_patterns(),
         )
 
-    def _ipython_key_completions_(self) -> list[str]:
-        return list(self._datasets.keys())
-
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)

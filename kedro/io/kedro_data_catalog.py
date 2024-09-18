@@ -39,19 +39,19 @@ class KedroDataCatalog:
         """``KedroDataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
         anywhere in the program. To use a ``KedroDataCatalog``, you need to
-        instantiate it with a dictionary of data sets. Then it will act as a
+        instantiate it with a dictionary of datasets. Then it will act as a
         single point of reference for your calls, relaying load and save
-        functions to the underlying data sets.
+        functions to the underlying datasets.
 
         Args:
-            datasets: A dictionary of data set names and data set instances.
+            datasets: A dictionary of dataset names and dataset instances.
             raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
                 Keys represent dataset names and the values are raw data.
             config_resolver: An instance of CatalogConfigResolver to resolve dataset patterns and configurations.
-            load_versions: A mapping between data set names and versions
-                to load. Has no effect on data sets without enabled versioning.
+            load_versions: A mapping between dataset names and versions
+                to load. Has no effect on datasets without enabled versioning.
             save_version: Version string to be used for ``save`` operations
-                by all data sets with enabled versioning. It must: a) be a
+                by all datasets with enabled versioning. It must: a) be a
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.

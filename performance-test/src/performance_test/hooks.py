@@ -1,8 +1,6 @@
 from time import sleep
-from typing import Dict
 
 from kedro.framework.hooks import hook_impl
-from kedro.pipeline import Pipeline
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
@@ -27,14 +25,3 @@ class SparkHooks:
         sleep(context.params['hook_delay'])
         _spark_session = spark_session_conf.getOrCreate()
         _spark_session.sparkContext.setLogLevel("WARN")
-
-
-def register_pipelines(self) -> Dict[str, Pipeline]:
-    from performance_test.pipelines.expense_analysis import (
-        pipeline as expense_analysis_pipeline,
-    )
-
-    return {
-        "__default__": expense_analysis_pipeline.create_pipeline(),
-        "expense_analysis": expense_analysis_pipeline.create_pipeline(),
-    }

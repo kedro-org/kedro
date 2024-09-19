@@ -18,13 +18,13 @@ There are a variety of Python tools available to use with your Kedro projects. T
 type.
 
 ### Install the tools
-Install `ruff` by adding the following section to the `pyproject.toml` file located in the project root:
+To install `ruff` add the following section to the `pyproject.toml` file located in the project root:
 ```toml
 [project.optional-dependencies]
 dev = ["ruff"]
 ```
 
-To install all the project-specific dependencies, including the linting tools, navigate to the root directory of the
+Then to install your project including all the project-specific dependencies and the linting tools, navigate to the root directory of the
 project and run:
 
 ```bash

@@ -18,17 +18,17 @@ There are a variety of Python tools available to use with your Kedro projects. T
 type.
 
 ### Install the tools
-Install `ruff` by adding the following lines to your project's `requirements.txt`
-file:
-```text
-ruff # Used for linting, formatting and sorting module imports
+Install `ruff` by adding the following section to the `pyproject.toml` file located in the project root:
+```toml
+[project.optional-dependencies]
+dev = ["ruff"]
 ```
 
 To install all the project-specific dependencies, including the linting tools, navigate to the root directory of the
 project and run:
 
 ```bash
-pip install -r requirements.txt
+pip install ."[dev]"
 ```
 
 Alternatively, you can individually install the linting tools using the following shell commands:

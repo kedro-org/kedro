@@ -67,7 +67,7 @@ class KedroDataCatalog:
             self._add_from_config(ds_name, ds_config)
 
         if raw_data:
-            self.add_raw_data(raw_data)
+            self.add_data(raw_data)
 
     @property
     def datasets(self) -> dict[str, Any]:
@@ -84,7 +84,7 @@ class KedroDataCatalog:
         return self._config_resolver
 
     def __repr__(self) -> str:
-        return self._datasets.__repr__()
+        return repr(self._datasets)
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern"""
@@ -184,10 +184,10 @@ class KedroDataCatalog:
             DatasetNotFoundError: When a dataset with the given name
                 is not in the collection and do not match patterns.
         """
-        ds_config = self._config_resolver.resolve_dataset_pattern(ds_name)
-
-        if ds_name not in self._datasets and ds_config:
-            self._add_from_config(ds_name, ds_config)
+        if ds_name not in self._datasets:
+            ds_config = self._config_resolver.resolve_dataset_pattern(ds_name)
+            if ds_config:
+                self._add_from_config(ds_name, ds_config)
 
         dataset = self._datasets.get(ds_name, None)
 
@@ -303,7 +303,7 @@ class KedroDataCatalog:
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
 
-    def add_raw_data(self, data: dict[str, Any], replace: bool = False) -> None:
+    def add_data(self, data: dict[str, Any], replace: bool = False) -> None:
         # This method was simplified to add memory datasets only, since
         # adding AbstractDataset can be done via add() method
         for ds_name, ds_data in data.items():
@@ -311,7 +311,7 @@ class KedroDataCatalog:
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         # TODO: remove when removing old catalog
-        return self.add_raw_data(feed_dict, replace)
+        return self.add_data(feed_dict, replace)
 
     def shallow_copy(
         self, extra_dataset_patterns: Patterns | None = None

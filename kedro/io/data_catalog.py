@@ -75,7 +75,7 @@ class _FrozenDatasets:
         if key == "_original_names":
             super().__setattr__(key, value)
             return
-        msg = "Operation not allowed! "
+        msg = "Operation not allowed. "
         if key in self.__dict__:
             msg += "Please change datasets through configuration."
         else:

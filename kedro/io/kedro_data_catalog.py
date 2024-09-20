@@ -76,7 +76,7 @@ class KedroDataCatalog:
     @datasets.setter
     def datasets(self, value: Any) -> None:
         raise AttributeError(
-            "Operation not allowed! Please use KedroDataCatalog.add() instead."
+            "Operation not allowed. Please use KedroDataCatalog.add() instead."
         )
 
     @property

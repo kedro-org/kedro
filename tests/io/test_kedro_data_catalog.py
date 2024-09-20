@@ -75,7 +75,7 @@ class TestKedroDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a dataset
         from nonexistent source"""
-        pattern = r"Failed while loading data from dataset CSVDataset"
+        pattern = r"Failed while loading data from data set CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
@@ -334,15 +334,7 @@ class TestKedroDataCatalog:
             spy = mocker.spy(kedro.io.core, "_load_obj")
             parse_dataset_definition(correct_config["catalog"]["boats"])
             for prefix, call_args in zip(_DEFAULT_PACKAGES, spy.call_args_list):
-                # In Python 3.7 call_args.args is not available thus we access the call
-                # arguments with less meaningful index.
-                # The 1st index returns a tuple, the 2nd index return the name of module.
-                assert call_args[0][0] == f"{prefix}pandas.CSVDataset"
-
-        def test_config_import_extras(self, correct_config):
-            """Test kedro_datasets default path to the dataset class"""
-            correct_config["catalog"]["boats"]["type"] = "pandas.CSVDataset"
-            assert KedroDataCatalog.from_config(**correct_config)
+                assert call_args.args[0] == f"{prefix}pandas.CSVDataset"
 
         def test_config_missing_class(self, correct_config):
             """Check the error if the type points to nonexistent class"""
@@ -378,7 +370,7 @@ class TestKedroDataCatalog:
             pattern = (
                 "An exception occurred when parsing config for dataset 'boats':\n"
                 "Dataset type 'kedro.io.kedro_data_catalog.KedroDataCatalog' is invalid: "
-                "all dataset types must extend 'AbstractDataset'"
+                "all data set types must extend 'AbstractDataset'"
             )
             with pytest.raises(DatasetError, match=re.escape(pattern)):
                 KedroDataCatalog.from_config(**correct_config)
@@ -579,7 +571,7 @@ class TestKedroDataCatalog:
             KedroDataCatalog.from_config(**correct_config)
             log_record = caplog.records[0]
             expected_log_message = (
-                "'version' attribute removed from dataset configuration since it "
+                "'version' attribute removed from data set configuration since it "
                 "is a reserved word and cannot be directly specified"
             )
             assert log_record.levelname == "WARNING"

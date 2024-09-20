@@ -44,7 +44,18 @@ VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
-CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
+CLOUD_PROTOCOLS = (
+    "abfs",
+    "abfss",
+    "adl",
+    "gcs",
+    "gdrive",
+    "gs",
+    "oss",
+    "s3",
+    "s3a",
+    "s3n",
+)
 
 
 class DatasetError(Exception):

@@ -17,7 +17,15 @@ from functools import partial, wraps
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    Protocol,
+    TypeVar,
+    runtime_checkable,
+)
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -28,6 +36,8 @@ from kedro.utils import load_obj
 
 if TYPE_CHECKING:
     import os
+
+    from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
@@ -882,3 +892,70 @@ def validate_on_forbidden_chars(**kwargs: Any) -> None:
             raise DatasetError(
                 f"Neither white-space nor semicolon are allowed in '{key}'."
             )
+
+
+_C = TypeVar("_C")
+
+
+@runtime_checkable
+class CatalogProtocol(Protocol[_C]):
+    _datasets: dict[str, AbstractDataset]
+
+    def __contains__(self, ds_name: str) -> bool:
+        """Check if a dataset is in the catalog."""
+        ...
+
+    @property
+    def config_resolver(self) -> CatalogConfigResolver:
+        """Return a copy of the datasets dictionary."""
+        ...
+
+    @classmethod
+    def from_config(cls, catalog: dict[str, dict[str, Any]] | None) -> _C:
+        """Create a catalog instance from configuration."""
+        ...
+
+    def _get_dataset(
+        self,
+        dataset_name: str,
+        version: Any = None,
+        suggest: bool = True,
+    ) -> AbstractDataset:
+        """Retrieve a dataset by its name."""
+        ...
+
+    def list(self, regex_search: str | None = None) -> list[str]:
+        """List all dataset names registered in the catalog."""
+        ...
+
+    def save(self, name: str, data: Any) -> None:
+        """Save data to a registered dataset."""
+        ...
+
+    def load(self, name: str, version: str | None = None) -> Any:
+        """Load data from a registered dataset."""
+        ...
+
+    def add(self, ds_name: str, dataset: Any, replace: bool = False) -> None:
+        """Add a new dataset to the catalog."""
+        ...
+
+    def add_feed_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
+        """Add datasets to the catalog using the data provided through the `feed_dict`."""
+        ...
+
+    def exists(self, name: str) -> bool:
+        """Checks whether registered data set exists by calling its `exists()` method."""
+        ...
+
+    def release(self, name: str) -> None:
+        """Release any cached data associated with a dataset."""
+        ...
+
+    def confirm(self, name: str) -> None:
+        """Confirm a dataset by its name."""
+        ...
+
+    def shallow_copy(self, extra_dataset_patterns: Patterns | None = None) -> _C:
+        """Returns a shallow copy of the current object."""
+        ...

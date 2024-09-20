@@ -588,9 +588,9 @@ class TestKedroDataCatalog:
         def test_from_correct_config_load_versions_warn(self, correct_config):
             correct_config["catalog"]["boats"]["versioned"] = True
             version = generate_timestamp()
-            load_version = {"non-boart": version}
+            load_version = {"non-boat": version}
             pattern = (
-                r"\'load_versions\' keys \[non-boart\] are not found in the catalog\."
+                r"\'load_versions\' keys \[non-boat\] are not found in the catalog\."
             )
             with pytest.raises(DatasetNotFoundError, match=pattern):
                 KedroDataCatalog.from_config(

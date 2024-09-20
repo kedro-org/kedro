@@ -261,7 +261,7 @@ class TestKedroContext:
         pattern = (
             "Invalid value 'tests.framework.context.test_context.BadCatalog' received "
             "for setting 'DATA_CATALOG_CLASS'. "
-            "It must be a subclass of 'kedro.io.data_catalog.DataCatalog'."
+            "It must implement 'kedro.io.core.CatalogProtocol'."
         )
         mock_settings = _ProjectSettings(
             settings_file=str(mock_settings_file_bad_data_catalog_class)

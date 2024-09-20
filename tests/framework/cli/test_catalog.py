@@ -543,6 +543,7 @@ class TestCatalogFactoryCommands:
             "catalog": fake_catalog_config,
             "credentials": fake_credentials_config,
         }
+        mocked_context._get_config_credentials.return_value = fake_credentials_config
         mocked_context.catalog = DataCatalog.from_config(
             catalog=fake_catalog_config, credentials=fake_credentials_config
         )

@@ -130,6 +130,7 @@ type_targets = {
         "kedro.io.catalog_config_resolver.CatalogConfigResolver",
         "kedro.io.core.AbstractDataset",
         "kedro.io.core.AbstractVersionedDataset",
+        "kedro.io.core.CatalogProtocol",
         "kedro.io.core.DatasetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
@@ -170,6 +171,7 @@ type_targets = {
         "None.  Update D from mapping/iterable E and F.",
         "Patterns",
         "CatalogConfigResolver",
+        "CatalogProtocol",
     ),
     "py:data": (
         "typing.Any",

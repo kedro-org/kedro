@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Moved development requirements from `requirements.txt` to the dedicated section in `pyproject.toml` for project template.
 * Implemented `Protocol` abstraction for the current `DataCatalog` and adding new catalog implementations.
 * Refactored `kedro run` and `kedro catalog` commands.
 * Moved pattern resolution logic from `DataCatalog` to a separate component - `CatalogConfigResolver`. Updated `DataCatalog` to use `CatalogConfigResolver` internally.

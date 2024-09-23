@@ -147,17 +147,11 @@ def _assert_requirements_ok(
     assert "Congratulations!" in result.output
     assert f"has been created in the directory \n{root_path}" in result.output
 
-    requirements_file_path = root_path / "requirements.txt"
     pyproject_file_path = root_path / "pyproject.toml"
 
     tools_list = _parse_tools_input(tools)
 
     if "1" in tools_list:
-        with open(requirements_file_path) as requirements_file:
-            requirements = requirements_file.read()
-
-        assert "ruff" in requirements
-
         pyproject_config = toml.load(pyproject_file_path)
         expected = {
             "tool": {
@@ -171,15 +165,11 @@ def _assert_requirements_ok(
             }
         }
         assert expected["tool"]["ruff"] == pyproject_config["tool"]["ruff"]
+        assert (
+            "ruff~=0.1.8" in pyproject_config["project"]["optional-dependencies"]["dev"]
+        )
 
     if "2" in tools_list:
-        with open(requirements_file_path) as requirements_file:
-            requirements = requirements_file.read()
-
-        assert "pytest-cov~=3.0" in requirements
-        assert "pytest-mock>=1.7.1, <2.0" in requirements
-        assert "pytest~=7.2" in requirements
-
         pyproject_config = toml.load(pyproject_file_path)
         expected = {
             "pytest": {
@@ -197,6 +187,18 @@ def _assert_requirements_ok(
         }
         assert expected["pytest"] == pyproject_config["tool"]["pytest"]
         assert expected["coverage"] == pyproject_config["tool"]["coverage"]
+
+        assert (
+            "pytest-cov~=3.0"
+            in pyproject_config["project"]["optional-dependencies"]["dev"]
+        )
+        assert (
+            "pytest-mock>=1.7.1, <2.0"
+            in pyproject_config["project"]["optional-dependencies"]["dev"]
+        )
+        assert (
+            "pytest~=7.2" in pyproject_config["project"]["optional-dependencies"]["dev"]
+        )
 
     if "4" in tools_list:
         pyproject_config = toml.load(pyproject_file_path)

@@ -7,7 +7,6 @@ save functions to the underlying datasets.
 
 from __future__ import annotations
 
-import copy
 import difflib
 import logging
 import re
@@ -72,7 +71,7 @@ class KedroDataCatalog(CatalogProtocol):
 
     @property
     def datasets(self) -> dict[str, Any]:
-        return copy.copy(self._datasets)
+        return self.items()
 
     @datasets.setter
     def datasets(self, value: Any) -> None:
@@ -99,6 +98,26 @@ class KedroDataCatalog(CatalogProtocol):
             other._datasets,
             other.config_resolver.list_patterns(),
         )
+
+    def keys(self, regex_search: str | None = None) -> list[str]:
+        return self._filter_keys(regex_search)
+
+    def values(self, regex_search: str | None = None) -> list[AbstractDataset]:
+        return [self._datasets[key] for key in self._filter_keys(regex_search)]
+
+    def items(self, regex_search: str | None = None) -> dict[str, AbstractDataset]:
+        return {key: self._datasets[key] for key in self._filter_keys(regex_search)}
+
+    def __iter__(self) -> tuple[str, AbstractDataset]:
+        yield from self._datasets.items()
+
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
+        return self.get_dataset(ds_name)
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        if key in self._datasets:
+            self._logger.warning("Replacing dataset '%s'", key)
+        self._datasets[key] = value
 
     @property
     def _logger(self) -> logging.Logger:
@@ -220,14 +239,11 @@ class KedroDataCatalog(CatalogProtocol):
         self, ds_name: str, dataset: AbstractDataset, replace: bool = False
     ) -> None:
         """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""
-        if ds_name in self._datasets:
-            if replace:
-                self._logger.warning("Replacing dataset '%s'", ds_name)
-            else:
-                raise DatasetAlreadyExistsError(
-                    f"Dataset '{ds_name}' has already been registered"
-                )
-        self._datasets[ds_name] = dataset
+        if ds_name in self._datasets and not replace:
+            raise DatasetAlreadyExistsError(
+                f"Dataset '{ds_name}' has already been registered"
+            )
+        self.__setitem__(ds_name, ds_name)
 
     def list(self, regex_search: str | None = None) -> list[str]:
         """
@@ -235,13 +251,15 @@ class KedroDataCatalog(CatalogProtocol):
         This can be filtered by providing an optional regular expression
         which will only return matching keys.
         """
-
-        if regex_search is None:
-            return list(self._datasets.keys())
-
-        if not regex_search.strip():
+        if regex_search == "":
             self._logger.warning("The empty string will not match any datasets")
             return []
+
+        return self.keys(regex_search)
+
+    def _filter_keys(self, regex_search: str | None) -> list[str]:
+        if regex_search is None:
+            return list(self._datasets.keys())
 
         try:
             pattern = re.compile(regex_search, flags=re.IGNORECASE)

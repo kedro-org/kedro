@@ -17,6 +17,7 @@ from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
     AbstractDataset,
     AbstractVersionedDataset,
+    CatalogProtocol,
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
@@ -27,7 +28,7 @@ from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 
-class KedroDataCatalog:
+class KedroDataCatalog(CatalogProtocol):
     def __init__(
         self,
         datasets: dict[str, AbstractDataset] | None = None,

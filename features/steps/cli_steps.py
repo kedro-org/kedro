@@ -755,3 +755,13 @@ def exec_magic_command(context):
 def change_dir(context, dir):
     """Execute Kedro target."""
     util.chdir(dir)
+
+
+@when("I install project and its dev dependencies")
+def pip_install_project_and_dev_dependencies(context):
+    """Install project and its development dependencies using pip."""
+    _ = run(
+        [context.pip, "install", ".[dev]"],
+        env=context.env,
+        cwd=str(context.root_project_dir),
+    )

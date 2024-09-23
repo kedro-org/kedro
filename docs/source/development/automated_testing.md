@@ -19,21 +19,36 @@ There are many testing frameworks available for Python. One of the most popular 
 
 Let's look at how you can start working with `pytest` in your Kedro project.
 
-### Prerequisite: Install your Kedro project
+### Install test requirements
+Before getting started with test requirements, it is important to ensure you have installed your project locally. This allows you to test different parts of your project by importing them into your test files.
 
-Before getting started with `pytest`, it is important to ensure you have installed your project locally. This allows you to test different parts of your project by importing them into your test files.
 
-To install your project, navigate to your project root and run the following command:
+To install your project including all the project-specific dependencies and test requirements:
+1. Add the following section to the `pyproject.toml` file located in the project root:
+```toml
+[project.optional-dependencies]
+dev = [
+    "pytest-cov",
+    "pytest-mock",
+    "pytest",
+]
+```
+
+2. Navigate to the root directory of the project and run:
+```bash
+pip install ."[dev]"
+```
+
+Alternatively, you can individually install test requirements as you would install other packages with `pip`, making sure you have installed your project locally and your [project's virtual environment is active](../get_started/install.md#create-a-virtual-environment-for-your-kedro-project).
+
+1. To install your project, navigate to your project root and run the following command:
 
 ```bash
 pip install -e .
 ```
-
 >**NOTE**: The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
-### Install `pytest`
 
-Install `pytest` as you would install other packages with `pip`, making sure your [project's virtual environment is active](../get_started/install.md#create-a-virtual-environment-for-your-kedro-project).
-
+2. Install test requirements one by one:
 ```bash
 pip install pytest
 ```

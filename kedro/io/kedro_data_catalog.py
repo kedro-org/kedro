@@ -124,6 +124,9 @@ class KedroDataCatalog(CatalogProtocol):
         else:
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
+    def _ipython_key_completions_(self) -> list[str]:
+        return list(self._datasets.keys())
+
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)

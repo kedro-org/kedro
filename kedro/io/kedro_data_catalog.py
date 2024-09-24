@@ -7,6 +7,7 @@ save functions to the underlying datasets.
 
 from __future__ import annotations
 
+import copy
 import difflib
 import logging
 import re
@@ -72,7 +73,7 @@ class KedroDataCatalog(CatalogProtocol):
     @property
     def datasets(self) -> dict[str, Any]:
         # TODO: remove when removing old catalog
-        return self.items()
+        return copy.copy(self._datasets)
 
     @datasets.setter
     def datasets(self, value: Any) -> None:
@@ -107,11 +108,13 @@ class KedroDataCatalog(CatalogProtocol):
     def values(self, regex_search: str | None = None) -> List[AbstractDataset]:  # noqa: UP006
         return [self._datasets[key] for key in self._filter_keys(regex_search)]
 
-    def items(self, regex_search: str | None = None) -> dict[str, AbstractDataset]:
-        return {key: self._datasets[key] for key in self._filter_keys(regex_search)}
+    def items(
+        self, regex_search: str | None = None
+    ) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
+        return [(key, self._datasets[key]) for key in self._filter_keys(regex_search)]
 
-    def __iter__(self) -> tuple[str, AbstractDataset]:
-        yield from self._datasets.items()
+    def __iter__(self) -> str:
+        yield from self._datasets.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
         return self.get_dataset(ds_name)

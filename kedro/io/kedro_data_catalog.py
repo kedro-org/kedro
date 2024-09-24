@@ -186,7 +186,7 @@ class KedroDataCatalog(CatalogProtocol):
                 is not in the collection and do not match patterns.
         """
         if ds_name not in self._datasets:
-            ds_config = self._config_resolver.resolve_dataset_pattern(ds_name)
+            ds_config = self._config_resolver.resolve_pattern(ds_name)
             if ds_config:
                 self._add_from_config(ds_name, ds_config)
 

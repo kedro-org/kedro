@@ -229,7 +229,7 @@ class CatalogConfigResolver:
 
         return resolved_configs
 
-    def resolve_dataset_pattern(self, ds_name: str) -> dict[str, Any]:
+    def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
         matched_pattern = self.match_pattern(ds_name)
 

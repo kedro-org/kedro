@@ -3,10 +3,10 @@ jupyterlab>=3.0
 kedro~=0.19.8
 kedro-datasets>=3.0; python_version >= "3.9"
 kedro-datasets>=1.0; python_version < "3.9"
+kedro-datasets[spark]
 kedro-viz>=6.7.0
 kedro[jupyter]
 notebook
-pyspark
 ruff~=0.1.8
 scikit-learn~=1.5.1; python_version >= "3.9"
 scikit-learn<=1.4.0,>=1.0; python_version < "3.9"

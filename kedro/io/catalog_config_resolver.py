@@ -131,12 +131,12 @@ class CatalogConfigResolver:
 
     @classmethod
     def _validate_pattern_config(cls, ds_name: str, ds_config: dict[str, Any]) -> None:
-        # Find all occurrences of {}
+        # Find all occurrences of {} in the string including brackets
         search_regex = r"\{.*?\}"
         name_placeholders = set(re.findall(search_regex, ds_name))
         config_placeholders = set()
 
-        def _traverse_config(config):
+        def _traverse_config(config: Any) -> None:
             if isinstance(config, dict):
                 for value in config.values():
                     _traverse_config(value)

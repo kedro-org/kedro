@@ -95,9 +95,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 
         for ds_name in default_ds:
             if data_catalog.config_resolver.match_pattern(ds_name):
-                ds_config = data_catalog.config_resolver.resolve_dataset_pattern(
-                    ds_name
-                )
+                ds_config = data_catalog.config_resolver.resolve_pattern(ds_name)
                 factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
                     ds_name
                 )
@@ -250,7 +248,7 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
         if ds_name in explicit_datasets or is_parameter(ds_name):
             continue
 
-        ds_config = data_catalog.config_resolver.resolve_dataset_pattern(ds_name)
+        ds_config = data_catalog.config_resolver.resolve_pattern(ds_name)
 
         # Exclude MemoryDatasets not set in the catalog explicitly
         if ds_config:

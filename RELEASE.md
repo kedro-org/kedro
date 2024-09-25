@@ -1,6 +1,11 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Implemented `KedroDataCatalog` repeating `DataCatalog` functionality with a few API enhancements:
+  * Removed `_FrozenDatasets` and access datasets as properties;
+  * Added get dataset by name feature;
+  * `add_feed_dict()` was simplified and renamed to `add_data()`;
+  * Datasets' initialisation was moved out from `from_config()` method to the constructor.
 * Moved development requirements from `requirements.txt` to the dedicated section in `pyproject.toml` for project template.
 * Implemented `Protocol` abstraction for the current `DataCatalog` and adding new catalog implementations.
 * Refactored `kedro run` and `kedro catalog` commands.
@@ -9,6 +14,7 @@
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 ## Bug fixes and other changes
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.
+* Fixed a bug where `SharedMemoryDataset.exists` would not call the underlying `MemoryDataset`.
 * Fixed template projects example tests.
 * Made credentials loading consistent between `KedroContext._get_catalog()` and `resolve_patterns` so that both us
 e `_get_config_credentials()`
@@ -25,6 +31,7 @@ e `_get_config_credentials()`
 * [ethanknights](https://github.com/ethanknights)
 * [Manezki](https://github.com/Manezki)
 * [MigQ2](https://github.com/MigQ2)
+* [Felix Scherz](https://github.com/felixscherz)
 
 # Release 0.19.8
 

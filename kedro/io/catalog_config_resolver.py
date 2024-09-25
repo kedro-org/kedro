@@ -130,6 +130,32 @@ class CatalogConfigResolver:
         return {k: _resolve_value(k, v) for k, v in config.items()}
 
     @classmethod
+    def _validate_pattern_config(cls, ds_name: str, ds_config: dict[str, Any]) -> None:
+        # Find all occurrences of {}
+        search_regex = r"\{.*?\}"
+        name_placeholders = set(re.findall(search_regex, ds_name))
+        config_placeholders = set()
+
+        def _traverse_config(config):
+            if isinstance(config, dict):
+                for value in config.values():
+                    _traverse_config(value)
+            elif isinstance(config, (list, tuple)):
+                for value in config:
+                    _traverse_config(value)
+            elif isinstance(config, str) and "}" in config:
+                config_placeholders.update(set(re.findall(search_regex, config)))
+
+        _traverse_config(ds_config)
+
+        if config_placeholders - name_placeholders:
+            raise DatasetError(
+                f"Incorrect dataset configuration provided. "
+                f"Keys used in the configuration {config_placeholders - name_placeholders} "
+                f"should present in the dataset factory pattern name {ds_name}."
+            )
+
+    @classmethod
     def _resolve_dataset_config(
         cls,
         ds_name: str,
@@ -147,13 +173,7 @@ class CatalogConfigResolver:
                 cls._resolve_dataset_config(ds_name, pattern, value) for value in config
             ]
         elif isinstance(config, str) and "}" in config:
-            try:
-                config = config.format_map(resolved_vars.named)
-            except KeyError as exc:
-                raise DatasetError(
-                    f"Unable to resolve '{config}' from the pattern '{pattern}'. Keys used in the configuration "
-                    f"should be present in the dataset factory pattern."
-                ) from exc
+            config = config.format_map(resolved_vars.named)
         return config
 
     def list_patterns(self) -> list[str]:
@@ -192,6 +212,7 @@ class CatalogConfigResolver:
 
         for ds_name, ds_config in config.items():
             if cls.is_pattern(ds_name):
+                cls._validate_pattern_config(ds_name, ds_config)
                 dataset_patterns[ds_name] = cls._resolve_credentials(
                     ds_config, credentials
                 )

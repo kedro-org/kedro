@@ -131,6 +131,17 @@ class CatalogConfigResolver:
 
     @classmethod
     def _validate_pattern_config(cls, ds_name: str, ds_config: dict[str, Any]) -> None:
+        """Checks whether a dataset factory pattern configuration is valid - all
+        keys used in the configuration present in the dataset factory pattern name.
+
+        Args:
+            ds_name: Dataset factory pattern name.
+            ds_config: Dataset pattern configuration.
+
+        Raises:
+            DatasetError: when keys used in the configuration do not present in the dataset factory pattern name.
+
+        """
         # Find all occurrences of {} in the string including brackets
         search_regex = r"\{.*?\}"
         name_placeholders = set(re.findall(search_regex, ds_name))

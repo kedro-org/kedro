@@ -35,7 +35,7 @@ class SparkHooks:
         """
 
         # Load the spark configuration in spark.yaml using the config loader
-        parameters = context.config_loader.get("spark*", "spark*/**")
+        parameters = context.config_loader["spark"]
         spark_conf = SparkConf().setAll(parameters.items())
 
         # Initialise the spark session

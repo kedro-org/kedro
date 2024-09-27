@@ -324,7 +324,7 @@ class DataCatalog:
         version: Version | None = None,
         suggest: bool = True,
     ) -> AbstractDataset:
-        ds_config = self._config_resolver.resolve_dataset_pattern(dataset_name)
+        ds_config = self._config_resolver.resolve_pattern(dataset_name)
 
         if dataset_name not in self._datasets and ds_config:
             ds = AbstractDataset.from_config(

@@ -79,3 +79,9 @@ class TestSharedMemoryDataset:
     def test_str_representation(self, shared_memory_dataset):
         """Test string representation of the dataset"""
         assert "MemoryDataset" in str(shared_memory_dataset)
+
+    def test_exists(self, shared_memory_dataset, input_data):
+        """Check that exists returns the expected values"""
+        assert not shared_memory_dataset.exists()
+        shared_memory_dataset.save(input_data)
+        assert shared_memory_dataset.exists()

@@ -111,7 +111,7 @@ def create_pipeline(
     **kwargs: Any,
 ) -> None:
     """Create a new modular pipeline by providing a name."""
-    sleep(1)
+    sleep(5)
     package_dir = metadata.source_dir / metadata.package_name
     project_root = metadata.project_path / metadata.project_name
     conf_source = settings.CONF_SOURCE

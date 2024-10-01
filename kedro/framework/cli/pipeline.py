@@ -6,6 +6,7 @@ import re
 import shutil
 from pathlib import Path
 from textwrap import indent
+from time import sleep
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 import click
@@ -110,6 +111,7 @@ def create_pipeline(
     **kwargs: Any,
 ) -> None:
     """Create a new modular pipeline by providing a name."""
+    sleep(1)
     package_dir = metadata.source_dir / metadata.package_name
     project_root = metadata.project_path / metadata.project_name
     conf_source = settings.CONF_SOURCE

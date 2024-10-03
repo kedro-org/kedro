@@ -27,7 +27,7 @@ from kedro.io import (
     MemoryDataset,
     SharedMemoryDataset,
 )
-from kedro.runner.runner import AbstractRunner, decrement_and_release_datasets, run_node
+from kedro.runner.runner import AbstractRunner, run_node
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -319,4 +319,4 @@ class ParallelRunner(AbstractRunner):
                     node = future.result()
                     done_nodes.add(node)
 
-                    decrement_and_release_datasets(node, catalog, load_counts, pipeline)
+                    self._release_datasets(node, catalog, load_counts, pipeline)

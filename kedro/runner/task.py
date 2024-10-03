@@ -15,19 +15,26 @@ from more_itertools import interleave
 if TYPE_CHECKING:
     from pluggy import PluginManager
 
-    from kedro.io import DataCatalog
+    from kedro.io import CatalogProtocol
     from kedro.pipeline.node import Node
 
 
 class Task:
-    def __init__(self, node, catalog, hook_manager, is_async, session_id):
+    def __init__(
+        self,
+        node: Node,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager,
+        is_async: bool,
+        session_id: str | None = None,
+    ):
         self.node = node
         self.catalog = catalog
         self.hook_manager = hook_manager
         self.is_async = is_async
         self.session_id = session_id
 
-    def execute(self):
+    def execute(self) -> Node:
         if self.is_async:
             node = self._run_node_async(
                 self.node, self.catalog, self.hook_manager, self.session_id
@@ -45,7 +52,7 @@ class Task:
     def _run_node_sequential(
         self,
         node: Node,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> Node:
@@ -96,7 +103,7 @@ class Task:
     def _run_node_async(
         self,
         node: Node,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> Node:
@@ -140,7 +147,10 @@ class Task:
 
     @staticmethod
     def _synchronous_dataset_load(
-        dataset_name: str, node: Node, catalog: DataCatalog, hook_manager: PluginManager
+        dataset_name: str,
+        node: Node,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager,
     ) -> Any:
         """Minimal wrapper to ensure Hooks are run synchronously
         within an asynchronous dataset load."""
@@ -154,7 +164,7 @@ class Task:
     @staticmethod
     def _collect_inputs_from_hook(  # noqa: PLR0913
         node: Node,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         inputs: dict[str, Any],
         is_async: bool,
         hook_manager: PluginManager,
@@ -189,7 +199,7 @@ class Task:
     @staticmethod
     def _call_node_run(  # noqa: PLR0913
         node: Node,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         inputs: dict[str, Any],
         is_async: bool,
         hook_manager: PluginManager,

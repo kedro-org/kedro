@@ -467,6 +467,8 @@ def _validate_config_file(key: str) -> None:
 def _split_params(ctx: click.Context, param: Any, value: Any) -> Any:
     if isinstance(value, dict):
         return value
+    if isinstance(value, list) and len(value) == 1:
+        value = value[0]
     dot_list = []
     for item in split_string(ctx, param, value):
         equals_idx = item.find("=")

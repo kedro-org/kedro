@@ -14,7 +14,7 @@ from kedro.runner.runner import AbstractRunner, decrement_and_release_datasets, 
 if TYPE_CHECKING:
     from pluggy import PluginManager
 
-    from kedro.io import DataCatalog
+    from kedro.io import CatalogProtocol
     from kedro.pipeline import Pipeline
 
 
@@ -34,7 +34,7 @@ class SequentialRunner(AbstractRunner):
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
                 during the run. This is used to set the default datasets to MemoryDataset
                 for `SequentialRunner`.
 
@@ -48,7 +48,7 @@ class SequentialRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:
@@ -56,7 +56,7 @@ class SequentialRunner(AbstractRunner):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``DataCatalog`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 

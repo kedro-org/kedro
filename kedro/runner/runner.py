@@ -11,7 +11,7 @@ from collections import deque
 from typing import TYPE_CHECKING, Any, Collection, Iterable
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import CatalogProtocol, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.task import Task
 
@@ -36,7 +36,7 @@ class AbstractRunner(ABC):
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
                 during the run. This is used to set the default datasets on the Runner instances.
 
         """
@@ -50,7 +50,7 @@ class AbstractRunner(ABC):
     def run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> dict[str, Any]:
@@ -59,7 +59,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``DataCatalog`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
@@ -67,14 +67,13 @@ class AbstractRunner(ABC):
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
 
         Returns:
-            Any node outputs that cannot be processed by the ``DataCatalog``.
+            Any node outputs that cannot be processed by the catalog.
             These are returned in a dictionary, where the keys are defined
             by the node outputs.
 
         """
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
-        catalog = catalog.shallow_copy()
 
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog
@@ -86,7 +85,7 @@ class AbstractRunner(ABC):
 
         if unsatisfied:
             raise ValueError(
-                f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
+                f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
             )
 
         # Identify MemoryDataset in the catalog
@@ -116,7 +115,7 @@ class AbstractRunner(ABC):
         return {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
 
     def run_only_missing(
-        self, pipeline: Pipeline, catalog: DataCatalog, hook_manager: PluginManager
+        self, pipeline: Pipeline, catalog: CatalogProtocol, hook_manager: PluginManager
     ) -> dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
         datasets provided by ``catalog``, and save results back to the
@@ -124,7 +123,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``DataCatalog`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be
@@ -132,7 +131,7 @@ class AbstractRunner(ABC):
 
         Returns:
             Any node outputs that cannot be processed by the
-            ``DataCatalog``. These are returned in a dictionary, where
+            catalog. These are returned in a dictionary, where
             the keys are defined by the node outputs.
 
         """
@@ -156,7 +155,7 @@ class AbstractRunner(ABC):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:
@@ -165,7 +164,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``DataCatalog`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
@@ -176,7 +175,7 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         done_nodes: Iterable[Node],
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
     ) -> None:
         """
         Suggest a command to the user to resume a run after it fails.
@@ -186,7 +185,7 @@ class AbstractRunner(ABC):
         Args:
             pipeline: the ``Pipeline`` of the run.
             done_nodes: the ``Node``s that executed successfully.
-            catalog: the ``DataCatalog`` of the run.
+            catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
         """
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
@@ -215,7 +214,7 @@ class AbstractRunner(ABC):
 
 
 def _find_nodes_to_resume_from(
-    pipeline: Pipeline, unfinished_nodes: Collection[Node], catalog: DataCatalog
+    pipeline: Pipeline, unfinished_nodes: Collection[Node], catalog: CatalogProtocol
 ) -> set[str]:
     """Given a collection of unfinished nodes in a pipeline using
     a certain catalog, find the node names to pass to pipeline.from_nodes()
@@ -225,7 +224,7 @@ def _find_nodes_to_resume_from(
     Args:
         pipeline: the ``Pipeline`` to find starting nodes for.
         unfinished_nodes: collection of ``Node``s that have not finished yet
-        catalog: the ``DataCatalog`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         Set of node names to pass to pipeline.from_nodes() to continue
@@ -243,7 +242,7 @@ def _find_nodes_to_resume_from(
 
 
 def _find_all_nodes_for_resumed_pipeline(
-    pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: DataCatalog
+    pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: CatalogProtocol
 ) -> set[Node]:
     """Breadth-first search approach to finding the complete set of
     ``Node``s which need to run to cover all unfinished nodes,
@@ -253,7 +252,7 @@ def _find_all_nodes_for_resumed_pipeline(
     Args:
         pipeline: the ``Pipeline`` to analyze.
         unfinished_nodes: the iterable of ``Node``s which have not finished yet.
-        catalog: the ``DataCatalog`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         A set containing all input unfinished ``Node``s and all remaining
@@ -301,12 +300,12 @@ def _nodes_with_external_inputs(nodes_of_interest: Iterable[Node]) -> set[Node]:
     return set(p_nodes_with_external_inputs.nodes)
 
 
-def _enumerate_non_persistent_inputs(node: Node, catalog: DataCatalog) -> set[str]:
+def _enumerate_non_persistent_inputs(node: Node, catalog: CatalogProtocol) -> set[str]:
     """Enumerate non-persistent input datasets of a ``Node``.
 
     Args:
         node: the ``Node`` to check the inputs of.
-        catalog: the ``DataCatalog`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` of the run.
 
     Returns:
         Set of names of non-persistent inputs of given ``Node``.
@@ -371,7 +370,7 @@ def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[
 
 def run_node(
     node: Node,
-    catalog: DataCatalog,
+    catalog: CatalogProtocol,
     hook_manager: PluginManager,
     is_async: bool = False,
     session_id: str | None = None,
@@ -380,7 +379,7 @@ def run_node(
 
     Args:
         node: The ``Node`` to run.
-        catalog: A ``DataCatalog`` containing the node's inputs and outputs.
+        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
         hook_manager: The ``PluginManager`` to activate hooks.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
@@ -403,13 +402,14 @@ def run_node(
             f"in node {node!s}."
         )
 
+
     task = Task(node, catalog, hook_manager, is_async, session_id)
     node = task.execute()
     return node
 
 
 def decrement_and_release_datasets(
-    node: Node, catalog: DataCatalog, load_counts, pipeline
+        node: Node, catalog: DataCatalog, load_counts, pipeline
 ):
     """Decrement dataset load counts and release any datasets we've finished with"""
     for dataset in node.inputs:
@@ -419,3 +419,176 @@ def decrement_and_release_datasets(
     for dataset in node.outputs:
         if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
             catalog.release(dataset)
+
+    if is_async:
+        node = _run_node_async(node, catalog, hook_manager, session_id)
+    else:
+        node = _run_node_sequential(node, catalog, hook_manager, session_id)
+
+    for name in node.confirms:
+        catalog.confirm(name)
+    return node
+
+
+def _collect_inputs_from_hook(  # noqa: PLR0913
+    node: Node,
+    catalog: DataCatalog,
+    inputs: dict[str, Any],
+    is_async: bool,
+    hook_manager: PluginManager,
+    session_id: str | None = None,
+) -> dict[str, Any]:
+    inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
+    hook_response = hook_manager.hook.before_node_run(
+        node=node,
+        catalog=catalog,
+        inputs=inputs,
+        is_async=is_async,
+        session_id=session_id,
+    )
+
+    additional_inputs = {}
+    if (
+        hook_response is not None
+    ):  # all hooks on a _NullPluginManager will return None instead of a list
+        for response in hook_response:
+            if response is not None and not isinstance(response, dict):
+                response_type = type(response).__name__
+                raise TypeError(
+                    f"'before_node_run' must return either None or a dictionary mapping "
+                    f"dataset names to updated values, got '{response_type}' instead."
+                )
+            additional_inputs.update(response or {})
+
+    return additional_inputs
+
+
+def _call_node_run(  # noqa: PLR0913
+    node: Node,
+    catalog: DataCatalog,
+    inputs: dict[str, Any],
+    is_async: bool,
+    hook_manager: PluginManager,
+    session_id: str | None = None,
+) -> dict[str, Any]:
+    try:
+        outputs = node.run(inputs)
+    except Exception as exc:
+        hook_manager.hook.on_node_error(
+            error=exc,
+            node=node,
+            catalog=catalog,
+            inputs=inputs,
+            is_async=is_async,
+            session_id=session_id,
+        )
+        raise exc
+    hook_manager.hook.after_node_run(
+        node=node,
+        catalog=catalog,
+        inputs=inputs,
+        outputs=outputs,
+        is_async=is_async,
+        session_id=session_id,
+    )
+    return outputs
+
+
+def _run_node_sequential(
+    node: Node,
+    catalog: DataCatalog,
+    hook_manager: PluginManager,
+    session_id: str | None = None,
+) -> Node:
+    inputs = {}
+
+    for name in node.inputs:
+        hook_manager.hook.before_dataset_loaded(dataset_name=name, node=node)
+        inputs[name] = catalog.load(name)
+        hook_manager.hook.after_dataset_loaded(
+            dataset_name=name, data=inputs[name], node=node
+        )
+
+    is_async = False
+
+    additional_inputs = _collect_inputs_from_hook(
+        node, catalog, inputs, is_async, hook_manager, session_id=session_id
+    )
+    inputs.update(additional_inputs)
+
+    outputs = _call_node_run(
+        node, catalog, inputs, is_async, hook_manager, session_id=session_id
+    )
+
+    items: Iterable = outputs.items()
+    # if all outputs are iterators, then the node is a generator node
+    if all(isinstance(d, Iterator) for d in outputs.values()):
+        # Python dictionaries are ordered, so we are sure
+        # the keys and the chunk streams are in the same order
+        # [a, b, c]
+        keys = list(outputs.keys())
+        # [Iterator[chunk_a], Iterator[chunk_b], Iterator[chunk_c]]
+        streams = list(outputs.values())
+        # zip an endless cycle of the keys
+        # with an interleaved iterator of the streams
+        # [(a, chunk_a), (b, chunk_b), ...] until all outputs complete
+        items = zip(it.cycle(keys), interleave(*streams))
+
+    for name, data in items:
+        hook_manager.hook.before_dataset_saved(dataset_name=name, data=data, node=node)
+        catalog.save(name, data)
+        hook_manager.hook.after_dataset_saved(dataset_name=name, data=data, node=node)
+    return node
+
+
+def _run_node_async(
+    node: Node,
+    catalog: CatalogProtocol,
+    hook_manager: PluginManager,
+    session_id: str | None = None,
+) -> Node:
+    def _synchronous_dataset_load(dataset_name: str) -> Any:
+        """Minimal wrapper to ensure Hooks are run synchronously
+        within an asynchronous dataset load."""
+        hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)
+        return_ds = catalog.load(dataset_name)
+        hook_manager.hook.after_dataset_loaded(
+            dataset_name=dataset_name, data=return_ds, node=node
+        )
+        return return_ds
+
+    with ThreadPoolExecutor() as pool:
+        inputs: dict[str, Future] = {}
+
+        for name in node.inputs:
+            inputs[name] = pool.submit(_synchronous_dataset_load, name)
+
+        wait(inputs.values(), return_when=ALL_COMPLETED)
+        inputs = {key: value.result() for key, value in inputs.items()}
+        is_async = True
+        additional_inputs = _collect_inputs_from_hook(
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        )
+        inputs.update(additional_inputs)
+
+        outputs = _call_node_run(
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        )
+
+        future_dataset_mapping = {}
+        for name, data in outputs.items():
+            hook_manager.hook.before_dataset_saved(
+                dataset_name=name, data=data, node=node
+            )
+            future = pool.submit(catalog.save, name, data)
+            future_dataset_mapping[future] = (name, data)
+
+        for future in as_completed(future_dataset_mapping):
+            exception = future.exception()
+            if exception:
+                raise exception
+            name, data = future_dataset_mapping[future]
+            hook_manager.hook.after_dataset_saved(
+                dataset_name=name, data=data, node=node
+            )
+    return node

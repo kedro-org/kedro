@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import difflib
 import importlib
 import logging
@@ -469,6 +470,15 @@ def _split_params(ctx: click.Context, param: Any, value: Any) -> Any:
         return value
     if isinstance(value, list) and len(value) == 1:
         value = value[0]
+    # Try evaluating the string as a Python literal in case it contains a list
+    if isinstance(value, str):
+        try:
+            evaluated_value = ast.literal_eval(value)
+            if isinstance(evaluated_value, list) and len(evaluated_value) == 1:
+                value = evaluated_value[0]
+        except (ValueError, SyntaxError):
+            pass  # Safely continue if the evaluation fails
+
     dot_list = []
     for item in split_string(ctx, param, value):
         equals_idx = item.find("=")

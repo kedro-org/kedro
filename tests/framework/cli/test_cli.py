@@ -860,6 +860,7 @@ class TestRunCommand:
                 {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
             ),
             (["foo=bar,fizz=buzz"], {"foo": "bar", "fizz": "buzz"}),
+            ('["foo=bar,fizz=buzz"]', {"foo": "bar", "fizz": "buzz"}),
         ],
     )
     def test_run_extra_params(

@@ -580,7 +580,12 @@ class TestAsyncNodeDatasetHooks:
         mock_session.load_context()
 
         # run the node asynchronously with an instance of `LogCatalog`
-        task = Task(node=sample_node, catalog=memory_catalog, hook_manager=mock_session._hook_manager, is_async=True)
+        task = Task(
+            node=sample_node,
+            catalog=memory_catalog,
+            hook_manager=mock_session._hook_manager,
+            is_async=True,
+        )
         task.execute()
 
         hooks_log_messages = [r.message for r in logs_listener.logs]
@@ -601,7 +606,12 @@ class TestAsyncNodeDatasetHooks:
             hook_manager.hook, "after_dataset_saved"
         )
 
-        task = Task(node=sample_node_multiple_outputs, catalog=memory_catalog, hook_manager=hook_manager, is_async=True)
+        task = Task(
+            node=sample_node_multiple_outputs,
+            catalog=memory_catalog,
+            hook_manager=hook_manager,
+            is_async=True,
+        )
         task.execute()
 
         after_dataset_saved_mock.assert_has_calls(

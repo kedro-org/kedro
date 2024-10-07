@@ -3,6 +3,9 @@ provide ``load`` and ``save`` capabilities from anywhere in the program. To
 use a ``KedroDataCatalog``, you need to instantiate it with a dictionary of datasets.
 Then it will act as a single point of reference for your calls, relaying load and
 save functions to the underlying datasets.
+
+``KedroDataCatalog`` is an experimental feature aimed to replace ``DataCatalog`` in the future.
+Expect possible breaking changes while using it.
 """
 
 from __future__ import annotations
@@ -44,6 +47,9 @@ class KedroDataCatalog(CatalogProtocol):
         single point of reference for your calls, relaying load and save
         functions to the underlying datasets.
 
+        Note: ``KedroDataCatalog`` is an experimental feature, so please mind
+        possible breaking changes while using it.
+
         Args:
             datasets: A dictionary of dataset names and dataset instances.
             raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
@@ -56,6 +62,13 @@ class KedroDataCatalog(CatalogProtocol):
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
+
+        Example:
+        ::
+            >>> # settings.py
+            >>> from kedro.io import KedroDataCatalog
+            >>>
+            >>> DATA_CATALOG_CLASS = KedroDataCatalog
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}

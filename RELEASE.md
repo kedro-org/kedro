@@ -33,6 +33,7 @@ e `_get_config_credentials()`
 * [Manezki](https://github.com/Manezki)
 * [MigQ2](https://github.com/MigQ2)
 * [Felix Scherz](https://github.com/felixscherz)
+* [Yu-Sheng Li](https://github.com/kevin1kevin1k)
 
 # Release 0.19.8
 

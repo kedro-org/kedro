@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Dropped Python 3.8 support.
 * Implemented `KedroDataCatalog` repeating `DataCatalog` functionality with a few API enhancements:
   * Removed `_FrozenDatasets` and access datasets as properties;
   * Added get dataset by name feature;

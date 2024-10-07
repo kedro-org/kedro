@@ -4,7 +4,7 @@
 * Implemented `KedroDataCatalog` repeating `DataCatalog` functionality with a few API enhancements:
   * Removed `_FrozenDatasets` and access datasets as properties;
   * Added get dataset by name feature;
-  * `add_feed_dict()` was simplified and renamed to `add_data()`;
+  * `add_feed_dict()` was simplified to only add raw data;
   * Datasets' initialisation was moved out from `from_config()` method to the constructor.
 * Moved development requirements from `requirements.txt` to the dedicated section in `pyproject.toml` for project template.
 * Implemented `Protocol` abstraction for the current `DataCatalog` and adding new catalog implementations.

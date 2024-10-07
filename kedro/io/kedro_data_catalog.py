@@ -68,7 +68,7 @@ class KedroDataCatalog(CatalogProtocol):
             self._add_from_config(ds_name, ds_config)
 
         if raw_data:
-            self.add_data(raw_data)
+            self.add_feed_dict(raw_data)
 
     @property
     def datasets(self) -> dict[str, Any]:
@@ -304,15 +304,12 @@ class KedroDataCatalog(CatalogProtocol):
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
 
-    def add_data(self, data: dict[str, Any], replace: bool = False) -> None:
-        # This method was simplified to add memory datasets only, since
-        # adding AbstractDataset can be done via add() method
-        for ds_name, ds_data in data.items():
-            self.add(ds_name, MemoryDataset(data=ds_data), replace)  # type: ignore[abstract]
-
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         # TODO: remove when removing old catalog
-        return self.add_data(feed_dict, replace)
+        # This method was simplified to add memory datasets only, since
+        # adding AbstractDataset can be done via add() method
+        for ds_name, ds_data in feed_dict.items():
+            self.add(ds_name, MemoryDataset(data=ds_data), replace)  # type: ignore[abstract]
 
     def shallow_copy(
         self, extra_dataset_patterns: Patterns | None = None

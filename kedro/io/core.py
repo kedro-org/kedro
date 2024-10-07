@@ -71,7 +71,7 @@ class DatasetError(Exception):
 
 class DatasetNotFoundError(DatasetError):
     """``DatasetNotFoundError`` raised by ``DataCatalog`` class in case of
-    trying to use a non-existing data set.
+    trying to use a non-existing dataset.
     """
 
     pass
@@ -79,7 +79,7 @@ class DatasetNotFoundError(DatasetError):
 
 class DatasetAlreadyExistsError(DatasetError):
     """``DatasetAlreadyExistsError`` raised by ``DataCatalog`` class in case
-    of trying to add a data set which already exists in the ``DataCatalog``.
+    of trying to add a dataset which already exists in the ``DataCatalog``.
     """
 
     pass
@@ -87,7 +87,7 @@ class DatasetAlreadyExistsError(DatasetError):
 
 class VersionNotFoundError(DatasetError):
     """``VersionNotFoundError`` raised by ``AbstractVersionedDataset`` implementations
-    in case of no load versions available for the data set.
+    in case of no load versions available for the dataset.
     """
 
     pass
@@ -98,9 +98,9 @@ _DO = TypeVar("_DO")
 
 
 class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
-    """``AbstractDataset`` is the base class for all data set implementations.
+    """``AbstractDataset`` is the base class for all dataset implementations.
 
-    All data set implementations should extend this abstract class
+    All dataset implementations should extend this abstract class
     and implement the methods marked as abstract.
     If a specific dataset implementation cannot be used in conjunction with
     the ``ParallelRunner``, such user-defined dataset should have the
@@ -156,23 +156,23 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         load_version: str | None = None,
         save_version: str | None = None,
     ) -> AbstractDataset:
-        """Create a data set instance using the configuration provided.
+        """Create a dataset instance using the configuration provided.
 
         Args:
             name: Data set name.
             config: Data set config dictionary.
             load_version: Version string to be used for ``load`` operation if
-                the data set is versioned. Has no effect on the data set
+                the dataset is versioned. Has no effect on the dataset
                 if versioning was not enabled.
             save_version: Version string to be used for ``save`` operation if
-                the data set is versioned. Has no effect on the data set
+                the dataset is versioned. Has no effect on the dataset
                 if versioning was not enabled.
 
         Returns:
             An instance of an ``AbstractDataset`` subclass.
 
         Raises:
-            DatasetError: When the function fails to create the data set
+            DatasetError: When the function fails to create the dataset
                 from its config.
 
         """
@@ -245,9 +245,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             except DatasetError:
                 raise
             except Exception as exc:
-                # This exception handling is by design as the composed data sets
+                # This exception handling is by design as the composed datasets
                 # can throw any type of exception.
-                message = f"Failed while loading data from data set {self!s}.\n{exc!s}"
+                message = f"Failed while loading data from dataset {self!s}.\n{exc!s}"
                 raise DatasetError(message) from exc
 
         load.__annotations__["return"] = load_func.__annotations__.get("return")
@@ -271,7 +271,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             except (DatasetError, FileNotFoundError, NotADirectoryError):
                 raise
             except Exception as exc:
-                message = f"Failed while saving data to data set {self!s}.\n{exc!s}"
+                message = f"Failed while saving data to dataset {self!s}.\n{exc!s}"
                 raise DatasetError(message) from exc
 
         save.__annotations__["data"] = save_func.__annotations__.get("data", Any)
@@ -377,7 +377,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         )
 
     def exists(self) -> bool:
-        """Checks whether a data set's output already exists by calling
+        """Checks whether a dataset's output already exists by calling
         the provided _exists() method.
 
         Returns:
@@ -391,7 +391,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             self._logger.debug("Checking whether target of %s exists", str(self))
             return self._exists()
         except Exception as exc:
-            message = f"Failed during exists check for data set {self!s}.\n{exc!s}"
+            message = f"Failed during exists check for dataset {self!s}.\n{exc!s}"
             raise DatasetError(message) from exc
 
     def _exists(self) -> bool:
@@ -412,7 +412,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             self._logger.debug("Releasing %s", str(self))
             self._release()
         except Exception as exc:
-            message = f"Failed during release for data set {self!s}.\n{exc!s}"
+            message = f"Failed during release for dataset {self!s}.\n{exc!s}"
             raise DatasetError(message) from exc
 
     def _release(self) -> None:
@@ -438,7 +438,7 @@ def generate_timestamp() -> str:
 
 class Version(namedtuple("Version", ["load", "save"])):
     """This namedtuple is used to provide load and save versions for versioned
-    data sets. If ``Version.load`` is None, then the latest available version
+    datasets. If ``Version.load`` is None, then the latest available version
     is loaded. If ``Version.save`` is None, then save version is formatted as
     YYYY-MM-DDThh.mm.ss.sssZ of the current timestamp.
     """
@@ -450,7 +450,7 @@ _CONSISTENCY_WARNING = (
     "Save version '{}' did not match load version '{}' for {}. This is strongly "
     "discouraged due to inconsistencies it may cause between 'save' and "
     "'load' operations. Please refrain from setting exact load version for "
-    "intermediate data sets where possible to avoid this warning."
+    "intermediate datasets where possible to avoid this warning."
 )
 
 _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", ""]
@@ -467,10 +467,10 @@ def parse_dataset_definition(
         config: Data set config dictionary. It *must* contain the `type` key
             with fully qualified class name or the class object.
         load_version: Version string to be used for ``load`` operation if
-            the data set is versioned. Has no effect on the data set
+            the dataset is versioned. Has no effect on the dataset
             if versioning was not enabled.
         save_version: Version string to be used for ``save`` operation if
-            the data set is versioned. Has no effect on the data set
+            the dataset is versioned. Has no effect on the dataset
             if versioning was not enabled.
 
     Raises:
@@ -522,14 +522,14 @@ def parse_dataset_definition(
     if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(
             f"Dataset type '{class_obj.__module__}.{class_obj.__qualname__}' "
-            f"is invalid: all data set types must extend 'AbstractDataset'."
+            f"is invalid: all dataset types must extend 'AbstractDataset'."
         )
 
     if VERSION_KEY in config:
         # remove "version" key so that it's not passed
-        # to the "unversioned" data set constructor
+        # to the "unversioned" dataset constructor
         message = (
-            "'%s' attribute removed from data set configuration since it is a "
+            "'%s' attribute removed from dataset configuration since it is a "
             "reserved word and cannot be directly specified"
         )
         logging.getLogger(__name__).warning(message, VERSION_KEY)
@@ -579,10 +579,10 @@ def _local_exists(local_filepath: str) -> bool:  # SKIP_IF_NO_SPARK
 
 class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     """
-    ``AbstractVersionedDataset`` is the base class for all versioned data set
+    ``AbstractVersionedDataset`` is the base class for all versioned dataset
     implementations.
 
-    All data sets that implement versioning should extend this
+    All datasets that implement versioning should extend this
     abstract class and implement the methods marked as abstract.
 
     Example:
@@ -764,7 +764,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         return save
 
     def exists(self) -> bool:
-        """Checks whether a data set's output already exists by calling
+        """Checks whether a dataset's output already exists by calling
         the provided _exists() method.
 
         Returns:
@@ -780,7 +780,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         except VersionNotFoundError:
             return False
         except Exception as exc:  # SKIP_IF_NO_SPARK
-            message = f"Failed during exists check for data set {self!s}.\n{exc!s}"
+            message = f"Failed during exists check for dataset {self!s}.\n{exc!s}"
             raise DatasetError(message) from exc
 
     def _release(self) -> None:
@@ -938,7 +938,7 @@ class CatalogProtocol(Protocol[_C]):
         ...
 
     def exists(self, name: str) -> bool:
-        """Checks whether registered data set exists by calling its `exists()` method."""
+        """Checks whether registered dataset exists by calling its `exists()` method."""
         ...
 
     def release(self, name: str) -> None:

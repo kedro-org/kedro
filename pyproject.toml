@@ -93,7 +93,10 @@ jupyter = [
     "ipylab>=1.0.0",
     "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
 ]
-all = [ "kedro[test,docs,jupyter]" ]
+benchmark = [
+    "asv"
+]
+all = [ "kedro[test,docs,jupyter,benchmark]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

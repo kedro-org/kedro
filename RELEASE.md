@@ -13,7 +13,7 @@
 * Made packaged Kedro projects return `session.run()` output to be used when running it in the interactive environment.
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 
-**Note:** ``KedroDataCatalog`` is an experimental feature, so please mind possible breaking changes while using it.
+**Note:** ``KedroDataCatalog`` is an experimental feature and is under active development. Therefore, it is possible we'll introduce breaking changes to this class, so be mindful of that if you decide to use it already. Let us know if you have any feedback about the ``KedroDataCatalog`` or ideas for new features.
 
 ## Bug fixes and other changes
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.

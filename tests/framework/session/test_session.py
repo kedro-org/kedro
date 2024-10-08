@@ -5,7 +5,7 @@ import sys
 import textwrap
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Type
+from typing import Any
 from unittest.mock import create_autospec
 
 import pytest
@@ -50,7 +50,7 @@ ATTRS_ATTRIBUTE = "__attrs_attrs__"
 NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
 
 
-def create_attrs_autospec(spec: Type, spec_set: bool = True) -> Any:
+def create_attrs_autospec(spec: type, spec_set: bool = True) -> Any:
     """Creates a mock of an attr class (creates mocks recursively on all attributes).
     https://github.com/python-attrs/attrs/issues/462#issuecomment-1134656377
 

@@ -14,7 +14,10 @@ import typing
 import warnings
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Callable, OrderedDict
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from collections import OrderedDict
 
 from IPython.core.getipython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic

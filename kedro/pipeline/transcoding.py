@@ -1,9 +1,7 @@
-from typing import Tuple
-
 TRANSCODING_SEPARATOR = "@"
 
 
-def _transcode_split(element: str) -> Tuple[str, str]:
+def _transcode_split(element: str) -> tuple[str, str]:
     """Split the name by the transcoding separator.
     If the transcoding part is missing, empty string will be put in.
 

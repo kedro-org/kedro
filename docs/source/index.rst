@@ -23,9 +23,9 @@ Welcome to Kedro's award-winning documentation!
     :target: https://opensource.org/license/apache2-0-php/
     :alt: License is Apache 2.0
 
-.. image:: https://img.shields.io/badge/3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
+.. image:: https://img.shields.io/badge/3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg
     :target: https://pypi.org/project/kedro/
-    :alt: Python version 3.8, 3.9, 3.10, 3.11
+    :alt: Python version 3.9, 3.10, 3.11, 3.12
 
 .. image:: https://badge.fury.io/py/kedro.svg
     :target: https://pypi.org/project/kedro/

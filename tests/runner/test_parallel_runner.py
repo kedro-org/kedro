@@ -345,6 +345,7 @@ class TestParallelRunnerRelease:
         assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]
 
 
+@pytest.mark.parametrize("is_async", [False, True])
 class TestRunNodeSynchronisationHelper:
     """Test class for _run_node_synchronization helper. It is tested manually
     in isolation since it's called in the subprocess, which ParallelRunner
@@ -360,6 +361,10 @@ class TestRunNodeSynchronisationHelper:
         return mocker.patch("kedro.runner.parallel_runner.run_node")
 
     @pytest.fixture
+    def mock_execute_task(self, mocker):
+        return mocker.patch("kedro.runner.task.Task.execute")
+
+    @pytest.fixture
     def mock_configure_project(self, mocker):
         return mocker.patch("kedro.framework.project.configure_project")
 
@@ -367,21 +372,39 @@ class TestRunNodeSynchronisationHelper:
         self,
         mock_logging,
         mock_configure_project,
+        mock_execute_task,
+        is_async,
         mocker,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
+        node_ = mocker.sentinel.node
+        catalog = mocker.sentinel.catalog
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
         _run_node_synchronization(
+            node_,
+            catalog,
+            is_async,
+            session_id,
             package_name=package_name,
             logging_config={"fake_logging_config": True},
         )
+        mock_execute_task.assert_called_once()
         mock_logging.assert_called_once_with({"fake_logging_config": True})
         mock_configure_project.assert_called_once_with(package_name)
 
-    def test_package_name_not_provided(self, mock_logging, mocker):
+    def test_package_name_not_provided(
+        self, mock_logging, mock_execute_task, is_async, mocker
+    ):
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
+        node_ = mocker.sentinel.node
+        catalog = mocker.sentinel.catalog
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
-        _run_node_synchronization(package_name=package_name)
+        _run_node_synchronization(
+            node_, catalog, is_async, session_id, package_name=package_name
+        )
+        mock_execute_task.assert_called_once()
         mock_logging.assert_not_called()

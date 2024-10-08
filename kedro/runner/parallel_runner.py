@@ -60,10 +60,14 @@ def _bootstrap_subprocess(
         configure_logging(logging_config)
 
 
-def _run_node_synchronization(
+def _run_node_synchronization(  # noqa: PLR0913
+    node: Node,
+    catalog: CatalogProtocol,
+    is_async: bool = False,
+    session_id: str | None = None,
     package_name: str | None = None,
     logging_config: dict[str, Any] | None = None,
-) -> None:
+) -> Any:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
     A ``PluginManager`` instance is created in each subprocess because the
@@ -88,6 +92,15 @@ def _run_node_synchronization(
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
     _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+    from kedro.runner import Task
+
+    return Task(
+        node=node,
+        catalog=catalog,
+        hook_manager=hook_manager,
+        is_async=is_async,
+        session_id=session_id,
+    ).execute()
 
 
 class ParallelRunner(AbstractRunner):
@@ -283,20 +296,17 @@ class ParallelRunner(AbstractRunner):
                 ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
-                    from kedro.runner.task import Task
-
-                    _run_node_synchronization(
-                        package_name=PACKAGE_NAME,
-                        logging_config=LOGGING,  # type: ignore[arg-type]
+                    futures.add(
+                        pool.submit(
+                            _run_node_synchronization,
+                            node,
+                            catalog,
+                            self._is_async,
+                            session_id,
+                            package_name=PACKAGE_NAME,
+                            logging_config=LOGGING,  # type: ignore[arg-type]
+                        )
                     )
-                    task = Task(
-                        node=node,
-                        catalog=catalog,
-                        hook_manager=hook_manager,
-                        is_async=self._is_async,
-                        session_id=session_id,
-                    )
-                    futures.add(pool.submit(task))
                 if not futures:
                     if todo_nodes:
                         debug_data = {

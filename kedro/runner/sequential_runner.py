@@ -9,7 +9,7 @@ from collections import Counter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
-from kedro.runner.runner import AbstractRunner, run_node
+from kedro.runner.runner import AbstractRunner
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -75,7 +75,15 @@ class SequentialRunner(AbstractRunner):
 
         for exec_index, node in enumerate(nodes):
             try:
-                run_node(node, catalog, hook_manager, self._is_async, session_id)
+                from kedro.runner.task import Task
+
+                Task(
+                    node=node,
+                    catalog=catalog,
+                    hook_manager=hook_manager,
+                    is_async=self._is_async,
+                    session_id=session_id,
+                ).execute()
                 done_nodes.add(node)
             except Exception:
                 self._suggest_resume_scenario(pipeline, done_nodes, catalog)

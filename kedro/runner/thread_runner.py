@@ -11,7 +11,8 @@ from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
-from kedro.runner.runner import AbstractRunner, run_node
+from kedro.runner import Task
+from kedro.runner.runner import AbstractRunner
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -117,16 +118,14 @@ class ThreadRunner(AbstractRunner):
                 ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
-                    futures.add(
-                        pool.submit(
-                            run_node,
-                            node,
-                            catalog,
-                            hook_manager,
-                            self._is_async,
-                            session_id,
-                        )
+                    task = Task(
+                        node=node,
+                        catalog=catalog,
+                        hook_manager=hook_manager,
+                        is_async=self._is_async,
+                        session_id=session_id,
                     )
+                    futures.add(pool.submit(task))
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)  # noqa: S101
                     break

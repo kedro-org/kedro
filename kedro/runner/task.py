@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import itertools as it
 from concurrent.futures import (
     ALL_COMPLETED,
@@ -35,6 +36,14 @@ class Task:
         self.session_id = session_id
 
     def execute(self) -> Node:
+        if self.is_async and inspect.isgeneratorfunction(self.node.func):
+            raise ValueError(
+                f"Async data loading and saving does not work with "
+                f"nodes wrapping generator functions. Please make "
+                f"sure you don't use `yield` anywhere "
+                f"in node {self.node!s}."
+            )
+
         if self.is_async:
             node = self._run_node_async(
                 self.node, self.catalog, self.hook_manager, self.session_id
@@ -48,6 +57,10 @@ class Task:
             self.catalog.confirm(name)
 
         return node
+
+    def __call__(self) -> Node:
+        """Make the class instance callable by ProcessPoolExecutor."""
+        return self.execute()
 
     def _run_node_sequential(
         self,

@@ -32,7 +32,6 @@ The spaceflights project dependencies are stored in `requirements.txt`(you may f
 
 ```text
 # code quality packages
-ipython>=7.31.1, <8.0; python_version < '3.8'
 ipython~=8.10; python_version >= '3.8'
 ruff==0.1.8
 

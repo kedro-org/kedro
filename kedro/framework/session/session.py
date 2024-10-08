@@ -11,7 +11,7 @@ import sys
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any
 
 import click
 
@@ -28,6 +28,8 @@ from kedro.runner import AbstractRunner, SequentialRunner, ThreadRunner
 from kedro.utils import _find_kedro_project
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from kedro.config import AbstractConfigLoader
     from kedro.framework.context import KedroContext
     from kedro.framework.session.store import BaseSessionStore

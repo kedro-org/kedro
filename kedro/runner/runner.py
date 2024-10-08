@@ -8,7 +8,17 @@ import inspect
 import logging
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import TYPE_CHECKING, Any, Collection, Iterable
+from collections.abc import Iterator
+from concurrent.futures import (
+    ALL_COMPLETED,
+    Future,
+    ThreadPoolExecutor,
+    as_completed,
+    wait,
+)
+from typing import TYPE_CHECKING, Any
+
+from more_itertools import interleave
 
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import CatalogProtocol, MemoryDataset
@@ -16,6 +26,8 @@ from kedro.pipeline import Pipeline
 from kedro.runner.task import Task
 
 if TYPE_CHECKING:
+    from collections.abc import Collection, Iterable
+
     from pluggy import PluginManager
 
     from kedro.pipeline.node import Node
@@ -373,7 +385,7 @@ def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[
         A list of initial ``Node``s to run given inputs (in topological order).
 
     """
-    node_names = set(n.name for n in nodes)
+    node_names = {n.name for n in nodes}
     if len(node_names) == 0:
         return []
     sub_pipeline = pipeline.only_nodes(*node_names)

@@ -1,6 +1,5 @@
 import logging
 import re
-import sys
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -459,23 +458,6 @@ class TestDataCatalogFromConfig:
         pattern = (
             "An exception occurred when parsing config for dataset 'boats':\n"
             "Class 'kedro.io.CSVDatasetInvalid' not found, is this a typo?"
-        )
-        with pytest.raises(DatasetError, match=re.escape(pattern)):
-            DataCatalog.from_config(**correct_config)
-
-    @pytest.mark.skipif(
-        sys.version_info < (3, 9),
-        reason="for python 3.8 kedro-datasets version 1.8 is used which has the old spelling",
-    )
-    def test_config_incorrect_spelling(self, correct_config):
-        """Check hint if the type uses the old DataSet spelling"""
-        correct_config["catalog"]["boats"]["type"] = "pandas.CSVDataSet"
-
-        pattern = (
-            "An exception occurred when parsing config for dataset 'boats':\n"
-            "Class 'pandas.CSVDataSet' not found, is this a typo?"
-            "\nHint: If you are trying to use a dataset from `kedro-datasets`>=2.0.0,"
-            " make sure that the dataset name uses the `Dataset` spelling instead of `DataSet`."
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**correct_config)

@@ -12,7 +12,8 @@ import tempfile
 import toml
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Iterable, Iterator, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
+
 
 import click
 from omegaconf import OmegaConf
@@ -42,6 +43,7 @@ from kedro.framework.cli.utils import (
 if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
     from importlib_metadata import PackageMetadata
+    from collections.abc import Iterable, Iterator
 
 _PYPROJECT_TOML_TEMPLATE = """
 [build-system]

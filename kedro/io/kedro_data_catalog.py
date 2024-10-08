@@ -308,7 +308,7 @@ class KedroDataCatalog(CatalogProtocol):
 
     def _validate_dataset(self, ds_name: str, ds: AbstractDataset | None) -> None:
         """Validates if dataset is not None and suggests fuzzy-matching datasets' names
-            in the DatasetNotFoundError message otherwise.
+        in the DatasetNotFoundError message otherwise.
 
         Raises:
             DatasetNotFoundError: When a dataset with the given name

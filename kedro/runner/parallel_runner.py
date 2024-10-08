@@ -13,7 +13,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any
 
 from kedro.framework.hooks.manager import (
     _create_hook_manager,
@@ -30,6 +30,8 @@ from kedro.io import (
 from kedro.runner.runner import AbstractRunner, run_node
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from pluggy import PluginManager
 
     from kedro.pipeline import Pipeline

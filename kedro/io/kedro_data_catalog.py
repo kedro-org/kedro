@@ -47,8 +47,7 @@ class KedroDataCatalog(CatalogProtocol):
         single point of reference for your calls, relaying load and save
         functions to the underlying datasets.
 
-        Note: ``KedroDataCatalog`` is an experimental feature, so please mind
-        possible breaking changes while using it.
+        Note: ``KedroDataCatalog`` is an experimental feature and is under active development. Therefore, it is possible we'll introduce breaking changes to this class, so be mindful of that if you decide to use it already.
 
         Args:
             datasets: A dictionary of dataset names and dataset instances.

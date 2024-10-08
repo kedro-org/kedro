@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Dropped Python 3.8 support.
 * Implemented `KedroDataCatalog` repeating `DataCatalog` functionality with a few API enhancements:
   * Removed `_FrozenDatasets` and access datasets as properties;
   * Added get dataset by name feature;
@@ -13,7 +14,7 @@
 * Made packaged Kedro projects return `session.run()` output to be used when running it in the interactive environment.
 * Enhanced `OmegaConfigLoader` configuration validation to detect duplicate keys at all parameter levels, ensuring comprehensive nested key checking.
 
-**Note:** ``KedroDataCatalog`` is an experimental feature, so please mind possible breaking changes while using it.
+**Note:** ``KedroDataCatalog`` is an experimental feature and is under active development. Therefore, it is possible we'll introduce breaking changes to this class, so be mindful of that if you decide to use it already. Let us know if you have any feedback about the ``KedroDataCatalog`` or ideas for new features.
 
 ## Bug fixes and other changes
 * Fixed bug where using dataset factories breaks with `ThreadRunner`.
@@ -34,6 +35,7 @@
 * [Manezki](https://github.com/Manezki)
 * [MigQ2](https://github.com/MigQ2)
 * [Felix Scherz](https://github.com/felixscherz)
+* [Yu-Sheng Li](https://github.com/kevin1kevin1k)
 
 # Release 0.19.8
 

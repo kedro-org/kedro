@@ -397,7 +397,7 @@ class TestKedroDataCatalog:
 
         def test_empty_config(self):
             """Test empty config"""
-            assert KedroDataCatalog.from_config(None)
+            assert len(KedroDataCatalog.from_config(None)) == 0
 
         def test_missing_credentials(self, correct_config):
             """Check the error if credentials can't be located"""
@@ -519,6 +519,39 @@ class TestKedroDataCatalog:
             data_catalog = KedroDataCatalog.from_config(**correct_config)
             with pytest.raises(DatasetError, match=re.escape(pattern)):
                 data_catalog.confirm(dataset_name)
+
+        def test_iteration(self, correct_config):
+            """Test iterate through keys, values and items."""
+            data_catalog = KedroDataCatalog.from_config(**correct_config)
+
+            for ds_name_cat, ds_name_config in zip(
+                data_catalog, correct_config["catalog"]
+            ):
+                assert ds_name_cat == ds_name_config
+
+            for ds_name_cat, ds_name_config in zip(
+                data_catalog.keys(), correct_config["catalog"]
+            ):
+                assert ds_name_cat == ds_name_config
+
+            for ds in data_catalog.values():
+                assert isinstance(ds, CSVDataset)
+
+            for ds_name, ds in data_catalog.items():
+                assert isinstance(ds, CSVDataset)
+                assert ds_name in correct_config["catalog"]
+
+        def test_getitem_setitem(self, correct_config):
+            """Test get and set item."""
+            data_catalog = KedroDataCatalog.from_config(**correct_config)
+            data_catalog["test"] = 123
+            assert isinstance(data_catalog["test"], MemoryDataset)
+
+        def test_ipython_key_completions(self, correct_config):
+            data_catalog = KedroDataCatalog.from_config(**correct_config)
+            assert data_catalog._ipython_key_completions_() == list(
+                correct_config["catalog"].keys()
+            )
 
     class TestDataCatalogVersioned:
         def test_from_correct_config_versioned(self, correct_config, dummy_dataframe):

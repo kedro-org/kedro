@@ -1,0 +1,58 @@
+congress_expenses:
+  type: spark.SparkDataset
+  filepath: data/gastos-deputados.csv
+  file_format: csv
+  load_args:
+    header: True
+    inferSchema: True
+
+expenses_per_party:
+  type: spark.SparkDataset
+  filepath: data/output/expenses_per_party.csv
+  file_format: csv
+  save_args:
+    sep: ','
+    header: True
+    mode: overwrite
+  load_args:
+    header: True
+    inferSchema: True
+
+largest_expense_source:
+  type: spark.SparkDataset
+  filepath: data/output/largest_expense_source.parquet
+  file_format: parquet
+  save_args:
+    sep: ','
+    header: True
+    mode: overwrite
+
+top_spender_per_party:
+  type: spark.SparkDataset
+  filepath: data/output/top_spender_per_party.csv
+  file_format: csv
+  save_args:
+    sep: ','
+    header: True
+    mode: overwrite
+  load_args:
+    header: True
+    inferSchema: True
+
+top_overall_spender:
+  type: spark.SparkDataset
+  filepath: data/output/top_overall_spender.parquet
+  file_format: parquet
+  save_args:
+    sep: ','
+    header: True
+    mode: overwrite
+
+top_spending_party:
+  type: spark.SparkDataset
+  filepath: data/output/top_spending_party.parquet
+  file_format: parquet
+  save_args:
+    sep: ','
+    header: True
+    mode: overwrite

@@ -14,7 +14,7 @@ import copy
 import difflib
 import logging
 import re
-from typing import Any, List
+from typing import Any, List  # noqa: UP035
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (

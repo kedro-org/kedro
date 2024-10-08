@@ -127,11 +127,11 @@ class TestPipelineCreateCommand:
         assert not (pipelines_dir / PIPELINE_NAME).exists()
 
         # Rename the local template dir to something else so we know the command line flag is taking precedence
-        try:
-            # Can skip if already there but copytree has a dirs_exist_ok flag in >python 3.8 only
-            shutil.copytree(fake_local_template_dir, fake_repo_path / "local_templates")
-        except FileExistsError:
-            pass
+        shutil.copytree(
+            fake_local_template_dir,
+            fake_repo_path / "local_templates",
+            dirs_exist_ok=True,
+        )
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
         cmd += ["-t", str(fake_repo_path / "local_templates/pipeline")]

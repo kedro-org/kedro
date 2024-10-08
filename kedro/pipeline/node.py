@@ -9,12 +9,15 @@ import inspect
 import logging
 import re
 from collections import Counter
-from typing import Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable
 from warnings import warn
 
 from more_itertools import spy, unzip
 
 from .transcoding import _strip_transcoding
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class Node:

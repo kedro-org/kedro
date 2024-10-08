@@ -128,7 +128,7 @@ class KedroDataCatalog(CatalogProtocol):
     def __iter__(self) -> str:
         yield from self._datasets.keys()
 
-    def __getitem__(self, ds_name: str) -> AbstractDataset | None:
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
         return self.get(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -306,22 +306,6 @@ class KedroDataCatalog(CatalogProtocol):
             ) from exc
         return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
 
-    def _validate_dataset(self, ds_name: str, ds: AbstractDataset | None) -> None:
-        """Validates if dataset is not None and suggests fuzzy-matching datasets' names
-        in the DatasetNotFoundError message otherwise.
-
-        Raises:
-            DatasetNotFoundError: When a dataset with the given name
-                is not in the collection and do not match patterns.
-        """
-        if ds is None:
-            error_msg = f"Dataset '{ds_name}' not found in the catalog"
-            matches = difflib.get_close_matches(ds_name, self._datasets.keys())
-            if matches:
-                suggestions = ", ".join(matches)
-                error_msg += f" - did you mean one of these instead: {suggestions}"
-            raise DatasetNotFoundError(error_msg)
-
     def save(self, name: str, data: Any) -> None:
         # TODO: remove when removing old catalog
         """Save data to a registered dataset."""
@@ -329,8 +313,7 @@ class KedroDataCatalog(CatalogProtocol):
 
     def save_data(self, name: str, data: Any) -> None:
         """Save data to a registered dataset."""
-        dataset = self.get(name)
-        self._validate_dataset(name, dataset)
+        dataset = self.get_dataset(name)
 
         self._logger.info(
             "Saving data to %s (%s)...",
@@ -339,7 +322,7 @@ class KedroDataCatalog(CatalogProtocol):
             extra={"markup": True},
         )
 
-        dataset.save(data)  # type: ignore[union-attr]
+        dataset.save(data)
 
     def load(self, name: str, version: str | None = None) -> Any:
         # TODO: remove when removing old catalog
@@ -347,14 +330,8 @@ class KedroDataCatalog(CatalogProtocol):
 
     def load_data(self, name: str, version: str | None = None) -> Any:
         """Loads a registered dataset."""
-        dataset = self.get(name)
-        self._validate_dataset(name, dataset)
-
         load_version = Version(version, None) if version else None
-        if load_version and isinstance(dataset, AbstractVersionedDataset):
-            # we only want to return a similar-looking dataset,
-            # not modify the one stored in the current catalog
-            dataset = dataset._copy(_version=load_version)
+        dataset = self.get_dataset(name, version=load_version)
 
         self._logger.info(
             "Loading data from %s (%s)...",
@@ -363,7 +340,7 @@ class KedroDataCatalog(CatalogProtocol):
             extra={"markup": True},
         )
 
-        return dataset.load()  # type: ignore[union-attr]
+        return dataset.load()
 
     def release(self, name: str) -> None:
         """Release any cached data associated with a dataset

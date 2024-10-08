@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import itertools as it
+from collections.abc import Iterable, Iterator
 from concurrent.futures import (
     ALL_COMPLETED,
     Future,
@@ -9,7 +10,7 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import TYPE_CHECKING, Any, Iterable, Iterator
+from typing import TYPE_CHECKING, Any
 
 from more_itertools import interleave
 

@@ -8,17 +8,7 @@ import inspect
 import logging
 from abc import ABC, abstractmethod
 from collections import deque
-from collections.abc import Iterator
-from concurrent.futures import (
-    ALL_COMPLETED,
-    Future,
-    ThreadPoolExecutor,
-    as_completed,
-    wait,
-)
 from typing import TYPE_CHECKING, Any
-
-from more_itertools import interleave
 
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import CatalogProtocol, MemoryDataset

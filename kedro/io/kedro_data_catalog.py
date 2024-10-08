@@ -140,6 +140,22 @@ class KedroDataCatalog(CatalogProtocol):
         else:
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
+    def __len__(self) -> int:
+        return len(self.keys())
+
+    def get(
+        self, key: str, default: AbstractDataset | None = None
+    ) -> AbstractDataset | None:
+        """Get a dataset by name from an internal collection of datasets."""
+        if key not in self._datasets:
+            ds_config = self._config_resolver.resolve_pattern(key)
+            if ds_config:
+                self._add_from_config(key, ds_config)
+
+        dataset = self._datasets.get(key, None)
+
+        return dataset or default
+
     def _ipython_key_completions_(self) -> list[str]:
         return list(self._datasets.keys())
 
@@ -209,6 +225,7 @@ class KedroDataCatalog(CatalogProtocol):
     def get_dataset(
         self, ds_name: str, version: Version | None = None, suggest: bool = True
     ) -> AbstractDataset:
+        # TODO: remove when removing old catalog
         """Get a dataset by name from an internal collection of datasets.
 
         If a dataset is not in the collection but matches any pattern
@@ -228,12 +245,7 @@ class KedroDataCatalog(CatalogProtocol):
             DatasetNotFoundError: When a dataset with the given name
                 is not in the collection and do not match patterns.
         """
-        if ds_name not in self._datasets:
-            ds_config = self._config_resolver.resolve_pattern(ds_name)
-            if ds_config:
-                self._add_from_config(ds_name, ds_config)
-
-        dataset = self._datasets.get(ds_name, None)
+        dataset = self.get(ds_name)
 
         if dataset is None:
             error_msg = f"Dataset '{ds_name}' not found in the catalog"
@@ -271,12 +283,12 @@ class KedroDataCatalog(CatalogProtocol):
         self.__setitem__(ds_name, dataset)
 
     def list(self, regex_search: str | None = None) -> List[str]:  # noqa: UP006
+        # TODO: remove when removing old catalog
         """
         List of all dataset names registered in the catalog.
         This can be filtered by providing an optional regular expression
         which will only return matching keys.
         """
-        # TODO: remove when removing old catalog
         if regex_search == "":
             self._logger.warning("The empty string will not match any datasets")
             return []
@@ -296,6 +308,11 @@ class KedroDataCatalog(CatalogProtocol):
         return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:
+        # TODO: remove when removing old catalog
+        """Save data to a registered dataset."""
+        self.save_data(name, data)
+
+    def save_data(self, name: str, data: Any) -> None:
         """Save data to a registered dataset."""
         dataset = self.get_dataset(name)
 
@@ -309,6 +326,10 @@ class KedroDataCatalog(CatalogProtocol):
         dataset.save(data)
 
     def load(self, name: str, version: str | None = None) -> Any:
+        # TODO: remove when removing old catalog
+        return self.load_data(name, version)
+
+    def load_data(self, name: str, version: str | None = None) -> Any:
         """Loads a registered dataset."""
         load_version = Version(version, None) if version else None
         dataset = self.get_dataset(name, version=load_version)

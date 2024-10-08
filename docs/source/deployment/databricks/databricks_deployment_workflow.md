@@ -10,7 +10,7 @@ Here are some typical use cases for running a packaged Kedro project as a Databr
 
 - **Data engineering pipeline**: the output of your Kedro project is a file or set of files containing cleaned and processed data.
 - **Machine learning with MLflow**: your Kedro project runs an ML model; metrics about your experiments are tracked in MLflow.
-- **Automated and scheduled runs**: your Kedro project should be [run on Databricks automatically](https://docs.databricks.com/workflows/jobs/schedule-jobs.html#add-a-job-schedule).
+- **Automated and scheduled runs**: your Kedro project should be [run on Databricks automatically](https://docs.databricks.com/en/jobs/scheduled.html#add-a-job-schedule).
 - **CI/CD integration**: you have a CI/CD pipeline that produces a packaged Kedro project.
 
 Running your packaged project as a Databricks job is very different from running it from a Databricks notebook. The Databricks job cluster has to be provisioned and started for each run, which is significantly slower than running it as a notebook on a cluster that has already been started. In addition, there is no way to change your project's code once it has been packaged. Instead, you must change your code, create a new package, and then upload it to Databricks again.

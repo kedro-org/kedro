@@ -16,10 +16,14 @@ import traceback
 import typing
 import warnings
 from collections import defaultdict
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import IO, Any, Callable, Iterable, Sequence
+from typing import IO, Any, Callable
 
 import click
 import importlib_metadata
@@ -56,7 +60,7 @@ def call(cmd: list[str], **kwargs: Any) -> None:  # pragma: no cover
     Raises:
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
-    click.echo(" ".join(shlex.quote(c) for c in cmd))
+    click.echo(shlex.join(cmd))
     code = subprocess.run(cmd, **kwargs).returncode  # noqa: PLW1510, S603
     if code:
         raise click.exceptions.Exit(code=code)

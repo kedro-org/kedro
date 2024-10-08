@@ -3,6 +3,9 @@ provide ``load`` and ``save`` capabilities from anywhere in the program. To
 use a ``KedroDataCatalog``, you need to instantiate it with a dictionary of datasets.
 Then it will act as a single point of reference for your calls, relaying load and
 save functions to the underlying datasets.
+
+``KedroDataCatalog`` is an experimental feature aimed to replace ``DataCatalog`` in the future.
+Expect possible breaking changes while using it.
 """
 
 from __future__ import annotations
@@ -44,6 +47,8 @@ class KedroDataCatalog(CatalogProtocol):
         single point of reference for your calls, relaying load and save
         functions to the underlying datasets.
 
+        Note: ``KedroDataCatalog`` is an experimental feature and is under active development. Therefore, it is possible we'll introduce breaking changes to this class, so be mindful of that if you decide to use it already.
+
         Args:
             datasets: A dictionary of dataset names and dataset instances.
             raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
@@ -56,6 +61,13 @@ class KedroDataCatalog(CatalogProtocol):
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
+
+        Example:
+        ::
+            >>> # settings.py
+            >>> from kedro.io import KedroDataCatalog
+            >>>
+            >>> DATA_CATALOG_CLASS = KedroDataCatalog
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
@@ -68,7 +80,7 @@ class KedroDataCatalog(CatalogProtocol):
             self._add_from_config(ds_name, ds_config)
 
         if raw_data:
-            self.add_data(raw_data)
+            self.add_feed_dict(raw_data)
 
     @property
     def datasets(self) -> dict[str, Any]:
@@ -304,15 +316,12 @@ class KedroDataCatalog(CatalogProtocol):
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
 
-    def add_data(self, data: dict[str, Any], replace: bool = False) -> None:
-        # This method was simplified to add memory datasets only, since
-        # adding AbstractDataset can be done via add() method
-        for ds_name, ds_data in data.items():
-            self.add(ds_name, MemoryDataset(data=ds_data), replace)  # type: ignore[abstract]
-
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         # TODO: remove when removing old catalog
-        return self.add_data(feed_dict, replace)
+        # This method was simplified to add memory datasets only, since
+        # adding AbstractDataset can be done via add() method
+        for ds_name, ds_data in feed_dict.items():
+            self.add(ds_name, MemoryDataset(data=ds_data), replace)  # type: ignore[abstract]
 
     def shallow_copy(
         self, extra_dataset_patterns: Patterns | None = None

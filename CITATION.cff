@@ -44,6 +44,6 @@ authors:
 - family-names: Brugman
   given-names: Simon
 title: Kedro
-version: 0.19.8
-date-released: 2024-08-20
+version: 0.19.9
+date-released: 2024-10-09
 url: https://github.com/kedro-org/kedro

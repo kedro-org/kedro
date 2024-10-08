@@ -1,5 +1,7 @@
 # Upcoming Release
 
+# Release 0.19.9
+
 ## Major features and improvements
 * Dropped Python 3.8 support.
 * Implemented `KedroDataCatalog` repeating `DataCatalog` functionality with a few API enhancements:

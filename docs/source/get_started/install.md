@@ -1,7 +1,7 @@
 # Set up Kedro
 
 ## Installation prerequisites
-* **Python**: Kedro supports macOS, Linux, and Windows and is built for Python 3.8+. You'll select a version of Python when you create a virtual environment for your Kedro project.
+* **Python**: Kedro supports macOS, Linux, and Windows and is built for Python 3.9+. You'll select a version of Python when you create a virtual environment for your Kedro project.
 
 * **Virtual environment**: You should create a new virtual environment for *each* new Kedro project you work on to isolate its Python dependencies from those of other projects.
 
@@ -55,7 +55,7 @@ deactivate
 conda create --name kedro-environment python=3.10 -y
 ```
 
-The example below uses Python 3.10, and creates a virtual environment called `kedro-environment`. You can opt for a different version of Python (any version >= 3.8 and <3.12) for your project, and you can name it anything you choose.
+The example below uses Python 3.10, and creates a virtual environment called `kedro-environment`. You can opt for a different version of Python (any version >= 3.9 and <3.12) for your project, and you can name it anything you choose.
 
 The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory:
 
@@ -136,7 +136,7 @@ When migrating an existing project to a newer Kedro version, make sure you also 
 ## Summary
 
 * Kedro can be used on Windows, macOS or Linux.
-* Installation prerequisites include a virtual environment manager like `conda`, Python 3.8+, and `git`.
+* Installation prerequisites include a virtual environment manager like `conda`, Python 3.9+, and `git`.
 * You should install Kedro using `pip install kedro`.
 
 If you encounter any problems as you set up Kedro, ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or review the [searchable archive of Slack discussions](https://linen-slack.kedro.org/).

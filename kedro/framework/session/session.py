@@ -11,7 +11,7 @@ import sys
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any
 
 import click
 
@@ -28,6 +28,8 @@ from kedro.runner import AbstractRunner, SequentialRunner, ThreadRunner
 from kedro.utils import _find_kedro_project
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from kedro.config import AbstractConfigLoader
     from kedro.framework.context import KedroContext
     from kedro.framework.session.store import BaseSessionStore
@@ -394,13 +396,11 @@ class KedroSession:
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 
+        if isinstance(runner, ThreadRunner):
+            for ds in filtered_pipeline.datasets():
+                if catalog.config_resolver.match_pattern(ds):
+                    _ = catalog._get_dataset(ds)
         try:
-            if isinstance(runner, ThreadRunner):
-                for ds in filtered_pipeline.datasets():
-                    if catalog._match_pattern(
-                        catalog._dataset_patterns, ds
-                    ) or catalog._match_pattern(catalog._default_pattern, ds):
-                        _ = catalog._get_dataset(ds)
             run_result = runner.run(
                 filtered_pipeline, catalog, hook_manager, session_id
             )

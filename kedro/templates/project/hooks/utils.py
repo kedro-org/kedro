@@ -20,7 +20,9 @@ test_pyproject_requirements = [  # For pyproject.toml
 ]
 
 # Configuration key for documentation dependencies
-docs_pyproject_requirements = ["project.optional-dependencies"]  # For pyproject.toml
+docs_pyproject_requirements = ["project.optional-dependencies.docs"]  # For pyproject.toml
+# Configuration key for linting and testing dependencies
+dev_pyproject_requirements = ["project.optional-dependencies.dev"]  # For pyproject.toml
 
 # Requirements for example pipelines
 example_pipeline_requirements = "seaborn~=0.12.1\nscikit-learn~=1.0\n"
@@ -34,7 +36,7 @@ def _remove_from_file(file_path: Path, content_to_remove: str) -> None:
         file_path (Path): The path of the file from which to remove content.
         content_to_remove (str): The content to be removed from the file.
     """
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = file.readlines()
 
     # Split the content to remove into lines and remove trailing whitespaces/newlines
@@ -84,7 +86,7 @@ def _remove_from_toml(file_path: Path, sections_to_remove: list) -> None:
         sections_to_remove (list): A list of section keys to remove from the TOML file.
     """
     # Load the TOML file
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         data = toml.load(file)
 
     # Remove the specified sections
@@ -160,7 +162,7 @@ def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
     Args:
         file_path (Path): The path of the requirements file.
     """
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = file.readlines()
 
     for i, line in enumerate(lines):
@@ -191,12 +193,14 @@ def setup_template_tools(
         python_package_name (str): The name of the python package.
         example_pipeline (str): 'True' if example pipeline was selected
     """
+
+    if "Linting" not in selected_tools_list and "Testing" not in selected_tools_list:
+        _remove_from_toml(pyproject_file_path, dev_pyproject_requirements)
+
     if "Linting" not in selected_tools_list:
-        _remove_from_file(requirements_file_path, lint_requirements)
         _remove_from_toml(pyproject_file_path, lint_pyproject_requirements)
 
     if "Testing" not in selected_tools_list:
-        _remove_from_file(requirements_file_path, test_requirements)
         _remove_from_toml(pyproject_file_path, test_pyproject_requirements)
         _remove_dir(current_dir / "tests")
 

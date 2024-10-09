@@ -10,7 +10,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro helps you build production-ready data and analytics pipelines"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "attrs>=21.3",
     "build>=0.7.0",
@@ -33,7 +33,6 @@ dependencies = [
     "rope>=0.21,<2.0",  # subject to LGPLv3 license
     "toml>=0.10.0",
     "typing_extensions>=4.0",
-    "graphlib_backport>=1.0.0; python_version < '3.9'",
 ]
 keywords = [
     "pipelines",
@@ -45,10 +44,10 @@ keywords = [
 license = {text = "Apache Software License (Apache 2.0)"}
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dynamic = ["readme", "version"]
 
@@ -58,13 +57,11 @@ test = [
     "coverage[toml]",
     "import-linter==2.0",
     "ipylab>=1.0.0",
-    "ipython>=7.31.1, <8.0; python_version < '3.8'",
-    "ipython~=8.10; python_version >= '3.8'",
+    "ipython~=8.10",
     "jupyterlab_server>=2.11.1",
     "jupyterlab>=3,<5",
     "jupyter~=1.0",
-    "kedro-datasets; python_version >= '3.9'",
-    "kedro-datasets<2.0.0; python_version < '3.9'",
+    "kedro-datasets",
     "mypy~=1.0",
     "pandas~=2.0",
     "pluggy>=1.0",
@@ -134,7 +131,7 @@ omit = [
     "kedro/runner/parallel_runner.py",
     "*/site-packages/*",
 ]
-exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:"]
+exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:", "class CatalogProtocol"]
 
 [tool.pytest.ini_options]
 addopts="""

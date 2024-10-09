@@ -5,7 +5,7 @@ import sys
 import textwrap
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Type
+from typing import Any
 from unittest.mock import create_autospec
 
 import pytest
@@ -22,12 +22,10 @@ from kedro.framework.project import (
     ValidationError,
     Validator,
     _HasSharedParentClassValidator,
-    _IsSubclassValidator,
     _ProjectSettings,
 )
 from kedro.framework.session import KedroSession
 from kedro.framework.session.session import KedroSessionError
-from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
 from kedro.utils import _has_rich_handler
 
@@ -52,7 +50,7 @@ ATTRS_ATTRIBUTE = "__attrs_attrs__"
 NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
 
 
-def create_attrs_autospec(spec: Type, spec_set: bool = True) -> Any:
+def create_attrs_autospec(spec: type, spec_set: bool = True) -> Any:
     """Creates a mock of an attr class (creates mocks recursively on all attributes).
     https://github.com/python-attrs/attrs/issues/462#issuecomment-1134656377
 
@@ -233,21 +231,6 @@ def mock_settings_uncaught_session_store_exception(mocker):
     return mocker.patch.object(
         BaseSessionStore, "__init__", side_effect=Exception("Fake")
     )
-
-
-@pytest.fixture
-def mock_settings_shelve_session_store(mocker, fake_project):
-    shelve_location = fake_project / "nested" / "sessions"
-
-    class MockSettings(_ProjectSettings):
-        _SESSION_STORE_CLASS = _IsSubclassValidator(
-            "SESSION_STORE_CLASS", default=lambda *_: ShelveStore
-        )
-        _SESSION_STORE_ARGS = Validator(
-            "SESSION_STORE_ARGS", default={"path": shelve_location.as_posix()}
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
 
 
 @pytest.fixture
@@ -502,26 +485,6 @@ class TestKedroSession:
         ]
         assert actual_log_messages == expected_log_messages
 
-    @pytest.mark.usefixtures("mock_settings_shelve_session_store")
-    def test_shelve_store(self, fake_project, fake_session_id, caplog, mocker):
-        mocker.patch("pathlib.Path.is_file", return_value=True)
-        shelve_location = fake_project / "nested" / "sessions"
-        other = KedroSession.create(fake_project)
-        assert other._store.__class__ is ShelveStore
-        assert other._store._path == shelve_location.as_posix()
-        assert other._store._location == shelve_location / fake_session_id / "store"
-        assert other._store._session_id == fake_session_id
-        assert not shelve_location.is_dir()
-
-        other.close()  # session data persisted
-        assert shelve_location.is_dir()
-        actual_log_messages = [
-            rec.getMessage()
-            for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.DEBUG
-        ]
-        assert not actual_log_messages
-
     def test_wrong_store_type(self, mock_settings_file_bad_session_store_class):
         pattern = (
             "Invalid value 'tests.framework.session.test_session.BadStore' received "
@@ -730,7 +693,7 @@ class TestKedroSession:
         }
         mocker.patch("kedro.framework.session.session.pipelines", pipelines_ret)
         mocker.patch(
-            "kedro.io.data_catalog.DataCatalog._match_pattern",
+            "kedro.io.data_catalog.CatalogConfigResolver.match_pattern",
             return_value=match_pattern,
         )
 

@@ -1,5 +1,12 @@
 # Upcoming Release
 
+## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Documentation changes
+## Community contributions
+
+
 # Release 0.19.9
 
 ## Major features and improvements

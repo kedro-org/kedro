@@ -27,7 +27,7 @@ from kedro.io import (
     MemoryDataset,
     SharedMemoryDataset,
 )
-from kedro.runner.runner import AbstractRunner, run_node
+from kedro.runner.runner import AbstractRunner
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -67,7 +67,7 @@ def _run_node_synchronization(  # noqa: PLR0913
     session_id: str | None = None,
     package_name: str | None = None,
     logging_config: dict[str, Any] | None = None,
-) -> Node:
+) -> Any:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
     A ``PluginManager`` instance is created in each subprocess because the
@@ -92,8 +92,15 @@ def _run_node_synchronization(  # noqa: PLR0913
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
     _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+    from kedro.runner import Task
 
-    return run_node(node, catalog, hook_manager, is_async, session_id)
+    return Task(
+        node=node,
+        catalog=catalog,
+        hook_manager=hook_manager,
+        is_async=is_async,
+        session_id=session_id,
+    ).execute()
 
 
 class ParallelRunner(AbstractRunner):
@@ -321,19 +328,4 @@ class ParallelRunner(AbstractRunner):
                     node = future.result()
                     done_nodes.add(node)
 
-                    # Decrement load counts, and release any datasets we
-                    # have finished with. This is particularly important
-                    # for the shared, default datasets we created above.
-                    for dataset in node.inputs:
-                        load_counts[dataset] -= 1
-                        if (
-                            load_counts[dataset] < 1
-                            and dataset not in pipeline.inputs()
-                        ):
-                            catalog.release(dataset)
-                    for dataset in node.outputs:
-                        if (
-                            load_counts[dataset] < 1
-                            and dataset not in pipeline.outputs()
-                        ):
-                            catalog.release(dataset)
+                    self._release_datasets(node, catalog, load_counts, pipeline)

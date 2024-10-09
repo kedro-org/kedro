@@ -361,14 +361,18 @@ class TestRunNodeSynchronisationHelper:
         return mocker.patch("kedro.runner.parallel_runner.run_node")
 
     @pytest.fixture
+    def mock_execute_task(self, mocker):
+        return mocker.patch("kedro.runner.task.Task.execute")
+
+    @pytest.fixture
     def mock_configure_project(self, mocker):
         return mocker.patch("kedro.framework.project.configure_project")
 
     def test_package_name_and_logging_provided(
         self,
         mock_logging,
-        mock_run_node,
         mock_configure_project,
+        mock_execute_task,
         is_async,
         mocker,
     ):
@@ -386,12 +390,12 @@ class TestRunNodeSynchronisationHelper:
             package_name=package_name,
             logging_config={"fake_logging_config": True},
         )
-        mock_run_node.assert_called_once()
+        mock_execute_task.assert_called_once()
         mock_logging.assert_called_once_with({"fake_logging_config": True})
         mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_not_provided(
-        self, mock_logging, mock_run_node, is_async, mocker
+        self, mock_logging, mock_execute_task, is_async, mocker
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
         node_ = mocker.sentinel.node
@@ -402,5 +406,5 @@ class TestRunNodeSynchronisationHelper:
         _run_node_synchronization(
             node_, catalog, is_async, session_id, package_name=package_name
         )
-        mock_run_node.assert_called_once()
+        mock_execute_task.assert_called_once()
         mock_logging.assert_not_called()

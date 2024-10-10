@@ -11,7 +11,7 @@ import pandas as pd
 
 
 def split_data(data: pd.DataFrame, example_test_data_ratio: float) -> dict[str, Any]:
-    """Node for splitting the classical Iris data set into training and test
+    """Node for splitting the classical Iris dataset into training and test
     sets, each split into features and labels.
     The split ratio parameter is taken from conf/project/parameters.yml.
     The data and the parameters will be loaded and provided to your function

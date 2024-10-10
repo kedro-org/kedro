@@ -134,7 +134,7 @@ and you would be able to preview it in the MLflow web UI:
 ```
 
 :::{warning}
-If you get a `Failed while saving data to data set MlflowMatplotlibWriter` error,
+If you get a `Failed while saving data to dataset MlflowMatplotlibWriter` error,
 it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.
 The solution is to cleanup the old `data/08_reporting/dummy_confusion_matrix.png` directory.
 :::

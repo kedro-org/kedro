@@ -210,7 +210,7 @@ class TestPipelineUnregistered:
         assert _pipeline_contains(new_pipeline, ["split", "right_out"])
 
     def test_partial_non_existent_propagation(self, branched_pipeline, hook_manager):
-        """A non existent data set whose node has one unregistered input
+        """A non existent dataset whose node has one unregistered input
         and one existent input should be recalculated correctly.
         """
         catalog = _make_catalog(existent=["A", "C", "E", "F"], non_existent=["D"])

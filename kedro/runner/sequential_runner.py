@@ -81,7 +81,7 @@ class SequentialRunner(AbstractRunner):
                 self._suggest_resume_scenario(pipeline, done_nodes, catalog)
                 raise
 
-            # decrement load counts and release any data sets we've finished with
+            # decrement load counts and release any datasets we've finished with
             for dataset in node.inputs:
                 load_counts[dataset] -= 1
                 if load_counts[dataset] < 1 and dataset not in pipeline.inputs():

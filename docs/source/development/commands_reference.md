@@ -16,7 +16,7 @@ echo $0
 Add the following to your <code>~/.bashrc</code> (or just run it on the command line):
 
 ```bash
-eval "$(_KEDRO_COMPLETE=source kedro)"
+eval "$(_KEDRO_COMPLETE=bash_source kedro)"
 ```
 </details>
 
@@ -26,7 +26,7 @@ eval "$(_KEDRO_COMPLETE=source kedro)"
 Add the following to <code>~/.zshrc</code>:
 
 ```bash
-eval "$(_KEDRO_COMPLETE=source_zsh kedro)"
+eval "$(_KEDRO_COMPLETE=zsh_source kedro)"
 ```
 </details>
 
@@ -36,7 +36,7 @@ eval "$(_KEDRO_COMPLETE=source_zsh kedro)"
 Add the following to <code>~/.config/fish/completions/foo-bar.fish</code>:
 
 ```bash
-eval (env _KEDRO_COMPLETE=source_fish kedro)
+eval (env _KEDRO_COMPLETE=fish_source kedro)
 ```
 </details>
 

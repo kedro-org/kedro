@@ -70,13 +70,13 @@ class DryRunner(AbstractRunner):
     """
 
     def create_default_dataset(self, ds_name: str) -> AbstractDataset:
-        """Factory method for creating the default data set for the runner.
+        """Factory method for creating the default dataset for the runner.
 
         Args:
-            ds_name: Name of the missing data set
+            ds_name: Name of the missing dataset
         Returns:
             An instance of an implementation of AbstractDataset to be used
-            for all unregistered data sets.
+            for all unregistered datasets.
 
         """
         return MemoryDataset()

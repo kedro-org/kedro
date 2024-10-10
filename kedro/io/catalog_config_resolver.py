@@ -90,7 +90,7 @@ class CatalogConfigResolver:
             The set of requested credentials.
 
         Raises:
-            KeyError: When a data set with the given name has not yet been
+            KeyError: When a dataset with the given name has not yet been
                 registered.
 
         """

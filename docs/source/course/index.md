@@ -62,7 +62,7 @@ You don't need to register for the course and you can skip around the sections t
 1. [Set up the Kedro Data Catalog](https://www.youtube.com/watch?v=rl2cncGxyts)
 1. [Explore the spaceflights data](https://www.youtube.com/watch?v=bZD8N0yv3Fs)
 1. [Refactor your data processing code into functions](https://www.youtube.com/watch?v=VFcrvnnNas4)
-1. [Create your first data pipeline with Kedro](https://www.youtube.com/watch?v=VFcrvnnNas4)
+1. [Create your first data pipeline with Kedro](https://www.youtube.com/watch?v=3YeE_gvDCvw)
 1. [Assemble your nodes into a Kedro pipeline](https://www.youtube.com/watch?v=P__gFG1TmMo)
 1. [Run your Kedro pipeline](https://www.youtube.com/watch?v=sll_LhZE-p8)
 1. [Visualise your data pipeline with Kedro-Viz](https://www.youtube.com/watch?v=KWqSzbHgNW4)

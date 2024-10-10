@@ -104,7 +104,7 @@ class TestLambdaDatasetLoad:
 
     def test_load_undefined(self):
         """Check the error if `LambdaDataset.__load` is None"""
-        with pytest.raises(DatasetError, match="Cannot load data set"):
+        with pytest.raises(DatasetError, match="Cannot load dataset"):
             LambdaDataset(None, None).load()
 
     def test_load_not_callable(self):
@@ -128,7 +128,7 @@ class TestLambdaDatasetSave:
         mocked_save.side_effect = FileExistsError(error_message)
 
         pattern = (
-            r"Failed while saving data to data set LambdaDataset\(.+\)\.\n"
+            r"Failed while saving data to dataset LambdaDataset\(.+\)\.\n"
             + error_message
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -137,7 +137,7 @@ class TestLambdaDatasetSave:
 
     def test_save_undefined(self):
         """Check the error if `LambdaDataset.__save` is None"""
-        with pytest.raises(DatasetError, match="Cannot save to data set"):
+        with pytest.raises(DatasetError, match="Cannot save to dataset"):
             LambdaDataset(None, None).save(42)
 
     def test_save_none(self, mocked_save, mocked_dataset):

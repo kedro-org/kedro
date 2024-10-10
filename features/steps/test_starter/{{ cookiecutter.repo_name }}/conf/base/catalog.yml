@@ -1,11 +1,11 @@
-# Here you can define all your data sets by using simple YAML syntax.
+# Here you can define all your datasets by using simple YAML syntax.
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
 #
 # We support interacting with a variety of data stores including local file systems, cloud, network and HDFS
 #
-# An example data set definition can look as follows:
+# An example dataset definition can look as follows:
 #
 #bikes:
 #  type: pandas.CSVDataset
@@ -39,7 +39,7 @@
 # (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
 # https://docs.kedro.org/en/stable/data/data_catalog.html
 #
-# This is a data set used by the "Hello World" example pipeline provided with the project
+# This is a dataset used by the "Hello World" example pipeline provided with the project
 # template. Please feel free to remove it once you remove the example pipeline.
 
 example_iris_data:

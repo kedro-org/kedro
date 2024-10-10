@@ -200,7 +200,7 @@ cars:
 
 In this example, `filepath` is used as the basis of a folder that stores versions of the `cars` dataset. Each time a new version is created by a pipeline run it is stored within `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
 
-By default, `kedro run` loads the latest version of the dataset. However, you can also specify a particular versioned data set with `--load-version` flag as follows:
+By default, `kedro run` loads the latest version of the dataset. However, you can also specify a particular versioned dataset with `--load-version` flag as follows:
 
 ```bash
 kedro run --load-versions=cars:YYYY-MM-DDThh.mm.ss.sssZ

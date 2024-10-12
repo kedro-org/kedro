@@ -11,11 +11,11 @@ from kedro.io.core import AbstractDataset, DatasetError
 
 
 class LambdaDataset(AbstractDataset):
-    """``LambdaDataset`` loads and saves data to a data set.
+    """``LambdaDataset`` loads and saves data to a dataset.
     It relies on delegating to specific implementation such as csv, sql, etc.
 
     ``LambdaDataset`` class captures Exceptions while performing operations on
-    composed ``Dataset`` implementations. The composed data set is
+    composed ``Dataset`` implementations. The composed dataset is
     responsible for providing information on how to resolve the issue when
     possible. This information should be available through str(error).
 
@@ -53,7 +53,7 @@ class LambdaDataset(AbstractDataset):
     def _load(self) -> Any:
         if not self.__load:
             raise DatasetError(
-                "Cannot load data set. No 'load' function "
+                "Cannot load dataset. No 'load' function "
                 "provided when LambdaDataset was created."
             )
         return self.__load()
@@ -61,7 +61,7 @@ class LambdaDataset(AbstractDataset):
     def _save(self, data: Any) -> None:
         if not self.__save:
             raise DatasetError(
-                "Cannot save to data set. No 'save' function "
+                "Cannot save to dataset. No 'save' function "
                 "provided when LambdaDataset was created."
             )
         self.__save(data)
@@ -86,11 +86,11 @@ class LambdaDataset(AbstractDataset):
         metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``LambdaDataset`` with references to the
-        required input/output data set methods.
+        required input/output dataset methods.
 
         Args:
-            load: Method to load data from a data set.
-            save: Method to save data to a data set.
+            load: Method to load data from a dataset.
+            save: Method to save data to a dataset.
             exists: Method to check whether output data already exists.
             release: Method to release any cached information.
             metadata: Any arbitrary metadata.

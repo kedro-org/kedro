@@ -12,6 +12,7 @@ import pandas as pd
 from kedro.io.memory_dataset import MemoryDataset
 from pathlib import Path
 
+
 # Simulate an I/O-bound task
 def io_bound_task(input_data):
     time.sleep(2)  # Simulate an I/O wait (e.g., reading from a file)
@@ -97,52 +98,60 @@ def create_compute_bound_pipeline():
     return dummy_pipeline
 
 
-class TimeSuite:
-    """
-    A dummy benchmark suite to test with asv framework.
-    """
-
-    def setup(self):
-        self.d = {}
-        for x in range(500):
-            self.d[x] = None
-
-    def time_keys(self):
-        for key in self.d.keys():
-            pass
-
-class RunnerSuite:
-    """
-    A class to collect all runners performance test
-    """
+class RunnerMemorySuite:
     params = [SequentialRunner, ThreadRunner, ParallelRunner]
     param_names = ["runner"]
-    timeout= 3600
 
     def setup(self, *args, **kwargs):
-        print("AAAAA", args)
         data_dir = Path("benchmarks/data")
         data_dir.mkdir(exist_ok=True, parents=True)
-        # Create a dummy csv
-        with open(data_dir/"data.csv", "w") as f:
-            f.write("col1,col2\n1,2\n")
-        print(f"all files: {list(Path().glob('**/*'))}")
 
-    def time_runners(self,runner):
-        import os
-        print(f"Current Directory {os.getcwd()}")
+        # Create a dummy csv
+        with open(data_dir / "data.csv", "w") as f:
+            f.write("col1,col2\n1,2\n")
+
+    def mem_runners(self, runner):
         catalog = create_data_catalog()
-        print("**"*20)
-        print(catalog)
         test_pipeline = create_compute_bound_pipeline()
         runner_obj = runner()
         runner_obj.run(test_pipeline, catalog=catalog)
 
-    def mem_runners(self, runner):
-        ...
-
     def peakmem_runners(self, runner):
-        ...
+        catalog = create_data_catalog()
+        test_pipeline = create_compute_bound_pipeline()
+        runner_obj = runner()
+        runner_obj.run(test_pipeline, catalog=catalog)
+
+
+class RunnerTimeSuite:
+    def setup(self, *args, **kwargs):
+        data_dir = Path("benchmarks/data")
+        data_dir.mkdir(exist_ok=True, parents=True)
+
+        # Create a dummy csv
+        with open(data_dir / "data.csv", "w") as f:
+            f.write("col1,col2\n1,2\n")
+
+    def time_sequential_runner(self):
+        catalog = create_data_catalog()
+        test_pipeline = create_compute_bound_pipeline()
+        runner_obj = SequentialRunner()
+        runner_obj.run(test_pipeline, catalog=catalog)
+
+    def time_sequential_runner(self):
+        """compute bound pipeline"""
+        catalog = create_data_catalog()
+        test_pipeline = create_compute_bound_pipeline()
+        runner_obj = ParallelRunner()
+        runner_obj.run(test_pipeline, catalog=catalog)
+
+    def time_thread_runner(self):
+        """IO bound pipeline"""
+        catalog = create_data_catalog()
+        test_pipeline = create_io_bound_pipeline()
+        runner_obj = ThreadRunner()
+        runner_obj.run(test_pipeline, catalog=catalog)
+
 
 if __name__ == "__main__":
     suite = RunnerSuite()

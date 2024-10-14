@@ -138,7 +138,7 @@ class RunnerTimeSuite:
         runner_obj = SequentialRunner()
         runner_obj.run(test_pipeline, catalog=catalog)
 
-    def time_sequential_runner(self):
+    def time_parallel_runner(self):
         """compute bound pipeline"""
         catalog = create_data_catalog()
         test_pipeline = create_compute_bound_pipeline()

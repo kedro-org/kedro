@@ -359,7 +359,7 @@ class TestAbstractVersionedDataset:
 
     def test_save_and_load(self, my_versioned_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
+        the versioned dataset."""
         my_versioned_dataset.save(dummy_data)
         reloaded = my_versioned_dataset.load()
         assert dummy_data == reloaded
@@ -398,14 +398,14 @@ class TestAbstractVersionedDataset:
             my_other_versioned_dataset.exists()
 
     def test_exists(self, my_versioned_dataset, dummy_data):
-        """Test `exists` method invocation for versioned data set."""
+        """Test `exists` method invocation for versioned dataset."""
         assert not my_versioned_dataset.exists()
         my_versioned_dataset.save(dummy_data)
         assert my_versioned_dataset.exists()
         shutil.rmtree(my_versioned_dataset._filepath)
 
     def test_prevent_overwrite(self, my_versioned_dataset, dummy_data):
-        """Check the error when attempting to override the data set if the
+        """Check the error when attempting to override the dataset if the
         corresponding json file for a given save version already exists."""
         my_versioned_dataset.save(dummy_data)
         pattern = (
@@ -550,7 +550,7 @@ class TestLegacyLoadAndSave:
             my_legacy_dataset.save(None)
 
     def test_saving_invalid_data(self, my_legacy_dataset, dummy_data):
-        pattern = r"Failed while saving data to data set"
+        pattern = r"Failed while saving data to dataset"
         with pytest.raises(DatasetError, match=pattern):
             my_legacy_dataset.save(pd.DataFrame())
 

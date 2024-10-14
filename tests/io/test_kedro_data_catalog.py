@@ -74,7 +74,7 @@ class TestKedroDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a dataset
         from nonexistent source"""
-        pattern = r"Failed while loading data from data set CSVDataset"
+        pattern = r"Failed while loading data from dataset CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
@@ -352,7 +352,7 @@ class TestKedroDataCatalog:
             pattern = (
                 "An exception occurred when parsing config for dataset 'boats':\n"
                 "Dataset type 'kedro.io.kedro_data_catalog.KedroDataCatalog' is invalid: "
-                "all data set types must extend 'AbstractDataset'"
+                "all dataset types must extend 'AbstractDataset'"
             )
             with pytest.raises(DatasetError, match=re.escape(pattern)):
                 KedroDataCatalog.from_config(**correct_config)
@@ -586,7 +586,7 @@ class TestKedroDataCatalog:
             KedroDataCatalog.from_config(**correct_config)
             log_record = caplog.records[0]
             expected_log_message = (
-                "'version' attribute removed from data set configuration since it "
+                "'version' attribute removed from dataset configuration since it "
                 "is a reserved word and cannot be directly specified"
             )
             assert log_record.levelname == "WARNING"

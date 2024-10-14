@@ -8,7 +8,8 @@
     ],
     "matrix": {
         "req": {
-            "kedro-datasets[pandas]": []
+            "kedro-datasets[pandas]": [],
+            "numpy": []
         }
     },
     "branches": [

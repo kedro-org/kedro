@@ -12,10 +12,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Get commit message
+    - name: Get the commit message (strip signature)
       id: get_commit_message
       run: |
-        commit_message=$(git log -1 --pretty=%B | head -n 1 | tr -d '\n')
+        commit_message=$(git log -1 --pretty=%B | sed -n '/^$/q;p')
         echo "commit_message=$commit_message" >> $GITHUB_ENV
 
     - name: Check if commit contains 'PERFORMANCE TEST'

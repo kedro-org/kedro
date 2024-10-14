@@ -10,7 +10,7 @@ import numpy as np
 import yaml
 import pandas as pd
 from kedro.io.memory_dataset import MemoryDataset
-
+from pathlib import Path
 
 # Simulate an I/O-bound task
 def io_bound_task(input_data):
@@ -36,15 +36,15 @@ def create_data_catalog():
 
 'output_{pattern}':
     type: pandas.CSVDataset
-    filepath: '{pattern}.csv'
+    filepath: benchmarks/data/'{pattern}.csv'
 
 'numpy_{pattern}':
     type: pickle.PickleDataset
-    filepath: '{pattern}.pkl'
+    filepath: benchmarks/data/'{pattern}.pkl'
 
 '{catch_all_dataset_pattern}':
     type: pandas.CSVDataset
-    filepath: data.csv
+    filepath: benchmarks/data/data.csv
 """
     catalog_conf = yaml.safe_load(catalog_conf)
     catalog = DataCatalog.from_config(catalog_conf)
@@ -111,27 +111,40 @@ class TimeSuite:
         for key in self.d.keys():
             pass
 
+class RunnerSuite:
+    """
+    A class to collect all runners performance test
+    """
+    params = [SequentialRunner, ThreadRunner, ParallelRunner]
+    param_names = ["runner"]
+    timeout= 3600
+
+    def setup(self, *args, **kwargs):
+        print("AAAAA", args)
+        data_dir = Path("benchmarks/data")
+        data_dir.mkdir(exist_ok=True, parents=True)
+        # Create a dummy csv
+        with open(data_dir/"data.csv", "w") as f:
+            f.write("col1,col2\n1,2\n")
+        print(f"all files: {list(Path().glob('**/*'))}")
+
+    def time_runners(self,runner):
+        import os
+        print(f"Current Directory {os.getcwd()}")
+        catalog = create_data_catalog()
+        print("**"*20)
+        print(catalog)
+        test_pipeline = create_compute_bound_pipeline()
+        runner_obj = runner()
+        runner_obj.run(test_pipeline, catalog=catalog)
+
+    def mem_runners(self, runner):
+        ...
+
+    def peakmem_runners(self, runner):
+        ...
 
 if __name__ == "__main__":
-    print("===" * 20)
-    import time
-
-    result = {}
-    runner_class = {
-        "SequentialRunner": SequentialRunner,
-        "ThreadRunner": ThreadRunner,
-        "ParallelRunner": ParallelRunner,
-    }
-    for name, runner in runner_class.items():
-        start = time.time()
-        print("==" * 20 + name + "==" * 20)
-        catalog = create_data_catalog()
-        test_pipeline = create_compute_bound_pipeline()
-        runner = runner()
-        runner.run(test_pipeline, catalog=catalog)
-        end = time.time()
-        result[name] = end - start
-        print(f"Time spent: {end - start}")
-
-    print("===" * 20 + "Done" + "===" * 20)
-    print(result)
+    suite = RunnerSuite()
+    for param in suite.params:
+        suite.time_runners(param)

@@ -129,7 +129,7 @@ class KedroDataCatalog(CatalogProtocol):
         yield from self._datasets.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset | None:
-        return self.get(ds_name)
+        return self.get_dataset(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
         if key in self._datasets:

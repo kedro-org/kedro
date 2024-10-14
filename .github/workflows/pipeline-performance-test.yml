@@ -15,8 +15,8 @@ jobs:
     - name: Get commit message
       id: get_commit_message
       run: |
-        commit_message=$(git log -1 --pretty=%B)
-        echo "::set-output name=commit_message::${commit_message}"
+        commit_message=$(git log -1 --pretty=%B | head -n 1 | tr -d '\n')
+        echo "commit_message=$commit_message" >> $GITHUB_ENV
 
     - name: Check if commit contains 'PERFORMANCE TEST'
       if: contains(steps.get_commit_message.outputs.commit_message, 'PERFORMANCE TEST')

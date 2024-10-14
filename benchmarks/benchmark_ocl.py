@@ -3,58 +3,37 @@ from pathlib import Path
 
 from kedro.config import OmegaConfigLoader
 
-base_catalog = {
-    "dataset_1": {
-        "type": "pandas.CSVDataset",
-        "filepath": "data1.csv"
-    },
-    "dataset_2": {
-        "type": "pandas.CSVDataset",
-        "filepath": "data2.csv"
-    },
-    "dataset_3": {
-        "type": "pandas.CSVDataset",
-        "filepath": "data3.csv"
-    },
-    "dataset_4": {
-        "type": "pandas.CSVDataset",
-        "filepath": "data4.csv",
-        "versioned": True,
-    },
-}
-local_catalog = {
-    "dataset_4" : {
-        "filepath": "data4_local.csv",
-        "type": "pandas.CSVDataset",
-    },
-    "dataset_5" : {
-        "filepath": "data5_local.csv",
-        "type": "pandas.CSVDataset",
-    },
-}
-base_params = {
-    "param_1": "value_1",
-    "param_2": "value_2",
-    "param_3": "value_3",
-    "param_4": "value_4",
-}
-local_params = {
-    "param_4": "value_4_local",
-    "param_5": "value_5_local",
-}
-base_globals = {
-    "global1": "value1",
-    "global2": "value2",
-    "global3": "value3",
-    "global4": "value4",
-}
-local_globals = {
-    "global4": "value4_local",
-    "global5": "value5_local",
-}
 
-def _create_config_file(self, env, file_name, data):
-        env_path = self.conf_source / env
+# Helper functions to generate sample configuration data
+def generate_catalog(start_range, end_range, is_local=False, is_versioned=False, add_interpolation=False):
+    catalog = {}
+    for i in range(start_range, end_range + 1):
+        catalog[f"dataset_{i}"] = {
+            "type": "pandas.CSVDataset",
+            "filepath": f"data{i}{'_local' if is_local else ''}.csv"
+        }
+        if is_versioned:
+            catalog[f"dataset_{i}"]["versioned"] = True
+        if add_interpolation:
+            catalog[f"dataset_{i}"]["filepath"] = "${_basepath}" + catalog[f"dataset_{i}"]["filepath"]
+    return catalog
+
+def generate_params(start_range, end_range, is_local=False, add_globals=False):
+    if add_globals:
+        # Generate params with "${globals:global{i}}"
+        params = {f"param_{i}": f"${{globals:global_{i}}}" for i in range(start_range, end_range + 1)}
+    else:
+        # Generate params with "value_{i}" or "value_{i}_local"
+        params = {f"param_{i}": f"value_{i}{'_local' if is_local else ''}" for i in range(start_range, end_range + 1)}
+
+    return params
+
+def generate_globals(start_range, end_range, is_local=False):
+    globals_dict = {f"global_{i}": f"value{i}{'_local' if is_local else ''}" for i in range(start_range, end_range + 1)}
+    return globals_dict
+
+def _create_config_file(conf_source, env, file_name, data):
+        env_path = conf_source / env
         env_path.mkdir(parents=True, exist_ok=True)
         file_path = env_path / file_name
 
@@ -62,21 +41,35 @@ def _create_config_file(self, env, file_name, data):
         with open(file_path, "w") as f:
             yaml.dump(data, f)
 
+base_catalog = generate_catalog(1, 1000, is_versioned=True)
+local_catalog = generate_catalog(501, 1500, is_local=True)
+base_params = generate_params(1, 1000)
+local_params = generate_params(501, 1500, is_local=True)
+base_globals = generate_globals(1, 1000)
+local_globals = generate_globals(501, 1500, is_local=True)
+
+base_catalog_with_interpolations = generate_catalog(1, 1000, is_versioned=True, add_interpolation=True)
+base_catalog_with_interpolations.update({"_basepath": "/path/to/data"})
+local_catalog_with_interpolations = generate_catalog(501, 1500, is_local=True, add_interpolation=True)
+local_catalog_with_interpolations.update({"_basepath": "/path/to/data"})
+
+base_params_with_globals = generate_params(1, 100, add_globals=True)
+# local_params_with_globals = generate_params(501, 1000, is_local=True, add_globals=True)
+
 
 class TimeOmegaConfigLoader:
-
     def setup(self):
         # Setup temporary configuration directory with sample config files
         self.temp_dir = tempfile.TemporaryDirectory()
         self.conf_source = Path(self.temp_dir.name)
 
         # Create sample config files in the temp directory
-        _create_config_file("base", "catalog.yml", base_catalog)
-        _create_config_file("local", "catalog.yml", local_catalog)
-        _create_config_file("base", "parameters.yml", base_params)
-        _create_config_file("local", "parameters.yml", local_params)
-        _create_config_file("base", "globals.yml", base_globals)
-        _create_config_file("local", "globals.yml", local_globals)
+        _create_config_file(self.conf_source, "base", "catalog.yml", base_catalog)
+        _create_config_file(self.conf_source, "local", "catalog.yml", local_catalog)
+        _create_config_file(self.conf_source, "base", "parameters.yml", base_params)
+        _create_config_file(self.conf_source, "local", "parameters.yml", local_params)
+        _create_config_file(self.conf_source, "base", "globals.yml", base_globals)
+        _create_config_file(self.conf_source, "local", "globals.yml", local_globals)
 
         # Instantiate the OmegaConfigLoader
         self.loader = OmegaConfigLoader(conf_source=self.conf_source, base_env='base', default_run_env='local')
@@ -93,56 +86,36 @@ class TimeOmegaConfigLoader:
         """Benchmark the time to load environment-specific configuration"""
         self.loader["parameters"]
 
-    def time_loading_parameters_runtime(self):
-        """Benchmark the time to load parameters with runtime configuration"""
-        self.loader.runtime_params = {"param_6": "value_6", "param_7": "value_7"}
-        self.loader["parameters"]
-
     def time_loading_globals(self):
         """Benchmark the time to load global configuration"""
         self.loader["globals"]
+
+    def time_loading_parameters_runtime(self):
+        """Benchmark the time to load parameters with runtime configuration"""
+        self.loader.runtime_params = generate_params(2001, 2002)
+        self.loader["parameters"]
 
     def time_merge_soft_strategy(self):
         """Benchmark the time to load and soft-merge configurations"""
         self.loader.merge_strategy = {"catalog": "soft"}
         self.loader["catalog"]
 
-base_catalog_resolvers = {
-    "dataset_4": {
-        "type": "pandas.CSVDataset",
-        "filepath": "${_basepath}/data4.csv",
-        "versioned": True,
-    },
-    "_basepath": "folder",
-}
-base_params_resolvers = {
-    "param_2": "${globals:global4}",
-    "param_3": "${my_custom_resolver:custom_resolver}",
-}
-def custom_resolver(value):
-    return f"custom_{value}"
 
 class TimeOmegaConfigLoaderAdvanced:
-
     def setup(self):
         # Setup temporary configuration directory with sample config files
         self.temp_dir = tempfile.TemporaryDirectory()
         self.conf_source = Path(self.temp_dir.name)
-        custom_resolvers = {"my_custom_resolver": custom_resolver}
-
-        base_catalog.update(base_catalog_resolvers)
-        base_params.update(base_params_resolvers)
 
         # Create sample config files in the temp directory
-        _create_config_file("base", "catalog.yml", base_catalog)
-        _create_config_file("local", "catalog.yml", local_catalog)
-        _create_config_file("base", "parameters.yml", base_params)
-        _create_config_file("local", "parameters.yml", local_params)
-        _create_config_file("base", "globals.yml", base_globals)
-        _create_config_file("local", "globals.yml", local_globals)
+        _create_config_file(self.conf_source, "base", "catalog.yml", base_catalog_with_interpolations)
+        _create_config_file(self.conf_source, "local", "catalog.yml", local_catalog_with_interpolations)
+        _create_config_file(self.conf_source, "base", "parameters.yml", base_params_with_globals)
+        _create_config_file(self.conf_source, "base", "globals.yml", base_globals)
+        _create_config_file(self.conf_source, "local", "globals.yml", local_globals)
 
         # Instantiate the OmegaConfigLoader
-        self.loader = OmegaConfigLoader(conf_source=self.conf_source, base_env='base', default_run_env='local', custom_resolvers=custom_resolvers)
+        self.loader = OmegaConfigLoader(conf_source=self.conf_source, base_env='base', default_run_env='local')
 
     def teardown(self):
         # Cleanup temporary directory
@@ -159,3 +132,5 @@ class TimeOmegaConfigLoaderAdvanced:
     def time_loading_globals(self):
         """Benchmark the time to load global configuration"""
         self.loader["globals"]
+
+

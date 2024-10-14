@@ -1,0 +1,82 @@
+{
+    "benchmark_runner.RunnerMemorySuite.mem_runners": {
+        "code": "class RunnerMemorySuite:\n    def mem_runners(self, runner):\n        catalog = create_data_catalog()\n        test_pipeline = create_compute_bound_pipeline()\n        runner_obj = runner()\n        runner_obj.run(test_pipeline, catalog=catalog)\n\n    def setup(self, *args, **kwargs):\n        data_dir = Path(\"benchmarks/data\")\n        data_dir.mkdir(exist_ok=True, parents=True)\n    \n        # Create a dummy csv\n        with open(data_dir / \"data.csv\", \"w\") as f:\n            f.write(\"col1,col2\\n1,2\\n\")",
+        "name": "benchmark_runner.RunnerMemorySuite.mem_runners",
+        "param_names": [
+            "runner"
+        ],
+        "params": [
+            [
+                "<class 'kedro.runner.sequential_runner.SequentialRunner'>",
+                "<class 'kedro.runner.thread_runner.ThreadRunner'>",
+                "<class 'kedro.runner.parallel_runner.ParallelRunner'>"
+            ]
+        ],
+        "type": "memory",
+        "unit": "bytes",
+        "version": "13acda1c4dae582477fa994a0910a548a2189f858f5a89ace163cad942928337"
+    },
+    "benchmark_runner.RunnerMemorySuite.peakmem_runners": {
+        "code": "class RunnerMemorySuite:\n    def peakmem_runners(self, runner):\n        catalog = create_data_catalog()\n        test_pipeline = create_compute_bound_pipeline()\n        runner_obj = runner()\n        runner_obj.run(test_pipeline, catalog=catalog)\n\n    def setup(self, *args, **kwargs):\n        data_dir = Path(\"benchmarks/data\")\n        data_dir.mkdir(exist_ok=True, parents=True)\n    \n        # Create a dummy csv\n        with open(data_dir / \"data.csv\", \"w\") as f:\n            f.write(\"col1,col2\\n1,2\\n\")",
+        "name": "benchmark_runner.RunnerMemorySuite.peakmem_runners",
+        "param_names": [
+            "runner"
+        ],
+        "params": [
+            [
+                "<class 'kedro.runner.sequential_runner.SequentialRunner'>",
+                "<class 'kedro.runner.thread_runner.ThreadRunner'>",
+                "<class 'kedro.runner.parallel_runner.ParallelRunner'>"
+            ]
+        ],
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "c906244a890c199414b4d50adc3d6de53c0756386563b573c66627fb492f74ad"
+    },
+    "benchmark_runner.RunnerTimeSuite.time_parallel_runner": {
+        "code": "class RunnerTimeSuite:\n    def time_parallel_runner(self):\n        \"\"\"compute bound pipeline\"\"\"\n        catalog = create_data_catalog()\n        test_pipeline = create_compute_bound_pipeline()\n        runner_obj = ParallelRunner()\n        runner_obj.run(test_pipeline, catalog=catalog)\n\n    def setup(self, *args, **kwargs):\n        data_dir = Path(\"benchmarks/data\")\n        data_dir.mkdir(exist_ok=True, parents=True)\n    \n        # Create a dummy csv\n        with open(data_dir / \"data.csv\", \"w\") as f:\n            f.write(\"col1,col2\\n1,2\\n\")",
+        "min_run_count": 2,
+        "name": "benchmark_runner.RunnerTimeSuite.time_parallel_runner",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "bc652bf3bbaddc5fe5838632fb007a7a4e6e99592a452ea38987b498e989331c",
+        "warmup_time": -1
+    },
+    "benchmark_runner.RunnerTimeSuite.time_sequential_runner": {
+        "code": "class RunnerTimeSuite:\n    def time_sequential_runner(self):\n        catalog = create_data_catalog()\n        test_pipeline = create_compute_bound_pipeline()\n        runner_obj = SequentialRunner()\n        runner_obj.run(test_pipeline, catalog=catalog)\n\n    def setup(self, *args, **kwargs):\n        data_dir = Path(\"benchmarks/data\")\n        data_dir.mkdir(exist_ok=True, parents=True)\n    \n        # Create a dummy csv\n        with open(data_dir / \"data.csv\", \"w\") as f:\n            f.write(\"col1,col2\\n1,2\\n\")",
+        "min_run_count": 2,
+        "name": "benchmark_runner.RunnerTimeSuite.time_sequential_runner",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "16b755b06d88eedad82d93a3b24dca6efd7cb45dc252319feb4f3a3a1ffe5326",
+        "warmup_time": -1
+    },
+    "benchmark_runner.RunnerTimeSuite.time_thread_runner": {
+        "code": "class RunnerTimeSuite:\n    def time_thread_runner(self):\n        \"\"\"IO bound pipeline\"\"\"\n        catalog = create_data_catalog()\n        test_pipeline = create_io_bound_pipeline()\n        runner_obj = ThreadRunner()\n        runner_obj.run(test_pipeline, catalog=catalog)\n\n    def setup(self, *args, **kwargs):\n        data_dir = Path(\"benchmarks/data\")\n        data_dir.mkdir(exist_ok=True, parents=True)\n    \n        # Create a dummy csv\n        with open(data_dir / \"data.csv\", \"w\") as f:\n            f.write(\"col1,col2\\n1,2\\n\")",
+        "min_run_count": 2,
+        "name": "benchmark_runner.RunnerTimeSuite.time_thread_runner",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "f11dce24b5e61ce532f0c810d23916a0d0a0dd2e3f9150cc9aa1f6b20ebe4d4e",
+        "warmup_time": -1
+    },
+    "version": 2
+}

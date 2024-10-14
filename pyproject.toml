@@ -55,7 +55,7 @@ dynamic = ["readme", "version"]
 test = [
     "behave==1.2.6",
     "coverage[toml]",
-    "import-linter==2.0",
+    "import-linter==2.1",
     "ipylab>=1.0.0",
     "ipython~=8.10",
     "jupyterlab_server>=2.11.1",

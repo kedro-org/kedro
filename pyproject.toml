@@ -114,9 +114,9 @@ kedro = ["py.typed"]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}
 
-#[tool.ruff.format]
-#exclude = ["**/templates", "features/steps/test_starter"]
-#docstring-code-format = true
+[tool.ruff.format]
+exclude = ["**/templates", "features/steps/test_starter"]
+docstring-code-format = true
 
 [tool.coverage.report]
 fail_under = 100

@@ -1,0 +1,15 @@
+[project]
+name = "benchmarks"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Nok Lam Chan", email = "nok.lam.chan@quantumblack.com"},
+]
+dependencies = []
+requires-python = "==3.10.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false

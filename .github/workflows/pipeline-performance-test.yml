@@ -1,0 +1,33 @@
+name: Trigger Pipeline Performance Test
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  check-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Get commit message
+      id: get_commit_message
+      run: |
+        commit_message=$(git log -1 --pretty=%B)
+        echo "::set-output name=commit_message::${commit_message}"
+
+    - name: Check if commit contains 'PERFORMANCE TEST'
+      if: contains(steps.get_commit_message.outputs.commit_message, 'PERFORMANCE TEST')
+      run: |
+        echo "Commit message contains 'PERFORMANCE TEST'. Triggering performance test."
+
+    - name: Trigger performance test workflow in test project
+      if: contains(steps.get_commit_message.outputs.commit_message, 'PERFORMANCE TEST')
+      run: |
+        curl -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.GH_TAGGING_TOKEN }}" \
+          https://api.github.com/repos/kedro-org/pipeline-performance-test/blob/main/.github/workflows/performance-test.yml/dispatches \
+          -d '{"ref":"main"}'

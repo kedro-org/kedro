@@ -19,12 +19,12 @@ jobs:
         echo "commit_message=$commit_message" >> $GITHUB_ENV
 
     - name: Check if commit contains 'PERFORMANCE TEST'
-      if: contains(steps.get_commit_message.outputs.commit_message, 'PERFORMANCE TEST')
+      if: contains(env.commit_message, 'PERFORMANCE TEST')
       run: |
         echo "Commit message contains 'PERFORMANCE TEST'. Triggering performance test."
 
     - name: Trigger performance test workflow in test project
-      if: contains(steps.get_commit_message.outputs.commit_message, 'PERFORMANCE TEST')
+      if: contains(env.commit_message, 'PERFORMANCE TEST')
       run: |
         curl -X POST \
           -H "Accept: application/vnd.github+json" \

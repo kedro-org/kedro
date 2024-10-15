@@ -100,15 +100,15 @@ project-dir          # Parent directory of the template
 
 ### Tool selection and resulting structure
 
-During `kedro new`, you can select which tools to include in your project. Each tool adds specific files or folders to the project structure:
+During `kedro new`, you can select which [tools to include in your project](../starters/new_project_tools.md). Each tool adds specific files or folders to the project structure:
 
 - **Lint (Ruff)**: Modifies the `pyproject.toml` file to include Ruff configuration settings for linting. It sets up `ruff` under `[tool.ruff]`, defines options like line length, selected rules, and ignored rules, and includes `ruff` as an optional `dev` dependency.
-- **Test (Pytest)**: Adds a `tests` folder for storing unit and integration tests, helping to maintain code quality and ensuring that changes in the codebase do not introduce bugs. For more information about testing in Kedro, visit the [Automated Testing Guide](https://docs.kedro.org/en/stable/development/automated_testing.html).
-- **Log**: Allows specific logging configurations by including a `logging.yml` file inside the `conf` folder. For more information about logging customisation in Kedro, visit the [Logging Customisation Guide](https://docs.kedro.org/en/stable/logging/index.html).
+- **Test (Pytest)**: Adds a `tests` folder for storing unit and integration tests, helping to maintain code quality and ensuring that changes in the codebase do not introduce bugs. For more information about testing in Kedro, visit the [Automated Testing Guide](../development/automated_testing.md).
+- **Log**: Allows specific logging configurations by including a `logging.yml` file inside the `conf` folder. For more information about logging customisation in Kedro, visit the [Logging Customisation Guide](../logging/index.md).
 - **Docs (Sphinx)**: Adds a `docs` folder with a Sphinx documentation setup. This folder is typically used to generate technical documentation for the project.
-- **Data Folder**: Adds a `data` folder structure for managing project data. The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders according to the [commonly accepted data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71).
+- **Data Folder**: Adds a `data` folder structure for managing project data. The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders, as outlined [in this data engineering article](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71).
 - **PySpark**: Adds PySpark-specific configuration files.
-- **Kedro-Viz**: Adds Kedro's native visualisation tool.
+- **Kedro-Viz**: Adds Kedro's native visualisation tool with [experiment tracking setup.](https://docs.kedro.org/projects/kedro-viz/en/stable/experiment_tracking.html)
 
 ### `conf`
 
@@ -139,3 +139,7 @@ This subfolder contains the project's source code.
 ### Customising your project structure
 
 While the default Kedro structure is recommended for collaboration and standardisation, it is possible to adapt the folder structure if necessary. This flexibility allows you to tailor the project to your needs while maintaining a consistent and recognisable structure.
+
+The only technical requirement when organising code is that the `pipeline_registry.py` and `settings.py` files must remain in the `<your_project>/src/<your_project>` directory, where they are created by default.
+
+The `pipeline_registry.py` file must include a `register_pipelines()` function that returns a `dict[str, Pipeline]`, which maps pipeline names to their corresponding `Pipeline` objects.

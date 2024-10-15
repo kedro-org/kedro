@@ -59,7 +59,7 @@ class Node:
                 contain only letters, digits, hyphens, underscores and/or fullstops.
             confirms: Optional name or the list of the names of the datasets
                 that should be confirmed. This will result in calling
-                ``confirm()`` method of the corresponding data set instance.
+                ``confirm()`` method of the corresponding dataset instance.
                 Specified dataset names do not necessarily need to be present
                 in the node ``inputs`` or ``outputs``.
             namespace: Optional node namespace.
@@ -601,7 +601,7 @@ def node(  # noqa: PLR0913
         tags: Optional set of tags to be applied to the node.
         confirms: Optional name or the list of the names of the datasets
             that should be confirmed. This will result in calling ``confirm()``
-            method of the corresponding data set instance. Specified dataset
+            method of the corresponding dataset instance. Specified dataset
             names do not necessarily need to be present in the node ``inputs``
             or ``outputs``.
         namespace: Optional node namespace.

@@ -239,6 +239,7 @@ class TestNodeHooks:
     @SKIP_ON_WINDOWS_AND_MACOS
     @pytest.mark.usefixtures("mock_broken_pipelines")
     def test_on_node_error_hook_parallel_runner(self, mock_session, logs_listener):
+        print(multiprocessing.get_start_method())
         with pytest.raises(ValueError, match="broken"):
             mock_session.run(
                 runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]

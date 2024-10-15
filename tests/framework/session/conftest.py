@@ -358,6 +358,7 @@ def _mock_imported_settings_paths(mocker, mock_settings):
     for path in [
         "kedro.framework.session.session.settings",
         "kedro.framework.project.settings",
+        "kedro.runner.task.settings",
     ]:
         mocker.patch(path, mock_settings)
     return mock_settings

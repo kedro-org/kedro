@@ -1,0 +1,39 @@
+name: Trigger Pipeline Performance Test
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  check-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Get the commit message (strip signature)
+      id: get_commit_message
+      run: |
+        commit_message=$(git log -1 --pretty=%B | sed -n '/^$/q;p')
+        echo "commit_message=$commit_message" >> $GITHUB_ENV
+    
+    - name: Get the branch name
+      id: get_branch_name
+      run: |
+        branch_name=${GITHUB_REF#refs/heads/}
+        echo "branch_name=$branch_name" >> $GITHUB_ENV
+
+    - name: Check if commit contains 'PERFORMANCE TEST'
+      if: contains(env.commit_message, 'PERFORMANCE TEST')
+      run: |
+        echo "Commit message contains 'PERFORMANCE TEST'. Triggering performance test."
+
+    - name: Trigger performance test workflow in test project
+      if: contains(env.commit_message, 'PERFORMANCE TEST')
+      run: |
+        curl -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.GH_TAGGING_TOKEN }}" \
+          https://api.github.com/repos/kedro-org/pipeline-performance-test/actions/workflows/performance-test.yml/dispatches \
+          -d '{"ref":"main", "inputs": {"branch_name": "${{ env.branch_name }}"}}'

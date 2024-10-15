@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import itertools as it
+import multiprocessing
 from collections.abc import Iterable, Iterator
 from concurrent.futures import (
     ALL_COMPLETED,
@@ -14,11 +15,70 @@ from typing import TYPE_CHECKING, Any
 
 from more_itertools import interleave
 
+from kedro.framework.hooks.manager import (
+    _create_hook_manager,
+    _register_hooks,
+    _register_hooks_entry_points,
+)
+from kedro.framework.project import settings
+
 if TYPE_CHECKING:
     from pluggy import PluginManager
 
     from kedro.io import CatalogProtocol
     from kedro.pipeline.node import Node
+
+
+def _bootstrap_subprocess(
+    package_name: str, logging_config: dict[str, Any] | None = None
+) -> None:
+    from kedro.framework.project import configure_logging, configure_project
+
+    configure_project(package_name)
+    if logging_config:
+        configure_logging(logging_config)
+
+
+def _run_node_synchronization(  # noqa: PLR0913
+    node: Node,
+    catalog: CatalogProtocol,
+    is_async: bool = False,
+    session_id: str | None = None,
+    package_name: str | None = None,
+    logging_config: dict[str, Any] | None = None,
+) -> Any:
+    """Run a single `Node` with inputs from and outputs to the `catalog`.
+
+    A ``PluginManager`` instance is created in each subprocess because the
+    ``PluginManager`` can't be serialised.
+
+    Args:
+        node: The ``Node`` to run.
+        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
+        is_async: If True, the node inputs and outputs are loaded and saved
+            asynchronously with threads. Defaults to False.
+        session_id: The session id of the pipeline run.
+        package_name: The name of the project Python package.
+        logging_config: A dictionary containing logging configuration.
+
+    Returns:
+        The node argument.
+
+    """
+    if multiprocessing.get_start_method() == "spawn" and package_name:
+        _bootstrap_subprocess(package_name, logging_config)
+
+    hook_manager = _create_hook_manager()
+    _register_hooks(hook_manager, settings.HOOKS)
+    _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+    return Task(
+        node=node,
+        catalog=catalog,
+        hook_manager=hook_manager,
+        is_async=is_async,
+        session_id=session_id,
+    ).execute()
 
 
 class Task:

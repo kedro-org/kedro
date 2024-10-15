@@ -4,7 +4,6 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 
 from __future__ import annotations
 
-import multiprocessing
 import os
 import sys
 from collections import Counter
@@ -15,12 +14,6 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import TYPE_CHECKING, Any
 
-from kedro.framework.hooks.manager import (
-    _create_hook_manager,
-    _register_hooks,
-    _register_hooks_entry_points,
-)
-from kedro.framework.project import settings
 from kedro.io import (
     CatalogProtocol,
     DatasetNotFoundError,
@@ -48,59 +41,6 @@ class ParallelRunnerManager(SyncManager):
 
 
 ParallelRunnerManager.register("MemoryDataset", MemoryDataset)
-
-
-def _bootstrap_subprocess(
-    package_name: str, logging_config: dict[str, Any] | None = None
-) -> None:
-    from kedro.framework.project import configure_logging, configure_project
-
-    configure_project(package_name)
-    if logging_config:
-        configure_logging(logging_config)
-
-
-def _run_node_synchronization(  # noqa: PLR0913
-    node: Node,
-    catalog: CatalogProtocol,
-    is_async: bool = False,
-    session_id: str | None = None,
-    package_name: str | None = None,
-    logging_config: dict[str, Any] | None = None,
-) -> Any:
-    """Run a single `Node` with inputs from and outputs to the `catalog`.
-
-    A ``PluginManager`` instance is created in each subprocess because the
-    ``PluginManager`` can't be serialised.
-
-    Args:
-        node: The ``Node`` to run.
-        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
-        is_async: If True, the node inputs and outputs are loaded and saved
-            asynchronously with threads. Defaults to False.
-        session_id: The session id of the pipeline run.
-        package_name: The name of the project Python package.
-        logging_config: A dictionary containing logging configuration.
-
-    Returns:
-        The node argument.
-
-    """
-    if multiprocessing.get_start_method() == "spawn" and package_name:
-        _bootstrap_subprocess(package_name, logging_config)
-
-    hook_manager = _create_hook_manager()
-    _register_hooks(hook_manager, settings.HOOKS)
-    _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
-    from kedro.runner import Task
-
-    return Task(
-        node=node,
-        catalog=catalog,
-        hook_manager=hook_manager,
-        is_async=is_async,
-        session_id=session_id,
-    ).execute()
 
 
 class ParallelRunner(AbstractRunner):
@@ -290,6 +230,7 @@ class ParallelRunner(AbstractRunner):
         max_workers = self._get_required_workers_count(pipeline)
 
         from kedro.framework.project import LOGGING, PACKAGE_NAME
+        from kedro.runner.task import _run_node_synchronization
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:

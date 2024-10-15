@@ -19,8 +19,8 @@ from kedro.runner import ParallelRunner
 from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
-    _run_node_synchronization,
 )
+from kedro.runner.task import _run_node_synchronization
 from tests.runner.conftest import (
     exception_fn,
     identity,

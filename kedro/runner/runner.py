@@ -6,10 +6,12 @@ from __future__ import annotations
 
 import inspect
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from collections import deque
 from typing import TYPE_CHECKING, Any
 
+from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import CatalogProtocol, MemoryDataset
 from kedro.pipeline import Pipeline
@@ -408,6 +410,10 @@ def run_node(
         The node argument.
 
     """
+    warnings.warn(
+        "`run_node()` has been deprecated and will be removed in Kedro 0.20.0",
+        KedroDeprecationWarning,
+    )
 
     if is_async and inspect.isgeneratorfunction(node.func):
         raise ValueError(

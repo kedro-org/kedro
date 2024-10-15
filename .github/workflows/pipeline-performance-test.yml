@@ -17,6 +17,12 @@ jobs:
       run: |
         commit_message=$(git log -1 --pretty=%B | sed -n '/^$/q;p')
         echo "commit_message=$commit_message" >> $GITHUB_ENV
+    
+    - name: Get the branch name
+      id: get_branch_name
+      run: |
+        branch_name=${GITHUB_REF#refs/heads/}
+        echo "branch_name=$branch_name" >> $GITHUB_ENV
 
     - name: Check if commit contains 'PERFORMANCE TEST'
       if: contains(env.commit_message, 'PERFORMANCE TEST')
@@ -30,4 +36,4 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: token ${{ secrets.GH_TAGGING_TOKEN }}" \
           https://api.github.com/repos/kedro-org/pipeline-performance-test/actions/workflows/performance-test.yml/dispatches \
-          -d '{"ref":"main"}'
+          -d '{"ref":"${{ env.branch_name }}"}'

@@ -126,5 +126,3 @@ class TimeOmegaConfigLoaderAdvanced:
     def time_loading_parameters(self):
         """Benchmark the time to load parameters with global interpolation"""
         self.loader["parameters"]
-
-

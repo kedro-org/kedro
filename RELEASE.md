@@ -4,7 +4,10 @@
 ## Bug fixes and other changes
 ## Breaking changes to the API
 ## Documentation changes
+* Updated CLI autocompletion docs with new Click syntax.
+
 ## Community contributions
+* [Hyewon Choi](https://github.com/hyew0nChoi)
 
 
 # Release 0.19.9
@@ -37,7 +40,6 @@
 ## Documentation changes
 * Fix logo on PyPI page.
 * Minor language/styling updates.
-* Update CLI autocompletion docs with new Click syntax.
 
 
 ## Community contributions
@@ -47,7 +49,6 @@
 * [MigQ2](https://github.com/MigQ2)
 * [Felix Scherz](https://github.com/felixscherz)
 * [Yu-Sheng Li](https://github.com/kevin1kevin1k)
-* [Hyewon Choi](https://github.com/hyew0nChoi)
 
 # Release 0.19.8
 

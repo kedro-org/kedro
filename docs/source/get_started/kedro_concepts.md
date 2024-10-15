@@ -75,7 +75,7 @@ project-dir          # Parent directory of the template
 ├── data             # Local project data (not committed to version control)
 ├── docs             # Project documentation
 ├── notebooks        # Project-related Jupyter notebooks (can be used for experimental code before moving the code to src)
-└── src              # Project source code
+├── src              # Project source code
 ├── tests            # Folder containing unit and integration tests
 ├── .gitignore       # Hidden file that prevents staging of unnecessary files to `git`
 ├── pyproject.toml   # Identifies the project root and contains configuration information
@@ -91,7 +91,7 @@ If you select no tools, the resulting structure will be simpler:
 project-dir          # Parent directory of the template
 ├── conf             # Project configuration files
 ├── notebooks        # Project-related Jupyter notebooks (can be used for experimental code before moving the code to src)
-└── src              # Project source code
+├── src              # Project source code
 ├── .gitignore       # Hidden file that prevents staging of unnecessary files to `git`
 ├── pyproject.toml   # Identifies the project root and contains configuration information
 ├── README.md        # Project README

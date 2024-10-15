@@ -1,5 +1,5 @@
 """``kedro.io`` provides functionality to read and write to a
-number of data sets. At the core of the library is the ``AbstractDataset`` class.
+number of datasets. At the core of the library is the ``AbstractDataset`` class.
 """
 
 from __future__ import annotations

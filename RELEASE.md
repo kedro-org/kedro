@@ -4,7 +4,10 @@
 ## Bug fixes and other changes
 ## Breaking changes to the API
 ## Documentation changes
+* Updated CLI autocompletion docs with new Click syntax.
+
 ## Community contributions
+* [Hyewon Choi](https://github.com/hyew0nChoi)
 
 
 # Release 0.19.9
@@ -37,6 +40,7 @@
 ## Documentation changes
 * Fix logo on PyPI page.
 * Minor language/styling updates.
+
 
 ## Community contributions
 * [Puneet](https://github.com/puneeter)

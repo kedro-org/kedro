@@ -1,6 +1,5 @@
 import logging
 import re
-import sys
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -75,7 +74,7 @@ class TestKedroDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a dataset
         from nonexistent source"""
-        pattern = r"Failed while loading data from data set CSVDataset"
+        pattern = r"Failed while loading data from dataset CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
@@ -347,30 +346,13 @@ class TestKedroDataCatalog:
             with pytest.raises(DatasetError, match=re.escape(pattern)):
                 KedroDataCatalog.from_config(**correct_config)
 
-        @pytest.mark.skipif(
-            sys.version_info < (3, 9),
-            reason="for python 3.8 kedro-datasets version 1.8 is used which has the old spelling",
-        )
-        def test_config_incorrect_spelling(self, correct_config):
-            """Check hint if the type uses the old DataSet spelling"""
-            correct_config["catalog"]["boats"]["type"] = "pandas.CSVDataSet"
-
-            pattern = (
-                "An exception occurred when parsing config for dataset 'boats':\n"
-                "Class 'pandas.CSVDataSet' not found, is this a typo?"
-                "\nHint: If you are trying to use a dataset from `kedro-datasets`>=2.0.0,"
-                " make sure that the dataset name uses the `Dataset` spelling instead of `DataSet`."
-            )
-            with pytest.raises(DatasetError, match=re.escape(pattern)):
-                KedroDataCatalog.from_config(**correct_config)
-
         def test_config_invalid_dataset(self, correct_config):
             """Check the error if the type points to invalid class"""
             correct_config["catalog"]["boats"]["type"] = "KedroDataCatalog"
             pattern = (
                 "An exception occurred when parsing config for dataset 'boats':\n"
                 "Dataset type 'kedro.io.kedro_data_catalog.KedroDataCatalog' is invalid: "
-                "all data set types must extend 'AbstractDataset'"
+                "all dataset types must extend 'AbstractDataset'"
             )
             with pytest.raises(DatasetError, match=re.escape(pattern)):
                 KedroDataCatalog.from_config(**correct_config)
@@ -571,7 +553,7 @@ class TestKedroDataCatalog:
             KedroDataCatalog.from_config(**correct_config)
             log_record = caplog.records[0]
             expected_log_message = (
-                "'version' attribute removed from data set configuration since it "
+                "'version' attribute removed from dataset configuration since it "
                 "is a reserved word and cannot be directly specified"
             )
             assert log_record.levelname == "WARNING"

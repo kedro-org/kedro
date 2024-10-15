@@ -13,7 +13,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any
 
 from kedro.framework.hooks.manager import (
     _create_hook_manager,
@@ -30,6 +30,8 @@ from kedro.io import (
 from kedro.runner.runner import AbstractRunner, run_node
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from pluggy import PluginManager
 
     from kedro.pipeline import Pipeline
@@ -41,7 +43,7 @@ _MAX_WINDOWS_WORKERS = 61
 
 class ParallelRunnerManager(SyncManager):
     """``ParallelRunnerManager`` is used to create shared ``MemoryDataset``
-    objects as default data sets in a pipeline.
+    objects as default datasets in a pipeline.
     """
 
 
@@ -169,8 +171,8 @@ class ParallelRunner(AbstractRunner):
 
     @classmethod
     def _validate_catalog(cls, catalog: CatalogProtocol, pipeline: Pipeline) -> None:
-        """Ensure that all data sets are serialisable and that we do not have
-        any non proxied memory data sets being used as outputs as their content
+        """Ensure that all datasets are serialisable and that we do not have
+        any non proxied memory datasets being used as outputs as their content
         will not be synchronized across threads.
         """
 
@@ -188,9 +190,9 @@ class ParallelRunner(AbstractRunner):
 
         if unserialisable:
             raise AttributeError(
-                f"The following data sets cannot be used with multiprocessing: "
+                f"The following datasets cannot be used with multiprocessing: "
                 f"{sorted(unserialisable)}\nIn order to utilize multiprocessing you "
-                f"need to make sure all data sets are serialisable, i.e. data sets "
+                f"need to make sure all datasets are serialisable, i.e. datasets "
                 f"should not make use of lambda functions, nested functions, closures "
                 f"etc.\nIf you are using custom decorators ensure they are correctly "
                 f"decorated using functools.wraps()."
@@ -207,7 +209,7 @@ class ParallelRunner(AbstractRunner):
 
         if memory_datasets:
             raise AttributeError(
-                f"The following data sets are memory data sets: "
+                f"The following datasets are memory datasets: "
                 f"{sorted(memory_datasets)}\n"
                 f"ParallelRunner does not support output to externally created "
                 f"MemoryDatasets"

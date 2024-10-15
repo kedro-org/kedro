@@ -7,11 +7,11 @@ If you can't find the answer you need here, [ask the Kedro community for help](h
 ## How do I resolve these common errors?
 
 ### Dataset errors
-#### DatasetError: Failed while loading data from data set
+#### DatasetError: Failed while loading data from dataset
 You're [testing whether Kedro can load the raw test data](./set_up_data.md#test-that-kedro-can-load-the-data) and see the following:
 
 ```python
-DatasetError: Failed while loading data from data set
+DatasetError: Failed while loading data from dataset
 CSVDataset(filepath=...).
 [Errno 2] No such file or directory: '.../companies.csv'
 ```
@@ -71,6 +71,6 @@ The above exception was the direct cause of the following exception:
 Traceback (most recent call last):
   ...
     raise DatasetError(message) from exc
-kedro.io.core.DatasetError: Failed while loading data from data set CSVDataset(filepath=data/03_primary/model_input_table.csv, save_args={'index': False}).
+kedro.io.core.DatasetError: Failed while loading data from dataset CSVDataset(filepath=data/03_primary/model_input_table.csv, save_args={'index': False}).
 [Errno 2] File b'data/03_primary/model_input_table.csv' does not exist: b'data/03_primary/model_input_table.csv'
 ```

@@ -36,7 +36,7 @@ def _remove_from_file(file_path: Path, content_to_remove: str) -> None:
         file_path (Path): The path of the file from which to remove content.
         content_to_remove (str): The content to be removed from the file.
     """
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = file.readlines()
 
     # Split the content to remove into lines and remove trailing whitespaces/newlines
@@ -86,7 +86,7 @@ def _remove_from_toml(file_path: Path, sections_to_remove: list) -> None:
         sections_to_remove (list): A list of section keys to remove from the TOML file.
     """
     # Load the TOML file
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         data = toml.load(file)
 
     # Remove the specified sections
@@ -162,7 +162,7 @@ def _remove_extras_from_kedro_datasets(file_path: Path) -> None:
     Args:
         file_path (Path): The path of the requirements file.
     """
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = file.readlines()
 
     for i, line in enumerate(lines):

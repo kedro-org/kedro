@@ -156,7 +156,7 @@ This file acts as the handler for each Lambda function in our pipeline, receives
 ```Dockerfile
 # Define global args
 ARG FUNCTION_DIR="/home/app/"
-ARG RUNTIME_VERSION="3.8"
+ARG RUNTIME_VERSION="3.9"
 
 # Stage 1 - bundle base image + runtime
 # Grab a fresh copy of the image and install GCC

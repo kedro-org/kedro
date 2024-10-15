@@ -36,4 +36,4 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: token ${{ secrets.GH_TAGGING_TOKEN }}" \
           https://api.github.com/repos/kedro-org/pipeline-performance-test/actions/workflows/performance-test.yml/dispatches \
-          -d '{"ref":"${{ env.branch_name }}"}'
+          -d '{"ref":"main", "inputs": {"branch_name": "${{ env.branch_name }}"}}'

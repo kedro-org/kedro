@@ -17,7 +17,7 @@ jobs:
       run: |
         commit_message=$(git log -1 --pretty=%B | sed -n '/^$/q;p')
         echo "commit_message=$commit_message" >> $GITHUB_ENV
-    
+
     - name: Get the branch name
       id: get_branch_name
       run: |

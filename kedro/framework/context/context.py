@@ -207,7 +207,7 @@ class KedroContext:
             # Merge nested structures
             params = OmegaConf.merge(params, self._extra_params)
 
-        return OmegaConf.to_container(params) if OmegaConf.is_config(params) else params  # type: ignore[return-value]
+        return OmegaConf.to_container(params) if OmegaConf.is_config(params) else params  # type: ignore[no-any-return]
 
     def _get_catalog(
         self,

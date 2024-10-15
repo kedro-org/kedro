@@ -118,7 +118,7 @@ class KedroDataCatalog(CatalogProtocol):
         return self._filter_keys(regex_search)
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
-        return [self._datasets[key] for key in self]
+        return [self._datasets[key] for key in self.__iter__()]
 
     def items(
         self, regex_search: str | None = None

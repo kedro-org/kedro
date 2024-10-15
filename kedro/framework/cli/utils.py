@@ -422,7 +422,7 @@ def find_run_command(package_name: str) -> Callable:
         # use run command from `kedro.framework.cli.project`
         from kedro.framework.cli.project import run
 
-        return run  # type: ignore[return-value]
+        return run  # type: ignore[no-any-return]
     # fail badly if cli.py exists, but has no `cli` in it
     if not hasattr(project_cli, "cli"):
         raise KedroCliError(f"Cannot load commands from {package_name}.cli")

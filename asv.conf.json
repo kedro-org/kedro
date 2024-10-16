@@ -3,22 +3,11 @@
     "project": "Kedro",
     "project_url": "https://kedro.org/",
     "repo": ".",
-    "install_command": [
-        "pip install -e . ./kedro_benchmarks/ "
-    ],
-    "matrix": {
-        "req": {
-            "kedro-datasets[pandas]": [""],
-            "numpy": [""]
-        }
-    },
-    "branches": [
-        "noklam/stress-testing-runners-4127"
-    ],
+    "install_command": ["pip install -e . ./kedro_benchmarks/ kedro-datasets numpy pandas "],
+    "branches": ["noklam/stress-testing-runners-4127"],
     "environment_name": "kedro",
     "environment_type": "virtualenv",
     "show_commit_url": "http://github.com/kedro-org/kedro/commit/",
     "results_dir": ".asv/results",
-    "html_dir": ".asv/html",
-    "benchmark_dir": "kedro_benchmarks"
+    "html_dir": ".asv/html"
 }

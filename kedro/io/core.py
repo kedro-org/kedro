@@ -572,9 +572,8 @@ def _load_obj(class_path: str) -> Any | None:
     return class_obj
 
 
-def _local_exists(local_filepath: str) -> bool:  # SKIP_IF_NO_SPARK
-    filepath = Path(local_filepath)
-    return filepath.exists() or any(par.is_file() for par in filepath.parents)
+def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
+    return Path(filepath).exists()
 
 
 class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):

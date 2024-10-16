@@ -36,6 +36,9 @@ class TimeDataCatalog:
             f"param_{i}": i for i in range(1, 1001)
         }
 
+    def time_init(self):
+        """Benchmark the time to initialize the catalog"""
+        DataCatalog.from_config(base_catalog)
 
     def time_save(self):
         """Benchmark the time to save datasets"""

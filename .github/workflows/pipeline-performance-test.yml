@@ -9,12 +9,12 @@ jobs:
 
     steps:
     - name: Check if 'performance' label was added
-      if: contains(github.event.label.name, 'performance')
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
       run: |
         echo "performance label detected. Triggering performance test."
 
     - name: Trigger performance test workflow in test project
-      if: contains(github.event.label.name, 'performance')
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
       run: |
         curl -X POST \
           -H "Accept: application/vnd.github+json" \

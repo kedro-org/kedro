@@ -287,6 +287,9 @@ class KedroDataCatalog(CatalogProtocol):
         This can be filtered by providing an optional regular expression
         which will only return matching keys.
         """
+        if regex_search is None:
+            return self.keys()
+
         if regex_search == "":
             self._logger.warning("The empty string will not match any datasets")
             return []
@@ -294,13 +297,11 @@ class KedroDataCatalog(CatalogProtocol):
         return self.filter(regex_search)
 
     def filter(
-        self, regex_search: str | None, regex_flags: int | re.RegexFlag | None = None
+        self, regex_search: str, regex_flags: int | re.RegexFlag | None = None
     ) -> List[str]:  # noqa: UP006
         """
         Filter dataset names registered in the catalog.
         """
-        if regex_search is None:
-            return self.keys()
         if regex_flags is None:
             regex_flags = re.IGNORECASE
 

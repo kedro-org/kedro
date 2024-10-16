@@ -114,21 +114,19 @@ class KedroDataCatalog(CatalogProtocol):
             other.config_resolver.list_patterns(),
         )
 
-    def keys(self, regex_search: str | None = None) -> List[str]:  # noqa: UP006
-        return self._filter_keys(regex_search)
+    def keys(self) -> List[str]:  # noqa: UP006
+        return list(self.__iter__())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         return [self._datasets[key] for key in self.__iter__()]
 
-    def items(
-        self, regex_search: str | None = None
-    ) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
-        return [(key, self._datasets[key]) for key in self._filter_keys(regex_search)]
+    def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
+        return [(key, self._datasets[key]) for key in self.__iter__()]
 
     def __iter__(self) -> Iterable[str]:
         yield from self._datasets.keys()
 
-    def __getitem__(self, ds_name: str) -> AbstractDataset | None:
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
         return self.get_dataset(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -137,6 +135,7 @@ class KedroDataCatalog(CatalogProtocol):
         if isinstance(value, AbstractDataset):
             self._datasets[key] = value
         else:
+            self._logger.info(f"Adding input data as a MemoryDataset - {key}")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:
@@ -292,19 +291,26 @@ class KedroDataCatalog(CatalogProtocol):
             self._logger.warning("The empty string will not match any datasets")
             return []
 
-        return self.keys(regex_search)
+        return self.filter(regex_search)
 
-    def _filter_keys(self, regex_search: str | None) -> List[str]:  # noqa: UP006
+    def filter(
+        self, regex_search: str | None, regex_flags: int | re.RegexFlag | None = None
+    ) -> List[str]:  # noqa: UP006
+        """
+        Filter dataset names registered in the catalog.
+        """
         if regex_search is None:
-            return list(self._datasets.keys())
+            return self.keys()
+        if regex_flags is None:
+            regex_flags = re.IGNORECASE
 
         try:
-            pattern = re.compile(regex_search, flags=re.IGNORECASE)
+            pattern = re.compile(regex_search, flags=regex_flags)
         except re.error as exc:
             raise SyntaxError(
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
-        return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
+        return [ds_name for ds_name in self.__iter__() if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:
         # TODO: rename input argument when breaking change: name -> ds_name

@@ -297,12 +297,12 @@ class KedroDataCatalog(CatalogProtocol):
         return self.filter(regex_search)
 
     def filter(
-        self, regex_search: str, regex_flags: int | re.RegexFlag | None = None
+        self, regex_search: str, regex_flags: int | re.RegexFlag = 0
     ) -> List[str]:  # noqa: UP006
         """
         Filter dataset names registered in the catalog.
         """
-        if regex_flags is None:
+        if not regex_flags:
             regex_flags = re.IGNORECASE
 
         try:

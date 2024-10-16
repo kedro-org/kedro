@@ -1,0 +1,9 @@
+{
+    "arch": "arm64",
+    "cpu": "Apple M1 Max",
+    "machine": "M-WFLM6NH6G5",
+    "num_cpu": "10",
+    "os": "Darwin 23.6.0",
+    "ram": "34359738368",
+    "version": 1
+}

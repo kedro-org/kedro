@@ -7,7 +7,6 @@ import shutil
 from pathlib import Path
 from textwrap import indent
 from time import sleep
-from time import sleep
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 import click

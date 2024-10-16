@@ -307,12 +307,35 @@ class KedroDataCatalog(CatalogProtocol):
         return [ds_name for ds_name in self._datasets if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:
-        # TODO: remove when removing old catalog
-        """Save data to a registered dataset."""
-        self.save_data(name, data)
+        # TODO: rename input argument when breaking change: name -> ds_name
+        """Save data to a registered dataset.
 
-    def save_data(self, name: str, data: Any) -> None:
-        """Save data to a registered dataset."""
+        Args:
+            name: A dataset to be saved to.
+            data: A data object to be saved as configured in the registered
+                dataset.
+
+        Raises:
+            DatasetNotFoundError: When a dataset with the given name
+                has not yet been registered.
+
+        Example:
+        ::
+
+            >>> import pandas as pd
+            >>>
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>>
+            >>> cars = CSVDataset(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
+            >>>
+            >>> df = pd.DataFrame({'col1': [1, 2],
+            >>>                    'col2': [4, 5],
+            >>>                    'col3': [5, 6]})
+            >>> catalog.save("cars", df)
+        """
         dataset = self.get_dataset(name)
 
         self._logger.info(
@@ -325,11 +348,35 @@ class KedroDataCatalog(CatalogProtocol):
         dataset.save(data)
 
     def load(self, name: str, version: str | None = None) -> Any:
-        # TODO: remove when removing old catalog
-        return self.load_data(name, version)
+        # TODO: rename input argument when breaking change: name -> ds_name
+        # TODO: remove version from input arguments when breaking change
+        """Loads a registered dataset.
 
-    def load_data(self, name: str, version: str | None = None) -> Any:
-        """Loads a registered dataset."""
+        Args:
+            name: A dataset to be loaded.
+            version: Optional argument for concrete data version to be loaded.
+                Works only with versioned datasets.
+
+        Returns:
+            The loaded data as configured.
+
+        Raises:
+            DatasetNotFoundError: When a dataset with the given name
+                has not yet been registered.
+
+        Example:
+        ::
+
+            >>> from kedro.io import DataCatalog
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>>
+            >>> cars = CSVDataset(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
+            >>>
+            >>> df = catalog.load("cars")
+        """
         load_version = Version(version, None) if version else None
         dataset = self.get_dataset(name, version=load_version)
 

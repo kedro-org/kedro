@@ -9,7 +9,7 @@ jobs:
 
     steps:
     - name: Check if 'performance' label was added
-      if: contains(github.event.label.name, 'PERFORMANCE TEST')
+      if: contains(github.event.label.name, 'performance')
       run: |
         echo "performance label detected. Triggering performance test."
 

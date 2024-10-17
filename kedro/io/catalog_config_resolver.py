@@ -7,13 +7,13 @@ from __future__ import annotations
 import copy
 import logging
 import re
-from typing import Any, Dict
+from typing import Any
 
 from parse import parse
 
 from kedro.io.core import DatasetError
 
-Patterns = Dict[str, Dict[str, Any]]
+Patterns = dict[str, dict[str, Any]]
 
 CREDENTIALS_KEY = "credentials"
 
@@ -90,7 +90,7 @@ class CatalogConfigResolver:
             The set of requested credentials.
 
         Raises:
-            KeyError: When a data set with the given name has not yet been
+            KeyError: When a dataset with the given name has not yet been
                 registered.
 
         """

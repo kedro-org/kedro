@@ -19,7 +19,7 @@ This tutorial introduces a Kedro project development workflow using only the Dat
 
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
-- Python >= 3.8 installed.
+- Python >= 3.9 installed.
 - Git installed.
 - A [GitHub](https://github.com/) account.
 - A Python environment management system installed, [venv](https://docs.python.org/3/library/venv.html), [virtualenv](https://virtualenv.pypa.io/en/latest/) or [Conda](https://docs.conda.io/en/latest/) are popular choices.

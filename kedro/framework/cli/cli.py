@@ -10,9 +10,12 @@ import sys
 import traceback
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import click
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 from kedro import __version__ as version
 from kedro.framework.cli import BRIGHT_BLACK, ORANGE

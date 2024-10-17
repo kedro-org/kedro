@@ -153,6 +153,6 @@ class TestResumeLogicBehaviour:
             test_pipeline, remaining_nodes, persistent_dataset_catalog
         )
 
-        assert set(n.name for n in required_nodes) == set(
+        assert {n.name for n in required_nodes} == {
             n.name for n in test_pipeline.from_nodes(*resume_node_names).nodes
-        )
+        }

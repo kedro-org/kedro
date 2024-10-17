@@ -127,7 +127,10 @@ class AbstractRunner(ABC):
         run_output = {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
 
         # Remove runtime patterns after run, so they do not affect further runs
-        catalog.config_resolver.remove_runtime_patterns(self._extra_dataset_patterns)
+        if self._extra_dataset_patterns:
+            catalog.config_resolver.remove_runtime_patterns(
+                self._extra_dataset_patterns
+            )
 
         return run_output
 

@@ -3,6 +3,7 @@ import pytest
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.pipeline import node
 from kedro.runner import Task
+from kedro.runner.task import TaskError
 
 
 def generate_one():
@@ -77,3 +78,18 @@ class TestTask:
         )
         task._run_node_synchronization(package_name=package_name)
         mock_logging.assert_not_called()
+
+    def test_raise_task_exception(self, mocker):
+        node_ = mocker.sentinel.node
+        catalog = mocker.sentinel.catalog
+        session_id = "fake_session_id"
+
+        with pytest.raises(TaskError, match="No hook_manager provided."):
+            task = Task(
+                node=node_,
+                catalog=catalog,
+                is_async=False,
+                session_id=session_id,
+                parallel=False,
+            )
+            task.execute()

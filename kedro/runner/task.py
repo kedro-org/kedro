@@ -29,6 +29,15 @@ if TYPE_CHECKING:
     from kedro.pipeline.node import Node
 
 
+class TaskError(Exception):
+    """``TaskError`` raised by ``Task``
+    in case of failure of provided task arguments
+
+    """
+
+    pass
+
+
 class Task:
     def __init__(  # noqa: PLR0913
         self,
@@ -47,14 +56,6 @@ class Task:
         self.parallel = parallel
 
     def execute(self) -> Node:
-        if self.parallel:
-            from kedro.framework.project import LOGGING, PACKAGE_NAME
-
-            hook_manager = Task._run_node_synchronization(
-                package_name=PACKAGE_NAME, logging_config=LOGGING
-            )
-            self.hook_manager = hook_manager
-
         if self.is_async and inspect.isgeneratorfunction(self.node.func):
             raise ValueError(
                 f"Async data loading and saving does not work with "
@@ -63,13 +64,32 @@ class Task:
                 f"in node {self.node!s}."
             )
 
+        if not self.hook_manager and not self.parallel:
+            raise TaskError(
+                "No hook_manager provided. This is only allowed when running a ``Task`` with ``ParallelRunner``."
+            )
+
+        if self.parallel:
+            from kedro.framework.project import LOGGING, PACKAGE_NAME
+
+            hook_manager = Task._run_node_synchronization(
+                package_name=PACKAGE_NAME,
+                logging_config=LOGGING,  # type: ignore[arg-type]
+            )
+            self.hook_manager = hook_manager
         if self.is_async:
             node = self._run_node_async(
-                self.node, self.catalog, self.hook_manager, self.session_id
+                self.node,
+                self.catalog,
+                self.hook_manager,  # type: ignore[arg-type]
+                self.session_id,
             )
         else:
             node = self._run_node_sequential(
-                self.node, self.catalog, self.hook_manager, self.session_id
+                self.node,
+                self.catalog,
+                self.hook_manager,  # type: ignore[arg-type]
+                self.session_id,
             )
 
         for name in node.confirms:
@@ -173,7 +193,7 @@ class Task:
         self,
         node: Node,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager,  # type: ignore[arg-type]
         session_id: str | None = None,
     ) -> Node:
         with ThreadPoolExecutor() as pool:

@@ -10,6 +10,7 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any
 
 from kedro.runner.runner import AbstractRunner
+from kedro.runner.task import Task
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -75,8 +76,6 @@ class SequentialRunner(AbstractRunner):
 
         for exec_index, node in enumerate(nodes):
             try:
-                from kedro.runner.task import Task
-
                 Task(
                     node=node,
                     catalog=catalog,

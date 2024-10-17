@@ -21,6 +21,7 @@ from kedro.io import (
     SharedMemoryDataset,
 )
 from kedro.runner.runner import AbstractRunner
+from kedro.runner.task import Task
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -228,8 +229,6 @@ class ParallelRunner(AbstractRunner):
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)
-
-        from kedro.runner.task import Task
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:

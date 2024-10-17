@@ -29,74 +29,32 @@ if TYPE_CHECKING:
     from kedro.pipeline.node import Node
 
 
-def _bootstrap_subprocess(
-    package_name: str, logging_config: dict[str, Any] | None = None
-) -> None:
-    from kedro.framework.project import configure_logging, configure_project
-
-    configure_project(package_name)
-    if logging_config:
-        configure_logging(logging_config)
-
-
-def _run_node_synchronization(  # noqa: PLR0913
-    node: Node,
-    catalog: CatalogProtocol,
-    is_async: bool = False,
-    session_id: str | None = None,
-    package_name: str | None = None,
-    logging_config: dict[str, Any] | None = None,
-) -> Any:
-    """Run a single `Node` with inputs from and outputs to the `catalog`.
-
-    A ``PluginManager`` instance is created in each subprocess because the
-    ``PluginManager`` can't be serialised.
-
-    Args:
-        node: The ``Node`` to run.
-        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
-        is_async: If True, the node inputs and outputs are loaded and saved
-            asynchronously with threads. Defaults to False.
-        session_id: The session id of the pipeline run.
-        package_name: The name of the project Python package.
-        logging_config: A dictionary containing logging configuration.
-
-    Returns:
-        The node argument.
-
-    """
-    if multiprocessing.get_start_method() == "spawn" and package_name:
-        _bootstrap_subprocess(package_name, logging_config)
-
-    hook_manager = _create_hook_manager()
-    _register_hooks(hook_manager, settings.HOOKS)
-    _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
-
-    return Task(
-        node=node,
-        catalog=catalog,
-        hook_manager=hook_manager,
-        is_async=is_async,
-        session_id=session_id,
-    ).execute()
-
-
 class Task:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         node: Node,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
         is_async: bool,
+        hook_manager: PluginManager | None = None,
         session_id: str | None = None,
+        parallel: bool = False,
     ):
         self.node = node
         self.catalog = catalog
         self.hook_manager = hook_manager
         self.is_async = is_async
         self.session_id = session_id
+        self.parallel = parallel
 
     def execute(self) -> Node:
+        if self.parallel:
+            from kedro.framework.project import LOGGING, PACKAGE_NAME
+
+            hook_manager = Task._run_node_synchronization(
+                package_name=PACKAGE_NAME, logging_config=LOGGING
+            )
+            self.hook_manager = hook_manager
+
         if self.is_async and inspect.isgeneratorfunction(self.node.func):
             raise ValueError(
                 f"Async data loading and saving does not work with "
@@ -122,6 +80,43 @@ class Task:
     def __call__(self) -> Node:
         """Make the class instance callable by ProcessPoolExecutor."""
         return self.execute()
+
+    @staticmethod
+    def _bootstrap_subprocess(
+        package_name: str, logging_config: dict[str, Any] | None = None
+    ) -> None:
+        from kedro.framework.project import configure_logging, configure_project
+
+        configure_project(package_name)
+        if logging_config:
+            configure_logging(logging_config)
+
+    @staticmethod
+    def _run_node_synchronization(
+        package_name: str | None = None,
+        logging_config: dict[str, Any] | None = None,
+    ) -> Any:
+        """Run a single `Node` with inputs from and outputs to the `catalog`.
+
+        A ``PluginManager`` instance is created in each subprocess because the
+        ``PluginManager`` can't be serialised.
+
+        Args:
+            package_name: The name of the project Python package.
+            logging_config: A dictionary containing logging configuration.
+
+        Returns:
+            The node argument.
+
+        """
+        if multiprocessing.get_start_method() == "spawn" and package_name:
+            Task._bootstrap_subprocess(package_name, logging_config)
+
+        hook_manager = _create_hook_manager()
+        _register_hooks(hook_manager, settings.HOOKS)
+        _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+        return hook_manager
 
     def _run_node_sequential(
         self,

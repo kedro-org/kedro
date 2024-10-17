@@ -169,7 +169,6 @@ layers = [
     "config"
 ]
 ignore_imports = [
-    "kedro.runner.parallel_runner -> kedro.framework.project",
     "kedro.runner.task -> kedro.framework.project",
     "kedro.framework.hooks.specs -> kedro.framework.context"
 ]

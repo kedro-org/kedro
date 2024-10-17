@@ -423,6 +423,12 @@ def run_node(
             f"in node {node!s}."
         )
 
-    task = Task(node, catalog, hook_manager, is_async, session_id)
+    task = Task(
+        node=node,
+        catalog=catalog,
+        hook_manager=hook_manager,
+        is_async=is_async,
+        session_id=session_id,
+    )
     node = task.execute()
     return node

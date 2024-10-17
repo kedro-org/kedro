@@ -229,25 +229,21 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
-        from kedro.framework.project import LOGGING, PACKAGE_NAME
-        from kedro.runner.task import _run_node_synchronization
+        from kedro.runner.task import Task
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:
                 ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
-                    futures.add(
-                        pool.submit(
-                            _run_node_synchronization,
-                            node,
-                            catalog,
-                            self._is_async,
-                            session_id,
-                            package_name=PACKAGE_NAME,
-                            logging_config=LOGGING,  # type: ignore[arg-type]
-                        )
+                    task = Task(
+                        node=node,
+                        catalog=catalog,
+                        is_async=self._is_async,
+                        session_id=session_id,
+                        parallel=True,
                     )
+                    futures.add(pool.submit(task))
                 if not futures:
                     if todo_nodes:
                         debug_data = {

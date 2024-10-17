@@ -289,3 +289,10 @@ class CatalogConfigResolver:
         """Add new runtime patterns and re-sort them."""
         self._runtime_patterns = {**self._runtime_patterns, **dataset_patterns}
         self._runtime_patterns = self._sort_patterns(self._runtime_patterns)
+
+    def remove_runtime_patterns(self, dataset_patterns: Patterns) -> None:
+        """Remove runtime patterns and re-sort them."""
+        for pattern_name in dataset_patterns:
+            if pattern_name in self._runtime_patterns:
+                del self._runtime_patterns[pattern_name]
+        self._runtime_patterns = self._sort_patterns(self._runtime_patterns)

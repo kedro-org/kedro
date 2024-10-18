@@ -280,8 +280,10 @@ class KedroDataCatalog(CatalogProtocol):
             )
         self.__setitem__(ds_name, dataset)
 
-    def list(self, regex_search: str | None = None) -> List[str]:  # noqa: UP006
-        # TODO: remove when removing old catalog
+    def list(
+        self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0
+    ) -> List[str]:  # noqa: UP006
+        # TODO: rename depending on the solution for https://github.com/kedro-org/kedro/issues/3917
         """
         List of all dataset names registered in the catalog.
         This can be filtered by providing an optional regular expression
@@ -294,14 +296,6 @@ class KedroDataCatalog(CatalogProtocol):
             self._logger.warning("The empty string will not match any datasets")
             return []
 
-        return self.filter(regex_search)
-
-    def filter(
-        self, regex_search: str, regex_flags: int | re.RegexFlag = 0
-    ) -> List[str]:  # noqa: UP006
-        """
-        Filter dataset names registered in the catalog.
-        """
         if not regex_flags:
             regex_flags = re.IGNORECASE
 

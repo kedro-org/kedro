@@ -70,7 +70,7 @@ templates_path = ["_templates"]
 intersphinx_mapping = {
     "kedro-viz": ("https://docs.kedro.org/projects/kedro-viz/en/v6.6.1/", None),
     "kedro-datasets": ("https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-2.0.0/", None),
-    "cpython": ("https://docs.python.org/3.8/", None),
+    "cpython": ("https://docs.python.org/3.9/", None),
     "ipython": ("https://ipython.readthedocs.io/en/8.21.0/", None),
     "mlflow": ("https://www.mlflow.org/docs/2.12.1/", None),
     "kedro-mlflow": ("https://kedro-mlflow.readthedocs.io/en/0.12.2/", None),
@@ -134,6 +134,7 @@ type_targets = {
         "kedro.io.core.DatasetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
+        "kedro.io.kedro_data_catalog.KedroDataCatalog",
         "kedro.io.memory_dataset.MemoryDataset",
         "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",
@@ -172,6 +173,7 @@ type_targets = {
         "Patterns",
         "CatalogConfigResolver",
         "CatalogProtocol",
+        "KedroDataCatalog",
     ),
     "py:data": (
         "typing.Any",

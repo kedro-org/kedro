@@ -1,4 +1,4 @@
-"""``MemoryDataset`` is a data set implementation which handles in-memory data."""
+"""``MemoryDataset`` is a dataset implementation which handles in-memory data."""
 
 from __future__ import annotations
 

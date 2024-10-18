@@ -8,15 +8,17 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
-from itertools import chain
-from typing import Any, Iterable
-
 from graphlib import CycleError, TopologicalSorter
+from itertools import chain
+from typing import TYPE_CHECKING, Any
 
 import kedro
 from kedro.pipeline.node import Node, _to_list
 
 from .transcoding import _strip_transcoding
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def __getattr__(name: str) -> Any:
@@ -91,8 +93,8 @@ class Pipeline:
             >>> from kedro.pipeline import node
             >>>
             >>> # In the following scenario first_ds and second_ds
-            >>> # are data sets provided by io. Pipeline will pass these
-            >>> # data sets to first_node function and provides the result
+            >>> # are datasets provided by io. Pipeline will pass these
+            >>> # datasets to first_node function and provides the result
             >>> # to the second_node as input.
             >>>
             >>> def first_node(first_ds, second_ds):
@@ -245,11 +247,11 @@ class Pipeline:
         return self._remove_intermediates(self.all_outputs())
 
     def datasets(self) -> set[str]:
-        """The names of all data sets used by the ``Pipeline``,
+        """The names of all datasets used by the ``Pipeline``,
         including inputs and outputs.
 
         Returns:
-            The set of all pipeline data sets.
+            The set of all pipeline datasets.
 
         """
         return self.all_outputs() | self.all_inputs()

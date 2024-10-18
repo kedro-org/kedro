@@ -2,7 +2,7 @@
 provide ``load`` and ``save`` capabilities from anywhere in the program. To
 use a ``DataCatalog``, you need to instantiate it with a dictionary of data
 sets. Then it will act as a single point of reference for your calls,
-relaying load and save functions to the underlying data sets.
+relaying load and save functions to the underlying datasets.
 """
 
 from __future__ import annotations
@@ -35,10 +35,10 @@ WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
 def _sub_nonword_chars(dataset_name: str) -> str:
-    """Replace non-word characters in data set names since Kedro 0.16.2.
+    """Replace non-word characters in dataset names since Kedro 0.16.2.
 
     Args:
-        dataset_name: The data set name registered in the data catalog.
+        dataset_name: The dataset name registered in the data catalog.
 
     Returns:
         The name used in `DataCatalog.datasets`.
@@ -75,7 +75,7 @@ class _FrozenDatasets:
         if key == "_original_names":
             super().__setattr__(key, value)
             return
-        msg = "Operation not allowed! "
+        msg = "Operation not allowed. "
         if key in self.__dict__:
             msg += "Please change datasets through configuration."
         else:
@@ -102,9 +102,9 @@ class DataCatalog:
     """``DataCatalog`` stores instances of ``AbstractDataset`` implementations
     to provide ``load`` and ``save`` capabilities from anywhere in the
     program. To use a ``DataCatalog``, you need to instantiate it with
-    a dictionary of data sets. Then it will act as a single point of reference
+    a dictionary of datasets. Then it will act as a single point of reference
     for your calls, relaying load and save functions
-    to the underlying data sets.
+    to the underlying datasets.
     """
 
     def __init__(  # noqa: PLR0913
@@ -120,15 +120,15 @@ class DataCatalog:
         """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
         anywhere in the program. To use a ``DataCatalog``, you need to
-        instantiate it with a dictionary of data sets. Then it will act as a
+        instantiate it with a dictionary of datasets. Then it will act as a
         single point of reference for your calls, relaying load and save
-        functions to the underlying data sets.
+        functions to the underlying datasets.
 
         Args:
-            datasets: A dictionary of data set names and data set instances.
+            datasets: A dictionary of dataset names and dataset instances.
             feed_dict: A feed dict with data to be added in memory.
-            dataset_patterns: A dictionary of data set factory patterns
-                and corresponding data set configuration. When fetched from catalog configuration
+            dataset_patterns: A dictionary of dataset factory patterns
+                and corresponding dataset configuration. When fetched from catalog configuration
                 these patterns will be sorted by:
                 1. Decreasing specificity (number of characters outside the curly brackets)
                 2. Decreasing number of placeholders (number of curly bracket pairs)
@@ -137,10 +137,10 @@ class DataCatalog:
                 pattern provided through the runners if it comes before "default" in the alphabet.
                 Such an overwriting pattern will emit a warning. The `"{default}"` name will
                 not emit a warning.
-            load_versions: A mapping between data set names and versions
-                to load. Has no effect on data sets without enabled versioning.
+            load_versions: A mapping between dataset names and versions
+                to load. Has no effect on datasets without enabled versioning.
             save_version: Version string to be used for ``save`` operations
-                by all data sets with enabled versioning. It must: a) be a
+                by all datasets with enabled versioning. It must: a) be a
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
@@ -216,28 +216,28 @@ class DataCatalog:
         ``DataCatalog`` with configuration parsed from configuration files.
 
         Args:
-            catalog: A dictionary whose keys are the data set names and
+            catalog: A dictionary whose keys are the dataset names and
                 the values are dictionaries with the constructor arguments
-                for classes implementing ``AbstractDataset``. The data set
+                for classes implementing ``AbstractDataset``. The dataset
                 class to be loaded is specified with the key ``type`` and their
-                fully qualified class name. All ``kedro.io`` data set can be
+                fully qualified class name. All ``kedro.io`` dataset can be
                 specified by their class name only, i.e. their module name
                 can be omitted.
             credentials: A dictionary containing credentials for different
-                data sets. Use the ``credentials`` key in a ``AbstractDataset``
+                datasets. Use the ``credentials`` key in a ``AbstractDataset``
                 to refer to the appropriate credentials as shown in the example
                 below.
             load_versions: A mapping between dataset names and versions
-                to load. Has no effect on data sets without enabled versioning.
+                to load. Has no effect on datasets without enabled versioning.
             save_version: Version string to be used for ``save`` operations
-                by all data sets with enabled versioning. It must: a) be a
+                by all datasets with enabled versioning. It must: a) be a
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
 
         Returns:
             An instantiated ``DataCatalog`` containing all specified
-            data sets, created and ready to use.
+            datasets, created and ready to use.
 
         Raises:
             DatasetError: When the method fails to create any of the data
@@ -324,7 +324,7 @@ class DataCatalog:
         version: Version | None = None,
         suggest: bool = True,
     ) -> AbstractDataset:
-        ds_config = self._config_resolver.resolve_dataset_pattern(dataset_name)
+        ds_config = self._config_resolver.resolve_pattern(dataset_name)
 
         if dataset_name not in self._datasets and ds_config:
             ds = AbstractDataset.from_config(
@@ -356,10 +356,10 @@ class DataCatalog:
         return dataset
 
     def load(self, name: str, version: str | None = None) -> Any:
-        """Loads a registered data set.
+        """Loads a registered dataset.
 
         Args:
-            name: A data set to be loaded.
+            name: A dataset to be loaded.
             version: Optional argument for concrete data version to be loaded.
                 Works only with versioned datasets.
 
@@ -367,7 +367,7 @@ class DataCatalog:
             The loaded data as configured.
 
         Raises:
-            DatasetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
 
         Example:
@@ -398,15 +398,15 @@ class DataCatalog:
         return result
 
     def save(self, name: str, data: Any) -> None:
-        """Save data to a registered data set.
+        """Save data to a registered dataset.
 
         Args:
-            name: A data set to be saved to.
+            name: A dataset to be saved to.
             data: A data object to be saved as configured in the registered
-                data set.
+                dataset.
 
         Raises:
-            DatasetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
 
         Example:
@@ -438,15 +438,15 @@ class DataCatalog:
         dataset.save(data)
 
     def exists(self, name: str) -> bool:
-        """Checks whether registered data set exists by calling its `exists()`
+        """Checks whether registered dataset exists by calling its `exists()`
         method. Raises a warning and returns False if `exists()` is not
         implemented.
 
         Args:
-            name: A data set to be checked.
+            name: A dataset to be checked.
 
         Returns:
-            Whether the data set output exists.
+            Whether the dataset output exists.
 
         """
         try:
@@ -456,13 +456,13 @@ class DataCatalog:
         return dataset.exists()
 
     def release(self, name: str) -> None:
-        """Release any cached data associated with a data set
+        """Release any cached data associated with a dataset
 
         Args:
-            name: A data set to be checked.
+            name: A dataset to be checked.
 
         Raises:
-            DatasetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
         """
         dataset = self._get_dataset(name)
@@ -477,15 +477,15 @@ class DataCatalog:
         """Adds a new ``AbstractDataset`` object to the ``DataCatalog``.
 
         Args:
-            dataset_name: A unique data set name which has not been
+            dataset_name: A unique dataset name which has not been
                 registered yet.
-            dataset: A data set object to be associated with the given data
+            dataset: A dataset object to be associated with the given data
                 set name.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
 
         Raises:
-            DatasetAlreadyExistsError: When a data set with the same name
+            DatasetAlreadyExistsError: When a dataset with the same name
                 has already been registered.
 
         Example:
@@ -514,7 +514,7 @@ class DataCatalog:
         datasets: dict[str, AbstractDataset],
         replace: bool = False,
     ) -> None:
-        """Adds a group of new data sets to the ``DataCatalog``.
+        """Adds a group of new datasets to the ``DataCatalog``.
 
         Args:
             datasets: A dictionary of dataset names and dataset
@@ -523,7 +523,7 @@ class DataCatalog:
                 with the same name is allowed.
 
         Raises:
-            DatasetAlreadyExistsError: When a data set with the same name
+            DatasetAlreadyExistsError: When a dataset with the same name
                 has already been registered.
 
         Example:
@@ -597,10 +597,10 @@ class DataCatalog:
 
         Args:
             regex_search: An optional regular expression which can be provided
-                to limit the data sets returned by a particular pattern.
+                to limit the datasets returned by a particular pattern.
         Returns:
             A list of dataset names available which match the
-            `regex_search` criteria (if provided). All data set names are returned
+            `regex_search` criteria (if provided). All dataset names are returned
             by default.
 
         Raises:
@@ -610,11 +610,11 @@ class DataCatalog:
         ::
 
             >>> catalog = DataCatalog()
-            >>> # get data sets where the substring 'raw' is present
+            >>> # get datasets where the substring 'raw' is present
             >>> raw_data = catalog.list(regex_search='raw')
-            >>> # get data sets which start with 'prm' or 'feat'
+            >>> # get datasets which start with 'prm' or 'feat'
             >>> feat_eng_data = catalog.list(regex_search='^(prm|feat)')
-            >>> # get data sets which end with 'time_series'
+            >>> # get datasets which end with 'time_series'
             >>> models = catalog.list(regex_search='.+time_series$')
         """
 
@@ -622,7 +622,7 @@ class DataCatalog:
             return list(self._datasets.keys())
 
         if not regex_search.strip():
-            self._logger.warning("The empty string will not match any data sets")
+            self._logger.warning("The empty string will not match any datasets")
             return []
 
         try:

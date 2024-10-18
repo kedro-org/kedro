@@ -15,10 +15,14 @@ import traceback
 import typing
 import warnings
 from collections import defaultdict
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import IO, Any, Callable, Iterable, Sequence
+from typing import IO, Any, Callable
 
 import click
 import importlib_metadata
@@ -55,7 +59,7 @@ def call(cmd: list[str], **kwargs: Any) -> None:  # pragma: no cover
     Raises:
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
-    click.echo(" ".join(shlex.quote(c) for c in cmd))
+    click.echo(shlex.join(cmd))
     code = subprocess.run(cmd, **kwargs).returncode  # noqa: PLW1510, S603
     if code:
         raise click.exceptions.Exit(code=code)
@@ -418,7 +422,7 @@ def find_run_command(package_name: str) -> Callable:
         # use run command from `kedro.framework.cli.project`
         from kedro.framework.cli.project import run
 
-        return run  # type: ignore[no-any-return]
+        return run  # type: ignore[return-value]
     # fail badly if cli.py exists, but has no `cli` in it
     if not hasattr(project_cli, "cli"):
         raise KedroCliError(f"Cannot load commands from {package_name}.cli")

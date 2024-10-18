@@ -8,5 +8,11 @@
     "environment_type": "virtualenv",
     "show_commit_url": "http://github.com/kedro-org/kedro/commit/",
     "results_dir": ".asv/results",
-    "html_dir": ".asv/html"
+    "html_dir": ".asv/html",
+    "matrix": {
+        "req": {
+            "kedro-datasets": [],
+            "pandas": []
+        }
+    }
 }

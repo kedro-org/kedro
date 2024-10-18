@@ -14,7 +14,7 @@ import copy
 import difflib
 import logging
 import re
-from typing import Any, Iterable, List  # noqa: UP035
+from typing import Any, Iterator, List  # noqa: UP035
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
@@ -118,12 +118,12 @@ class KedroDataCatalog(CatalogProtocol):
         return list(self.__iter__())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
-        return [self._datasets[key] for key in self.__iter__()]
+        return [self._datasets[key] for key in self]
 
     def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
-        return [(key, self._datasets[key]) for key in self.__iter__()]
+        return [(key, self._datasets[key]) for key in self]
 
-    def __iter__(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield from self._datasets.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:

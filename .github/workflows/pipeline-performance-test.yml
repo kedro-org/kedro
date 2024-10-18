@@ -16,7 +16,7 @@ jobs:
     - name: Clone test repo
       if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
       run: |
-        git clone https://github.com/kedro-org/pipeline-performance-test.git
+        git clone https://x-access-token:${{ secrets.GH_TAGGING_TOKEN }}@github.com/kedro-org/pipeline-performance-test.git
         cd pipeline-performance-test
 
     - name: Set up Python 3.11

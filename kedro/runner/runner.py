@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Any
 from more_itertools import interleave
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import CatalogProtocol, MemoryDataset
+from kedro.io import CatalogProtocol, MemoryDataset, SharedMemoryDataset
 from kedro.pipeline import Pipeline
 
 if TYPE_CHECKING:
@@ -84,6 +84,10 @@ class AbstractRunner(ABC):
             by the node outputs.
 
         """
+        # Register the default dataset pattern with the catalog
+        catalog = catalog.shallow_copy(
+            extra_dataset_patterns=self._extra_dataset_patterns
+        )
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
@@ -100,22 +104,6 @@ class AbstractRunner(ABC):
                 f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
             )
 
-        # Identify MemoryDataset in the catalog
-        memory_datasets = {
-            ds_name
-            for ds_name, ds in catalog._datasets.items()
-            if isinstance(ds, MemoryDataset)
-        }
-
-        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
-        # in the catalog and include MemoryDataset.
-        free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
-
-        # Register the default dataset pattern with the catalog
-        catalog = catalog.shallow_copy(
-            extra_dataset_patterns=self._extra_dataset_patterns
-        )
-
         if self._is_async:
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
@@ -124,13 +112,18 @@ class AbstractRunner(ABC):
 
         self._logger.info("Pipeline execution completed successfully.")
 
-        run_output = {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
+        # Identify MemoryDataset in the catalog
+        memory_datasets = {
+            ds_name
+            for ds_name, ds in catalog._datasets.items()
+            if isinstance(ds, MemoryDataset) or isinstance(ds, SharedMemoryDataset)
+        }
 
-        # Remove runtime patterns after run, so they do not affect further runs
-        if self._extra_dataset_patterns:
-            catalog.config_resolver.remove_runtime_patterns(
-                self._extra_dataset_patterns
-            )
+        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
+        # in the catalog and include MemoryDataset.
+        free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
+
+        run_output = {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
 
         return run_output
 

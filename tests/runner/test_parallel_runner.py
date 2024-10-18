@@ -49,7 +49,11 @@ class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
+        print(catalog)
+        print(fan_out_fan_in.datasets())
         result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
+        print(catalog)
+        print(result)
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)

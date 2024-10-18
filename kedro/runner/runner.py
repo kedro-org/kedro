@@ -84,15 +84,8 @@ class AbstractRunner(ABC):
             by the node outputs.
 
         """
-        # Register the default dataset pattern with the catalog
-        catalog = catalog.shallow_copy(
-            extra_dataset_patterns=self._extra_dataset_patterns
-        )
-
-        hook_or_null_manager = hook_manager or _NullPluginManager()
-
         # Check which datasets used in the pipeline are in the catalog or match
-        # a pattern in the catalog
+        # a pattern in the catalog, not including extra dataset patterns
         registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
 
         # Check if there are any input datasets that aren't in the catalog and
@@ -103,6 +96,17 @@ class AbstractRunner(ABC):
             raise ValueError(
                 f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
             )
+
+        # Register the default dataset pattern with the catalog
+        catalog = catalog.shallow_copy(
+            extra_dataset_patterns=self._extra_dataset_patterns
+        )
+
+        hook_or_null_manager = hook_manager or _NullPluginManager()
+
+        # Check which datasets used in the pipeline are in the catalog or match
+        # a pattern in the catalog, including added extra_dataset_patterns
+        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
 
         if self._is_async:
             self._logger.info(

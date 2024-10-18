@@ -1,23 +1,78 @@
-name: Trigger Pipeline Performance Test
+name: Trigger and Run Pipeline Performance Test
+
 on:
   pull_request:
     types: [labeled]
 
 jobs:
-  check-label:
+  performance-test:
     runs-on: ubuntu-latest
 
     steps:
     - name: Check if 'performance' label was added
       if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
-      run: |
-        echo "performance label detected. Triggering performance test."
+      run: echo "Performance label detected. Running performance test."
 
-    - name: Trigger performance test workflow in test project
+    - name: Clone test repo
       if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
       run: |
-        curl -X POST \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: token ${{ secrets.GH_TAGGING_TOKEN }}" \
-          https://api.github.com/repos/kedro-org/pipeline-performance-test/actions/workflows/performance-test.yml/dispatches \
-          -d '{"ref":"main", "inputs": {"branch_name": "${{ github.event.pull_request.head.ref }}"}}'
+        git clone https://github.com/kedro-org/pipeline-performance-test.git
+        cd pipeline-performance-test
+
+    - name: Set up Python 3.11
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      run: |
+        cd pipeline-performance-test
+        pip install -r requirements.txt
+
+    - name: Run performance test and capture time for latest Kedro release
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      run: |
+        cd pipeline-performance-test 
+        total_time_release=0.0
+        for i in {1..10}; do
+          { time kedro run; } 2> release_time_output.txt
+          real_time_release=$(grep real release_time_output.txt | awk '{print $2}' | sed 's/[^0-9.]//g')
+          total_time_release=$(echo "$total_time_release + $real_time_release" | bc)
+        done
+        average_time_release=$(echo "scale=3; $total_time_release / 10" | bc)
+        echo "average_time_release=${average_time_release}" >> $GITHUB_ENV
+
+    - name: Pull specific branch from Kedro and install it
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      run: |
+        git clone --branch ${{ github.event.pull_request.head.ref }} https://github.com/kedro-org/kedro.git
+        cd kedro
+        make install
+
+    - name: Run performance test and capture time for specific Kedro branch
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      run: |
+        cd pipeline-performance-test 
+        total_time_branch=0.0
+        for i in {1..10}; do
+          { time kedro run --params=hook_delay=0,dataset_load_delay=0,file_save_delay=0; } 2> branch_time_output.txt
+          real_time_branch=$(grep real branch_time_output.txt | awk '{print $2}' | sed 's/[^0-9.]//g')
+          total_time_branch=$(echo "$total_time_branch + $real_time_branch" | bc)
+        done
+        average_time_branch=$(echo "scale=3; $total_time_branch / 10" | bc)
+        echo "average_time_branch=${average_time_branch}" >> $GITHUB_ENV
+
+    - name: Extract and format real time from release version
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      run: echo "Average elapsed time for Kedro release version test was ${average_time_release} seconds"
+
+    - name: Extract and format real time from specific branch
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      run: echo "Average elapsed time for specific branch test was ${average_time_branch} seconds"
+
+    - name: Clean up time output files
+      if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      run: |
+        rm pipeline-performance-test/release_time_output.txt pipeline-performance-test/branch_time_output.txt

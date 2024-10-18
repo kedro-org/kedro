@@ -33,13 +33,13 @@ def _generate_globals(start_range, end_range, is_local=False):
     return globals_dict
 
 def _create_config_file(conf_source, env, file_name, data):
-        env_path = conf_source / env
-        env_path.mkdir(parents=True, exist_ok=True)
-        file_path = env_path / file_name
+    env_path = conf_source / env
+    env_path.mkdir(parents=True, exist_ok=True)
+    file_path = env_path / file_name
 
-        import yaml
-        with open(file_path, "w") as f:
-            yaml.dump(data, f)
+    import yaml
+    with open(file_path, "w") as f:
+        yaml.dump(data, f)
 
 base_catalog = _generate_catalog(1, 1000, is_versioned=True)
 local_catalog = _generate_catalog(501, 1500, is_local=True)

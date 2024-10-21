@@ -14,5 +14,10 @@
     "show_commit_url": "http://github.com/kedro-org/kedro/commit/",
     "results_dir": ".asv/results",
     "html_dir": ".asv/html",
-    "benchmark_dir": "kedro_benchmarks"
+    "benchmark_dir": "kedro_benchmarks",
+    "matrix": {
+        "req": {
+            "kedro-datasets[pandas]": [],
+        }
+    }
 }

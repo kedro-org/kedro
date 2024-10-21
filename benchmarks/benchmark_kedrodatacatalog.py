@@ -40,6 +40,26 @@ class TimeKedroDataCatalog:
         """Benchmark the time to initialize the catalog"""
         KedroDataCatalog.from_config(base_catalog)
 
+    def time_contains(self):
+        """Benchmark the time to check if a dataset exists"""
+        for i in range(1,1001):
+            f"dataset_{i}" in self.catalog
+
+    def time_getitem(self):
+        """Benchmark the time to get a dataset"""
+        for i in range(1,1001):
+            self.catalog[f"dataset_{i}"]
+
+    def time_setitem(self):
+        """Benchmark the time to set a dataset"""
+        for i in range(1,1001):
+            self.catalog[f"dataset_new_{i}"] = CSVDataset(filepath="data.csv")
+
+    def time_getdataset(self):
+        """Benchmark the time to get a dataset"""
+        for i in range(1,1001):
+            self.catalog.get_dataset(f"dataset_{i}")
+
     def time_save(self):
         """Benchmark the time to save datasets"""
         for i in range(1,1001):
@@ -60,24 +80,13 @@ class TimeKedroDataCatalog:
         for i in range(1,1001):
             self.catalog.release(f"dataset_{i}")
 
-    def time_add_all(self):
-        """Benchmark the time to add all datasets"""
-        # Have to initialise a new DataCatalog to avoid failing with DatasetAlreadyExistsError
-        catalog = KedroDataCatalog.from_config(base_catalog)
-        catalog.add_all(self.datasets)
-
-    def time_feed_dict(self):
-        """Benchmark the time to add feed dict"""
-        # Have to initialise a new DataCatalog to avoid failing with DatasetAlreadyExistsError
-        catalog = KedroDataCatalog.from_config(base_catalog)
-        catalog.add_feed_dict(self.feed_dict)
-
     def time_list(self):
         """Benchmark the time to list all datasets"""
         self.catalog.list()
 
     def time_shallow_copy(self):
         """Benchmark the time to shallow copy the catalog"""
+        # Will be removed
         self.catalog.shallow_copy()
 
     def time_resolve_factory(self):

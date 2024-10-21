@@ -1,7 +1,7 @@
 import pandas as pd
 from kedro_datasets.pandas import CSVDataset
 
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 
 base_catalog = {
     f"dataset_{i}": {
@@ -24,9 +24,16 @@ base_catalog.update({
     }
 })
 
-class TimeDataCatalog:
+runtime_patterns = {
+    "{placeholder}": {
+        "type": "pandas.CSVDataset",
+        "filepath": "{placeholder}.csv",
+    }
+}
+
+class TimeKedroDataCatalog:
     def setup(self):
-        self.catalog = DataCatalog.from_config(base_catalog)
+        self.catalog = KedroDataCatalog.from_config(base_catalog)
         self.dataframe = pd.DataFrame({"column": [1, 2, 3]})
         self.dataframe.to_csv("data.csv", index=False)
         self.datasets = {
@@ -38,7 +45,50 @@ class TimeDataCatalog:
 
     def time_init(self):
         """Benchmark the time to initialize the catalog"""
-        DataCatalog.from_config(base_catalog)
+        KedroDataCatalog.from_config(base_catalog)
+
+    def time_contains(self):
+        """Benchmark the time to check if a dataset exists"""
+        for i in range(1,1001):
+            f"dataset_{i}" in self.catalog
+
+    def time_getitem(self):
+        """Benchmark the time to get a dataset"""
+        for i in range(1,1001):
+            self.catalog[f"dataset_{i}"]
+
+
+    def time_get(self):
+        """Benchmark the time to get a dataset"""
+        for i in range(1,1001):
+            self.catalog.get(f"dataset_{i}")
+
+    def time_iter(self):
+        """Benchmark the time to iterate over the catalog"""
+        for dataset in self.catalog:
+            pass
+
+    def time_keys(self):
+        """Benchmark the time to get the keys of the catalog"""
+        self.catalog.keys()
+
+    def time_values(self):
+        """Benchmark the time to get the items of the catalog"""
+        self.catalog.values()
+
+    def time_items(self):
+        """Benchmark the time to get the items of the catalog"""
+        self.catalog.items()
+
+    def time_setitem(self):
+        """Benchmark the time to set a dataset"""
+        for i in range(1,1001):
+            self.catalog[f"dataset_new_{i}"] = CSVDataset(filepath="data.csv")
+
+    def time_setitem_raw(self):
+        """Benchmark the time to add a memory dataset"""
+        for i in range(1,1001):
+            self.catalog[f"param_{i}"] = self.feed_dict[f"param_{i}"]
 
     def time_save(self):
         """Benchmark the time to save datasets"""
@@ -60,27 +110,21 @@ class TimeDataCatalog:
         for i in range(1,1001):
             self.catalog.release(f"dataset_{i}")
 
-    def time_add_all(self):
-        """Benchmark the time to add all datasets"""
-        # Have to initialise a new DataCatalog to avoid failing with DatasetAlreadyExistsError
-        catalog = DataCatalog.from_config(base_catalog)
-        catalog.add_all(self.datasets)
-
-    def time_feed_dict(self):
-        """Benchmark the time to add feed dict"""
-        # Have to initialise a new DataCatalog to avoid failing with DatasetAlreadyExistsError
-        catalog = DataCatalog.from_config(base_catalog)
-        catalog.add_feed_dict(self.feed_dict)
-
     def time_list(self):
         """Benchmark the time to list all datasets"""
         self.catalog.list()
 
     def time_shallow_copy(self):
         """Benchmark the time to shallow copy the catalog"""
+        # Will be removed
         self.catalog.shallow_copy()
 
     def time_resolve_factory(self):
         """Benchmark the time to resolve factory"""
         for i in range(1,1001):
-            self.catalog._get_dataset(f"dataset_factory_{i}")
+            self.catalog.get(f"dataset_factory_{i}")
+
+    def time_add_runtime_patterns(self):
+        """Benchmark the time to add runtime patterns"""
+        for i in range(1,1001):
+            self.catalog.config_resolver.add_runtime_patterns(runtime_patterns)

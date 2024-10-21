@@ -24,6 +24,13 @@ base_catalog.update({
     }
 })
 
+runtime_patterns = {
+    "{placeholder}": {
+        "type": "pandas.CSVDataset",
+        "filepath": "{placeholder}.csv",
+    }
+}
+
 class TimeKedroDataCatalog:
     def setup(self):
         self.catalog = KedroDataCatalog.from_config(base_catalog)
@@ -115,4 +122,9 @@ class TimeKedroDataCatalog:
     def time_resolve_factory(self):
         """Benchmark the time to resolve factory"""
         for i in range(1,1001):
-            self.catalog._get_dataset(f"dataset_factory_{i}")
+            self.catalog.get(f"dataset_factory_{i}")
+
+    def time_add_runtime_patterns(self):
+        """Benchmark the time to add runtime patterns"""
+        for i in range(1,1001):
+            self.catalog.config_resolver.add_runtime_patterns(runtime_patterns)

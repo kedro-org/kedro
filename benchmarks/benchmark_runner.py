@@ -20,9 +20,9 @@ def io_bound_task(input_data):
     return output
 
 
-# Simulate a compute-bound task
+# Simulate a compute-bound task (matrix multiplication)
 def compute_bound_task(input_data) -> str:
-    # Simulate heavy compute that use single core(not pandas/numpy etc)
+    # Simulate heavy compute that are not using multicore (not pandas/numpy etc)
     ans = 1
     for i in range(1, 50000):
         ans = ans * i
@@ -109,6 +109,12 @@ class RunnerMemorySuite:
         # Create a dummy csv
         with open(data_dir / "data.csv", "w") as f:
             f.write("col1,col2\n1,2\n")
+
+    def mem_runners(self, runner):
+        catalog = create_data_catalog()
+        test_pipeline = create_compute_bound_pipeline()
+        runner_obj = runner()
+        runner_obj.run(test_pipeline, catalog=catalog)
 
     def peakmem_runners(self, runner):
         catalog = create_data_catalog()

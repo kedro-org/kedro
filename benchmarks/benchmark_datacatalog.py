@@ -62,11 +62,15 @@ class TimeDataCatalog:
 
     def time_add_all(self):
         """Benchmark the time to add all datasets"""
-        self.catalog.add_all(self.datasets)
+        # Have to initialise a new DataCatalog to avoid failing with DatasetAlreadyExistsError
+        catalog = DataCatalog.from_config(base_catalog)
+        catalog.add_all(self.datasets)
 
     def time_feed_dict(self):
         """Benchmark the time to add feed dict"""
-        self.catalog.add_feed_dict(self.feed_dict)
+        # Have to initialise a new DataCatalog to avoid failing with DatasetAlreadyExistsError
+        catalog = DataCatalog.from_config(base_catalog)
+        catalog.add_feed_dict(self.feed_dict)
 
     def time_list(self):
         """Benchmark the time to list all datasets"""

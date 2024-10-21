@@ -50,15 +50,38 @@ class TimeKedroDataCatalog:
         for i in range(1,1001):
             self.catalog[f"dataset_{i}"]
 
+
+    def time_get(self):
+        """Benchmark the time to get a dataset"""
+        for i in range(1,1001):
+            self.catalog.get(f"dataset_{i}")
+
+    def time_iter(self):
+        """Benchmark the time to iterate over the catalog"""
+        for dataset in self.catalog:
+            pass
+
+    def time_keys(self):
+        """Benchmark the time to get the keys of the catalog"""
+        self.catalog.keys()
+
+    def time_values(self):
+        """Benchmark the time to get the items of the catalog"""
+        self.catalog.values()
+
+    def time_items(self):
+        """Benchmark the time to get the items of the catalog"""
+        self.catalog.items()
+
     def time_setitem(self):
         """Benchmark the time to set a dataset"""
         for i in range(1,1001):
             self.catalog[f"dataset_new_{i}"] = CSVDataset(filepath="data.csv")
 
-    def time_getdataset(self):
-        """Benchmark the time to get a dataset"""
+    def time_setitem_raw(self):
+        """Benchmark the time to add a memory dataset"""
         for i in range(1,1001):
-            self.catalog.get_dataset(f"dataset_{i}")
+            self.catalog[f"param_{i}"] = self.feed_dict[f"param_{i}"]
 
     def time_save(self):
         """Benchmark the time to save datasets"""

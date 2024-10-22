@@ -1,5 +1,7 @@
 # {{ cookiecutter.project_name }}
 
+[![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
+
 ## Overview
 
 This is your new Kedro project, which was generated using `kedro {{ cookiecutter.kedro_version }}`.

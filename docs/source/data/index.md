@@ -47,12 +47,18 @@ This section on handing data with Kedro concludes with an advanced use case, ill
 how_to_create_a_custom_dataset
 ```
 
-From Kedro 0.19.0 you can use an experimental feature - `KedroDataCatalog` instead of `DataCatalog`.
+## KedroDataCatalog (Experimental Feature)
 
-Currently, it repeats `DataCatalog` functionality and fully compatible with Kedro `run` with a few API enhancements:
-  * Removed `_FrozenDatasets` and access datasets as properties;
-  * `KedroDataCatalog` supports dict-like interface to get/set datasets and iterate through them.
+As of Kedro 0.19.0, you can explore a new experimental feature — the `KedroDataCatalog`, an enhanced alternative to `DataCatalog`.
 
-A separate page of [Kedro Data Catalog](./kedro_data_catalog.md) shows `KedroDataCatalog` usage examples, and it's new API but all the information provided for the `DataCatalog` is relevant as well.
+At present, `KedroDataCatalog` replicates the functionality of `DataCatalog` and is fully compatible with the Kedro `run` command. It introduces several API improvements:
+* Simplified Dataset Access: `_FrozenDatasets` has been removed.
+* Enhanced Dict-Like Interface: You can now use a dictionary-like syntax to retrieve, set, and iterate over datasets.
 
-It is an experimental feature and is under active development. Though all the new catalog features will be released for `KedroDataCatalog` and soon it will fully replace `DataCatalog`. So we encourage you to try it out, but it is possible we'll introduce breaking changes to this class, so be mindful of that. Let us know if you have any feedback about the `KedroDataCatalog` or ideas for new features.
+For more details and examples of how to use `KedroDataCatalog`, see the [Kedro Data Catalog page](./kedro_data_catalog.md). The documentation for `DataCatalog` remains relevant as `KedroDataCatalog` retains its core functionality with some enhancements.
+
+```{note}
+`KedroDataCatalog` is under active development and may undergo breaking changes in future releases. While we encourage you to try it out, please be aware of potential modifications as we continue to improve it. Additionally, all upcoming catalog-related features will be introduced through `KedroDataCatalog` before it replaces `DataCatalog`.
+```
+
+We value your feedback — let us know if you have any thoughts or suggestions regarding `KedroDataCatalog` or potential new features.

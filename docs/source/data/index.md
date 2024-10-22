@@ -55,7 +55,13 @@ At present, `KedroDataCatalog` replicates the functionality of `DataCatalog` and
 * Simplified Dataset Access: `_FrozenDatasets` has been removed.
 * Enhanced Dict-Like Interface: You can now use a dictionary-like syntax to retrieve, set, and iterate over datasets.
 
-For more details and examples of how to use `KedroDataCatalog`, see the [Kedro Data Catalog page](./kedro_data_catalog.md). The documentation for `DataCatalog` remains relevant as `KedroDataCatalog` retains its core functionality with some enhancements.
+For more details and examples of how to use `KedroDataCatalog`, see the Kedro Data Catalog page. The documentation for `DataCatalog` remains relevant as `KedroDataCatalog` retains its core functionality with some enhancements.
+
+```{toctree}
+:maxdepth: 1
+
+kedro_data_catalog
+```
 
 ```{note}
 `KedroDataCatalog` is under active development and may undergo breaking changes in future releases. While we encourage you to try it out, please be aware of potential modifications as we continue to improve it. Additionally, all upcoming catalog-related features will be introduced through `KedroDataCatalog` before it replaces `DataCatalog`.

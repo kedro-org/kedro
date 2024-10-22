@@ -64,10 +64,12 @@ class KedroDataCatalog(CatalogProtocol):
 
         Example:
         ::
-            >>> # settings.py
-            >>> from kedro.io import KedroDataCatalog
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> DATA_CATALOG_CLASS = KedroDataCatalog
+            >>> cars = CSVDataset(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
+            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
@@ -102,34 +104,83 @@ class KedroDataCatalog(CatalogProtocol):
         return repr(self._datasets)
 
     def __contains__(self, dataset_name: str) -> bool:
-        """Check if an item is in the catalog as a materialised dataset or pattern"""
+        """Check if an item is in the catalog as a materialised dataset or pattern."""
         return (
             dataset_name in self._datasets
             or self._config_resolver.match_pattern(dataset_name) is not None
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
+        """Compares two catalogs based on materialised datasets' and datasets' patterns."""
         return (self._datasets, self._config_resolver.list_patterns()) == (
             other._datasets,
             other.config_resolver.list_patterns(),
         )
 
     def keys(self) -> List[str]:  # noqa: UP006
+        """List all dataset names registered in the catalog."""
         return list(self.__iter__())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
+        """List all datasets registered in the catalog."""
         return [self._datasets[key] for key in self]
 
     def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
+        """List all dataset names and datasets registered in the catalog."""
         return [(key, self._datasets[key]) for key in self]
 
     def __iter__(self) -> Iterator[str]:
         yield from self._datasets.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
+        """Get a dataset by name from an internal collection of datasets.
+
+        If a dataset is not in the collection but matches any pattern
+        it is instantiated and added to the collection first, then returned.
+
+        Args:
+            ds_name: A dataset name.
+
+        Returns:
+            An instance of AbstractDataset.
+
+        Raises:
+            DatasetNotFoundError: When a dataset with the given name
+                is not in the collection and do not match patterns.
+        """
         return self.get_dataset(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Add dataset to the ``KedroDataCatalog`` using key as a datsets name and the data provided through the value.
+
+        Values can either be raw data or Kedro datasets - instances of classes that inherit from ``AbstractDataset``.
+        If raw data is provided, it will be automatically wrapped in a ``MemoryDataset`` before being added to the ``KedroDataCatalog``.
+
+        Args:
+            key: A dataset name.
+            value: Raw data or instance of classes that inherit from ``AbstractDataset``.
+
+        Example:
+        ::
+
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>> import pandas as pd
+            >>>
+            >>> df = pd.DataFrame({"col1": [1, 2],
+            >>>                    "col2": [4, 5],
+            >>>                    "col3": [5, 6]})
+            >>>
+            >>> catalog = KedroDataCatalog()
+            >>> catalog["data_df"] = df
+            >>>
+            >>> assert catalog.load("data_df").equals(df)
+            >>>
+            >>> csv_dataset = CSVDataset(filepath="test.csv")
+            >>> csv_dataset.save(df)
+            >>> catalog["data_csv_dataset"] = csv_dataset
+            >>>
+            >>> assert catalog.load("data_csv_dataset").equals(df)
+        """
         if key in self._datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
@@ -144,7 +195,19 @@ class KedroDataCatalog(CatalogProtocol):
     def get(
         self, key: str, default: AbstractDataset | None = None
     ) -> AbstractDataset | None:
-        """Get a dataset by name from an internal collection of datasets."""
+        """Get a dataset by name from an internal collection of datasets.
+
+        If a dataset is not in the collection but matches any pattern
+        it is instantiated and added to the collection first, then returned.
+
+        Args:
+            key: A dataset name.
+            default: Optional argument for default dataset to return in case
+                requested dataset not in the catalog.
+
+        Returns:
+            An instance of AbstractDataset.
+        """
         if key not in self._datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
@@ -172,6 +235,69 @@ class KedroDataCatalog(CatalogProtocol):
         """Create a ``KedroDataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
         ``KedroDataCatalog`` with configuration parsed from configuration files.
+
+        Args:
+            catalog: A dictionary whose keys are the dataset names and
+                the values are dictionaries with the constructor arguments
+                for classes implementing ``AbstractDataset``. The dataset
+                class to be loaded is specified with the key ``type`` and their
+                fully qualified class name. All ``kedro.io`` dataset can be
+                specified by their class name only, i.e. their module name
+                can be omitted.
+            credentials: A dictionary containing credentials for different
+                datasets. Use the ``credentials`` key in a ``AbstractDataset``
+                to refer to the appropriate credentials as shown in the example
+                below.
+            load_versions: A mapping between dataset names and versions
+                to load. Has no effect on datasets without enabled versioning.
+            save_version: Version string to be used for ``save`` operations
+                by all datasets with enabled versioning. It must: a) be a
+                case-insensitive string that conforms with operating system
+                filename limitations, b) always return the latest version when
+                sorted in lexicographical order.
+
+        Returns:
+            An instantiated ``DataCatalog`` containing all specified
+            datasets, created and ready to use.
+
+        Raises:
+            DatasetNotFoundError: When `load_versions` refers to a dataset that doesn't
+                exist in the catalog.
+
+        Example:
+        ::
+
+            >>> config = {
+            >>>     "cars": {
+            >>>         "type": "pandas.CSVDataset",
+            >>>         "filepath": "cars.csv",
+            >>>         "save_args": {
+            >>>             "index": False
+            >>>         }
+            >>>     },
+            >>>     "boats": {
+            >>>         "type": "pandas.CSVDataset",
+            >>>         "filepath": "s3://aws-bucket-name/boats.csv",
+            >>>         "credentials": "boats_credentials",
+            >>>         "save_args": {
+            >>>             "index": False
+            >>>         }
+            >>>     }
+            >>> }
+            >>>
+            >>> credentials = {
+            >>>     "boats_credentials": {
+            >>>         "client_kwargs": {
+            >>>             "aws_access_key_id": "<your key id>",
+            >>>             "aws_secret_access_key": "<your secret>"
+            >>>         }
+            >>>      }
+            >>> }
+            >>>
+            >>> catalog = KedroDataCatalog.from_config(config, credentials)
+            >>>
+            >>> df = catalog.load("cars")
+            >>> catalog.save("boats", df)
         """
         catalog = catalog or {}
         config_resolver = CatalogConfigResolver(catalog, credentials)
@@ -284,10 +410,32 @@ class KedroDataCatalog(CatalogProtocol):
         self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0
     ) -> List[str]:  # noqa: UP006
         # TODO: rename depending on the solution for https://github.com/kedro-org/kedro/issues/3917
-        """
-        List of all dataset names registered in the catalog.
-        This can be filtered by providing an optional regular expression
-        which will only return matching keys.
+        # TODO: make regex_search mandatory argument as we have catalog.keys() for listing all the datasets.
+        """List of all dataset names registered in the catalog.
+
+        This can be filtered by providing an optional regular expression which will only return matching keys.
+
+        Args:
+            regex_search: An optional regular expression which can be provided
+                to limit the datasets returned by a particular pattern.
+            regex_flags: An optional combination of regex flags.
+        Returns:
+            A list of dataset names available which match the `regex_search` criteria (if provided).
+                All dataset names are returned by default.
+
+        Raises:
+            SyntaxError: When an invalid regex filter is provided.
+
+        Example:
+        ::
+
+            >>> catalog = KedroDataCatalog()
+            >>> # get datasets where the substring 'raw' is present
+            >>> raw_data = catalog.list(regex_search='raw')
+            >>> # get datasets which start with 'prm' or 'feat'
+            >>> feat_eng_data = catalog.list(regex_search='^(prm|feat)')
+            >>> # get datasets which end with 'time_series'
+            >>> models = catalog.list(regex_search='.+time_series$')
         """
         if regex_search is None:
             return self.keys()

@@ -151,14 +151,16 @@ class KedroDataCatalog(CatalogProtocol):
         return self.get_dataset(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """Add dataset to the ``KedroDataCatalog`` using key as a datsets name and the data provided through the value.
+        """Add dataset to the ``KedroDataCatalog`` using the given key as a datsets name
+        and the provided data as the value.
 
-        Values can either be raw data or Kedro datasets - instances of classes that inherit from ``AbstractDataset``.
-        If raw data is provided, it will be automatically wrapped in a ``MemoryDataset`` before being added to the ``KedroDataCatalog``.
+        The value can either be raw data or a Kedro dataset (i.e., an instance of a class
+        inheriting from ``AbstractDataset``). If raw data is provided, it will be automatically
+        wrapped in a ``MemoryDataset`` before being added to the catalog.
 
         Args:
-            key: A dataset name.
-            value: Raw data or instance of classes that inherit from ``AbstractDataset``.
+            key: Name of the dataset.
+            value: Raw data or an instance of a class inheriting from ``AbstractDataset``.
 
         Example:
         ::
@@ -171,13 +173,13 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                    "col3": [5, 6]})
             >>>
             >>> catalog = KedroDataCatalog()
-            >>> catalog["data_df"] = df
+            >>> catalog["data_df"] = df  # Add raw data as a dataset
             >>>
             >>> assert catalog.load("data_df").equals(df)
             >>>
             >>> csv_dataset = CSVDataset(filepath="test.csv")
             >>> csv_dataset.save(df)
-            >>> catalog["data_csv_dataset"] = csv_dataset
+            >>> catalog["data_csv_dataset"] = csv_dataset  # Add a dataset instance
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
@@ -411,20 +413,20 @@ class KedroDataCatalog(CatalogProtocol):
     ) -> List[str]:  # noqa: UP006
         # TODO: rename depending on the solution for https://github.com/kedro-org/kedro/issues/3917
         # TODO: make regex_search mandatory argument as we have catalog.keys() for listing all the datasets.
-        """List of all dataset names registered in the catalog.
+        """List all dataset names registered in the catalog, optionally filtered by a regex pattern.
 
-        This can be filtered by providing an optional regular expression which will only return matching keys.
+        If a regex pattern is provided, only dataset names matching the pattern will be returned.
+        This method supports optional regex flags for customization
 
         Args:
-            regex_search: An optional regular expression which can be provided
-                to limit the datasets returned by a particular pattern.
-            regex_flags: An optional combination of regex flags.
+            regex_search: Optional regular expression to filter dataset names.
+            regex_flags: Optional regex flags.
         Returns:
-            A list of dataset names available which match the `regex_search` criteria (if provided).
-                All dataset names are returned by default.
+            A list of dataset names that match the `regex_search` criteria. If no pattern is
+                provided, all dataset names are returned.
 
         Raises:
-            SyntaxError: When an invalid regex filter is provided.
+            SyntaxError: If the provided regex pattern is invalid.
 
         Example:
         ::

@@ -1,16 +1,15 @@
 # Write the benchmarking functions here.
 # See "Writing benchmarks" in the asv docs for more information.
 
+import time
+from pathlib import Path
+
+import yaml
+
+from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline
-from kedro.io.data_catalog import DataCatalog
-from kedro.runner import SequentialRunner, ThreadRunner, ParallelRunner
-import time
-import numpy as np
-import yaml
-import pandas as pd
-from kedro.io.memory_dataset import MemoryDataset
-from pathlib import Path
+from kedro.runner import ParallelRunner, SequentialRunner, ThreadRunner
 
 
 # Simulate an I/O-bound task
@@ -99,8 +98,8 @@ def create_compute_bound_pipeline():
 
 
 class RunnerMemorySuite:
-    params = [SequentialRunner, ThreadRunner, ParallelRunner]
-    param_names = ["runner"]
+    params = (SequentialRunner, ThreadRunner, ParallelRunner,)
+    param_names = ("runner",)
 
     def setup(self, *args, **kwargs):
         data_dir = Path("benchmarks/data")

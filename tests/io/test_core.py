@@ -263,6 +263,7 @@ class TestCoreFunctions:
                 "abfss://mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
                 ("abfss", "mycontainer@mystorageaccount.dfs.core.windows.net/mypath"),
             ),
+            ("oci://bucket@namespace/file.txt", ("oci", "bucket@namespace/file.txt")),
             ("hdfs://namenode:8020/file.txt", ("hdfs", "/file.txt")),
             ("file:///tmp/file.txt", ("file", "/tmp/file.txt")),
             ("/tmp/file.txt", ("file", "/tmp/file.txt")),

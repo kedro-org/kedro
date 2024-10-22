@@ -31,7 +31,6 @@ The new API allows you to add datasets as well as raw data directly to the catal
 ```python
 from kedro_datasets.pandas import CSVDataset
 
-
 bikes_ds = CSVDataset(filepath="../data/01_raw/bikes.csv")
 catalog["bikes"] = bikes_ds  # Adding a dataset
 catalog["cars"] = ["Ferrari", "Audi"]  # Adding raw data

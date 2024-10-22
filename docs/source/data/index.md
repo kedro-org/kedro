@@ -1,5 +1,5 @@
 
-# The Kedro Data Catalog
+# Data Catalog
 
 In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. The catalog is stored in a YAML file (`catalog.yml`) that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
 
@@ -46,3 +46,13 @@ This section on handing data with Kedro concludes with an advanced use case, ill
 
 how_to_create_a_custom_dataset
 ```
+
+From Kedro 0.19.0 you can use an experimental feature - `KedroDataCatalog` instead of `DataCatalog`.
+
+Currently, it repeats `DataCatalog` functionality and fully compatible with Kedro `run` with a few API enhancements:
+  * Removed `_FrozenDatasets` and access datasets as properties;
+  * `KedroDataCatalog` supports dict-like interface to get/set datasets and iterate through them.
+
+A separate page of [Kedro Data Catalog](./kedro_data_catalog.md) shows `KedroDataCatalog` usage examples, and it's new API but all the information provided for the `DataCatalog` is relevant as well.
+
+It is an experimental feature and is under active development. Though all the new catalog features will be released for `KedroDataCatalog` and soon it will fully replace `DataCatalog`. So we encourage you to try it out, but it is possible we'll introduce breaking changes to this class, so be mindful of that. Let us know if you have any feedback about the `KedroDataCatalog` or ideas for new features.

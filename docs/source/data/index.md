@@ -49,7 +49,7 @@ how_to_create_a_custom_dataset
 
 ## KedroDataCatalog (Experimental Feature)
 
-As of Kedro 0.19.0, you can explore a new experimental feature — the `KedroDataCatalog`, an enhanced alternative to `DataCatalog`.
+As of Kedro 0.19.9, you can explore a new experimental feature — the `KedroDataCatalog`, an enhanced alternative to `DataCatalog`.
 
 At present, `KedroDataCatalog` replicates the functionality of `DataCatalog` and is fully compatible with the Kedro `run` command. It introduces several API improvements:
 * Simplified dataset access: `_FrozenDatasets` has been removed.

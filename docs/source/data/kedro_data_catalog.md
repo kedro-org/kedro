@@ -1,7 +1,7 @@
 # Kedro Data Catalog
 `KedroDataCatalog` retains the core functionality of `DataCatalog`, with a few API enhancements. This page highlights the new features and provides usage examples. For a comprehensive understanding, we recommend reviewing the existing `DataCatalog` documentation before exploring the additional functionality of `KedroDataCatalog`.
 
-## How to make `KedroDataCatalog` default catalog for Kedro `run`
+## How to make `KedroDataCatalog` the default catalog for Kedro `run`
 
 To set `KedroDataCatalog` as the default catalog for the `kedro run` command and other CLI commands, update your `settings.py` as follows:
 
@@ -15,7 +15,7 @@ Once this change is made, you can run your Kedro project as usual.
 
 For more information on `settings.py`, refer to the [Project settings documentation](../kedro_project_setup/settings.md).
 
-## How to access dataset in the catalog
+## How to access datasets in the catalog
 
 You can retrieve a dataset from the catalog using either the dictionary-like syntax or the `get` method:
 
@@ -24,7 +24,7 @@ reviews_ds = catalog["reviews"]
 reviews_ds = catalog.get("reviews", default=default_ds)
 ```
 
-## How add dataset to the catalog
+## How add datasets to the catalog
 
 The new API allows you to add datasets as well as raw data directly to the catalog:
 
@@ -65,7 +65,7 @@ You can get the number of datasets in the catalog using the `len()` function:
 ds_count = len(catalog)
 ```
 
-## How to print catalog and dataset
+## How to print the full catalog and individual datasets
 
 To print the catalog or an individual dataset programmatically, use the `print()` function:
 

@@ -173,7 +173,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                    "col3": [5, 6]})
             >>>
             >>> catalog = KedroDataCatalog()
-            >>> catalog["data_df"] = df  # Add raw data as a dataset
+            >>> catalog["data_df"] = df  # Add raw data as a MemoryDataset
             >>>
             >>> assert catalog.load("data_df").equals(df)
             >>>

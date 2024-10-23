@@ -52,7 +52,6 @@ When you add raw data, it is automatically wrapped in a `MemoryDataset` under th
 `KedroDataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
 
 ```python
-
 for ds_name in catalog:  # __iter__ defaults to keys
     pass
 

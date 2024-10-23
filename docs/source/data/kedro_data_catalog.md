@@ -1,5 +1,14 @@
 # Kedro Data Catalog
-`KedroDataCatalog` retains the core functionality of `DataCatalog`, with a few API enhancements. This page highlights the new features and provides usage examples. For a comprehensive understanding, we recommend reviewing the existing `DataCatalog` documentation before exploring the additional functionality of `KedroDataCatalog`.
+`KedroDataCatalog` retains the core functionality of `DataCatalog`, with a few API enhancements. For a comprehensive understanding, we recommend reviewing the existing `DataCatalog` documentation before exploring the additional functionality of `KedroDataCatalog`.
+
+This page highlights the new features and provides usage examples:
+* [How to make KedroDataCatalog the default catalog for Kedro run](#how-to-make-kedrodatacatalog-the-default-catalog-for-kedro-run)
+* [How to access datasets in the catalog](#how-to-access-datasets-in-the-catalog)
+* [How to add datasets to the catalog](#how-to-add-datasets-to-the-catalog)
+* [How to iterate trough datasets in the catalog](#how-to-iterate-trough-datasets-in-the-catalog)
+* [How to get the number of datasets in the catalog](#how-to-get-the-number-of-datasets-in-the-catalog)
+* [How to print the full catalog and individual datasets](#how-to-print-the-full-catalog-and-individual-datasets)
+* [How to access dataset patterns](#how-to-access-dataset-patterns)
 
 ## How to make `KedroDataCatalog` the default catalog for Kedro `run`
 
@@ -24,7 +33,7 @@ reviews_ds = catalog["reviews"]
 reviews_ds = catalog.get("reviews", default=default_ds)
 ```
 
-## How add datasets to the catalog
+## How to add datasets to the catalog
 
 The new API allows you to add datasets as well as raw data directly to the catalog:
 

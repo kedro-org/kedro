@@ -47,7 +47,7 @@ This section on handing data with Kedro concludes with an advanced use case, ill
 how_to_create_a_custom_dataset
 ```
 
-## KedroDataCatalog (Experimental Feature)
+## `KedroDataCatalog` (experimental feature)
 
 As of Kedro 0.19.9, you can explore a new experimental feature — the `KedroDataCatalog`, an enhanced alternative to `DataCatalog`.
 

@@ -40,6 +40,17 @@ class TestValidSequentialRunner:
         SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." in caplog.text
 
+    def test_run_twice_giving_same_result(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict({"A": 42})
+        result_first_run = SequentialRunner().run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
+        result_second_run = SequentialRunner().run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
+
+        assert result_first_run == result_second_run
+
 
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSeqentialRunnerBranchlessPipeline:

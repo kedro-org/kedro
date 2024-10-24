@@ -69,7 +69,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
+            >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
@@ -111,7 +111,7 @@ class KedroDataCatalog(CatalogProtocol):
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
-        """Compares two catalogs based on materialised datasets' and datasets' patterns."""
+        """Compares two catalogs based on materialised datasets and datasets patterns."""
         return (self._datasets, self._config_resolver.list_patterns()) == (
             other._datasets,
             other.config_resolver.list_patterns(),
@@ -146,7 +146,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         Raises:
             DatasetNotFoundError: When a dataset with the given name
-                is not in the collection and do not match patterns.
+                is not in the collection and does not match patterns.
         """
         return self.get_dataset(ds_name)
 
@@ -259,7 +259,7 @@ class KedroDataCatalog(CatalogProtocol):
                 sorted in lexicographical order.
 
         Returns:
-            An instantiated ``DataCatalog`` containing all specified
+            An instantiated ``KedroDataCatalog`` containing all specified
             datasets, created and ready to use.
 
         Raises:
@@ -475,12 +475,13 @@ class KedroDataCatalog(CatalogProtocol):
 
             >>> import pandas as pd
             >>>
+            >>> from kedro.io import KedroDataCatalog
             >>> from kedro_datasets.pandas import CSVDataset
             >>>
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> catalog = DataCatalog(datasets={'cars': cars})
+            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
             >>>
             >>> df = pd.DataFrame({'col1': [1, 2],
             >>>                    'col2': [4, 5],
@@ -518,13 +519,13 @@ class KedroDataCatalog(CatalogProtocol):
         Example:
         ::
 
-            >>> from kedro.io import DataCatalog
+            >>> from kedro.io import KedroDataCatalog
             >>> from kedro_datasets.pandas import CSVDataset
             >>>
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> catalog = DataCatalog(datasets={'cars': cars})
+            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
             >>>
             >>> df = catalog.load("cars")
         """

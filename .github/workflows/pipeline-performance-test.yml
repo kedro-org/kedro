@@ -27,13 +27,10 @@ jobs:
     - name: Install dependencies
       if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
       run: |
+        pip install kedro
+        pip install uv
         cd pipeline-performance-test/performance-test
         pip install -r requirements.txt
-
-    - name: Install UV dependency (if needed)
-      run: |
-        sudo apt-get update
-        sudo apt-get install uv
 
     - name: Run performance test and capture time for latest Kedro release
       if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')

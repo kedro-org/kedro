@@ -76,4 +76,4 @@ jobs:
     - name: Clean up time output files
       if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
       run: |
-        rm pipeline-performance-test/release_time_output.txt pipeline-performance-test/branch_time_output.txt
+        rm pipeline-performance-test/performance-test/release_time_output.txt pipeline-performance-test/performance-test/branch_time_output.txt

@@ -52,16 +52,18 @@ how_to_create_a_custom_dataset
 As of Kedro 0.19.9, you can explore a new experimental feature — the `KedroDataCatalog`, an enhanced alternative to `DataCatalog`.
 
 At present, `KedroDataCatalog` replicates the functionality of `DataCatalog` and is fully compatible with the Kedro `run` command. It introduces several API improvements:
-* Simplified dataset access: `_FrozenDatasets` has been replaced with public `get` method to retrieve datasets.
+* Simplified dataset access: `_FrozenDatasets` has been replaced with a public `get` method to retrieve datasets.
 * Added dict-like interface: You can now use a dictionary-like syntax to retrieve, set, and iterate over datasets.
 
-For more details and examples of how to use `KedroDataCatalog`, see the Kedro Data Catalog page. The [documentation](./data_catalog.md) for `DataCatalog` remains relevant as `KedroDataCatalog` retains its core functionality with some enhancements.
+For more details and examples of how to use `KedroDataCatalog`, see the Kedro Data Catalog page.
 
 ```{toctree}
 :maxdepth: 1
 
 kedro_data_catalog
 ```
+
+The [documentation](./data_catalog.md) for `DataCatalog` remains relevant as `KedroDataCatalog` retains its core functionality with some enhancements.
 
 ```{note}
 `KedroDataCatalog` is under active development and may undergo breaking changes in future releases. While we encourage you to try it out, please be aware of potential modifications as we continue to improve it. Additionally, all upcoming catalog-related features will be introduced through `KedroDataCatalog` before it replaces `DataCatalog`.

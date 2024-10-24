@@ -1,5 +1,5 @@
 # Kedro Data Catalog
-`KedroDataCatalog` retains the core functionality of `DataCatalog`, with a few API enhancements. For a comprehensive understanding, we recommend reviewing the existing `DataCatalog` documentation before exploring the additional functionality of `KedroDataCatalog`.
+`KedroDataCatalog` retains the core functionality of `DataCatalog`, with a few API enhancements. For a comprehensive understanding, we recommend reviewing the existing `DataCatalog` [documentation](./data_catalog.md) before exploring the additional functionality of `KedroDataCatalog`.
 
 This page highlights the new features and provides usage examples:
 * [How to make KedroDataCatalog the default catalog for Kedro run](#how-to-make-kedrodatacatalog-the-default-catalog-for-kedro-run)

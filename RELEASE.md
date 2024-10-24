@@ -11,6 +11,7 @@
 ## Breaking changes to the API
 ## Documentation changes
 * Updated CLI autocompletion docs with new Click syntax.
+* Standardize suffix `.parquet` in docs & tests.
 
 ## Community contributions
 * [Hyewon Choi](https://github.com/hyew0nChoi)

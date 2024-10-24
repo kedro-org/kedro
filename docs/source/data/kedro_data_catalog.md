@@ -75,20 +75,14 @@ ds_count = len(catalog)
 
 ## How to print the full catalog and individual datasets
 
-To print the catalog or an individual dataset programmatically, use the `print()` function:
-
-```python
-print(catalog)
-
-print(catalog["reviews"])
-```
-
-In an interactive environment like IPython or JupyterLab, simply entering the variable will display it:
+To print the catalog or an individual dataset programmatically, use the `print()` function or in an interactive environment like IPython or JupyterLab, simply enter the variable:
 
 ```bash
-catalog
+In [1]: catalog
+Out[1]: {'shuttles': kedro_datasets.pandas.excel_dataset.ExcelDataset(filepath=PurePosixPath('/data/01_raw/shuttles.xlsx'), protocol='file', load_args={'engine': 'openpyxl'}, save_args={'index': False}, writer_args={'engine': 'openpyxl'}), 'preprocessed_companies': kedro_datasets.pandas.parquet_dataset.ParquetDataset(filepath=PurePosixPath('/data/02_intermediate/preprocessed_companies.pq'), protocol='file', load_args={}, save_args={}), 'params:model_options.test_size': kedro.io.memory_dataset.MemoryDataset(data='<float>'), 'params:model_options.features': kedro.io.memory_dataset.MemoryDataset(data='<list>'))}
 
-catalog["reviews"]
+In [2]: catalog["shuttles"]
+Out[2]: kedro_datasets.pandas.excel_dataset.ExcelDataset(filepath=PurePosixPath('/data/01_raw/shuttles.xlsx'), protocol='file', load_args={'engine': 'openpyxl'}, save_args={'index': False}, writer_args={'engine': 'openpyxl'})
 ```
 
 ## How to access dataset patterns

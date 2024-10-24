@@ -195,7 +195,7 @@ For that, you can make use of {ref}`runtime parameters <runtime-params>`:
 # Add the intermediate datasets to run only the inference
 X_test:
   type: pandas.ParquetDataset
-  filepath: data/05_model_input/X_test.pq
+  filepath: data/05_model_input/X_test.parquet
 
 y_test:
   type: pandas.CSVDataset  # https://github.com/pandas-dev/pandas/issues/54638

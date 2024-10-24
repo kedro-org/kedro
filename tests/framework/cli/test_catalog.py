@@ -38,7 +38,7 @@ def fake_catalog_config():
     config = {
         "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataset",
-            "filepath": "data/01_raw/{factory_pattern}.pq",
+            "filepath": "data/01_raw/{factory_pattern}.parquet",
             "credentials": "db_connection",
         },
         "csv_{factory_pattern}": {
@@ -55,7 +55,7 @@ def fake_catalog_config_resolved():
     config = {
         "parquet_example": {
             "type": "pandas.ParquetDataset",
-            "filepath": "data/01_raw/example.pq",
+            "filepath": "data/01_raw/example.parquet",
             "credentials": {"con": "foo"},
         },
         "csv_example": {
@@ -99,7 +99,7 @@ def fake_catalog_config_with_factories(fake_metadata):
     config = {
         "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataset",
-            "filepath": "data/01_raw/{factory_pattern}.pq",
+            "filepath": "data/01_raw/{factory_pattern}.parquet",
         },
         "csv_{factory_pattern}": {
             "type": "pandas.CSVDataset",
@@ -108,7 +108,7 @@ def fake_catalog_config_with_factories(fake_metadata):
         "explicit_ds": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
         "{factory_pattern}_ds": {
             "type": "pandas.ParquetDataset",
-            "filepath": "data/01_raw/{factory_pattern}_ds.pq",
+            "filepath": "data/01_raw/{factory_pattern}_ds.parquet",
         },
         "partitioned_{factory_pattern}": {
             "type": "partitions.PartitionedDataset",
@@ -129,7 +129,7 @@ def fake_catalog_config_with_factories_resolved():
     config = {
         "parquet_example": {
             "type": "pandas.ParquetDataset",
-            "filepath": "data/01_raw/example.pq",
+            "filepath": "data/01_raw/example.parquet",
         },
         "csv_example": {
             "type": "pandas.CSVDataset",

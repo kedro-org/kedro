@@ -164,21 +164,21 @@ entries share `type`, `file_format` and `save_args`:
 ```yaml
 processing.factory_data:
   type: spark.SparkDataset
-  filepath: data/processing/factory_data.pq
+  filepath: data/processing/factory_data.parquet
   file_format: parquet
   save_args:
     mode: overwrite
 
 processing.process_data:
   type: spark.SparkDataset
-  filepath: data/processing/process_data.pq
+  filepath: data/processing/process_data.parquet
   file_format: parquet
   save_args:
     mode: overwrite
 
 modelling.metrics:
   type: spark.SparkDataset
-  filepath: data/modelling/factory_data.pq
+  filepath: data/modelling/factory_data.parquet
   file_format: parquet
   save_args:
     mode: overwrite
@@ -189,7 +189,7 @@ This could be generalised to the following pattern:
 ```yaml
 "{layer}.{dataset_name}":
   type: spark.SparkDataset
-  filepath: data/{layer}/{dataset_name}.pq
+  filepath: data/{layer}/{dataset_name}.parquet
   file_format: parquet
   save_args:
     mode: overwrite
@@ -202,7 +202,7 @@ You can have multiple dataset factories in your catalog. For example:
 ```yaml
 "{namespace}.{dataset_name}@spark":
   type: spark.SparkDataset
-  filepath: data/{namespace}/{dataset_name}.pq
+  filepath: data/{namespace}/{dataset_name}.parquet
   file_format: parquet
 
 "{dataset_name}@csv":
@@ -255,11 +255,11 @@ Consider a catalog file with the following patterns:
 
 "preprocessed_{dataset_name}":
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/preprocessed_{dataset_name}.pq
+  filepath: data/02_intermediate/preprocessed_{dataset_name}.parquet
 
 "processed_{dataset_name}":
   type: pandas.ParquetDataset
-  filepath: data/03_primary/processed_{dataset_name}.pq
+  filepath: data/03_primary/processed_{dataset_name}.parquet
 
 "{dataset_name}_csv":
   type: pandas.CSVDataset
@@ -267,7 +267,7 @@ Consider a catalog file with the following patterns:
 
 "{namespace}.{dataset_name}_pq":
   type: pandas.ParquetDataset
-  filepath: data/03_primary/{dataset_name}_{namespace}.pq
+  filepath: data/03_primary/{dataset_name}_{namespace}.parquet
 
 "{default_dataset}":
   type: pickle.PickleDataset
@@ -315,11 +315,11 @@ shuttles:
 
 "preprocessed_{name}":
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/preprocessed_{name}.pq
+  filepath: data/02_intermediate/preprocessed_{name}.parquet
 
 "{default}":
   type: pandas.ParquetDataset
-  filepath: data/03_primary/{default}.pq
+  filepath: data/03_primary/{default}.parquet
 ```
 </details>
 
@@ -365,13 +365,13 @@ companies:
   filepath: data/01_raw/companies.csv
   type: pandas.CSVDataset
 model_input_table:
-  filepath: data/03_primary/model_input_table.pq
+  filepath: data/03_primary/model_input_table.parquet
   type: pandas.ParquetDataset
 preprocessed_companies:
-  filepath: data/02_intermediate/preprocessed_companies.pq
+  filepath: data/02_intermediate/preprocessed_companies.parquet
   type: pandas.ParquetDataset
 preprocessed_shuttles:
-  filepath: data/02_intermediate/preprocessed_shuttles.pq
+  filepath: data/02_intermediate/preprocessed_shuttles.parquet
   type: pandas.ParquetDataset
 reviews:
   filepath: data/01_raw/reviews.csv

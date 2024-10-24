@@ -200,11 +200,11 @@ Each of the nodes outputs a new dataset (`preprocessed_companies` and `preproces
 ```yaml
 preprocessed_companies:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/preprocessed_companies.pq
+  filepath: data/02_intermediate/preprocessed_companies.parquet
 
 preprocessed_shuttles:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/preprocessed_shuttles.pq
+  filepath: data/02_intermediate/preprocessed_shuttles.parquet
 ```
 </details>
 
@@ -290,7 +290,7 @@ The following entry in `conf/base/catalog.yml` saves the model input table datas
 ```yaml
 model_input_table:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/model_input_table.pq
+  filepath: data/03_primary/model_input_table.parquet
 ```
 
 ## Test the example again

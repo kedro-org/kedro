@@ -38,7 +38,7 @@ def config_with_dataset_factories():
             },
             "audi_cars": {
                 "type": "pandas.ParquetDataset",
-                "filepath": "data/01_raw/audi_cars.pq",
+                "filepath": "data/01_raw/audi_cars.parquet",
             },
             "{type}_boats": {
                 "type": "pandas.CSVDataset",
@@ -84,7 +84,7 @@ def config_with_dataset_factories_with_default(config_with_dataset_factories):
 def config_with_dataset_factories_bad_pattern(config_with_dataset_factories):
     config_with_dataset_factories["catalog"]["{type}@planes"] = {
         "type": "pandas.ParquetDataset",
-        "filepath": "data/01_raw/{brand}_plane.pq",
+        "filepath": "data/01_raw/{brand}_plane.parquet",
     }
     return config_with_dataset_factories
 
@@ -95,7 +95,7 @@ def config_with_dataset_factories_only_patterns():
         "catalog": {
             "{namespace}_{dataset}": {
                 "type": "pandas.CSVDataset",
-                "filepath": "data/01_raw/{namespace}_{dataset}.pq",
+                "filepath": "data/01_raw/{namespace}_{dataset}.parquet",
             },
             "{country}_companies": {
                 "type": "pandas.CSVDataset",

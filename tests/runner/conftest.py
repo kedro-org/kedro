@@ -58,7 +58,8 @@ def pandas_df():
 
 @pytest.fixture
 def pandas_df_feed_dict():
-    return {"ds3": pandas_df()}
+    df = pd.DataFrame({"Name": ["Alex", "Bob"], "Age": [15, 25]})
+    return {"ds3": df}
 
 
 @pytest.fixture

@@ -5,7 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "{{ cookiecutter.python_package }}"
 readme = "README.md"
-dynamic = ["dependencies", "version"]
+dynamic = ["version"]
+dependencies = [
+    "ipython>=8.10",
+    "jupyterlab>=3.0",
+    "notebook",
+    "kedro~={{ cookiecutter.kedro_version }}"
+]
 
 [project.scripts]
 {{ cookiecutter.repo_name }} = "{{ cookiecutter.python_package }}.__main__:main"
@@ -31,9 +37,7 @@ dev = [
     "ruff~=0.1.8"
 ]
 
-
 [tool.setuptools.dynamic]
-dependencies = {file = "requirements.txt"}
 version = {attr = "{{ cookiecutter.python_package }}.__version__"}
 
 [tool.setuptools.packages.find]

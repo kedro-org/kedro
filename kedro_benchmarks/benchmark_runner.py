@@ -1,6 +1,7 @@
 # Write the benchmarking functions here.
 # See "Writing benchmarks" in the asv docs for more information.
 
+import importlib
 import time
 from pathlib import Path
 
@@ -9,7 +10,6 @@ import yaml
 from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline
-from kedro.runner import ParallelRunner, SequentialRunner, ThreadRunner
 
 
 # Simulate an I/O-bound task
@@ -98,7 +98,11 @@ def create_compute_bound_pipeline():
 
 
 class RunnerMemorySuite:
-    params = (SequentialRunner, ThreadRunner, ParallelRunner,)
+    params = (
+        "SequentialRunner",
+        "ThreadRunner",
+        "ParallelRunner",
+    )
     param_names = ("runner",)
 
     def setup(self, *args, **kwargs):
@@ -112,17 +116,26 @@ class RunnerMemorySuite:
     def mem_runners(self, runner):
         catalog = create_data_catalog()
         test_pipeline = create_compute_bound_pipeline()
-        runner_obj = runner()
+        runner_module = importlib.import_module("kedro.runner")
+        runner_obj = getattr(runner_module, runner)()
         runner_obj.run(test_pipeline, catalog=catalog)
 
     def peakmem_runners(self, runner):
         catalog = create_data_catalog()
         test_pipeline = create_compute_bound_pipeline()
-        runner_obj = runner()
+        runner_module = importlib.import_module("kedro.runner")
+        runner_obj = getattr(runner_module, runner)()
         runner_obj.run(test_pipeline, catalog=catalog)
 
 
 class RunnerTimeSuite:
+    params = (
+        "SequentialRunner",
+        "ThreadRunner",
+        "ParallelRunner",
+    )
+    param_names = ("runner",)
+
     def setup(self, *args, **kwargs):
         data_dir = Path("benchmarks/data")
         data_dir.mkdir(exist_ok=True, parents=True)
@@ -131,22 +144,17 @@ class RunnerTimeSuite:
         with open(data_dir / "data.csv", "w") as f:
             f.write("col1,col2\n1,2\n")
 
-    def time_sequential_runner(self):
+    def time_compute_bound_runner(self, runner):
         catalog = create_data_catalog()
         test_pipeline = create_compute_bound_pipeline()
-        runner_obj = SequentialRunner()
+        runner_module = importlib.import_module("kedro.runner")
+        runner_obj = getattr(runner_module, runner)()
         runner_obj.run(test_pipeline, catalog=catalog)
 
-    def time_parallel_runner(self):
-        """compute bound pipeline"""
-        catalog = create_data_catalog()
-        test_pipeline = create_compute_bound_pipeline()
-        runner_obj = ParallelRunner()
-        runner_obj.run(test_pipeline, catalog=catalog)
-
-    def time_thread_runner(self):
+    def time_io_bound_runner(self, runner):
         """IO bound pipeline"""
         catalog = create_data_catalog()
         test_pipeline = create_io_bound_pipeline()
-        runner_obj = ThreadRunner()
+        runner_module = importlib.import_module("kedro.runner")
+        runner_obj = getattr(runner_module, runner)()
         runner_obj.run(test_pipeline, catalog=catalog)

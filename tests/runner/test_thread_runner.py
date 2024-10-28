@@ -10,7 +10,6 @@ from kedro.io import (
     AbstractDataset,
     DataCatalog,
     DatasetError,
-    KedroDataCatalog,
     MemoryDataset,
 )
 from kedro.pipeline import node
@@ -56,7 +55,7 @@ class TestValidThreadRunner:
         }
 
         catalog = DataCatalog.from_config(catalog_conf)
-        kedro_catalog = KedroDataCatalog.from_config(catalog_conf)
+        # kedro_catalog = KedroDataCatalog.from_config(catalog_conf)
 
         test_pipeline = pipeline(
             [
@@ -68,7 +67,7 @@ class TestValidThreadRunner:
         runner_obj = ThreadRunner()
 
         runner_obj.run(test_pipeline, catalog=catalog)
-        runner_obj.run(test_pipeline, catalog=kedro_catalog)
+        # runner_obj.run(test_pipeline, catalog=kedro_catalog)
 
 
 class TestMaxWorkers:

@@ -46,17 +46,10 @@ class TestValidThreadRunner:
         ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." not in caplog.text
 
-    def test_thread_run_with_patterns(self, tmp_path):
+    def test_thread_run_with_patterns(self, tmp_path, pandas_df):
         """Test warm-up is done and patterns are resolved before running pipeline."""
         filepath = tmp_path / "data.csv"
-
-        with open(filepath, "w") as f:
-            f.write(
-                """\
-                col1,col2
-                1,2
-                """
-            )
+        pandas_df.to_csv(filepath)
 
         catalog_conf = {
             "{catch_all}": {"type": "pandas.CSVDataset", "filepath": filepath}

@@ -8,6 +8,7 @@ import pytest
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import AbstractDataset, DataCatalog, DatasetError, MemoryDataset
 from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ThreadRunner
 from tests.runner.conftest import exception_fn, identity, return_none, sink, source
@@ -38,6 +39,28 @@ class TestValidThreadRunner:
         catalog.add_feed_dict({"A": 42})
         ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." not in caplog.text
+
+    def test_thread_run_with_patterns(self, tmp_path):
+        filepath = tmp_path / "data.csv"
+
+        with open(filepath, "w") as f:
+            f.write("col1,col2\n1,2\n")
+
+        catalog_conf = {
+            "{catch_all}": {"type": "pandas.CSVDataset", "filepath": filepath}
+        }
+
+        catalog = DataCatalog.from_config(catalog_conf)
+
+        test_pipeline = pipeline(
+            [
+                node(identity, inputs="dummy_1", outputs="output_1", name="node_1"),
+                node(identity, inputs="dummy_2", outputs="output_2", name="node_2"),
+                node(identity, inputs="dummy_1", outputs="output_3", name="node_3"),
+            ]
+        )
+        runner_obj = ThreadRunner()
+        runner_obj.run(test_pipeline, catalog=catalog)
 
 
 class TestMaxWorkers:

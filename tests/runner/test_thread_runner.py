@@ -51,7 +51,12 @@ class TestValidThreadRunner:
         filepath = tmp_path / "data.csv"
 
         with open(filepath, "w") as f:
-            f.write("col1,col2\n1,2\n")
+            f.write(
+                """\
+                col1,col2
+                1,2
+                """
+            )
 
         catalog_conf = {
             "{catch_all}": {"type": "pandas.CSVDataset", "filepath": filepath}

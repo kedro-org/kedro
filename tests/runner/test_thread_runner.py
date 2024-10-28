@@ -6,7 +6,13 @@ from typing import Any
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataset, DataCatalog, DatasetError, MemoryDataset
+from kedro.io import (
+    AbstractDataset,
+    DataCatalog,
+    DatasetError,
+    KedroDataCatalog,
+    MemoryDataset,
+)
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
@@ -41,6 +47,7 @@ class TestValidThreadRunner:
         assert "Using synchronous mode for loading and saving data." not in caplog.text
 
     def test_thread_run_with_patterns(self, tmp_path):
+        """Test warm-up is done and patterns are resolved before running pipeline."""
         filepath = tmp_path / "data.csv"
 
         with open(filepath, "w") as f:
@@ -51,6 +58,7 @@ class TestValidThreadRunner:
         }
 
         catalog = DataCatalog.from_config(catalog_conf)
+        kedro_catalog = KedroDataCatalog.from_config(catalog_conf)
 
         test_pipeline = pipeline(
             [
@@ -60,7 +68,9 @@ class TestValidThreadRunner:
             ]
         )
         runner_obj = ThreadRunner()
+
         runner_obj.run(test_pipeline, catalog=catalog)
+        runner_obj.run(test_pipeline, catalog=kedro_catalog)
 
 
 class TestMaxWorkers:

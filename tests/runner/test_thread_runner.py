@@ -10,6 +10,7 @@ from kedro.io import (
     AbstractDataset,
     DataCatalog,
     DatasetError,
+    KedroDataCatalog,
     MemoryDataset,
 )
 from kedro.pipeline import node
@@ -45,7 +46,8 @@ class TestValidThreadRunner:
         ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." not in caplog.text
 
-    def test_thread_run_with_patterns(self, tmp_path, pandas_df):
+    @pytest.mark.parametrize("catalog_type", [DataCatalog, KedroDataCatalog])
+    def test_thread_run_with_patterns(self, tmp_path, pandas_df, catalog_type):
         """Test warm-up is done and patterns are resolved before running pipeline."""
         filepath = tmp_path / "data.csv"
         pandas_df.to_csv(filepath)
@@ -54,8 +56,7 @@ class TestValidThreadRunner:
             "{catch_all}": {"type": "pandas.CSVDataset", "filepath": filepath}
         }
 
-        catalog = DataCatalog.from_config(catalog_conf)
-        # kedro_catalog = KedroDataCatalog.from_config(catalog_conf)
+        catalog = catalog_type.from_config(catalog_conf)
 
         test_pipeline = pipeline(
             [
@@ -67,7 +68,6 @@ class TestValidThreadRunner:
         runner_obj = ThreadRunner()
 
         runner_obj.run(test_pipeline, catalog=catalog)
-        # runner_obj.run(test_pipeline, catalog=kedro_catalog)
 
 
 class TestMaxWorkers:

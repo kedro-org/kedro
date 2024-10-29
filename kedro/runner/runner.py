@@ -106,7 +106,12 @@ class AbstractRunner(ABC):
 
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, including added extra_dataset_patterns
-        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
+        # Run a warm-up to materialize all datasets in the catalog before run
+        registered_ds = []
+        for ds in pipeline.datasets():
+            if ds in catalog:
+                registered_ds.append(ds)
+            _ = catalog._get_dataset(ds)
 
         if self._is_async:
             self._logger.info(

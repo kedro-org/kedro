@@ -52,14 +52,9 @@ def conflicting_feed_dict(pandas_df_feed_dict):
 
 
 @pytest.fixture
-def pandas_df():
-    return pd.DataFrame({"Name": ["Alex", "Bob"], "Age": [15, 25]})
-
-
-@pytest.fixture
 def pandas_df_feed_dict():
-    df = pd.DataFrame({"Name": ["Alex", "Bob"], "Age": [15, 25]})
-    return {"ds3": df}
+    pandas_df = pd.DataFrame({"Name": ["Alex", "Bob"], "Age": [15, 25]})
+    return {"ds3": pandas_df}
 
 
 @pytest.fixture

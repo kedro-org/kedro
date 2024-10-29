@@ -10,6 +10,7 @@ from kedro.io import (
     AbstractDataset,
     DataCatalog,
     DatasetError,
+    KedroDataCatalog,
     MemoryDataset,
 )
 from kedro.pipeline import node
@@ -45,15 +46,15 @@ class TestValidThreadRunner:
         ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." not in caplog.text
 
-    @pytest.mark.parametrize("catalog_type", [DataCatalog])
-    def test_thread_run_with_patterns(self, tmp_path, pandas_df, catalog_type):
-        """Test warm-up is done and patterns are resolved before running pipeline."""
-        filepath = tmp_path / "data.csv"
-        pandas_df.to_csv(filepath)
+    @pytest.mark.parametrize("catalog_type", [DataCatalog, KedroDataCatalog])
+    def test_thread_run_with_patterns(self, catalog_type):
+        """Test warm-up is done and patterns are resolved before running pipeline.
 
-        catalog_conf = {
-            "{catch_all}": {"type": "pandas.CSVDataset", "filepath": filepath}
-        }
+        Without the warm-up "Dataset 'dummy_1' has already been registered" error
+        would be raised for this test. We check that the dataset was registered at the
+        warm-upg, and we successfully passed to loading.
+        """
+        catalog_conf = {"{catch_all}": {"type": "MemoryDataset"}}
 
         catalog = catalog_type.from_config(catalog_conf)
 
@@ -64,9 +65,11 @@ class TestValidThreadRunner:
                 node(identity, inputs="dummy_1", outputs="output_3", name="node_3"),
             ]
         )
-        runner_obj = ThreadRunner()
 
-        runner_obj.run(test_pipeline, catalog=catalog)
+        with pytest.raises(
+            Exception, match="Data for MemoryDataset has not been saved yet"
+        ):
+            ThreadRunner().run(test_pipeline, catalog)
 
 
 class TestMaxWorkers:

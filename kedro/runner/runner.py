@@ -86,9 +86,12 @@ class AbstractRunner(ABC):
         """
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, not including extra dataset patterns
-        registered_ds_no_runtime_patterns = [
-            ds for ds in pipeline.datasets() if ds in catalog
-        ]
+        # Run a warm-up to materialize all datasets in the catalog before run
+        registered_ds_no_runtime_patterns = []
+        for ds in pipeline.datasets():
+            if ds in catalog:
+                registered_ds_no_runtime_patterns.append(ds)
+                _ = catalog._get_dataset(ds)
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
@@ -108,12 +111,7 @@ class AbstractRunner(ABC):
 
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, including added extra_dataset_patterns
-        # Run a warm-up to materialize all datasets in the catalog before run
-        registered_ds = []
-        for ds in pipeline.datasets():
-            if ds in catalog:
-                registered_ds.append(ds)
-            _ = catalog._get_dataset(ds)
+        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
 
         if self._is_async:
             self._logger.info(

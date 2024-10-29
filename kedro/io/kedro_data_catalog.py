@@ -134,6 +134,7 @@ class KedroDataCatalog(CatalogProtocol):
         """Check if an item is in the catalog as a materialised dataset or pattern."""
         return (
             dataset_name in self._datasets
+            or dataset_name in self._non_initialized_datasets
             or self._config_resolver.match_pattern(dataset_name) is not None
         )
 

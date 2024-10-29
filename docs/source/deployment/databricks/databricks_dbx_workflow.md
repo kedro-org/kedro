@@ -1,6 +1,6 @@
 # Use an IDE, dbx and Databricks Repos to develop a Kedro project
 
-```{note}
+```{warning}
 `dbx` is deprecated in 2023, the recommended workflow now is to use [Databricks Asset Bundles](./databricks_ide_development_workflow.md)
 ```
 This guide demonstrates a workflow for developing Kedro projects on Databricks using your local environment for development, then using dbx and Databricks Repos to sync code for testing on Databricks.

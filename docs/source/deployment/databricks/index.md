@@ -49,4 +49,5 @@ databricks_notebooks_development_workflow.md
 databricks_ide_development_workflow.md
 databricks_deployment_workflow
 databricks_visualisation
+databricks_dbx_workflow.md
 ```

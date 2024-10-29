@@ -2,3 +2,4 @@ ipython>=8.10
 jupyterlab>=3.0
 notebook
 kedro~={{ cookiecutter.kedro_version }}
+pip install -e .

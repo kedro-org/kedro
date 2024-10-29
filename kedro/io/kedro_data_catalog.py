@@ -45,7 +45,7 @@ class NonInitializedDataset:
         self.save_version = save_version
 
     def __repr__(self):
-        return self.name
+        return self.config.get("type", "UnknownType")
 
     def materialize(self) -> AbstractDataset:
         return AbstractDataset.from_config(
@@ -368,9 +368,14 @@ class KedroDataCatalog(CatalogProtocol):
                 "make sure that the key is preceded by an underscore."
             )
 
+        if "type" not in ds_config:
+            raise DatasetError(
+                "'type' is missing from dataset catalog configuration."
+                "\nHint: If this catalog entry is intended for variable interpolation, "
+                "make sure that the top level key is preceded by an underscore."
+            )
+
     def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
-        # TODO: Add lazy loading feature to store the configuration but not to init actual dataset
-        # TODO: Initialise actual dataset when load or save
         self._validate_dataset_config(ds_name, ds_config)
         ds = NonInitializedDataset(
             ds_name,

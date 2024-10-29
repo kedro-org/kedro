@@ -118,9 +118,6 @@ class AbstractRunner(ABC):
                 "Asynchronous mode is enabled for loading and saving data"
             )
 
-        for ds in pipeline.datasets():
-            _ = catalog._get_dataset(ds)
-
         self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
 
         self._logger.info("Pipeline execution completed successfully.")

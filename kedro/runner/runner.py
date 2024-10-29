@@ -86,11 +86,13 @@ class AbstractRunner(ABC):
         """
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, not including extra dataset patterns
-        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
+        registered_ds_no_runtime_patterns = [
+            ds for ds in pipeline.datasets() if ds in catalog
+        ]
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
-        unsatisfied = pipeline.inputs() - set(registered_ds)
+        unsatisfied = pipeline.inputs() - set(registered_ds_no_runtime_patterns)
 
         if unsatisfied:
             raise ValueError(
@@ -106,12 +108,21 @@ class AbstractRunner(ABC):
 
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, including added extra_dataset_patterns
-        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
+        # Run a warm-up to materialize all datasets in the catalog before run
+        registered_ds = []
+        for ds in pipeline.datasets():
+            if ds in catalog:
+                registered_ds.append(ds)
+            _ = catalog._get_dataset(ds)
 
         if self._is_async:
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
+
+        for ds in pipeline.datasets():
+            _ = catalog._get_dataset(ds)
+
         self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
 
         self._logger.info("Pipeline execution completed successfully.")

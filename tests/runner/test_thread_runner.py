@@ -52,7 +52,7 @@ class TestValidThreadRunner:
 
         Without the warm-up "Dataset 'dummy_1' has already been registered" error
         would be raised for this test. We check that the dataset was registered at the
-        warm-upg, and we successfully passed to loading.
+        warm-up, and we successfully passed to loading it.
         """
         catalog_conf = {"{catch_all}": {"type": "MemoryDataset"}}
 

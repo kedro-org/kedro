@@ -210,7 +210,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
-        if key in self._datasets or key in self._non_initialized_datasets:
+        if key in self._datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
             self._datasets[key] = value

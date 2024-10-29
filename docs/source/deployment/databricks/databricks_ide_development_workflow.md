@@ -1,8 +1,8 @@
 # Use Databricks Asset Bundles to deploy a Kedro project
 
 ```{note}
-Since the `dbx` package is deprecated by Databricks, and dbx workflow documentation is moved to a [new page](./databricks_dbx_workflow.md)
- ```
+The `dbx` package is deprecated by Databricks, and dbx workflow documentation is moved to a [new page](./databricks_dbx_workflow.md).
+```
 
 This guide demonstrates a wokrflow for developing Kedro Project on Databricks using Databricks Asset Bundles. You will learn how to develop your project using local environment, then use `kedro-databricks` and Databricks Asset Bundle `to package your code for running pipeline on Databricks.
 
@@ -14,7 +14,7 @@ By working in your local environment, you can take advantage of features within 
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
 
-If you prefer to develop a projects in notebooks rather than an in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
+If you prefer to develop projects in notebooks rather than in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
 
 
 
@@ -46,12 +46,41 @@ The main steps in this tutorial are as follows:
 
 ### Authenticate the Databricks CLI
 ### Create a new Kedro Project
-### Create the Datanrickls Asset Bundles using `kedro-databricks`
+### Create the Databricks Asset Bundles using `kedro-databricks`
+`kedro-databricks` is a wrapper around `databricks` CLI. It is the simplest way to get started without getting stuck with configuration. To find more about Databricks Asset Bundles, customisation, you can read [What are Databricks Asset Bundles](https://docs.databricks.com/en/dev-tools/bundles/index.html)
+
+Install `kedro-databricks` with:
+`pip install kedro-databricks`
+Then run this command:
 `kedro databricks init`
 
+This will generate a `databricks.yml` sitting inside the `conf` folder. By default it sets the resource, i.e. cluster type you need. Optionally, you can override these configurations. 
+
+To create Databricks Asset Bundles, run:
 `kedro databricks bundle`
 
+If `conf/databricks.yml` exist, it will read the configuration and override the corresponding keys. This generates the Databricks job configuration inside a `resource` folder. 
+
 ### Deploy Databricks Job using Databricks Asset Bundles
+Once you have all the resource generated, run this command to deploy Databriks Asset Bundles to Databricks:
 `kedro databricks deploy`
 
-### Run Databricks Job with `databricks` CLI
+You should see something similar:
+> Uploading databrick_iris-0.1-py3-none-any.whl...
+> Uploading bundle files to /Workspace/Users/xxxxxxx.com/.bundle/databrick_iris/local/files...
+> Deploying resources...
+> Updating deployment state...
+> Deployment complete!
+
+Once you see the `Deployment complete` log, you can now run your pipelines on Databricks!
+
+#### How to run the Deployed job?
+There are two options to run Databricks Jobs:
+1. Use the `databricks` CLI
+2. Use Databricks UI
+#### Run Databricks Job with `databricks` CLI
+`databricks bundle run`
+
+
+#### Run Databricks Job with Databricks UI
+[add images later]

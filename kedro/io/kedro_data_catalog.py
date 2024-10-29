@@ -44,6 +44,9 @@ class NonInitializedDataset:
         self.load_version = load_version
         self.save_version = save_version
 
+    def __repr__(self):
+        return self.name
+
     def materialize(self) -> AbstractDataset:
         return AbstractDataset.from_config(
             self.name, self.config, self.load_version, self.save_version
@@ -122,7 +125,10 @@ class KedroDataCatalog(CatalogProtocol):
         return self._config_resolver
 
     def __repr__(self) -> str:
-        return repr(self._datasets)
+        return (
+            f"Initialized datasets: \n{self._datasets!r}\n"
+            f"Non-initialized datasets: \n{self._non_initialized_datasets!r}"
+        )
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern."""
@@ -247,7 +253,7 @@ class KedroDataCatalog(CatalogProtocol):
         return dataset or default
 
     def _ipython_key_completions_(self) -> list[str]:
-        return list(self._datasets.keys())
+        return list(self._datasets.keys() | self._non_initialized_datasets.keys())
 
     @property
     def _logger(self) -> logging.Logger:

@@ -45,7 +45,7 @@ class NonInitializedDataset:
         self.save_version = save_version
 
     def __repr__(self):
-        return self.config.get("type", "UnknownType")
+        return f"{self.config.get('type', 'UnknownType')}()"
 
     def materialize(self) -> AbstractDataset:
         return AbstractDataset.from_config(
@@ -239,7 +239,7 @@ class KedroDataCatalog(CatalogProtocol):
         Returns:
             An instance of AbstractDataset.
         """
-        if key not in self._datasets or key not in self._non_initialized_datasets:
+        if key not in self._datasets and key not in self._non_initialized_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
                 self._add_from_config(key, ds_config)

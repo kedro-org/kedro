@@ -32,8 +32,22 @@ from kedro.utils import _format_rich, _has_rich_handler
 
 
 class NonInitializedDataset:
-    def __init__(self):
-        pass
+    def __init__(
+        self,
+        name: str,
+        config: dict[str, Any],
+        load_version: str | None = None,
+        save_version: str | None = None,
+    ):
+        self.name = name
+        self.config = config
+        self.load_version = load_version
+        self.save_version = save_version
+
+    def materialize(self) -> AbstractDataset:
+        return AbstractDataset.from_config(
+            self.name, self.config, self.load_version, self.save_version
+        )
 
 
 class KedroDataCatalog(CatalogProtocol):
@@ -78,6 +92,7 @@ class KedroDataCatalog(CatalogProtocol):
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
+        self._non_initialized_datasets = {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
@@ -129,14 +144,14 @@ class KedroDataCatalog(CatalogProtocol):
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """List all datasets registered in the catalog."""
-        return [self._datasets[key] for key in self]
+        return [self.get(key) for key in self]
 
     def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
         """List all dataset names and datasets registered in the catalog."""
-        return [(key, self._datasets[key]) for key in self]
+        return [(key, self.get(key)) for key in self]
 
     def __iter__(self) -> Iterator[str]:
-        yield from self._datasets.keys()
+        yield from self._datasets.keys() | self._non_initialized_datasets.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
@@ -189,10 +204,12 @@ class KedroDataCatalog(CatalogProtocol):
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
-        if key in self._datasets:
+        if key in self._datasets or key in self._non_initialized_datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
             self._datasets[key] = value
+        elif isinstance(value, NonInitializedDataset):
+            self._non_initialized_datasets[key] = value
         else:
             self._logger.info(f"Adding input data as a MemoryDataset - {key}")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
@@ -216,10 +233,14 @@ class KedroDataCatalog(CatalogProtocol):
         Returns:
             An instance of AbstractDataset.
         """
-        if key not in self._datasets:
+        if key not in self._datasets or key not in self._non_initialized_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
                 self._add_from_config(key, ds_config)
+
+        non_initialized_dataset = self._non_initialized_datasets.pop(key, None)
+        if non_initialized_dataset:
+            self[key] = non_initialized_dataset.materialize()
 
         dataset = self._datasets.get(key, None)
 
@@ -345,7 +366,7 @@ class KedroDataCatalog(CatalogProtocol):
         # TODO: Add lazy loading feature to store the configuration but not to init actual dataset
         # TODO: Initialise actual dataset when load or save
         self._validate_dataset_config(ds_name, ds_config)
-        ds = AbstractDataset.from_config(
+        ds = NonInitializedDataset(
             ds_name,
             ds_config,
             self._load_versions.get(ds_name),
@@ -404,7 +425,10 @@ class KedroDataCatalog(CatalogProtocol):
         return self.get_dataset(dataset_name, version, suggest)
 
     def add(
-        self, ds_name: str, dataset: AbstractDataset, replace: bool = False
+        self,
+        ds_name: str,
+        dataset: AbstractDataset | NonInitializedDataset,
+        replace: bool = False,
     ) -> None:
         # TODO: remove when removing old catalog
         """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""

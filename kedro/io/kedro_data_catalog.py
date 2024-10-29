@@ -31,6 +31,11 @@ from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 
+class NonInitializedDataset:
+    def __init__(self):
+        pass
+
+
 class KedroDataCatalog(CatalogProtocol):
     def __init__(
         self,
@@ -81,8 +86,9 @@ class KedroDataCatalog(CatalogProtocol):
         for ds_name, ds_config in self._config_resolver.config.items():
             self._add_from_config(ds_name, ds_config)
 
-        if raw_data:
-            self.add_feed_dict(raw_data)
+        raw_data = raw_data or {}
+        for ds_name, data in raw_data:
+            self[ds_name] = data
 
     @property
     def datasets(self) -> dict[str, Any]:

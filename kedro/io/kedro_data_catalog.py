@@ -125,10 +125,7 @@ class KedroDataCatalog(CatalogProtocol):
         return self._config_resolver
 
     def __repr__(self) -> str:
-        return (
-            f"Initialized datasets: \n{self._datasets!r}\n"
-            f"Non-initialized datasets: \n{self._non_initialized_datasets!r}"
-        )
+        return repr(self._non_initialized_datasets | self._datasets)
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern."""
@@ -140,8 +137,13 @@ class KedroDataCatalog(CatalogProtocol):
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         """Compares two catalogs based on materialised datasets and datasets patterns."""
-        return (self._datasets, self._config_resolver.list_patterns()) == (
+        return (
+            self._datasets,
+            self._non_initialized_datasets,
+            self._config_resolver.list_patterns(),
+        ) == (
             other._datasets,
+            other._non_initialized_datasets,
             other.config_resolver.list_patterns(),
         )
 
@@ -158,7 +160,7 @@ class KedroDataCatalog(CatalogProtocol):
         return [(key, self.get(key)) for key in self]
 
     def __iter__(self) -> Iterator[str]:
-        yield from self._datasets.keys() | self._non_initialized_datasets.keys()
+        yield from self._non_initialized_datasets.keys() | self._datasets.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
@@ -254,7 +256,7 @@ class KedroDataCatalog(CatalogProtocol):
         return dataset or default
 
     def _ipython_key_completions_(self) -> list[str]:
-        return list(self._datasets.keys() | self._non_initialized_datasets.keys())
+        return list(self._non_initialized_datasets.keys() | self._datasets.keys())
 
     @property
     def _logger(self) -> logging.Logger:

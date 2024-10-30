@@ -44,7 +44,7 @@ class NonInitializedDataset:
         self.load_version = load_version
         self.save_version = save_version
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.config.get('type', 'UnknownType')}()"
 
     def materialize(self) -> AbstractDataset:
@@ -95,7 +95,7 @@ class KedroDataCatalog(CatalogProtocol):
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
-        self._non_initialized_datasets = {}
+        self._non_initialized_datasets: dict[str, NonInitializedDataset] = {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
@@ -106,7 +106,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         raw_data = raw_data or {}
         for ds_name, data in raw_data:
-            self[ds_name] = data
+            self[ds_name] = data  # type: ignore[has-type]
 
     @property
     def datasets(self) -> dict[str, Any]:

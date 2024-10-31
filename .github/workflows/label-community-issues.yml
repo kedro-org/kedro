@@ -1,9 +1,6 @@
 name: Label Community Issues
 
 on:
-  pull_request_target:
-    types:
-      - opened
   issues:
     types:
       - opened
@@ -31,7 +28,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Label issue if author is external
-        if: steps.check_author.outputs.result == 'internal'
+        if: steps.check_author.outputs.result == 'external'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

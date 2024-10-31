@@ -31,7 +31,7 @@ from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 
-class NonInitializedDataset:
+class LazyDataset:
     def __init__(
         self,
         name: str,
@@ -95,7 +95,7 @@ class KedroDataCatalog(CatalogProtocol):
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
-        self._non_initialized_datasets: dict[str, NonInitializedDataset] = {}
+        self._lazy_datasets: dict[str, LazyDataset] = {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
@@ -125,13 +125,13 @@ class KedroDataCatalog(CatalogProtocol):
         return self._config_resolver
 
     def __repr__(self) -> str:
-        return repr(self._non_initialized_datasets | self._datasets)
+        return repr(self._lazy_datasets | self._datasets)
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern."""
         return (
             dataset_name in self._datasets
-            or dataset_name in self._non_initialized_datasets
+            or dataset_name in self._lazy_datasets
             or self._config_resolver.match_pattern(dataset_name) is not None
         )
 
@@ -139,11 +139,11 @@ class KedroDataCatalog(CatalogProtocol):
         """Compares two catalogs based on materialised datasets and datasets patterns."""
         return (
             self._datasets,
-            self._non_initialized_datasets,
+            self._lazy_datasets,
             self._config_resolver.list_patterns(),
         ) == (
             other._datasets,
-            other._non_initialized_datasets,
+            other._lazy_datasets,
             other.config_resolver.list_patterns(),
         )
 
@@ -160,7 +160,7 @@ class KedroDataCatalog(CatalogProtocol):
         return [(key, self.get(key)) for key in self]
 
     def __iter__(self) -> Iterator[str]:
-        yield from self._non_initialized_datasets.keys() | self._datasets.keys()
+        yield from self._lazy_datasets.keys() | self._datasets.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
@@ -217,8 +217,8 @@ class KedroDataCatalog(CatalogProtocol):
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
             self._datasets[key] = value
-        elif isinstance(value, NonInitializedDataset):
-            self._non_initialized_datasets[key] = value
+        elif isinstance(value, LazyDataset):
+            self._lazy_datasets[key] = value
         else:
             self._logger.info(f"Adding input data as a MemoryDataset - {key}")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
@@ -242,12 +242,12 @@ class KedroDataCatalog(CatalogProtocol):
         Returns:
             An instance of AbstractDataset.
         """
-        if key not in self._datasets and key not in self._non_initialized_datasets:
+        if key not in self._datasets and key not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
                 self._add_from_config(key, ds_config)
 
-        non_initialized_dataset = self._non_initialized_datasets.pop(key, None)
+        non_initialized_dataset = self._lazy_datasets.pop(key, None)
         if non_initialized_dataset:
             self[key] = non_initialized_dataset.materialize()
 
@@ -256,7 +256,7 @@ class KedroDataCatalog(CatalogProtocol):
         return dataset or default
 
     def _ipython_key_completions_(self) -> list[str]:
-        return list(self._non_initialized_datasets.keys() | self._datasets.keys())
+        return list(self._lazy_datasets.keys() | self._datasets.keys())
 
     @property
     def _logger(self) -> logging.Logger:
@@ -380,7 +380,7 @@ class KedroDataCatalog(CatalogProtocol):
 
     def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
         self._validate_dataset_config(ds_name, ds_config)
-        ds = NonInitializedDataset(
+        ds = LazyDataset(
             ds_name,
             ds_config,
             self._load_versions.get(ds_name),
@@ -441,7 +441,7 @@ class KedroDataCatalog(CatalogProtocol):
     def add(
         self,
         ds_name: str,
-        dataset: AbstractDataset | NonInitializedDataset,
+        dataset: AbstractDataset | LazyDataset,
         replace: bool = False,
     ) -> None:
         # TODO: remove when removing old catalog

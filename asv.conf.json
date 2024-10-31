@@ -7,7 +7,7 @@
         "pip install -e .  kedro-datasets[pandas-csvdataset]"
     ],
     "branches": [
-        "noklam/stress-testing-runners-4127"
+        "main"
     ],
     "environment_name": "kedro",
     "environment_type": "virtualenv",

@@ -45,7 +45,7 @@ class NonInitializedDataset:
         self.save_version = save_version
 
     def __repr__(self) -> str:
-        return f"{self.config.get('type', 'UnknownType')}()"
+        return f"{self.config.get('type', 'UnknownType')}"
 
     def materialize(self) -> AbstractDataset:
         return AbstractDataset.from_config(

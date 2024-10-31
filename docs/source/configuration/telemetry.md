@@ -46,8 +46,9 @@ To withdraw consent, you have a few options:
    ```
    This will create a new project with a `.telemetry` file in its root folder, containing `consent: false`. This file will be used when executing Kedro commands within that project folder. Note that telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
 
-   >*Note:* The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
-
+```{note}
+The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
+```
 3. **Modify or Create the `.telemetry` file manually**:
    If the `.telemetry` file exists in the root folder of your Kedro project, set the `consent` variable to `false`. If the file does not exist, create it with the following content:
      ```yaml
@@ -60,4 +61,6 @@ To withdraw consent, you have a few options:
    ```console
    pip uninstall kedro-telemetry
    ```
-   >*Note:* This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
+```{note}
+This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
+```

@@ -149,7 +149,7 @@ class KedroDataCatalog(CatalogProtocol):
 
     def keys(self) -> List[str]:  # noqa: UP006
         """List all dataset names registered in the catalog."""
-        return list(self.__iter__())
+        return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """List all datasets registered in the catalog."""
@@ -160,7 +160,7 @@ class KedroDataCatalog(CatalogProtocol):
         return [(key, self.get(key)) for key in self]
 
     def __iter__(self) -> Iterator[str]:
-        yield from self._lazy_datasets.keys() | self._datasets.keys()
+        yield from self.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
@@ -256,7 +256,7 @@ class KedroDataCatalog(CatalogProtocol):
         return dataset or default
 
     def _ipython_key_completions_(self) -> list[str]:
-        return list(self._lazy_datasets.keys() | self._datasets.keys())
+        return self.keys()
 
     @property
     def _logger(self) -> logging.Logger:
@@ -373,6 +373,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         if "type" not in ds_config:
             raise DatasetError(
+                f"An exception occurred when parsing config for dataset '{ds_name}':\n"
                 "'type' is missing from dataset catalog configuration."
                 "\nHint: If this catalog entry is intended for variable interpolation, "
                 "make sure that the top level key is preceded by an underscore."

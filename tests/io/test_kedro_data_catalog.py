@@ -178,14 +178,14 @@ class TestKedroDataCatalog:
 
     def test_datasets_on_init(self, data_catalog_from_config):
         """Check datasets are loaded correctly on construction"""
-        assert isinstance(data_catalog_from_config.datasets["boats"], CSVDataset)
-        assert isinstance(data_catalog_from_config.datasets["cars"], CSVDataset)
+        assert isinstance(data_catalog_from_config.get("boats"), CSVDataset)
+        assert isinstance(data_catalog_from_config.get("cars"), CSVDataset)
 
     def test_datasets_on_add(self, data_catalog_from_config):
         """Check datasets are updated correctly after adding"""
         data_catalog_from_config.add("new_dataset", CSVDataset(filepath="some_path"))
-        assert isinstance(data_catalog_from_config.datasets["new_dataset"], CSVDataset)
-        assert isinstance(data_catalog_from_config.datasets["boats"], CSVDataset)
+        assert isinstance(data_catalog_from_config.get("new_dataset"), CSVDataset)
+        assert isinstance(data_catalog_from_config.get("boats"), CSVDataset)
 
     def test_adding_datasets_not_allowed(self, data_catalog_from_config):
         """Check error if user tries to update the datasets attribute"""

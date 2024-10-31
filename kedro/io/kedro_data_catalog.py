@@ -105,7 +105,7 @@ class KedroDataCatalog(CatalogProtocol):
             self._add_from_config(ds_name, ds_config)
 
         raw_data = raw_data or {}
-        for ds_name, data in raw_data:
+        for ds_name, data in raw_data.items():
             self[ds_name] = data  # type: ignore[has-type]
 
     @property

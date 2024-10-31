@@ -266,6 +266,10 @@ class TestKedroDataCatalog:
     def test_repr(self, data_catalog):
         assert data_catalog.__repr__() == str(data_catalog)
 
+    def test_repr_no_type_found(self, data_catalog_from_config):
+        del data_catalog_from_config._lazy_datasets["boats"].config["type"]
+        assert data_catalog_from_config.__repr__() == str(data_catalog_from_config)
+
     def test_missing_keys_from_load_versions(self, correct_config):
         """Test load versions include keys missing in the catalog"""
         pattern = "'load_versions' keys [version] are not found in the catalog."

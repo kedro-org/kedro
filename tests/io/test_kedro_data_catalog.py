@@ -395,7 +395,7 @@ class TestKedroDataCatalog:
             config = deepcopy(correct_config)
             del config["catalog"]["boats"]
 
-            KedroDataCatalog.from_config(**config)
+            KedroDataCatalog.from_config(**config).get("cars")
 
             expected_client_kwargs = correct_config["credentials"]["s3_credentials"]
             mock_client.filesystem.assert_called_with("s3", **expected_client_kwargs)
@@ -404,7 +404,7 @@ class TestKedroDataCatalog:
             mock_client = mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec")
             config = deepcopy(correct_config_with_nested_creds)
             del config["catalog"]["boats"]
-            KedroDataCatalog.from_config(**config)
+            KedroDataCatalog.from_config(**config).get("cars")
 
             expected_client_kwargs = {
                 "client_kwargs": {
@@ -583,7 +583,7 @@ class TestKedroDataCatalog:
             to the dataset config"""
             correct_config["catalog"]["boats"]["versioned"] = versioned
             correct_config["catalog"]["boats"]["version"] = True
-            KedroDataCatalog.from_config(**correct_config)
+            KedroDataCatalog.from_config(**correct_config).get("boats")
             log_record = caplog.records[0]
             expected_log_message = (
                 "'version' attribute removed from dataset configuration since it "

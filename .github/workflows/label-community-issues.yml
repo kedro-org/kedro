@@ -1,34 +1,37 @@
 name: Label Community Issues
 
 on:
+  pull_request_target:
+    types:
+      - opened
   issues:
-    types: [opened]
+    types:
+      - opened
 
 jobs:
   label_external_issues:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if issue author is a member
+      - name: Check if issue author is a member of Kedro org
         id: check_author
         uses: actions/github-script@v6
         with:
           script: |
-            const { owner, repo } = context.repo;
             const issueAuthor = context.payload.issue.user.login;
 
             // Check if the issue author is a member of the org
             const { data: membership } = await github.orgs.getMembershipForUser({
-              org: owner,
+              org: "kedro-org",
               username: issueAuthor
             }).catch(() => ({ data: null }));
-
+            console.log(data)
             // Set an output for the membership status
             return membership ? 'internal' : 'external';
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Label issue if author is external
-        if: steps.check_author.outputs.result == 'external'
+        if: steps.check_author.outputs.result == 'internal'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

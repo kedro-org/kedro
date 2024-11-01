@@ -19,7 +19,6 @@ from kedro.runner import ParallelRunner
 from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
-    _run_node_synchronization,
 )
 from tests.runner.conftest import (
     exception_fn,
@@ -343,64 +342,3 @@ class TestParallelRunnerRelease:
 
         # we want to see both datasets being released
         assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]
-
-
-@pytest.mark.parametrize("is_async", [False, True])
-class TestRunNodeSynchronisationHelper:
-    """Test class for _run_node_synchronization helper. It is tested manually
-    in isolation since it's called in the subprocess, which ParallelRunner
-    patches have no access to.
-    """
-
-    @pytest.fixture(autouse=True)
-    def mock_logging(self, mocker):
-        return mocker.patch("logging.config.dictConfig")
-
-    @pytest.fixture
-    def mock_run_node(self, mocker):
-        return mocker.patch("kedro.runner.parallel_runner.run_node")
-
-    @pytest.fixture
-    def mock_configure_project(self, mocker):
-        return mocker.patch("kedro.framework.project.configure_project")
-
-    def test_package_name_and_logging_provided(
-        self,
-        mock_logging,
-        mock_run_node,
-        mock_configure_project,
-        is_async,
-        mocker,
-    ):
-        mocker.patch("multiprocessing.get_start_method", return_value="spawn")
-        node_ = mocker.sentinel.node
-        catalog = mocker.sentinel.catalog
-        session_id = "fake_session_id"
-        package_name = mocker.sentinel.package_name
-
-        _run_node_synchronization(
-            node_,
-            catalog,
-            is_async,
-            session_id,
-            package_name=package_name,
-            logging_config={"fake_logging_config": True},
-        )
-        mock_run_node.assert_called_once()
-        mock_logging.assert_called_once_with({"fake_logging_config": True})
-        mock_configure_project.assert_called_once_with(package_name)
-
-    def test_package_name_not_provided(
-        self, mock_logging, mock_run_node, is_async, mocker
-    ):
-        mocker.patch("multiprocessing.get_start_method", return_value="fork")
-        node_ = mocker.sentinel.node
-        catalog = mocker.sentinel.catalog
-        session_id = "fake_session_id"
-        package_name = mocker.sentinel.package_name
-
-        _run_node_synchronization(
-            node_, catalog, is_async, session_id, package_name=package_name
-        )
-        mock_run_node.assert_called_once()
-        mock_logging.assert_not_called()

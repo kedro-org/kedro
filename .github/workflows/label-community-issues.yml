@@ -1,0 +1,48 @@
+name: Label Community Issues
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if issue author is a member of Kedro org
+        uses: actions/github-script@v6
+        id: membership
+        with:
+          github-token: ${{ secrets.GH_TAGGING_TOKEN }}
+          result-encoding: string
+          script: |
+
+            try {
+              const result = await github.rest.orgs.getMembershipForUser({
+                       org: "kedro-org",
+                       username: '${{ github.actor }}'
+                    })
+
+              console.log(result?.data?.state)
+              if (result?.data?.state == "active"){
+                console.log("%s: detected as an active member of Kedro org", '${{ github.actor }}')
+                return "member";
+              } else {
+                console.log("%s: not detected as active member of Kedro org", '${{ github.actor }}')
+                return "notMember";
+              }
+
+            } catch (error) {
+              console.log("%s: Error occured and marked user as notMember", '${{ github.actor }}')
+              console.log("Error", error.stack);
+              console.log("Error", error.name);
+              console.log("Error", error.message);
+              return "notMember";
+            }
+
+      - name: Label issue if author is from community
+        if: ${{ steps.membership.outputs.result == 'notMember' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GH_TAGGING_TOKEN }}
+          labels: 'Community'

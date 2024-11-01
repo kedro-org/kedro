@@ -22,7 +22,6 @@ jobs:
                        org: "kedro-org",
                        username: '${{ github.actor }}'
                     })
-
               console.log(result?.data?.state)
               if (result?.data?.state == "active"){
                 console.log("%s: detected as an active member of Kedro org", '${{ github.actor }}')
@@ -31,11 +30,13 @@ jobs:
                 console.log("%s: not detected as active member of Kedro org", '${{ github.actor }}')
                 return "notMember";
               }
-
             } catch (error) {
+              console.log("%s: Error occured and marked user as notMember", '${{ github.actor }}')
+              console.log("Error", e.stack);
+              console.log("Error", e.name);
+              console.log("Error", e.message);
               return "notMember";
             }
-
 
       - name: Label issue if author is from community
         if: ${{ steps.membership.outputs.result == 'notMember' }}

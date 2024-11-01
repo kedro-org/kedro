@@ -33,9 +33,12 @@ jobs:
               }
 
             } catch (error) {
+              console.log("%s: Error occured and marked user as notMember", '${{ github.actor }}')
+              console.log("Error", e.stack);
+              console.log("Error", e.name);
+              console.log("Error", e.message);
               return "notMember";
             }
-
 
       - name: Label issue if author is from community
         if: ${{ steps.membership.outputs.result == 'notMember' }}

@@ -4,7 +4,6 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 
 from __future__ import annotations
 
-import multiprocessing
 import os
 import sys
 from collections import Counter
@@ -15,19 +14,14 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import TYPE_CHECKING, Any
 
-from kedro.framework.hooks.manager import (
-    _create_hook_manager,
-    _register_hooks,
-    _register_hooks_entry_points,
-)
-from kedro.framework.project import settings
 from kedro.io import (
     CatalogProtocol,
     DatasetNotFoundError,
     MemoryDataset,
     SharedMemoryDataset,
 )
-from kedro.runner.runner import AbstractRunner, run_node
+from kedro.runner.runner import AbstractRunner
+from kedro.runner.task import Task
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -48,52 +42,6 @@ class ParallelRunnerManager(SyncManager):
 
 
 ParallelRunnerManager.register("MemoryDataset", MemoryDataset)
-
-
-def _bootstrap_subprocess(
-    package_name: str, logging_config: dict[str, Any] | None = None
-) -> None:
-    from kedro.framework.project import configure_logging, configure_project
-
-    configure_project(package_name)
-    if logging_config:
-        configure_logging(logging_config)
-
-
-def _run_node_synchronization(  # noqa: PLR0913
-    node: Node,
-    catalog: CatalogProtocol,
-    is_async: bool = False,
-    session_id: str | None = None,
-    package_name: str | None = None,
-    logging_config: dict[str, Any] | None = None,
-) -> Node:
-    """Run a single `Node` with inputs from and outputs to the `catalog`.
-
-    A ``PluginManager`` instance is created in each subprocess because the
-    ``PluginManager`` can't be serialised.
-
-    Args:
-        node: The ``Node`` to run.
-        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
-        is_async: If True, the node inputs and outputs are loaded and saved
-            asynchronously with threads. Defaults to False.
-        session_id: The session id of the pipeline run.
-        package_name: The name of the project Python package.
-        logging_config: A dictionary containing logging configuration.
-
-    Returns:
-        The node argument.
-
-    """
-    if multiprocessing.get_start_method() == "spawn" and package_name:
-        _bootstrap_subprocess(package_name, logging_config)
-
-    hook_manager = _create_hook_manager()
-    _register_hooks(hook_manager, settings.HOOKS)
-    _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
-
-    return run_node(node, catalog, hook_manager, is_async, session_id)
 
 
 class ParallelRunner(AbstractRunner):
@@ -282,24 +230,19 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
-        from kedro.framework.project import LOGGING, PACKAGE_NAME
-
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:
                 ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
-                    futures.add(
-                        pool.submit(
-                            _run_node_synchronization,
-                            node,
-                            catalog,
-                            self._is_async,
-                            session_id,
-                            package_name=PACKAGE_NAME,
-                            logging_config=LOGGING,  # type: ignore[arg-type]
-                        )
+                    task = Task(
+                        node=node,
+                        catalog=catalog,
+                        is_async=self._is_async,
+                        session_id=session_id,
+                        parallel=True,
                     )
+                    futures.add(pool.submit(task))
                 if not futures:
                     if todo_nodes:
                         debug_data = {
@@ -321,19 +264,4 @@ class ParallelRunner(AbstractRunner):
                     node = future.result()
                     done_nodes.add(node)
 
-                    # Decrement load counts, and release any datasets we
-                    # have finished with. This is particularly important
-                    # for the shared, default datasets we created above.
-                    for dataset in node.inputs:
-                        load_counts[dataset] -= 1
-                        if (
-                            load_counts[dataset] < 1
-                            and dataset not in pipeline.inputs()
-                        ):
-                            catalog.release(dataset)
-                    for dataset in node.outputs:
-                        if (
-                            load_counts[dataset] < 1
-                            and dataset not in pipeline.outputs()
-                        ):
-                            catalog.release(dataset)
+                    self._release_datasets(node, catalog, load_counts, pipeline)

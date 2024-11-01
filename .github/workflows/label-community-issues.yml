@@ -32,9 +32,9 @@ jobs:
               }
             } catch (error) {
               console.log("%s: Error occured and marked user as notMember", '${{ github.actor }}')
-              console.log("Error", e.stack);
-              console.log("Error", e.name);
-              console.log("Error", e.message);
+              console.log("Error", error.stack);
+              console.log("Error", error.name);
+              console.log("Error", error.message);
               return "notMember";
             }
 

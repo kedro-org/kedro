@@ -18,9 +18,9 @@
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/6711/badge)](https://bestpractices.coreinfrastructure.org/projects/6711)
 [![Monthly downloads](https://static.pepy.tech/badge/kedro/month)](https://pepy.tech/project/kedro)
 [![Total downloads](https://static.pepy.tech/badge/kedro)](https://pepy.tech/project/kedro)
+[![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20Kedro%20Guru-006BFF)](https://gurubase.io/g/kedro)
 
 [![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
-[![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20Kedro%20Guru-006BFF)](https://gurubase.io/g/kedro)
 
 ## What is Kedro?
 

@@ -6,29 +6,39 @@ on:
       - opened
 
 jobs:
-  label_external_issues:
+  label:
     runs-on: ubuntu-latest
     steps:
       - name: Check if issue author is a member of Kedro org
-        id: check_author
         uses: actions/github-script@v6
+        id: membership
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
           script: |
-            const issueAuthor = context.payload.issue.user.login;
 
-            // Check if the issue author is a member of the org
-            const { data: membership } = await github.orgs.getMembershipForUser({
-              org: "kedro-org",
-              username: issueAuthor
-            }).catch(() => ({ data: null }));
-            console.log(data)
-            // Set an output for the membership status
-            return membership ? 'internal' : 'external';
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            try {
+              const result = await github.rest.orgs.getMembershipForUser({
+                       org: "kedro-org",
+                       username: '${{ github.actor }}'
+                    })
 
-      - name: Label issue if author is external
-        if: steps.check_author.outputs.result == 'external'
+              console.log(result?.data?.state)
+              if (result?.data?.state == "active"){
+                console.log("%s: detected as an active member of elastic org", '${{ github.actor }}')
+                return "member";
+              } else {
+                console.log("%s: not detected as active member of elastic org", '${{ github.actor }}')
+                return "notMember";
+              }
+
+            } catch (error) {
+              return "notMember";
+            }
+
+
+      - name: Label issue if author is from community
+        if: ${{ steps.membership.outputs.result == 'notMember' }}
         uses: actions-ecosystem/action-add-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

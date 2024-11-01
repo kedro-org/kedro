@@ -25,10 +25,10 @@ jobs:
 
               console.log(result?.data?.state)
               if (result?.data?.state == "active"){
-                console.log("%s: detected as an active member of elastic org", '${{ github.actor }}')
+                console.log("%s: detected as an active member of Kedro org", '${{ github.actor }}')
                 return "member";
               } else {
-                console.log("%s: not detected as active member of elastic org", '${{ github.actor }}')
+                console.log("%s: not detected as active member of Kedro org", '${{ github.actor }}')
                 return "notMember";
               }
 

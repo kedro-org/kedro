@@ -31,7 +31,9 @@ from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 
-class LazyDataset:
+class _LazyDataset:
+    """A helper class to store AbstractDataset configuration and materialize dataset object."""
+
     def __init__(
         self,
         name: str,
@@ -95,7 +97,7 @@ class KedroDataCatalog(CatalogProtocol):
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
-        self._lazy_datasets: dict[str, LazyDataset] = {}
+        self._lazy_datasets: dict[str, _LazyDataset] = {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
@@ -217,7 +219,7 @@ class KedroDataCatalog(CatalogProtocol):
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
             self._datasets[key] = value
-        elif isinstance(value, LazyDataset):
+        elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
             self._logger.info(f"Adding input data as a MemoryDataset - {key}")
@@ -380,8 +382,17 @@ class KedroDataCatalog(CatalogProtocol):
             )
 
     def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
+        """Create a LazyDataset instance and add it to the catalog.
+
+        Args:
+            ds_name: A dataset name.
+            ds_config: A dataset configuration.
+
+        Raises:
+            DatasetError: When a dataset configuration provided is not valid.
+        """
         self._validate_dataset_config(ds_name, ds_config)
-        ds = LazyDataset(
+        ds = _LazyDataset(
             ds_name,
             ds_config,
             self._load_versions.get(ds_name),
@@ -442,7 +453,7 @@ class KedroDataCatalog(CatalogProtocol):
     def add(
         self,
         ds_name: str,
-        dataset: AbstractDataset | LazyDataset,
+        dataset: AbstractDataset | _LazyDataset,
         replace: bool = False,
     ) -> None:
         # TODO: remove when removing old catalog

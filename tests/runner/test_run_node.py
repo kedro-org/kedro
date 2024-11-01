@@ -1,5 +1,7 @@
 import pytest
+from pytest import warns
 
+from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.pipeline import node
 from kedro.runner import run_node
@@ -87,3 +89,15 @@ class TestRunGeneratorNode:
         assert left.save.call_args_list == expected_left
         assert 10 == right.save.call_count
         assert right.save.call_args_list == expected_right
+
+    def test_run_node_deprecated(self, mocker, catalog):
+        left = mocker.Mock()
+        right = mocker.Mock()
+        catalog.add("left", left)
+        catalog.add("right", right)
+        n = node(generate_dict, inputs=None, outputs={"idx": "left", "square": "right"})
+        with warns(
+            KedroDeprecationWarning,
+            match=r"\`run_node\(\)\` has been deprecated",
+        ):
+            run_node(n, catalog, _NullPluginManager())

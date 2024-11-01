@@ -13,7 +13,7 @@ jobs:
         uses: actions/github-script@v6
         id: membership
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TAGGING_TOKEN }}
           result-encoding: string
           script: |
 
@@ -34,9 +34,9 @@ jobs:
 
             } catch (error) {
               console.log("%s: Error occured and marked user as notMember", '${{ github.actor }}')
-              console.log("Error", e.stack);
-              console.log("Error", e.name);
-              console.log("Error", e.message);
+              console.log("Error", error.stack);
+              console.log("Error", error.name);
+              console.log("Error", error.message);
               return "notMember";
             }
 
@@ -44,5 +44,5 @@ jobs:
         if: ${{ steps.membership.outputs.result == 'notMember' }}
         uses: actions-ecosystem/action-add-labels@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_TAGGING_TOKEN }}
           labels: 'Community'

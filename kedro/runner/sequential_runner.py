@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
     from kedro.io import CatalogProtocol
     from kedro.pipeline import Pipeline
+    from kedro.pipeline.node import Node
 
 
 class SequentialRunner(AbstractRunner):
@@ -70,11 +71,10 @@ class SequentialRunner(AbstractRunner):
                 "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
             )
         nodes = pipeline.nodes
-        done_nodes = set()
-
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
+        done_nodes: set[Node] = set()
 
-        for exec_index, node in enumerate(nodes):
+        for node in nodes:
             try:
                 Task(
                     node=node,
@@ -88,8 +88,8 @@ class SequentialRunner(AbstractRunner):
                 self._suggest_resume_scenario(pipeline, done_nodes, catalog)
                 raise
 
-            self._release_datasets(node, catalog, load_counts, pipeline)
-
+            self._logger.info("Completed node: %s", node.name)
             self._logger.info(
                 "Completed %d out of %d tasks", len(done_nodes), len(nodes)
             )
+            self._release_datasets(node, catalog, load_counts, pipeline)

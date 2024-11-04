@@ -196,7 +196,7 @@ class ParallelRunner(AbstractRunner):
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:
-        """The abstract interface for running pipelines.
+        """The method implementing parallel pipeline running.
 
         Args:
             pipeline: The ``Pipeline`` to run.
@@ -263,5 +263,9 @@ class ParallelRunner(AbstractRunner):
                 for future in done:
                     node = future.result()
                     done_nodes.add(node)
+                    self._logger.info("Completed node: %s", node.name)
+                    self._logger.info(
+                        "Completed %d out of %d tasks", len(done_nodes), len(nodes)
+                    )
 
                     self._release_datasets(node, catalog, load_counts, pipeline)

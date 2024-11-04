@@ -92,7 +92,7 @@ class ThreadRunner(AbstractRunner):
         hook_manager: PluginManager,
         session_id: str | None = None,
     ) -> None:
-        """The abstract interface for running pipelines.
+        """The method implementing threaded pipeline running.
 
         Args:
             pipeline: The ``Pipeline`` to run.
@@ -127,8 +127,21 @@ class ThreadRunner(AbstractRunner):
                     )
                     futures.add(pool.submit(task))
                 if not futures:
-                    assert not todo_nodes, (todo_nodes, done_nodes, ready, done)  # noqa: S101
-                    break
+                    if todo_nodes:
+                        debug_data = {
+                            "todo_nodes": todo_nodes,
+                            "done_nodes": done_nodes,
+                            "ready_nodes": ready,
+                            "done_futures": done,
+                        }
+                        debug_data_str = "\n".join(
+                            f"{k} = {v}" for k, v in debug_data.items()
+                        )
+                        raise RuntimeError(
+                            f"Unable to schedule new tasks although some nodes "
+                            f"have not been run:\n{debug_data_str}"
+                        )
+                    break  # pragma: no cover
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:
                     try:

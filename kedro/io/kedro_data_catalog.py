@@ -249,9 +249,9 @@ class KedroDataCatalog(CatalogProtocol):
             if ds_config:
                 self._add_from_config(key, ds_config)
 
-        non_initialized_dataset = self._lazy_datasets.pop(key, None)
-        if non_initialized_dataset:
-            self[key] = non_initialized_dataset.materialize()
+        lazy_dataset = self._lazy_datasets.pop(key, None)
+        if lazy_dataset:
+            self[key] = lazy_dataset.materialize()
 
         dataset = self._datasets.get(key, None)
 

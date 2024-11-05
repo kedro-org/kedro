@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 * Implemented dict-like interface for `KedroDataCatalog`.
-* Implemented lazy dataset loading for `KedroDataCatalog`.
+* Implemented lazy dataset initializing for `KedroDataCatalog`.
 
 **Note:** ``KedroDataCatalog`` is an experimental feature and is under active development. Therefore, it is possible we'll introduce breaking changes to this class, so be mindful of that if you decide to use it already. Let us know if you have any feedback about the ``KedroDataCatalog`` or ideas for new features.
 

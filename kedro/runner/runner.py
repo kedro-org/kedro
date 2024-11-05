@@ -216,12 +216,11 @@ class AbstractRunner(ABC):
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:
-                    node = future.result()
-                    # try:
-                    #     node = future.result()
-                    # except Exception:
-                    #     self._suggest_resume_scenario(pipeline, done_nodes, catalog)
-                    #     raise
+                    try:
+                        node = future.result()
+                    except Exception:
+                        self._suggest_resume_scenario(pipeline, done_nodes, catalog)
+                        raise
                     done_nodes.add(node)
                     self._logger.info("Completed node: %s", node.name)
                     self._logger.info(

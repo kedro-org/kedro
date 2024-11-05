@@ -6,9 +6,7 @@ from __future__ import annotations
 
 import os
 import sys
-from collections import Counter
-from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
-from itertools import chain
+from concurrent.futures import ProcessPoolExecutor
 from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
@@ -21,7 +19,6 @@ from kedro.io import (
     SharedMemoryDataset,
 )
 from kedro.runner.runner import AbstractRunner
-from kedro.runner.task import Task
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -189,11 +186,14 @@ class ParallelRunner(AbstractRunner):
 
         return min(required_processes, self._max_workers)
 
+    def _get_executor(self, max_workers: int):
+        return ProcessPoolExecutor(max_workers=max_workers)
+
     def _run(
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:
         """The method implementing parallel pipeline running.
@@ -218,54 +218,8 @@ class ParallelRunner(AbstractRunner):
                 "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
             )
 
-        nodes = pipeline.nodes
-        self._validate_catalog(catalog, pipeline)
-        self._validate_nodes(nodes)
-        self._set_manager_datasets(catalog, pipeline)
-        load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
-        node_dependencies = pipeline.node_dependencies
-        todo_nodes = set(node_dependencies.keys())
-        done_nodes: set[Node] = set()
-        futures = set()
-        done = None
-        max_workers = self._get_required_workers_count(pipeline)
-
-        with ProcessPoolExecutor(max_workers=max_workers) as pool:
-            while True:
-                ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
-                todo_nodes -= ready
-                for node in ready:
-                    task = Task(
-                        node=node,
-                        catalog=catalog,
-                        is_async=self._is_async,
-                        session_id=session_id,
-                        parallel=True,
-                    )
-                    futures.add(pool.submit(task))
-                if not futures:
-                    if todo_nodes:
-                        debug_data = {
-                            "todo_nodes": todo_nodes,
-                            "done_nodes": done_nodes,
-                            "ready_nodes": ready,
-                            "done_futures": done,
-                        }
-                        debug_data_str = "\n".join(
-                            f"{k} = {v}" for k, v in debug_data.items()
-                        )
-                        raise RuntimeError(
-                            f"Unable to schedule new tasks although some nodes "
-                            f"have not been run:\n{debug_data_str}"
-                        )
-                    break  # pragma: no cover
-                done, futures = wait(futures, return_when=FIRST_COMPLETED)
-                for future in done:
-                    node = future.result()
-                    done_nodes.add(node)
-                    self._logger.info("Completed node: %s", node.name)
-                    self._logger.info(
-                        "Completed %d out of %d tasks", len(done_nodes), len(nodes)
-                    )
-
-                    self._release_datasets(node, catalog, load_counts, pipeline)
+        super()._run(
+            pipeline=pipeline,
+            catalog=catalog,
+            session_id=session_id,
+        )

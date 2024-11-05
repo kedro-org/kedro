@@ -8,8 +8,12 @@ import inspect
 import logging
 import warnings
 from abc import ABC, abstractmethod
-from collections import deque
+from collections import Counter, deque
+from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
+from itertools import chain
 from typing import TYPE_CHECKING, Any
+
+from pluggy import PluginManager
 
 from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
@@ -160,25 +164,79 @@ class AbstractRunner(ABC):
 
         return self.run(to_rerun, catalog, hook_manager)
 
+    @abstractmethod
+    def _get_executor(self, max_workers):
+        """Abstract method to provide the correct executor (e.g., ThreadPoolExecutor or ProcessPoolExecutor)."""
+        pass
+
     @abstractmethod  # pragma: no cover
     def _run(
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:
-        """The abstract interface for running pipelines, assuming that the
-        inputs have already been checked and normalized by run().
+        """Common pipeline execution logic using an executor."""
+        nodes = pipeline.nodes
+        self._validate_catalog(catalog, pipeline)
+        self._validate_nodes(nodes)
+        self._set_manager_datasets(catalog, pipeline)
+        load_counts = Counter(chain.from_iterable(n.inputs for n in pipeline.nodes))
+        node_dependencies = pipeline.node_dependencies
+        todo_nodes = set(node_dependencies.keys())
+        done_nodes: set[Node] = set()
+        futures = set()
+        done = None
+        max_workers = self._get_required_workers_count(pipeline)
 
-        Args:
-            pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
-            hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+        with self._get_executor(max_workers) as pool:
+            while True:
+                ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
+                todo_nodes -= ready
+                for node in ready:
+                    task = Task(
+                        node=node,
+                        catalog=catalog,
+                        hook_manager=hook_manager,
+                        is_async=self._is_async,
+                        session_id=session_id,
+                    )
+                    if isinstance(pool, ProcessPoolExecutor):
+                        task.parallel = True
+                    futures.add(pool.submit(task))
+                if not futures:
+                    if todo_nodes:
+                        self._raise_runtime_error(todo_nodes, done_nodes, ready, done)
+                    break
+                done, futures = wait(futures, return_when=FIRST_COMPLETED)
+                for future in done:
+                    node = future.result()
+                    # try:
+                    #     node = future.result()
+                    # except Exception:
+                    #     self._suggest_resume_scenario(pipeline, done_nodes, catalog)
+                    #     raise
+                    done_nodes.add(node)
+                    self._logger.info("Completed node: %s", node.name)
+                    self._logger.info(
+                        "Completed %d out of %d tasks", len(done_nodes), len(nodes)
+                    )
+                    self._release_datasets(node, catalog, load_counts, pipeline)
 
-        """
-        pass
+    @staticmethod
+    def _raise_runtime_error(todo_nodes, done_nodes, ready, done):
+        debug_data = {
+            "todo_nodes": todo_nodes,
+            "done_nodes": done_nodes,
+            "ready_nodes": ready,
+            "done_futures": done,
+        }
+        debug_data_str = "\n".join(f"{k} = {v}" for k, v in debug_data.items())
+        raise RuntimeError(
+            f"Unable to schedule new tasks although some nodes "
+            f"have not been run:\n{debug_data_str}"
+        )
 
     def _suggest_resume_scenario(
         self,
@@ -233,6 +291,21 @@ class AbstractRunner(ABC):
         for dataset in node.outputs:
             if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
                 catalog.release(dataset)
+
+    def _validate_catalog(self, catalog, pipeline):
+        # Add catalog validation logic here if needed
+        pass
+
+    def _validate_nodes(self, nodes):
+        # Add node validation logic here if needed
+        pass
+
+    def _set_manager_datasets(self, catalog, pipeline):
+        # Set up any necessary manager datasets here
+        pass
+
+    def _get_required_workers_count(self, pipeline):
+        return 1
 
 
 def _find_nodes_to_resume_from(

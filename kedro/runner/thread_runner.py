@@ -6,12 +6,9 @@ using threads.
 from __future__ import annotations
 
 import warnings
-from collections import Counter
-from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
-from itertools import chain
+from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
-from kedro.runner import Task
 from kedro.runner.runner import AbstractRunner
 
 if TYPE_CHECKING:
@@ -19,7 +16,6 @@ if TYPE_CHECKING:
 
     from kedro.io import CatalogProtocol
     from kedro.pipeline import Pipeline
-    from kedro.pipeline.node import Node
 
 
 class ThreadRunner(AbstractRunner):
@@ -85,11 +81,14 @@ class ThreadRunner(AbstractRunner):
             else required_threads
         )
 
+    def _get_executor(self, max_workers: int):
+        return ThreadPoolExecutor(max_workers=max_workers)
+
     def _run(
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:
         """The method implementing threaded pipeline running.
@@ -104,55 +103,4 @@ class ThreadRunner(AbstractRunner):
             Exception: in case of any downstream node failure.
 
         """
-        nodes = pipeline.nodes
-        load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
-        node_dependencies = pipeline.node_dependencies
-        todo_nodes = set(node_dependencies.keys())
-        done_nodes: set[Node] = set()
-        futures = set()
-        done = None
-        max_workers = self._get_required_workers_count(pipeline)
-
-        with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            while True:
-                ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
-                todo_nodes -= ready
-                for node in ready:
-                    task = Task(
-                        node=node,
-                        catalog=catalog,
-                        hook_manager=hook_manager,
-                        is_async=self._is_async,
-                        session_id=session_id,
-                    )
-                    futures.add(pool.submit(task))
-                if not futures:
-                    if todo_nodes:
-                        debug_data = {
-                            "todo_nodes": todo_nodes,
-                            "done_nodes": done_nodes,
-                            "ready_nodes": ready,
-                            "done_futures": done,
-                        }
-                        debug_data_str = "\n".join(
-                            f"{k} = {v}" for k, v in debug_data.items()
-                        )
-                        raise RuntimeError(
-                            f"Unable to schedule new tasks although some nodes "
-                            f"have not been run:\n{debug_data_str}"
-                        )
-                    break  # pragma: no cover
-                done, futures = wait(futures, return_when=FIRST_COMPLETED)
-                for future in done:
-                    try:
-                        node = future.result()
-                    except Exception:
-                        self._suggest_resume_scenario(pipeline, done_nodes, catalog)
-                        raise
-                    done_nodes.add(node)
-                    self._logger.info("Completed node: %s", node.name)
-                    self._logger.info(
-                        "Completed %d out of %d tasks", len(done_nodes), len(nodes)
-                    )
-
-                    self._release_datasets(node, catalog, load_counts, pipeline)
+        super()._run(pipeline, catalog, hook_manager, session_id)

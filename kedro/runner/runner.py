@@ -79,15 +79,15 @@ class AbstractRunner(ABC):
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, not including extra dataset patterns
         # Run a warm-up to materialize all datasets in the catalog before run
-        registered_ds_no_runtime_patterns = []
+        warmed_up_ds = []
         for ds in pipeline.datasets():
             if ds in catalog:
-                registered_ds_no_runtime_patterns.append(ds)
+                warmed_up_ds.append(ds)
                 _ = catalog._get_dataset(ds)
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
-        unsatisfied = pipeline.inputs() - set(registered_ds_no_runtime_patterns)
+        unsatisfied = pipeline.inputs() - set(warmed_up_ds)
 
         if unsatisfied:
             raise ValueError(

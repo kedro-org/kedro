@@ -1,0 +1,16 @@
+name: Move to Needs more info on Wizard Board
+
+on:
+  issues:
+    types: [labeled]
+jobs:
+  Move_Labeled_Issue_On_Wizard_Board:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
+      with:
+        action-token: "${{ secrets.GITHUB_TOKEN }}"
+        project-url: "https://github.com/orgs/kedro-org/projects/10"
+        column-name: "Needs more info"
+        label-name: "support: needs more info"
+        columns-to-ignore: ""

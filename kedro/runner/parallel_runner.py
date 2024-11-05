@@ -4,8 +4,6 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 
 from __future__ import annotations
 
-import os
-import sys
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
@@ -18,7 +16,7 @@ from kedro.io import (
     MemoryDataset,
     SharedMemoryDataset,
 )
-from kedro.runner.runner import AbstractRunner
+from kedro.runner.runner import AbstractRunner, validate_max_workers
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -27,9 +25,6 @@ if TYPE_CHECKING:
 
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
-
-# see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
-_MAX_WINDOWS_WORKERS = 61
 
 
 class ParallelRunnerManager(SyncManager):
@@ -80,16 +75,7 @@ class ParallelRunner(AbstractRunner):
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
-        # This code comes from the concurrent.futures library
-        # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588
-        if max_workers is None:
-            # NOTE: `os.cpu_count` might return None in some weird cases.
-            # https://github.com/python/cpython/blob/3.7/Modules/posixmodule.c#L11431
-            max_workers = os.cpu_count() or 1
-            if sys.platform == "win32":
-                max_workers = min(_MAX_WINDOWS_WORKERS, max_workers)
-
-        self._max_workers = max_workers
+        self._max_workers = validate_max_workers(max_workers)
 
     def __del__(self) -> None:
         self._manager.shutdown()

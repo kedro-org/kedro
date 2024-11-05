@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import inspect
 import logging
+import os
+import sys
 import warnings
 from abc import ABC, abstractmethod
 from collections import Counter, deque
@@ -20,6 +22,9 @@ from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import CatalogProtocol, MemoryDataset, SharedMemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.task import Task
+
+# see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
+_MAX_WINDOWS_WORKERS = 61
 
 if TYPE_CHECKING:
     from collections.abc import Collection, Iterable
@@ -510,3 +515,27 @@ def run_node(
     )
     node = task.execute()
     return node
+
+
+def validate_max_workers(max_workers: int | None) -> int:
+    """
+    Validates and returns the number of workers. Sets to os.cpu_count() or 1 if max_workers is None,
+    and limits max_workers to 61 on Windows.
+
+    Args:
+        max_workers: Desired number of workers. If None, defaults to os.cpu_count() or 1.
+
+    Returns:
+        A valid number of workers to use.
+
+    Raises:
+        ValueError: If max_workers is set and is not positive.
+    """
+    if max_workers is None:
+        max_workers = os.cpu_count() or 1
+        if sys.platform == "win32":
+            max_workers = min(_MAX_WINDOWS_WORKERS, max_workers)
+    elif max_workers <= 0:
+        raise ValueError("max_workers should be positive")
+
+    return max_workers

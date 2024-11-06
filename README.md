@@ -115,17 +115,6 @@ If you're an academic, Kedro can also help you, for example, as a tool to solve 
 
 We appreciate our community and want to stay connected. For that, we offer a public Coffee Chat format where we share updates and cool stuff around Kedro once every two weeks and give you time to ask your questions live.
 
-### Outline
+Check out the upcoming demo topics and dates at the [Kedro Coffee Chat wiki page](https://github.com/kedro-org/kedro/wiki/Kedro-Coffee-Chat).
 
-- `:00-:20` Demo (Kedro team or guest will showcase something useful or cool)
-- `:20-:30` Q&A (Ask Us Anything!)
-
-_🔓 these sessions are public and we welcome anyone to join 🔓_
-
-### Rules
-
-- We record the demo part for further sharing with the community.
-- "There is no such thing as a silly question".
-- Every time a live demo fails, clap.
-
-Follow our Slack [announcement channel](https://kedro-org.slack.com/archives/C03RKAQ0MGQ) to check Kedro Coffee Chat announcements and access demo recordings.
+Follow our Slack [announcement channel](https://kedro-org.slack.com/archives/C03RKAQ0MGQ) to see Kedro Coffee Chat announcements and access demo recordings.

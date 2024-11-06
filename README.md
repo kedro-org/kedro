@@ -120,7 +120,7 @@ We appreciate our community and want to stay connected. For that, we offer a pub
 - `:00-:20` Demo (Kedro team or guest will showcase something useful or cool)
 - `:20-:30` Q&A (Ask Us Anything!)
 
-_🔒 these sessions are public and we welcome anyone to join 🔒_
+_🔓 these sessions are public and we welcome anyone to join 🔓_
 
 ### Rules
 

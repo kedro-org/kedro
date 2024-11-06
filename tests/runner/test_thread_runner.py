@@ -6,8 +6,15 @@ from typing import Any
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataset, DataCatalog, DatasetError, MemoryDataset
+from kedro.io import (
+    AbstractDataset,
+    DataCatalog,
+    DatasetError,
+    KedroDataCatalog,
+    MemoryDataset,
+)
 from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ThreadRunner
 from tests.runner.conftest import exception_fn, identity, return_none, sink, source
@@ -38,6 +45,31 @@ class TestValidThreadRunner:
         catalog.add_feed_dict({"A": 42})
         ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." not in caplog.text
+
+    @pytest.mark.parametrize("catalog_type", [DataCatalog, KedroDataCatalog])
+    def test_thread_run_with_patterns(self, catalog_type):
+        """Test warm-up is done and patterns are resolved before running pipeline.
+
+        Without the warm-up "Dataset 'dummy_1' has already been registered" error
+        would be raised for this test. We check that the dataset was registered at the
+        warm-up, and we successfully passed to loading it.
+        """
+        catalog_conf = {"{catch_all}": {"type": "MemoryDataset"}}
+
+        catalog = catalog_type.from_config(catalog_conf)
+
+        test_pipeline = pipeline(
+            [
+                node(identity, inputs="dummy_1", outputs="output_1", name="node_1"),
+                node(identity, inputs="dummy_2", outputs="output_2", name="node_2"),
+                node(identity, inputs="dummy_1", outputs="output_3", name="node_3"),
+            ]
+        )
+
+        with pytest.raises(
+            Exception, match="Data for MemoryDataset has not been saved yet"
+        ):
+            ThreadRunner().run(test_pipeline, catalog)
 
 
 class TestMaxWorkers:

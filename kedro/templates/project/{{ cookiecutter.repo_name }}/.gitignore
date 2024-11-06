@@ -24,9 +24,6 @@ data/**
 # ignore file based logs
 *.log
 
-# ignore packaged Kedro project
-dist/
-
 ##########################
 # Common files
 

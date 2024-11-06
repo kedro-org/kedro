@@ -217,7 +217,7 @@ class KedroCLI(CommandCollection):
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
         """
-        return [*load_entry_points("global"), cli, global_commands]
+        return [cli, *load_entry_points("global"), global_commands]
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:

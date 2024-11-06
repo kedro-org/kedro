@@ -31,6 +31,30 @@ from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 
+class _LazyDataset:
+    """A helper class to store AbstractDataset configuration and materialize dataset object."""
+
+    def __init__(
+        self,
+        name: str,
+        config: dict[str, Any],
+        load_version: str | None = None,
+        save_version: str | None = None,
+    ):
+        self.name = name
+        self.config = config
+        self.load_version = load_version
+        self.save_version = save_version
+
+    def __repr__(self) -> str:
+        return f"{self.config.get('type', 'UnknownType')}"
+
+    def materialize(self) -> AbstractDataset:
+        return AbstractDataset.from_config(
+            self.name, self.config, self.load_version, self.save_version
+        )
+
+
 class KedroDataCatalog(CatalogProtocol):
     def __init__(
         self,
@@ -73,6 +97,7 @@ class KedroDataCatalog(CatalogProtocol):
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
+        self._lazy_datasets: dict[str, _LazyDataset] = {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
 
@@ -81,8 +106,9 @@ class KedroDataCatalog(CatalogProtocol):
         for ds_name, ds_config in self._config_resolver.config.items():
             self._add_from_config(ds_name, ds_config)
 
-        if raw_data:
-            self.add_feed_dict(raw_data)
+        raw_data = raw_data or {}
+        for ds_name, data in raw_data.items():
+            self[ds_name] = data  # type: ignore[has-type]
 
     @property
     def datasets(self) -> dict[str, Any]:
@@ -101,36 +127,42 @@ class KedroDataCatalog(CatalogProtocol):
         return self._config_resolver
 
     def __repr__(self) -> str:
-        return repr(self._datasets)
+        return repr(self._lazy_datasets | self._datasets)
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern."""
         return (
             dataset_name in self._datasets
+            or dataset_name in self._lazy_datasets
             or self._config_resolver.match_pattern(dataset_name) is not None
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         """Compares two catalogs based on materialised datasets and datasets patterns."""
-        return (self._datasets, self._config_resolver.list_patterns()) == (
+        return (
+            self._datasets,
+            self._lazy_datasets,
+            self._config_resolver.list_patterns(),
+        ) == (
             other._datasets,
+            other._lazy_datasets,
             other.config_resolver.list_patterns(),
         )
 
     def keys(self) -> List[str]:  # noqa: UP006
         """List all dataset names registered in the catalog."""
-        return list(self.__iter__())
+        return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """List all datasets registered in the catalog."""
-        return [self._datasets[key] for key in self]
+        return [self.get(key) for key in self]
 
     def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
         """List all dataset names and datasets registered in the catalog."""
-        return [(key, self._datasets[key]) for key in self]
+        return [(key, self.get(key)) for key in self]
 
     def __iter__(self) -> Iterator[str]:
-        yield from self._datasets.keys()
+        yield from self.keys()
 
     def __getitem__(self, ds_name: str) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
@@ -187,6 +219,8 @@ class KedroDataCatalog(CatalogProtocol):
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
             self._datasets[key] = value
+        elif isinstance(value, _LazyDataset):
+            self._lazy_datasets[key] = value
         else:
             self._logger.info(f"Adding input data as a MemoryDataset - {key}")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
@@ -210,17 +244,21 @@ class KedroDataCatalog(CatalogProtocol):
         Returns:
             An instance of AbstractDataset.
         """
-        if key not in self._datasets:
+        if key not in self._datasets and key not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
                 self._add_from_config(key, ds_config)
+
+        lazy_dataset = self._lazy_datasets.pop(key, None)
+        if lazy_dataset:
+            self[key] = lazy_dataset.materialize()
 
         dataset = self._datasets.get(key, None)
 
         return dataset or default
 
     def _ipython_key_completions_(self) -> list[str]:
-        return list(self._datasets.keys())
+        return self.keys()
 
     @property
     def _logger(self) -> logging.Logger:
@@ -335,11 +373,26 @@ class KedroDataCatalog(CatalogProtocol):
                 "make sure that the key is preceded by an underscore."
             )
 
+        if "type" not in ds_config:
+            raise DatasetError(
+                f"An exception occurred when parsing config for dataset '{ds_name}':\n"
+                "'type' is missing from dataset catalog configuration."
+                "\nHint: If this catalog entry is intended for variable interpolation, "
+                "make sure that the top level key is preceded by an underscore."
+            )
+
     def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
-        # TODO: Add lazy loading feature to store the configuration but not to init actual dataset
-        # TODO: Initialise actual dataset when load or save
+        """Create a LazyDataset instance and add it to the catalog.
+
+        Args:
+            ds_name: A dataset name.
+            ds_config: A dataset configuration.
+
+        Raises:
+            DatasetError: When a dataset configuration provided is not valid.
+        """
         self._validate_dataset_config(ds_name, ds_config)
-        ds = AbstractDataset.from_config(
+        ds = _LazyDataset(
             ds_name,
             ds_config,
             self._load_versions.get(ds_name),
@@ -398,7 +451,10 @@ class KedroDataCatalog(CatalogProtocol):
         return self.get_dataset(dataset_name, version, suggest)
 
     def add(
-        self, ds_name: str, dataset: AbstractDataset, replace: bool = False
+        self,
+        ds_name: str,
+        dataset: AbstractDataset | _LazyDataset,
+        replace: bool = False,
     ) -> None:
         # TODO: remove when removing old catalog
         """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""

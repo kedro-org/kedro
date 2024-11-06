@@ -128,4 +128,4 @@ _🔒 these sessions are public and we welcome anyone to join 🔒_
 - "There is no such thing as a silly question".
 - Every time a live demo fails, clap.
 
-Follow our [announcement channel](https://kedro-org.slack.com/archives/C03RKAQ0MGQ) in Slack to check Kedro Coffee Chat announcements and access demo recordings.
+Follow our Slack [announcement channel](https://kedro-org.slack.com/archives/C03RKAQ0MGQ) to check Kedro Coffee Chat announcements and access demo recordings.

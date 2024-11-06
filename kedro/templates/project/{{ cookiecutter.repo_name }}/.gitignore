@@ -11,18 +11,21 @@ conf/**/*credentials*
 
 # ignore everything in the following folders
 data/**
-logs/**
 
 # except their sub-folders
 !data/**/
-!logs/**/
 
 # also keep all .gitkeep files
 !.gitkeep
 
-# also keep the example dataset
-!data/01_raw/iris.csv
+# ignore kedro-viz metadata
+.viz
 
+# ignore file based logs
+*.log
+
+# ignore packaged Kedro project
+dist/
 
 ##########################
 # Common files

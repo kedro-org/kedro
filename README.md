@@ -109,3 +109,12 @@ If you're an academic, Kedro can also help you, for example, as a tool to solve 
 ## Python version support policy
 * The core [Kedro Framework](https://github.com/kedro-org/kedro) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from Kedro. This is not considered a breaking change.
 * The [Kedro Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package follows the [NEP 29](https://numpy.org/neps/nep-0029-deprecation_policy.html) Python version support policy. This means that `kedro-datasets` generally drops Python version support before `kedro`. This is because `kedro-datasets` has a lot of dependencies that follow NEP 29 and the more conservative version support approach of the Kedro Framework makes it hard to manage those dependencies properly.
+
+
+## ☕️ Kedro Coffee Chat 🔶
+
+We appreciate our community and want to stay connected. For that, we offer a public Coffee Chat format where we share updates and cool stuff around Kedro once every two weeks and give you time to ask your questions live.
+
+Check out the upcoming demo topics and dates at the [Kedro Coffee Chat wiki page](https://github.com/kedro-org/kedro/wiki/Kedro-Coffee-Chat).
+
+Follow our Slack [announcement channel](https://kedro-org.slack.com/archives/C03RKAQ0MGQ) to see Kedro Coffee Chat announcements and access demo recordings.

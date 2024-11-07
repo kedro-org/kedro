@@ -15,6 +15,6 @@ jobs:
         with:
           token: ${{ github.token }}
           responseRequiredLabel: "support: needs more info"
-          daysUntilClose: 14
+          daysUntilClose: 28
           closeComment: >-
             This issue has been closed due to lack of information. Feel free to re-open this issue if you're facing a similar problem. Please provide as much information as possible so we can help resolve your issue.

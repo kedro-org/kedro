@@ -151,8 +151,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     _config: dict[str, Any] = None
 
     def __post_init__(self, *args, **kwargs):
-        # print("args:", args)
-        # print("kwargs", kwargs)
+        # TODO: decide what to do with args
         self._config = kwargs
 
     @classmethod
@@ -208,9 +207,10 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return dataset
 
     def to_config(self) -> dict[str, Any]:
-        if "type" not in self._config:
-            self._config["type"] = f"{type(self).__module__}.{type(self).__name__}"
-        return self._config
+        return_config = {"type": f"{type(self).__module__}.{type(self).__name__}"}
+        return_config.update(self._config)
+
+        return return_config
 
     @property
     def _logger(self) -> logging.Logger:

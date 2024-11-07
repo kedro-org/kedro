@@ -261,6 +261,29 @@ class CatalogConfigResolver:
 
         return resolved_configs
 
+    @classmethod
+    def unresolve_config_credentials(
+        cls, ds_name: str, ds_config: dict[str, dict[str, Any]] | None
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+        ds_config = ds_config or {}
+        credentials = {}
+        credentials_ref = f"{ds_name}_{CREDENTIALS_KEY}"
+
+        def unresolve(config: Any):
+            if credentials:
+                return
+            for key, val in config.items():
+                if key == CREDENTIALS_KEY:
+                    credentials[credentials_ref] = config[key]
+                    config[key] = credentials_ref
+                    return
+                if isinstance(val, dict):
+                    unresolve(val)
+
+        unresolve(ds_config)
+
+        return ds_config, credentials
+
     def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
         matched_pattern = self.match_pattern(ds_name)

@@ -208,6 +208,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return dataset
 
     def to_config(self) -> dict[str, Any]:
+        if "type" not in self._config:
+            self._config["type"] = f"{type(self).__module__}.{type(self).__name__}"
         return self._config
 
     @property

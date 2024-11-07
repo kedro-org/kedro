@@ -273,11 +273,16 @@ class KedroDataCatalog(CatalogProtocol):
         credentials: dict[str, dict[str, Any]] = {}
 
         for ds_name, ds in self._datasets.items():
-            ds_config = ds.to_config()
-            # print(ds)
-            # print(ds_config)
-            # print()
-            catalog[ds_name] = ds_config
+            cur_config, cur_credentials = (
+                self._config_resolver.unresolve_config_credentials(
+                    ds_name, ds.to_config()
+                )
+            )
+            catalog[ds_name] = cur_config
+            credentials.update(cur_credentials)
+
+        # print(catalog)
+        # print(credentials)
 
         return catalog, credentials, self._load_versions, self._save_version
 

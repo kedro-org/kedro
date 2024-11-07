@@ -267,24 +267,35 @@ class KedroDataCatalog(CatalogProtocol):
     def to_config(
         self,
     ) -> tuple[
-        dict[str, dict[str, Any]], dict[str, dict[str, Any]], dict[str, str], str
+        dict[str, dict[str, Any]],
+        dict[str, dict[str, Any]],
+        dict[str, dict[str, str] | None],
+        dict[str, str | None],
     ]:
+        # TODO: process lazy loaded datasets
         catalog: dict[str, dict[str, Any]] = {}
         credentials: dict[str, dict[str, Any]] = {}
+        load_versions: dict[str : dict[str, str] | None] = {}
+        save_version: dict[str, str | None] = {}
 
         for ds_name, ds in self._datasets.items():
-            cur_config, cur_credentials = (
+            resolved_config, cur_load_versions, cur_save_version = ds.to_config()
+            unresolved_config, unresolved_credentials = (
                 self._config_resolver.unresolve_config_credentials(
-                    ds_name, ds.to_config()
+                    ds_name, resolved_config
                 )
             )
-            catalog[ds_name] = cur_config
-            credentials.update(cur_credentials)
+            catalog[ds_name] = unresolved_config
+            credentials.update(unresolved_credentials)
+            load_versions[ds_name] = cur_load_versions
+            save_version[ds_name] = cur_save_version
 
         # print(catalog)
         # print(credentials)
+        # print(load_versions)
+        # print(save_version)
 
-        return catalog, credentials, self._load_versions, self._save_version
+        return catalog, credentials, load_versions, save_version
 
     @classmethod
     def from_config(

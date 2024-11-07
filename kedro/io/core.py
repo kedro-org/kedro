@@ -57,6 +57,7 @@ CLOUD_PROTOCOLS = (
     "s3a",
     "s3n",
 )
+TYPE_KEY = "type"
 
 
 class DatasetError(Exception):
@@ -206,11 +207,22 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from err
         return dataset
 
-    def to_config(self) -> dict[str, Any]:
-        return_config = {"type": f"{type(self).__module__}.{type(self).__name__}"}
+    def to_config(self) -> tuple[dict[str, Any], dict[str, str] | None, str | None]:
+        # TODO: pop data key for MemoryDataset
+        # TODO: check other datasets
+        return_config = {
+            f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
+        }
+        load_versions: dict[str, str] | None = None
+        save_version: str | None = None
+
         return_config.update(self._config)
 
-        return return_config
+        if VERSION_KEY in return_config:
+            version = return_config.pop(VERSION_KEY)
+            load_versions, save_version = version.load, version.save
+
+        return return_config, load_versions, save_version
 
     @property
     def _logger(self) -> logging.Logger:
@@ -506,14 +518,14 @@ def parse_dataset_definition(
     config = copy.deepcopy(config)
 
     # TODO: remove when removing old catalog as moved to KedroDataCatalog
-    if "type" not in config:
+    if TYPE_KEY not in config:
         raise DatasetError(
             "'type' is missing from dataset catalog configuration."
             "\nHint: If this catalog entry is intended for variable interpolation, "
             "make sure that the top level key is preceded by an underscore."
         )
 
-    dataset_type = config.pop("type")
+    dataset_type = config.pop(TYPE_KEY)
     class_obj = None
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):

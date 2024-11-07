@@ -148,6 +148,12 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     need to change the `_EPHEMERAL` attribute to 'True'.
     """
     _EPHEMERAL = False
+    _config: dict[str, Any] = None
+
+    def __post_init__(self, *args, **kwargs):
+        # print("args:", args)
+        # print("kwargs", kwargs)
+        self._config = kwargs
 
     @classmethod
     def from_config(
@@ -200,6 +206,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 f"of type '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
         return dataset
+
+    def to_config(self) -> dict[str, Any]:
+        return self._config
 
     @property
     def _logger(self) -> logging.Logger:
@@ -286,6 +295,17 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         If `_load` or `_save` are defined, alias them as a prerequisite.
 
         """
+
+        def init_decorator(previous_init):
+            def new_init(self, *args, **kwargs):
+                previous_init(self, *args, **kwargs)
+                if type(self) is cls:
+                    self.__post_init__(*args, **kwargs)
+
+            return new_init
+
+        cls.__init__ = init_decorator(cls.__init__)
+
         super().__init_subclass__(**kwargs)
 
         if hasattr(cls, "_load") and not cls._load.__qualname__.startswith("Abstract"):

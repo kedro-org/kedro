@@ -264,6 +264,23 @@ class KedroDataCatalog(CatalogProtocol):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
+    def to_config(
+        self,
+    ) -> tuple[
+        dict[str, dict[str, Any]], dict[str, dict[str, Any]], dict[str, str], str
+    ]:
+        catalog: dict[str, dict[str, Any]] = {}
+        credentials: dict[str, dict[str, Any]] = {}
+
+        for ds_name, ds in self._datasets.items():
+            ds_config = ds.to_config()
+            # print(ds)
+            # print(ds_config)
+            # print()
+            catalog[ds_name] = ds_config
+
+        return catalog, credentials, self._load_versions, self._save_version
+
     @classmethod
     def from_config(
         cls,

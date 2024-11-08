@@ -265,7 +265,7 @@ class CatalogConfigResolver:
     def unresolve_config_credentials(
         cls, ds_name: str, ds_config: dict[str, dict[str, Any]] | None
     ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
-        ds_config = copy.deepcopy(ds_config) or {}
+        ds_config_copy = copy.deepcopy(ds_config) or {}
         credentials = {}
         credentials_ref = f"{ds_name}_{CREDENTIALS_KEY}"
 
@@ -282,9 +282,9 @@ class CatalogConfigResolver:
                 if isinstance(val, dict):
                     unresolve(val)
 
-        unresolve(ds_config)
+        unresolve(ds_config_copy)
 
-        return ds_config, credentials
+        return ds_config_copy, credentials
 
     def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""

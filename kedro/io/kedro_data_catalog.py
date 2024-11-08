@@ -299,8 +299,11 @@ class KedroDataCatalog(CatalogProtocol):
             save_version[ds_name] = cur_save_version
 
         # print(catalog)
+        # print("-")
         # print(credentials)
+        # print("-")
         # print(load_version)
+        # print("-")
         # print(save_version)
 
         return catalog, credentials, load_version, save_version

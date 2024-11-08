@@ -272,11 +272,19 @@ class KedroDataCatalog(CatalogProtocol):
         dict[str, dict[str, str] | None],
         dict[str, str | None],
     ]:
-        # TODO: process lazy loaded datasets
         catalog: dict[str, dict[str, Any]] = {}
         credentials: dict[str, dict[str, Any]] = {}
-        load_versions: dict[str : dict[str, str] | None] = {}
+        load_version: dict[str, dict[str, str] | None] = {}
         save_version: dict[str, str | None] = {}
+
+        for ds_name, ds in self._lazy_datasets.items():
+            unresolved_config, unresolved_credentials = (
+                self._config_resolver.unresolve_config_credentials(ds_name, ds.config)
+            )
+            catalog[ds_name] = unresolved_config
+            credentials.update(unresolved_credentials)
+            load_version[ds_name] = ds.load_version
+            save_version[ds_name] = ds.save_version
 
         for ds_name, ds in self._datasets.items():
             resolved_config, cur_load_versions, cur_save_version = ds.to_config()
@@ -287,15 +295,15 @@ class KedroDataCatalog(CatalogProtocol):
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
-            load_versions[ds_name] = cur_load_versions
+            load_version[ds_name] = cur_load_versions
             save_version[ds_name] = cur_save_version
 
         # print(catalog)
         # print(credentials)
-        # print(load_versions)
+        # print(load_version)
         # print(save_version)
 
-        return catalog, credentials, load_versions, save_version
+        return catalog, credentials, load_version, save_version
 
     @classmethod
     def from_config(

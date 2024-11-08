@@ -1,7 +1,47 @@
 # Kedro dataset factories
 You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`.
 
-The syntax allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
+The dataset factories introduce a syntax that allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
+
+For example:
+```yaml
+factory_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/factory_data.csv
+```
+
+With dataset factory, it can be re-written as:
+```yaml
+{placeholder}_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/{placeholder}.csv
+```
+
+In runtime, the pattern will be matched against the nodes.
+```
+            ...
+            node(
+                func=process_factory,
+                inputs="factory_data",
+                outputs=None,
+            ),
+            ...
+```
+It is similar to **regular expression** and reverse `f-string`. In this case, the name of dataset `factory_data` matches the pattern `{placeholder}_data` with the `_data` suffix, so it resolves `placeholder` to `factory`.
+
+Similarly, if you update the name of the inputs:
+```diff
+-                inputs="factory_data",
++                inputs="transaction_data",
+```
+
+It will be resolved as:
+```yaml
+transaction_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/transaction_data.csv
+```
+
 
 ```{warning}
 Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.

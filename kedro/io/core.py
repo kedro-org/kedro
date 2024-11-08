@@ -208,6 +208,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return dataset
 
     def to_config(self) -> tuple[dict[str, Any], dict[str, str] | None, str | None]:
+        # TODO: pop metadata?
+        # TODO: test with LambdaDataset/SharedMemoryDataset - it won't work
+        # TODO: parse CachedDataset config
         # TODO: check other datasets
         return_config = {
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"

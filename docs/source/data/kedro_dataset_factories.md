@@ -19,20 +19,19 @@ With dataset factory, it can be re-written as:
 
 In runtime, the pattern will be matched against the nodes.
 ```
-            ...
-            node(
-                func=process_factory,
-                inputs="factory_data",
-                outputs=None,
-            ),
-            ...
+node(
+    func=process_factory,
+    inputs="factory_data",
+    outputs=None,
+),
+...
 ```
 It is similar to **regular expression** and reverse `f-string`. In this case, the name of dataset `factory_data` matches the pattern `{placeholder}_data` with the `_data` suffix, so it resolves `placeholder` to `factory`.
 
 Similarly, if you update the name of the inputs:
 ```diff
--                inputs="factory_data",
-+                inputs="transaction_data",
+-   inputs="factory_data",
++   inputs="transaction_data",
 ```
 
 It will be resolved as:

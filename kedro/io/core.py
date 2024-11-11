@@ -214,7 +214,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         # TODO: test with LambdaDataset/SharedMemoryDataset - it won't work
         # TODO: parse CachedDataset config
         # TODO: check other datasets
-        # print("to_config", signature(self.__init__))
         return_config = {
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
         }

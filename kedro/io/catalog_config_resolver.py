@@ -275,7 +275,7 @@ class CatalogConfigResolver:
             if credentials:
                 return
             for key, val in config.items():
-                if key == CREDENTIALS_KEY:
+                if key == CREDENTIALS_KEY and config[key]:
                     credentials[credentials_ref] = config[key]
                     config[key] = credentials_ref
                     return

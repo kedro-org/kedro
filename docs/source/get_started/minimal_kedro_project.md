@@ -60,31 +60,30 @@ The `pipeline_registry.py` file is essential for managing the pipelines within y
 - Autodiscovery of Pipelines: Since Kedro 0.18.3, you can use the [`find_pipeline`](../nodes_and_pipelines/pipeline_registry.md#pipeline-autodiscovery) function to automatically discover pipelines defined in your project without manually updating the registry each time you create a new pipeline.
 
 ## Creating a Minimal Kedro Project Step-by-Step
-The following section will guide you to create a minimal Kedro project, where you can successfully run `kedro run` with just 3 files.
-
-To create a minimal Kedro project, follow these steps:
+This guide will walk you through the process of creating a minimal Kedro project, allowing you to successfully run `kedro run` with just three files.
 
 ### Step 1: Install Kedro
-First, ensure you have Python installed on your machine, then install Kedro using pip:
+
+First, ensure that Python is installed on your machine. Then, install Kedro using pip:
 
 ```bash
 pip install kedro
 ```
 
 ### Step 2: Create a New Kedro Project
-Create a new working directory:
+Create a new directory for your project:
 ```bash
 mkdir minikedro
 ```
 
-Change into your newly created project directory:
+Navigate into your newly created project directory:
 
 ```bash
 cd minikiedro
 ```
 
 ### Step 3: Create `pyproject.toml`
-Create a new file called `pyproject.toml` at the project directory:
+Create a new file named `pyproject.toml` in the project directory with the following content:
 
 ```toml
 [tool.kedro]
@@ -106,13 +105,13 @@ Note we define `source_dir = "."`, usually we keep our source code inside a dire
 ```
 
 ### Step 4: Create `settings.py` and `pipeline_registry.py`
-First, create a folder called `minikedro`, the name of the folder should be the same as the `package_name` defined in `pyproject.toml`.
+Next, create a folder named minikedro, which should match the package_name defined in pyproject.toml:
 
 ```bash
 mkdir minikedro
 ```
+Inside this folder, create two empty files: settings.py and pipeline_registry.py:
 
-Then, create two empty files `settings.py` and `pipeline_registry.py` inside the folder.
 ```bash
 touch minikedro/settings.py minikedro/pipeline_registry.py
 ```
@@ -126,18 +125,18 @@ Now your working directory should look like this:
 └── pyproject.toml
 ```
 
-Run this in ther terminal:
+Try running the following command in the terminal:
 ```bash
 kedro run
 ```
 
-You should see an error because we have an empty `pipeline_registry.py`.
+You will encounter an error indicating that pipeline_registry.py is empty:
 ```bash
 AttributeError: module 'minikedro.pipeline_registry' has no attribute 'register_pipelines'
 ```
 
 ### Step 5: Create a Simple Pipeline
-Now, copy the following code into `pipeline_registry.py` so that we have some pipeline to run.
+To resolve this issue, add the following code to pipeline_registry.py, which defines a simple pipeline to run:
 
 ```python
 from kedro.pipeline import pipeline, node
@@ -149,13 +148,13 @@ def register_pipelines():
     return {"__default__": pipeline([node(foo, None, "dummy_output")])}
 ```
 
-If you try to run the pipeline again with `kedro run`, you will see a new error:
+If you attempt to run the pipeline again with kedro run, you will see another error:
 ```bash
 MissingConfigException: Given configuration path either does not exist or is not a valid directory: /workspace/kedro/minikedro/conf/base
 ```
 
 ### Step 6: Define the Project Settings
-The error happened by default the Kedro Framework expects a configuration folder called `conf` and two separate environment named `base` and `local`.
+This error occurs because Kedro expects a configuration folder named `conf`, along with two environments called `base` and `local`. To fix this, add the following lines to `settings.py`:
 
 To fix this, add these two lines into `settings.py`:
 ```python
@@ -163,15 +162,17 @@ CONF_SOURCE = "."
 CONFIG_LOADER_ARGS = {"base_env": ".", "default_run_env": "."}
 ```
 
-This override the defaults so that Kedro knows that it should not look for configurations in `conf`. This is explained in details in [How to change the setting for a configuration source folder](../configuration/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project]((../configuration/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
+These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected conf folder. For more details, refer to [How to change the setting for a configuration source folder](../configuration/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project]((../configuration/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
 
-Run the pipeline again:
+Now, run the pipeline again:
 ```bash
 kedro run
 ```
 
-You should see that the pipeline run is successful!
+
+
+You should see that the pipeline runs successfully!
 
 ## Conclusion
 
-Kedro provides a structured approach to developing data pipelines with clear separation of concerns through its components and directory structure. By following the steps outlined above, you can set up a minimal Kedro project that serves as a foundation for more complex data processing workflows. This guide explains the essential concepts of Kedro Project. If you already have a Python project and want to embeded a Kedro project within it, these concepts can help you to adjust easily.
+Kedro provides a structured approach to developing data pipelines with clear separation of concerns through its components and directory structure. By following the steps outlined above, you can set up a minimal Kedro project that serves as a foundation for more complex data processing workflows. This guide explains essential concepts of Kedro projects. If you already have a Python project and want to integrate Kedro into it, these concepts will help you adjust and fit your own needs.

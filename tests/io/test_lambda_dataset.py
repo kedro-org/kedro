@@ -1,5 +1,6 @@
 import pytest
 
+from kedro import KedroDeprecationWarning
 from kedro.io import DatasetError, LambdaDataset
 
 
@@ -79,6 +80,14 @@ def test_dataset_describe():
 
 def test_ephemeral_attribute(mocked_dataset):
     assert mocked_dataset._EPHEMERAL is False
+
+
+def test_lambda_dataset_deprecated():
+    with pytest.warns(
+        KedroDeprecationWarning,
+        match=r"\`LambdaDataset\` has been deprecated",
+    ):
+        _ = LambdaDataset(None, None)
 
 
 class TestLambdaDatasetLoad:

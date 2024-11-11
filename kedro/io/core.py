@@ -212,7 +212,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def to_config(self) -> tuple[dict[str, Any], dict[str, str] | None, str | None]:
         # TODO: pop metadata?
         # TODO: test with LambdaDataset/SharedMemoryDataset - it won't work
-        # TODO: parse CachedDataset config
         # TODO: check other datasets
         return_config = {
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
@@ -222,9 +221,24 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
         return_config.update(self._init_args)
 
+        if type(self).__name__ == "CachedDataset":
+            cached_ds = return_config.pop("dataset")
+            if isinstance(cached_ds, dict):
+                cached_ds_return_config = cached_ds
+            else:
+                cached_ds_return_config, load_versions, save_version = (
+                    cached_ds.to_config()
+                )
+            if "versioned" in cached_ds_return_config:
+                return_config["versioned"] = cached_ds_return_config.pop("versioned")
+            return_config["dataset"] = cached_ds_return_config
+
         version = return_config.pop(VERSION_KEY, None)
         if version:
-            load_versions, save_version = version.load, version.save
+            load_versions, save_version = (
+                load_versions or version.load,
+                save_version or version.save,
+            )
 
         # Pop data from configuration
         if type(self).__name__ == "MemoryDataset":

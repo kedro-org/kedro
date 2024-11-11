@@ -82,7 +82,7 @@ def test_ephemeral_attribute(mocked_dataset):
     assert mocked_dataset._EPHEMERAL is False
 
 
-def test_lambda_dataset_deprecated():
+def test_lambda_dataset_deprecation():
     with pytest.warns(
         KedroDeprecationWarning,
         match=r"\`LambdaDataset\` has been deprecated",

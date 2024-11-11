@@ -15,6 +15,7 @@ from collections import namedtuple
 from datetime import datetime, timezone
 from functools import partial, wraps
 from glob import iglob
+from inspect import getcallargs
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
 from typing import (
@@ -149,11 +150,12 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     need to change the `_EPHEMERAL` attribute to 'True'.
     """
     _EPHEMERAL = False
-    _config: dict[str, Any] = None
+    _init_args: dict[str, Any] = None
 
-    def __post_init__(self, *args, **kwargs):
-        # TODO: decide what to do with args
-        self._config = kwargs
+    def __post_init__(self, call_args: dict[str, Any]):
+        # print(call_args)
+        self._init_args = call_args
+        self._init_args.pop("self", None)
 
     @classmethod
     def from_config(
@@ -212,16 +214,17 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         # TODO: test with LambdaDataset/SharedMemoryDataset - it won't work
         # TODO: parse CachedDataset config
         # TODO: check other datasets
+        # print("to_config", signature(self.__init__))
         return_config = {
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
         }
         load_versions: dict[str, str] | None = None
         save_version: str | None = None
 
-        return_config.update(self._config)
+        return_config.update(self._init_args)
 
-        if VERSION_KEY in return_config:
-            version = return_config.pop(VERSION_KEY)
+        version = return_config.pop(VERSION_KEY, None)
+        if version:
             load_versions, save_version = version.load, version.save
 
         # Pop data from configuration
@@ -316,11 +319,14 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
         """
 
+        init_func: Callable = cls.__init__
+
         def init_decorator(previous_init):
             def new_init(self, *args, **kwargs):
                 previous_init(self, *args, **kwargs)
                 if type(self) is cls:
-                    self.__post_init__(*args, **kwargs)
+                    call_args = getcallargs(init_func, self, *args, **kwargs)
+                    self.__post_init__(call_args)
 
             return new_init
 

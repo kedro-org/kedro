@@ -269,13 +269,21 @@ class KedroDataCatalog(CatalogProtocol):
     ) -> tuple[
         dict[str, dict[str, Any]],
         dict[str, dict[str, Any]],
-        dict[str, dict[str, str] | None],
+        dict[str, str | None],
         dict[str, str | None],
     ]:
         catalog: dict[str, dict[str, Any]] = {}
         credentials: dict[str, dict[str, Any]] = {}
-        load_version: dict[str, dict[str, str] | None] = {}
+        load_version: dict[str, str | None] = {}
         save_version: dict[str, str | None] = {}
+
+        # print()
+        # print("Lazy:")
+        # print(self._lazy_datasets.keys())
+        #
+        # print("Normal:")
+        # print(self._datasets.keys())
+        # print()
 
         for ds_name, ds in self._lazy_datasets.items():
             unresolved_config, unresolved_credentials = (

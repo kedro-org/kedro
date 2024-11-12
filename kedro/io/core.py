@@ -153,7 +153,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     _init_args: dict[str, Any] = None
 
     def __post_init__(self, call_args: dict[str, Any]):
-        # print(call_args)
         self._init_args = call_args
         self._init_args.pop("self", None)
 
@@ -229,11 +228,14 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 cached_ds_return_config, load_versions, save_version = (
                     cached_ds.to_config()
                 )
-            if "versioned" in cached_ds_return_config:
-                return_config["versioned"] = cached_ds_return_config.pop("versioned")
+            if VERSIONED_FLAG_KEY in cached_ds_return_config:
+                return_config[VERSIONED_FLAG_KEY] = cached_ds_return_config.pop(
+                    VERSIONED_FLAG_KEY
+                )
             return_config["dataset"] = cached_ds_return_config
 
         version = return_config.pop(VERSION_KEY, None)
+
         if version:
             load_versions, save_version = (
                 load_versions or version.load,
@@ -542,7 +544,6 @@ def parse_dataset_definition(
     Returns:
         2-tuple: (Dataset class object, configuration dictionary)
     """
-    save_version = save_version or generate_timestamp()
     config = copy.deepcopy(config)
 
     # TODO: remove when removing old catalog as moved to KedroDataCatalog
@@ -601,10 +602,15 @@ def parse_dataset_definition(
 
     # dataset is either versioned explicitly by the user or versioned is set to true by default
     # on the dataset
+    # Included load_version into condition
     if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
-        class_obj, VERSIONED_FLAG_KEY, False
+        class_obj, VERSIONED_FLAG_KEY, False or load_version
     ):
+        # print()
+        # print("Adding flag")
         config[VERSION_KEY] = Version(load_version, save_version)
+        # print(config)
+        # print()
 
     return class_obj, config
 

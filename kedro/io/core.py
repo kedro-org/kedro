@@ -210,9 +210,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return dataset
 
     def to_config(self) -> tuple[dict[str, Any], dict[str, str] | None, str | None]:
-        # TODO: pop metadata?
-        # TODO: test with LambdaDataset/SharedMemoryDataset - it won't work
-        # TODO: check IncrementalDataset
         # TODO: check dataset factories
         # TODO: check transcoding
         # TODO: test loading back
@@ -246,6 +243,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         # Pop data from configuration
         if type(self).__name__ == "MemoryDataset":
             return_config.pop("data", None)
+
+        # Pop metadata from configuration
+        return_config.pop("metadata", None)
 
         return return_config, load_versions, save_version
 

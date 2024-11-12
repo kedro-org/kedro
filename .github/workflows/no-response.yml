@@ -1,0 +1,20 @@
+name: No Response
+
+on:
+  issue_comment:
+    types: [created]
+  schedule:
+    # Run every day at 9am (UTC time)
+    - cron: '0 9 * * *'
+
+jobs:
+  noResponse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: lee-dohm/no-response@v0.5.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          responseRequiredLabel: "support: needs more info"
+          daysUntilClose: 28
+          closeComment: >-
+            This issue has been closed due to lack of information. Feel free to re-open this issue if you're facing a similar problem. Please provide as much information as possible so we can help resolve your issue.

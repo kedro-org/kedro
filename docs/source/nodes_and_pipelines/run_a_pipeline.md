@@ -238,6 +238,10 @@ Out[11]: {'v': 0.666666666666667}
 
 We can also use IO to save outputs to a file. In this example, we define a custom `LambdaDataset` that would serialise the output to a file locally:
 
+```{warning}
+`LambdaDataset` has been deprecated and will be removed in Kedro `0.20.0`.
+```
+
 <details>
 <summary><b>Click to expand</b></summary>
 

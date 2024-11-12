@@ -10,7 +10,7 @@ dependencies = [
     "ipython>=8.10",
     "jupyterlab>=3.0",
     "notebook",
-    "kedro~={{ cookiecutter.kedro_version}}",
+    "kedro~={{ cookiecutter.kedro_version }}",
     "kedro-datasets[pandas-csvdataset]"
 ]
 
@@ -55,7 +55,7 @@ source_dir = "src"
 [tool.pytest.ini_options]
 addopts = """
 --cov-report term-missing \
---cov src/"{{ cookiecutter.python_package }}" -ra"""
+--cov src/{{ cookiecutter.python_package }} -ra"""
 
 [tool.coverage.report]
 fail_under = 0

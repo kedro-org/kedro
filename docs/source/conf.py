@@ -223,7 +223,7 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # We've decided to rely on RTD's default robots.txt, so we no longer need to specify a custom one,
 # see discussion at https://github.com/kedro-org/kedro/issues/3741
 # html_extra_path = [str(here / "robots.txt")]
-html_extra_path = [str(here / "robots.txt")]
+html_extra_path = [str(here / "sitemap.xml")]
 
 
 # Removes, from all docs, the copyright footer.

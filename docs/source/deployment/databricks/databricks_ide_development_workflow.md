@@ -39,12 +39,60 @@ The main steps in this tutorial are as follows:
 ## Set up your project
 
 ### Note your Databricks username and host
+Note your Databricks **username** and **host** as you will need it for the remainder of this guide.
 
+Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
+
+![Find Databricks host and username](../../meta/images/find_databricks_host_and_username.png)
+
+```{note}
+Your databricks host must include the protocol (`https://`).
+```
 ### Install Kedro and Databricks CLI in a new virtual environment
+In your local development environment, create a virtual environment for this tutorial using Conda:
+
+```bash
+conda create --name iris-databricks python=3.10
+```
+
+Once it is created, activate it:
+
+```bash
+conda activate iris-databricks
+```
+
+With your Conda environment activated, install Kedro and dbx:
+
+```bash
+pip install kedro dbx --upgrade
+```
 
 ### Authenticate the Databricks CLI
+**Now, you must authenticate the Databricks CLI with your Databricks instance.**
+
+[Refer to the Databricks documentation](https://docs.databricks.com/en/dev-tools/cli/authentication.html) for a complete guide on how to authenticate your CLI. The key steps are:
+
+1. Create a personal access token for your user on your Databricks instance.
+2. Run `databricks configure --token`.
+3. Enter your token and Databricks host when prompted.
+4. Run `databricks fs ls dbfs:/` at the command line to verify your authentication.
+
+```{note}
+dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks Repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
+```
 
 ### Create a new Kedro Project
+Create a Kedro project with the `databricks-iris` starter using the following command in your local environment:
+
+```bash
+kedro new --starter=databricks-iris
+```
+
+Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
+
+ ```{note}
+If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
+ ```
 
 ## Create the Databricks Asset Bundles using `kedro-databricks`
 

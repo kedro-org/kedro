@@ -169,8 +169,6 @@ Now, run the pipeline again:
 kedro run
 ```
 
-
-
 You should see that the pipeline runs successfully!
 
 ## Conclusion

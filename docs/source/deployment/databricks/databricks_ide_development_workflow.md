@@ -48,7 +48,7 @@ The main steps in this tutorial are as follows:
 
 ## Create the Databricks Asset Bundles using `kedro-databricks`
 
-`kedro-databricks` is a wrapper around the `databricks` CLI. It's the simplest way to get started without getting stuck with configuration. To learn more about Databricks Asset Bundles and customization, read [What are Databricks Asset Bundles](https://docs.databricks.com/en/dev-tools/bundles/index.html).
+`kedro-databricks` is a wrapper around the `databricks` CLI. It's the simplest way to get started without getting stuck with configuration. To learn more about Databricks Asset Bundles and customisation, read [What are Databricks Asset Bundles](https://docs.databricks.com/en/dev-tools/bundles/index.html).
 
 1. Install `kedro-databricks`:
 
@@ -56,7 +56,7 @@ The main steps in this tutorial are as follows:
 pip install kedro-databricks
 ```
 
-2. Initialize the Databricks configuration:
+2. Initialise the Databricks configuration:
 
 ```bash
 kedro databricks init

@@ -534,5 +534,3 @@ user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99
 
 myst_heading_anchors = 5
 myst_enable_extensions = ["colon_fence"]
-
-#check RTD build

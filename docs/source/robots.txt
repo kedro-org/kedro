@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /
+
+Allow: /en/stable/
+Allow: /projects/kedro-viz/en/stable/
+Allow: /projects/kedro-datasets/en/latest/

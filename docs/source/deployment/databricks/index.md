@@ -12,8 +12,7 @@ To avoid the overhead of setting up and syncing a local development environment 
 
 **I want a hybrid workflow model combining local IDE with Databricks**
 
-
-The workflow documented in ["Use an IDE, dbx and Databricks Repos to develop a Kedro project"](./databricks_ide_development_workflow.md) is for those that prefer to work in a local IDE.
+The workflow documented in ["Use Databricks Asset Bundles to deploy a Kedro project"](./databricks_ide_development_workflow.md) is for those that prefer to work in a local IDE.
 
 If you're in the early stages of learning Kedro, or your project requires constant testing and adjustments, choose this workflow. You can use your IDE's capabilities for faster, error-free development, while testing on Databricks. Later you can make the transition into a production deployment with this approach, although you may prefer to switch to use [job-based deployment](./databricks_deployment_workflow.md) and fully optimise your workflow for production.
 

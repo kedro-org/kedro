@@ -14,7 +14,7 @@
 ## Documentation changes
 * Updated CLI autocompletion docs with new Click syntax.
 * Standardised `.parquet` suffix in docs and tests.
-* Added a new minial Kedro project creation guide.
+* Added a new minimal Kedro project creation guide.
 
 ## Community contributions
 * [Hyewon Choi](https://github.com/hyew0nChoi)

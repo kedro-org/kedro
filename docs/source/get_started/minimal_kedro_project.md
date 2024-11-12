@@ -1,9 +1,9 @@
 # Create a Minimal Kedro Project
-The goal of this documentation is to explain what makes a minimal Kedro project. This guide will start from a blank project and introduce the necessary components. In reality, you are more likely to use a [project template](./new_project.md), or start from an existing Python project. You will able to able to adapt the concept and accomdate your specific need.
+This documentation aims to explain the essential components of a minimal Kedro project. The guide begins with a blank project and gradually introduces the necessary elements. While most users typically start with a [project template]((./new_project.md)) or adapt an existing Python project, this guide will help you understand the core concepts and how to customise them to suit your specific needs.
 
 ## Essential Components of a Kedro Project
 
-Kedro is an Python framework designed for creating reproducible data science code. A typical Kedro project consists of two parts, the **mandatory structure** and the **opionated project structure**.
+Kedro is a Python framework designed for creating reproducible data science code. A typical Kedro project consists of two parts, the **mandatory structure** and the **opinionated** project structure**.
 
 ### 1. **Recommended Structure**
 Kedro projects follow a specific directory structure that promotes best practices for collaboration and maintenance. The default structure includes:
@@ -25,7 +25,7 @@ There are 3 files that you must have to be considered as a Kedro project, i.e. a
 - **`settings.py`**: Defines project settings, including library component registration.
 - **`pipeline_registry.py`**: Registers the project's pipelines.
 
-If you want to see some examples, you can either create a project with `kedro new` or check out the [project template on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas)
+If you want to see some examples of these files, you can either create a project with `kedro new` or check out the [project template on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas)
 
 
 #### `pyproject.toml`
@@ -110,7 +110,7 @@ Next, create a folder named minikedro, which should match the package_name defin
 ```bash
 mkdir minikedro
 ```
-Inside this folder, create two empty files: settings.py and pipeline_registry.py:
+Inside this folder, create two empty files: `settings.py` and `pipeline_registry.py`:
 
 ```bash
 touch minikedro/settings.py minikedro/pipeline_registry.py
@@ -136,7 +136,7 @@ AttributeError: module 'minikedro.pipeline_registry' has no attribute 'register_
 ```
 
 ### Step 5: Create a Simple Pipeline
-To resolve this issue, add the following code to pipeline_registry.py, which defines a simple pipeline to run:
+To resolve this issue, add the following code to `pipeline_registry.py`, which defines a simple pipeline to run:
 
 ```python
 from kedro.pipeline import pipeline, node
@@ -148,13 +148,13 @@ def register_pipelines():
     return {"__default__": pipeline([node(foo, None, "dummy_output")])}
 ```
 
-If you attempt to run the pipeline again with kedro run, you will see another error:
+If you attempt to run the pipeline again with `kedro run`, you will see another error:
 ```bash
 MissingConfigException: Given configuration path either does not exist or is not a valid directory: /workspace/kedro/minikedro/conf/base
 ```
 
 ### Step 6: Define the Project Settings
-This error occurs because Kedro expects a configuration folder named `conf`, along with two environments called `base` and `local`. To fix this, add the following lines to `settings.py`:
+This error occurs because Kedro expects a configuration folder named `conf`, along with two environments called `base` and `local`.
 
 To fix this, add these two lines into `settings.py`:
 ```python
@@ -162,7 +162,7 @@ CONF_SOURCE = "."
 CONFIG_LOADER_ARGS = {"base_env": ".", "default_run_env": "."}
 ```
 
-These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected conf folder. For more details, refer to [How to change the setting for a configuration source folder](../configuration/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project]((../configuration/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
+These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected conf folder. For more details, refer to [How to change the setting for a configuration source folder](../configuration/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project](../configuration/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
 
 Now, run the pipeline again:
 ```bash

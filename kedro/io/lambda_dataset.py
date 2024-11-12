@@ -5,8 +5,10 @@ providing custom load, save, and exists methods without extending
 
 from __future__ import annotations
 
+import warnings
 from typing import Any, Callable
 
+from kedro import KedroDeprecationWarning
 from kedro.io.core import AbstractDataset, DatasetError
 
 
@@ -100,6 +102,12 @@ class LambdaDataset(AbstractDataset):
             DatasetError: If a method is specified, but is not a Callable.
 
         """
+
+        warnings.warn(
+            "`LambdaDataset` has been deprecated and will be removed in Kedro 0.20.0.",
+            KedroDeprecationWarning,
+        )
+
         for name, value in [
             ("load", load),
             ("save", save),

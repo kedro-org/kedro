@@ -150,9 +150,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     need to change the `_EPHEMERAL` attribute to 'True'.
     """
     _EPHEMERAL = False
-    _init_args: dict[str, Any] = None
+    _init_args: dict[str, Any] | None = None
 
-    def __post_init__(self, call_args: dict[str, Any]):
+    def __post_init__(self, call_args: dict[str, Any]) -> None:
         self._init_args = call_args
         self._init_args.pop("self", None)
 
@@ -212,19 +212,21 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         # TODO: check dataset factories
         # TODO: check transcoding
         # TODO: test loading back
-        return_config = {
+        return_config: dict[str, Any] = {
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
         }
         load_versions: dict[str, str] | None = None
         save_version: str | None = None
 
-        return_config.update(self._init_args)
+        if self._init_args:
+            return_config.update(self._init_args)
 
         if type(self).__name__ == "CachedDataset":
             cached_ds = return_config.pop("dataset")
+            cached_ds_return_config: dict[str, Any] = {}
             if isinstance(cached_ds, dict):
                 cached_ds_return_config = cached_ds
-            else:
+            elif isinstance(cached_ds, AbstractDataset):
                 cached_ds_return_config, load_versions, save_version = (
                     cached_ds.to_config()
                 )
@@ -339,8 +341,8 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
         init_func: Callable = cls.__init__
 
-        def init_decorator(previous_init):
-            def new_init(self, *args, **kwargs):
+        def init_decorator(previous_init: Callable) -> Callable:
+            def new_init(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
                 previous_init(self, *args, **kwargs)
                 if type(self) is cls:
                     call_args = getcallargs(init_func, self, *args, **kwargs)
@@ -348,7 +350,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
             return new_init
 
-        cls.__init__ = init_decorator(cls.__init__)
+        cls.__init__ = init_decorator(cls.__init__)  # type: ignore[method-assign]
 
         super().__init_subclass__(**kwargs)
 

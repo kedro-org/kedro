@@ -266,10 +266,10 @@ class CatalogConfigResolver:
         cls, ds_name: str, ds_config: dict[str, dict[str, Any]] | None
     ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
         ds_config_copy = copy.deepcopy(ds_config) or {}
-        credentials = {}
+        credentials: dict[str, Any] = {}
         credentials_ref = f"{ds_name}_{CREDENTIALS_KEY}"
 
-        def unresolve(config: Any):
+        def unresolve(config: Any) -> None:
             # We don't expect credentials key appears more than once in the config,
             # So once we found the key first time we unresolve it and stop iterating after
             if credentials:

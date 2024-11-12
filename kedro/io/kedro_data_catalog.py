@@ -96,7 +96,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
-        self._datasets = datasets or {}
+        self._datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
@@ -294,8 +294,8 @@ class KedroDataCatalog(CatalogProtocol):
             load_version[ds_name] = ds.load_version
             save_version[ds_name] = ds.save_version
 
-        for ds_name, ds in self._datasets.items():
-            resolved_config, cur_load_versions, cur_save_version = ds.to_config()
+        for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
+            resolved_config, cur_load_versions, cur_save_version = ds.to_config()  # type: ignore[attr-defined]
             unresolved_config, unresolved_credentials = (
                 self._config_resolver.unresolve_config_credentials(
                     ds_name, resolved_config

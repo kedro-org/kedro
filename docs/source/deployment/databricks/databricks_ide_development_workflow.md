@@ -4,7 +4,7 @@
 The `dbx` package is deprecated by Databricks, and dbx workflow documentation is moved to a [new page](./databricks_dbx_workflow.md).
 ```
 
-This guide demonstrates a workflow for developing a Kedro Project on Databricks using Databricks Asset Bundles. You will learn how to develop your project using a local environment, then use `kedro-databricks` and Databricks Asset Bundle to package your code for running pipelines on Databricks.
+This guide demonstrates a workflow for developing a Kedro Project on Databricks using Databricks Asset Bundles. You will learn how to develop your project using a local environment, then use `kedro-databricks` and Databricks Asset Bundle to package your code for running pipelines on Databricks. To learn more about Databricks Asset Bundles and customization, read [What are Databricks Asset Bundles](https://docs.databricks.com/en/dev-tools/bundles/index.html).
 
 ## Benefits of local development
 
@@ -48,8 +48,7 @@ The main steps in this tutorial are as follows:
 
 ## Create the Databricks Asset Bundles using `kedro-databricks`
 
-`kedro-databricks` is a wrapper around the `databricks` CLI. It's the simplest way to get started without getting stuck with configuration. To learn more about Databricks Asset Bundles and customisation, read [What are Databricks Asset Bundles](https://docs.databricks.com/en/dev-tools/bundles/index.html).
-
+`kedro-databricks` is a wrapper around the `databricks` CLI. It's the simplest way to get started without getting stuck with configuration.
 1. Install `kedro-databricks`:
 
 ```bash

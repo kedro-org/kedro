@@ -605,11 +605,7 @@ def parse_dataset_definition(
     if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
         class_obj, VERSIONED_FLAG_KEY, False or load_version
     ):
-        # print()
-        # print("Adding flag")
         config[VERSION_KEY] = Version(load_version, save_version)
-        # print(config)
-        # print()
 
     return class_obj, config
 

@@ -3,11 +3,14 @@
 ## Major features and improvements
 * Implemented dict-like interface for `KedroDataCatalog`.
 * Added Python 3.13 support.
+* Implemented lazy dataset initializing for `KedroDataCatalog`.
+* Project dependencies on both the default template and on starter templates are now explicitly declared on the `pyproject.toml` file, allowing Kedro projects to work with project management tools like `uv`, `pdm`, and `rye`.
 
 **Note:** ``KedroDataCatalog`` is an experimental feature and is under active development. Therefore, it is possible we'll introduce breaking changes to this class, so be mindful of that if you decide to use it already. Let us know if you have any feedback about the ``KedroDataCatalog`` or ideas for new features.
 
 ## Bug fixes and other changes
-* Added I/O support for Oracle Cloud Infrastructure (OCI) Object Storage filesystem
+* Added I/O support for Oracle Cloud Infrastructure (OCI) Object Storage filesystem.
+* Fixed `DatasetAlreadyExistsError` for `ThreadRunner` when Kedro project run and using runner separately.
 
 ## Breaking changes to the API
 ## Documentation changes
@@ -102,6 +105,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 ## Upcoming deprecations for Kedro 0.20.0
 * The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 0.20.0.
+* `LambdaDataset` is deprecated and will be removed in Kedro 0.20.0.
 
 ## Documentation changes
 * Improved documentation for configuring dataset parameters in the data catalog

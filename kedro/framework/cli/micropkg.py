@@ -274,6 +274,7 @@ def _pull_package(  # noqa: PLR0913
         alias,
         destination,
     )
+    temp_dir.cleanup()
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:

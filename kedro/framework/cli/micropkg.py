@@ -211,67 +211,69 @@ def _pull_package(  # noqa: PLR0913
     destination: str | None = None,
     fs_args: str | None = None,
 ) -> None:
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_dir_path = Path(temp_dir).resolve()
-        _unpack_sdist(package_path, temp_dir_path, fs_args)
+    import tempfile
 
-        # temp_dir_path is the parent directory of the project root dir
-        contents = [member for member in temp_dir_path.iterdir() if member.is_dir()]
-        if len(contents) != 1:
-            raise KedroCliError(
-                "Invalid sdist was extracted: exactly one directory was expected, "
-                f"got {contents}"
-            )
-        project_root_dir = contents[0]
+    temp_dir = tempfile.TemporaryDirectory()
+    temp_dir_path = Path(temp_dir).resolve()
+    _unpack_sdist(package_path, temp_dir_path, fs_args)
 
-        # This is much slower than parsing the requirements
-        # directly from the metadata files
-        # because it installs the package in an isolated environment,
-        # but it's the only reliable way of doing it
-        # without making assumptions on the project metadata.
-        library_meta = project_wheel_metadata(project_root_dir)
-
-        # Project name will be `my-pipeline` even if `pyproject.toml` says `my_pipeline`
-        # because standards mandate normalization of names for comparison,
-        # see https://packaging.python.org/en/latest/specifications/core-metadata/#name
-        # The proper way to get it would be
-        # project_name = library_meta.get("Name")
-        # However, the rest of the code expects the non-normalized package name,
-        # so we have to find it.
-        packages = [
-            project_item.name
-            for project_item in project_root_dir.iterdir()
-            if project_item.is_dir()
-            and project_item.name != "tests"
-            and (project_item / "__init__.py").exists()
-        ]
-        if len(packages) != 1:
-            # Should not happen if user is calling `micropkg pull`
-            # with the result of a `micropkg package`,
-            # and in general if the distribution only contains one package (most likely),
-            # but helps give a sensible error message otherwise
-            raise KedroCliError(
-                "Invalid package contents: exactly one package was expected, "
-                f"got {packages}"
-            )
-        package_name = packages[0]
-
-        # Type ignored because of https://github.com/pypa/build/pull/693
-        package_reqs = _get_all_library_reqs(library_meta)  # type: ignore[arg-type]
-
-        if package_reqs:
-            requirements_txt = metadata.project_path / "requirements.txt"
-            _append_package_reqs(requirements_txt, package_reqs, package_name)
-
-        _clean_pycache(temp_dir_path)
-        _install_files(
-            metadata,
-            package_name,
-            project_root_dir,
-            env,
-            alias,
-            destination,
+    # temp_dir_path is the parent directory of the project root dir
+    contents = [member for member in temp_dir_path.iterdir() if member.is_dir()]
+    if len(contents) != 1:
+        raise KedroCliError(
+            "Invalid sdist was extracted: exactly one directory was expected, "
+            f"got {contents}"
         )
+    project_root_dir = contents[0]
+
+    # This is much slower than parsing the requirements
+    # directly from the metadata files
+    # because it installs the package in an isolated environment,
+    # but it's the only reliable way of doing it
+    # without making assumptions on the project metadata.
+    library_meta = project_wheel_metadata(project_root_dir)
+
+    # Project name will be `my-pipeline` even if `pyproject.toml` says `my_pipeline`
+    # because standards mandate normalization of names for comparison,
+    # see https://packaging.python.org/en/latest/specifications/core-metadata/#name
+    # The proper way to get it would be
+    # project_name = library_meta.get("Name")
+    # However, the rest of the code expects the non-normalized package name,
+    # so we have to find it.
+    packages = [
+        project_item.name
+        for project_item in project_root_dir.iterdir()
+        if project_item.is_dir()
+        and project_item.name != "tests"
+        and (project_item / "__init__.py").exists()
+    ]
+    if len(packages) != 1:
+        # Should not happen if user is calling `micropkg pull`
+        # with the result of a `micropkg package`,
+        # and in general if the distribution only contains one package (most likely),
+        # but helps give a sensible error message otherwise
+        raise KedroCliError(
+            "Invalid package contents: exactly one package was expected, "
+            f"got {packages}"
+        )
+    package_name = packages[0]
+
+    # Type ignored because of https://github.com/pypa/build/pull/693
+    package_reqs = _get_all_library_reqs(library_meta)  # type: ignore[arg-type]
+
+    if package_reqs:
+        requirements_txt = metadata.project_path / "requirements.txt"
+        _append_package_reqs(requirements_txt, package_reqs, package_name)
+
+    _clean_pycache(temp_dir_path)
+    _install_files(
+        metadata,
+        package_name,
+        project_root_dir,
+        env,
+        alias,
+        destination,
+    )
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:

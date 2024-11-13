@@ -277,14 +277,6 @@ class KedroDataCatalog(CatalogProtocol):
         load_version: dict[str, str | None] = {}
         save_version: dict[str, str | None] = {}
 
-        # print()
-        # print("Lazy:")
-        # print(self._lazy_datasets.keys())
-        #
-        # print("Normal:")
-        # print(self._datasets.keys())
-        # print()
-
         for ds_name, ds in self._lazy_datasets.items():
             unresolved_config, unresolved_credentials = (
                 self._config_resolver.unresolve_config_credentials(ds_name, ds.config)
@@ -305,14 +297,6 @@ class KedroDataCatalog(CatalogProtocol):
             credentials.update(unresolved_credentials)
             load_version[ds_name] = cur_load_versions
             save_version[ds_name] = cur_save_version
-
-        # print(catalog)
-        # print("-")
-        # print(credentials)
-        # print("-")
-        # print(load_version)
-        # print("-")
-        # print(save_version)
 
         return catalog, credentials, load_version, save_version
 

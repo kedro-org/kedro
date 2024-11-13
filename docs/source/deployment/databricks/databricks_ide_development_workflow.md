@@ -52,20 +52,15 @@ Your databricks host must include the protocol (`https://`).
 In your local development environment, create a virtual environment for this tutorial using Conda:
 
 ```bash
-conda create --name iris-databricks python=3.10
+conda create --name databricks-iris python=3.10
 ```
 
 Once it is created, activate it:
 
 ```bash
-conda activate iris-databricks
+conda activate databricks-iris
 ```
 
-With your Conda environment activated, install Kedro and dbx:
-
-```bash
-pip install kedro dbx --upgrade
-```
 
 ### Authenticate the Databricks CLI
 **Now, you must authenticate the Databricks CLI with your Databricks instance.**
@@ -77,9 +72,6 @@ pip install kedro dbx --upgrade
 3. Enter your token and Databricks host when prompted.
 4. Run `databricks fs ls dbfs:/` at the command line to verify your authentication.
 
-```{note}
-dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks Repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
-```
 
 ### Create a new Kedro Project
 Create a Kedro project with the `databricks-iris` starter using the following command in your local environment:

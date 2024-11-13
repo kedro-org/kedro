@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 * Implemented dict-like interface for `KedroDataCatalog`.
-* Added Python 3.13 support.
+* Add official support for Python 3.13.
 * Implemented lazy dataset initializing for `KedroDataCatalog`.
 * Project dependencies on both the default template and on starter templates are now explicitly declared on the `pyproject.toml` file, allowing Kedro projects to work with project management tools like `uv`, `pdm`, and `rye`.
 

@@ -65,9 +65,28 @@ def correct_config_versioned(filepath):
                 "filepath": "s3://test_bucket/test_file.csv",
                 "credentials": "cars_credentials",
             },
+            "cars_ibis": {
+                "type": "ibis.FileDataset",
+                "filepath": "cars_ibis.csv",
+                "file_format": "csv",
+                "table_name": "cars",
+                "connection": {"backend": "duckdb", "database": "company.db"},
+                "load_args": {"sep": ",", "nullstr": "#NA"},
+                "save_args": {"sep": ",", "nullstr": "#NA"},
+            },
+            "cached_ds": {
+                "type": "CachedDataset",
+                "versioned": "true",
+                "dataset": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": "cached_ds.csv",
+                    "credentials": "cached_ds_credentials",
+                },
+            },
         },
         "credentials": {
-            "cars_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
+            "cars_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"},
+            "cached_ds_credentials": {"key": "KEY", "secret": "SECRET"},
         },
     }
 

@@ -10,6 +10,7 @@ from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from pandas.testing import assert_frame_equal
 
 from kedro.io import (
+    CachedDataset,
     CatalogConfigResolver,
     DatasetAlreadyExistsError,
     DatasetError,
@@ -21,6 +22,7 @@ from kedro.io import (
 from kedro.io.core import (
     _DEFAULT_PACKAGES,
     VERSION_FORMAT,
+    Version,
     generate_timestamp,
     parse_dataset_definition,
 )
@@ -302,6 +304,16 @@ class TestKedroDataCatalog:
             catalog["resolved_ds"] = dataset
             catalog["memory_ds"] = [1, 2, 3]
 
+            version = Version(
+                load="fake_load_version.csv",  # load exact version
+                save="fake_save_version.csv",  # save to exact version
+            )
+            versioned_dataset = CSVDataset(
+                filepath="shuttles.csv", version=version, metadata=[1, 2, 3]
+            )
+            cached_versioned_dataset = CachedDataset(dataset=versioned_dataset)
+            catalog["cached_versioned_dataset"] = cached_versioned_dataset
+
             catalog_config, catalog_credentials, load_version, save_version = (
                 catalog.to_config()
             )
@@ -318,6 +330,19 @@ class TestKedroDataCatalog:
                 "memory_ds": {
                     "type": "kedro.io.memory_dataset.MemoryDataset",
                     "copy_mode": None,
+                },
+                "cached_versioned_dataset": {
+                    "type": "kedro.io.cached_dataset.CachedDataset",
+                    "copy_mode": None,
+                    "versioned": True,
+                    "dataset": {
+                        "type": "kedro_datasets.pandas.csv_dataset.CSVDataset",
+                        "filepath": "shuttles.csv",
+                        "load_args": None,
+                        "save_args": None,
+                        "credentials": None,
+                        "fs_args": None,
+                    },
                 },
             }
             expected_config.update(config)

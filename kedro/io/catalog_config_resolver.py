@@ -237,8 +237,9 @@ class CatalogConfigResolver:
 
         return sorted_patterns, user_default
 
+    @classmethod
     def _resolve_config_credentials(
-        self,
+        cls,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
     ) -> dict[str, dict[str, Any]]:
@@ -254,8 +255,8 @@ class CatalogConfigResolver:
                     "\nHint: If this catalog entry is intended for variable interpolation, "
                     "make sure that the key is preceded by an underscore."
                 )
-            if not self.is_pattern(ds_name):
-                resolved_configs[ds_name] = self._resolve_credentials(
+            if not cls.is_pattern(ds_name):
+                resolved_configs[ds_name] = cls._resolve_credentials(
                     ds_config, credentials
                 )
 
@@ -263,17 +264,15 @@ class CatalogConfigResolver:
 
     @classmethod
     def unresolve_config_credentials(
-        cls, ds_name: str, ds_config: dict[str, dict[str, Any]] | None
+        cls, cred_name: str, ds_config: dict[str, dict[str, Any]] | None
     ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
         ds_config_copy = copy.deepcopy(ds_config) or {}
         credentials: dict[str, Any] = {}
-        credentials_ref = f"{ds_name}_{CREDENTIALS_KEY}"
+        credentials_ref = f"{cred_name}_{CREDENTIALS_KEY}"
 
         def unresolve(config: Any) -> None:
             # We don't expect credentials key appears more than once in the config,
             # So once we found the key first time we unresolve it and stop iterating after
-            if credentials:
-                return
             for key, val in config.items():
                 if key == CREDENTIALS_KEY and config[key]:
                     credentials[credentials_ref] = config[key]

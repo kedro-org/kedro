@@ -66,7 +66,7 @@ test = [
     "pandas~=2.0",
     "pluggy>=1.0",
     "pre-commit>=2.9.2, <5.0",  # The hook `mypy` requires pre-commit version 2.9.2.
-    "pytest-cov~=3.0",
+    "pytest-cov>=3,<7",
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest>=7.2,<9.0",
@@ -135,6 +135,11 @@ omit = [
     "*/site-packages/*",
 ]
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:", "class CatalogProtocol"]
+
+[tool.coverage.run]
+concurrency = ["multiprocessing", "thread"]
+parallel = true
+sigterm = true
 
 [tool.pytest.ini_options]
 addopts="""

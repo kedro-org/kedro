@@ -236,6 +236,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         version = return_config.pop(VERSION_KEY, None)
 
         if version:
+            return_config[VERSIONED_FLAG_KEY] = True
             load_versions, save_version = (
                 load_versions or version.load,
                 save_version or version.save,
@@ -543,6 +544,7 @@ def parse_dataset_definition(
     Returns:
         2-tuple: (Dataset class object, configuration dictionary)
     """
+    save_version = save_version or generate_timestamp()
     config = copy.deepcopy(config)
 
     # TODO: remove when removing old catalog as moved to KedroDataCatalog
@@ -601,9 +603,8 @@ def parse_dataset_definition(
 
     # dataset is either versioned explicitly by the user or versioned is set to true by default
     # on the dataset
-    # Included load_version into condition
     if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
-        class_obj, VERSIONED_FLAG_KEY, False or load_version
+        class_obj, VERSIONED_FLAG_KEY, False
     ):
         config[VERSION_KEY] = Version(load_version, save_version)
 

@@ -295,10 +295,12 @@ class TestKedroDataCatalog:
 
     class TestKedroDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):
+            """Test dumping catalog config"""
             config = correct_config_versioned["catalog"]
             credentials = correct_config_versioned["credentials"]
             catalog = KedroDataCatalog.from_config(config, credentials)
             catalog["resolved_ds"] = dataset
+            catalog["memory_ds"] = [1, 2, 3]
 
             catalog_config, catalog_credentials, load_version, save_version = (
                 catalog.to_config()
@@ -312,7 +314,11 @@ class TestKedroDataCatalog:
                     "load_args": None,
                     "credentials": None,
                     "fs_args": None,
-                }
+                },
+                "memory_ds": {
+                    "type": "kedro.io.memory_dataset.MemoryDataset",
+                    "copy_mode": None,
+                },
             }
             expected_config.update(config)
 

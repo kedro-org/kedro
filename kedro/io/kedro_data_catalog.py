@@ -18,6 +18,7 @@ from typing import Any, Iterator, List  # noqa: UP035
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
+    VERSIONED_FLAG_KEY,
     AbstractDataset,
     AbstractVersionedDataset,
     CatalogProtocol,
@@ -283,8 +284,12 @@ class KedroDataCatalog(CatalogProtocol):
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
-            load_version[ds_name] = ds.load_version
-            save_version[ds_name] = ds.save_version
+            if catalog[ds_name].get(VERSIONED_FLAG_KEY, None):
+                load_version[ds_name] = ds.load_version
+                save_version[ds_name] = ds.save_version
+            else:
+                load_version[ds_name] = None
+                save_version[ds_name] = None
 
         for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
             resolved_config, cur_load_versions, cur_save_version = ds.to_config()  # type: ignore[attr-defined]

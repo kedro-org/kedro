@@ -284,6 +284,7 @@ class KedroDataCatalog(CatalogProtocol):
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
+            # TODO: Update when resolve #4327
             if catalog[ds_name].get(VERSIONED_FLAG_KEY, None):
                 load_version[ds_name] = ds.load_version
                 save_version[ds_name] = ds.save_version

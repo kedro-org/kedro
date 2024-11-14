@@ -137,7 +137,7 @@ omit = [
 exclude_also = ["raise NotImplementedError", "if TYPE_CHECKING:", "class CatalogProtocol"]
 
 [tool.coverage.run]
-concurrency = ["multiprocessing"]
+concurrency = ["multiprocessing", "thread"]
 parallel = true
 sigterm = true
 

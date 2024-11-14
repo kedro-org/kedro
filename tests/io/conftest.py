@@ -75,13 +75,14 @@ def correct_config_versioned(filepath):
                 "save_args": {"sep": ",", "nullstr": "#NA"},
             },
             "cached_ds": {
-                "type": "CachedDataset",
-                "versioned": "true",
+                "type": "kedro.io.cached_dataset.CachedDataset",
+                "versioned": True,
                 "dataset": {
                     "type": "pandas.CSVDataset",
                     "filepath": "cached_ds.csv",
                     "credentials": "cached_ds_credentials",
                 },
+                "copy_mode": None,
             },
         },
         "credentials": {

@@ -303,6 +303,8 @@ class TestKedroDataCatalog:
             catalog = KedroDataCatalog.from_config(config, credentials)
             catalog["resolved_ds"] = dataset
             catalog["memory_ds"] = [1, 2, 3]
+            # Materialize cached_ds
+            _ = catalog["cached_ds"]
 
             version = Version(
                 load="fake_load_version.csv",  # load exact version
@@ -346,6 +348,8 @@ class TestKedroDataCatalog:
                 },
             }
             expected_config.update(config)
+
+            # TODO: Add expected load/save versions when #4327 resolved
 
             assert catalog_config == expected_config
             assert catalog_credentials == credentials

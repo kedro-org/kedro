@@ -293,6 +293,32 @@ class TestKedroDataCatalog:
         """Test release is called without errors"""
         data_catalog.release("test")
 
+    class TestKedroDataCatalogToConfig:
+        def test_to_config(self, correct_config_versioned, dataset, filepath):
+            config = correct_config_versioned["catalog"]
+            credentials = correct_config_versioned["credentials"]
+            catalog = KedroDataCatalog.from_config(config, credentials)
+            catalog["resolved_ds"] = dataset
+
+            catalog_config, catalog_credentials, load_version, save_version = (
+                catalog.to_config()
+            )
+
+            expected_config = {
+                "resolved_ds": {
+                    "type": "kedro_datasets.pandas.csv_dataset.CSVDataset",
+                    "filepath": filepath,
+                    "save_args": {"index": False},
+                    "load_args": None,
+                    "credentials": None,
+                    "fs_args": None,
+                }
+            }
+            expected_config.update(config)
+
+            assert catalog_config == expected_config
+            assert catalog_credentials == credentials
+
     class TestKedroDataCatalogFromConfig:
         def test_from_correct_config(self, data_catalog_from_config, dummy_dataframe):
             """Test populating the data catalog from config"""

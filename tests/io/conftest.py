@@ -52,6 +52,27 @@ def correct_config(filepath):
 
 
 @pytest.fixture
+def correct_config_versioned(filepath):
+    return {
+        "catalog": {
+            "boats": {
+                "type": "pandas.CSVDataset",
+                "filepath": filepath,
+                "versioned": True,
+            },
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "s3://test_bucket/test_file.csv",
+                "credentials": "cars_credentials",
+            },
+        },
+        "credentials": {
+            "cars_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
+        },
+    }
+
+
+@pytest.fixture
 def correct_config_with_nested_creds(correct_config):
     correct_config["catalog"]["cars"]["credentials"] = {
         "client_kwargs": {"credentials": "other_credentials"},

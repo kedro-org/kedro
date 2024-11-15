@@ -111,6 +111,33 @@ kedro databricks bundle
 
 This command reads the configuration from `conf/databricks.yml` (if it exists) and generates the Databricks job configuration inside a `resource` folder.
 
+### Use Existing Cluster to run Databricks Job
+By default Databricks creates new job cluster for each job. Sometimes you may want to use existing cluster due to:
+1. You do not have permission to create a cluster
+2. You want to get started quickly with an all-purpose cluster
+
+
+ It is [not recommended to use `all-purpose Compute`](https://docs.databricks.com/en/jobs/compute.html#should-all-purpose-compute-ever-be-used-for-jobs) to run job, but it is possible to configure Databricks Job for testing purpose.
+
+First, you need to find what is the `cluster_id`. Click the `Compute` tab, then click the `View Json` options.
+
+![Find cluster ID through UI](../../meta/images/databricks_cluster_id1.png)
+
+You will see the cluster configuration in JSON format, copy the `cluster_id`
+![cluster_id in the JSON view](../../meta/images/databricks_cluster_id2.png)
+
+Next, update `conf/databricks.yml`
+```diff
+    tasks:
+        - task_key: default
+-          job_cluster_key: default
++          existing_cluster_id: 0502-***********
+```
+
+Then generate the bundle definition again with the `overwrite` options.
+```
+kedro databricks bundle --overwrite
+```
 ## Deploy Databricks Job using Databricks Asset Bundles
 
 Once you have all the resources generated, deploy the Databricks Asset Bundles to Databricks:
@@ -139,7 +166,20 @@ There are two options to run Databricks Jobs:
 databricks bundle run
 ```
 
-### Run Databricks Job with Databricks UI
+This will shows all the job that you have created. Select the job and run it.
+```bash
+? Resource to run:
+  Job: [dev] databricks-iris (databricks-iris)
+```
+You should see similar output like this:
+```
+databricks bundle run
+Run URL: https://<host>/?*********#job/**************/run/**********
+```
 
-[add images later]
+Copy that URL into your browser or go to the `Jobs Run` UI to see the run status.
+
+### Run Databricks Job with Databricks UI
+Alternatively, you can go to the `Workflow` tab and select the desired job to run directly:
+![alt text](../../meta/images/databricks-job-run.png)
 ```

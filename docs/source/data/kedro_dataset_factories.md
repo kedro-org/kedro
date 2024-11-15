@@ -12,13 +12,13 @@ factory_data:
 
 With dataset factory, it can be re-written as:
 ```yaml
-{placeholder}_data:
+{name}_data:
   type: pandas.CSVDataset
-  filepath: data/01_raw/{placeholder}.csv
+  filepath: data/01_raw/{name}_data.csv
 ```
 
-In runtime, the pattern will be matched against the nodes.
-```
+In runtime, the pattern will be matched against the name of the datasets defined in `inputs` or `outputs`.
+```python
 node(
     func=process_factory,
     inputs="factory_data",
@@ -26,52 +26,26 @@ node(
 ),
 ...
 ```
-It is similar to **regular expression** and reverse `f-string`. In this case, the name of dataset `factory_data` matches the pattern `{placeholder}_data` with the `_data` suffix, so it resolves `placeholder` to `factory`.
 
-Similarly, if you update the name of the inputs:
-```diff
--   inputs="factory_data",
-+   inputs="transaction_data",
+```{note}
+The factory pattern must always be enclosed in quotes to avoid YAML parsing errors.
 ```
 
-It will be resolved as:
+Dataset factories is similar to **regular expression** and you can think of it as reversed `f-string`. In this case, the name of dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`.
+
+Similarly, if you have a dataset called `process_data`, it will be resolved as:
 ```yaml
-transaction_data:
-  type: pandas.CSVDataset
-  filepath: data/01_raw/transaction_data.csv
-```
-
-
-```{warning}
-Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
-From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
-```
-
-## How to generalise datasets with similar names and types
-
-Consider the following catalog entries:
-
-```yaml
-factory_data:
-  type: pandas.CSVDataset
-  filepath: data/01_raw/factory_data.csv
-
-
 process_data:
   type: pandas.CSVDataset
   filepath: data/01_raw/process_data.csv
 ```
 
-The datasets in this catalog can be generalised to the following dataset factory:
+This allows you to use one dataset factory pattern to replace multiple datasets entries. It keeps your catalog concise and you can generalise datasets using similar names, type or namespaces.
 
-```yaml
-"{name}_data":
-  type: pandas.CSVDataset
-  filepath: data/01_raw/{name}_data.csv
+```{warning}
+Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 ```
-
-When `factory_data` or `process_data` is used in your pipeline, it is matched to the factory pattern `{name}_data`. The factory pattern must always be enclosed in
-quotes to avoid YAML parsing errors.
 
 
 ## How to generalise datasets of the same type

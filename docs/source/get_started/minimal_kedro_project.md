@@ -20,7 +20,7 @@ Kedro projects follow a specific directory structure that promotes best practice
 | `.gitignore`          | Specifies files and directories to be ignored by Git.                     |
 
 ### 2. **Mandatory Files**
-There are 3 files that you must have to be considered as a Kedro project, i.e. able to run `kedro run` on it.
+For a project to be recognised as a Kedro project and support running `kedro run`, it must contain three essential files:
 - **`pyprojec.toml`**: Defines the python project
 - **`settings.py`**: Defines project settings, including library component registration.
 - **`pipeline_registry.py`**: Registers the project's pipelines.

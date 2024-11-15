@@ -45,7 +45,7 @@ package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
-	python -m pip install "uv==0.1.32"
+	python -m pip install "uv==0.4.29"
 	uv pip install --system "kedro[test] @ ."
 
 install-pre-commit:

@@ -111,15 +111,17 @@ kedro databricks bundle
 
 This command reads the configuration from `conf/databricks.yml` (if it exists) and generates the Databricks job configuration inside a `resource` folder.
 
-### Use Existing Cluster to run Databricks Job
-By default Databricks creates new job cluster for each job. Sometimes you may want to use existing cluster due to:
-1. You do not have permission to create a cluster
-2. You want to get started quickly with an all-purpose cluster
+### Running a Databricks Job Using an Existing Cluster
 
+By default, Databricks creates a new job cluster for each job. However, there are instances where you might prefer to use an existing cluster, such as:
 
- It is [not recommended to use `all-purpose Compute`](https://docs.databricks.com/en/jobs/compute.html#should-all-purpose-compute-ever-be-used-for-jobs) to run job, but it is possible to configure Databricks Job for testing purpose.
+1. Lack of permissions to create a new cluster.
+2. The need for a quick start with an all-purpose cluster.
 
-First, you need to find what is the `cluster_id`. Click the `Compute` tab, then click the `View Json` options.
+While it is generally [**not recommended** to utilize **all-purpose compute** for running jobs](https://docs.databricks.com/en/jobs/compute.html#should-all-purpose-compute-ever-be-used-for-jobs), it is feasible to configure a Databricks job for testing purposes.
+
+To begin, you need to determine the `cluster_id`. Navigate to the `Compute` tab and select the `View JSON` option.
+
 
 ![Find cluster ID through UI](../../meta/images/databricks_cluster_id1.png)
 

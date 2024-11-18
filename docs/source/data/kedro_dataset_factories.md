@@ -8,11 +8,15 @@ For example:
 factory_data:
   type: pandas.CSVDataset
   filepath: data/01_raw/factory_data.csv
+
+process_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/process_data.csv
 ```
 
 With dataset factory, it can be re-written as:
 ```yaml
-{name}_data:
+"{name}_data":
   type: pandas.CSVDataset
   filepath: data/01_raw/{name}_data.csv
 ```
@@ -22,8 +26,9 @@ In runtime, the pattern will be matched against the name of the datasets defined
 node(
     func=process_factory,
     inputs="factory_data",
-    outputs=None,
+    outputs="process_data",
 ),
+
 ...
 ```
 
@@ -31,14 +36,8 @@ node(
 The factory pattern must always be enclosed in quotes to avoid YAML parsing errors.
 ```
 
-Dataset factories is similar to **regular expression** and you can think of it as reversed `f-string`. In this case, the name of dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`.
+Dataset factories is similar to **regular expression** and you can think of it as reversed `f-string`. In this case, the name of the input dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`. Similarly, it resolves `name` to `process` for the output dataset `process_data`.
 
-Similarly, if you have a dataset called `process_data`, it will be resolved as:
-```yaml
-process_data:
-  type: pandas.CSVDataset
-  filepath: data/01_raw/process_data.csv
-```
 
 This allows you to use one dataset factory pattern to replace multiple datasets entries. It keeps your catalog concise and you can generalise datasets using similar names, type or namespaces.
 

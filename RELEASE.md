@@ -14,7 +14,7 @@
 ## Documentation changes
 * Updated CLI autocompletion docs with new Click syntax.
 * Standardised `.parquet` suffix in docs and tests.
-* Added example to explains how dataset factories work.
+* Added example to explain how dataset factories work.
 
 ## Community contributions
 * [Hyewon Choi](https://github.com/hyew0nChoi)

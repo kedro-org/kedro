@@ -1019,3 +1019,8 @@ class CatalogProtocol(Protocol[_C]):
     def shallow_copy(self, extra_dataset_patterns: Patterns | None = None) -> _C:
         """Returns a shallow copy of the current object."""
         ...
+
+
+def is_parameter(dataset_name: str) -> bool:
+    """Check if dataset is a parameter."""
+    return dataset_name.startswith("params:") or dataset_name == "parameters"

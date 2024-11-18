@@ -27,6 +27,7 @@ from kedro.io.core import (
     DatasetNotFoundError,
     Version,
     generate_timestamp,
+    is_parameter,
 )
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
@@ -279,6 +280,8 @@ class KedroDataCatalog(CatalogProtocol):
         save_version: dict[str, str | None] = {}
 
         for ds_name, ds in self._lazy_datasets.items():
+            if is_parameter(ds_name):
+                continue
             unresolved_config, unresolved_credentials = (
                 self._config_resolver.unresolve_config_credentials(ds_name, ds.config)
             )
@@ -293,6 +296,8 @@ class KedroDataCatalog(CatalogProtocol):
                 save_version[ds_name] = None
 
         for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
+            if is_parameter(ds_name):
+                continue
             resolved_config, cur_load_versions, cur_save_version = ds.to_config()  # type: ignore[attr-defined]
             unresolved_config, unresolved_credentials = (
                 self._config_resolver.unresolve_config_credentials(

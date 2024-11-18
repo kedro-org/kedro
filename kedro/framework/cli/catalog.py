@@ -13,7 +13,7 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
-from kedro.io import is_parameter
+from kedro.io.core import is_parameter
 from kedro.io.data_catalog import DataCatalog
 
 if TYPE_CHECKING:

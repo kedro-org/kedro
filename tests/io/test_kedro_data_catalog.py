@@ -303,6 +303,7 @@ class TestKedroDataCatalog:
             catalog = KedroDataCatalog.from_config(config, credentials)
             catalog["resolved_ds"] = dataset
             catalog["memory_ds"] = [1, 2, 3]
+            catalog["params:a.b"] = {"abc": "def"}
             # Materialize cached_ds
             _ = catalog["cached_ds"]
 
@@ -348,6 +349,7 @@ class TestKedroDataCatalog:
                 },
             }
             expected_config.update(config)
+            expected_config.pop("parameters", None)
 
             # TODO: Add expected load/save versions when #4327 resolved
 

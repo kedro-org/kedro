@@ -84,6 +84,11 @@ def correct_config_versioned(filepath):
                 },
                 "copy_mode": None,
             },
+            "parameters": {
+                "type": "kedro.io.memory_dataset.MemoryDataset",
+                "data": [4, 5, 6],
+                "copy_mode": None,
+            },
         },
         "credentials": {
             "cars_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"},

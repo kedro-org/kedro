@@ -17,6 +17,14 @@ from kedro.framework.project import settings
 PIPELINE_NAME = "my_pipeline"
 
 
+@pytest.fixture
+def temp_dir_with_context_manager(tmp_path):
+    mock_temp_dir = Mock()
+    mock_temp_dir.__enter__ = Mock(return_value=tmp_path)
+    mock_temp_dir.__exit__ = Mock(return_value=None)
+    return mock_temp_dir
+
+
 def call_pipeline_create(cli, metadata, pipeline_name=PIPELINE_NAME):
     result = CliRunner().invoke(
         cli, ["pipeline", "create", pipeline_name], obj=metadata
@@ -552,6 +560,7 @@ class TestMicropkgPullCommand:
         env,
         alias,
         fake_metadata,
+        temp_dir_with_context_manager,
     ):
         """
         Test for pulling a valid sdist file from pypi.
@@ -581,7 +590,7 @@ class TestMicropkgPullCommand:
         python_call_mock = mocker.patch("kedro.framework.cli.micropkg.python_call")
         mocker.patch(
             "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
-            return_value=tmp_path,
+            return_value=temp_dir_with_context_manager,
         )
 
         # Mock needed to avoid an error when build.util.project_wheel_metadata
@@ -639,7 +648,12 @@ class TestMicropkgPullCommand:
         assert actual_test_files == expected_test_files
 
     def test_invalid_pull_from_pypi(
-        self, fake_project_cli, mocker, tmp_path, fake_metadata
+        self,
+        fake_project_cli,
+        mocker,
+        tmp_path,
+        fake_metadata,
+        temp_dir_with_context_manager,
     ):
         """
         Test for pulling package from pypi, and it cannot be found.
@@ -654,7 +668,7 @@ class TestMicropkgPullCommand:
         )
         mocker.patch(
             "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
-            return_value=tmp_path,
+            return_value=temp_dir_with_context_manager,
         )
 
         invalid_pypi_name = "non_existent"
@@ -679,7 +693,12 @@ class TestMicropkgPullCommand:
         assert pypi_error_message in result.stdout
 
     def test_pull_from_pypi_more_than_one_sdist_file(
-        self, fake_project_cli, mocker, tmp_path, fake_metadata
+        self,
+        fake_project_cli,
+        mocker,
+        tmp_path,
+        fake_metadata,
+        temp_dir_with_context_manager,
     ):
         """
         Test for pulling a sdist file with `pip download`, but there are more than one sdist
@@ -695,7 +714,7 @@ class TestMicropkgPullCommand:
         mocker.patch("kedro.framework.cli.micropkg.python_call")
         mocker.patch(
             "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
-            return_value=tmp_path,
+            return_value=temp_dir_with_context_manager,
         )
         result = CliRunner().invoke(
             fake_project_cli, ["micropkg", "pull", PIPELINE_NAME], obj=fake_metadata
@@ -705,7 +724,12 @@ class TestMicropkgPullCommand:
         assert "Error: More than 1 or no sdist files found:" in result.output
 
     def test_pull_unsupported_protocol_by_fsspec(
-        self, fake_project_cli, fake_metadata, tmp_path, mocker
+        self,
+        fake_project_cli,
+        fake_metadata,
+        tmp_path,
+        mocker,
+        temp_dir_with_context_manager,
     ):
         protocol = "unsupported"
         exception_message = f"Protocol not known: {protocol}"
@@ -718,7 +742,7 @@ class TestMicropkgPullCommand:
         )
         mocker.patch(
             "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
-            return_value=tmp_path,
+            return_value=temp_dir_with_context_manager,
         )
 
         result = CliRunner().invoke(

@@ -3,12 +3,19 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
+requires-python = ">=3.9"
 name = "{{ cookiecutter.python_package }}"
 readme = "README.md"
-dynamic = ["dependencies", "version"]
+dynamic = ["version"]
+dependencies = [
+    "ipython>=8.10",
+    "jupyterlab>=3.0",
+    "notebook",
+    "kedro~={{ cookiecutter.kedro_version }}"
+]
 
 [project.scripts]
-{{ cookiecutter.repo_name }} = "{{ cookiecutter.python_package }}.__main__:main"
+"{{ cookiecutter.repo_name }}" = "{{ cookiecutter.python_package }}.__main__:main"
 
 [project.entry-points."kedro.hooks"]
 
@@ -31,9 +38,7 @@ dev = [
     "ruff~=0.1.8"
 ]
 
-
 [tool.setuptools.dynamic]
-dependencies = {file = "requirements.txt"}
 version = {attr = "{{ cookiecutter.python_package }}.__version__"}
 
 [tool.setuptools.packages.find]
@@ -44,7 +49,7 @@ namespaces = false
 package_name = "{{ cookiecutter.python_package }}"
 project_name = "{{ cookiecutter.project_name }}"
 kedro_init_version = "{{ cookiecutter.kedro_version }}"
-tools = {{ cookiecutter.tools | default('') | string | replace('\"', '\\\"') }}
+tools = "{{ cookiecutter.tools | default('') | string | replace('\"', '\\\"') }}"
 example_pipeline = "{{ cookiecutter.example_pipeline }}"
 source_dir = "src"
 

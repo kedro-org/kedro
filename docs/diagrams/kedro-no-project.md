@@ -1,14 +1,14 @@
 ```mermaid
 sequenceDiagram
-    title "$ kedro\ndirectory without Kedro project"
+    title $ kedro in directory without Kedro project
 
-    participant kedro as "$ kedro"
-    participant entrypoint as "setup.py\nkedro = kedro.framework.cli:main"
-    participant init_plugins as "Kedro Plugins\nentry_point = kedro.init"
-    participant kedro_cli as "Kedro CLI\nglobal commands\ninfo, new, docs, starter"
-    participant global_plugins as "Kedro Plugins\nentry_point = kedro.global_commands"
-    participant pyproject.toml as "Current directory\npyproject.toml"
-    participant click as "Click"
+    participant kedro as $ kedro
+    participant entrypoint as pyproject.toml <br> kedro = "kedro.framework.cli:main"
+    participant init_plugins as Kedro Plugins <br> [project.entry-points."kedro.init"]
+    participant kedro_cli as Kedro CLI <br> global commands <br> info, new, docs, starter
+    participant global_plugins as Kedro Plugins <br> [project.entry-points."kedro.global_commands"]
+    participant pyproject.toml as Current directory <br> pyproject.toml
+    participant click as Click
 
     kedro->>entrypoint: Python calls this
 

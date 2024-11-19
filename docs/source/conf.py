@@ -225,6 +225,7 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # html_extra_path = [str(here / "robots.txt")]
 html_extra_path = [str(here / "sitemap.xml")]
 
+html_meta = {"robots": "noindex, nofollow"}
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False

@@ -1,6 +1,11 @@
 # Kedro dataset factories
 You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`.
 
+```{warning}
+Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
+```
+
 The dataset factories introduce a syntax that allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
 For example:
@@ -40,11 +45,6 @@ Dataset factories is similar to **regular expression** and you can think of it a
 
 
 This allows you to use one dataset factory pattern to replace multiple datasets entries. It keeps your catalog concise and you can generalise datasets using similar names, type or namespaces.
-
-```{warning}
-Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
-From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
-```
 
 
 ## How to generalise datasets of the same type

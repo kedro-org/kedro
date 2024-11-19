@@ -271,7 +271,7 @@ class CatalogConfigResolver:
         credentials_ref = f"{cred_name}_{CREDENTIALS_KEY}"
 
         def unresolve(config: Any) -> None:
-            # We don't expect credentials key appears more than once in the config,
+            # We don't expect credentials key appears more than once within the same dataset config,
             # So once we found the key first time we unresolve it and stop iterating after
             for key, val in config.items():
                 if key == CREDENTIALS_KEY and config[key]:

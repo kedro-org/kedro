@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Add official support for Python 3.13.
 * Implemented dict-like interface for `KedroDataCatalog`.
 * Implemented lazy dataset initializing for `KedroDataCatalog`.
 * Project dependencies on both the default template and on starter templates are now explicitly declared on the `pyproject.toml` file, allowing Kedro projects to work with project management tools like `uv`, `pdm`, and `rye`.
@@ -15,6 +16,8 @@
 ## Documentation changes
 * Updated CLI autocompletion docs with new Click syntax.
 * Standardised `.parquet` suffix in docs and tests.
+* Added a new minimal Kedro project creation guide.
+* Added example to explain how dataset factories work.
 
 ## Community contributions
 * [Hyewon Choi](https://github.com/hyew0nChoi)

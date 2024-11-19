@@ -1,38 +1,50 @@
 # Kedro dataset factories
 You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`.
 
-The syntax allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
-
 ```{warning}
 Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 ```
 
-## How to generalise datasets with similar names and types
+The dataset factories introduce a syntax that allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
-Consider the following catalog entries:
-
+For example:
 ```yaml
 factory_data:
   type: pandas.CSVDataset
   filepath: data/01_raw/factory_data.csv
-
 
 process_data:
   type: pandas.CSVDataset
   filepath: data/01_raw/process_data.csv
 ```
 
-The datasets in this catalog can be generalised to the following dataset factory:
-
+With dataset factory, it can be re-written as:
 ```yaml
 "{name}_data":
   type: pandas.CSVDataset
   filepath: data/01_raw/{name}_data.csv
 ```
 
-When `factory_data` or `process_data` is used in your pipeline, it is matched to the factory pattern `{name}_data`. The factory pattern must always be enclosed in
-quotes to avoid YAML parsing errors.
+In runtime, the pattern will be matched against the name of the datasets defined in `inputs` or `outputs`.
+```python
+node(
+    func=process_factory,
+    inputs="factory_data",
+    outputs="process_data",
+),
+
+...
+```
+
+```{note}
+The factory pattern must always be enclosed in quotes to avoid YAML parsing errors.
+```
+
+Dataset factories is similar to **regular expression** and you can think of it as reversed `f-string`. In this case, the name of the input dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`. Similarly, it resolves `name` to `process` for the output dataset `process_data`.
+
+
+This allows you to use one dataset factory pattern to replace multiple datasets entries. It keeps your catalog concise and you can generalise datasets using similar names, type or namespaces.
 
 
 ## How to generalise datasets of the same type

@@ -262,9 +262,9 @@ class CatalogConfigResolver:
 
         return resolved_configs
 
-    @classmethod
+    @staticmethod
     def unresolve_config_credentials(
-        cls, cred_name: str, ds_config: dict[str, dict[str, Any]] | None
+        cred_name: str, ds_config: dict[str, dict[str, Any]] | None
     ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
         ds_config_copy = copy.deepcopy(ds_config) or {}
         credentials: dict[str, Any] = {}

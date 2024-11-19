@@ -169,3 +169,6 @@ kedro run --params="key1=value with spaces,key2=value"
 ```
 
 Since key-value pairs are split on the first equals sign, values can contain equals signs, but keys cannot.
+
+
+> **Note:** If you want to override values of certain keys in your configuration with runtime parameters provided through the CLI option, you can use the [OmegaConfigLoader `runtime_params` resolver](advanced_configuration.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader).

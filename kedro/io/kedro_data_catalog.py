@@ -266,51 +266,6 @@ class KedroDataCatalog(CatalogProtocol):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    def to_config(
-        self,
-    ) -> tuple[
-        dict[str, dict[str, Any]],
-        dict[str, dict[str, Any]],
-        dict[str, str | None],
-        dict[str, str | None],
-    ]:
-        catalog: dict[str, dict[str, Any]] = {}
-        credentials: dict[str, dict[str, Any]] = {}
-        load_version: dict[str, str | None] = {}
-        save_version: dict[str, str | None] = {}
-
-        for ds_name, ds in self._lazy_datasets.items():
-            if is_parameter(ds_name):
-                continue
-            unresolved_config, unresolved_credentials = (
-                self._config_resolver.unresolve_config_credentials(ds_name, ds.config)
-            )
-            catalog[ds_name] = unresolved_config
-            credentials.update(unresolved_credentials)
-            # TODO: Update when #4327 resolved
-            if catalog[ds_name].get(VERSIONED_FLAG_KEY, None):
-                load_version[ds_name] = ds.load_version
-                save_version[ds_name] = ds.save_version
-            else:
-                load_version[ds_name] = None
-                save_version[ds_name] = None
-
-        for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
-            if is_parameter(ds_name):
-                continue
-            resolved_config, cur_load_versions, cur_save_version = ds.to_config()  # type: ignore[attr-defined]
-            unresolved_config, unresolved_credentials = (
-                self._config_resolver.unresolve_config_credentials(
-                    ds_name, resolved_config
-                )
-            )
-            catalog[ds_name] = unresolved_config
-            credentials.update(unresolved_credentials)
-            load_version[ds_name] = cur_load_versions
-            save_version[ds_name] = cur_save_version
-
-        return catalog, credentials, load_version, save_version
-
     @classmethod
     def from_config(
         cls,
@@ -410,6 +365,51 @@ class KedroDataCatalog(CatalogProtocol):
             save_version=save_version,
             config_resolver=config_resolver,
         )
+
+    def to_config(
+        self,
+    ) -> tuple[
+        dict[str, dict[str, Any]],
+        dict[str, dict[str, Any]],
+        dict[str, str | None],
+        dict[str, str | None],
+    ]:
+        catalog: dict[str, dict[str, Any]] = {}
+        credentials: dict[str, dict[str, Any]] = {}
+        load_version: dict[str, str | None] = {}
+        save_version: dict[str, str | None] = {}
+
+        for ds_name, ds in self._lazy_datasets.items():
+            if is_parameter(ds_name):
+                continue
+            unresolved_config, unresolved_credentials = (
+                self._config_resolver.unresolve_config_credentials(ds_name, ds.config)
+            )
+            catalog[ds_name] = unresolved_config
+            credentials.update(unresolved_credentials)
+            # TODO: Update when #4327 resolved
+            if catalog[ds_name].get(VERSIONED_FLAG_KEY, None):
+                load_version[ds_name] = ds.load_version
+                save_version[ds_name] = ds.save_version
+            else:
+                load_version[ds_name] = None
+                save_version[ds_name] = None
+
+        for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
+            if is_parameter(ds_name):
+                continue
+            resolved_config, cur_load_versions, cur_save_version = ds.to_config()  # type: ignore[attr-defined]
+            unresolved_config, unresolved_credentials = (
+                self._config_resolver.unresolve_config_credentials(
+                    ds_name, resolved_config
+                )
+            )
+            catalog[ds_name] = unresolved_config
+            credentials.update(unresolved_credentials)
+            load_version[ds_name] = cur_load_versions
+            save_version[ds_name] = cur_save_version
+
+        return catalog, credentials, load_version, save_version
 
     @staticmethod
     def _validate_dataset_config(ds_name: str, ds_config: Any) -> None:

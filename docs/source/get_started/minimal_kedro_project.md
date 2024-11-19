@@ -1,9 +1,9 @@
 # Create a Minimal Kedro Project
-This documentation aims to explain the essential components of a minimal Kedro project. The guide begins with a blank project and gradually introduces the necessary elements. While most users typically start with a [project template]((./new_project.md)) or adapt an existing Python project, this guide will help you understand the core concepts and how to customise them to suit your specific needs.
+This documentation aims to explain the essential components of a minimal Kedro project. While most users typically start with a [project template](./new_project.md) or adapt an existing Python project, this guide begins with a blank project and gradually introduces the necessary elements. This will help you understand the core concepts and how to customise them to suit your specific needs.
 
 ## Essential Components of a Kedro Project
 
-Kedro is a Python framework designed for creating reproducible data science code. A typical Kedro project consists of two parts, the **mandatory structure** and the **opinionated** project structure**.
+Kedro is a Python framework designed for creating reproducible data science code. A typical Kedro project consists of two parts, the **mandatory structure** and the **opinionated project structure**.
 
 ### 1. **Recommended Structure**
 Kedro projects follow a specific directory structure that promotes best practices for collaboration and maintenance. The default structure includes:
@@ -21,7 +21,7 @@ Kedro projects follow a specific directory structure that promotes best practice
 
 ### 2. **Mandatory Files**
 For a project to be recognised as a Kedro project and support running `kedro run`, it must contain three essential files:
-- **`pyprojec.toml`**: Defines the python project
+- **`pyproject.toml`**: Defines the python project
 - **`settings.py`**: Defines project settings, including library component registration.
 - **`pipeline_registry.py`**: Registers the project's pipelines.
 
@@ -29,7 +29,7 @@ If you want to see some examples of these files, you can either create a project
 
 
 #### `pyproject.toml`
-The `pyproject.toml` file is a crucial component of a Kedro project, serving as the standard way to store build metadata and tool settings for Python projects. It is essential for defining the project's configuration and ensuring proper integration with various tools and libraries.
+The `pyproject.toml` file is a crucial component of a Kedro project that serve as the standard way to store build metadata and tool settings for Python projects. It is essential for defining the project's configuration and ensuring proper integration with various tools and libraries.
 
 Particularly, Kedro requires `[tool.kedro]` section in `pyproject.toml`, this describes the [project metadata](../kedro_project_setup/settings.md) in the project.
 
@@ -49,8 +49,8 @@ This informs Kedro where to look for the source code, `settings.py` and `pipelin
 #### `settings.py`
 The `settings.py` file is an important configuration file in a Kedro project that allows you to define various settings and hooks for your project. Here’s a breakdown of its purpose and functionality:
 - Project Settings: This file is where you can configure project-wide settings, such as defining the logging level, setting environment variables, or specifying paths for data and outputs.
-- Hooks Registration: You can register custom hooks in settings.py, which are functions that can be executed at specific points in the Kedro pipeline lifecycle (e.g., before or after a node runs). This is useful for adding additional functionality, such as logging or monitoring.
-- Integration with Plugins: If you are using Kedro plugins, settings.py can also be utilized to configure them appropriately.
+- Hooks Registration: You can register custom hooks in `settings.py`, which are functions that can be executed at specific points in the Kedro pipeline lifecycle (e.g., before or after a node runs). This is useful for adding additional functionality, such as logging or monitoring.
+- Integration with Plugins: If you are using Kedro plugins, `settings.py` can also be utilized to configure them appropriately.
 
 Even if you do not have any settings, an empty `settings.py` is still required. Typically, they are stored at `src/<package_name>/settings.py`.
 
@@ -130,7 +130,7 @@ Try running the following command in the terminal:
 kedro run
 ```
 
-You will encounter an error indicating that pipeline_registry.py is empty:
+You will encounter an error indicating that `pipeline_registry.py` is empty:
 ```bash
 AttributeError: module 'minikedro.pipeline_registry' has no attribute 'register_pipelines'
 ```
@@ -162,7 +162,7 @@ CONF_SOURCE = "."
 CONFIG_LOADER_ARGS = {"base_env": ".", "default_run_env": "."}
 ```
 
-These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected conf folder. For more details, refer to [How to change the setting for a configuration source folder](../configuration/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project](../configuration/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
+These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected `conf` folder. For more details, refer to [How to change the setting for a configuration source folder](../configuration/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project](../configuration/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
 
 Now, run the pipeline again:
 ```bash

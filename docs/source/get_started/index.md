@@ -8,4 +8,5 @@ This section explains the first steps to set up and explore Kedro:
 install
 new_project
 kedro_concepts
+minimal_kedro_project
 ```

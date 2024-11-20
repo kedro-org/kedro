@@ -30,7 +30,7 @@ class CatalogConfigResolver:
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )
-        self._resolved_configs = self._resolve_config_credentials(config, credentials)
+        self._resolved_configs = self.resolve_credentials(config, credentials)
 
     @property
     def config(self) -> dict[str, dict[str, Any]]:
@@ -238,7 +238,7 @@ class CatalogConfigResolver:
         return sorted_patterns, user_default
 
     @classmethod
-    def _resolve_config_credentials(
+    def resolve_credentials(
         cls,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
@@ -263,7 +263,7 @@ class CatalogConfigResolver:
         return resolved_configs
 
     @staticmethod
-    def unresolve_config_credentials(
+    def unresolve_credentials(
         cred_name: str, ds_config: dict[str, dict[str, Any]] | None
     ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
         ds_config_copy = copy.deepcopy(ds_config) or {}

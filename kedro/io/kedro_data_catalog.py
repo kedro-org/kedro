@@ -383,7 +383,7 @@ class KedroDataCatalog(CatalogProtocol):
             if _is_parameter(ds_name):
                 continue
             unresolved_config, unresolved_credentials = (
-                self._config_resolver.unresolve_config_credentials(ds_name, ds.config)
+                self._config_resolver.unresolve_credentials(ds_name, ds.config)
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
@@ -400,9 +400,7 @@ class KedroDataCatalog(CatalogProtocol):
                 continue
             resolved_config, cur_load_versions, cur_save_version = ds.to_config()  # type: ignore[attr-defined]
             unresolved_config, unresolved_credentials = (
-                self._config_resolver.unresolve_config_credentials(
-                    ds_name, resolved_config
-                )
+                self._config_resolver.unresolve_credentials(ds_name, resolved_config)
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)

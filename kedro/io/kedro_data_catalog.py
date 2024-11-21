@@ -96,6 +96,10 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                   save_args={"index": False})
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
+        load_versions, save_version = self._validate_versions(
+            datasets, load_versions, save_version
+        )
+
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
@@ -219,6 +223,9 @@ class KedroDataCatalog(CatalogProtocol):
         if key in self._datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
+            self._load_versions, self._save_version = self._validate_versions(
+                {key: value}, self._load_versions, self._save_version
+            )
             self._datasets[key] = value
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value

@@ -25,6 +25,7 @@ from kedro.io.core import (
     DatasetError,
     DatasetNotFoundError,
     Version,
+    VersionAlreadyExistsError,
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
@@ -660,3 +661,26 @@ class KedroDataCatalog(CatalogProtocol):
         except DatasetNotFoundError:
             return False
         return dataset.exists()
+
+    @staticmethod
+    def _validate_versions(
+        datasets: dict[str, AbstractDataset] | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
+    ) -> tuple[dict[str, str] | None, str | None]:
+        cur_save_version = save_version
+        cur_load_versions = load_versions or {}
+        for ds_name, ds in datasets.items():
+            if isinstance(ds, AbstractVersionedDataset) and ds._version:
+                if ds._version.load:
+                    cur_load_versions[ds_name] = ds._version.load
+                if ds._version.save:
+                    cur_save_version = cur_save_version or ds._version.save
+                    if cur_save_version != ds._version.save:
+                        raise VersionAlreadyExistsError(
+                            f"Cannot add a dataset `{ds_name}` with `{ds._version.save}` save version. "
+                            f"Save version set for the catalog is `{cur_save_version}`"
+                            f"All datasets in the catalog must have the same Save version."
+                        )
+
+        return cur_save_version, cur_load_versions

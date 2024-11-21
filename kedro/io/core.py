@@ -94,6 +94,15 @@ class VersionNotFoundError(DatasetError):
     pass
 
 
+class VersionAlreadyExistsError(DatasetError):
+    """``VersioIsAmbiguousError`` raised by ``DataCatalog`` and ``KedroDataCatalog``
+    classes in case of trying to add a datasets to the catalog with a save version
+    different from the one set for catalog.
+    """
+
+    pass
+
+
 _DI = TypeVar("_DI")
 _DO = TypeVar("_DO")
 

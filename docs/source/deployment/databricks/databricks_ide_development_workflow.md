@@ -136,7 +136,7 @@ Next, update `conf/databricks.yml`
 +          existing_cluster_id: 0502-***********
 ```
 
-Then generate the bundle definition again with the `overwrite` options.
+Then generate the bundle definition again with the `overwrite` option.
 ```
 kedro databricks bundle --overwrite
 ```

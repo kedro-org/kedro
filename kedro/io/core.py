@@ -71,16 +71,16 @@ class DatasetError(Exception):
 
 
 class DatasetNotFoundError(DatasetError):
-    """``DatasetNotFoundError`` raised by ``DataCatalog`` class in case of
-    trying to use a non-existing dataset.
+    """``DatasetNotFoundError`` raised by ```DataCatalog`` and ``KedroDataCatalog``
+    classes in case of trying to use a non-existing dataset.
     """
 
     pass
 
 
 class DatasetAlreadyExistsError(DatasetError):
-    """``DatasetAlreadyExistsError`` raised by ``DataCatalog`` class in case
-    of trying to add a dataset which already exists in the ``DataCatalog``.
+    """``DatasetAlreadyExistsError`` raised by ```DataCatalog`` and ``KedroDataCatalog``
+    classes in case of trying to add a dataset which already exists in the ``DataCatalog``.
     """
 
     pass

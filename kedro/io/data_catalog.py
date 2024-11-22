@@ -25,6 +25,7 @@ from kedro.io.core import (
     DatasetError,
     DatasetNotFoundError,
     Version,
+    _validate_versions,
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
@@ -159,8 +160,11 @@ class DataCatalog:
             >>>                   save_args={"index": False})
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
-        self._config_resolver = config_resolver or CatalogConfigResolver()
+        load_versions, save_version = _validate_versions(
+            datasets, load_versions, save_version
+        )
 
+        self._config_resolver = config_resolver or CatalogConfigResolver()
         # Kept to avoid breaking changes
         if not config_resolver:
             self._config_resolver._dataset_patterns = dataset_patterns or {}
@@ -506,6 +510,9 @@ class DataCatalog:
                 raise DatasetAlreadyExistsError(
                     f"Dataset '{dataset_name}' has already been registered"
                 )
+        self._load_versions, self._save_version = _validate_versions(
+            {dataset_name: dataset}, self._load_versions, self._save_version
+        )
         self._datasets[dataset_name] = dataset
         self.datasets = _FrozenDatasets(self.datasets, {dataset_name: dataset})
 

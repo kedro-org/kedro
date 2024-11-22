@@ -217,12 +217,10 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from err
         return dataset
 
-    def to_config(self) -> tuple[dict[str, Any], dict[str, str] | None, str | None]:
+    def to_config(self) -> dict[str, Any]:
         return_config: dict[str, Any] = {
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
         }
-        load_versions: dict[str, str] | None = None
-        save_version: str | None = None
 
         if self._init_args:
             return_config.update(self._init_args)
@@ -233,23 +231,16 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             if isinstance(cached_ds, dict):
                 cached_ds_return_config = cached_ds
             elif isinstance(cached_ds, AbstractDataset):
-                cached_ds_return_config, load_versions, save_version = (
-                    cached_ds.to_config()
-                )
+                cached_ds_return_config = cached_ds.to_config()
             if VERSIONED_FLAG_KEY in cached_ds_return_config:
                 return_config[VERSIONED_FLAG_KEY] = cached_ds_return_config.pop(
                     VERSIONED_FLAG_KEY
                 )
             return_config["dataset"] = cached_ds_return_config
 
-        version = return_config.pop(VERSION_KEY, None)
-
-        if version:
+        # Set `versioned` key if version present in the dataset
+        if return_config.pop(VERSION_KEY, None):
             return_config[VERSIONED_FLAG_KEY] = True
-            load_versions, save_version = (
-                load_versions or version.load,
-                save_version or version.save,
-            )
 
         # Pop data from configuration
         if type(self).__name__ == "MemoryDataset":
@@ -258,7 +249,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         # Pop metadata from configuration
         return_config.pop("metadata", None)
 
-        return return_config, load_versions, save_version
+        return return_config
 
     @property
     def _logger(self) -> logging.Logger:

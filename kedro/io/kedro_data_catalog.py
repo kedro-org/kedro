@@ -18,7 +18,6 @@ from typing import Any, Iterator, List  # noqa: UP035
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
-    VERSIONED_FLAG_KEY,
     AbstractDataset,
     AbstractVersionedDataset,
     CatalogProtocol,
@@ -377,12 +376,11 @@ class KedroDataCatalog(CatalogProtocol):
         dict[str, dict[str, Any]],
         dict[str, dict[str, Any]],
         dict[str, str | None],
-        dict[str, str | None],
+        str | None,
     ]:
         catalog: dict[str, dict[str, Any]] = {}
         credentials: dict[str, dict[str, Any]] = {}
-        load_version: dict[str, str | None] = {}
-        save_version: dict[str, str | None] = {}
+        load_versions: dict[str, str | None] = {}
 
         for ds_name, ds in self._lazy_datasets.items():
             if _is_parameter(ds_name):
@@ -392,27 +390,20 @@ class KedroDataCatalog(CatalogProtocol):
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
-            # TODO: Update when #4327 resolved
-            if catalog[ds_name].get(VERSIONED_FLAG_KEY, None):
-                load_version[ds_name] = ds.load_version
-                save_version[ds_name] = ds.save_version
-            else:
-                load_version[ds_name] = None
-                save_version[ds_name] = None
+            load_versions[ds_name] = self._load_versions.get(ds_name, None)
 
         for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
             if _is_parameter(ds_name):
                 continue
-            resolved_config, cur_load_versions, cur_save_version = ds.to_config()  # type: ignore[attr-defined]
+            resolved_config = ds.to_config()  # type: ignore[attr-defined]
             unresolved_config, unresolved_credentials = (
                 self._config_resolver.unresolve_credentials(ds_name, resolved_config)
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
-            load_version[ds_name] = cur_load_versions
-            save_version[ds_name] = cur_save_version
+            load_versions[ds_name] = self._load_versions.get(ds_name, None)
 
-        return catalog, credentials, load_version, save_version
+        return catalog, credentials, load_versions, self._save_version
 
     @staticmethod
     def _validate_dataset_config(ds_name: str, ds_config: Any) -> None:

@@ -6,7 +6,6 @@ sequenceDiagram
     participant env as Environment variables
     participant ipython as IPython
     participant entrypoint as ipython/__init__.py <br> reload_kedro
-    participant hook_manager as Hook manager
     participant project as Kedro project directory
     participant session as KedroSession
     participant context as KedroContext

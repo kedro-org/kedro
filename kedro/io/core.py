@@ -996,17 +996,22 @@ def _validate_versions(
     if not datasets:
         return load_versions, save_version
 
+    cur_load_versions = load_versions.copy()
     cur_save_version = save_version
-    cur_load_versions = load_versions
+
     for ds_name, ds in datasets.items():
-        if isinstance(ds, AbstractVersionedDataset) and ds._version:
-            if ds._version.load:
-                cur_load_versions[ds_name] = ds._version.load
-            if ds._version.save:
-                cur_save_version = cur_save_version or ds._version.save
-                if cur_save_version != ds._version.save:
+        # TODO: Move to kedro/io/kedro_data_catalog.py when removing DataCatalog
+        # TODO: Replace with isinstance(ds, CachedDataset) - current implementation to avoid circular import
+        cur_ds = ds._dataset if ds.__class__.__name__ == "CachedDataset" else ds  # type: ignore[attr-defined]
+
+        if isinstance(cur_ds, AbstractVersionedDataset) and cur_ds._version:
+            if cur_ds._version.load:
+                cur_load_versions[ds_name] = cur_ds._version.load
+            if cur_ds._version.save:
+                cur_save_version = cur_save_version or cur_ds._version.save
+                if cur_save_version != cur_ds._version.save:
                     raise VersionAlreadyExistsError(
-                        f"Cannot add a dataset `{ds_name}` with `{ds._version.save}` save version. "
+                        f"Cannot add a dataset `{ds_name}` with `{cur_ds._version.save}` save version. "
                         f"Save version set for the catalog is `{cur_save_version}`"
                         f"All datasets in the catalog must have the same Save version."
                     )

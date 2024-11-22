@@ -3,6 +3,8 @@ import pandas as pd
 import pytest
 from kedro_datasets.pandas import CSVDataset
 
+from kedro.io import Version
+
 
 @pytest.fixture
 def dummy_numpy_array():
@@ -32,6 +34,15 @@ def filepath(tmp_path):
 @pytest.fixture
 def dataset(filepath):
     return CSVDataset(filepath=filepath, save_args={"index": False})
+
+
+@pytest.fixture
+def dataset_versioned(filepath):
+    return CSVDataset(
+        filepath=filepath,
+        save_args={"index": False},
+        version=Version(load="test_load_version.csv", save="test_save_version.csv"),
+    )
 
 
 @pytest.fixture

@@ -96,15 +96,12 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                   save_args={"index": False})
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
-        load_versions, save_version = _validate_versions(
-            datasets, load_versions, save_version
-        )
-
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
-        self._load_versions = load_versions or {}
-        self._save_version = save_version
+        self._load_versions, self._save_version = _validate_versions(
+            datasets, load_versions or {}, save_version
+        )
 
         self._use_rich_markup = _has_rich_handler()
 

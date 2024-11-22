@@ -968,14 +968,14 @@ class CatalogProtocol(Protocol[_C]):
 
 def _validate_versions(
     datasets: dict[str, AbstractDataset] | None,
-    load_versions: dict[str, str] | None,
+    load_versions: dict[str, str],
     save_version: str | None,
-) -> tuple[dict[str, str] | None, str | None]:
+) -> tuple[dict[str, str], str | None]:
     if not datasets:
         return load_versions, save_version
 
     cur_save_version = save_version
-    cur_load_versions = load_versions or {}
+    cur_load_versions = load_versions
     for ds_name, ds in datasets.items():
         if isinstance(ds, AbstractVersionedDataset) and ds._version:
             if ds._version.load:

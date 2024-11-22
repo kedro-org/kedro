@@ -160,23 +160,20 @@ class DataCatalog:
             >>>                   save_args={"index": False})
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
-        load_versions, save_version = _validate_versions(
-            datasets, load_versions, save_version
-        )
-
         self._config_resolver = config_resolver or CatalogConfigResolver()
         # Kept to avoid breaking changes
         if not config_resolver:
             self._config_resolver._dataset_patterns = dataset_patterns or {}
             self._config_resolver._default_pattern = default_pattern or {}
 
+        self._load_versions, self._save_version = _validate_versions(
+            datasets, load_versions or {}, save_version
+        )
+
         self._datasets: dict[str, AbstractDataset] = {}
         self.datasets: _FrozenDatasets | None = None
 
         self.add_all(datasets or {})
-
-        self._load_versions = load_versions or {}
-        self._save_version = save_version
 
         self._use_rich_markup = _has_rich_handler()
 

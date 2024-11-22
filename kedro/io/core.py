@@ -95,9 +95,9 @@ class VersionNotFoundError(DatasetError):
 
 
 class VersionAlreadyExistsError(DatasetError):
-    """``VersioIsAmbiguousError`` raised by ``DataCatalog`` and ``KedroDataCatalog``
-    classes in case of trying to add a datasets to the catalog with a save version
-    different from the one set for catalog.
+    """``VersionAlreadyExistsError`` raised by ``DataCatalog`` and ``KedroDataCatalog``
+    classes when attempting to add a dataset to a catalog with a save version
+    that conflicts with the save version already set for the catalog.
     """
 
     pass
@@ -971,6 +971,28 @@ def _validate_versions(
     load_versions: dict[str, str],
     save_version: str | None,
 ) -> tuple[dict[str, str], str | None]:
+    """Validates and synchronizes dataset versions for loading and saving.
+
+    Insures consistency of dataset versions across a catalog, particularly
+    for versioned datasets. It updates load versions and validates that all
+    save versions are consistent.
+
+    Args:
+        datasets: A dictionary mapping dataset names to their instances.
+            if None, no validation occurs.
+        load_versions: A mapping between dataset names and versions
+            to load.
+        save_version: Version string to be used for ``save`` operations
+            by all datasets with enabled versioning.
+
+    Returns:
+        Updated ``load_versions`` with load versions specified in the ``datasets``
+            and resolved ``save_version``.
+
+    Raises:
+        VersionAlreadyExistsError: If a dataset's save version conflicts with
+            the catalog's save version.
+    """
     if not datasets:
         return load_versions, save_version
 

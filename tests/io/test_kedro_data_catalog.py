@@ -710,8 +710,8 @@ class TestKedroDataCatalog:
             """Test redefining save version when it is already set"""
             catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
             dataset_versioned._version = Version(
-                load="another_load_version.csv",  # load exact version
-                save="test_save_version.csv",  # save to exact version
+                load="another_load_version.csv",
+                save="test_save_version.csv",
             )
             catalog["ds_same_versions"] = dataset_versioned
 
@@ -726,8 +726,8 @@ class TestKedroDataCatalog:
             """Test redefining save version when it is already set"""
             catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
             dataset_versioned._version = Version(
-                load="another_load_version.csv",  # load exact version
-                save="another_save_version.csv",  # save to exact version
+                load="another_load_version.csv",
+                save="another_save_version.csv",
             )
             with pytest.raises(VersionAlreadyExistsError):
                 catalog["ds_same_versions"] = dataset_versioned

@@ -2,7 +2,7 @@
 sequenceDiagram
     title Installed Kedro project
 
-    participant script as third-party Python script
+    participant script as Third-party Python script
     participant curr_dir as Directory with Kedro conf/ in it
     participant session as KedroSession
 

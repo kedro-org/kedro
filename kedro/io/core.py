@@ -483,6 +483,7 @@ def parse_dataset_definition(
     save_version = save_version or generate_timestamp()
     config = copy.deepcopy(config)
 
+    # TODO: remove when removing old catalog as moved to KedroDataCatalog
     if "type" not in config:
         raise DatasetError(
             "'type' is missing from dataset catalog configuration."

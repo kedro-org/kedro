@@ -116,7 +116,7 @@ creating reproducible, maintainable
 and modular data science code.
 
 Installed plugins:
-kedro_viz: 10.1.0 (hooks:global,line_magic)
+kedro_viz: 10.1.0 (entry points:global,hooks,line_magic)
 
 ```
 

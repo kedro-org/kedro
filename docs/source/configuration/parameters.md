@@ -171,4 +171,4 @@ kedro run --params="key1=value with spaces,key2=value"
 Since key-value pairs are split on the first equals sign, values can contain equals signs, but keys cannot.
 
 
-> If you want to override values of certain keys in your configuration with runtime parameters provided through the CLI option, you can use the [OmegaConfigLoader `runtime_params` resolver](advanced_configuration.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader).
+> If you want to **override not only parameters but also other configurations** (e.g., catalog entries or file paths) or specify upfront that certain parameters must be set at runtime, use `$runtime_params` with the OmegaConfigLoader. Introduced in Kedro 0.18.14, this feature allows dynamic overrides of various configuration types using the `--params` CLI option, making it ideal for scenarios like switching data sources or adjusting runtime settings. [Learn more about `$runtime_params`.](advanced_configuration.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)

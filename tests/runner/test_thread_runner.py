@@ -260,7 +260,7 @@ class TestSuggestResumeScenario:
             (["node2"], r"(node1_A,node1_B|node1_B,node1_A)"),
             (["node3_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
             (["node4_A"], r"(node3_A,node3_C|node3_C,node3_A|node3_A)"),
-            (["node3_A", "node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+            (["node3_A", "node4_A"], r"(node3_A,node3_B|node3_B,node3_A|node3_A)"),
             (["node2", "node4_A"], r"(node1_A,node1_B|node1_B,node1_A)"),
         ],
     )

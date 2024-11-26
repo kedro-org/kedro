@@ -222,7 +222,8 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # to ignore or allow certain links.
 # We've tried to rely on RTD's default `robots.txt`, but it doesn't support sub-projects (Viz and Datasets),
 # so we decided to use our own `robots.txt` again, with a link to the custom `sitemap.xml`.
-# See the discussion at https://github.com/kedro-org/kedro/issues/3741.
+# See the discussion at https://github.com/kedro-org/kedro/issues/3741
+# and https://github.com/readthedocs/readthedocs.org/issues/6841
 html_extra_path = [str(here / "extra_files")]
 
 # Removes, from all docs, the copyright footer.

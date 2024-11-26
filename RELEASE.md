@@ -30,8 +30,10 @@
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
+* [G. D. McBain](https://github.com/gdmcbain)
+* [Greg Vaslowski](https://github.com/Vaslo)
 * [Hyewon Choi](https://github.com/hyew0nChoi)
-
+* [Pedro Antonacio](https://github.com/antonacio)
 
 # Release 0.19.9
 

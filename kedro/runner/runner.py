@@ -182,11 +182,23 @@ class AbstractRunner(ABC):
         hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:
-        """Common pipeline execution logic using an executor."""
+        """The abstract interface for running pipelines, assuming that the
+         inputs have already been checked and normalized by run().
+         This contains the Common pipeline execution logic using an executor.
+
+        Args:
+            pipeline: The ``Pipeline`` to run.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
+        """
+
         nodes = pipeline.nodes
+
         self._validate_catalog(catalog, pipeline)
         self._validate_nodes(nodes)
         self._set_manager_datasets(catalog, pipeline)
+
         load_counts = Counter(chain.from_iterable(n.inputs for n in pipeline.nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())

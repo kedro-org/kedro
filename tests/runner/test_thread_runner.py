@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import pytest
-import re
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import AbstractDataset, DataCatalog, DatasetError, MemoryDataset

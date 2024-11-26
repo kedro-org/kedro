@@ -78,7 +78,7 @@ class ThreadRunner(AbstractRunner):
             else required_threads
         )
 
-    def _get_executor(self, max_workers: int):
+    def _get_executor(self, max_workers: int) -> ThreadPoolExecutor:
         return ThreadPoolExecutor(max_workers=max_workers)
 
     def _run(

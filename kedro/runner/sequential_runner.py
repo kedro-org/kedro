@@ -46,7 +46,7 @@ class SequentialRunner(AbstractRunner):
             is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )
 
-    def _get_executor(self, max_workers: int):
+    def _get_executor(self, max_workers: int) -> ThreadPoolExecutor:
         return ThreadPoolExecutor(
             max_workers=1
         )  # Single-threaded for sequential execution

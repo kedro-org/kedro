@@ -11,7 +11,12 @@ import sys
 import warnings
 from abc import ABC, abstractmethod
 from collections import Counter, deque
-from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
+from concurrent.futures import (
+    FIRST_COMPLETED,
+    ProcessPoolExecutor,
+    ThreadPoolExecutor,
+    wait,
+)
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
@@ -170,7 +175,9 @@ class AbstractRunner(ABC):
         return self.run(to_rerun, catalog, hook_manager)
 
     @abstractmethod
-    def _get_executor(self, max_workers):
+    def _get_executor(
+        self, max_workers: int
+    ) -> ThreadPoolExecutor | ProcessPoolExecutor:
         """Abstract method to provide the correct executor (e.g., ThreadPoolExecutor or ProcessPoolExecutor)."""
         pass
 
@@ -241,7 +248,12 @@ class AbstractRunner(ABC):
                     self._release_datasets(node, catalog, load_counts, pipeline)
 
     @staticmethod
-    def _raise_runtime_error(todo_nodes, done_nodes, ready, done):
+    def _raise_runtime_error(
+        todo_nodes: set[Node],
+        done_nodes: set[Node],
+        ready: set[Node],
+        done: set[Node] | None,
+    ) -> None:
         debug_data = {
             "todo_nodes": todo_nodes,
             "done_nodes": done_nodes,
@@ -308,19 +320,21 @@ class AbstractRunner(ABC):
             if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
                 catalog.release(dataset)
 
-    def _validate_catalog(self, catalog, pipeline):
+    def _validate_catalog(self, catalog: CatalogProtocol, pipeline: Pipeline) -> None:
         # Add catalog validation logic here if needed
         pass
 
-    def _validate_nodes(self, nodes):
+    def _validate_nodes(self, node: Iterable[Node]) -> None:
         # Add node validation logic here if needed
         pass
 
-    def _set_manager_datasets(self, catalog, pipeline):
+    def _set_manager_datasets(
+        self, catalog: CatalogProtocol, pipeline: Pipeline
+    ) -> None:
         # Set up any necessary manager datasets here
         pass
 
-    def _get_required_workers_count(self, pipeline):
+    def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         return 1
 
 

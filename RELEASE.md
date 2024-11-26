@@ -22,10 +22,11 @@
 
 ## Breaking changes to the API
 ## Documentation changes
-* Updated CLI autocompletion docs with new Click syntax.
-* Standardised `.parquet` suffix in docs and tests.
+* Added Databricks Asset Bundles deployment guide.
 * Added a new minimal Kedro project creation guide.
 * Added example to explain how dataset factories work.
+* Updated CLI autocompletion docs with new Click syntax.
+* Standardised `.parquet` suffix in docs and tests.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

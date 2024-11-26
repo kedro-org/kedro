@@ -1,10 +1,10 @@
-# Use Databricks Asset Bundles to deploy a Kedro project
+# Use an IDE and Databricks Asset Bundles to deploy a Kedro project
 
 ```{note}
-The `dbx` package is deprecated by Databricks, and dbx workflow documentation is moved to a [new page](./databricks_dbx_workflow.md).
+The `dbx` package was deprecated by Databricks, and dbx workflow documentation is moved to a [new page](./databricks_dbx_workflow.md).
 ```
 
-This guide demonstrates a workflow for developing a Kedro Project on Databricks using Databricks Asset Bundles. You will learn how to develop your project using a local environment, then use `kedro-databricks` and Databricks Asset Bundle to package your code for running pipelines on Databricks. To learn more about Databricks Asset Bundles and customization, read [What are Databricks Asset Bundles](https://docs.databricks.com/en/dev-tools/bundles/index.html).
+This guide demonstrates a workflow for developing a Kedro Project on Databricks using Databricks Asset Bundles. You will learn how to develop your project using a local environment, then use `kedro-databricks` and Databricks Asset Bundle to package your code for running pipelines on Databricks. To learn more about Databricks Asset Bundles and customisation, read [What are Databricks Asset Bundles](https://docs.databricks.com/en/dev-tools/bundles/index.html).
 
 ## Benefits of local development
 
@@ -183,5 +183,4 @@ Copy that URL into your browser or go to the `Jobs Run` UI to see the run status
 
 ### Run Databricks Job with Databricks UI
 Alternatively, you can go to the `Workflow` tab and select the desired job to run directly:
-![alt text](../../meta/images/databricks-job-run.png)
-```
+![Run deployed Databricks Job with Databricks UI](../../meta/images/databricks-job-run.png)

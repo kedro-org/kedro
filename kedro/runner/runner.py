@@ -180,7 +180,7 @@ class AbstractRunner(ABC):
 
         return self.run(to_rerun, catalog, hook_manager)
 
-    @abstractmethod
+    @abstractmethod  # pragma: no cover
     def _get_executor(
         self, max_workers: int
     ) -> ThreadPoolExecutor | ProcessPoolExecutor:

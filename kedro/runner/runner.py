@@ -92,11 +92,16 @@ class AbstractRunner(ABC):
         """
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, not including extra dataset patterns
-        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
+        # Run a warm-up to materialize all datasets in the catalog before run
+        warmed_up_ds = []
+        for ds in pipeline.datasets():
+            if ds in catalog:
+                warmed_up_ds.append(ds)
+                _ = catalog._get_dataset(ds)
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
-        unsatisfied = pipeline.inputs() - set(registered_ds)
+        unsatisfied = pipeline.inputs() - set(warmed_up_ds)
 
         if unsatisfied:
             raise ValueError(
@@ -118,6 +123,7 @@ class AbstractRunner(ABC):
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
+
         self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
 
         self._logger.info("Pipeline execution completed successfully.")

@@ -45,7 +45,7 @@ Remember, the best choice of workflow is the one that aligns best with your proj
 :maxdepth: 1
 
 databricks_notebooks_development_workflow.md
-databricks_ide_development_workflow.md
+databricks_ide_databricks_asset_bundles_workflow.md
 databricks_deployment_workflow
 databricks_visualisation
 databricks_dbx_workflow.md

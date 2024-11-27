@@ -231,27 +231,21 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
     def to_config(self) -> dict[str, Any]:
         """Converts the dataset instance into a dictionary-based configuration for
-        serialization.
-
-        Ensures that any subclass-specific details are handled, with
+        serialization. Ensures that any subclass-specific details are handled, with
         additional logic for versioning and caching implemented for `CachedDataset`.
 
-        Functionality:
-        1. Base Configuration:
-            - Adds a key for the dataset's type using its module and class name.
-            - Includes the initialization arguments (`_init_args`) if available.
+        Adds a key for the dataset's type using its module and class name and
+        includes the initialization arguments.
 
-        2. Special Handling for `CachedDataset`:
-            - Extracts the underlying dataset's configuration.
-            - Handles the `versioned` flag and removes unnecessary metadata.
-            - Ensures the embedded dataset's configuration is appropriately flattened
-                or transformed.
+        For `CachedDataset` it extracts the underlying dataset's configuration,
+        handles the `versioned` flag and removes unnecessary metadata. It also
+        ensures the embedded dataset's configuration is appropriately flattened
+        or transformed.
 
-        3. Versioning:
-            - If the dataset has a version key, sets the `versioned` flag in the configuration.
+        If the dataset has a version key, it sets the `versioned` flag in the
+        configuration.
 
-        4. Metadata Removal:
-            - Removes the `metadata` key from the configuration if present.
+        Removes the `metadata` key from the configuration if present.
 
         Returns:
             A dictionary containing the dataset's type and initialization arguments.

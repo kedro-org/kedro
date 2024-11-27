@@ -1017,12 +1017,6 @@ class CatalogProtocol(Protocol[_C]):
         ...
 
 
-def _is_parameter(dataset_name: str) -> bool:
-    # TODO: when breaking change replace with is_parameter and remove is_parameter from kedro/framework/cli/catalog.py
-    """Check if dataset is a parameter."""
-    return dataset_name.startswith("params:") or dataset_name == "parameters"
-
-
 def _validate_versions(
     datasets: dict[str, AbstractDataset] | None,
     load_versions: dict[str, str],

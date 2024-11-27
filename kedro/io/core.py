@@ -372,7 +372,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         of AbstractDataset is defined.
 
 
-        Decorate the `load` and `save` methods provided by the class.
+        Decorates the `load` and `save` methods provided by the class.
         If `_load` or `_save` are defined, alias them as a prerequisite.
 
         """

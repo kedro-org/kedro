@@ -1,6 +1,14 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Documentation changes
+## Community contributions
+
+# Release 0.19.10
+
+## Major features and improvements
 * Add official support for Python 3.13.
 * Implemented dict-like interface for `KedroDataCatalog`.
 * Implemented lazy dataset initializing for `KedroDataCatalog`.
@@ -21,8 +29,11 @@
 * Standardised `.parquet` suffix in docs and tests.
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [G. D. McBain](https://github.com/gdmcbain)
+* [Greg Vaslowski](https://github.com/Vaslo)
 * [Hyewon Choi](https://github.com/hyew0nChoi)
-
+* [Pedro Antonacio](https://github.com/antonacio)
 
 # Release 0.19.9
 

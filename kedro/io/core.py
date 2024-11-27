@@ -231,7 +231,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
     def to_config(self) -> dict[str, Any]:
         """Converts the dataset instance into a dictionary-based configuration for
-        serialization or reconstruction.
+        serialization.
 
         Ensures that any subclass-specific details are handled, with
         additional logic for versioning and caching implemented for `CachedDataset`.

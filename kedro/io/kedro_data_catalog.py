@@ -378,6 +378,34 @@ class KedroDataCatalog(CatalogProtocol):
         dict[str, str | None],
         str | None,
     ]:
+        """Converts the KedroDataCatalog instance into a configuration format suitable for
+        serialization. This includes datasets, credentials, and versioning information.
+
+        Returns:
+            A tuple containing:
+                - catalog: A dictionary mapping dataset names to their unresolved configurations,
+                    excluding in-memory datasets.
+                - credentials: A dictionary of unresolved credentials extracted from dataset configurations.
+                - load_versions: A dictionary mapping dataset names to specific versions to be loaded,
+                    or `None` if no version is set.
+                - save_version: A global version identifier for saving datasets, or `None` if not specified.
+        Example:
+        ::
+
+            >>> from kedro.io import KedroDataCatalog
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>>
+            >>> cars = CSVDataset(
+            >>>     filepath="cars.csv",
+            >>>     load_args=None,
+            >>>     save_args={"index": False}
+            >>> )
+            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
+            >>>
+            >>> catalog, credentials, load_versions, save_version = data_catalog.to_config()
+            >>>
+            >>> new_catalog = KedroDataCatalog.from_config(config, credentials, load_versions, save_version)
+        """
         catalog: dict[str, dict[str, Any]] = {}
         credentials: dict[str, dict[str, Any]] = {}
         load_versions: dict[str, str | None] = {}

@@ -330,10 +330,6 @@ class TestKedroDataCatalog:
                     "credentials": None,
                     "fs_args": None,
                 },
-                "memory_ds": {
-                    "type": "kedro.io.memory_dataset.MemoryDataset",
-                    "copy_mode": None,
-                },
                 "cached_versioned_dataset": {
                     "type": "kedro.io.cached_dataset.CachedDataset",
                     "copy_mode": None,

@@ -1077,6 +1077,6 @@ def _is_memory_dataset(ds_or_type: AbstractDataset | str) -> bool:
     if isinstance(ds_or_type, AbstractDataset):
         return ds_or_type.__class__.__name__ == "MemoryDataset"
     if isinstance(ds_or_type, str):
-        return ds_or_type == "MemoryDataset"
+        return ds_or_type in {"MemoryDataset", "kedro.io.memory_dataset.MemoryDataset"}
 
     return False

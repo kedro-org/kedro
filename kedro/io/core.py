@@ -245,7 +245,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             - Extracts the underlying dataset's configuration.
             - Handles the `versioned` flag and removes unnecessary metadata.
             - Ensures the embedded dataset's configuration is appropriately flattened
-              or transformed.
+                or transformed.
 
         3. Versioning:
             - If the dataset has a version key, sets the `versioned` flag in the configuration.

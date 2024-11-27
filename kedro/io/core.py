@@ -242,10 +242,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         if return_config.pop(VERSION_KEY, None):
             return_config[VERSIONED_FLAG_KEY] = True
 
-        # Pop data from configuration
-        if type(self).__name__ == "MemoryDataset":
-            return_config.pop("data", None)
-
         # Pop metadata from configuration
         return_config.pop("metadata", None)
 
@@ -1078,3 +1074,13 @@ def _validate_versions(
                     )
 
     return cur_load_versions, cur_save_version
+
+
+def _is_memory_dataset(ds_or_type: str | AbstractDataset) -> bool:
+    """Check if dataset or str type provided is a MemoryDataset."""
+    if isinstance(ds_or_type, AbstractDataset):
+        return ds_or_type.__class__.__name__ == "MemoryDataset"
+    if isinstance(ds_or_type, str):
+        return ds_or_type == "MemoryDataset"
+
+    return False

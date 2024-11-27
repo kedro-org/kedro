@@ -322,5 +322,4 @@ class TestSuggestResumeScenario:
                 persistent_dataset_catalog,
                 hook_manager=_create_hook_manager(),
             )
-        print(caplog.text)
         assert re.search(expected_pattern, caplog.text)

@@ -100,4 +100,9 @@ class ThreadRunner(AbstractRunner):
             Exception: in case of any downstream node failure.
 
         """
-        super()._run(pipeline, catalog, hook_manager, session_id)
+        super()._run(
+            pipeline=pipeline,
+            catalog=catalog,
+            hook_manager=hook_manager,
+            session_id=session_id,
+        )

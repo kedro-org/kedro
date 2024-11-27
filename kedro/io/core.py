@@ -253,7 +253,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         4. Metadata Removal:
             - Removes the `metadata` key from the configuration if present.
 
-         Returns:
+        Returns:
             A dictionary containing the dataset's type and initialization arguments.
         """
         return_config: dict[str, Any] = {

@@ -393,7 +393,7 @@ class KedroDataCatalog(CatalogProtocol):
             load_versions[ds_name] = self._load_versions.get(ds_name, None)
 
         for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
-            if _is_memory_dataset(ds):
+            if _is_memory_dataset(ds):  # type: ignore[arg-type]
                 continue
             resolved_config = ds.to_config()  # type: ignore[attr-defined]
             unresolved_config, unresolved_credentials = (

@@ -309,7 +309,7 @@ class TestKedroDataCatalog:
 
             version = Version(
                 load="fake_load_version.csv",  # load exact version
-                save="fake_save_version.csv",  # save to exact version
+                save=None,  # save to exact version
             )
             versioned_dataset = CSVDataset(
                 filepath="shuttles.csv", version=version, metadata=[1, 2, 3]
@@ -351,10 +351,14 @@ class TestKedroDataCatalog:
             expected_config.update(config)
             expected_config.pop("parameters", None)
 
-            # TODO: Add expected load/save versions when #4327 resolved
-
             assert catalog_config == expected_config
             assert catalog_credentials == credentials
+            # Load version is set only for cached_versioned_dataset
+            assert catalog._load_versions == {
+                "cached_versioned_dataset": "fake_load_version.csv"
+            }
+            # Save version is not None and  set to default
+            assert catalog._save_version
 
     class TestKedroDataCatalogFromConfig:
         def test_from_correct_config(self, data_catalog_from_config, dummy_dataframe):

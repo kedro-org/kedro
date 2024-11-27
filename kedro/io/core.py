@@ -159,9 +159,21 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     need to change the `_EPHEMERAL` attribute to 'True'.
     """
     _EPHEMERAL = False
+    # Declares a class-level attribute that will store the initialization
+    # arguments of an instance. Initially, it is set to None, but it will
+    # hold a dictionary of arguments after initialization.
     _init_args: dict[str, Any] | None = None
 
     def __post_init__(self, call_args: dict[str, Any]) -> None:
+        """Handles additional setup after the object is initialized.
+
+        Stores the initialization arguments (excluding `self`) in the `_init_args` attribute.
+
+        Args:
+            call_args: A dictionary of arguments passed to the `__init__` method, captured
+                using `inspect.getcallargs`.
+        """
+
         self._init_args = call_args
         self._init_args.pop("self", None)
 
@@ -218,6 +230,32 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return dataset
 
     def to_config(self) -> dict[str, Any]:
+        """Converts the dataset instance into a dictionary-based configuration for
+        serialization or reconstruction.
+
+        Ensures that any subclass-specific details are handled, with
+        additional logic for versioning and caching implemented for `CachedDataset`.
+
+        Functionality:
+        1. Base Configuration:
+            - Adds a key for the dataset's type using its module and class name.
+            - Includes the initialization arguments (`_init_args`) if available.
+
+        2. Special Handling for `CachedDataset`:
+            - Extracts the underlying dataset's configuration.
+            - Handles the `versioned` flag and removes unnecessary metadata.
+            - Ensures the embedded dataset's configuration is appropriately flattened
+              or transformed.
+
+        3. Versioning:
+            - If the dataset has a version key, sets the `versioned` flag in the configuration.
+
+        4. Metadata Removal:
+            - Removes the `metadata` key from the configuration if present.
+
+         Returns:
+            A dictionary containing the dataset's type and initialization arguments.
+        """
         return_config: dict[str, Any] = {
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
         }
@@ -329,23 +367,47 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return save
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Decorate the `load` and `save` methods provided by the class.
+        """Customizes the behavior of subclasses of AbstractDataset during
+        their creation. This method is automatically invoked when a subclass
+        of AbstractDataset is defined.
 
+
+        Decorate the `load` and `save` methods provided by the class.
         If `_load` or `_save` are defined, alias them as a prerequisite.
 
         """
 
+        # Save the original __init__ method of the subclass
         init_func: Callable = cls.__init__
 
         def init_decorator(previous_init: Callable) -> Callable:
+            """A decorator that wraps the original __init__ of the subclass.
+
+            It ensures that after the original __init__ executes, the `__post_init__`
+            method of the instance is called with the arguments used to initialize
+            the object.
+            """
+
             def new_init(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+                """The decorated __init__ method.
+
+                Executes the original __init__, then calls __post_init__ with the arguments
+                used to initialize the instance.
+                """
+
+                # Call the original __init__ method
                 previous_init(self, *args, **kwargs)
                 if type(self) is cls:
+                    # Capture and process the arguments passed to the original __init__
                     call_args = getcallargs(init_func, self, *args, **kwargs)
+                    # Call the custom post-initialization method to save captured arguments
                     self.__post_init__(call_args)
 
             return new_init
 
+        # Replace the subclass's __init__ with the decorated version
+        # A hook for subclasses to capture initialization arguments and save them
+        # in the AbstractDataset._init_args field
         cls.__init__ = init_decorator(cls.__init__)  # type: ignore[method-assign]
 
         super().__init_subclass__(**kwargs)

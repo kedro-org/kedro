@@ -971,9 +971,9 @@ def _validate_versions(
     load_versions: dict[str, str],
     save_version: str | None,
 ) -> tuple[dict[str, str], str | None]:
-    """Validates and synchronizes dataset versions for loading and saving.
+    """Validates and synchronises dataset versions for loading and saving.
 
-    Insures consistency of dataset versions across a catalog, particularly
+    Ensures consistency of dataset versions across a catalog, particularly
     for versioned datasets. It updates load versions and validates that all
     save versions are consistent.
 
@@ -983,7 +983,7 @@ def _validate_versions(
         load_versions: A mapping between dataset names and versions
             to load.
         save_version: Version string to be used for ``save`` operations
-            by all datasets with enabled versioning.
+            by all datasets with versioning enabled.
 
     Returns:
         Updated ``load_versions`` with load versions specified in the ``datasets``
@@ -1013,7 +1013,7 @@ def _validate_versions(
                     raise VersionAlreadyExistsError(
                         f"Cannot add a dataset `{ds_name}` with `{cur_ds._version.save}` save version. "
                         f"Save version set for the catalog is `{cur_save_version}`"
-                        f"All datasets in the catalog must have the same Save version."
+                        f"All datasets in the catalog must have the same save version."
                     )
 
     return cur_load_versions, cur_save_version

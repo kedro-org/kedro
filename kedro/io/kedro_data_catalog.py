@@ -402,7 +402,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>> )
             >>> catalog = KedroDataCatalog(datasets={'cars': cars})
             >>>
-            >>> catalog, credentials, load_versions, save_version = data_catalog.to_config()
+            >>> config, credentials, load_versions, save_version = catalog.to_config()
             >>>
             >>> new_catalog = KedroDataCatalog.from_config(config, credentials, load_versions, save_version)
         """

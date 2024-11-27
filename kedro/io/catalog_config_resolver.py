@@ -266,6 +266,25 @@ class CatalogConfigResolver:
     def unresolve_credentials(
         cred_name: str, ds_config: dict[str, dict[str, Any]] | None
     ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+        """Extracts and replaces credentials in a dataset configuration with
+        references, ensuring separation of credentials from the dataset configuration.
+
+        Credentials are searched for recursively in the dataset configuration.
+        The first occurrence of the `CREDENTIALS_KEY` is replaced with a generated
+        reference key.
+
+        Args:
+            cred_name: A unique identifier for the credentials being unresolved.
+                This is used to generate a reference key for the credentials.
+            ds_config: The dataset configuration containing potential credentials
+                under the key `CREDENTIALS_KEY`.
+
+        Returns:
+            A tuple containing:
+                ds_config_copy : A deep copy of the original dataset
+                    configuration with credentials replaced by reference keys.
+                credentials: A dictionary mapping generated reference keys to the original credentials.
+        """
         ds_config_copy = copy.deepcopy(ds_config) or {}
         credentials: dict[str, Any] = {}
         credentials_ref = f"{cred_name}_{CREDENTIALS_KEY}"

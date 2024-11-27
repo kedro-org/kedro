@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Added validation to ensure dataset versions consistency across catalog.
 ## Breaking changes to the API
 ## Documentation changes
 ## Community contributions
@@ -19,7 +20,6 @@
 ## Bug fixes and other changes
 * Added I/O support for Oracle Cloud Infrastructure (OCI) Object Storage filesystem.
 * Fixed `DatasetAlreadyExistsError` for `ThreadRunner` when Kedro project run and using runner separately.
-* Added validation to ensure dataset versions consistency across catalog.
 
 ## Breaking changes to the API
 ## Documentation changes

@@ -1001,7 +1001,7 @@ def _validate_versions(
 
     for ds_name, ds in datasets.items():
         # TODO: Move to kedro/io/kedro_data_catalog.py when removing DataCatalog
-        # TODO: Replace with isinstance(ds, CachedDataset) - current implementation to avoid circular import
+        # TODO: Replace with isinstance(ds, CachedDataset) - current implementation avoids circular import
         cur_ds = ds._dataset if ds.__class__.__name__ == "CachedDataset" else ds  # type: ignore[attr-defined]
 
         if isinstance(cur_ds, AbstractVersionedDataset) and cur_ds._version:

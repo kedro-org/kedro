@@ -808,6 +808,28 @@ class TestDataCatalogVersioned:
         with pytest.raises(VersionAlreadyExistsError):
             catalog.add("ds_same_versions", dataset_versioned)
 
+    def test_redefine_save_version_with_cached_dataset(
+        self, correct_config, cached_dataset_versioned
+    ):
+        """Test redefining load and save version with CachedDataset"""
+        catalog = DataCatalog.from_config(**correct_config)
+
+        # Redefining save version fails
+        with pytest.raises(VersionAlreadyExistsError):
+            catalog.add("cached_dataset_versioned", cached_dataset_versioned)
+
+        # Redefining load version passes
+        cached_dataset_versioned._dataset._version = Version(
+            load="test_load_version.csv", save=None
+        )
+        catalog.add("cached_dataset_versioned", cached_dataset_versioned)
+
+        assert (
+            catalog._load_versions["cached_dataset_versioned"]
+            == "test_load_version.csv"
+        )
+        assert catalog._save_version
+
 
 class TestDataCatalogDatasetFactories:
     def test_match_added_to_datasets_on_get(self, config_with_dataset_factories):

@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from kedro_datasets.pandas import CSVDataset
 
-from kedro.io import Version
+from kedro.io import CachedDataset, Version
 
 
 @pytest.fixture
@@ -42,6 +42,17 @@ def dataset_versioned(filepath):
         filepath=filepath,
         save_args={"index": False},
         version=Version(load="test_load_version.csv", save="test_save_version.csv"),
+    )
+
+
+@pytest.fixture
+def cached_dataset_versioned(filepath):
+    return CachedDataset(
+        dataset=CSVDataset(
+            filepath=filepath,
+            save_args={"index": False},
+            version=Version(load="test_load_version.csv", save="test_save_version.csv"),
+        )
     )
 
 

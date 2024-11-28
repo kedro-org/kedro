@@ -16,9 +16,9 @@ import logging
 import re
 from typing import Any, Iterator, List  # noqa: UP035
 
-from build.lib.kedro.io.core import TYPE_KEY
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
+    TYPE_KEY,
     AbstractDataset,
     AbstractVersionedDataset,
     CatalogProtocol,

@@ -20,6 +20,8 @@ from kedro.io import (
 from kedro.io.core import (
     _DEFAULT_PACKAGES,
     VERSION_FORMAT,
+    Version,
+    VersionAlreadyExistsError,
     generate_timestamp,
     parse_dataset_definition,
 )
@@ -667,3 +669,87 @@ class TestKedroDataCatalog:
 
             with pytest.raises(DatasetError):
                 catalog.load("boats", version="first")
+
+        def test_redefine_save_version_via_catalog(
+            self, correct_config, dataset_versioned
+        ):
+            """Test redefining save version when it is already set"""
+            # Version is set automatically for the catalog
+            catalog = KedroDataCatalog.from_config(**correct_config)
+            with pytest.raises(VersionAlreadyExistsError):
+                catalog["ds_versioned"] = dataset_versioned
+
+            # Version is set manually for the catalog
+            correct_config["catalog"]["boats"]["versioned"] = True
+            catalog = KedroDataCatalog.from_config(**correct_config)
+            with pytest.raises(VersionAlreadyExistsError):
+                catalog["ds_versioned"] = dataset_versioned
+
+        def test_set_load_and_save_versions(self, correct_config, dataset_versioned):
+            """Test setting load and save versions for catalog based on dataset's versions provided"""
+            catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
+
+            assert (
+                catalog._load_versions["ds_versioned"]
+                == dataset_versioned._version.load
+            )
+            assert catalog._save_version == dataset_versioned._version.save
+
+        def test_set_same_versions(self, correct_config, dataset_versioned):
+            """Test setting the same load and save versions for catalog based on dataset's versions provided"""
+            catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
+            catalog["ds_same_versions"] = dataset_versioned
+
+            assert (
+                catalog._load_versions["ds_versioned"]
+                == dataset_versioned._version.load
+            )
+            assert catalog._save_version == dataset_versioned._version.save
+
+        def test_redefine_load_version(self, correct_config, dataset_versioned):
+            """Test redefining save version when it is already set"""
+            catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
+            dataset_versioned._version = Version(
+                load="another_load_version.csv",
+                save="test_save_version.csv",
+            )
+            catalog["ds_same_versions"] = dataset_versioned
+
+            assert (
+                catalog._load_versions["ds_same_versions"]
+                == dataset_versioned._version.load
+            )
+            assert catalog._load_versions["ds_versioned"] == "test_load_version.csv"
+            assert catalog._save_version == dataset_versioned._version.save
+
+        def test_redefine_save_version(self, correct_config, dataset_versioned):
+            """Test redefining save version when it is already set"""
+            catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
+            dataset_versioned._version = Version(
+                load="another_load_version.csv",
+                save="another_save_version.csv",
+            )
+            with pytest.raises(VersionAlreadyExistsError):
+                catalog["ds_same_versions"] = dataset_versioned
+
+        def test_redefine_save_version_with_cached_dataset(
+            self, correct_config, cached_dataset_versioned
+        ):
+            """Test redefining load and save version with CachedDataset"""
+            catalog = KedroDataCatalog.from_config(**correct_config)
+
+            # Redefining save version fails
+            with pytest.raises(VersionAlreadyExistsError):
+                catalog["cached_dataset_versioned"] = cached_dataset_versioned
+
+            # Redefining load version passes
+            cached_dataset_versioned._dataset._version = Version(
+                load="test_load_version.csv", save=None
+            )
+            catalog["cached_dataset_versioned"] = cached_dataset_versioned
+
+            assert (
+                catalog._load_versions["cached_dataset_versioned"]
+                == "test_load_version.csv"
+            )
+            assert catalog._save_version

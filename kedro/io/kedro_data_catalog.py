@@ -25,6 +25,7 @@ from kedro.io.core import (
     DatasetError,
     DatasetNotFoundError,
     Version,
+    _validate_versions,
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
@@ -98,8 +99,9 @@ class KedroDataCatalog(CatalogProtocol):
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
-        self._load_versions = load_versions or {}
-        self._save_version = save_version
+        self._load_versions, self._save_version = _validate_versions(
+            datasets, load_versions or {}, save_version
+        )
 
         self._use_rich_markup = _has_rich_handler()
 
@@ -218,6 +220,9 @@ class KedroDataCatalog(CatalogProtocol):
         if key in self._datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
+            self._load_versions, self._save_version = _validate_versions(
+                {key: value}, self._load_versions, self._save_version
+            )
             self._datasets[key] = value
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value

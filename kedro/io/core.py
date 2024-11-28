@@ -71,16 +71,16 @@ class DatasetError(Exception):
 
 
 class DatasetNotFoundError(DatasetError):
-    """``DatasetNotFoundError`` raised by ``DataCatalog`` class in case of
-    trying to use a non-existing dataset.
+    """``DatasetNotFoundError`` raised by ```DataCatalog`` and ``KedroDataCatalog``
+    classes in case of trying to use a non-existing dataset.
     """
 
     pass
 
 
 class DatasetAlreadyExistsError(DatasetError):
-    """``DatasetAlreadyExistsError`` raised by ``DataCatalog`` class in case
-    of trying to add a dataset which already exists in the ``DataCatalog``.
+    """``DatasetAlreadyExistsError`` raised by ```DataCatalog`` and ``KedroDataCatalog``
+    classes in case of trying to add a dataset which already exists in the ``DataCatalog``.
     """
 
     pass
@@ -89,6 +89,15 @@ class DatasetAlreadyExistsError(DatasetError):
 class VersionNotFoundError(DatasetError):
     """``VersionNotFoundError`` raised by ``AbstractVersionedDataset`` implementations
     in case of no load versions available for the dataset.
+    """
+
+    pass
+
+
+class VersionAlreadyExistsError(DatasetError):
+    """``VersionAlreadyExistsError`` raised by ``DataCatalog`` and ``KedroDataCatalog``
+    classes when attempting to add a dataset to a catalog with a save version
+    that conflicts with the save version already set for the catalog.
     """
 
     pass
@@ -955,3 +964,57 @@ class CatalogProtocol(Protocol[_C]):
     def shallow_copy(self, extra_dataset_patterns: Patterns | None = None) -> _C:
         """Returns a shallow copy of the current object."""
         ...
+
+
+def _validate_versions(
+    datasets: dict[str, AbstractDataset] | None,
+    load_versions: dict[str, str],
+    save_version: str | None,
+) -> tuple[dict[str, str], str | None]:
+    """Validates and synchronises dataset versions for loading and saving.
+
+    Ensures consistency of dataset versions across a catalog, particularly
+    for versioned datasets. It updates load versions and validates that all
+    save versions are consistent.
+
+    Args:
+        datasets: A dictionary mapping dataset names to their instances.
+            if None, no validation occurs.
+        load_versions: A mapping between dataset names and versions
+            to load.
+        save_version: Version string to be used for ``save`` operations
+            by all datasets with versioning enabled.
+
+    Returns:
+        Updated ``load_versions`` with load versions specified in the ``datasets``
+            and resolved ``save_version``.
+
+    Raises:
+        VersionAlreadyExistsError: If a dataset's save version conflicts with
+            the catalog's save version.
+    """
+    if not datasets:
+        return load_versions, save_version
+
+    cur_load_versions = load_versions.copy()
+    cur_save_version = save_version
+
+    for ds_name, ds in datasets.items():
+        # TODO: Move to kedro/io/kedro_data_catalog.py when removing DataCatalog
+        # TODO: Make it a protected static method for KedroDataCatalog
+        # TODO: Replace with isinstance(ds, CachedDataset) - current implementation avoids circular import
+        cur_ds = ds._dataset if ds.__class__.__name__ == "CachedDataset" else ds  # type: ignore[attr-defined]
+
+        if isinstance(cur_ds, AbstractVersionedDataset) and cur_ds._version:
+            if cur_ds._version.load:
+                cur_load_versions[ds_name] = cur_ds._version.load
+            if cur_ds._version.save:
+                cur_save_version = cur_save_version or cur_ds._version.save
+                if cur_save_version != cur_ds._version.save:
+                    raise VersionAlreadyExistsError(
+                        f"Cannot add a dataset `{ds_name}` with `{cur_ds._version.save}` save version. "
+                        f"Save version set for the catalog is `{cur_save_version}`"
+                        f"All datasets in the catalog must have the same save version."
+                    )
+
+    return cur_load_versions, cur_save_version

@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Added validation to ensure dataset versions consistency across catalog.
 ## Breaking changes to the API
 ## Documentation changes
 ## Community contributions

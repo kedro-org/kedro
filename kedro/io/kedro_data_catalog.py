@@ -26,11 +26,10 @@ from kedro.io.core import (
     DatasetError,
     DatasetNotFoundError,
     Version,
-    _is_memory_dataset,
     _validate_versions,
     generate_timestamp,
 )
-from kedro.io.memory_dataset import MemoryDataset
+from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 

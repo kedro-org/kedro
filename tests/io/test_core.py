@@ -18,7 +18,6 @@ from kedro.io.core import (
     DatasetError,
     Version,
     VersionNotFoundError,
-    _is_memory_dataset,
     generate_timestamp,
     get_filepath_str,
     get_protocol_and_path,
@@ -594,16 +593,3 @@ class TestLegacyLoadAndSave:
         Path(my_legacy_dataset._filepath.as_posix()).unlink()
         my_legacy_versioned_dataset.save(dummy_data)
         assert my_legacy_versioned_dataset.exists()
-
-
-@pytest.mark.parametrize(
-    "ds_or_type,expected_result",
-    [
-        ("MemoryDataset", True),
-        ("kedro.io.memory_dataset.MemoryDataset", True),
-        ("NotMemoryDataset", False),
-        (my_dataset, False),
-    ],
-)
-def test_is_memory_dataset(ds_or_type, expected_result):
-    assert _is_memory_dataset(ds_or_type) == expected_result

@@ -1127,13 +1127,3 @@ def _validate_versions(
                     )
 
     return cur_load_versions, cur_save_version
-
-
-def _is_memory_dataset(ds_or_type: AbstractDataset | str) -> bool:
-    """Check if dataset or str type provided is a MemoryDataset."""
-    if isinstance(ds_or_type, AbstractDataset):
-        return ds_or_type.__class__.__name__ == "MemoryDataset"
-    if isinstance(ds_or_type, str):
-        return ds_or_type in {"MemoryDataset", "kedro.io.memory_dataset.MemoryDataset"}
-
-    return False

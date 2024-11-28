@@ -162,20 +162,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     # Declares a class-level attribute that will store the initialization
     # arguments of an instance. Initially, it is set to None, but it will
     # hold a dictionary of arguments after initialization.
+    # It is overridden in the __init_subclass__ and further used as an
+    # instance attribute
     _init_args: dict[str, Any] | None = None
-
-    def __post_init__(self, call_args: dict[str, Any]) -> None:
-        """Handles additional setup after the object is initialized.
-
-        Stores the initialization arguments (excluding `self`) in the `_init_args` attribute.
-
-        Args:
-            call_args: A dictionary of arguments passed to the `__init__` method, captured
-                using `inspect.getcallargs`.
-        """
-
-        self._init_args = call_args
-        self._init_args.pop("self", None)
 
     @classmethod
     def from_config(
@@ -255,6 +244,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         }
 
         if self._init_args:
+            self._init_args.pop("self", None)
             return_config.update(self._init_args)
 
         if type(self).__name__ == "CachedDataset":
@@ -365,7 +355,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         their creation. This method is automatically invoked when a subclass
         of AbstractDataset is defined.
 
-
         Decorates the `load` and `save` methods provided by the class.
         If `_load` or `_save` are defined, alias them as a prerequisite.
 
@@ -374,35 +363,20 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         # Save the original __init__ method of the subclass
         init_func: Callable = cls.__init__
 
-        def init_decorator(previous_init: Callable) -> Callable:
-            """A decorator that wraps the original __init__ of the subclass.
-
-            It ensures that after the original __init__ executes, the `__post_init__`
-            method of the instance is called with the arguments used to initialize
-            the object.
+        def new_init(self, *args, **kwargs) -> None:
+            """Executes the original __init__, then save the arguments used
+            to initialize the instance.
             """
+            # Call the original __init__ method
+            init_func(self, *args, **kwargs)
+            # Capture and save the arguments passed to the original __init__
+            call_args = getcallargs(init_func, self, *args, **kwargs)
+            self._init_args = call_args
 
-            def new_init(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
-                """The decorated __init__ method.
-
-                Executes the original __init__, then calls __post_init__ with the arguments
-                used to initialize the instance.
-                """
-
-                # Call the original __init__ method
-                previous_init(self, *args, **kwargs)
-                if type(self) is cls:
-                    # Capture and process the arguments passed to the original __init__
-                    call_args = getcallargs(init_func, self, *args, **kwargs)
-                    # Call the custom post-initialization method to save captured arguments
-                    self.__post_init__(call_args)
-
-            return new_init
-
-        # Replace the subclass's __init__ with the decorated version
+        # Replace the subclass's __init__ with the new_init
         # A hook for subclasses to capture initialization arguments and save them
         # in the AbstractDataset._init_args field
-        cls.__init__ = init_decorator(cls.__init__)  # type: ignore[method-assign]
+        cls.__init__ = new_init
 
         super().__init_subclass__(**kwargs)
 

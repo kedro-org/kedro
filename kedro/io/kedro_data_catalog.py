@@ -381,7 +381,7 @@ class KedroDataCatalog(CatalogProtocol):
         """Converts the `KedroDataCatalog` instance into a configuration format suitable for
         serialization. This includes datasets, credentials, and versioning information.
 
-        This method is only applicabe to catalogs that contain datasets initialized with static, primitive
+        This method is only applicable to catalogs that contain datasets initialized with static, primitive
         parameters. For example, it will work fine if one passes credentials as dictionary to
         `GBQQueryDataset` but not as `google.auth.credentials.Credentials` object. See
         https://github.com/kedro-org/kedro-plugins/issues/950 for the details.

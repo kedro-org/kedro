@@ -16,6 +16,7 @@ import logging
 import re
 from typing import Any, Iterator, List  # noqa: UP035
 
+from build.lib.kedro.io.core import TYPE_KEY
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
     AbstractDataset,
@@ -416,7 +417,7 @@ class KedroDataCatalog(CatalogProtocol):
         load_versions: dict[str, str | None] = {}
 
         for ds_name, ds in self._lazy_datasets.items():
-            if _is_memory_dataset(ds.config.get("type", "")):
+            if _is_memory_dataset(ds.config.get(TYPE_KEY, "")):
                 continue
             unresolved_config, unresolved_credentials = (
                 self._config_resolver.unresolve_credentials(ds_name, ds.config)

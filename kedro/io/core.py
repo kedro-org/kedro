@@ -15,6 +15,7 @@ from collections import namedtuple
 from datetime import datetime, timezone
 from functools import partial, wraps
 from glob import iglob
+from inspect import getcallargs
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
 from typing import (
@@ -57,6 +58,7 @@ CLOUD_PROTOCOLS = (
     "s3a",
     "s3n",
 )
+TYPE_KEY = "type"
 
 
 class DatasetError(Exception):
@@ -210,6 +212,59 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from err
         return dataset
 
+    def to_config(self) -> dict[str, Any]:
+        """Converts the dataset instance into a dictionary-based configuration for
+        serialization. Ensures that any subclass-specific details are handled, with
+        additional logic for versioning and caching implemented for `CachedDataset`.
+
+        Adds a key for the dataset's type using its module and class name and
+        includes the initialization arguments.
+
+        For `CachedDataset` it extracts the underlying dataset's configuration,
+        handles the `versioned` flag and removes unnecessary metadata. It also
+        ensures the embedded dataset's configuration is appropriately flattened
+        or transformed.
+
+        If the dataset has a version key, it sets the `versioned` flag in the
+        configuration.
+
+        Removes the `metadata` key from the configuration if present.
+
+        Returns:
+            A dictionary containing the dataset's type and initialization arguments.
+        """
+        return_config: dict[str, Any] = {
+            f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
+        }
+
+        if self._init_args:  # type: ignore[attr-defined]
+            self._init_args.pop("self", None)  # type: ignore[attr-defined]
+            return_config.update(self._init_args)  # type: ignore[attr-defined]
+
+        if type(self).__name__ == "CachedDataset":
+            cached_ds = return_config.pop("dataset")
+            cached_ds_return_config: dict[str, Any] = {}
+            if isinstance(cached_ds, dict):
+                cached_ds_return_config = cached_ds
+            elif isinstance(cached_ds, AbstractDataset):
+                cached_ds_return_config = cached_ds.to_config()
+            if VERSIONED_FLAG_KEY in cached_ds_return_config:
+                return_config[VERSIONED_FLAG_KEY] = cached_ds_return_config.pop(
+                    VERSIONED_FLAG_KEY
+                )
+            # Pop metadata from configuration
+            cached_ds_return_config.pop("metadata", None)
+            return_config["dataset"] = cached_ds_return_config
+
+        # Set `versioned` key if version present in the dataset
+        if return_config.pop(VERSION_KEY, None):
+            return_config[VERSIONED_FLAG_KEY] = True
+
+        # Pop metadata from configuration
+        return_config.pop("metadata", None)
+
+        return return_config
+
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
@@ -290,11 +345,32 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return save
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Decorate the `load` and `save` methods provided by the class.
+        """Customizes the behavior of subclasses of AbstractDataset during
+        their creation. This method is automatically invoked when a subclass
+        of AbstractDataset is defined.
 
+        Decorates the `load` and `save` methods provided by the class.
         If `_load` or `_save` are defined, alias them as a prerequisite.
-
         """
+
+        # Save the original __init__ method of the subclass
+        init_func: Callable = cls.__init__
+
+        @wraps(init_func)
+        def new_init(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+            """Executes the original __init__, then save the arguments used
+            to initialize the instance.
+            """
+            # Call the original __init__ method
+            init_func(self, *args, **kwargs)
+            # Capture and save the arguments passed to the original __init__
+            self._init_args = getcallargs(init_func, self, *args, **kwargs)
+
+        # Replace the subclass's __init__ with the new_init
+        # A hook for subclasses to capture initialization arguments and save them
+        # in the AbstractDataset._init_args field
+        cls.__init__ = new_init  # type: ignore[method-assign]
+
         super().__init_subclass__(**kwargs)
 
         if hasattr(cls, "_load") and not cls._load.__qualname__.startswith("Abstract"):
@@ -493,14 +569,14 @@ def parse_dataset_definition(
     config = copy.deepcopy(config)
 
     # TODO: remove when removing old catalog as moved to KedroDataCatalog
-    if "type" not in config:
+    if TYPE_KEY not in config:
         raise DatasetError(
             "'type' is missing from dataset catalog configuration."
             "\nHint: If this catalog entry is intended for variable interpolation, "
             "make sure that the top level key is preceded by an underscore."
         )
 
-    dataset_type = config.pop("type")
+    dataset_type = config.pop(TYPE_KEY)
     class_obj = None
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):

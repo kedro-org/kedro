@@ -1,8 +1,11 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Implemented `KedroDataCatalog.to_config()` method that converts the catalog instance into a configuration format suitable for serialization.
+
 ## Bug fixes and other changes
 * Added validation to ensure dataset versions consistency across catalog.
+
 ## Breaking changes to the API
 ## Documentation changes
 ## Community contributions

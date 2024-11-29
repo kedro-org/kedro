@@ -3,11 +3,13 @@ import re
 import numpy as np
 import pandas as pd
 import pytest
+from kedro_datasets.pandas import CSVDataset
 
 from kedro.io import DatasetError, MemoryDataset
 from kedro.io.memory_dataset import (
     _copy_with_mode,
     _infer_copy_mode,
+    _is_memory_dataset,
 )
 
 
@@ -233,3 +235,17 @@ def test_infer_mode_assign():
     data = DataFrame()
     copy_mode = _infer_copy_mode(data)
     assert copy_mode == "assign"
+
+
+@pytest.mark.parametrize(
+    "ds_or_type,expected_result",
+    [
+        ("MemoryDataset", True),
+        ("kedro.io.memory_dataset.MemoryDataset", True),
+        ("NotMemoryDataset", False),
+        (MemoryDataset(data=""), True),
+        (CSVDataset(filepath="abc.csv"), False),
+    ],
+)
+def test_is_memory_dataset(ds_or_type, expected_result):
+    assert _is_memory_dataset(ds_or_type) == expected_result

@@ -10,6 +10,7 @@ from kedro_datasets.pandas import CSVDataset, ParquetDataset
 from pandas.testing import assert_frame_equal
 
 from kedro.io import (
+    CachedDataset,
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
@@ -293,6 +294,67 @@ class TestKedroDataCatalog:
     def test_release(self, data_catalog):
         """Test release is called without errors"""
         data_catalog.release("test")
+
+    class TestKedroDataCatalogToConfig:
+        def test_to_config(self, correct_config_versioned, dataset, filepath):
+            """Test dumping catalog config"""
+            config = correct_config_versioned["catalog"]
+            credentials = correct_config_versioned["credentials"]
+            catalog = KedroDataCatalog.from_config(config, credentials)
+            catalog["resolved_ds"] = dataset
+            catalog["memory_ds"] = [1, 2, 3]
+            catalog["params:a.b"] = {"abc": "def"}
+            # Materialize cached_ds
+            _ = catalog["cached_ds"]
+
+            version = Version(
+                load="fake_load_version.csv",  # load exact version
+                save=None,  # save to exact version
+            )
+            versioned_dataset = CSVDataset(
+                filepath="shuttles.csv", version=version, metadata=[1, 2, 3]
+            )
+            cached_versioned_dataset = CachedDataset(dataset=versioned_dataset)
+            catalog["cached_versioned_dataset"] = cached_versioned_dataset
+
+            catalog_config, catalog_credentials, load_version, save_version = (
+                catalog.to_config()
+            )
+
+            expected_config = {
+                "resolved_ds": {
+                    "type": "kedro_datasets.pandas.csv_dataset.CSVDataset",
+                    "filepath": filepath,
+                    "save_args": {"index": False},
+                    "load_args": None,
+                    "credentials": None,
+                    "fs_args": None,
+                },
+                "cached_versioned_dataset": {
+                    "type": "kedro.io.cached_dataset.CachedDataset",
+                    "copy_mode": None,
+                    "versioned": True,
+                    "dataset": {
+                        "type": "kedro_datasets.pandas.csv_dataset.CSVDataset",
+                        "filepath": "shuttles.csv",
+                        "load_args": None,
+                        "save_args": None,
+                        "credentials": None,
+                        "fs_args": None,
+                    },
+                },
+            }
+            expected_config.update(config)
+            expected_config.pop("parameters", None)
+
+            assert catalog_config == expected_config
+            assert catalog_credentials == credentials
+            # Load version is set only for cached_versioned_dataset
+            assert catalog._load_versions == {
+                "cached_versioned_dataset": "fake_load_version.csv"
+            }
+            # Save version is not None and  set to default
+            assert catalog._save_version
 
     class TestKedroDataCatalogFromConfig:
         def test_from_correct_config(self, data_catalog_from_config, dummy_dataframe):

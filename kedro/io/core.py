@@ -351,12 +351,12 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
         Decorates the `load` and `save` methods provided by the class.
         If `_load` or `_save` are defined, alias them as a prerequisite.
-
         """
 
         # Save the original __init__ method of the subclass
         init_func: Callable = cls.__init__
 
+        @wraps(init_func)
         def new_init(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
             """Executes the original __init__, then save the arguments used
             to initialize the instance.
@@ -364,8 +364,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             # Call the original __init__ method
             init_func(self, *args, **kwargs)
             # Capture and save the arguments passed to the original __init__
-            call_args = getcallargs(init_func, self, *args, **kwargs)
-            self._init_args = call_args
+            self._init_args = getcallargs(init_func, self, *args, **kwargs)
 
         # Replace the subclass's __init__ with the new_init
         # A hook for subclasses to capture initialization arguments and save them

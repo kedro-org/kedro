@@ -159,12 +159,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     need to change the `_EPHEMERAL` attribute to 'True'.
     """
     _EPHEMERAL = False
-    # Declares a class-level attribute that will store the initialization
-    # arguments of an instance. Initially, it is set to None, but it will
-    # hold a dictionary of arguments after initialization.
-    # It is overridden in the __init_subclass__ and further used as an
-    # instance attribute
-    _init_args: dict[str, Any] | None = None
 
     @classmethod
     def from_config(
@@ -243,9 +237,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
         }
 
-        if self._init_args:
-            self._init_args.pop("self", None)
-            return_config.update(self._init_args)
+        if self._init_args:  # type: ignore[attr-defined]
+            self._init_args.pop("self", None)  # type: ignore[attr-defined]
+            return_config.update(self._init_args)  # type: ignore[attr-defined]
 
         if type(self).__name__ == "CachedDataset":
             cached_ds = return_config.pop("dataset")

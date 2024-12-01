@@ -5,10 +5,13 @@
 
 ## Bug fixes and other changes
 * Added validation to ensure dataset versions consistency across catalog.
+* Moved `kedro-catalog` JSON schema to `kedro-datasets`.
 
 ## Breaking changes to the API
 ## Documentation changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Chris Schopp](https://github.com/chrisschopp)
 
 # Release 0.19.10
 

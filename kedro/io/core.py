@@ -15,6 +15,7 @@ from collections import namedtuple
 from datetime import datetime, timezone
 from functools import partial, wraps
 from glob import iglob
+from inspect import getcallargs
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
 from typing import (
@@ -57,6 +58,7 @@ CLOUD_PROTOCOLS = (
     "s3a",
     "s3n",
 )
+TYPE_KEY = "type"
 
 
 class DatasetError(Exception):
@@ -71,16 +73,16 @@ class DatasetError(Exception):
 
 
 class DatasetNotFoundError(DatasetError):
-    """``DatasetNotFoundError`` raised by ``DataCatalog`` class in case of
-    trying to use a non-existing dataset.
+    """``DatasetNotFoundError`` raised by ```DataCatalog`` and ``KedroDataCatalog``
+    classes in case of trying to use a non-existing dataset.
     """
 
     pass
 
 
 class DatasetAlreadyExistsError(DatasetError):
-    """``DatasetAlreadyExistsError`` raised by ``DataCatalog`` class in case
-    of trying to add a dataset which already exists in the ``DataCatalog``.
+    """``DatasetAlreadyExistsError`` raised by ```DataCatalog`` and ``KedroDataCatalog``
+    classes in case of trying to add a dataset which already exists in the ``DataCatalog``.
     """
 
     pass
@@ -89,6 +91,15 @@ class DatasetAlreadyExistsError(DatasetError):
 class VersionNotFoundError(DatasetError):
     """``VersionNotFoundError`` raised by ``AbstractVersionedDataset`` implementations
     in case of no load versions available for the dataset.
+    """
+
+    pass
+
+
+class VersionAlreadyExistsError(DatasetError):
+    """``VersionAlreadyExistsError`` raised by ``DataCatalog`` and ``KedroDataCatalog``
+    classes when attempting to add a dataset to a catalog with a save version
+    that conflicts with the save version already set for the catalog.
     """
 
     pass
@@ -201,6 +212,59 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from err
         return dataset
 
+    def to_config(self) -> dict[str, Any]:
+        """Converts the dataset instance into a dictionary-based configuration for
+        serialization. Ensures that any subclass-specific details are handled, with
+        additional logic for versioning and caching implemented for `CachedDataset`.
+
+        Adds a key for the dataset's type using its module and class name and
+        includes the initialization arguments.
+
+        For `CachedDataset` it extracts the underlying dataset's configuration,
+        handles the `versioned` flag and removes unnecessary metadata. It also
+        ensures the embedded dataset's configuration is appropriately flattened
+        or transformed.
+
+        If the dataset has a version key, it sets the `versioned` flag in the
+        configuration.
+
+        Removes the `metadata` key from the configuration if present.
+
+        Returns:
+            A dictionary containing the dataset's type and initialization arguments.
+        """
+        return_config: dict[str, Any] = {
+            f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
+        }
+
+        if self._init_args:  # type: ignore[attr-defined]
+            self._init_args.pop("self", None)  # type: ignore[attr-defined]
+            return_config.update(self._init_args)  # type: ignore[attr-defined]
+
+        if type(self).__name__ == "CachedDataset":
+            cached_ds = return_config.pop("dataset")
+            cached_ds_return_config: dict[str, Any] = {}
+            if isinstance(cached_ds, dict):
+                cached_ds_return_config = cached_ds
+            elif isinstance(cached_ds, AbstractDataset):
+                cached_ds_return_config = cached_ds.to_config()
+            if VERSIONED_FLAG_KEY in cached_ds_return_config:
+                return_config[VERSIONED_FLAG_KEY] = cached_ds_return_config.pop(
+                    VERSIONED_FLAG_KEY
+                )
+            # Pop metadata from configuration
+            cached_ds_return_config.pop("metadata", None)
+            return_config["dataset"] = cached_ds_return_config
+
+        # Set `versioned` key if version present in the dataset
+        if return_config.pop(VERSION_KEY, None):
+            return_config[VERSIONED_FLAG_KEY] = True
+
+        # Pop metadata from configuration
+        return_config.pop("metadata", None)
+
+        return return_config
+
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
@@ -281,11 +345,32 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return save
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Decorate the `load` and `save` methods provided by the class.
+        """Customizes the behavior of subclasses of AbstractDataset during
+        their creation. This method is automatically invoked when a subclass
+        of AbstractDataset is defined.
 
+        Decorates the `load` and `save` methods provided by the class.
         If `_load` or `_save` are defined, alias them as a prerequisite.
-
         """
+
+        # Save the original __init__ method of the subclass
+        init_func: Callable = cls.__init__
+
+        @wraps(init_func)
+        def new_init(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+            """Executes the original __init__, then save the arguments used
+            to initialize the instance.
+            """
+            # Call the original __init__ method
+            init_func(self, *args, **kwargs)
+            # Capture and save the arguments passed to the original __init__
+            self._init_args = getcallargs(init_func, self, *args, **kwargs)
+
+        # Replace the subclass's __init__ with the new_init
+        # A hook for subclasses to capture initialization arguments and save them
+        # in the AbstractDataset._init_args field
+        cls.__init__ = new_init  # type: ignore[method-assign]
+
         super().__init_subclass__(**kwargs)
 
         if hasattr(cls, "_load") and not cls._load.__qualname__.startswith("Abstract"):
@@ -484,14 +569,14 @@ def parse_dataset_definition(
     config = copy.deepcopy(config)
 
     # TODO: remove when removing old catalog as moved to KedroDataCatalog
-    if "type" not in config:
+    if TYPE_KEY not in config:
         raise DatasetError(
             "'type' is missing from dataset catalog configuration."
             "\nHint: If this catalog entry is intended for variable interpolation, "
             "make sure that the top level key is preceded by an underscore."
         )
 
-    dataset_type = config.pop("type")
+    dataset_type = config.pop(TYPE_KEY)
     class_obj = None
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):
@@ -955,3 +1040,57 @@ class CatalogProtocol(Protocol[_C]):
     def shallow_copy(self, extra_dataset_patterns: Patterns | None = None) -> _C:
         """Returns a shallow copy of the current object."""
         ...
+
+
+def _validate_versions(
+    datasets: dict[str, AbstractDataset] | None,
+    load_versions: dict[str, str],
+    save_version: str | None,
+) -> tuple[dict[str, str], str | None]:
+    """Validates and synchronises dataset versions for loading and saving.
+
+    Ensures consistency of dataset versions across a catalog, particularly
+    for versioned datasets. It updates load versions and validates that all
+    save versions are consistent.
+
+    Args:
+        datasets: A dictionary mapping dataset names to their instances.
+            if None, no validation occurs.
+        load_versions: A mapping between dataset names and versions
+            to load.
+        save_version: Version string to be used for ``save`` operations
+            by all datasets with versioning enabled.
+
+    Returns:
+        Updated ``load_versions`` with load versions specified in the ``datasets``
+            and resolved ``save_version``.
+
+    Raises:
+        VersionAlreadyExistsError: If a dataset's save version conflicts with
+            the catalog's save version.
+    """
+    if not datasets:
+        return load_versions, save_version
+
+    cur_load_versions = load_versions.copy()
+    cur_save_version = save_version
+
+    for ds_name, ds in datasets.items():
+        # TODO: Move to kedro/io/kedro_data_catalog.py when removing DataCatalog
+        # TODO: Make it a protected static method for KedroDataCatalog
+        # TODO: Replace with isinstance(ds, CachedDataset) - current implementation avoids circular import
+        cur_ds = ds._dataset if ds.__class__.__name__ == "CachedDataset" else ds  # type: ignore[attr-defined]
+
+        if isinstance(cur_ds, AbstractVersionedDataset) and cur_ds._version:
+            if cur_ds._version.load:
+                cur_load_versions[ds_name] = cur_ds._version.load
+            if cur_ds._version.save:
+                cur_save_version = cur_save_version or cur_ds._version.save
+                if cur_save_version != cur_ds._version.save:
+                    raise VersionAlreadyExistsError(
+                        f"Cannot add a dataset `{ds_name}` with `{cur_ds._version.save}` save version. "
+                        f"Save version set for the catalog is `{cur_save_version}`"
+                        f"All datasets in the catalog must have the same save version."
+                    )
+
+    return cur_load_versions, cur_save_version

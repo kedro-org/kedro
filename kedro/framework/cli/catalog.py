@@ -28,6 +28,7 @@ def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
 
 
 def is_parameter(dataset_name: str) -> bool:
+    # TODO: when breaking change move it to kedro/io/core.py
     """Check if dataset is a parameter."""
     return dataset_name.startswith("params:") or dataset_name == "parameters"
 

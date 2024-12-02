@@ -140,3 +140,13 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
         )
 
     return copied_data
+
+
+def _is_memory_dataset(ds_or_type: AbstractDataset | str) -> bool:
+    """Check if dataset or str type provided is a MemoryDataset."""
+    if isinstance(ds_or_type, MemoryDataset):
+        return True
+    if isinstance(ds_or_type, str):
+        return ds_or_type in {"MemoryDataset", "kedro.io.memory_dataset.MemoryDataset"}
+
+    return False

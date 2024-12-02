@@ -30,7 +30,7 @@ class CatalogConfigResolver:
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )
-        self._resolved_configs = self._resolve_config_credentials(config, credentials)
+        self._resolved_configs = self.resolve_credentials(config, credentials)
 
     @property
     def config(self) -> dict[str, dict[str, Any]]:
@@ -237,8 +237,9 @@ class CatalogConfigResolver:
 
         return sorted_patterns, user_default
 
-    def _resolve_config_credentials(
-        self,
+    @classmethod
+    def resolve_credentials(
+        cls,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
     ) -> dict[str, dict[str, Any]]:
@@ -254,12 +255,54 @@ class CatalogConfigResolver:
                     "\nHint: If this catalog entry is intended for variable interpolation, "
                     "make sure that the key is preceded by an underscore."
                 )
-            if not self.is_pattern(ds_name):
-                resolved_configs[ds_name] = self._resolve_credentials(
+            if not cls.is_pattern(ds_name):
+                resolved_configs[ds_name] = cls._resolve_credentials(
                     ds_config, credentials
                 )
 
         return resolved_configs
+
+    @staticmethod
+    def unresolve_credentials(
+        cred_name: str, ds_config: dict[str, dict[str, Any]] | None
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+        """Extracts and replaces credentials in a dataset configuration with
+        references, ensuring separation of credentials from the dataset configuration.
+
+        Credentials are searched for recursively in the dataset configuration.
+        The first occurrence of the `CREDENTIALS_KEY` is replaced with a generated
+        reference key.
+
+        Args:
+            cred_name: A unique identifier for the credentials being unresolved.
+                This is used to generate a reference key for the credentials.
+            ds_config: The dataset configuration containing potential credentials
+                under the key `CREDENTIALS_KEY`.
+
+        Returns:
+            A tuple containing:
+                ds_config_copy : A deep copy of the original dataset
+                    configuration with credentials replaced by reference keys.
+                credentials: A dictionary mapping generated reference keys to the original credentials.
+        """
+        ds_config_copy = copy.deepcopy(ds_config) or {}
+        credentials: dict[str, Any] = {}
+        credentials_ref = f"{cred_name}_{CREDENTIALS_KEY}"
+
+        def unresolve(config: Any) -> None:
+            # We don't expect credentials key appears more than once within the same dataset config,
+            # So once we found the key first time we unresolve it and stop iterating after
+            for key, val in config.items():
+                if key == CREDENTIALS_KEY and config[key]:
+                    credentials[credentials_ref] = config[key]
+                    config[key] = credentials_ref
+                    return
+                if isinstance(val, dict):
+                    unresolve(val)
+
+        unresolve(ds_config_copy)
+
+        return ds_config_copy, credentials
 
     def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""

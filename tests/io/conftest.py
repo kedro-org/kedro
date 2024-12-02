@@ -3,6 +3,8 @@ import pandas as pd
 import pytest
 from kedro_datasets.pandas import CSVDataset
 
+from kedro.io import CachedDataset, Version
+
 
 @pytest.fixture
 def dummy_numpy_array():
@@ -35,6 +37,26 @@ def dataset(filepath):
 
 
 @pytest.fixture
+def dataset_versioned(filepath):
+    return CSVDataset(
+        filepath=filepath,
+        save_args={"index": False},
+        version=Version(load="test_load_version.csv", save="test_save_version.csv"),
+    )
+
+
+@pytest.fixture
+def cached_dataset_versioned(filepath):
+    return CachedDataset(
+        dataset=CSVDataset(
+            filepath=filepath,
+            save_args={"index": False},
+            version=Version(load="test_load_version.csv", save="test_save_version.csv"),
+        )
+    )
+
+
+@pytest.fixture
 def correct_config(filepath):
     return {
         "catalog": {
@@ -47,6 +69,52 @@ def correct_config(filepath):
         },
         "credentials": {
             "s3_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
+        },
+    }
+
+
+@pytest.fixture
+def correct_config_versioned(filepath):
+    return {
+        "catalog": {
+            "boats": {
+                "type": "pandas.CSVDataset",
+                "filepath": filepath,
+                "versioned": True,
+            },
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "s3://test_bucket/test_file.csv",
+                "credentials": "cars_credentials",
+            },
+            "cars_ibis": {
+                "type": "ibis.FileDataset",
+                "filepath": "cars_ibis.csv",
+                "file_format": "csv",
+                "table_name": "cars",
+                "connection": {"backend": "duckdb", "database": "company.db"},
+                "load_args": {"sep": ",", "nullstr": "#NA"},
+                "save_args": {"sep": ",", "nullstr": "#NA"},
+            },
+            "cached_ds": {
+                "type": "kedro.io.cached_dataset.CachedDataset",
+                "versioned": True,
+                "dataset": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": "cached_ds.csv",
+                    "credentials": "cached_ds_credentials",
+                },
+                "copy_mode": None,
+            },
+            "parameters": {
+                "type": "kedro.io.memory_dataset.MemoryDataset",
+                "data": [4, 5, 6],
+                "copy_mode": None,
+            },
+        },
+        "credentials": {
+            "cars_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"},
+            "cached_ds_credentials": {"key": "KEY", "secret": "SECRET"},
         },
     }
 

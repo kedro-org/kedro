@@ -18,6 +18,7 @@ from typing import Any, Iterator, List  # noqa: UP035
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
+    TYPE_KEY,
     AbstractDataset,
     AbstractVersionedDataset,
     CatalogProtocol,
@@ -25,9 +26,10 @@ from kedro.io.core import (
     DatasetError,
     DatasetNotFoundError,
     Version,
+    _validate_versions,
     generate_timestamp,
 )
-from kedro.io.memory_dataset import MemoryDataset
+from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 
@@ -96,10 +98,11 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
-        self._datasets = datasets or {}
+        self._datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
-        self._load_versions = load_versions or {}
-        self._save_version = save_version
+        self._load_versions, self._save_version = _validate_versions(
+            datasets, load_versions or {}, save_version
+        )
 
         self._use_rich_markup = _has_rich_handler()
 
@@ -218,6 +221,9 @@ class KedroDataCatalog(CatalogProtocol):
         if key in self._datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
+            self._load_versions, self._save_version = _validate_versions(
+                {key: value}, self._load_versions, self._save_version
+            )
             self._datasets[key] = value
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
@@ -363,6 +369,74 @@ class KedroDataCatalog(CatalogProtocol):
             save_version=save_version,
             config_resolver=config_resolver,
         )
+
+    def to_config(
+        self,
+    ) -> tuple[
+        dict[str, dict[str, Any]],
+        dict[str, dict[str, Any]],
+        dict[str, str | None],
+        str | None,
+    ]:
+        """Converts the `KedroDataCatalog` instance into a configuration format suitable for
+        serialization. This includes datasets, credentials, and versioning information.
+
+        This method is only applicable to catalogs that contain datasets initialized with static, primitive
+        parameters. For example, it will work fine if one passes credentials as dictionary to
+        `GBQQueryDataset` but not as `google.auth.credentials.Credentials` object. See
+        https://github.com/kedro-org/kedro-plugins/issues/950 for the details.
+
+        Returns:
+            A tuple containing:
+                catalog: A dictionary mapping dataset names to their unresolved configurations,
+                    excluding in-memory datasets.
+                credentials: A dictionary of unresolved credentials extracted from dataset configurations.
+                load_versions: A dictionary mapping dataset names to specific versions to be loaded,
+                    or `None` if no version is set.
+                save_version: A global version identifier for saving datasets, or `None` if not specified.
+        Example:
+        ::
+
+            >>> from kedro.io import KedroDataCatalog
+            >>> from kedro_datasets.pandas import CSVDataset
+            >>>
+            >>> cars = CSVDataset(
+            >>>     filepath="cars.csv",
+            >>>     load_args=None,
+            >>>     save_args={"index": False}
+            >>> )
+            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
+            >>>
+            >>> config, credentials, load_versions, save_version = catalog.to_config()
+            >>>
+            >>> new_catalog = KedroDataCatalog.from_config(config, credentials, load_versions, save_version)
+        """
+        catalog: dict[str, dict[str, Any]] = {}
+        credentials: dict[str, dict[str, Any]] = {}
+        load_versions: dict[str, str | None] = {}
+
+        for ds_name, ds in self._lazy_datasets.items():
+            if _is_memory_dataset(ds.config.get(TYPE_KEY, "")):
+                continue
+            unresolved_config, unresolved_credentials = (
+                self._config_resolver.unresolve_credentials(ds_name, ds.config)
+            )
+            catalog[ds_name] = unresolved_config
+            credentials.update(unresolved_credentials)
+            load_versions[ds_name] = self._load_versions.get(ds_name, None)
+
+        for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
+            if _is_memory_dataset(ds):  # type: ignore[arg-type]
+                continue
+            resolved_config = ds.to_config()  # type: ignore[attr-defined]
+            unresolved_config, unresolved_credentials = (
+                self._config_resolver.unresolve_credentials(ds_name, resolved_config)
+            )
+            catalog[ds_name] = unresolved_config
+            credentials.update(unresolved_credentials)
+            load_versions[ds_name] = self._load_versions.get(ds_name, None)
+
+        return catalog, credentials, load_versions, self._save_version
 
     @staticmethod
     def _validate_dataset_config(ds_name: str, ds_config: Any) -> None:

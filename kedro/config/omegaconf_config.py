@@ -126,7 +126,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self.base_env = base_env or ""
         self.default_run_env = default_run_env or ""
         self.merge_strategy = merge_strategy or {}
-
+        self._globals_oc = None
+        self._runtime_params_oc = None
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
@@ -436,9 +437,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise InterpolationResolutionError(
                 "Keys starting with '_' are not supported for globals."
             )
-        globals_oc = OmegaConf.create(self._globals)
+
+        if not self._globals_oc:
+            self._globals_oc = OmegaConf.create(self._globals)
+
         interpolated_value = OmegaConf.select(
-            globals_oc, variable, default=default_value
+            self._globals_oc, variable, default=default_value
         )
         if interpolated_value != _NO_VALUE:
             return interpolated_value
@@ -449,9 +453,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _get_runtime_value(self, variable: str, default_value: Any = _NO_VALUE) -> Any:
         """Return the runtime params values to the resolver"""
-        runtime_oc = OmegaConf.create(self.runtime_params)
+        if not self._runtime_params_oc:
+            self._runtime_params_oc = OmegaConf.create(self.runtime_params)
+
         interpolated_value = OmegaConf.select(
-            runtime_oc, variable, default=default_value
+            self._runtime_params_oc, variable, default=default_value
         )
         if interpolated_value != _NO_VALUE:
             return interpolated_value

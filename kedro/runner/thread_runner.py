@@ -9,7 +9,7 @@ import warnings
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
-from kedro.runner.runner import AbstractRunner, validate_max_workers
+from kedro.runner.runner import AbstractRunner
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -59,7 +59,7 @@ class ThreadRunner(AbstractRunner):
             is_async=False, extra_dataset_patterns=self._extra_dataset_patterns
         )
 
-        self._max_workers = validate_max_workers(max_workers)
+        self._max_workers = self._validate_max_workers(max_workers)
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """

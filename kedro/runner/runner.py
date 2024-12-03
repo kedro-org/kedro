@@ -11,12 +11,7 @@ import sys
 import warnings
 from abc import ABC, abstractmethod
 from collections import Counter, deque
-from concurrent.futures import (
-    FIRST_COMPLETED,
-    ProcessPoolExecutor,
-    ThreadPoolExecutor,
-    wait,
-)
+from concurrent.futures import FIRST_COMPLETED, Executor, ProcessPoolExecutor, wait
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
@@ -181,9 +176,7 @@ class AbstractRunner(ABC):
         return self.run(to_rerun, catalog, hook_manager)
 
     @abstractmethod  # pragma: no cover
-    def _get_executor(
-        self, max_workers: int
-    ) -> ThreadPoolExecutor | ProcessPoolExecutor:
+    def _get_executor(self, max_workers: int) -> Executor:
         """Abstract method to provide the correct executor (e.g., ThreadPoolExecutor or ProcessPoolExecutor)."""
         pass
 
@@ -342,6 +335,30 @@ class AbstractRunner(ABC):
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         return 1
+
+    @classmethod
+    def _validate_max_workers(cls, max_workers: int | None) -> int:
+        """
+        Validates and returns the number of workers. Sets to os.cpu_count() or 1 if max_workers is None,
+        and limits max_workers to 61 on Windows.
+
+        Args:
+            max_workers: Desired number of workers. If None, defaults to os.cpu_count() or 1.
+
+        Returns:
+            A valid number of workers to use.
+
+        Raises:
+            ValueError: If max_workers is set and is not positive.
+        """
+        if max_workers is None:
+            max_workers = os.cpu_count() or 1
+            if sys.platform == "win32":
+                max_workers = min(_MAX_WINDOWS_WORKERS, max_workers)
+        elif max_workers <= 0:
+            raise ValueError("max_workers should be positive")
+
+        return max_workers
 
 
 def _find_nodes_to_resume_from(
@@ -546,27 +563,3 @@ def run_node(
     )
     node = task.execute()
     return node
-
-
-def validate_max_workers(max_workers: int | None) -> int:
-    """
-    Validates and returns the number of workers. Sets to os.cpu_count() or 1 if max_workers is None,
-    and limits max_workers to 61 on Windows.
-
-    Args:
-        max_workers: Desired number of workers. If None, defaults to os.cpu_count() or 1.
-
-    Returns:
-        A valid number of workers to use.
-
-    Raises:
-        ValueError: If max_workers is set and is not positive.
-    """
-    if max_workers is None:
-        max_workers = os.cpu_count() or 1
-        if sys.platform == "win32":
-            max_workers = min(_MAX_WINDOWS_WORKERS, max_workers)
-    elif max_workers <= 0:
-        raise ValueError("max_workers should be positive")
-
-    return max_workers

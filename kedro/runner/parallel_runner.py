@@ -16,7 +16,7 @@ from kedro.io import (
     MemoryDataset,
     SharedMemoryDataset,
 )
-from kedro.runner.runner import AbstractRunner, validate_max_workers
+from kedro.runner.runner import AbstractRunner
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -75,7 +75,7 @@ class ParallelRunner(AbstractRunner):
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
-        self._max_workers = validate_max_workers(max_workers)
+        self._max_workers = self._validate_max_workers(max_workers)
 
     def __del__(self) -> None:
         self._manager.shutdown()

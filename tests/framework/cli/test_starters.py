@@ -30,7 +30,7 @@ from kedro.framework.cli.starters import (
     _validate_tool_selection,
 )
 
-FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
+FILES_IN_TEMPLATE_WITH_NO_TOOLS = 18
 
 
 @pytest.fixture

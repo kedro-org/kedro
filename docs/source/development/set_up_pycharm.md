@@ -163,10 +163,10 @@ You can enable the Kedro catalog validation schema in your PyCharm IDE to enable
 
 ![](../meta/images/pycharm_edit_schema_mapping.png)
 
-Add a new mapping using the "+" button in the top left of the window and select the name you want for it. Enter this URL `https://raw.githubusercontent.com/kedro-org/kedro/develop/static/jsonschema/kedro-catalog-0.19.json` in the "Schema URL" field and select "JSON Schema Version 7" in the "Schema version" field.
+Add a new mapping using the "+" button in the top left of the window and select the name you want for it. Enter this URL `https://raw.githubusercontent.com/kedro-org/kedro-plugins/main/kedro-datasets/static/jsonschema/kedro-catalog-0.19.json` in the "Schema URL" field and select "JSON Schema Version 7" in the "Schema version" field.
 
 Add the following file path pattern to the mapping: `conf/**/*catalog*`.
 
 ![](../meta/images/pycharm_catalog_schema_mapping.png)
 
-> [Different schemas for different Kedro versions can be found in the Kedro repository](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).
+> [Different schemas for different Kedro versions can be found in the `kedro-datasets` repository](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/static/jsonschema).

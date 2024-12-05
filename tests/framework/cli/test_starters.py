@@ -30,7 +30,7 @@ from kedro.framework.cli.starters import (
     _validate_tool_selection,
 )
 
-FILES_IN_TEMPLATE_WITH_NO_TOOLS = 18
+FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
 
 
 @pytest.fixture
@@ -111,10 +111,6 @@ def _get_expected_files(tools: str, example_pipeline: str):
     tools_list = _parse_tools_input(tools)
     example_pipeline_bool = _parse_yes_no_to_bool(example_pipeline)
     expected_files = FILES_IN_TEMPLATE_WITH_NO_TOOLS
-
-    if any((example_pipeline_bool, "6" in tools_list, "7" in tools_list)):
-        expected_files -= 3
-    # Subtract the three files from the default dummy pipeline if an example pipeline is taken from kedro-starters
 
     for tool in tools_list:
         expected_files = expected_files + tools_template_files[tool]

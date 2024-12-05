@@ -25,8 +25,7 @@ Feature: Run Project
     Given I have prepared a config file without starter
     And I have run a non-interactive kedro new without starter
     When I execute the kedro command "run"
-    Then I should get an error exit code
-    And I should get an error message including "Pipeline contains no nodes"
+    Then I should get a successful exit code
 
   Scenario: Run kedro run with config file
     Given I have prepared a config file

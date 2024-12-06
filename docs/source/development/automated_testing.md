@@ -105,7 +105,7 @@ This test is redundant, but it introduces a few of `pytest`'s core features and 
 - Tests are implemented in methods or functions beginning with `test_` and classes beginning with `Test`.
 - The `assert` statement is used to compare the result of the test with an expected value.
 
-Although this specific example does not utilize fixtures, they are an essential part of pytest for defining reusable resources across tests. See [Fixtures](https://docs.pytest.org/en/7.1.x/explanation/fixtures.html#about-fixtures)
+Although this specific example does not utilise fixtures, they are an essential part of pytest for defining reusable resources across tests. See [Fixtures](https://docs.pytest.org/en/7.1.x/explanation/fixtures.html#about-fixtures)
 
 Tests should be named as descriptively as possible, especially if you are working with other people. For example, it is easier to understand the purpose of a test with the name `test_node_passes_with_valid_input` than a test with the name `test_passes`.
 

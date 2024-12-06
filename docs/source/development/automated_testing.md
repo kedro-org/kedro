@@ -85,7 +85,7 @@ tests
 
 ### Create an example test
 
-Now that you have a place to put your tests, you can create an example test in the new file `/src/tests/test_run.py`. 
+Now that you have a place to put your tests, you can create an example test in the new file `/src/tests/test_run.py`.
 This example test demonstrates how to programmatically execute a `kedro run` using the `KedroSession` class.
 
 ```

@@ -260,11 +260,11 @@ Enter the following in your `settings.json` file:
 ```json
 {
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/kedro-org/kedro/develop/static/jsonschema/kedro-catalog-0.19.json": "conf/**/*catalog*"
+    "https://raw.githubusercontent.com/kedro-org/kedro-plugins/main/kedro-datasets/static/jsonschema/kedro-catalog-0.19.json": "conf/**/*catalog*"
   }
 }
 ```
 
 and start editing your `catalog` files.
 
-> [Different schemas for different Kedro versions can be found in the Kedro repository](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).
+> [Different schemas for different Kedro versions can be found in the Kedro repository](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/static/jsonschema).

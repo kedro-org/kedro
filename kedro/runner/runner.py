@@ -6,16 +6,25 @@ from __future__ import annotations
 
 import inspect
 import logging
+import os
+import sys
 import warnings
 from abc import ABC, abstractmethod
-from collections import deque
+from collections import Counter, deque
+from concurrent.futures import FIRST_COMPLETED, Executor, ProcessPoolExecutor, wait
+from itertools import chain
 from typing import TYPE_CHECKING, Any
+
+from pluggy import PluginManager
 
 from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import CatalogProtocol, MemoryDataset, SharedMemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.task import Task
+
+# see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
+_MAX_WINDOWS_WORKERS = 61
 
 if TYPE_CHECKING:
     from collections.abc import Collection, Iterable
@@ -167,24 +176,94 @@ class AbstractRunner(ABC):
         return self.run(to_rerun, catalog, hook_manager)
 
     @abstractmethod  # pragma: no cover
+    def _get_executor(self, max_workers: int) -> Executor:
+        """Abstract method to provide the correct executor (e.g., ThreadPoolExecutor or ProcessPoolExecutor)."""
+        pass
+
+    @abstractmethod  # pragma: no cover
     def _run(
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
-        inputs have already been checked and normalized by run().
+         inputs have already been checked and normalized by run().
+         This contains the Common pipeline execution logic using an executor.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
-
         """
-        pass
+
+        nodes = pipeline.nodes
+
+        self._validate_catalog(catalog, pipeline)
+        self._validate_nodes(nodes)
+        self._set_manager_datasets(catalog, pipeline)
+
+        load_counts = Counter(chain.from_iterable(n.inputs for n in pipeline.nodes))
+        node_dependencies = pipeline.node_dependencies
+        todo_nodes = set(node_dependencies.keys())
+        done_nodes: set[Node] = set()
+        futures = set()
+        done = None
+        max_workers = self._get_required_workers_count(pipeline)
+
+        with self._get_executor(max_workers) as pool:
+            while True:
+                ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
+                todo_nodes -= ready
+                for node in ready:
+                    task = Task(
+                        node=node,
+                        catalog=catalog,
+                        hook_manager=hook_manager,
+                        is_async=self._is_async,
+                        session_id=session_id,
+                    )
+                    if isinstance(pool, ProcessPoolExecutor):
+                        task.parallel = True
+                    futures.add(pool.submit(task))
+                if not futures:
+                    if todo_nodes:
+                        self._raise_runtime_error(todo_nodes, done_nodes, ready, done)
+                    break
+                done, futures = wait(futures, return_when=FIRST_COMPLETED)
+                for future in done:
+                    try:
+                        node = future.result()
+                    except Exception:
+                        self._suggest_resume_scenario(pipeline, done_nodes, catalog)
+                        raise
+                    done_nodes.add(node)
+                    self._logger.info("Completed node: %s", node.name)
+                    self._logger.info(
+                        "Completed %d out of %d tasks", len(done_nodes), len(nodes)
+                    )
+                    self._release_datasets(node, catalog, load_counts, pipeline)
+
+    @staticmethod
+    def _raise_runtime_error(
+        todo_nodes: set[Node],
+        done_nodes: set[Node],
+        ready: set[Node],
+        done: set[Node] | None,
+    ) -> None:
+        debug_data = {
+            "todo_nodes": todo_nodes,
+            "done_nodes": done_nodes,
+            "ready_nodes": ready,
+            "done_futures": done,
+        }
+        debug_data_str = "\n".join(f"{k} = {v}" for k, v in debug_data.items())
+        raise RuntimeError(
+            f"Unable to schedule new tasks although some nodes "
+            f"have not been run:\n{debug_data_str}"
+        )
 
     def _suggest_resume_scenario(
         self,
@@ -239,6 +318,47 @@ class AbstractRunner(ABC):
         for dataset in node.outputs:
             if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
                 catalog.release(dataset)
+
+    def _validate_catalog(self, catalog: CatalogProtocol, pipeline: Pipeline) -> None:
+        # Add catalog validation logic here if needed
+        pass
+
+    def _validate_nodes(self, node: Iterable[Node]) -> None:
+        # Add node validation logic here if needed
+        pass
+
+    def _set_manager_datasets(
+        self, catalog: CatalogProtocol, pipeline: Pipeline
+    ) -> None:
+        # Set up any necessary manager datasets here
+        pass
+
+    def _get_required_workers_count(self, pipeline: Pipeline) -> int:
+        return 1
+
+    @classmethod
+    def _validate_max_workers(cls, max_workers: int | None) -> int:
+        """
+        Validates and returns the number of workers. Sets to os.cpu_count() or 1 if max_workers is None,
+        and limits max_workers to 61 on Windows.
+
+        Args:
+            max_workers: Desired number of workers. If None, defaults to os.cpu_count() or 1.
+
+        Returns:
+            A valid number of workers to use.
+
+        Raises:
+            ValueError: If max_workers is set and is not positive.
+        """
+        if max_workers is None:
+            max_workers = os.cpu_count() or 1
+            if sys.platform == "win32":
+                max_workers = min(_MAX_WINDOWS_WORKERS, max_workers)
+        elif max_workers <= 0:
+            raise ValueError("max_workers should be positive")
+
+        return max_workers
 
 
 def _find_nodes_to_resume_from(

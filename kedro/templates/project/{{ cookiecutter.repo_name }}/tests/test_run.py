@@ -1,42 +1,25 @@
 """
-This module contains an example test.
-
+This module contains example tests for a Kedro project.
 Tests should be placed in ``src/tests``, in modules that mirror your
-project's structure, and in files named test_*.py. They are simply functions
-named ``test_*`` which test a unit of logic.
-
-To run the tests, run ``pytest`` from the project root directory.
+project's structure, and in files named test_*.py.
 """
-
-from pathlib import Path
-
 import pytest
-
-from kedro.config import OmegaConfigLoader
-from kedro.framework.context import KedroContext
-from kedro.framework.hooks import _create_hook_manager
-from kedro.framework.project import settings
-
-
-@pytest.fixture
-def config_loader():
-    return OmegaConfigLoader(conf_source=str(Path.cwd() / settings.CONF_SOURCE))
-
-
-@pytest.fixture
-def project_context(config_loader):
-    return KedroContext(
-        package_name="{{ cookiecutter.python_package }}",
-        project_path=Path.cwd(),
-        env="local",
-        config_loader=config_loader,
-        hook_manager=_create_hook_manager(),
-    )
-
+from pathlib import Path
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
 
 # The tests below are here for the demonstration purpose
 # and should be replaced with the ones testing the project
 # functionality
-class TestProjectContext:
-    def test_project_path(self, project_context):
-        assert project_context.project_path == Path.cwd()
+
+class TestKedroRun:
+    def test_kedro_run_no_pipeline(self):
+    # This example test expects a pipeline run failure, since
+    # the default project template contains no pipelines.
+        bootstrap_project(Path.cwd())
+
+        with pytest.raises(Exception) as excinfo:
+            with KedroSession.create(project_path=Path.cwd()) as session:
+                session.run()
+
+        assert "Pipeline contains no nodes" in str(excinfo.value)

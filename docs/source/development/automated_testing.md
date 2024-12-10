@@ -85,38 +85,27 @@ tests
 
 ### Create an example test
 
-Now that you have a place to put your tests, you can create an example test in the new file `/src/tests/test_run.py`. The example test simply checks that the project_path attribute of a specially-defined `KedroContext` object has been correctly set.
+Now that you have a place to put your tests, you can create an example test in the new file `/src/tests/test_run.py`.
+This example test demonstrates how to programmatically execute a `kedro run` using the `KedroSession` class.
 
 ```
-import pytest
-from kedro.config import OmegaConfigLoader
-from kedro.framework.context import KedroContext
-from kedro.framework.hooks import _create_hook_manager
+from pathlib import Path
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
 
+class TestKedroRun:
+    def test_kedro_run(self):
+        bootstrap_project(Path.cwd())
 
-@pytest.fixture
-def config_loader():
-    return OmegaConfigLoader(conf_source=str(Path.cwd()))
-
-
-@pytest.fixture
-def project_context(config_loader):
-    return KedroContext(
-        package_name=<package_name>,
-        project_path=Path.cwd(),
-        config_loader=config_loader,
-        hook_manager=_create_hook_manager(),
-    )
-
-class TestProjectContext:
-    def test_project_path(self, project_context):
-        assert project_context.project_path == Path.cwd()
+        with KedroSession.create(project_path=Path.cwd()) as session:
+            assert session.run() is not None
 ```
 
 This test is redundant, but it introduces a few of `pytest`'s core features and demonstrates the layout of a test file:
-- [Fixtures](https://docs.pytest.org/en/7.1.x/explanation/fixtures.html#about-fixtures) are used to define resources used in tests.
 - Tests are implemented in methods or functions beginning with `test_` and classes beginning with `Test`.
 - The `assert` statement is used to compare the result of the test with an expected value.
+
+Although this specific example does not utilise fixtures, they are an essential part of pytest for defining reusable resources across tests. See [Fixtures](https://docs.pytest.org/en/7.1.x/explanation/fixtures.html#about-fixtures)
 
 Tests should be named as descriptively as possible, especially if you are working with other people. For example, it is easier to understand the purpose of a test with the name `test_node_passes_with_valid_input` than a test with the name `test_passes`.
 

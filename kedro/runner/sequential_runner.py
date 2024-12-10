@@ -5,12 +5,13 @@ of provided nodes.
 
 from __future__ import annotations
 
-from collections import Counter
-from itertools import chain
+from concurrent.futures import (
+    Executor,
+    ThreadPoolExecutor,
+)
 from typing import TYPE_CHECKING, Any
 
 from kedro.runner.runner import AbstractRunner
-from kedro.runner.task import Task
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -46,11 +47,16 @@ class SequentialRunner(AbstractRunner):
             is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )
 
+    def _get_executor(self, max_workers: int) -> Executor:
+        return ThreadPoolExecutor(
+            max_workers=1
+        )  # Single-threaded for sequential execution
+
     def _run(
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:
         """The method implementing sequential pipeline running.
@@ -69,27 +75,9 @@ class SequentialRunner(AbstractRunner):
                 "Using synchronous mode for loading and saving data. Use the --async flag "
                 "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
             )
-        nodes = pipeline.nodes
-        done_nodes = set()
-
-        load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
-
-        for exec_index, node in enumerate(nodes):
-            try:
-                Task(
-                    node=node,
-                    catalog=catalog,
-                    hook_manager=hook_manager,
-                    is_async=self._is_async,
-                    session_id=session_id,
-                ).execute()
-                done_nodes.add(node)
-            except Exception:
-                self._suggest_resume_scenario(pipeline, done_nodes, catalog)
-                raise
-
-            self._release_datasets(node, catalog, load_counts, pipeline)
-
-            self._logger.info(
-                "Completed %d out of %d tasks", len(done_nodes), len(nodes)
-            )
+        super()._run(
+            pipeline=pipeline,
+            catalog=catalog,
+            hook_manager=hook_manager,
+            session_id=session_id,
+        )

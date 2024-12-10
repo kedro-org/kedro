@@ -6,7 +6,7 @@ using threads.
 from __future__ import annotations
 
 import warnings
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Executor, ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 from kedro.runner.runner import AbstractRunner

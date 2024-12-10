@@ -6,6 +6,7 @@ of provided nodes.
 from __future__ import annotations
 
 from concurrent.futures import (
+    Executor,
     ThreadPoolExecutor,
 )
 from typing import TYPE_CHECKING, Any

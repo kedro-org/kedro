@@ -172,7 +172,7 @@ class ParallelRunner(AbstractRunner):
 
         return min(required_processes, self._max_workers)
 
-    def _get_executor(self, max_workers: int) -> ProcessPoolExecutor:
+    def _get_executor(self, max_workers: int) -> Executor:
         return ProcessPoolExecutor(max_workers=max_workers)
 
     def _run(

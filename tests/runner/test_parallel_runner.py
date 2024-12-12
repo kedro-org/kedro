@@ -17,9 +17,9 @@ from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
 from kedro.runner.parallel_runner import (
-    _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
 )
+from kedro.runner.runner import _MAX_WINDOWS_WORKERS
 from tests.runner.conftest import (
     exception_fn,
     identity,

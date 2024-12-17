@@ -79,11 +79,41 @@ We cannot see nor store information contained into a Kedro project. Opt in with 
 and out with "no".
 """
 
-NAME_PROMPT = """Project Name
+NAME_PROMPT = """
+Project Name
 ============
 Please enter a name for your new project.
 Spaces, hyphens, and underscores are allowed.
 To skip this step in future use --name
+"""
+
+TOOLS_PROMPT = """
+Project Tools
+=============
+These optional tools can help you apply software engineering best practices.
+To skip this step in future use --tools
+To find out more: https://docs.kedro.org/en/stable/starters/new_project_tools.html
+
+Tools
+1) Lint: Basic linting with Ruff
+2) Test: Basic testing with pytest
+3) Log: Additional, environment-specific logging options
+4) Docs: A Sphinx documentation setup
+5) Data Folder: A folder structure for data management
+6) PySpark: Configuration for working with PySpark
+7) Kedro-Viz: Kedro's native visualisation tool
+
+Which tools would you like to include in your project? [1-7/1,3/all/none]:
+"""
+
+EXAMPLE_PROMPT = """
+Example Pipeline
+================
+Select whether you would like an example spaceflights pipeline included in your project.
+To skip this step in the future use --example=y/n
+To find out more: https://docs.kedro.org/en/stable/starters/new_project_tools.html
+
+Would you like to include an example pipeline? :
 """
 
 
@@ -310,7 +340,6 @@ def starter() -> None:
 @click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-@click.option("--tools", "-t", "selected_tools", help=TOOLS_ARG_HELP)
 @click.option(
     "--name",
     "-n",
@@ -319,7 +348,22 @@ def starter() -> None:
     prompt=NAME_PROMPT,
     default="new-kedro-project",
 )
-@click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
+@click.option(
+    "--tools",
+    "-t",
+    "selected_tools",
+    help=TOOLS_ARG_HELP,
+    prompt=TOOLS_PROMPT,
+    default="none",
+)
+@click.option(
+    "--example",
+    "-e",
+    "example_pipeline",
+    help=EXAMPLE_ARG_HELP,
+    prompt=EXAMPLE_PROMPT,
+    default="no",
+)
 @click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP)
 def new(  # noqa: PLR0913
     config_path: str,

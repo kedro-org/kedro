@@ -79,6 +79,13 @@ We cannot see nor store information contained into a Kedro project. Opt in with 
 and out with "no".
 """
 
+NAME_PROMPT = """Project Name
+============
+Please enter a name for your new project.
+Spaces, hyphens, and underscores are allowed.
+To skip this step in future use --name
+"""
+
 
 @define(order=True)
 class KedroStarterSpec:
@@ -304,7 +311,7 @@ def starter() -> None:
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--tools", "-t", "selected_tools", help=TOOLS_ARG_HELP)
-@click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
+@click.option("--name", "-n", "project_name", help=NAME_ARG_HELP, prompt=NAME_PROMPT)
 @click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
 @click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP)
 def new(  # noqa: PLR0913

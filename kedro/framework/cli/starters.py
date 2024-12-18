@@ -386,7 +386,7 @@ def new(  # noqa: PLR0913
 
     if not starter_alias:
         if not project_name:
-            project_name = click.prompt(NAME_PROMPT, default="new-kedro-project")
+            project_name = click.prompt(NAME_PROMPT, default="New Kedro Project")
         if not selected_tools:
             selected_tools = click.prompt(TOOLS_PROMPT, default="none")
         if not example_pipeline:

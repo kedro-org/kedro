@@ -345,24 +345,18 @@ def starter() -> None:
     "-n",
     "project_name",
     help=NAME_ARG_HELP,
-    prompt=NAME_PROMPT,
-    default="new-kedro-project",
 )
 @click.option(
     "--tools",
     "-t",
     "selected_tools",
     help=TOOLS_ARG_HELP,
-    prompt=TOOLS_PROMPT,
-    default="none",
 )
 @click.option(
     "--example",
     "-e",
     "example_pipeline",
     help=EXAMPLE_ARG_HELP,
-    prompt=EXAMPLE_PROMPT,
-    default="no",
 )
 @click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP)
 def new(  # noqa: PLR0913
@@ -389,6 +383,14 @@ def new(  # noqa: PLR0913
     }
     _validate_flag_inputs(flag_inputs)
     starters_dict = _get_starters_dict()
+
+    if not starter_alias:
+        if not project_name:
+            project_name = click.prompt(NAME_PROMPT, default="new-kedro-project")
+        if not selected_tools:
+            selected_tools = click.prompt(TOOLS_PROMPT, default="none")
+        if not example_pipeline:
+            example_pipeline = click.prompt(EXAMPLE_PROMPT, default="no")
 
     if starter_alias in starters_dict:
         if directory:

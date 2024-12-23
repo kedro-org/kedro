@@ -13,6 +13,7 @@ import shutil
 import stat
 import sys
 import tempfile
+import warnings
 from itertools import groupby
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable
@@ -271,6 +272,13 @@ def _print_selection_and_prompt_info(
         click.secho(
             "It has been created with an example pipeline.",
             fg="green",
+        )
+    else:
+        warnings.warn(
+            "Your project does not contain any pipelines with nodes. "
+            "Please ensure that at least one pipeline has been defined before "
+            "executing 'kedro run'.",
+            UserWarning,
         )
 
     # Give hint for skipping interactive flow

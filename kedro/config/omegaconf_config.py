@@ -347,12 +347,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
 
+        merged_config_container = OmegaConf.to_container(
+            OmegaConf.merge(*aggregate_config), resolve=True
+        )
         return {
-            k: v
-            for k, v in OmegaConf.to_container(
-                OmegaConf.merge(*aggregate_config), resolve=True
-            ).items()
-            if not k.startswith("_")
+            k: v for k, v in merged_config_container.items() if not k.startswith("_")
         }
 
     @staticmethod

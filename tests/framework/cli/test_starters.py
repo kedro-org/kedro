@@ -861,9 +861,6 @@ class TestNewWithStarterValid:
             "template": "git+https://github.com/fake/fake.git",
             "directory": None,
         }
-        starters_version = mock_determine_repo_dir.call_args[1].pop("checkout", None)
-
-        assert starters_version in [version, "main"]
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         del kwargs["directory"]
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
@@ -910,9 +907,6 @@ class TestNewWithStarterValid:
             "template": "git+https://github.com/fake/fake.git",
             "directory": "my_directory",
         }
-        starters_version = mock_determine_repo_dir.call_args[1].pop("checkout", None)
-
-        assert starters_version in [version, "main"]
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
 

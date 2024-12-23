@@ -345,7 +345,6 @@ def new(  # noqa: PLR0913
         checkout = _select_checkout_branch_for_cookiecutter(checkout)
     elif starter_alias is not None:
         template_path = starter_alias
-        checkout = _select_checkout_branch_for_cookiecutter(checkout)
     else:
         template_path = str(TEMPLATE_PATH)
 

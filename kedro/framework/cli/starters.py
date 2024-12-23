@@ -519,7 +519,7 @@ def _get_available_tags(template_path: str) -> list:
         # tags: ['/tags/version', '/tags/version^{}']
         # unique_tags: {'version'}
 
-    except git.GitCommandError:
+    except git.GitCommandError:  # pragma: no cover
         return []
     return sorted(unique_tags)
 

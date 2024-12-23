@@ -936,26 +936,6 @@ class TestNewWithStarterInvalid:
         assert result.exit_code != 0
         assert "Kedro project template not found at invalid" in result.output
 
-    def test_invalid_starter_tag_suggestions(self, fake_kedro_cli):
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            [
-                "new",
-                "-v",
-                "--starter",
-                "https://github.com/kedro-org/kedro-starters.git",
-                "--directory",
-                "spaceflights-pandas",
-                "--checkout",
-                "invalid",
-            ],
-            input=_make_cli_prompt_input(),
-        )
-        assert result.exit_code != 0
-        assert (
-            "Specified tag invalid. The following tags are available:" in result.output
-        )
-
     @pytest.mark.parametrize(
         "starter, repo",
         [

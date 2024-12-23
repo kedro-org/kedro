@@ -126,8 +126,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self.base_env = base_env or ""
         self.default_run_env = default_run_env or ""
         self.merge_strategy = merge_strategy or {}
-        self._globals_oc = None
-        self._runtime_params_oc = None
+        self._globals_oc: DictConfig | None = None
+        self._runtime_params_oc: DictConfig | None = None
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],

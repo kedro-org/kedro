@@ -4,6 +4,7 @@ in a Kedro's execution process.
 
 import logging
 from collections.abc import Iterable
+from inspect import isclass
 from typing import Any
 
 from pluggy import PluginManager
@@ -48,6 +49,11 @@ def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:
         # case hooks have already been registered, so we perform a simple check
         # here to avoid an error being raised and break user's workflow.
         if not hook_manager.is_registered(hooks_collection):
+            if isclass(hooks_collection):
+                raise TypeError(
+                    "KedroSession expects hooks to be registered as instances. "
+                    "Have you forgotten the `()` when registering a hook class ?"
+                )
             hook_manager.register(hooks_collection)
 
 

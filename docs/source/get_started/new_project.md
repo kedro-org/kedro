@@ -133,7 +133,7 @@ kedro run
 ```
 
 ```{warning}
-`kedro run` requires at least one pipeline with nodes. Please define a pipeline before running this command, and ensure it is registred in `pipeline_registry.py`.
+`kedro run` requires at least one pipeline with nodes. Please define a pipeline before running this command and ensure it is registred in `pipeline_registry.py`.
 ```
 
 ```{note}

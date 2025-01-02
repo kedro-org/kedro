@@ -5,6 +5,7 @@
 
 ## Bug fixes and other changes
 * Added validation to ensure dataset versions consistency across catalog.
+* Added `node` import to the pipeline template.
 
 ## Breaking changes to the API
 ## Documentation changes

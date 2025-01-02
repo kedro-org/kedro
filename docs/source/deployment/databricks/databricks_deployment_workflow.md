@@ -253,8 +253,8 @@ The Databricks API enables you to programmatically interact with Databricks serv
 
 1. [Set up your Kedro project for deployment on Databricks](#set-up-your-project-for-deployment-to-databricks)
 2. Create a JSON file containing your job's configuration.
-3. Use the Jobs API's [`/create` endpoint](https://docs.databricks.com/workflows/jobs/jobs-api-updates.html#create) to create a new job.
-4. Use the Jobs API's [`/runs/submit` endpoint](https://docs.databricks.com/workflows/jobs/jobs-api-updates.html#runs-submit) to run your newly created job.
+3. Use the Jobs API's [`/create` endpoint](https://docs.databricks.com/en/reference/jobs-2.0-api.html#create) to create a new job.
+4. Use the Jobs API's [`/runs/submit` endpoint](https://docs.databricks.com/en/reference/jobs-2.0-api.html#runs-submit) to run your newly created job.
 
 ### How to use the Databricks CLI to automatically deploy a Kedro project
 

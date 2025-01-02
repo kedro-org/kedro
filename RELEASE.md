@@ -5,6 +5,7 @@
 
 ## Bug fixes and other changes
 * Added validation to ensure dataset versions consistency across catalog.
+* Fixed a bug in project creation when using a custom starter template offline.
 
 ## Breaking changes to the API
 ## Documentation changes

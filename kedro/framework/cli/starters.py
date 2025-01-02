@@ -353,7 +353,6 @@ def new(  # noqa: PLR0913
         checkout = _select_checkout_branch_for_cookiecutter(checkout)
     elif starter_alias is not None:
         template_path = starter_alias
-        checkout = _select_checkout_branch_for_cookiecutter(checkout)
     else:
         template_path = str(TEMPLATE_PATH)
 
@@ -528,7 +527,7 @@ def _get_available_tags(template_path: str) -> list:
         # tags: ['/tags/version', '/tags/version^{}']
         # unique_tags: {'version'}
 
-    except git.GitCommandError:
+    except git.GitCommandError:  # pragma: no cover
         return []
     return sorted(unique_tags)
 

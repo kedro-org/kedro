@@ -1,4 +1,4 @@
-image: gitpod/workspace-python-3.11
+image: gitpod/workspace-python-3.9
 
 tasks:
   - name: kedro

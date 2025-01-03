@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Implemented `KedroDataCatalog.to_config()` method that converts the catalog instance into a configuration format suitable for serialization.
+* Improve OmegaConfigLoader performance
 
 ## Bug fixes and other changes
 * Added validation to ensure dataset versions consistency across catalog.

@@ -1,6 +1,11 @@
 import pytest
+from pluggy import PluginManager
 
-from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
+from kedro.framework.hooks.manager import (
+    _create_hook_manager,
+    _NullPluginManager,
+    _register_hooks,
+)
 from kedro.framework.hooks.specs import (
     DataCatalogSpecs,
     DatasetSpecs,
@@ -8,6 +13,10 @@ from kedro.framework.hooks.specs import (
     NodeSpecs,
     PipelineSpecs,
 )
+
+
+class ExampleHook:
+    pass
 
 
 @pytest.mark.parametrize(
@@ -73,3 +82,23 @@ def test_null_plugin_manager_returns_none_when_called():
     assert (
         plugin_manager.hook.before_dataset_saved(dataset_name="mock", data=[]) is None
     )
+
+
+@pytest.mark.parametrize(
+    "hooks, should_raise",
+    [
+        ([ExampleHook], True),
+        ([ExampleHook()], False),
+    ],
+)
+def test_register_hooks(hooks, should_raise):
+    mock_hook_manager = PluginManager("test_project")
+
+    if should_raise:
+        with pytest.raises(
+            TypeError, match="KedroSession expects hooks to be registered as instances"
+        ):
+            _register_hooks(mock_hook_manager, hooks)
+    else:
+        _register_hooks(mock_hook_manager, hooks)
+        assert mock_hook_manager.is_registered(hooks[0])

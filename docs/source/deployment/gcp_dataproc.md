@@ -1,7 +1,59 @@
 # GCP Dataproc
 
-The guide details kedro pipeline deployment steps for Dataproc compute engine and Dataproc serverless.
+`Dataproc serverless` lets you run Spark workloads without requiring you to provision and manage your own Dataproc cluster. An advantage over `Dataproc compute engine` is that `Dataproc serverless` supports custom containers allowing you package your dependencies at build time. Refer [here](https://cloud.google.com/dataproc-serverless/docs/overview#s8s-compared) for the official comparison between Dataproc serverless and compute engine.
 
+The guide details kedro pipeline deployment steps for `Dataproc serverless`.
+
+## Overview
+
+The below diagram details the dataproc serverless dev and prod deployment workflows. 
+
+
+### DEV deployment (and experimentation)
+
+The following are the steps:
+
+1. **User build**: Each developer branches out from develop, pulls the latest develop dataproc image, and builds their own custom docker image (if required). Note the following:
+  - `libraries` - Packaged: This includes any python dependencies + any other libraries
+  - `artifacts` - NOT Packaged
+  - `code` - NOT Packaged
+  - `entrypoint.py` - NOT Packaged
+2. **Push image**: After successful manual build, the developer pushes it to artifact registry with a custom tag (default: branch_name)
+3. **Submit spark batches**: The developer triggers an experimental run with dataproc batches submission python script with parameters
+   - `--env=dev`
+   - `--run-id=...`
+   - `--kedro-run-args=...`
+3.1. **Prepare and push artifacts to GCS**: The script packages the active code changes in the branch into an archive, prepares any necessary artifacts and pushes to GCS in `{branch}/{run_id}` namespace.
+3.2. **Pull docker image to dataproc**: Dataproc pulls the custom docker image tagged with the branch name from artifact registry
+3.3. **Pull artifact archives**: Dataproc pulls the archives containing the artifacts and unzips them on master and all workers in the working directory
+3.4. **Run pyspark job**: The main file then triggers the pyspark job as the standard kedro cli command: `kedro run --pipeline=... --params=...`
+3.5. *(Optional)* **Run output**: It is recommended to segregate the experimental run outputs into `{branch}/{run_id}` namespace.
+ 
+
+![GCP DEV deployment workflow](../meta/images/gcp_dataproc_serverless_dev_workflow.png)
+
+### PROD deployment
+
+The following are the steps:
+
+1. **Cut a release from develop**: A release branch is cut from the `develop` branch as `release/v0.2.0`
+2. **Prepare release**: Minor fixes, final readiness and release notes are added to prepare the release.
+3. **Merge into main**: After all checks passes and necessary approvals, the release branch is merged into main, and the commit is tagged with the version
+4. **Deploy docker image**: The docker image is built with release tag version `v0.2.0` and pushed to prod artifact registry. Note the following:
+  - `libraries` - Packaged
+  - `artifacts` - Packaged
+  - `code` - Packaged
+  - `entrypoint.py` - Packaged
+5.1. **Prepare and push artifacts to GCS**: The script prepares any necessary artifacts and pushes to GCS in `{branch}/{run_id}` namespace.
+5.2. **Pull docker image to dataproc**: Dataproc pulls the custom docker image tagged with the branch name from artifact registry
+5.3. **Pull artifact archives**: Dataproc pulls the archives containing the artifacts and unzips them on master and all workers in the working directory
+5.4. **Run pyspark job**: The main file then triggers the pyspark job as the standard kedro cli command: `kedro run --pipeline=... --params=...`
+5.5. *(Optional)* **Run output**: It is recommended to segregate the experimental run outputs into `{branch}/{run_id}` namespace.
+
+![GCP PROD deployment workflow](../meta/images/gcp_dataproc_serverless_prod_workflow.png)
+
+
+**NOTE**: The above describes a simple reference deployment pattern. Please adapt it for your usecase.
 
 ## Prerequisite Setup
 
@@ -84,7 +136,7 @@ dataproc-run-submit-{REGION}-{UID}-dev/
 ```bash
 dataproc-run-submit-{REGION}-{UID}-prod/
 └── release/
-    └── {version}/ # for e.g. v0.1.2 
+    └── {version}/ # for e.g. v.2.0 
 ```
 
 #### Dataproc run output bucket
@@ -102,7 +154,7 @@ dataproc-run-output-{REGION}-{UID}-dev/
 ```bash
 dataproc-run-output-{REGION}-{UID}-prod/
 └── release/
-    └── {version}/ # for e.g. v0.1.2 
+    └── {version}/ # for e.g. v.2.0 
         └── {run_id}
 ```
 
@@ -243,8 +295,10 @@ RUN chmod -R a+w /home/kedro
 
 ### Configure Artifact registry
 
+This creates your repository in the artifact registry.
+
 ```bash
-gcloud artifacts repositories create my-kedro-project \
+gcloud artifacts repositories create ${ARTIFACT_REPOSITORY} \
     --repository-format=docker \
     --location=${REGION} \
     --description="Kedro project docker repository"
@@ -252,26 +306,38 @@ gcloud artifacts repositories create my-kedro-project \
 
 #### Gcloud configure docker auth
 
+This configures gcloud authentication with the artifact registry.
+
 ```bash
-gcloud auth configure-docker {region}-docker.pkg.dev
+gcloud auth configure-docker ${ARTIFACT_REGISTRY}
 ```
 
 #### Push Image to Artifact Registry
 
-
 `deployment/dataproc/serverless/build_push_docker.sh`
+
+- This script builds and pushes the docker image for user dev workflows by tagging each custom build with the branch name (or a custom tag).
+- The developer can experiment with any customizations to the docker image in their feature branches.
+- It also allows to build and push the docker image for prod workflows by tagging it with the release version.
 
 ```bash
 #!/usr/bin/env bash
 
 set -ex
 
+# NOTE: Specify or fetch project level details here
+PROJECT_ID=xxxx
+ARTIFACT_REPOSITORY=xxxx
+ARTIFACT_REPOSITORY=xxxx
+
+CONTAINER_IMAGE_NAME="dataproc-serverless"
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 BRANCH_NAME_CLEAN=$(echo ${BRANCH_NAME} | sed 's/[^a-zA-Z0-9]/-/g')
 
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
+        --custom-tag) CUSTOM_TAG="$2"; shift ;;
         --env) ENV="$2"; shift ;;
         --release) RELEASE="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
@@ -279,7 +345,9 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-if [ "$ENV" == "dev" ]; then
+if [ "$CUSTOM_TAG" ]; then
+    CONTAINER_IMAGE_TAG=${CUSTOM_TAG}
+elif [ "$ENV" == "dev" ]; then
     CONTAINER_IMAGE_TAG=${BRANCH_NAME_CLEAN}
 elif [ "$ENV" == "prod" ]; then
     CONTAINER_IMAGE_TAG=${RELEASE}
@@ -288,9 +356,9 @@ else
     exit 1
 fi
 
-CONTAINER_IMAGE=xxxx:${CONTAINER_IMAGE_TAG}
+CONTAINER_IMAGE=${ARTIFACT_REGISTRY}/${PROJECT_ID}/${ARTIFACT_REPOSITORY}/${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}
 
-docker build -f deployment/dataproc/Dockerfile -t ${CONTAINER_IMAGE} . --platform="linux/amd64"
+docker build -f deployment/dataproc/serverless/Dockerfile -t ${CONTAINER_IMAGE} . --platform="linux/amd64"
 docker push ${CONTAINER_IMAGE}
 ```
 
@@ -303,7 +371,7 @@ deployment/dataproc/serverless/build_push_docker.sh --env dev
 In prod workflow:
 
 ```bash
-deployment/dataproc/serverless/build_push_docker.sh --env prod --release v0.1.2
+deployment/dataproc/serverless/build_push_docker.sh --env prod --release v.2.0
 ```
 
 #### Submit pyspark batches
@@ -366,11 +434,11 @@ BRANCH_NAME_CLEAN = re.sub(r'[^a-zA-Z0-9]', '-', BRANCH_NAME)
 PROJECT_CONFIG = load_project_config()[ENV]
 
 PROJECT_ID = PROJECT_CONFIG["PROJECT_ID"]
-USECASE = PROJECT_CONFIG["USECASE"]
 REGION = PROJECT_CONFIG["REGION"]
 RUN_SUBMIT_BUCKET = PROJECT_CONFIG["DATAPROC"]["RUN_SUBMIT_BUCKET"]
 RUN_SERVICE_ACCOUNT = PROJECT_CONFIG["DATAPROC"]["RUN_SERVICE_ACCOUNT"]
 DATAPROC_RUNTIME_VERSION = PROJECT_CONFIG["DATAPROC"]["SERVERLESS"]["RUNTIME_VERSION"]
+DATAPROC_DOCKER_IMAGE_NAME = PROJECT_CONFIG["DATAPROC"]["SERVERLESS"]["IMAGE_NAME"]
 
 if ENV == 'dev':
     GCS_RUN_SUBMIT_DIR = f'gs://{RUN_SUBMIT_BUCKET}/{BRANCH_NAME_CLEAN}/{RUN_ID}'
@@ -457,7 +525,7 @@ For dev workflow:
 ```bash
 python deployment/dataproc/serverless/submit_batches.py \
     --env dev \
-    --run-id 20241230-my-kedro-pipeline-dev-run-1 \
+    --run-id 20241230-my-kedro-pipeline-feat-feature-a-dev-run-1 \
     --kedro-run-args="--pipeline=my_kedro_pipeline --params='param1:10,param2=a'"
 ```
 
@@ -468,7 +536,7 @@ During release (one time):
 ```bash
 python deployment/dataproc/serverless/submit_batches.py \
     --env prod \
-    --release v0.1.2 \
+    --release v0.2.0 \
     --no-run-trigger
 ```
 
@@ -477,14 +545,12 @@ In subsequent run triggers:
 ```bash
 python deployment/dataproc/serverless/submit_batches.py \
     --env prod \
-    --release v0.1.2 \
+    --release v0.2.0 \
     --no-prepare-artifacts \
-    --run-id 20241230-my-kedro-pipeline-prod-run-1 \
+    --run-id 20250101-my-kedro-pipeline-v0.2.0-prod-run-1 \
     --kedro-run-args="--pipeline=my_kedro_pipeline --params='param1:10,param2=a'"
 ```
 
 NOTE
 > 1. It is recommended to automate release workflows in the CI/CD pipeline using CI Framework native docker build steps which can benefit from caching.
 > 2. The pipeline deployment depicted here is a simplified example. In real world workflows, the pipeline deployment will have a lot more nuances.
-
-

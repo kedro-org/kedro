@@ -8,6 +8,7 @@
 * Added validation to ensure dataset versions consistency across catalog.
 * Fixed a bug in project creation when using a custom starter template offline.
 * Added `node` import to the pipeline template.
+* Update error message when executing kedro run without pipeline.
 * Safeguard hooks when user incorrectly registers a hook class in settings.py.
 
 ## Breaking changes to the API

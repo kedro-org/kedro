@@ -132,6 +132,10 @@ Now run the project:
 kedro run
 ```
 
+```{warning}
+`kedro run` requires at least one pipeline with nodes. Please define a pipeline before running this command and ensure it is registred in `pipeline_registry.py`.
+```
+
 ```{note}
 The first time you type a `kedro` command in a new project, you will be asked whether you wish to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask this question again.
 ```

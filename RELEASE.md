@@ -10,6 +10,7 @@
 * Added `node` import to the pipeline template.
 * Update error message when executing kedro run without pipeline.
 * Safeguard hooks when user incorrectly registers a hook class in settings.py.
+* Updated `Partitioned dataset lazy saving` docs page.
 
 ## Breaking changes to the API
 ## Documentation changes

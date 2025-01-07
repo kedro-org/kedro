@@ -235,7 +235,7 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 ```
 
 ```{note}
-Other `Callable` types but `lambda` provided will be ignored and processed as is without apllying lazy saving.
+Other `Callable` types but `lambda` provided will be ignored and processed as is without applying lazy saving.
 ```
 
 ```{note}

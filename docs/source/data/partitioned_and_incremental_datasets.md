@@ -213,7 +213,7 @@ Writing to an existing partition may result in its data being overwritten, if th
 ### Partitioned dataset lazy saving
 `PartitionedDataset` also supports lazy saving, where the partition's data is not materialised until it is time to write.
 
-To use this, simply return `Callable` types in the dictionary:
+To use this, simply wrap your object with `lambda` function in the dictionary before return:
 
 ```python
 from typing import Any, Dict, Callable
@@ -232,6 +232,10 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
         # create a file "s3://my-bucket-name/part/bar.csv"
         "part/bar": lambda: pd.DataFrame({"data": [3, 4]}),
     }
+```
+
+```{note}
+Other `Callable` types but `lambda` provided will be ignored and processed as is without apllying lazy saving.
 ```
 
 ```{note}

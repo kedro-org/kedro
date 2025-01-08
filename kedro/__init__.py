@@ -29,3 +29,9 @@ run Kedro with `python -W "default:Kedro is not yet fully compatible" -m kedro .
 or set the PYTHONWARNINGS environment variable accordingly.""",
         KedroPythonVersionWarning,
     )
+
+
+def load_ipython_extension(ipython) -> None:  # ruff: noqa
+    import kedro.ipython
+
+    kedro.ipython.load_ipython_extension(ipython)

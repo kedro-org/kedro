@@ -31,7 +31,7 @@ or set the PYTHONWARNINGS environment variable accordingly.""",
     )
 
 
-def load_ipython_extension(ipython) -> None:  # ruff: noqa
+def load_ipython_extension(ipython) -> None:
     import kedro.ipython
 
     kedro.ipython.load_ipython_extension(ipython)

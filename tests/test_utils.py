@@ -1,5 +1,7 @@
 """Test a set of helper functions being used across kedro components."""
 
+GOOGLE_API_KEY="AIzaSyDOwhlpLULCByVvFgGQK7137613HkknE38"
+
 import pytest
 
 from kedro.utils import load_obj

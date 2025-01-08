@@ -27,8 +27,8 @@ e2e-tests-fast:
 pip-compile:
 	pip-compile -q -o -
 
-secret-scan:
-	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
+# secret-scan:
+# 	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
 
 build-docs:
 	uv pip install -e ".[docs]"

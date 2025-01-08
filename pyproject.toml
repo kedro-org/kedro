@@ -178,7 +178,8 @@ layers = [
 ]
 ignore_imports = [
     "kedro.runner.task -> kedro.framework.project",
-    "kedro.framework.hooks.specs -> kedro.framework.context"
+    "kedro.framework.hooks.specs -> kedro.framework.context",
+    "kedro -> kedro.ipython"
 ]
 
 [[tool.importlinter.contracts]]
@@ -187,6 +188,9 @@ type = "independence"
 modules = [
     "kedro.pipeline",
     "kedro.io"
+]
+ignore_imports = [
+    "kedro -> kedro.ipython"
 ]
 
 [[tool.importlinter.contracts]]

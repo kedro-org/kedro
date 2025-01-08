@@ -5,6 +5,7 @@ configuration and pipeline assembly.
 
 import sys
 import warnings
+from typing import Any
 
 __version__ = "0.19.10"
 
@@ -31,7 +32,7 @@ or set the PYTHONWARNINGS environment variable accordingly.""",
     )
 
 
-def load_ipython_extension(ipython) -> None:
+def load_ipython_extension(ipython: Any) -> None:
     import kedro.ipython
 
     kedro.ipython.load_ipython_extension(ipython)

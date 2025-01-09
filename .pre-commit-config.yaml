@@ -40,11 +40,9 @@ repos:
             pass_filenames: false
             entry: lint-imports
 
-    - repo: local
+    - repo: https://github.com/Yelp/detect-secrets
+      rev: v1.5.0
       hooks:
-          - id: secret_scan
-            name: "Secret scan"
-            language: system
+          - id: detect-secrets
+            args: ['--baseline', '.secrets.baseline']
             exclude: ^features/steps/test_starter
-            pass_filenames: false
-            entry: make secret-scan

@@ -132,6 +132,10 @@ Now run the project:
 kedro run
 ```
 
+```{warning}
+`kedro run` requires at least one pipeline with nodes. Please define a pipeline before running this command and ensure it is registred in `pipeline_registry.py`.
+```
+
 ## Visualise a Kedro project
 
 This section swiftly introduces project visualisation using Kedro-Viz. See the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.

@@ -901,6 +901,11 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
         if windows_path:
             path = ":".join(windows_path.groups())
 
+    if parsed_path.query:
+        path = f"{path}?{parsed_path.query}"
+    if parsed_path.fragment:
+        path = f"{path}#{parsed_path.fragment}"
+
     options = {"protocol": protocol, "path": path}
 
     if parsed_path.netloc and protocol in CLOUD_PROTOCOLS:

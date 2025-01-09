@@ -54,13 +54,23 @@ jobs:
       python-version: ${{ matrix.python-version }}
       branch: ${{ inputs.branch }}
 
-
   pip-compile:
     strategy:
       matrix:
         os: [ windows-latest, ubuntu-latest ]
         python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
     uses: ./.github/workflows/pip-compile.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
+
+  detect-secrets:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.11" ]
+    uses: ./.github/workflows/detect-secrets.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}

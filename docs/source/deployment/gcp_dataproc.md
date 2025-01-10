@@ -57,7 +57,7 @@ The following are the steps:
 
 ## Prerequisite Setup
 
-#### Create service accounts
+### Create service accounts
 
 NOTE:
 

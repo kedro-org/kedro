@@ -32,6 +32,7 @@ This following pages provide information for deployment to, or integration with,
 * [Azure](azure.md)
 * [Dask](dask.md)
 * [Databricks](./databricks/index.md)
+* [GCP Dataproc](gcp_dataproc.md)
 * [Kubeflow Workflows](kubeflow.md)
 * [Prefect](prefect.md)
 * [Vertex AI](vertexai.md)

@@ -539,7 +539,6 @@ myst_enable_extensions = ["colon_fence"]
 
 def linkcode_resolve(domain, info):
   """Resolve a GitHub URL corresponding to Python object."""
-  import os
   if domain != 'py':
     return None
 
@@ -568,5 +567,4 @@ def linkcode_resolve(domain, info):
     return None
 
   return 'https://github.com/kedro-org/kedro/blob/main/kedro/%s#L%d#L%d' % (
-      os.path.relpath(filename, start=os.path.dirname(
-          kedro.__file__)), lineno, lineno + len(source) - 1)
+    Path(filename).relative_to(Path(kedro.__file__).parent), lineno, lineno + len(source) - 1)

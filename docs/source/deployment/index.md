@@ -59,6 +59,7 @@ aws_step_functions
 azure
 dask
 databricks/index
+gcp_dataproc
 kubeflow
 prefect
 vertexai

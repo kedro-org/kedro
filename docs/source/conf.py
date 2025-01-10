@@ -538,33 +538,23 @@ myst_heading_anchors = 5
 myst_enable_extensions = ["colon_fence"]
 
 def linkcode_resolve(domain, info):
-  """Resolve a GitHub URL corresponding to Python object."""
-  if domain != 'py':
-    return None
+    """Resolve a GitHub URL corresponding to a Python object."""
+    if domain != 'py':
+        return None
 
-  try:
-    mod = sys.modules[info['module']]
-  except ImportError:
-    return None
+    try:
+        mod = sys.modules[info['module']]
+        obj = mod
+        for attr in info['fullname'].split('.'):
+            obj = getattr(obj, attr)
+        obj = inspect.unwrap(obj)
 
-  obj = mod
-  try:
-    for attr in info['fullname'].split('.'):
-      obj = getattr(obj, attr)
-  except AttributeError:
-    return None
-  else:
-    obj = inspect.unwrap(obj)
+        filename = inspect.getsourcefile(obj)
+        source, lineno = inspect.getsourcelines(obj)
+        relpath = str(Path(filename).relative_to(Path(kedro.__file__)))
 
-  try:
-    filename = inspect.getsourcefile(obj)
-  except TypeError:
-    return None
-
-  try:
-    source, lineno = inspect.getsourcelines(obj)
-  except OSError:
-    return None
-
-  return 'https://github.com/kedro-org/kedro/blob/main/kedro/%s#L%d#L%d' % (
-    str(Path(filename).relative_to(Path(kedro.__file__))), lineno, lineno + len(source) - 1)
+        return 'https://github.com/kedro-org/kedro/blob/main/kedro/%s#L%d#L%d' % (
+            relpath, lineno, lineno + len(source) - 1
+        )
+    except (KeyError, ImportError, AttributeError, TypeError, OSError, ValueError):
+        return None

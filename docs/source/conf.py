@@ -567,4 +567,4 @@ def linkcode_resolve(domain, info):
     return None
 
   return 'https://github.com/kedro-org/kedro/blob/main/kedro/%s#L%d#L%d' % (
-    Path(filename).relative_to(Path(kedro.__file__).parent), lineno, lineno + len(source) - 1)
+    str(Path(filename).relative_to(Path(kedro.__file__).parent)), lineno, lineno + len(source) - 1)

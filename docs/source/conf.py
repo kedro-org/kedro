@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import re
 import sys
 from inspect import getmembers, isclass, isfunction
@@ -21,6 +22,7 @@ from pathlib import Path
 
 from click import secho, style
 
+import kedro
 from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
@@ -47,7 +49,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx.ext.doctest",
     "sphinx.ext.ifconfig",
-    "sphinx.ext.viewcode",
+    "sphinx.ext.linkcode",
     "sphinx_copybutton",
     "myst_parser",
     "notfound.extension",
@@ -534,3 +536,37 @@ user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99
 
 myst_heading_anchors = 5
 myst_enable_extensions = ["colon_fence"]
+
+def linkcode_resolve(domain, info):
+  """Resolve a GitHub URL corresponding to Python object."""
+  import os
+  if domain != 'py':
+    return None
+
+  try:
+    mod = sys.modules[info['module']]
+  except ImportError:
+    return None
+
+  obj = mod
+  try:
+    for attr in info['fullname'].split('.'):
+      obj = getattr(obj, attr)
+  except AttributeError:
+    return None
+  else:
+    obj = inspect.unwrap(obj)
+
+  try:
+    filename = inspect.getsourcefile(obj)
+  except TypeError:
+    return None
+
+  try:
+    source, lineno = inspect.getsourcelines(obj)
+  except OSError:
+    return None
+
+  return 'https://github.com/kedro-org/kedro/blob/main/kedro/%s#L%d#L%d' % (
+      os.path.relpath(filename, start=os.path.dirname(
+          kedro.__file__)), lineno, lineno + len(source) - 1)

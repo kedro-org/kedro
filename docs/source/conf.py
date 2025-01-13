@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import os
 import re
 import sys
 from inspect import getmembers, isclass, isfunction
@@ -551,7 +552,8 @@ def linkcode_resolve(domain, info):
 
         filename = inspect.getsourcefile(obj)
         source, lineno = inspect.getsourcelines(obj)
-        relpath = str(Path(filename).relative_to(Path(kedro.__file__)))
+        relpath = os.path.relpath(filename, start=os.path.dirname(
+          kedro.__file__))
 
         return 'https://github.com/kedro-org/kedro/blob/main/kedro/%s#L%d#L%d' % (
             relpath, lineno, lineno + len(source) - 1

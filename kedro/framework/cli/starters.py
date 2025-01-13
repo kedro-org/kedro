@@ -204,6 +204,17 @@ TOOLS_SHORTNAME_TO_NUMBER = {
     "pyspark": "6",
     "viz": "7",
 }
+
+TOOLS_NUMBER_TO_SHORTNAME = {
+    "1": "lint",
+    "2": "test",
+    "3": "log",
+    "4": "docs",
+    "5": "data",
+    "6": "pyspark",
+    "7": "viz",
+}
+
 NUMBER_TO_TOOLS_NAME = {
     "1": "Linting",
     "2": "Testing",
@@ -272,7 +283,8 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
 
     if selected_tools is not None:
         tools = re.sub(r"\s", "", selected_tools).split(",")
-        for tool in tools:
+        converted_tools = _convert_tools_numbers_to_short_names(tools)
+        for tool in converted_tools:
             if tool not in valid_tools:
                 click.secho(
                     "Please select from the available tools: lint, test, log, docs, data, pyspark, viz, all, none",
@@ -280,7 +292,9 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
                     err=True,
                 )
                 sys.exit(1)
-        if ("none" in tools or "all" in tools) and len(tools) > 1:
+        if ("none" in converted_tools or "all" in converted_tools) and len(
+            converted_tools
+        ) > 1:
             click.secho(
                 "Tools options 'all' and 'none' cannot be used with other options",
                 fg="red",
@@ -389,8 +403,6 @@ def new(  # noqa: PLR0913
         "example": example_pipeline,
         "telemetry_consent": telemetry_consent,
     }
-    _validate_flag_inputs(flag_inputs)
-    starters_dict = _get_starters_dict()
 
     if not starter_alias:
         if not project_name:
@@ -399,6 +411,9 @@ def new(  # noqa: PLR0913
             selected_tools = click.prompt(TOOLS_PROMPT, default="none")
         if not example_pipeline:
             example_pipeline = click.prompt(EXAMPLE_PROMPT, default="no")
+
+    _validate_flag_inputs(flag_inputs)
+    starters_dict = _get_starters_dict()
 
     if starter_alias in starters_dict:
         if directory:
@@ -441,6 +456,7 @@ def new(  # noqa: PLR0913
     shutil.rmtree(tmpdir, onerror=_remove_readonly)  # type: ignore[arg-type]
 
     # Obtain config, either from a file or from interactive user prompts.
+
     extra_context = _get_extra_context(
         prompts_required=prompts_required,
         config_path=config_path,
@@ -668,7 +684,7 @@ def _get_extra_context(  # noqa: PLR0913
         )
     else:
         extra_context = _fetch_validate_parse_config_from_user_prompts(
-            prompts_required, cookiecutter_context
+            prompts_required, cookiecutter_context, selected_tools
         )
 
     # Update extra_context, if CLI inputs are available
@@ -711,6 +727,34 @@ def _convert_tool_short_names_to_numbers(selected_tools: str) -> list:
         tool_short_name = tool.strip()
         if tool_short_name in TOOLS_SHORTNAME_TO_NUMBER:
             tools.append(TOOLS_SHORTNAME_TO_NUMBER[tool_short_name])
+
+    # Remove duplicates if any
+    tools = sorted(list(set(tools)))
+
+    return tools
+
+
+def _convert_tools_numbers_to_short_names(selected_tools: list[str]) -> list:
+    """Replaces tool prompt numbers with the corresponding shortname.
+       e.g. "1" becomes "lint", "2" becomes "test", etc.
+
+    Args:
+        selected_tools: a string containing the value for the --tools flag or config file,
+            or None in case none were provided, i.e. "1, 2, 3".
+
+    Returns:
+        String with the shortnames corresponding to the desired tools.
+    """
+    if "none" in selected_tools:
+        return []
+    if "all" in selected_tools:
+        return list("all")
+
+    tools = []
+    for tool in selected_tools:
+        tool_number = tool.strip()
+        if tool_number in TOOLS_NUMBER_TO_SHORTNAME:
+            tools.append(TOOLS_NUMBER_TO_SHORTNAME[tool_number])
 
     # Remove duplicates if any
     tools = sorted(list(set(tools)))
@@ -787,7 +831,9 @@ def _fetch_validate_parse_config_from_file(
 
 
 def _fetch_validate_parse_config_from_user_prompts(
-    prompts: dict[str, Any], cookiecutter_context: OrderedDict | None
+    prompts: dict[str, Any],
+    cookiecutter_context: OrderedDict | None,
+    selected_tools: str | None,
 ) -> dict[str, str]:
     """Interactively obtains information from user prompts.
 
@@ -806,6 +852,9 @@ def _fetch_validate_parse_config_from_user_prompts(
         raise Exception("No cookiecutter context available.")
 
     config: dict[str, str] = {}
+
+    if selected_tools:
+        config["tools"] = selected_tools
 
     for variable_name, prompt_dict in prompts.items():
         prompt = _Prompt(**prompt_dict)

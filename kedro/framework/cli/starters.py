@@ -13,6 +13,7 @@ import shutil
 import stat
 import sys
 import tempfile
+import warnings
 from itertools import groupby
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable
@@ -309,6 +310,13 @@ def _print_selection_and_prompt_info(
             "It has been created with an example pipeline.",
             fg="green",
         )
+    else:
+        warnings.warn(
+            "Your project does not contain any pipelines with nodes. "
+            "Please ensure that at least one pipeline has been defined before "
+            "executing 'kedro run'.",
+            UserWarning,
+        )
 
     # Give hint for skipping interactive flow
     if interactive:
@@ -405,7 +413,6 @@ def new(  # noqa: PLR0913
         checkout = _select_checkout_branch_for_cookiecutter(checkout)
     elif starter_alias is not None:
         template_path = starter_alias
-        checkout = _select_checkout_branch_for_cookiecutter(checkout)
     else:
         template_path = str(TEMPLATE_PATH)
 
@@ -580,7 +587,7 @@ def _get_available_tags(template_path: str) -> list:
         # tags: ['/tags/version', '/tags/version^{}']
         # unique_tags: {'version'}
 
-    except git.GitCommandError:
+    except git.GitCommandError:  # pragma: no cover
         return []
     return sorted(unique_tags)
 

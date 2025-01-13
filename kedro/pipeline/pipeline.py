@@ -772,7 +772,8 @@ class Pipeline:
 
         if not filtered_pipeline.nodes:
             raise ValueError(
-                "Pipeline contains no nodes after applying all provided filters"
+                "Pipeline contains no nodes after applying all provided filters. "
+                "Please ensure that at least one pipeline with nodes has been defined."
             )
         return filtered_pipeline
 

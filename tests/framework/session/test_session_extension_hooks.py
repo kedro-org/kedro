@@ -3,7 +3,6 @@ import multiprocessing
 import re
 import time
 from typing import Any, Optional
-from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
@@ -240,11 +239,6 @@ class TestNodeHooks:
     @SKIP_ON_WINDOWS_AND_MACOS
     @pytest.mark.usefixtures("mock_broken_pipelines")
     def test_on_node_error_hook_parallel_runner(self, mock_session, logs_listener):
-        # Simplify logs_listener if needed
-        logs_listener.logs = [
-            MagicMock(funcName="on_node_error", error=ValueError("broken"))
-        ]
-
         with pytest.raises(ValueError, match="broken"):
             mock_session.run(
                 runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]
@@ -594,7 +588,7 @@ class TestAsyncNodeDatasetHooks:
         )
         task.execute()
 
-        hooks_log_messages = [r.message for r in logs_listener.logs]
+        hooks_log_messages = [r.get("message") for r in logs_listener.logs]
 
         # check the logs are in the correct order
         assert str(

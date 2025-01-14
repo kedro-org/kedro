@@ -153,7 +153,17 @@ class LogsListener(QueueListener):
 
     @property
     def logs(self):
-        return self.log_recorder.log_records
+        # Convert LogRecord instances to dictionaries
+        return [
+            {
+                "name": record.name,
+                "funcName": record.funcName,
+                "levelname": record.levelname,
+                "message": record.getMessage(),
+                "error": getattr(record, "error", None),
+            }
+            for record in self.log_recorder.log_records
+        ]
 
 
 @pytest.fixture

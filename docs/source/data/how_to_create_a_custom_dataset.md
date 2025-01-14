@@ -603,6 +603,6 @@ kedro-plugins/kedro-datasets/kedro_datasets/image
 There are two special considerations when contributing a dataset:
 
    1. Add the dataset to `kedro_datasets.rst` so it shows up in the API documentation.
-   2. Add the dataset to `static/jsonschema/kedro-catalog-X.json` for IDE validation.
+   2. Add the dataset to `kedro-plugins/kedro-datasets/static/jsonschema/kedro-catalog-X.json` for IDE validation.
 
 ```

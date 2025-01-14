@@ -311,16 +311,14 @@ class TestSuggestResumeScenario:
         """
         test_pipeline = two_branches_crossed_pipeline_variable_inputs
 
-        nodes = {n.name: n for n in test_pipeline.nodes}
+        nodes = {n.name: n for n in list(test_pipeline.nodes)}
         for name in failing_node_names:
             test_pipeline -= modular_pipeline([nodes[name]])
             test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
 
-        pipeline_to_test = test_pipeline
-
         with pytest.raises(Exception, match="test exception"):
             ThreadRunner().run(
-                pipeline_to_test,
+                test_pipeline,
                 persistent_dataset_catalog,
                 hook_manager=_create_hook_manager(),
             )

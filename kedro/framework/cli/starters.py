@@ -407,10 +407,13 @@ def new(  # noqa: PLR0913
     if not starter_alias:
         if not project_name:
             project_name = click.prompt(NAME_PROMPT, default="New Kedro Project")
+            _validate_input_with_regex_pattern("project_name", project_name)
         if not selected_tools:
             selected_tools = click.prompt(TOOLS_PROMPT, default="none")
+            _validate_input_with_regex_pattern("tools", selected_tools)
         if not example_pipeline:
             example_pipeline = click.prompt(EXAMPLE_PROMPT, default="no")
+            _validate_input_with_regex_pattern("yes_no", example_pipeline)
 
     _validate_flag_inputs(flag_inputs)
     starters_dict = _get_starters_dict()

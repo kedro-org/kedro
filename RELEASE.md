@@ -11,6 +11,7 @@
 * Added `node` import to the pipeline template.
 * Update error message when executing kedro run without pipeline.
 * Safeguard hooks when user incorrectly registers a hook class in settings.py.
+* Fixed parsing paths with query and fragment.
 
 ## Breaking changes to the API
 ## Documentation changes

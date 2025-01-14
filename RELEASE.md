@@ -11,10 +11,13 @@
 * Added `node` import to the pipeline template.
 * Update error message when executing kedro run without pipeline.
 * Safeguard hooks when user incorrectly registers a hook class in settings.py.
+* Remove lowercase transformation in regex validation
 
 ## Breaking changes to the API
 ## Documentation changes
+
 ## Community contributions
+* [Hendrik Scherner](https://github.com/SchernHe)
 
 # Release 0.19.10
 

@@ -245,7 +245,7 @@ class TestNodeHooks:
             )
 
         on_node_error_records = [
-            r for r in logs_listener.logs if r.funcName == "on_node_error"
+            r for r in logs_listener.logs if r.get("funcName") == "on_node_error"
         ]
         assert len(on_node_error_records) == 2
 
@@ -270,7 +270,7 @@ class TestNodeHooks:
         mock_session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
 
         before_node_run_log_records = [
-            r for r in logs_listener.logs if r.funcName == "before_node_run"
+            r for r in logs_listener.logs if r.get("funcName") == "before_node_run"
         ]
         assert len(before_node_run_log_records) == 2
         for record in before_node_run_log_records:
@@ -279,7 +279,7 @@ class TestNodeHooks:
             assert set(record.inputs.keys()) <= {"cars", "boats"}
 
         after_node_run_log_records = [
-            r for r in logs_listener.logs if r.funcName == "after_node_run"
+            r for r in logs_listener.logs if r.get("funcName") == "after_node_run"
         ]
         assert len(after_node_run_log_records) == 2
         for record in after_node_run_log_records:
@@ -338,7 +338,9 @@ class TestDatasetHooks:
         mock_session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
 
         before_dataset_loaded_log_records = [
-            r for r in logs_listener.logs if r.funcName == "before_dataset_loaded"
+            r
+            for r in logs_listener.logs
+            if r.get("funcName") == "before_dataset_loaded"
         ]
         assert len(before_dataset_loaded_log_records) == 2
         for record in before_dataset_loaded_log_records:
@@ -346,7 +348,7 @@ class TestDatasetHooks:
             assert record.dataset_name in ["cars", "boats"]
 
         after_dataset_loaded_log_records = [
-            r for r in logs_listener.logs if r.funcName == "after_dataset_loaded"
+            r for r in logs_listener.logs if r.get("funcName") == "after_dataset_loaded"
         ]
         assert len(after_dataset_loaded_log_records) == 2
         for record in after_dataset_loaded_log_records:
@@ -403,7 +405,7 @@ class TestDatasetHooks:
         mock_session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
 
         before_dataset_saved_log_records = [
-            r for r in logs_listener.logs if r.funcName == "before_dataset_saved"
+            r for r in logs_listener.logs if r.get("funcName") == "before_dataset_saved"
         ]
         assert len(before_dataset_saved_log_records) == 2
         for record in before_dataset_saved_log_records:
@@ -412,7 +414,7 @@ class TestDatasetHooks:
             assert record.data.to_dict() == dummy_dataframe.to_dict()
 
         after_dataset_saved_log_records = [
-            r for r in logs_listener.logs if r.funcName == "after_dataset_saved"
+            r for r in logs_listener.logs if r.get("funcName") == "after_dataset_saved"
         ]
         assert len(after_dataset_saved_log_records) == 2
         for record in after_dataset_saved_log_records:

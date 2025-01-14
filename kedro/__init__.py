@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from IPython.core.interactiveshell import InteractiveShellABC
+    from IPython.core.interactiveshell import InteractiveShell
 
 import sys
 import warnings
@@ -38,7 +38,7 @@ or set the PYTHONWARNINGS environment variable accordingly.""",
     )
 
 
-def load_ipython_extension(ipython: InteractiveShellABC) -> None:
+def load_ipython_extension(ipython: InteractiveShell) -> None:
     import kedro.ipython
 
     kedro.ipython.load_ipython_extension(ipython)

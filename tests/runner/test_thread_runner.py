@@ -316,9 +316,11 @@ class TestSuggestResumeScenario:
             test_pipeline -= modular_pipeline([nodes[name]])
             test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
 
+        pipeline_to_test = test_pipeline
+
         with pytest.raises(Exception, match="test exception"):
             ThreadRunner().run(
-                test_pipeline,
+                pipeline_to_test,
                 persistent_dataset_catalog,
                 hook_manager=_create_hook_manager(),
             )

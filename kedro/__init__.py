@@ -3,9 +3,15 @@ data pipelines by providing uniform project templates, data abstraction,
 configuration and pipeline assembly.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from IPython.core.interactiveshell import InteractiveShellABC
+
 import sys
 import warnings
-from typing import Any
 
 __version__ = "0.19.10"
 
@@ -32,7 +38,7 @@ or set the PYTHONWARNINGS environment variable accordingly.""",
     )
 
 
-def load_ipython_extension(ipython: Any) -> None:
+def load_ipython_extension(ipython: InteractiveShellABC) -> None:
     import kedro.ipython
 
     kedro.ipython.load_ipython_extension(ipython)

@@ -19,6 +19,8 @@ from typing import TYPE_CHECKING, Any, Callable
 if TYPE_CHECKING:
     from collections import OrderedDict
 
+    from IPython.core.interactiveshell import InteractiveShellABC
+
 from IPython.core.getipython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
@@ -50,7 +52,7 @@ FunctionParameters = MappingProxyType
 RICH_INSTALLED = True if importlib.util.find_spec("rich") is not None else False
 
 
-def load_ipython_extension(ipython: Any) -> None:
+def load_ipython_extension(ipython: InteractiveShellABC) -> None:
     """
     Main entry point when %load_ext kedro.ipython is executed, either manually or
     automatically through `kedro ipython` or `kedro jupyter lab/notebook`.

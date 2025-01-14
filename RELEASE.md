@@ -12,7 +12,7 @@
 * Update error message when executing kedro run without pipeline.
 * Safeguard hooks when user incorrectly registers a hook class in settings.py.
 * Fixed parsing paths with query and fragment.
-* Remove lowercase transformation in regex validation
+* Remove lowercase transformation in regex validation.
 
 ## Breaking changes to the API
 ## Documentation changes

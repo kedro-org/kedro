@@ -153,6 +153,10 @@ class LogsListener(QueueListener):
 
     @property
     def logs(self):
+        return self.log_recorder.log_records
+
+    @property
+    def logs_dict(self):
         # Convert LogRecord instances to dictionaries
         return [
             {

@@ -19,6 +19,8 @@ from typing import TYPE_CHECKING, Any, Callable
 if TYPE_CHECKING:
     from collections import OrderedDict
 
+    from IPython.core.interactiveshell import InteractiveShell
+
 from IPython.core.getipython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
@@ -50,16 +52,16 @@ FunctionParameters = MappingProxyType
 RICH_INSTALLED = True if importlib.util.find_spec("rich") is not None else False
 
 
-def load_ipython_extension(ipython: Any) -> None:
+def load_ipython_extension(ipython: InteractiveShell) -> None:
     """
     Main entry point when %load_ext kedro.ipython is executed, either manually or
     automatically through `kedro ipython` or `kedro jupyter lab/notebook`.
     IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
-    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
+    ipython.register_magic_function(func=magic_reload_kedro, magic_name="reload_kedro")  # type: ignore[call-arg]
     logger.info("Registered line magic '%reload_kedro'")
-    ipython.register_magic_function(magic_load_node, magic_name="load_node")
+    ipython.register_magic_function(func=magic_load_node, magic_name="load_node")  # type: ignore[call-arg]
     logger.info("Registered line magic '%load_node'")
 
     if _find_kedro_project(Path.cwd()) is None:

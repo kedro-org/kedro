@@ -422,7 +422,15 @@ class TestNewFromUserPromptsValid:
         _assert_template_ok(result)
         _clean_up_project(Path("./new-kedro-project"))
 
-    def test_custom_prompt_valid_input(self, fake_kedro_cli):
+    @pytest.mark.parametrize(
+        "regex, valid_value",
+        [
+            ("^\\w+(-*\\w+)*$", "my-value"),
+            ("^[A-Z_]+", "MY-VALUE"),
+            ("^\\d+$", "123"),
+        ],
+    )
+    def test_custom_prompt_valid_input(self, fake_kedro_cli, regex, valid_value):
         shutil.copytree(TEMPLATE_PATH, "template")
         _write_yaml(
             Path("template") / "prompts.yml",
@@ -430,11 +438,11 @@ class TestNewFromUserPromptsValid:
                 "project_name": {"title": "Project Name"},
                 "custom_value": {
                     "title": "Custom Value",
-                    "regex_validator": "^\\w+(-*\\w+)*$",
+                    "regex_validator": regex,
                 },
             },
         )
-        custom_input = "\n".join(["my-project", "My Project"])
+        custom_input = "\n".join([valid_value, "My Project"])
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--starter", "template"],
@@ -446,6 +454,7 @@ class TestNewFromUserPromptsValid:
             repo_name="my-project",
             python_package="my_project",
         )
+
         _clean_up_project(Path("./my-project"))
 
     def test_custom_prompt_for_essential_variable(self, fake_kedro_cli):

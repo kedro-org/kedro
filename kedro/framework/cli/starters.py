@@ -404,7 +404,7 @@ def new(  # noqa: PLR0913
         "telemetry_consent": telemetry_consent,
     }
 
-    if not starter_alias:
+    if not starter_alias and not config_path:
         if not project_name:
             project_name = click.prompt(NAME_PROMPT, default="New Kedro Project")
             _validate_input_with_regex_pattern("project_name", project_name)

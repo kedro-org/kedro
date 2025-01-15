@@ -312,28 +312,13 @@ class TestSuggestResumeScenario:
         test_pipeline = two_branches_crossed_pipeline_variable_inputs
 
         nodes = {n.name: n for n in test_pipeline.nodes}
-
-        # Collect changes to apply after the iteration.
-        to_remove = []
-        to_add = []
-
         for name in failing_node_names:
-            to_remove.append(modular_pipeline([nodes[name]]))
-            to_add.append(modular_pipeline([nodes[name]._copy(func=exception_fn)]))
-
-        # Apply changes to the pipeline after iteration.
-        for remove_node in to_remove:
-            test_pipeline -= modular_pipeline([remove_node])
-
-        test_pipeline_removed = test_pipeline
-        for add_node in to_add:
-            test_pipeline_removed += modular_pipeline([add_node])
-
-        test_pipeline_added = test_pipeline_removed
+            test_pipeline -= modular_pipeline([nodes[name]])
+            test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
 
         with pytest.raises(Exception, match="test exception"):
             ThreadRunner().run(
-                test_pipeline_added,
+                test_pipeline,
                 persistent_dataset_catalog,
                 hook_manager=_create_hook_manager(),
             )

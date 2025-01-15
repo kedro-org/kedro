@@ -300,7 +300,7 @@ class TestSuggestResumeScenario:
     def test_stricter_suggest_resume_scenario(
         self,
         caplog,
-        two_branches_crossed_pipeline_variable_inputs,
+        two_branches_crossed_pipeline,
         persistent_dataset_catalog,
         failing_node_names,
         expected_pattern,
@@ -309,7 +309,7 @@ class TestSuggestResumeScenario:
         Stricter version of previous test.
         Covers pipelines where inputs are shared across nodes.
         """
-        test_pipeline = two_branches_crossed_pipeline_variable_inputs
+        test_pipeline = two_branches_crossed_pipeline
 
         nodes = {n.name: n for n in test_pipeline.nodes}
         for name in failing_node_names:

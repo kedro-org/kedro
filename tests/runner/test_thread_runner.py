@@ -278,7 +278,7 @@ class TestSuggestResumeScenario:
             two_branches_crossed_pipeline += modular_pipeline(
                 [nodes[name]._copy(func=exception_fn)]
             )
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="test exception"):
             ThreadRunner().run(
                 two_branches_crossed_pipeline,
                 persistent_dataset_catalog,

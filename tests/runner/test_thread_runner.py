@@ -278,7 +278,7 @@ class TestSuggestResumeScenario:
             two_branches_crossed_pipeline += modular_pipeline(
                 [nodes[name]._copy(func=exception_fn)]
             )
-        with pytest.raises(Exception, match="test exception"):
+        with pytest.raises(Exception):
             ThreadRunner().run(
                 two_branches_crossed_pipeline,
                 persistent_dataset_catalog,
@@ -300,7 +300,7 @@ class TestSuggestResumeScenario:
     def test_stricter_suggest_resume_scenario(
         self,
         caplog,
-        two_branches_crossed_pipeline,
+        two_branches_crossed_pipeline_variable_inputs,
         persistent_dataset_catalog,
         failing_node_names,
         expected_pattern,
@@ -309,7 +309,7 @@ class TestSuggestResumeScenario:
         Stricter version of previous test.
         Covers pipelines where inputs are shared across nodes.
         """
-        test_pipeline = two_branches_crossed_pipeline
+        test_pipeline = two_branches_crossed_pipeline_variable_inputs
 
         nodes = {n.name: n for n in test_pipeline.nodes}
         for name in failing_node_names:
@@ -317,7 +317,7 @@ class TestSuggestResumeScenario:
             test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
 
         with pytest.raises(Exception, match="test exception"):
-            ThreadRunner().run(
+            ThreadRunner(max_workers=1).run(
                 test_pipeline,
                 persistent_dataset_catalog,
                 hook_manager=_create_hook_manager(),

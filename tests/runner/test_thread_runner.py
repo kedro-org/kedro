@@ -311,7 +311,7 @@ class TestSuggestResumeScenario:
         """
         test_pipeline = two_branches_crossed_pipeline_variable_inputs
 
-        nodes = {n.name: n for n in list(test_pipeline.nodes)}
+        nodes = {n.name: n for n in test_pipeline.nodes}
         for name in failing_node_names:
             test_pipeline -= modular_pipeline([nodes[name]])
             test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])

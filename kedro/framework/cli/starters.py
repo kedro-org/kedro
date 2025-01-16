@@ -956,10 +956,6 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
         else:
             selected.append(choice.strip())
 
-    if not all(item.isdigit() for item in selected):
-        # If the list was passed as shortnames, return it as numbers instead.
-        selected = _convert_tool_short_names_to_numbers(str(selected))
-
     return selected
 
 

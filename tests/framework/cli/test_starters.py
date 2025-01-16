@@ -488,7 +488,7 @@ class TestNewFromUserPromptsValid:
         message = "No cookiecutter context available."
         with pytest.raises(Exception, match=message):
             _fetch_validate_parse_config_from_user_prompts(
-                prompts=required_prompts, cookiecutter_context=None, selected_tools=None
+                prompts=required_prompts, cookiecutter_context=None
             )
 
 
@@ -535,10 +535,11 @@ class TestNewFromUserPromptsInvalid:
             ["new"],
             input=_make_cli_prompt_input(project_name="My $Project!"),
         )
-        expected_output = "is an invalid value for project name. It must contain only alphanumeric symbols"
-
         assert result.exit_code != 0
-        assert expected_output in " ".join(result.output.split())
+        assert (
+            "is an invalid value for project name.\nIt must contain only alphanumeric symbols"
+            in result.output
+        )
 
     def test_invalid_project_name_too_short(self, fake_kedro_cli):
         result = CliRunner().invoke(
@@ -546,10 +547,11 @@ class TestNewFromUserPromptsInvalid:
             ["new"],
             input=_make_cli_prompt_input(project_name="P"),
         )
-        expected_output = "is an invalid value for project name. It must contain only alphanumeric symbols"
-
         assert result.exit_code != 0
-        assert expected_output in " ".join(result.output.split())
+        assert (
+            "is an invalid value for project name.\nIt must contain only alphanumeric symbols"
+            in result.output
+        )
 
     def test_custom_prompt_invalid_input(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")

@@ -404,17 +404,6 @@ def new(  # noqa: PLR0913
         "telemetry_consent": telemetry_consent,
     }
 
-    if not starter_alias and not config_path:
-        if not project_name:
-            project_name = click.prompt(NAME_PROMPT, default="New Kedro Project")
-            _validate_input_with_regex_pattern("project_name", project_name)
-        if not selected_tools:
-            selected_tools = click.prompt(TOOLS_PROMPT, default="none")
-            _validate_input_with_regex_pattern("tools", selected_tools)
-        if not example_pipeline:
-            example_pipeline = click.prompt(EXAMPLE_PROMPT, default="no")
-            _validate_input_with_regex_pattern("yes_no", example_pipeline)
-
     _validate_flag_inputs(flag_inputs)
     starters_dict = _get_starters_dict()
 
@@ -849,7 +838,7 @@ def _fetch_validate_parse_config_from_user_prompts(
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
     from cookiecutter.environment import StrictEnvironment
-    from cookiecutter.prompt import read_user_variable, render_variable
+    from cookiecutter.prompt import render_variable
 
     if not cookiecutter_context:
         raise Exception("No cookiecutter context available.")
@@ -870,7 +859,10 @@ def _fetch_validate_parse_config_from_user_prompts(
         )
 
         # read the user's input for the variable
-        user_input = read_user_variable(str(prompt), cookiecutter_variable)
+        default_value = cookiecutter_variable or ""
+        user_input = click.prompt(
+            str(prompt), default=default_value, show_default=True, type=str
+        )
         if user_input:
             prompt.validate(user_input)
             config[variable_name] = user_input

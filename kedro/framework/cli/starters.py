@@ -246,8 +246,7 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
 
     if selected_tools is not None:
         tools = re.sub(r"\s", "", selected_tools).split(",")
-        converted_tools = _convert_tools_numbers_to_short_names(tools)
-        for tool in converted_tools:
+        for tool in tools:
             if tool not in valid_tools:
                 click.secho(
                     "Please select from the available tools: lint, test, log, docs, data, pyspark, viz, all, none",
@@ -255,9 +254,7 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
                     err=True,
                 )
                 sys.exit(1)
-        if ("none" in converted_tools or "all" in converted_tools) and len(
-            converted_tools
-        ) > 1:
+        if ("none" in tools or "all" in tools) and len(tools) > 1:
             click.secho(
                 "Tools options 'all' and 'none' cannot be used with other options",
                 fg="red",
@@ -825,7 +822,7 @@ def _fetch_validate_parse_config_from_user_prompts(
         default_value = cookiecutter_variable or ""
         user_input = click.prompt(
             str(prompt), default=default_value, show_default=True, type=str
-        )
+        ).strip()
         if user_input:
             prompt.validate(user_input)
             config[variable_name] = user_input

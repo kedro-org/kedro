@@ -175,6 +175,7 @@ new_partitioned_dataset:
   path: s3://my-bucket-name
   dataset: pandas.CSVDataset
   filename_suffix: ".csv"
+  save_lazily: True
 ```
 
 Here is the node definition:
@@ -213,7 +214,7 @@ Writing to an existing partition may result in its data being overwritten, if th
 ### Partitioned dataset lazy saving
 `PartitionedDataset` also supports lazy saving, where the partition's data is not materialised until it is time to write.
 
-To use this, simply wrap your object with `lambda` function in the dictionary before return:
+To use this, simply return `Callable` types in the dictionary:
 
 ```python
 from typing import Any, Dict, Callable
@@ -235,11 +236,25 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 ```
 
 ```{note}
-Other `Callable` types but `lambda` provided will be ignored and processed as is without applying lazy saving.
+When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../hooks/introduction).
 ```
 
 ```{note}
-When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../hooks/introduction).
+Lazy saving is a default behaviour, meaning that if `Callable` type provided the dataset will be written _after_ the `after_node_run` hook.
+```
+
+In some cases, it might be useful to disable such a behaviour, for example, when your object is already `Callable`, like a Tensorflow model, and you do not mean to save it lazily.
+To disable lazy saving set `save_lazily` parameter to `False`:
+
+```yaml
+# conf/base/catalog.yml
+
+new_partitioned_dataset:
+  type: partitions.PartitionedDataset
+  path: s3://my-bucket-name
+  dataset: pandas.CSVDataset
+  filename_suffix: ".csv"
+  save_lazily: False
 ```
 
 ## Incremental datasets

@@ -241,7 +241,7 @@ class TestNodeHooks:
     def test_on_node_error_hook_parallel_runner(self, mock_session, logs_listener):
         with pytest.raises(ValueError, match="broken"):
             mock_session.run(
-                runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]
+                runner=ParallelRunner(max_workers=1), node_names=["node1", "node2"]
             )
 
         on_node_error_records = [

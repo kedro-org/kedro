@@ -168,16 +168,6 @@ TOOLS_SHORTNAME_TO_NUMBER = {
     "viz": "7",
 }
 
-TOOLS_NUMBER_TO_SHORTNAME = {
-    "1": "lint",
-    "2": "test",
-    "3": "log",
-    "4": "docs",
-    "5": "data",
-    "6": "pyspark",
-    "7": "viz",
-}
-
 NUMBER_TO_TOOLS_NAME = {
     "1": "Linting",
     "2": "Testing",
@@ -686,34 +676,6 @@ def _convert_tool_short_names_to_numbers(selected_tools: str) -> list:
     return tools
 
 
-def _convert_tools_numbers_to_short_names(selected_tools: list[str]) -> list:
-    """Replaces tool prompt numbers with the corresponding shortname.
-       e.g. "1" becomes "lint", "2" becomes "test", etc.
-
-    Args:
-        selected_tools: a string containing the value for the --tools flag or config file,
-            or None in case none were provided, i.e. "1, 2, 3".
-
-    Returns:
-        String with the shortnames corresponding to the desired tools.
-    """
-    if "none" in selected_tools:
-        return []
-    if "all" in selected_tools:
-        return list("all")
-
-    tools = []
-    for tool in selected_tools:
-        tool_number = tool.strip()
-        if tool_number in TOOLS_NUMBER_TO_SHORTNAME:
-            tools.append(TOOLS_NUMBER_TO_SHORTNAME[tool_number])
-
-    # Remove duplicates if any
-    tools = sorted(list(set(tools)))
-
-    return tools
-
-
 def _convert_tool_numbers_to_readable_names(tools_numbers: list) -> str:
     """Transform the list of tool numbers into a list of readable names, using 'None' for empty lists.
     Then, convert the result into a string format to prevent issues with Cookiecutter.
@@ -1002,6 +964,10 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
             selected.extend(str(i) for i in range(int(start), int(end) + 1))
         else:
             selected.append(choice.strip())
+
+    if not all(item.isdigit() for item in selected):
+        # If the list was passed as shortnames, return it as numbers instead.
+        selected = _convert_tool_short_names_to_numbers(str(selected))
 
     return selected
 

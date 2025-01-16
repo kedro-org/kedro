@@ -324,12 +324,7 @@ def starter() -> None:
     "selected_tools",
     help=TOOLS_ARG_HELP,
 )
-@click.option(
-    "--example",
-    "-e",
-    "example_pipeline",
-    help=EXAMPLE_ARG_HELP,
-)
+@click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
 @click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP)
 def new(  # noqa: PLR0913
     config_path: str,
@@ -626,7 +621,7 @@ def _get_extra_context(  # noqa: PLR0913
         )
     else:
         extra_context = _fetch_validate_parse_config_from_user_prompts(
-            prompts_required, cookiecutter_context, selected_tools
+            prompts_required, cookiecutter_context
         )
 
     # Update extra_context, if CLI inputs are available
@@ -747,7 +742,6 @@ def _fetch_validate_parse_config_from_file(
 def _fetch_validate_parse_config_from_user_prompts(
     prompts: dict[str, Any],
     cookiecutter_context: OrderedDict | None,
-    selected_tools: str | None,
 ) -> dict[str, str]:
     """Interactively obtains information from user prompts.
 
@@ -766,9 +760,6 @@ def _fetch_validate_parse_config_from_user_prompts(
         raise Exception("No cookiecutter context available.")
 
     config: dict[str, str] = {}
-
-    if selected_tools:
-        config["tools"] = selected_tools
 
     for variable_name, prompt_dict in prompts.items():
         prompt = _Prompt(**prompt_dict)

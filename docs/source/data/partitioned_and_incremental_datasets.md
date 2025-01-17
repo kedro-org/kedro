@@ -240,11 +240,11 @@ When using lazy saving, the dataset will be written _after_ the `after_node_run`
 ```
 
 ```{note}
-Lazy saving is a default behaviour, meaning that if `Callable` type provided the dataset will be written _after_ the `after_node_run` hook.
+Lazy saving is the default behaviour, meaning that if a `Callable` type is provided, the dataset will be written _after_ the `after_node_run` hook is executed.
 ```
 
-In some cases, it might be useful to disable such a behaviour, for example, when your object is already `Callable`, like a Tensorflow model, and you do not mean to save it lazily.
-To disable lazy saving set `save_lazily` parameter to `False`:
+In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (e.g., a TensorFlow model) and you do not intend to save it lazily.
+To disable the lazy saving set `save_lazily` parameter to `False`:
 
 ```yaml
 # conf/base/catalog.yml

@@ -753,9 +753,6 @@ def _fetch_validate_parse_config_from_user_prompts(
         Configuration for starting a new project. This is passed as ``extra_context``
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
-    from cookiecutter.environment import StrictEnvironment
-    from cookiecutter.prompt import render_variable
-
     if not cookiecutter_context:
         raise Exception("No cookiecutter context available.")
 
@@ -765,17 +762,16 @@ def _fetch_validate_parse_config_from_user_prompts(
         prompt = _Prompt(**prompt_dict)
 
         # render the variable on the command line
-        cookiecutter_variable = render_variable(
-            env=StrictEnvironment(context=cookiecutter_context),
-            raw=cookiecutter_context.get(variable_name),
-            cookiecutter_dict=config,
-        )
+        default_value = cookiecutter_context.get(variable_name) or ""
 
         # read the user's input for the variable
-        default_value = cookiecutter_variable or ""
         user_input = click.prompt(
-            str(prompt), default=default_value, show_default=True, type=str
+            str(prompt),
+            default=click.style(default_value, italic=True),
+            show_default=True,
+            type=str,
         ).strip()
+
         if user_input:
             prompt.validate(user_input)
             config[variable_name] = user_input
@@ -1014,9 +1010,17 @@ class _Prompt:
         self.error_message = kwargs.get("error_message", "")
 
     def __str__(self) -> str:
+        # Format the title with optional color
         title = self.title.strip().title()
-        title = click.style(title + "\n" + "=" * len(title), bold=True)
-        prompt_lines = [title, self.text]
+        title = click.style(title, fg="cyan", bold=True)
+        title_line = "=" * len(self.title)
+        title_line = click.style(title_line, fg="cyan", bold=True)
+
+        # Format the main text
+        text = self.text.strip()
+
+        # Combine everything
+        prompt_lines = [title, title_line, text]
         prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
         return f"\n{prompt_text}\n"
 

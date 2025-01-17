@@ -369,6 +369,46 @@ class Pipeline:
 
         return [list(group) for group in self._toposorted_groups]
 
+    @property
+    def grouped_by_namespace(self):
+        """Return a dictionary of the pipeline nodes grouped by namespace.
+
+        Returns:
+            The pipeline nodes grouped by namespace.
+        """
+        nodes_by_namespace = defaultdict(list)
+        for node in self.nodes:
+            if node.namespace:
+                nodes_by_namespace[node.namespace].append(node)
+            else:
+                nodes_by_namespace[node.name].append(node)
+        return nodes_by_namespace
+
+    @property
+    def node_dependencies_by_namespace(self):
+        """Return a dictionary of the pipeline nodes dependencies grouped by namespace.
+
+        Returns:
+            The pipeline nodes dependencies grouped by namespace.
+        """
+        node_dependencies_by_namespace = defaultdict(dict)
+        for node in self.nodes:
+            key = node.namespace if node.namespace else node.name
+            for parent in self.node_dependencies[node]:
+                if key not in node_dependencies_by_namespace:
+                    node_dependencies_by_namespace[key] = []
+                if parent.namespace and parent.namespace != key:
+                    node_dependencies_by_namespace[key].append(parent.namespace)
+                elif parent.namespace and parent.namespace == key:
+                    continue
+                else:
+                    node_dependencies_by_namespace[key].append(parent.name)
+
+        node_dependencies_by_namespace = {
+            key: set(value) for key, value in node_dependencies_by_namespace.items()
+        }
+        return node_dependencies_by_namespace
+
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified
         nodes by name.

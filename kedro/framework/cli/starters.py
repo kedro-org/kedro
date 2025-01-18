@@ -767,7 +767,7 @@ def _fetch_validate_parse_config_from_user_prompts(
         # read the user's input for the variable
         user_input = click.prompt(
             str(prompt),
-            default=click.style(default_value, italic=True),
+            default=default_value,
             show_default=True,
             type=str,
         ).strip()

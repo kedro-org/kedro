@@ -1676,11 +1676,11 @@ class TestTelemetryCLIFlag:
         )
 
         repo_name = "new-kedro-project"
-        assert result.exit_code == 1
+        assert result.exit_code == 2
 
         assert (
-            "'wrong' is an invalid value for example pipeline. It must contain only y, n, YES, or NO (case insensitive)."
-            in result.output
+            "Invalid value for '--telemetry' / '-tc': 'wrong' is not one of 'yes', "
+            "'no', 'y', 'n'.\n" in result.output
         )
 
         telemetry_file_path = Path(repo_name + "/.telemetry")

@@ -206,16 +206,6 @@ def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
             "regex": r"^[\w -]{2,}$",
             "error_message": f"'{input}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long",
         },
-        "tools": {
-            "regex": r"""^(
-                all|none|                        # A: "all" or "none" or
-                (\ *\d+                          # B: any number of spaces followed by one or more digits
-                (\ *-\ *\d+)?                    # C: zero or one instances of: a hyphen followed by one or more digits, spaces allowed
-                (\ *,\ *\d+(\ *-\ *\d+)?)*       # D: any number of instances of: a comma followed by B and C, spaces allowed
-                \ *)?)                           # E: zero or one instances of (B,C,D) as empty strings are also permissible
-                $""",
-            "error_message": f"'{input}' is an invalid value for project tools. Please select valid options for tools using comma-separated values, ranges, or 'all/none'.",
-        },
     }
 
     if not re.match(VALIDATION_PATTERNS[pattern_name]["regex"], input, flags=re.X):
@@ -324,8 +314,20 @@ def starter() -> None:
     "selected_tools",
     help=TOOLS_ARG_HELP,
 )
-@click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
-@click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP)
+@click.option(
+    "--example",
+    "-e",
+    "example_pipeline",
+    help=EXAMPLE_ARG_HELP,
+    type=click.Choice(["yes", "no", "y", "n"], case_sensitive=False),
+)
+@click.option(
+    "--telemetry",
+    "-tc",
+    "telemetry_consent",
+    help=TELEMETRY_ARG_HELP,
+    type=click.Choice(["yes", "no", "y", "n"], case_sensitive=False),
+)
 def new(  # noqa: PLR0913
     config_path: str,
     starter_alias: str,
@@ -412,7 +414,6 @@ def new(  # noqa: PLR0913
     )
 
     if telemetry_consent is not None:
-        _validate_input_with_regex_pattern("yes_no", telemetry_consent)
         telemetry_consent = (
             "true" if _parse_yes_no_to_bool(telemetry_consent) else "false"
         )
@@ -520,7 +521,6 @@ def _get_prompts_required_and_clear_from_CLI_provided(
         del prompts_required["project_name"]
 
     if example_pipeline is not None:
-        _validate_input_with_regex_pattern("yes_no", example_pipeline)
         del prompts_required["example_pipeline"]
 
     return prompts_required

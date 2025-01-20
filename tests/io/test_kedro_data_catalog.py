@@ -291,6 +291,15 @@ class TestKedroDataCatalog:
         ds = data_catalog.get_dataset(match_pattern_ds)
         assert isinstance(ds, MemoryDataset)
 
+    def test_remove_runtime_pattern(self, data_catalog):
+        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
+        data_catalog.config_resolver.add_runtime_patterns(runtime_pattern)
+        match_pattern_ds = "match_pattern_ds"
+        assert match_pattern_ds in data_catalog
+
+        data_catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
+        assert match_pattern_ds not in data_catalog
+
     def test_release(self, data_catalog):
         """Test release is called without errors"""
         data_catalog.release("test")

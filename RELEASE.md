@@ -14,6 +14,7 @@
 * Safeguard hooks when user incorrectly registers a hook class in settings.py.
 * Fixed parsing paths with query and fragment.
 * Remove lowercase transformation in regex validation.
+* Fixed `KedroDataCatalog` mutation after pipeline run.
 
 ## Breaking changes to the API
 ## Documentation changes

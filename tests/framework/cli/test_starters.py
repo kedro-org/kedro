@@ -1676,10 +1676,14 @@ class TestTelemetryCLIFlag:
         )
 
         repo_name = "new-kedro-project"
-        assert result.exit_code == 1
+        assert result.exit_code == 2
 
         assert (
-            "'wrong' is an invalid value for example pipeline. It must contain only y, n, YES, or NO (case insensitive)."
+            "'wrong' is an invalid value"
+            in result.output
+        )
+        assert (
+            " It must contain only y, n, YES, or NO (case insensitive)."
             in result.output
         )
 

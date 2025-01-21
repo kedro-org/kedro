@@ -196,11 +196,13 @@ def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
         )
 
 
-def _validate_yes_no(ctx, param, value) -> None:
+def _validate_yes_no(ctx: Any, param: Any, value: Any) -> Any | None:
     if value is None:
         return None
     if not re.match(r"(?i)^\s*(y|yes|n|no)\s*$", value, flags=re.X):
-        raise click.BadParameter(f"'{value}' is an invalid value for {param}. It must contain only y, n, YES, or NO (case insensitive).")
+        raise click.BadParameter(
+            f"'{value}' is an invalid value for {param}. It must contain only y, n, YES, or NO (case insensitive)."
+        )
     return value
 
 
@@ -332,8 +334,20 @@ def starter() -> None:
     "selected_tools",
     help=TOOLS_ARG_HELP,
 )
-@click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP, callback=_validate_yes_no)
-@click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP, callback=_validate_yes_no)
+@click.option(
+    "--example",
+    "-e",
+    "example_pipeline",
+    help=EXAMPLE_ARG_HELP,
+    callback=_validate_yes_no,
+)
+@click.option(
+    "--telemetry",
+    "-tc",
+    "telemetry_consent",
+    help=TELEMETRY_ARG_HELP,
+    callback=_validate_yes_no,
+)
 def new(  # noqa: PLR0913
     config_path: str,
     starter_alias: str,
@@ -1030,11 +1044,11 @@ class _Prompt:
         return f"\n{prompt_text}\n"
 
     @property
-    def user_input(self):
+    def user_input(self) -> str:
         return self._user_input
 
     @user_input.setter
-    def user_input(self, input):
+    def user_input(self, input: str) -> None:
         """Validate and set the user input."""
         if self.regexp and not re.match(self.regexp, input):
             message = f"'{input}' is an invalid value for {(self.title).lower()}."

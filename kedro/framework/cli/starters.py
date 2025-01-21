@@ -196,16 +196,6 @@ def _validate_flag_inputs(flag_inputs: dict[str, Any]) -> None:
         )
 
 
-def _validate_yes_no(ctx: Any, param: Any, value: Any) -> Any | None:
-    if value is None:
-        return None
-    if not re.match(r"(?i)^\s*(y|yes|n|no)\s*$", value, flags=re.X):
-        raise click.BadParameter(
-            f"'{value}' is an invalid value for {param}. It must contain only y, n, YES, or NO (case insensitive)."
-        )
-    return value
-
-
 def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
     VALIDATION_PATTERNS = {
         "yes_no": {
@@ -339,14 +329,13 @@ def starter() -> None:
     "-e",
     "example_pipeline",
     help=EXAMPLE_ARG_HELP,
-    callback=_validate_yes_no,
 )
 @click.option(
     "--telemetry",
     "-tc",
     "telemetry_consent",
     help=TELEMETRY_ARG_HELP,
-    callback=_validate_yes_no,
+    type=click.Choice(["yes", "no", "y", "n"], case_sensitive=False),
 )
 def new(  # noqa: PLR0913
     config_path: str,
@@ -748,7 +737,7 @@ def _fetch_validate_parse_config_from_file(
     )
 
     example_pipeline = config.get("example_pipeline", "no")
-    _validate_yes_no(None, "example pipeline", example_pipeline)
+    _validate_input_with_regex_pattern("yes_no", example_pipeline)
     config["example_pipeline"] = str(_parse_yes_no_to_bool(example_pipeline))
 
     tools_short_names = config.get("tools", "none").lower()

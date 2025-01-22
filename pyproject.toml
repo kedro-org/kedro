@@ -83,7 +83,7 @@ test = [
 docs = [
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
-    "kedro-sphinx-theme==2024.10.2",
+    "kedro-sphinx-theme==2024.10.3",
     "sphinx-notfound-page!=1.0.3",  # Required by kedro-sphinx-theme. 1.0.3 results in `AttributeError: 'tuple' object has no attribute 'default'`.
 ]
 jupyter = [
@@ -178,7 +178,8 @@ layers = [
 ]
 ignore_imports = [
     "kedro.runner.task -> kedro.framework.project",
-    "kedro.framework.hooks.specs -> kedro.framework.context"
+    "kedro.framework.hooks.specs -> kedro.framework.context",
+    "kedro -> kedro.ipython"
 ]
 
 [[tool.importlinter.contracts]]
@@ -187,6 +188,9 @@ type = "independence"
 modules = [
     "kedro.pipeline",
     "kedro.io"
+]
+ignore_imports = [
+    "kedro -> kedro.ipython"
 ]
 
 [[tool.importlinter.contracts]]

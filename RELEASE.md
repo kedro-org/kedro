@@ -4,6 +4,7 @@
 * Implemented `KedroDataCatalog.to_config()` method that converts the catalog instance into a configuration format suitable for serialization.
 * Improve OmegaConfigLoader performance.
 * Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+* Added support for `%load_ext kedro`.
 
 ## Bug fixes and other changes
 * Added validation to ensure dataset versions consistency across catalog.
@@ -11,12 +12,16 @@
 * Added `node` import to the pipeline template.
 * Update error message when executing kedro run without pipeline.
 * Safeguard hooks when user incorrectly registers a hook class in settings.py.
+* Fixed parsing paths with query and fragment.
+* Remove lowercase transformation in regex validation.
 * Moved `kedro-catalog` JSON schema to `kedro-datasets`.
 
 ## Breaking changes to the API
 ## Documentation changes
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
+* [Hendrik Scherner](https://github.com/SchernHe)
 * [Chris Schopp](https://github.com/chrisschopp)
 
 # Release 0.19.10

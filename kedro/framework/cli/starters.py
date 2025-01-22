@@ -1005,8 +1005,7 @@ class _Prompt:
 
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
-
-        if self.regexp and not re.match(self.regexp, user_input.lower()):
+        if self.regexp and not re.match(self.regexp, user_input):
             message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
             click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)

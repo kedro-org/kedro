@@ -13,7 +13,7 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
-from kedro.io.data_catalog import DataCatalog
+from kedro.io import DataCatalog, KedroDataCatalog
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -67,7 +67,10 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 
     try:
         data_catalog = context.catalog
-        datasets_meta = data_catalog._datasets
+        if isinstance(data_catalog, KedroDataCatalog):
+            datasets_meta = {ds_name: ds for ds_name, ds in data_catalog.items()}
+        else:
+            datasets_meta = data_catalog._datasets
         catalog_ds = set(data_catalog.list())
     except Exception as exc:
         raise KedroCliError(

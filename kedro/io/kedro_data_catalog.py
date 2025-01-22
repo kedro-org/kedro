@@ -118,6 +118,13 @@ class KedroDataCatalog(CatalogProtocol):
         # TODO: remove when removing old catalog
         return copy.copy(self._datasets)
 
+    def __getattr__(self, key: str):
+        # Needed for compatability with old catalog interface since now we
+        # differ _datasets and _lazy_datasets
+        # TODO: remove when removing old catalog
+        if key == "_datasets":
+            return {ds_name: ds for ds_name, ds in self.items()}
+
     @datasets.setter
     def datasets(self, value: Any) -> None:
         # TODO: remove when removing old catalog

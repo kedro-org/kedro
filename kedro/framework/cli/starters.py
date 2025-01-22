@@ -530,6 +530,7 @@ def _get_prompts_required_and_clear_from_CLI_provided(
         del prompts_required["project_name"]
 
     if example_pipeline is not None:
+        _validate_input_with_regex_pattern("yes_no", example_pipeline)
         del prompts_required["example_pipeline"]
 
     return prompts_required

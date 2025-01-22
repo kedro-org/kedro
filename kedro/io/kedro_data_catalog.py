@@ -515,7 +515,7 @@ class KedroDataCatalog(CatalogProtocol):
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
-                matches = difflib.get_close_matches(ds_name, self.__datasets.keys())
+                matches = difflib.get_close_matches(ds_name, self.keys())
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
@@ -542,7 +542,9 @@ class KedroDataCatalog(CatalogProtocol):
     ) -> None:
         # TODO: remove when removing old catalog
         """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""
-        if ds_name in self.__datasets and not replace:
+        if (
+            ds_name in self.__datasets or ds_name in self._lazy_datasets
+        ) and not replace:
             raise DatasetAlreadyExistsError(
                 f"Dataset '{ds_name}' has already been registered"
             )

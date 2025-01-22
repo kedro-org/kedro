@@ -1,5 +1,6 @@
 Kedro
 Kedro's
+Kedroids
 Kubeflow
 Databricks
 Conda

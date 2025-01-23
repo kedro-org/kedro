@@ -97,9 +97,6 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
-        # TODO: remove when removing old catalog
-        # Needed for compatability with old catalog and as we access this property externally
-        # self._datasets: dict[str, AbstractDataset] = {}
         # TODO: rename back to _datasets when removing old catalog
         self.__datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
@@ -119,7 +116,7 @@ class KedroDataCatalog(CatalogProtocol):
     @property
     def datasets(self) -> dict[str, Any]:
         # TODO: remove when removing old catalog
-        return {ds_name: ds for ds_name, ds in self.items()}
+        return self._lazy_datasets | self.__datasets
 
     def __getattribute__(self, key: str):
         # Needed for compatability with old catalog interface since now we

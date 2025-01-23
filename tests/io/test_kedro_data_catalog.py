@@ -295,8 +295,13 @@ class TestKedroDataCatalog:
         """Test release is called without errors"""
         data_catalog.release("test")
 
-    def test_dataset_property(self, data_catalog):
-        pass
+    def test_dataset_property(self, data_catalog_from_config):
+        """Test _dataset attribute returns the same result as dataset property"""
+        # Catalog includes only lazy dataset, we get boats dataset to materialize it
+        _ = data_catalog_from_config["boats"]
+        assert data_catalog_from_config.datasets == data_catalog_from_config._datasets
+        for ds_name in data_catalog_from_config.list():
+            assert ds_name in data_catalog_from_config._datasets
 
     class TestKedroDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):

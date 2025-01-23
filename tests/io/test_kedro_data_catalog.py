@@ -295,6 +295,9 @@ class TestKedroDataCatalog:
         """Test release is called without errors"""
         data_catalog.release("test")
 
+    def test_dataset_property(self, data_catalog):
+        pass
+
     class TestKedroDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):
             """Test dumping catalog config"""

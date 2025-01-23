@@ -99,7 +99,7 @@ class KedroDataCatalog(CatalogProtocol):
         self._config_resolver = config_resolver or CatalogConfigResolver()
         # TODO: remove when removing old catalog
         # Needed for compatability with old catalog and as we access this property externally
-        self._datasets: dict[str, AbstractDataset] = {}
+        # self._datasets: dict[str, AbstractDataset] = {}
         # TODO: rename back to _datasets when removing old catalog
         self.__datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}

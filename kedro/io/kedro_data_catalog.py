@@ -118,7 +118,14 @@ class KedroDataCatalog(CatalogProtocol):
         # TODO: remove when removing old catalog
         return self._lazy_datasets | self.__datasets
 
-    def __getattribute__(self, key: str):
+    @datasets.setter
+    def datasets(self, value: Any) -> None:
+        # TODO: remove when removing old catalog
+        raise AttributeError(
+            "Operation not allowed. Please use KedroDataCatalog.add() instead."
+        )
+
+    def __getattribute__(self, key: str) -> Any:
         # Needed for compatability with old catalog interface since now we
         # differ _datasets and _lazy_datasets
         # TODO: remove when removing old catalog
@@ -126,13 +133,6 @@ class KedroDataCatalog(CatalogProtocol):
             return self.datasets
         else:
             return super().__getattribute__(key)
-
-    @datasets.setter
-    def datasets(self, value: Any) -> None:
-        # TODO: remove when removing old catalog
-        raise AttributeError(
-            "Operation not allowed. Please use KedroDataCatalog.add() instead."
-        )
 
     @property
     def config_resolver(self) -> CatalogConfigResolver:

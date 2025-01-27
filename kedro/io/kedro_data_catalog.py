@@ -27,6 +27,7 @@ from kedro.io.core import (
     Version,
     _validate_versions,
     generate_timestamp,
+    parse_dataset_definition,
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.utils import _format_rich, _has_rich_handler
@@ -548,6 +549,54 @@ class KedroDataCatalog(CatalogProtocol):
                 f"Dataset '{ds_name}' has already been registered"
             )
         self.__setitem__(ds_name, dataset)
+
+    def filter(
+        self,
+        name_regex: str | None = None,
+        name_regex_flags: int | re.RegexFlag = 0,
+        type_regex: str | None = None,
+        type_regex_flags: int | re.RegexFlag = 0,
+    ) -> List[str]:  # noqa: UP006
+        if name_regex is None and type_regex is None:
+            return self.keys()
+
+        if name_regex:
+            name_regex_flags = name_regex_flags or re.IGNORECASE
+            try:
+                pattern = re.compile(name_regex, flags=name_regex_flags)
+            except re.error as exc:
+                raise SyntaxError(
+                    f"Invalid regular expression provided: '{name_regex}'"
+                ) from exc
+
+            filtered_names = [
+                ds_name for ds_name in self.__iter__() if pattern.search(ds_name)
+            ]
+        else:
+            filtered_names = self.keys()
+
+        if type_regex:
+            try:
+                pattern = re.compile(type_regex, flags=type_regex_flags)
+            except re.error as exc:
+                raise SyntaxError(
+                    f"Invalid regular expression provided: '{type_regex}'"
+                ) from exc
+
+            filtered_types = []
+            for ds_name in filtered_names:
+                if ds_name in self._lazy_datasets:
+                    lazy_ds_obj = self._lazy_datasets[ds_name]
+                    class_obj, _ = parse_dataset_definition(lazy_ds_obj.config)
+                else:
+                    class_obj = self.__datasets[ds_name]
+                str_type = f"{class_obj.__module__}.{class_obj.__qualname__}"
+                if pattern.search(str_type):
+                    filtered_types.append(str_type)
+
+            return filtered_types
+        else:
+            return filtered_names
 
     def list(
         self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0

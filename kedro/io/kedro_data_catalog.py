@@ -571,11 +571,11 @@ class KedroDataCatalog(CatalogProtocol):
             for ds_name in filtered_names:
                 if ds_name in self._lazy_datasets:
                     lazy_ds_obj = self._lazy_datasets[ds_name]
-                    class_obj, _ = parse_dataset_definition(lazy_ds_obj.config)
+                    class_type, _ = parse_dataset_definition(lazy_ds_obj.config)
                 else:
-                    class_obj = self.__datasets[ds_name]
+                    class_type = type(self.__datasets[ds_name])
 
-                str_type = f"{class_obj.__module__}.{class_obj.__qualname__}"
+                str_type = f"{class_type.__module__}.{class_type.__qualname__}"
                 if pattern.search(str_type):
                     filtered_types.append(str_type)
 

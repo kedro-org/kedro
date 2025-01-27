@@ -17,6 +17,7 @@
 * Moved `kedro-catalog` JSON schema to `kedro-datasets`.
 * Updated `Partitioned dataset lazy saving` docs page.
 * Fixed `KedroDataCatalog` mutation after pipeline run.
+* Made `KedroDataCatalog._datasets` compatible with `DataCatalog._datasets`.
 
 ## Breaking changes to the API
 ## Documentation changes

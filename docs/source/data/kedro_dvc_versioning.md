@@ -43,7 +43,7 @@ companies:
  dvc add data/01_raw/companies.csv
  ```
 
-This generates the companies.csv.dvc file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for the purpose of Git tracking.
+This generates the `companies.csv.dvc` file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for the purpose of Git tracking.
 
  Update the `.gitignore` file provided by Kedro to allow DVC to track these files. By default, Kedro's `.gitignore` excludes the data directory and its contents, which would prevent DVC-generated files from being committed.
 

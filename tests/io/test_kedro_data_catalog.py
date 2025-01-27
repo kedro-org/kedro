@@ -291,9 +291,26 @@ class TestKedroDataCatalog:
         ds = data_catalog.get_dataset(match_pattern_ds)
         assert isinstance(ds, MemoryDataset)
 
+    def test_remove_runtime_pattern(self, data_catalog):
+        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
+        data_catalog.config_resolver.add_runtime_patterns(runtime_pattern)
+        match_pattern_ds = "match_pattern_ds"
+        assert match_pattern_ds in data_catalog
+
+        data_catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
+        assert match_pattern_ds not in data_catalog
+
     def test_release(self, data_catalog):
         """Test release is called without errors"""
         data_catalog.release("test")
+
+    def test_dataset_property(self, data_catalog_from_config):
+        """Test _dataset attribute returns the same result as dataset property"""
+        # Catalog includes only lazy dataset, we get boats dataset to materialize it
+        _ = data_catalog_from_config["boats"]
+        assert data_catalog_from_config.datasets == data_catalog_from_config._datasets
+        for ds_name in data_catalog_from_config.list():
+            assert ds_name in data_catalog_from_config._datasets
 
     class TestKedroDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):

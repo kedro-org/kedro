@@ -10,7 +10,6 @@ Expect possible breaking changes while using it.
 
 from __future__ import annotations
 
-import copy
 import difflib
 import logging
 import re
@@ -98,7 +97,8 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
-        self._datasets: dict[str, AbstractDataset] = datasets or {}
+        # TODO: rename back to _datasets when removing old catalog
+        self.__datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
         self._load_versions, self._save_version = _validate_versions(
             datasets, load_versions or {}, save_version
@@ -116,7 +116,7 @@ class KedroDataCatalog(CatalogProtocol):
     @property
     def datasets(self) -> dict[str, Any]:
         # TODO: remove when removing old catalog
-        return copy.copy(self._datasets)
+        return self._lazy_datasets | self.__datasets
 
     @datasets.setter
     def datasets(self, value: Any) -> None:
@@ -125,17 +125,26 @@ class KedroDataCatalog(CatalogProtocol):
             "Operation not allowed. Please use KedroDataCatalog.add() instead."
         )
 
+    def __getattribute__(self, key: str) -> Any:
+        # Needed for compatability with old catalog interface since now we
+        # differ _datasets and _lazy_datasets
+        # TODO: remove when removing old catalog
+        if key == "_datasets":
+            return self.datasets
+        else:
+            return super().__getattribute__(key)
+
     @property
     def config_resolver(self) -> CatalogConfigResolver:
         return self._config_resolver
 
     def __repr__(self) -> str:
-        return repr(self._lazy_datasets | self._datasets)
+        return repr(self._lazy_datasets | self.__datasets)
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern."""
         return (
-            dataset_name in self._datasets
+            dataset_name in self.__datasets
             or dataset_name in self._lazy_datasets
             or self._config_resolver.match_pattern(dataset_name) is not None
         )
@@ -143,18 +152,18 @@ class KedroDataCatalog(CatalogProtocol):
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         """Compares two catalogs based on materialised datasets and datasets patterns."""
         return (
-            self._datasets,
+            self.__datasets,
             self._lazy_datasets,
             self._config_resolver.list_patterns(),
         ) == (
-            other._datasets,
+            other.__datasets,
             other._lazy_datasets,
             other.config_resolver.list_patterns(),
         )
 
     def keys(self) -> List[str]:  # noqa: UP006
         """List all dataset names registered in the catalog."""
-        return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
+        return list(self._lazy_datasets.keys()) + list(self.__datasets.keys())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """List all datasets registered in the catalog."""
@@ -218,18 +227,18 @@ class KedroDataCatalog(CatalogProtocol):
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
-        if key in self._datasets:
+        if key in self.__datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
             self._load_versions, self._save_version = _validate_versions(
                 {key: value}, self._load_versions, self._save_version
             )
-            self._datasets[key] = value
+            self.__datasets[key] = value
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
             self._logger.info(f"Adding input data as a MemoryDataset - {key}")
-            self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
+            self.__datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:
         return len(self.keys())
@@ -250,7 +259,7 @@ class KedroDataCatalog(CatalogProtocol):
         Returns:
             An instance of AbstractDataset.
         """
-        if key not in self._datasets and key not in self._lazy_datasets:
+        if key not in self.__datasets and key not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
                 self._add_from_config(key, ds_config)
@@ -259,7 +268,7 @@ class KedroDataCatalog(CatalogProtocol):
         if lazy_dataset:
             self[key] = lazy_dataset.materialize()
 
-        dataset = self._datasets.get(key, None)
+        dataset = self.__datasets.get(key, None)
 
         return dataset or default
 
@@ -425,7 +434,7 @@ class KedroDataCatalog(CatalogProtocol):
             credentials.update(unresolved_credentials)
             load_versions[ds_name] = self._load_versions.get(ds_name, None)
 
-        for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
+        for ds_name, ds in self.__datasets.items():  # type: ignore[assignment]
             if _is_memory_dataset(ds):  # type: ignore[arg-type]
                 continue
             resolved_config = ds.to_config()  # type: ignore[attr-defined]
@@ -505,7 +514,7 @@ class KedroDataCatalog(CatalogProtocol):
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
-                matches = difflib.get_close_matches(ds_name, self._datasets.keys())
+                matches = difflib.get_close_matches(ds_name, self.keys())
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
@@ -532,7 +541,9 @@ class KedroDataCatalog(CatalogProtocol):
     ) -> None:
         # TODO: remove when removing old catalog
         """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""
-        if ds_name in self._datasets and not replace:
+        if (
+            ds_name in self.__datasets or ds_name in self._lazy_datasets
+        ) and not replace:
             raise DatasetAlreadyExistsError(
                 f"Dataset '{ds_name}' has already been registered"
             )

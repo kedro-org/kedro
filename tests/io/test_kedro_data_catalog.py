@@ -47,9 +47,10 @@ def conflicting_feed_dict():
 
 @pytest.fixture
 def multi_catalog():
-    csv = CSVDataset(filepath="abc.csv")
+    csv_1 = CSVDataset(filepath="abc.csv")
+    csv_2 = CSVDataset(filepath="def.csv")
     parq = ParquetDataset(filepath="xyz.parq")
-    return KedroDataCatalog({"abc": csv, "xyz": parq})
+    return KedroDataCatalog({"abc": csv_1, "def": csv_2, "xyz": parq})
 
 
 @pytest.fixture
@@ -159,8 +160,9 @@ class TestKedroDataCatalog:
         [
             ("^a", ["abc"]),
             ("a|x", ["abc", "xyz"]),
-            ("^(?!(a|x))", []),
-            ("def", []),
+            ("^(?!(a|d|x))", []),
+            ("def", ["def"]),
+            ("ghi", []),
             ("", []),
         ],
     )
@@ -174,6 +176,38 @@ class TestKedroDataCatalog:
         pattern = f"Invalid regular expression provided: '{escaped_regex}'"
         with pytest.raises(SyntaxError, match=pattern):
             multi_catalog.list("((")
+
+    @pytest.mark.parametrize(
+        "name_regex,type_regex,expected",
+        [
+            ("^a", None, ["abc"]),
+            ("a|x", None, ["abc", "xyz"]),
+            ("a|d|x", None, ["abc", "def", "xyz"]),
+            ("a|d|x", "CSVDataset", ["abc", "def"]),
+            ("a|d|x", "kedro_datasets", ["abc", "def", "xyz"]),
+            (None, "ParquetDataset", ["xyz"]),
+            ("^(?!(a|d|x))", None, []),
+            ("def", None, ["def"]),
+            (None, None, ["abc", "def", "xyz"]),
+        ],
+    )
+    def test_catalog_filter_regex(
+        self, multi_catalog, name_regex, type_regex, expected
+    ):
+        """Test that regex patterns filter datasets accordingly"""
+        assert (
+            multi_catalog.filter(name_regex=name_regex, type_regex=type_regex)
+            == expected
+        )
+
+    def test_catalog_filter_bad_regex(self, multi_catalog):
+        """Test that bad regex is caught accordingly"""
+        escaped_regex = r"\(\("
+        pattern = f"Invalid regular expression provided: '{escaped_regex}'"
+        with pytest.raises(SyntaxError, match=pattern):
+            multi_catalog.filter(name_regex="((")
+        with pytest.raises(SyntaxError, match=pattern):
+            multi_catalog.filter(type_regex="((")
 
     def test_eq(self, multi_catalog, data_catalog):
         assert multi_catalog == multi_catalog.shallow_copy()

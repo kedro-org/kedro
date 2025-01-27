@@ -577,11 +577,11 @@ class KedroDataCatalog(CatalogProtocol):
 
                 str_type = f"{class_type.__module__}.{class_type.__qualname__}"
                 if pattern.search(str_type):
-                    filtered_types.append(str_type)
+                    filtered_types.append(ds_name)
 
             return filtered_types
-        else:
-            return filtered_names
+
+        return filtered_names
 
     def list(
         self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0

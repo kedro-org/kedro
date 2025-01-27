@@ -31,7 +31,7 @@ You can now commit the changes to git.
 
 Suppose you have a dataset in your project, such as:
 
-```yml
+```yaml
 companies:
   type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
@@ -94,7 +94,7 @@ To address these issues, you can define Kedro pipelines as DVC stages in the dvc
 
 Here is an example configuration for dvc.yaml:
 
-```yml
+```yaml
 stages:
   data_processing:
     cmd: kedro run --pipeline data_processing
@@ -131,7 +131,7 @@ The command `dvc repro` executes pipelines where outputs or dependencies have ch
 
 You can track changes to your code by adding the relevant files to the `deps` section in `dvc.yaml`.
 
-```yml
+```yaml
 stages:
   data_processing:
     cmd: kedro run --pipeline data_processing
@@ -158,7 +158,7 @@ dvc push
 
 To track parameters, you can include them under the params section in `dvc.yaml`.
 
-```yml
+```yaml
 stages:
   data_science:
     cmd: kedro run --pipeline data_science
@@ -167,7 +167,7 @@ stages:
       - src/space_dvc/pipelines/data_science/nodes.py
       - src/space_dvc/pipelines/data_science/pipeline.py
     params:
-      - conf/base/parameters_data_science.yml:
+      - conf/base/parameters_data_science.yaml:
           - model_options
     outs:
       - data/06_models/regressor.pickle
@@ -182,6 +182,6 @@ dvc push
 
 ### Running Experiments with Different Parameters
 
-To experiment with different parameter values, update the parameter in `parameters.yml` and then run the pipelines with `dvc repro`.
+To experiment with different parameter values, update the parameter in `parameters.yaml` and then run the pipelines with `dvc repro`.
 
 Compare parameter changes between runs with `dvc params diff`

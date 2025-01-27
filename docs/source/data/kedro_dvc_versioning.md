@@ -1,0 +1,187 @@
+# Data and pipeline versioning with Kedro and DVC
+
+This document explains how to use [DVC](https://dvc.org/), a command line tool and VS Code Extension to help you develop reproducible machine learning projects, to version datasets and pipelines in your Kedro project.
+
+## Versioning data with .dvc files
+
+### Initializing the repository
+
+For this example, we will be using a Kedro `spaceflights-pandas` starter project, which includes preconfigured datasets and pipelines.
+
+To use DVC as a Python library, install it using `pip` or `conda`, for example:
+`pip install dvc`
+
+Initialise the Kedro project as a git repository: `git init`, and initialise the Kedro project as a DVC repository: `dvc init`. You should see a message such as:
+
+```bash
+Initialized DVC repository.
+
+You can now commit the changes to git.
+
++---------------------------------------------------------------------+
+|                                                                     |
+|        DVC has enabled anonymous aggregate usage analytics.         |
+|     Read the analytics documentation (and how to opt-out) here:     |
+|             <https://dvc.org/doc/user-guide/analytics>              |
+|                                                                     |
++---------------------------------------------------------------------+
+```
+
+### First commits
+
+Suppose you have a dataset in your project, such as:
+
+```yml
+companies:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/companies.csv
+```
+
+ Use `dvc add` to start tracking a dataset file:
+ 
+ ```bash
+ dvc add data/01_raw/companies.csv
+ ```
+ 
+This generates the companies.csv.dvc file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for the purpose of Git tracking.
+  
+ Update the `.gitignore` file provided by Kedro to allow DVC to track these files. By default, Kedro's `.gitignore` excludes the data directory and its contents, which would prevent DVC-generated files from being committed.
+
+ This metadata file can then be commited to git.
+
+ ### Going back to a previous version of the data
+
+Check which git commit contains the desired version of the data.
+
+```bash
+git checkout HEAD~2 data/01_raw/companies.csv.dvc
+dvc checkout
+```
+
+### Storing data remotely
+
+DVC remotes provide access to external storage locations to track and share your data and ML models with the `dvc push` and `dvc pull` commands. Usually, those will be shared between devices or team members who are working on a project. It supports [several different storage types](https://dvc.org/doc/user-guide/data-management/remote-storage#supported-storage-types).
+
+For example:
+
+```bash
+dvc remote add myremote s3://mybucket
+kedro run
+git add .
+git commit -m "Update"
+dvc push
+```
+
+### Going back to a previous version of the data, stored remotely
+
+```bash
+git checkout <commit hash> data/01_raw/companies.csv.dvc
+dvc checkout
+dvc pull
+```
+
+## Versioning with DVC Data Pipelines
+
+While the previous method allows you to version datasets, it comes with some limitations:
+
+- Intermediate and output datasets must be added to DVC manually.
+- Parameters and code changes are not explicitly tracked.
+- Artefacts and metrics cannot be tracked effectively.
+
+To address these issues, you can define Kedro pipelines as DVC stages in the dvc.yaml file.
+
+### Defining Kedro Pipelines as DVC Stages
+
+Here is an example configuration for dvc.yaml:
+
+```yml
+stages:
+  data_processing:
+    cmd: kedro run --pipeline data_processing
+    deps:
+      - data/01_raw/companies.csv
+      - data/01_raw/reviews.csv
+      - data/01_raw/shuttles.xlsx
+    outs:
+      - data/02_intermediate/preprocessed_companies.pq
+      - data/02_intermediate/preprocessed_shuttles.pq
+      - data/03_primary/model_input_table.pq
+  
+  data_science:
+    cmd: kedro run --pipeline data_science
+    deps:
+      - data/03_primary/model_input_table.pq
+    outs:
+      - data/06_models/regressor.pickle
+```
+
+Run the pipeline with:
+
+```bash
+dvc repro
+```
+
+### Updating a Dataset
+
+If one of the datasets is updated, you can rerun only the pipelines affected by the change.
+
+The command `dvc repro` executes pipelines where outputs or dependencies have changed.
+
+### Tracking Code Changes
+
+You can track changes to your code by adding the relevant files to the `deps` section in `dvc.yaml`.
+
+```yml
+stages:
+  data_processing:
+    cmd: kedro run --pipeline data_processing
+    deps:
+      - data/01_raw/companies.csv
+      - data/01_raw/reviews.csv
+      - data/01_raw/shuttles.xlsx
+      - src/space_dvc/pipelines/data_processing/nodes.py
+      - src/space_dvc/pipelines/data_processing/pipeline.py
+    outs:
+      - data/02_intermediate/preprocessed_companies.pq
+      - data/02_intermediate/preprocessed_shuttles.pq
+      - data/03_primary/model_input_table.pq
+```
+
+After applying the desired code changes, run:
+
+```bash
+dvc repro
+dvc push
+```
+
+### Tracking Parameters
+
+To track parameters, you can include them under the params section in `dvc.yaml`.
+
+```yml
+stages:
+  data_science:
+    cmd: kedro run --pipeline data_science
+    deps:
+      - data/03_primary/model_input_table.pq
+      - src/space_dvc/pipelines/data_science/nodes.py
+      - src/space_dvc/pipelines/data_science/pipeline.py
+    params:
+      - conf/base/parameters_data_science.yml:
+          - model_options
+    outs:
+      - data/06_models/regressor.pickle
+```
+
+Run the pipeline and push the changes:
+
+```bash
+dvc repro
+dvc push
+```
+
+### Running Experiments with Different Parameters
+
+To experiment with different parameter values, update the parameter in `parameters.yml` and then run the pipelines with `dvc repro`.
+
+Compare parameter changes between runs with `dvc params diff`

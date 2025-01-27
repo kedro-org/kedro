@@ -104,6 +104,7 @@ class AbstractRunner(ABC):
             )
 
         # Register the default dataset pattern with the catalog
+        # TODO: replace with catalog.config_resolver.add_runtime_patterns() when removing old catalog
         catalog = catalog.shallow_copy(
             extra_dataset_patterns=self._extra_dataset_patterns
         )
@@ -135,6 +136,12 @@ class AbstractRunner(ABC):
         free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
 
         run_output = {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
+
+        # Remove runtime patterns after run, so they do not affect further runs
+        if self._extra_dataset_patterns:
+            catalog.config_resolver.remove_runtime_patterns(
+                self._extra_dataset_patterns
+            )
 
         return run_output
 

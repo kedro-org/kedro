@@ -16,7 +16,7 @@
 * Remove lowercase transformation in regex validation.
 * Moved `kedro-catalog` JSON schema to `kedro-datasets`.
 * Updated `Partitioned dataset lazy saving` docs page.
-
+* Fixed `KedroDataCatalog` mutation after pipeline run.
 
 ## Breaking changes to the API
 ## Documentation changes

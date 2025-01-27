@@ -553,22 +553,12 @@ class KedroDataCatalog(CatalogProtocol):
     def filter(
         self,
         name_regex: str | None = None,
-        name_regex_flags: int | re.RegexFlag = 0,
+        name_regex_flags: int | re.RegexFlag = re.IGNORECASE,
         type_regex: str | None = None,
         type_regex_flags: int | re.RegexFlag = 0,
     ) -> List[str]:  # noqa: UP006
-        if name_regex is None and type_regex is None:
-            return self.keys()
-
         if name_regex:
-            name_regex_flags = name_regex_flags or re.IGNORECASE
-            try:
-                pattern = re.compile(name_regex, flags=name_regex_flags)
-            except re.error as exc:
-                raise SyntaxError(
-                    f"Invalid regular expression provided: '{name_regex}'"
-                ) from exc
-
+            pattern = _compile_pattern(name_regex, name_regex_flags)
             filtered_names = [
                 ds_name for ds_name in self.__iter__() if pattern.search(ds_name)
             ]
@@ -576,13 +566,7 @@ class KedroDataCatalog(CatalogProtocol):
             filtered_names = self.keys()
 
         if type_regex:
-            try:
-                pattern = re.compile(type_regex, flags=type_regex_flags)
-            except re.error as exc:
-                raise SyntaxError(
-                    f"Invalid regular expression provided: '{type_regex}'"
-                ) from exc
-
+            pattern = _compile_pattern(type_regex, type_regex_flags)
             filtered_types = []
             for ds_name in filtered_names:
                 if ds_name in self._lazy_datasets:
@@ -590,6 +574,7 @@ class KedroDataCatalog(CatalogProtocol):
                     class_obj, _ = parse_dataset_definition(lazy_ds_obj.config)
                 else:
                     class_obj = self.__datasets[ds_name]
+
                 str_type = f"{class_obj.__module__}.{class_obj.__qualname__}"
                 if pattern.search(str_type):
                     filtered_types.append(str_type)
@@ -794,3 +779,12 @@ class KedroDataCatalog(CatalogProtocol):
         except DatasetNotFoundError:
             return False
         return dataset.exists()
+
+
+def _compile_pattern(regex: str, regex_flags: int | re.RegexFlag) -> re.Pattern:
+    try:
+        pattern = re.compile(regex, flags=regex_flags)
+    except re.error as exc:
+        raise SyntaxError(f"Invalid regular expression provided: '{regex}'") from exc
+
+    return pattern

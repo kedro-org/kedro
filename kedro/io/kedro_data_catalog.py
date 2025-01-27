@@ -586,8 +586,7 @@ class KedroDataCatalog(CatalogProtocol):
     def list(
         self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0
     ) -> List[str]:  # noqa: UP006
-        # TODO: rename depending on the solution for https://github.com/kedro-org/kedro/issues/3917
-        # TODO: make regex_search mandatory argument as we have catalog.keys() for listing all the datasets.
+        # TODO: remove when removing old catalog
         """List all dataset names registered in the catalog, optionally filtered by a regex pattern.
 
         If a regex pattern is provided, only dataset names matching the pattern will be returned.
@@ -624,12 +623,7 @@ class KedroDataCatalog(CatalogProtocol):
         if not regex_flags:
             regex_flags = re.IGNORECASE
 
-        try:
-            pattern = re.compile(regex_search, flags=regex_flags)
-        except re.error as exc:
-            raise SyntaxError(
-                f"Invalid regular expression provided: '{regex_search}'"
-            ) from exc
+        pattern = _compile_pattern(regex_search, regex_flags)
         return [ds_name for ds_name in self.__iter__() if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:

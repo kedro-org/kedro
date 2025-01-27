@@ -42,9 +42,13 @@ class TestValidSequentialRunner:
 
     def test_run_twice_giving_same_result(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
+        patterns_before_run = catalog.config_resolver.list_patterns()
         result_first_run = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
+        # Check runtime patterns removed after run, so catalog is not mutated
+        assert patterns_before_run == catalog.config_resolver.list_patterns()
+
         result_second_run = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )

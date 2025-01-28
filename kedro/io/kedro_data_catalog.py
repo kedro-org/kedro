@@ -586,11 +586,11 @@ class KedroDataCatalog(CatalogProtocol):
             >>> # get datasets where the substring 'raw' is present
             >>> raw_data = catalog.filter(name_regex='raw')
             >>> # get datasets of a specific type
-            >>> csv_datasets = catalog.filter(type_regex='pandas\\.CSVDataset')
+            >>> csv_datasets = catalog.filter(type_regex='pandas.excel_dataset.ExcelDataset')
             >>> # get datasets where names start with 'model_' and are of a specific type
             >>> model_datasets = catalog.filter(
             ...     name_regex='^model_',
-            ...     type_regex='tensorflow\\.ModelDataset',
+            ...     type_regex='ModelDataset',
             ... )
         """
 
@@ -610,13 +610,11 @@ class KedroDataCatalog(CatalogProtocol):
             for ds_name in filtered_names:
                 # Retrieve the dataset type
                 if ds_name in self._lazy_datasets:
-                    lazy_ds_obj = self._lazy_datasets[ds_name]
-                    class_type, _ = parse_dataset_definition(lazy_ds_obj.config)
+                    str_type = str(self._lazy_datasets[ds_name])
                 else:
                     class_type = type(self.__datasets[ds_name])
-
+                    str_type = f"{class_type.__module__}.{class_type.__qualname__}"
                 # Match the dataset type against the type_regex
-                str_type = f"{class_type.__module__}.{class_type.__qualname__}"
                 if pattern.search(str_type):
                     filtered_types.append(ds_name)
 

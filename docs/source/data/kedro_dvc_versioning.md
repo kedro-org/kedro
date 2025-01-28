@@ -4,7 +4,7 @@ This document explains how to use [DVC](https://dvc.org/), a command line tool a
 
 ## Versioning data with .dvc files
 
-### Initializing the repository
+### Initialising the repository
 
 For this example, we will be using a Kedro `spaceflights-pandas` starter project, which includes preconfigured datasets and pipelines.
 
@@ -80,7 +80,7 @@ dvc checkout
 dvc pull
 ```
 
-## Versioning with DVC Data Pipelines
+## Versioning with DVC data pipelines
 
 While the previous method allows you to version datasets, it comes with some limitations:
 
@@ -88,9 +88,9 @@ While the previous method allows you to version datasets, it comes with some lim
 - Parameters and code changes are not explicitly tracked.
 - Artefacts and metrics cannot be tracked effectively.
 
-To address these issues, you can define Kedro pipelines as DVC stages in the dvc.yaml file.
+To address these issues, you can define Kedro pipelines as DVC stages in the dvc.yaml file. The list of stages is typically the most important part of a dvc.yaml file, though the file can also be used to configure artifacts, metrics, params, and plots, either as part of a stage definition or on their own.
 
-### Defining Kedro Pipelines as DVC Stages
+### Defining Kedro pipelines as DVC stages
 
 Here is an example configuration for dvc.yaml:
 
@@ -103,14 +103,14 @@ stages:
       - data/01_raw/reviews.csv
       - data/01_raw/shuttles.xlsx
     outs:
-      - data/02_intermediate/preprocessed_companies.pq
-      - data/02_intermediate/preprocessed_shuttles.pq
-      - data/03_primary/model_input_table.pq
+      - data/02_intermediate/preprocessed_companies.parquet
+      - data/02_intermediate/preprocessed_shuttles.parquet
+      - data/03_primary/model_input_table.parquet
 
   data_science:
     cmd: kedro run --pipeline data_science
     deps:
-      - data/03_primary/model_input_table.pq
+      - data/03_primary/model_input_table.parquet
     outs:
       - data/06_models/regressor.pickle
 ```
@@ -121,13 +121,13 @@ Run the pipeline with:
 dvc repro
 ```
 
-### Updating a Dataset
+### Updating a dataset
 
 If one of the datasets is updated, you can rerun only the pipelines affected by the change.
 
 The command `dvc repro` executes pipelines where outputs or dependencies have changed.
 
-### Tracking Code Changes
+### Tracking code changes
 
 You can track changes to your code by adding the relevant files to the `deps` section in `dvc.yaml`.
 
@@ -142,19 +142,21 @@ stages:
       - src/space_dvc/pipelines/data_processing/nodes.py
       - src/space_dvc/pipelines/data_processing/pipeline.py
     outs:
-      - data/02_intermediate/preprocessed_companies.pq
-      - data/02_intermediate/preprocessed_shuttles.pq
-      - data/03_primary/model_input_table.pq
+      - data/02_intermediate/preprocessed_companies.parquet
+      - data/02_intermediate/preprocessed_shuttles.parquet
+      - data/03_primary/model_input_table.parquet
 ```
 
-After applying the desired code changes, run:
+After applying the desired code changes, run `dvc repro`. The output should confirm the updates on the `dvc.lock` file, if any:
 
 ```bash
-dvc repro
-dvc push
+Updating lock file 'dvc.lock'
+Use `dvc push` to send your updates to remote storage.
 ```
 
-### Tracking Parameters
+After that, they can be pushed to remote storage with the `dvc push` command.
+
+### Tracking parameters
 
 To track parameters, you can include them under the params section in `dvc.yaml`.
 
@@ -163,7 +165,7 @@ stages:
   data_science:
     cmd: kedro run --pipeline data_science
     deps:
-      - data/03_primary/model_input_table.pq
+      - data/03_primary/model_input_table.parquet
       - src/space_dvc/pipelines/data_science/nodes.py
       - src/space_dvc/pipelines/data_science/pipeline.py
     params:
@@ -180,8 +182,15 @@ dvc repro
 dvc push
 ```
 
-### Running Experiments with Different Parameters
+### Running experiments with different parameters
 
 To experiment with different parameter values, update the parameter in `parameters.yaml` and then run the pipelines with `dvc repro`.
 
-Compare parameter changes between runs with `dvc params diff`
+Compare parameter changes between runs with `dvc params diff`:
+
+```bash
+Path                                   Param                       HEAD    workspace
+conf/base/parameters_data_science.yml  model_options.features      -       ['engines', 'passenger_capacity', 'crew', 'd_check_complete', 'moon_clearance_complete', 'iata_approved', 'company_rating', 'review_scores_rating']
+conf/base/parameters_data_science.yml  model_options.random_state  -       3
+conf/base/parameters_data_science.yml  model_options.test_size     -       0.2
+```

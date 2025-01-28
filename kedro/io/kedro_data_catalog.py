@@ -585,11 +585,11 @@ class KedroDataCatalog(CatalogProtocol):
             >>> # get datasets where the substring 'raw' is present
             >>> raw_data = catalog.filter(name_regex='raw')
             >>> # get datasets of a specific type
-            >>> csv_datasets = catalog.filter(type_regex='pandas\\.CSVDataSet')
+            >>> csv_datasets = catalog.filter(type_regex='pandas\\.CSVDataset')
             >>> # get datasets where names start with 'model_' and are of a specific type
             >>> model_datasets = catalog.filter(
             ...     name_regex='^model_',
-            ...     type_regex='tensorflow\\.ModelDataSet',
+            ...     type_regex='tensorflow\\.ModelDataset',
             ... )
         """
 

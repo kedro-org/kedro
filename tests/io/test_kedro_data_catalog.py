@@ -266,8 +266,8 @@ class TestKedroDataCatalog:
         assert isinstance(catalog["ds"], CSVDataset)
         assert isinstance(catalog["df"], MemoryDataset)
 
-    def test_repr(self, data_catalog):
-        assert data_catalog.__repr__() == str(data_catalog)
+    def test_repr(self, data_catalog_from_config):
+        assert data_catalog_from_config.__repr__() == str(data_catalog_from_config)
 
     def test_repr_no_type_found(self, data_catalog_from_config):
         del data_catalog_from_config._lazy_datasets["boats"].config["type"]

@@ -18,6 +18,7 @@
 * Updated `Partitioned dataset lazy saving` docs page.
 * Fixed `KedroDataCatalog` mutation after pipeline run.
 * Made `KedroDataCatalog._datasets` compatible with `DataCatalog._datasets`.
+* Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
 
 ## Breaking changes to the API
 ## Documentation changes

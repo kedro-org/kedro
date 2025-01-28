@@ -1,6 +1,13 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Documentation changes
+
+# Release 0.19.11
+
+## Major features and improvements
 * Implemented `KedroDataCatalog.to_config()` method that converts the catalog instance into a configuration format suitable for serialization.
 * Improve OmegaConfigLoader performance.
 * Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.

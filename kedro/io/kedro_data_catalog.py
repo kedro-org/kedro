@@ -597,7 +597,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         # Apply name filter if specified
         if name_regex:
-            pattern = _compile_pattern(name_regex, name_regex_flags)
+            pattern = _compile_regex_pattern(name_regex, name_regex_flags)
             filtered_names = [
                 ds_name for ds_name in self.__iter__() if pattern.search(ds_name)
             ]
@@ -606,7 +606,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         # Apply type filter if specified
         if type_regex:
-            pattern = _compile_pattern(type_regex, type_regex_flags)
+            pattern = _compile_regex_pattern(type_regex, type_regex_flags)
             filtered_types = []
             for ds_name in filtered_names:
                 # Retrieve the dataset type
@@ -663,7 +663,7 @@ class KedroDataCatalog(CatalogProtocol):
         if not regex_flags:
             regex_flags = re.IGNORECASE
 
-        pattern = _compile_pattern(regex_search, regex_flags)
+        pattern = _compile_regex_pattern(regex_search, regex_flags)
         return [ds_name for ds_name in self.__iter__() if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:
@@ -815,7 +815,7 @@ class KedroDataCatalog(CatalogProtocol):
         return dataset.exists()
 
 
-def _compile_pattern(regex: str, regex_flags: int | re.RegexFlag) -> re.Pattern:
+def _compile_regex_pattern(regex: str, regex_flags: int | re.RegexFlag) -> re.Pattern:
     try:
         pattern = re.compile(regex, flags=regex_flags)
     except re.error as exc:

@@ -1,6 +1,8 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Implemented `KedroDataCatalog.filter()` to filter datasets by name and type.
+
 ## Bug fixes and other changes
 * Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
 
@@ -14,7 +16,6 @@
 * Improve OmegaConfigLoader performance.
 * Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
 * Added support for `%load_ext kedro`.
-* Implemented `KedroDataCatalog.filter()` to filter datasets by name and type.
 
 ## Bug fixes and other changes
 * Added validation to ensure dataset versions consistency across catalog.

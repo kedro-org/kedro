@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
+
 ## Breaking changes to the API
 ## Documentation changes
 
@@ -25,7 +27,6 @@
 * Updated `Partitioned dataset lazy saving` docs page.
 * Fixed `KedroDataCatalog` mutation after pipeline run.
 * Made `KedroDataCatalog._datasets` compatible with `DataCatalog._datasets`.
-* Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

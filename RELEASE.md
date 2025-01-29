@@ -1,6 +1,15 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+* Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
+
+## Breaking changes to the API
+## Documentation changes
+
+# Release 0.19.11
+
+## Major features and improvements
 * Implemented `KedroDataCatalog.to_config()` method that converts the catalog instance into a configuration format suitable for serialization.
 * Improve OmegaConfigLoader performance.
 * Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
@@ -19,10 +28,6 @@
 * Updated `Partitioned dataset lazy saving` docs page.
 * Fixed `KedroDataCatalog` mutation after pipeline run.
 * Made `KedroDataCatalog._datasets` compatible with `DataCatalog._datasets`.
-* Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
-
-## Breaking changes to the API
-## Documentation changes
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

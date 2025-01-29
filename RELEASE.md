@@ -26,9 +26,6 @@
 * Fixed `KedroDataCatalog` mutation after pipeline run.
 * Made `KedroDataCatalog._datasets` compatible with `DataCatalog._datasets`.
 
-## Breaking changes to the API
-## Documentation changes
-
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Hendrik Scherner](https://github.com/SchernHe)

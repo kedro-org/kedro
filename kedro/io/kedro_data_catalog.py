@@ -567,6 +567,7 @@ class KedroDataCatalog(CatalogProtocol):
         Args:
             name_regex: Optional regular expression to filter dataset names by name.
             name_regex_flags: Optional regex flags for the name filter.
+                By default, IGNORECASE key is set.
             type_regex: Optional regular expression to filter dataset names by their type.
                 The provided regex is matched against the full dataset type path, for example:
                 `kedro_datasets.pandas.parquet_dataset.ParquetDataset`.

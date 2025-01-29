@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
+
 ## Breaking changes to the API
 ## Documentation changes
 

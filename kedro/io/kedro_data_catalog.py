@@ -27,6 +27,7 @@ from kedro.io.core import (
     Version,
     _validate_versions,
     generate_timestamp,
+    parse_dataset_definition,
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.utils import _format_rich, _has_rich_handler
@@ -48,7 +49,8 @@ class _LazyDataset:
         self.save_version = save_version
 
     def __repr__(self) -> str:
-        return f"{self.config.get('type', 'UnknownType')}"
+        class_type, _ = parse_dataset_definition(self.config)
+        return f"{class_type.__module__}.{class_type.__qualname__}"
 
     def materialize(self) -> AbstractDataset:
         return AbstractDataset.from_config(

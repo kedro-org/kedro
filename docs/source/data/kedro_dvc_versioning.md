@@ -49,11 +49,19 @@ companies:
 
 This generates the `companies.csv.dvc` file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for the purpose of Git tracking.
 
- Update the `.gitignore` file provided by Kedro to allow DVC to track these files. By default, Kedro's `.gitignore` excludes the data directory and its contents, which would prevent DVC-generated files from being committed.
+If you are using the `spaceflights-pandas` starter as an example, keep in mind that you will have to update the `.gitignore` file provided in the starter template to allow DVC to track these files. By default, Kedro's `.gitignore` excludes the data directory and its contents, which would prevent DVC-generated files from being committed.
 
- This metadata file can then be commited to git.
+```bash
+# ignore everything in the following folders
+data/**
 
- ### Going back to a previous version of the data
+# except their sub-folders
+!data/**/
+```
+
+The metadata file can then be commited to git.
+
+### Going back to a previous version of the data
 
 Check which git commit contains the desired version of the data.
 

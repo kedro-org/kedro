@@ -6,7 +6,11 @@ This document explains how to use [DVC](https://dvc.org/), a command line tool a
 
 ### Initialising the repository
 
-For this example, we will be using a Kedro `spaceflights-pandas` starter project, which includes preconfigured datasets and pipelines.
+For this example, we will be using a Kedro `spaceflights-pandas` starter project, which includes preconfigured datasets and pipelines. To create this starter project locally, use the command:
+
+`kedro new --starter=spaceflights-pandas --name=space-dvc`
+
+For more information about starter projects, visit the [Kedro starters documentation](https://docs.kedro.org/en/stable/starters/starters.html) page.
 
 To use DVC as a Python library, install it using `pip` or `conda`, for example:
 `pip install dvc`

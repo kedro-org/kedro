@@ -376,6 +376,34 @@ class TestValidPipeline:
         }
         assert actual == expected
 
+    def test_node_grouping_by_namespace(self):
+        pipeline = modular_pipeline(
+            [
+                node(identity, "A", "B", name="node1", namespace="name_1"),
+                node(identity, "B", "C", name="node2", namespace="name_1"),
+                node(identity, "C", "D", name="node3", namespace="name_2"),
+                node(identity, "D", "E", name="node4", namespace="name_2"),
+                node(identity, "E", "G", name="node5"),
+            ]
+        )
+        grouped = pipeline.grouped_nodes_by_namespace
+        # Validate keys for namespace groups
+        for key in ["name_1", "name_2"]:
+            assert key in grouped
+            assert grouped[key]["name"] == key
+            assert grouped[key]["type"] == "namespace"
+            assert len(grouped[key]["nodes"]) == 2
+
+        # Validate dependencies for namespace groups
+        assert grouped["name_1"]["dependencies"] == set()
+        assert grouped["name_2"]["dependencies"] == {"name_1"}
+
+        # Validate nodes for namespace groups
+        assert grouped["node5"]["type"] == "node"
+        assert grouped["node5"]["name"] == "node5"
+        assert len(grouped["node5"]["nodes"]) == 1
+        assert grouped["node5"]["dependencies"] == {"name_2"}
+
 
 @pytest.fixture
 def pipeline_with_circle():

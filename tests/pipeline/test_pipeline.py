@@ -384,6 +384,7 @@ class TestValidPipeline:
                 node(identity, "C", "D", name="node3", namespace="name_2"),
                 node(identity, "D", "E", name="node4", namespace="name_2"),
                 node(identity, "E", "G", name="node5"),
+                node(identity, "G", "H", name="node6"),
             ]
         )
         grouped = pipeline.grouped_nodes_by_namespace
@@ -403,6 +404,8 @@ class TestValidPipeline:
         assert grouped["node5"]["name"] == "node5"
         assert len(grouped["node5"]["nodes"]) == 1
         assert grouped["node5"]["dependencies"] == {"name_2"}
+        # Validate when node depends on node
+        assert grouped["node6"]["dependencies"] == {"node5"}
 
 
 @pytest.fixture

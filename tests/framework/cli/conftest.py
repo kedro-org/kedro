@@ -27,7 +27,7 @@ from kedro.framework.cli.registry import registry_cli
 from kedro.framework.cli.starters import create_cli
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
-from kedro.io import CatalogProtocol
+from kedro.io import KedroDataCatalog
 
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"
@@ -115,13 +115,15 @@ def fake_kedro_cli():
     )
 
 
-@fixture(scope="module")
+@fixture(scope="module", params=[None, KedroDataCatalog])
 def fake_project_cli(
     fake_repo_path: Path,
     dummy_config: Path,
     fake_kedro_cli: click.CommandCollection,
-    default_catalog: CatalogProtocol | None = None,
+    request,
 ):
+    # TODO: remove parametrization after removing old catalog as KedroDataCatalog will be default
+    default_catalog = request.param
     old_settings = settings.as_dict()
     starter_path = Path(__file__).resolve().parents[3]
     starter_path = starter_path / "features" / "steps" / "test_starter"
@@ -130,7 +132,10 @@ def fake_project_cli(
     )
     # Delete the project logging.yml, which leaves behind info.log and error.log files.
     # This leaves logging config as the framework default.
-    (fake_repo_path / "conf" / "logging.yml").unlink()
+    try:
+        (fake_repo_path / "conf" / "logging.yml").unlink()
+    except FileNotFoundError:
+        pass
 
     # NOTE: Here we load a couple of modules, as they would be imported in
     # the code and tests.

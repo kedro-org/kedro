@@ -1,10 +1,10 @@
 # TODO: move all tests to test_catalog.py after removing old catalog
 import pytest
-import yaml
 from click.testing import CliRunner
 from kedro_datasets.pandas import CSVDataset
 
 from kedro.io import KedroDataCatalog, MemoryDataset
+from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 PIPELINE_NAME = "pipeline"
@@ -203,28 +203,37 @@ class TestCatalogListCommand:
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
 
+def identity(data):
+    return data  # pragma: no cover
+
+
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestCatalogCreateCommand:
     PIPELINE_NAME = "data_engineering"
 
-    @staticmethod
-    @pytest.fixture(params=["base"])
-    def catalog_path(request, fake_repo_path):
-        catalog_path = fake_repo_path / "conf" / request.param
-
-        yield catalog_path
-
-        for file in catalog_path.glob("catalog_*"):
-            file.unlink()
-
-    def test_catalog_is_created_in_base_by_default(
-        self, fake_project_cli, fake_metadata, fake_repo_path, catalog_path
+    def test_no_missing_datasets(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_load_context,
+        fake_repo_path,
+        mock_pipelines,
     ):
-        main_catalog_path = fake_repo_path / "conf" / "base" / "catalog.yml"
-        main_catalog_config = yaml.safe_load(main_catalog_path.read_text())
-        assert "example_iris_data" in main_catalog_config
+        mocked_context = fake_load_context.return_value
 
-        data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
+        catalog_datasets = {
+            "input_data": CSVDataset(filepath="test.csv"),
+            "output_data": CSVDataset(filepath="test2.csv"),
+        }
+        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+        mocked_context.project_path = fake_repo_path
+        mock_pipelines[self.PIPELINE_NAME] = modular_pipeline(
+            [node(identity, "input_data", "output_data")]
+        )
+
+        data_catalog_file = (
+            fake_repo_path / "conf" / "base" / f"catalog_{self.PIPELINE_NAME}.yml"
+        )
 
         result = CliRunner().invoke(
             fake_project_cli,
@@ -233,17 +242,7 @@ class TestCatalogCreateCommand:
         )
 
         assert not result.exit_code
-        assert data_catalog_file.is_file()
-
-        expected_catalog_config = {
-            "example_test_x": {"type": "MemoryDataset"},
-            "example_test_y": {"type": "MemoryDataset"},
-            "example_train_x": {"type": "MemoryDataset"},
-            "example_train_y": {"type": "MemoryDataset"},
-        }
-        catalog_config = yaml.safe_load(data_catalog_file.read_text())
-        assert catalog_config == expected_catalog_config
-        # assert True is False
+        assert not data_catalog_file.exists()
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "fake_load_context")

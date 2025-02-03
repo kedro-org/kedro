@@ -412,6 +412,7 @@ class TestCatalogCreateCommand:
         fake_repo_path,
         mock_pipelines,
     ):
+        # TODO: replace with the corresponding test from test_kedro_data_catalog.py after removing
         mocked_context = fake_load_context.return_value
 
         catalog_datasets = {

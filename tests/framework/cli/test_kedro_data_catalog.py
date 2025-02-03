@@ -1,5 +1,6 @@
-# TODO: rename to test_catalog.py after removing old catalog
+# TODO: move all tests to test_catalog.py after removing old catalog
 import pytest
+import yaml
 from click.testing import CliRunner
 from kedro_datasets.pandas import CSVDataset
 
@@ -53,37 +54,32 @@ def fake_catalog_with_overlapping_factories():
     return config
 
 
+@pytest.fixture()
+def fake_credentials_config(tmp_path):
+    return {"db_connection": {"con": "foo"}}
+
+
+@pytest.fixture
+def fake_catalog_config():
+    config = {
+        "parquet_{factory_pattern}": {
+            "type": "pandas.ParquetDataset",
+            "filepath": "data/01_raw/{factory_pattern}.parquet",
+            "credentials": "db_connection",
+        },
+        "csv_{factory_pattern}": {
+            "type": "pandas.CSVDataset",
+            "filepath": "data/01_raw/{factory_pattern}.csv",
+        },
+        "csv_test": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+    }
+    return config
+
+
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
 )
 class TestCatalogListCommand:
-    def test_list_all_pipelines(self, fake_project_cli, fake_metadata, mocker):
-        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
-
-        result = CliRunner().invoke(
-            fake_project_cli, ["catalog", "list"], obj=fake_metadata
-        )
-
-        assert not result.exit_code
-        expected_dict = {
-            "Datasets in 'pipeline' pipeline": {},
-            "Datasets in 'second' pipeline": {},
-        }
-        yaml_dump_mock.assert_called_once_with(expected_dict)
-
-    def test_list_specific_pipelines(self, fake_project_cli, fake_metadata, mocker):
-        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
-
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["catalog", "list", "--pipeline", PIPELINE_NAME],
-            obj=fake_metadata,
-        )
-
-        assert not result.exit_code
-        expected_dict = {f"Datasets in '{PIPELINE_NAME}' pipeline": {}}
-        yaml_dump_mock.assert_called_once_with(expected_dict)
-
     def test_no_param_datasets_in_respose(
         self, fake_project_cli, fake_metadata, fake_load_context, mocker, mock_pipelines
     ):
@@ -125,14 +121,129 @@ class TestCatalogListCommand:
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
+    def test_default_dataset(
+        self, fake_project_cli, fake_metadata, fake_load_context, mocker, mock_pipelines
+    ):
+        """Test that datasets that are found in `Pipeline.datasets()`,
+        but not in the catalog, are outputted under the key "DefaultDataset".
+        """
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        catalog_datasets = {"some_dataset": CSVDataset(filepath="test.csv")}
+        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+        mocker.patch.object(
+            mock_pipelines[PIPELINE_NAME],
+            "datasets",
+            return_value=catalog_datasets.keys() | {"intermediate"},
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["catalog", "list"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        expected_dict = {
+            f"Datasets in '{PIPELINE_NAME}' pipeline": {
+                "Datasets mentioned in pipeline": {
+                    "CSVDataset": ["some_dataset"],
+                    "DefaultDataset": ["intermediate"],
+                }
+            }
+        }
+        key = f"Datasets in '{PIPELINE_NAME}' pipeline"
+        assert yaml_dump_mock.call_count == 1
+        assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
+
+    def test_list_factory_generated_datasets(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_load_context,
+        mocker,
+        mock_pipelines,
+        fake_catalog_config,
+        fake_credentials_config,
+    ):
+        """Test that datasets generated from factory patterns in the catalog
+        are resolved correctly under the correct dataset classes.
+        """
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        mocked_context.catalog = KedroDataCatalog.from_config(
+            catalog=fake_catalog_config, credentials=fake_credentials_config
+        )
+        mocker.patch.object(
+            mock_pipelines[PIPELINE_NAME],
+            "datasets",
+            return_value=mocked_context.catalog._datasets.keys()
+            | {"csv_example", "parquet_example"},
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["catalog", "list"],
+            obj=fake_metadata,
+        )
+        assert not result.exit_code
+        expected_dict = {
+            f"Datasets in '{PIPELINE_NAME}' pipeline": {
+                "Datasets generated from factories": {
+                    "pandas.CSVDataset": ["csv_example"],
+                    "pandas.ParquetDataset": ["parquet_example"],
+                },
+                "Datasets mentioned in pipeline": {
+                    "CSVDataset": ["csv_test"],
+                },
+            }
+        }
+        key = f"Datasets in '{PIPELINE_NAME}' pipeline"
+        assert yaml_dump_mock.call_count == 1
+        assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
+
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestCatalogCreateCommand:
-    def test_pipeline_argument_is_required(self, fake_project_cli):
-        result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
-        assert result.exit_code
-        expected_output = "Error: Missing option '--pipeline' / '-p'."
-        assert expected_output in result.output
+    PIPELINE_NAME = "data_engineering"
+
+    @staticmethod
+    @pytest.fixture(params=["base"])
+    def catalog_path(request, fake_repo_path):
+        catalog_path = fake_repo_path / "conf" / request.param
+
+        yield catalog_path
+
+        for file in catalog_path.glob("catalog_*"):
+            file.unlink()
+
+    def test_catalog_is_created_in_base_by_default(
+        self, fake_project_cli, fake_metadata, fake_repo_path, catalog_path
+    ):
+        main_catalog_path = fake_repo_path / "conf" / "base" / "catalog.yml"
+        main_catalog_config = yaml.safe_load(main_catalog_path.read_text())
+        assert "example_iris_data" in main_catalog_config
+
+        data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert data_catalog_file.is_file()
+
+        expected_catalog_config = {
+            "example_test_x": {"type": "MemoryDataset"},
+            "example_test_y": {"type": "MemoryDataset"},
+            "example_train_x": {"type": "MemoryDataset"},
+            "example_train_y": {"type": "MemoryDataset"},
+        }
+        catalog_config = yaml.safe_load(data_catalog_file.read_text())
+        assert catalog_config == expected_catalog_config
+        # assert True is False
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "fake_load_context")

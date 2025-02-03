@@ -27,6 +27,7 @@ from kedro.framework.cli.registry import registry_cli
 from kedro.framework.cli.starters import create_cli
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
+from kedro.io import CatalogProtocol
 
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"
@@ -116,7 +117,10 @@ def fake_kedro_cli():
 
 @fixture(scope="module")
 def fake_project_cli(
-    fake_repo_path: Path, dummy_config: Path, fake_kedro_cli: click.CommandCollection
+    fake_repo_path: Path,
+    dummy_config: Path,
+    fake_kedro_cli: click.CommandCollection,
+    default_catalog: CatalogProtocol | None = None,
 ):
     old_settings = settings.as_dict()
     starter_path = Path(__file__).resolve().parents[3]
@@ -137,6 +141,9 @@ def fake_project_cli(
 
     import_module(PACKAGE_NAME)
     configure_project(PACKAGE_NAME)
+    if default_catalog is not None:
+        settings.set("DATA_CATALOG_CLASS", default_catalog)
+    # print(settings.as_dict())
     yield fake_kedro_cli
 
     # reset side-effects of configure_project

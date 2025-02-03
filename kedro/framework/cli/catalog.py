@@ -66,10 +66,8 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    LOGGER = logging.getLogger(__name__)
     try:
         data_catalog = context.catalog
-        LOGGER.info(type(data_catalog))
         datasets_meta = data_catalog._datasets
         catalog_ds = set(data_catalog.list())
     except Exception as exc:
@@ -162,6 +160,8 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
+    LOGGER = logging.getLogger(__name__)
+    LOGGER.info(type(context.catalog))
 
     pipeline = pipelines.get(pipeline_name)
 

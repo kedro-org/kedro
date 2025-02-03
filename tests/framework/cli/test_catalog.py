@@ -197,6 +197,7 @@ class TestCatalogListCommand:
     def test_no_param_datasets_in_respose(
         self, fake_project_cli, fake_metadata, fake_load_context, mocker, mock_pipelines
     ):
+        # TODO: replace with the corresponding test from test_kedro_data_catalog.py after removing old catalog
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         catalog_datasets = {
@@ -241,6 +242,7 @@ class TestCatalogListCommand:
         """Test that datasets that are found in `Pipeline.datasets()`,
         but not in the catalog, are outputted under the key "DefaultDataset".
         """
+        # TODO: replace with the corresponding test from test_kedro_data_catalog.py after removing old catalog
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         catalog_datasets = {"some_dataset": CSVDataset(filepath="test.csv")}
@@ -283,6 +285,7 @@ class TestCatalogListCommand:
         """Test that datasets generated from factory patterns in the catalog
         are resolved correctly under the correct dataset classes.
         """
+        # TODO: replace with the corresponding test from test_kedro_data_catalog.py after removing old catalog
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         mocked_context.catalog = DataCatalog.from_config(

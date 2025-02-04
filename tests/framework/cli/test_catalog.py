@@ -489,6 +489,7 @@ class TestCatalogFactoryCommands:
         fake_load_context,
         fake_catalog_with_overlapping_factories,
     ):
+        # TODO: replace with the corresponding test from test_kedro_data_catalog.py after removing
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         mocked_context.catalog = DataCatalog.from_config(
@@ -512,6 +513,7 @@ class TestCatalogFactoryCommands:
     def test_rank_catalog_factories_with_no_factories(
         self, fake_project_cli, fake_metadata, fake_load_context
     ):
+        # TODO: replace with the corresponding test from test_kedro_data_catalog.py after removing
         mocked_context = fake_load_context.return_value
 
         catalog_datasets = {
@@ -542,6 +544,7 @@ class TestCatalogFactoryCommands:
         fake_credentials_config,
     ):
         """Test that datasets factories are correctly resolved to the explicit datasets in the pipeline."""
+        # TODO: replace with the corresponding test from test_kedro_data_catalog.py after removing
         mocked_context = fake_load_context.return_value
         mocked_context.config_loader = {
             "catalog": fake_catalog_config,

@@ -1,5 +1,6 @@
 # TODO: move all tests to test_catalog.py after removing old catalog
 import pytest
+import yaml
 from click.testing import CliRunner
 from kedro_datasets.pandas import CSVDataset
 
@@ -245,6 +246,23 @@ class TestCatalogCreateCommand:
         assert not data_catalog_file.exists()
 
 
+@pytest.fixture
+def fake_catalog_config_resolved():
+    config = {
+        "parquet_example": {
+            "type": "pandas.ParquetDataset",
+            "filepath": "data/01_raw/example.parquet",
+            "credentials": {"con": "foo"},
+        },
+        "csv_example": {
+            "type": "pandas.CSVDataset",
+            "filepath": "data/01_raw/example.csv",
+        },
+        "csv_test": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+    }
+    return config
+
+
 @pytest.mark.usefixtures("chdir_to_dummy_project", "fake_load_context")
 class TestCatalogFactoryCommands:
     @pytest.mark.usefixtures("mock_pipelines")
@@ -275,3 +293,65 @@ class TestCatalogFactoryCommands:
 
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0] == expected_patterns_sorted
+
+    def test_rank_catalog_factories_with_no_factories(
+        self, fake_project_cli, fake_metadata, fake_load_context
+    ):
+        mocked_context = fake_load_context.return_value
+
+        catalog_datasets = {
+            "iris_data": CSVDataset(filepath="test.csv"),
+            "intermediate": MemoryDataset(),
+            "not_used": CSVDataset(filepath="test2.csv"),
+        }
+        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["catalog", "rank"], obj=fake_metadata
+        )
+
+        assert not result.exit_code
+        expected_output = "There are no dataset factories in the catalog."
+        assert expected_output in result.output
+
+    @pytest.mark.usefixtures("mock_pipelines")
+    def test_catalog_resolve(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_load_context,
+        mocker,
+        mock_pipelines,
+        fake_catalog_config,
+        fake_catalog_config_resolved,
+        fake_credentials_config,
+    ):
+        """Test that datasets factories are correctly resolved to the explicit datasets in the pipeline."""
+        mocked_context = fake_load_context.return_value
+        mocked_context.config_loader = {
+            "catalog": fake_catalog_config,
+            "credentials": fake_credentials_config,
+        }
+        mocked_context._get_config_credentials.return_value = fake_credentials_config
+        mocked_context.catalog = KedroDataCatalog.from_config(
+            catalog=fake_catalog_config, credentials=fake_credentials_config
+        )
+        placeholder_ds = mocked_context.catalog.config_resolver.list_patterns()
+        pipeline_datasets = {"csv_example", "parquet_example", "explicit_dataset"}
+
+        mocker.patch.object(
+            mock_pipelines[PIPELINE_NAME],
+            "datasets",
+            return_value=pipeline_datasets,
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["catalog", "resolve"], obj=fake_metadata
+        )
+
+        assert not result.exit_code
+        resolved_config = yaml.safe_load(result.output)
+        assert resolved_config == fake_catalog_config_resolved
+
+        for ds in placeholder_ds:
+            assert ds not in result.output

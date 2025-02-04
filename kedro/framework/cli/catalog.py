@@ -160,9 +160,6 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    LOGGER = logging.getLogger(__name__)
-    LOGGER.info(type(context.catalog))
-
     pipeline = pipelines.get(pipeline_name)
 
     if not pipeline:
@@ -213,6 +210,8 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     """List all dataset factories in the catalog, ranked by priority by which they are matched."""
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
+    LOGGER = logging.getLogger(__name__)
+    LOGGER.info(type(context.catalog))
 
     catalog_factories = context.catalog.config_resolver.list_patterns()
     if catalog_factories:
@@ -230,6 +229,9 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
+
+    LOGGER = logging.getLogger(__name__)
+    LOGGER.info(type(context.catalog))
 
     catalog_config = context.config_loader["catalog"]
     credentials_config = context._get_config_credentials()

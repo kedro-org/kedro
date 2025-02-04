@@ -263,6 +263,62 @@ def fake_catalog_config_resolved():
     return config
 
 
+@pytest.fixture
+def fake_catalog_config_with_factories(fake_metadata):
+    config = {
+        "parquet_{factory_pattern}": {
+            "type": "pandas.ParquetDataset",
+            "filepath": "data/01_raw/{factory_pattern}.parquet",
+        },
+        "csv_{factory_pattern}": {
+            "type": "pandas.CSVDataset",
+            "filepath": "data/01_raw/{factory_pattern}.csv",
+        },
+        "explicit_ds": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "{factory_pattern}_ds": {
+            "type": "pandas.ParquetDataset",
+            "filepath": "data/01_raw/{factory_pattern}_ds.parquet",
+        },
+        "partitioned_{factory_pattern}": {
+            "type": "partitions.PartitionedDataset",
+            "path": "data/01_raw",
+            "dataset": "pandas.CSVDataset",
+            "metadata": {
+                "my-plugin": {
+                    "path": "data/01_raw",
+                }
+            },
+        },
+    }
+    return config
+
+
+@pytest.fixture
+def fake_catalog_config_with_factories_resolved():
+    config = {
+        "parquet_example": {
+            "type": "pandas.ParquetDataset",
+            "filepath": "data/01_raw/example.parquet",
+        },
+        "csv_example": {
+            "type": "pandas.CSVDataset",
+            "filepath": "data/01_raw/example.csv",
+        },
+        "explicit_ds": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "partitioned_example": {
+            "type": "partitions.PartitionedDataset",
+            "path": "data/01_raw",
+            "dataset": "pandas.CSVDataset",
+            "metadata": {
+                "my-plugin": {
+                    "path": "data/01_raw",
+                }
+            },
+        },
+    }
+    return config
+
+
 @pytest.mark.usefixtures("chdir_to_dummy_project", "fake_load_context")
 class TestCatalogFactoryCommands:
     @pytest.mark.usefixtures("mock_pipelines")
@@ -355,3 +411,87 @@ class TestCatalogFactoryCommands:
 
         for ds in placeholder_ds:
             assert ds not in result.output
+
+    @pytest.mark.usefixtures("mock_pipelines")
+    def test_catalog_resolve_nested_config(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_load_context,
+        mocker,
+        mock_pipelines,
+        fake_catalog_config_with_factories,
+        fake_catalog_config_with_factories_resolved,
+    ):
+        """Test that explicit catalog entries are not overwritten by factory config."""
+        mocked_context = fake_load_context.return_value
+        mocked_context.project_path = fake_metadata.project_path
+
+        mocked_context.config_loader = {"catalog": fake_catalog_config_with_factories}
+        mocked_context.catalog = KedroDataCatalog.from_config(
+            fake_catalog_config_with_factories
+        )
+
+        mocker.patch.object(
+            mock_pipelines[PIPELINE_NAME],
+            "datasets",
+            return_value=mocked_context.catalog._datasets.keys()
+            | {"csv_example", "parquet_example", "partitioned_example"},
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["catalog", "resolve"], obj=fake_metadata
+        )
+
+        assert not result.exit_code
+        resolved_config = yaml.safe_load(result.output)
+
+        assert resolved_config == fake_catalog_config_with_factories_resolved
+
+    @pytest.mark.usefixtures("mock_pipelines")
+    def test_no_param_datasets_in_resolve(
+        self, fake_project_cli, fake_metadata, fake_load_context, mocker, mock_pipelines
+    ):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+
+        catalog_config = {
+            "iris_data": {
+                "type": "pandas.CSVDataset",
+                "filepath": "test.csv",
+            },
+            "intermediate": {"type": "MemoryDataset"},
+        }
+
+        catalog_datasets = {
+            "iris_data": CSVDataset(filepath="test.csv"),
+            "intermediate": MemoryDataset(),
+            "parameters": MemoryDataset(),
+            "params:data_ratio": MemoryDataset(),
+        }
+
+        mocked_context.config_loader = {"catalog": catalog_config}
+        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+
+        mocker.patch.object(
+            mock_pipelines[PIPELINE_NAME],
+            "datasets",
+            return_value=catalog_datasets.keys(),
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["catalog", "resolve"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert yaml_dump_mock.call_count == 1
+
+        # 'parameters' and 'params:data_ratio' should not appear in the output
+        output = yaml_dump_mock.call_args[0][0]
+
+        assert "parameters" not in output.keys()
+        assert "params:data_ratio" not in output.keys()
+        assert "iris_data" in output.keys()
+        assert "intermediate" in output.keys()

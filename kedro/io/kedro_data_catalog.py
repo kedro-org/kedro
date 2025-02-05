@@ -557,6 +557,7 @@ class KedroDataCatalog(CatalogProtocol):
         name_regex_flags: int | re.RegexFlag = re.IGNORECASE,
         type_regex: str | None = None,
         type_regex_flags: int | re.RegexFlag = 0,
+        by_type: type | list[type] | None = None,
     ) -> List[str]:  # noqa: UP006
         """Filter dataset names registered in the catalog based on name and/or type.
 
@@ -572,10 +573,12 @@ class KedroDataCatalog(CatalogProtocol):
                 The provided regex is matched against the full dataset type path, for example:
                 `kedro_datasets.pandas.parquet_dataset.ParquetDataset`.
             type_regex_flags: Optional regex flags for the type filter.
+            by_type: Optional dataset types to filter by.
 
         Returns:
             A list of dataset names that match the filtering criteria based on `name_regex`
-            and/or `type_regex`. If no filters are provided, all dataset names are returned.
+            and/or `type_regex` and/or types provided via `by_type`.
+            If no filters are provided, all dataset names are returned.
 
         Raises:
             SyntaxError: If the provided regex patterns are invalid.
@@ -594,21 +597,27 @@ class KedroDataCatalog(CatalogProtocol):
             ...     type_regex='ModelDataset',
             ... )
         """
+        filtered = self.keys()
 
         # Apply name filter if specified
         if name_regex:
             pattern = _compile_regex_pattern(name_regex, name_regex_flags)
-            filtered_names = [
-                ds_name for ds_name in self.__iter__() if pattern.search(ds_name)
-            ]
-        else:
-            filtered_names = self.keys()
+            filtered = [ds_name for ds_name in filtered if pattern.search(ds_name)]
 
         # Apply type filter if specified
+        by_type_set = {}
+        if by_type:
+            by_type_set = set(by_type) if isinstance(by_type, list) else set([by_type])
+
+        type_str_pattern = None
         if type_regex:
-            pattern = _compile_regex_pattern(type_regex, type_regex_flags)
+            type_str_pattern = _compile_regex_pattern(type_regex, type_regex_flags)
+
+        if by_type_set or type_str_pattern:
+            # Use pattern or match everything
+            type_str_pattern = type_str_pattern or ".*"
             filtered_types = []
-            for ds_name in filtered_names:
+            for ds_name in filtered:
                 # Retrieve the dataset type
                 if ds_name in self._lazy_datasets:
                     str_type = str(self._lazy_datasets[ds_name])
@@ -616,12 +625,14 @@ class KedroDataCatalog(CatalogProtocol):
                     class_type = type(self.__datasets[ds_name])
                     str_type = f"{class_type.__module__}.{class_type.__qualname__}"
                 # Match the dataset type against the type_regex
-                if pattern.search(str_type):
+                if type_str_pattern.search(str_type) and (
+                    not by_type_set or str_type in by_type
+                ):
                     filtered_types.append(ds_name)
 
             return filtered_types
 
-        return filtered_names
+        return filtered
 
     def list(
         self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0

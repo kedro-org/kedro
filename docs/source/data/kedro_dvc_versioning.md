@@ -2,6 +2,8 @@
 
 This document explains how to use [DVC](https://dvc.org/), a command line tool and VS Code Extension to help you develop reproducible machine learning projects, to version datasets and pipelines in your Kedro project.
 
+This tutorial assumes you have experience with the Git CLI and Kedro CLI commands but does not require any prior knowledge of DVC.
+
 ## Versioning data with .dvc files
 
 ### Initialising the repository
@@ -15,7 +17,11 @@ For more information about starter projects, visit the [Kedro starters documenta
 To use DVC as a Python library, install it using `pip` or `conda`, for example:
 `pip install dvc`
 
-Initialise the Kedro project as a git repository: `git init`, and initialise the Kedro project as a DVC repository: `dvc init`. You should see a message such as:
+Since DVC works alongside Git to track data changes, initialise the Kedro project as a git repository: `git init`.
+
+Then, initialize DVC in the project: `dvc init`.
+
+You should see a message such as:
 
 ```bash
 Initialized DVC repository.
@@ -33,6 +39,10 @@ You can now commit the changes to git.
 
 ### First commits
 
+DVC helps manage large datasets that should not be stored directly in Git. Instead of adding dataset files to Git, DVC generates small metadata files that Git tracks instead.
+
+These metadata files store information about the actual dataset, such as its hash and location. More information about the structure of the .dvc file can be found in the [DVC documentation](https://dvc.org/doc/user-guide/project-structure/dvc-files#dvc-files).
+
 Suppose you have a dataset in your project, such as:
 
 ```yaml
@@ -49,7 +59,7 @@ companies:
 
 This generates the `companies.csv.dvc` file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for the purpose of Git tracking.
 
-If you are using the `spaceflights-pandas` starter as an example, keep in mind that you will have to update the `.gitignore` file provided in the starter template to allow DVC to track these files. By default, Kedro's `.gitignore` excludes the data directory and its contents, which would prevent DVC-generated files from being committed.
+Since the spaceflights-pandas starter ignores everything under the `data/` directory by default, you have to update the `.gitignore` file provided by the template by removing the following lines from it:
 
 ```bash
 # ignore everything in the following folders
@@ -59,16 +69,29 @@ data/**
 !data/**/
 ```
 
-The metadata file can then be commited to git.
+Once updated, add the `.dvc` file to Git and commit the changes:
+
+```bash
+git add data/01_raw/companies.csv.dvc
+git commit -m "Track companies.csv dataset with DVC"
+```
 
 ### Going back to a previous version of the data
 
-Check which git commit contains the desired version of the data.
+DVC integrates with Git to manage different dataset versions. If you need to restore a previous version of a dataset, first identify the commit containing the desired version. You can use:
 
 ```bash
-git checkout HEAD~2 data/01_raw/companies.csv.dvc
+git log -- data/01_raw/companies.csv.dvc
+```
+
+To display the commit hashes associated with this file. Once you find the desired commit, run:
+
+```bash
+git checkout <commit_hash> data/01_raw/companies.csv.dvc
 dvc checkout
 ```
+
+The first command will restore the `.dvc` metadata file to its previous version. The second uses the metadata file to restore the corresponding dataset.
 
 ### Storing data remotely
 

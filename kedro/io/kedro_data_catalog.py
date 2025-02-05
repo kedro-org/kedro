@@ -608,7 +608,7 @@ class KedroDataCatalog(CatalogProtocol):
             pattern = _compile_regex_pattern(name_regex, name_regex_flags)
             filtered = [ds_name for ds_name in filtered if pattern.search(ds_name)]
 
-        # Apply type filter if specified
+        # Apply type filters if specified
         by_type_set = set()
         if by_type:
             if not isinstance(by_type, list):
@@ -631,7 +631,7 @@ class KedroDataCatalog(CatalogProtocol):
                 else:
                     class_type = type(self.__datasets[ds_name])
                     str_type = f"{class_type.__module__}.{class_type.__qualname__}"
-                # Match the dataset type against the type_regex
+                # Match the dataset type against the type_regex and apply by_type filtering
                 if type_str_pattern.search(str_type) and (
                     not by_type_set or str_type in by_type_set
                 ):

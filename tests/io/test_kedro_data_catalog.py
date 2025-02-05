@@ -202,23 +202,32 @@ class TestKedroDataCatalog:
         )
 
     @pytest.mark.parametrize(
-        "name_regex,type_regex,expected",
+        "name_regex,type_regex,by_type,expected",
         [
-            ("b|m", None, ["boats", "materialized"]),
-            (None, None, ["boats", "cars", "materialized"]),
-            (None, "CSVDataset", ["boats", "cars"]),
-            (None, "ParquetDataset", ["materialized"]),
-            ("b|c", "ParquetDataset", []),
+            ("b|m", None, None, ["boats", "materialized"]),
+            (None, None, None, ["boats", "cars", "materialized"]),
+            (None, "CSVDataset", None, ["boats", "cars"]),
+            (None, "ParquetDataset", None, ["materialized"]),
+            ("b|c", "ParquetDataset", None, []),
+            (None, None, ParquetDataset, ["materialized"]),
+            (
+                None,
+                None,
+                [CSVDataset, ParquetDataset],
+                ["boats", "cars", "materialized"],
+            ),
+            (None, "ParquetDataset", [CSVDataset, ParquetDataset], ["materialized"]),
+            ("b|m", None, [CSVDataset, ParquetDataset], ["boats", "materialized"]),
         ],
     )
     def test_from_config_catalog_filter_regex(
-        self, data_catalog_from_config, name_regex, type_regex, expected
+        self, data_catalog_from_config, name_regex, type_regex, by_type, expected
     ):
         """Test that regex patterns filter lazy and materialized datasets accordingly"""
         data_catalog_from_config["materialized"] = ParquetDataset(filepath="xyz.parq")
         assert (
             data_catalog_from_config.filter(
-                name_regex=name_regex, type_regex=type_regex
+                name_regex=name_regex, type_regex=type_regex, by_type=by_type
             )
             == expected
         )

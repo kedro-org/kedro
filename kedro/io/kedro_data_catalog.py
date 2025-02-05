@@ -596,6 +596,10 @@ class KedroDataCatalog(CatalogProtocol):
             ...     name_regex='^model_',
             ...     type_regex='ModelDataset',
             ... )
+            >>> # get datasets where names include 'data' and are of a specific types
+            >>> from kedro_datasets.pandas import SQLQueryDataset
+            >>> from kedro.io import MemoryDataset
+            >>> catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])
         """
         filtered = self.keys()
 
@@ -605,17 +609,20 @@ class KedroDataCatalog(CatalogProtocol):
             filtered = [ds_name for ds_name in filtered if pattern.search(ds_name)]
 
         # Apply type filter if specified
-        by_type_set = {}
+        by_type_set = set()
         if by_type:
-            by_type_set = set(by_type) if isinstance(by_type, list) else set([by_type])
+            if not isinstance(by_type, list):
+                by_type = [by_type]
+            for _type in by_type:
+                by_type_set.add(f"{_type.__module__}.{_type.__qualname__}")
 
         type_str_pattern = None
         if type_regex:
             type_str_pattern = _compile_regex_pattern(type_regex, type_regex_flags)
 
         if by_type_set or type_str_pattern:
-            # Use pattern or match everything
-            type_str_pattern = type_str_pattern or ".*"
+            # Use provided pattern or compile new to match everything
+            type_str_pattern = type_str_pattern or _compile_regex_pattern(".*", 0)
             filtered_types = []
             for ds_name in filtered:
                 # Retrieve the dataset type
@@ -626,7 +633,7 @@ class KedroDataCatalog(CatalogProtocol):
                     str_type = f"{class_type.__module__}.{class_type.__qualname__}"
                 # Match the dataset type against the type_regex
                 if type_str_pattern.search(str_type) and (
-                    not by_type_set or str_type in by_type
+                    not by_type_set or str_type in by_type_set
                 ):
                     filtered_types.append(ds_name)
 

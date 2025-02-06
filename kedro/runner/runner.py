@@ -11,7 +11,13 @@ import sys
 import warnings
 from abc import ABC, abstractmethod
 from collections import Counter, deque
-from concurrent.futures import FIRST_COMPLETED, Executor, ProcessPoolExecutor, wait
+from concurrent.futures import (
+    FIRST_COMPLETED,
+    Executor,
+    Future,
+    ProcessPoolExecutor,
+    wait,
+)
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
@@ -258,7 +264,7 @@ class AbstractRunner(ABC):
         todo_nodes: set[Node],
         done_nodes: set[Node],
         ready: set[Node],
-        done: set[Node] | None,
+        done: set[Future[Node]] | None,
     ) -> None:
         debug_data = {
             "todo_nodes": todo_nodes,

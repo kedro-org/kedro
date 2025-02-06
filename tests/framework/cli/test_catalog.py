@@ -154,13 +154,11 @@ def fake_catalog_config_with_factories_resolved():
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
 )
 class TestCatalogListCommand:
-    def test_list_all_pipelines(
-        self, fake_project_cli_parametrized, fake_metadata, mocker
-    ):
+    def test_list_all_pipelines(self, fake_project_cli, fake_metadata, mocker):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized, ["catalog", "list"], obj=fake_metadata
+            fake_project_cli, ["catalog", "list"], obj=fake_metadata
         )
 
         assert not result.exit_code
@@ -170,13 +168,11 @@ class TestCatalogListCommand:
         }
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_list_specific_pipelines(
-        self, fake_project_cli_parametrized, fake_metadata, mocker
-    ):
+    def test_list_specific_pipelines(self, fake_project_cli, fake_metadata, mocker):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list", "--pipeline", PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -185,9 +181,9 @@ class TestCatalogListCommand:
         expected_dict = {f"Datasets in '{PIPELINE_NAME}' pipeline": {}}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_not_found_pipeline(self, fake_project_cli_parametrized, fake_metadata):
+    def test_not_found_pipeline(self, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list", "--pipeline", "fake"],
             obj=fake_metadata,
         )
@@ -207,7 +203,7 @@ class TestCatalogListCommand:
     )
     def test_no_param_datasets_in_respose(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -233,7 +229,7 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list"],
             obj=fake_metadata,
         )
@@ -262,7 +258,7 @@ class TestCatalogListCommand:
     )
     def test_default_dataset(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -284,7 +280,7 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list"],
             obj=fake_metadata,
         )
@@ -311,7 +307,7 @@ class TestCatalogListCommand:
     )
     def test_list_factory_generated_datasets(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -337,7 +333,7 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list"],
             obj=fake_metadata,
         )
@@ -376,20 +372,16 @@ class TestCatalogCreateCommand:
         for file in catalog_path.glob("catalog_*"):
             file.unlink()
 
-    def test_pipeline_argument_is_required(self, fake_project_cli_parametrized):
-        result = CliRunner().invoke(
-            fake_project_cli_parametrized, ["catalog", "create"]
-        )
+    def test_pipeline_argument_is_required(self, fake_project_cli):
+        result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
         assert result.exit_code
         expected_output = "Error: Missing option '--pipeline' / '-p'."
         assert expected_output in result.output
 
     @pytest.mark.usefixtures("fake_load_context")
-    def test_not_found_pipeline(
-        self, fake_project_cli_parametrized, fake_metadata, mock_pipelines
-    ):
+    def test_not_found_pipeline(self, fake_project_cli, fake_metadata, mock_pipelines):
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", "fake"],
             obj=fake_metadata,
         )
@@ -404,7 +396,7 @@ class TestCatalogCreateCommand:
         assert expected_output in result.output
 
     def test_catalog_is_created_in_base_by_default(
-        self, fake_project_cli_parametrized, fake_metadata, fake_repo_path, catalog_path
+        self, fake_project_cli, fake_metadata, fake_repo_path, catalog_path
     ):
         main_catalog_path = fake_repo_path / "conf" / "base" / "catalog.yml"
         main_catalog_config = yaml.safe_load(main_catalog_path.read_text())
@@ -413,7 +405,7 @@ class TestCatalogCreateCommand:
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -432,13 +424,13 @@ class TestCatalogCreateCommand:
 
     @pytest.mark.parametrize("catalog_path", ["local"], indirect=True)
     def test_catalog_is_created_in_correct_env(
-        self, fake_project_cli_parametrized, fake_metadata, catalog_path
+        self, fake_project_cli, fake_metadata, catalog_path
     ):
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         env = catalog_path.name
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME, "--env", env],
             obj=fake_metadata,
         )
@@ -455,7 +447,7 @@ class TestCatalogCreateCommand:
     )
     def test_no_missing_datasets(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         fake_repo_path,
@@ -480,7 +472,7 @@ class TestCatalogCreateCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -490,7 +482,7 @@ class TestCatalogCreateCommand:
 
     @pytest.mark.usefixtures("fake_repo_path")
     def test_missing_datasets_appended(
-        self, fake_project_cli_parametrized, fake_metadata, catalog_path
+        self, fake_project_cli, fake_metadata, catalog_path
     ):
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
@@ -501,7 +493,7 @@ class TestCatalogCreateCommand:
             yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -517,14 +509,12 @@ class TestCatalogCreateCommand:
         catalog_config = yaml.safe_load(data_catalog_file.read_text())
         assert catalog_config == expected_catalog_config
 
-    def test_bad_env(self, fake_project_cli_parametrized, fake_metadata):
+    def test_bad_env(self, fake_project_cli, fake_metadata):
         """Test error when provided conf environment does not exist"""
         env = "no_such_env"
         cmd = ["catalog", "list", "-e", env, "--pipeline", PIPELINE_NAME]
 
-        result = CliRunner().invoke(
-            fake_project_cli_parametrized, cmd, obj=fake_metadata
-        )
+        result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
         assert result.exit_code
         assert "Unable to instantiate Kedro Catalog" in result.output
@@ -542,7 +532,7 @@ class TestCatalogFactoryCommands:
     @pytest.mark.usefixtures("mock_pipelines")
     def test_rank_catalog_factories(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         mocker,
         fake_load_context,
@@ -556,7 +546,7 @@ class TestCatalogFactoryCommands:
             fake_catalog_with_overlapping_factories
         )
         result = CliRunner().invoke(
-            fake_project_cli_parametrized, ["catalog", "rank"], obj=fake_metadata
+            fake_project_cli, ["catalog", "rank"], obj=fake_metadata
         )
         assert not result.exit_code
 
@@ -579,7 +569,7 @@ class TestCatalogFactoryCommands:
     )
     def test_rank_catalog_factories_with_no_factories(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         catalog_type,
@@ -595,7 +585,7 @@ class TestCatalogFactoryCommands:
         mocked_context.catalog = catalog_type(datasets=catalog_datasets)
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized, ["catalog", "rank"], obj=fake_metadata
+            fake_project_cli, ["catalog", "rank"], obj=fake_metadata
         )
 
         assert not result.exit_code
@@ -612,7 +602,7 @@ class TestCatalogFactoryCommands:
     @pytest.mark.usefixtures("mock_pipelines")
     def test_catalog_resolve(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -643,7 +633,7 @@ class TestCatalogFactoryCommands:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized, ["catalog", "resolve"], obj=fake_metadata
+            fake_project_cli, ["catalog", "resolve"], obj=fake_metadata
         )
 
         assert not result.exit_code
@@ -663,7 +653,7 @@ class TestCatalogFactoryCommands:
     @pytest.mark.usefixtures("mock_pipelines")
     def test_catalog_resolve_nested_config(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -690,7 +680,7 @@ class TestCatalogFactoryCommands:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized, ["catalog", "resolve"], obj=fake_metadata
+            fake_project_cli, ["catalog", "resolve"], obj=fake_metadata
         )
 
         assert not result.exit_code
@@ -708,7 +698,7 @@ class TestCatalogFactoryCommands:
     @pytest.mark.usefixtures("mock_pipelines")
     def test_no_param_datasets_in_resolve(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -744,7 +734,7 @@ class TestCatalogFactoryCommands:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "resolve"],
             obj=fake_metadata,
         )

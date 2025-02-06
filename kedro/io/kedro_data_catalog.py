@@ -573,7 +573,8 @@ class KedroDataCatalog(CatalogProtocol):
                 The provided regex is matched against the full dataset type path, for example:
                 `kedro_datasets.pandas.parquet_dataset.ParquetDataset`.
             type_regex_flags: Optional regex flags for the type filter.
-            by_type: Optional dataset types to filter by.
+            by_type: Optional dataset type(s) to filter by. This performs an instance type check
+                rather than a regular match. It can be a single dataset type or a list of types.
 
         Returns:
             A list of dataset names that match the filtering criteria based on `name_regex`
@@ -596,8 +597,10 @@ class KedroDataCatalog(CatalogProtocol):
             ...     name_regex='^model_',
             ...     type_regex='ModelDataset',
             ... )
-            >>> # get datasets where names include 'data' and are of a specific types
+            >>> # get datasets where names include 'data' and are of specific type
             >>> from kedro_datasets.pandas import SQLQueryDataset
+            >>> catalog.filter(name_regex="data", by_type=[SQLQueryDataset])
+            >>> # get datasets where names include 'data' and are of multiple specific types
             >>> from kedro.io import MemoryDataset
             >>> catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])
         """

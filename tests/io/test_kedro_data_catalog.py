@@ -180,7 +180,9 @@ class TestKedroDataCatalog:
     @pytest.mark.parametrize(
         "name_regex,type_regex,expected",
         [
-            ("^a", None, ["abc"]),
+            (re.compile("^a"), None, ["abc"]),
+            (re.compile("^A"), None, []),
+            (re.compile("^A", flags=re.IGNORECASE), None, ["abc"]),
             ("a|x", None, ["abc", "xyz"]),
             ("a|d|x", None, ["abc", "def", "xyz"]),
             ("a|d|x", "CSVDataset", ["abc", "def"]),

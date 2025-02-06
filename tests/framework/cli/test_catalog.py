@@ -154,11 +154,13 @@ def fake_catalog_config_with_factories_resolved():
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
 )
 class TestCatalogListCommand:
-    def test_list_all_pipelines(self, fake_project_cli, fake_metadata, mocker):
+    def test_list_all_pipelines(
+        self, fake_project_cli_parametrized, fake_metadata, mocker
+    ):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
 
         result = CliRunner().invoke(
-            fake_project_cli, ["catalog", "list"], obj=fake_metadata
+            fake_project_cli_parametrized, ["catalog", "list"], obj=fake_metadata
         )
 
         assert not result.exit_code
@@ -168,11 +170,13 @@ class TestCatalogListCommand:
         }
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_list_specific_pipelines(self, fake_project_cli, fake_metadata, mocker):
+    def test_list_specific_pipelines(
+        self, fake_project_cli_parametrized, fake_metadata, mocker
+    ):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
 
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "list", "--pipeline", PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -181,9 +185,9 @@ class TestCatalogListCommand:
         expected_dict = {f"Datasets in '{PIPELINE_NAME}' pipeline": {}}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_not_found_pipeline(self, fake_project_cli, fake_metadata):
+    def test_not_found_pipeline(self, fake_project_cli_parametrized, fake_metadata):
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "list", "--pipeline", "fake"],
             obj=fake_metadata,
         )
@@ -203,7 +207,7 @@ class TestCatalogListCommand:
     )
     def test_no_param_datasets_in_respose(
         self,
-        fake_project_cli,
+        fake_project_cli_parametrized,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -229,7 +233,7 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "list"],
             obj=fake_metadata,
         )
@@ -258,7 +262,7 @@ class TestCatalogListCommand:
     )
     def test_default_dataset(
         self,
-        fake_project_cli,
+        fake_project_cli_parametrized,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -280,7 +284,7 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "list"],
             obj=fake_metadata,
         )
@@ -307,7 +311,7 @@ class TestCatalogListCommand:
     )
     def test_list_factory_generated_datasets(
         self,
-        fake_project_cli,
+        fake_project_cli_parametrized,
         fake_metadata,
         fake_load_context,
         mocker,
@@ -333,7 +337,7 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "list"],
             obj=fake_metadata,
         )
@@ -372,16 +376,20 @@ class TestCatalogCreateCommand:
         for file in catalog_path.glob("catalog_*"):
             file.unlink()
 
-    def test_pipeline_argument_is_required(self, fake_project_cli):
-        result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
+    def test_pipeline_argument_is_required(self, fake_project_cli_parametrized):
+        result = CliRunner().invoke(
+            fake_project_cli_parametrized, ["catalog", "create"]
+        )
         assert result.exit_code
         expected_output = "Error: Missing option '--pipeline' / '-p'."
         assert expected_output in result.output
 
     @pytest.mark.usefixtures("fake_load_context")
-    def test_not_found_pipeline(self, fake_project_cli, fake_metadata, mock_pipelines):
+    def test_not_found_pipeline(
+        self, fake_project_cli_parametrized, fake_metadata, mock_pipelines
+    ):
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "create", "--pipeline", "fake"],
             obj=fake_metadata,
         )
@@ -396,7 +404,7 @@ class TestCatalogCreateCommand:
         assert expected_output in result.output
 
     def test_catalog_is_created_in_base_by_default(
-        self, fake_project_cli, fake_metadata, fake_repo_path, catalog_path
+        self, fake_project_cli_parametrized, fake_metadata, fake_repo_path, catalog_path
     ):
         main_catalog_path = fake_repo_path / "conf" / "base" / "catalog.yml"
         main_catalog_config = yaml.safe_load(main_catalog_path.read_text())
@@ -405,7 +413,7 @@ class TestCatalogCreateCommand:
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -424,13 +432,13 @@ class TestCatalogCreateCommand:
 
     @pytest.mark.parametrize("catalog_path", ["local"], indirect=True)
     def test_catalog_is_created_in_correct_env(
-        self, fake_project_cli, fake_metadata, catalog_path
+        self, fake_project_cli_parametrized, fake_metadata, catalog_path
     ):
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         env = catalog_path.name
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME, "--env", env],
             obj=fake_metadata,
         )
@@ -447,7 +455,7 @@ class TestCatalogCreateCommand:
     )
     def test_no_missing_datasets(
         self,
-        fake_project_cli,
+        fake_project_cli_parametrized,
         fake_metadata,
         fake_load_context,
         fake_repo_path,
@@ -472,7 +480,7 @@ class TestCatalogCreateCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli,
+            fake_project_cli_parametrized,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
             obj=fake_metadata,
         )

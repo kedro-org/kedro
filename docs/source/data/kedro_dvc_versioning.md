@@ -51,15 +51,7 @@ companies:
   filepath: data/01_raw/companies.csv
 ```
 
- Use `dvc add` to start tracking a dataset file:
-
- ```bash
- dvc add data/01_raw/companies.csv
- ```
-
-This generates the `companies.csv.dvc` file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for the purpose of Git tracking.
-
-Since the spaceflights-pandas starter ignores everything under the `data/` directory by default, you have to update the `.gitignore` file provided by the template by removing the following lines from it:
+You will have to do some changes to the the `.gitignore` file provided by the template to allow DVC to track the dataset files. Since the spaceflights-pandas starter's `.gitignore` ignores everything under the `data/` directory by default, you will have to update it by removing the following lines from it:
 
 ```bash
 # ignore everything in the following folders
@@ -68,6 +60,14 @@ data/**
 # except their sub-folders
 !data/**/
 ```
+
+ Then, use `dvc add` to start tracking a dataset file:
+
+ ```bash
+ dvc add data/01_raw/companies.csv
+ ```
+
+This generates the `companies.csv.dvc` file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for the purpose of Git tracking.
 
 Once updated, add the `.dvc` file to Git and commit the changes:
 

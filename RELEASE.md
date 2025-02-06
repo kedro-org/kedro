@@ -1,7 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
-* Implemented `KedroDataCatalog.filter()` to filter datasets by name and type.
+* Added `KedroDataCatalog.filter()` to filter datasets by name and type.
 
 ## Bug fixes and other changes
 * Updated `_LazyDataset` representation when printing `KedroDataCatalog`.

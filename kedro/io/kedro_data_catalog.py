@@ -13,7 +13,7 @@ from __future__ import annotations
 import difflib
 import logging
 import re
-from typing import Any, Iterator, List  # noqa: UP035
+from typing import Any, AnyStr, Iterator, List  # noqa: UP035
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
@@ -553,53 +553,43 @@ class KedroDataCatalog(CatalogProtocol):
 
     def filter(
         self,
-        name_regex: str | None = None,
-        name_regex_flags: int | re.RegexFlag = re.IGNORECASE,
-        type_regex: str | None = None,
-        type_regex_flags: int | re.RegexFlag = 0,
+        name_regex: re.Pattern | AnyStr | None = None,
+        type_regex: re.Pattern | AnyStr | None = None,
         by_type: type | list[type] | None = None,
     ) -> List[str]:  # noqa: UP006
         """Filter dataset names registered in the catalog based on name and/or type.
 
-        This method allows filtering datasets by their names and/or types using optional
-        regular expression patterns. Each pattern can also support optional regex flags
-        for customization. If no filters are provided, all dataset names are returned.
+        This method allows filtering datasets by their names and/or types. Regular expressions
+        should be precompiled before passing them to `name_regex` or `type_regex`, but plain
+        strings are also supported.
 
         Args:
-            name_regex: Optional regular expression to filter dataset names by name.
-            name_regex_flags: Optional regex flags for the name filter.
-                By default, IGNORECASE key is set.
-            type_regex: Optional regular expression to filter dataset names by their type.
+            name_regex: Optional compiled regex pattern or string to filter dataset names.
+            type_regex: Optional compiled regex pattern or string to filter dataset types.
                 The provided regex is matched against the full dataset type path, for example:
                 `kedro_datasets.pandas.parquet_dataset.ParquetDataset`.
-            type_regex_flags: Optional regex flags for the type filter.
             by_type: Optional dataset type(s) to filter by. This performs an instance type check
-                rather than a regular match. It can be a single dataset type or a list of types.
+                rather than a regex match. It can be a single dataset type or a list of types.
 
         Returns:
-            A list of dataset names that match the filtering criteria based on `name_regex`
-            and/or `type_regex` and/or types provided via `by_type`.
-            If no filters are provided, all dataset names are returned.
-
-        Raises:
-            SyntaxError: If the provided regex patterns are invalid.
+            A list of dataset names that match the filtering criteria.
 
         Example:
         ::
 
+            >>> import re
             >>> catalog = KedroDataCatalog()
             >>> # get datasets where the substring 'raw' is present
             >>> raw_data = catalog.filter(name_regex='raw')
-            >>> # get datasets of a specific type
+            >>> # get datasets where names start with 'model_' (precompiled regex)
+            >>> model_datasets = catalog.filter(name_regex=re.compile('^model_'))
+            >>> # get datasets of a specific type using type_regex
             >>> csv_datasets = catalog.filter(type_regex='pandas.excel_dataset.ExcelDataset')
-            >>> # get datasets where names start with 'model_' and are of a specific type
-            >>> model_datasets = catalog.filter(
-            ...     name_regex='^model_',
-            ...     type_regex='ModelDataset',
-            ... )
-            >>> # get datasets where names include 'data' and are of specific type
+            >>> # get datasets where names contain 'train' and type matches 'CSV' in the path
+            >>> catalog.filter(name_regex="train", type_regex="CSV")
+            >>> # get datasets where names include 'data' and are of a specific type
             >>> from kedro_datasets.pandas import SQLQueryDataset
-            >>> catalog.filter(name_regex="data", by_type=[SQLQueryDataset])
+            >>> catalog.filter(name_regex="data", by_type=SQLQueryDataset)
             >>> # get datasets where names include 'data' and are of multiple specific types
             >>> from kedro.io import MemoryDataset
             >>> catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])
@@ -608,8 +598,9 @@ class KedroDataCatalog(CatalogProtocol):
 
         # Apply name filter if specified
         if name_regex:
-            pattern = _compile_regex_pattern(name_regex, name_regex_flags)
-            filtered = [ds_name for ds_name in filtered if pattern.search(ds_name)]
+            filtered = [
+                ds_name for ds_name in filtered if re.search(name_regex, ds_name)
+            ]
 
         # Apply type filters if specified
         by_type_set = set()
@@ -619,13 +610,7 @@ class KedroDataCatalog(CatalogProtocol):
             for _type in by_type:
                 by_type_set.add(f"{_type.__module__}.{_type.__qualname__}")
 
-        type_str_pattern = None
-        if type_regex:
-            type_str_pattern = _compile_regex_pattern(type_regex, type_regex_flags)
-
-        if by_type_set or type_str_pattern:
-            # Use provided pattern or compile new to match everything
-            type_str_pattern = type_str_pattern or _compile_regex_pattern(".*", 0)
+        if by_type_set or type_regex:
             filtered_types = []
             for ds_name in filtered:
                 # Retrieve the dataset type
@@ -634,8 +619,8 @@ class KedroDataCatalog(CatalogProtocol):
                 else:
                     class_type = type(self.__datasets[ds_name])
                     str_type = f"{class_type.__module__}.{class_type.__qualname__}"
-                # Match the dataset type against the type_regex and apply by_type filtering
-                if type_str_pattern.search(str_type) and (
+                # Match against type_regex and apply by_type filtering
+                if (not type_regex or re.search(type_regex, str_type)) and (
                     not by_type_set or str_type in by_type_set
                 ):
                     filtered_types.append(ds_name)
@@ -684,7 +669,13 @@ class KedroDataCatalog(CatalogProtocol):
         if not regex_flags:
             regex_flags = re.IGNORECASE
 
-        pattern = _compile_regex_pattern(regex_search, regex_flags)
+        try:
+            pattern = re.compile(regex_search, flags=regex_flags)
+        except re.error as exc:
+            raise SyntaxError(
+                f"Invalid regular expression provided: '{regex_search}'"
+            ) from exc
+
         return [ds_name for ds_name in self.__iter__() if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:
@@ -834,12 +825,3 @@ class KedroDataCatalog(CatalogProtocol):
         except DatasetNotFoundError:
             return False
         return dataset.exists()
-
-
-def _compile_regex_pattern(regex: str, regex_flags: int | re.RegexFlag) -> re.Pattern:
-    try:
-        pattern = re.compile(regex, flags=regex_flags)
-    except re.error as exc:
-        raise SyntaxError(f"Invalid regular expression provided: '{regex}'") from exc
-
-    return pattern

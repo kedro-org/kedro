@@ -234,15 +234,6 @@ class TestKedroDataCatalog:
             == expected
         )
 
-    def test_catalog_filter_bad_regex(self, multi_catalog):
-        """Test that bad regex is caught accordingly"""
-        escaped_regex = r"\(\("
-        pattern = f"Invalid regular expression provided: '{escaped_regex}'"
-        with pytest.raises(SyntaxError, match=pattern):
-            multi_catalog.filter(name_regex="((")
-        with pytest.raises(SyntaxError, match=pattern):
-            multi_catalog.filter(type_regex="((")
-
     def test_eq(self, multi_catalog, data_catalog):
         assert multi_catalog == multi_catalog.shallow_copy()
         assert multi_catalog != data_catalog

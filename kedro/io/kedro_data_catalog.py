@@ -13,7 +13,7 @@ from __future__ import annotations
 import difflib
 import logging
 import re
-from typing import Any, AnyStr, Iterator, List  # noqa: UP035
+from typing import Any, Iterator, List  # noqa: UP035
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
@@ -553,8 +553,8 @@ class KedroDataCatalog(CatalogProtocol):
 
     def filter(
         self,
-        name_regex: re.Pattern | AnyStr | None = None,
-        type_regex: re.Pattern | AnyStr | None = None,
+        name_regex: re.Pattern[str] | str | None = None,
+        type_regex: re.Pattern[str] | str | None = None,
         by_type: type | list[type] | None = None,
     ) -> List[str]:  # noqa: UP006
         """Filter dataset names registered in the catalog based on name and/or type.

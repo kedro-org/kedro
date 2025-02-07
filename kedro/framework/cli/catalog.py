@@ -14,6 +14,7 @@ from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.io.data_catalog import DataCatalog
+from kedro.io.kedro_data_catalog import _LazyDataset
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -64,7 +65,6 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-
     try:
         data_catalog = context.catalog
         datasets_meta = data_catalog._datasets
@@ -126,7 +126,10 @@ def _map_type_to_datasets(
     """
     mapping = defaultdict(list)  # type: ignore[var-annotated]
     for dataset_name in filterfalse(is_parameter, datasets):
-        ds_type = datasets_meta[dataset_name].__class__.__name__
+        if isinstance(datasets_meta[dataset_name], _LazyDataset):
+            ds_type = str(datasets_meta[dataset_name]).split(".")[-1]
+        else:
+            ds_type = datasets_meta[dataset_name].__class__.__name__
         if dataset_name not in mapping[ds_type]:
             mapping[ds_type].append(dataset_name)
     return mapping

@@ -380,7 +380,9 @@ class Pipeline:
                 grouped_nodes[key] = {}
                 grouped_nodes[key]["name"] = key
                 grouped_nodes[key]["type"] = "namespace" if node.namespace else "node"
-            grouped_nodes[key]["nodes"] = [*grouped_nodes[key].get("nodes", []), node]
+                grouped_nodes[key]["nodes"] = []
+                grouped_nodes[key]["dependencies"] = set()
+            grouped_nodes[key]["nodes"].append(node)
             dependencies = set()
             for parent in self.node_dependencies[node]:
                 if parent.namespace and parent.namespace != key:
@@ -389,9 +391,7 @@ class Pipeline:
                     continue
                 else:
                     dependencies.add(parent.name)
-            grouped_nodes[key]["dependencies"] = (
-                grouped_nodes[key].get("dependencies", set()) | dependencies
-            )
+            grouped_nodes[key]["dependencies"].update(dependencies)
         return grouped_nodes
 
     def only_nodes(self, *node_names: str) -> Pipeline:

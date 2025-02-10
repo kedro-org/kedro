@@ -47,9 +47,10 @@ def conflicting_feed_dict():
 
 @pytest.fixture
 def multi_catalog():
-    csv = CSVDataset(filepath="abc.csv")
+    csv_1 = CSVDataset(filepath="abc.csv")
+    csv_2 = CSVDataset(filepath="def.csv")
     parq = ParquetDataset(filepath="xyz.parq")
-    return KedroDataCatalog({"abc": csv, "xyz": parq})
+    return KedroDataCatalog({"abc": csv_1, "def": csv_2, "xyz": parq})
 
 
 @pytest.fixture
@@ -159,8 +160,9 @@ class TestKedroDataCatalog:
         [
             ("^a", ["abc"]),
             ("a|x", ["abc", "xyz"]),
-            ("^(?!(a|x))", []),
-            ("def", []),
+            ("^(?!(a|d|x))", []),
+            ("def", ["def"]),
+            ("ghi", []),
             ("", []),
         ],
     )
@@ -174,6 +176,63 @@ class TestKedroDataCatalog:
         pattern = f"Invalid regular expression provided: '{escaped_regex}'"
         with pytest.raises(SyntaxError, match=pattern):
             multi_catalog.list("((")
+
+    @pytest.mark.parametrize(
+        "name_regex,type_regex,expected",
+        [
+            (re.compile("^a"), None, ["abc"]),
+            (re.compile("^A"), None, []),
+            (re.compile("^A", flags=re.IGNORECASE), None, ["abc"]),
+            ("a|x", None, ["abc", "xyz"]),
+            ("a|d|x", None, ["abc", "def", "xyz"]),
+            ("a|d|x", "CSVDataset", ["abc", "def"]),
+            ("a|d|x", "kedro_datasets", ["abc", "def", "xyz"]),
+            (None, "ParquetDataset", ["xyz"]),
+            ("^(?!(a|d|x))", None, []),
+            ("def", None, ["def"]),
+            (None, None, ["abc", "def", "xyz"]),
+            ("a|d|x", "no_such_dataset", []),
+        ],
+    )
+    def test_catalog_filter_regex(
+        self, multi_catalog, name_regex, type_regex, expected
+    ):
+        """Test that regex patterns filter materialized datasets accordingly"""
+        assert (
+            multi_catalog.filter(name_regex=name_regex, type_regex=type_regex)
+            == expected
+        )
+
+    @pytest.mark.parametrize(
+        "name_regex,type_regex,by_type,expected",
+        [
+            ("b|m", None, None, ["boats", "materialized"]),
+            (None, None, None, ["boats", "cars", "materialized"]),
+            (None, "CSVDataset", None, ["boats", "cars"]),
+            (None, "ParquetDataset", None, ["materialized"]),
+            ("b|c", "ParquetDataset", None, []),
+            (None, None, ParquetDataset, ["materialized"]),
+            (
+                None,
+                None,
+                [CSVDataset, ParquetDataset],
+                ["boats", "cars", "materialized"],
+            ),
+            (None, "ParquetDataset", [CSVDataset, ParquetDataset], ["materialized"]),
+            ("b|m", None, [CSVDataset, ParquetDataset], ["boats", "materialized"]),
+        ],
+    )
+    def test_from_config_catalog_filter_regex(
+        self, data_catalog_from_config, name_regex, type_regex, by_type, expected
+    ):
+        """Test that regex patterns filter lazy and materialized datasets accordingly"""
+        data_catalog_from_config["materialized"] = ParquetDataset(filepath="xyz.parq")
+        assert (
+            data_catalog_from_config.filter(
+                name_regex=name_regex, type_regex=type_regex, by_type=by_type
+            )
+            == expected
+        )
 
     def test_eq(self, multi_catalog, data_catalog):
         assert multi_catalog == multi_catalog.shallow_copy()

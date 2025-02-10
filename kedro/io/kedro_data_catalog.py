@@ -551,11 +551,88 @@ class KedroDataCatalog(CatalogProtocol):
             )
         self.__setitem__(ds_name, dataset)
 
+    def filter(
+        self,
+        name_regex: re.Pattern[str] | str | None = None,
+        type_regex: re.Pattern[str] | str | None = None,
+        by_type: type | list[type] | None = None,
+    ) -> List[str]:  # noqa: UP006
+        """Filter dataset names registered in the catalog based on name and/or type.
+
+        This method allows filtering datasets by their names and/or types. Regular expressions
+        should be precompiled before passing them to `name_regex` or `type_regex`, but plain
+        strings are also supported.
+
+        Args:
+            name_regex: Optional compiled regex pattern or string to filter dataset names.
+            type_regex: Optional compiled regex pattern or string to filter dataset types.
+                The provided regex is matched against the full dataset type path, for example:
+                `kedro_datasets.pandas.parquet_dataset.ParquetDataset`.
+            by_type: Optional dataset type(s) to filter by. This performs an instance type check
+                rather than a regex match. It can be a single dataset type or a list of types.
+
+        Returns:
+            A list of dataset names that match the filtering criteria.
+
+        Example:
+        ::
+
+            >>> import re
+            >>> catalog = KedroDataCatalog()
+            >>> # get datasets where the substring 'raw' is present
+            >>> raw_data = catalog.filter(name_regex='raw')
+            >>> # get datasets where names start with 'model_' (precompiled regex)
+            >>> model_datasets = catalog.filter(name_regex=re.compile('^model_'))
+            >>> # get datasets of a specific type using type_regex
+            >>> csv_datasets = catalog.filter(type_regex='pandas.excel_dataset.ExcelDataset')
+            >>> # get datasets where names contain 'train' and type matches 'CSV' in the path
+            >>> catalog.filter(name_regex="train", type_regex="CSV")
+            >>> # get datasets where names include 'data' and are of a specific type
+            >>> from kedro_datasets.pandas import SQLQueryDataset
+            >>> catalog.filter(name_regex="data", by_type=SQLQueryDataset)
+            >>> # get datasets where names include 'data' and are of multiple specific types
+            >>> from kedro.io import MemoryDataset
+            >>> catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])
+        """
+        filtered = self.keys()
+
+        # Apply name filter if specified
+        if name_regex:
+            filtered = [
+                ds_name for ds_name in filtered if re.search(name_regex, ds_name)
+            ]
+
+        # Apply type filters if specified
+        by_type_set = set()
+        if by_type:
+            if not isinstance(by_type, list):
+                by_type = [by_type]
+            for _type in by_type:
+                by_type_set.add(f"{_type.__module__}.{_type.__qualname__}")
+
+        if by_type_set or type_regex:
+            filtered_types = []
+            for ds_name in filtered:
+                # Retrieve the dataset type
+                if ds_name in self._lazy_datasets:
+                    str_type = str(self._lazy_datasets[ds_name])
+                else:
+                    class_type = type(self.__datasets[ds_name])
+                    str_type = f"{class_type.__module__}.{class_type.__qualname__}"
+                # Match against type_regex and apply by_type filtering
+                if (not type_regex or re.search(type_regex, str_type)) and (
+                    not by_type_set or str_type in by_type_set
+                ):
+                    filtered_types.append(ds_name)
+
+            return filtered_types
+
+        return filtered
+
     def list(
         self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0
     ) -> List[str]:  # noqa: UP006
-        # TODO: rename depending on the solution for https://github.com/kedro-org/kedro/issues/3917
-        # TODO: make regex_search mandatory argument as we have catalog.keys() for listing all the datasets.
+        # TODO: remove when removing old catalog
         """List all dataset names registered in the catalog, optionally filtered by a regex pattern.
 
         If a regex pattern is provided, only dataset names matching the pattern will be returned.
@@ -598,6 +675,7 @@ class KedroDataCatalog(CatalogProtocol):
             raise SyntaxError(
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
+
         return [ds_name for ds_name in self.__iter__() if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:

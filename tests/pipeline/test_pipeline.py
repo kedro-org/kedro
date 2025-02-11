@@ -389,6 +389,16 @@ class TestValidPipeline:
     def test_node_grouping_by_namespace_name_type(
         self, request, pipeline_name, expected
     ):
+        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
+        {
+            'node_name/namespace_name' : {
+                                            'name': 'node_name/namespace_name',
+                                            'type': 'namespace' or 'node',
+                                            'nodes': [list of nodes],
+                                            'dependencies': [list of dependencies]}
+        }
+        This test checks for the 'name' and 'type' keys in the dictionary.
+        """
         p = request.getfixturevalue(pipeline_name)
         grouped = p.grouped_nodes_by_namespace
         assert set(grouped.keys()) == set(expected)
@@ -426,6 +436,16 @@ class TestValidPipeline:
         ],
     )
     def test_node_grouping_by_namespace_nodes(self, request, pipeline_name, expected):
+        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
+        {
+            'node_name/namespace_name' : {
+                                            'name': 'node_name/namespace_name',
+                                            'type': 'namespace' or 'node',
+                                            'nodes': [list of nodes],
+                                            'dependencies': [list of dependencies]}
+        }
+        This test checks for the 'nodes' key in the dictionary which should be a list of nodes.
+        """
         p = request.getfixturevalue(pipeline_name)
         grouped = p.grouped_nodes_by_namespace
         for key, value in grouped.items():
@@ -453,6 +473,16 @@ class TestValidPipeline:
     def test_node_grouping_by_namespace_dependencies(
         self, request, pipeline_name, expected
     ):
+        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
+        {
+            'node_name/namespace_name' : {
+                                            'name': 'node_name/namespace_name',
+                                            'type': 'namespace' or 'node',
+                                            'nodes': [list of nodes],
+                                            'dependencies': [list of dependencies]}
+        }
+        This test checks for the 'dependencies' in the dictionary which is a list of nodes/namespaces the group depends on.
+        """
         p = request.getfixturevalue(pipeline_name)
         grouped = p.grouped_nodes_by_namespace
         for key, value in grouped.items():

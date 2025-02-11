@@ -19,7 +19,7 @@ To use DVC as a Python library, install it using `pip` or `conda`, for example:
 
 Since DVC works alongside Git to track data changes, initialise the Kedro project as a git repository: `git init`.
 
-Then, initialize DVC in the project: `dvc init`.
+Then, initialize DVC in the project: `dvc init`. This will create the `.dvc` directory inside the project.
 
 You should see a message such as:
 
@@ -51,17 +51,27 @@ companies:
   filepath: data/01_raw/companies.csv
 ```
 
-You will have to do some changes to the the `.gitignore` file provided by the template to allow DVC to track the dataset files. Since the spaceflights-pandas starter's `.gitignore` ignores everything under the `data/` directory by default, you will have to update it by removing the following lines from it:
+Since we initialized a new Git repository with `git init` on the previous step, we can now make an initial commit containing all of the files in the project:
 
 ```bash
-# ignore everything in the following folders
-data/**
-
-# except their sub-folders
-!data/**/
+git add .
+git commit -m "First commit, initial structure from the starter"
 ```
 
- Then, use `dvc add` to start tracking a dataset file:
+Because of the location of the datasets files in the project template, it will be necessary to make sure that the following line is present in the projectg's `.gitignore` file so we allow for the `.dvc` files to be commited:
+
+```bash
+!*.dvc
+```
+
+We want to use DVC to track and version our dataset file, so we remove it from Git and commit the change:
+
+ ```bash
+ git rm -r --cached 'data/01_raw/companies.csv'
+ git commit -m "Stop tracking data/01_raw/companies.csv"
+ ```
+
+ Finally, we start tracking it with DVC:
 
  ```bash
  dvc add data/01_raw/companies.csv

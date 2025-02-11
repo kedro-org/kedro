@@ -105,7 +105,7 @@ The first command will restore the `.dvc` metadata file to its previous version.
 
 ### Storing data remotely
 
-DVC remotes provide access to external storage locations to track and share your data and ML models with the `dvc push` and `dvc pull` commands. Usually, those will be shared between devices or team members who are working on a project. It supports [several different storage types](https://dvc.org/doc/user-guide/data-management/remote-storage#supported-storage-types).
+DVC remotes provide access to external storage locations to track and share your data and ML models with the `dvc push` and `dvc pull` commands. Usually, those will be shared between devices or team members who are working on a project. It supports several different storage types, like Amazon S3, Azure Blob Storage or Google Cloud Storage, as well as self-hosted options. For more detail on this subject, refer to the [DVC documentation on remote storage](https://dvc.org/doc/user-guide/data-management/remote-storage#supported-storage-types).
 
 For example:
 
@@ -127,11 +127,11 @@ dvc pull
 
 ## Versioning with DVC data pipelines
 
-While the previous method allows you to version datasets, it comes with some limitations:
+While the previous method allows you to version datasets, it comes with some limitations, as DVC requires the files to be tracked to be added manually:
 
 - Intermediate and output datasets must be added to DVC manually.
 - Parameters and code changes are not explicitly tracked.
-- Artefacts and metrics cannot be tracked effectively.
+- Artifacts and metrics can be cumbersome to track.
 
 To address these issues, you can define Kedro pipelines as DVC stages in the dvc.yaml file. The list of stages is typically the most important part of a dvc.yaml file, though the file can also be used to configure artifacts, metrics, params, and plots, either as part of a stage definition or on their own.
 

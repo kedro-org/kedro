@@ -58,7 +58,7 @@ companies:
   filepath: data/01_raw/companies.csv
 ```
 
-Because of the location of the datasets files in the project template, it will be necessary to make sure that the following line is present in the project's `.gitignore` file so we allow for the `.dvc` files to be committed:
+Due to the location of the dataset files in the project template, you must ensure the following line is present in the `.gitignore` file to allow `.dvc` files to be committed:
 
 ```bash
 !*.dvc
@@ -71,7 +71,7 @@ We want to use DVC to track and version our dataset file, so we remove it from G
  git commit -m "Stop tracking data/01_raw/companies.csv"
  ```
 
- Finally, we start tracking it with DVC:
+ We can then start tracking it with DVC:
 
  ```bash
  dvc add data/01_raw/companies.csv
@@ -158,7 +158,7 @@ Using the command `tail data/01_raw/companies.csv` again shows that the dataset 
 
 ### How to store data remotely
 
-DVC remotes provide access to external storage locations to track and share your data and ML models with the `dvc push` and `dvc pull` commands. Usually, those will be shared between devices or team members who are working on a project. It supports several different storage types, like Amazon S3, Azure Blob Storage or Google Cloud Storage, as well as self-hosted options. For more detail on this subject, see the [DVC documentation on remote storage](https://dvc.org/doc/user-guide/data-management/remote-storage#supported-storage-types).
+DVC remotes provide access to external storage locations to track and share your data and ML models with the `dvc push` and `dvc pull` commands. Those will be shared between devices or team members who are working on a project. It supports several different storage types, like Amazon S3, Azure Blob Storage or Google Cloud Storage, as well as self-hosted options. For more detail on this subject, see the [DVC documentation on remote storage](https://dvc.org/doc/user-guide/data-management/remote-storage#supported-storage-types).
 
 For example:
 

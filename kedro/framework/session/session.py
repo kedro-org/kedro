@@ -23,6 +23,7 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
+from kedro.framework.session.catalog import CatalogCommandsMixin
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import _find_kedro_project
@@ -78,7 +79,7 @@ class KedroSessionError(Exception):
     pass
 
 
-class KedroSession:
+class KedroSession(CatalogCommandsMixin):
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
     a context manager to construct a new KedroSession with session data
@@ -127,6 +128,10 @@ class KedroSession:
         self._conf_source = conf_source or str(
             self._project_path / settings.CONF_SOURCE
         )
+
+    @property
+    def context(self):
+        return self.load_context()
 
     @classmethod
     def create(

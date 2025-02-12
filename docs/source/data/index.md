@@ -37,6 +37,7 @@ Further pages describe more advanced concepts:
 
 advanced_data_catalog_usage
 partitioned_and_incremental_datasets
+kedro_dvc_versioning
 ```
 
 This section on handing data with Kedro concludes with an advanced use case, illustrated with a tutorial that explains how to create your own custom dataset:

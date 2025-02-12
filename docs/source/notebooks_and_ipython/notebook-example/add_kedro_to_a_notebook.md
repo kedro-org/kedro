@@ -152,7 +152,7 @@ When writing exploratory code, it’s tempting to hard code values to save time,
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=3)
 ```
 
-[Good software engineering practice](https://towardsdatascience.com/five-software-engineering-principles-for-collaborative-data-science-ab26667a311) suggests that we extract *‘magic numbers’* into named constants. These could be defined at the top of a file or in a utility file, in a format such as yaml.
+[Good software engineering practice](https://medium.com/towards-data-science/five-software-engineering-principles-for-collaborative-data-science-ab26667a311) suggests that we extract *‘magic numbers’* into named constants. These could be defined at the top of a file or in a utility file, in a format such as yaml.
 
 
 ```yaml

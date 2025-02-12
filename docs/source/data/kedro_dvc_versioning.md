@@ -37,7 +37,14 @@ You can now commit the changes to git.
 +---------------------------------------------------------------------+
 ```
 
-### First commits
+Since we initialized a new Git repository with `git init` on the previous step, we can now make an initial commit containing all of the files in the project:
+
+```bash
+git add .
+git commit -m "First commit, initial structure from the starter"
+```
+
+### Tracking your data with DVC
 
 DVC helps manage large datasets that should not be stored directly in Git. Instead of adding dataset files to Git, DVC generates small metadata files that Git tracks instead.
 
@@ -49,13 +56,6 @@ Suppose you have a dataset in your project, such as:
 companies:
   type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
-```
-
-Since we initialized a new Git repository with `git init` on the previous step, we can now make an initial commit containing all of the files in the project:
-
-```bash
-git add .
-git commit -m "First commit, initial structure from the starter"
 ```
 
 Because of the location of the datasets files in the project template, it will be necessary to make sure that the following line is present in the projectg's `.gitignore` file so we allow for the `.dvc` files to be commited:
@@ -88,6 +88,35 @@ git commit -m "Track companies.csv dataset with DVC"
 
 ### Going back to a previous version of the data
 
+First, let's create a different version of the `companies.csv` file by adding a dummy line to it.
+
+```bash
+echo "000,100%,Example,1.0,f" >> data/01_raw/companies.csv
+```
+
+By using the command `tail data/01_raw/companies.csv`, we can verify that the line has been added to the file:
+
+```bash
+6957,,Rwanda,1.0,t
+7554,100%,,1105.0,f
+34243,95%,Uzbekistan,1.0,f
+12502,89%,Denmark,1.0,f
+20213,,Russian Federation,1.0,f
+2235,100%,Guinea,1.0,f
+2353,100%,Senegal,2.0,t
+49772,100%,Jersey,1.0,f
+16548,90%,,2.0,f
+000,100%,Example,1.0,f
+```
+
+Then we can track the changes with DVC, and commit them to Git:
+
+```bash
+dvc add data/01_raw/companies.csv
+git add data/01_raw/companies.csv.dvc
+git commit -m "Track dataset changes with DVC"
+```
+
 DVC integrates with Git to manage different dataset versions. If you need to restore a previous version of a dataset, first identify the commit containing the desired version. You can use:
 
 ```bash
@@ -103,7 +132,31 @@ dvc checkout
 
 The first command will restore the `.dvc` metadata file to its previous version. The second uses the metadata file to restore the corresponding dataset.
 
-### Storing data remotely
+```bash
+Building workspace index
+Comparing indexes
+Applying changes
+M       data/01_raw/companies.csv
+```
+
+Using the command `tail data/01_raw/companies.csv` again shows that the dataset file has been restored to a previous version.
+
+```bash
+1618,100%,,1.0,t
+6957,,Rwanda,1.0,t
+7554,100%,,1105.0,f
+34243,95%,Uzbekistan,1.0,f
+12502,89%,Denmark,1.0,f
+20213,,Russian Federation,1.0,f
+2235,100%,Guinea,1.0,f
+2353,100%,Senegal,2.0,t
+49772,100%,Jersey,1.0,f
+16548,90%,,2.0,f
+```
+
+## Advanced use cases
+
+### How to store data remotely
 
 DVC remotes provide access to external storage locations to track and share your data and ML models with the `dvc push` and `dvc pull` commands. Usually, those will be shared between devices or team members who are working on a project. It supports several different storage types, like Amazon S3, Azure Blob Storage or Google Cloud Storage, as well as self-hosted options. For more detail on this subject, refer to the [DVC documentation on remote storage](https://dvc.org/doc/user-guide/data-management/remote-storage#supported-storage-types).
 
@@ -117,7 +170,7 @@ git commit -m "Update"
 dvc push
 ```
 
-### Going back to a previous version of the data, stored remotely
+### How to go back to a previous version of the data, stored remotely
 
 ```bash
 git checkout <commit hash> data/01_raw/companies.csv.dvc
@@ -125,7 +178,7 @@ dvc checkout
 dvc pull
 ```
 
-## Versioning with DVC data pipelines
+### How to version with DVC data pipelines
 
 While the previous method allows you to version datasets, it comes with some limitations, as DVC requires the files to be tracked to be added manually:
 
@@ -135,7 +188,7 @@ While the previous method allows you to version datasets, it comes with some lim
 
 To address these issues, you can define Kedro pipelines as DVC stages in the dvc.yaml file. The list of stages is typically the most important part of a dvc.yaml file, though the file can also be used to configure artifacts, metrics, params, and plots, either as part of a stage definition or on their own.
 
-### Defining Kedro pipelines as DVC stages
+### How to define Kedro pipelines as DVC stages
 
 Here is an example configuration for dvc.yaml:
 
@@ -166,13 +219,13 @@ Run the pipeline with:
 dvc repro
 ```
 
-### Updating a dataset
+### How to update a dataset
 
 If one of the datasets is updated, you can rerun only the pipelines affected by the change.
 
 The command `dvc repro` executes pipelines where outputs or dependencies have changed.
 
-### Tracking code changes
+### How to track code changes
 
 You can track changes to your code by adding the relevant files to the `deps` section in `dvc.yaml`.
 
@@ -201,7 +254,7 @@ Use `dvc push` to send your updates to remote storage.
 
 After that, they can be pushed to remote storage with the `dvc push` command.
 
-### Tracking parameters
+### How to track parameters
 
 To track parameters, you can include them under the params section in `dvc.yaml`.
 
@@ -227,7 +280,7 @@ dvc repro
 dvc push
 ```
 
-### Running experiments with different parameters
+### How to run experiments with different parameters
 
 To experiment with different parameter values, update the parameter in `parameters.yaml` and then run the pipelines with `dvc repro`.
 

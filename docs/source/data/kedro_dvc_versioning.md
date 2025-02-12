@@ -8,7 +8,7 @@ This tutorial assumes you have experience with the Git CLI and Kedro CLI command
 
 ### Initialising the repository
 
-For this example, we will be using a Kedro `spaceflights-pandas` starter project, which includes pre-configured datasets and pipelines. To create this starter project locally, use the command:
+For this example, you will be using a Kedro `spaceflights-pandas` starter project, which includes pre-configured datasets and pipelines. To create this starter project locally, use the command:
 
 `kedro new --starter=spaceflights-pandas --name=space-dvc`
 
@@ -37,7 +37,7 @@ You can now commit the changes to git.
 +---------------------------------------------------------------------+
 ```
 
-Since we initialised a new Git repository with `git init` on the previous step, we can now make an initial commit containing all of the files in the project:
+Since you initialised a new Git repository with `git init` on the previous step, you can now make an initial commit containing all of the files in the project:
 
 ```bash
 git add .
@@ -64,7 +64,7 @@ Due to the location of the dataset files in the project template, you must ensur
 !*.dvc
 ```
 
-We want to use DVC to track and version our dataset file, so we remove it from Git and commit the change:
+We want to use DVC to track and version our dataset file, so you remove it from Git and commit the change:
 
  ```bash
  git rm -r --cached 'data/01_raw/companies.csv'
@@ -94,7 +94,7 @@ First, let's create a different version of the `companies.csv` file by adding a 
 echo "000,100%,Example,1.0,f" >> data/01_raw/companies.csv
 ```
 
-By using the command `tail data/01_raw/companies.csv`, we can verify that the line has been added to the file:
+By using the command `tail data/01_raw/companies.csv`, you can verify that the line has been added to the file:
 
 ```bash
 6957,,Rwanda,1.0,t
@@ -109,7 +109,7 @@ By using the command `tail data/01_raw/companies.csv`, we can verify that the li
 000,100%,Example,1.0,f
 ```
 
-Then we can track the changes with DVC, and commit them to Git:
+Then you can track the changes with DVC, and commit them to Git:
 
 ```bash
 dvc add data/01_raw/companies.csv

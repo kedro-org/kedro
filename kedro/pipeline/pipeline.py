@@ -369,6 +369,35 @@ class Pipeline:
 
         return [list(group) for group in self._toposorted_groups]
 
+    @property
+    def grouped_nodes_by_namespace(self) -> dict[str, dict[str, Any]]:
+        """Return a dictionary of the pipeline nodes grouped by namespace with
+        information about the nodes, their type, and dependencies. The structure of the dictionary is:
+        {'node_name/namespace_name' : {'name': 'node_name/namespace_name','type': 'namespace' or 'node','nodes': [list of nodes],'dependencies': [list of dependencies]}}
+        This property is intended to be used by deployment plugins to group nodes by namespace.
+
+        """
+        grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
+        for node in self.nodes:
+            key = node.namespace or node.name
+            if key not in grouped_nodes:
+                grouped_nodes[key] = {}
+                grouped_nodes[key]["name"] = key
+                grouped_nodes[key]["type"] = "namespace" if node.namespace else "node"
+                grouped_nodes[key]["nodes"] = []
+                grouped_nodes[key]["dependencies"] = set()
+            grouped_nodes[key]["nodes"].append(node)
+            dependencies = set()
+            for parent in self.node_dependencies[node]:
+                if parent.namespace and parent.namespace != key:
+                    dependencies.add(parent.namespace)
+                elif parent.namespace and parent.namespace == key:
+                    continue
+                else:
+                    dependencies.add(parent.name)
+            grouped_nodes[key]["dependencies"].update(dependencies)
+        return grouped_nodes
+
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified
         nodes by name.

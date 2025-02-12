@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Added `KedroDataCatalog.filter()` to filter datasets by name and type.
+* Added `Pipeline.grouped_nodes_by_namespace` property which returns a dictionary of nodes grouped by namespace, intended to be used by plugins to facilitate deployment of namespaced nodes together.
 
 ## Bug fixes and other changes
 * Updated `_LazyDataset` representation when printing `KedroDataCatalog`.

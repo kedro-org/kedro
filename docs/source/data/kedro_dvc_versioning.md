@@ -50,7 +50,7 @@ DVC helps manage large datasets that should not be stored directly in Git. Inste
 
 These metadata files store information about the actual dataset, such as its hash and location. More information about the structure of the .dvc file can be found in the [DVC documentation](https://dvc.org/doc/user-guide/project-structure/dvc-files#dvc-files).
 
-Suppose you have a dataset in your project, such as:
+Verify that your project catalog contains this dataset definition:
 
 ```yaml
 companies:

@@ -182,7 +182,7 @@ dvc pull
 
 While the previous method allows you to version datasets, it comes with some limitations, as DVC requires the files to be tracked to be added manually:
 
-- Intermediate and output datasets must be added to DVC manually.
+- Intermediate and output datasets must be added to DVC individually.
 - Parameters and code changes are not explicitly tracked.
 - Artifacts and metrics can be cumbersome to track.
 

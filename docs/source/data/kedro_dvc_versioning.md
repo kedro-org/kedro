@@ -59,7 +59,7 @@ git commit -m "First commit, initial structure from the starter"
 
 DVC helps manage large datasets that should not be stored directly in Git. Instead of adding dataset files to Git, DVC generates small metadata files that Git tracks instead.
 
-These metadata files store information about the actual dataset, such as its hash and location. More information about the structure of the .dvc file can be found in the [DVC documentation](https://dvc.org/doc/user-guide/project-structure/dvc-files#dvc-files).
+These metadata files store information about the actual dataset, such as its hash and location. More information about the structure of the `.dvc` file can be found in the [DVC documentation](https://dvc.org/doc/user-guide/project-structure/dvc-files#dvc-files).
 
 Verify that your project catalog contains this dataset definition:
 
@@ -193,7 +193,7 @@ dvc pull
 
 While the previous method allows you to version datasets, it comes with some limitations, as DVC requires the files to be tracked to be added manually:
 
-- Intermediate and output datasets must be added to DVC manually.
+- Intermediate and output datasets must be added to DVC individually.
 - Parameters and code changes are not explicitly tracked.
 - Artifacts and metrics can be cumbersome to track.
 

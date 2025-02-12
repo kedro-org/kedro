@@ -15,13 +15,24 @@ For this example, you will be using a Kedro `spaceflights-pandas` starter projec
 For more information about starter projects, see the [Kedro starters documentation](https://docs.kedro.org/en/stable/starters/starters.html) page.
 
 To use DVC as a Python library, install it using `pip` or `conda`, for example:
+
+```bash
 `pip install dvc`
+```
 
-Since DVC works alongside Git to track data changes, initialise the Kedro project as a git repository: `git init`.
+Since DVC works alongside Git to track data changes, initialise the Kedro project as a git repository:
 
-Then, initialise DVC in the project: `dvc init`. This will create the `.dvc` directory inside the project.
+```bash
+`git init`
+```
 
-You should see a message such as:
+Then, initialise DVC in the project:
+
+```bash
+`dvc init`
+```
+
+This will create the `.dvc` directory inside the project. You should see a message such as:
 
 ```bash
 Initialized DVC repository.
@@ -188,7 +199,10 @@ While the previous method allows you to version datasets, it comes with some lim
 
 To address these issues, you can define Kedro pipelines as DVC stages in the dvc.yaml file. The list of stages is typically the most important part of a dvc.yaml file. The file can also be used to configure artifacts, metrics, parameters, and plots, either as part of a stage definition or on their own.
 
+For more information on the configuration of those files, see [the documentation on dvc.yaml](https://dvc.org/doc/user-guide/project-structure/dvcyaml-files#dvcyaml).
+
 ### How to define Kedro pipelines as DVC stages
+
 
 Here is an example configuration for dvc.yaml:
 

@@ -1,6 +1,6 @@
 # Data and pipeline versioning with Kedro and DVC
 
-This document explains how to use [DVC](https://dvc.org/), a command line tool and VS Code Extension to help you develop reproducible machine learning projects, to version datasets and pipelines in your Kedro project.
+This document explains how to use [DVC](https://dvc.org/) to version datasets and pipelines in your Kedro project. DVC is a tool to develop reproducible machine learning projects. It can be installed on Visual Studio Code, any system terminal, and used as a Python library.
 
 This tutorial assumes you have experience with the Git CLI and Kedro CLI commands but does not require any prior knowledge of DVC.
 
@@ -8,18 +8,18 @@ This tutorial assumes you have experience with the Git CLI and Kedro CLI command
 
 ### Initialising the repository
 
-For this example, we will be using a Kedro `spaceflights-pandas` starter project, which includes preconfigured datasets and pipelines. To create this starter project locally, use the command:
+For this example, we will be using a Kedro `spaceflights-pandas` starter project, which includes pre-configured datasets and pipelines. To create this starter project locally, use the command:
 
 `kedro new --starter=spaceflights-pandas --name=space-dvc`
 
-For more information about starter projects, visit the [Kedro starters documentation](https://docs.kedro.org/en/stable/starters/starters.html) page.
+For more information about starter projects, see the [Kedro starters documentation](https://docs.kedro.org/en/stable/starters/starters.html) page.
 
 To use DVC as a Python library, install it using `pip` or `conda`, for example:
 `pip install dvc`
 
 Since DVC works alongside Git to track data changes, initialise the Kedro project as a git repository: `git init`.
 
-Then, initialize DVC in the project: `dvc init`. This will create the `.dvc` directory inside the project.
+Then, initialise DVC in the project: `dvc init`. This will create the `.dvc` directory inside the project.
 
 You should see a message such as:
 
@@ -37,7 +37,7 @@ You can now commit the changes to git.
 +---------------------------------------------------------------------+
 ```
 
-Since we initialized a new Git repository with `git init` on the previous step, we can now make an initial commit containing all of the files in the project:
+Since we initialised a new Git repository with `git init` on the previous step, we can now make an initial commit containing all of the files in the project:
 
 ```bash
 git add .
@@ -58,7 +58,7 @@ companies:
   filepath: data/01_raw/companies.csv
 ```
 
-Because of the location of the datasets files in the project template, it will be necessary to make sure that the following line is present in the projectg's `.gitignore` file so we allow for the `.dvc` files to be commited:
+Because of the location of the datasets files in the project template, it will be necessary to make sure that the following line is present in the project's `.gitignore` file so we allow for the `.dvc` files to be committed:
 
 ```bash
 !*.dvc
@@ -77,7 +77,7 @@ We want to use DVC to track and version our dataset file, so we remove it from G
  dvc add data/01_raw/companies.csv
  ```
 
-This generates the `companies.csv.dvc` file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for the purpose of Git tracking.
+This generates the `companies.csv.dvc` file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for Git tracking.
 
 Once updated, add the `.dvc` file to Git and commit the changes:
 
@@ -158,7 +158,7 @@ Using the command `tail data/01_raw/companies.csv` again shows that the dataset 
 
 ### How to store data remotely
 
-DVC remotes provide access to external storage locations to track and share your data and ML models with the `dvc push` and `dvc pull` commands. Usually, those will be shared between devices or team members who are working on a project. It supports several different storage types, like Amazon S3, Azure Blob Storage or Google Cloud Storage, as well as self-hosted options. For more detail on this subject, refer to the [DVC documentation on remote storage](https://dvc.org/doc/user-guide/data-management/remote-storage#supported-storage-types).
+DVC remotes provide access to external storage locations to track and share your data and ML models with the `dvc push` and `dvc pull` commands. Usually, those will be shared between devices or team members who are working on a project. It supports several different storage types, like Amazon S3, Azure Blob Storage or Google Cloud Storage, as well as self-hosted options. For more detail on this subject, see the [DVC documentation on remote storage](https://dvc.org/doc/user-guide/data-management/remote-storage#supported-storage-types).
 
 For example:
 
@@ -186,7 +186,7 @@ While the previous method allows you to version datasets, it comes with some lim
 - Parameters and code changes are not explicitly tracked.
 - Artifacts and metrics can be cumbersome to track.
 
-To address these issues, you can define Kedro pipelines as DVC stages in the dvc.yaml file. The list of stages is typically the most important part of a dvc.yaml file, though the file can also be used to configure artifacts, metrics, params, and plots, either as part of a stage definition or on their own.
+To address these issues, you can define Kedro pipelines as DVC stages in the dvc.yaml file. The list of stages is typically the most important part of a dvc.yaml file. The file can also be used to configure artifacts, metrics, parameters, and plots, either as part of a stage definition or on their own.
 
 ### How to define Kedro pipelines as DVC stages
 
@@ -256,7 +256,7 @@ After that, they can be pushed to remote storage with the `dvc push` command.
 
 ### How to track parameters
 
-To track parameters, you can include them under the params section in `dvc.yaml`.
+To track parameters, you can include them under the `params` section in `dvc.yaml`.
 
 ```yaml
 stages:

@@ -21,7 +21,9 @@ class CatalogCommandsMixin:
 
         # TODO: remove after moving to new catalog
         if not isinstance(catalog, KedroDataCatalog):
-            self._logger.watring("This method is available for KedroDataCatalog only.")
+            self._logger.warning(
+                "This method is available for `KedroDataCatalog` only."
+            )
             return {}
 
         # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475

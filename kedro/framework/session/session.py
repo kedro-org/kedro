@@ -130,7 +130,7 @@ class KedroSession(CatalogCommandsMixin):
         )
 
     @property
-    def context(self):
+    def context(self) -> KedroContext:
         return self.load_context()
 
     @classmethod

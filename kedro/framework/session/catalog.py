@@ -1,18 +1,22 @@
+import logging
 from typing import Any
 
+from kedro.framework.context import KedroContext
 from kedro.framework.project import pipelines
 from kedro.io import KedroDataCatalog
 
 
 class CatalogCommandsMixin:
-    context = None
-    _logger = None
+    @property
+    def context(self) -> KedroContext: ...  # type: ignore[empty-body]
+
+    @property
+    def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
     def rank_catalog_factories(self) -> list[str]:
         """List all dataset factories in the catalog, ranked by priority
         by which they are matched.
         """
-
         return self.context.catalog.config_resolver.list_patterns()
 
     def resolve_patterns(self, include_default: bool = False) -> dict[str, Any]:

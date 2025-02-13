@@ -119,6 +119,7 @@ class KedroSession(CatalogCommandsMixin):
         self._package_name = package_name
         self._store = self._init_store()
         self._run_called = False
+        self._context = None
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
@@ -131,7 +132,8 @@ class KedroSession(CatalogCommandsMixin):
 
     @property
     def context(self) -> KedroContext:
-        return self.load_context()
+        self._context = self._context or self.load_context()
+        return self._context
 
     @classmethod
     def create(
@@ -238,6 +240,8 @@ class KedroSession(CatalogCommandsMixin):
 
     def load_context(self) -> KedroContext:
         """An instance of the project context."""
+        if self._context:
+            return self._context
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
         config_loader = self._get_config_loader()
@@ -251,6 +255,8 @@ class KedroSession(CatalogCommandsMixin):
             hook_manager=self._hook_manager,
         )
         self._hook_manager.hook.after_context_created(context=context)
+
+        self._context = context
 
         return context  # type: ignore[no-any-return]
 
@@ -343,7 +349,6 @@ class KedroSession(CatalogCommandsMixin):
         session_id = self.store["session_id"]
         save_version = session_id
         extra_params = self.store.get("extra_params") or {}
-        context = self.load_context()
 
         name = pipeline_name or "__default__"
 
@@ -369,7 +374,7 @@ class KedroSession(CatalogCommandsMixin):
         record_data = {
             "session_id": session_id,
             "project_path": self._project_path.as_posix(),
-            "env": context.env,
+            "env": self.context.env,
             "kedro_version": kedro_version,
             "tags": tags,
             "from_nodes": from_nodes,
@@ -384,7 +389,7 @@ class KedroSession(CatalogCommandsMixin):
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(
+        catalog = self.context.get_catalog(
             save_version=save_version,
             load_versions=load_versions,
         )

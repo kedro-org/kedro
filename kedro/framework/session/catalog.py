@@ -13,7 +13,7 @@ class CatalogCommandsMixin:
     @property
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
-    def rank_catalog_factories(self) -> list[str]:
+    def list_patterns(self) -> list[str]:
         """List all dataset factories in the catalog, ranked by priority
         by which they are matched.
         """
@@ -35,7 +35,6 @@ class CatalogCommandsMixin:
         if include_default:
             catalog.config_resolver.add_runtime_patterns(runtime_pattern)
 
-        explicit_datasets = catalog.config_resolver.config
         pipeline_datasets = set()
 
         for pipe in pipelines.keys():
@@ -43,10 +42,22 @@ class CatalogCommandsMixin:
             if pl_obj:
                 pipeline_datasets.update(pl_obj.datasets())
 
+        # We need to include datasets defined in the catalog.yaml and datasets added manually to the catalog
+        explicit_datasets = {}
+        for ds_name, ds in catalog.items():
+            # TODO: when breaking change replace with is_parameter() from kedro/io/core.py
+            if ds_name.startswith("params:") or ds_name == "parameters":
+                continue
+
+            unresolved_config, _ = catalog.config_resolver.unresolve_credentials(
+                ds_name, ds.to_config()
+            )
+            explicit_datasets[ds_name] = unresolved_config
+
         for ds_name in pipeline_datasets:
-            # TODO: when breaking change replace with is_parameter from kedro/io/core.py
+            # TODO: when breaking change replace with is_parameter() from kedro/io/core.py
             if (
-                ds_name in catalog.config_resolver.config
+                ds_name in explicit_datasets
                 or ds_name.startswith("params:")
                 or ds_name == "parameters"
             ):

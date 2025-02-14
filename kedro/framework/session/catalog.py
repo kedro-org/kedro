@@ -13,13 +13,13 @@ class CatalogCommandsMixin:
     @property
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
-    def list_patterns(self) -> list[str]:
+    def list_catalog_patterns(self) -> list[str]:
         """List all dataset factories in the catalog, ranked by priority
         by which they are matched.
         """
         return self.context.catalog.config_resolver.list_patterns()
 
-    def resolve_patterns(self, include_default: bool = False) -> dict[str, Any]:
+    def resolve_catalog_patterns(self, include_default: bool = False) -> dict[str, Any]:
         """Resolve catalog factories against pipeline datasets."""
         catalog = self.context.catalog
 

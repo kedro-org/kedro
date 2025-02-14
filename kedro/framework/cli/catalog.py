@@ -209,7 +209,7 @@ def _add_missing_datasets_to_catalog(missing_ds: list[str], catalog_path: Path) 
 def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     """List all dataset factories in the catalog, ranked by priority by which they are matched."""
     session = _create_session(metadata.package_name, env=env)
-    catalog_factories = session.list_patterns()
+    catalog_factories = session.list_catalog_patterns()
 
     if catalog_factories:
         click.echo(yaml.dump(catalog_factories))

@@ -6,7 +6,7 @@
 
 ## Bug fixes and other changes
 * Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
-
+* Fixed `MemoryDataset` to infer `assign` copy mode for Ibis Tables, which previously would be inferred as `deepcopy`.
 ## Breaking changes to the API
 ## Documentation changes
 

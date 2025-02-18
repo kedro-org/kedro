@@ -54,3 +54,8 @@ class RichHandler(rich.logging.RichHandler):
             # fixed on their side at some point, but until then we disable it.
             # See https://github.com/Textualize/rich/issues/2455
             rich.traceback.install(**traceback_install_kwargs)  # type: ignore[arg-type]
+
+
+def _format_rich(value: str, markup: str) -> str:
+    """Format string with rich markup"""
+    return f"[{markup}]{value}[/{markup}]"

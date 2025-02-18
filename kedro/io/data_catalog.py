@@ -29,7 +29,8 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
-from kedro.utils import _format_rich, _has_rich_handler
+from kedro.logging import _format_rich
+from kedro.utils import _has_rich_handler
 
 CATALOG_KEY = "catalog"  # Kept to avoid the breaking change
 WORDS_REGEX_PATTERN = re.compile(r"\W+")

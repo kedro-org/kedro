@@ -1,6 +1,7 @@
 import importlib
 import logging
 import sys
+from logging import _format_rich
 from pathlib import Path
 from unittest import mock
 
@@ -9,7 +10,7 @@ import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
 from kedro.io.data_catalog import DataCatalog
-from kedro.utils import _format_rich, _has_rich_handler
+from kedro.utils import _has_rich_handler
 
 
 @pytest.fixture

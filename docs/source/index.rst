@@ -88,6 +88,7 @@ Welcome to Kedro's award-winning documentation!
 
    integrations/pyspark_integration.md
    integrations/mlflow.md
+   integrations/marimo.md
 
 .. toctree::
    :maxdepth: 2

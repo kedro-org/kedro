@@ -6,6 +6,7 @@
 
 ## Bug fixes and other changes
 * Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
+* Added non-jupyter environment integration page (e.g. marimo) with dynamic kedro session loading.
 
 ## Breaking changes to the API
 ## Documentation changes

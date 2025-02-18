@@ -392,7 +392,6 @@ class DataCatalog:
             "Loading data from %s (%s)...",
             _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
-            extra={"markup": True},
         )
 
         result = dataset.load()
@@ -434,7 +433,6 @@ class DataCatalog:
             "Saving data to %s (%s)...",
             _format_rich(name, "dark_orange") if self._use_rich_markup else name,
             type(dataset).__name__,
-            extra={"markup": True},
         )
 
         dataset.save(data)

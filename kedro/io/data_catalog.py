@@ -29,7 +29,6 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
-from kedro.logging import _format_rich
 from kedro.utils import _has_rich_handler
 
 CATALOG_KEY = "catalog"  # Kept to avoid the breaking change
@@ -390,8 +389,9 @@ class DataCatalog:
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
+            name,
             type(dataset).__name__,
+            extra={"rich_format": ["dark_orange"]},
         )
 
         result = dataset.load()
@@ -431,8 +431,9 @@ class DataCatalog:
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
+            name,
             type(dataset).__name__,
+            extra={"rich_format": ["dark_orange"]},
         )
 
         dataset.save(data)

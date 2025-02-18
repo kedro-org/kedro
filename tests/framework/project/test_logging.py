@@ -8,6 +8,7 @@ import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
+from kedro.io.data_catalog import DataCatalog
 from kedro.utils import _format_rich, _has_rich_handler
 
 
@@ -187,3 +188,28 @@ def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):
     assert logging.getLogger("kedro").level == logging.DEBUG
     expected_message = "You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
     assert expected_message in "".join(caplog.messages).strip("\n")
+
+
+def test_logger_without_rich_markup():
+    class CustomHandler(logging.Handler):
+        def __init__(self):
+            super().__init__()
+            self.records = []
+
+        def emit(self, record):
+            self.records.append(record)
+
+    data = ("dummy",)
+    catalog = DataCatalog.from_config({"dummy": {"type": "MemoryDataset"}})
+
+    # Add a custom handler
+    custom_handler = CustomHandler()
+    root_logger = logging.getLogger()
+    root_logger.addHandler(custom_handler)
+
+    # Emit some logs
+    assert not custom_handler.records
+    catalog.save("dummy", data)
+    assert custom_handler.records
+    for record in custom_handler.records:
+        assert "[dark_orange]" not in record.message

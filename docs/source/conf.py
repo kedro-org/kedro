@@ -255,6 +255,8 @@ linkcheck_ignore = [
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
     "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors",
     "https://www.quora.com/What-is-thread-safety-in-Python",  # "403 Client Error: Forbidden for url"
+    "https://docs.databricks.com/en/reference/jobs-2.0-api.html#create",  # Flaky link that works fine in browser
+    "https://docs.databricks.com/en/reference/jobs-2.0-api.html#runs-submit",  # Flaky link that works fine in browser
 ]
 
 # Comment out settings to fix Client Rate Limit Error 429

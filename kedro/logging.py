@@ -1,3 +1,4 @@
+import copy
 import logging
 import sys
 from logging import LogRecord
@@ -61,14 +62,16 @@ class RichHandler(rich.logging.RichHandler):
     def emit(self, record: LogRecord):
         args = record.args
         new_args = list(args)
+        # LogRecord is shared among all handler, created a new instance so it does not affect the rest.
+        updated_record = copy.copy(record)
         if hasattr(record, "rich_format"):
             # Add markup to the message
             # if the list is shorter than the arg list, keep it unchanged
             for i, color in enumerate(record.rich_format):
                 new_args[i] = _format_rich(args[i], color)
 
-        record.args = tuple(new_args)
-        super().emit(record)
+        updated_record.args = tuple(new_args)
+        super().emit(updated_record)
 
 
 def _format_rich(value: str, markup: str) -> str:

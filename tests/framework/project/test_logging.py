@@ -1,7 +1,6 @@
 import importlib
 import logging
 import sys
-from logging import _format_rich
 from pathlib import Path
 from unittest import mock
 
@@ -10,6 +9,7 @@ import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
 from kedro.io.data_catalog import DataCatalog
+from kedro.logging import _format_rich
 from kedro.utils import _has_rich_handler
 
 
@@ -212,5 +212,6 @@ def test_logger_without_rich_markup():
     assert not custom_handler.records
     catalog.save("dummy", data)
     assert custom_handler.records
+
     for record in custom_handler.records:
         assert "[dark_orange]" not in record.message

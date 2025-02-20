@@ -23,6 +23,7 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
+from kedro.framework.session.catalog import CatalogCommandsMixin
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import _find_kedro_project
@@ -78,7 +79,7 @@ class KedroSessionError(Exception):
     pass
 
 
-class KedroSession:
+class KedroSession(CatalogCommandsMixin):
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
     a context manager to construct a new KedroSession with session data
@@ -118,6 +119,7 @@ class KedroSession:
         self._package_name = package_name
         self._store = self._init_store()
         self._run_called = False
+        self._context = None
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
@@ -127,6 +129,11 @@ class KedroSession:
         self._conf_source = conf_source or str(
             self._project_path / settings.CONF_SOURCE
         )
+
+    @property
+    def context(self) -> KedroContext:
+        self._context = self._context or self.load_context()
+        return self._context
 
     @classmethod
     def create(
@@ -233,6 +240,8 @@ class KedroSession:
 
     def load_context(self) -> KedroContext:
         """An instance of the project context."""
+        if self._context:
+            return self._context
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
         config_loader = self._get_config_loader()
@@ -246,6 +255,8 @@ class KedroSession:
             hook_manager=self._hook_manager,
         )
         self._hook_manager.hook.after_context_created(context=context)
+
+        self._context = context
 
         return context  # type: ignore[no-any-return]
 
@@ -338,7 +349,6 @@ class KedroSession:
         session_id = self.store["session_id"]
         save_version = session_id
         extra_params = self.store.get("extra_params") or {}
-        context = self.load_context()
 
         name = pipeline_name or "__default__"
 
@@ -364,7 +374,7 @@ class KedroSession:
         record_data = {
             "session_id": session_id,
             "project_path": self._project_path.as_posix(),
-            "env": context.env,
+            "env": self.context.env,
             "kedro_version": kedro_version,
             "tags": tags,
             "from_nodes": from_nodes,
@@ -379,7 +389,7 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(
+        catalog = self.context.get_catalog(
             save_version=save_version,
             load_versions=load_versions,
         )

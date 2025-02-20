@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from typing import Any
 
 from kedro.framework.context import KedroContext
@@ -24,14 +23,9 @@ class CatalogCommandsMixin:
             )
             return {}
 
-        # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475
-        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
-        catalog.config_resolver.add_runtime_patterns(runtime_pattern)
-
-        # title = "Datasets in '{}' pipeline"
-        # not_mentioned = "Datasets not mentioned in pipeline"
-        # mentioned = "Datasets mentioned in pipeline"
-        # factories = "Datasets generated from factories"
+        not_mentioned = "Datasets not mentioned in pipeline"
+        mentioned = "Datasets mentioned in pipeline"
+        factories = "Datasets generated from factories"
 
         target_pipelines = pipelines or _pipelines.keys()
 
@@ -46,39 +40,35 @@ class CatalogCommandsMixin:
                     f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
                 )
 
-            catalog_ds = set(catalog.keys())
-            # unused_ds = catalog_ds - pipeline_ds
-            default_ds = pipeline_ds - catalog_ds
-            # used_ds = catalog_ds - unused_ds
+            # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475
+            runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
+            catalog.config_resolver.add_runtime_patterns(runtime_pattern)
 
-            # resolve any factory datasets in the pipeline
-            factory_ds_by_type = defaultdict(list)
+            catalog_ds = set(catalog.keys())
+            unused_ds = catalog_ds - pipeline_ds
+            default_ds = pipeline_ds - catalog_ds
+            used_ds = catalog_ds - unused_ds
+
+            catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
+            patterns_ds = set()
 
             for ds_name in default_ds:
                 if catalog.config_resolver.match_pattern(ds_name):
-                    ds_config = catalog.config_resolver.resolve_pattern(ds_name)
-                    factory_ds_by_type[ds_config.get("type", "MemoryDataset")].append(
-                        ds_name
-                    )
+                    patterns_ds.add(ds_name)
 
-            # default_ds = default_ds - set(
-            #     chain.from_iterable(factory_ds_by_type.values())
-            # )
+            default_ds -= patterns_ds
+            used_ds.update(default_ds)
 
-        #     unused_by_type = _map_type_to_datasets(unused_ds, datasets_meta)
-        #     used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
-        #
-        #     if default_ds:
-        #         used_by_type["MemoryDataset"].extend(default_ds)
-        #
-        #     data = (
-        #         (mentioned, dict(used_by_type)),
-        #         (factories, dict(factory_ds_by_type)),
-        #         (not_mentioned, dict(unused_by_type)),
-        #     )
-        #     result[title.format(pipe)] = {key: value for key, value in data if value}
-        #
-        # catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
+            used_ds_by_type = _group_ds_by_type(used_ds, catalog)
+            patterns_ds_by_type = _group_ds_by_type(patterns_ds, catalog)
+            unused_ds_by_type = _group_ds_by_type(unused_ds, catalog)
+
+            data = (
+                (mentioned, used_ds_by_type),
+                (factories, patterns_ds_by_type),
+                (not_mentioned, unused_ds_by_type),
+            )
+            result[pipe] = {key: value for key, value in data if value}
 
         return result
 
@@ -140,3 +130,7 @@ class CatalogCommandsMixin:
             catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
 
         return explicit_datasets
+
+
+def _group_ds_by_type(datasets, catalog) -> dict[str, dict]:
+    pass

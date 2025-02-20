@@ -1,9 +1,11 @@
 import logging
+from collections import defaultdict
 from typing import Any
 
 from kedro.framework.context import KedroContext
 from kedro.framework.project import pipelines as _pipelines
 from kedro.io import KedroDataCatalog
+from kedro.io.core import TYPE_KEY
 
 
 class CatalogCommandsMixin:
@@ -132,5 +134,18 @@ class CatalogCommandsMixin:
         return explicit_datasets
 
 
-def _group_ds_by_type(datasets, catalog) -> dict[str, dict]:
-    pass
+def _group_ds_by_type(datasets: set[str], catalog: KedroDataCatalog) -> dict[str, list]:
+    mapping = defaultdict(list)
+    for ds_name in datasets:
+        # TODO: when breaking change replace with is_parameter() from kedro/io/core.py
+        if ds_name.startswith("params:") or ds_name == "parameters":
+            continue
+
+        ds = catalog[ds_name]
+        unresolved_config, _ = catalog.config_resolver.unresolve_credentials(
+            ds_name, ds.to_config()
+        )
+        ds_type = unresolved_config.get(TYPE_KEY)
+        mapping[ds_type].append({ds_name: unresolved_config})
+
+    return mapping

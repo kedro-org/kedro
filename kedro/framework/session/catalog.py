@@ -1,11 +1,9 @@
 import logging
-from collections import defaultdict
 from typing import Any
 
 from kedro.framework.context import KedroContext
 from kedro.framework.project import pipelines as _pipelines
 from kedro.io import KedroDataCatalog
-from kedro.io.core import TYPE_KEY
 
 
 class CatalogCommandsMixin:
@@ -25,6 +23,9 @@ class CatalogCommandsMixin:
             )
             return {}
 
+        # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475
+        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
+
         not_mentioned = "Datasets not mentioned in pipeline"
         mentioned = "Datasets mentioned in pipeline"
         factories = "Datasets generated from factories"
@@ -42,16 +43,11 @@ class CatalogCommandsMixin:
                     f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
                 )
 
-            # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475
-            runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
-            catalog.config_resolver.add_runtime_patterns(runtime_pattern)
-
             catalog_ds = set(catalog.keys())
             unused_ds = catalog_ds - pipeline_ds
             default_ds = pipeline_ds - catalog_ds
             used_ds = catalog_ds - unused_ds
 
-            catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
             patterns_ds = set()
 
             for ds_name in default_ds:
@@ -61,9 +57,13 @@ class CatalogCommandsMixin:
             default_ds -= patterns_ds
             used_ds.update(default_ds)
 
+            catalog.config_resolver.add_runtime_patterns(runtime_pattern)
+
             used_ds_by_type = _group_ds_by_type(used_ds, catalog)
             patterns_ds_by_type = _group_ds_by_type(patterns_ds, catalog)
             unused_ds_by_type = _group_ds_by_type(unused_ds, catalog)
+
+            catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
 
             data = (
                 (mentioned, used_ds_by_type),
@@ -134,8 +134,8 @@ class CatalogCommandsMixin:
         return explicit_datasets
 
 
-def _group_ds_by_type(datasets: set[str], catalog: KedroDataCatalog) -> dict[str, list]:
-    mapping = defaultdict(list)
+def _group_ds_by_type(datasets: set[str], catalog: KedroDataCatalog) -> dict[str, dict]:
+    mapping = {}
     for ds_name in datasets:
         # TODO: when breaking change replace with is_parameter() from kedro/io/core.py
         if ds_name.startswith("params:") or ds_name == "parameters":
@@ -145,7 +145,6 @@ def _group_ds_by_type(datasets: set[str], catalog: KedroDataCatalog) -> dict[str
         unresolved_config, _ = catalog.config_resolver.unresolve_credentials(
             ds_name, ds.to_config()
         )
-        ds_type = unresolved_config.get(TYPE_KEY)
-        mapping[ds_type].append({ds_name: unresolved_config})
+        mapping[ds_name] = unresolved_config
 
     return mapping

@@ -50,14 +50,13 @@ kedro run --to-outputs=model_input_table
 To inspect the updated dataset and logs:
 ```bash
 tree data/03_primary
->> data/03_primary
+data/03_primary
 └── model_input_table
     ├── _delta_log
     │   ├── 00000000000000000000.json
-    │   ├── 00000000000000000001.json
-    ├── part-00001-73cbb76d-88e8-4a58-a8f1-4a87b5283203-c000.snappy.parquet
-    ├── part-00001-7498e001-81e7-4098-b651-8ae4f6e844c9-c000.snappy.parquet
-    └── part-00001-9b79408f-b5cb-4400-9f26-103ab28da96c-c000.snappy.parquet
+    │   └── 00000000000000000001.json
+    ├── part-00001-0d522679-916c-4283-ad06-466c27025bcf-c000.snappy.parquet
+    └── part-00001-42733095-97f4-46ef-bdfd-3afef70ee9d8-c000.snappy.parquet
 ```
 ### Load a specific version of the dataset
 To load a specific version of the dataset, you can specify the version number in the `load_args` parameter in the catalog entry:
@@ -81,13 +80,13 @@ kedro ipython
 You can load the Delta table using the `catalog.load` method and inspect the dataset:
 
 ```python
-model_input_table = catalog.datasets['model_input_table']
+In [1]: model_input_table = catalog.datasets['model_input_table']
 ```
 You can inspect the history of the Delta table by accessing the `history` attribute:
 ```python
->> model_input_table.history
-
-[Out]: [
+In [2]: model_input_table.history
+Out [2]:
+[
     {
         'timestamp': 1739891304488,
         'operation': 'WRITE',
@@ -122,6 +121,88 @@ You can inspect the history of the Delta table by accessing the `history` attrib
 You can also inspect the loaded version of the table with the following method:
 
 ```python
->> model_input_table.get_loaded_version()
-[Out]: 1
+In [3]: model_input_table.get_loaded_version()
+Out [3]: 1
+```
+
+## Using Delta tables with Spark
+
+You can also use [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html) to interact with Delta tables in your Kedro project. To set up Delta tables with Spark, consult the [documentation on the integration of Spark with Kedro](./pyspark_integration.md#spark-and-delta-lake-interaction).
+
+We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding):
+
+* To create a Delta table, use a `spark.SparkDataset` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table or overwrite it.
+* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataset` and perform the write operations within the node function.
+
+As a result, we end up with a catalog that looks like this:
+
+```yaml
+temperature:
+  type: spark.SparkDataset
+  filepath: data/01_raw/data.csv
+  file_format: "csv"
+  load_args:
+    header: True
+    inferSchema: True
+  save_args:
+    sep: '|'
+    header: True
+
+weather@spark:
+  type: spark.SparkDataset
+  filepath: s3a://my_bucket/03_primary/weather
+  file_format: "delta"
+  save_args:
+    mode: "overwrite"
+    versionAsOf: 0
+
+weather@delta:
+  type: spark.DeltaTableDataset
+  filepath: s3a://my_bucket/03_primary/weather
+```
+
+The `DeltaTableDataset` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
+
+
+```{note}
+If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, via the DeltaTable API.
+```
+
+```python
+pipeline(
+    [
+        node(
+            func=process_barometer_data, inputs="temperature", outputs="weather@spark"
+        ),
+        node(
+            func=update_meterological_state,
+            inputs="weather@delta",
+            outputs="first_operation_complete",
+        ),
+        node(
+            func=estimate_weather_trend,
+            inputs=["first_operation_complete", "weather@delta"],
+            outputs="second_operation_complete",
+        ),
+    ]
+)
+```
+
+`first_operation_complete` is a `MemoryDataset` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node can simply not return anything:
+
+```python
+pipeline(
+    [
+        node(func=..., inputs="temperature", outputs="weather@spark"),
+        node(func=..., inputs="weather@delta", outputs=None),
+    ]
+)
+```
+
+The following diagram is the visual representation of the workflow explained above:
+
+![Spark and Delta Lake workflow](../meta/images/spark_delta_workflow.png)
+
+```{note}
+This pattern of creating "dummy" datasets to preserve the data flow also applies to other "out of DAG" execution operations such as SQL operations within a node.
 ```

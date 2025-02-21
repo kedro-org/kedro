@@ -66,33 +66,33 @@ When we put these steps together, we have the following test:
 import pandas as pd
 from spaceflights.pipelines.data_science.nodes import split_data
 
-    def test_split_data():
-        # Arrange
-        dummy_data = pd.DataFrame(
-            {
-                "engines": [1, 2, 3],
-                "crew": [4, 5, 6],
-                "passenger_capacity": [5, 6, 7],
-                "price": [120, 290, 30],
-            }
-        )
-
-        dummy_parameters = {
-            "model_options": {
-                "test_size": 0.2,
-                "random_state": 3,
-                "features": ["engines", "passenger_capacity", "crew"],
-            }
+def test_split_data():
+    # Arrange
+    dummy_data = pd.DataFrame(
+        {
+            "engines": [1, 2, 3],
+            "crew": [4, 5, 6],
+            "passenger_capacity": [5, 6, 7],
+            "price": [120, 290, 30],
         }
+    )
 
-        # Act
-        X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters["model_options"])
+    dummy_parameters = {
+        "model_options": {
+            "test_size": 0.2,
+            "random_state": 3,
+            "features": ["engines", "passenger_capacity", "crew"],
+        }
+    }
 
-        # Assert
-        assert len(X_train) == 2
-        assert len(y_train) == 2
-        assert len(X_test) == 1
-        assert len(y_test) == 1
+    # Act
+    X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters["model_options"])
+
+    # Assert
+    assert len(X_train) == 2
+    assert len(y_train) == 2
+    assert len(X_test) == 1
+    assert len(y_test) == 1
 ```
 
 </details>
@@ -112,31 +112,31 @@ Using the same steps as above, we can write the following test to validate an er
 import pandas as pd
 from spaceflights.pipelines.data_science.nodes import split_data
 
-    def test_split_data_missing_price():
-        # Arrange
-        dummy_data = pd.DataFrame(
-            {
-                "engines": [1, 2, 3],
-                "crew": [4, 5, 6],
-                "passenger_capacity": [5, 6, 7],
-                # Note the missing price data
-            }
-        )
-
-        dummy_parameters = {
-            "model_options": {
-                "test_size": 0.2,
-                "random_state": 3,
-                "features": ["engines", "passenger_capacity", "crew"],
-            }
+def test_split_data_missing_price():
+    # Arrange
+    dummy_data = pd.DataFrame(
+        {
+            "engines": [1, 2, 3],
+            "crew": [4, 5, 6],
+            "passenger_capacity": [5, 6, 7],
+            # Note the missing price data
         }
+    )
 
-        with pytest.raises(KeyError) as e_info:
-            # Act
-            X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters["model_options"])
+    dummy_parameters = {
+        "model_options": {
+            "test_size": 0.2,
+            "random_state": 3,
+            "features": ["engines", "passenger_capacity", "crew"],
+        }
+    }
 
-        # Assert
-        assert "price" in str(e_info.value) # checks that the error is about the missing price data
+    with pytest.raises(KeyError) as e_info:
+        # Act
+        X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters["model_options"])
+
+    # Assert
+    assert "price" in str(e_info.value) # checks that the error is about the missing price data
 ```
 </details>
 
@@ -205,46 +205,46 @@ from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
 
-    def test_data_science_pipeline(caplog):    # Note: caplog is passed as an argument
-        # Arrange pipeline
-        pipeline = create_ds_pipeline()
+def test_data_science_pipeline(caplog):    # Note: caplog is passed as an argument
+    # Arrange pipeline
+    pipeline = create_ds_pipeline()
 
-        # Arrange data catalog
-        catalog = DataCatalog()
+    # Arrange data catalog
+    catalog = DataCatalog()
 
-        dummy_data = pd.DataFrame(
-            {
-                "engines": [1, 2, 3],
-                "crew": [4, 5, 6],
-                "passenger_capacity": [5, 6, 7],
-                "price": [120, 290, 30],
-            }
-        )
-
-        duummy_parameters = {
-            "model_options": {
-                "test_size": 0.2,
-                "random_state": 3,
-                "features": ["engines", "passenger_capacity", "crew"],
-            }
+    dummy_data = pd.DataFrame(
+        {
+            "engines": [1, 2, 3],
+            "crew": [4, 5, 6],
+            "passenger_capacity": [5, 6, 7],
+            "price": [120, 290, 30],
         }
+    )
 
-        catalog.add_feed_dict(
-            {
-                "model_input_table" : dummy_data,
-                "params:model_options": dummy_parameters["model_options"],
-            }
-        )
+    duummy_parameters = {
+        "model_options": {
+            "test_size": 0.2,
+            "random_state": 3,
+            "features": ["engines", "passenger_capacity", "crew"],
+        }
+    }
 
-        # Arrange the log testing setup
-        caplog.set_level(logging.DEBUG, logger="kedro") # Ensure all logs produced by Kedro are captured
-        successful_run_msg = "Pipeline execution completed successfully."
+    catalog.add_feed_dict(
+        {
+            "model_input_table" : dummy_data,
+            "params:model_options": dummy_parameters["model_options"],
+        }
+    )
 
-        # Act
-        SequentialRunner().run(pipeline, catalog)
+    # Arrange the log testing setup
+    caplog.set_level(logging.DEBUG, logger="kedro") # Ensure all logs produced by Kedro are captured
+    successful_run_msg = "Pipeline execution completed successfully."
 
-        # Assert
-        assert successful_run_msg in caplog.text
+    # Act
+    SequentialRunner().run(pipeline, catalog)
+
+    # Assert
+    assert successful_run_msg in caplog.text
 
 ```
 
@@ -321,16 +321,16 @@ def test_split_data(dummy_data, dummy_parameters):
 In the test `test_data_science_pipeline` we test the data science pipeline, as currently defined, can be run successfully. However, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../nodes_and_pipelines/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
 
 ```python
-    def test_data_science_pipeline(self):
-        # Arrange pipeline
-        pipeline = create_pipeline().from_nodes("split_data_node").to_nodes("evaluate_model_node")
-        ...
+def test_data_science_pipeline(self):
+    # Arrange pipeline
+    pipeline = create_pipeline().from_nodes("split_data_node").to_nodes("evaluate_model_node")
+    ...
 ```
 
 This ensures that the test will still perform as designed, even with the addition of more nodes to the pipeline.
 
 
-After incorporating these testing practices, our test file `test_data_science.py` becomes:
+After incorporating these testing practices, our test file `test_data_science_pipeline.py` becomes:
 
 <details>
 
@@ -428,7 +428,7 @@ To run your tests, run `pytest` from within your project's root directory.
 
 ```bash
 cd <project_root>
-pytest tests/pipelines/test_data_science.py
+pytest tests/pipelines/test_data_science_pipeline.py
 ```
 
 You should see the following output in your shell.
@@ -438,9 +438,9 @@ You should see the following output in your shell.
 ...
 collected 2 items
 
-tests/pipelines/test_data_science.py ..                                                  [100%]
+tests/pipelines/test_data_science_pipeline.py ..                                                  [100%]
 
 ============================== 2 passed in 4.38s ===============================
 ```
 
-This output indicates that all tests ran successfully in the file `tests/pipelines/test_data_science.py`.
+This output indicates that all tests ran successfully in the file `tests/pipelines/test_data_science_pipeline.py`.

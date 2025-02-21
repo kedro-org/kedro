@@ -59,7 +59,7 @@ tree data/03_primary
     ├── part-00001-7498e001-81e7-4098-b651-8ae4f6e844c9-c000.snappy.parquet
     └── part-00001-9b79408f-b5cb-4400-9f26-103ab28da96c-c000.snappy.parquet
 ```
-#### Load a specific version of the dataset
+### Load a specific version of the dataset
 To load a specific version of the dataset, you can specify the version number in the `load_args` parameter in the catalog entry:
 
 ```yaml

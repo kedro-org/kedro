@@ -86,7 +86,6 @@ Welcome to Kedro's award-winning documentation!
    :maxdepth: 2
    :caption: Integrations
 
-   integrations/index.md
    integrations/pyspark_integration.md
    integrations/mlflow.md
    integrations/kedro_dvc_versioning.md

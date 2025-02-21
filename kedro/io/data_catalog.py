@@ -165,7 +165,7 @@ class DataCatalog:
         warnings.warn(
             "`DataCatalog` has been deprecated and will be replaced by an improved alternative, `KedroDataCatalog`, in Kedro 1.0.0."
             "After this change, the `DataCatalog` name will persist, but its functionality will align with `KedroDataCatalog`. "
-            "For more details, refer to the documentation:: https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
+            "For more details, refer to the documentation: https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
             KedroDeprecationWarning,
         )
         self._config_resolver = config_resolver or CatalogConfigResolver()

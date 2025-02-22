@@ -2,16 +2,16 @@
 
 `Dataproc serverless` lets you run Spark workloads without requiring you to provision and manage your own Dataproc cluster. An advantage over `Dataproc compute engine` is that `Dataproc serverless` supports custom containers allowing you to package your dependencies at build time. Refer to [the Dataproc serverless documentation](https://cloud.google.com/dataproc-serverless/docs/overview#s8s-compared) for the official comparison between Dataproc serverless and compute engine.
 
-The guide details kedro pipeline deployment steps for `Dataproc serverless`.
+This guide describes the steps needed to deploy a Kedro pipeline with `Dataproc Serverless`.
 
 ## Overview
 
-The below diagram details the dataproc serverless dev and prod deployment workflows. 
+The below sections and diagrams detail the dataproc serverless dev and prod deployment workflows. 
 
 
 ### DEV deployment (and experimentation)
 
-The following are the steps:
+The following steps are needed to do a DEV deployment on Dataproc Serverless:
 
 1. **User build**: Each developer branches out from develop, pulls the latest develop dataproc image, and builds their own custom docker image (if required). Note the following:
   - `libraries` - Packaged: This includes any python dependencies + any other libraries
@@ -34,11 +34,11 @@ The following are the steps:
 
 ### PROD deployment
 
-The following are the steps:
+The following steps are needed to do a PROD deployment on Dataproc Serverless:
 
 1. **Cut a release from develop**: A release branch is cut from the `develop` branch as `release/v0.2.0`
 2. **Prepare release**: Minor fixes, final readiness and release notes are added to prepare the release.
-3. **Merge into main**: After all checks passes and necessary approvals, the release branch is merged into main, and the commit is tagged with the version
+3. **Merge into main**: After all checks pass and necessary approvals are received, the release branch is merged into main, and the commit is tagged with the version
 4. **Deploy docker image**: The docker image is built with release tag version `v0.2.0` and pushed to prod artifact registry. Note the following:
   - `libraries` - Packaged
   - `artifacts` - Packaged
@@ -62,7 +62,7 @@ The following are the steps:
 NOTE:
 
 > 1. The service account creation method below assigns all permissions needed for this walkthrough in one service account. 
-> 2. Different teired environments may have their own GCP Projects.
+> 2. Different tiered environments may have their own GCP Projects.
 > 3. This does not indicate best practice, and you should create multiple service accounts with fine grained permissions to services and resources in different tiered environments.
 
 Create service account:
@@ -159,7 +159,7 @@ dataproc-run-output-{REGION}-{UID}-prod/
 ```
 
 
-#### Authorize with service account
+#### Authorise with service account
 
 
 ```bash
@@ -317,7 +317,7 @@ gcloud auth configure-docker ${ARTIFACT_REGISTRY}
 `deployment/dataproc/serverless/build_push_docker.sh`
 
 - This script builds and pushes the docker image for user dev workflows by tagging each custom build with the branch name (or a custom tag).
-- The developer can experiment with any customizations to the docker image in their feature branches.
+- The developer can experiment with any customisations to the docker image in their feature branches.
 - It also allows to build and push the docker image for prod workflows by tagging it with the release version.
 
 ```bash

@@ -1,6 +1,6 @@
 # GCP Dataproc
 
-`Dataproc serverless` lets you run Spark workloads without requiring you to provision and manage your own Dataproc cluster. An advantage over `Dataproc compute engine` is that `Dataproc serverless` supports custom containers allowing you package your dependencies at build time. Refer [here](https://cloud.google.com/dataproc-serverless/docs/overview#s8s-compared) for the official comparison between Dataproc serverless and compute engine.
+`Dataproc serverless` lets you run Spark workloads without requiring you to provision and manage your own Dataproc cluster. An advantage over `Dataproc compute engine` is that `Dataproc serverless` supports custom containers allowing you to package your dependencies at build time. Refer to [the Dataproc serverless documentation](https://cloud.google.com/dataproc-serverless/docs/overview#s8s-compared) for the official comparison between Dataproc serverless and compute engine.
 
 The guide details kedro pipeline deployment steps for `Dataproc serverless`.
 

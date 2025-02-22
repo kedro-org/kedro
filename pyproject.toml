@@ -55,7 +55,8 @@ dynamic = ["readme", "version"]
 test = [
     "behave==1.2.6",
     "coverage[toml]",
-    "import-linter==2.1",
+    "detect-secrets~=1.5.0",
+    "import-linter==2.2",
     "ipylab>=1.0.0",
     "ipython~=8.10",
     "jupyterlab_server>=2.11.1",
@@ -70,9 +71,8 @@ test = [
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest>=7.2,<9.0",
-    "s3fs>=2021.4, <2025.1",  # Upper bound set arbitrarily, to be reassessed in late 2024
+    "s3fs>=2021.4, <2025.3",  # Upper bound set arbitrarily, to be reassessed in late 2024
     "requests_mock",
-    "trufflehog~=2.1",
     # mypy related dependencies
     "pandas-stubs",
     "types-PyYAML",
@@ -83,7 +83,7 @@ test = [
 docs = [
     "ipykernel>=5.3, <7.0",
     "Jinja2<3.2.0",
-    "kedro-sphinx-theme==2024.10.2",
+    "kedro-sphinx-theme==2024.10.3",
     "sphinx-notfound-page!=1.0.3",  # Required by kedro-sphinx-theme. 1.0.3 results in `AttributeError: 'tuple' object has no attribute 'default'`.
 ]
 jupyter = [
@@ -178,7 +178,8 @@ layers = [
 ]
 ignore_imports = [
     "kedro.runner.task -> kedro.framework.project",
-    "kedro.framework.hooks.specs -> kedro.framework.context"
+    "kedro.framework.hooks.specs -> kedro.framework.context",
+    "kedro -> kedro.ipython"
 ]
 
 [[tool.importlinter.contracts]]
@@ -187,6 +188,9 @@ type = "independence"
 modules = [
     "kedro.pipeline",
     "kedro.io"
+]
+ignore_imports = [
+    "kedro -> kedro.ipython"
 ]
 
 [[tool.importlinter.contracts]]

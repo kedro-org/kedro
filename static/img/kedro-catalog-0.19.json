@@ -1,0 +1,101 @@
+{
+    "type": "object",
+    "patternProperties": {
+      "^[a-z0-9-_]+$": {
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CachedDataset",
+              "MemoryDataset",
+              "LambdaDataset"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "CachedDataset"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "dataset"
+              ],
+              "properties": {
+                "dataset": {
+                  "pattern": ".*",
+                  "description": "A Kedro Dataset object or a dictionary to cache."
+                },
+                "copy_mode": {
+                  "type": "string",
+                  "description": "The copy mode used to copy the data. Possible\nvalues are: \"deepcopy\", \"copy\" and \"assign\". If not\nprovided, it is inferred based on the data type."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "MemoryDataset"
+                }
+              }
+            },
+            "then": {
+              "required": [],
+              "properties": {
+                "data": {
+                  "pattern": ".*",
+                  "description": "Python object containing the data."
+                },
+                "copy_mode": {
+                  "type": "string",
+                  "description": "The copy mode used to copy the data. Possible\nvalues are: \"deepcopy\", \"copy\" and \"assign\". If not\nprovided, it is inferred based on the data type."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "LambdaDataset"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "load",
+                "save"
+              ],
+              "properties": {
+                "load": {
+                  "pattern": ".*",
+                  "description": "Method to load data from a data set."
+                },
+                "save": {
+                  "pattern": ".*",
+                  "description": "Method to save data to a data set."
+                },
+                "exists": {
+                  "pattern": ".*",
+                  "description": "Method to check whether output data already exists."
+                },
+                "release": {
+                  "pattern": ".*",
+                  "description": "Method to release any cached information."
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }

@@ -40,6 +40,10 @@ This typing is optional however, and defaults to `Any` type.
 
 The `_EPHEMERAL` boolean attribute in `AbstractDataset` indicates if a dataset is persistent. For example, in the case of {py:class}`~kedro.io.MemoryDataset`, which is not persistent, it is set to True. By default, `_EPHEMERAL` is set to False.
 
+```{note}
+The parameter to specify the location of the data file/folder must be called either `filename`, `filepath`, or `path` in the constructor function of the custom dataset class to comply with the Kedro convention.
+```
+
 Here is an example skeleton for `ImageDataset`:
 
 <details>
@@ -599,6 +603,6 @@ kedro-plugins/kedro-datasets/kedro_datasets/image
 There are two special considerations when contributing a dataset:
 
    1. Add the dataset to `kedro_datasets.rst` so it shows up in the API documentation.
-   2. Add the dataset to `static/jsonschema/kedro-catalog-X.json` for IDE validation.
+   2. Add the dataset to `kedro-plugins/kedro-datasets/static/jsonschema/kedro-catalog-X.json` for IDE validation.
 
 ```

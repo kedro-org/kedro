@@ -47,9 +47,10 @@ def conflicting_feed_dict():
 
 @pytest.fixture
 def multi_catalog():
-    csv = CSVDataset(filepath="abc.csv")
+    csv_1 = CSVDataset(filepath="abc.csv")
+    csv_2 = CSVDataset(filepath="def.csv")
     parq = ParquetDataset(filepath="xyz.parq")
-    return KedroDataCatalog({"abc": csv, "xyz": parq})
+    return KedroDataCatalog({"abc": csv_1, "def": csv_2, "xyz": parq})
 
 
 @pytest.fixture
@@ -159,8 +160,9 @@ class TestKedroDataCatalog:
         [
             ("^a", ["abc"]),
             ("a|x", ["abc", "xyz"]),
-            ("^(?!(a|x))", []),
-            ("def", []),
+            ("^(?!(a|d|x))", []),
+            ("def", ["def"]),
+            ("ghi", []),
             ("", []),
         ],
     )
@@ -174,6 +176,63 @@ class TestKedroDataCatalog:
         pattern = f"Invalid regular expression provided: '{escaped_regex}'"
         with pytest.raises(SyntaxError, match=pattern):
             multi_catalog.list("((")
+
+    @pytest.mark.parametrize(
+        "name_regex,type_regex,expected",
+        [
+            (re.compile("^a"), None, ["abc"]),
+            (re.compile("^A"), None, []),
+            (re.compile("^A", flags=re.IGNORECASE), None, ["abc"]),
+            ("a|x", None, ["abc", "xyz"]),
+            ("a|d|x", None, ["abc", "def", "xyz"]),
+            ("a|d|x", "CSVDataset", ["abc", "def"]),
+            ("a|d|x", "kedro_datasets", ["abc", "def", "xyz"]),
+            (None, "ParquetDataset", ["xyz"]),
+            ("^(?!(a|d|x))", None, []),
+            ("def", None, ["def"]),
+            (None, None, ["abc", "def", "xyz"]),
+            ("a|d|x", "no_such_dataset", []),
+        ],
+    )
+    def test_catalog_filter_regex(
+        self, multi_catalog, name_regex, type_regex, expected
+    ):
+        """Test that regex patterns filter materialized datasets accordingly"""
+        assert (
+            multi_catalog.filter(name_regex=name_regex, type_regex=type_regex)
+            == expected
+        )
+
+    @pytest.mark.parametrize(
+        "name_regex,type_regex,by_type,expected",
+        [
+            ("b|m", None, None, ["boats", "materialized"]),
+            (None, None, None, ["boats", "cars", "materialized"]),
+            (None, "CSVDataset", None, ["boats", "cars"]),
+            (None, "ParquetDataset", None, ["materialized"]),
+            ("b|c", "ParquetDataset", None, []),
+            (None, None, ParquetDataset, ["materialized"]),
+            (
+                None,
+                None,
+                [CSVDataset, ParquetDataset],
+                ["boats", "cars", "materialized"],
+            ),
+            (None, "ParquetDataset", [CSVDataset, ParquetDataset], ["materialized"]),
+            ("b|m", None, [CSVDataset, ParquetDataset], ["boats", "materialized"]),
+        ],
+    )
+    def test_from_config_catalog_filter_regex(
+        self, data_catalog_from_config, name_regex, type_regex, by_type, expected
+    ):
+        """Test that regex patterns filter lazy and materialized datasets accordingly"""
+        data_catalog_from_config["materialized"] = ParquetDataset(filepath="xyz.parq")
+        assert (
+            data_catalog_from_config.filter(
+                name_regex=name_regex, type_regex=type_regex, by_type=by_type
+            )
+            == expected
+        )
 
     def test_eq(self, multi_catalog, data_catalog):
         assert multi_catalog == multi_catalog.shallow_copy()
@@ -266,12 +325,14 @@ class TestKedroDataCatalog:
         assert isinstance(catalog["ds"], CSVDataset)
         assert isinstance(catalog["df"], MemoryDataset)
 
-    def test_repr(self, data_catalog):
-        assert data_catalog.__repr__() == str(data_catalog)
+    def test_repr(self, data_catalog_from_config):
+        assert data_catalog_from_config.__repr__() == str(data_catalog_from_config)
 
     def test_repr_no_type_found(self, data_catalog_from_config):
         del data_catalog_from_config._lazy_datasets["boats"].config["type"]
-        assert data_catalog_from_config.__repr__() == str(data_catalog_from_config)
+        pattern = "'type' is missing from dataset catalog configuration"
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            _ = str(data_catalog_from_config)
 
     def test_missing_keys_from_load_versions(self, correct_config):
         """Test load versions include keys missing in the catalog"""
@@ -291,9 +352,26 @@ class TestKedroDataCatalog:
         ds = data_catalog.get_dataset(match_pattern_ds)
         assert isinstance(ds, MemoryDataset)
 
+    def test_remove_runtime_pattern(self, data_catalog):
+        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
+        data_catalog.config_resolver.add_runtime_patterns(runtime_pattern)
+        match_pattern_ds = "match_pattern_ds"
+        assert match_pattern_ds in data_catalog
+
+        data_catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
+        assert match_pattern_ds not in data_catalog
+
     def test_release(self, data_catalog):
         """Test release is called without errors"""
         data_catalog.release("test")
+
+    def test_dataset_property(self, data_catalog_from_config):
+        """Test _dataset attribute returns the same result as dataset property"""
+        # Catalog includes only lazy dataset, we get boats dataset to materialize it
+        _ = data_catalog_from_config["boats"]
+        assert data_catalog_from_config.datasets == data_catalog_from_config._datasets
+        for ds_name in data_catalog_from_config.list():
+            assert ds_name in data_catalog_from_config._datasets
 
     class TestKedroDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):

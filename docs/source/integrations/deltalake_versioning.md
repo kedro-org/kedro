@@ -1,6 +1,6 @@
 # Data versioning with Delta Lake
 
-[Delta Lake](https://delta.io/) is an open-source storage layer that brings reliability to data lakes by adding a transactional storage layer on top of the data stored in cloud storage. It allows for ACID transactions, data versioning, and rollback capabilities. Delta table is the default table format in Databricks and is typically used for data lakes, where data is ingested either incrementally or in batch.
+[Delta Lake](https://delta.io/) is an open-source storage layer that brings reliability to data lakes by adding a transactional storage layer on top of the data stored in cloud storage. It allows for ACID transactions, data versioning, and rollback capabilities. Delta table is the default table format in Databricks, and it can be used outside of it as well. It is typically used for data lakes, where data is ingested either incrementally or in batch.
 
 This tutorial explores how to use Delta tables in your Kedro workflow and how to leverage the data versioning capabilities of Delta Lake.
 
@@ -38,7 +38,7 @@ model_input_table:
     mode: overwrite
 ```
 
-You can add `save_args` to the configuration to specify the mode of saving the Delta table. The `mode` parameter can "overwrite" or "append" depending on whether you want to overwrite the existing Delta table or append to it. You can also specify [additional saving options that are accepted by the `write_deltalake` function in the `delta-rs` library](https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables) which is used by `pandas.DeltaTableDataset` to interact with the Delta table format.
+You can add `save_args` to the configuration to specify the mode of saving the Delta table. The `mode` parameter can be "overwrite" or "append" depending on whether you want to overwrite the existing Delta table or append to it. You can also specify [additional saving options that are accepted by the `write_deltalake` function in the `delta-rs` library](https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables) which is used by `pandas.DeltaTableDataset` to interact with the Delta table format.
 
 When you run the Kedro project with `kedro run` command, the Delta table will be saved to the location specified in the `filepath` argument as a folder of `parquet` files. This folder also contains a `_delta_log` directory which stores the transaction log of the Delta table. The following runs of the pipeline will create new versions of the Delta table in the same location and new entries in the `_delta_log` directory. You can run the Kedro project with the following command to generate the `model_input_table` dataset:
 
@@ -53,7 +53,7 @@ kedro run --to-outputs=model_input_table
 ```
 To inspect the updated dataset and logs:
 ```bash
-tree data/03_primary
+$ tree data/03_primary
 data/03_primary
 └── model_input_table
     ├── _delta_log
@@ -167,7 +167,9 @@ weather@delta:
   filepath: s3a://my_bucket/03_primary/weather
 ```
 
-The `DeltaTableDataset` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
+```{note}
+The `DeltaTableDataset` does not support `save()` operation. Instead, pick the operation you want to perform (`DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`) and write it in your node code instead.
+```
 
 
 ```{note}

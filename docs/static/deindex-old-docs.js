@@ -1,3 +1,6 @@
+// Explanation from RTD on how this script works:
+// https://github.com/readthedocs/addons/pull/474#issuecomment-2615984387
+
 // Ensure the correct API version is set
 if (document.querySelector("meta[name='readthedocs-addons-api-version']") === null) {
     const meta = document.createElement("meta");

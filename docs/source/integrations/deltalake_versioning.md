@@ -38,7 +38,7 @@ model_input_table:
     mode: overwrite
 ```
 
-You can specify `save_args` to specify the mode of saving the Delta table. The `mode` parameter can "overwrite" or "append" depending on whether you want to overwrite the existing Delta table or append to it. You can also specify [additional saving options that are accepted by the `write_deltalake` function in the `delta-rs` library](https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables) which is used by `pandas.DeltaTableDataset` to interact with the Delta table format.
+You can add `save_args` to the configuration to specify the mode of saving the Delta table. The `mode` parameter can "overwrite" or "append" depending on whether you want to overwrite the existing Delta table or append to it. You can also specify [additional saving options that are accepted by the `write_deltalake` function in the `delta-rs` library](https://delta-io.github.io/delta-rs/python/api_reference.html#writing-deltatables) which is used by `pandas.DeltaTableDataset` to interact with the Delta table format.
 
 When you run the Kedro project with `kedro run` command, the Delta table will be saved to the location specified in the `filepath` argument as a folder of `parquet` files. This folder also contains a `_delta_log` directory which stores the transaction log of the Delta table. The following runs of the pipeline will create new versions of the Delta table in the same location and new entries in the `_delta_log` directory. You can run the Kedro project with the following command to generate the `model_input_table` dataset:
 
@@ -62,7 +62,9 @@ data/03_primary
     ├── part-00001-0d522679-916c-4283-ad06-466c27025bcf-c000.snappy.parquet
     └── part-00001-42733095-97f4-46ef-bdfd-3afef70ee9d8-c000.snappy.parquet
 ```
+
 ### Load a specific version of the dataset
+
 To load a specific version of the dataset, you can specify the version number in the `load_args` parameter in the catalog entry:
 
 ```yaml

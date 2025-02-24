@@ -63,7 +63,7 @@ data/03_primary
     └── part-00001-42733095-97f4-46ef-bdfd-3afef70ee9d8-c000.snappy.parquet
 ```
 
-### Load a specific version of the dataset
+### Load a specific version
 
 To load a specific version of the dataset, you can specify the version number in the `load_args` parameter in the catalog entry:
 

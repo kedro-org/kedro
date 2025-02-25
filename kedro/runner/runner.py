@@ -188,9 +188,8 @@ class AbstractRunner(ABC):
 
         return self.run(to_rerun, catalog, hook_manager)
 
-    @abstractmethod  # pragma: no cover
     def _get_executor(self, max_workers: int) -> Executor | None:
-        """Abstract method to provide the correct executor (e.g., ThreadPoolExecutor, ProcessPoolExecutor or None if running sequentially)."""
+        """Method to provide the correct executor (e.g., ThreadPoolExecutor, ProcessPoolExecutor)."""
         pass
 
     @abstractmethod  # pragma: no cover

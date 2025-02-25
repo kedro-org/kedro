@@ -47,9 +47,6 @@ class SequentialRunner(AbstractRunner):
             is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )
 
-    def _get_executor(self, max_workers: int) -> None:
-        pass
-
     def _run(
         self,
         pipeline: Pipeline,

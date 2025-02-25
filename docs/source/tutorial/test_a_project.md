@@ -443,4 +443,4 @@ tests/pipelines/test_data_science_pipeline.py ..                                
 ============================== 2 passed in 4.38s ===============================
 ```
 
-This output indicates that all tests ran successfully in the file `tests/pipelines/test_data_science_pipeline.py`.
+This output indicates that all tests ran without errors in the file `tests/pipelines/test_data_science_pipeline.py`.

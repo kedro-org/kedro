@@ -48,7 +48,7 @@ class SequentialRunner(AbstractRunner):
         )
 
     def _get_executor(self, max_workers: int) -> None:
-        return None
+        pass
 
     def _run(
         self,

@@ -228,7 +228,7 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
     if selected_tools is not None:
         tools = re.sub(r"\s", "", selected_tools).split(",")
         for tool in tools:
-            if tool is "viz":
+            if tool == "viz":
                 click.secho(
                     "Kedro Viz is now automatically included in the project. Please remove 'viz' from your setup.",
                     fg="red",

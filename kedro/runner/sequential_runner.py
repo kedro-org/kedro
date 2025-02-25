@@ -9,8 +9,8 @@ from collections import Counter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
-from kedro.runner.task import Task
 from kedro.runner.runner import AbstractRunner
+from kedro.runner.task import Task
 
 if TYPE_CHECKING:
     from pluggy import PluginManager

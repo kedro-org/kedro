@@ -56,6 +56,7 @@ We also have legacy documentation pages for the following deployment targets, bu
 
 single_machine
 distributed
+nodes_grouping
 airflow
 amazon_sagemaker
 amazon_emr_serverless

@@ -60,14 +60,14 @@ DEFAULT_SAVE_ARGS = {"mode": "overwrite"}
 
 class PyIcebergDataset(AbstractDataset):
     def __init__(
-            self,
-            catalog,
-            namespace,
-            table_name,
-            table_type="pandas",
-            load_args=DEFAULT_LOAD_ARGS,
-            scan_args=None,
-            save_args=DEFAULT_SAVE_ARGS,
+        self,
+        catalog,
+        namespace,
+        table_name,
+        table_type="pandas",
+        load_args=DEFAULT_LOAD_ARGS,
+        scan_args=None,
+        save_args=DEFAULT_SAVE_ARGS,
     ):
         self.table_name = table_name
         self.namespace = namespace
@@ -129,6 +129,7 @@ This dataset allows you to load Iceberg tables as `pandas`, `arrow`, `duckdb`, o
 You can also update the code to extend the functionality of the dataset to support more features of Iceberg tables. Refer to the [Iceberg API documentation](https://py.iceberg.apache.org/api/) to see what you can do with the `Table` object.
 
 ## Using Iceberg tables in the catalog
+## Using Iceberg tables in the catalog
 
 ### Save the dataset as an Iceberg table
 

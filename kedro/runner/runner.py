@@ -188,8 +188,9 @@ class AbstractRunner(ABC):
 
         return self.run(to_rerun, catalog, hook_manager)
 
+    @abstractmethod  # pragma: no cover
     def _get_executor(self, max_workers: int) -> Executor | None:
-        """Method to provide the correct executor (e.g., ThreadPoolExecutor, ProcessPoolExecutor)."""
+        """Abstract method to provide the correct executor (e.g., ThreadPoolExecutor, ProcessPoolExecutor or None if running sequentially)."""
         pass
 
     @abstractmethod  # pragma: no cover
@@ -226,43 +227,60 @@ class AbstractRunner(ABC):
         max_workers = self._get_required_workers_count(pipeline)
 
         pool = self._get_executor(max_workers)
-        if pool is not None:
-            with pool as executor:
-                while True:
-                    ready = {
-                        n for n in todo_nodes if node_dependencies[n] <= done_nodes
-                    }
-                    todo_nodes -= ready
-                    for node in ready:
-                        task = Task(
-                            node=node,
-                            catalog=catalog,
-                            hook_manager=hook_manager,
-                            is_async=self._is_async,
-                            session_id=session_id,
-                        )
-                        if isinstance(executor, ProcessPoolExecutor):
-                            task.parallel = True
-                        futures.add(executor.submit(task))
-                    if not futures:
-                        if todo_nodes:
-                            self._raise_runtime_error(
-                                todo_nodes, done_nodes, ready, done
-                            )
-                        break
-                    done, futures = wait(futures, return_when=FIRST_COMPLETED)
-                    for future in done:
-                        try:
-                            node = future.result()
-                        except Exception:
-                            self._suggest_resume_scenario(pipeline, done_nodes, catalog)
-                            raise
-                        done_nodes.add(node)
-                        self._logger.info("Completed node: %s", node.name)
-                        self._logger.info(
-                            "Completed %d out of %d tasks", len(done_nodes), len(nodes)
-                        )
-                        self._release_datasets(node, catalog, load_counts, pipeline)
+        if pool is None:
+            for exec_index, node in enumerate(nodes):
+                try:
+                    Task(
+                        node=node,
+                        catalog=catalog,
+                        hook_manager=hook_manager,
+                        is_async=self._is_async,
+                        session_id=session_id,
+                    ).execute()
+                    done_nodes.add(node)
+                except Exception:
+                    self._suggest_resume_scenario(pipeline, done_nodes, catalog)
+                    raise
+                self._logger.info("Completed node: %s", node.name)
+                self._logger.info(
+                    "Completed %d out of %d tasks", len(done_nodes), len(nodes)
+                )
+                self._release_datasets(node, catalog, load_counts, pipeline)
+
+            return  # Exit early since everything runs sequentially
+
+        with pool as executor:
+            while True:
+                ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
+                todo_nodes -= ready
+                for node in ready:
+                    task = Task(
+                        node=node,
+                        catalog=catalog,
+                        hook_manager=hook_manager,
+                        is_async=self._is_async,
+                        session_id=session_id,
+                    )
+                    if isinstance(executor, ProcessPoolExecutor):
+                        task.parallel = True
+                    futures.add(executor.submit(task))
+                if not futures:
+                    if todo_nodes:
+                        self._raise_runtime_error(todo_nodes, done_nodes, ready, done)
+                    break
+                done, futures = wait(futures, return_when=FIRST_COMPLETED)
+                for future in done:
+                    try:
+                        node = future.result()
+                    except Exception:
+                        self._suggest_resume_scenario(pipeline, done_nodes, catalog)
+                        raise
+                    done_nodes.add(node)
+                    self._logger.info("Completed node: %s", node.name)
+                    self._logger.info(
+                        "Completed %d out of %d tasks", len(done_nodes), len(nodes)
+                    )
+                    self._release_datasets(node, catalog, load_counts, pipeline)
 
     @staticmethod
     def _raise_runtime_error(

@@ -36,6 +36,11 @@ This following pages provide information for deployment to, or integration with,
 * [Prefect](prefect.md)
 * [Vertex AI](vertexai.md)
 
+
+Effective Node Grouping for Deployment
+When deploying a Kedro project, grouping nodes effectively is crucial for maintainability, scalability, and efficient execution across different deployment environments. To learn more about the best ways to group nodes using Pipelines, Tags, and Namespaces, refer to our detailed guide:
+*  [Node Grouping in Kedro](nodes_grouping.md)
+
 ``` {warning}
 We also have legacy documentation pages for the following deployment targets, but these have not been tested against recent Kedro releases and we cannot guarantee them:
 
@@ -51,6 +56,7 @@ We also have legacy documentation pages for the following deployment targets, bu
 
 single_machine
 distributed
+nodes_grouping
 airflow
 amazon_sagemaker
 amazon_emr_serverless

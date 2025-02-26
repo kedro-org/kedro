@@ -119,9 +119,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 settings, where default_run_env defaults to `"local"`.
                 Can be overridden by supplying the `env` argument.
             custom_resolvers: A dictionary of custom resolvers to be registered. For more information,
-             see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
+                see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
             merge_strategy: A dictionary that specifies the merging strategy for each configuration type.
-             The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
+                The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
         """
         self.base_env = base_env or ""
         self.default_run_env = default_run_env or ""

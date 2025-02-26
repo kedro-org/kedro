@@ -83,7 +83,7 @@ You can inspect the history and the metadata of the Delta table in an interactiv
 kedro ipython
 ```
 
-You can load the Delta table using the `catalog.load` method and inspect the dataset:
+You can load the Delta table dataset using the `catalog.datasets` attribute and inspect the dataset:
 
 ```python
 In [1]: model_input_table = catalog.datasets['model_input_table']

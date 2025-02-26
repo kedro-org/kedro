@@ -10,6 +10,7 @@
 ## Breaking changes to the API
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.
+* Added documentation for Kedro's support for Iceberg versioning.
 
 # Release 0.19.11
 

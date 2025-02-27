@@ -37,8 +37,8 @@ This following pages provide information for deployment to, or integration with,
 * [Vertex AI](vertexai.md)
 
 
-Effective Node Grouping for Deployment
-When deploying a Kedro project, grouping nodes effectively is crucial for maintainability, scalability, and efficient execution across different deployment environments. To learn more about the best ways to group nodes using Pipelines, Tags, and Namespaces, refer to our detailed guide:
+# Effective Node Grouping for Deployment
+When deploying a Kedro project, grouping nodes effectively is crucial for maintainability, scalability, and efficient execution across different deployment environments. To learn more about the best ways to group nodes using Pipelines, Tags, and Namespaces, follow our detailed guide:
 *  [Node Grouping in Kedro](nodes_grouping.md)
 
 ``` {warning}

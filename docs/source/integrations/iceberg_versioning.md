@@ -4,16 +4,16 @@
 
 ## Prerequisites
 
-You will need to create a `spaceflights-pandas` starter project which contains example pipelines to work with. If you haven't already, you can create a new Kedro project using the following command:
+You will need to create a `spaceflights-pandas` starter project which contains example pipelines to work with called `kedro-iceberg`. If you haven't already, you can create a new Kedro project using the following command:
 
 ```bash
-kedro new --starter spaceflights-pandas
+kedro new --starter spaceflights-pandas --name kedro-iceberg
 ```
 
 To interact with Iceberg tables, you will also need the `pyiceberg` package installed. You can install it by adding the following line to your `requirements.txt`:
 
 ```bash
-pyiceberg[pyarrow]
+pyiceberg[pyarrow] =~ 0.8
 ```
 Depending on your choice of storage, you may also need to install the optional dependencies. Consult [the installation guide for `PyIceberg`](https://py.iceberg.apache.org/#installation) to update the line above with the necessary optional dependencies.
 
@@ -30,7 +30,7 @@ Create a temporary location for Iceberg tables by running the following command:
 ```bash
 mkdir -p /tmp/warehouse
 ```
-Then create or update a file called `.pyiceberg.yaml` in the root directory of the system with the following content:
+You might also have to update the `PYICEBERG_HOME` environment variable to point to the directory where you intend to store the configuration file called the `.pyiceberg.yaml`. By default, `pyiceberg` looks for the `.pyiceberg.yaml` file in your home directory i.e. it looks for `~/.pyiceberg.yaml`. Create or update the existing file `.pyiceberg.yaml` in your home directory with the following content:
 
 ```yaml
 catalog:
@@ -47,7 +47,7 @@ catalog = load_catalog(name="default")
 ```
 ## Define a custom dataset to use Iceberg tables
 
-To use the Iceberg tables with Kedro, you will need to define a [custom dataset that uses the `pyiceberg` library](../data/how_to_create_a_custom_dataset.md). Create a new file  called `pyiceberg_dataset.py` in the `src/<package_name>` directory of your project and copy the following code:
+To use the Iceberg tables with Kedro, you will need to define a [custom dataset that uses the `pyiceberg` library](../data/how_to_create_a_custom_dataset.md). Create a new file  called `pyiceberg_dataset.py` in the `src/kedro_iceberg/` directory of your project and copy the following code:
 
 ```python
 import pyarrow as pa

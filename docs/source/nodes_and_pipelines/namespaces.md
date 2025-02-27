@@ -1,5 +1,11 @@
 # Reuse pipelines and group nodes with namespaces
 
+In this section, we introduce namespaces - a powerful tool for grouping and isolating nodes. Namespaces are useful in two key scenarios:
+
+- **Reusing a Kedro pipeline:** If you need to reuse a pipeline with some modifications of inputs, outputs or parameters, Kedro does not allow direct duplication because all nodes within a project must have unique names. Using namespaces helps resolve this issue by isolating identical pipelines while also enhancing visualization in Kedro-Viz.
+
+- **Grouping specific nodes:**  Namespaces provide a simple way to group selected nodes, making it possible to execute them together in deployment while also improving their visual representation in Kedro-Viz.
+
 ## How to reuse your pipelines
 
 If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your `existing_pipeline`, you can use the same `pipeline()` creation function as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
@@ -167,9 +173,9 @@ After executing the pipeline with `kedro run`, the visualisation with `kedro viz
 
 ## Group nodes with namespaces
 
-You can [namespace your pipeline](#what-is-a-namespace) to group nodes within your pipeline, providing enhanced visualisation in Kedro-Viz if your pipeline structure aligns with the desired node grouping.
+You can [namespace an entire pipeline](#what-is-a-namespace) to enhance visualisation in Kedro-Viz if your pipeline structure aligns with the desired node grouping. But if you want to group specific nodes rather than an entire pipeline, you can do so by assigning the `namespace` option in the node creation function. In this case, only the node name will be prefixed with "namespace_name.", while inputs, outputs, and parameters will remain unchanged. Note that this behavior differs from namespacing at the pipeline level.
 
-However, if you don’t want to namespace an entire pipeline but instead wish to group specific nodes from one or multiple pipelines under the same namespace, you can achieve this by assigning the `namespace` option in the node creation function. For example, if you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline) into the same namespace, you can do:
+For example, if you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline) into the same namespace, you can do:
 
 ```python
 #src/project_name/pipelines/data_science/pipeline.py

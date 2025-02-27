@@ -244,6 +244,46 @@ On the next page, set the `Public network (Internet accessible)` option in the `
 
 ## How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
 
-The `kedro-airflow-k8s` plugin from GetInData | Part of Xebia enables you to run a Kedro pipeline on Airflow with a Kubernetes cluster. The plugin can be used together with `kedro-docker` to prepare a docker image for pipeline execution. At present, the plugin is available for versions of Kedro < 0.18 only.
+If you want to execute your DAG in an isolated environment on Airflow using a Kubernetes cluster, you can use a combination of the [`kedro-airflow`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) and [`kedro-docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugins.
 
-Consult the [GitHub repository for `kedro-airflow-k8s`](https://github.com/getindata/kedro-airflow-k8s) for further details, or take a look at the [documentation](https://kedro-airflow-k8s.readthedocs.io/).
+### Steps to Deploy:
+
+1. **Package Your Kedro Project as a Docker Container**
+   [Use the `kedro docker init` and `kedro docker build` commands](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to containerize your Kedro project.
+
+2. **Push the Docker Image to a Container Registry**
+   Upload the built Docker image to a cloud container registry, such as AWS ECR, Google Container Registry, or Docker Hub.
+
+3. **Generate an Airflow DAG**
+   Run the following command to generate an Airflow DAG:
+   ```sh
+   kedro airflow create
+   ```
+   This will create a DAG file that includes the `KedroOperator()` by default.
+
+4. **Modify the DAG to Use `KubernetesPodOperator`**
+   To execute each Kedro node in an isolated Kubernetes pod, replace `KedroOperator()` with `KubernetesPodOperator()`, as shown in the example below:
+
+   ```python
+   from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+
+   KubernetesPodOperator(
+       task_id=node_name,
+       name=node_name,
+       namespace=NAMESPACE,
+       image=DOCKER_IMAGE,
+       cmds=["kedro"],
+       arguments=["run", f"--nodes={node_name}"],
+       get_logs=True,
+       is_delete_operator_pod=True,  # Cleanup after execution
+       in_cluster=False,
+       do_xcom_push=False,
+       image_pull_policy="Always",
+   )
+   ```
+
+### Running Multiple Nodes in a Single Container
+By default, this approach runs each node in an isolated Docker container. However, to reduce computational overhead, you can choose to run multiple nodes together within the same container. If you opt for this, you must modify the DAG accordingly to adjust task dependencies and execution order.
+
+### Future Improvements
+In upcoming releases, we plan to integrate an option within the `kedro-airflow` plugin that allows users to choose between `KedroOperator` and `KubernetesPodOperator` without manual modifications. Additionally, we aim to provide an automated way to generate a DAG that groups multiple nodes together using namespaces, reducing the number of container executions.

@@ -10,6 +10,7 @@ When deploying a **Kedro** project, grouping nodes effectively is crucial for **
 - If your project contains multiple pipelines, you can use them as predefined node groupings for deployment.
 - Pipelines can be executed separately in the deployment environment.
 - With the visualisation in Kedro Viz, you can switch to see different pipeline in a more isolated view
+<br>
 ![Switching between different pipelines in Kedro Viz](../meta/images/kedro_viz_switching_pipeline.gif)
 
 ### What Doesn't Work
@@ -38,7 +39,8 @@ When deploying a **Kedro** project, grouping nodes effectively is crucial for **
 ### What Works
 - You can tag individual nodes or the entire pipeline, allowing flexible execution of specific sections without modifying the pipeline structure.
 - Kedro-Viz provides a clear visualization of tagged nodes, making it easier to understand.
-- ![Filters Panel in Kedro Viz](../meta/images/kedro_viz_filters_tags.png)
+<br>
+![Filters Panel in Kedro Viz](../meta/images/kedro_viz_filters_tags.png)
 
 ### What Doesn't Work
 - Nodes with the same tag can exist in different pipelines, making debugging and maintaining the codebase more challenging.
@@ -68,6 +70,7 @@ When deploying a **Kedro** project, grouping nodes effectively is crucial for **
 - Namespaces allow you to group nodes, ensuring clear dependencies and separation within a pipeline while maintaining a consistent structure.
 - Similar to pipelines or tags, you can enable selective execution using namespaces.
 - Namespaces improve visualization in Kedro-Viz.
+<br>
 ![Switching expanding namespaced pipeline in Kedro Viz](../meta/images/kedro_viz_expanding_namespace.gif)
 
 
@@ -100,5 +103,5 @@ When deploying a **Kedro** project, grouping nodes effectively is crucial for **
 | Aspect | Pipelines | Tags | Namespaces |
 |--------|-----------|------|-----------|
 | **What Works** | If you're happy with how the nodes are structured in your existing pipeline, or your pipeline is low complexity and a new grouping view is not required then you don't have to use any alternatives | Tagging individual nodes or the entire pipeline allows flexible execution of specific sections without altering the pipeline structure, and Kedro-Viz offers clear visualization of these tagged nodes for better understanding. | Namespaces group nodes to ensure clear dependencies and separation within a pipeline, allow selective execution, and can be visualized using Kedro-Viz. |
-| **What Doesn't Work** | "If you need to create custom node groupings that don’t align with your existing pipelines, creating new pipelines for them may not be convenient. Instead, you can use alternative grouping methods such as tags or namespaces. | Lack of hierarchical structure, making debugging and maintaining the codebase more challenging, and executing multiple tags in a single step isn't always possible if parts of the pipeline aren't populated beforehand. | Defining namespaces at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps with modularization by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline. |
+| **What Doesn't Work** | If you need to create custom node groupings that don’t align with your existing pipelines, creating new pipelines for them may not be convenient. Instead, you can use alternative grouping methods such as tags or namespaces. | Lack of hierarchical structure, using tags makes debugging and maintaining the codebase more challenging, and executing multiple tags in a single step isn't always possible if parts of the pipeline aren't populated beforehand. | Defining namespaces at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps with modularization by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline. |
 | **Syntax** | `kedro run --pipeline=<your_pipeline_name>` | `kedro run --tags=<your_tag_name>` | `kedro run --namespace=<your_namespace_name>` |

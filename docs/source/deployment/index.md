@@ -54,6 +54,7 @@ We also have legacy documentation pages for the following deployment targets, bu
 :maxdepth: 1
 :hidden:
 
+nodes_grouping
 single_machine
 distributed
 airflow

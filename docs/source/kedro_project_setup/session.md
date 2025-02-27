@@ -18,15 +18,23 @@ The main methods and properties of `KedroSession` are:
 
 ## Create a session
 
-The following code creates a `KedroSession` object as a context manager and runs a pipeline inside the context, with session data provided. The session automatically closes after exit:
+The following code creates a `KedroSession` object as a context manager and runs a pipeline inside the context, with session data provided. This script can be called from anywhere in your kedro project as the Kedro project would folder will automatically be located. The session automatically closes after exit:
 
 ```python
-from kedro.framework.session import KedroSession
-from kedro.framework.startup import bootstrap_project
 from pathlib import Path
 
-bootstrap_project(Path.cwd())
-with KedroSession.create() as session:
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
+from kedro.framework.project import configure_project
+from kedro.utils import _find_kedro_project
+
+# Get project root
+current_dir = Path(__file__).resolve().parent
+project_root = _find_kedro_project(current_dir)
+bootstrap_project(Path(project_root))
+
+# Create and use the session
+with KedroSession.create(project_path=project_root) as session:
     session.run()
 ```
 

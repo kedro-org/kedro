@@ -1,6 +1,6 @@
 # How to use Kedro from Marimo and non-Jupyter environments
 
-This guide explains how to set up Kedro programmatically without relying on IPython magics, making it compatible with non-Jupyter environments (python scripts or streamlit apps) and modern notebook interfaces like Marimo.
+This guide explains how to set up Kedro programmatically without relying on IPython magics, making it compatible with non-Jupyter environments (python scripts or streamlit apps) and modern notebook interfaces like [Marimo](https://marimo.io/). Marimo notebooks are reactive notebook with a focus on reproducibility, they are executable as a script and shareable as an app. Reactivity in this case ensures that code and outputs are always in sync.
 
 ## Overview
 

@@ -86,6 +86,8 @@ A namespace is a way to isolate nodes, inputs, outputs, and parameters inside yo
 
 ```{note}
 If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `pipeline()` creation function. For example:
+
+```python
 pipeline(
     [node(...), node(...), node(...)],
     namespace="your_namespace_name",
@@ -93,6 +95,7 @@ pipeline(
     outputs={"first_output_to_not_be_prefixed", "second_output_to_not_be_prefixed"},
     parameters={"first_parameter_to_not_be_prefixed", "second_parameter_to_not_be_prefixed"},
 )
+```
 ```
 
 Let's extend our previous example and try to reuse the `base_data_science` pipeline one more time by creating another pipeline based on it. First, we should use the `kedro pipeline create` command to create a new blank pipeline named `data_science_2`:

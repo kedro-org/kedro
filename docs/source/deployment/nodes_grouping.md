@@ -4,7 +4,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 
 # Choosing between pipelines, tags, and namespaces in Kedro
 
-## Nodes grouping using pipelines in Kedro
+## Grouping by pipelines
 
 ### What works with Kedro
 - If your project contains different pipelines, you can use them as predefined node groupings for deployment.

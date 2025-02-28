@@ -34,7 +34,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 
 ---
 
-## Tags
+## Grouping by tags
 
 ### What works with Kedro
 - You can tag individual nodes or the entire pipeline, allowing flexible execution of specific sections without modifying the pipeline structure.

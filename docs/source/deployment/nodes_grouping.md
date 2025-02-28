@@ -78,7 +78,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 ### What doesn't work with Kedro
 - You cannot run more than one namespace simultaneously—Kedro allows executing one namespace at a time.
 - **Defining namespace at Node-level:** If you define namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
-- **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. This can introduce naming conflicts.
+- **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly.
 
 ### Best used when
 - You want to organise nodes logically within a pipeline while keeping a structured execution flow.

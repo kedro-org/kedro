@@ -188,7 +188,7 @@ After executing the pipeline with `kedro run`, the visualisation with `kedro viz
 
 ## Group nodes with namespaces
 
-You can [namespace an entire pipeline](#what-is-a-namespace) to enhance visualisation in Kedro-Viz if your pipeline structure aligns with the desired node grouping. But if you want to group specific nodes rather than an entire pipeline, you can do so by assigning the `namespace` argument in the node creation function. In this case, only the node name will be prefixed with `namespace_name.`, while inputs, outputs, and parameters will remain unchanged. Note that this behavior differs from [namespacing at the pipeline level](#what-is-a-namespace).
+You can [namespace an entire pipeline](#what-is-a-namespace) to enhance visualisation in Kedro-Viz if your pipeline structure aligns with the desired node grouping. But if you want to group specific nodes rather than an entire pipeline, you can do so by assigning the `namespace` argument in the node creation function. In this case, only the node name will be prefixed with `namespace_name.`, while inputs, outputs, and parameters will remain unchanged. Note that this behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).
 
 For example, if you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline) into the same namespace, you can do:
 

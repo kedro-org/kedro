@@ -64,7 +64,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 
 ---
 
-## Namespaces
+## Grouping by namespaces
 
 ### What works with Kedro
 - Namespaces allow you to group nodes, ensuring clear dependencies and separation within a pipeline while maintaining a consistent structure.

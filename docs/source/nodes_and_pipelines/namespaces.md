@@ -2,7 +2,7 @@
 
 In this section, we introduce namespaces - a powerful tool for grouping and isolating nodes. Namespaces are useful in two key scenarios:
 
-- **Reusing a Kedro pipeline:** If you need to reuse a pipeline with some modifications of inputs, outputs or parameters, Kedro does not allow direct duplication because all nodes within a project must have unique names. Using namespaces helps resolve this issue by isolating identical pipelines while also enhancing visualization in Kedro-Viz.
+- **Reusing a Kedro pipeline:** If you need to reuse a pipeline with some modifications of inputs, outputs or parameters, Kedro does not allow direct duplication because all nodes within a project must have unique names. Using namespaces helps resolve this issue by isolating identical pipelines while also enhancing visualisation in Kedro-Viz.
 
 - **Grouping specific nodes:**  Namespaces provide a simple way to group selected nodes, making it possible to execute them together in deployment while also improving their visual representation in Kedro-Viz.
 
@@ -179,7 +179,7 @@ After executing the pipeline with `kedro run`, the visualisation with `kedro viz
 
 ## Group nodes with namespaces
 
-You can [namespace an entire pipeline](#what-is-a-namespace) to enhance visualisation in Kedro-Viz if your pipeline structure aligns with the desired node grouping. But if you want to group specific nodes rather than an entire pipeline, you can do so by assigning the `namespace` option in the node creation function. In this case, only the node name will be prefixed with `namespace_name.`, while inputs, outputs, and parameters will remain unchanged. Note that this behavior differs from namespacing at the pipeline level.
+You can [namespace an entire pipeline](#what-is-a-namespace) to enhance visualisation in Kedro-Viz if your pipeline structure aligns with the desired node grouping. But if you want to group specific nodes rather than an entire pipeline, you can do so by assigning the `namespace` argument in the node creation function. In this case, only the node name will be prefixed with `namespace_name.`, while inputs, outputs, and parameters will remain unchanged. Note that this behaviour differs from namespacing at the pipeline level.
 
 For example, if you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline) into the same namespace, you can do:
 
@@ -226,5 +226,5 @@ kedro run --namespace=<your_namespace>
 Additionally, Kedro-Viz will allow you to expand and collapse your namespace for better visualisation.
 
 ```{warning}
-While this functionality is useful for grouping nodes easily without additional complexities that may arise when creating a fully namespaced pipeline, be aware that it can create a namespace that is **non-executable**. This happens if you group, for example, the first and last nodes of a pipeline without including the intermediate nodes in the same namespace. In such cases, attempting to execute that namespace with `kedro run --namespace=<your_namespace>` will result in an error, and your visualisation in Kedro-Viz will be broken.
+While this functionality is useful for grouping nodes without additional complexities that may arise when creating a fully namespaced pipeline, be aware that it can create a namespace that is **non-executable**. This happens if you group, for example, the first and last nodes of a pipeline without including the intermediate nodes in the same namespace. In such cases, attempting to execute that namespace with `kedro run --namespace=<your_namespace>` will result in an error, and your visualisation in Kedro-Viz will be broken.
 ```

@@ -244,7 +244,7 @@ def magic_load_node(args: str) -> None:
     if run_environment in ("ipython", "vscode", "jupyter"):
         # Combine multiple cells into one for IPython or VSCode or Jupyter
         combined_cell = "\n\n".join(cells)
-        _create_cell_with_text(combined_cell, is_jupyter=False)
+        _create_cell_with_text(combined_cell)
     else:
         # For other environments or if detection fails, just print the cells
         _print_cells(cells)
@@ -280,7 +280,7 @@ class _NodeBoundArguments(inspect.BoundArguments):
         return None
 
 
-def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
+def _create_cell_with_text(text: str) -> None:
     """Create a new cell with the provided text content."""
     get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
 

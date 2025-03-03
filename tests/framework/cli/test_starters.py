@@ -333,7 +333,7 @@ class TestParseToolsInput:
     def test_parse_tools_valid(self, input, expected):
         result = _parse_tools_input(input)
         assert result == expected
-    
+
     @pytest.mark.parametrize(
         "input",
         ["1-7"],
@@ -1236,9 +1236,9 @@ class TestToolsAndExampleFromConfigFile:
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
-    "bad_input",
-    ["viz"],
-)
+        "bad_input",
+        ["viz"],
+    )
     def test_viz_tool(self, fake_kedro_cli, bad_input):
         """Test project created from config with 'viz' tool."""
         config = {

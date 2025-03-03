@@ -16,7 +16,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 ### What doesn't work with Kedro
 - If you need to create custom node groupings that are different with your existing pipelines, creating new pipelines for them may not be convenient. Instead, you can use alternative grouping methods such as tags or namespaces.
 - You cannot execute more than one pipeline in a single step because the `kedro run --pipeline` command allows running only one pipeline at a time.
-- You can switch between different pipelines in Kedro Viz, but the visualisation does not support collapsing or expanding pipelines within Kedro Viz.
+- You can switch between different pipelines in Kedro Viz, but the flowchart view does not support collapsing or expanding pipelines.
 
 ### Best used when
 - Your project is structured in a way that requires executing pipelines separately in the deployment environment.

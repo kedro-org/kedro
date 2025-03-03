@@ -234,9 +234,6 @@ def magic_load_node(args: str) -> None:
     For Jupyter Notebook 7.2.0+, it creates a single cell with all the code due to
     limitations with newer notebook versions.
     """
-    import logging
-    logger = logging.getLogger(__name__)
-
     parameters = parse_argstring(magic_load_node, args)
     node_name = parameters.node
 
@@ -254,7 +251,7 @@ def magic_load_node(args: str) -> None:
 
     run_environment = _guess_run_environment()
 
-    # Try to detect Jupyter Notebook version
+    # Check if we're using a newer version of Jupyter Notebook (>=7.2.0)
     is_new_notebook = False
     if run_environment == "jupyter":
         try:
@@ -267,7 +264,7 @@ def magic_load_node(args: str) -> None:
 
     if run_environment == "jupyter":
         if is_new_notebook:
-            # For Notebook >= 7.2.0, combine all cells into one
+            # For Notebook >= 7.2.0, create a single cell with all node code
             print("Note: Using Jupyter Notebook >=7.2.0. Creating a single cell with all node code.")
             combined_cell = "\n\n".join(cells)
             _create_cell_with_text(combined_cell, is_jupyter=True)
@@ -318,13 +315,13 @@ class _NodeBoundArguments(inspect.BoundArguments):
 def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
     """Create a new cell with the provided text content."""
     if is_jupyter:
-        # Try to detect Jupyter Notebook version
+        # Check if running on Jupyter Notebook 7.2.0+
         try:
             import notebook
             nb_version = tuple(int(x) for x in notebook.__version__.split(".")[:2])
             using_new_notebook = nb_version >= (7, 2)
         except Exception:
-            # If we can't determine the version, assume it's new to be safe
+            # If version check fails, assume newer version for safety
             using_new_notebook = True
 
         # For Notebook >= 7.2.0, fall back to set_next_input
@@ -338,9 +335,7 @@ def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
                 app.commands.execute("notebook:insert-cell-below")
                 app.commands.execute("notebook:replace-selection", {"text": text})
             except Exception as e:
-                # If ipylab fails, fall back to set_next_input
-                import logging
-                logger = logging.getLogger(__name__)
+                # Fall back to set_next_input if ipylab fails
                 logger.debug(f"Failed to use ipylab approach: {e}")
                 get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
     else:

@@ -333,6 +333,16 @@ class TestParseToolsInput:
     def test_parse_tools_valid(self, input, expected):
         result = _parse_tools_input(input)
         assert result == expected
+    
+    @pytest.mark.parametrize(
+        "input",
+        ["1-7"],
+    )
+    def test_validate_range_includes_7(self, input, capsys):
+        with pytest.raises(SystemExit):
+            _parse_tools_input(input)
+        message = "Kedro Viz is automatically included in the project. Please remove 7 from your setup."
+        assert message in capsys.readouterr().err
 
     @pytest.mark.parametrize(
         "input",

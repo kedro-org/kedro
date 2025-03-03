@@ -1515,6 +1515,14 @@ class TestValidateSelection:
         tools = ["1", "2", "3", "4"]
         assert _validate_tool_selection(tools) is None
 
+    def test_validate_tool_selection_viz_or_7_tool(self, capsys):
+        tools = ["viz", "7"]
+        for tool in tools:
+            with pytest.raises(SystemExit):
+                _validate_tool_selection([tool])
+            message = "Kedro Viz is now automatically included in the project. Please remove 'viz' from your setup."
+            assert message in capsys.readouterr().err
+
     def test_validate_tool_selection_invalid_single_tool(self, capsys):
         tools = ["8"]
         with pytest.raises(SystemExit):

@@ -23,7 +23,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 
 ### Not to use when
 - You need to run more than one pipeline together.
-- You want to use the expand or collapse functionality in Kedro Viz
+- You want to use the expand and collapse functionality in Kedro Viz
 
 ### How to use
 - Run using:

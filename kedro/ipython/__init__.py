@@ -228,32 +228,21 @@ def _guess_run_environment() -> str:  # pragma: no cover
 )
 def magic_load_node(args: str) -> None:
     """The line magic %load_node <node_name>.
-
-    This magic loads a Kedro node into a single cell containing all the node code.
+    Currently, this feature is only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython,
+    and VSCode Notebook. This line magic will generate code in multiple cells to load
+    datasets from `DataCatalog`, import relevant functions and modules, node function
+    definition and a function call. If generating code is not possible, it will print
+    the code instead.
     """
     parameters = parse_argstring(magic_load_node, args)
     node_name = parameters.node
 
-    if not node_name:
-        print("Error: Node name is required. Usage: %load_node <node_name>")
-        return
-
-    try:
-        cells = _load_node(node_name, pipelines)
-    except Exception as e:
-        print(f"Error loading node '{node_name}': {e}")
-        import traceback
-        traceback.print_exc()
-        return
+    cells = _load_node(node_name, pipelines)
 
     run_environment = _guess_run_environment()
 
-    if run_environment == "jupyter":
-        # Create a single cell with all node code for all notebook versions
-        combined_cell = "\n\n".join(cells)
-        _create_cell_with_text(combined_cell, is_jupyter=True)
-    elif run_environment in ("ipython", "vscode"):
-        # Combine multiple cells into one for IPython or VSCode
+    if run_environment in ("ipython", "vscode", "jupyter"):
+        # Combine multiple cells into one for IPython or VSCode or Jupyter
         combined_cell = "\n\n".join(cells)
         _create_cell_with_text(combined_cell, is_jupyter=False)
     else:
@@ -293,19 +282,7 @@ class _NodeBoundArguments(inspect.BoundArguments):
 
 def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
     """Create a new cell with the provided text content."""
-    if is_jupyter:
-        try:
-            from ipylab import JupyterFrontEnd
-            app = JupyterFrontEnd()
-            app.commands.execute("notebook:insert-cell-below")
-            app.commands.execute("notebook:replace-selection", {"text": text})
-        except Exception as e:
-            # Fall back to set_next_input if ipylab fails
-            logger.debug(f"Failed to use ipylab approach: {e}")
-            get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
-    else:
-        # For non-Jupyter environments (e.g. IPython, VS Code)
-        get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
+    get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
 
 
 def _print_cells(cells: list[str]) -> None:

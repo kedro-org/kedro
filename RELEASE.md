@@ -7,6 +7,8 @@
 ## Bug fixes and other changes
 * Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
 * Fixed `MemoryDataset` to infer `assign` copy mode for Ibis Tables, which previously would be inferred as `deepcopy`.
+* Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0` by implementing a version specific fallback mechanism.
+
 ## Breaking changes to the API
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.

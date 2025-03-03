@@ -1226,6 +1226,30 @@ class TestToolsAndExampleFromConfigFile:
         _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
+    "bad_input",
+    ["viz"],
+)
+    def test_viz_tool(self, fake_kedro_cli, bad_input):
+        """Test project created from config with 'viz' tool."""
+        config = {
+            "tools": bad_input,
+            "project_name": "My Project",
+            "example_pipeline": "no",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "Kedro Viz is automatically included in the project. Please remove 'viz' from your setup."
+            in result.output
+        )
+
+    @pytest.mark.parametrize(
         "bad_input",
         ["bad input", "0,3,5", "1,3,9", "llint", "tes", "test, lin"],
     )
@@ -1515,13 +1539,12 @@ class TestValidateSelection:
         tools = ["1", "2", "3", "4"]
         assert _validate_tool_selection(tools) is None
 
-    def test_validate_tool_selection_viz_or_7_tool(self, capsys):
-        tools = ["viz", "7"]
-        for tool in tools:
-            with pytest.raises(SystemExit):
-                _validate_tool_selection([tool])
-            message = "Kedro Viz is now automatically included in the project. Please remove 'viz' from your setup."
-            assert message in capsys.readouterr().err
+    def test_validate_tool_selection_7_tool(self, capsys):
+        tools = ["7"]
+        with pytest.raises(SystemExit):
+            _validate_tool_selection(tools)
+        message = "Kedro Viz is automatically included in the project. Please remove 7 from your setup."
+        assert message in capsys.readouterr().err
 
     def test_validate_tool_selection_invalid_single_tool(self, capsys):
         tools = ["8"]

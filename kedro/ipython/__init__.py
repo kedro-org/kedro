@@ -229,10 +229,7 @@ def _guess_run_environment() -> str:  # pragma: no cover
 def magic_load_node(args: str) -> None:
     """The line magic %load_node <node_name>.
 
-    This magic loads a Kedro node into notebook cells.
-    For Jupyter Notebook versions prior to 7.2.0, it creates multiple cells.
-    For Jupyter Notebook 7.2.0+, it creates a single cell with all the code due to
-    limitations with newer notebook versions.
+    This magic loads a Kedro node into a single cell containing all the node code.
     """
     parameters = parse_argstring(magic_load_node, args)
     node_name = parameters.node
@@ -251,28 +248,10 @@ def magic_load_node(args: str) -> None:
 
     run_environment = _guess_run_environment()
 
-    # Check if we're using a newer version of Jupyter Notebook (>=7.2.0)
-    is_new_notebook = False
     if run_environment == "jupyter":
-        try:
-            import notebook
-            nb_version = tuple(int(x) for x in notebook.__version__.split(".")[:2])
-            is_new_notebook = nb_version >= (7, 2)
-        except Exception:
-            # If we can't determine the version, assume it's new to be safe
-            is_new_notebook = True
-
-    if run_environment == "jupyter":
-        if is_new_notebook:
-            # For Notebook >= 7.2.0, create a single cell with all node code
-            print("Note: Using Jupyter Notebook >=7.2.0. Creating a single cell with all node code.")
-            combined_cell = "\n\n".join(cells)
-            _create_cell_with_text(combined_cell, is_jupyter=True)
-        else:
-            # For older Notebook versions, create multiple cells
-            for cell in cells:
-                _create_cell_with_text(cell, is_jupyter=True)
-
+        # Create a single cell with all node code for all notebook versions
+        combined_cell = "\n\n".join(cells)
+        _create_cell_with_text(combined_cell, is_jupyter=True)
     elif run_environment in ("ipython", "vscode"):
         # Combine multiple cells into one for IPython or VSCode
         combined_cell = "\n\n".join(cells)
@@ -315,29 +294,15 @@ class _NodeBoundArguments(inspect.BoundArguments):
 def _create_cell_with_text(text: str, is_jupyter: bool = True) -> None:
     """Create a new cell with the provided text content."""
     if is_jupyter:
-        # Check if running on Jupyter Notebook 7.2.0+
         try:
-            import notebook
-            nb_version = tuple(int(x) for x in notebook.__version__.split(".")[:2])
-            using_new_notebook = nb_version >= (7, 2)
-        except Exception:
-            # If version check fails, assume newer version for safety
-            using_new_notebook = True
-
-        # For Notebook >= 7.2.0, fall back to set_next_input
-        if using_new_notebook:
+            from ipylab import JupyterFrontEnd
+            app = JupyterFrontEnd()
+            app.commands.execute("notebook:insert-cell-below")
+            app.commands.execute("notebook:replace-selection", {"text": text})
+        except Exception as e:
+            # Fall back to set_next_input if ipylab fails
+            logger.debug(f"Failed to use ipylab approach: {e}")
             get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
-        else:
-            # Original approach for older notebook versions
-            try:
-                from ipylab import JupyterFrontEnd
-                app = JupyterFrontEnd()
-                app.commands.execute("notebook:insert-cell-below")
-                app.commands.execute("notebook:replace-selection", {"text": text})
-            except Exception as e:
-                # Fall back to set_next_input if ipylab fails
-                logger.debug(f"Failed to use ipylab approach: {e}")
-                get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
     else:
         # For non-Jupyter environments (e.g. IPython, VS Code)
         get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]

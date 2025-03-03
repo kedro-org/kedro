@@ -34,6 +34,7 @@ class CatalogCommandsMixin:
 
         result = {}
         for pipe in target_pipelines:
+            catalog = self.context._get_catalog()
             pl_obj = _pipelines.get(pipe)
             if pl_obj:
                 pipeline_ds = pl_obj.datasets()

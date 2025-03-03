@@ -1,8 +1,8 @@
-# Kedro VSCode Extension 
+# Kedro VSCode Extension
 
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 set_up_vscode
 ```

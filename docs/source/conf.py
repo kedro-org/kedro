@@ -227,7 +227,11 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # so we decided to use our own `robots.txt` again, with a link to the custom `sitemap.xml`.
 # See the discussion at https://github.com/kedro-org/kedro/issues/3741
 # and https://github.com/readthedocs/readthedocs.org/issues/6841
-html_extra_path = [str(here / "extra_files")]
+# html_extra_path = [str(here / "extra_files")]
+# Finally, we decided to use the default `robots.txt` and `sitemap.xml` from RTD
+# because we embeded the nonindex tag in all old docs versions, preventing search engines from indexing them.
+# See: https://github.com/kedro-org/kedro/pull/4516
+
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False

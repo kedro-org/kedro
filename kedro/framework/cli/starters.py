@@ -230,7 +230,7 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
         for tool in tools:
             if tool == "viz":
                 click.secho(
-                    "Kedro Viz is automatically included in the project. Please remove 'viz' from your setup.",
+                    "Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection.",
                     fg="red",
                     err=True,
                 )

@@ -32,10 +32,6 @@ class CatalogCommandsMixin:
         # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475
         runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
 
-        not_mentioned = "Datasets not mentioned in pipeline"
-        mentioned = "Datasets mentioned in pipeline"
-        factories = "Datasets generated from factories"
-
         target_pipelines = pipelines or _pipelines.keys()
 
         result = {}
@@ -50,33 +46,31 @@ class CatalogCommandsMixin:
                 )
 
             catalog_ds = set(catalog.keys())
-            unused_ds = catalog_ds - pipeline_ds
-            default_ds = pipeline_ds - catalog_ds
-            used_ds = catalog_ds - unused_ds
 
             patterns_ds = set()
-
-            for ds_name in default_ds:
+            default_ds = set()
+            for ds_name in pipeline_ds - catalog_ds:
                 if catalog.config_resolver.match_pattern(ds_name):
                     patterns_ds.add(ds_name)
-
-            default_ds -= patterns_ds
-            used_ds.update(default_ds)
+                else:
+                    default_ds.add(ds_name)
 
             catalog.config_resolver.add_runtime_patterns(runtime_pattern)
 
-            used_ds_by_type = _group_ds_by_type(used_ds, catalog)
+            used_ds_by_type = _group_ds_by_type(
+                pipeline_ds - patterns_ds - default_ds, catalog
+            )
             patterns_ds_by_type = _group_ds_by_type(patterns_ds, catalog)
-            unused_ds_by_type = _group_ds_by_type(unused_ds, catalog)
+            default_ds_by_type = _group_ds_by_type(default_ds, catalog)
 
             catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
 
             data = (
-                (mentioned, used_ds_by_type),
-                (factories, patterns_ds_by_type),
-                (not_mentioned, unused_ds_by_type),
+                ("datasets", used_ds_by_type),
+                ("factories", patterns_ds_by_type),
+                ("defaults", default_ds_by_type),
             )
-            result[pipe] = {key: value for key, value in data if value}
+            result[pipe] = {key: value for key, value in data}
 
         return result
 

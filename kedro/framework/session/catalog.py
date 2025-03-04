@@ -142,7 +142,7 @@ def _group_ds_by_type(
         if is_parameter(ds_name):
             continue
 
-        str_type = catalog._get_type(ds_name)
+        str_type = catalog.get_type(ds_name)
         if str_type not in mapping:
             mapping[str_type] = []
 

@@ -614,7 +614,7 @@ class KedroDataCatalog(CatalogProtocol):
             filtered_types = []
             for ds_name in filtered:
                 # Retrieve the dataset type
-                str_type = self._get_dataset_type(ds_name)
+                str_type = self._get_type(ds_name)
                 # Match against type_regex and apply by_type filtering
                 if (not type_regex or re.search(type_regex, str_type)) and (
                     not by_type_set or str_type in by_type_set
@@ -625,7 +625,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         return filtered
 
-    def _get_dataset_type(self, ds_name: str) -> str:
+    def _get_type(self, ds_name: str) -> str:
         if ds_name in self._lazy_datasets:
             return str(self._lazy_datasets[ds_name])
 

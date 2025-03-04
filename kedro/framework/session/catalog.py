@@ -40,7 +40,6 @@ class CatalogCommandsMixin:
 
         result = {}
         for pipe in target_pipelines:
-            catalog = self.context._get_catalog()
             pl_obj = _pipelines.get(pipe)
             if pl_obj:
                 pipeline_ds = pl_obj.datasets()
@@ -135,16 +134,18 @@ class CatalogCommandsMixin:
         return explicit_datasets
 
 
-def _group_ds_by_type(datasets: set[str], catalog: KedroDataCatalog) -> dict[str, dict]:
+def _group_ds_by_type(
+    datasets: set[str], catalog: KedroDataCatalog
+) -> dict[str, list[str]]:
     mapping = {}
     for ds_name in datasets:
         if is_parameter(ds_name):
             continue
 
-        ds = catalog[ds_name]
-        unresolved_config, _ = catalog.config_resolver.unresolve_credentials(
-            ds_name, ds.to_config()
-        )
-        mapping[ds_name] = unresolved_config
+        str_type = catalog._get_type(ds_name)
+        if str_type not in mapping:
+            mapping[str_type] = []
+
+        mapping[str_type].append(ds_name)
 
     return mapping

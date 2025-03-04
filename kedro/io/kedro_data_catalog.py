@@ -626,6 +626,7 @@ class KedroDataCatalog(CatalogProtocol):
         return filtered
 
     def _get_type(self, ds_name: str) -> str:
+        """Access dataset type without adding resolved dataset to the catalog."""
         if ds_name not in self.__datasets and ds_name not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(ds_name)
             if not ds_config:

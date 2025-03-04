@@ -257,18 +257,16 @@ With the latest **Kedro VS Code extension**, you can automatically validate your
 
 ### How It Works
 
-- **Parsing & Dataset Checks**: The extension reads your catalog file and tries to load each dataset to ensure the configuration is correct.  
-- **Immediate Feedback**: If any dataset has an invalid type or missing dependency, you’ll see red underlines in the editor and an entry in VS Code’s **Problems** panel.  
+- **Parsing & Dataset Checks**: The extension reads your catalog file and tries to load each dataset to ensure the configuration is correct.
+- **Immediate Feedback**: If any dataset has an invalid type or missing dependency, you’ll see red underlines in the editor and an entry in VS Code’s **Problems** panel.
 - **Incremental & Periodic Validation**: The extension re-checks your catalogs whenever you open or edit a file, and it can also run in the background, so you’re always up-to-date on any potential issues.
 
 ### Viewing Errors in the Problems Panel
 
 VS Code’s **Problems** panel provides a convenient overview of all catalog issues:
 
-1. Go to **View > Problems** or press `Ctrl+Shift+M` (or `Cmd+Shift+M` on macOS).  
-2. Expand any reported errors to see details about what’s wrong (e.g., “Class not found.”).  
+1. Go to **View > Problems** or press `Ctrl+Shift+M` (or `Cmd+Shift+M` on macOS).
+2. Expand any reported errors to see details about what’s wrong (e.g., “Class not found.”).
 3. **Click** an error to jump directly to the problematic line in the catalog file.
 
 This makes it easy to fix dataset errors caused by things such as typos in your dataset type or missing modules before running any Kedro pipelines.
-
-

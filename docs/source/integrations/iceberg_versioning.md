@@ -1,6 +1,6 @@
 # Data versioning with Iceberg
 
-[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM.
+[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM. It is important to note that `pyiceberg` is a rapidly evolving project and does not support the full range of features that Iceberg tables offer. You can use this tutorial as a starting point to extend the functionality using different compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/), or [dataframe technologies such as Apache Arrow, DuckDB, etc](https://py.iceberg.apache.org/api/#query-the-data).
 
 ## Prerequisites
 
@@ -60,19 +60,17 @@ DEFAULT_SAVE_ARGS = {"mode": "overwrite"}
 
 class PyIcebergDataset(AbstractDataset):
     def __init__(
-        self,
-        catalog,
-        namespace,
-        table_name,
-        table_type="pandas",
-        load_args=DEFAULT_LOAD_ARGS,
-        scan_args=None,
-        save_args=DEFAULT_SAVE_ARGS,
+            self,
+            catalog,
+            namespace,
+            table_name,
+            load_args=DEFAULT_LOAD_ARGS,
+            scan_args=None,
+            save_args=DEFAULT_SAVE_ARGS,
     ):
         self.table_name = table_name
         self.namespace = namespace
         self.catalog = load_catalog(catalog)
-        self.table_type = table_type
         self.load_args = load_args
         self.table = self._load_table(namespace, table_name)
         self.save_args = save_args
@@ -80,22 +78,12 @@ class PyIcebergDataset(AbstractDataset):
 
 
     def load(self):
-        if not self.table:
-            raise DatasetError("Table does not exist")
+        self.table = self.catalog.load_table((self.namespace, self.table_name))
         if self.scan_args:
             scan = self.table.scan(**self.scan_args)
         else:
             scan = self.table.scan()
-        if self.table_type == "pandas":
-            return scan.to_pandas()
-        elif self.table_type == "arrow":
-            return scan.to_arrow()
-        elif self.table_type == "duckdb":
-            return scan.to_duckdb()
-        elif self.table_type == "daft":
-            return scan.to_daft()
-        else:
-            raise DatasetError("Table type not supported")
+        return scan.to_pandas()
 
     def _load_table(self, namespace, table_name):
         try:
@@ -125,11 +113,10 @@ class PyIcebergDataset(AbstractDataset):
         return self.table.inspect
 ```
 
-This dataset allows you to load Iceberg tables as `pandas`, `arrow`, `duckdb`, or `daft` objects. You can also load a subset of the table by passing the `scan_args` parameter to the dataset. The `save()` method allows you to save a dataframe as an Iceberg table. You can specify the mode of saving the table by passing the `save_args` parameter to the dataset. The `inspect()` method returns an `InspectTable` object which contains metadata about the table.
+This dataset allows you to load Iceberg tables as `pandas` dataframes. You can also load a subset of the table by passing [the `scan_args` parameter to the dataset](https://py.iceberg.apache.org/reference/pyiceberg/table/#pyiceberg.table.Table.scan). The `save()` method allows you to save a dataframe as an Iceberg table. You can specify the mode of saving the table by passing the `save_args` parameter to the dataset. The `inspect()` method returns an `InspectTable` object which contains metadata about the table.
 You can also update the code to extend the functionality of the dataset to support more features of Iceberg tables. Refer to the [Iceberg API documentation](https://py.iceberg.apache.org/api/) to see what you can do with the `Table` object.
 
 ## Using Iceberg tables in the catalog
-## Using Iceberg tables in the catalog
 
 ### Save the dataset as an Iceberg table
 
@@ -141,7 +128,6 @@ model_input_table:
   catalog: default
   namespace: default
   table_name: model_input_table
-  table_type: pandas
 ```
 
 Now run your Kedro project with the following command:

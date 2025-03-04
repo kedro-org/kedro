@@ -21,7 +21,7 @@ from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
 from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigException
-from kedro.io.core import _parse_filepath, HTTP_PROTOCOLS, CLOUD_PROTOCOLS  # noqa: F401,D100,D104
+from kedro.utils import CLOUD_PROTOCOLS, HTTP_PROTOCOLS, _parse_filepath
 
 _config_logger = logging.getLogger(__name__)
 

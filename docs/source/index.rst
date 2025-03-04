@@ -106,7 +106,7 @@ Welcome to Kedro's award-winning documentation!
    :maxdepth: 2
    :caption: Kedro VS Code Extension
 
-   visual_studio_code_extension/index.md
+   visual_studio_code_extension/set_up_vscode.md
 
 .. toctree::
    :maxdepth: 2

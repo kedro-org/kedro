@@ -362,6 +362,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         conf_source: str,
     ) -> tuple[fsspec.AbstractFileSystem, str]:
         """Set up the file system based on the file type or protocol detected in conf_source."""
+        # Force string for regex
+        conf_source = str(conf_source)
         # Check if it's an archive file
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":

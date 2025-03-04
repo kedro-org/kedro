@@ -6,6 +6,12 @@ from kedro.framework.project import pipelines as _pipelines
 from kedro.io import KedroDataCatalog
 
 
+def is_parameter(dataset_name: str) -> bool:
+    # TODO: when breaking change move it to kedro/io/core.py
+    """Check if dataset is a parameter."""
+    return dataset_name.startswith("params:") or dataset_name == "parameters"
+
+
 class CatalogCommandsMixin:
     @property
     def context(self) -> KedroContext: ...  # type: ignore[empty-body]
@@ -107,8 +113,7 @@ class CatalogCommandsMixin:
         # We need to include datasets defined in the catalog.yaml and datasets added manually to the catalog
         explicit_datasets = {}
         for ds_name, ds in catalog.items():
-            # TODO: when breaking change replace with is_parameter() from kedro/io/core.py
-            if ds_name.startswith("params:") or ds_name == "parameters":
+            if is_parameter(ds_name):
                 continue
 
             unresolved_config, _ = catalog.config_resolver.unresolve_credentials(
@@ -117,12 +122,7 @@ class CatalogCommandsMixin:
             explicit_datasets[ds_name] = unresolved_config
 
         for ds_name in pipeline_datasets:
-            # TODO: when breaking change replace with is_parameter() from kedro/io/core.py
-            if (
-                ds_name in explicit_datasets
-                or ds_name.startswith("params:")
-                or ds_name == "parameters"
-            ):
+            if ds_name in explicit_datasets or is_parameter(ds_name):
                 continue
 
             ds_config = catalog.config_resolver.resolve_pattern(ds_name)
@@ -138,8 +138,7 @@ class CatalogCommandsMixin:
 def _group_ds_by_type(datasets: set[str], catalog: KedroDataCatalog) -> dict[str, dict]:
     mapping = {}
     for ds_name in datasets:
-        # TODO: when breaking change replace with is_parameter() from kedro/io/core.py
-        if ds_name.startswith("params:") or ds_name == "parameters":
+        if is_parameter(ds_name):
             continue
 
         ds = catalog[ds_name]

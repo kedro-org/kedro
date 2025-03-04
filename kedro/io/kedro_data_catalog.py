@@ -626,12 +626,16 @@ class KedroDataCatalog(CatalogProtocol):
         return filtered
 
     def _get_type(self, ds_name: str) -> str:
+        if ds_name not in self.__datasets and ds_name not in self._lazy_datasets:
+            ds_config = self._config_resolver.resolve_pattern(ds_name)
+            if not ds_config:
+                self._logger.warning(f"Dataset `{ds_name}` is missing in the catalog")
+                return ""
+
+            return str(_LazyDataset(ds_name, ds_config))
+
         if ds_name in self._lazy_datasets:
             return str(self._lazy_datasets[ds_name])
-
-        if ds_name not in self.__datasets:
-            self._logger.warning(f"Dataset `{ds_name}` is missing in the catalog")
-            return ""
 
         class_type = type(self.__datasets[ds_name])
         return f"{class_type.__module__}.{class_type.__qualname__}"

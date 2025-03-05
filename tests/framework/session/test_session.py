@@ -15,7 +15,7 @@ from omegaconf import OmegaConf
 
 from kedro import __version__ as kedro_version
 from kedro.config import AbstractConfigLoader, OmegaConfigLoader
-from kedro.framework.cli.utils import _split_params
+from kedro.framework.cli.utils import split_params
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     LOGGING,
@@ -1019,7 +1019,7 @@ def test_no_DictConfig_in_store(
     params,
     fake_project,
 ):
-    extra_params = _split_params(None, None, params)
+    extra_params = split_params(None, None, params)
     session = KedroSession.create(fake_project, extra_params=extra_params)
 
     assert not any(

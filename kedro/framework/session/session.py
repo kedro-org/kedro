@@ -25,7 +25,7 @@ from kedro.framework.project import (
 )
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
-from kedro.utils import _find_kedro_project
+from kedro.utils import find_kedro_project
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -111,7 +111,7 @@ class KedroSession:
         conf_source: str | None = None,
     ):
         self._project_path = Path(
-            project_path or _find_kedro_project(Path.cwd()) or Path.cwd()
+            project_path or find_kedro_project(Path.cwd()) or Path.cwd()
         ).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close

@@ -1,6 +1,6 @@
 # Data versioning with Iceberg
 
-[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM. It is important to note that `pyiceberg` is a rapidly evolving project and does not support the full range of features that Iceberg tables offer. You can use this tutorial as a starting point to extend the functionality using different compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/), or [dataframe technologies such as Apache Arrow, DuckDB, etc](https://py.iceberg.apache.org/api/#query-the-data).
+[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM. It is important to note that `pyiceberg` is a fast evolving project and does not support the full range of features that Iceberg tables offer. You can use this tutorial as a starting point to extend the functionality using different compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/), or [dataframe technologies such as Apache Arrow, DuckDB, and more](https://py.iceberg.apache.org/api/#query-the-data).
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ kedro new --starter spaceflights-pandas --name kedro-iceberg
 To interact with Iceberg tables, you will also need the `pyiceberg` package installed. You can install it by adding the following line to your `requirements.txt`:
 
 ```bash
-pyiceberg[pyarrow] =~ 0.8
+pyiceberg[pyarrow]~=0.8.0
 ```
 Depending on your choice of storage, you may also need to install the optional dependencies. Consult [the installation guide for `PyIceberg`](https://py.iceberg.apache.org/#installation) to update the line above with the necessary optional dependencies.
 
@@ -23,14 +23,14 @@ pip install -r requirements.txt
 ```
 ### Set up the Iceberg catalog
 
-Iceberg tables are managed by a catalog which is responsible for managing the metadata of the tables. In production, this could be a Hive, Glue, or [other catalog supported by Apache Iceberg](https://py.iceberg.apache.org/configuration/#catalogs). Iceberg also supports various storage options such as S3, HDFS, and more. There are multiple ways you can configure the catalog, credentials, and object storage to suit your needs by refering to the [configuration guide](https://py.iceberg.apache.org/configuration/). For this tutorial, we will use the `SQLCatalog` which stores the metadata in a local `sqlite` database and uses the local filesystem for storage.
+Iceberg tables are managed by a catalog which is responsible for managing the metadata of the tables. In production, this could be a Hive, Glue, or [other catalog supported by Apache Iceberg](https://py.iceberg.apache.org/configuration/#catalogs). Iceberg also supports various storage options such as S3, HDFS, and more. There are multiple ways you can configure the catalog, credentials, and object storage to suit your needs by referring to the [configuration guide](https://py.iceberg.apache.org/configuration/). For this tutorial, we will use the `SQLCatalog` which stores the metadata in a local `sqlite` database and uses the local filesystem for storage.
 
 Create a temporary location for Iceberg tables by running the following command:
 
 ```bash
 mkdir -p /tmp/warehouse
 ```
-You might also have to update the `PYICEBERG_HOME` environment variable to point to the directory where you intend to store the configuration file called the `.pyiceberg.yaml`. By default, `pyiceberg` looks for the `.pyiceberg.yaml` file in your home directory i.e. it looks for `~/.pyiceberg.yaml`. Create or update the existing file `.pyiceberg.yaml` in your home directory with the following content:
+You might also have to update the `PYICEBERG_HOME` environment variable to point to the directory where you intend to store the configuration file called the `.pyiceberg.yaml`. By default, `pyiceberg` looks for the `.pyiceberg.yaml` file in your home directory, that is, it looks for `~/.pyiceberg.yaml`. Create or update the existing file `.pyiceberg.yaml` in your home directory with the following content:
 
 ```yaml
 catalog:
@@ -116,7 +116,7 @@ class PyIcebergDataset(AbstractDataset):
 This dataset allows you to load Iceberg tables as `pandas` dataframes. You can also load a subset of the table by passing [the `scan_args` parameter to the dataset](https://py.iceberg.apache.org/reference/pyiceberg/table/#pyiceberg.table.Table.scan). The `save()` method allows you to save a dataframe as an Iceberg table. You can specify the mode of saving the table by passing the `save_args` parameter to the dataset. The `inspect()` method returns an `InspectTable` object which contains metadata about the table.
 You can also update the code to extend the functionality of the dataset to support more features of Iceberg tables. Refer to the [Iceberg API documentation](https://py.iceberg.apache.org/api/) to see what you can do with the `Table` object.
 
-## Using Iceberg tables in the catalog
+## Using Iceberg tables in the catalog
 
 ### Save the dataset as an Iceberg table
 
@@ -138,22 +138,28 @@ kedro run
 You can inspect the `model_input_table` dataset created as an Iceberg table by running the following command:
 
 ```bash
-find /tmp/warehouse/
+tree /tmp/warehouse
 ```
 The output should look something like:
 ```bash
 /tmp/warehouse
-/tmp/warehouse/pyiceberg_catalog.db
-/tmp/warehouse/warehouse
-/tmp/warehouse/warehouse/default.db
-/tmp/warehouse/warehouse/default.db/model_input_table
-/tmp/warehouse/warehouse/default.db/model_input_table/data
-/tmp/warehouse/warehouse/default.db/model_input_table/data/00000-0-73afaa5b-463d-40f5-80e9-9361e93ffa82.parquet
-/tmp/warehouse/warehouse/default.db/model_input_table/metadata
-/tmp/warehouse/warehouse/default.db/model_input_table/metadata/00001-5befce5c-fc2d-4358-abd0-0b52d985fe26.metadata.json
-/tmp/warehouse/warehouse/default.db/model_input_table/metadata/snap-9089827653240705573-0-73afaa5b-463d-40f5-80e9-9361e93ffa82.avro
-/tmp/warehouse/warehouse/default.db/model_input_table/metadata/73afaa5b-463d-40f5-80e9-9361e93ffa82-m0.avro
-/tmp/warehouse/warehouse/default.db/model_input_table/metadata/00000-3dff5724-4321-419e-81fa-bb60c375bca1.metadata.json
+├── pyiceberg_catalog.db
+└── warehouse
+    └── default.db
+        └── model_input_table
+            ├── data
+            │   ├── 00000-0-a3d0f3e6-a9b4-44e4-8dac-95d4b5c14b29.parquet
+            │   └── 00000-0-baa30a43-2cad-4507-967e-84c744d69c9b.parquet
+            └── metadata
+                ├── 00000-e66a465e-cdfa-458e-aaf3-aed48ac49157.metadata.json
+                ├── 00001-d1fa7797-ef6f-438e-83c0-bdaabf1bd8de.metadata.json
+                ├── 00002-f0b5294e-a0be-450c-95fe-4cee96c9a311.metadata.json
+                ├── 836ecf2e-e339-44d8-933a-bd978991ea3e-m0.avro
+                ├── a3d0f3e6-a9b4-44e4-8dac-95d4b5c14b29-m0.avro
+                ├── baa30a43-2cad-4507-967e-84c744d69c9b-m0.avro
+                ├── snap-3087457244520966174-0-836ecf2e-e339-44d8-933a-bd978991ea3e.avro
+                ├── snap-3885749350984242152-0-a3d0f3e6-a9b4-44e4-8dac-95d4b5c14b29.avro
+                └── snap-7387825159950300388-0-baa30a43-2cad-4507-967e-84c744d69c9b.avro
 ```
 
 Suppose the upstream datasets `companies`, `shuttles`, or `reviews` are updated. You can run the following command to generate a new version of the `model_input_table` dataset:
@@ -212,4 +218,4 @@ snapshot_id: [[9089827653240705573,5091346767047746426,7107920212859354452]]
 parent_id: [[null,9089827653240705573,5091346767047746426]]
 is_current_ancestor: [[true,true,true]]
 ```
-Similary, you can call [other methods on the `InspectTable` object](https://py.iceberg.apache.org/api/#inspecting-tables) to get more information about the table, such as `snapshots()`, `schema()`, `partitions()`, and more.
+Similarly, you can call [other methods on the `InspectTable` object](https://py.iceberg.apache.org/api/#inspecting-tables) to get more information about the table, such as `snapshots()`, `schema()`, `partitions()`, and more.

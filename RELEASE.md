@@ -7,6 +7,9 @@
 ## Bug fixes and other changes
 * Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
 * Fixed `MemoryDataset` to infer `assign` copy mode for Ibis Tables, which previously would be inferred as `deepcopy`.
+* Fixed pipeline packaging issue by ensuring `pipelines/__init__.py` exists when creating new pipelines.
+* Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
+
 ## Breaking changes to the API
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.

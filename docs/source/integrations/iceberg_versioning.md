@@ -218,4 +218,17 @@ snapshot_id: [[9089827653240705573,5091346767047746426,7107920212859354452]]
 parent_id: [[null,9089827653240705573,5091346767047746426]]
 is_current_ancestor: [[true,true,true]]
 ```
+
+Alternatively, you can also call the `history()` method from the `pyiceberg.table.Table` object directly which shows a more consise output:
+
+```python
+In [4]: model_input_table.table.history()
+Out [4]:
+[
+    SnapshotLogEntry(snapshot_id=7387825159950300388, timestamp_ms=1741190825900),
+    SnapshotLogEntry(snapshot_id=3087457244520966174, timestamp_ms=1741190833531),
+    SnapshotLogEntry(snapshot_id=3885749350984242152, timestamp_ms=1741190833554)
+]
+```
+
 Similarly, you can call [other methods on the `InspectTable` object](https://py.iceberg.apache.org/api/#inspecting-tables) to get more information about the table, such as `snapshots()`, `schema()`, `partitions()`, and more.

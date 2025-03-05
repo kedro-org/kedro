@@ -1,6 +1,6 @@
-# Node Grouping in Kedro: Pipelines, Tags, and Namespaces
+# Node grouping in Kedro: pipelines, tags, and namespaces
 
-When deploying a Kedro project, grouping nodes effectively is crucial for maintainability, debugging, and execution control. This document provides an overview of three key grouping methods: Pipelines, Tags, and Namespaces, along with a list of their strengths, limitations, best use cases, and links to how to use them.
+Effectively grouping nodes in deployment is crucial for maintainability, debugging, and execution control. This document provides an overview of three key grouping methods: pipelines, tags, and namespaces, along with their strengths, limitations, best uses, and relevant documentation links.
 
 # Choosing between pipelines, tags, and namespaces in Kedro
 
@@ -13,7 +13,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 ![Switching between different pipelines in Kedro Viz](../meta/images/kedro_viz_switching_pipeline.gif)
 
 - If you want to group nodes differently from the current pipeline structure, instead of creating a new pipeline, you can use tags or namespaces to achieve that.
-- You cannot execute more than one pipeline in a single step because the `kedro run --pipeline` command allows running only one pipeline at a time.
+- You cannot execute more than one pipeline in a single step because the `kedro run --pipeline` command allows running one pipeline at a time.
 - You can switch between different pipelines in Kedro Viz, but the flowchart view does not support collapsing or expanding pipelines.
 
 ### Best used when
@@ -63,7 +63,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 
 - Namespaces allow you to group nodes, ensuring clear dependencies and separation within a pipeline while maintaining a consistent structure.
 - As the same as pipelines or tags, you can enable selective execution using namespaces.
-- Kedro Viz allows expanding and collapsing namespace pipelines in the visualization.
+- Kedro Viz allows expanding and collapsing namespace pipelines in the visualisation.
 <br>
 ![Switching expanding namespaced pipeline in Kedro Viz](../meta/images/kedro_viz_expanding_namespace.gif)
 
@@ -72,7 +72,7 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 - **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly.
 
 ### Best used when
-- You want to organise nodes logically within a pipeline while keeping a structured execution flow. Additionally, you can nest namespace pipelines within each other.
+- You want to organise nodes logically within a pipeline while keeping a structured execution flow. You can also nest namespace pipelines within each other.
 - Your pipeline structure is well-defined, and using namespaces improves visualisation in Kedro-Viz.
 - Customising deployment groups by adding namespaces at the node level.
 

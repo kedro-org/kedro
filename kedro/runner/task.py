@@ -20,7 +20,6 @@ from kedro.framework.hooks.manager import (
     _register_hooks,
     _register_hooks_entry_points,
 )
-from kedro.framework.project import settings
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -129,6 +128,8 @@ class Task:
             The node argument.
 
         """
+        from kedro.framework.project import settings
+
         if multiprocessing.get_start_method() == "spawn" and package_name:
             Task._bootstrap_subprocess(package_name, logging_config)
 

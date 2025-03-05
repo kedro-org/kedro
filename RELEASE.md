@@ -11,6 +11,8 @@
 * Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
 
 ## Breaking changes to the API
+* Private methods `_is_project`, `_find_kedro_project`, `_split_params` are made public.
+
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.
 

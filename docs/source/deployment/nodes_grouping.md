@@ -6,14 +6,12 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 
 ## Grouping by pipelines
 
-### What works with Kedro
 - If your project contains different pipelines, you can use them as predefined node groupings for deployment.
 - Pipelines can be executed separately in the deployment environment.
 - With the visualisation in Kedro Viz, you can switch to see different pipeline in a more isolated view
 <br>
 ![Switching between different pipelines in Kedro Viz](../meta/images/kedro_viz_switching_pipeline.gif)
 
-### What doesn't work with Kedro
 - If you want to group nodes differently from the current pipeline structure, instead of creating a new pipeline, you can use tags or namespaces to achieve that.
 - You cannot execute more than one pipeline in a single step because the `kedro run --pipeline` command allows running only one pipeline at a time.
 - You can switch between different pipelines in Kedro Viz, but the flowchart view does not support collapsing or expanding pipelines.
@@ -36,13 +34,11 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 
 ## Grouping by tags
 
-### What works with Kedro
 - You can tag individual nodes or the entire pipeline, allowing flexible execution of specific sections without modifying the pipeline structure.
 - Kedro-Viz provides a clear visualisation of tagged nodes, making it easier to understand.
 <br>
 ![Filters Panel in Kedro Viz](../meta/images/kedro_viz_filters_tags.png)
 
-### What doesn't work with Kedro
 - Nodes with the same tag can exist in different pipelines, making debugging and maintaining the codebase more challenging.
 
 ### Best used when
@@ -65,16 +61,12 @@ When deploying a Kedro project, grouping nodes effectively is crucial for mainta
 
 ## Grouping by namespaces
 
-### What works with Kedro
 - Namespaces allow you to group nodes, ensuring clear dependencies and separation within a pipeline while maintaining a consistent structure.
 - As the same as pipelines or tags, you can enable selective execution using namespaces.
 - Kedro Viz allows expanding and collapsing namespace pipelines in the visualization.
 <br>
 ![Switching expanding namespaced pipeline in Kedro Viz](../meta/images/kedro_viz_expanding_namespace.gif)
 
-
-
-### What doesn't work with Kedro
 - You cannot run more than one namespace simultaneously—Kedro allows executing one namespace at a time.
 - **Defining namespace at Node-level:** If you define namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
 - **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly.

@@ -99,6 +99,80 @@ To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift +
 ![](../meta/images/vscode_run.png)
 
 
+## Setting a Custom Kedro Project Path
+
+Starting with Kedro VS Code extension version 0.3.0, you can now specify a custom path to your Kedro project. This is particularly useful when:
+
+- Your Kedro project is not at the root of your workspace
+- You want to work with a Kedro project that is outside your current workspace
+- You have multiple Kedro projects and want to switch between them
+
+### Setting the Custom Project Path
+
+There are two ways to set a custom path for your Kedro project:
+
+#### Method 1: Using the Command Palette
+
+1. Open the Command Palette by pressing `Cmd + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux)
+2. Type `Kedro: Set Project Path` and select it
+3. Enter the absolute path to your Kedro project (e.g., `/Users/username/projects/my-kedro-project`)
+
+![Setting Kedro project path via Command Palette](../meta/images/vscode_set_custom_path_using_command_palette.gif)
+
+#### Method 2: Using the Settings UI
+
+1. Open VS Code settings by pressing `Cmd + ,` (macOS) or `Ctrl + ,` (Windows/Linux)
+2. Search for `kedro` in the settings search bar
+3. Find the `Kedro: Project Path` setting
+4. Enter the absolute path to your Kedro project in the field
+
+![Setting Kedro project path via Settings](../meta/images/vscode_set_custom_path_using_settings_ui.gif)
+
+### Multi-Root Workspace Integration
+
+If the Kedro project path you specify is not part of your current workspace, the extension will automatically add it to your workspace as part of a multi-root workspace. This allows you to:
+
+- See the project files in the Explorer
+- Navigate the project structure
+- Use all Kedro extension features with the specified project
+
+### Example Directory Structure
+
+If your Kedro project is nested within other folders, setting a custom project path can help the extension locate it correctly. For example:
+
+```
+root
+│   file001.txt    
+│
+└───folder1
+│   │   file011.txt
+│   │   file012.txt
+│   │
+│   └───kedroProject  <-- Set this path
+│       │   pyproject.toml
+│       │   README.md
+│       │   ...
+│   
+└───folder2
+    │   file021.txt
+    │   file022.txt
+```
+
+In this case, you would set the Kedro project path to the absolute path of the `kedroProject` directory, such as `/Users/username/root/folder1/kedroProject`.
+
+### Switching Between Multiple Projects
+
+If you work with multiple Kedro projects, you can easily switch between them by updating the project path setting. The extension will automatically detect the change and reconfigure itself to work with the newly specified project.
+
+### Troubleshooting
+
+If the extension doesn't recognize your Kedro project after setting a custom path:
+
+1. Ensure the path points to a valid Kedro project (containing `pyproject.toml` with Kedro dependencies)
+2. Check that the path is an absolute path, not a relative one
+3. Reload VS Code if the changes don't take effect immediately
+
+
 ## Debugging
 
 To debug, you _may_ need to create an `.env` file in your project root. Add the full path to the `./src/` folder to the *PYTHONPATH* environment variable in the `.env` file:

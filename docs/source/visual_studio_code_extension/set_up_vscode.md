@@ -107,7 +107,6 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 - You want to work with a Kedro project that is outside your current workspace
 - You have multiple Kedro projects and want to switch between them
 
-### Setting the Custom Project Path
 
 There are two ways to set a custom path for your Kedro project:
 

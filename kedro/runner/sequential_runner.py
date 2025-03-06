@@ -5,10 +5,6 @@ of provided nodes.
 
 from __future__ import annotations
 
-from concurrent.futures import (
-    Executor,
-    ThreadPoolExecutor,
-)
 from typing import TYPE_CHECKING, Any
 
 from kedro.runner.runner import AbstractRunner
@@ -47,10 +43,8 @@ class SequentialRunner(AbstractRunner):
             is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )
 
-    def _get_executor(self, max_workers: int) -> Executor:
-        return ThreadPoolExecutor(
-            max_workers=1
-        )  # Single-threaded for sequential execution
+    def _get_executor(self, max_workers: int) -> None:
+        return None
 
     def _run(
         self,

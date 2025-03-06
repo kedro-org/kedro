@@ -1,6 +1,6 @@
 # Data versioning with Iceberg
 
-[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM. It is important to note that `pyiceberg` is a fast evolving project and does not support the full range of features that Iceberg tables offer. You can use this tutorial as a starting point to extend the functionality using different compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/), or [dataframe technologies such as Apache Arrow, DuckDB, and more](https://py.iceberg.apache.org/api/#query-the-data).
+[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM. It is important to note that `pyiceberg` is a fast evolving project and does not support the full range of features that Iceberg tables offer. You can use this tutorial as a starting point to extend the functionality using different compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/), or dataframe technologies such as [Apache Arrow, DuckDB, and more](https://py.iceberg.apache.org/api/#query-the-data).
 
 ## Prerequisites
 
@@ -39,7 +39,7 @@ catalog:
     uri: sqlite:////tmp/warehouse/pyiceberg_catalog.db
     warehouse: file:///tmp/warehouse/warehouse
 ```
-You can check if the configuration is by opening a Python shell with `ipython` command and running the following code:
+You can check if the configuration is loading by opening a Python shell with `ipython` command and running the following code:
 
 ```python
 from pyiceberg.catalog import load_catalog

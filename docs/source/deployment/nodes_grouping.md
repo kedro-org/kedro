@@ -20,11 +20,11 @@ If you want to group nodes differently from the existing pipeline structure, you
 - You want to use the expand and collapse functionality in Kedro Viz
 
 **How to use**
-- Run using:
+
   ```bash
   kedro run --pipeline=<your_pipeline_name>
   ```
-- More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#run-a-pipeline-by-name)
+More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#run-a-pipeline-by-name)
 
 ---
 
@@ -46,11 +46,11 @@ Please note that nodes with the same tag can exist in different pipelines, makin
 - Tags do not enforce structure like pipelines or namespaces.
 
 **How to use**
-- Run using:
+
   ```bash
   kedro run --tags=<your_tag_name>
   ```
-- More information: [How to tag a node](https://docs.kedro.org/en/stable/nodes_and_pipelines/nodes.html#how-to-tag-a-node)
+More information: [How to tag a node](https://docs.kedro.org/en/stable/nodes_and_pipelines/nodes.html#how-to-tag-a-node)
 
 ---
 
@@ -74,11 +74,11 @@ Using namespaces comes with a few challenges:
 - Applying namespaces at the pipeline level makes management harder due to automatic renaming of inputs/outputs.
 
 **How to use**
-- Run using:
+
   ```bash
   kedro run --namespace=<your_namespace_name>
   ```
-- More information: [Namespaces](https://docs.kedro.org/en/stable/nodes_and_pipelines/namespaces.html)
+More information: [Namespaces](https://docs.kedro.org/en/stable/nodes_and_pipelines/namespaces.html)
 
 ---
 

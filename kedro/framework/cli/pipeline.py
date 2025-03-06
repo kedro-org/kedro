@@ -134,7 +134,11 @@ def create_pipeline(
 
     click.secho(f"Using pipeline template at: '{template_path}'")
 
-    result_path = _create_pipeline(name, template_path, package_dir / "pipelines")
+    # Ensure pipelines directory has __init__.py
+    pipelines_dir = package_dir / "pipelines"
+    _ensure_pipelines_init_file(pipelines_dir)
+
+    result_path = _create_pipeline(name, template_path, pipelines_dir)
     _copy_pipeline_tests(name, result_path, project_root)
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
@@ -361,4 +365,16 @@ def _delete_artifacts(*artifacts: Path) -> None:
             click.secho("FAILED", fg="red")
             cls = exc.__class__
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
+        click.secho("OK", fg="green")
+
+
+def _ensure_pipelines_init_file(pipelines_dir: Path) -> None:
+    # Ensure the pipelines directory exists
+    pipelines_dir.mkdir(exist_ok=True, parents=True)
+
+    # Create __init__.py if it doesn't exist
+    init_file = pipelines_dir / "__init__.py"
+    if not init_file.is_file():
+        click.echo(f"Creating '{init_file}': ", nl=False)
+        init_file.touch()
         click.secho("OK", fg="green")

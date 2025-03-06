@@ -251,7 +251,7 @@ You must [set a breakpoint in VS Code as described in the debugging section abov
 
 [Find more information on debugging in VS Code](https://code.visualstudio.com/docs/python/debugging).
 
-## Real-Time catalog validation with Kedro LSP
+## Real time catalog validation with Kedro LSP
 
 With the latest **Kedro VS Code extension**, you can automatically check your `catalog*.yml` or `catalog*.yaml` files without installing additional YAML plugins or schemas. The extension now uses a **Language Server Protocol (LSP)** approach to catch configuration issues as you edit.
 
@@ -261,12 +261,12 @@ With the latest **Kedro VS Code extension**, you can automatically check your `c
 - **Immediate Feedback**: If any dataset has an invalid type or missing dependency, you’ll see red underlines in the editor and an entry in VS Code’s **Problems** panel.
 - **Incremental & Periodic Validation**: The extension re-checks your catalogs whenever you open or edit a file, and it can also run in the background, so you’re always up-to-date on any potential issues.
 
-### Viewing errors in the Problems Panel
+### Viewing errors in the problems panel
 
 VS Code’s **Problems** panel provides a convenient overview of all catalog issues:
 
 1. Go to **View > Problems** or press `Ctrl+Shift+M` (or `Cmd+Shift+M` on macOS).
-2. Expand any reported errors to see details about what’s wrong (e.g., “Class not found.”).
+2. Expand any reported errors to see details about what’s wrong (for example, “Class not found.”).
 3. **Click** an error to jump directly to the problematic line in the catalog file.
 
 ![](../meta/images/vscode_problems_panel.png)

@@ -2,7 +2,7 @@
 
 Effectively grouping nodes in deployment is crucial for maintainability, debugging, and execution control. This document provides an overview of three key grouping methods: pipelines, tags, and namespaces, along with their strengths, limitations, best uses, and relevant documentation links.
 
-# Choosing between pipelines, tags, and namespaces in Kedro
+Choosing between pipelines, tags, and namespaces in Kedro
 
 ## Grouping by pipelines
 
@@ -16,14 +16,14 @@ Effectively grouping nodes in deployment is crucial for maintainability, debuggi
 - You cannot execute more than one pipeline in a single step because the `kedro run --pipeline` command allows running one pipeline at a time.
 - You can switch between different pipelines in Kedro Viz, but the flowchart view does not support collapsing or expanding pipelines.
 
-### Best used when
+**Best used when**
 - You have already separated your logic into different pipelines, and your project is structured to execute them independently in the deployment environment
 
-### Not to use when
+**Not to use when**
 - You need to run more than one pipeline together.
 - You want to use the expand and collapse functionality in Kedro Viz
 
-### How to use
+**How to use**
 - Run using:
   ```bash
   kedro run --pipeline=<your_pipeline_name>
@@ -41,16 +41,16 @@ Effectively grouping nodes in deployment is crucial for maintainability, debuggi
 
 - Nodes with the same tag can exist in different pipelines, making debugging and maintaining the codebase more challenging.
 
-### Best used when
+**Best used when**
 - You need to run specific nodes that don’t belong to the same pipeline.
 - You want to rerun a subset of nodes in a large pipeline.
 
-### Not to use when
+**Not to use when**
 - The tagged nodes have strong dependencies, which might cause execution failures.
 - Tags are not hierarchical, so tracking groups of nodes can become difficult.
 - Tags do not enforce structure like pipelines or namespaces.
 
-### How to use
+**How to use**
 - Run using:
   ```bash
   kedro run --tags=<your_tag_name>
@@ -71,16 +71,16 @@ Effectively grouping nodes in deployment is crucial for maintainability, debuggi
 - **Defining namespace at Node-level:** If you define namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
 - **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly.
 
-### Best used when
+**Best used when**
 - You want to organise nodes logically within a pipeline while keeping a structured execution flow. You can also nest namespace pipelines within each other.
 - Your pipeline structure is well-defined, and using namespaces improves visualisation in Kedro-Viz.
 - Customising deployment groups by adding namespaces at the node level.
 
-### Not to use when
+**Not to use when**
 - Defining namespace at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps with modularisation by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline.dding namespaces may introduce unnecessary complexity.
 - Applying namespaces at the pipeline level makes management harder due to automatic renaming of inputs/outputs.
 
-### How to use
+**How to use**
 - Run using:
   ```bash
   kedro run --namespace=<your_namespace_name>
@@ -89,7 +89,7 @@ Effectively grouping nodes in deployment is crucial for maintainability, debuggi
 
 ---
 
-## Summary table
+**Summary table**
 
 | Aspect | Pipelines | Tags | Namespaces |
 |--------|-----------|------|-----------|

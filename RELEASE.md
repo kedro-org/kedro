@@ -9,10 +9,12 @@
 * Fixed `MemoryDataset` to infer `assign` copy mode for Ibis Tables, which previously would be inferred as `deepcopy`.
 * Fixed pipeline packaging issue by ensuring `pipelines/__init__.py` exists when creating new pipelines.
 * Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
+* Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
 
 ## Breaking changes to the API
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.
+* Fixed a minor grammatical error in Kedro-Viz installation instructions to improve documentation clarity.
 
 # Release 0.19.11
 

@@ -153,8 +153,8 @@ root
 │       │   ...
 │
 └───folder2
+    │   file020.txt
     │   file021.txt
-    │   file022.txt
 ```
 
 In this case, you would set the Kedro project path to the absolute path of the `kedroProject` directory, such as `/Users/username/root/folder1/kedroProject`.

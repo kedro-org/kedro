@@ -43,7 +43,7 @@ We also have legacy documentation pages for the following deployment targets, bu
 * for [AWS Batch](aws_batch.md)
 ```
 
-## Effective node grouping for deployment
+Effective node grouping for deployment
 Effectively grouping node in deployment makes pipelines easier to manage and update, helps them run faster by using resources efficiently, and allows them to handle more data as they grow across different deployment environments. To learn more about the best ways to group nodes using Pipelines, Tags, and Namespaces, follow our detailed guide:
 *  [Node Grouping in Kedro](nodes_grouping.md)
 
@@ -52,7 +52,6 @@ Effectively grouping node in deployment makes pipelines easier to manage and upd
 :maxdepth: 1
 :hidden:
 
-nodes_grouping
 single_machine
 distributed
 airflow
@@ -67,4 +66,5 @@ prefect
 vertexai
 argo
 aws_batch
+nodes_grouping
 ```

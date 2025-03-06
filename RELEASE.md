@@ -17,6 +17,7 @@
 * Added `Pipeline.grouped_nodes_by_namespace` property which returns a dictionary of nodes grouped by namespace, intended to be used by plugins to facilitate deployment of namespaced nodes together.
 
 ## Bug fixes and other changes
+* Added `DataCatalog` deprecation warning.
 * Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
 * Fixed `MemoryDataset` to infer `assign` copy mode for Ibis Tables, which previously would be inferred as `deepcopy`.
 * Fixed pipeline packaging issue by ensuring `pipelines/__init__.py` exists when creating new pipelines.

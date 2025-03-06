@@ -1,3 +1,15 @@
+# Release 1.0.0
+
+## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+## Breaking changes to the API
+
+
+## Migration guide from Kedro 0.19.* to 1.*
+[See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+
 # Upcoming Release
 
 ## Major features and improvements
@@ -10,9 +22,6 @@
 * Fixed pipeline packaging issue by ensuring `pipelines/__init__.py` exists when creating new pipelines.
 * Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
 * Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
-
-## Breaking changes to the API
-* Private methods `_is_project`, `_find_kedro_project`, `_split_params` are made public.
 
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.

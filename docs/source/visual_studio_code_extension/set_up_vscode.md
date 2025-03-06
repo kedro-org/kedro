@@ -101,7 +101,7 @@ To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift +
 
 ## Setting a custom Kedro project path
 
-Starting with Kedro VS Code extension version 0.3.0, you can now specify a custom path to your Kedro project. This is particularly useful when:
+Starting with Kedro VS Code extension version 0.3.0, you can now specify a custom path to your Kedro project. This is useful when:
 
 - Your Kedro project is not at the root of your workspace
 - You want to work with a Kedro project that is outside your current workspace
@@ -114,9 +114,9 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 
 1. Open the Command Palette by pressing `Cmd + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux)
 2. Type `Kedro: Set Project Path` and select it
-3. Enter the absolute path to your Kedro project (e.g., `/Users/username/projects/my-kedro-project`)
+3. Enter the absolute path to your Kedro project (for example, `/Users/username/projects/my-kedro-project`)
 
-![Setting Kedro project path via Command Palette](../meta/images/vscode_set_custom_path_using_command_palette.gif)
+![Setting Kedro project path through Command Palette](../meta/images/vscode_set_custom_path_using_command_palette.gif)
 
 #### Using the VSCode settings UI
 
@@ -125,9 +125,9 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 3. Find the `Kedro: Project Path` setting
 4. Enter the absolute path to your Kedro project in the field
 
-![Setting Kedro project path via Settings](../meta/images/vscode_set_custom_path_using_settings_ui.gif)
+![Setting Kedro project path through Settings](../meta/images/vscode_set_custom_path_using_settings_ui.gif)
 
-### Multi-Root workspace integration
+### Multi-root workspace integration
 
 If the Kedro project path you specify is not part of your current workspace, the extension will automatically add it to your workspace as part of a multi-root workspace. This allows you to:
 
@@ -137,7 +137,7 @@ If the Kedro project path you specify is not part of your current workspace, the
 
 ### Example directory structure
 
-If your Kedro project is nested within other folders, setting a custom project path can help the extension locate it correctly. For example:
+If your Kedro project is nested within other folders, setting a custom project path can help the extension locate it. For example:
 
 ```
 root
@@ -161,15 +161,15 @@ In this case, you would set the Kedro project path to the absolute path of the `
 
 ### Switching between multiple projects
 
-If you work with multiple Kedro projects, you can easily switch between them by updating the project path setting. The extension will automatically detect the change and reconfigure itself to work with the newly specified project.
+If you work with multiple Kedro projects, you can switch between them by updating the project path setting. The extension will automatically detect the change and reconfigure itself to work with the newly specified project.
 
 ### Troubleshooting
 
-If the extension doesn't recognize your Kedro project after setting a custom path:
+If the extension doesn't recognise your Kedro project after setting a custom path:
 
 1. Ensure the path points to a valid Kedro project (containing `pyproject.toml` with Kedro dependencies)
 2. Check that the path is an absolute path, not a relative one
-3. Reload VS Code if the changes don't take effect immediately
+3. Reload VS Code if the changes don’t take effect.
 
 
 ## Debugging

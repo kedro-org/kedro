@@ -99,7 +99,7 @@ To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift +
 ![](../meta/images/vscode_run.png)
 
 
-## Setting a Custom Kedro Project Path
+## Setting a custom Kedro project path
 
 Starting with Kedro VS Code extension version 0.3.0, you can now specify a custom path to your Kedro project. This is particularly useful when:
 
@@ -108,9 +108,9 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 - You have multiple Kedro projects and want to switch between them
 
 
-There are two ways to set a custom path for your Kedro project:
+### Ways to set a custom path for Kedro project:
 
-### Method 1: Using the Command Palette
+#### Using the command palette
 
 1. Open the Command Palette by pressing `Cmd + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux)
 2. Type `Kedro: Set Project Path` and select it
@@ -118,7 +118,7 @@ There are two ways to set a custom path for your Kedro project:
 
 ![Setting Kedro project path via Command Palette](../meta/images/vscode_set_custom_path_using_command_palette.gif)
 
-### Method 2: Using the Settings UI
+#### Using the VSCode settings UI
 
 1. Open VS Code settings by pressing `Cmd + ,` (macOS) or `Ctrl + ,` (Windows/Linux)
 2. Search for `kedro` in the settings search bar
@@ -127,7 +127,7 @@ There are two ways to set a custom path for your Kedro project:
 
 ![Setting Kedro project path via Settings](../meta/images/vscode_set_custom_path_using_settings_ui.gif)
 
-### Multi-Root Workspace Integration
+### Multi-Root workspace integration
 
 If the Kedro project path you specify is not part of your current workspace, the extension will automatically add it to your workspace as part of a multi-root workspace. This allows you to:
 
@@ -135,7 +135,7 @@ If the Kedro project path you specify is not part of your current workspace, the
 - Navigate the project structure
 - Use all Kedro extension features with the specified project
 
-### Example Directory Structure
+### Example directory structure
 
 If your Kedro project is nested within other folders, setting a custom project path can help the extension locate it correctly. For example:
 
@@ -159,7 +159,7 @@ root
 
 In this case, you would set the Kedro project path to the absolute path of the `kedroProject` directory, such as `/Users/username/root/folder1/kedroProject`.
 
-### Switching Between Multiple Projects
+### Switching between multiple projects
 
 If you work with multiple Kedro projects, you can easily switch between them by updating the project path setting. The extension will automatically detect the change and reconfigure itself to work with the newly specified project.
 

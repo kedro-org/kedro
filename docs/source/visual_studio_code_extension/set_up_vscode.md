@@ -142,7 +142,7 @@ If your Kedro project is nested within other folders, setting a custom project p
 
 ```
 root
-│   file001.txt    
+│   file001.txt
 │
 └───folder1
 │   │   file011.txt
@@ -152,7 +152,7 @@ root
 │       │   pyproject.toml
 │       │   README.md
 │       │   ...
-│   
+│
 └───folder2
     │   file021.txt
     │   file022.txt

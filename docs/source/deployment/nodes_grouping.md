@@ -11,7 +11,7 @@ If your project contains different pipelines, you can use them as predefined nod
 If you want to group nodes differently from the existing pipeline structure, you can use tags or namespaces instead of creating a new pipeline. The `kedro run --pipeline` command allows running one pipeline at a time, so multiple pipelines cannot be executed in a single step. While you can switch between pipelines in Kedro Viz, the flowchart view does not support collapsing or expanding them.
 
 **Best used when**
-- You have already separated your logic into different pipelines, and your project is structured to execute them independently in the deployment environment
+- You have already separated your logic into different pipelines, and your project is structured to execute them independently in the deployment environment.
 
 **Not to use when**
 - You need to run more than one pipeline together.

@@ -28,7 +28,7 @@ More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/node
 
 ## Grouping by tags
 
-You can tag individual nodes or the entire pipeline, allowing flexible execution of specific sections without modifying the pipeline structure.Kedro-Viz provides a clear visualisation of tagged nodes, making it easier to understand.
+You can tag individual nodes or the entire pipeline, allowing flexible execution of specific sections without modifying the pipeline structure. Kedro-Viz provides a clear visualisation of tagged nodes, making it easier to understand.
 <br>
 ![Filters Panel in Kedro Viz](../meta/images/kedro_viz_filters_tags.png)
 

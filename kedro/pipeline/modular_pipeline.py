@@ -196,7 +196,7 @@ def pipeline(  # noqa: PLR0913
             Must only refer to the pipeline's free inputs.
         outputs: A name or collection of names to be exposed as connection points
             to other pipelines downstream. This is optional; if not provided, the
-            pipeline inputs are automatically inferred from the pipeline structure.
+            pipeline outputs are automatically inferred from the pipeline structure.
             When str or set[str] is provided, the listed output names will stay
             the same as they are named in the provided pipeline.
             When dict[str, str] is provided, current output names will be

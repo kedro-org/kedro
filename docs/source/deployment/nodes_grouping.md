@@ -68,7 +68,7 @@ Using namespaces comes with a few challenges:
 - Customising deployment groups by adding namespaces at the node level.
 
 **Not to use when**
-- Defining namespace at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps with modularisation by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline.dding namespaces may introduce unnecessary complexity.
+- Defining namespace at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps with modularisation by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline.
 - Applying namespaces at the pipeline level makes management harder due to automatic renaming of inputs/outputs.
 
 **How to use**

@@ -38,7 +38,7 @@ to a local directory called `mlflow_runs`.
 :::{note}
 If you want to use a more sophisticated setup,
 have a look at the documentation of
-[MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/),
+[MLflow tracking server](https://mlflow.org/docs/latest/tracking/server),
 {external+mlflow:doc}`the official MLflow tracking server 5 minute overview <getting-started/tracking-server-overview/index>`,
 and {external+mlflow:ref}`the MLflow tracking server documentation <logging_to_a_tracking_server>`.
 :::

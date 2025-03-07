@@ -14,7 +14,7 @@ If you want to group nodes differently from the existing pipeline structure, you
 - You have already separated your logic into different pipelines, and your project is structured to execute them independently in the deployment environment.
 
 **Not to use when**
-- You need to run more than one pipeline together.
+- You need to run more than one pipeline at a time.
 - You want to use the expand and collapse functionality in Kedro Viz.
 
 **How to use**

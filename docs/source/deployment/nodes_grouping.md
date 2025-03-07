@@ -54,7 +54,7 @@ More information: [How to tag a node](https://docs.kedro.org/en/stable/nodes_and
 
 ## Grouping by namespaces
 
-Namespaces allow you to group nodes, ensuring clear dependencies and separation within a pipeline while maintaining a consistent structure. As the same as pipelines or tags, you can enable selective execution using namespaces, and you cannot run more than one namespace simultaneously—Kedro allows executing one namespace at a time. Kedro Viz allows expanding and collapsing namespace pipelines in the visualisation.
+Namespaces allow you to group nodes, ensuring clear dependencies and separation within a pipeline while maintaining a consistent structure. Like with pipelines or tags, you can enable selective execution using namespaces, and you cannot run more than one namespace simultaneously—Kedro allows executing one namespace at a time. Kedro Viz allows expanding and collapsing namespace pipelines in the visualisation.
 <br>
 ![Switching expanding namespaced pipeline in Kedro Viz](../meta/images/kedro_viz_expanding_namespace.gif)
 

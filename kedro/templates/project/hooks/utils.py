@@ -117,11 +117,10 @@ def _remove_file(path: Path) -> None:
         path.unlink()
 
 
-def _remove_pyspark_viz_starter_files(is_viz: bool, python_package_name: str) -> None:
+def _remove_pyspark_viz_starter_files(python_package_name: str) -> None:
     """Clean up the unnecessary files in the starters template.
 
     Args:
-        is_viz (bool): if Viz included in starter, then need to remove "reporting" folder.
         python_package_name (str): The name of the python package.
     """
     # Remove all .csv and .xlsx files from data/01_raw/
@@ -141,10 +140,8 @@ def _remove_pyspark_viz_starter_files(is_viz: bool, python_package_name: str) ->
         for param_file in conf_base_path.glob(pattern):
             _remove_file(param_file)
 
-    # Remove the pipelines subdirectories, if Viz - also "reporting" folder
-    pipelines_to_remove = ["data_science", "data_processing"] + (
-        ["reporting"] if is_viz else []
-    )
+    # Remove the pipelines subdirectories
+    pipelines_to_remove = ["data_science", "data_processing", "reporting"]
 
     pipelines_path = current_dir / f"src/{python_package_name}/pipelines/"
     for pipeline_subdir in pipelines_to_remove:
@@ -214,12 +211,8 @@ def setup_template_tools(
     if "Data Structure" not in selected_tools_list and example_pipeline != "True":
         _remove_dir(current_dir / "data")
 
-    if (
-        "PySpark" in selected_tools_list or "Kedro Viz" in selected_tools_list
-    ) and example_pipeline != "True":
-        _remove_pyspark_viz_starter_files(
-            "Kedro Viz" in selected_tools_list, python_package_name
-        )
+    if "PySpark" in selected_tools_list and example_pipeline != "True":
+        _remove_pyspark_viz_starter_files(python_package_name)
         # Remove requirements used by example pipelines
         _remove_from_file(requirements_file_path, example_pipeline_requirements)
         _remove_extras_from_kedro_datasets(requirements_file_path)

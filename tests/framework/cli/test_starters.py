@@ -326,13 +326,23 @@ class TestParseToolsInput:
             ("1,2,3", ["1", "2", "3"]),
             ("2-4", ["2", "3", "4"]),
             ("3-3", ["3"]),
-            ("all", ["1", "2", "3", "4", "5", "6", "7"]),
+            ("all", ["1", "2", "3", "4", "5", "6"]),
             ("none", []),
         ],
     )
     def test_parse_tools_valid(self, input, expected):
         result = _parse_tools_input(input)
         assert result == expected
+
+    @pytest.mark.parametrize(
+        "input",
+        ["1-7"],
+    )
+    def test_validate_range_includes_7(self, input, capsys):
+        with pytest.raises(SystemExit):
+            _parse_tools_input(input)
+        message = "Kedro Viz is automatically included in the project. Please remove 7 from your tool selection."
+        assert message in capsys.readouterr().err
 
     @pytest.mark.parametrize(
         "input",
@@ -351,7 +361,7 @@ class TestParseToolsInput:
     def test_parse_tools_range_too_high(self, input, right_border, capsys):
         with pytest.raises(SystemExit):
             _parse_tools_input(input)
-        message = f"'{right_border}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        message = f"'{right_border}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."
         assert message in capsys.readouterr().err
 
     @pytest.mark.parametrize(
@@ -362,7 +372,7 @@ class TestParseToolsInput:
         with pytest.raises(SystemExit):
             selected = _parse_tools_input(input)
             _validate_tool_selection(selected)
-        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."
         assert message in capsys.readouterr().err
 
 
@@ -1044,14 +1054,12 @@ class TestToolsAndExampleFromUserPrompts:
             "4",
             "5",
             "6",
-            "7",
             "2,3,4",
             "3-5",
             "1,2,4-6",
-            "1,2,4-6,7",
-            "4-6,7",
-            "1, 2 ,4 - 6, 7",
-            "1-3, 5-7",
+            "4-6",
+            "1, 2 ,4 - 6",
+            "1-3, 5-6",
             "all",
             "1, 2, 3",
             "  1,  2, 3  ",
@@ -1119,7 +1127,7 @@ class TestToolsAndExampleFromUserPrompts:
         )
 
         assert result.exit_code != 0
-        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        message = f"'{last_invalid}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."
         assert message in result.output
 
     @pytest.mark.parametrize(
@@ -1183,7 +1191,6 @@ class TestToolsAndExampleFromConfigFile:
             "doc",
             "data",
             "pyspark",
-            "viz",
             "tests,logs,doc",
             "test,data,lint",
             "log,docs,data,test,lint",
@@ -1230,6 +1237,30 @@ class TestToolsAndExampleFromConfigFile:
 
     @pytest.mark.parametrize(
         "bad_input",
+        ["viz"],
+    )
+    def test_viz_tool(self, fake_kedro_cli, bad_input):
+        """Test project created from config with 'viz' tool."""
+        config = {
+            "tools": bad_input,
+            "project_name": "My Project",
+            "example_pipeline": "no",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection."
+            in result.output
+        )
+
+    @pytest.mark.parametrize(
+        "bad_input",
         ["bad input", "0,3,5", "1,3,9", "llint", "tes", "test, lin"],
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
@@ -1248,7 +1279,7 @@ class TestToolsAndExampleFromConfigFile:
 
         assert result.exit_code != 0
         assert (
-            "Please select from the available tools: lint, test, log, docs, data, pyspark, viz, all, none"
+            "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none"
             in result.output
         )
 
@@ -1363,7 +1394,6 @@ class TestToolsAndExampleFromCLI:
             "doc",
             "data",
             "pyspark",
-            "viz",
             "tests,logs,doc",
             "test,data,lint",
             "log,docs,data,test,lint",
@@ -1410,7 +1440,7 @@ class TestToolsAndExampleFromCLI:
 
         assert result.exit_code != 0
         assert (
-            "Please select from the available tools: lint, test, log, docs, data, pyspark, viz, all, none"
+            "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none"
             in result.output
         )
 
@@ -1519,25 +1549,32 @@ class TestValidateSelection:
         tools = ["1", "2", "3", "4"]
         assert _validate_tool_selection(tools) is None
 
+    def test_validate_tool_selection_7_tool(self, capsys):
+        tools = ["7"]
+        with pytest.raises(SystemExit):
+            _validate_tool_selection(tools)
+        message = "Kedro Viz is automatically included in the project. Please remove 7 from your tool selection."
+        assert message in capsys.readouterr().err
+
     def test_validate_tool_selection_invalid_single_tool(self, capsys):
         tools = ["8"]
         with pytest.raises(SystemExit):
             _validate_tool_selection(tools)
-        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."
         assert message in capsys.readouterr().err
 
     def test_validate_tool_selection_invalid_multiple_tools(self, capsys):
         tools = ["8", "10", "15"]
         with pytest.raises(SystemExit):
             _validate_tool_selection(tools)
-        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."
         assert message in capsys.readouterr().err
 
     def test_validate_tool_selection_mix_valid_invalid_tools(self, capsys):
         tools = ["1", "8", "3", "15"]
         with pytest.raises(SystemExit):
             _validate_tool_selection(tools)
-        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+        message = "is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."
         assert message in capsys.readouterr().err
 
     def test_validate_tool_selection_empty_list(self):
@@ -1563,7 +1600,7 @@ class TestConvertToolNamesToNumbers:
 
     def test_convert_tool_short_names_to_numbers_with_all_string(self):
         result = _convert_tool_short_names_to_numbers("all")
-        assert result == ["1", "2", "3", "4", "5", "6", "7"]
+        assert result == ["1", "2", "3", "4", "5", "6"]
 
     def test_convert_tool_short_names_to_numbers_with_mixed_valid_invalid_tools(self):
         selected_tools = "lint,invalid_tool,docs"
@@ -1806,7 +1843,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
             return_value=True,
         )
 
-        config["tools"] = ["PySpark", "Kedro Viz"]
+        config["tools"] = ["PySpark"]
         checkout = version
         directory = "my-directory"
         template_path = "my/template/path"
@@ -1816,7 +1853,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
             "no_input": True,
             "extra_context": config,
             "checkout": version,
-            "directory": "spaceflights-pyspark-viz",
+            "directory": "spaceflights-pyspark",
         }
         expected_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
@@ -1833,7 +1870,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
             return_value=False,
         )
 
-        config["tools"] = ["PySpark", "Kedro Viz"]
+        config["tools"] = ["PySpark"]
         checkout = "my-checkout"
         directory = "my-directory"
         template_path = "my/template/path"
@@ -1843,7 +1880,7 @@ class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:
             "no_input": True,
             "extra_context": config,
             "checkout": "my-checkout",
-            "directory": "spaceflights-pyspark-viz",
+            "directory": "spaceflights-pyspark",
         }
         expected_path = "git+https://github.com/kedro-org/kedro-starters.git"
 

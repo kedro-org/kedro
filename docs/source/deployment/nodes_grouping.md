@@ -2,8 +2,6 @@
 
 Effectively grouping nodes in deployment is crucial for maintainability, debugging, and execution control. This document provides an overview of three key grouping methods: pipelines, tags, and namespaces, along with their strengths, limitations, best uses, and relevant documentation links.
 
-Choosing between pipelines, tags, and namespaces in Kedro
-
 ## Grouping by pipelines
 
 If your project contains different pipelines, you can use them as predefined node groupings for deployment. Pipelines can be executed separately in the deployment environment. With the visualisation in Kedro Viz, you can switch to see different pipeline in a more isolated view.

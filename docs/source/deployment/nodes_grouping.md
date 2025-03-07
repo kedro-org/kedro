@@ -15,7 +15,7 @@ If you want to group nodes differently from the existing pipeline structure, you
 
 **Not to use when**
 - You need to run more than one pipeline together.
-- You want to use the expand and collapse functionality in Kedro Viz
+- You want to use the expand and collapse functionality in Kedro Viz.
 
 **How to use**
 

@@ -4,7 +4,7 @@ Effectively grouping nodes in deployment is crucial for maintainability, debuggi
 
 ## Grouping by pipelines
 
-If your project contains different pipelines, you can use them as predefined node groupings for deployment. Pipelines can be executed separately in the deployment environment. With the visualisation in Kedro Viz, you can switch to see different pipeline in a more isolated view.
+If your project contains different pipelines, you can use them as predefined node groupings for deployment. Pipelines can be executed separately in the deployment environment. With the visualisation in Kedro Viz, you can switch to see different pipelines in an isolated view.
 <br>
 ![Switching between different pipelines in Kedro Viz](../meta/images/kedro_viz_switching_pipeline.gif)
 

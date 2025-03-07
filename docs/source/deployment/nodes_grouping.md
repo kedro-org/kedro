@@ -32,7 +32,7 @@ You can tag individual nodes or the entire pipeline, allowing flexible execution
 <br>
 ![Filters Panel in Kedro Viz](../meta/images/kedro_viz_filters_tags.png)
 
-Please note that nodes with the same tag can exist in different pipelines, making debugging and maintaining the codebase more challenging.
+Please note that nodes with the same tag can exist in different pipelines, making debugging and maintaining the codebase more challenging, and tags do not enforce structure like pipelines or namespaces.
 
 **Best used when**
 - You need to run specific nodes that don’t belong to the same pipeline.
@@ -41,7 +41,6 @@ Please note that nodes with the same tag can exist in different pipelines, makin
 **Not to use when**
 - The tagged nodes have strong dependencies, which might cause execution failures.
 - Tags are not hierarchical, so tracking groups of nodes can become difficult.
-- Tags do not enforce structure like pipelines or namespaces.
 
 **How to use**
 
@@ -60,7 +59,15 @@ Namespaces allow you to group nodes, ensuring clear dependencies and separation 
 
 Using namespaces comes with a few challenges:
 - **Defining namespace at Node-level:** If you define namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
-- **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly.
+- **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly. If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `pipeline()` creation function. For example:
+
+```
+return pipeline(
+    base_pipeline,
+    namespace = "new_namespaced_pipeline", # With that namespace, "new_namespaced_pipeline" prefix will be added to inputs, outputs, params, and node names
+    inputs={"the_original_input_name"}, # Inputs remain the same, without namespace prefix
+)
+```
 
 **Best used when**
 - You want to organise nodes logically within a pipeline while keeping a structured execution flow. You can also nest namespace pipelines within each other.
@@ -68,8 +75,8 @@ Using namespaces comes with a few challenges:
 - Customising deployment groups by adding namespaces at the node level.
 
 **Not to use when**
-- Defining namespace at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps with modularisation by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline.
-- Applying namespaces at the pipeline level makes management harder due to automatic renaming of inputs/outputs.
+- In small and simple projects, using namespaces can introduce unnecessary complexity, making pipeline grouping a more suitable choice.
+- Namespaces require additional effort, such as updating catalog names, since namespace prefixes are automatically applied to all the elements unless explicitly overridden in the namespaced pipeline parameters.
 
 **How to use**
 

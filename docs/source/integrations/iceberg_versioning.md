@@ -113,7 +113,7 @@ class PyIcebergDataset(AbstractDataset):
         return self.table.inspect
 ```
 
-This dataset allows you to load Iceberg tables as `pandas` dataframes. You can also load a subset of the table by passing [the `scan_args` parameter to the dataset](https://py.iceberg.apache.org/reference/pyiceberg/table/#pyiceberg.table.Table.scan). The `save()` method allows you to save a dataframe as an Iceberg table. You can specify the mode of saving the table by passing the `save_args` parameter to the dataset. The `inspect()` method returns an `InspectTable` object which contains metadata about the table.
+This dataset allows you to load Iceberg tables as `pandas` dataframes. You can also load a subset of the table by passing the [`scan_args` parameter to the dataset](https://py.iceberg.apache.org/reference/pyiceberg/table/#pyiceberg.table.Table.scan). The `save()` method allows you to save a dataframe as an Iceberg table. You can specify the mode of saving the table by passing the `save_args` parameter to the dataset. The `inspect()` method returns an `InspectTable` object which contains metadata about the table.
 You can also update the code to extend the functionality of the dataset to support more features of Iceberg tables. Refer to the [Iceberg API documentation](https://py.iceberg.apache.org/api/) to see what you can do with the `Table` object.
 
 ## Using Iceberg tables in the catalog

@@ -5,7 +5,7 @@
 ## Migrate an existing project that uses Kedro 0.19.* to use 1.*
 
 ### Polishing API Surface
-Kedro 1.0.0 made the following private methods `_is_project`, `_find_kedro_project` and `_split_params` public. To update, you need to use `is_project`, `find_kedro_project` and `split_params` respectively.
+Kedro 1.0.0 made the following private methods `_is_project` and `_find_kedro_project` public. To update, you need to use `is_kedro_project` and `find_kedro_project` respectively.
 
 ## Migrate an existing project that uses Kedro 0.18.* to use 0.19.*
 

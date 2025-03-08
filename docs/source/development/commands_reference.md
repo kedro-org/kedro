@@ -161,7 +161,7 @@ from kedro.framework.cli.project import (
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     _config_file_callback,
-    split_params,
+    _split_params,
     _split_load_versions,
     env_option,
     split_string,
@@ -222,7 +222,7 @@ def cli():
     type=click.UNPROCESSED,
     default="",
     help=PARAMS_ARG_HELP,
-    callback=split_params,
+    callback=_split_params,
 )
 def run(
     tags,

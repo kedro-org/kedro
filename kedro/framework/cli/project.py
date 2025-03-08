@@ -13,11 +13,11 @@ from kedro.framework.cli.utils import (
     _check_module_importable,
     _config_file_callback,
     _split_load_versions,
+    _split_params,
     call,
     env_option,
     forward_command,
     split_node_names,
-    split_params,
     split_string,
 )
 from kedro.framework.project import settings
@@ -197,7 +197,7 @@ def package(metadata: ProjectMetadata) -> None:
     type=click.UNPROCESSED,
     default="",
     help=PARAMS_ARG_HELP,
-    callback=split_params,
+    callback=_split_params,
 )
 def run(  # noqa: PLR0913
     tags: str,

@@ -468,7 +468,7 @@ def _validate_config_file(key: str) -> None:
         )
 
 
-def split_params(ctx: click.Context, param: Any, value: Any) -> Any:
+def _split_params(ctx: click.Context, param: Any, value: Any) -> Any:
     if isinstance(value, dict):
         return value
     dot_list = []

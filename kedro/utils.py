@@ -44,7 +44,7 @@ def _is_databricks() -> bool:
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
-def is_project(project_path: Union[str, Path]) -> bool:
+def is_kedro_project(project_path: Union[str, Path]) -> bool:
     """Evaluate if a given path is a root directory of a Kedro project or not.
 
     Args:
@@ -77,7 +77,7 @@ def find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     """
     paths_to_check = [current_dir, *list(current_dir.parents)]
     for parent_dir in paths_to_check:
-        if is_project(parent_dir):
+        if is_kedro_project(parent_dir):
             return parent_dir
     return None
 

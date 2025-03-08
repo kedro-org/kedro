@@ -470,7 +470,7 @@ ERROR,
 
         load_ipython_extension(ipython)
         ipython.magic("load_node dummy_node")
-        calls = [call("cell1", is_jupyter=True), call("cell2", is_jupyter=True)]
+        calls = [call("cell1\n\ncell2")]
         spy.assert_has_calls(calls)
 
     @pytest.mark.parametrize("run_env", ["ipython", "vscode"])

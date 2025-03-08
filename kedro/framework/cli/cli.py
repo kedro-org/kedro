@@ -31,7 +31,7 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.project import LOGGING  # noqa: F401
 from kedro.framework.startup import bootstrap_project
-from kedro.utils import find_kedro_project, is_project
+from kedro.utils import find_kedro_project, is_kedro_project
 
 LOGO = rf"""
  _            _
@@ -131,7 +131,7 @@ class KedroCLI(CommandCollection):
 
     def __init__(self, project_path: Path):
         self._metadata = None  # running in package mode
-        if is_project(project_path):
+        if is_kedro_project(project_path):
             self._metadata = bootstrap_project(project_path)
         self._cli_hook_manager = get_cli_hook_manager()
 

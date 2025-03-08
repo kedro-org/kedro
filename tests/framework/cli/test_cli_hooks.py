@@ -101,7 +101,7 @@ class TestKedroCLIHooks:
         caplog.set_level(logging.DEBUG, logger="kedro")
 
         mocker.patch(
-            "kedro.framework.cli.cli.is_project",
+            "kedro.framework.cli.cli.is_kedro_project",
             return_value=True,
         )
         mocker.patch(

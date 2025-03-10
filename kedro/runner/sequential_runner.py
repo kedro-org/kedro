@@ -32,9 +32,7 @@ class SequentialRunner(AbstractRunner):
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
         """
-        super().__init__(
-            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
-        )
+        super().__init__(is_async=is_async)
 
     def _get_executor(self, max_workers: int) -> None:
         return None

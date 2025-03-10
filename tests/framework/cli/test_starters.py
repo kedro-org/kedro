@@ -341,7 +341,7 @@ class TestParseToolsInput:
     def test_validate_range_includes_7(self, input, capsys):
         with pytest.raises(SystemExit):
             _parse_tools_input(input)
-        message = "Kedro Viz is automatically included in the project. Please remove 7 from your tool selection."
+        message = "'7' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6.\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
         assert message in capsys.readouterr().err
 
     @pytest.mark.parametrize(
@@ -1255,7 +1255,7 @@ class TestToolsAndExampleFromConfigFile:
 
         assert result.exit_code != 0
         assert (
-            "Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection."
+            "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none. Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection."
             in result.output
         )
 
@@ -1552,8 +1552,8 @@ class TestValidateSelection:
     def test_validate_tool_selection_7_tool(self, capsys):
         tools = ["7"]
         with pytest.raises(SystemExit):
-            _validate_tool_selection(tools)
-        message = "Kedro Viz is automatically included in the project. Please remove 7 from your tool selection."
+            _validate_tool_selection(tools)  
+        message = "'7' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6.\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
         assert message in capsys.readouterr().err
 
     def test_validate_tool_selection_invalid_single_tool(self, capsys):

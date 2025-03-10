@@ -43,7 +43,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
-from kedro.utils import _find_kedro_project, _is_databricks
+from kedro.utils import _is_databricks, find_kedro_project
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def load_ipython_extension(ipython: InteractiveShell) -> None:
     ipython.register_magic_function(func=magic_load_node, magic_name="load_node")  # type: ignore[call-arg]
     logger.info("Registered line magic '%load_node'")
 
-    if _find_kedro_project(Path.cwd()) is None:
+    if find_kedro_project(Path.cwd()) is None:
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
             "Make sure you run '%reload_kedro <project_root>'."
@@ -175,7 +175,7 @@ def _resolve_project_path(
         ):
             project_path = local_namespace["context"].project_path
         else:
-            project_path = _find_kedro_project(Path.cwd())
+            project_path = find_kedro_project(Path.cwd())
         if project_path:
             logger.info(
                 "Resolved project path as: %s.\nTo set a different path, run "

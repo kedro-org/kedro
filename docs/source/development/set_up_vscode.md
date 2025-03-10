@@ -108,9 +108,7 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 - You have multiple Kedro projects and want to switch between them
 
 
-### Ways to set a custom path for Kedro project:
-
-#### Using the command palette
+### Set up a custom path using the command palette
 
 1. Open the Command Palette by pressing `Cmd + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux)
 2. Type `Kedro: Set Project Path` and select it
@@ -118,7 +116,7 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 
 ![Setting Kedro project path through Command Palette](../meta/images/vscode_set_custom_path_using_command_palette.gif)
 
-#### Using the VSCode settings UI
+### Set up a custom path using the VSCode settings UI
 
 1. Open VS Code settings by pressing `Cmd + ,` (macOS) or `Ctrl + ,` (Windows/Linux)
 2. Search for `kedro` in the settings search bar

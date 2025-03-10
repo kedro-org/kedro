@@ -90,6 +90,7 @@ Welcome to Kedro's award-winning documentation!
    integrations/mlflow.md
    integrations/kedro_dvc_versioning.md
    integrations/deltalake_versioning.md
+   integrations/iceberg_versioning.md
 
 .. toctree::
    :maxdepth: 2

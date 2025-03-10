@@ -117,7 +117,7 @@ def _remove_file(path: Path) -> None:
         path.unlink()
 
 
-def _remove_pyspark_viz_starter_files(python_package_name: str) -> None:
+def _remove_pyspark_starter_files(python_package_name: str) -> None:
     """Clean up the unnecessary files in the starters template.
 
     Args:
@@ -212,7 +212,7 @@ def setup_template_tools(
         _remove_dir(current_dir / "data")
 
     if "PySpark" in selected_tools_list and example_pipeline != "True":
-        _remove_pyspark_viz_starter_files(python_package_name)
+        _remove_pyspark_starter_files(python_package_name)
         # Remove requirements used by example pipelines
         _remove_from_file(requirements_file_path, example_pipeline_requirements)
         _remove_extras_from_kedro_datasets(requirements_file_path)

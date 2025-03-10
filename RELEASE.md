@@ -30,6 +30,7 @@
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.
 * Added documentation for Kedro's support for Iceberg versioning.
+* Added documentation for Kedro's nodes grouping in deployment.
 * Fixed a minor grammatical error in Kedro-Viz installation instructions to improve documentation clarity.
 
 # Release 0.19.11

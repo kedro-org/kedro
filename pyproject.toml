@@ -58,7 +58,7 @@ test = [
     "detect-secrets~=1.5.0",
     "import-linter==2.2",
     "ipylab>=1.0.0",
-    "ipython~=8.10",
+    "ipython>=8.10,<10.0",
     "jupyterlab_server>=2.11.1",
     "jupyterlab>=3,<5",
     "jupyter~=1.0",

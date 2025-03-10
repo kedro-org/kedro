@@ -36,7 +36,7 @@ You'll start by finding the path of your Kedro CLI script in the terminal:
 which kedro
 
 # Windows (in **Anaconda Command Prompt**)
-python -c 'import sys, os.path; print(os.path.join(os.path.dirname(sys.executable), "kedro"))'
+where kedro
 ```
 
 We're going to need you to modify your `tasks.json`. To do this, go to **Terminal > Configure Tasks...** on your menu and open up `tasks.json` in the editor. Modify it with the following:

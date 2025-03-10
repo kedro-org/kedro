@@ -222,7 +222,7 @@ def _parse_yes_no_to_bool(value: str) -> Any:
     return value.strip().lower() in ["y", "yes"] if value is not None else None
 
 
-def _validate_selected_tools(selected_tools: str | Nonde) -> None:
+def _validate_selected_tools(selected_tools: str | None) -> None:
     valid_tools = [*list(TOOLS_SHORTNAME_TO_NUMBER), "all", "none"]
 
     if selected_tools is not None:
@@ -897,11 +897,12 @@ def _validate_config_file_against_prompts(
             "It must be a relative or absolute path to an existing directory."
         )
 
+
 def _validate_tool_selection(tools: list[str]) -> None:
     # start validating from the end, when user select 1-20, it will generate a message
     # '20' is not a valid selection instead of '8'
     for tool in tools[::-1]:
-         if tool not in NUMBER_TO_TOOLS_NAME:
+        if tool not in NUMBER_TO_TOOLS_NAME:
             message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
             if tool == "7":
                 message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."

@@ -1552,7 +1552,7 @@ class TestValidateSelection:
     def test_validate_tool_selection_7_tool(self, capsys):
         tools = ["7"]
         with pytest.raises(SystemExit):
-            _validate_tool_selection(tools)  
+            _validate_tool_selection(tools)
         message = "'7' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6.\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
         assert message in capsys.readouterr().err
 

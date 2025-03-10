@@ -5,7 +5,7 @@ of provided nodes.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from kedro.runner.runner import AbstractRunner
 
@@ -25,20 +25,13 @@ class SequentialRunner(AbstractRunner):
     def __init__(
         self,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
-                during the run. This is used to set the default datasets to MemoryDataset
-                for `SequentialRunner`.
-
         """
-        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
-        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
         super().__init__(
             is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
         )

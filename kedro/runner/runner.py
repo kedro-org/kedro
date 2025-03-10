@@ -48,19 +48,14 @@ class AbstractRunner(ABC):
     def __init__(
         self,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
-                during the run. This is used to set the default datasets on the Runner instances.
-
         """
         self._is_async = is_async
-        self._extra_dataset_patterns = extra_dataset_patterns
 
     @property
     def _logger(self) -> logging.Logger:
@@ -109,12 +104,6 @@ class AbstractRunner(ABC):
                 f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
             )
 
-        # Register the default dataset pattern with the catalog
-        # TODO: replace with catalog.config_resolver.add_runtime_patterns() when removing old catalog
-        catalog = catalog.shallow_copy(
-            extra_dataset_patterns=self._extra_dataset_patterns
-        )
-
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
         # Check which datasets used in the pipeline are in the catalog or match
@@ -142,12 +131,6 @@ class AbstractRunner(ABC):
         free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
 
         run_output = {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
-
-        # Remove runtime patterns after run, so they do not affect further runs
-        if self._extra_dataset_patterns:
-            catalog.config_resolver.remove_runtime_patterns(
-                self._extra_dataset_patterns
-            )
 
         return run_output
 

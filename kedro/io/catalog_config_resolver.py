@@ -25,8 +25,9 @@ class CatalogConfigResolver:
         self,
         config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
+        runtime_patterns: Patterns | None = None,
     ):
-        self._runtime_patterns: Patterns = {}
+        self._runtime_patterns = runtime_patterns or {}
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )
@@ -327,15 +328,3 @@ class CatalogConfigResolver:
             return ds_config  # type: ignore[no-any-return]
 
         return self._resolved_configs.get(ds_name, {})
-
-    def add_runtime_patterns(self, dataset_patterns: Patterns) -> None:
-        """Add new runtime patterns and re-sort them."""
-        self._runtime_patterns = {**self._runtime_patterns, **dataset_patterns}
-        self._runtime_patterns = self._sort_patterns(self._runtime_patterns)
-
-    def remove_runtime_patterns(self, dataset_patterns: Patterns) -> None:
-        """Remove runtime patterns and re-sort them."""
-        for pattern_name in dataset_patterns:
-            if pattern_name in self._runtime_patterns:
-                del self._runtime_patterns[pattern_name]
-        self._runtime_patterns = self._sort_patterns(self._runtime_patterns)

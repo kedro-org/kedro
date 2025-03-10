@@ -322,20 +322,24 @@ You must [set a breakpoint in VS Code as described in the debugging section abov
 
 [Find more information on debugging in VS Code](https://code.visualstudio.com/docs/python/debugging).
 
-## Configuring the Kedro catalog validation schema
+## Real time catalog validation with Kedro LSP
 
-You can enable the Kedro catalog validation schema in your VS Code to enable real-time validation, autocompletion and see information about the different fields in your `catalog` as you write it. To enable this, make sure you have the [YAML plugin](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) installed.
+With the latest **Kedro VS Code extension**, you can automatically check your `catalog*.yml` or `catalog*.yaml` files without installing additional YAML plugins or schemas. The extension now uses a **Language Server Protocol (LSP)** approach to catch configuration issues as you edit.
 
-Enter the following in your `settings.json` file:
+### How it works
 
-```json
-{
-  "yaml.schemas": {
-    "https://raw.githubusercontent.com/kedro-org/kedro-plugins/main/kedro-datasets/static/jsonschema/kedro-catalog-0.19.json": "conf/**/*catalog*"
-  }
-}
-```
+- **Parsing & Dataset Checks**: The extension reads your catalog file and tries to load each dataset to ensure the configuration is correct.
+- **Immediate Feedback**: If any dataset has an invalid type or missing dependency, you’ll see red underlines in the editor and an entry in VS Code’s **Problems** panel.
+- **Incremental & Periodic Validation**: The extension re-checks your catalogs whenever you open or edit a file, and it can also run in the background, so you’re always up-to-date on any potential issues.
 
-and start editing your `catalog` files.
+### Viewing errors in the problems panel
 
-> [Different schemas for different Kedro versions can be found in the Kedro repository](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/static/jsonschema).
+VS Code’s **Problems** panel provides a convenient overview of all catalog issues:
+
+1. Go to **View > Problems** or press `Ctrl+Shift+M` (or `Cmd+Shift+M` on macOS).
+2. Expand any reported errors to see details about what’s wrong (for example, “Class not found.”).
+3. **Click** an error to jump directly to the problematic line in the catalog file.
+
+![](../meta/images/vscode_problems_panel.png)
+
+This simplifies fixing dataset errors caused by things such as typos in your dataset type or missing modules before running any Kedro pipelines.

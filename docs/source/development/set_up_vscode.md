@@ -14,7 +14,8 @@ At this stage, you should be able to see the `conda` environment that you have c
 [Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate around your Kedro project by finding the definition of your datasets, find references to them in your code, and more.
 
 ![Kedro VS Code gif](https://github.com/kedro-org/vscode-kedro/blob/main/assets/lsp-go-to-definition.gif?raw=true)
-## Setting up `venv` / `virtualenv`
+
+## Setting up `venv` / `virtualenv` in VS Code
 
 We're going to show you how to get your virtual environments to show up in your Python interpreter in VS Code. You do this by opening [`settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settings-file-locations) and adding the following:
 

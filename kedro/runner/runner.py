@@ -95,15 +95,6 @@ class AbstractRunner(ABC):
                 warmed_up_ds.append(ds)
                 _ = catalog._get_dataset(ds)
 
-        # Check if there are any input datasets that aren't in the catalog and
-        # don't match a pattern in the catalog.
-        unsatisfied = pipeline.inputs() - set(warmed_up_ds)
-
-        if unsatisfied:
-            raise ValueError(
-                f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
-            )
-
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
         # Check which datasets used in the pipeline are in the catalog or match

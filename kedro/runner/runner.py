@@ -104,8 +104,9 @@ class AbstractRunner(ABC):
 
         self._logger.info("Pipeline execution completed successfully.")
 
-        # Check if there's any output datasets that aren't in the catalog
-        # (are not in the catalog and do not match user pattern)
+        # TODO: decide if we want to differ default datasets added in the catalog with
+        # TODO: default datasets resolved when execution
+        # TODO: Can we just return pipeline.outputs() instead but without loading data?
         free_outputs = [ds for ds in pipeline.outputs() if ds not in catalog]
 
         run_output = {ds_name: catalog.load(ds_name) for ds_name in free_outputs}

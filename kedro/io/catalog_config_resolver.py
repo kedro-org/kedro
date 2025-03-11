@@ -7,11 +7,14 @@ from __future__ import annotations
 import copy
 import logging
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from parse import parse
 
 from kedro.io.core import DatasetError
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable
 
 Patterns = dict[str, dict[str, Any]]
 
@@ -196,10 +199,20 @@ class CatalogConfigResolver:
             + list(self._runtime_patterns.keys())
         )
 
+    @classmethod
+    def _get_matches(cls, pattens: Iterable[str], ds_name: str) -> Generator[str]:
+        return (pattern for pattern in pattens if parse(pattern, ds_name))
+
     def match_pattern(self, ds_name: str) -> str | None:
-        """Match a dataset name against patterns in a dictionary."""
-        all_patterns = self.list_patterns()
-        matches = (pattern for pattern in all_patterns if parse(pattern, ds_name))
+        """Match a dataset name against catalog patterns in a dictionary."""
+        matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
+        return next(matches, None)
+
+    def match_default_pattern(self, ds_name: str) -> str | None:
+        """Match a dataset name against default patterns in a dictionary."""
+        matches = self._get_matches(
+            self._default_pattern.keys() + self._runtime_patterns.keys(), ds_name
+        )
         return next(matches, None)
 
     def _get_pattern_config(self, pattern: str) -> dict[str, Any]:

@@ -11,11 +11,13 @@
 * Fixed pipeline packaging issue by ensuring `pipelines/__init__.py` exists when creating new pipelines.
 * Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
 * Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
+* Remove `7: Kedro Viz` from Kedro tools.
 
 ## Breaking changes to the API
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.
 * Added documentation for Kedro's support for Iceberg versioning.
+* Added documentation for Kedro's nodes grouping in deployment.
 * Fixed a minor grammatical error in Kedro-Viz installation instructions to improve documentation clarity.
 
 # Release 0.19.11

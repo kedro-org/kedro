@@ -527,6 +527,19 @@ def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str
     return load_versions_dict
 
 
+def validate_conf_source(ctx: click.Context, param: Any, value: str) -> str | None:
+    """Validate the conf_source, only checking existence for local paths."""
+    if not value:
+        return None
+
+    if "://" in value and not value.startswith("file://"):
+        return value
+
+    # For local paths, use the standard Click path validation
+    path_validator = click.Path(exists=True, file_okay=True, resolve_path=True)
+    return path_validator(ctx, param, value)
+
+
 class LazyGroup(click.Group):
     """A click Group that supports lazy loading of subcommands."""
 

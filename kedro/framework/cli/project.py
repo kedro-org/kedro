@@ -19,6 +19,7 @@ from kedro.framework.cli.utils import (
     forward_command,
     split_node_names,
     split_string,
+    validate_conf_source,
 )
 from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
@@ -189,7 +190,7 @@ def package(metadata: ProjectMetadata) -> None:
 )
 @click.option(
     "--conf-source",
-    type=str,
+    callback=validate_conf_source,
     help=CONF_SOURCE_HELP,
 )
 @click.option(

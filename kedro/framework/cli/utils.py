@@ -117,6 +117,29 @@ def _suggest_cli_command(
     return suggestion
 
 
+def validate_conf_source(ctx: click.Context, param: Any, value: str) -> str | None:
+    """Validate the conf_source, only checking existence for local paths."""
+    if not value:
+        return None
+
+    # Check for remote URLs (except file://)
+    if "://" in value and not value.startswith("file://"):
+        return value
+
+    # For local paths
+    try:
+        path = Path(value)
+        if not path.exists():
+            raise click.BadParameter(f"Path '{value}' does not exist.")
+        return str(path.resolve())
+    except click.BadParameter:
+        # Re-raise Click exceptions
+        raise
+    except Exception as exc:
+        # Wrap other exceptions
+        raise click.BadParameter(f"Invalid path: {value}. Error: {exc!s}")
+
+
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
@@ -525,19 +548,6 @@ def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str
         load_versions_dict[load_version_list[0]] = load_version_list[1]
 
     return load_versions_dict
-
-
-def validate_conf_source(ctx: click.Context, param: Any, value: str) -> str | None:
-    """Validate the conf_source, only checking existence for local paths."""
-    if not value:
-        return None
-
-    if "://" in value and not value.startswith("file://"):
-        return value
-
-    # For local paths, use the standard Click path validation
-    path_validator = click.Path(exists=True, file_okay=True, resolve_path=True)
-    return path_validator(ctx, param, value)
 
 
 class LazyGroup(click.Group):

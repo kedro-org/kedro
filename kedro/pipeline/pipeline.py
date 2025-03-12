@@ -988,8 +988,8 @@ class Pipeline:
         ]
 
         for predicate, processor in rules:
-            if predicate(name):
-                return processor(name)
+            if predicate(name):  # type: ignore[no-untyped-call]
+                return processor(name)  # type: ignore[no-untyped-call]
         return name
 
     def _process_dataset_names(
@@ -1009,7 +1009,9 @@ class Pipeline:
                 key: self._rename(value, mapping, namespace)
                 for key, value in datasets.items()
             }
-        raise ValueError(f"Unexpected input {datasets} of type {type(datasets)}")
+        raise ValueError(
+            f"Unexpected input {datasets} of type {type(datasets)}"
+        )  # pragma: no cover
 
     def _copy_node(self, node: Node, mapping: dict, namespace: str) -> Node:
         new_namespace = node.namespace

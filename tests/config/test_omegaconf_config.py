@@ -1349,6 +1349,37 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["my_global"] == 89
         assert conf["parameters"]["my_second_global"] == 24
 
+    def test_init_filesystem_http_protocol(self, mocker, tmp_path):
+        """Test initialising filesystem with HTTP protocol."""
+        # Mock fsspec
+        mock_fs = mocker.patch("fsspec.filesystem")
+
+        mock_filesystem = mocker.MagicMock()
+        mock_fs.return_value = mock_filesystem
+
+        # Test with HTTP URL
+        config_loader = OmegaConfigLoader("http://example.com/configs")
+
+        mock_fs.assert_called_once_with(protocol="http")
+
+        assert config_loader._protocol == "http"
+
+    def test_init_filesystem_cloud_protocol(self, mocker, tmp_path):
+        """Test initialising filesystem with cloud protocol (S3)."""
+        # Mock fsspec
+        mock_fs = mocker.patch("fsspec.filesystem")
+
+        mock_filesystem = mocker.MagicMock()
+        mock_filesystem.ls.return_value = ["dummy_path"]
+        mock_fs.return_value = mock_filesystem
+
+        # Test with S3 URL
+        config_loader = OmegaConfigLoader("s3://mybucket/configs")
+
+        mock_fs.assert_called_once_with(protocol="s3")
+
+        assert config_loader._protocol == "s3"
+
 
 class TestOmegaConfigLoaderStandalone:
     """

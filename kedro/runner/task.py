@@ -247,8 +247,12 @@ class Task:
 
     @staticmethod
     async def _async_dataset_save(
-        dataset_name: str, data: Any, node, catalog, hook_manager
-    ):
+        dataset_name: str,
+        data: Any,
+        node: Node,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager,
+    ) -> None:
         """Asynchronously saves a dataset while ensuring hooks are executed in order."""
         hook_manager.hook.before_dataset_saved(
             dataset_name=dataset_name, data=data, node=node

@@ -1,15 +1,12 @@
 from __future__ import annotations
 
+import asyncio
 import inspect
 import itertools as it
 import multiprocessing
 from collections.abc import Iterable, Iterator
 from concurrent.futures import (
     ALL_COMPLETED,
-    Future,
-    ThreadPoolExecutor,
-    as_completed,
-    wait,
 )
 from typing import TYPE_CHECKING, Any
 
@@ -78,11 +75,15 @@ class Task:
             )
             self.hook_manager = hook_manager
         if self.is_async:
-            node = self._run_node_async(
-                self.node,
-                self.catalog,
-                self.hook_manager,  # type: ignore[arg-type]
-                self.session_id,
+            import asyncio
+
+            node = asyncio.run(
+                self._run_node_async(
+                    self.node,
+                    self.catalog,
+                    self.hook_manager,  # type: ignore[arg-type]
+                    self.session_id,
+                )
             )
         else:
             node = self._run_node_sequential(
@@ -189,49 +190,61 @@ class Task:
             )
         return node
 
-    def _run_node_async(
+    async def _run_node_async(
         self,
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,  # type: ignore[arg-type]
         session_id: str | None = None,
     ) -> Node:
-        with ThreadPoolExecutor() as pool:
-            inputs: dict[str, Future] = {}
-
-            for name in node.inputs:
-                inputs[name] = pool.submit(
+        # Load inputs (still requires `to_thread` as it's synchronous due to _synchronous_dataset_load)
+        input_tasks: dict[str, asyncio.Task] = {
+            name: asyncio.create_task(
+                asyncio.to_thread(
                     self._synchronous_dataset_load, name, node, catalog, hook_manager
                 )
-
-            wait(inputs.values(), return_when=ALL_COMPLETED)
-            inputs = {key: value.result() for key, value in inputs.items()}
-            is_async = True
-            additional_inputs = self._collect_inputs_from_hook(
-                node, catalog, inputs, is_async, hook_manager, session_id=session_id
             )
-            inputs.update(additional_inputs)
+            for name in node.inputs
+        }
 
-            outputs = self._call_node_run(
-                node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        # Wait for all input tasks to complete
+        await asyncio.wait(input_tasks.values(), return_when=ALL_COMPLETED)
+
+        inputs = {key: value.result() for key, value in input_tasks.items()}
+
+        is_async = True
+        additional_inputs = self._collect_inputs_from_hook(
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        )
+        inputs.update(additional_inputs)
+
+        outputs = self._call_node_run(
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        )
+
+        output_tasks = []
+        for name, data in outputs.items():
+            hook_manager.hook.before_dataset_saved(
+                dataset_name=name, data=data, node=node
+            )
+            output_tasks.append(
+                asyncio.create_task(asyncio.to_thread(catalog.save, name, data))
             )
 
-            future_dataset_mapping = {}
-            for name, data in outputs.items():
-                hook_manager.hook.before_dataset_saved(
-                    dataset_name=name, data=data, node=node
-                )
-                future = pool.submit(catalog.save, name, data)
-                future_dataset_mapping[future] = (name, data)
+        for output_task in asyncio.as_completed(output_tasks):
+            try:
+                await output_task
+            except Exception as exception:
+                raise exception
 
-            for future in as_completed(future_dataset_mapping):
-                exception = future.exception()
-                if exception:
-                    raise exception
-                name, data = future_dataset_mapping[future]
-                hook_manager.hook.after_dataset_saved(
-                    dataset_name=name, data=data, node=node
-                )
+            # Extract corresponding name/data using the output_tasks order
+            idx = output_tasks.index(output_task)
+            name, data = list(outputs.items())[idx]
+
+            hook_manager.hook.after_dataset_saved(
+                dataset_name=name, data=data, node=node
+            )
+
         return node
 
     @staticmethod

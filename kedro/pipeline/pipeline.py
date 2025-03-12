@@ -99,22 +99,6 @@ def _validate_datasets_exist(
         raise PipelineError(error_msg + suggestions)
 
 
-def __getattr__(name: str) -> Any:
-    if name == "TRANSCODING_SEPARATOR":
-        import warnings
-
-        from kedro.pipeline.transcoding import TRANSCODING_SEPARATOR
-
-        warnings.warn(
-            f"{name!r} has been moved to 'kedro.pipeline.transcoding', "
-            f"and the alias will be removed in Kedro 0.20.0",
-            kedro.KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return TRANSCODING_SEPARATOR
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
 class OutputNotUniqueError(Exception):
     """Raised when two or more nodes that are part of the same pipeline
     produce outputs with the same name.
@@ -1020,7 +1004,6 @@ class Pipeline:
         inputs=None,
         outputs=None,
         parameters=None,
-        tags=None,
         namespace=None,
         pipe=None,
     ):

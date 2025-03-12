@@ -198,10 +198,10 @@ The remote storage should maintain the same configuration structure as local con
 
 ```text
 s3://my-bucket/configs/
-├── base/              
+├── base/
 │   ├── catalog.yml
 │   └── parameters.yml
-└── prod/              
+└── prod/
     └── parameters.yml
 ```
 

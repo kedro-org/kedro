@@ -3,8 +3,7 @@ from itertools import chain
 import pytest
 
 import kedro
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     OutputNotUniqueError,
@@ -87,7 +86,7 @@ def pipeline_with_duplicate_transcoded_inputs():
 
 @pytest.fixture
 def complex_pipeline():
-    pipeline = modular_pipeline(
+    pipeline = Pipeline(
         [
             node(triconcat, ["H@node1", "I", "M"], "N", name="node1"),
             node(identity, "H@node2", "I", name="node2"),
@@ -120,7 +119,7 @@ class TestValidPipeline:
         """Check if grouped_nodes func groups the nodes correctly"""
         nodes_input = input_data["nodes"]
         expected = input_data["expected"]
-        pipeline = modular_pipeline(nodes_input)
+        pipeline = Pipeline(nodes_input)
 
         grouped = pipeline.grouped_nodes
         # Flatten a list of grouped nodes
@@ -132,7 +131,7 @@ class TestValidPipeline:
         nodes = input_data["nodes"]
         inputs = input_data["free_inputs"]
 
-        pipeline = modular_pipeline(nodes)
+        pipeline = Pipeline(nodes)
 
         assert pipeline.inputs() == set(inputs)
 
@@ -140,13 +139,13 @@ class TestValidPipeline:
         nodes = input_data["nodes"]
         outputs = input_data["outputs"]
 
-        pipeline = modular_pipeline(nodes)
+        pipeline = Pipeline(nodes)
 
         assert pipeline.outputs() == set(outputs)
 
     def test_pipeline_to_json(self, input_data):
         nodes = input_data["nodes"]
-        json_rep = modular_pipeline(nodes).to_json()
+        json_rep = Pipeline(nodes).to_json()
         for pipeline_node in nodes:
             assert pipeline_node.name in json_rep
             assert all(node_input in json_rep for node_input in pipeline_node.inputs)
@@ -163,7 +162,7 @@ class TestInvalidPipeline:
         pattern = "The following datasets are used with transcoding, "
         pattern += "but were referenced without the separator: B."
         with pytest.raises(ValueError, match=pattern):
-            modular_pipeline(
+            Pipeline(
                 [
                     node(identity, "A", "B", name="node1"),
                     node(identity, "B@pandas", "C", name="node2"),
@@ -174,7 +173,7 @@ class TestInvalidPipeline:
 
     def test_duplicates_in_transcoded_outputs(self):
         with pytest.raises(OutputNotUniqueError, match="['B']"):
-            modular_pipeline(
+            Pipeline(
                 [
                     node(identity, "A", "B@pandas", name="node1"),
                     node(identity, "A", "B@spark", name="node2"),
@@ -183,7 +182,7 @@ class TestInvalidPipeline:
 
     def test_transcoding_loop(self):
         with pytest.raises(CircularDependencyError, match="node1"):
-            modular_pipeline(
+            Pipeline(
                 [
                     node(identity, "A@pandas", "B@pandas", name="node1"),
                     node(identity, "B@spark", "C@spark", name="node2"),

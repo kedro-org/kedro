@@ -19,7 +19,7 @@ from kedro.framework.project import (
 )
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataset
-from kedro.pipeline import node, pipeline
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
 from kedro.runner.task import Task
@@ -47,7 +47,7 @@ def broken_node():
 
 @pytest.fixture
 def broken_pipeline():
-    return pipeline(
+    return Pipeline(
         [
             node(broken_node, None, "A", name="node1"),
             node(broken_node, None, "B", name="node2"),

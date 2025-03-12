@@ -4,8 +4,7 @@ from itertools import chain
 import pytest
 
 import kedro
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
@@ -281,7 +280,7 @@ def str_node_inputs_list():
 @pytest.fixture
 def complex_pipeline(pipeline_list_with_lists):
     nodes = pipeline_list_with_lists["nodes"]
-    return modular_pipeline(nodes)
+    return Pipeline(nodes)
 
 
 @pytest.fixture(
@@ -302,7 +301,7 @@ def all_pipeline_input_data(request):
 class TestValidPipeline:
     def test_nodes(self, str_node_inputs_list):
         nodes = str_node_inputs_list["nodes"]
-        pipeline = modular_pipeline(nodes)
+        pipeline = Pipeline(nodes)
 
         assert set(pipeline.nodes) == set(nodes)
 
@@ -310,7 +309,7 @@ class TestValidPipeline:
         """Check if grouped_nodes func groups the nodes correctly"""
         nodes_input = all_pipeline_input_data["nodes"]
         expected = all_pipeline_input_data["expected"]
-        pipeline = modular_pipeline(nodes_input)
+        pipeline = Pipeline(nodes_input)
 
         grouped = pipeline.grouped_nodes
         # Flatten a list of grouped nodes
@@ -323,7 +322,7 @@ class TestValidPipeline:
         nodes = all_pipeline_input_data["nodes"]
         inputs = all_pipeline_input_data["free_inputs"]
 
-        pipeline = modular_pipeline(nodes)
+        pipeline = Pipeline(nodes)
 
         assert pipeline.inputs() == set(inputs)
 
@@ -331,16 +330,16 @@ class TestValidPipeline:
         nodes = all_pipeline_input_data["nodes"]
         outputs = all_pipeline_input_data["outputs"]
 
-        pipeline = modular_pipeline(nodes)
+        pipeline = Pipeline(nodes)
 
         assert pipeline.outputs() == set(outputs)
 
     def test_empty_case(self):
         """Empty pipeline is possible"""
-        modular_pipeline([])
+        Pipeline([])
 
     def test_initialized_with_tags(self):
-        pipeline = modular_pipeline(
+        pipeline = Pipeline(
             [node(identity, "A", "B", tags=["node1", "p1"]), node(identity, "B", "C")],
             tags=["p1", "p2"],
         )
@@ -505,15 +504,15 @@ class TestInvalidPipeline:
     def test_circle_case(self, pipeline_with_circle):
         pattern = "Circular dependencies"
         with pytest.raises(CircularDependencyError, match=pattern):
-            modular_pipeline(pipeline_with_circle)
+            Pipeline(pipeline_with_circle)
 
     def test_unique_outputs(self, non_unique_node_outputs):
         with pytest.raises(OutputNotUniqueError, match=r"\['D', 'E'\]"):
-            modular_pipeline(non_unique_node_outputs)
+            Pipeline(non_unique_node_outputs)
 
     def test_none_case(self):
         with pytest.raises(ValueError, match="is None"):
-            modular_pipeline(None)
+            Pipeline(None)
 
     def test_duplicate_free_nodes(self):
         pattern = (
@@ -521,21 +520,21 @@ class TestInvalidPipeline:
             "names appear more than once:\n\nFree nodes:\n  - same_name"
         )
         with pytest.raises(ValueError, match=re.escape(pattern)):
-            modular_pipeline(
+            Pipeline(
                 [
                     node(identity, "in1", "out1", name="same_name"),
                     node(identity, "in2", "out2", name="same_name"),
                 ]
             )
 
-        pipeline = modular_pipeline([node(identity, "in1", "out1", name="same_name")])
+        pipeline = Pipeline([node(identity, "in1", "out1", name="same_name")])
         another_node = node(identity, "in2", "out2", name="same_name")
         with pytest.raises(ValueError, match=re.escape(pattern)):
             # 'pipeline' passes the check, 'another_node' doesn't
-            modular_pipeline([pipeline, another_node])
+            Pipeline([pipeline, another_node])
 
     def test_duplicate_nodes_in_pipelines(self):
-        pipeline = modular_pipeline(
+        pipeline = Pipeline(
             [node(biconcat, ["input", "input1"], ["output", "output1"], name="node")]
         )
         pattern = (
@@ -544,33 +543,33 @@ class TestInvalidPipeline:
         )
         with pytest.raises(ValueError, match=pattern):
             # the first 'pipeline' passes the check, the second doesn't
-            modular_pipeline([pipeline, pipeline])
+            Pipeline([pipeline, pipeline])
 
         another_node = node(identity, "in1", "out1", name="node")
         with pytest.raises(ValueError, match=pattern):
             # 'another_node' passes the check, 'pipeline' doesn't
-            modular_pipeline([another_node, pipeline])
+            Pipeline([another_node, pipeline])
 
     def test_bad_combine_node(self):
         """Node cannot be combined to pipeline."""
         fred = node(identity, "input", "output")
-        pipeline = modular_pipeline([fred])
+        pipeline = Pipeline([fred])
         with pytest.raises(TypeError):
             pipeline + fred
 
     def test_bad_combine_int(self):
         """int cannot be combined to pipeline, tests __radd__"""
         fred = node(identity, "input", "output")
-        pipeline = modular_pipeline([fred])
+        pipeline = Pipeline([fred])
         with pytest.raises(TypeError):
             _ = 1 + pipeline
 
     def test_conflicting_names(self):
         """Node names must be unique."""
-        pipeline1 = modular_pipeline(
+        pipeline1 = Pipeline(
             [node(biconcat, ["input", "input1"], ["output1"], name="a")]
         )
-        new_pipeline = modular_pipeline(
+        new_pipeline = Pipeline(
             [node(biconcat, ["input", "input1"], ["output2"], name="a")]
         )
         pattern = (
@@ -582,10 +581,10 @@ class TestInvalidPipeline:
 
     def test_conflicting_outputs(self):
         """Node outputs must be unique."""
-        pipeline1 = modular_pipeline(
+        pipeline1 = Pipeline(
             [node(biconcat, ["input", "input1"], ["output", "output1"], name="a")]
         )
-        new_pipeline = modular_pipeline(
+        new_pipeline = Pipeline(
             [node(biconcat, ["input", "input2"], ["output", "output2"], name="b")]
         )
         with pytest.raises(OutputNotUniqueError, match=r"\['output'\]"):
@@ -593,10 +592,8 @@ class TestInvalidPipeline:
 
     def test_duplicate_node_confirms(self):
         """Test that non-unique dataset confirms break pipeline concatenation"""
-        pipeline1 = modular_pipeline(
-            [node(identity, "input1", "output1", confirms="other")]
-        )
-        pipeline2 = modular_pipeline(
+        pipeline1 = Pipeline([node(identity, "input1", "output1", confirms="other")])
+        pipeline2 = Pipeline(
             [node(identity, "input2", "output2", confirms=["other", "output2"])]
         )
         with pytest.raises(ConfirmNotUniqueError, match=r"\['other'\]"):
@@ -605,24 +602,16 @@ class TestInvalidPipeline:
 
 class TestPipelineOperators:
     def test_combine_add(self):
-        pipeline1 = modular_pipeline(
-            [node(biconcat, ["input", "input1"], "output1", name="a")]
-        )
-        pipeline2 = modular_pipeline(
-            [node(biconcat, ["input", "input2"], "output2", name="b")]
-        )
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
         new_pipeline = pipeline1 + pipeline2
         assert new_pipeline.inputs() == {"input", "input1", "input2"}
         assert new_pipeline.outputs() == {"output1", "output2"}
         assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
 
     def test_combine_sum(self):
-        pipeline1 = modular_pipeline(
-            [node(biconcat, ["input", "input1"], "output1", name="a")]
-        )
-        pipeline2 = modular_pipeline(
-            [node(biconcat, ["input", "input2"], "output2", name="b")]
-        )
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
         new_pipeline = sum([pipeline1, pipeline2])
         assert new_pipeline.inputs() == {"input", "input1", "input2"}
         assert new_pipeline.outputs() == {"output1", "output2"}
@@ -630,16 +619,14 @@ class TestPipelineOperators:
 
     def test_remove(self):
         """Create a pipeline of 3 nodes and remove one of them"""
-        pipeline1 = modular_pipeline(
+        pipeline1 = Pipeline(
             [
                 node(biconcat, ["input", "input1"], "output1", name="a"),
                 node(biconcat, ["input", "input2"], "output2", name="b"),
                 node(biconcat, ["input", "input3"], "output3", name="c"),
             ]
         )
-        pipeline2 = modular_pipeline(
-            [node(biconcat, ["input", "input2"], "output2", name="b")]
-        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
         new_pipeline = pipeline1 - pipeline2
         assert new_pipeline.inputs() == {"input", "input1", "input3"}
         assert new_pipeline.outputs() == {"output1", "output3"}
@@ -649,14 +636,14 @@ class TestPipelineOperators:
         """Create a pipeline of 3 nodes and remove one of them using a pipeline
         that contains a partial match.
         """
-        pipeline1 = modular_pipeline(
+        pipeline1 = Pipeline(
             [
                 node(biconcat, ["input", "input1"], "output1", name="a"),
                 node(biconcat, ["input", "input2"], "output2", name="b"),
                 node(biconcat, ["input", "input3"], "output3", name="c"),
             ]
         )
-        pipeline2 = modular_pipeline(
+        pipeline2 = Pipeline(
             [
                 node(biconcat, ["input", "input2"], "output2", name="b"),
                 node(biconcat, ["input", "input4"], "output4", name="d"),
@@ -669,10 +656,8 @@ class TestPipelineOperators:
 
     def test_remove_empty_from_pipeline(self):
         """Remove an empty pipeline"""
-        pipeline1 = modular_pipeline(
-            [node(biconcat, ["input", "input1"], "output1", name="a")]
-        )
-        pipeline2 = modular_pipeline([])
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([])
         new_pipeline = pipeline1 - pipeline2
         assert new_pipeline.inputs() == pipeline1.inputs()
         assert new_pipeline.outputs() == pipeline1.outputs()
@@ -680,10 +665,8 @@ class TestPipelineOperators:
 
     def test_remove_from_empty_pipeline(self):
         """Remove node from an empty pipeline"""
-        pipeline1 = modular_pipeline(
-            [node(biconcat, ["input", "input1"], "output1", name="a")]
-        )
-        pipeline2 = modular_pipeline([])
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([])
         new_pipeline = pipeline2 - pipeline1
         assert new_pipeline.inputs() == pipeline2.inputs()
         assert new_pipeline.outputs() == pipeline2.outputs()
@@ -691,29 +674,25 @@ class TestPipelineOperators:
 
     def test_remove_all_nodes(self):
         """Remove an entire pipeline"""
-        pipeline1 = modular_pipeline(
-            [node(biconcat, ["input", "input1"], "output1", name="a")]
-        )
-        pipeline2 = modular_pipeline(
-            [node(biconcat, ["input", "input1"], "output1", name="a")]
-        )
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
         new_pipeline = pipeline1 - pipeline2
         assert new_pipeline.inputs() == set()
         assert new_pipeline.outputs() == set()
         assert not new_pipeline.nodes
 
     def test_invalid_remove(self):
-        p = modular_pipeline([])
+        p = Pipeline([])
         pattern = r"unsupported operand type\(s\) for -: 'Pipeline' and 'str'"
         with pytest.raises(TypeError, match=pattern):
             p - "hello"
 
     def test_combine_same_node(self):
         """Multiple (identical) pipelines are possible"""
-        pipeline1 = modular_pipeline(
+        pipeline1 = Pipeline(
             [node(biconcat, ["input", "input1"], ["output"], name="a")]
         )
-        pipeline2 = modular_pipeline(
+        pipeline2 = Pipeline(
             [node(biconcat, ["input", "input1"], ["output"], name="a")]
         )
         new_pipeline = pipeline1 + pipeline2
@@ -722,68 +701,60 @@ class TestPipelineOperators:
         assert {n.name for n in new_pipeline.nodes} == {"a"}
 
     def test_intersection(self):
-        pipeline1 = modular_pipeline(
+        pipeline1 = Pipeline(
             [
                 node(biconcat, ["input", "input1"], "output1", name="a"),
                 node(biconcat, ["input", "input2"], "output2", name="b"),
             ]
         )
-        pipeline2 = modular_pipeline(
-            [node(biconcat, ["input", "input2"], "output2", name="b")]
-        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
         new_pipeline = pipeline1 & pipeline2
         assert new_pipeline.inputs() == {"input", "input2"}
         assert new_pipeline.outputs() == {"output2"}
         assert {n.name for n in new_pipeline.nodes} == {"b"}
 
     def test_invalid_intersection(self):
-        p = modular_pipeline([])
+        p = Pipeline([])
         pattern = r"unsupported operand type\(s\) for &: 'Pipeline' and 'str'"
         with pytest.raises(TypeError, match=pattern):
             p & "hello"
 
     def test_union(self):
-        pipeline1 = modular_pipeline(
+        pipeline1 = Pipeline(
             [
                 node(biconcat, ["input", "input1"], "output1", name="a"),
                 node(biconcat, ["input", "input2"], "output2", name="b"),
             ]
         )
-        pipeline2 = modular_pipeline(
-            [node(biconcat, ["input", "input2"], "output2", name="b")]
-        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
         new_pipeline = pipeline1 | pipeline2
         assert new_pipeline.inputs() == {"input", "input1", "input2"}
         assert new_pipeline.outputs() == {"output1", "output2"}
         assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
 
     def test_invalid_union(self):
-        p = modular_pipeline([])
+        p = Pipeline([])
         pattern = r"unsupported operand type\(s\) for |: 'Pipeline' and 'str'"
         with pytest.raises(TypeError, match=pattern):
             p | "hello"
 
     def test_node_unique_confirms(self):
         """Test that unique dataset confirms don't break pipeline concatenation"""
-        pipeline1 = modular_pipeline(
-            [node(identity, "input1", "output1", confirms="output1")]
-        )
-        pipeline2 = modular_pipeline(
-            [node(identity, "input2", "output2", confirms="other")]
-        )
-        pipeline3 = modular_pipeline([node(identity, "input3", "output3")])
+        pipeline1 = Pipeline([node(identity, "input1", "output1", confirms="output1")])
+        pipeline2 = Pipeline([node(identity, "input2", "output2", confirms="other")])
+        pipeline3 = Pipeline([node(identity, "input3", "output3")])
         combined = pipeline1 + pipeline2 + pipeline3
         assert len(combined.nodes) == 3
 
     def test_connected_pipeline(self, disjoint_pipeline):
         """Connect two separate pipelines."""
         nodes = disjoint_pipeline["nodes"]
-        subpipeline = modular_pipeline(nodes, tags=["subpipeline"])
+        subpipeline = Pipeline(nodes, tags=["subpipeline"])
 
         assert len(subpipeline.inputs()) == 2
         assert len(subpipeline.outputs()) == 2
 
-        pipeline = modular_pipeline(
+        pipeline = Pipeline(
             [node(identity, "C", "D", name="connecting_node"), subpipeline], tags="main"
         )
 
@@ -794,7 +765,7 @@ class TestPipelineOperators:
 
 class TestPipelineDescribe:
     def test_names_only(self, str_node_inputs_list):
-        pipeline = modular_pipeline(str_node_inputs_list["nodes"])
+        pipeline = Pipeline(str_node_inputs_list["nodes"])
         description = pipeline.describe()
 
         desc = description.split("\n")
@@ -814,7 +785,7 @@ class TestPipelineDescribe:
             assert res == example
 
     def test_full(self, str_node_inputs_list):
-        pipeline = modular_pipeline(str_node_inputs_list["nodes"])
+        pipeline = Pipeline(str_node_inputs_list["nodes"])
         description = pipeline.describe(names_only=False)
 
         desc = description.split("\n")
@@ -836,13 +807,13 @@ class TestPipelineDescribe:
 
 class TestPipelineTags:
     def test_tag_existing_pipeline(self, branchless_pipeline):
-        pipeline = modular_pipeline(branchless_pipeline["nodes"])
+        pipeline = Pipeline(branchless_pipeline["nodes"])
         pipeline = pipeline.tag(["new_tag"])
         assert all("new_tag" in n.tags for n in pipeline.nodes)
 
     def test_pipeline_single_tag(self, branchless_pipeline):
-        p1 = modular_pipeline(branchless_pipeline["nodes"], tags="single_tag")
-        p2 = modular_pipeline(branchless_pipeline["nodes"]).tag("single_tag")
+        p1 = Pipeline(branchless_pipeline["nodes"], tags="single_tag")
+        p2 = Pipeline(branchless_pipeline["nodes"]).tag("single_tag")
 
         for pipeline in (p1, p2):
             assert all("single_tag" in n.tags for n in pipeline.nodes)
@@ -850,7 +821,7 @@ class TestPipelineTags:
 
 @pytest.fixture
 def pipeline_with_namespaces():
-    return modular_pipeline(
+    return Pipeline(
         [
             node(identity, "A", "B", name="node1", namespace="katie"),
             node(identity, "B", "C", name="node2", namespace="lisa"),
@@ -864,7 +835,7 @@ def pipeline_with_namespaces():
 
 @pytest.fixture
 def pipeline_with_namespace_simple():
-    return modular_pipeline(
+    return Pipeline(
         [
             node(identity, "A", "B", name="node_1", namespace="namespace_1"),
             node(identity, "B", "C", name="node_2", namespace="namespace_1"),
@@ -878,7 +849,7 @@ def pipeline_with_namespace_simple():
 
 @pytest.fixture
 def pipeline_with_namespace_partial():
-    return modular_pipeline(
+    return Pipeline(
         [
             node(identity, "A", "B", name="node_1", namespace="namespace_1"),
             node(identity, "B", "C", name="node_2", namespace="namespace_1"),
@@ -970,7 +941,7 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_tags(self, tags, expected_nodes, nodes_with_tags):
         """Test that the 'only_nodes_with_tags' method correctly filters nodes based on provided tags."""
         # Create a pipeline from nodes with tags.
-        pipeline = modular_pipeline(nodes_with_tags)
+        pipeline = Pipeline(nodes_with_tags)
 
         # Filter the pipeline based on the specified tags.
         filtered_pipeline = pipeline.only_nodes_with_tags(*tags)
@@ -1010,7 +981,7 @@ class TestPipelineFilterHelpers:
     )
     def test_only_nodes_filtering(self, pipeline_list_with_lists, target_node_names):
         # Create a pipeline from the input nodes.
-        full_pipeline = modular_pipeline(pipeline_list_with_lists["nodes"])
+        full_pipeline = Pipeline(pipeline_list_with_lists["nodes"])
 
         # Apply the 'only_nodes' method to filter the pipeline.
         filtered_pipeline = full_pipeline.only_nodes(*target_node_names)
@@ -1029,7 +1000,7 @@ class TestPipelineFilterHelpers:
         """
         pattern = r"Pipeline does not contain nodes"
 
-        full = modular_pipeline(pipeline_list_with_lists["nodes"])
+        full = Pipeline(pipeline_list_with_lists["nodes"])
 
         with pytest.raises(ValueError, match=pattern):
             full.only_nodes(*target_node_names)
@@ -1154,7 +1125,7 @@ class TestPipelineFilterHelpers:
         Test that the `only_nodes_with_namespace` method raises a ValueError with the expected error message
         when a non-existent namespace is provided.
         """
-        pipeline = modular_pipeline([node(identity, "A", "B", namespace=namespace)])
+        pipeline = Pipeline([node(identity, "A", "B", namespace=namespace)])
         expected_error_message = (
             "Pipeline does not contain nodes with namespace 'non_existent'"
         )
@@ -1199,7 +1170,7 @@ class TestPipelineRunnerHelpers:
 
 def test_pipeline_to_json(all_pipeline_input_data):
     nodes = all_pipeline_input_data["nodes"]
-    json_rep = modular_pipeline(nodes).to_json()
+    json_rep = Pipeline(nodes).to_json()
     for pipeline_node in nodes:
         assert pipeline_node.name in json_rep
         assert all(node_input in json_rep for node_input in pipeline_node.inputs)

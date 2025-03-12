@@ -189,7 +189,7 @@ def package(metadata: ProjectMetadata) -> None:
 )
 @click.option(
     "--conf-source",
-    type=click.Path(exists=True, file_okay=True, resolve_path=True),
+    type=str,
     help=CONF_SOURCE_HELP,
 )
 @click.option(

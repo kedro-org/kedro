@@ -148,8 +148,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Register globals resolver
         self._register_globals_resolver()
 
+        # Store original conf_source
+        self._original_conf_source = conf_source
+
         # Setup file system and protocol
         self._fs, self._protocol = self._initialise_filesystem_and_protocol(conf_source)
+
+        # Store remote root path if using cloud protocol
+        if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
+            options = _parse_filepath(conf_source)
+            self._remote_root_path = options["path"]
 
         super().__init__(
             conf_source=conf_source,
@@ -207,7 +215,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         processed_files: set[Path] = set()
         # Load base env config
-        if self._protocol == "file":
+        # Handle remote paths
+        if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
+            base_path = f"{self._remote_root_path}/{self.base_env}"
+        elif self._protocol == "file":
             base_path = str(Path(self.conf_source) / self.base_env)
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
@@ -232,7 +243,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if run_env == self.base_env:
             return config  # type: ignore[no-any-return]
 
-        if self._protocol == "file":
+        # Handle remote paths
+        if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
+            env_path = f"{self._remote_root_path}/{run_env}"
+        elif self._protocol == "file":
             env_path = str(Path(self.conf_source) / run_env)
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
@@ -300,8 +314,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
             Resulting configuration dictionary.
 
         """
-
-        if not self._fs.isdir(Path(conf_path).as_posix()):
+        # Handle directory existence check for remote paths
+        if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
+            try:
+                # Check directory existence in remote paths
+                self._fs.ls(conf_path)
+            except Exception as exc:
+                raise MissingConfigException(
+                    f"Given configuration path either does not exist "
+                    f"or is not a valid directory: {conf_path}. Error: {exc!s}"
+                )
+        # Original check for local paths
+        elif not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
                 f"Given configuration path either does not exist "
                 f"or is not a valid directory: {conf_path}"

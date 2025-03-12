@@ -44,7 +44,9 @@ def _is_parameter(name: str) -> bool:
 
 
 def _validate_inputs_outputs(
-    inputs: Set[str], outputs: Set[str], pipe: Pipeline
+    inputs: Set[str],
+    outputs: Set[str],
+    pipe: Iterable[Node | Pipeline],
 ) -> None:
     """Safeguards to ensure that:
     - parameters are not specified under inputs
@@ -58,8 +60,13 @@ def _validate_inputs_outputs(
         raise PipelineError(
             "Parameters should be specified in the 'parameters' argument"
         )
-
-    free_inputs = {_strip_transcoding(i) for i in pipe.inputs()}
+    if isinstance(pipe, Pipeline):
+        free_inputs = {_strip_transcoding(i) for i in pipe.inputs()}
+    else:
+        node_inputs: list[str] = []
+        for n in pipe:
+            node_inputs.extend(n.inputs)
+        free_inputs = {_strip_transcoding(i) for i in node_inputs}
 
     if not inputs <= free_inputs:
         raise PipelineError(
@@ -76,13 +83,21 @@ def _validate_datasets_exist(
     inputs: Set[str],
     outputs: Set[str],
     parameters: Set[str],
-    pipe: Pipeline,
+    pipe: Iterable[Node | Pipeline],
 ) -> None:
     """Validate that inputs, parameters and outputs map correctly onto the provided nodes."""
     inputs = {_strip_transcoding(k) for k in inputs}
     outputs = {_strip_transcoding(k) for k in outputs}
 
-    existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
+    if isinstance(pipe, Pipeline):
+        existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
+    else:
+        node_inputs_outputs: list[str] = []
+        for n in pipe:
+            node_inputs_outputs.extend(n.inputs)
+            node_inputs_outputs.extend(n.outputs)
+        existing = {_strip_transcoding(ds) for ds in node_inputs_outputs}
+
     non_existent = (inputs | outputs | parameters) - existing
     if non_existent:
         sorted_non_existent = sorted(non_existent)
@@ -123,7 +138,7 @@ class Pipeline:
 
     def __init__(  # noqa: PLR0913
         self,
-        nodes: Iterable[Node | Pipeline] | Pipeline,
+        nodes: Iterable[Node | Pipeline],
         *,
         inputs: str | set[str] | dict[str, str] | None = None,
         outputs: str | set[str] | dict[str, str] | None = None,
@@ -177,20 +192,20 @@ class Pipeline:
             >>>
 
         """
+        self.pipe = nodes
         if isinstance(nodes, Pipeline):
             # To ensure that we are always dealing with a *copy* of pipe.
-            self.pipe = nodes
             nodes = nodes.nodes
 
         self._nodes = nodes
 
         if any([inputs, outputs, parameters, namespace]):
             nodes = self.map_nodes(
+                pipe=self.pipe,
                 inputs=inputs,
                 outputs=outputs,
                 parameters=parameters,
                 namespace=namespace,
-                pipe=self.pipe,
             )
 
         if nodes is None:
@@ -919,7 +934,9 @@ class Pipeline:
         return json.dumps(pipeline_versioned)
 
     @staticmethod
-    def _get_dataset_names_mapping(names=None):
+    def _get_dataset_names_mapping(
+        names: str | set[str] | dict[str, str] | None = None,
+    ) -> dict[str, str]:
         if names is None:
             return {}
         if isinstance(names, str):
@@ -929,11 +946,13 @@ class Pipeline:
         return {item: item for item in names}
 
     @staticmethod
-    def _normalize_param_name(name):
+    def _normalize_param_name(name: str) -> str:
         return name if name.startswith("params:") else f"params:{name}"
 
     @staticmethod
-    def _get_param_names_mapping(names=None):
+    def _get_param_names_mapping(
+        names: str | set[str] | dict[str, str] | None = None,
+    ) -> dict[str, str]:
         params = {}
         for name, new_name in Pipeline._get_dataset_names_mapping(names).items():
             if name == "parameters":
@@ -944,19 +963,19 @@ class Pipeline:
                 params[param_name] = param_new_name
         return params
 
-    def _rename(self, name, mapping, namespace):
-        def _prefix_dataset(name):
+    def _rename(self, name: str, mapping: dict, namespace: str) -> str:
+        def _prefix_dataset(name: str) -> str:
             return f"{namespace}.{name}"
 
-        def _prefix_param(name):
+        def _prefix_param(name: str) -> str:
             _, param_name = name.split("params:")
             return f"params:{namespace}.{param_name}"
 
-        def _is_transcode_base_in_mapping(name):
+        def _is_transcode_base_in_mapping(name: str) -> bool:
             base_name, _ = _transcode_split(name)
             return base_name in mapping
 
-        def _map_transcode_base(name):
+        def _map_transcode_base(name: str) -> str:
             base_name, transcode_suffix = _transcode_split(name)
             return TRANSCODING_SEPARATOR.join((mapping[base_name], transcode_suffix))
 
@@ -973,7 +992,12 @@ class Pipeline:
                 return processor(name)
         return name
 
-    def _process_dataset_names(self, datasets, mapping, namespace):
+    def _process_dataset_names(
+        self,
+        datasets: str | list[str] | dict[str, str] | None,
+        mapping: dict,
+        namespace: str,
+    ) -> str | list[str] | dict[str, str] | None:
         if datasets is None:
             return None
         if isinstance(datasets, str):
@@ -987,7 +1011,7 @@ class Pipeline:
             }
         raise ValueError(f"Unexpected input {datasets} of type {type(datasets)}")
 
-    def _copy_node(self, node, mapping, namespace):
+    def _copy_node(self, node: Node, mapping: dict, namespace: str) -> Node:
         new_namespace = node.namespace
         if namespace:
             new_namespace = (
@@ -1001,12 +1025,12 @@ class Pipeline:
 
     def map_nodes(
         self,
-        inputs=None,
-        outputs=None,
-        parameters=None,
-        namespace=None,
-        pipe=None,
-    ):
+        pipe: Iterable[Node | Pipeline],
+        inputs: str | set[str] | dict[str, str] | None = None,
+        outputs: str | set[str] | dict[str, str] | None = None,
+        parameters: str | set[str] | dict[str, str] | None = None,
+        namespace: str | None = None,
+    ) -> list[Node]:
         inputs = self._get_dataset_names_mapping(inputs)
         outputs = self._get_dataset_names_mapping(outputs)
         parameters = self._get_param_names_mapping(parameters)

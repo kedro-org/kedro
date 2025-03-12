@@ -24,11 +24,26 @@ def triconcat(input1: str, input2: str, input3: str):
 
 
 class TestPipelineHelper:
+    def test_simple_pipeline(self):
+        resulting_pipeline = Pipeline(
+            [
+                node(identity, "A", "B", name="node1"),
+                node(biconcat, ["C", "D"], ["E", "F"], name="node2"),
+                node(
+                    biconcat, {"input1": "H", "input2": "J"}, {"K": "L"}, name="node3"
+                ),
+            ],
+            inputs={"A": "A_new", "D": "D_new", "H": "H_new"},
+            outputs={"B": "B_new", "E": "E_new", "L": "L_new"},
+        )
+
+        assert resulting_pipeline.nodes
+
     def test_transform_dataset_names(self):
         """
         Rename some datasets, test string, list and dict formats.
         """
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(identity, "A", "B", name="node1"),
                 node(biconcat, ["C", "D"], ["E", "F"], name="node2"),
@@ -38,14 +53,14 @@ class TestPipelineHelper:
             ]
         )
 
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline,
+        resulting_pipeline = Pipeline(
+            raw_pipeline,
             inputs={"A": "A_new", "D": "D_new", "H": "H_new"},
             outputs={"B": "B_new", "E": "E_new", "L": "L_new"},
         )
 
         # make sure the order is correct
-        nodes = sorted(resulting_Pipeline.nodes)
+        nodes = sorted(resulting_pipeline.nodes)
         assert nodes[0]._inputs == "A_new"
         assert nodes[0]._outputs == "B_new"
 
@@ -59,7 +74,7 @@ class TestPipelineHelper:
         """
         Simple prefixing for dataset of all formats: str, list and dict
         """
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(identity, "A", "B", name="node1"),
                 node(biconcat, ["C", "D"], ["E", "F"], name="node2"),
@@ -68,8 +83,8 @@ class TestPipelineHelper:
                 ),
             ]
         )
-        resulting_Pipeline = Pipeline(raw_Pipeline, namespace="PREFIX")
-        nodes = sorted(resulting_Pipeline.nodes)
+        resulting_pipeline = Pipeline(raw_pipeline, namespace="PREFIX")
+        nodes = sorted(resulting_pipeline.nodes)
         assert nodes[0]._inputs == "PREFIX.A"
         assert nodes[0]._outputs == "PREFIX.B"
 
@@ -84,32 +99,32 @@ class TestPipelineHelper:
         Prefixing and renaming at the same time.
         Explicitly renamed  datasets should not be prefixed anymore.
         """
-        raw_Pipeline = Pipeline([node(biconcat, ["C", "D"], ["E", "F"])])
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline,
+        raw_pipeline = Pipeline([node(biconcat, ["C", "D"], ["E", "F"])])
+        resulting_pipeline = Pipeline(
+            raw_pipeline,
             namespace="PREFIX",
             inputs={"C": "C_new"},
             outputs={"E": "E_new"},
         )
-        assert resulting_Pipeline.nodes[0]._inputs == ["C_new", "PREFIX.D"]
-        assert resulting_Pipeline.nodes[0]._outputs == ["E_new", "PREFIX.F"]
+        assert resulting_pipeline.nodes[0]._inputs == ["C_new", "PREFIX.D"]
+        assert resulting_pipeline.nodes[0]._outputs == ["E_new", "PREFIX.F"]
 
     @pytest.mark.parametrize(
         "inputs,outputs",
         [("A", "D"), (["A"], ["D"]), ({"A"}, {"D"}), ({"A": "A"}, {"D": "D"})],
     )
     def test_prefix_exclude_free_inputs(self, inputs, outputs):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(identity, "A", "B", name="node1"),
                 node(identity, "B", "C", name="node2"),
                 node(identity, "C", "D", name="node3"),
             ]
         )
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline, inputs=inputs, outputs=outputs, namespace="PREFIX"
+        resulting_pipeline = Pipeline(
+            raw_pipeline, inputs=inputs, outputs=outputs, namespace="PREFIX"
         )
-        nodes = sorted(resulting_Pipeline.nodes)
+        nodes = sorted(resulting_pipeline.nodes)
         assert nodes[0]._inputs == "A"
         assert nodes[0]._outputs == "PREFIX.B"
 
@@ -123,7 +138,7 @@ class TestPipelineHelper:
         """
         Test that transform should prefix all parameters by default.
         """
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(identity, "parameters", "params:B", name="node1"),
                 node(biconcat, ["params:C", "D"], ["parameters", "F"], name="node2"),
@@ -135,8 +150,8 @@ class TestPipelineHelper:
                 ),
             ]
         )
-        resulting_Pipeline = Pipeline(raw_Pipeline, namespace="PREFIX")
-        nodes = sorted(resulting_Pipeline.nodes)
+        resulting_pipeline = Pipeline(raw_pipeline, namespace="PREFIX")
+        nodes = sorted(resulting_pipeline.nodes)
         assert nodes[0]._inputs == "parameters"
         assert nodes[0]._outputs == "params:PREFIX.B"
 
@@ -148,48 +163,48 @@ class TestPipelineHelper:
         assert nodes[2].name == "PREFIX.node3"
 
     def test_dataset_transcoding_mapping_base_name(self):
-        raw_Pipeline = Pipeline([node(biconcat, ["C@pandas", "D"], ["E@spark", "F"])])
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline, namespace="PREFIX", inputs={"C": "C_new"}
+        raw_pipeline = Pipeline([node(biconcat, ["C@pandas", "D"], ["E@spark", "F"])])
+        resulting_pipeline = Pipeline(
+            raw_pipeline, namespace="PREFIX", inputs={"C": "C_new"}
         )
 
-        assert resulting_Pipeline.nodes[0]._inputs == ["C_new@pandas", "PREFIX.D"]
-        assert resulting_Pipeline.nodes[0]._outputs == ["PREFIX.E@spark", "PREFIX.F"]
+        assert resulting_pipeline.nodes[0]._inputs == ["C_new@pandas", "PREFIX.D"]
+        assert resulting_pipeline.nodes[0]._outputs == ["PREFIX.E@spark", "PREFIX.F"]
 
     def test_dataset_transcoding_mapping_full_dataset(self):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(biconcat, ["A@pandas", "B"], "C"),
                 node(biconcat, ["A@spark", "C"], "CC"),
             ]
         )
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline, inputs={"A@pandas": "Alpha"}, namespace="PREFIX"
+        resulting_pipeline = Pipeline(
+            raw_pipeline, inputs={"A@pandas": "Alpha"}, namespace="PREFIX"
         )
 
-        assert resulting_Pipeline.nodes[0]._inputs == ["Alpha", "PREFIX.B"]
-        assert resulting_Pipeline.nodes[0]._outputs == "PREFIX.C"
+        assert resulting_pipeline.nodes[0]._inputs == ["Alpha", "PREFIX.B"]
+        assert resulting_pipeline.nodes[0]._outputs == "PREFIX.C"
 
-        assert resulting_Pipeline.nodes[1]._inputs == ["PREFIX.A@spark", "PREFIX.C"]
-        assert resulting_Pipeline.nodes[1]._outputs == "PREFIX.CC"
+        assert resulting_pipeline.nodes[1]._inputs == ["PREFIX.A@spark", "PREFIX.C"]
+        assert resulting_pipeline.nodes[1]._outputs == "PREFIX.CC"
 
     def test_empty_input(self):
-        raw_Pipeline = Pipeline([node(constant_output, None, ["A", "B"])])
+        raw_pipeline = Pipeline([node(constant_output, None, ["A", "B"])])
 
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline, namespace="PREFIX", outputs={"A": "A_new"}
+        resulting_pipeline = Pipeline(
+            raw_pipeline, namespace="PREFIX", outputs={"A": "A_new"}
         )
-        assert resulting_Pipeline.nodes[0]._inputs is None
-        assert resulting_Pipeline.nodes[0]._outputs == ["A_new", "PREFIX.B"]
+        assert resulting_pipeline.nodes[0]._inputs is None
+        assert resulting_pipeline.nodes[0]._outputs == ["A_new", "PREFIX.B"]
 
     def test_empty_output(self):
-        raw_Pipeline = Pipeline([node(biconcat, ["A", "B"], None)])
+        raw_pipeline = Pipeline([node(biconcat, ["A", "B"], None)])
 
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline, namespace="PREFIX", inputs={"A": "A_new"}
+        resulting_pipeline = Pipeline(
+            raw_pipeline, namespace="PREFIX", inputs={"A": "A_new"}
         )
-        assert resulting_Pipeline.nodes[0]._inputs == ["A_new", "PREFIX.B"]
-        assert resulting_Pipeline.nodes[0]._outputs is None
+        assert resulting_pipeline.nodes[0]._inputs == ["A_new", "PREFIX.B"]
+        assert resulting_pipeline.nodes[0]._outputs is None
 
     @pytest.mark.parametrize(
         "func, inputs, outputs, inputs_map, outputs_map, expected_missing",
@@ -218,13 +233,13 @@ class TestPipelineHelper:
     def test_missing_dataset_name_no_suggestion(
         self, func, inputs, outputs, inputs_map, outputs_map, expected_missing
     ):
-        raw_Pipeline = Pipeline([node(func, inputs, outputs)])
+        raw_pipeline = Pipeline([node(func, inputs, outputs)])
 
         with pytest.raises(
             PipelineError, match=r"Failed to map datasets and/or parameters"
         ) as e:
             Pipeline(
-                raw_Pipeline, namespace="PREFIX", inputs=inputs_map, outputs=outputs_map
+                raw_pipeline, namespace="PREFIX", inputs=inputs_map, outputs=outputs_map
             )
         assert ", ".join(expected_missing) in str(e.value)
         assert " - did you mean one of these instead: " not in str(e.value)
@@ -266,13 +281,13 @@ class TestPipelineHelper:
         expected_missing,
         expected_suggestion,
     ):
-        raw_Pipeline = Pipeline([node(func, inputs, outputs)])
+        raw_pipeline = Pipeline([node(func, inputs, outputs)])
 
         with pytest.raises(
             PipelineError, match=r"Failed to map datasets and/or parameters"
         ) as e:
             Pipeline(
-                raw_Pipeline, namespace="PREFIX", inputs=inputs_map, outputs=outputs_map
+                raw_pipeline, namespace="PREFIX", inputs=inputs_map, outputs=outputs_map
             )
         assert ", ".join(expected_missing) in str(e.value)
         assert ", ".join(expected_suggestion) in str(e.value)
@@ -282,16 +297,16 @@ class TestPipelineHelper:
         Check that we don't loose any valuable properties on node cloning.
         Also an explicitly defined name should get prefixed.
         """
-        raw_Pipeline = Pipeline([node(identity, "A", "B", name="node1", tags=["tag1"])])
-        resulting_Pipeline = Pipeline(raw_Pipeline, namespace="PREFIX")
+        raw_pipeline = Pipeline([node(identity, "A", "B", name="node1", tags=["tag1"])])
+        resulting_pipeline = Pipeline(raw_pipeline, namespace="PREFIX")
 
-        assert resulting_Pipeline.nodes[0].name == "PREFIX.node1"
-        assert resulting_Pipeline.nodes[0].tags == {"tag1"}
+        assert resulting_pipeline.nodes[0].name == "PREFIX.node1"
+        assert resulting_pipeline.nodes[0].tags == {"tag1"}
 
     def test_default_node_name_is_namespaced(self):
         """Check that auto-generated node names are also namespaced"""
-        raw_Pipeline = Pipeline([node(identity, "A", "B")])
-        first_layer_nested_pipe = Pipeline(raw_Pipeline, namespace="PREFIX")
+        raw_pipeline = Pipeline([node(identity, "A", "B")])
+        first_layer_nested_pipe = Pipeline(raw_pipeline, namespace="PREFIX")
         resulting_node = first_layer_nested_pipe.nodes[0]
 
         assert resulting_node.name.startswith("PREFIX.")
@@ -306,7 +321,7 @@ class TestPipelineHelper:
     def test_expose_intermediate_output(self):
         """Check that we don't namespace an intermediary dataset, anywhere it
         is used - either input or output"""
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(identity, "A", "B", name="node1"),
                 node(identity, "B", "C", name="node2"),
@@ -314,10 +329,10 @@ class TestPipelineHelper:
                 node(biconcat, ["D", "params:x"], "X", name="node4"),
             ]
         )
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline, outputs={"B": "B_new"}, namespace="ACTUAL"
+        resulting_pipeline = Pipeline(
+            raw_pipeline, outputs={"B": "B_new"}, namespace="ACTUAL"
         )
-        actual_nodes = resulting_Pipeline.nodes
+        actual_nodes = resulting_pipeline.nodes
 
         assert actual_nodes[0]._outputs == "B_new"
         assert actual_nodes[1]._inputs == "B_new"
@@ -331,11 +346,11 @@ class TestPipelineHelper:
         assert actual_nodes[3]._outputs == "ACTUAL.X"
 
     def test_parameters_left_intact_when_defined_as_str(self):
-        raw_Pipeline = Pipeline([node(biconcat, ["A", "params:x"], "AA", name="node1")])
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline, outputs={"AA": "B"}, parameters="x", namespace="PREFIX"
+        raw_pipeline = Pipeline([node(biconcat, ["A", "params:x"], "AA", name="node1")])
+        resulting_pipeline = Pipeline(
+            raw_pipeline, outputs={"AA": "B"}, parameters="x", namespace="PREFIX"
         )
-        actual_nodes = resulting_Pipeline.nodes
+        actual_nodes = resulting_pipeline.nodes
 
         assert actual_nodes[0]._inputs == ["PREFIX.A", "params:x"]
         assert actual_nodes[0]._outputs == "B"
@@ -344,36 +359,36 @@ class TestPipelineHelper:
         "parameters", ["params:x", {"params:x"}, {"params:x": "params:x"}]
     )
     def test_parameters_left_intact_when_defined_as_(self, parameters):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [node(triconcat, ["A", "params:x", "params:y"], "AA", name="node1")]
         )
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline,
+        resulting_pipeline = Pipeline(
+            raw_pipeline,
             outputs={"AA": "B"},
             parameters=parameters,
             namespace="PREFIX",
         )
-        actual_nodes = resulting_Pipeline.nodes
+        actual_nodes = resulting_pipeline.nodes
 
         # x is left intact because it's defined in parameters but y is namespaced
         assert actual_nodes[0]._inputs == ["PREFIX.A", "params:x", "params:PREFIX.y"]
         assert actual_nodes[0]._outputs == "B"
 
     def test_parameters_updated_with_dict(self):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(biconcat, ["A", "params:x"], "AA", name="node1"),
                 node(biconcat, ["AA", "params:y"], "B", name="node2"),
                 node(biconcat, ["B", "params:x"], "BB", name="node3"),
             ]
         )
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline,
+        resulting_pipeline = Pipeline(
+            raw_pipeline,
             outputs={"B": "B_new"},
             parameters={"x": "X"},
             namespace="ACTUAL",
         )
-        actual_nodes = resulting_Pipeline.nodes
+        actual_nodes = resulting_pipeline.nodes
 
         assert actual_nodes[0]._inputs == ["ACTUAL.A", "params:X"]
         assert actual_nodes[0]._outputs == "ACTUAL.AA"
@@ -385,23 +400,23 @@ class TestPipelineHelper:
         assert actual_nodes[2]._outputs == "ACTUAL.BB"
 
     def test_parameters_defined_with_params_prefix(self):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [node(triconcat, ["A", "params:x", "params:y"], "AA", name="node1")]
         )
-        resulting_Pipeline = Pipeline(
-            raw_Pipeline,
+        resulting_pipeline = Pipeline(
+            raw_pipeline,
             outputs={"AA": "B"},
             parameters={"params:x"},
             namespace="PREFIX",
         )
-        actual_nodes = resulting_Pipeline.nodes
+        actual_nodes = resulting_pipeline.nodes
 
         # x is left intact because it's defined in parameters but y is namespaced
         assert actual_nodes[0]._inputs == ["PREFIX.A", "params:x", "params:PREFIX.y"]
         assert actual_nodes[0]._outputs == "B"
 
     def test_parameters_specified_under_inputs(self):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(biconcat, ["A", "params:alpha"], "AA", name="node1"),
                 node(biconcat, ["AA", "parameters"], "BB", name="node2"),
@@ -410,13 +425,13 @@ class TestPipelineHelper:
 
         pattern = r"Parameters should be specified in the 'parameters' argument"
         with pytest.raises(PipelineError, match=pattern):
-            Pipeline(raw_Pipeline, inputs={"params:alpha": "params:beta"})
+            Pipeline(raw_pipeline, inputs={"params:alpha": "params:beta"})
 
         with pytest.raises(PipelineError, match=pattern):
-            Pipeline(raw_Pipeline, inputs={"parameters": "some_yaml_dataset"})
+            Pipeline(raw_pipeline, inputs={"parameters": "some_yaml_dataset"})
 
     def test_non_existent_parameters_mapped(self):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(biconcat, ["A", "params:alpha"], "AA", name="node1"),
                 node(biconcat, ["AA", "CC"], "BB", name="node2"),
@@ -425,14 +440,14 @@ class TestPipelineHelper:
 
         pattern = r"Failed to map datasets and/or parameters onto the nodes provided: params:beta"
         with pytest.raises(PipelineError, match=pattern):
-            Pipeline(raw_Pipeline, parameters={"beta": "gamma"})
+            Pipeline(raw_pipeline, parameters={"beta": "gamma"})
 
         pattern = r"Failed to map datasets and/or parameters onto the nodes provided: parameters"
         with pytest.raises(PipelineError, match=pattern):
-            Pipeline(raw_Pipeline, parameters={"parameters": "some_yaml_dataset"})
+            Pipeline(raw_pipeline, parameters={"parameters": "some_yaml_dataset"})
 
     def test_bad_inputs_mapping(self):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(biconcat, ["A", "params:alpha"], "AA", name="node1"),
                 node(biconcat, ["AA", "parameters"], "BB", name="node2"),
@@ -441,10 +456,10 @@ class TestPipelineHelper:
 
         pattern = "Inputs must not be outputs from another node in the same pipeline"
         with pytest.raises(PipelineError, match=pattern):
-            Pipeline(raw_Pipeline, inputs={"AA": "CC"})
+            Pipeline(raw_pipeline, inputs={"AA": "CC"})
 
     def test_bad_outputs_mapping(self):
-        raw_Pipeline = Pipeline(
+        raw_pipeline = Pipeline(
             [
                 node(biconcat, ["A", "params:alpha"], "AA", name="node1"),
                 node(biconcat, ["AA", "parameters"], "BB", name="node2"),
@@ -453,18 +468,18 @@ class TestPipelineHelper:
 
         pattern = "All outputs must be generated by some node within the pipeline"
         with pytest.raises(PipelineError, match=pattern):
-            Pipeline(raw_Pipeline, outputs={"A": "C"})
+            Pipeline(raw_pipeline, outputs={"A": "C"})
 
-    def test_Pipeline_always_copies(self):
-        original_Pipeline = Pipeline([node(constant_output, None, "A")])
-        new_Pipeline = Pipeline(original_Pipeline)
-        assert new_Pipeline.nodes == original_Pipeline.nodes
-        assert new_Pipeline is not original_Pipeline
+    def test_pipeline_always_copies(self):
+        original_pipeline = Pipeline([node(constant_output, None, "A")])
+        new_pipeline = Pipeline(original_pipeline)
+        assert new_pipeline.nodes == original_pipeline.nodes
+        assert new_pipeline is not original_pipeline
 
-    def test_Pipeline_tags(self):
-        tagged_Pipeline = Pipeline(
+    def test_pipeline_tags(self):
+        tagged_pipeline = Pipeline(
             [node(constant_output, None, "A"), node(constant_output, None, "B")],
             tags="tag",
         )
 
-        assert all(n.tags == {"tag"} for n in tagged_Pipeline.nodes)
+        assert all(n.tags == {"tag"} for n in tagged_pipeline.nodes)

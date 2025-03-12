@@ -5,9 +5,6 @@ import inspect
 import itertools as it
 import multiprocessing
 from collections.abc import Iterable, Iterator
-from concurrent.futures import (
-    ALL_COMPLETED,
-)
 from typing import TYPE_CHECKING, Any
 
 from more_itertools import interleave
@@ -200,17 +197,13 @@ class Task:
         # Load inputs (still requires `to_thread` as it's synchronous due to _synchronous_dataset_load)
         input_tasks: dict[str, asyncio.Task] = {
             name: asyncio.create_task(
-                asyncio.to_thread(
-                    self._synchronous_dataset_load, name, node, catalog, hook_manager
-                )
+                self._async_dataset_load(name, node, catalog, hook_manager)
             )
             for name in node.inputs
         }
 
-        # Wait for all input tasks to complete
-        await asyncio.wait(input_tasks.values(), return_when=ALL_COMPLETED)
-
-        inputs = {key: value.result() for key, value in input_tasks.items()}
+        # Wait for all dataset loads to complete
+        inputs = {key: await input_task for key, input_task in input_tasks.items()}
 
         is_async = True
         additional_inputs = self._collect_inputs_from_hook(
@@ -222,46 +215,48 @@ class Task:
             node, catalog, inputs, is_async, hook_manager, session_id=session_id
         )
 
-        output_tasks = []
-        for name, data in outputs.items():
-            hook_manager.hook.before_dataset_saved(
-                dataset_name=name, data=data, node=node
+        output_tasks = {
+            name: asyncio.create_task(
+                self._async_dataset_save(name, data, node, catalog, hook_manager)
             )
-            output_tasks.append(
-                asyncio.create_task(asyncio.to_thread(catalog.save, name, data))
-            )
+            for name, data in outputs.items()
+        }
 
-        for output_task in asyncio.as_completed(output_tasks):
+        for output_task in asyncio.as_completed(output_tasks.values()):
             try:
                 await output_task
             except Exception as exception:
                 raise exception
 
-            # Extract corresponding name/data using the output_tasks order
-            idx = output_tasks.index(output_task)
-            name, data = list(outputs.items())[idx]
-
-            hook_manager.hook.after_dataset_saved(
-                dataset_name=name, data=data, node=node
-            )
-
         return node
 
     @staticmethod
-    def _synchronous_dataset_load(
+    async def _async_dataset_load(
         dataset_name: str,
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,
     ) -> Any:
-        """Minimal wrapper to ensure Hooks are run synchronously
-        within an asynchronous dataset load."""
+        """Asynchronously loads a dataset while ensuring hooks are executed in order."""
         hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)
-        return_ds = catalog.load(dataset_name)
+        return_ds = await asyncio.to_thread(catalog.load, dataset_name)
         hook_manager.hook.after_dataset_loaded(
             dataset_name=dataset_name, data=return_ds, node=node
         )
         return return_ds
+
+    @staticmethod
+    async def _async_dataset_save(
+        dataset_name: str, data: Any, node, catalog, hook_manager
+    ):
+        """Asynchronously saves a dataset while ensuring hooks are executed in order."""
+        hook_manager.hook.before_dataset_saved(
+            dataset_name=dataset_name, data=data, node=node
+        )
+        await asyncio.to_thread(catalog.save, dataset_name, data)
+        hook_manager.hook.after_dataset_saved(
+            dataset_name=dataset_name, data=data, node=node
+        )
 
     @staticmethod
     def _collect_inputs_from_hook(  # noqa: PLR0913

@@ -14,7 +14,8 @@ At this stage, you should be able to see the `conda` environment that you have c
 [Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate around your Kedro project by finding the definition of your datasets, find references to them in your code, and more.
 
 ![Kedro VS Code gif](https://github.com/kedro-org/vscode-kedro/blob/main/assets/lsp-go-to-definition.gif?raw=true)
-## Advanced: For those using `venv` / `virtualenv`
+
+## Setting up `venv` / `virtualenv` in VS Code
 
 We're going to show you how to get your virtual environments to show up in your Python interpreter in VS Code. You do this by opening [`settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settings-file-locations) and adding the following:
 
@@ -36,7 +37,7 @@ You'll start by finding the path of your Kedro CLI script in the terminal:
 which kedro
 
 # Windows (in **Anaconda Command Prompt**)
-python -c 'import sys, os.path; print(os.path.join(os.path.dirname(sys.executable), "kedro"))'
+where kedro
 ```
 
 We're going to need you to modify your `tasks.json`. To do this, go to **Terminal > Configure Tasks...** on your menu and open up `tasks.json` in the editor. Modify it with the following:
@@ -98,6 +99,120 @@ To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift +
 
 ![](../meta/images/vscode_run.png)
 
+
+## Setting a custom Kedro project path
+
+Starting with Kedro VS Code extension version 0.3.0, you can now specify a custom path to your Kedro project. This is useful when:
+
+- Your Kedro project is not at the root of your workspace
+- You want to work with a Kedro project that is outside your current workspace
+- You have multiple Kedro projects and want to switch between them
+
+
+### Set up a custom path using the command palette
+
+1. Open the Command Palette by pressing `Cmd + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux)
+2. Type `Kedro: Set Project Path` and select it
+3. Enter the absolute path to your Kedro project (for example, `/Users/username/projects/my-kedro-project`)
+
+![Setting Kedro project path through Command Palette](../meta/images/vscode_set_custom_path_using_command_palette.gif)
+
+### Set up a custom path using the VSCode settings UI
+
+1. Open VS Code settings by pressing `Cmd + ,` (macOS) or `Ctrl + ,` (Windows/Linux)
+2. Search for `kedro` in the settings search bar
+3. Find the `Kedro: Project Path` setting
+4. Enter the absolute path to your Kedro project in the field
+
+![Setting Kedro project path through Settings](../meta/images/vscode_set_custom_path_using_settings_ui.gif)
+
+### Multi-root workspace integration
+
+If the Kedro project path you specify is not part of your current workspace, the extension will automatically add it to your workspace as part of a multi-root workspace. This allows you to:
+
+- See the project files in the Explorer
+- Navigate the project structure
+- Use all Kedro extension features with the specified project
+
+### Example directory structure
+
+If your Kedro project is nested within other folders, setting a custom project path can help the extension locate it. For example:
+
+```
+root
+│   file001.txt
+│
+└───folder1
+│   │   file011.txt
+│   │   file012.txt
+│   │
+│   └───kedroProject  <-- Set this path
+│       │   pyproject.toml
+│       │   README.md
+│       │   ...
+│
+└───folder2
+    │   file020.txt
+    │   file021.txt
+```
+
+In this case, you would set the Kedro project path to the absolute path of the `kedroProject` directory, such as `/Users/username/root/folder1/kedroProject`.
+
+### Switching between multiple projects
+
+If you work with multiple Kedro projects, you can switch between them by updating the project path setting. The extension will automatically detect the change and reconfigure itself to work with the newly specified project.
+
+### Troubleshooting
+
+If the extension doesn't recognise your Kedro project after setting a custom path:
+
+1. Ensure the path points to a valid Kedro project (containing `pyproject.toml` with Kedro dependencies)
+2. Check that the path is an absolute path, not a relative one
+3. Reload VS Code if the changes don’t take effect.
+
+
+## Real time catalog validation with Kedro LSP
+
+With the latest **Kedro VS Code extension**, you can automatically check your `catalog*.yml` or `catalog*.yaml` files without installing additional YAML plugins or schemas. The extension now uses a **Language Server Protocol (LSP)** approach to catch configuration issues as you edit.
+
+### How it works
+
+- **Parsing & Dataset Checks**: The extension reads your catalog file and tries to load each dataset to ensure the configuration is correct.
+- **Immediate Feedback**: If any dataset has an invalid type or missing dependency, you’ll see red underlines in the editor and an entry in VS Code’s **Problems** panel.
+- **Incremental & Periodic Validation**: The extension re-checks your catalogs whenever you open or edit a file, and it can also run in the background, so you’re always up-to-date on any potential issues.
+
+### Viewing errors in the problems panel
+
+VS Code’s **Problems** panel provides a convenient overview of all catalog issues:
+
+1. Go to **View > Problems** or press `Ctrl+Shift+M` (or `Cmd+Shift+M` on macOS).
+2. Expand any reported errors to see details about what’s wrong (for example, “Class not found.”).
+3. **Click** an error to jump directly to the problematic line in the catalog file.
+
+![](../meta/images/vscode_problems_panel.png)
+
+This simplifies fixing dataset errors caused by things such as typos in your dataset type or missing modules before running any Kedro pipelines.
+
+## Visualise the pipeline with Kedro-Viz
+
+To visualize your Kedro project using Kedro-Viz in Visual Studio Code, follow these steps:
+
+1. **Open the Command Palette**:
+Press `Cmd` + `Shift` + `P` (on macOS) or `Ctrl` + `Shift` + `P` (on Windows/Linux).
+
+2. **Run Kedro-Viz**:
+Type `kedro: Run Kedro Viz` and select the command.
+This will launch Kedro-Viz and display your pipeline visually within the extension.
+
+**Note:** To update the Kedro-Viz flowchart after making any changes to your Kedro project, please hit `Cmd` + `Shift` + `P` to open the VSCode command and look for `kedro: restart server`.
+
+Navigate to Node Functions:
+Click on a node in the Kedro-Viz flowchart, and it will automatically navigate to the corresponding node function in your code.
+![navigation to node function](../meta/images/viz-vsc-nav-function-node.gif)
+
+Navigate to DataCatalog:
+Clicking on a data node in the flowchart will open the corresponding dataset in the Data Catalog.
+![navigation to dataset](../meta/images/viz-vsc-nav-data-node.gif)
 
 ## Debugging
 
@@ -250,25 +365,3 @@ Go to the **Debugging** section in VS Code and select the newly created remote d
 You must [set a breakpoint in VS Code as described in the debugging section above](#debugging) and start the debugger by clicking the green play triangle:
 
 [Find more information on debugging in VS Code](https://code.visualstudio.com/docs/python/debugging).
-
-## Real time catalog validation with Kedro LSP
-
-With the latest **Kedro VS Code extension**, you can automatically check your `catalog*.yml` or `catalog*.yaml` files without installing additional YAML plugins or schemas. The extension now uses a **Language Server Protocol (LSP)** approach to catch configuration issues as you edit.
-
-### How it works
-
-- **Parsing & Dataset Checks**: The extension reads your catalog file and tries to load each dataset to ensure the configuration is correct.
-- **Immediate Feedback**: If any dataset has an invalid type or missing dependency, you’ll see red underlines in the editor and an entry in VS Code’s **Problems** panel.
-- **Incremental & Periodic Validation**: The extension re-checks your catalogs whenever you open or edit a file, and it can also run in the background, so you’re always up-to-date on any potential issues.
-
-### Viewing errors in the problems panel
-
-VS Code’s **Problems** panel provides a convenient overview of all catalog issues:
-
-1. Go to **View > Problems** or press `Ctrl+Shift+M` (or `Cmd+Shift+M` on macOS).
-2. Expand any reported errors to see details about what’s wrong (for example, “Class not found.”).
-3. **Click** an error to jump directly to the problematic line in the catalog file.
-
-![](../meta/images/vscode_problems_panel.png)
-
-This simplifies fixing dataset errors caused by things such as typos in your dataset type or missing modules before running any Kedro pipelines.

@@ -1,8 +1,10 @@
 import logging
+from collections.abc import Iterable
 from typing import Any
 
 from kedro.framework.project import pipelines as _pipelines
 from kedro.io import KedroDataCatalog
+from kedro.pipeline import Pipeline
 
 
 def is_parameter(dataset_name: str) -> bool:
@@ -16,7 +18,7 @@ class CatalogCommandsMixin:
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
     def list_datasets(
-        self: KedroDataCatalog, pipelines: list[str] | None = None
+        self: KedroDataCatalog, pipelines: list[str] | Pipeline | None = None
     ) -> dict:
         """Show datasets per type."""
 
@@ -26,15 +28,21 @@ class CatalogCommandsMixin:
         target_pipelines = pipelines or _pipelines.keys()
 
         result = {}
+        if not isinstance(target_pipelines, Iterable):
+            target_pipelines = [target_pipelines]
+
         for pipe in target_pipelines:
-            pl_obj = _pipelines.get(pipe)
-            if pl_obj:
-                pipeline_ds = pl_obj.datasets()
+            if isinstance(pipe, str):
+                pl_obj = _pipelines.get(pipe)
+                if pl_obj:
+                    pipeline_ds = pl_obj.datasets()
+                else:
+                    existing_pls = ", ".join(sorted(_pipelines.keys()))
+                    raise ValueError(
+                        f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
+                    )
             else:
-                existing_pls = ", ".join(sorted(_pipelines.keys()))
-                raise ValueError(
-                    f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
-                )
+                pipeline_ds = pipe.datasets()
 
             catalog_ds = set(self.keys())
 
@@ -61,7 +69,8 @@ class CatalogCommandsMixin:
                 ("factories", patterns_ds_by_type),
                 ("defaults", default_ds_by_type),
             )
-            result[pipe] = {key: value for key, value in data}
+            pipe_name = pipe if isinstance(pipe, str) else "pipeline"
+            result[pipe_name] = {key: value for key, value in data}
 
         return result
 

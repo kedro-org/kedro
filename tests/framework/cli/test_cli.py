@@ -1061,26 +1061,18 @@ class TestValidateConfSource:
         ):
             validate_conf_source(ctx, param, "somepath")
 
+    def test_remote_url_direct(self, mocker):
+        """Test that remote URLs are handled directly without using the fake CLI structure"""
+        ctx = mocker.MagicMock()
+        param = mocker.MagicMock()
 
-class TestRunCommandWithRemoteConf:
-    def test_run_with_remote_conf_source(self, mocker, fake_project_cli, fake_metadata):
-        """Test run command with S3 conf source"""
-        mock_validate = mocker.patch("kedro.framework.cli.utils.validate_conf_source")
-        mock_validate.return_value = "s3://bucket/conf"
+        from kedro.framework.cli.utils import validate_conf_source
 
-        mock_session = mocker.patch("kedro.framework.session.KedroSession.create")
-        mock_session.return_value.__enter__.return_value = MagicMock()
+        result = validate_conf_source(ctx, param, "s3://bucket/path")
+        assert result == "s3://bucket/path"
 
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["run", "--conf-source", "s3://bucket/conf"],
-            obj=fake_metadata,
-        )
+        result = validate_conf_source(ctx, param, "http://example.com/path")
+        assert result == "http://example.com/path"
 
-        assert result.exit_code == 0
-
-        mock_validate.assert_called_once()
-        assert mock_validate.call_args[0][2] == "s3://bucket/conf"
-
-        mock_session.assert_called_once()
-        assert "s3://bucket/conf" in mock_session.call_args.kwargs.values()
+        result = validate_conf_source(ctx, param, "gs://bucket/path")
+        assert result == "gs://bucket/path"

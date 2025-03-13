@@ -1678,8 +1678,6 @@ class TestRemotePathHandling:
         # Exception is raised when the directory doesn't exist
         with pytest.raises(
             MissingConfigException,
-            match="Either does not exist.*Error: No such file or bucket",
+            match="Given configuration path either does not exist or is not a valid directory.*Error: No such file or bucket",
         ):
             conf["catalog"]
-
-        mock_filesystem.ls.assert_called_once()

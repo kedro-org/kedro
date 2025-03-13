@@ -379,7 +379,6 @@ class Pipeline:
         """
         grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
         for node in self.nodes:
-            key = node.namespace or node.name
             if node.namespace:
                 key = node.namespace.split(".")[0]  # only take top level namespace
             else:

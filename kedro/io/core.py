@@ -31,7 +31,13 @@ from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 from typing_extensions import Self
 
-from kedro.utils import HTTP_PROTOCOLS, _parse_filepath, load_obj
+# These are re-exported for backward compatibility
+from kedro.utils import (  # noqa: F401
+    CLOUD_PROTOCOLS,
+    HTTP_PROTOCOLS,
+    _parse_filepath,
+    load_obj,
+)
 
 if TYPE_CHECKING:
     import os

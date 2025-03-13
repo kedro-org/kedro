@@ -27,6 +27,7 @@ from kedro.framework.cli.utils import (
     find_run_command,
     forward_command,
     get_pkg_version,
+    validate_conf_source,
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -1024,3 +1025,62 @@ class TestRunCommand:
             " does not exist."
         )
         assert expected_output in result.output
+
+
+class TestValidateConfSource:
+    def test_remote_url_validation(self):
+        """Test that remote URLs are not validated for existence"""
+        ctx = MagicMock()
+        param = MagicMock()
+
+        s3_url = "s3://bucket/path"
+        gs_url = "gs://bucket/path"
+        http_url = "http://example.com/path"
+
+        assert validate_conf_source(ctx, param, s3_url) == s3_url
+        assert validate_conf_source(ctx, param, gs_url) == gs_url
+        assert validate_conf_source(ctx, param, http_url) == http_url
+
+        with pytest.raises(
+            click.BadParameter, match="Path 'file://nonexistent' does not exist"
+        ):
+            validate_conf_source(ctx, param, "file://nonexistent")
+
+    def test_exception_handling_in_validator(self, mocker):
+        """Test exception handling in validate_conf_source function"""
+        ctx = MagicMock()
+        param = MagicMock()
+
+        # Mock Path to raise an unexpected exception
+        mock_path = mocker.patch("kedro.framework.cli.utils.Path")
+        mock_path.side_effect = ValueError("Mock error in Path handling")
+
+        with pytest.raises(
+            click.BadParameter,
+            match="Invalid path: somepath. Error: Mock error in Path handling",
+        ):
+            validate_conf_source(ctx, param, "somepath")
+
+
+class TestRunCommandWithRemoteConf:
+    def test_run_with_remote_conf_source(self, mocker, fake_project_cli, fake_metadata):
+        """Test run command with S3 conf source"""
+        mock_validate = mocker.patch("kedro.framework.cli.utils.validate_conf_source")
+        mock_validate.return_value = "s3://bucket/conf"
+
+        mock_session = mocker.patch("kedro.framework.session.KedroSession.create")
+        mock_session.return_value.__enter__.return_value = MagicMock()
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "s3://bucket/conf"],
+            obj=fake_metadata,
+        )
+
+        assert result.exit_code == 0
+
+        mock_validate.assert_called_once()
+        assert mock_validate.call_args[0][2] == "s3://bucket/conf"
+
+        mock_session.assert_called_once()
+        assert "s3://bucket/conf" in mock_session.call_args.kwargs.values()

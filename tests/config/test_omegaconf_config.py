@@ -1633,3 +1633,53 @@ class TestOmegaConfigLoaderStandalone:
     def test_keys_exist(self):
         conf = OmegaConfigLoader(conf_source="")
         assert list(conf.keys()) == ["catalog", "parameters", "credentials", "globals"]
+
+
+class TestRemotePathHandling:
+    def test_remote_path_construction(self, tmp_path, mocker):
+        """Test environment path construction for cloud protocols (like S3)"""
+        mock_fs = mocker.patch("fsspec.filesystem")
+        mock_filesystem = mocker.MagicMock()
+        mock_fs.return_value = mock_filesystem
+
+        mock_parse = mocker.patch("kedro.config.omegaconf_config._parse_filepath")
+        mock_parse.return_value = {"protocol": "s3", "path": "bucket/path"}
+
+        conf = OmegaConfigLoader(
+            conf_source="s3://bucket/path", base_env="base", default_run_env="local"
+        )
+
+        # Force getitem to try loading from both base and local
+        with pytest.raises(MissingConfigException):
+            conf["catalog"]
+
+        mock_fs.assert_called_with(protocol="s3")
+        assert conf._protocol == "s3"
+        assert conf._remote_root_path == "bucket/path"
+
+    def test_remote_dir_not_exists_exception(self, tmp_path, mocker):
+        """Test exception handling when a remote directory doesn't exist"""
+        mock_fs = mocker.patch("fsspec.filesystem")
+        mock_filesystem = mocker.MagicMock()
+
+        mock_filesystem.ls.side_effect = FileNotFoundError("No such file or bucket")
+        mock_fs.return_value = mock_filesystem
+
+        # Parse filepath
+        mock_parse = mocker.patch("kedro.config.omegaconf_config._parse_filepath")
+        mock_parse.return_value = {"protocol": "s3", "path": "bucket/nonexistent"}
+
+        conf = OmegaConfigLoader(
+            conf_source="s3://bucket/nonexistent",
+            base_env="base",
+            default_run_env="local",
+        )
+
+        # Exception is raised when the directory doesn't exist
+        with pytest.raises(
+            MissingConfigException,
+            match="Either does not exist.*Error: No such file or bucket",
+        ):
+            conf["catalog"]
+
+        mock_filesystem.ls.assert_called_once()

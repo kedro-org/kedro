@@ -207,7 +207,7 @@ class Task:
 
         is_async = True
         additional_inputs = self._collect_inputs_from_hook(
-            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+            node, catalog, inputs.copy(), is_async, hook_manager, session_id=session_id
         )
         inputs.update(additional_inputs)
 

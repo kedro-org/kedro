@@ -918,7 +918,7 @@ def pipeline_with_namespace_nested():
     return modular_pipeline(
         [
             node(identity, "A", "B", name="node_1", namespace="level1_1.level2"),
-            node(identity, "B", "C", name="node_2", namespace="level1_1.level2"),
+            node(identity, "B", "C", name="node_2", namespace="level1_1.level2_a"),
             node(identity, "C", "D", name="node_3", namespace="level1_1"),
             node(identity, "D", "E", name="node_4", namespace="level1_2"),
             node(identity, "E", "F", name="node_5", namespace="level1_2.level2"),

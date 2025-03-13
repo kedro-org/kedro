@@ -281,5 +281,5 @@ Open the visualisation with `kedro viz run` to see the collapsible pipeline part
 ![Nested pipeline visualisation on Viz](../meta/images/viz_collapse_panel.png)
 
 ```{warning}
-The defining of `namespace` at node level is not recommended for grouping your nodes for deployment as this behaviour differs from defining `namespace` at `pipeline()` level. When defining namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
+The use of `namespace` at node level is not recommended for grouping your nodes for deployment as this behaviour differs from defining `namespace` at `pipeline()` level. When defining namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
 ```

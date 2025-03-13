@@ -13,8 +13,8 @@ from attrs import define, field
 from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
+from kedro.framework.context.catalog_mixins import CatalogCommandsMixin
 from kedro.framework.project import settings
-from kedro.framework.session.catalog_mixins import CatalogCommandsMixin
 from kedro.io import CatalogProtocol  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 

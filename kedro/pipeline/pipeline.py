@@ -380,6 +380,10 @@ class Pipeline:
         grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
         for node in self.nodes:
             key = node.namespace or node.name
+            if node.namespace:
+                key = node.namespace.split(".")[0]  # only take top level namespace
+            else:
+                key = node.name
             if key not in grouped_nodes:
                 grouped_nodes[key] = {}
                 grouped_nodes[key]["name"] = key
@@ -389,10 +393,12 @@ class Pipeline:
             grouped_nodes[key]["nodes"].append(node)
             dependencies = set()
             for parent in self.node_dependencies[node]:
-                if parent.namespace and parent.namespace != key:
-                    dependencies.add(parent.namespace)
-                elif parent.namespace and parent.namespace == key:
-                    continue
+                if parent.namespace:
+                    parent_namespace = parent.namespace.split(".")[0]
+                    if parent_namespace != key:
+                        dependencies.add(parent_namespace)
+                    else:
+                        continue
                 else:
                     dependencies.add(parent.name)
             grouped_nodes[key]["dependencies"].update(dependencies)

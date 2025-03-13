@@ -452,6 +452,21 @@ class TestValidPipeline:
             names = [node.name for node in value["nodes"]]
             assert set(names) == set(expected[key])
 
+    def test_node_grouping_by_namespace_nested(self, request):
+        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
+        {
+            'node_name/namespace_name' : {
+                                            'name': 'node_name/namespace_name',
+                                            'type': 'namespace' or 'node',
+                                            'nodes': [list of nodes],
+                                            'dependencies': [list of dependencies]}
+        }
+        This test checks if the grouping only occurs on first level of namespaces
+        """
+        p = request.getfixturevalue("pipeline_with_namespace_nested")
+        grouped = p.grouped_nodes_by_namespace
+        assert set(grouped.keys()) == {"level1_1", "level1_2"}
+
     @pytest.mark.parametrize(
         "pipeline_name, expected",
         [
@@ -894,6 +909,20 @@ def pipeline_with_namespace_partial():
             node(identity, "D", "E", name="node_4", namespace="namespace_2"),
             node(identity, "E", "F", name="node_5", namespace="namespace_2"),
             node(identity, "F", "G", name="node_6"),
+        ]
+    )
+
+
+@pytest.fixture
+def pipeline_with_namespace_nested():
+    return modular_pipeline(
+        [
+            node(identity, "A", "B", name="node_1", namespace="level1_1.level2"),
+            node(identity, "B", "C", name="node_2", namespace="level1_1.level2"),
+            node(identity, "C", "D", name="node_3", namespace="level1_1"),
+            node(identity, "D", "E", name="node_4", namespace="level1_2"),
+            node(identity, "E", "F", name="node_5", namespace="level1_2.level2"),
+            node(identity, "F", "G", name="node_6", namespace="level1_2.level2"),
         ]
     )
 

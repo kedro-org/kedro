@@ -193,6 +193,26 @@ VS Code’s **Problems** panel provides a convenient overview of all catalog iss
 
 This simplifies fixing dataset errors caused by things such as typos in your dataset type or missing modules before running any Kedro pipelines.
 
+## Visualise the pipeline with Kedro-Viz
+
+To visualize your Kedro project using Kedro-Viz in Visual Studio Code, follow these steps:
+
+1. **Open the Command Palette**:
+Press `Cmd` + `Shift` + `P` (on macOS) or `Ctrl` + `Shift` + `P` (on Windows/Linux).
+
+2. **Run Kedro-Viz**:
+Type `kedro: Run Kedro Viz` and select the command.
+This will launch Kedro-Viz and display your pipeline visually within the extension.
+
+**Note:** To update the Kedro-Viz flowchart after making any changes to your Kedro project, please hit `Cmd` + `Shift` + `P` to open the VSCode command and look for `kedro: restart server`.
+
+Navigate to Node Functions:
+Click on a node in the Kedro-Viz flowchart, and it will automatically navigate to the corresponding node function in your code.
+![navigation to node function](../meta/images/viz-vsc-nav-function-node.gif)
+
+Navigate to DataCatalog:
+Clicking on a data node in the flowchart will open the corresponding dataset in the Data Catalog.
+![navigation to dataset](../meta/images/viz-vsc-nav-data-node.gif)
 
 ## Debugging
 

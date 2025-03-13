@@ -18,7 +18,7 @@ class CatalogCommandsMixin:
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
     def list_datasets(
-        self: KedroDataCatalog, pipelines: list[str] | Pipeline | None = None
+        self: KedroDataCatalog, pipelines: list[str] | list[Pipeline] | None = None
     ) -> dict:
         """Show datasets per type."""
 
@@ -31,18 +31,11 @@ class CatalogCommandsMixin:
         if not isinstance(target_pipelines, Iterable):
             target_pipelines = [target_pipelines]
 
-        for pipe in target_pipelines:
-            if isinstance(pipe, str):
-                pl_obj = _pipelines.get(pipe)
-                if pl_obj:
-                    pipeline_ds = pl_obj.datasets()
-                else:
-                    existing_pls = ", ".join(sorted(_pipelines.keys()))
-                    raise ValueError(
-                        f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
-                    )
-            else:
-                pipeline_ds = pipe.datasets()
+        for i, pipe in enumerate(target_pipelines):
+            pipeline_ds = set()
+            pl_obj = _pipelines.get(pipe) if isinstance(pipe, str) else pipe
+            if pl_obj:
+                pipeline_ds = pl_obj.datasets()
 
             catalog_ds = set(self.keys())
 
@@ -69,7 +62,7 @@ class CatalogCommandsMixin:
                 ("factories", patterns_ds_by_type),
                 ("defaults", default_ds_by_type),
             )
-            pipe_name = pipe if isinstance(pipe, str) else "pipeline"
+            pipe_name = pipe if isinstance(pipe, str) else f"pipeline_{i}"
             result[pipe_name] = {key: value for key, value in data}
 
         return result
@@ -81,7 +74,9 @@ class CatalogCommandsMixin:
         return self.config_resolver.list_patterns()
 
     def resolve_patterns(
-        self: KedroDataCatalog, include_default: bool = False
+        self: KedroDataCatalog,
+        pipelines: list[Pipeline] | None = None,
+        include_default: bool = False,
     ) -> dict[str, Any]:
         """Resolve catalog factories against pipeline datasets."""
         # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475
@@ -89,10 +84,11 @@ class CatalogCommandsMixin:
         if include_default:
             self.config_resolver.add_runtime_patterns(runtime_pattern)
 
-        pipeline_datasets = set()
+        target_pipelines = pipelines or _pipelines.keys()
 
-        for pipe in _pipelines.keys():
-            pl_obj = _pipelines.get(pipe)
+        pipeline_datasets = set()
+        for pipe in target_pipelines:
+            pl_obj = _pipelines.get(pipe) if isinstance(pipe, str) else pipe
             if pl_obj:
                 pipeline_datasets.update(pl_obj.datasets())
 

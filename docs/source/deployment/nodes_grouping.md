@@ -58,7 +58,7 @@ Namespaces allow you to group nodes, ensuring clear dependencies and separation 
 ![Switching expanding namespaced pipeline in Kedro Viz](../meta/images/kedro_viz_expanding_namespace.gif)
 
 Using namespaces comes with a few challenges:
-- **Defining namespace at Node-level:** If you define namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
+- **Defining namespace at Node-level:** Defining namespaces at node level is not recommended for grouping your nodes. The node level definition of namespaces should only be used for creating collapsible views on Kedro-Viz for high level representation of your nodes. If you define namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
 - **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly. If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `pipeline()` creation function. For example:
 
 ```
@@ -70,9 +70,8 @@ return pipeline(
 ```
 
 **Best used when**
-- You want to organise nodes logically within a pipeline while keeping a structured execution flow. You can also nest namespace pipelines within each other.
+- You want to organise nodes logically within a pipeline while keeping a structured execution flow. You can also nest namespace pipelines within each other for visualisation.
 - Your pipeline structure is well-defined, and using namespaces improves visualisation in Kedro-Viz.
-- Customising deployment groups by adding namespaces at the node level.
 
 **Not to use when**
 - In small and simple projects, using namespaces can introduce unnecessary complexity, making pipeline grouping a more suitable choice.

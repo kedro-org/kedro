@@ -192,7 +192,29 @@ kedro run --conf-source=abfs://container@account/configs/
 kedro run --conf-source=gs://my-bucket/configs/
 ```
 
-Authentication for remote storage access follows the same mechanisms as those used by the data catalog.
+#### Authentication for remote configuration
+Authentication for remote configuration sources must be set up through environment variables or other credential mechanisms provided by the cloud platform.
+
+**Examples of authentication setup:**
+
+Amazon S3:
+```bash
+  export AWS_ACCESS_KEY_ID=your_access_key
+  export AWS_SECRET_ACCESS_KEY=your_secret_key
+  kedro run --conf-source=s3://my-bucket/configs/
+```
+Google Cloud Storage:
+```
+gcloud auth application-default login
+kedro run --conf-source=gs://my-bucket/configs/
+```
+Azure Blob Storage:
+```
+export AZURE_STORAGE_ACCOUNT=your_account_name
+export AZURE_STORAGE_KEY=your_account_key
+kedro run --conf-source=abfs://container@account/configs/
+```
+For more detailed authentication instructions, refer to the documentation of your cloud provider.
 
 The remote storage should maintain the same configuration structure as local configuration, with appropriate `base` and environment folders:
 

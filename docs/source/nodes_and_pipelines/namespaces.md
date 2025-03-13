@@ -187,7 +187,7 @@ After executing the pipeline with `kedro run`, the visualisation with `kedro viz
 
 ## Group nodes with namespaces
 
-You can use namespaces in your Kedro projects, not only to reuse pipelines but to also group your nodes for better high level visualisation in Kedro Viz and for deployment purposes. In production environments, it might be highly inefficient to map each node to a container. Using namespaces as a grouping mechanism, you can map each namespaced pipeline to a container or a task in your deployment environment.
+You can use namespaces in your Kedro projects, not only to reuse pipelines but to also group your nodes for better high level visualisation in Kedro Viz and for deployment purposes. In production environments, it might be inefficient to map each node to a container. Using namespaces as a grouping mechanism, you can map each namespaced pipeline to a container or a task in your deployment environment.
 
 For example, in your spaceflights project, you can assign a namespace to the `data_processing` pipeline like this:
 
@@ -227,7 +227,7 @@ The pipeline will expect the inputs and outputs to be prefixed with the namespac
 ```{note}
 From Kedro 0.19.12, you can use the `grouped_nodes_by_namespace` property of the `Pipeline` object to get a dictionary which groups nodes by their top level namespace. Plugin developers are encouraged to use this property to obtain the mapping of namespaced group of nodes to a container or a task in the deployment environment.
 ```
-You can further nest namespaces by assigning namespaces on the node level with the `namespace` argument of the `node()` function but it should only be done to enhance visualisation by creating collapsible pipeline parts on Kedro Viz. In this case, only the node name will be prefixed with `namespace_name`, while inputs, outputs, and parameters will remain unchanged. Note that this behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).
+You can further nest namespaces by assigning namespaces on the node level with the `namespace` argument of the `node()` function. Namespacing at node level should only be done to enhance visualisation by creating collapsible pipeline parts on Kedro Viz. In this case, only the node name will be prefixed with `namespace_name`, while inputs, outputs, and parameters will remain unchanged. This behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).
 
 For example, if you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorial/add_another_pipeline.md#data-science-pipeline) into the same collapsible namespace for visualisation, you can update your pipeline like this:
 

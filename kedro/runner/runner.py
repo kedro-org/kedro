@@ -25,7 +25,6 @@ from pluggy import PluginManager
 
 from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import CatalogProtocol, MemoryDataset, SharedMemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.task import Task
 
@@ -37,6 +36,7 @@ if TYPE_CHECKING:
 
     from pluggy import PluginManager
 
+    from kedro.io import CatalogProtocol
     from kedro.pipeline.node import Node
 
 
@@ -48,19 +48,14 @@ class AbstractRunner(ABC):
     def __init__(
         self,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
-                during the run. This is used to set the default datasets on the Runner instances.
-
         """
         self._is_async = is_async
-        self._extra_dataset_patterns = extra_dataset_patterns
 
     @property
     def _logger(self) -> logging.Logger:
@@ -94,32 +89,11 @@ class AbstractRunner(ABC):
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, not including extra dataset patterns
         # Run a warm-up to materialize all datasets in the catalog before run
-        warmed_up_ds = []
         for ds in pipeline.datasets():
             if ds in catalog:
-                warmed_up_ds.append(ds)
                 _ = catalog._get_dataset(ds)
 
-        # Check if there are any input datasets that aren't in the catalog and
-        # don't match a pattern in the catalog.
-        unsatisfied = pipeline.inputs() - set(warmed_up_ds)
-
-        if unsatisfied:
-            raise ValueError(
-                f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
-            )
-
-        # Register the default dataset pattern with the catalog
-        # TODO: replace with catalog.config_resolver.add_runtime_patterns() when removing old catalog
-        catalog = catalog.shallow_copy(
-            extra_dataset_patterns=self._extra_dataset_patterns
-        )
-
         hook_or_null_manager = hook_manager or _NullPluginManager()
-
-        # Check which datasets used in the pipeline are in the catalog or match
-        # a pattern in the catalog, including added extra_dataset_patterns
-        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
 
         if self._is_async:
             self._logger.info(
@@ -130,24 +104,12 @@ class AbstractRunner(ABC):
 
         self._logger.info("Pipeline execution completed successfully.")
 
-        # Identify MemoryDataset in the catalog
-        memory_datasets = {
-            ds_name
-            for ds_name, ds in catalog._datasets.items()
-            if isinstance(ds, MemoryDataset) or isinstance(ds, SharedMemoryDataset)
-        }
-
-        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
-        # in the catalog and include MemoryDataset.
-        free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
+        # TODO: decide if we want to differ default datasets added in the catalog with
+        # TODO: default datasets resolved when execution
+        # TODO: Can we just return pipeline.outputs() instead but without loading data?
+        free_outputs = [ds for ds in pipeline.outputs() if ds not in catalog]
 
         run_output = {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
-
-        # Remove runtime patterns after run, so they do not affect further runs
-        if self._extra_dataset_patterns:
-            catalog.config_resolver.remove_runtime_patterns(
-                self._extra_dataset_patterns
-            )
 
         return run_output
 

@@ -32,6 +32,8 @@ from kedro.io.core import (
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.utils import _format_rich, _has_rich_handler
 
+DEFAULT_PATTERN = {"{default}": {"type": "MemoryDataset"}}
+
 
 class _LazyDataset:
     """A helper class to store AbstractDataset configuration and materialize dataset object."""
@@ -98,7 +100,9 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                   save_args={"index": False})
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
-        self._config_resolver = config_resolver or CatalogConfigResolver()
+        self._config_resolver = config_resolver or CatalogConfigResolver(
+            runtime_patterns=DEFAULT_PATTERN
+        )
         # TODO: rename back to _datasets when removing old catalog
         self.__datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
@@ -288,6 +292,7 @@ class KedroDataCatalog(CatalogProtocol):
         credentials: dict[str, dict[str, Any]] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
+        runtime_patterns: Patterns | None = None,
     ) -> KedroDataCatalog:
         """Create a ``KedroDataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -312,6 +317,7 @@ class KedroDataCatalog(CatalogProtocol):
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
+            runtime_patterns: Default atterns used to resolve datasets.
 
         Returns:
             An instantiated ``KedroDataCatalog`` containing all specified
@@ -357,7 +363,8 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog.save("boats", df)
         """
         catalog = catalog or {}
-        config_resolver = CatalogConfigResolver(catalog, credentials)
+        runtime_patterns = runtime_patterns or DEFAULT_PATTERN
+        config_resolver = CatalogConfigResolver(catalog, credentials, runtime_patterns)
         save_version = save_version or generate_timestamp()
         load_versions = load_versions or {}
 

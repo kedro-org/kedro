@@ -213,6 +213,7 @@ class KedroContext:
         self,
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
+        runtime_patterns: dict[str, dict[str, Any]] | None = None,
     ) -> CatalogProtocol:
         """A hook for changing the creation of a catalog instance.
 
@@ -236,6 +237,7 @@ class KedroContext:
             credentials=conf_creds,
             load_versions=load_versions,
             save_version=save_version,
+            runtime_patterns=runtime_patterns,
         )
 
         feed_dict = self._get_feed_dict()

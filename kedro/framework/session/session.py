@@ -24,7 +24,7 @@ from kedro.framework.project import (
     validate_settings,
 )
 from kedro.io.core import generate_timestamp
-from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
 if TYPE_CHECKING:
@@ -33,6 +33,9 @@ if TYPE_CHECKING:
     from kedro.config import AbstractConfigLoader
     from kedro.framework.context import KedroContext
     from kedro.framework.session.store import BaseSessionStore
+
+
+PARALLEL_RUNNER_DEFAULT_PATTERN = {"{default}": {"type": "SharedMemoryDataset"}}
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
@@ -379,19 +382,27 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(
-            save_version=save_version,
-            load_versions=load_versions,
-        )
-
-        # Run the runner
-        hook_manager = self._hook_manager
         runner = runner or SequentialRunner()
         if not isinstance(runner, AbstractRunner):
             raise KedroSessionError(
                 "KedroSession expect an instance of Runner instead of a class."
                 "Have you forgotten the `()` at the end of the statement?"
             )
+
+        runtime_patterns = (
+            PARALLEL_RUNNER_DEFAULT_PATTERN
+            if isinstance(runner, ParallelRunner)
+            else None
+        )
+
+        catalog = context._get_catalog(
+            save_version=save_version,
+            load_versions=load_versions,
+            runtime_patterns=runtime_patterns,
+        )
+
+        # Run the runner
+        hook_manager = self._hook_manager
         hook_manager.hook.before_pipeline_run(
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )

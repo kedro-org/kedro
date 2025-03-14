@@ -8,7 +8,7 @@ from concurrent.futures import Executor, ProcessPoolExecutor
 from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from kedro.io import (
     CatalogProtocol,
@@ -48,7 +48,6 @@ class ParallelRunner(AbstractRunner):
         self,
         max_workers: int | None = None,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """
         Instantiates the runner by creating a Manager.
@@ -60,18 +59,10 @@ class ParallelRunner(AbstractRunner):
                 cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
-                during the run. This is used to set the default datasets to SharedMemoryDataset
-                for `ParallelRunner`.
-
         Raises:
             ValueError: bad parameters passed
         """
-        default_dataset_pattern = {"{default}": {"type": "SharedMemoryDataset"}}
-        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
-        super().__init__(
-            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
-        )
+        super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
         self._manager.start()
 

@@ -278,6 +278,8 @@ kedro run --namespace=data_processing.preprocessing
 Open the visualisation with `kedro viz run` to see the collapsible pipeline parts, which you can toggle with "Collapse pipelines" button on the left panel.
 
 ![nested pipeline visualisation](../meta/images/viz_collapse_panel.png)
+<br>
+
 
 ```{warning}
 The use of `namespace` at node level is not recommended for grouping your nodes for deployment as this behaviour differs from defining `namespace` at `pipeline()` level. When defining namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.

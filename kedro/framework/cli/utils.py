@@ -117,6 +117,29 @@ def _suggest_cli_command(
     return suggestion
 
 
+def validate_conf_source(ctx: click.Context, param: Any, value: str) -> str | None:
+    """Validate the conf_source, only checking existence for local paths."""
+    if not value:
+        return None
+
+    # Check for remote URLs (except file://)
+    if "://" in value and not value.startswith("file://"):
+        return value
+
+    # For local paths
+    try:
+        path = Path(value)
+        if not path.exists():
+            raise click.BadParameter(f"Path '{value}' does not exist.")
+        return str(path.resolve())
+    except click.BadParameter:
+        # Re-raise Click exceptions
+        raise
+    except Exception as exc:
+        # Wrap other exceptions
+        raise click.BadParameter(f"Invalid path: {value}. Error: {exc!s}")
+
+
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 

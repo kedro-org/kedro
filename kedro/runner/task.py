@@ -194,7 +194,6 @@ class Task:
         hook_manager: PluginManager,  # type: ignore[arg-type]
         session_id: str | None = None,
     ) -> Node:
-        # Load inputs (still requires `to_thread` as it's synchronous due to _synchronous_dataset_load)
         input_tasks: dict[str, asyncio.Task] = {
             name: asyncio.create_task(
                 self._async_dataset_load(name, node, catalog, hook_manager)
@@ -202,8 +201,13 @@ class Task:
             for name in node.inputs
         }
 
-        # Wait for all dataset loads to complete
-        inputs = {key: await input_task for key, input_task in input_tasks.items()}
+        # Gather results as they complete
+        inputs = {}
+        for name, input_task in input_tasks.items():
+            try:
+                inputs[name] = await input_task
+            except Exception as exception:
+                raise exception
 
         is_async = True
         additional_inputs = self._collect_inputs_from_hook(

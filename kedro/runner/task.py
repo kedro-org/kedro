@@ -206,7 +206,7 @@ class Task:
         for name, input_task in input_tasks.items():
             try:
                 inputs[name] = await input_task
-            except Exception as exception:
+            except Exception as exception:  # pragma: no cover
                 raise exception
 
         is_async = True

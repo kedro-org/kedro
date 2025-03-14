@@ -318,7 +318,7 @@ def run(tag, env, ...):
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
-    with KedroSession.create(env=env, extra_params=params) as session:
+    with KedroSession.create(env=env, runtime_params=params) as session:
         context = session.load_context()
         runner_instance = _instantiate_runner(runner, is_async, context)
         session.run(

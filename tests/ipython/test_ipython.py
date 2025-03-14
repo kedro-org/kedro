@@ -95,7 +95,7 @@ class TestLoadKedroObjects:
         mock_session_create.assert_called_once_with(
             None,
             env=None,
-            extra_params=None,
+            runtime_params=None,
             conf_source=None,
         )
         _, kwargs = ipython_spy.call_args_list[0]
@@ -132,7 +132,7 @@ class TestLoadKedroObjects:
         mock_session_create.assert_called_once_with(
             fake_metadata.project_path,
             env=dummy_env,
-            extra_params=dummy_dict,
+            runtime_params=dummy_dict,
             conf_source=dummy_conf_source,
         )
         _, kwargs = ipython_spy.call_args_list[0]

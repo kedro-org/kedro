@@ -108,7 +108,7 @@ class TestSessionHookManager:
         unregister_mock = mocker.patch("pluggy._manager.PluginManager.unregister")
 
         # create a session that will use the mock_settings_with_disabled_hooks from the fixture.
-        KedroSession.create(tmp_path, extra_params={"params:key": "value"})
+        KedroSession.create(tmp_path, runtime_params={"params:key": "value"})
 
         mocked_distinfo.assert_called_once_with()
         unregister_mock.assert_called_once_with(plugin=distinfo[0][0])

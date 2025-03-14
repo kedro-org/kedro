@@ -70,7 +70,7 @@ return pipeline(
 ```
 
 **Best used when**
-- You want to organise nodes logically within a pipeline while keeping a structured execution flow. You can also nest namespace pipelines within each other for visualisation.
+- You want to organise nodes logically within a pipeline while keeping a structured execution flow. You can also nest namespaced pipelines within each other for visualisation.
 - Your pipeline structure is well-defined, and using namespaces improves visualisation in Kedro-Viz.
 
 **Not to use when**

@@ -57,6 +57,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 
 ```python
 # in src/<package_name>/runner.py
+from typing import Any, Dict
 from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
@@ -66,20 +67,21 @@ from pluggy import PluginManager
 class DryRunner(AbstractRunner):
     """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
     nodes would be run without actually executing anything. It also checks if all the
-    neccessary data exists.
+    necessary data exists.
     """
 
-    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
-        """Factory method for creating the default dataset for the runner.
+    def __init__(self, is_async: bool = False, extra_dataset_patterns: Dict[str, Dict[str, Any]] = None):
+        """Instantiates the runner class.
 
         Args:
-            ds_name: Name of the missing dataset
-        Returns:
-            An instance of an implementation of AbstractDataset to be used
-            for all unregistered datasets.
-
+            is_async: If True, the node inputs and outputs are loaded and saved
+                asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets.
         """
-        return MemoryDataset()
+        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
+        super().__init__(is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns)
 
     def _run(
         self,
@@ -99,6 +101,7 @@ class DryRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         """
@@ -110,6 +113,10 @@ class DryRunner(AbstractRunner):
         )
         self._logger.info("Checking inputs...")
         input_names = pipeline.inputs()
+        
+        # Register the default dataset pattern with the catalog
+        catalog = catalog.shallow_copy(extra_dataset_patterns=self._extra_dataset_patterns)
+        
         missing_inputs = [
             input_name
             for input_name in input_names

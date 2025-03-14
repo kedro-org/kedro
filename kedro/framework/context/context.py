@@ -176,9 +176,10 @@ class KedroContext:
     _extra_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
+    _catalog: CatalogProtocol | None = None
 
     @property
-    def catalog(self) -> CatalogProtocol:
+    def catalog(self) -> CatalogProtocol | None:
         """Read-only property referring to Kedro's catalog` for this context.
 
         Returns:
@@ -187,7 +188,8 @@ class KedroContext:
             KedroContextError: Incorrect catalog registered for the project.
 
         """
-        return self._get_catalog()
+        self._catalog = self._catalog or self._get_catalog()
+        return self._catalog
 
     @property
     def params(self) -> dict[str, Any]:
@@ -208,6 +210,14 @@ class KedroContext:
             params = OmegaConf.merge(params, self._extra_params)
 
         return OmegaConf.to_container(params) if OmegaConf.is_config(params) else params  # type: ignore[return-value]
+
+    def get_catalog(
+        self,
+        save_version: str | None = None,
+        load_versions: dict[str, str] | None = None,
+    ) -> CatalogProtocol:
+        self._catalog = self._catalog or self._get_catalog(save_version, load_versions)
+        return self._catalog
 
     def _get_catalog(
         self,

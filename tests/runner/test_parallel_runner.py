@@ -14,8 +14,7 @@ from kedro.io import (
     LambdaDataset,
     MemoryDataset,
 )
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner
 from kedro.runner.parallel_runner import (
     ParallelRunnerManager,
@@ -66,7 +65,7 @@ class TestValidParallelRunner:
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_memory_dataset_input(self, is_async, fan_out_fan_in):
-        pipeline = modular_pipeline([fan_out_fan_in])
+        pipeline = Pipeline([fan_out_fan_in])
         catalog = DataCatalog({"A": MemoryDataset("42")})
         result = ParallelRunner(is_async=is_async).run(pipeline, catalog)
         assert "Z" in result
@@ -140,7 +139,7 @@ class TestInvalidParallelRunner:
     def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise the lambda function."""
         catalog.add_feed_dict({"A": 42})
-        pipeline = modular_pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
+        pipeline = Pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
@@ -152,7 +151,7 @@ class TestInvalidParallelRunner:
 
     def test_task_exception(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(feed_dict={"A": 42})
-        pipeline = modular_pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
+        pipeline = Pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
@@ -160,15 +159,13 @@ class TestInvalidParallelRunner:
         """ParallelRunner does not support output to externally
         created MemoryDatasets.
         """
-        pipeline = modular_pipeline([fan_out_fan_in])
+        pipeline = Pipeline([fan_out_fan_in])
         catalog = DataCatalog({"C": MemoryDataset()}, {"A": 42})
         with pytest.raises(AttributeError, match="['C']"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_node_returning_none(self, is_async):
-        pipeline = modular_pipeline(
-            [node(identity, "A", "B"), node(return_none, "B", "C")]
-        )
+        pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataset("42")})
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
@@ -188,14 +185,14 @@ class TestInvalidParallelRunner:
         # Data set A cannot be serialised
         catalog = DataCatalog({"A": LambdaDataset(load=_load, save=_save)})
 
-        pipeline = modular_pipeline([fan_out_fan_in])
+        pipeline = Pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_memory_dataset_not_serialisable(self, is_async, catalog):
         """Memory dataset cannot be serialisable because of data it stores."""
         data = return_not_serialisable(None)
-        pipeline = modular_pipeline([node(return_not_serialisable, "A", "B")])
+        pipeline = Pipeline([node(return_not_serialisable, "A", "B")])
         catalog.add_feed_dict(feed_dict={"A": 42})
         pattern = (
             rf"{data.__class__!s} cannot be serialised. ParallelRunner implicit "
@@ -277,7 +274,7 @@ class TestParallelRunnerRelease:
         runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
-        pipeline = modular_pipeline(
+        pipeline = Pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
         catalog = DataCatalog(
@@ -296,7 +293,7 @@ class TestParallelRunnerRelease:
         runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
-        pipeline = modular_pipeline(
+        pipeline = Pipeline(
             [
                 node(source, None, "first"),
                 node(identity, "first", "second"),
@@ -323,7 +320,7 @@ class TestParallelRunnerRelease:
         runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
-        pipeline = modular_pipeline(
+        pipeline = Pipeline(
             [
                 node(source, None, "dataset"),
                 node(sink, "dataset", None, name="bob"),
@@ -346,7 +343,7 @@ class TestParallelRunnerRelease:
         runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
-        pipeline = modular_pipeline(
+        pipeline = Pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
         catalog = DataCatalog(
@@ -384,8 +381,8 @@ class TestSuggestResumeScenario:
     ):
         nodes = {n.name: n for n in two_branches_crossed_pipeline.nodes}
         for name in failing_node_names:
-            two_branches_crossed_pipeline -= modular_pipeline([nodes[name]])
-            two_branches_crossed_pipeline += modular_pipeline(
+            two_branches_crossed_pipeline -= Pipeline([nodes[name]])
+            two_branches_crossed_pipeline += Pipeline(
                 [nodes[name]._copy(func=exception_fn)]
             )
         with pytest.raises(Exception):
@@ -423,8 +420,8 @@ class TestSuggestResumeScenario:
 
         nodes = {n.name: n for n in test_pipeline.nodes}
         for name in failing_node_names:
-            test_pipeline -= modular_pipeline([nodes[name]])
-            test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
+            test_pipeline -= Pipeline([nodes[name]])
+            test_pipeline += Pipeline([nodes[name]._copy(func=exception_fn)])
 
         with pytest.raises(Exception, match="test exception"):
             ParallelRunner().run(

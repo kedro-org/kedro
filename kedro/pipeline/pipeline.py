@@ -885,7 +885,7 @@ class Pipeline:
 
         # Intersect all the pipelines subsets. We apply each filter to the original
         # pipeline object (self) rather than incrementally chaining filter methods
-        # together. Hence the order of filtering does not affect the outcome, and the
+        # together. Hence, the order of filtering does not affect the outcome, and the
         # resultant pipeline is unambiguously defined.
         # If this were not the case then, for example,
         # pipeline.filter(node_names=["node1", "node3"], from_inputs=["A"])
@@ -1041,6 +1041,70 @@ class Pipeline:
         mapping = {**inputs, **outputs, **parameters}
         new_nodes = [self._copy_node(n, mapping, namespace) for n in self._nodes]
         return new_nodes
+
+
+def pipeline(  # noqa: PLR0913
+    nodes: Iterable[Node | Pipeline],
+    *,
+    inputs: str | set[str] | dict[str, str] | None = None,
+    outputs: str | set[str] | dict[str, str] | None = None,
+    parameters: str | set[str] | dict[str, str] | None = None,
+    tags: str | Iterable[str] | None = None,
+    namespace: str | None = None,
+) -> Pipeline:
+    r"""Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``\s.
+
+    Args:
+        nodes: The nodes the ``Pipeline`` will be made of. If you
+            provide pipelines among the list of nodes, those pipelines will
+            be expanded and all their nodes will become part of this
+            new pipeline.
+        inputs: A name or collection of input names to be exposed as connection points
+            to other pipelines upstream. This is optional; if not provided, the
+            pipeline inputs are automatically inferred from the pipeline structure.
+            When str or set[str] is provided, the listed input names will stay
+            the same as they are named in the provided pipeline.
+            When dict[str, str] is provided, current input names will be
+            mapped to new names.
+            Must only refer to the pipeline's free inputs.
+        outputs: A name or collection of names to be exposed as connection points
+            to other pipelines downstream. This is optional; if not provided, the
+            pipeline outputs are automatically inferred from the pipeline structure.
+            When str or set[str] is provided, the listed output names will stay
+            the same as they are named in the provided pipeline.
+            When dict[str, str] is provided, current output names will be
+            mapped to new names.
+            Can refer to both the pipeline's free outputs, as well as
+            intermediate results that need to be exposed.
+        parameters: A name or collection of parameters to namespace.
+            When str or set[str] are provided, the listed parameter names will stay
+            the same as they are named in the provided pipeline.
+            When dict[str, str] is provided, current parameter names will be
+            mapped to new names.
+            The parameters can be specified without the `params:` prefix.
+        tags: Optional set of tags to be applied to all the pipeline nodes.
+        namespace: A prefix to give to all dataset names,
+            except those explicitly named with the `inputs`/`outputs`
+            arguments, and parameter references (`params:` and `parameters`).
+
+    Raises:
+        ModularPipelineError: When inputs, outputs or parameters are incorrectly
+            specified, or they do not exist on the original pipeline.
+        ValueError: When underlying pipeline nodes inputs/outputs are not
+            any of the expected types (str, dict, list, or None).
+
+    Returns:
+        A new ``Pipeline`` object.
+    """
+
+    return Pipeline(
+        nodes,
+        inputs=inputs,
+        outputs=outputs,
+        parameters=parameters,
+        tags=tags,
+        namespace=namespace,
+    )
 
 
 def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]) -> None:

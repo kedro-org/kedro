@@ -827,11 +827,11 @@ class TestRunCommand:
             namespace=None,
         )
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, conf_source=None, extra_params=expected
+            env=mocker.ANY, conf_source=None, runtime_params=expected
         )
 
     @mark.parametrize(
-        "cli_arg,expected_extra_params",
+        "cli_arg,expected_runtime_params",
         [
             ("foo=bar", {"foo": "bar"}),
             (
@@ -861,13 +861,13 @@ class TestRunCommand:
             ),
         ],
     )
-    def test_run_extra_params(
+    def test_run_runtime_params(
         self,
         mocker,
         fake_project_cli,
         fake_metadata,
         cli_arg,
-        expected_extra_params,
+        expected_runtime_params,
     ):
         mock_session_create = mocker.patch.object(KedroSession, "create")
 
@@ -877,11 +877,11 @@ class TestRunCommand:
 
         assert not result.exit_code
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
+            env=mocker.ANY, conf_source=None, runtime_params=expected_runtime_params
         )
 
     @mark.parametrize("bad_arg", ["bad", "foo=bar,bad"])
-    def test_bad_extra_params(self, fake_project_cli, fake_metadata, bad_arg):
+    def test_bad_runtime_params(self, fake_project_cli, fake_metadata, bad_arg):
         result = CliRunner().invoke(
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )

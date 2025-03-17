@@ -162,7 +162,7 @@ class KedroContext:
         package_name: Package name for the Kedro project the context is
             created for.
         hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
-        extra_params: Optional dictionary containing extra project parameters.
+        runtime_params: Optional dictionary containing runtime project parameters.
             If specified, will update (and therefore take precedence over)
             the parameters retrieved from the project configuration.
 
@@ -173,7 +173,7 @@ class KedroContext:
     env: str | None = field(init=True)
     _package_name: str = field(init=True)
     _hook_manager: PluginManager = field(init=True)
-    _extra_params: dict[str, Any] | None = field(
+    _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
 
@@ -203,9 +203,9 @@ class KedroContext:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
             params = {}
 
-        if self._extra_params:
+        if self._runtime_params:
             # Merge nested structures
-            params = OmegaConf.merge(params, self._extra_params)
+            params = OmegaConf.merge(params, self._runtime_params)
 
         return OmegaConf.to_container(params) if OmegaConf.is_config(params) else params  # type: ignore[return-value]
 

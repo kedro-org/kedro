@@ -878,7 +878,7 @@ def pipeline_with_namespace_partial():
 
 @pytest.fixture
 def pipeline_with_namespace_nested():
-    return modular_pipeline(
+    return Pipeline(
         [
             node(identity, "A", "B", name="node_1", namespace="level1_1.level2"),
             node(identity, "B", "C", name="node_2", namespace="level1_1.level2_a"),

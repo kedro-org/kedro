@@ -197,7 +197,7 @@ class Pipeline:
             # To ensure that we are always dealing with a *copy* of pipe.
             nodes = nodes.nodes
 
-        self._nodes = nodes
+        self._nodes: list[Node] = nodes
 
         if any([inputs, outputs, parameters, namespace]):
             nodes = self.map_nodes(
@@ -965,7 +965,7 @@ class Pipeline:
                 params[param_name] = param_new_name
         return params
 
-    def _rename(self, name: str, mapping: dict, namespace: str) -> str:
+    def _rename(self, name: str, mapping: dict, namespace: str | None) -> str:
         def _prefix_dataset(name: str) -> str:
             return f"{namespace}.{name}"
 
@@ -991,14 +991,14 @@ class Pipeline:
 
         for predicate, processor in rules:
             if predicate(name):  # type: ignore[no-untyped-call]
-                return processor(name)  # type: ignore[no-untyped-call]
+                return processor(name)  # type: ignore[no-untyped-call, no-any-return]
         return name
 
     def _process_dataset_names(
         self,
         datasets: str | list[str] | dict[str, str] | None,
         mapping: dict,
-        namespace: str,
+        namespace: str | None,
     ) -> str | list[str] | dict[str, str] | None:
         if datasets is None:
             return None
@@ -1015,7 +1015,7 @@ class Pipeline:
             f"Unexpected input {datasets} of type {type(datasets)}"
         )  # pragma: no cover
 
-    def _copy_node(self, node: Node, mapping: dict, namespace: str) -> Node:
+    def _copy_node(self, node: Node, mapping: dict, namespace: str | None) -> Node:
         new_namespace = node.namespace
         if namespace:
             new_namespace = (

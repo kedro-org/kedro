@@ -578,6 +578,7 @@ def parse_dataset_definition(
 
     dataset_type = config.pop(TYPE_KEY)
     class_obj = None
+    warning = None 
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
@@ -587,21 +588,22 @@ def parse_dataset_definition(
         class_paths = (prefix + dataset_type for prefix in _DEFAULT_PACKAGES)
 
         for class_path in class_paths:
-            tmp = _load_obj(class_path)
+            tmp, warning = _load_obj(class_path)  # Load dataset class, capture the warning
+
             if tmp is not None:
                 class_obj = tmp
-                break
-        else:
+                break  
+
+        if class_obj is None:  # If no valid class was found, raise an error
+            error_msg = warning if warning else f"Class '{dataset_type}' not found, is this a typo?"
             hint = (
-                "Hint: If you are trying to use a dataset from `kedro-datasets`, "
+                "\nHint: If you are trying to use a dataset from `kedro-datasets`, "
                 "make sure that the package is installed in your current environment. "
                 "You can do so by running `pip install kedro-datasets` or "
                 "`pip install kedro-datasets[<dataset-group>]` to install `kedro-datasets` along with "
                 "related dependencies for the specific dataset group."
             )
-            raise DatasetError(
-                f"Class '{dataset_type}' not found, is this a typo?" f"\n{hint}"
-            )
+            raise DatasetError(f"{error_msg}{hint}")
 
     if not class_obj:
         class_obj = dataset_type
@@ -654,9 +656,9 @@ def _load_obj(class_path: str) -> Any | None:
                 f"https://docs.kedro.org/en/stable/kedro_project_setup/"
                 f"dependencies.html#install-dependencies-related-to-the-data-catalog"
             ) from exc
-        return None
+        return None, str(exc)
 
-    return class_obj
+    return class_obj, None
 
 
 def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK

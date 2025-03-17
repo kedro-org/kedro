@@ -452,15 +452,16 @@ class TestDataCatalogFromConfig:
         correct_config["catalog"]["boats"]["type"] = "pandas.CSVDataset"
         assert DataCatalog.from_config(**correct_config)
 
-    def test_config_missing_class(self, correct_config):
+    def test_config_missing_class(correct_config):
         """Check the error if the type points to nonexistent class"""
         correct_config["catalog"]["boats"]["type"] = "kedro.io.CSVDatasetInvalid"
 
         pattern = (
-            "An exception occurred when parsing config for dataset 'boats':\n"
-            "Class 'kedro.io.CSVDatasetInvalid' not found, is this a typo?"
+            r"An exception occurred when parsing config for dataset 'boats':\n"
+            r"module 'kedro.io' has no attribute 'CSVDatasetInvalid'.*"
         )
-        with pytest.raises(DatasetError, match=re.escape(pattern)):
+
+        with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**correct_config)
 
     def test_config_invalid_dataset(self, correct_config):

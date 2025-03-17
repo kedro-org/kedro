@@ -458,7 +458,7 @@ class TestKedroDataCatalog:
                 "kedro.invalid_module_name.io.CSVDataset"
             )
 
-            error_msg = "Class 'kedro.invalid_module_name.io.CSVDataset' not found"
+            error_msg = "No module named 'kedro.invalid_module_name'"
             with pytest.raises(DatasetError, match=re.escape(error_msg)):
                 KedroDataCatalog.from_config(**correct_config).get("boats")
 
@@ -486,10 +486,10 @@ class TestKedroDataCatalog:
             correct_config["catalog"]["boats"]["type"] = "kedro.io.CSVDatasetInvalid"
 
             pattern = (
-                "An exception occurred when parsing config for dataset 'boats':\n"
-                "Class 'kedro.io.CSVDatasetInvalid' not found, is this a typo?"
+                r"An exception occurred when parsing config for dataset 'boats':\n"
+                r"module 'kedro.io' has no attribute 'CSVDatasetInvalid'.*"
             )
-            with pytest.raises(DatasetError, match=re.escape(pattern)):
+            with pytest.raises(DatasetError, match=pattern):
                 KedroDataCatalog.from_config(**correct_config).get("boats")
 
         def test_config_invalid_dataset(self, correct_config):

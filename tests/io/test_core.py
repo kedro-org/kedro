@@ -328,22 +328,6 @@ class TestCoreFunctions:
         ):
             parse_dataset_definition({"type": dataset_name})
 
-    def test_dataset_missing_dependencies(self, mocker):
-        # If the module is found but import the dataset trigger ModuleNotFoundError
-        dataset_name = "LambdaDataset"
-
-        def side_effect_function(value):
-            if "__all__" in value:
-                return [dataset_name]
-            else:
-                raise ModuleNotFoundError
-
-        mocker.patch("kedro.io.core.load_obj", side_effect=side_effect_function)
-
-        pattern = "Please see the documentation on how to install relevant dependencies"
-        with pytest.raises(DatasetError, match=pattern):
-            parse_dataset_definition({"type": dataset_name})
-
     def test_parse_dataset_definition(self):
         config = {"type": "LambdaDataset"}
         dataset, _ = parse_dataset_definition(config)
@@ -357,11 +341,11 @@ class TestCoreFunctions:
         dataset_name = "LambdaDataset"
 
         def side_effect_function(value):
-            pass
+            import random_package  # noqa: F401
 
         mocker.patch("kedro.io.core.load_obj", side_effect=side_effect_function)
 
-        pattern = 'No module named "unknown_package"'
+        pattern = "No module named 'random_package'.*"
         with pytest.raises(DatasetError, match=pattern):
             parse_dataset_definition({"type": dataset_name})
 

@@ -4,7 +4,7 @@ import pytest
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import DataCatalog, LambdaDataset
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 from kedro.runner import SequentialRunner
 
 
@@ -55,7 +55,7 @@ def branched_pipeline():
     #       r-out
     #
     # ##################################
-    return Pipeline(
+    return pipeline(
         [
             node(identity, "A", "B", name="left_in"),
             node(constant_output, None, "C", name="right_in"),

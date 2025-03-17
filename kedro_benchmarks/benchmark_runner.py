@@ -8,7 +8,7 @@ from pathlib import Path
 import yaml
 
 from kedro.io.data_catalog import DataCatalog
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 
 
 # Simulate an I/O-bound task
@@ -56,7 +56,7 @@ def create_io_bound_node(inputs=None, outputs=None, name=None):
 
 
 def create_io_bound_pipeline():
-    dummy_pipeline = Pipeline(
+    dummy_pipeline = pipeline(
         [
             create_io_bound_node("dummy_1", "output_1"),
             create_io_bound_node("dummy_2", "output_2"),
@@ -79,7 +79,7 @@ def create_compute_bound_node(inputs=None, outputs=None, name=None):
 
 
 def create_compute_bound_pipeline():
-    dummy_pipeline = Pipeline(
+    dummy_pipeline = pipeline(
         [
             create_compute_bound_node("dummy_1", "numpy_1"),
             create_compute_bound_node("dummy_2", "numpy_2"),

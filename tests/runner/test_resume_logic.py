@@ -4,7 +4,7 @@ from kedro.io import (
     DataCatalog,
     LambdaDataset,
 )
-from kedro.pipeline import Pipeline
+from kedro.pipeline import pipeline
 from kedro.runner.runner import (
     _find_all_nodes_for_resumed_pipeline,
     _find_nodes_to_resume_from,
@@ -121,7 +121,7 @@ class TestResumeLogicBehaviour:
         test_pipeline = request.getfixturevalue(pipeline_name)
 
         # Add parameter shared across all nodes
-        test_pipeline = Pipeline(
+        test_pipeline = pipeline(
             [n._copy(inputs=[*n.inputs, extra_input]) for n in test_pipeline.nodes]
         )
 

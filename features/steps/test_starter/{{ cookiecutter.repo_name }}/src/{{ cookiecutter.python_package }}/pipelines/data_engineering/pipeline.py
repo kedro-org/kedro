@@ -4,13 +4,13 @@ just for illustrating basic Kedro features.
 Delete this when you start working on your own Kedro project.
 """
 
-from kedro.pipeline import node, Pipeline
+from kedro.pipeline import node, pipeline
 
 from .nodes import split_data
 
 
 def create_pipeline(**kwargs):
-    return Pipeline(
+    return pipeline(
         [
             node(
                 split_data,

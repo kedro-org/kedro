@@ -21,11 +21,11 @@ def mock_package_name_with_pipelines(tmp_path, request):
         (pipeline_dir / "__init__.py").write_text(
             textwrap.dedent(
                 f"""
-                from kedro.pipeline import Pipeline, node
+                from kedro.pipeline import pipeline, node
 
 
-                def create_pipeline(**kwargs) -> Pipeline:
-                    return Pipeline([node(lambda: 1, None, "{pipeline_name}")])
+                def create_pipeline(**kwargs) -> pipeline:
+                    return pipeline([node(lambda: 1, None, "{pipeline_name}")])
                 """
             )
         )
@@ -99,11 +99,11 @@ def test_find_pipelines_skips_hidden_modules(
             """
             from __future__ import annotations
 
-            from kedro.pipeline import Pipeline, node
+            from kedro.pipeline import pipeline, node
 
 
-            def create_pipeline(**kwargs) -> Pipeline:
-                return Pipeline([node(lambda: 1, None, "simple_pipeline")])
+            def create_pipeline(**kwargs) -> pipeline:
+                return pipeline([node(lambda: 1, None, "simple_pipeline")])
             """
         )
     )
@@ -131,13 +131,13 @@ def test_find_pipelines_skips_modules_with_unexpected_return_value_type(
             """
             from __future__ import annotations
 
-            from kedro.pipeline import Pipeline, node
+            from kedro.pipeline import pipeline, node
 
 
-            def create_pipeline(**kwargs) -> dict[str, Pipeline]:
+            def create_pipeline(**kwargs) -> dict[str, pipeline]:
                 return {
-                    "pipe1": Pipeline([node(lambda: 1, None, "pipe1")]),
-                    "pipe2": Pipeline([node(lambda: 2, None, "pipe2")]),
+                    "pipe1": pipeline([node(lambda: 1, None, "pipe1")]),
+                    "pipe2": pipeline([node(lambda: 2, None, "pipe2")]),
                 }
             """
         )
@@ -216,11 +216,11 @@ def test_find_pipelines_handles_simplified_project_structure(
     (Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py").write_text(
         textwrap.dedent(
             """
-            from kedro.pipeline import Pipeline, node
+            from kedro.pipeline import pipeline, node
 
 
-            def create_pipeline(**kwargs) -> Pipeline:
-                return Pipeline([node(lambda: 1, None, "simple_pipeline")])
+            def create_pipeline(**kwargs) -> pipeline:
+                return pipeline([node(lambda: 1, None, "simple_pipeline")])
             """
         )
     )
@@ -248,11 +248,11 @@ def test_find_pipelines_skips_unimportable_pipeline_module(
             f"""
             import {"".join(pipeline_names)}
 
-            from kedro.pipeline import Pipeline, node
+            from kedro.pipeline import pipeline, node
 
 
-            def create_pipeline(**kwargs) -> Pipeline:
-                return Pipeline([node(lambda: 1, None, "simple_pipeline")])
+            def create_pipeline(**kwargs) -> pipeline:
+                return pipeline([node(lambda: 1, None, "simple_pipeline")])
             """
         )
     )
@@ -286,11 +286,11 @@ def test_find_pipelines_handles_project_structure_without_pipelines_dir(
         ).write_text(
             textwrap.dedent(
                 """
-                from kedro.pipeline import Pipeline, node
+                from kedro.pipeline import pipeline, node
 
 
-                def create_pipeline(**kwargs) -> Pipeline:
-                    return Pipeline([node(lambda: 1, None, "simple_pipeline")])
+                def create_pipeline(**kwargs) -> pipeline:
+                    return pipeline([node(lambda: 1, None, "simple_pipeline")])
                 """
             )
         )

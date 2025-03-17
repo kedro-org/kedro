@@ -19,7 +19,7 @@ from kedro.framework.project import (
     configure_project,
 )
 from kedro.framework.session import KedroSession
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
 
 if TYPE_CHECKING:
@@ -114,8 +114,8 @@ def dummy_dataframe() -> pd.DataFrame:
 
 
 @pytest.fixture
-def mock_pipeline() -> Pipeline:
-    return Pipeline(
+def mock_pipeline() -> pipeline:
+    return pipeline(
         [
             node(identity_node, "cars", "planes", name="node1"),
             node(identity_node, "boats", "ships", name="node2"),

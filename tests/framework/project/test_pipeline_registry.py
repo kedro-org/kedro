@@ -4,7 +4,7 @@ import textwrap
 import pytest
 
 from kedro.framework.project import configure_project, pipelines
-from kedro.pipeline import Pipeline
+from kedro.pipeline import pipeline
 
 
 @pytest.fixture
@@ -13,9 +13,9 @@ def mock_package_name_with_pipelines_file(tmpdir):
     pipelines_file_path.write(
         textwrap.dedent(
             """
-                from kedro.pipeline import Pipeline
+                from kedro.pipeline import pipeline
                 def register_pipelines():
-                    return {"new_pipeline": Pipeline([])}
+                    return {"new_pipeline": pipeline([])}
             """
         )
     )
@@ -43,9 +43,9 @@ def mock_package_name_with_unimportable_pipelines_file(tmpdir):
         textwrap.dedent(
             """
                 import this_is_not_a_real_thing
-                from kedro.pipeline import Pipeline
+                from kedro.pipeline import pipeline
                 def register_pipelines():
-                    return {"new_pipeline": Pipeline([])}
+                    return {"new_pipeline": pipeline([])}
             """
         )
     )
@@ -61,7 +61,7 @@ def test_pipelines_after_configuring_project_shows_updated_values(
     mock_package_name_with_pipelines_file,
 ):
     configure_project(mock_package_name_with_pipelines_file)
-    assert isinstance(pipelines["new_pipeline"], Pipeline)
+    assert isinstance(pipelines["new_pipeline"], pipeline)
 
 
 def test_configure_project_should_not_raise_for_unimportable_pipelines(

@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 from kedro.framework.project import find_pipelines
-from kedro.pipeline import Pipeline
+from kedro.pipeline import pipeline
 
 
-def register_pipelines() -> dict[str, Pipeline]:
+def register_pipelines() -> dict[str, pipeline]:
     """Register the project's pipelines.
 
     Returns:
@@ -13,7 +13,7 @@ def register_pipelines() -> dict[str, Pipeline]:
     """
     pipelines = find_pipelines()
     pipelines["__default__"] = sum(pipelines.values())
-    pipelines["data_processing"] = Pipeline(
+    pipelines["data_processing"] = pipeline(
         pipelines["data_engineering"], namespace="data_processing"
     )
     return pipelines

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 
 
 def source():
@@ -93,7 +93,7 @@ def persistent_dataset_catalog():
 
 @pytest.fixture
 def fan_out_fan_in():
-    return Pipeline(
+    return pipeline(
         [
             node(identity, "A", "B"),
             node(identity, "B", "C"),
@@ -107,7 +107,7 @@ def fan_out_fan_in():
 @pytest.fixture
 def branchless_no_input_pipeline():
     """The pipeline runs in the order A->B->C->D->E."""
-    return Pipeline(
+    return pipeline(
         [
             node(identity, "D", "E", name="node1"),
             node(identity, "C", "D", name="node2"),
@@ -120,7 +120,7 @@ def branchless_no_input_pipeline():
 
 @pytest.fixture
 def branchless_pipeline():
-    return Pipeline(
+    return pipeline(
         [
             node(identity, "ds1", "ds2", name="node1"),
             node(identity, "ds2", "ds3", name="node2"),
@@ -130,19 +130,19 @@ def branchless_pipeline():
 
 @pytest.fixture
 def saving_result_pipeline():
-    return Pipeline([node(identity, "ds", "dsX")])
+    return pipeline([node(identity, "ds", "dsX")])
 
 
 @pytest.fixture
 def saving_none_pipeline():
-    return Pipeline(
+    return pipeline(
         [node(random, None, "A"), node(return_none, "A", "B"), node(identity, "B", "C")]
     )
 
 
 @pytest.fixture
 def unfinished_outputs_pipeline():
-    return Pipeline(
+    return pipeline(
         [
             node(identity, {"arg": "ds4"}, "ds8", name="node1"),
             node(sink, "ds7", None, name="node2"),
@@ -166,7 +166,7 @@ def two_branches_crossed_pipeline():
     (node4_A)     (node4_B)
 
     """
-    return Pipeline(
+    return pipeline(
         [
             node(first_arg, "ds0_A", "ds1_A", name="node1_A"),
             node(first_arg, "ds0_B", "ds1_B", name="node1_B"),
@@ -186,7 +186,7 @@ def two_branches_crossed_pipeline():
 
 @pytest.fixture
 def pipeline_with_memory_datasets():
-    return Pipeline(
+    return pipeline(
         [
             node(func=identity, inputs="Input1", outputs="MemOutput1", name="node1"),
             node(func=identity, inputs="Input2", outputs="MemOutput2", name="node2"),
@@ -205,7 +205,7 @@ def pipeline_asymmetric():
            (node4)
 
     """
-    return Pipeline(
+    return pipeline(
         [
             node(first_arg, ["ds0_A"], ["_ds1"], name="node1"),
             node(first_arg, ["ds0_B"], ["_ds2"], name="node2"),
@@ -226,7 +226,7 @@ def pipeline_triangular():
     [node3*]
 
     """
-    return Pipeline(
+    return pipeline(
         [
             node(first_arg, ["ds0_A"], ["_ds1_A"], name="node1"),
             node(first_arg, ["_ds1_A"], ["ds2_A"], name="node2"),
@@ -248,7 +248,7 @@ def pipeline_triangular2():
     [node3 +]
 
     """
-    return Pipeline(
+    return pipeline(
         [
             node(first_arg, ["ds0_A"], ["_ds1_A"], name="node1"),
             node(first_arg, ["_ds1_A"], ["ds2_A"], name="node2"),
@@ -259,7 +259,7 @@ def pipeline_triangular2():
 
 @pytest.fixture
 def empty_pipeline():
-    return Pipeline([])
+    return pipeline([])
 
 
 @pytest.fixture(
@@ -276,7 +276,7 @@ def two_branches_crossed_pipeline_variable_inputs(request):
     """
     extra_inputs = list(request.param)
 
-    return Pipeline(
+    return pipeline(
         [
             node(first_arg, ["ds0_A", *extra_inputs], "_ds1_A", name="node1_A"),
             node(first_arg, ["ds0_B", *extra_inputs], "_ds1_B", name="node1_B"),

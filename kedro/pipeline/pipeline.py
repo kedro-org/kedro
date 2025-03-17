@@ -170,8 +170,7 @@ class Pipeline:
         Example:
         ::
 
-            >>> from kedro.pipeline import Pipeline
-            >>> from kedro.pipeline import node
+            >>> from kedro.pipeline import node, pipeline
             >>>
             >>> # In the following scenario first_ds and second_ds
             >>> # are datasets provided by io. Pipeline will pass these
@@ -184,11 +183,11 @@ class Pipeline:
             >>> def second_node(third_ds):
             >>>     return third_ds
             >>>
-            >>> pipeline = Pipeline([
+            >>> ds_pipeline = pipeline([
             >>>     node(first_node, ['first_ds', 'second_ds'], ['third_ds']),
             >>>     node(second_node, dict(third_ds='third_ds'), 'fourth_ds')])
             >>>
-            >>> pipeline.describe()
+            >>> ds_pipeline.describe()
             >>>
 
         """

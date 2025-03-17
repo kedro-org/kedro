@@ -228,13 +228,6 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
     if selected_tools is not None:
         tools = re.sub(r"\s", "", selected_tools).split(",")
         for tool in tools:
-            if tool == "viz":
-                click.secho(
-                    "Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection.",
-                    fg="red",
-                    err=True,
-                )
-                sys.exit(1)
             if tool not in valid_tools:
                 message = "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none."
                 if tool == "viz":

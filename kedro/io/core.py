@@ -578,7 +578,7 @@ def parse_dataset_definition(
 
     dataset_type = config.pop(TYPE_KEY)
     class_obj = None
-    warning = None 
+    warning = None
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
@@ -588,14 +588,20 @@ def parse_dataset_definition(
         class_paths = (prefix + dataset_type for prefix in _DEFAULT_PACKAGES)
 
         for class_path in class_paths:
-            tmp, warning = _load_obj(class_path)  # Load dataset class, capture the warning
+            tmp, warning = _load_obj(
+                class_path
+            )  # Load dataset class, capture the warning
 
             if tmp is not None:
                 class_obj = tmp
-                break  
+                break
 
         if class_obj is None:  # If no valid class was found, raise an error
-            error_msg = warning if warning else f"Class '{dataset_type}' not found, is this a typo?"
+            error_msg = (
+                warning
+                if warning
+                else f"Class '{dataset_type}' not found, is this a typo?"
+            )
             hint = (
                 "\nHint: If you are trying to use a dataset from `kedro-datasets`, "
                 "make sure that the package is installed in your current environment. "

@@ -352,6 +352,18 @@ class TestCoreFunctions:
     def test_parse_dataset_definition_with_python_class_type(self):
         config = {"type": MyDataset}
         parse_dataset_definition(config)
+        
+    def test_dataset_missing_dependencies(self, mocker):
+        dataset_name = "LambdaDataset"
+
+        def side_effect_function(value):
+            import unknown_package
+
+        mocker.patch("kedro.io.core.load_obj", side_effect=side_effect_function)
+
+        pattern = "No module named \"unknown_package\""
+        with pytest.raises(DatasetError, match=pattern):
+            parse_dataset_definition({"type": dataset_name})
 
     def test_load_and_save_are_wrapped_once(self):
         assert not getattr(

@@ -106,7 +106,6 @@ def _get_expected_files(tools: str, example_pipeline: str):
         "4": 2,  # If Documentation is selected, we add conf.py and index.rst
         "5": 8,  # If Data Structure is selected, we add 8 .gitkeep files
         "6": 2,  # If PySpark is selected, we add spark.yml and hooks.py
-        "7": 0,  # Kedro Viz does not add any files
     }  # files added to template by each tool
     tools_list = _parse_tools_input(tools)
     example_pipeline_bool = _parse_yes_no_to_bool(example_pipeline)
@@ -119,14 +118,11 @@ def _get_expected_files(tools: str, example_pipeline: str):
         expected_files += tools_template_files["5"]
     example_files_count = [
         3,  # Raw data files
-        2,  # Parameters_ .yml files
-        6,  # .py files in pipelines folder
+        3,  # Parameters_ .yml files, including 1 extra for viz
+        9,  # .py files in pipelines folder, including 3 .py from reporting for Viz
     ]
     if example_pipeline_bool:  # If example option is chosen
         expected_files += sum(example_files_count)
-        expected_files += (
-            4 if "7" in tools_list else 0
-        )  # add 3 .py and 1 parameters files in reporting for Viz
         expected_files += (
             1 if "2" in tools_list else 0
         )  # add 1 test file if tests is chosen in tools
@@ -341,7 +337,7 @@ class TestParseToolsInput:
     def test_validate_range_includes_7(self, input, capsys):
         with pytest.raises(SystemExit):
             _parse_tools_input(input)
-        message = "Kedro Viz is automatically included in the project. Please remove 7 from your tool selection."
+        message = "'7' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6.\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
         assert message in capsys.readouterr().err
 
     @pytest.mark.parametrize(
@@ -1255,7 +1251,7 @@ class TestToolsAndExampleFromConfigFile:
 
         assert result.exit_code != 0
         assert (
-            "Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection."
+            "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none. Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection."
             in result.output
         )
 
@@ -1553,7 +1549,7 @@ class TestValidateSelection:
         tools = ["7"]
         with pytest.raises(SystemExit):
             _validate_tool_selection(tools)
-        message = "Kedro Viz is automatically included in the project. Please remove 7 from your tool selection."
+        message = "'7' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6.\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
         assert message in capsys.readouterr().err
 
     def test_validate_tool_selection_invalid_single_tool(self, capsys):

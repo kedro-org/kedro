@@ -236,8 +236,11 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
                 )
                 sys.exit(1)
             if tool not in valid_tools:
+                message = "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none."
+                if tool == "viz":
+                    message += " Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection."
                 click.secho(
-                    "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none",
+                    message,
                     fg="red",
                     err=True,
                 )
@@ -907,10 +910,9 @@ def _validate_tool_selection(tools: list[str]) -> None:
     # '20' is not a valid selection instead of '8'
     for tool in tools[::-1]:
         if tool not in NUMBER_TO_TOOLS_NAME:
+            message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
             if tool == "7":
-                message = "Kedro Viz is automatically included in the project. Please remove 7 from your tool selection."
-            else:
-                message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
+                message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
@@ -932,10 +934,9 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
             sys.exit(1)
         # safeguard to prevent passing of excessively large intervals that could cause freezing:
         if int(end) > len(NUMBER_TO_TOOLS_NAME):
+            message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
             if end == "7":
-                message = "Kedro Viz is automatically included in the project. Please remove 7 from your tool selection."
-            else:
-                message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."
+                message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 

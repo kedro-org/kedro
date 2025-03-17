@@ -421,7 +421,7 @@ class TestDataCatalogFromConfig:
             "kedro.invalid_module_name.io.CSVDataset"
         )
 
-        error_msg = "Class 'kedro.invalid_module_name.io.CSVDataset' not found"
+        error_msg = "No module named 'kedro.invalid_module_name'"
         with pytest.raises(DatasetError, match=re.escape(error_msg)):
             DataCatalog.from_config(**correct_config)
 
@@ -452,7 +452,7 @@ class TestDataCatalogFromConfig:
         correct_config["catalog"]["boats"]["type"] = "pandas.CSVDataset"
         assert DataCatalog.from_config(**correct_config)
 
-    def test_config_missing_class(correct_config):
+    def test_config_missing_class(self, correct_config):
         """Check the error if the type points to nonexistent class"""
         correct_config["catalog"]["boats"]["type"] = "kedro.io.CSVDatasetInvalid"
 

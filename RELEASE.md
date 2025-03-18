@@ -12,7 +12,6 @@
 * Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
 * Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
 * Remove `7: Kedro Viz` from Kedro tools.
-* Refactor `_run_node_async` to use asyncio.
 
 ## Breaking changes to the API
 ## Documentation changes

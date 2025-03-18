@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 import itertools as it
+import logging
 import multiprocessing
 from collections.abc import Iterable, Iterator
 from typing import TYPE_CHECKING, Any
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
 
     from kedro.io import CatalogProtocol
     from kedro.pipeline.node import Node
+
+logger = logging.getLogger(__name__)
 
 
 class TaskError(Exception):
@@ -206,8 +209,15 @@ class Task:
         for name, input_task in input_tasks.items():
             try:
                 inputs[name] = await input_task
-            except Exception as exception:  # pragma: no cover
-                raise exception
+            except Exception as exc:  # pragma: no cover
+                logger.error(
+                    "Error loading input '%s' for node '%s': %s",
+                    name,
+                    node.name,
+                    exc,
+                    exc_info=True,
+                )
+                raise
 
         is_async = True
         additional_inputs = self._collect_inputs_from_hook(
@@ -226,11 +236,18 @@ class Task:
             for name, data in outputs.items()
         }
 
-        for output_task in asyncio.as_completed(output_tasks.values()):
+        for name, output_task in output_tasks.items():
             try:
                 await output_task
-            except Exception as exception:
-                raise exception
+            except Exception as exc:
+                logger.error(
+                    "Error saving output '%s' for node '%s': %s",
+                    name,
+                    node.name,
+                    exc,
+                    exc_info=True,
+                )
+                raise
 
         return node
 

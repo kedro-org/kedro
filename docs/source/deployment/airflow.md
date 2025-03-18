@@ -247,7 +247,7 @@ On the next page, set the `Public network (Internet accessible)` option in the `
 If you want to execute your DAG in an isolated environment on Airflow using a Kubernetes cluster, you can use a combination of the [`kedro-airflow`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) and [`kedro-docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugins.
 
 1. **Package your Kedro project as a Docker container**
-   [Use the `kedro docker init` and `kedro docker build` commands](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to containerize your Kedro project.
+   [Use the `kedro docker init` and `kedro docker build` commands](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to containerise your Kedro project.
 
 2. **Push the Docker image to a container registry**
    Upload the built Docker image to a cloud container registry, such as AWS ECR, Google Container Registry, or Docker Hub.

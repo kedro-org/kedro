@@ -274,9 +274,12 @@ If you want to execute your DAG in an isolated environment on Airflow using a Ku
        arguments=["run", f"--nodes={node_name}"],
        get_logs=True,
        is_delete_operator_pod=True,  # Cleanup after execution
-       in_cluster=False,
+       in_cluster=False, # Set to True if Airflow runs inside the Kubernetes cluster
        do_xcom_push=False,
        image_pull_policy="Always",
+       # Uncomment the following lines if Airflow is running outside Kubernetes
+       # cluster_context="k3d-your-cluster",  # Specify the Kubernetes context from your kubeconfig
+       # config_file="~/.kube/config",  # Path to your kubeconfig file
    )
    ```
 

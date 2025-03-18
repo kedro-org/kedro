@@ -922,7 +922,7 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
         )
 
 
-def _match_namespaces(node_namespace: str, filter_namespace: str):
+def _match_namespaces(node_namespace: str, filter_namespace: str) -> bool:
     return node_namespace.split(".")[
         : len(filter_namespace.split("."))
     ] == filter_namespace.split(".")

@@ -244,7 +244,7 @@ On the next page, set the `Public network (Internet accessible)` option in the `
 
 ## How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
 
-If you want to execute your DAG in an isolated environment on Airflow using a Kubernetes cluster, you can use a combination of the [`kedro-airflow`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) and [`kedro-docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugins.
+If you want to execute your DAG in an isolated environment on Airflow using a Kubernetes cluster, you can use a combination of the [`kedro-airflow`](https://pypi.org/project/kedro-airflow/) and [`kedro-docker`](https://pypi.org/project/kedro-docker/) plugins.
 
 1. **Package your Kedro project as a Docker container**
    [Use the `kedro docker init` and `kedro docker build` commands](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to containerise your Kedro project.

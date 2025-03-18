@@ -148,9 +148,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Register globals resolver
         self._register_globals_resolver()
 
-        # Store original conf_source
-        self._original_conf_source = conf_source
-
         # Setup file system and protocol
         self._fs, self._protocol = self._initialise_filesystem_and_protocol(conf_source)
 
@@ -404,11 +401,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         protocol = options["protocol"]
 
         # Create and return the appropriate filesystem
-        if protocol in HTTP_PROTOCOLS:
-            # For HTTP, use the full URL as path
-            return fsspec.filesystem(protocol=protocol), protocol
-        elif protocol in CLOUD_PROTOCOLS:
-            # For cloud storage, create filesystem with appropriate protocol
+        if protocol in HTTP_PROTOCOLS or protocol in CLOUD_PROTOCOLS:
+            # For HTTP and cloud storage protocols, create the appropriate filesystem
             return fsspec.filesystem(protocol=protocol), protocol
         else:
             # Default to local filesystem

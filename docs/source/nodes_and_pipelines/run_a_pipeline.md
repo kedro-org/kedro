@@ -114,9 +114,6 @@ class DryRunner(AbstractRunner):
         self._logger.info("Checking inputs...")
         input_names = pipeline.inputs()
 
-        # Register the default dataset pattern with the catalog
-        catalog = catalog.shallow_copy(extra_dataset_patterns=self._extra_dataset_patterns)
-
         missing_inputs = [
             input_name
             for input_name in input_names

@@ -4,7 +4,7 @@ import textwrap
 import pytest
 
 from kedro.framework.project import configure_project, pipelines
-from kedro.pipeline import pipeline
+from kedro.pipeline import Pipeline
 
 
 @pytest.fixture
@@ -61,7 +61,7 @@ def test_pipelines_after_configuring_project_shows_updated_values(
     mock_package_name_with_pipelines_file,
 ):
     configure_project(mock_package_name_with_pipelines_file)
-    assert isinstance(pipelines["new_pipeline"], pipeline)
+    assert isinstance(pipelines["new_pipeline"], Pipeline)
 
 
 def test_configure_project_should_not_raise_for_unimportable_pipelines(

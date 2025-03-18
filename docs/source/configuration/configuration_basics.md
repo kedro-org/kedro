@@ -193,7 +193,7 @@ kedro run --conf-source=gs://my-bucket/configs/
 ```
 
 #### Authentication for remote configuration
-Authentication for remote configuration sources must be set up through environment variables or other credential mechanisms provided by the cloud platform.
+Authentication for remote configuration sources must be set up through environment variables or other credential mechanisms provided by the cloud platform. Unlike datasets in the data catalog, you cannot use credentials from `credentials.yml` for remote configuration sources since those credentials would be part of the configuration you're trying to access.
 
 **Examples of authentication setup:**
 
@@ -225,6 +225,10 @@ s3://my-bucket/configs/
 │   └── parameters.yml
 └── prod/
     └── parameters.yml
+```
+
+```{note}
+While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not currently support reading compressed files directly from cloud storage (e.g., s3://my-bucket/configs.tar.gz).
 ```
 
 ### How to access configuration in code

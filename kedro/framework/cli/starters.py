@@ -50,10 +50,9 @@ Tools\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
 6) PySpark: Provides set up configuration for working with PySpark\n
-7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
-kedro new --tools=lint,test,log,docs,data,pyspark,viz (or any subset of these options)\n
+kedro new --tools=lint,test,log,docs,data,pyspark (or any subset of these options)\n
 kedro new --tools=all\n
 kedro new --tools=none
 
@@ -140,13 +139,7 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
-    KedroStarterSpec(
-        "spaceflights-pandas-viz", _STARTERS_REPO, "spaceflights-pandas-viz"
-    ),
     KedroStarterSpec("spaceflights-pyspark", _STARTERS_REPO, "spaceflights-pyspark"),
-    KedroStarterSpec(
-        "spaceflights-pyspark-viz", _STARTERS_REPO, "spaceflights-pyspark-viz"
-    ),
     KedroStarterSpec("databricks-iris", _STARTERS_REPO, "databricks-iris"),
 ]
 # Set the origin for official starters
@@ -165,7 +158,6 @@ TOOLS_SHORTNAME_TO_NUMBER = {
     "doc": "4",
     "data": "5",
     "pyspark": "6",
-    "viz": "7",
 }
 
 NUMBER_TO_TOOLS_NAME = {
@@ -175,7 +167,6 @@ NUMBER_TO_TOOLS_NAME = {
     "4": "Documentation",
     "5": "Data Structure",
     "6": "PySpark",
-    "7": "Kedro Viz",
 }
 
 
@@ -238,8 +229,11 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
         tools = re.sub(r"\s", "", selected_tools).split(",")
         for tool in tools:
             if tool not in valid_tools:
+                message = "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none."
+                if tool == "viz":
+                    message += " Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection."
                 click.secho(
-                    "Please select from the available tools: lint, test, log, docs, data, pyspark, viz, all, none",
+                    message,
                     fg="red",
                     err=True,
                 )
@@ -854,20 +848,14 @@ def _make_cookiecutter_args_and_fetch_template(
 
     cookiecutter_args["checkout"] = checkout
 
-    if "PySpark" in tools and "Kedro Viz" in tools:
-        # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
-        cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-    elif "PySpark" in tools:
+    if "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-    elif "Kedro Viz" in tools:
-        # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
-        cookiecutter_args["directory"] = "spaceflights-pandas-viz"
     elif example_pipeline == "True":
-        # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
+        # Use spaceflights-pandas starter if example was selected, but PySpark wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
     else:
-        # Use the default template path for non PySpark, Viz or example options:
+        # Use the default template path for non PySpark or example options:
         starter_path = template_path
 
     return cookiecutter_args, starter_path
@@ -915,7 +903,9 @@ def _validate_tool_selection(tools: list[str]) -> None:
     # '20' is not a valid selection instead of '8'
     for tool in tools[::-1]:
         if tool not in NUMBER_TO_TOOLS_NAME:
-            message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."  # nosec
+            message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
+            if tool == "7":
+                message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
@@ -937,7 +927,9 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
             sys.exit(1)
         # safeguard to prevent passing of excessively large intervals that could cause freezing:
         if int(end) > len(NUMBER_TO_TOOLS_NAME):
-            message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+            message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
+            if end == "7":
+                message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 

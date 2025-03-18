@@ -11,8 +11,10 @@ import difflib
 import logging
 import pprint
 import re
+import warnings
 from typing import Any
 
+from kedro import KedroDeprecationWarning
 from kedro.io.catalog_config_resolver import (
     CREDENTIALS_KEY,  # noqa: F401
     CatalogConfigResolver,
@@ -160,6 +162,15 @@ class DataCatalog:
             >>>                   save_args={"index": False})
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
+        warnings.warn(
+            "`DataCatalog` has been deprecated and will be replaced by `KedroDataCatalog`, in Kedro 1.0.0."
+            "Currently some `KedroDataCatalog` APIs have been retained for compatibility with `DataCatalog`, including "
+            "the `datasets` property and the `get_datasets`, `_get_datasets`, `add`,` list`, `add_feed_dict`, "
+            "and `shallow_copy` methods. These will be removed or replaced with updated alternatives in Kedro 1.0.0. "
+            "For more details, refer to the documentation: "
+            "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
+            KedroDeprecationWarning,
+        )
         self._config_resolver = config_resolver or CatalogConfigResolver()
         # Kept to avoid breaking changes
         if not config_resolver:

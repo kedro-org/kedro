@@ -90,6 +90,17 @@ Welcome to Kedro's award-winning documentation!
    integrations/mlflow.md
    integrations/kedro_dvc_versioning.md
    integrations/deltalake_versioning.md
+   integrations/iceberg_versioning.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Development
+
+   development/set_up_vscode
+   development/set_up_pycharm
+   development/debugging
+   development/automated_testing
+   development/linting
 
 .. toctree::
    :maxdepth: 2
@@ -99,7 +110,6 @@ Welcome to Kedro's award-winning documentation!
    extend_kedro/index.md
    hooks/index.md
    logging/index.md
-   development/index.md
    deployment/index.md
 
 .. toctree::
@@ -107,6 +117,12 @@ Welcome to Kedro's award-winning documentation!
    :caption: Contribute to Kedro
 
    contribution/index.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: CLI reference
+
+   development/commands_reference.md
 
 API documentation
 =================

@@ -1,5 +1,7 @@
+import copy
 import logging
 import sys
+from logging import LogRecord
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +28,8 @@ class RichHandler(rich.logging.RichHandler):
     """
 
     def __init__(self, *args: Any, **kwargs: Any):
+        if "markup" not in kwargs:
+            kwargs.update({"markup": True})  # Set markup as default
         super().__init__(*args, **kwargs)
         logging.captureWarnings(True)
         rich.pretty.install()
@@ -54,3 +58,29 @@ class RichHandler(rich.logging.RichHandler):
             # fixed on their side at some point, but until then we disable it.
             # See https://github.com/Textualize/rich/issues/2455
             rich.traceback.install(**traceback_install_kwargs)  # type: ignore[arg-type]
+
+    def emit(self, record: LogRecord) -> None:
+        args = record.args
+        if not args or not hasattr(record, "rich_format"):
+            return super().emit(record)
+
+        else:
+            # LogRecord is shared among all handler, created a new instance so it does not affect the rest.
+            updated_record = copy.copy(record)
+            format_args = record.rich_format  # type: ignore
+
+            if format_args and isinstance(format_args, list):
+                new_args = list(args)
+                # Add markup to the message
+                # if the list is shorter than the arg list, keep it unchanged
+                for i, color in enumerate(format_args):
+                    new_args[i] = _format_rich(str(new_args[i]), color)
+                updated_record.args = tuple(new_args)
+                super().emit(updated_record)
+            else:
+                raise TypeError("rich_format only accept non-empty list as an argument")
+
+
+def _format_rich(value: str, markup: str) -> str:
+    """Format string with rich markup"""
+    return f"[{markup}]{value}[/{markup}]"

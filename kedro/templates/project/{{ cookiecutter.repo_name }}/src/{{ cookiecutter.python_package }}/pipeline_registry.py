@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 from kedro.framework.project import find_pipelines
-from kedro.pipeline import Pipeline
+from kedro.pipeline import pipeline
 
 
-def register_pipelines() -> dict[str, Pipeline]:
+def register_pipelines() -> dict[str, pipeline]:
     """Register the project's pipelines.
 
     Returns:

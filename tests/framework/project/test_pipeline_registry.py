@@ -13,9 +13,9 @@ def mock_package_name_with_pipelines_file(tmpdir):
     pipelines_file_path.write(
         textwrap.dedent(
             """
-                from kedro.pipeline import Pipeline
+                from kedro.pipeline import pipeline
                 def register_pipelines():
-                    return {"new_pipeline": Pipeline([])}
+                    return {"new_pipeline": pipeline([])}
             """
         )
     )
@@ -43,9 +43,9 @@ def mock_package_name_with_unimportable_pipelines_file(tmpdir):
         textwrap.dedent(
             """
                 import this_is_not_a_real_thing
-                from kedro.pipeline import Pipeline
+                from kedro.pipeline import pipeline
                 def register_pipelines():
-                    return {"new_pipeline": Pipeline([])}
+                    return {"new_pipeline": pipeline([])}
             """
         )
     )

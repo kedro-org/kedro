@@ -59,19 +59,26 @@ class RichHandler(rich.logging.RichHandler):
             # See https://github.com/Textualize/rich/issues/2455
             rich.traceback.install(**traceback_install_kwargs)  # type: ignore[arg-type]
 
-    def emit(self, record: LogRecord):
+    def emit(self, record: LogRecord) -> None:
         args = record.args
-        new_args = list(args)
-        # LogRecord is shared among all handler, created a new instance so it does not affect the rest.
-        updated_record = copy.copy(record)
-        if hasattr(record, "rich_format"):
-            # Add markup to the message
-            # if the list is shorter than the arg list, keep it unchanged
-            for i, color in enumerate(record.rich_format):
-                new_args[i] = _format_rich(args[i], color)
+        if not args or not isinstance(args, list) or not hasattr(record, "rich_format"):
+            return super().emit(record)
 
-        updated_record.args = tuple(new_args)
-        super().emit(updated_record)
+        else:
+            # LogRecord is shared among all handler, created a new instance so it does not affect the rest.
+            updated_record = copy.copy(record)
+            format_args = record.rich_format  # type: ignore
+
+            if format_args and isinstance(format_args, list):
+                new_args = list(args)
+                # Add markup to the message
+                # if the list is shorter than the arg list, keep it unchanged
+                for i, color in enumerate(format_args):
+                    new_args[i] = _format_rich(str(new_args[i]), color)
+                updated_record.args = tuple(new_args)
+                super().emit(updated_record)
+            else:
+                raise TypeError("rich_format only accept non-empty list as an argument")
 
 
 def _format_rich(value: str, markup: str) -> str:

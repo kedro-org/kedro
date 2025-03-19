@@ -61,7 +61,7 @@ class RichHandler(rich.logging.RichHandler):
 
     def emit(self, record: LogRecord) -> None:
         args = record.args
-        if not args or not isinstance(args, list) or not hasattr(record, "rich_format"):
+        if not args or not hasattr(record, "rich_format"):
             return super().emit(record)
 
         else:

@@ -821,8 +821,7 @@ def _make_cookiecutter_args_and_fetch_template(
             ``extra_context`` to cookiecutter and will overwrite the cookiecutter.json
             defaults.
         checkout: The tag, branch or commit in the starter repository to checkout.
-            Maps directly to cookiecutter's ``checkout`` argument. Relevant only when
-            using a starter.
+            Maps directly to cookiecutter's ``checkout`` argument.
         directory: The directory of a specific starter inside a repository containing
             multiple starters. Maps directly to cookiecutter's ``directory`` argument.
             Relevant only when using a starter.
@@ -846,7 +845,7 @@ def _make_cookiecutter_args_and_fetch_template(
     example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
-    cookiecutter_args["checkout"] = checkout
+    cookiecutter_args["checkout"] = _select_checkout_branch_for_cookiecutter(checkout)
 
     if "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.

@@ -840,6 +840,7 @@ def _make_cookiecutter_args_and_fetch_template(
 
     if directory:
         cookiecutter_args["directory"] = directory
+    cookiecutter_args["checkout"] = checkout
 
     tools = config["tools"]
     example_pipeline = config["example_pipeline"]

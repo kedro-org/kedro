@@ -227,7 +227,11 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # so we decided to use our own `robots.txt` again, with a link to the custom `sitemap.xml`.
 # See the discussion at https://github.com/kedro-org/kedro/issues/3741
 # and https://github.com/readthedocs/readthedocs.org/issues/6841
-html_extra_path = [str(here / "extra_files")]
+# html_extra_path = [str(here / "extra_files")]
+# Finally, we decided to use the default `robots.txt` and `sitemap.xml` from RTD
+# because we embeded the nonindex tag in all old docs versions, preventing search engines from indexing them.
+# See: https://github.com/kedro-org/kedro/pull/4516
+
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
@@ -255,6 +259,9 @@ linkcheck_ignore = [
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
     "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors",
     "https://www.quora.com/What-is-thread-safety-in-Python",  # "403 Client Error: Forbidden for url"
+    "https://docs.databricks.com/en/reference/jobs-2.0-api.html#create",  # Flaky link that works fine in browser
+    "https://docs.databricks.com/en/reference/jobs-2.0-api.html#runs-submit",  # Flaky link that works fine in browser
+    "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
 ]
 
 # Comment out settings to fix Client Rate Limit Error 429

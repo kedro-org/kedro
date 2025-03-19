@@ -137,7 +137,7 @@ class KedroSession:
         project_path: Path | str | None = None,
         save_on_close: bool = True,
         env: str | None = None,
-        extra_params: dict[str, Any] | None = None,
+        runtime_params: dict[str, Any] | None = None,
         conf_source: str | None = None,
     ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
@@ -148,7 +148,7 @@ class KedroSession:
             save_on_close: Whether or not to save the session when it's closed.
             conf_source: Path to a directory containing configuration
             env: Environment for the KedroContext.
-            extra_params: Optional dictionary containing extra project parameters
+            runtime_params: Optional dictionary containing extra project parameters
                 for underlying KedroContext. If specified, will update (and therefore
                 take precedence over) the parameters retrieved from the project
                 configuration.
@@ -180,8 +180,8 @@ class KedroSession:
         if env:
             session_data["env"] = env
 
-        if extra_params:
-            session_data["extra_params"] = extra_params
+        if runtime_params:
+            session_data["runtime_params"] = runtime_params
 
         try:
             session_data["username"] = getpass.getuser()
@@ -237,7 +237,7 @@ class KedroSession:
     def load_context(self) -> KedroContext:
         """An instance of the project context."""
         env = self.store.get("env")
-        extra_params = self.store.get("extra_params")
+        runtime_params = self.store.get("runtime_params")
         config_loader = self._get_config_loader()
         context_class = settings.CONTEXT_CLASS
         context = context_class(
@@ -245,7 +245,7 @@ class KedroSession:
             project_path=self._project_path,
             config_loader=config_loader,
             env=env,
-            extra_params=extra_params,
+            runtime_params=runtime_params,
             hook_manager=self._hook_manager,
         )
         self._hook_manager.hook.after_context_created(context=context)
@@ -255,13 +255,13 @@ class KedroSession:
     def _get_config_loader(self) -> AbstractConfigLoader:
         """An instance of the config loader."""
         env = self.store.get("env")
-        extra_params = self.store.get("extra_params")
+        runtime_params = self.store.get("runtime_params")
 
         config_loader_class = settings.CONFIG_LOADER_CLASS
         return config_loader_class(  # type: ignore[no-any-return]
             conf_source=self._conf_source,
             env=env,
-            runtime_params=extra_params,
+            runtime_params=runtime_params,
             **settings.CONFIG_LOADER_ARGS,
         )
 
@@ -340,7 +340,7 @@ class KedroSession:
 
         session_id = self.store["session_id"]
         save_version = session_id
-        extra_params = self.store.get("extra_params") or {}
+        runtime_params = self.store.get("runtime_params") or {}
         context = self.load_context()
 
         name = pipeline_name or "__default__"
@@ -376,7 +376,7 @@ class KedroSession:
             "from_inputs": from_inputs,
             "to_outputs": to_outputs,
             "load_versions": load_versions,
-            "extra_params": extra_params,
+            "runtime_params": runtime_params,
             "pipeline_name": pipeline_name,
             "namespace": namespace,
             "runner": getattr(runner, "__name__", str(runner)),

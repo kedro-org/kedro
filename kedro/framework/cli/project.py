@@ -19,6 +19,7 @@ from kedro.framework.cli.utils import (
     forward_command,
     split_node_names,
     split_string,
+    validate_conf_source,
 )
 from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
@@ -189,7 +190,7 @@ def package(metadata: ProjectMetadata) -> None:
 )
 @click.option(
     "--conf-source",
-    type=click.Path(exists=True, file_okay=True, resolve_path=True),
+    callback=validate_conf_source,
     help=CONF_SOURCE_HELP,
 )
 @click.option(
@@ -223,7 +224,7 @@ def run(  # noqa: PLR0913
     tuple_node_names = tuple(node_names)
 
     with KedroSession.create(
-        env=env, conf_source=conf_source, extra_params=params
+        env=env, conf_source=conf_source, runtime_params=params
     ) as session:
         return session.run(
             tags=tuple_tags,

@@ -185,16 +185,16 @@ pyproject_toml_payload = {
 
 
 @pytest.fixture(params=[None])
-def extra_params(request):
+def runtime_params(request):
     return request.param
 
 
 @pytest.fixture
-def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
+def dummy_context(tmp_path, prepare_project_dir, env, runtime_params):
     bootstrap_project(tmp_path)
 
     session = KedroSession.create(
-        project_path=tmp_path, env=env, extra_params=extra_params
+        project_path=tmp_path, env=env, runtime_params=runtime_params
     )
     context = session.load_context()
     config_loader = context.config_loader
@@ -204,7 +204,7 @@ def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
         env=env,
         package_name=MOCK_PACKAGE_NAME,
         hook_manager=_create_hook_manager(),
-        extra_params=extra_params,
+        runtime_params=runtime_params,
     )
 
     yield context
@@ -270,13 +270,13 @@ class TestKedroContext:
             assert mock_settings.DATA_CATALOG_CLASS
 
     @pytest.mark.parametrize(
-        "extra_params",
+        "runtime_params",
         [None, {}, {"foo": "bar", "baz": [1, 2], "qux": None}],
         indirect=True,
     )
-    def test_params(self, dummy_context, extra_params):
-        extra_params = extra_params or {}
-        expected = {"param1": 1, "param2": 2, "param3": {"param4": 3}, **extra_params}
+    def test_params(self, dummy_context, runtime_params):
+        runtime_params = runtime_params or {}
+        expected = {"param1": 1, "param2": 2, "param3": {"param4": 3}, **runtime_params}
         assert dummy_context.params == expected
 
     @pytest.mark.parametrize(
@@ -288,19 +288,19 @@ class TestKedroContext:
         assert param == expected
 
     @pytest.mark.parametrize(
-        "extra_params",
+        "runtime_params",
         [None, {}, {"foo": "bar", "baz": [1, 2], "qux": None}],
         indirect=True,
     )
-    def test_params_missing(self, mocker, extra_params, dummy_context):
+    def test_params_missing(self, mocker, runtime_params, dummy_context):
         mock_config_loader = mocker.patch("kedro.config.OmegaConfigLoader.__getitem__")
         mock_config_loader.side_effect = MissingConfigException("nope")
-        extra_params = extra_params or {}
+        runtime_params = runtime_params or {}
 
         pattern = "Parameters not found in your Kedro project config"
         with pytest.warns(UserWarning, match=pattern):
             actual = dummy_context.params
-        assert actual == extra_params
+        assert actual == runtime_params
 
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
     def test_custom_env(self, dummy_context, env):

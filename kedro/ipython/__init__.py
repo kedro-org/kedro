@@ -112,7 +112,7 @@ def magic_reload_kedro(
 def reload_kedro(
     path: str | None = None,
     env: str | None = None,
-    extra_params: dict[str, Any] | None = None,
+    runtime_params: dict[str, Any] | None = None,
     local_namespace: dict[str, Any] | None = None,
     conf_source: str | None = None,
 ) -> None:  # pragma: no cover
@@ -128,7 +128,7 @@ def reload_kedro(
     session = KedroSession.create(
         project_path,
         env=env,
-        extra_params=extra_params,
+        runtime_params=runtime_params,
         conf_source=conf_source,
     )
     context = session.load_context()

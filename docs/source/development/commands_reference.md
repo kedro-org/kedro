@@ -247,7 +247,7 @@ def run(
     node_names = tuple(node_names)
 
     with KedroSession.create(
-        env=env, conf_source=conf_source, extra_params=params
+        env=env, conf_source=conf_source, runtime_params=params
     ) as session:
         session.run(
             tags=tags,

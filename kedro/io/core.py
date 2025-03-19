@@ -8,7 +8,6 @@ import abc
 import copy
 import logging
 import pprint
-import re
 import sys
 import traceback
 import warnings
@@ -28,13 +27,18 @@ from typing import (
     TypeVar,
     runtime_checkable,
 )
-from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 from typing_extensions import Self
 
-from kedro.utils import load_obj
+# These are re-exported for backward compatibility
+from kedro.utils import (  # noqa: F401
+    CLOUD_PROTOCOLS,
+    HTTP_PROTOCOLS,
+    _parse_filepath,
+    load_obj,
+)
 
 if TYPE_CHECKING:
     import os
@@ -44,21 +48,7 @@ if TYPE_CHECKING:
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
-HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
-CLOUD_PROTOCOLS = (
-    "abfs",
-    "abfss",
-    "adl",
-    "gcs",
-    "gdrive",
-    "gs",
-    "oci",
-    "oss",
-    "s3",
-    "s3a",
-    "s3n",
-)
 TYPE_KEY = "type"
 
 
@@ -879,54 +869,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _release(self) -> None:
         super()._release()
         self._version_cache.clear()
-
-
-def _parse_filepath(filepath: str) -> dict[str, str]:
-    """Split filepath on protocol and path. Based on `fsspec.utils.infer_storage_options`.
-
-    Args:
-        filepath: Either local absolute file path or URL (s3://bucket/file.csv)
-
-    Returns:
-        Parsed filepath.
-    """
-    if (
-        re.match(r"^[a-zA-Z]:[\\/]", filepath)
-        or re.match(r"^[a-zA-Z0-9]+://", filepath) is None
-    ):
-        return {"protocol": "file", "path": filepath}
-
-    parsed_path = urlsplit(filepath)
-    protocol = parsed_path.scheme or "file"
-
-    if protocol in HTTP_PROTOCOLS:
-        return {"protocol": protocol, "path": filepath}
-
-    path = parsed_path.path
-    if protocol == "file":
-        windows_path = re.match(r"^/([a-zA-Z])[:|]([\\/].*)$", path)
-        if windows_path:
-            path = ":".join(windows_path.groups())
-
-    if parsed_path.query:
-        path = f"{path}?{parsed_path.query}"
-    if parsed_path.fragment:
-        path = f"{path}#{parsed_path.fragment}"
-
-    options = {"protocol": protocol, "path": path}
-
-    if parsed_path.netloc and protocol in CLOUD_PROTOCOLS:
-        host_with_port = parsed_path.netloc.rsplit("@", 1)[-1]
-        host = host_with_port.rsplit(":", 1)[0]
-        options["path"] = host + options["path"]
-        # - Azure Data Lake Storage Gen2 URIs can store the container name in the
-        #   'username' field of a URL (@ syntax), so we need to add it to the path
-        # - Oracle Cloud Infrastructure (OCI) Object Storage filesystem (ocifs) also
-        #   uses the @ syntax for I/O operations: "oci://bucket@namespace/path_to_file"
-        if protocol in ["abfss", "oci"] and parsed_path.username:
-            options["path"] = parsed_path.username + "@" + options["path"]
-
-    return options
 
 
 def get_protocol_and_path(

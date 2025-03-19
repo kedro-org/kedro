@@ -19,6 +19,7 @@
 * Fixed pipeline packaging issue by ensuring `pipelines/__init__.py` exists when creating new pipelines.
 * Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
 * Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
+* Remove `7: Kedro Viz` from Kedro tools.
 * Updated node grouping API to only group on first level of namespace.
 
 ## Documentation changes
@@ -33,7 +34,6 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Jacob Pieniazek](https://github.com/jakepenzak)
 * [Lucas Vittor](https://github.com/lvvittor)
-* [Deepyaman Datta](https://github.com/deepyaman)
 * [Ean Jimenez](https://github.com/Prometean)
 * [Toran Sahu](https://github.com/toransahu)
 

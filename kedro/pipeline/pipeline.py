@@ -199,7 +199,7 @@ class Pipeline:
         self._nodes: list[Node] = nodes
 
         if any([inputs, outputs, parameters, namespace]):
-            nodes = self.map_nodes(
+            nodes = self._map_nodes(
                 pipe=self.pipe,
                 inputs=inputs,
                 outputs=outputs,
@@ -1026,7 +1026,7 @@ class Pipeline:
             namespace=new_namespace,
         )
 
-    def map_nodes(
+    def _map_nodes(
         self,
         pipe: Iterable[Node | Pipeline],
         inputs: str | set[str] | dict[str, str] | None = None,

@@ -29,6 +29,14 @@
 * Improved the Kedro VSCode extension documentation.
 * Updated the recommendations for nesting namespaces.
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Jacob Pieniazek](https://github.com/jakepenzak)
+* [Lucas Vittor](https://github.com/lvvittor)
+* [Deepyaman Datta](https://github.com/deepyaman)
+* [Ean Jimenez](https://github.com/Prometean)
+* [Toran Sahu](https://github.com/toransahu)
+
 # Release 0.19.11
 
 ## Major features and improvements

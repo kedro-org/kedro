@@ -13,6 +13,7 @@
 * Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
 * Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
 * Remove `7: Kedro Viz` from Kedro tools.
+* Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
 
 ## Breaking changes to the API
 ## Documentation changes

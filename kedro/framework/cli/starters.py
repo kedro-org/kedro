@@ -845,14 +845,18 @@ def _make_cookiecutter_args_and_fetch_template(
     example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
-    cookiecutter_args["checkout"] = _select_checkout_branch_for_cookiecutter(checkout)
-
     if "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
+        cookiecutter_args["checkout"] = _select_checkout_branch_for_cookiecutter(
+            checkout
+        )
     elif example_pipeline == "True":
         # Use spaceflights-pandas starter if example was selected, but PySpark wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
+        cookiecutter_args["checkout"] = _select_checkout_branch_for_cookiecutter(
+            checkout
+        )
     else:
         # Use the default template path for non PySpark or example options:
         starter_path = template_path

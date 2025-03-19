@@ -10,6 +10,7 @@ import logging
 import pprint
 import re
 import sys
+import traceback
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -578,7 +579,7 @@ def parse_dataset_definition(
 
     dataset_type = config.pop(TYPE_KEY)
     class_obj = None
-    warning = None
+    error_msg = None
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):
             raise DatasetError(
@@ -588,7 +589,7 @@ def parse_dataset_definition(
         class_paths = (prefix + dataset_type for prefix in _DEFAULT_PACKAGES)
 
         for class_path in class_paths:
-            tmp, warning = _load_obj(
+            tmp, error_msg = _load_obj(
                 class_path
             )  # Load dataset class, capture the warning
 
@@ -597,11 +598,6 @@ def parse_dataset_definition(
                 break
 
         if class_obj is None:  # If no valid class was found, raise an error
-            error_msg = (
-                warning
-                if warning
-                else f"Class '{dataset_type}' not found, is this a typo?"
-            )
             hint = (
                 "\nHint: If you are trying to use a dataset from `kedro-datasets`, "
                 "make sure that the package is installed in your current environment. "
@@ -609,7 +605,8 @@ def parse_dataset_definition(
                 "`pip install kedro-datasets[<dataset-group>]` to install `kedro-datasets` along with "
                 "related dependencies for the specific dataset group."
             )
-            raise DatasetError(f"{error_msg}{hint}")
+            default_error_msg = f"Class '{dataset_type}' not found, is this a typo?"
+            raise DatasetError(f"{error_msg if error_msg else default_error_msg}{hint}")
 
     if not class_obj:
         class_obj = dataset_type
@@ -662,7 +659,9 @@ def _load_obj(class_path: str) -> Any | None:
                 f"https://docs.kedro.org/en/stable/kedro_project_setup/"
                 f"dependencies.html#install-dependencies-related-to-the-data-catalog"
             ) from exc
-        return None, str(exc)
+
+        error_message = traceback.format_exc()
+        return None, error_message
 
     return class_obj, None
 

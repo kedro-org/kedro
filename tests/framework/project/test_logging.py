@@ -9,7 +9,7 @@ import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
 from kedro.io.data_catalog import DataCatalog
-from kedro.logging import _format_rich
+from kedro.logging import RichHandler, _format_rich
 from kedro.utils import _has_rich_handler
 
 
@@ -215,3 +215,12 @@ def test_logger_without_rich_markup():
 
     for record in custom_handler.records:
         assert "[dark_orange]" not in record.message
+
+
+def test_logger_with_invalid_markup_args():
+    root_logger = logging.getLogger()
+    rich_handler = RichHandler()
+    root_logger.addHandler(rich_handler)
+    var = "dummy"
+    with pytest.raises(TypeError):
+        root_logger.warn("dummy %s", var, extra={"rich_format": "invalid_arg"})

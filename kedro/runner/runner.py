@@ -81,13 +81,9 @@ class AbstractRunner(ABC):
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
 
         Returns:
-            Any node outputs that cannot be processed by the catalog.
-            These are returned in a dictionary, where the keys are defined
-            by the node outputs.
-
+            Dictionary with pipeline outputs, where keys are dataset names
+            and values are dataset object.
         """
-        # Check which datasets used in the pipeline are in the catalog or match
-        # a pattern in the catalog, not including extra dataset patterns
         # Run a warm-up to materialize all datasets in the catalog before run
         for ds in pipeline.datasets():
             if ds in catalog:

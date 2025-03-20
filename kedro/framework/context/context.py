@@ -14,11 +14,12 @@ from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import CatalogProtocol, DataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
+
+    from kedro.io import CatalogProtocol
 
 
 def _is_relative_path(path_string: str) -> bool:
@@ -231,7 +232,7 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        catalog: DataCatalog = settings.DATA_CATALOG_CLASS.from_config(
+        catalog: CatalogProtocol = settings.DATA_CATALOG_CLASS.from_config(
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,
@@ -294,3 +295,10 @@ class KedroContext:
 
 class KedroContextError(Exception):
     """Error occurred when loading project and running context pipeline."""
+
+
+def compose_classes(base: type, *mixins) -> type:
+    """Injecting mixins dynamically"""
+    t = (base, *mixins)
+    name = f"{base.__name__}With{''.join(x.__name__ for x in mixins)}"
+    return type(name, t, {})

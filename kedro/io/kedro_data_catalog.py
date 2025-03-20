@@ -13,8 +13,10 @@ from __future__ import annotations
 import difflib
 import logging
 import re
+from multiprocessing.managers import SyncManager
 from typing import Any, ClassVar, Iterator, List  # noqa: UP035
 
+from kedro.io import SharedMemoryDataset
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
     TYPE_KEY,
@@ -274,9 +276,9 @@ class KedroDataCatalog(CatalogProtocol):
         if lazy_dataset:
             self[key] = lazy_dataset.materialize()
 
-        dataset = self.__datasets.get(key, None)
+        dataset = self.__datasets.get(key, None) or default
 
-        return dataset or default
+        return dataset
 
     def _ipython_key_completions_(self) -> list[str]:
         return self.keys()
@@ -831,3 +833,35 @@ class KedroDataCatalog(CatalogProtocol):
         except DatasetNotFoundError:
             return False
         return dataset.exists()
+
+
+class ParallelRunnerManager(SyncManager):
+    """``ParallelRunnerManager`` is used to create shared ``MemoryDataset``
+    objects as default datasets in a pipeline.
+    """
+
+
+ParallelRunnerManager.register("MemoryDataset", MemoryDataset)
+
+
+class KedroDataCatalogSharedMemory(KedroDataCatalog):
+    runtime_patterns: ClassVar = {"{default}": {"type": "SharedMemoryDataset"}}
+
+    def __post_init__(self):
+        self._manager = ParallelRunnerManager()
+        self._manager.start()
+
+    def __del__(self) -> None:
+        self._manager.shutdown()
+
+    def _set_manager_datasets(self, dataset: AbstractDataset) -> None:
+        if isinstance(dataset, SharedMemoryDataset):
+            dataset.set_manager(self._manager)
+
+    def get(
+        self, key: str, default: AbstractDataset | None = None
+    ) -> AbstractDataset | None:
+        dataset = super().get(key, default)
+        self._set_manager_datasets(dataset)
+
+        return dataset

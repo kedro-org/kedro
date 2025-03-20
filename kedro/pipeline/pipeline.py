@@ -455,7 +455,7 @@ class Pipeline:
         nodes = [
             n
             for n in self._nodes
-            if n.namespace and n.namespace.startswith(node_namespace)
+            if n.namespace and _match_namespaces(n.namespace, node_namespace)
         ]
         if not nodes:
             raise ValueError(
@@ -920,6 +920,12 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
             f"Please specify a transcoding option or "
             f"rename the datasets."
         )
+
+
+def _match_namespaces(node_namespace: str, filter_namespace: str) -> bool:
+    return node_namespace.split(".")[
+        : len(filter_namespace.split("."))
+    ] == filter_namespace.split(".")
 
 
 class CircularDependencyError(Exception):

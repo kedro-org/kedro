@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
+
 ## Documentation changes
 ## Community contributions
 

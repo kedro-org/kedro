@@ -154,7 +154,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Store remote root path if using cloud protocol
         if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
             options = _parse_filepath(conf_source)
-            self._remote_root_path = options["path"]
+            self._remote_root_path = options["path"].rstrip('/')
 
         super().__init__(
             conf_source=conf_source,
@@ -214,7 +214,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Load base env config
         # Handle remote paths
         if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
-            base_path = f"{self._remote_root_path.rstrip('/')}/{self.base_env}"
+            base_path = f"{self._remote_root_path}/{self.base_env}"
         elif self._protocol == "file":
             base_path = str(Path(self.conf_source) / self.base_env)
         else:
@@ -242,7 +242,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         # Handle remote paths
         if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
-            env_path = f"{self._remote_root_path.rstrip('/')}/{run_env}"
+            env_path = f"{self._remote_root_path}/{run_env}"
         elif self._protocol == "file":
             env_path = str(Path(self.conf_source) / run_env)
         else:

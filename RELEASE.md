@@ -1,3 +1,16 @@
+# Release 1.0.0
+
+## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+
+## Breaking changes to the API
+* Private methods `_is_project` and `_find_kedro_project` are changed to `is_kedro_project` and `find_kedro_project`.
+
+## Migration guide from Kedro 0.19.* to 1.*
+[See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+
 # Upcoming Release
 
 ## Major features and improvements

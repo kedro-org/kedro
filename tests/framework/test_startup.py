@@ -13,7 +13,7 @@ from kedro.framework.startup import (
     _validate_source_path,
     bootstrap_project,
 )
-from kedro.utils import _is_project
+from kedro.utils import is_kedro_project
 
 
 class TestIsProject:
@@ -22,33 +22,33 @@ class TestIsProject:
     def test_no_metadata_file(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=False)
 
-        assert not _is_project(self.project_path)
+        assert not is_kedro_project(self.project_path)
 
     def test_toml_invalid_format(self, tmp_path):
         """Test for loading context from an invalid path."""
         toml_path = tmp_path / "pyproject.toml"
         toml_path.write_text("!!")  # Invalid TOML
 
-        assert not _is_project(tmp_path)
+        assert not is_kedro_project(tmp_path)
 
     def test_non_kedro_project(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
         mocker.patch.object(Path, "read_text", return_value="[tool]")
 
-        assert not _is_project(self.project_path)
+        assert not is_kedro_project(self.project_path)
 
     def test_valid_toml_file(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
         pyproject_toml_payload = "[tool.kedro]"  # \nproject_name = 'proj'"
         mocker.patch.object(Path, "read_text", return_value=pyproject_toml_payload)
 
-        assert _is_project(self.project_path)
+        assert is_kedro_project(self.project_path)
 
     def test_toml_bad_encoding(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
         mocker.patch.object(Path, "read_text", side_effect=UnicodeDecodeError)
 
-        assert not _is_project(self.project_path)
+        assert not is_kedro_project(self.project_path)
 
 
 class TestGetProjectMetadata:

@@ -158,8 +158,3 @@ def _has_rich_handler(logger: Optional[logging.Logger] = None) -> bool:
     except ImportError:
         return False
     return any(isinstance(handler, RichHandler) for handler in logger.handlers)
-
-
-def _format_rich(value: str, markup: str) -> str:
-    """Format string with rich markup"""
-    return f"[{markup}]{value}[/{markup}]"

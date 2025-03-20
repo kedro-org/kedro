@@ -117,10 +117,6 @@ kedro = ["py.typed"]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}
 
-[tool.ruff.format]
-exclude = ["**/templates", "features/steps/test_starter"]
-docstring-code-format = true
-
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
@@ -220,32 +216,3 @@ ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
     "kedro.framework.session.session -> kedro.config",
 ]
-
-[tool.ruff]
-line-length = 88
-show-fixes = true
-lint.select = [
-    "F",    # Pyflakes
-    "W",    # pycodestyle
-    "E",    # pycodestyle
-    "I",    # isort
-    "UP",   # pyupgrade
-    "PL",   # Pylint
-    "T201", # Print Statement
-    "S",    # flake8-bandit
-    "TCH",  # flake8-type-checking
-    "RUF",  # Ruff-specific rules
-]
-lint.ignore = ["E501"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["kedro"]
-
-[tool.ruff.lint.per-file-ignores]
-"{tests,docs}/*" = ["PLR2004","PLR0913"]
-"{tests,docs,tools,static,features,docs}/*" = ["T201", "S101", "S108"]  # Check print statement for kedro/ only
-
-[tool.mypy]
-ignore_missing_imports = true
-disable_error_code = ['misc']
-exclude = ['^kedro/templates/', '^docs/', '^features/steps/test_starter/']

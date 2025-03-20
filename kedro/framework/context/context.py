@@ -13,7 +13,7 @@ from attrs import define, field
 from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
-from kedro.framework.project import settings
+from kedro.io.kedro_data_catalog import KedroDataCatalogSharedMemory
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -232,7 +232,7 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        catalog: CatalogProtocol = settings.DATA_CATALOG_CLASS.from_config(
+        catalog: CatalogProtocol = KedroDataCatalogSharedMemory.from_config(
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,

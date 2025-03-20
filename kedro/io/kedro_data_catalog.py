@@ -16,7 +16,6 @@ import re
 from multiprocessing.managers import SyncManager
 from typing import Any, ClassVar, Iterator, List  # noqa: UP035
 
-from kedro.io import SharedMemoryDataset
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
     TYPE_KEY,
@@ -32,6 +31,7 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
+from kedro.io.shared_memory_dataset import SharedMemoryDataset
 from kedro.utils import _format_rich, _has_rich_handler
 
 
@@ -847,16 +847,32 @@ ParallelRunnerManager.register("MemoryDataset", MemoryDataset)
 class KedroDataCatalogSharedMemory(KedroDataCatalog):
     runtime_patterns: ClassVar = {"{default}": {"type": "SharedMemoryDataset"}}
 
-    def __post_init__(self):
+    def __init__(
+        self,
+        datasets: dict[str, AbstractDataset] | None = None,
+        raw_data: dict[str, Any] | None = None,
+        config_resolver: CatalogConfigResolver | None = None,
+        load_versions: dict[str, str] | None = None,
+        save_version: str | None = None,
+    ) -> None:
         self._manager = ParallelRunnerManager()
         self._manager.start()
+
+        super().__init__(
+            datasets, raw_data, config_resolver, load_versions, save_version
+        )
+
+    # def __post_init__(self):
+    #     self._manager = ParallelRunnerManager()
+    #     self._manager.start()
 
     def __del__(self) -> None:
         self._manager.shutdown()
 
     def _set_manager_datasets(self, dataset: AbstractDataset) -> None:
         if isinstance(dataset, SharedMemoryDataset):
-            dataset.set_manager(self._manager)
+            if not dataset.shared_memory_dataset:
+                dataset.set_manager(self._manager)
 
     def get(
         self, key: str, default: AbstractDataset | None = None

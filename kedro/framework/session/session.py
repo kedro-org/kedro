@@ -24,7 +24,7 @@ from kedro.framework.project import (
     validate_settings,
 )
 from kedro.io.core import generate_timestamp
-from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
+from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
 if TYPE_CHECKING:
@@ -389,16 +389,9 @@ class KedroSession:
                 "Have you forgotten the `()` at the end of the statement?"
             )
 
-        runtime_patterns = (
-            PARALLEL_RUNNER_DEFAULT_PATTERN
-            if isinstance(runner, ParallelRunner)
-            else None
-        )
-
         catalog = context._get_catalog(
             save_version=save_version,
             load_versions=load_versions,
-            runtime_patterns=runtime_patterns,
         )
 
         # Run the runner

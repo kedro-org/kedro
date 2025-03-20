@@ -13,7 +13,7 @@ from __future__ import annotations
 import difflib
 import logging
 import re
-from typing import Any, Iterator, List  # noqa: UP035
+from typing import Any, ClassVar, Iterator, List  # noqa: UP035
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
@@ -31,8 +31,6 @@ from kedro.io.core import (
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.utils import _format_rich, _has_rich_handler
-
-DEFAULT_PATTERN = {"{default}": {"type": "MemoryDataset"}}
 
 
 class _LazyDataset:
@@ -61,6 +59,8 @@ class _LazyDataset:
 
 
 class KedroDataCatalog(CatalogProtocol):
+    runtime_patterns: ClassVar = {"{default}": {"type": "MemoryDataset"}}
+
     def __init__(
         self,
         datasets: dict[str, AbstractDataset] | None = None,
@@ -101,7 +101,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver(
-            runtime_patterns=DEFAULT_PATTERN
+            runtime_patterns=self.runtime_patterns
         )
         # TODO: rename back to _datasets when removing old catalog
         self.__datasets: dict[str, AbstractDataset] = datasets or {}
@@ -292,7 +292,6 @@ class KedroDataCatalog(CatalogProtocol):
         credentials: dict[str, dict[str, Any]] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-        runtime_patterns: Patterns | None = None,
     ) -> KedroDataCatalog:
         """Create a ``KedroDataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -317,7 +316,6 @@ class KedroDataCatalog(CatalogProtocol):
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
-            runtime_patterns: Default atterns used to resolve datasets.
 
         Returns:
             An instantiated ``KedroDataCatalog`` containing all specified
@@ -363,8 +361,9 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog.save("boats", df)
         """
         catalog = catalog or {}
-        runtime_patterns = runtime_patterns or DEFAULT_PATTERN
-        config_resolver = CatalogConfigResolver(catalog, credentials, runtime_patterns)
+        config_resolver = CatalogConfigResolver(
+            catalog, credentials, cls.runtime_patterns
+        )
         save_version = save_version or generate_timestamp()
         load_versions = load_versions or {}
 

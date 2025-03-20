@@ -224,7 +224,7 @@ def run(  # noqa: PLR0913
     tuple_node_names = tuple(node_names)
 
     with KedroSession.create(
-        env=env, conf_source=conf_source, extra_params=params
+        env=env, conf_source=conf_source, runtime_params=params
     ) as session:
         return session.run(
             tags=tuple_tags,

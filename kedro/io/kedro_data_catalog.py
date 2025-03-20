@@ -855,6 +855,8 @@ class KedroDataCatalogSharedMemory(KedroDataCatalog):
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> None:
+        # Explanation of why sync manager can't be here
+        # https://stackoverflow.com/questions/29007619/python-typeerror-pickling-an-authenticationstring-object-is-disallowed-for-sec
         self._manager = ParallelRunnerManager()
         self._manager.start()
 

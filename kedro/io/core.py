@@ -627,31 +627,24 @@ def parse_dataset_definition(
     return class_obj, config
 
 
-def _load_obj(class_path: str) -> Any | None:
+def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
     mod_path, _, class_name = class_path.rpartition(".")
-    # Check if the module exists
-    try:
-        available_classes = load_obj(f"{mod_path}.__all__")
-    # ModuleNotFoundError: When `load_obj` can't find `mod_path` (e.g `kedro.io.pandas`)
-    #                      this is because we try a combination of all prefixes.
-    # AttributeError: When `load_obj` manages to load `mod_path` but it doesn't have an
-    #                 `__all__` attribute -- either because it's a custom or a kedro.io dataset
-    except (ModuleNotFoundError, AttributeError, ValueError):
-        available_classes = None
+
     try:
         class_obj = load_obj(class_path)
-    except (ModuleNotFoundError, ValueError, AttributeError) as exc:
-        # If it's available, module exist but dependencies are missing
-        if available_classes and class_name in available_classes:
-            raise DatasetError(
-                f"{exc}. Please see the documentation on how to "
-                f"install relevant dependencies for {class_path}:\n"
-                f"https://docs.kedro.org/en/stable/kedro_project_setup/"
-                f"dependencies.html#install-dependencies-related-to-the-data-catalog"
-            ) from exc
-
-        error_message = traceback.format_exc()
-        return None, error_message
+    except ValueError as exc:
+        return None, f"{exc}. Invalid dataset path: '{class_path}'. Please check if it's correct."
+    except AttributeError as exc:
+        return None, (
+            f"Dataset '{class_name}' not found in '{mod_path}'. "
+            f"Make sure the dataset name is correct."
+        )
+    except ModuleNotFoundError as exc:
+        return None, (
+            f"{exc}. Please install the missing dependencies for {class_path}:\n"
+            f"https://docs.kedro.org/en/stable/kedro_project_setup/"
+            f"dependencies.html#install-dependencies-related-to-the-data-catalog"
+        )
 
     return class_obj, None
 

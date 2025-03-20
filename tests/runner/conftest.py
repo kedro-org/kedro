@@ -3,7 +3,7 @@ from random import random
 import pandas as pd
 import pytest
 
-from kedro.io import DataCatalog, KedroDataCatalog, LambdaDataset, MemoryDataset
+from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
 from kedro.pipeline import node, pipeline
 
 
@@ -59,12 +59,7 @@ def pandas_df_feed_dict():
 
 @pytest.fixture
 def catalog():
-    return KedroDataCatalog()
-
-
-@pytest.fixture
-def new_catalog():
-    return KedroDataCatalog()
+    return DataCatalog()
 
 
 @pytest.fixture

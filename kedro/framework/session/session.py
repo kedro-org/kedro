@@ -24,7 +24,8 @@ from kedro.framework.project import (
     validate_settings,
 )
 from kedro.io.core import generate_timestamp
-from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.io.kedro_data_catalog import SharedMemoryDataCatalog
+from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
 if TYPE_CHECKING:
@@ -237,7 +238,7 @@ class KedroSession:
     def load_context(self) -> KedroContext:
         """An instance of the project context."""
         env = self.store.get("env")
-        runtime_params = self.store.get("runtime_params")
+        extra_params = self.store.get("extra_params")
         config_loader = self._get_config_loader()
         context_class = settings.CONTEXT_CLASS
         context = context_class(
@@ -245,7 +246,7 @@ class KedroSession:
             project_path=self._project_path,
             config_loader=config_loader,
             env=env,
-            runtime_params=runtime_params,
+            extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
         self._hook_manager.hook.after_context_created(context=context)
@@ -389,7 +390,14 @@ class KedroSession:
                 "Have you forgotten the `()` at the end of the statement?"
             )
 
+        catalog_class = (
+            SharedMemoryDataCatalog
+            if isinstance(runner, ParallelRunner)
+            else settings.DATA_CATALOG_CLASS
+        )
+
         catalog = context._get_catalog(
+            catalog_class=catalog_class,
             save_version=save_version,
             load_versions=load_versions,
         )

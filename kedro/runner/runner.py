@@ -167,9 +167,9 @@ class AbstractRunner(ABC):
 
         nodes = pipeline.nodes
 
-        self._validate_catalog(catalog, pipeline)
+        self._validate_catalog(catalog)
         self._validate_nodes(nodes)
-        self._set_manager_datasets(catalog, pipeline)
+        self._set_manager_datasets(catalog)
 
         load_counts = Counter(chain.from_iterable(n.inputs for n in pipeline.nodes))
         node_dependencies = pipeline.node_dependencies
@@ -308,7 +308,7 @@ class AbstractRunner(ABC):
             if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
                 catalog.release(dataset)
 
-    def _validate_catalog(self, catalog: CatalogProtocol, pipeline: Pipeline) -> None:
+    def _validate_catalog(self, catalog: CatalogProtocol) -> None:
         # Add catalog validation logic here if needed
         pass
 
@@ -316,9 +316,7 @@ class AbstractRunner(ABC):
         # Add node validation logic here if needed
         pass
 
-    def _set_manager_datasets(
-        self, catalog: CatalogProtocol, pipeline: Pipeline
-    ) -> None:
+    def _set_manager_datasets(self, catalog: CatalogProtocol) -> None:
         # Set up any necessary manager datasets here
         pass
 

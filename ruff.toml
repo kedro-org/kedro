@@ -1,4 +1,4 @@
-# Global configuration options
+# Global options
 line-length = 88
 show-fixes = true
 
@@ -9,11 +9,11 @@ select = [
     "E",    # pycodestyle
     "I",    # isort
     "UP",   # pyupgrade
-    "PL",   # Pylint
-    "T201", # Print Statement
-    "S",    # flake8-bandit
-    "TCH",  # flake8-type-checking
-    "RUF",  # Ruff-specific rules
+    "PL",    # Pylint
+    "T201",  # Print Statement
+    "S",     # flake8-bandit
+    "TCH",   # flake8-type-checking
+    "RUF",   # Ruff-specific rules
 ]
 ignore = ["E501"]
 
@@ -22,7 +22,7 @@ known-first-party = ["kedro"]
 
 [lint.per-file-ignores]
 "{tests,docs}/*" = ["PLR2004", "PLR0913"]
-"{tests,docs,tools,static,features,docs}/*" = ["T201", "S101", "S108"]
+"{tests,docs,tools,static,features,docs}/*" = ["T201", "S101", "S108"]  # Check print statement for kedro/ only
 
 [format]
 exclude = ["**/templates", "features/steps/test_starter"]

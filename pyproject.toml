@@ -216,3 +216,8 @@ ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
     "kedro.framework.session.session -> kedro.config",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = ['misc']
+exclude = ['^kedro/templates/', '^docs/', '^features/steps/test_starter/']

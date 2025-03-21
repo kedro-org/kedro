@@ -56,7 +56,7 @@ test = [
     "behave==1.2.6",
     "coverage[toml]",
     "detect-secrets~=1.5.0",
-    "import-linter==2.2",
+    "import-linter==2.3",
     "ipylab>=1.0.0",
     "ipython~=8.10",
     "jupyterlab_server>=2.11.1",

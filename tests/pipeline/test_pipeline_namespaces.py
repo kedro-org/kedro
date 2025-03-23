@@ -23,7 +23,8 @@ def test_pipeline_with_interrupted_namespace():
 
     # Capture warnings during pipeline creation
     with pytest.warns(
-        UserWarning, match="Namespace 'ns1' is interrupted and thus invalid."
+        UserWarning,
+        match="Namespace 'ns1' is interrupted by node 'node2' and thus invalid.",
     ):
         Pipeline(nodes)
 
@@ -90,5 +91,11 @@ def test_pipeline_with_complex_namespace_interruption():
 
     # Check that both warning messages are present
     warning_messages = [str(warning.message) for warning in record]
-    assert "Namespace 'ns1.child' is interrupted and thus invalid." in warning_messages
-    assert "Namespace 'ns1' is interrupted and thus invalid." in warning_messages
+    assert (
+        "Namespace 'ns1.child' is interrupted by node 'ns2.node3' and thus invalid."
+        in warning_messages
+    )
+    assert (
+        "Namespace 'ns1' is interrupted by node 'ns2.node3' and thus invalid."
+        in warning_messages
+    )

@@ -12,6 +12,7 @@
 * Added `KedroDataCatalog.filter()` to filter datasets by name and type.
 * Added `Pipeline.grouped_nodes_by_namespace` property which returns a dictionary of nodes grouped by namespace, intended to be used by plugins to facilitate deployment of namespaced nodes together.
 * Added support for cloud storage protocols in `--conf-source`, allowing configuration to be loaded from remote locations such as S3.
+* Added warnings for invalid namespaces on pipeline creation.
 
 ## Bug fixes and other changes
 * Added `DataCatalog` deprecation warning.

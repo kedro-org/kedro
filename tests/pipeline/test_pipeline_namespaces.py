@@ -1,12 +1,17 @@
-import pytest
 import warnings
-from kedro.pipeline import node, Pipeline
+
+import pytest
+
+from kedro.pipeline import Pipeline, node
+
 
 def identity(x):
     return x
 
+
 def branching(x):
     return x, x
+
 
 def test_pipeline_with_interrupted_namespace():
     # Create a pipeline with an interrupted namespace
@@ -17,8 +22,11 @@ def test_pipeline_with_interrupted_namespace():
     ]
 
     # Capture warnings during pipeline creation
-    with pytest.warns(UserWarning, match="Namespace 'ns1' is interrupted and thus invalid."):
+    with pytest.warns(
+        UserWarning, match="Namespace 'ns1' is interrupted and thus invalid."
+    ):
         Pipeline(nodes)
+
 
 def test_pipeline_with_continuous_namespace():
     # Create a pipeline with continuous namespace
@@ -33,6 +41,7 @@ def test_pipeline_with_continuous_namespace():
         warnings.simplefilter("error")  # Convert warnings to exceptions
         Pipeline(nodes)
 
+
 def test_pipeline_with_child_namespace():
     # Create a pipeline with child namespaces
     nodes = [
@@ -45,6 +54,7 @@ def test_pipeline_with_child_namespace():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         Pipeline(nodes)
+
 
 def test_pipeline_with_parallel_namespaces():
     # Create a pipeline with parallel branches having different namespaces
@@ -59,14 +69,19 @@ def test_pipeline_with_parallel_namespaces():
         warnings.simplefilter("error")
         Pipeline(nodes)
 
+
 def test_pipeline_with_complex_namespace_interruption():
     # Create a more complex pipeline with namespace interruption
     nodes = [
         node(identity, "A", "B", name="node1", namespace="ns1"),
         node(identity, "C", "D", name="node2", namespace="ns1.child.grandchild"),
         node(identity, "D", "E", name="node3", namespace="ns2"),  # Different namespace
-        node(identity, "E", "F", name="node4", namespace="ns1.child"),  # Back to original namespace
-        node(identity, "F", "G", name="node5", namespace="ns1"),  # Back to original namespace
+        node(
+            identity, "E", "F", name="node4", namespace="ns1.child"
+        ),  # Back to original namespace
+        node(
+            identity, "F", "G", name="node5", namespace="ns1"
+        ),  # Back to original namespace
     ]
 
     # Should warn about both interrupted namespace

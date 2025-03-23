@@ -149,7 +149,8 @@ class Pipeline:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
         self._nodes = tagged_nodes
-        self._toposorter = TopologicalSorter(self.node_dependencies)
+        node_parents = self.node_dependencies
+        self._toposorter = TopologicalSorter(node_parents)
 
         # test for circular dependencies without executing the toposort for efficiency
         try:
@@ -161,13 +162,12 @@ class Pipeline:
 
         self._toposorted_nodes: list[Node] = []
         self._toposorted_groups: list[list[Node]] = []
-        self._validate_namespaces()
+        self._validate_namespaces(node_parents)
 
-    def _validate_namespaces(self) -> None:
+    def _validate_namespaces(self, node_parents: dict[Node, set[Node]]) -> None:
         from warnings import warn
 
         visited = set()
-        node_parents = self.node_dependencies
         node_children = defaultdict(set)
         for child, parents in node_parents.items():
             for parent in parents:

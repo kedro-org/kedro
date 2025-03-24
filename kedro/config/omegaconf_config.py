@@ -154,7 +154,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Store remote root path if using cloud protocol
         if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
             options = _parse_filepath(conf_source)
-            self._remote_root_path = options["path"]
+            self._remote_root_path = options["path"].rstrip("/")
 
         super().__init__(
             conf_source=conf_source,

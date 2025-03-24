@@ -630,7 +630,8 @@ def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
     """Try to load an object from a fully-qualified class path.
 
     Raises:
-        DatasetError: If the class is listed in `__all__` but cannot be loaded, indicating missing dependencies.
+        DatasetError: If the class is listed in `__all__` but cannot be loaded,
+        indicating missing dependencies.
 
     Returns:
         A tuple of (object or None, error message or None).

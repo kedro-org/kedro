@@ -636,9 +636,13 @@ def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
         A tuple of (object or None, error message or None).
     """
     mod_path, _, class_name = class_path.rpartition(".")
-
+    # Check if the module exists
     try:
         available_classes = load_obj(f"{mod_path}.__all__")
+        # ModuleNotFoundError: When `load_obj` can't find `mod_path` (e.g `kedro.io.pandas`)
+        #                      this is because we try a combination of all prefixes.
+        # AttributeError: When `load_obj` manages to load `mod_path` but it doesn't have an
+        #                 `__all__` attribute -- either because it's a custom or a kedro.io dataset
     except (ModuleNotFoundError, AttributeError, ValueError):
         available_classes = None
 

@@ -36,9 +36,6 @@ if TYPE_CHECKING:
     from kedro.framework.session.store import BaseSessionStore
 
 
-PARALLEL_RUNNER_DEFAULT_PATTERN = {"{default}": {"type": "SharedMemoryDataset"}}
-
-
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
     path = str(project_path)
     try:

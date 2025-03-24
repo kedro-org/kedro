@@ -634,7 +634,7 @@ def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
         indicating missing dependencies.
 
     Returns:
-        A tuple of (object or None, error message or None).
+        A tuple of (class object or None, error message or None).
     """
     mod_path, _, class_name = class_path.rpartition(".")
     # Check if the module exists

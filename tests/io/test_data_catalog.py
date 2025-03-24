@@ -461,7 +461,7 @@ class TestDataCatalogFromConfig:
 
         error_message = str(exc_info.value)
 
-        assert "module 'kedro.io' has no attribute 'CSVDatasetInvalid'" in error_message
+        assert "Dataset 'CSVDatasetInvalid' not found" in error_message
 
     def test_config_invalid_dataset(self, correct_config):
         """Check the error if the type points to invalid class"""

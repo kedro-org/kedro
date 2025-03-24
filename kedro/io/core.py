@@ -9,7 +9,6 @@ import copy
 import logging
 import pprint
 import sys
-import traceback
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -627,23 +626,53 @@ def parse_dataset_definition(
     return class_obj, config
 
 
+from kedro.io.core import DatasetError
+
+
 def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
+    """Try to load an object from a fully-qualified class path.
+
+    Raises:
+        DatasetError: If the class is listed in `__all__` but cannot be loaded, indicating missing dependencies.
+
+    Returns:
+        A tuple of (object or None, error message or None).
+    """
     mod_path, _, class_name = class_path.rpartition(".")
+
+    try:
+        available_classes = load_obj(f"{mod_path}.__all__")
+    except (ModuleNotFoundError, AttributeError, ValueError):
+        available_classes = None
 
     try:
         class_obj = load_obj(class_path)
     except ValueError as exc:
-        return None, f"{exc}. Invalid dataset path: '{class_path}'. Please check if it's correct."
+        return (
+            None,
+            f"{exc}. Invalid dataset path: '{class_path}'. Please check if it's correct.",
+        )
     except AttributeError as exc:
-        return None, (
+        # Raise if class exists in __all__ but failed to load (likely due to missing deps)
+        if available_classes and class_name in available_classes:
+            raise DatasetError(
+                f"{exc}. Please see the documentation on how to "
+                f"install relevant dependencies for {class_path}:\n"
+                f"https://docs.kedro.org/en/stable/kedro_project_setup/"
+                f"dependencies.html#install-dependencies-related-to-the-data-catalog"
+            ) from exc
+
+        return (
+            None,
             f"Dataset '{class_name}' not found in '{mod_path}'. "
-            f"Make sure the dataset name is correct."
+            f"Make sure the dataset name is correct.",
         )
     except ModuleNotFoundError as exc:
-        return None, (
+        return (
+            None,
             f"{exc}. Please install the missing dependencies for {class_path}:\n"
             f"https://docs.kedro.org/en/stable/kedro_project_setup/"
-            f"dependencies.html#install-dependencies-related-to-the-data-catalog"
+            f"dependencies.html#install-dependencies-related-to-the-data-catalog",
         )
 
     return class_obj, None

@@ -626,9 +626,6 @@ def parse_dataset_definition(
     return class_obj, config
 
 
-from kedro.io.core import DatasetError
-
-
 def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
     """Try to load an object from a fully-qualified class path.
 

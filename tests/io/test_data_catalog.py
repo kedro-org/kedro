@@ -498,6 +498,16 @@ class TestDataCatalogFromConfig:
         """Test empty config"""
         assert DataCatalog.from_config(None)
 
+    def test_config_invalid_class_path_format(self, correct_config):
+        """Check the error if the dataset type has an invalid format causing ValueError"""
+        # An invalid type path that doesn't include a dot or is otherwise malformed
+        correct_config["catalog"]["boats"]["type"] = "InvalidFormatNoDot"
+
+        with pytest.raises(DatasetError) as exc_info:
+            DataCatalog.from_config(**correct_config)
+
+        assert "Invalid dataset path: 'InvalidFormatNoDot'" in str(exc_info.value)
+
     def test_missing_credentials(self, correct_config):
         """Check the error if credentials can't be located"""
         correct_config["catalog"]["cars"]["credentials"] = "missing"

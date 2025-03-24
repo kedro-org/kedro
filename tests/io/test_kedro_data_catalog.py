@@ -492,6 +492,16 @@ class TestKedroDataCatalog:
 
             assert "Dataset 'CSVDatasetInvalid' not found" in error_message
 
+        def test_config_invalid_class_path_format(self, correct_config):
+            """Check the error if the dataset type has an invalid format causing ValueError"""
+            # An invalid type path that doesn't include a dot or is otherwise malformed
+            correct_config["catalog"]["boats"]["type"] = "InvalidFormatNoDot"
+
+            with pytest.raises(DatasetError) as exc_info:
+                KedroDataCatalog.from_config(**correct_config).get("boats")
+
+            assert "Invalid dataset path: 'InvalidFormatNoDot'" in str(exc_info.value)
+
         def test_config_invalid_dataset(self, correct_config):
             """Check the error if the type points to invalid class"""
             correct_config["catalog"]["boats"]["type"] = "KedroDataCatalog"

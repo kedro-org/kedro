@@ -11,6 +11,7 @@ from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
     OutputNotUniqueError,
+    _match_namespaces,
 )
 from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
 
@@ -1243,3 +1244,17 @@ def test_pipeline_to_json(all_pipeline_input_data):
         assert all(node_output in json_rep for node_output in pipeline_node.outputs)
 
     assert kedro.__version__ in json_rep
+
+
+@pytest.mark.parametrize(
+    "node_namespace,filter_namespace, expected",
+    [
+        ("x.a", "x.a", True),
+        ("x.b", "x.a", False),
+        ("x", "x.a", False),
+        ("x.a", "x", True),
+        ("xx", "x", False),
+    ],
+)
+def test_match_namespaces_helper(filter_namespace, node_namespace, expected):
+    assert _match_namespaces(node_namespace, filter_namespace) == expected

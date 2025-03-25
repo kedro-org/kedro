@@ -42,7 +42,7 @@ from kedro.utils import (  # noqa: F401
 if TYPE_CHECKING:
     import os
 
-    from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
+    from kedro.io.catalog_config_resolver import CatalogConfigResolver
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
@@ -557,15 +557,6 @@ def parse_dataset_definition(
     """
     save_version = save_version or generate_timestamp()
     config = copy.deepcopy(config)
-
-    # TODO: remove when removing old catalog as moved to KedroDataCatalog
-    if TYPE_KEY not in config:
-        raise DatasetError(
-            "'type' is missing from dataset catalog configuration."
-            "\nHint: If this catalog entry is intended for variable interpolation, "
-            "make sure that the top level key is preceded by an underscore."
-        )
-
     dataset_type = config.pop(TYPE_KEY)
     class_obj = None
     if isinstance(dataset_type, str):
@@ -922,6 +913,11 @@ def validate_on_forbidden_chars(**kwargs: Any) -> None:
             )
 
 
+def is_parameter(dataset_name: str) -> bool:
+    """Check if dataset is a parameter."""
+    return dataset_name.startswith("params:") or dataset_name == "parameters"
+
+
 _C = TypeVar("_C")
 
 
@@ -943,19 +939,6 @@ class CatalogProtocol(Protocol[_C]):
         """Create a catalog instance from configuration."""
         ...
 
-    def _get_dataset(
-        self,
-        dataset_name: str,
-        version: Any = None,
-        suggest: bool = True,
-    ) -> AbstractDataset:
-        """Retrieve a dataset by its name."""
-        ...
-
-    def list(self, regex_search: str | None = None) -> list[str]:
-        """List all dataset names registered in the catalog."""
-        ...
-
     def save(self, name: str, data: Any) -> None:
         """Save data to a registered dataset."""
         ...
@@ -966,10 +949,6 @@ class CatalogProtocol(Protocol[_C]):
 
     def add(self, ds_name: str, dataset: Any, replace: bool = False) -> None:
         """Add a new dataset to the catalog."""
-        ...
-
-    def add_feed_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
-        """Add datasets to the catalog using the data provided through the `feed_dict`."""
         ...
 
     def exists(self, name: str) -> bool:
@@ -983,61 +962,3 @@ class CatalogProtocol(Protocol[_C]):
     def confirm(self, name: str) -> None:
         """Confirm a dataset by its name."""
         ...
-
-    def shallow_copy(self, extra_dataset_patterns: Patterns | None = None) -> _C:
-        """Returns a shallow copy of the current object."""
-        ...
-
-
-def _validate_versions(
-    datasets: dict[str, AbstractDataset] | None,
-    load_versions: dict[str, str],
-    save_version: str | None,
-) -> tuple[dict[str, str], str | None]:
-    """Validates and synchronises dataset versions for loading and saving.
-
-    Ensures consistency of dataset versions across a catalog, particularly
-    for versioned datasets. It updates load versions and validates that all
-    save versions are consistent.
-
-    Args:
-        datasets: A dictionary mapping dataset names to their instances.
-            if None, no validation occurs.
-        load_versions: A mapping between dataset names and versions
-            to load.
-        save_version: Version string to be used for ``save`` operations
-            by all datasets with versioning enabled.
-
-    Returns:
-        Updated ``load_versions`` with load versions specified in the ``datasets``
-            and resolved ``save_version``.
-
-    Raises:
-        VersionAlreadyExistsError: If a dataset's save version conflicts with
-            the catalog's save version.
-    """
-    if not datasets:
-        return load_versions, save_version
-
-    cur_load_versions = load_versions.copy()
-    cur_save_version = save_version
-
-    for ds_name, ds in datasets.items():
-        # TODO: Move to kedro/io/kedro_data_catalog.py when removing DataCatalog
-        # TODO: Make it a protected static method for KedroDataCatalog
-        # TODO: Replace with isinstance(ds, CachedDataset) - current implementation avoids circular import
-        cur_ds = ds._dataset if ds.__class__.__name__ == "CachedDataset" else ds  # type: ignore[attr-defined]
-
-        if isinstance(cur_ds, AbstractVersionedDataset) and cur_ds._version:
-            if cur_ds._version.load:
-                cur_load_versions[ds_name] = cur_ds._version.load
-            if cur_ds._version.save:
-                cur_save_version = cur_save_version or cur_ds._version.save
-                if cur_save_version != cur_ds._version.save:
-                    raise VersionAlreadyExistsError(
-                        f"Cannot add a dataset `{ds_name}` with `{cur_ds._version.save}` save version. "
-                        f"Save version set for the catalog is `{cur_save_version}`"
-                        f"All datasets in the catalog must have the same save version."
-                    )
-
-    return cur_load_versions, cur_save_version

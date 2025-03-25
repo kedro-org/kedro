@@ -109,7 +109,6 @@ During `kedro new`, you can select which [tools to include in your project](../s
 - **Data Folder**: Adds a `data` folder structure for managing project data. The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders, as outlined [in this data engineering article](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71).
 - **PySpark**: Adds PySpark-specific configuration files.
 
-
 ### `conf`
 
 The `conf` folder contains two subfolders for storing configuration information: `base` and `local`.

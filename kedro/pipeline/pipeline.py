@@ -14,8 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 import kedro
 from kedro.pipeline.node import Node, _to_list
-
-from .transcoding import _strip_transcoding
+from kedro.pipeline.transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

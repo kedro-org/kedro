@@ -15,7 +15,6 @@ from .core import (
     DatasetNotFoundError,
     Version,
 )
-from .data_catalog import DataCatalog
 from .kedro_data_catalog import KedroDataCatalog
 from .lambda_dataset import LambdaDataset
 from .memory_dataset import MemoryDataset
@@ -26,7 +25,6 @@ __all__ = [
     "AbstractVersionedDataset",
     "CachedDataset",
     "CatalogProtocol",
-    "DataCatalog",
     "CatalogConfigResolver",
     "DatasetAlreadyExistsError",
     "DatasetError",

@@ -9,8 +9,8 @@ import pytest
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
-    DataCatalog,
     DatasetError,
+    KedroDataCatalog,
     LambdaDataset,
     MemoryDataset,
 )
@@ -67,7 +67,7 @@ class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_memory_dataset_input(self, is_async, fan_out_fan_in):
         pipeline = modular_pipeline([fan_out_fan_in])
-        catalog = DataCatalog({"A": MemoryDataset("42")})
+        catalog = KedroDataCatalog({"A": MemoryDataset("42")})
         result = ParallelRunner(is_async=is_async).run(pipeline, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
@@ -161,7 +161,7 @@ class TestInvalidParallelRunner:
         created MemoryDatasets.
         """
         pipeline = modular_pipeline([fan_out_fan_in])
-        catalog = DataCatalog({"C": MemoryDataset()}, {"A": 42})
+        catalog = KedroDataCatalog({"C": MemoryDataset()}, {"A": 42})
         with pytest.raises(AttributeError, match="['C']"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
@@ -169,7 +169,7 @@ class TestInvalidParallelRunner:
         pipeline = modular_pipeline(
             [node(identity, "A", "B"), node(return_none, "B", "C")]
         )
-        catalog = DataCatalog({"A": MemoryDataset("42")})
+        catalog = KedroDataCatalog({"A": MemoryDataset("42")})
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
@@ -186,7 +186,7 @@ class TestInvalidParallelRunner:
             assert arg == 0  # pragma: no cover
 
         # Data set A cannot be serialised
-        catalog = DataCatalog({"A": LambdaDataset(load=_load, save=_save)})
+        catalog = KedroDataCatalog({"A": LambdaDataset(load=_load, save=_save)})
 
         pipeline = modular_pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
@@ -258,7 +258,7 @@ ParallelRunnerManager.register("LoggingDataset", LoggingDataset)
 def logging_dataset_catalog():
     log = []
     persistent_dataset = LoggingDataset(log, "in", "stuff")
-    return DataCatalog(
+    return KedroDataCatalog(
         {
             "ds0_A": persistent_dataset,
             "ds0_B": persistent_dataset,
@@ -280,7 +280,7 @@ class TestParallelRunnerRelease:
         pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "in": runner._manager.LoggingDataset(log, "in", "stuff"),
                 "middle": runner._manager.LoggingDataset(log, "middle"),
@@ -303,7 +303,7 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "first": runner._manager.LoggingDataset(log, "first"),
                 "second": runner._manager.LoggingDataset(log, "second"),
@@ -330,7 +330,7 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {"dataset": runner._manager.LoggingDataset(log, "dataset")}
         )
         runner.run(pipeline, catalog)
@@ -349,7 +349,7 @@ class TestParallelRunnerRelease:
         pipeline = modular_pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "ds@save": LoggingDataset(log, "save"),
                 "ds@load": LoggingDataset(log, "load"),

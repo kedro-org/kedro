@@ -1,7 +1,7 @@
 import pandas as pd
 from kedro_datasets.pandas import CSVDataset
 
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 
 base_catalog = {
     f"dataset_{i}": {
@@ -26,7 +26,7 @@ base_catalog.update({
 
 class TimeDataCatalog:
     def setup(self):
-        self.catalog = DataCatalog.from_config(base_catalog)
+        self.catalog = KedroDataCatalog.from_config(base_catalog)
         self.dataframe = pd.DataFrame({"column": [1, 2, 3]})
         self.dataframe.to_csv("data.csv", index=False)
         self.datasets = {
@@ -38,7 +38,7 @@ class TimeDataCatalog:
 
     def time_init(self):
         """Benchmark the time to initialize the catalog"""
-        DataCatalog.from_config(base_catalog)
+        KedroDataCatalog.from_config(base_catalog)
 
     def time_save(self):
         """Benchmark the time to save datasets"""
@@ -62,14 +62,14 @@ class TimeDataCatalog:
 
     def time_add_all(self):
         """Benchmark the time to add all datasets"""
-        # Have to initialise a new DataCatalog to avoid failing with DatasetAlreadyExistsError
-        catalog = DataCatalog.from_config(base_catalog)
+        # Have to initialise a new KedroDataCatalog to avoid failing with DatasetAlreadyExistsError
+        catalog = KedroDataCatalog.from_config(base_catalog)
         catalog.add_all(self.datasets)
 
     def time_feed_dict(self):
         """Benchmark the time to add feed dict"""
-        # Have to initialise a new DataCatalog to avoid failing with DatasetAlreadyExistsError
-        catalog = DataCatalog.from_config(base_catalog)
+        # Have to initialise a new KedroDataCatalog to avoid failing with DatasetAlreadyExistsError
+        catalog = KedroDataCatalog.from_config(base_catalog)
         catalog.add_feed_dict(self.feed_dict)
 
     def time_list(self):

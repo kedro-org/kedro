@@ -462,8 +462,10 @@ class Pipeline:
             matching_nodes = [
                 n
                 for n in self._nodes
-                if n.namespace and (
-                    n.namespace == node_namespace or n.namespace.startswith(f"{node_namespace}.")
+                if n.namespace
+                and (
+                    n.namespace == node_namespace
+                    or n.namespace.startswith(f"{node_namespace}.")
                 )
             ]
             if not matching_nodes:

@@ -14,8 +14,7 @@ from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.io.core import is_parameter
-from kedro.io.data_catalog import DataCatalog
-from kedro.io.kedro_data_catalog import _LazyDataset
+from kedro.io.kedro_data_catalog import KedroDataCatalog, _LazyDataset
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -146,7 +145,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
 
     Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
     file for each dataset in a registered pipeline if it is missing from
-    the ``DataCatalog``.
+    the ``KedroDataCatalog``.
 
     The catalog configuration will be saved to
     `<conf_source>/<env>/catalog_<pipeline_name>.yml` file.
@@ -225,7 +224,7 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
 
     catalog_config = context.config_loader["catalog"]
     credentials_config = context._get_config_credentials()
-    data_catalog = DataCatalog.from_config(
+    data_catalog = KedroDataCatalog.from_config(
         catalog=catalog_config, credentials=credentials_config
     )
 

@@ -77,6 +77,11 @@ class Task:
         if self.is_async:
             import asyncio
 
+            if asyncio.get_event_loop().is_running():
+                import nest_asyncio
+
+                nest_asyncio.apply()
+
             node = asyncio.run(
                 self._run_node_async(
                     self.node,

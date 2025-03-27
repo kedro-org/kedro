@@ -17,11 +17,13 @@ from glob import iglob
 from inspect import getcallargs
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import (
+from typing import (  # noqa: UP035
     TYPE_CHECKING,
     Any,
     Callable,
     Generic,
+    Iterator,
+    List,
     Protocol,
     TypeVar,
     runtime_checkable,
@@ -41,6 +43,7 @@ from kedro.utils import (  # noqa: F401
 
 if TYPE_CHECKING:
     import os
+    import re
 
     from kedro.io.catalog_config_resolver import CatalogConfigResolver
 
@@ -925,18 +928,102 @@ _C = TypeVar("_C")
 class CatalogProtocol(Protocol[_C]):
     _datasets: dict[str, AbstractDataset]
 
-    def __contains__(self, ds_name: str) -> bool:
-        """Check if a dataset is in the catalog."""
-        ...
-
     @property
     def config_resolver(self) -> CatalogConfigResolver:
         """Return a copy of the datasets dictionary."""
         ...
 
+    def __repr__(self) -> str:
+        """Returns the canonical string representation of the object."""
+        ...
+
+    def __contains__(self, ds_name: str) -> bool:
+        """Check if a dataset is in the catalog."""
+        ...
+
+    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
+        """Compares two catalogs based on materialised datasets and datasets patterns."""
+        ...
+
+    def keys(self) -> List[str]:  # noqa: UP006
+        """List all dataset names registered in the catalog."""
+        ...
+
+    def values(self) -> List[AbstractDataset]:  # noqa: UP006
+        """List all datasets registered in the catalog."""
+        ...
+
+    def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
+        """List all dataset names and datasets registered in the catalog."""
+        ...
+
+    def __iter__(self) -> Iterator[str]:
+        """Returns an iterator for the object."""
+        ...
+
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
+        """Get a dataset by name from an internal collection of datasets."""
+        ...
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        """Adds dataset using the given key as a datset name and the provided data as the value."""
+        ...
+
+    def __len__(self) -> int:
+        """Returns the number of datasets registered in the catalog"""
+        ...
+
+    def get(
+        self,
+        key: str,
+        version: Version | None = None,
+        default: AbstractDataset | None = None,
+    ) -> AbstractDataset | None:
+        """Get a dataset by name from an internal collection of datasets."""
+        ...
+
+    def _ipython_key_completions_(self) -> list[str]:
+        """Customizes tab completions for catalog within IPython env."""
+        ...
+
+    @property
+    def _logger(self) -> logging.Logger:
+        """Returns a logger instance for catalog class."""
+        ...
+
     @classmethod
     def from_config(cls, catalog: dict[str, dict[str, Any]] | None) -> _C:
         """Create a catalog instance from configuration."""
+        ...
+
+    def to_config(
+        self,
+    ) -> tuple[
+        dict[str, dict[str, Any]],
+        dict[str, dict[str, Any]],
+        dict[str, str | None],
+        str | None,
+    ]:
+        """Converts the `CatalogProtocol` instance into a configuration format suitable for
+        serialization. This includes datasets, credentials, and versioning information."""
+        ...
+
+    @staticmethod
+    def _validate_dataset_config(ds_name: str, ds_config: Any) -> None:
+        """Validates dataset configuration."""
+        ...
+
+    def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
+        """Create a LazyDataset instance and add it to the catalog."""
+        ...
+
+    def filter(
+        self,
+        name_regex: re.Pattern[str] | str | None = None,
+        type_regex: re.Pattern[str] | str | None = None,
+        by_type: type | list[type] | None = None,
+    ) -> List[str]:  # noqa: UP006
+        """Filter dataset names registered in the catalog based on name and/or type."""
         ...
 
     def save(self, name: str, data: Any) -> None:
@@ -947,18 +1034,23 @@ class CatalogProtocol(Protocol[_C]):
         """Load data from a registered dataset."""
         ...
 
-    def add(self, ds_name: str, dataset: Any, replace: bool = False) -> None:
-        """Add a new dataset to the catalog."""
-        ...
-
-    def exists(self, name: str) -> bool:
-        """Checks whether registered dataset exists by calling its `exists()` method."""
-        ...
-
     def release(self, name: str) -> None:
         """Release any cached data associated with a dataset."""
         ...
 
     def confirm(self, name: str) -> None:
         """Confirm a dataset by its name."""
+        ...
+
+    def exists(self, name: str) -> bool:
+        """Checks whether registered dataset exists by calling its `exists()` method."""
+        ...
+
+    @staticmethod
+    def _validate_versions(
+        datasets: dict[str, AbstractDataset] | None,
+        load_versions: dict[str, str],
+        save_version: str | None,
+    ) -> tuple[dict[str, str], str | None]:
+        """Validates and synchronises dataset versions for loading and saving."""
         ...

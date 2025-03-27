@@ -1171,8 +1171,6 @@ class TestPipelineFilterHelpers:
             ("john", ["john"]),
             ("katie.lisa", ["katie.lisa.john", "katie.lisa"]),
             ("katie.lisa.john", ["katie.lisa.john"]),
-            #  find ways to test multiple namespaces
-            # ("lisa, john", ["lisa.john", "lisa", "john"])
         ],
     )
     def test_only_nodes_with_namespaces(
@@ -1180,11 +1178,17 @@ class TestPipelineFilterHelpers:
     ):
         """Test that only nodes with the matching namespaces are returned from the pipeline."""
         if not expected_namespaces:
-            with pytest.raises(ValueError, match="Pipeline does not contain nodes with namespaces"):
+            with pytest.raises(
+                ValueError, match="Pipeline does not contain nodes with namespaces"
+            ):
                 pipeline_with_namespaces.only_nodes_with_namespaces(target_namespaces)
         else:
-            resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespaces(target_namespaces)
-            actual_namespaces = sorted(node.namespace for node in resulting_pipeline.nodes)
+            resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespaces(
+                target_namespaces
+            )
+            actual_namespaces = sorted(
+                node.namespace for node in resulting_pipeline.nodes
+            )
             assert actual_namespaces == sorted(expected_namespaces)
 
     @pytest.mark.parametrize("namespace", ["katie", None])
@@ -1194,9 +1198,7 @@ class TestPipelineFilterHelpers:
         when a non-existent namespace is provided.
         """
         pipeline = modular_pipeline([node(identity, "A", "B", namespace=namespace)])
-        expected_error_message = (
-            "Pipeline does not contain nodes with the following namespaces: \\['non_existent'\\]"
-        )
+        expected_error_message = "Pipeline does not contain nodes with the following namespaces: \\['non_existent'\\]"
         with pytest.raises(ValueError, match=expected_error_message):
             pipeline.only_nodes_with_namespaces("non_existent")
 

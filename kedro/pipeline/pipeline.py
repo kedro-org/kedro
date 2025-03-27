@@ -452,9 +452,6 @@ class Pipeline:
         Returns:
             A new ``Pipeline`` containing nodes with the specified namespaces.
         """
-        if not node_namespaces:
-            raise ValueError("No namespaces provided to filter nodes.")
-
         # Ensure node_namespaces is a list if it's a string
         if isinstance(node_namespaces, str):
             node_namespaces = [node_namespaces]

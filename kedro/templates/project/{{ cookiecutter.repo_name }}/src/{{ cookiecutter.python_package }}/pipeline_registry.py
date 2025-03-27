@@ -5,7 +5,7 @@ from kedro.framework.project import find_pipelines
 from kedro.pipeline import pipeline
 
 
-def register_pipelines() -> dict[str, pipeline]:
+def register_pipelines() -> dict[str, Pipeline]:
     """Register the project's pipelines.
 
     Returns:

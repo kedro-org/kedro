@@ -138,7 +138,7 @@ class Pipeline:
 
     def __init__(  # noqa: PLR0913
         self,
-        nodes: Iterable[Node | Pipeline],
+        nodes: Iterable[Node | Pipeline] | Pipeline,
         *,
         inputs: str | set[str] | dict[str, str] | None = None,
         outputs: str | set[str] | dict[str, str] | None = None,
@@ -191,16 +191,12 @@ class Pipeline:
             >>>
 
         """
-        self.pipe = nodes
         if isinstance(nodes, Pipeline):
-            # To ensure that we are always dealing with a *copy* of pipe.
+            # Flatten a pipeline to a list of nodes
             nodes = nodes.nodes
-
-        self._nodes: list[Node] = nodes
-
         if any([inputs, outputs, parameters, namespace]):
             nodes = self._map_nodes(
-                pipe=self.pipe,
+                pipe=nodes,
                 inputs=inputs,
                 outputs=outputs,
                 parameters=parameters,
@@ -1045,7 +1041,7 @@ class Pipeline:
 
 
 def pipeline(  # noqa: PLR0913
-    nodes: Iterable[Node | Pipeline],
+    pipe: Iterable[Node | Pipeline] | Pipeline,
     *,
     inputs: str | set[str] | dict[str, str] | None = None,
     outputs: str | set[str] | dict[str, str] | None = None,
@@ -1099,7 +1095,7 @@ def pipeline(  # noqa: PLR0913
     """
 
     return Pipeline(
-        nodes,
+        nodes=pipe,
         inputs=inputs,
         outputs=outputs,
         parameters=parameters,

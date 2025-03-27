@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 class MyPluginHook:
     @hook_impl
-    def after_catalog_created(self, catalog):  # noqa: ARG001, PLR0201
+    def after_catalog_created(self, catalog):
         logger.info("Reached after_catalog_created hook")
 
 

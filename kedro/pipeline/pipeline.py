@@ -454,8 +454,8 @@ class Pipeline:
         """
         if not node_namespaces:
             raise ValueError("No namespaces provided to filter nodes.")
-        
-         # Ensure node_namespaces is a list if it's a string
+
+        # Ensure node_namespaces is a list if it's a string
         if isinstance(node_namespaces, str):
             node_namespaces = [node_namespaces]
 
@@ -466,7 +466,8 @@ class Pipeline:
             matching_nodes = []
             for n in self._nodes:
                 if n.namespace and (
-                    n.namespace == node_namespace or n.namespace.startswith(f"{node_namespace}.")
+                    n.namespace == node_namespace
+                    or n.namespace.startswith(f"{node_namespace}.")
                 ):
                     matching_nodes.append(n)
 
@@ -794,7 +795,9 @@ class Pipeline:
             self.only_nodes: node_names,
             self.from_inputs: from_inputs,
             self.to_outputs: to_outputs,
-            self.only_nodes_with_namespaces: [node_namespaces] if node_namespaces else None,
+            self.only_nodes_with_namespaces: [node_namespaces]
+            if node_namespaces
+            else None,
         }
 
         subset_pipelines = {

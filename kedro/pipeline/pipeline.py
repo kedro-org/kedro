@@ -8,14 +8,14 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
-from graphlib import CycleError, TopologicalSorter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
+from graphlib import CycleError, TopologicalSorter
+
 import kedro
 from kedro.pipeline.node import Node, _to_list
-
-from .transcoding import _strip_transcoding
+from kedro.pipeline.transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

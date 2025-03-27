@@ -13,7 +13,7 @@ from __future__ import annotations
 import difflib
 import logging
 import re
-from typing import Any, Iterator, List  # noqa: UP035
+from typing import Any, Iterator, List
 
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (

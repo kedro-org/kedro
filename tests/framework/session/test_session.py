@@ -649,7 +649,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "namespace": None,
+            "namespaces": None,
             "runner": mock_runner.__name__,
         }
 
@@ -715,7 +715,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "namespace": None,
+            "namespaces": None,
             "runner": mock_thread_runner.__name__,
         }
         mock_catalog = mock_context._get_catalog.return_value
@@ -785,7 +785,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "namespace": None,
+            "namespaces": None,
             "runner": mock_runner.__name__,
         }
 
@@ -864,7 +864,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "namespace": None,
+            "namespaces": None,
             "runner": mock_runner.__name__,
         }
 
@@ -936,7 +936,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "namespace": None,
+            "namespaces": None,
             "runner": broken_runner.__name__,
         }
 

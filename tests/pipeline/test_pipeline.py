@@ -950,7 +950,7 @@ class TestPipelineFilter:
         assert nodes == expected_nodes
 
     def test_namespace_filter(self, pipeline_with_namespaces):
-        filtered_pipeline = pipeline_with_namespaces.filter(node_namespace="katie")
+        filtered_pipeline = pipeline_with_namespaces.filter(node_namespaces="katie")
         nodes = {node.name for node in filtered_pipeline.nodes}
         assert nodes == {"katie.node1", "katie.lisa.node4", "katie.lisa.john.node6"}
 
@@ -1164,39 +1164,41 @@ class TestPipelineFilterHelpers:
             complex_pipeline.to_outputs("Z", "W", "E", "C")
 
     @pytest.mark.parametrize(
-        "target_namespace,expected_namespaces",
+        "target_namespaces,expected_namespaces",
         [
             ("katie", ["katie.lisa.john", "katie.lisa", "katie"]),
             ("lisa", ["lisa.john", "lisa"]),
             ("john", ["john"]),
             ("katie.lisa", ["katie.lisa.john", "katie.lisa"]),
             ("katie.lisa.john", ["katie.lisa.john"]),
+            #  find ways to test multiple namespaces
+            # ("lisa, john", ["lisa.john", "lisa", "john"])
         ],
     )
-    def test_only_nodes_with_namespace(
-        self, target_namespace, expected_namespaces, pipeline_with_namespaces
+    def test_only_nodes_with_namespaces(
+        self, target_namespaces, expected_namespaces, pipeline_with_namespaces
     ):
-        """Test that only nodes with the matching namespace are returned from the pipeline."""
-        resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespace(
-            target_namespace
-        )
-        for actual_node, expected_namespace in zip(
-            sorted(resulting_pipeline.nodes), expected_namespaces
-        ):
-            assert actual_node.namespace == expected_namespace
+        """Test that only nodes with the matching namespaces are returned from the pipeline."""
+        if not expected_namespaces:
+            with pytest.raises(ValueError, match="Pipeline does not contain nodes with namespaces"):
+                pipeline_with_namespaces.only_nodes_with_namespaces(target_namespaces)
+        else:
+            resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespaces(target_namespaces)
+            actual_namespaces = sorted(node.namespace for node in resulting_pipeline.nodes)
+            assert actual_namespaces == sorted(expected_namespaces)
 
     @pytest.mark.parametrize("namespace", ["katie", None])
     def test_only_nodes_with_unknown_namespace_raises_value_error(self, namespace):
         """
-        Test that the `only_nodes_with_namespace` method raises a ValueError with the expected error message
+        Test that the `only_nodes_with_namespaces` method raises a ValueError with the expected error message
         when a non-existent namespace is provided.
         """
         pipeline = modular_pipeline([node(identity, "A", "B", namespace=namespace)])
         expected_error_message = (
-            "Pipeline does not contain nodes with namespace 'non_existent'"
+            "Pipeline does not contain nodes with the following namespaces: \\['non_existent'\\]"
         )
         with pytest.raises(ValueError, match=expected_error_message):
-            pipeline.only_nodes_with_namespace("non_existent")
+            pipeline.only_nodes_with_namespaces("non_existent")
 
 
 class TestPipelineRunnerHelpers:

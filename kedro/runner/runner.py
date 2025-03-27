@@ -110,9 +110,8 @@ class AbstractRunner(ABC):
             )
 
         # Register the default dataset pattern with the catalog
-        # TODO: replace with catalog.config_resolver.add_runtime_patterns() when removing old catalog
-        catalog = catalog.shallow_copy(
-            extra_dataset_patterns=self._extra_dataset_patterns
+        catalog = catalog.config_resolver.add_runtime_patterns(
+            self._extra_dataset_patterns
         )
 
         hook_or_null_manager = hook_manager or _NullPluginManager()

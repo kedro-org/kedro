@@ -20,11 +20,11 @@ nav:
           - Nodes and Pipelines: nodes_and_pipelines/index.md
           - Anonymous Telemetry: configuration/telemetry.md
       - INTEGRATIONS:
-          - PySpark: integrations/pyspark_integration.md
-          - MLflow: integrations/mlflow.md
-          - DVC Versioning: integrations/kedro_dvc_versioning.md
-          - DeltaLake Versioning: integrations/deltalake_versioning.md
-          - Iceberg Versioning: integrations/iceberg_versioning.md
+          - PySpark integration: integrations/pyspark_integration.md
+          - How to add MLflow to your Kedro workflow: integrations/mlflow.md
+          - Data and pipeline versioning with Kedro and DVC: integrations/kedro_dvc_versioning.md
+          - Data versioning with Delta Lake: integrations/deltalake_versioning.md
+          - Data versioning with Iceberg: integrations/iceberg_versioning.md
       - DEVELOPMENT:
           - Set Up VSCode: development/set_up_vscode.md
           - Set Up PyCharm: development/set_up_pycharm.md

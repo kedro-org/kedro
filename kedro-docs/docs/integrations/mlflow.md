@@ -35,13 +35,11 @@ And then launch the UI locally from the root of your directory as follows:
 This will make MLflow record metadata and artifacts for each run
 to a local directory called `mlflow_runs`.
 
-:::{note}
-If you want to use a more sophisticated setup,
-have a look at the documentation of
-[MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/),
-{external+mlflow:doc}`the official MLflow tracking server 5 minute overview <getting-started/tracking-server-overview/index>`,
-and {external+mlflow:ref}`the MLflow tracking server documentation <logging_to_a_tracking_server>`.
-:::
+> **Note**  
+> If you want to use a more sophisticated setup, have a look at the documentation of  
+[MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/), [the official MLflow tracking server 5 minute overview](https://mlflow.org/docs/latest/getting-started/tracking-server-overview/index),  
+and [the MLflow tracking server documentation](https://mlflow.org/docs/latest/tracking.html#logging-to-a-tracking-server).
+
 
 ## Simple use cases
 
@@ -84,16 +82,12 @@ From this point, when you execute `kedro run` you will see the logs coming from 
 
 If you open your tracking server UI you will observe a result like this:
 
-```{image} ../meta/images/complete-mlflow-tracking-kedro-mlflow.png
-:alt: Complete MLflow tracking with kedro-mlflow
-:width: 80%
-:align: center
-```
+![Complete MLflow tracking with kedro-mlflow](../meta/images/complete-mlflow-tracking-kedro-mlflow.png)
 
 Notice that `kedro-mlflow` used a subset of the `run_params` as tags for the MLflow run,
 and logged the Kedro parameters as MLflow parameters.
 
-Check out {external+kedro-mlflow:doc}`the official kedro-mlflow tutorial <source/03_getting_started/02_first_steps>`
+Check out [the official kedro-mlflow tutorial](https://kedro-mlflow.readthedocs.io/en/stable/source/03_getting_started/02_first_steps.html)
 for more detailed steps.
 
 ### Artifact tracking in MLflow using `kedro-mlflow`
@@ -104,10 +98,9 @@ which can be used to wrap any of your existing Kedro datasets.
 
 Use of this dataset has the advantage that the preview capabilities of the MLflow UI can be used.
 
-:::{warning}
-This will work for datasets that are outputs of a node,
-and will have no effect for datasets that are free inputs (hence are only loaded).
-:::
+> **Warning**  
+> This will work for datasets that are outputs of a node,  
+> and will have no effect for datasets that are free inputs (hence are only loaded).
 
 For example, if you modify the a `matplotlib.MatplotlibWriter` dataset like this:
 
@@ -127,17 +120,12 @@ For example, if you modify the a `matplotlib.MatplotlibWriter` dataset like this
 Then the image would be logged as part of the artifacts of the run
 and you would be able to preview it in the MLflow web UI:
 
-```{image} ../meta/images/mlflow-artifact-preview-image.png
-:alt: MLflow image preview thanks to the artifact tracking capabilities of kedro-mlflow
-:width: 80%
-:align: center
-```
+![MLflow image preview thanks to the artifact tracking capabilities of kedro-mlflow](../meta/images/mlflow-artifact-preview-image.png)
 
-:::{warning}
-If you get a `Failed while saving data to dataset MlflowMatplotlibWriter` error,
-it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.
-The solution is to cleanup the old `data/08_reporting/dummy_confusion_matrix.png` directory.
-:::
+> **Warning**  
+> If you get a `Failed while saving data to dataset MlflowMatplotlibWriter` error,  
+> it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.  
+> The solution is to clean up the old `data/08_reporting/dummy_confusion_matrix.png` directory.
 
 Check out {external+kedro-mlflow:doc}`the official kedro-mlflow documentation on versioning Kedro datasets <source/04_experimentation_tracking/03_version_datasets>`
 for more information.
@@ -168,9 +156,7 @@ If you also want to _register_ it
 (hence store it in the MLflow Model Registry)
 you can add a `registered_model_name` parameter:
 
-```{code-block} yaml
-:emphasize-lines: 4-5
-
+```yaml
 regressor:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
   flavor: mlflow.sklearn
@@ -180,18 +166,12 @@ regressor:
 
 Then you will see it listed as a Registered Model:
 
-```{image} ../meta/images/kedro-mlflow-registered-model.png
-:alt: MLflow Model Registry listing one model registered with kedro-mlflow
-:width: 80%
-:align: center
-```
+![MLflow Model Registry listing one model registered with kedro-mlflow](../meta/images/kedro-mlflow-registered-model.png)
 
 To load a model from a specific run, you can specify the `run_id`.
 For that, you can make use of {ref}`runtime parameters <runtime-params>`:
 
-```{code-block} yaml
-:emphasize-lines: 13
-
+```yaml
 # Add the intermediate datasets to run only the inference
 X_test:
   type: pandas.ParquetDataset
@@ -217,10 +197,10 @@ $ kedro run --to-outputs=X_test,y_test
 $ kedro run --from-nodes=evaluate_model_node --params mlflow_run_id=4cba84...
 ```
 
-:::{note}
-Notice that MLflow runs are immutable for reproducibility purposes,
+> Note
+> Notice that MLflow runs are immutable for reproducibility purposes,
 therefore you cannot _save_ a model in an existing run.
-:::
+
 
 ## Advanced use cases
 
@@ -276,11 +256,7 @@ After enabling this custom Hook, you can execute `kedro run`, and see something 
 
 If you open your tracking server UI you will observe a result like this:
 
-```{image} ../meta/images/extra-mlflow-tracking.png
-:alt: Simple MLflow tracking
-:width: 50%
-:align: center
-```
+![Simple MLflow tracking](../meta/images/extra-mlflow-tracking.png)
 
 ### Tracking Kedro in MLflow using the Python API
 

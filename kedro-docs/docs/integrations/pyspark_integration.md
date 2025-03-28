@@ -11,9 +11,8 @@ spark.driver.maxResultSize: 3g
 spark.scheduler.mode: FAIR
 ```
 
-```{note}
-Optimal configuration for Spark depends on the setup of your Spark cluster.
-```
+> Note
+> Optimal configuration for Spark depends on the setup of your Spark cluster.
 
 ## Initialise a `SparkSession` using a hook
 
@@ -66,10 +65,10 @@ HOOKS = (SparkHooks(),)
 
 We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
-* {class}`spark.DeltaTableDataset <kedro-datasets:kedro_datasets.spark.DeltaTableDataset>`
-* {class}`spark.SparkDataset <kedro-datasets:kedro_datasets.spark.SparkDataset>`
-* {class}`spark.SparkJDBCDataset <kedro-datasets:kedro_datasets.spark.SparkJDBCDataset>`
-* {class}`spark.SparkHiveDataset <kedro-datasets:kedro_datasets.spark.SparkHiveDataset>`
+- {class}`spark.DeltaTableDataset <kedro-datasets:kedro_datasets.spark.DeltaTableDataset>`
+- {class}`spark.SparkDataset <kedro-datasets:kedro_datasets.spark.SparkDataset>`
+- {class}`spark.SparkJDBCDataset <kedro-datasets:kedro_datasets.spark.SparkJDBCDataset>`
+- {class}`spark.SparkHiveDataset <kedro-datasets:kedro_datasets.spark.SparkHiveDataset>`
 
 
 The example below illustrates how to use `spark.SparkDataset` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
@@ -77,7 +76,7 @@ The example below illustrates how to use `spark.SparkDataset` to read a CSV file
 ```yaml
 weather:
   type: spark.SparkDataset
-  filepath: s3a://your_bucket/data/01_raw/weather*
+  filepath: s3a://your_bucket/data/01_raw/weather-
   file_format: csv
   load_args:
     header: True

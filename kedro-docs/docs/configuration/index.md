@@ -1,11 +1,7 @@
 # Configuration
 
-```{toctree}
-:maxdepth: 1
-
-configuration_basics
-credentials
-parameters
-config_loader_migration
-advanced_configuration
-```
+- [Configuration Basics](configuration_basics.md)
+- [Credentials](credentials.md)
+- [Parameters](parameters.md)
+- [Config Loader Migration](config_loader_migration.md)
+- [Advanced Configuration](advanced_configuration.md)

@@ -18,11 +18,11 @@ nav:
           - Kedro for notebook users: notebooks_and_ipython/index.md
           - FAQs and resources: resources/index.md
       - Kedro Projects:
-          - Starters: starters/index.md
+          - Customise a new project: starters/index.md
           - Configuration: configuration/index.md
-          - Data: data/index.md
+          - Data catalog: data/index.md
           - Nodes and Pipelines: nodes_and_pipelines/index.md
-          - Telemetry: configuration/telemetry.md
+          - Anonymous Telemetry: configuration/telemetry.md
       - Integrations:
           - PySpark: integrations/pyspark_integration.md
           - MLflow: integrations/mlflow.md

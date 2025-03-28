@@ -1,48 +1,71 @@
 site_name: Kedro Documentation
 site_url: https://docs.kedro.org
-theme:
-  name: material
-  features:
-    - navigation.tabs
-    - navigation.sections
+
 nav:
   - Home: index.md
   - Kedro:
-      - Learn about Kedro:
+      - LEARN ABOUT KEDRO:
           - Introduction: introduction/index.md
-          - Get Started: get_started/index.md
-          - Courses: course/index.md
-      - Tutorial and Basic Usage:
+          - First steps: get_started/index.md
+          - Learn Kedro with hands-on video: course/index.md
+      - TUTORIAL AND BASIC USAGE:
           - Tutorial: tutorial/spaceflights_tutorial.md
           - Visualisation with Kedro-Viz: visualisation/index.md
           - Kedro for notebook users: notebooks_and_ipython/index.md
           - FAQs and resources: resources/index.md
-      - Kedro Projects:
+      - KEDRO PROJECTS:
           - Customise a new project: starters/index.md
           - Configuration: configuration/index.md
           - Data catalog: data/index.md
           - Nodes and Pipelines: nodes_and_pipelines/index.md
           - Anonymous Telemetry: configuration/telemetry.md
-      - Integrations:
+      - INTEGRATIONS:
           - PySpark: integrations/pyspark_integration.md
           - MLflow: integrations/mlflow.md
           - DVC Versioning: integrations/kedro_dvc_versioning.md
           - DeltaLake Versioning: integrations/deltalake_versioning.md
           - Iceberg Versioning: integrations/iceberg_versioning.md
-      - Development:
+      - DEVELOPMENT:
           - Set Up VSCode: development/set_up_vscode.md
           - Set Up PyCharm: development/set_up_pycharm.md
           - Debugging: development/debugging.md
           - Automated Testing: development/automated_testing.md
           - Linting: development/linting.md
-      - Advanced Usage:
+      - ADVANCED USAGE:
           - Kedro Project Setup: advanced_usage/kedro_project_setup.md
           - Extend Kedro: advanced_usage/extend_kedro.md
           - Hooks: advanced_usage/hooks.md
           - Logging: advanced_usage/logging.md
           - Deployment: advanced_usage/deployment.md
-      - Contribute to Kedro:
+      - CONTRIBUTE TO KEDRO:
           - Contribution Guide: contribution/index.md
-      - CLI Reference:
+      - CLI REFERENCE:
           - Commands Reference: development/commands_reference.md
-      - API Documentation: api/index.md
+      - API DOCUMENTATION:
+          - API Documentation: api/index.md
+
+theme:
+  name: material
+  language: en
+#   custom_dir: docs/overrides
+  palette:
+    - scheme: default
+  font:
+    text: Inter
+    code: Inter Regular
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+    - content.code.annotate
+    - content.code.highlight
+
+  watch:
+    - src

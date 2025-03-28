@@ -1,0 +1,47 @@
+site_name: Kedro Documentation
+site_url: https://docs.kedro.org
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+nav:
+  - Kedro:
+      - Home: index.md
+      - Learn about Kedro:
+          - Introduction: introduction/index.md
+          - Get Started: get_started/index.md
+      - Tutorial and Basic Usage:
+          - Spaceflights Tutorial: tutorial/spaceflights_tutorial.md
+          - Visualisation: visualisation/index.md
+          - Notebooks and IPython: notebooks_and_ipython/index.md
+          - Resources: resources/index.md
+      - Kedro Projects:
+          - Starters: starters/index.md
+          - Configuration: configuration/index.md
+          - Data: data/index.md
+          - Nodes and Pipelines: nodes_and_pipelines/index.md
+          - Telemetry: configuration/telemetry.md
+      - Integrations:
+          - PySpark: integrations/pyspark_integration.md
+          - MLflow: integrations/mlflow.md
+          - DVC Versioning: integrations/kedro_dvc_versioning.md
+          - DeltaLake Versioning: integrations/deltalake_versioning.md
+          - Iceberg Versioning: integrations/iceberg_versioning.md
+      - Development:
+          - Set Up VSCode: development/set_up_vscode.md
+          - Set Up PyCharm: development/set_up_pycharm.md
+          - Debugging: development/debugging.md
+          - Automated Testing: development/automated_testing.md
+          - Linting: development/linting.md
+      - Advanced Usage:
+          - Kedro Project Setup: advanced_usage/kedro_project_setup.md
+          - Extend Kedro: advanced_usage/extend_kedro.md
+          - Hooks: advanced_usage/hooks.md
+          - Logging: advanced_usage/logging.md
+          - Deployment: advanced_usage/deployment.md
+      - Contribute to Kedro:
+          - Contribution Guide: contribution/index.md
+      - CLI Reference:
+          - Commands Reference: development/commands_reference.md
+      - API Documentation: api/index.md

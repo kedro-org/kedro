@@ -4,10 +4,7 @@ If you like to learn from video, you can follow our [hands-on course "Introducti
 
 The course is structured into sections and these are each broken into short videos that cover specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and get hands-on with the example. Along the way, you'll learn key Kedro concepts like datasets and the Kedro Data Catalog, nodes and pipelines, and configuration management.
 
-```{eval-rst}
-..  youtube:: DD7JuYKp6BA
-    :width: 100%
-```
+<iframe width="100%" height="315" src="https://www.youtube.com/embed/DD7JuYKp6BA" frameborder="0" allowfullscreen></iframe>
 
 ## Who is this course for?
 
@@ -15,10 +12,10 @@ This course is for data scientists, data engineers and machine learning engineer
 
 We assume you know these concepts:
 
-* Python basics (coding on Jupyter and other notebook interfaces)
-* Manipulating data with pandas
-* Visualising insights
-* Command line basics
+- Python basics (coding on Jupyter and other notebook interfaces)
+- Manipulating data with pandas
+- Visualising insights
+- Command line basics
 
 We don't assume knowledge of software engineering in Python, so the course contains information about reusability principles, how to create a Python package, and how to use version control.
 
@@ -28,18 +25,17 @@ Please note that we do expect users to have Git installed, as it is a prerequisi
 
 In short, you'll learn answers to the following:
 
-* Introduction to Kedro
-* What is Kedro? How does it help you create maintainable, reusable data science code?
-* How does Kedro fit into the data science ecosystem?
-* What do you need to do to create a Kedro project?
-* How can you refactor a Jupyter notebook to a Kedro project?
-* How do you package Python code as a library?
-* How do you work with Kedro projects in VS Code?
-* What are namespaces and dataset factories?
-* What is needed to deploy a Kedro project using container solutions like Docker and open source orchestrators like Airflow?
-* What are Kedro plugins?
-* How can you contribute to Kedro?
-
+- Introduction to Kedro
+- What is Kedro? How does it help you create maintainable, reusable data science code?
+- How does Kedro fit into the data science ecosystem?
+- What do you need to do to create a Kedro project?
+- How can you refactor a Jupyter notebook to a Kedro project?
+- How do you package Python code as a library?
+- How do you work with Kedro projects in VS Code?
+- What are namespaces and dataset factories?
+- What is needed to deploy a Kedro project using container solutions like Docker and open source orchestrators like Airflow?
+- What are Kedro plugins?
+- How can you contribute to Kedro?
 
 You don't need to register for the course and you can skip around the sections to find help on a particular area as you pick up the skills needed to build your own Kedro projects.
 

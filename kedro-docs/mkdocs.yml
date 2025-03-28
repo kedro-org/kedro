@@ -13,10 +13,10 @@ nav:
           - Get Started: get_started/index.md
           - Courses: course/index.md
       - Tutorial and Basic Usage:
-          - Spaceflights Tutorial: tutorial/spaceflights_tutorial.md
-          - Visualisation: visualisation/index.md
-          - Notebooks and IPython: notebooks_and_ipython/index.md
-          - Resources: resources/index.md
+          - Tutorial: tutorial/spaceflights_tutorial.md
+          - Visualisation with Kedro-Viz: visualisation/index.md
+          - Kedro for notebook users: notebooks_and_ipython/index.md
+          - FAQs and resources: resources/index.md
       - Kedro Projects:
           - Starters: starters/index.md
           - Configuration: configuration/index.md

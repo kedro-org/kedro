@@ -1,10 +1,5 @@
 # FAQs and resources
 
-```{toctree}
-:maxdepth: 1
-
-../faq/faq
-glossary
-migration
-
-```
+- [FAQ](../faq/faq.md)
+- [Glossary](glossary.md)
+- [Migration](migration.md)

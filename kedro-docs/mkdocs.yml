@@ -26,11 +26,11 @@ nav:
           - Data versioning with Delta Lake: integrations/deltalake_versioning.md
           - Data versioning with Iceberg: integrations/iceberg_versioning.md
       - DEVELOPMENT:
-          - Set Up VSCode: development/set_up_vscode.md
-          - Set Up PyCharm: development/set_up_pycharm.md
+          - Set up Visual Studio Code: development/set_up_vscode.md
+          - Set up PyCharm: development/set_up_pycharm.md
           - Debugging: development/debugging.md
           - Automated Testing: development/automated_testing.md
-          - Linting: development/linting.md
+          - Code formatting and linting: development/linting.md
       - ADVANCED USAGE:
           - Kedro Project Setup: advanced_usage/kedro_project_setup.md
           - Extend Kedro: advanced_usage/extend_kedro.md

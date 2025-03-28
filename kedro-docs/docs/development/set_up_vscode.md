@@ -204,7 +204,8 @@ Press `Cmd` + `Shift` + `P` (on macOS) or `Ctrl` + `Shift` + `P` (on Windows/Lin
 Type `kedro: Run Kedro Viz` and select the command.
 This will launch Kedro-Viz and display your pipeline visually within the extension.
 
-**Note:** To update the Kedro-Viz flowchart after making any changes to your Kedro project, please hit `Cmd` + `Shift` + `P` to open the VSCode command and look for `kedro: restart server`.
+> **Note**  
+> To update the Kedro-Viz flowchart after making any changes to your Kedro project, please hit `Cmd` + `Shift` + `P` to open the VSCode command and look for `kedro: restart server`.
 
 Navigate to Node Functions:
 Click on a node in the Kedro-Viz flowchart, and it will automatically navigate to the corresponding node function in your code.
@@ -231,9 +232,9 @@ You can find [more information about setting up environmental variables in the V
 Click on the **Run and Debug** icon on the left activity bar (press `Cmd + Shift + D` for macOS). If there is no existing configuration, click on **create a launch.json file** else click on the dropdown arrow in the top-left (shown below) and click **Add Configuration** .
 ![](../meta/images/vscode_add_configuration.png)
 
-```{note}
-If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`, you can manually create `launch.json` file in `.vscode` directory and paste the configuration from below.
-```
+> **Note**  
+> If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`,  
+> you can manually create a `launch.json` file in the `.vscode` directory and paste the configuration from below.
 
 Edit the `launch.json` that opens in the editor with:
 
@@ -335,10 +336,8 @@ scp -r <project_root> <your_username>@<remote_server>:projects/
 
 
 
-
-```{note}
-[There is also a third-party plugin for VS Code that supports remote workspaces.](https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace)
-```
+> **Note**  
+> [There is also a third-party plugin for VS Code that supports remote workspaces.](https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace)
 
 Start executing the pipeline on your remote computer:
 

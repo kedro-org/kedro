@@ -171,3 +171,7 @@ package-lock.json
 
 # Kedro-Datasets plugin
 kedro/datasets/*
+
+# Mise
+.mise.toml
+mise.toml

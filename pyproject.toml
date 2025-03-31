@@ -29,7 +29,7 @@ dependencies = [
     "pluggy>=1.0",
     "pre-commit-hooks",
     "PyYAML>=4.2,<7.0",
-    "rich>=12.0,<14.0",
+    "rich>=12.0,<15.0",
     "rope>=0.21,<2.0",  # subject to LGPLv3 license
     "toml>=0.10.0",
     "typing_extensions>=4.0",

@@ -397,7 +397,7 @@ class Pipeline:
                 parent_key = (
                     parent.namespace.split(".")[0] if parent.namespace else parent.name
                 )
-                if parent_key != key:
+                if parent_key != key and parent_key not in dependencies:
                     dependencies.append(parent_key)
 
             grouped_nodes[key]["dependencies"].extend(dependencies)

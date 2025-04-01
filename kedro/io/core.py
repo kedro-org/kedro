@@ -575,7 +575,7 @@ def parse_dataset_definition(
             raise ValueError(
                 f"Since Kedro 0.19, 'Dataset' is spelled with a lowercase 's'. Got '{dataset_type}'."
             )
-        
+
     class_obj = None
     if isinstance(dataset_type, str):
         if len(dataset_type.strip(".")) != len(dataset_type):

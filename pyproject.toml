@@ -71,7 +71,7 @@ test = [
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest>=7.2,<9.0",
-    "pytest-asyncio>=0.21,<0.23",
+    "pytest-asyncio>=0.21,<0.26",
     "s3fs>=2021.4, <2025.4",
     "requests_mock",
     # mypy related dependencies

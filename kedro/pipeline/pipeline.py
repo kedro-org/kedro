@@ -74,13 +74,8 @@ def _validate_inputs_outputs(
         raise ModularPipelineError(
             "Parameters should be specified in the 'parameters' argument"
         )
-    if isinstance(pipe, Pipeline):
-        free_inputs = {_strip_transcoding(i) for i in pipe.inputs()}
-    else:
-        node_inputs: list[str] = []
-        for n in pipe:
-            node_inputs.extend(n.inputs)
-        free_inputs = {_strip_transcoding(i) for i in node_inputs}
+
+    free_inputs = {_strip_transcoding(i) for i in pipe.inputs()}
 
     if not inputs <= free_inputs:
         raise ModularPipelineError(
@@ -103,15 +98,7 @@ def _validate_datasets_exist(
     inputs = {_strip_transcoding(k) for k in inputs}
     outputs = {_strip_transcoding(k) for k in outputs}
 
-    if isinstance(pipe, Pipeline):
-        existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
-    else:
-        node_inputs_outputs: list[str] = []
-        for n in pipe:
-            node_inputs_outputs.extend(n.inputs)
-            node_inputs_outputs.extend(n.outputs)
-        existing = {_strip_transcoding(ds) for ds in node_inputs_outputs}
-
+    existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
     non_existent = (inputs | outputs | parameters) - existing
     if non_existent:
         sorted_non_existent = sorted(non_existent)

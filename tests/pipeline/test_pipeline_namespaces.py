@@ -1,7 +1,7 @@
 import pytest
 
 from kedro.pipeline import node, pipeline
-from kedro.pipeline.pipeline import ModularPipelineError
+from kedro.pipeline.pipeline import ModularPipelineError, Pipeline
 
 # from kedro.Pipeline.Pipeline import Pipeline as Pipeline
 # Different dummy func based on the number of arguments
@@ -483,3 +483,10 @@ class TestPipelineHelper:
         )
 
         assert all(n.tags == {"tag"} for n in tagged_pipeline.nodes)
+
+    def test_map_pipeline_namespace_to_nodes(self):
+        ds_pipeline = Pipeline(nodes=[node(identity, "A", "B", name="node1")])
+
+        new_nodes = ds_pipeline._map_nodes(pipe=ds_pipeline, namespace="ds")
+        for n in new_nodes:
+            assert n.namespace == "ds"

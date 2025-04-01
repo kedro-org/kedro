@@ -371,15 +371,10 @@ class Pipeline:
 
     @property
     def grouped_nodes_by_namespace(self) -> dict[str, dict[str, Any]]:
-        """Return a dictionary of the pipeline nodes grouped by top-level namespace with
-        information about the nodes, their type, and dependencies. The structure of the dictionary is:
-        {'node_name/namespace_name' : {'name': 'node_name/namespace_name','type': 'namespace' or 'node','nodes': [list of nodes],'dependencies': [list of dependencies]}}
-        This property is intended to be used by deployment plugins to group nodes by namespace.
-        """
+        """Return a dictionary of the pipeline nodes grouped by top-level namespace."""
         grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
-        toposorted_nodes = [node for group in self.grouped_nodes for node in group]
 
-        for node in toposorted_nodes:
+        for node in self.nodes:
             key = node.namespace.split(".")[0] if node.namespace else node.name
 
             if key not in grouped_nodes:
@@ -392,15 +387,17 @@ class Pipeline:
 
             grouped_nodes[key]["nodes"].append(node)
 
-            dependencies = []
+            # Ensure dependencies are not duplicated on the returned list
+            dependencies = grouped_nodes[key]["dependencies"]
+            unique_dependencies = set(dependencies)
+
             for parent in self.node_dependencies[node]:
                 parent_key = (
                     parent.namespace.split(".")[0] if parent.namespace else parent.name
                 )
-                if parent_key != key and parent_key not in dependencies:
+                if parent_key != key and parent_key not in unique_dependencies:
                     dependencies.append(parent_key)
-
-            grouped_nodes[key]["dependencies"].extend(dependencies)
+                    unique_dependencies.add(parent_key)
 
         return grouped_nodes
 

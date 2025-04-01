@@ -472,12 +472,12 @@ class TestValidPipeline:
         [
             (
                 "pipeline_with_namespace_simple",
-                {"namespace_1": set(), "namespace_2": {"namespace_1"}},
+                {"namespace_1": [], "namespace_2": {"namespace_1"}},
             ),
             (
                 "pipeline_with_namespace_partial",
                 {
-                    "namespace_1": set(),
+                    "namespace_1": [],
                     "node_3": {"namespace_1"},
                     "namespace_2": {"node_3"},
                     "node_6": {"namespace_2"},

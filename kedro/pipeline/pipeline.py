@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any
 import kedro
 from kedro.pipeline.node import Node, _to_list
 
-from .transcoding import TRANSCODING_SEPARATOR, _strip_transcoding, _transcode_split
+from .transcoding import _strip_transcoding, _transcode_split
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Set
@@ -31,7 +31,7 @@ def __getattr__(name: str) -> Any:
 
         warnings.warn(
             f"{name!r} has been moved to 'kedro.pipeline.transcoding', "
-            f"and the alias will be removed in Kedro 0.20.0",
+            f"and the alias will be removed in Kedro 1.0.0",
             kedro.KedroDeprecationWarning,
             stacklevel=2,
         )
@@ -958,6 +958,8 @@ class Pipeline:
             return base_name in mapping
 
         def _map_transcode_base(name: str) -> str:
+            from kedro.pipeline.transcoding import TRANSCODING_SEPARATOR
+
             base_name, transcode_suffix = _transcode_split(name)
             return TRANSCODING_SEPARATOR.join((mapping[base_name], transcode_suffix))
 

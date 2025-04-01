@@ -17,7 +17,7 @@ At this stage, you should be able to see the `conda` environment that you have c
 
 ## Setting up `venv` / `virtualenv` in VS Code
 
-We're going to show you how to get your virtual environments to show up in your Python interpreter in VS Code. You do this by opening [`settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settings-file-locations) and adding the following:
+We're going to show you how to get your virtual environments to show up in your Python interpreter in VS Code. You do this by opening [`settings.json`](https://code.visualstudio.com/docs/getstarted/getting-started#_configure-vs-code-settings) and adding the following:
 
 ```console
 "python.venvPath": "/path/containing/your/venvs/"

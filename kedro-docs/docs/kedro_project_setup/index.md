@@ -1,9 +1,5 @@
 # Project setup
 
-```{toctree}
-:maxdepth: 1
-
-dependencies
-session
-settings
-```
+- [Dependencies](dependencies.md)
+- [Session](session.md)
+- [Settings](settings.md)

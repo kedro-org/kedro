@@ -23,6 +23,22 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Set
 
 
+def __getattr__(name: str) -> Any:
+    if name == "TRANSCODING_SEPARATOR":
+        import warnings
+
+        from kedro.pipeline.transcoding import TRANSCODING_SEPARATOR
+
+        warnings.warn(
+            f"{name!r} has been moved to 'kedro.pipeline.transcoding', "
+            f"and the alias will be removed in Kedro 0.20.0",
+            kedro.KedroDeprecationWarning,
+            stacklevel=2,
+        )
+        return TRANSCODING_SEPARATOR
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 class ModularPipelineError(Exception):
     """Raised when a modular pipeline is not adapted and integrated
     appropriately using the helper.

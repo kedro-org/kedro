@@ -6,7 +6,7 @@ import copy
 import difflib
 from typing import TYPE_CHECKING
 
-from kedro.pipeline.pipeline import Pipeline
+from kedro.pipeline.pipeline import ModularPipelineError, Pipeline
 
 from .transcoding import TRANSCODING_SEPARATOR, _strip_transcoding, _transcode_split
 
@@ -14,14 +14,6 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Set
 
     from kedro.pipeline.node import Node
-
-
-class ModularPipelineError(Exception):
-    """Raised when a modular pipeline is not adapted and integrated
-    appropriately using the helper.
-    """
-
-    pass
 
 
 def _is_all_parameters(name: str) -> bool:

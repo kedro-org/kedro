@@ -44,7 +44,7 @@ def _is_parameter(name: str) -> bool:
 
 
 def _validate_inputs_outputs(
-    inputs: Set[str], outputs: Set[str], pipe: Iterable[Node | Pipeline] | Pipeline
+    inputs: Set[str], outputs: Set[str], pipe: Pipeline
 ) -> None:
     """Safeguards to ensure that:
     - parameters are not specified under inputs
@@ -81,7 +81,7 @@ def _validate_datasets_exist(
     inputs: Set[str],
     outputs: Set[str],
     parameters: Set[str],
-    pipe: Iterable[Node | Pipeline] | Pipeline,
+    pipe: Pipeline,
 ) -> None:
     """Validate that inputs, parameters and outputs map correctly onto the provided nodes."""
     inputs = {_strip_transcoding(k) for k in inputs}
@@ -189,19 +189,18 @@ class Pipeline:
             >>>
 
         """
-        self.pipe = nodes
         if isinstance(nodes, Pipeline):
-            # To ensure that we are always dealing with a *copy* of pipe.
             nodes = nodes.nodes
 
-        self._nodes: list[Node] = nodes
+        self._nodes: list[Node] = nodes  # type: ignore[assignment]
 
         if any([inputs, outputs, parameters, namespace]):
             nodes = self._map_nodes(
-                pipe=self.pipe,
+                pipe=nodes,
                 inputs=inputs,
                 outputs=outputs,
                 parameters=parameters,
+                tags=tags,
                 namespace=namespace,
             )
 
@@ -994,14 +993,21 @@ class Pipeline:
             namespace=new_namespace,
         )
 
-    def _map_nodes(
+    def _map_nodes(  # noqa: PLR0913
         self,
         pipe: Iterable[Node | Pipeline] | Pipeline,
         inputs: str | set[str] | dict[str, str] | None = None,
         outputs: str | set[str] | dict[str, str] | None = None,
         parameters: str | set[str] | dict[str, str] | None = None,
+        tags: str | Iterable[str] | None = None,
         namespace: str | None = None,
     ) -> list[Node]:
+        if isinstance(pipe, Pipeline):
+            # To ensure that we are always dealing with a *copy* of pipe.
+            pipe = Pipeline([pipe], tags=tags)
+        else:
+            pipe = Pipeline(pipe, tags=tags)
+
         inputs = _get_dataset_names_mapping(inputs)
         outputs = _get_dataset_names_mapping(outputs)
         parameters = _get_param_names_mapping(parameters)

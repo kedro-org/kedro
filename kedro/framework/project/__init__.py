@@ -21,7 +21,7 @@ from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
 from kedro.io import CatalogProtocol
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, pipeline
 
 if TYPE_CHECKING:
     import types
@@ -417,7 +417,7 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
     else:
         pipeline_obj = _create_pipeline(pipeline_module)
 
-    pipelines_dict = {"__default__": pipeline_obj or Pipeline([])}
+    pipelines_dict = {"__default__": pipeline_obj or pipeline([])}
 
     # Handle the case that a project doesn't have a pipelines directory.
     try:

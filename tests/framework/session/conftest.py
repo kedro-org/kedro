@@ -114,7 +114,7 @@ def dummy_dataframe() -> pd.DataFrame:
 
 
 @pytest.fixture
-def mock_pipeline() -> pipeline:
+def mock_pipeline() -> Pipeline:
     return pipeline(
         [
             node(identity_node, "cars", "planes", name="node1"),

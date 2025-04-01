@@ -192,8 +192,6 @@ class Pipeline:
         if isinstance(nodes, Pipeline):
             nodes = nodes.nodes
 
-        self._nodes: list[Node] = nodes  # type: ignore[assignment]
-
         if any([inputs, outputs, parameters, namespace]):
             nodes = self._map_nodes(
                 pipe=nodes,
@@ -1016,7 +1014,7 @@ class Pipeline:
         _validate_inputs_outputs(inputs.keys(), outputs.keys(), pipe)
 
         mapping = {**inputs, **outputs, **parameters}
-        new_nodes = [self._copy_node(n, mapping, namespace) for n in self._nodes]
+        new_nodes = [self._copy_node(n, mapping, namespace) for n in pipe.nodes]
         return new_nodes
 
 

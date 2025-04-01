@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from kedro.framework.project import find_pipelines
-from kedro.pipeline import pipeline
+from kedro.pipeline import pipeline, Pipeline
 
 
 def register_pipelines() -> dict[str, Pipeline]:

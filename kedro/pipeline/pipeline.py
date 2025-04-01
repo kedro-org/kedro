@@ -951,16 +951,24 @@ class Pipeline:
             return TRANSCODING_SEPARATOR.join((mapping[base_name], transcode_suffix))
 
         rules = [
+            # if name mapped to new name, update with new name
             (lambda n: n in mapping, lambda n: mapping[n]),
+            # if name refers to the set of all "parameters", leave as is
             (_is_all_parameters, lambda n: n),
+            # if transcode base is mapped to a new name, update with new base
             (_is_transcode_base_in_mapping, _map_transcode_base),
+            # if name refers to a single parameter and a namespace is given, apply prefix
             (lambda n: bool(namespace) and _is_single_parameter(n), _prefix_param),
+            # if namespace given for a dataset, prefix name using that namespace
             (lambda n: bool(namespace), _prefix_dataset),
         ]
 
         for predicate, processor in rules:
             if predicate(name):  # type: ignore[no-untyped-call]
-                return processor(name)  # type: ignore[no-untyped-call, no-any-return]
+                processor_name: str = processor(name)  # type: ignore[no-untyped-call]
+                return processor_name
+
+        # leave name as is
         return name
 
     def _process_dataset_names(
@@ -1035,7 +1043,7 @@ def pipeline(  # noqa: PLR0913
     r"""Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``\s.
 
     Args:
-        nodes: The nodes the ``Pipeline`` will be made of. If you
+        pipe: The nodes the ``Pipeline`` will be made of. If you
             provide pipelines among the list of nodes, those pipelines will
             be expanded and all their nodes will become part of this
             new pipeline.

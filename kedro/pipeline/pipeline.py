@@ -44,9 +44,7 @@ def _is_parameter(name: str) -> bool:
 
 
 def _validate_inputs_outputs(
-    inputs: Set[str],
-    outputs: Set[str],
-    pipe: Iterable[Node | Pipeline],
+    inputs: Set[str], outputs: Set[str], pipe: Iterable[Node | Pipeline] | Pipeline
 ) -> None:
     """Safeguards to ensure that:
     - parameters are not specified under inputs
@@ -83,7 +81,7 @@ def _validate_datasets_exist(
     inputs: Set[str],
     outputs: Set[str],
     parameters: Set[str],
-    pipe: Iterable[Node | Pipeline],
+    pipe: Iterable[Node | Pipeline] | Pipeline,
 ) -> None:
     """Validate that inputs, parameters and outputs map correctly onto the provided nodes."""
     inputs = {_strip_transcoding(k) for k in inputs}
@@ -191,12 +189,16 @@ class Pipeline:
             >>>
 
         """
+        self.pipe = nodes
         if isinstance(nodes, Pipeline):
-            # Flatten a pipeline to a list of nodes
+            # To ensure that we are always dealing with a *copy* of pipe.
             nodes = nodes.nodes
+
+        self._nodes: list[Node] = nodes
+
         if any([inputs, outputs, parameters, namespace]):
             nodes = self._map_nodes(
-                pipe=nodes,
+                pipe=self.pipe,
                 inputs=inputs,
                 outputs=outputs,
                 parameters=parameters,
@@ -930,36 +932,6 @@ class Pipeline:
 
         return json.dumps(pipeline_versioned)
 
-    @staticmethod
-    def _get_dataset_names_mapping(
-        names: str | set[str] | dict[str, str] | None = None,
-    ) -> dict[str, str]:
-        if names is None:
-            return {}
-        if isinstance(names, str):
-            return {names: names}
-        if isinstance(names, dict):
-            return copy.deepcopy(names)
-        return {item: item for item in names}
-
-    @staticmethod
-    def _normalize_param_name(name: str) -> str:
-        return name if name.startswith("params:") else f"params:{name}"
-
-    @staticmethod
-    def _get_param_names_mapping(
-        names: str | set[str] | dict[str, str] | None = None,
-    ) -> dict[str, str]:
-        params = {}
-        for name, new_name in Pipeline._get_dataset_names_mapping(names).items():
-            if name == "parameters":
-                params[name] = name
-            else:
-                param_name = Pipeline._normalize_param_name(name)
-                param_new_name = Pipeline._normalize_param_name(new_name)
-                params[param_name] = param_new_name
-        return params
-
     def _rename(self, name: str, mapping: dict, namespace: str | None) -> str:
         def _prefix_dataset(name: str) -> str:
             return f"{namespace}.{name}"
@@ -1024,17 +996,19 @@ class Pipeline:
 
     def _map_nodes(
         self,
-        pipe: Iterable[Node | Pipeline],
+        pipe: Iterable[Node | Pipeline] | Pipeline,
         inputs: str | set[str] | dict[str, str] | None = None,
         outputs: str | set[str] | dict[str, str] | None = None,
         parameters: str | set[str] | dict[str, str] | None = None,
         namespace: str | None = None,
     ) -> list[Node]:
-        inputs = self._get_dataset_names_mapping(inputs)
-        outputs = self._get_dataset_names_mapping(outputs)
-        parameters = self._get_param_names_mapping(parameters)
+        inputs = _get_dataset_names_mapping(inputs)
+        outputs = _get_dataset_names_mapping(outputs)
+        parameters = _get_param_names_mapping(parameters)
+
         _validate_datasets_exist(inputs.keys(), outputs.keys(), parameters.keys(), pipe)
         _validate_inputs_outputs(inputs.keys(), outputs.keys(), pipe)
+
         mapping = {**inputs, **outputs, **parameters}
         new_nodes = [self._copy_node(n, mapping, namespace) for n in self._nodes]
         return new_nodes
@@ -1102,6 +1076,84 @@ def pipeline(  # noqa: PLR0913
         tags=tags,
         namespace=namespace,
     )
+
+
+def _get_dataset_names_mapping(
+    names: str | set[str] | dict[str, str] | None = None,
+) -> dict[str, str]:
+    """Take a name or a collection of dataset names
+    and turn it into a mapping from the old dataset names to the provided ones if necessary.
+
+    Args:
+        names: A dataset name or collection of dataset names.
+            When str or set[str] is provided, the listed names will stay
+            the same as they are named in the provided pipeline.
+            When dict[str, str] is provided, current names will be
+            mapped to new names in the resultant pipeline.
+
+    Returns:
+        A dictionary that maps the old dataset names to the provided ones.
+
+    Examples:
+        >>> _get_dataset_names_mapping("dataset_name")
+        {"dataset_name": "dataset_name"}  # a str name will stay the same
+        >>> _get_dataset_names_mapping(set(["ds_1", "ds_2"]))
+        {"ds_1": "ds_1", "ds_2": "ds_2"}  # a set[str] of names will stay the same
+        >>> _get_dataset_names_mapping({"ds_1": "new_ds_1_name"})
+        {"ds_1": "new_ds_1_name"}  # a dict[str, str] of names will map key to value
+    """
+    if names is None:
+        return {}
+    if isinstance(names, str):
+        return {names: names}
+    if isinstance(names, dict):
+        return copy.deepcopy(names)
+
+    return {item: item for item in names}
+
+
+def _normalize_param_name(name: str) -> str:
+    """Make sure that a param name has a `params:` prefix before passing to the node"""
+    return name if name.startswith("params:") else f"params:{name}"
+
+
+def _get_param_names_mapping(
+    names: str | set[str] | dict[str, str] | None = None,
+) -> dict[str, str]:
+    """Take a parameter or a collection of parameter names
+    and turn it into a mapping from existing parameter names to new ones if necessary.
+    It follows the same rule as `_get_dataset_names_mapping` and
+    prefixes the keys on the resultant dictionary with `params:` to comply with node's syntax.
+
+    Args:
+        names: A parameter name or collection of parameter names.
+            When str or set[str] is provided, the listed names will stay
+            the same as they are named in the provided pipeline.
+            When dict[str, str] is provided, current names will be
+            mapped to new names in the resultant pipeline.
+
+    Returns:
+        A dictionary that maps the old parameter names to the provided ones.
+
+    Examples:
+        >>> _get_param_names_mapping("param_name")
+        {"params:param_name": "params:param_name"}  # a str name will stay the same
+        >>> _get_param_names_mapping(set(["param_1", "param_2"]))
+        # a set[str] of names will stay the same
+        {"params:param_1": "params:param_1", "params:param_2": "params:param_2"}
+        >>> _get_param_names_mapping({"param_1": "new_name_for_param_1"})
+        # a dict[str, str] of names will map key to valu
+        {"params:param_1": "params:new_name_for_param_1"}
+    """
+    params = {}
+    for name, new_name in _get_dataset_names_mapping(names).items():
+        if _is_all_parameters(name):
+            params[name] = name  # don't map parameters into params:parameters
+        else:
+            param_name = _normalize_param_name(name)
+            param_new_name = _normalize_param_name(new_name)
+            params[param_name] = param_new_name
+    return params
 
 
 def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]) -> None:

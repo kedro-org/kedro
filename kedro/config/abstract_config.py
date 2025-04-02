@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from collections import UserDict
 from typing import Any
+from pathlib import Path
 
 
 class AbstractConfigLoader(UserDict):
@@ -17,7 +18,7 @@ class AbstractConfigLoader(UserDict):
 
     def __init__(
         self,
-        conf_source: str,
+        conf_source: str | Path,
         env: str | None = None,
         runtime_params: dict[str, Any] | None = None,
         **kwargs: Any,

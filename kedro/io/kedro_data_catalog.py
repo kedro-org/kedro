@@ -468,7 +468,7 @@ class KedroDataCatalog(CatalogProtocol):
             self._save_version,
         )
 
-        self.add(ds_name, ds)
+        self.__setitem__(ds_name, ds)
 
     def filter(
         self,

@@ -1,9 +1,7 @@
 # AWS Batch (outdated documentation that needs review)
 
-``` {important}
-This page contains outdated documentation that has not been tested against recent Kedro releases. If you successfully use AWS Batch with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
-```
-<div style="color:gray">
+> **Important**  
+> This page contains outdated documentation that has not been tested against recent Kedro releases. If you successfully use AWS Batch with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
 
 ## Why would you use AWS Batch?
 [AWS Batch](https://aws.amazon.com/batch/) is optimised for batch computing and applications that scale with the number of jobs running in parallel. It manages job execution and compute resources, and dynamically provisions the optimal quantity and type. AWS Batch can assist with planning, scheduling, and executing your batch computing workloads, using [Amazon EC2](https://aws.amazon.com/ec2/) On-Demand and [Spot Instances](https://aws.amazon.com/ec2/spot/), and it has native integration with [CloudWatch](https://aws.amazon.com/cloudwatch/) for log collection.
@@ -359,4 +357,4 @@ kedro run --env=aws_batch --runner=kedro_tutorial.runner.AWSBatchRunner
 You should start seeing jobs appearing on your Jobs dashboard, under the `Runnable` tab - meaning they're ready to start as soon as the resources are provisioned in the compute environment.
 
 AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on [the Batch job in the Jobs tab](https://console.aws.amazon.com/batch/home/jobs) and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.
-</div>
+

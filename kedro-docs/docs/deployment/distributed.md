@@ -32,7 +32,7 @@ To perform the conversion programmatically, you will need to develop a script. M
 
 A `node` typically corresponds to a unit of compute, which can be run by parameterising the basic `kedro run`:
 
- ```bash
+```bash
 kedro run --nodes=<node_name>
 ```
 

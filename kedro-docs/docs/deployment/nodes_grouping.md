@@ -19,9 +19,10 @@ If you want to group nodes differently from the existing pipeline structure, you
 
 **How to use**
 
-  ```bash
+```bash
   kedro run --pipeline=<your_pipeline_name>
-  ```
+```
+
 More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#run-a-pipeline-by-name)
 
 ---
@@ -44,9 +45,10 @@ Please note that nodes with the same tag can exist in different pipelines, makin
 
 **How to use**
 
-  ```bash
+```bash
   kedro run --tags=<your_tag_name>
-  ```
+```
+
 More information: [How to tag a node](https://docs.kedro.org/en/stable/nodes_and_pipelines/nodes.html#how-to-tag-a-node)
 
 ---
@@ -67,6 +69,7 @@ return pipeline(
     inputs={"the_original_input_name"}, # Inputs remain the same, without namespace prefix
 )
 ```
+
 - **Defining namespace at Node-level:** Defining namespaces at node level is not recommended for grouping your nodes. The node level definition of namespaces should be used for creating collapsible views on Kedro-Viz for high level representation of your nodes. If you define namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
 
 
@@ -80,9 +83,10 @@ return pipeline(
 
 **How to use**
 
-  ```bash
+```bash
   kedro run --namespace=<your_namespace_name>
-  ```
+```
+
 More information: [Namespaces](https://docs.kedro.org/en/stable/nodes_and_pipelines/namespaces.html)
 
 ---

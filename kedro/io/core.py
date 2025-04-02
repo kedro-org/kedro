@@ -569,11 +569,12 @@ def parse_dataset_definition(
     dataset_type = config.pop(TYPE_KEY)
 
     # This check prevents the use of dataset types with uppercase 'S' in 'Dataset',
-    # which is no longer supported as of Kedro 0.19.
+    # which is no longer supported as of kedro-datasets 2.0
     if isinstance(dataset_type, str):
         if dataset_type.endswith("Set"):
-            raise ValueError(
-                f"Since Kedro 0.19, 'Dataset' is spelled with a lowercase 's'. Got '{dataset_type}'."
+            warnings.warn(
+                f"Since kedro-datasets 2.0, 'Dataset' is spelled with a lowercase 's'. Got '{dataset_type}'.",
+                UserWarning,
             )
 
     class_obj = None

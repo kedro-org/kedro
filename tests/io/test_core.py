@@ -345,8 +345,7 @@ class TestCoreFunctions:
             parse_dataset_definition({"type": dataset_name})
 
     def test_parse_dataset_definition_invalid_uppercase_s_in_dataset(self):
-        """Test that an invalid dataset type with uppercase 'S' in 'Dataset' raises a warning 
-        and then raises a DatasetError for the missing class."""
+        """Test that an invalid dataset type with uppercase 'S' in 'Dataset' raises a warning"""
         config = {"type": "LambdaDataSet"}  # Invalid type with uppercase 'S'
 
         # Check that the warning is issued

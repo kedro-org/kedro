@@ -1,8 +1,50 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+* Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
+## Breaking changes to the API
+## Documentation changes
+
+# Release 0.19.12
+
+## Major features and improvements
+* Added `KedroDataCatalog.filter()` to filter datasets by name and type.
+* Added `Pipeline.grouped_nodes_by_namespace` property which returns a dictionary of nodes grouped by namespace, intended to be used by plugins to facilitate deployment of namespaced nodes together.
+* Added support for cloud storage protocols in `--conf-source`, allowing configuration to be loaded from remote locations such as S3.
+
+## Bug fixes and other changes
+* Added `DataCatalog` deprecation warning.
+* Updated `_LazyDataset` representation when printing `KedroDataCatalog`.
+* Fixed `MemoryDataset` to infer `assign` copy mode for Ibis Tables, which previously would be inferred as `deepcopy`.
+* Fixed pipeline packaging issue by ensuring `pipelines/__init__.py` exists when creating new pipelines.
+* Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
+* Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
+* Remove `7: Kedro Viz` from Kedro tools.
+* Updated node grouping API to only group on first level of namespace.
+
+## Documentation changes
+* Added documentation for Kedro's support for Delta Lake versioning.
+* Added documentation for Kedro's support for Iceberg versioning.
+* Added documentation for Kedro's nodes grouping in deployment.
+* Fixed a minor grammatical error in Kedro-Viz installation instructions to improve documentation clarity.
+* Improved the Kedro VSCode extension documentation.
+* Updated the recommendations for nesting namespaces.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Jacob Pieniazek](https://github.com/jakepenzak)
+* [Lucas Vittor](https://github.com/lvvittor)
+* [Ean Jimenez](https://github.com/Prometean)
+* [Toran Sahu](https://github.com/toransahu)
+
+# Release 0.19.11
+
+## Major features and improvements
 * Implemented `KedroDataCatalog.to_config()` method that converts the catalog instance into a configuration format suitable for serialization.
-* Improve OmegaConfigLoader performance
+* Improve OmegaConfigLoader performance.
+* Replaced `trufflehog` with `detect-secrets` for detecting secrets within a code base.
+* Added support for `%load_ext kedro`.
 
 ## Bug fixes and other changes
 * Added validation to ensure dataset versions consistency across catalog.
@@ -10,10 +52,17 @@
 * Added `node` import to the pipeline template.
 * Update error message when executing kedro run without pipeline.
 * Safeguard hooks when user incorrectly registers a hook class in settings.py.
+* Fixed parsing paths with query and fragment.
+* Remove lowercase transformation in regex validation.
+* Moved `kedro-catalog` JSON schema to `kedro-datasets`.
+* Updated `Partitioned dataset lazy saving` docs page.
+* Fixed `KedroDataCatalog` mutation after pipeline run.
+* Made `KedroDataCatalog._datasets` compatible with `DataCatalog._datasets`.
 
-## Breaking changes to the API
-## Documentation changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Hendrik Scherner](https://github.com/SchernHe)
+* [Chris Schopp](https://github.com/chrisschopp)
 
 # Release 0.19.10
 

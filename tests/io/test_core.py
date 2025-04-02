@@ -271,6 +271,24 @@ class TestCoreFunctions:
             ("file:///C:\\Projects\\file.txt", ("file", "C:\\Projects\\file.txt")),
             ("https://example.com/file.txt", ("https", "example.com/file.txt")),
             ("http://example.com/file.txt", ("http", "example.com/file.txt")),
+            (
+                "https://example.com/search?query=books&category=fiction#reviews",
+                ("https", "example.com/search?query=books&category=fiction#reviews"),
+            ),
+            (
+                "https://example.com/search#reviews",
+                ("https", "example.com/search#reviews"),
+            ),
+            (
+                "http://example.com/search?query=books&category=fiction",
+                ("http", "example.com/search?query=books&category=fiction"),
+            ),
+            (
+                "s3://some/example?query=query#filename",
+                ("s3", "some/example?query=query#filename"),
+            ),
+            ("s3://some/example#filename", ("s3", "some/example#filename")),
+            ("s3://some/example?query=query", ("s3", "some/example?query=query")),
         ],
     )
     def test_get_protocol_and_path(self, filepath, expected_result):

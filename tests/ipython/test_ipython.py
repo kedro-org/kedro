@@ -222,6 +222,17 @@ class TestLoadIPythonExtension:
         ):
             ipython.magic("reload_kedro --invalid_arg=dummy")
 
+    def test_ipython_kedro_extension_alias(self, mocker, ipython):
+        mock_ipython_extension = mocker.patch(
+            "kedro.ipython.load_ipython_extension", autospec=True
+        )
+        # Ensure that `kedro` is not loaded initially
+        assert "kedro" not in ipython.extension_manager.loaded
+        ipython.magic("load_ext kedro")
+        mock_ipython_extension.assert_called_once_with(ipython)
+        # Ensure that `kedro` extension has been loaded
+        assert "kedro" in ipython.extension_manager.loaded
+
 
 class TestProjectPathResolution:
     def test_only_path_specified(self):
@@ -459,7 +470,7 @@ ERROR,
 
         load_ipython_extension(ipython)
         ipython.magic("load_node dummy_node")
-        calls = [call("cell1", is_jupyter=True), call("cell2", is_jupyter=True)]
+        calls = [call("cell1\n\ncell2")]
         spy.assert_has_calls(calls)
 
     @pytest.mark.parametrize("run_env", ["ipython", "vscode"])

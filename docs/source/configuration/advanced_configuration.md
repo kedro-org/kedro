@@ -219,6 +219,11 @@ companies:
 ```
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 
+```{note}
+When manually instantiating `OmegaConfigLoader` in code, runtime parameters passed via the CLI `--params` option will not be available to the resolver. This occurs because the manually created config loader instance doesn't have access to the runtime parameters provided through the CLI.
+If you need to access runtime parameters in code that manually instantiates `OmegaConfigLoader`, you should instead use the Kedro context to access parameters.
+```
+
 #### How to use `globals` and `runtime_params`
 
 As mentioned above, `runtime_params` are not designed to override `globals` configuration. This is done to avoid unexplicit overrides and to simplify parameter resolutions. Thus, `globals` has only one entry point - the `yaml` file.
@@ -264,7 +269,7 @@ CONFIG_LOADER_ARGS = {
     "custom_resolvers": {
         "add": lambda *my_list: sum(my_list),
         "polars": lambda x: getattr(pl, x),
-        "today": lambda: date_today(),
+        "today": date_today,
     }
 }
 ```

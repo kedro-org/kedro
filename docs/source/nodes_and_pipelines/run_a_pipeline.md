@@ -57,6 +57,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 
 ```python
 # in src/<package_name>/runner.py
+from typing import Any, Dict
 from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
@@ -66,20 +67,21 @@ from pluggy import PluginManager
 class DryRunner(AbstractRunner):
     """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
     nodes would be run without actually executing anything. It also checks if all the
-    neccessary data exists.
+    necessary data exists.
     """
 
-    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
-        """Factory method for creating the default dataset for the runner.
+    def __init__(self, is_async: bool = False, extra_dataset_patterns: Dict[str, Dict[str, Any]] = None):
+        """Instantiates the runner class.
 
         Args:
-            ds_name: Name of the missing dataset
-        Returns:
-            An instance of an implementation of AbstractDataset to be used
-            for all unregistered datasets.
-
+            is_async: If True, the node inputs and outputs are loaded and saved
+                asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
+                during the run. This is used to set the default datasets.
         """
-        return MemoryDataset()
+        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
+        super().__init__(is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns)
 
     def _run(
         self,
@@ -99,6 +101,7 @@ class DryRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         """
@@ -110,6 +113,7 @@ class DryRunner(AbstractRunner):
         )
         self._logger.info("Checking inputs...")
         input_names = pipeline.inputs()
+
         missing_inputs = [
             input_name
             for input_name in input_names
@@ -229,99 +233,6 @@ SequentialRunner().run(pipeline, catalog=io)
 
 ```console
 Out[11]: {'v': 0.666666666666667}
-```
-</details>
-
-
-
-## Output to a file
-
-We can also use IO to save outputs to a file. In this example, we define a custom `LambdaDataset` that would serialise the output to a file locally:
-
-```{warning}
-`LambdaDataset` has been deprecated and will be removed in Kedro `0.20.0`.
-```
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-
-```python
-def save(value):
-    with open("./data/07_model_output/variance.pickle", "wb") as f:
-        pickle.dump(value, f)
-
-
-def load():
-    with open("./data/07_model_output/variance.pickle", "rb") as f:
-        return pickle.load(f)
-
-
-pickler = LambdaDataset(load=load, save=save)
-io.add("v", pickler)
-```
-</details>
-
-It is important to make sure that the data catalog variable name `v` matches the name `v` in the pipeline definition.
-
-Next we can confirm that this `LambdaDataset` behaves correctly:
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-```python
-io.save("v", 5)
-```
-
-```python
-io.load("v")
-```
-
-`Ouput`:
-
-```Console
-Out[12]: 5
-```
-</details>
-
-Finally, let's run the pipeline again now and serialise the output:
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-
-```python
-SequentialRunner().run(pipeline, catalog=io)
-```
-
-`Ouput`:
-
-```console
-Out[13]: {}
-```
-</details>
-
-The output has been persisted to a local file so we don't see it directly, but it can be retrieved from the catalog:
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-
-```python
-io.load("v")
-```
-
-`Ouput`:
-
-```console
-Out[14]: 0.666666666666667
-```
-
-```python
-try:
-    os.remove("./data/07_model_output/variance.pickle")
-except FileNotFoundError:
-    pass
 ```
 </details>
 

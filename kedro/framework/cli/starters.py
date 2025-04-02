@@ -50,10 +50,9 @@ Tools\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
 6) PySpark: Provides set up configuration for working with PySpark\n
-7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
-kedro new --tools=lint,test,log,docs,data,pyspark,viz (or any subset of these options)\n
+kedro new --tools=lint,test,log,docs,data,pyspark (or any subset of these options)\n
 kedro new --tools=all\n
 kedro new --tools=none
 
@@ -140,13 +139,7 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
-    KedroStarterSpec(
-        "spaceflights-pandas-viz", _STARTERS_REPO, "spaceflights-pandas-viz"
-    ),
     KedroStarterSpec("spaceflights-pyspark", _STARTERS_REPO, "spaceflights-pyspark"),
-    KedroStarterSpec(
-        "spaceflights-pyspark-viz", _STARTERS_REPO, "spaceflights-pyspark-viz"
-    ),
     KedroStarterSpec("databricks-iris", _STARTERS_REPO, "databricks-iris"),
 ]
 # Set the origin for official starters
@@ -165,8 +158,8 @@ TOOLS_SHORTNAME_TO_NUMBER = {
     "doc": "4",
     "data": "5",
     "pyspark": "6",
-    "viz": "7",
 }
+
 NUMBER_TO_TOOLS_NAME = {
     "1": "Linting",
     "2": "Testing",
@@ -174,7 +167,6 @@ NUMBER_TO_TOOLS_NAME = {
     "4": "Documentation",
     "5": "Data Structure",
     "6": "PySpark",
-    "7": "Kedro Viz",
 }
 
 
@@ -237,8 +229,11 @@ def _validate_selected_tools(selected_tools: str | None) -> None:
         tools = re.sub(r"\s", "", selected_tools).split(",")
         for tool in tools:
             if tool not in valid_tools:
+                message = "Please select from the available tools: lint, test, log, docs, data, pyspark, all, none."
+                if tool == "viz":
+                    message += " Kedro Viz is automatically included in the project. Please remove 'viz' from your tool selection."
                 click.secho(
-                    "Please select from the available tools: lint, test, log, docs, data, pyspark, viz, all, none",
+                    message,
                     fg="red",
                     err=True,
                 )
@@ -311,10 +306,31 @@ def starter() -> None:
 @click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-@click.option("--tools", "-t", "selected_tools", help=TOOLS_ARG_HELP)
-@click.option("--name", "-n", "project_name", help=NAME_ARG_HELP)
-@click.option("--example", "-e", "example_pipeline", help=EXAMPLE_ARG_HELP)
-@click.option("--telemetry", "-tc", "telemetry_consent", help=TELEMETRY_ARG_HELP)
+@click.option(
+    "--name",
+    "-n",
+    "project_name",
+    help=NAME_ARG_HELP,
+)
+@click.option(
+    "--tools",
+    "-t",
+    "selected_tools",
+    help=TOOLS_ARG_HELP,
+)
+@click.option(
+    "--example",
+    "-e",
+    "example_pipeline",
+    help=EXAMPLE_ARG_HELP,
+)
+@click.option(
+    "--telemetry",
+    "-tc",
+    "telemetry_consent",
+    help=TELEMETRY_ARG_HELP,
+    type=click.Choice(["yes", "no", "y", "n"], case_sensitive=False),
+)
 def new(  # noqa: PLR0913
     config_path: str,
     starter_alias: str,
@@ -337,6 +353,7 @@ def new(  # noqa: PLR0913
         "example": example_pipeline,
         "telemetry_consent": telemetry_consent,
     }
+
     _validate_flag_inputs(flag_inputs)
     starters_dict = _get_starters_dict()
 
@@ -381,6 +398,7 @@ def new(  # noqa: PLR0913
     shutil.rmtree(tmpdir, onerror=_remove_readonly)  # type: ignore[arg-type]
 
     # Obtain config, either from a file or from interactive user prompts.
+
     extra_context = _get_extra_context(
         prompts_required=prompts_required,
         config_path=config_path,
@@ -399,7 +417,6 @@ def new(  # noqa: PLR0913
     )
 
     if telemetry_consent is not None:
-        _validate_input_with_regex_pattern("yes_no", telemetry_consent)
         telemetry_consent = (
             "true" if _parse_yes_no_to_bool(telemetry_consent) else "false"
         )
@@ -727,7 +744,8 @@ def _fetch_validate_parse_config_from_file(
 
 
 def _fetch_validate_parse_config_from_user_prompts(
-    prompts: dict[str, Any], cookiecutter_context: OrderedDict | None
+    prompts: dict[str, Any],
+    cookiecutter_context: OrderedDict | None,
 ) -> dict[str, str]:
     """Interactively obtains information from user prompts.
 
@@ -739,9 +757,6 @@ def _fetch_validate_parse_config_from_user_prompts(
         Configuration for starting a new project. This is passed as ``extra_context``
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
-    from cookiecutter.environment import StrictEnvironment
-    from cookiecutter.prompt import read_user_variable, render_variable
-
     if not cookiecutter_context:
         raise Exception("No cookiecutter context available.")
 
@@ -751,14 +766,16 @@ def _fetch_validate_parse_config_from_user_prompts(
         prompt = _Prompt(**prompt_dict)
 
         # render the variable on the command line
-        cookiecutter_variable = render_variable(
-            env=StrictEnvironment(context=cookiecutter_context),
-            raw=cookiecutter_context.get(variable_name),
-            cookiecutter_dict=config,
-        )
+        default_value = cookiecutter_context.get(variable_name) or ""
 
         # read the user's input for the variable
-        user_input = read_user_variable(str(prompt), cookiecutter_variable)
+        user_input = click.prompt(
+            str(prompt),
+            default=default_value,
+            show_default=True,
+            type=str,
+        ).strip()
+
         if user_input:
             prompt.validate(user_input)
             config[variable_name] = user_input
@@ -804,8 +821,7 @@ def _make_cookiecutter_args_and_fetch_template(
             ``extra_context`` to cookiecutter and will overwrite the cookiecutter.json
             defaults.
         checkout: The tag, branch or commit in the starter repository to checkout.
-            Maps directly to cookiecutter's ``checkout`` argument. Relevant only when
-            using a starter.
+            Maps directly to cookiecutter's ``checkout`` argument.
         directory: The directory of a specific starter inside a repository containing
             multiple starters. Maps directly to cookiecutter's ``directory`` argument.
             Relevant only when using a starter.
@@ -824,27 +840,26 @@ def _make_cookiecutter_args_and_fetch_template(
 
     if directory:
         cookiecutter_args["directory"] = directory
+    cookiecutter_args["checkout"] = checkout
 
     tools = config["tools"]
     example_pipeline = config["example_pipeline"]
     starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
 
-    cookiecutter_args["checkout"] = checkout
-
-    if "PySpark" in tools and "Kedro Viz" in tools:
-        # Use the spaceflights-pyspark-viz starter if both PySpark and Kedro Viz are chosen.
-        cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
-    elif "PySpark" in tools:
+    if "PySpark" in tools:
         # Use the spaceflights-pyspark starter if only PySpark is chosen.
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-    elif "Kedro Viz" in tools:
-        # Use the spaceflights-pandas-viz starter if only Kedro Viz is chosen.
-        cookiecutter_args["directory"] = "spaceflights-pandas-viz"
+        cookiecutter_args["checkout"] = _select_checkout_branch_for_cookiecutter(
+            checkout
+        )
     elif example_pipeline == "True":
-        # Use spaceflights-pandas starter if example was selected, but PySpark or Viz wasn't
+        # Use spaceflights-pandas starter if example was selected, but PySpark wasn't
         cookiecutter_args["directory"] = "spaceflights-pandas"
+        cookiecutter_args["checkout"] = _select_checkout_branch_for_cookiecutter(
+            checkout
+        )
     else:
-        # Use the default template path for non PySpark, Viz or example options:
+        # Use the default template path for non PySpark or example options:
         starter_path = template_path
 
     return cookiecutter_args, starter_path
@@ -892,7 +907,9 @@ def _validate_tool_selection(tools: list[str]) -> None:
     # '20' is not a valid selection instead of '8'
     for tool in tools[::-1]:
         if tool not in NUMBER_TO_TOOLS_NAME:
-            message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."  # nosec
+            message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
+            if tool == "7":
+                message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
@@ -914,7 +931,9 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
             sys.exit(1)
         # safeguard to prevent passing of excessively large intervals that could cause freezing:
         if int(end) > len(NUMBER_TO_TOOLS_NAME):
-            message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6, 7."
+            message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
+            if end == "7":
+                message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
@@ -997,16 +1016,23 @@ class _Prompt:
         self.error_message = kwargs.get("error_message", "")
 
     def __str__(self) -> str:
+        # Format the title with optional color
         title = self.title.strip().title()
-        title = click.style(title + "\n" + "=" * len(title), bold=True)
-        prompt_lines = [title, self.text]
+        title = click.style(title, fg="cyan", bold=True)
+        title_line = "=" * len(self.title)
+        title_line = click.style(title_line, fg="cyan", bold=True)
+
+        # Format the main text
+        text = self.text.strip()
+
+        # Combine everything
+        prompt_lines = [title, title_line, text]
         prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
         return f"\n{prompt_text}\n"
 
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
-
-        if self.regexp and not re.match(self.regexp, user_input.lower()):
+        if self.regexp and not re.match(self.regexp, user_input):
             message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
             click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)

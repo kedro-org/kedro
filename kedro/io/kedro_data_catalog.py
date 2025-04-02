@@ -10,7 +10,6 @@ Expect possible breaking changes while using it.
 
 from __future__ import annotations
 
-import copy
 import difflib
 import logging
 import re
@@ -28,9 +27,11 @@ from kedro.io.core import (
     Version,
     _validate_versions,
     generate_timestamp,
+    parse_dataset_definition,
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
-from kedro.utils import _format_rich, _has_rich_handler
+from kedro.logging import _format_rich
+from kedro.utils import _has_rich_handler
 
 
 class _LazyDataset:
@@ -49,7 +50,8 @@ class _LazyDataset:
         self.save_version = save_version
 
     def __repr__(self) -> str:
-        return f"{self.config.get('type', 'UnknownType')}"
+        class_type, _ = parse_dataset_definition(self.config)
+        return f"{class_type.__module__}.{class_type.__qualname__}"
 
     def materialize(self) -> AbstractDataset:
         return AbstractDataset.from_config(
@@ -98,7 +100,8 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
-        self._datasets: dict[str, AbstractDataset] = datasets or {}
+        # TODO: rename back to _datasets when removing old catalog
+        self.__datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
         self._load_versions, self._save_version = _validate_versions(
             datasets, load_versions or {}, save_version
@@ -116,7 +119,7 @@ class KedroDataCatalog(CatalogProtocol):
     @property
     def datasets(self) -> dict[str, Any]:
         # TODO: remove when removing old catalog
-        return copy.copy(self._datasets)
+        return self._lazy_datasets | self.__datasets
 
     @datasets.setter
     def datasets(self, value: Any) -> None:
@@ -125,17 +128,26 @@ class KedroDataCatalog(CatalogProtocol):
             "Operation not allowed. Please use KedroDataCatalog.add() instead."
         )
 
+    def __getattribute__(self, key: str) -> Any:
+        # Needed for compatability with old catalog interface since now we
+        # differ _datasets and _lazy_datasets
+        # TODO: remove when removing old catalog
+        if key == "_datasets":
+            return self.datasets
+        else:
+            return super().__getattribute__(key)
+
     @property
     def config_resolver(self) -> CatalogConfigResolver:
         return self._config_resolver
 
     def __repr__(self) -> str:
-        return repr(self._lazy_datasets | self._datasets)
+        return repr(self._lazy_datasets | self.__datasets)
 
     def __contains__(self, dataset_name: str) -> bool:
         """Check if an item is in the catalog as a materialised dataset or pattern."""
         return (
-            dataset_name in self._datasets
+            dataset_name in self.__datasets
             or dataset_name in self._lazy_datasets
             or self._config_resolver.match_pattern(dataset_name) is not None
         )
@@ -143,18 +155,18 @@ class KedroDataCatalog(CatalogProtocol):
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         """Compares two catalogs based on materialised datasets and datasets patterns."""
         return (
-            self._datasets,
+            self.__datasets,
             self._lazy_datasets,
             self._config_resolver.list_patterns(),
         ) == (
-            other._datasets,
+            other.__datasets,
             other._lazy_datasets,
             other.config_resolver.list_patterns(),
         )
 
     def keys(self) -> List[str]:  # noqa: UP006
         """List all dataset names registered in the catalog."""
-        return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
+        return list(self._lazy_datasets.keys()) + list(self.__datasets.keys())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """List all datasets registered in the catalog."""
@@ -218,18 +230,18 @@ class KedroDataCatalog(CatalogProtocol):
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
-        if key in self._datasets:
+        if key in self.__datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
             self._load_versions, self._save_version = _validate_versions(
                 {key: value}, self._load_versions, self._save_version
             )
-            self._datasets[key] = value
+            self.__datasets[key] = value
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
             self._logger.info(f"Adding input data as a MemoryDataset - {key}")
-            self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
+            self.__datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:
         return len(self.keys())
@@ -250,7 +262,7 @@ class KedroDataCatalog(CatalogProtocol):
         Returns:
             An instance of AbstractDataset.
         """
-        if key not in self._datasets and key not in self._lazy_datasets:
+        if key not in self.__datasets and key not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
                 self._add_from_config(key, ds_config)
@@ -259,7 +271,7 @@ class KedroDataCatalog(CatalogProtocol):
         if lazy_dataset:
             self[key] = lazy_dataset.materialize()
 
-        dataset = self._datasets.get(key, None)
+        dataset = self.__datasets.get(key, None)
 
         return dataset or default
 
@@ -425,7 +437,7 @@ class KedroDataCatalog(CatalogProtocol):
             credentials.update(unresolved_credentials)
             load_versions[ds_name] = self._load_versions.get(ds_name, None)
 
-        for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
+        for ds_name, ds in self.__datasets.items():  # type: ignore[assignment]
             if _is_memory_dataset(ds):  # type: ignore[arg-type]
                 continue
             resolved_config = ds.to_config()  # type: ignore[attr-defined]
@@ -505,7 +517,7 @@ class KedroDataCatalog(CatalogProtocol):
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
-                matches = difflib.get_close_matches(ds_name, self._datasets.keys())
+                matches = difflib.get_close_matches(ds_name, self.keys())
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
@@ -532,17 +544,96 @@ class KedroDataCatalog(CatalogProtocol):
     ) -> None:
         # TODO: remove when removing old catalog
         """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""
-        if ds_name in self._datasets and not replace:
+        if (
+            ds_name in self.__datasets or ds_name in self._lazy_datasets
+        ) and not replace:
             raise DatasetAlreadyExistsError(
                 f"Dataset '{ds_name}' has already been registered"
             )
         self.__setitem__(ds_name, dataset)
 
+    def filter(
+        self,
+        name_regex: re.Pattern[str] | str | None = None,
+        type_regex: re.Pattern[str] | str | None = None,
+        by_type: type | list[type] | None = None,
+    ) -> List[str]:  # noqa: UP006
+        """Filter dataset names registered in the catalog based on name and/or type.
+
+        This method allows filtering datasets by their names and/or types. Regular expressions
+        should be precompiled before passing them to `name_regex` or `type_regex`, but plain
+        strings are also supported.
+
+        Args:
+            name_regex: Optional compiled regex pattern or string to filter dataset names.
+            type_regex: Optional compiled regex pattern or string to filter dataset types.
+                The provided regex is matched against the full dataset type path, for example:
+                `kedro_datasets.pandas.parquet_dataset.ParquetDataset`.
+            by_type: Optional dataset type(s) to filter by. This performs an instance type check
+                rather than a regex match. It can be a single dataset type or a list of types.
+
+        Returns:
+            A list of dataset names that match the filtering criteria.
+
+        Example:
+        ::
+
+            >>> import re
+            >>> catalog = KedroDataCatalog()
+            >>> # get datasets where the substring 'raw' is present
+            >>> raw_data = catalog.filter(name_regex='raw')
+            >>> # get datasets where names start with 'model_' (precompiled regex)
+            >>> model_datasets = catalog.filter(name_regex=re.compile('^model_'))
+            >>> # get datasets of a specific type using type_regex
+            >>> csv_datasets = catalog.filter(type_regex='pandas.excel_dataset.ExcelDataset')
+            >>> # get datasets where names contain 'train' and type matches 'CSV' in the path
+            >>> catalog.filter(name_regex="train", type_regex="CSV")
+            >>> # get datasets where names include 'data' and are of a specific type
+            >>> from kedro_datasets.pandas import SQLQueryDataset
+            >>> catalog.filter(name_regex="data", by_type=SQLQueryDataset)
+            >>> # get datasets where names include 'data' and are of multiple specific types
+            >>> from kedro.io import MemoryDataset
+            >>> catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])
+        """
+        filtered = self.keys()
+
+        # Apply name filter if specified
+        if name_regex:
+            filtered = [
+                ds_name for ds_name in filtered if re.search(name_regex, ds_name)
+            ]
+
+        # Apply type filters if specified
+        by_type_set = set()
+        if by_type:
+            if not isinstance(by_type, list):
+                by_type = [by_type]
+            for _type in by_type:
+                by_type_set.add(f"{_type.__module__}.{_type.__qualname__}")
+
+        if by_type_set or type_regex:
+            filtered_types = []
+            for ds_name in filtered:
+                # Retrieve the dataset type
+                if ds_name in self._lazy_datasets:
+                    str_type = str(self._lazy_datasets[ds_name])
+                else:
+                    class_type = type(self.__datasets[ds_name])
+                    str_type = f"{class_type.__module__}.{class_type.__qualname__}"
+                # Match against type_regex and apply by_type filtering
+                if (not type_regex or re.search(type_regex, str_type)) and (
+                    not by_type_set or str_type in by_type_set
+                ):
+                    filtered_types.append(ds_name)
+
+            return filtered_types
+
+        return filtered
+
     def list(
         self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0
     ) -> List[str]:  # noqa: UP006
-        # TODO: rename depending on the solution for https://github.com/kedro-org/kedro/issues/3917
-        # TODO: make regex_search mandatory argument as we have catalog.keys() for listing all the datasets.
+        # TODO: remove when removing old catalog
         """List all dataset names registered in the catalog, optionally filtered by a regex pattern.
 
         If a regex pattern is provided, only dataset names matching the pattern will be returned.
@@ -585,6 +676,7 @@ class KedroDataCatalog(CatalogProtocol):
             raise SyntaxError(
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
+
         return [ds_name for ds_name in self.__iter__() if pattern.search(ds_name)]
 
     def save(self, name: str, data: Any) -> None:

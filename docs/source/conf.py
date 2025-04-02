@@ -14,6 +14,8 @@
 from __future__ import annotations
 
 import importlib
+import inspect
+import os
 import re
 import sys
 from inspect import getmembers, isclass, isfunction
@@ -21,6 +23,7 @@ from pathlib import Path
 
 from click import secho, style
 
+import kedro
 from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
@@ -47,7 +50,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx.ext.doctest",
     "sphinx.ext.ifconfig",
-    "sphinx.ext.viewcode",
+    "sphinx.ext.linkcode",
     "sphinx_copybutton",
     "myst_parser",
     "notfound.extension",
@@ -224,7 +227,11 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # so we decided to use our own `robots.txt` again, with a link to the custom `sitemap.xml`.
 # See the discussion at https://github.com/kedro-org/kedro/issues/3741
 # and https://github.com/readthedocs/readthedocs.org/issues/6841
-html_extra_path = [str(here / "extra_files")]
+# html_extra_path = [str(here / "extra_files")]
+# Finally, we decided to use the default `robots.txt` and `sitemap.xml` from RTD
+# because we embeded the nonindex tag in all old docs versions, preventing search engines from indexing them.
+# See: https://github.com/kedro-org/kedro/pull/4516
+
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
@@ -252,6 +259,9 @@ linkcheck_ignore = [
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
     "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors",
     "https://www.quora.com/What-is-thread-safety-in-Python",  # "403 Client Error: Forbidden for url"
+    "https://docs.databricks.com/en/reference/jobs-2.0-api.html#create",  # Flaky link that works fine in browser
+    "https://docs.databricks.com/en/reference/jobs-2.0-api.html#runs-submit",  # Flaky link that works fine in browser
+    "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
 ]
 
 # Comment out settings to fix Client Rate Limit Error 429
@@ -266,7 +276,10 @@ html_context = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+# Enable serving static files to expose deindex-old-docs.js at a public URL.
+# This is required so Read the Docs can fetch and execute the script to deindex legacy doc versions.
+# More details: https://github.com/kedro-org/kedro/issues/3741
+html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -534,3 +547,26 @@ user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99
 
 myst_heading_anchors = 5
 myst_enable_extensions = ["colon_fence"]
+
+def linkcode_resolve(domain, info):
+    """Resolve a GitHub URL corresponding to a Python object."""
+    if domain != 'py':
+        return None
+
+    try:
+        mod = sys.modules[info['module']]
+        obj = mod
+        for attr in info['fullname'].split('.'):
+            obj = getattr(obj, attr)
+        obj = inspect.unwrap(obj)
+
+        filename = inspect.getsourcefile(obj)
+        source, lineno = inspect.getsourcelines(obj)
+        relpath = os.path.relpath(filename, start=os.path.dirname(
+          kedro.__file__))
+
+        return 'https://github.com/kedro-org/kedro/blob/main/kedro/%s#L%d#L%d' % (
+            relpath, lineno, lineno + len(source) - 1
+        )
+    except (KeyError, ImportError, AttributeError, TypeError, OSError, ValueError):
+        return None

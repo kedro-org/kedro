@@ -334,7 +334,7 @@ You should see output similar to the following:
 
 ## Visualise the project
 
-This section introduces project visualisation using Kedro-Viz, which is a separate package from the standard Kedro installation. To install it your virtual environment:
+This section introduces project visualisation using Kedro-Viz, which is a separate package from the standard Kedro installation. To install it in your virtual environment:
 
 ```bash
 pip install kedro-viz

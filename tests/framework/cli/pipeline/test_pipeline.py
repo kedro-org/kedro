@@ -204,7 +204,7 @@ class TestPipelineCreateCommand:
 
         with KedroSession.create() as session:
             ctx = session.load_context()
-        assert isinstance(ctx.catalog._datasets["ds_from_pipeline"], CSVDataset)
+        assert isinstance(ctx.catalog._get_dataset("ds_from_pipeline"), CSVDataset)
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)
         assert ctx.params["params_from_pipeline"] == params_dict["params_from_pipeline"]
 
@@ -309,6 +309,34 @@ class TestPipelineCreateCommand:
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
         assert result.exit_code
         assert f"Unable to locate environment '{env}'" in result.output
+
+    def test_create_pipeline_ensures_init_file(
+        self, fake_repo_path, fake_project_cli, fake_metadata, fake_package_path
+    ):
+        """Test that creating a pipeline ensures pipelines/__init__.py exists"""
+        # Setup: make sure pipelines directory exists but remove __init__.py
+        pipelines_dir = fake_package_path / "pipelines"
+        pipelines_dir.mkdir(exist_ok=True)
+
+        init_file = pipelines_dir / "__init__.py"
+        if init_file.exists():
+            init_file.unlink()
+
+        # __init__.py doesn't exist before the test
+        assert not init_file.exists()
+
+        # Create a pipeline
+        pipeline_name = "init_test_pipeline"
+        cmd = ["pipeline", "create", pipeline_name]
+        result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
+
+        assert result.exit_code == 0
+        assert f"Creating the pipeline '{pipeline_name}': OK" in result.output
+
+        # __init__.py created
+        assert init_file.exists(), "The pipelines/__init__.py file was not created"
+        assert (pipelines_dir / pipeline_name).exists()
+        assert (pipelines_dir / pipeline_name / "__init__.py").exists()
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "make_pipelines")

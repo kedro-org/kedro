@@ -20,12 +20,11 @@ class DataCatalogSpecs:
     """Namespace that defines all specifications for a data catalog's lifecycle hooks."""
 
     @hook_spec
-    def after_catalog_created(  # noqa: PLR0913
+    def after_catalog_created(
         self,
         catalog: CatalogProtocol,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
-        feed_dict: dict[str, Any],
         save_version: str,
         load_versions: dict[str, str],
     ) -> None:
@@ -37,7 +36,6 @@ class DataCatalogSpecs:
             catalog: The catalog that was created.
             conf_catalog: The config from which the catalog was created.
             conf_creds: The credentials conf from which the catalog was created.
-            feed_dict: The feed_dict that was added to the catalog after creation.
             save_version: The save_version used in ``save`` operations
                 for all datasets in the catalog.
             load_versions: The load_versions used in ``load`` operations

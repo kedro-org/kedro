@@ -312,7 +312,7 @@ class KedroSession:
                 used as an end point of the new ``Pipeline``.
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
-            namespaces: The namespacse of the nodes that are being run.
+            namespaces: The namespaces of the nodes that are being run.
         Raises:
             ValueError: If the named or `__default__` pipeline is not
                 defined by `register_pipelines`.

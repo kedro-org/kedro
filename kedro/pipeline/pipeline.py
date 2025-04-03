@@ -371,7 +371,11 @@ class Pipeline:
 
     @property
     def grouped_nodes_by_namespace(self) -> dict[str, dict[str, Any]]:
-        """Return a dictionary of the pipeline nodes grouped by top-level namespace."""
+        """Return a dictionary of the pipeline nodes grouped by top-level namespace with
+        information about the nodes, their type, and dependencies. The structure of the dictionary is:
+        {'node_name/namespace_name' : {'name': 'node_name/namespace_name','type': 'namespace' or 'node','nodes': [list of nodes],'dependencies': [list of dependencies]}}
+        This property is intended to be used by deployment plugins to group nodes by namespace.
+        """
         grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
 
         for node in self.nodes:

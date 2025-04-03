@@ -257,13 +257,10 @@ class KedroContext:
         self, catalog: CatalogProtocol, parameters: dict[str, Any]
     ) -> None:
         """Add datasets to catalog using the data provided through `parameters`.
-        `parameters` is a dictionary where the keys represent dataset names and the values can either be raw data or
-        Kedro datasets - instances of classes that inherit from ``AbstractDataset``. If raw data is provided,
-        it will be automatically wrapped in a ``MemoryDataset`` before being added to the catalog.
+
         Args:
             catalog: The catalog to which parameters are added.
-            parameters: A dictionary with data to be added to catalog. Keys are dataset names and
-                values can be raw data or instances of classes that inherit from ``AbstractDataset``.
+            parameters: A dictionary where each key is a parameter name and each value is the corresponding parameter value.
         """
         for param_name, param_value in parameters.items():
             catalog[param_name] = param_value

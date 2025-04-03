@@ -673,6 +673,18 @@ class KedroDataCatalog(CatalogProtocol):
             return False
         return dataset.exists()
 
+    def add_parameters(self, parameters: dict[str, Any]) -> None:
+        """Add datasets to ``KedroDataCatalog`` using the data provided through `parameters`.
+        `parameters` is a dictionary where the keys represent dataset names and the values can either be raw data or
+        Kedro datasets - instances of classes that inherit from ``AbstractDataset``. If raw data is provided,
+        it will be automatically wrapped in a ``MemoryDataset`` before being added to the ``DataCatalog``.
+        Args:
+            parameters: A dictionary with data to be added to ``KedroDataCatalog``. Keys are dataset names and
+                values can be raw data or instances of classes that inherit from ``AbstractDataset``.
+        """
+        for param_name, param_value in parameters.items():
+            self.__setitem__(param_name, param_value)
+
     @staticmethod
     def _validate_versions(
         datasets: dict[str, AbstractDataset] | None,

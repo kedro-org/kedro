@@ -15,8 +15,6 @@ from omegaconf import OmegaConf
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import CatalogProtocol, KedroDataCatalog  # noqa: TCH001
-from kedro.io.core import AbstractDataset
-from kedro.io.memory_dataset import MemoryDataset
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -240,40 +238,29 @@ class KedroContext:
             save_version=save_version,
         )
 
-        # TODO: [KDC] Need to confirm if it is better to have add_raw_data
-        # similar to add_feed_dict ?
-        raw_data = self._get_raw_data()
-
-        for ds_name, ds_data in raw_data.items():
-            dataset = (
-                ds_data
-                if isinstance(ds_data, AbstractDataset)
-                else MemoryDataset(data=ds_data)
-            )
-            catalog[ds_name] = dataset
+        parameters = self._get_parameters()
+        catalog.add_parameters(parameters)
 
         _validate_transcoded_datasets(catalog)
-
-        # TODO: [KDC] Removed feed_dict from the args. Should we add raw_data
-        # instead ?
 
         self._hook_manager.hook.after_catalog_created(
             catalog=catalog,
             conf_catalog=conf_catalog,
             conf_creds=conf_creds,
+            parameters=parameters,
             save_version=save_version,
             load_versions=load_versions,
         )
         return catalog
 
-    def _get_raw_data(self) -> dict[str, Any]:
+    def _get_parameters(self) -> dict[str, Any]:
         """Returns a dictionary with data to be added in memory as `MemoryDataset`` instances.
-        Keys represent dataset names and the values are raw data."""
+        Keys represent parameter names and the values are parameter values."""
         params = self.params
-        raw_data = {"parameters": params}
+        params_dict = {"parameters": params}
 
-        def _add_param_to_raw_data(param_name: str, param_value: Any) -> None:
-            """This recursively adds parameter paths to the `raw_data`,
+        def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
+            """This recursively adds parameter paths to the `params_dict`,
             whenever `param_value` is a dictionary itself, so that users can
             specify specific nested parameters in their node inputs.
 
@@ -286,15 +273,15 @@ class KedroContext:
                 >>> assert raw_data["params:a.b"] == 1
             """
             key = f"params:{param_name}"
-            raw_data[key] = param_value
+            params_dict[key] = param_value
             if isinstance(param_value, dict):
                 for key, val in param_value.items():
-                    _add_param_to_raw_data(f"{param_name}.{key}", val)
+                    _add_param_to_params_dict(f"{param_name}.{key}", val)
 
         for param_name, param_value in params.items():
-            _add_param_to_raw_data(param_name, param_value)
+            _add_param_to_params_dict(param_name, param_value)
 
-        return raw_data
+        return params_dict
 
     def _get_config_credentials(self) -> dict[str, Any]:
         """Getter for credentials specified in credentials directory."""

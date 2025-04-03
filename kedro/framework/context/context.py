@@ -268,9 +268,9 @@ class KedroContext:
 
                 >>> param_name = "a"
                 >>> param_value = {"b": 1}
-                >>> _add_param_to_raw_data(param_name, param_value)
-                >>> assert raw_data["params:a"] == {"b": 1}
-                >>> assert raw_data["params:a.b"] == 1
+                >>> _add_param_to_params_dict(param_name, param_value)
+                >>> assert params_dict["params:a"] == {"b": 1}
+                >>> assert params_dict["params:a.b"] == 1
             """
             key = f"params:{param_name}"
             params_dict[key] = param_value

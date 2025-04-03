@@ -2,12 +2,16 @@
 [data-md-color-scheme="light"] {
     --md-default-bg-color: var(--white-200);
     --md-default-fg-color: var(--black-900);
+    --block-code-bg-color: var(--white-400);
+    --block-code-font-color: var(--black-900);
   }
   
   /* Dark Theme */
   [data-md-color-scheme="dark"] {
     --md-default-bg-color: var(--slate-800);
     --md-default-fg-color: var(--white-100);
+    --block-code-bg-color: var(--slate-200);
+    --block-code-font-color: var(--white-200);
   }
   
   /* Apply the variables to elements */
@@ -16,12 +20,49 @@
     color: var(--md-default-fg-color);
   }
   
-  .md-header {
+
+
+.md-typeset h1 {
+    color: var(--md-default-fg-color);
+}
+
+/* Ensure links also inherit the default text color */
+a, p, li, span, div {
+    color: var(--md-default-fg-color);
+}
+.md-header {
     background-color: var(--md-default-bg-color);
     color: var(--md-default-fg-color);
-  }
-  
-  .md-tabs {
+}
+
+.md-tabs {
     background-color: var(--md-default-bg-color);
     color: var(--md-default-fg-color);
-  }
+}
+
+.md-sidebar__scrollwrap:hover {
+    scrollbar-color: var(--yellow-300) #0000;
+}
+
+.md-tabs__item--active {
+    font-weight: 600;
+}
+
+.md-typeset blockquote {
+    border-left: 0.2rem solid var(--yellow-300) !important;
+}
+
+/* Style for all <pre> blocks */
+.md-typeset pre code, 
+.md-typeset code {
+    background-color: var(--block-code-bg-color); 
+    color: var(--block-code-font-color);
+}
+
+.md-clipboard {
+    color: var(--block-code-font-color);
+
+    &:hover {
+        color: var(--yellow-300);
+    }
+} 

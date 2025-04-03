@@ -1,4 +1,4 @@
-site_name: Kedro Documentation
+site_name: ""
 site_url: https://docs.kedro.org
 
 theme:
@@ -22,7 +22,8 @@ theme:
     text: Inter
     code: Inter Regular
   favicon: "https://kedro.org/images/favicon.ico"
-  # logo: "https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png"
+  logo: assets/kedro-horizontal-color-on-light.svg
+
 
   features:
     - navigation.instant

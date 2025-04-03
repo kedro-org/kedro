@@ -1,0 +1,27 @@
+/* Light Theme */
+[data-md-color-scheme="light"] {
+    --md-default-bg-color: var(--white-200);
+    --md-default-fg-color: var(--black-900);
+  }
+  
+  /* Dark Theme */
+  [data-md-color-scheme="dark"] {
+    --md-default-bg-color: var(--slate-800);
+    --md-default-fg-color: var(--white-100);
+  }
+  
+  /* Apply the variables to elements */
+  body {
+    background-color: var(--md-default-bg-color);
+    color: var(--md-default-fg-color);
+  }
+  
+  .md-header {
+    background-color: var(--md-default-bg-color);
+    color: var(--md-default-fg-color);
+  }
+  
+  .md-tabs {
+    background-color: var(--md-default-bg-color);
+    color: var(--md-default-fg-color);
+  }

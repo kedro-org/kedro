@@ -5,6 +5,7 @@ class model for a `ConfigLoader` implementation.
 from __future__ import annotations
 
 from collections import UserDict
+from pathlib import Path  # noqa: TCH003
 from typing import Any
 
 
@@ -17,7 +18,7 @@ class AbstractConfigLoader(UserDict):
 
     def __init__(
         self,
-        conf_source: str,
+        conf_source: str | Path,
         env: str | None = None,
         runtime_params: dict[str, Any] | None = None,
         **kwargs: Any,

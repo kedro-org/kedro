@@ -123,8 +123,7 @@ following pipeline which takes in a `model_input_table` and outputs two regresso
 `active_modelling_pipeline` and the `candidate_modelling_pipeline` namespaces:
 
 ```python
-from kedro.pipeline import Pipeline, node
-from kedro.pipeline.modular_pipeline import pipeline
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import evaluate_model, split_data, train_model
 

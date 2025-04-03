@@ -1,6 +1,5 @@
 from kedro.io import DataCatalog
 from kedro.pipeline import node, pipeline
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
 
 
@@ -22,11 +21,11 @@ class TestTransformPipelineIntegration:
         Two pipelines exist, the dataset names do not match.
         We `transform` them to work together.
         """
-        cook_pipeline = modular_pipeline(
+        cook_pipeline = pipeline(
             [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat")]
         )
 
-        lunch_pipeline = modular_pipeline([node(eat, "food", "output")])
+        lunch_pipeline = pipeline([node(eat, "food", "output")])
 
         pipeline1 = (
             pipeline(cook_pipeline, outputs={"grilled_meat": "food"}) + lunch_pipeline
@@ -50,16 +49,14 @@ class TestTransformPipelineIntegration:
         Normally dataset and node names would conflict,
         so we need to `transform` the pipelines.
         """
-        cook_pipeline = modular_pipeline(
+        cook_pipeline = pipeline(
             [
                 node(defrost, "frozen_meat", "meat", name="defrost_node"),
                 node(grill, "meat", "grilled_meat", name="grill_node"),
             ]
         )
-        breakfast_pipeline = modular_pipeline(
-            [node(eat, "breakfast_food", "breakfast_output")]
-        )
-        lunch_pipeline = modular_pipeline([node(eat, "lunch_food", "lunch_output")])
+        breakfast_pipeline = pipeline([node(eat, "breakfast_food", "breakfast_output")])
+        lunch_pipeline = pipeline([node(eat, "lunch_food", "lunch_output")])
 
         # We are using two different mechanisms here for breakfast and lunch,
         # renaming and prefixing pipelines differently.

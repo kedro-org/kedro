@@ -1,5 +1,4 @@
-![Kedro logo](https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png){.kedro-logo
-.kedro-logo}
+![Kedro logo](https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png)
 
 # Welcome to Kedro\'s award-winning documentation!
 

@@ -1,0 +1,16 @@
+{% extends "base.html" %}  {# Ensure this is extending base.html #}
+
+{% block header %}
+<div class="wy-grid-header">
+  <div class="wy-header-logo">
+    <a href="/">
+      <img src="https://raw.githubusercontent.com/kedro-org/kedro-brand-identity/main/horizontal/color/kedro-horizontal-color-on-light.svg" class="logo" alt="Logo" />
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block content %}
+    {{ page.content }}
+{% endblock %}

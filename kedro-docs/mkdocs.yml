@@ -59,16 +59,20 @@ nav:
           - Commands Reference: development/commands_reference.md
       - API DOCUMENTATION:
           - API Documentation: api/index.md
+  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
+  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
 
 theme:
   name: material
   language: en
-#   custom_dir: docs/overrides
+  # custom_dir: overrides
   palette:
     - scheme: default
   font:
     text: Inter
     code: Inter Regular
+  favicon: "https://kedro.org/images/favicon.ico"
+  # logo: "https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png"
   features:
     - navigation.instant
     - navigation.tabs

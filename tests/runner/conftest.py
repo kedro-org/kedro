@@ -3,7 +3,7 @@ from random import random
 import pandas as pd
 import pytest
 
-from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
+from kedro.io import KedroDataCatalog, LambdaDataset, MemoryDataset
 from kedro.pipeline import node, pipeline
 
 
@@ -59,14 +59,14 @@ def pandas_df_feed_dict():
 
 @pytest.fixture
 def catalog():
-    return DataCatalog()
+    return KedroDataCatalog()
 
 
 @pytest.fixture
 def memory_catalog():
     ds1 = MemoryDataset({"data": 42})
     ds2 = MemoryDataset([1, 2, 3, 4, 5])
-    return DataCatalog({"ds1": ds1, "ds2": ds2})
+    return KedroDataCatalog({"ds1": ds1, "ds2": ds2})
 
 
 @pytest.fixture
@@ -78,7 +78,7 @@ def persistent_dataset_catalog():
         pass
 
     persistent_dataset = LambdaDataset(load=_load, save=_save)
-    return DataCatalog(
+    return KedroDataCatalog(
         {
             "ds0_A": persistent_dataset,
             "ds0_B": persistent_dataset,

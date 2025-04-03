@@ -1056,10 +1056,6 @@ class CatalogProtocol(Protocol[_C]):
         """Checks whether registered dataset exists by calling its `exists()` method."""
         ...
 
-    def add_parameters(self, parameters: dict[str, Any]) -> None:
-        """Add datasets to catalog using the data provided through `parameters`."""
-        ...
-
     @staticmethod
     def _validate_versions(
         datasets: dict[str, AbstractDataset] | None,

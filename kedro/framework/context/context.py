@@ -262,7 +262,7 @@ class KedroContext:
         it will be automatically wrapped in a ``MemoryDataset`` before being added to the catalog.
         Args:
             catalog: The catalog to which parameters are added.
-            parameters: A dictionary with data to be added to ``KedroDataCatalog``. Keys are dataset names and
+            parameters: A dictionary with data to be added to catalog. Keys are dataset names and
                 values can be raw data or instances of classes that inherit from ``AbstractDataset``.
         """
         for param_name, param_value in parameters.items():

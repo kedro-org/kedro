@@ -23,6 +23,7 @@
 * Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
 * Remove `7: Kedro Viz` from Kedro tools.
 * Updated node grouping API to only group on first level of namespace.
+* Improved error handling to show root cause during dataset loading.
 
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.

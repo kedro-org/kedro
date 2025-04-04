@@ -344,6 +344,21 @@ class TestCoreFunctions:
         with pytest.raises(DatasetError, match=pattern):
             parse_dataset_definition({"type": dataset_name})
 
+    def test_parse_dataset_definition_invalid_uppercase_s_in_dataset(self):
+        """Test that an invalid dataset type with uppercase 'S' in 'Dataset' raises a warning"""
+        config = {"type": "LambdaDataSet"}  # Invalid type with uppercase 'S'
+
+        # Check that the warning is issued
+        with pytest.warns(
+            UserWarning,
+            match="Since kedro-datasets 2.0, 'Dataset' is spelled with a lowercase 's'.",
+        ):
+            with pytest.raises(
+                DatasetError,
+                match="Class 'LambdaDataSet' not found, is this a typo?",
+            ):
+                parse_dataset_definition(config)
+
     def test_parse_dataset_definition(self):
         config = {"type": "LambdaDataset"}
         dataset, _ = parse_dataset_definition(config)

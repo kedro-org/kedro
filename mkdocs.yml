@@ -38,9 +38,14 @@ theme:
     - content.code.annotate
     - content.code.highlight
 
-  plugins:
-    - search
-    - mermaid2
+plugins:
+  - search
+  - mermaid2
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
 
 extra_css:
   - stylesheets/extra.css
@@ -104,7 +109,12 @@ nav:
       - CLI REFERENCE:
           - Commands Reference: pages/development/commands_reference.md
       - API DOCUMENTATION:
-          - API Documentation: pages/development/commands_reference.md
+          - kedro.config: api/kedro.config.md
+          - kedro.io: api/kedro.io.md
+          - kedro.logging: api/kedro.logging.md
+          - kedro.pipeline: api/kedro.pipeline.md
+          - kedro.runner: api/kedro.runner.md
+          - kedro.utils: api/kedro.utils.md
   - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
 

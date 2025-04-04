@@ -472,15 +472,27 @@ class TestValidPipeline:
         [
             (
                 "pipeline_with_namespace_simple",
-                {"namespace_1": set(), "namespace_2": {"namespace_1"}},
+                {"namespace_1": [], "namespace_2": {"namespace_1"}},
             ),
             (
                 "pipeline_with_namespace_partial",
                 {
-                    "namespace_1": set(),
+                    "namespace_1": [],
                     "node_3": {"namespace_1"},
                     "namespace_2": {"node_3"},
                     "node_6": {"namespace_2"},
+                },
+            ),
+            (
+                "pipeline_with_multiple_dependencies_on_one_node",
+                {
+                    "f1": [],
+                    "f2": ["f1"],
+                    "f3": ["f2"],
+                    "f4": ["f2"],
+                    "f5": ["f2"],
+                    "f6": ["f4"],
+                    "f7": ["f2", "f4"],
                 },
             ),
         ],
@@ -924,6 +936,21 @@ def pipeline_with_namespace_nested():
             node(identity, "E", "F", name="node_5", namespace="level1_2.level2"),
             node(identity, "F", "G", name="node_6", namespace="level1_2.level2"),
         ]
+    )
+
+
+@pytest.fixture
+def pipeline_with_multiple_dependencies_on_one_node():
+    return modular_pipeline(
+        [
+            node(identity, "ds1", "ds2", name="f1"),
+            node(lambda x: (x, x), "ds2", ["ds3", "ds4"], name="f2"),
+            node(identity, "ds3", "ds5", name="f3"),
+            node(identity, "ds3", "ds6", name="f4"),
+            node(identity, "ds4", "ds8", name="f5"),
+            node(identity, "ds6", "ds7", name="f6"),
+            node(lambda x, y: x, ["ds3", "ds6"], "ds9", name="f7"),
+        ],
     )
 
 

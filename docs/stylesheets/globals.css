@@ -1,26 +1,22 @@
-/* Light Theme */
-[data-md-color-scheme="light"] {
-    --md-default-bg-color: var(--white-200);
-    --md-default-fg-color: var(--black-900);
-    --block-code-bg-color: var(--white-400);
-    --block-code-font-color: var(--black-900);
-  }
-  
-  /* Dark Theme */
-  [data-md-color-scheme="dark"] {
-    --md-default-bg-color: var(--slate-800);
-    --md-default-fg-color: var(--white-100);
-    --block-code-bg-color: var(--slate-200);
-    --block-code-font-color: var(--white-200);
-  }
-  
-  /* Apply the variables to elements */
-  body {
+/* Import the Inter font */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap");
+
+/* Global font settings */
+html {
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 400;
+    line-height: 2rem;
+}
+
+/* Apply the variables to elements */
+body {
     background-color: var(--md-default-bg-color);
     color: var(--md-default-fg-color);
-  }
-  
-
+}
 
 .md-typeset h1 {
     color: var(--md-default-fg-color);
@@ -30,6 +26,7 @@
 a, p, li, span, div {
     color: var(--md-default-fg-color);
 }
+
 .md-header {
     background-color: var(--md-default-bg-color);
     color: var(--md-default-fg-color);
@@ -38,10 +35,6 @@ a, p, li, span, div {
 .md-tabs {
     background-color: var(--md-default-bg-color);
     color: var(--md-default-fg-color);
-}
-
-.md-sidebar__scrollwrap:hover {
-    scrollbar-color: var(--yellow-300) #0000;
 }
 
 .md-tabs__item--active {
@@ -61,8 +54,8 @@ a, p, li, span, div {
 
 .md-clipboard {
     color: var(--block-code-font-color);
+}
 
-    &:hover {
-        color: var(--yellow-300);
-    }
-} 
+.md-sidebar__scrollwrap:hover {
+    scrollbar-color: var(--yellow-300) #0000;
+}

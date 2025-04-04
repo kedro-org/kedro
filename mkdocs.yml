@@ -48,8 +48,9 @@ plugins:
             docstring_style: google
 
 extra_css:
-  - stylesheets/extra.css
   - stylesheets/colors.css
+  - stylesheets/globals.css
+  - stylesheets/themes.css
 
 
 nav:

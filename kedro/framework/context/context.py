@@ -240,6 +240,7 @@ class KedroContext:
 
         parameters = self._get_parameters()
 
+        # Add parameters data to catalog.
         for param_name, param_value in parameters.items():
             catalog[param_name] = param_value
 

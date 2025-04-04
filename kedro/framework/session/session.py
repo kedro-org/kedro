@@ -24,7 +24,8 @@ from kedro.framework.project import (
     validate_settings,
 )
 from kedro.io.core import generate_timestamp
-from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.io.kedro_data_catalog import SharedMemoryDataCatalog
+from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
 if TYPE_CHECKING:
@@ -234,7 +235,7 @@ class KedroSession:
     def load_context(self) -> KedroContext:
         """An instance of the project context."""
         env = self.store.get("env")
-        runtime_params = self.store.get("runtime_params")
+        extra_params = self.store.get("extra_params")
         config_loader = self._get_config_loader()
         context_class = settings.CONTEXT_CLASS
         context = context_class(
@@ -242,7 +243,7 @@ class KedroSession:
             project_path=self._project_path,
             config_loader=config_loader,
             env=env,
-            runtime_params=runtime_params,
+            extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
         self._hook_manager.hook.after_context_created(context=context)
@@ -321,7 +322,7 @@ class KedroSession:
             KedroSessionError: If more than one run is attempted to be executed during
                 a single session.
         Returns:
-            Any node outputs that cannot be processed by the ``DataCatalog``.
+            Any node outputs that cannot be processed by the ``KedroDataCatalog``.
             These are returned in a dictionary, where the keys are defined
             by the node outputs.
         """
@@ -379,19 +380,27 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(
-            save_version=save_version,
-            load_versions=load_versions,
-        )
-
-        # Run the runner
-        hook_manager = self._hook_manager
         runner = runner or SequentialRunner()
         if not isinstance(runner, AbstractRunner):
             raise KedroSessionError(
                 "KedroSession expect an instance of Runner instead of a class."
                 "Have you forgotten the `()` at the end of the statement?"
             )
+
+        catalog_class = (
+            SharedMemoryDataCatalog
+            if isinstance(runner, ParallelRunner)
+            else settings.DATA_CATALOG_CLASS
+        )
+
+        catalog = context._get_catalog(
+            catalog_class=catalog_class,
+            save_version=save_version,
+            load_versions=load_versions,
+        )
+
+        # Run the runner
+        hook_manager = self._hook_manager
         hook_manager.hook.before_pipeline_run(
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )

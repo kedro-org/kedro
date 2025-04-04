@@ -17,11 +17,13 @@ from glob import iglob
 from inspect import getcallargs
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import (
+from typing import (  # noqa: UP035
     TYPE_CHECKING,
     Any,
     Callable,
     Generic,
+    Iterator,
+    List,
     Protocol,
     TypeVar,
     runtime_checkable,
@@ -41,8 +43,9 @@ from kedro.utils import (  # noqa: F401
 
 if TYPE_CHECKING:
     import os
+    import re
 
-    from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
+    from kedro.io.catalog_config_resolver import CatalogConfigResolver
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
@@ -63,16 +66,16 @@ class DatasetError(Exception):
 
 
 class DatasetNotFoundError(DatasetError):
-    """``DatasetNotFoundError`` raised by ```DataCatalog`` and ``KedroDataCatalog``
-    classes in case of trying to use a non-existing dataset.
+    """``DatasetNotFoundError`` raised by ``KedroDataCatalog``
+    class in case of trying to use a non-existing dataset.
     """
 
     pass
 
 
 class DatasetAlreadyExistsError(DatasetError):
-    """``DatasetAlreadyExistsError`` raised by ```DataCatalog`` and ``KedroDataCatalog``
-    classes in case of trying to add a dataset which already exists in the ``DataCatalog``.
+    """``DatasetAlreadyExistsError`` raised by ``KedroDataCatalog``
+    class in case of trying to add a dataset which already exists in the ``KedroDataCatalog``.
     """
 
     pass
@@ -87,8 +90,8 @@ class VersionNotFoundError(DatasetError):
 
 
 class VersionAlreadyExistsError(DatasetError):
-    """``VersionAlreadyExistsError`` raised by ``DataCatalog`` and ``KedroDataCatalog``
-    classes when attempting to add a dataset to a catalog with a save version
+    """``VersionAlreadyExistsError`` raised by ``KedroDataCatalog``
+    class when attempting to add a dataset to a catalog with a save version
     that conflicts with the save version already set for the catalog.
     """
 
@@ -557,15 +560,6 @@ def parse_dataset_definition(
     """
     save_version = save_version or generate_timestamp()
     config = copy.deepcopy(config)
-
-    # TODO: remove when removing old catalog as moved to KedroDataCatalog
-    if TYPE_KEY not in config:
-        raise DatasetError(
-            "'type' is missing from dataset catalog configuration."
-            "\nHint: If this catalog entry is intended for variable interpolation, "
-            "make sure that the top level key is preceded by an underscore."
-        )
-
     dataset_type = config.pop(TYPE_KEY)
 
     # This check prevents the use of dataset types with uppercase 'S' in 'Dataset',
@@ -932,6 +926,11 @@ def validate_on_forbidden_chars(**kwargs: Any) -> None:
             )
 
 
+def is_parameter(dataset_name: str) -> bool:
+    """Check if dataset is a parameter."""
+    return dataset_name.startswith("params:") or dataset_name == "parameters"
+
+
 _C = TypeVar("_C")
 
 
@@ -939,13 +938,67 @@ _C = TypeVar("_C")
 class CatalogProtocol(Protocol[_C]):
     _datasets: dict[str, AbstractDataset]
 
+    @property
+    def config_resolver(self) -> CatalogConfigResolver:
+        """Return a copy of the datasets dictionary."""
+        ...
+
+    def __repr__(self) -> str:
+        """Returns the canonical string representation of the object."""
+        ...
+
     def __contains__(self, ds_name: str) -> bool:
         """Check if a dataset is in the catalog."""
         ...
 
+    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
+        """Compares two catalogs based on materialised datasets and datasets patterns."""
+        ...
+
+    def keys(self) -> List[str]:  # noqa: UP006
+        """List all dataset names registered in the catalog."""
+        ...
+
+    def values(self) -> List[AbstractDataset]:  # noqa: UP006
+        """List all datasets registered in the catalog."""
+        ...
+
+    def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
+        """List all dataset names and datasets registered in the catalog."""
+        ...
+
+    def __iter__(self) -> Iterator[str]:
+        """Returns an iterator for the object."""
+        ...
+
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
+        """Get a dataset by name from an internal collection of datasets."""
+        ...
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        """Adds dataset using the given key as a datset name and the provided data as the value."""
+        ...
+
+    def __len__(self) -> int:
+        """Returns the number of datasets registered in the catalog"""
+        ...
+
+    def get(
+        self,
+        key: str,
+        version: Version | None = None,
+        default: AbstractDataset | None = None,
+    ) -> AbstractDataset | None:
+        """Get a dataset by name from an internal collection of datasets."""
+        ...
+
+    def _ipython_key_completions_(self) -> list[str]:
+        """Customizes tab completions for catalog within IPython env."""
+        ...
+
     @property
-    def config_resolver(self) -> CatalogConfigResolver:
-        """Return a copy of the datasets dictionary."""
+    def _logger(self) -> logging.Logger:
+        """Returns a logger instance for catalog class."""
         ...
 
     @classmethod
@@ -953,17 +1006,34 @@ class CatalogProtocol(Protocol[_C]):
         """Create a catalog instance from configuration."""
         ...
 
-    def _get_dataset(
+    def to_config(
         self,
-        dataset_name: str,
-        version: Any = None,
-        suggest: bool = True,
-    ) -> AbstractDataset:
-        """Retrieve a dataset by its name."""
+    ) -> tuple[
+        dict[str, dict[str, Any]],
+        dict[str, dict[str, Any]],
+        dict[str, str | None],
+        str | None,
+    ]:
+        """Converts the `CatalogProtocol` instance into a configuration format suitable for
+        serialization. This includes datasets, credentials, and versioning information."""
         ...
 
-    def list(self, regex_search: str | None = None) -> list[str]:
-        """List all dataset names registered in the catalog."""
+    @staticmethod
+    def _validate_dataset_config(ds_name: str, ds_config: Any) -> None:
+        """Validates dataset configuration."""
+        ...
+
+    def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
+        """Create a LazyDataset instance and add it to the catalog."""
+        ...
+
+    def filter(
+        self,
+        name_regex: re.Pattern[str] | str | None = None,
+        type_regex: re.Pattern[str] | str | None = None,
+        by_type: type | list[type] | None = None,
+    ) -> List[str]:  # noqa: UP006
+        """Filter dataset names registered in the catalog based on name and/or type."""
         ...
 
     def save(self, name: str, data: Any) -> None:
@@ -974,18 +1044,6 @@ class CatalogProtocol(Protocol[_C]):
         """Load data from a registered dataset."""
         ...
 
-    def add(self, ds_name: str, dataset: Any, replace: bool = False) -> None:
-        """Add a new dataset to the catalog."""
-        ...
-
-    def add_feed_dict(self, datasets: dict[str, Any], replace: bool = False) -> None:
-        """Add datasets to the catalog using the data provided through the `feed_dict`."""
-        ...
-
-    def exists(self, name: str) -> bool:
-        """Checks whether registered dataset exists by calling its `exists()` method."""
-        ...
-
     def release(self, name: str) -> None:
         """Release any cached data associated with a dataset."""
         ...
@@ -994,60 +1052,15 @@ class CatalogProtocol(Protocol[_C]):
         """Confirm a dataset by its name."""
         ...
 
-    def shallow_copy(self, extra_dataset_patterns: Patterns | None = None) -> _C:
-        """Returns a shallow copy of the current object."""
+    def exists(self, name: str) -> bool:
+        """Checks whether registered dataset exists by calling its `exists()` method."""
         ...
 
-
-def _validate_versions(
-    datasets: dict[str, AbstractDataset] | None,
-    load_versions: dict[str, str],
-    save_version: str | None,
-) -> tuple[dict[str, str], str | None]:
-    """Validates and synchronises dataset versions for loading and saving.
-
-    Ensures consistency of dataset versions across a catalog, particularly
-    for versioned datasets. It updates load versions and validates that all
-    save versions are consistent.
-
-    Args:
-        datasets: A dictionary mapping dataset names to their instances.
-            if None, no validation occurs.
-        load_versions: A mapping between dataset names and versions
-            to load.
-        save_version: Version string to be used for ``save`` operations
-            by all datasets with versioning enabled.
-
-    Returns:
-        Updated ``load_versions`` with load versions specified in the ``datasets``
-            and resolved ``save_version``.
-
-    Raises:
-        VersionAlreadyExistsError: If a dataset's save version conflicts with
-            the catalog's save version.
-    """
-    if not datasets:
-        return load_versions, save_version
-
-    cur_load_versions = load_versions.copy()
-    cur_save_version = save_version
-
-    for ds_name, ds in datasets.items():
-        # TODO: Move to kedro/io/kedro_data_catalog.py when removing DataCatalog
-        # TODO: Make it a protected static method for KedroDataCatalog
-        # TODO: Replace with isinstance(ds, CachedDataset) - current implementation avoids circular import
-        cur_ds = ds._dataset if ds.__class__.__name__ == "CachedDataset" else ds  # type: ignore[attr-defined]
-
-        if isinstance(cur_ds, AbstractVersionedDataset) and cur_ds._version:
-            if cur_ds._version.load:
-                cur_load_versions[ds_name] = cur_ds._version.load
-            if cur_ds._version.save:
-                cur_save_version = cur_save_version or cur_ds._version.save
-                if cur_save_version != cur_ds._version.save:
-                    raise VersionAlreadyExistsError(
-                        f"Cannot add a dataset `{ds_name}` with `{cur_ds._version.save}` save version. "
-                        f"Save version set for the catalog is `{cur_save_version}`"
-                        f"All datasets in the catalog must have the same save version."
-                    )
-
-    return cur_load_versions, cur_save_version
+    @staticmethod
+    def _validate_versions(
+        datasets: dict[str, AbstractDataset] | None,
+        load_versions: dict[str, str],
+        save_version: str | None,
+    ) -> tuple[dict[str, str], str | None]:
+        """Validates and synchronises dataset versions for loading and saving."""
+        ...

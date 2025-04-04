@@ -35,7 +35,7 @@ MOCK_PACKAGE_NAME = "mock_package_name"
 
 class BadCatalog:
     """
-    Catalog class that doesn't subclass `DataCatalog`, for testing only.
+    Catalog class that doesn't subclass `KedroDataCatalog`, for testing only.
     """
 
 

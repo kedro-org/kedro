@@ -1,0 +1,110 @@
+site_name: ""
+site_url: https://docs.kedro.org
+
+theme:
+  name: material
+  palette:
+     # Palette toggle for light mode
+    - scheme: light
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: dark
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  language: en
+  font:
+    text: Inter
+    code: Inter Regular
+  favicon: "https://kedro.org/images/favicon.ico"
+  logo: assets/kedro-horizontal-color-on-light.svg
+
+
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+    - content.code.annotate
+    - content.code.highlight
+
+  plugins:
+    - search
+    - mermaid2
+
+extra_css:
+  - stylesheets/extra.css
+  - stylesheets/colors.css
+
+
+nav:
+  - Home: pages/index.md
+  - Kedro:
+      - LEARN ABOUT KEDRO:
+          - Introduction: pages/introduction/index.md
+          - First steps: pages/get_started/index.md
+          - Learn Kedro with hands-on video: pages/course/index.md
+      - TUTORIAL AND BASIC USAGE:
+          - Tutorial: pages/tutorial/spaceflights_tutorial.md
+          - Visualisation with Kedro-Viz: pages/visualisation/index.md
+          - Kedro for notebook users: pages/notebooks_and_ipython/index.md
+          - FAQs and resources: pages/resources/index.md
+      - KEDRO PROJECTS:
+          - Customise a new project: pages/starters/index.md
+          - Configuration: pages/configuration/index.md
+          - Data catalog: pages/data/index.md
+          - Nodes and Pipelines: pages/nodes_and_pipelines/index.md
+          - Anonymous Telemetry: pages/configuration/telemetry.md
+      - INTEGRATIONS:
+          - PySpark integration: pages/integrations/pyspark_integration.md
+          - How to add MLflow to your Kedro workflow: pages/integrations/mlflow.md
+          - Data and pipeline versioning with Kedro and DVC: pages/integrations/kedro_dvc_versioning.md
+          - Data versioning with Delta Lake: pages/integrations/deltalake_versioning.md
+          - Data versioning with Iceberg: pages/integrations/iceberg_versioning.md
+      - DEVELOPMENT:
+          - Set up Visual Studio Code: pages/development/set_up_vscode.md
+          - Set up PyCharm: pages/development/set_up_pycharm.md
+          - Debugging: pages/development/debugging.md
+          - Automated Testing: pages/development/automated_testing.md
+          - Code formatting and linting: pages/development/linting.md
+      - ADVANCED USAGE:
+          - Project setup: pages/kedro_project_setup/index.md
+          - Extend Kedro: pages/extend_kedro/index.md
+          - Hooks: pages/hooks/index.md
+          - Logging: pages/logging/index.md
+      - DEPLOYMENT:
+          - Introduction: pages/deployment/index.md
+          - Nodes grouping: pages/deployment/nodes_grouping.md
+          - Single-machine deployment: pages/deployment/single_machine.md
+          - Distributed deployment: pages/deployment/distributed.md
+          - Airflow: pages/deployment/airflow.md
+          - Amazon SageMaker: pages/deployment/amazon_sagemaker.md
+          - Amazon EMR Serverless: pages/deployment/amazon_emr_serverless.md
+          - AWS Step Functions: pages/deployment/aws_step_functions.md
+          - Azure: pages/deployment/azure.md
+          - Dask: pages/deployment/dask.md
+          - Databricks: pages/deployment/databricks/index.md
+          - Kubeflow: pages/deployment/kubeflow.md
+          - Prefect: pages/deployment/prefect.md
+          - Vertex AI: pages/deployment/vertexai.md
+          - Argo Workflow (outdated documentation that needs review): pages/deployment/argo.md
+          - AWS Batch (outdated documentation that needs review): pages/deployment/aws_batch.md
+      - CONTRIBUTE TO KEDRO:
+          - Contribution Guide: pages/contribution/index.md
+      - CLI REFERENCE:
+          - Commands Reference: pages/development/commands_reference.md
+      - API DOCUMENTATION:
+          - API Documentation: pages/development/commands_reference.md
+  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
+  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
+

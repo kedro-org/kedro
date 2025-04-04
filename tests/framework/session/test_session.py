@@ -285,7 +285,7 @@ STORE_LOGGER_NAME = "kedro.framework.session.store"
 class TestKedroSession:
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("env", [None, "env1"])
-    @pytest.mark.parametrize("extra_params", [None, {"key": "val"}])
+    @pytest.mark.parametrize("runtime_params", [None, {"key": "val"}])
     def test_create(
         self,
         fake_project,
@@ -293,12 +293,14 @@ class TestKedroSession:
         fake_session_id,
         mocker,
         env,
-        extra_params,
+        runtime_params,
         fake_username,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
         mocker.patch("sys.argv", ["kedro", "run", "--params=x"])
-        session = KedroSession.create(fake_project, env=env, extra_params=extra_params)
+        session = KedroSession.create(
+            fake_project, env=env, runtime_params=runtime_params
+        )
 
         expected_cli_data = {
             "args": mock_click_ctx.args,
@@ -313,8 +315,8 @@ class TestKedroSession:
         }
         if env:
             expected_store["env"] = env
-        if extra_params:
-            expected_store["extra_params"] = extra_params
+        if runtime_params:
+            expected_store["runtime_params"] = runtime_params
 
         expected_store["username"] = fake_username
 
@@ -334,7 +336,7 @@ class TestKedroSession:
                 pass
 
     @pytest.mark.usefixtures("mock_settings_context_class")
-    def test_create_no_env_extra_params(
+    def test_create_no_env_runtime_params(
         self,
         fake_project,
         mock_context_class,
@@ -647,7 +649,7 @@ class TestKedroSession:
             "from_inputs": None,
             "to_outputs": None,
             "load_versions": None,
-            "extra_params": {},
+            "runtime_params": {},
             "pipeline_name": fake_pipeline_name,
             "namespaces": None,
             "runner": mock_runner.__name__,
@@ -713,7 +715,7 @@ class TestKedroSession:
             "from_inputs": None,
             "to_outputs": None,
             "load_versions": None,
-            "extra_params": {},
+            "runtime_params": {},
             "pipeline_name": fake_pipeline_name,
             "namespaces": None,
             "runner": mock_thread_runner.__name__,
@@ -783,7 +785,7 @@ class TestKedroSession:
             "from_inputs": None,
             "to_outputs": None,
             "load_versions": None,
-            "extra_params": {},
+            "runtime_params": {},
             "pipeline_name": fake_pipeline_name,
             "namespaces": None,
             "runner": mock_runner.__name__,
@@ -862,7 +864,7 @@ class TestKedroSession:
             "from_inputs": None,
             "to_outputs": None,
             "load_versions": None,
-            "extra_params": {},
+            "runtime_params": {},
             "pipeline_name": fake_pipeline_name,
             "namespaces": None,
             "runner": mock_runner.__name__,
@@ -934,7 +936,7 @@ class TestKedroSession:
             "from_inputs": None,
             "to_outputs": None,
             "load_versions": None,
-            "extra_params": {},
+            "runtime_params": {},
             "pipeline_name": fake_pipeline_name,
             "namespaces": None,
             "runner": broken_runner.__name__,
@@ -1019,8 +1021,8 @@ def test_no_DictConfig_in_store(
     params,
     fake_project,
 ):
-    extra_params = _split_params(None, None, params)
-    session = KedroSession.create(fake_project, extra_params=extra_params)
+    runtime_params = _split_params(None, None, params)
+    session = KedroSession.create(fake_project, runtime_params=runtime_params)
 
     assert not any(
         OmegaConf.is_config(value) for value in get_all_values(session._store)

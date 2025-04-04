@@ -11,6 +11,7 @@ from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
     OutputNotUniqueError,
+    _match_namespaces,
 )
 from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
 
@@ -472,15 +473,27 @@ class TestValidPipeline:
         [
             (
                 "pipeline_with_namespace_simple",
-                {"namespace_1": set(), "namespace_2": {"namespace_1"}},
+                {"namespace_1": [], "namespace_2": {"namespace_1"}},
             ),
             (
                 "pipeline_with_namespace_partial",
                 {
-                    "namespace_1": set(),
+                    "namespace_1": [],
                     "node_3": {"namespace_1"},
                     "namespace_2": {"node_3"},
                     "node_6": {"namespace_2"},
+                },
+            ),
+            (
+                "pipeline_with_multiple_dependencies_on_one_node",
+                {
+                    "f1": [],
+                    "f2": ["f1"],
+                    "f3": ["f2"],
+                    "f4": ["f2"],
+                    "f5": ["f2"],
+                    "f6": ["f4"],
+                    "f7": ["f2", "f4"],
                 },
             ),
         ],
@@ -927,6 +940,21 @@ def pipeline_with_namespace_nested():
     )
 
 
+@pytest.fixture
+def pipeline_with_multiple_dependencies_on_one_node():
+    return modular_pipeline(
+        [
+            node(identity, "ds1", "ds2", name="f1"),
+            node(lambda x: (x, x), "ds2", ["ds3", "ds4"], name="f2"),
+            node(identity, "ds3", "ds5", name="f3"),
+            node(identity, "ds3", "ds6", name="f4"),
+            node(identity, "ds4", "ds8", name="f5"),
+            node(identity, "ds6", "ds7", name="f6"),
+            node(lambda x, y: x, ["ds3", "ds6"], "ds9", name="f7"),
+        ],
+    )
+
+
 class TestPipelineFilter:
     def test_no_filters(self, complex_pipeline):
         filtered_pipeline = complex_pipeline.filter()
@@ -1247,3 +1275,17 @@ def test_pipeline_to_json(all_pipeline_input_data):
         assert all(node_output in json_rep for node_output in pipeline_node.outputs)
 
     assert kedro.__version__ in json_rep
+
+
+@pytest.mark.parametrize(
+    "node_namespace,filter_namespace, expected",
+    [
+        ("x.a", "x.a", True),
+        ("x.b", "x.a", False),
+        ("x", "x.a", False),
+        ("x.a", "x", True),
+        ("xx", "x", False),
+    ],
+)
+def test_match_namespaces_helper(filter_namespace, node_namespace, expected):
+    assert _match_namespaces(node_namespace, filter_namespace) == expected

@@ -286,7 +286,7 @@ class TestCliUtils:
     def test_find_run_command_with_clipy(
         self, fake_metadata, fake_repo_path, fake_project_cli, mocker
     ):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -303,7 +303,7 @@ class TestCliUtils:
         assert run is mock_project_cli.run
 
     def test_find_run_command_no_clipy(self, fake_metadata, fake_repo_path, mocker):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -326,7 +326,7 @@ class TestCliUtils:
             "kedro.framework.cli.utils.load_entry_points", return_value=[mock_plugin]
         )
 
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -339,7 +339,7 @@ class TestCliUtils:
         assert run == mock_command
 
     def test_find_run_command_use_default_run(self, fake_metadata, mocker):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -400,7 +400,7 @@ class TestEntryPoints:
 
 class TestKedroCLI:
     def test_project_commands_no_clipy(self, mocker, fake_metadata):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -425,13 +425,13 @@ class TestKedroCLI:
         ]
 
     def test_project_commands_no_project(self, mocker, tmp_path):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=False)
         kedro_cli = KedroCLI(tmp_path)
         assert len(kedro_cli.project_groups) == 0
         assert kedro_cli._metadata is None
 
     def test_project_commands_invalid_clipy(self, mocker, fake_metadata):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -443,7 +443,7 @@ class TestKedroCLI:
 
     def test_project_commands_valid_clipy(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -461,7 +461,7 @@ class TestKedroCLI:
         ]
 
     def test_kedro_cli_no_project(self, mocker, tmp_path):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=False)
         kedro_cli = KedroCLI(tmp_path)
         assert len(kedro_cli.global_groups) == 2
         # The global groups will be the cli(group for info command) and the global commands (starter and new)
@@ -474,7 +474,7 @@ class TestKedroCLI:
         assert "Project specific commands from Kedro" not in result.output
 
     def test_kedro_run_no_project(self, mocker, tmp_path):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=False)
         kedro_cli = KedroCLI(tmp_path)
 
         result = CliRunner().invoke(kedro_cli, ["run"])
@@ -489,7 +489,7 @@ class TestKedroCLI:
         )
 
     def test_kedro_cli_with_project(self, mocker, fake_metadata):
-        mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
+        mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
@@ -828,11 +828,11 @@ class TestRunCommand:
             namespaces=[],
         )
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, conf_source=None, extra_params=expected
+            env=mocker.ANY, conf_source=None, runtime_params=expected
         )
 
     @mark.parametrize(
-        "cli_arg,expected_extra_params",
+        "cli_arg,expected_runtime_params",
         [
             ("foo=bar", {"foo": "bar"}),
             (
@@ -862,13 +862,13 @@ class TestRunCommand:
             ),
         ],
     )
-    def test_run_extra_params(
+    def test_run_runtime_params(
         self,
         mocker,
         fake_project_cli,
         fake_metadata,
         cli_arg,
-        expected_extra_params,
+        expected_runtime_params,
     ):
         mock_session_create = mocker.patch.object(KedroSession, "create")
 
@@ -878,11 +878,11 @@ class TestRunCommand:
 
         assert not result.exit_code
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
+            env=mocker.ANY, conf_source=None, runtime_params=expected_runtime_params
         )
 
     @mark.parametrize("bad_arg", ["bad", "foo=bar,bad"])
-    def test_bad_extra_params(self, fake_project_cli, fake_metadata, bad_arg):
+    def test_bad_runtime_params(self, fake_project_cli, fake_metadata, bad_arg):
         result = CliRunner().invoke(
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )

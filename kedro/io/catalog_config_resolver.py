@@ -104,7 +104,7 @@ class CatalogConfigResolver:
             raise KeyError(
                 f"Unable to find credentials '{credentials_name}': check your data "
                 "catalog and credentials configuration. See "
-                "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
+                "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog "
                 "for an example."
             ) from exc
 

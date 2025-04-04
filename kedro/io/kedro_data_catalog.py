@@ -3,31 +3,27 @@ provide ``load`` and ``save`` capabilities from anywhere in the program. To
 use a ``KedroDataCatalog``, you need to instantiate it with a dictionary of datasets.
 Then it will act as a single point of reference for your calls, relaying load and
 save functions to the underlying datasets.
-
-``KedroDataCatalog`` is an experimental feature aimed to replace ``DataCatalog`` in the future.
-Expect possible breaking changes while using it.
 """
 
 from __future__ import annotations
 
-import difflib
 import logging
 import re
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, ClassVar, Iterator, List  # noqa: UP035
 
-from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
+from kedro.io.cached_dataset import CachedDataset
+from kedro.io.catalog_config_resolver import CatalogConfigResolver
 from kedro.io.core import (
     TYPE_KEY,
     AbstractDataset,
     AbstractVersionedDataset,
     CatalogProtocol,
-    DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
     Version,
-    _validate_versions,
+    VersionAlreadyExistsError,
     generate_timestamp,
     parse_dataset_definition,
 )
@@ -107,10 +103,9 @@ class KedroDataCatalog(CatalogProtocol):
         self._config_resolver = config_resolver or CatalogConfigResolver(
             runtime_patterns=self.runtime_patterns
         )
-        # TODO: rename back to _datasets when removing old catalog
         self._datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
-        self._load_versions, self._save_version = _validate_versions(
+        self._load_versions, self._save_version = self._validate_versions(
             datasets, load_versions or {}, save_version
         )
 
@@ -123,28 +118,6 @@ class KedroDataCatalog(CatalogProtocol):
         for ds_name, data in raw_data.items():
             self[ds_name] = data  # type: ignore[has-type]
 
-    @property
-    def datasets(self) -> dict[str, Any]:
-        # TODO: remove when removing old catalog
-        return self._lazy_datasets | self._datasets
-
-    @datasets.setter
-    def datasets(self, value: Any) -> None:
-        # TODO: remove when removing old catalog
-        raise AttributeError(
-            "Operation not allowed. Please use KedroDataCatalog.add() instead."
-        )
-
-    # def __getattribute__(self, key: str) -> Any:
-    #     # Needed for compatability with old catalog interface since now we
-    #     # differ _datasets and _lazy_datasets
-    #     # TODO: remove when removing old catalog
-    #     if key == "_datasets":
-    #         return self.datasets
-    #     else:
-    #         return super().__getattribute__(key)
-
-    @property
     def config_resolver(self) -> CatalogConfigResolver:
         return self._config_resolver
 
@@ -202,7 +175,7 @@ class KedroDataCatalog(CatalogProtocol):
             DatasetNotFoundError: When a dataset with the given name
                 is not in the collection and does not match patterns.
         """
-        return self.get_dataset(ds_name)
+        return self.get(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
         """Add dataset to the ``KedroDataCatalog`` using the given key as a datsets name
@@ -240,21 +213,25 @@ class KedroDataCatalog(CatalogProtocol):
         if key in self._datasets:
             self._logger.warning("Replacing dataset '%s'", key)
         if isinstance(value, AbstractDataset):
-            self._load_versions, self._save_version = _validate_versions(
+            self._load_versions, self._save_version = self._validate_versions(
                 {key: value}, self._load_versions, self._save_version
             )
             self._datasets[key] = value
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
-            self._logger.info(f"Adding input data as a MemoryDataset - {key}")
+            # TODO: update based on selected class
+            self._logger.debug(f"Adding input data as a MemoryDataset - {key}")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:
         return len(self.keys())
 
     def get(
-        self, key: str, default: AbstractDataset | None = None
+        self,
+        key: str,
+        version: Version | None = None,
+        default: AbstractDataset | None = None,
     ) -> AbstractDataset | None:
         """Get a dataset by name from an internal collection of datasets.
 
@@ -263,6 +240,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         Args:
             key: A dataset name.
+            version: Optional argument to get a specific version of the dataset.
             default: Optional argument for default dataset to return in case
                 requested dataset not in the catalog.
 
@@ -279,6 +257,11 @@ class KedroDataCatalog(CatalogProtocol):
             self[key] = lazy_dataset.materialize()
 
         dataset = self._datasets.get(key, None) or default
+
+        if version and isinstance(dataset, AbstractVersionedDataset):
+            # we only want to return a similar-looking dataset,
+            # not modify the one stored in the current catalog
+            dataset = dataset._copy(_version=version)
 
         return dataset
 
@@ -494,72 +477,7 @@ class KedroDataCatalog(CatalogProtocol):
             self._save_version,
         )
 
-        self.add(ds_name, ds)
-
-    def get_dataset(
-        self, ds_name: str, version: Version | None = None, suggest: bool = True
-    ) -> AbstractDataset:
-        # TODO: remove when removing old catalog
-        """Get a dataset by name from an internal collection of datasets.
-
-        If a dataset is not in the collection but matches any pattern
-        it is instantiated and added to the collection first, then returned.
-
-        Args:
-            ds_name: A dataset name.
-            version: Optional argument for concrete dataset version to be loaded.
-                Works only with versioned datasets.
-            suggest: Optional argument whether to suggest fuzzy-matching datasets' names
-                in the DatasetNotFoundError message.
-
-        Returns:
-            An instance of AbstractDataset.
-
-        Raises:
-            DatasetNotFoundError: When a dataset with the given name
-                is not in the collection and do not match patterns.
-        """
-        dataset = self.get(ds_name)
-
-        if dataset is None:
-            error_msg = f"Dataset '{ds_name}' not found in the catalog"
-            # Flag to turn on/off fuzzy-matching which can be time consuming and
-            # slow down plugins like `kedro-viz`
-            if suggest:
-                matches = difflib.get_close_matches(ds_name, self.keys())
-                if matches:
-                    suggestions = ", ".join(matches)
-                    error_msg += f" - did you mean one of these instead: {suggestions}"
-            raise DatasetNotFoundError(error_msg)
-
-        if version and isinstance(dataset, AbstractVersionedDataset):
-            # we only want to return a similar-looking dataset,
-            # not modify the one stored in the current catalog
-            dataset = dataset._copy(_version=version)
-
-        return dataset
-
-    def _get_dataset(
-        self, dataset_name: str, version: Version | None = None, suggest: bool = True
-    ) -> AbstractDataset:
-        # TODO: remove when removing old catalog
-        return self.get_dataset(dataset_name, version, suggest)
-
-    def add(
-        self,
-        ds_name: str,
-        dataset: AbstractDataset | _LazyDataset,
-        replace: bool = False,
-    ) -> None:
-        # TODO: remove when removing old catalog
-        """Adds a new ``AbstractDataset`` object to the ``KedroDataCatalog``."""
-        if (
-            ds_name in self._datasets or ds_name in self._lazy_datasets
-        ) and not replace:
-            raise DatasetAlreadyExistsError(
-                f"Dataset '{ds_name}' has already been registered"
-            )
-        self.__setitem__(ds_name, dataset)
+        self.__setitem__(ds_name, ds)
 
     def filter(
         self,
@@ -639,61 +557,11 @@ class KedroDataCatalog(CatalogProtocol):
 
         return filtered
 
-    def list(
-        self, regex_search: str | None = None, regex_flags: int | re.RegexFlag = 0
-    ) -> List[str]:  # noqa: UP006
-        # TODO: remove when removing old catalog
-        """List all dataset names registered in the catalog, optionally filtered by a regex pattern.
-
-        If a regex pattern is provided, only dataset names matching the pattern will be returned.
-        This method supports optional regex flags for customization
-
-        Args:
-            regex_search: Optional regular expression to filter dataset names.
-            regex_flags: Optional regex flags.
-        Returns:
-            A list of dataset names that match the `regex_search` criteria. If no pattern is
-                provided, all dataset names are returned.
-
-        Raises:
-            SyntaxError: If the provided regex pattern is invalid.
-
-        Example:
-        ::
-
-            >>> catalog = KedroDataCatalog()
-            >>> # get datasets where the substring 'raw' is present
-            >>> raw_data = catalog.list(regex_search='raw')
-            >>> # get datasets which start with 'prm' or 'feat'
-            >>> feat_eng_data = catalog.list(regex_search='^(prm|feat)')
-            >>> # get datasets which end with 'time_series'
-            >>> models = catalog.list(regex_search='.+time_series$')
-        """
-        if regex_search is None:
-            return self.keys()
-
-        if regex_search == "":
-            self._logger.warning("The empty string will not match any datasets")
-            return []
-
-        if not regex_flags:
-            regex_flags = re.IGNORECASE
-
-        try:
-            pattern = re.compile(regex_search, flags=regex_flags)
-        except re.error as exc:
-            raise SyntaxError(
-                f"Invalid regular expression provided: '{regex_search}'"
-            ) from exc
-
-        return [ds_name for ds_name in self.__iter__() if pattern.search(ds_name)]
-
-    def save(self, name: str, data: Any) -> None:
-        # TODO: rename input argument when breaking change: name -> ds_name
+    def save(self, ds_name: str, data: Any) -> None:
         """Save data to a registered dataset.
 
         Args:
-            name: A dataset to be saved to.
+            ds_name: The name of the dataset to be saved.
             data: A data object to be saved as configured in the registered
                 dataset.
 
@@ -719,24 +587,22 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                    'col3': [5, 6]})
             >>> catalog.save("cars", df)
         """
-        dataset = self.get_dataset(name)
+        dataset = self.get(ds_name)
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
+            _format_rich(ds_name, "dark_orange") if self._use_rich_markup else ds_name,
             type(dataset).__name__,
             extra={"markup": True},
         )
 
         dataset.save(data)
 
-    def load(self, name: str, version: str | None = None) -> Any:
-        # TODO: rename input argument when breaking change: name -> ds_name
-        # TODO: remove version from input arguments when breaking change
+    def load(self, ds_name: str, version: str | None = None) -> Any:
         """Loads a registered dataset.
 
         Args:
-            name: A dataset to be loaded.
+            ds_name: The name of the dataset to be loaded.
             version: Optional argument for concrete data version to be loaded.
                 Works only with versioned datasets.
 
@@ -761,11 +627,11 @@ class KedroDataCatalog(CatalogProtocol):
             >>> df = catalog.load("cars")
         """
         load_version = Version(version, None) if version else None
-        dataset = self.get_dataset(name, version=load_version)
+        dataset = self.get(ds_name, version=load_version)
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
+            _format_rich(ds_name, "dark_orange") if self._use_rich_markup else ds_name,
             type(dataset).__name__,
             extra={"markup": True},
         )
@@ -780,7 +646,7 @@ class KedroDataCatalog(CatalogProtocol):
             DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
         """
-        dataset = self.get_dataset(name)
+        dataset = self.get(name)
         dataset.release()
 
     def confirm(self, name: str) -> None:
@@ -791,32 +657,12 @@ class KedroDataCatalog(CatalogProtocol):
             DatasetError: When the dataset does not have `confirm` method.
         """
         self._logger.info("Confirming dataset '%s'", name)
-        dataset = self.get_dataset(name)
+        dataset = self.get(name)
 
         if hasattr(dataset, "confirm"):
             dataset.confirm()
         else:
             raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
-
-    def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
-        # TODO: remove when removing old catalog
-        # This method was simplified to add memory datasets only, since
-        # adding AbstractDataset can be done via add() method
-        for ds_name, ds_data in feed_dict.items():
-            self.add(ds_name, MemoryDataset(data=ds_data), replace)  # type: ignore[abstract]
-
-    def shallow_copy(
-        self, extra_dataset_patterns: Patterns | None = None
-    ) -> KedroDataCatalog:
-        # TODO: remove when removing old catalog
-        """Returns a shallow copy of the current object.
-
-        Returns:
-            Copy of the current object.
-        """
-        if extra_dataset_patterns:
-            self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
-        return self
 
     def exists(self, name: str) -> bool:
         """Checks whether registered dataset exists by calling its `exists()`
@@ -831,10 +677,61 @@ class KedroDataCatalog(CatalogProtocol):
 
         """
         try:
-            dataset = self._get_dataset(name)
+            dataset = self.get(name)
         except DatasetNotFoundError:
             return False
         return dataset.exists()
+
+    @staticmethod
+    def _validate_versions(
+        datasets: dict[str, AbstractDataset] | None,
+        load_versions: dict[str, str],
+        save_version: str | None,
+    ) -> tuple[dict[str, str], str | None]:
+        """Validates and synchronises dataset versions for loading and saving.
+
+        Ensures consistency of dataset versions across a catalog, particularly
+        for versioned datasets. It updates load versions and validates that all
+        save versions are consistent.
+
+        Args:
+            datasets: A dictionary mapping dataset names to their instances.
+                if None, no validation occurs.
+            load_versions: A mapping between dataset names and versions
+                to load.
+            save_version: Version string to be used for ``save`` operations
+                by all datasets with versioning enabled.
+
+        Returns:
+            Updated ``load_versions`` with load versions specified in the ``datasets``
+                and resolved ``save_version``.
+
+        Raises:
+            VersionAlreadyExistsError: If a dataset's save version conflicts with
+                the catalog's save version.
+        """
+        if not datasets:
+            return load_versions, save_version
+
+        cur_load_versions = load_versions.copy()
+        cur_save_version = save_version
+
+        for ds_name, ds in datasets.items():
+            cur_ds = ds._dataset if isinstance(ds, CachedDataset) else ds
+
+            if isinstance(cur_ds, AbstractVersionedDataset) and cur_ds._version:
+                if cur_ds._version.load:
+                    cur_load_versions[ds_name] = cur_ds._version.load
+                if cur_ds._version.save:
+                    cur_save_version = cur_save_version or cur_ds._version.save
+                    if cur_save_version != cur_ds._version.save:
+                        raise VersionAlreadyExistsError(
+                            f"Cannot add a dataset `{ds_name}` with `{cur_ds._version.save}` save version. "
+                            f"Save version set for the catalog is `{cur_save_version}`"
+                            f"All datasets in the catalog must have the same save version."
+                        )
+
+        return cur_load_versions, cur_save_version
 
 
 class SharedMemoryDataCatalog(KedroDataCatalog):

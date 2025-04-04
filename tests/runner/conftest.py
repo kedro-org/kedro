@@ -45,14 +45,14 @@ def multi_input_list_output(arg1, arg2, arg3=None):
 
 
 @pytest.fixture
-def conflicting_feed_dict(pandas_df_feed_dict):
+def conflicting_raw_data(pandas_df_raw_data):
     ds1 = MemoryDataset({"data": 0})
-    ds3 = pandas_df_feed_dict["ds3"]
+    ds3 = pandas_df_raw_data["ds3"]
     return {"ds1": ds1, "ds3": ds3}
 
 
 @pytest.fixture
-def pandas_df_feed_dict():
+def pandas_df_raw_data():
     pandas_df = pd.DataFrame({"Name": ["Alex", "Bob"], "Age": [15, 25]})
     return {"ds3": pandas_df}
 

@@ -239,6 +239,9 @@ class KedroDataCatalog(CatalogProtocol):
 
         Returns:
             An instance of AbstractDataset.
+
+        Raises:
+            DatasetNotFoundError: When dataset doesn't exist in the catalog.
         """
         if key not in self._datasets and key not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
@@ -255,6 +258,10 @@ class KedroDataCatalog(CatalogProtocol):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
             dataset = dataset._copy(_version=version)
+
+        if dataset is None:
+            error_msg = f"Dataset '{key}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
 
         return dataset
 

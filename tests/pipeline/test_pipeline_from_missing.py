@@ -68,14 +68,14 @@ def branched_pipeline():
 
 
 def _make_catalog(
-    existent=None, non_existent=None, no_exists_method=None, feed_dict=None
+    existent=None, non_existent=None, no_exists_method=None, raw_data=None
 ):
     """Creates a catalog of existent and non-existent Datasets."""
     existent = [] if existent is None else existent
     non_existent = [] if non_existent is None else non_existent
     no_exists_method = [] if no_exists_method is None else no_exists_method
 
-    catalog = KedroDataCatalog(feed_dict=feed_dict)
+    catalog = KedroDataCatalog(raw_data=raw_data)
     for source in existent:
         catalog.add(source, LambdaDataset(None, None, lambda: True))
     for source in non_existent:
@@ -116,8 +116,8 @@ class TestPipelineMissing:
         assert _pipeline_contains(new_pipeline, [])
 
     def test_none_missing_feeddict_only(self, branched_pipeline, hook_manager):
-        feed_dict = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6}
-        catalog = _make_catalog(feed_dict=feed_dict)
+        raw_data = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6}
+        catalog = _make_catalog(raw_data=raw_data)
         new_pipeline = _from_missing(branched_pipeline, catalog, hook_manager)
         assert _pipeline_contains(new_pipeline, [])
 
@@ -165,13 +165,6 @@ class TestPipelineMissing:
             "Assuming output does not exist."
         )
         assert expected_msg in log_msgs
-
-    def test_catalog_and_feed_dict(self, branched_pipeline, hook_manager):
-        """Mix of feed_dict and non-existent F."""
-        catalog = _make_catalog(non_existent=["F"], existent=["D", "E"])
-        catalog.add_feed_dict({"A": 1, "B": 2, "C": 3})
-        new_pipeline = _from_missing(branched_pipeline, catalog, hook_manager)
-        assert _pipeline_contains(new_pipeline, ["split", "right_out"])
 
 
 class TestPipelineUnregistered:

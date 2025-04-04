@@ -30,7 +30,7 @@ class ExampleHook:
                 "catalog",
                 "conf_catalog",
                 "conf_creds",
-                "feed_dict",
+                "parameters",
                 "save_version",
                 "load_versions",
             ),

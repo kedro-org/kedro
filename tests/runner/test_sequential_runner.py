@@ -22,7 +22,7 @@ from tests.runner.conftest import exception_fn, identity, sink, source
 
 class TestValidSequentialRunner:
     def test_run_with_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -30,18 +30,18 @@ class TestValidSequentialRunner:
         assert result["Z"] == (42, 42, 42)
 
     def test_run_without_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
     def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." in caplog.text
 
     def test_run_twice_giving_same_result(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         patterns_before_run = catalog.config_resolver.list_patterns()
         result_first_run = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
@@ -112,9 +112,10 @@ class TestSequentialRunnerBranchedPipeline:
         is_async,
         memory_catalog,
         unfinished_outputs_pipeline,
-        pandas_df_feed_dict,
+        pandas_df_raw_data,
     ):
-        memory_catalog.add_feed_dict(pandas_df_feed_dict, replace=True)
+        for df_name, df_value in pandas_df_raw_data.items():
+            memory_catalog[df_name] = df_value
         outputs = SequentialRunner(is_async=is_async).run(
             unfinished_outputs_pipeline, memory_catalog
         )
@@ -132,10 +133,13 @@ class TestSequentialRunnerBranchedPipeline:
         is_async,
         memory_catalog,
         unfinished_outputs_pipeline,
-        conflicting_feed_dict,
+        conflicting_raw_data,
     ):
         """ds1 and ds3 will be replaced with new inputs."""
-        memory_catalog.add_feed_dict(conflicting_feed_dict, replace=True)
+
+        for ds_name, ds_value in conflicting_raw_data.items():
+            memory_catalog[ds_name] = ds_value
+
         outputs = SequentialRunner(is_async=is_async).run(
             unfinished_outputs_pipeline, memory_catalog
         )

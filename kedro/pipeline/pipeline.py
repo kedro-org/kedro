@@ -167,7 +167,8 @@ class Pipeline:
     def _validate_namespaces(self, node_parents: dict[Node, set[Node]]) -> None:
         from warnings import warn
 
-        visited: dict[str, str] = dict()
+        visited: dict[str, int] = dict()
+        path: list[str] = []
         node_children = defaultdict(set)
         for child, parents in node_parents.items():
             for parent in parents:
@@ -177,13 +178,13 @@ class Pipeline:
             curr_namespace = n.namespace or ""
             if curr_namespace and curr_namespace in visited:
                 warn(
-                    f"Namespace '{curr_namespace}' is interrupted by node '{visited[curr_namespace]}' and thus invalid.",
+                    f"Namespace '{curr_namespace}' is interrupted by nodes {path[visited[curr_namespace]:]} and thus invalid.",
                     UserWarning,
                 )
 
             # If the current namespace is different from the last namespace and isn't a child namespace,
             # mark the last namespace and all unrelated parent namespaces as visited to detect potential future interruptions
-            backtracked: dict[str, str] = dict()
+            backtracked: dict[str, int] = dict()
             if (
                 last_namespace
                 and curr_namespace != last_namespace
@@ -194,16 +195,17 @@ class Pipeline:
                 for p in parts:
                     prefix += p
                     if not curr_namespace.startswith(prefix):
-                        backtracked[prefix] = n.name
+                        backtracked[prefix] = len(path)
                     prefix += "."
 
                 visited.update(backtracked)
 
+            path.append(n.name)
             for child in node_children[n]:
                 dfs(child, n.namespace or "")
-            if backtracked:
-                for key in backtracked.keys():
-                    visited.pop(key, None)
+            path.pop()
+            for key in backtracked.keys():
+                visited.pop(key, None)
 
         start = (n for n in node_parents if not node_parents[n])
         for n in start:

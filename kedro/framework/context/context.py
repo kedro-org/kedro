@@ -239,7 +239,9 @@ class KedroContext:
         )
 
         parameters = self._get_parameters()
-        self._add_parameters(catalog, parameters)
+
+        for param_name, param_value in parameters.items():
+            catalog[param_name] = param_value
 
         _validate_transcoded_datasets(catalog)
 
@@ -252,18 +254,6 @@ class KedroContext:
             load_versions=load_versions,
         )
         return catalog
-
-    def _add_parameters(
-        self, catalog: CatalogProtocol, parameters: dict[str, Any]
-    ) -> None:
-        """Add datasets to catalog using the data provided through `parameters`.
-
-        Args:
-            catalog: The catalog to which parameters are added.
-            parameters: A dictionary where each key is a parameter name and each value is the corresponding parameter value.
-        """
-        for param_name, param_value in parameters.items():
-            catalog[param_name] = param_value
 
     def _get_parameters(self) -> dict[str, Any]:
         """Returns a dictionary with data to be added in memory as `MemoryDataset`` instances.

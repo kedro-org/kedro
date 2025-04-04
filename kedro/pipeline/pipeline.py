@@ -439,7 +439,7 @@ class Pipeline:
         nodes = [self._nodes_by_name[name] for name in node_names]
         return Pipeline(nodes)
 
-    def only_nodes_with_namespaces(self, node_namespaces: str | list[str]) -> Pipeline:
+    def only_nodes_with_namespaces(self, node_namespaces: list[str]) -> Pipeline:
         """Creates a new ``Pipeline`` containing only nodes with the specified
         namespaces.
 
@@ -452,10 +452,6 @@ class Pipeline:
         Returns:
             A new ``Pipeline`` containing nodes with the specified namespaces.
         """
-        # Ensure node_namespaces is a list if it's a string
-        if isinstance(node_namespaces, str):
-            node_namespaces = [node_namespaces]
-
         nodes = []
         unmatched_namespaces = []  # Track namespaces that don't match any nodes
 

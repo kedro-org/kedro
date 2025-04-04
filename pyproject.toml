@@ -82,10 +82,14 @@ test = [
     "types-toml",
 ]
 docs = [
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.2.0",
-    "kedro-sphinx-theme==2024.10.3",
-    "sphinx-notfound-page!=1.0.3",  # Required by kedro-sphinx-theme. 1.0.3 results in `AttributeError: 'tuple' object has no attribute 'default'`.
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.11",
+    "mkdocs-material-extensions>=1.3.1",
+    "mkdocs-mermaid2-plugin>=1.2.1",
+    "mkdocs-autorefs>=1.4.1",
+    "mkdocs-get-deps>=0.2.0",
+    "mkdocstrings>=0.29.1",
+    "mkdocstrings-python>=0.29.1"
 ]
 jupyter = [
     "ipylab>=1.0.0",

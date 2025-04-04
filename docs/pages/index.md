@@ -80,9 +80,9 @@
 
 ## API documentation
 
-::: {.autosummary toctree="api" caption="API documentation" template="autosummary/module.rst" recursive=""}
+<!-- ::: {.autosummary toctree="api" caption="API documentation" template="autosummary/module.rst" recursive=""}
 kedro
-:::
+::: -->
 
 # Indices and tables
 

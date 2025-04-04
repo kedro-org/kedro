@@ -207,7 +207,7 @@ s3fs
             session.run(self.pipeline_name, node_names=[self.node_name])
 ```
 
-### Deployment on AWAA
+### Deployment on MWAA
 1. Archive your three files: `new_kedro_project-0.1-py3-none-any.whl` and `conf-new_kedro_project.tar.gz` located in `new-kedro-project/dist`, and `logging.yml` located in `new-kedro-project/conf/` into a file called `plugins.zip` and upload it to `s3://your_S3_bucket`.
 ```shell
 zip -j plugins.zip dist/new_kedro_project-0.1-py3-none-any.whl dist/conf-new_kedro_project.tar.gz conf/logging.yml

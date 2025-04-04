@@ -950,7 +950,7 @@ class TestPipelineFilter:
         assert nodes == expected_nodes
 
     def test_namespace_filter(self, pipeline_with_namespaces):
-        filtered_pipeline = pipeline_with_namespaces.filter(node_namespaces="katie")
+        filtered_pipeline = pipeline_with_namespaces.filter(node_namespaces=["katie"])
         nodes = {node.name for node in filtered_pipeline.nodes}
         assert nodes == {"katie.node1", "katie.lisa.node4", "katie.lisa.john.node6"}
 
@@ -1181,10 +1181,10 @@ class TestPipelineFilterHelpers:
             with pytest.raises(
                 ValueError, match="Pipeline does not contain nodes with namespaces"
             ):
-                pipeline_with_namespaces.only_nodes_with_namespaces(target_namespaces)
+                pipeline_with_namespaces.only_nodes_with_namespaces([target_namespaces])
         else:
             resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespaces(
-                target_namespaces
+                [target_namespaces]
             )
             actual_namespaces = sorted(
                 node.namespace for node in resulting_pipeline.nodes
@@ -1200,7 +1200,7 @@ class TestPipelineFilterHelpers:
         pipeline = modular_pipeline([node(identity, "A", "B", namespace=namespace)])
         expected_error_message = "Pipeline does not contain nodes with the following namespaces: \\['non_existent'\\]"
         with pytest.raises(ValueError, match=expected_error_message):
-            pipeline.only_nodes_with_namespaces("non_existent")
+            pipeline.only_nodes_with_namespaces(["non_existent"])
 
 
 class TestPipelineRunnerHelpers:

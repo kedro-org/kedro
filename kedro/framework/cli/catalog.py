@@ -13,6 +13,7 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
+from kedro.io.core import is_parameter
 from kedro.io.kedro_data_catalog import KedroDataCatalog, _LazyDataset
 
 if TYPE_CHECKING:
@@ -25,12 +26,6 @@ if TYPE_CHECKING:
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     kwargs.setdefault("save_on_close", False)
     return KedroSession.create(**kwargs)
-
-
-def is_parameter(dataset_name: str) -> bool:
-    # TODO: when breaking change move it to kedro/io/core.py
-    """Check if dataset is a parameter."""
-    return dataset_name.startswith("params:") or dataset_name == "parameters"
 
 
 @click.group(name="Kedro")

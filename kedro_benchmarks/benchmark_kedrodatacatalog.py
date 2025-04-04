@@ -39,7 +39,7 @@ class TimeKedroDataCatalog:
         self.datasets = {
             f"dataset_new_{i}": CSVDataset(filepath="data.csv") for i in range(1, 1001)
         }
-        self.feed_dict = {
+        self.parameters = {
             f"param_{i}": i for i in range(1, 1001)
         }
 
@@ -88,7 +88,7 @@ class TimeKedroDataCatalog:
     def time_setitem_raw(self):
         """Benchmark the time to add a memory dataset"""
         for i in range(1,1001):
-            self.catalog[f"param_{i}"] = self.feed_dict[f"param_{i}"]
+            self.catalog[f"param_{i}"] = self.parameters[f"param_{i}"]
 
     def time_save(self):
         """Benchmark the time to save datasets"""

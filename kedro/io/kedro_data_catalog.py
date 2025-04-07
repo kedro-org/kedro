@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Iterator, List  # noqa: UP035
+from multiprocessing.reduction import ForkingPickler
+from pickle import PicklingError
+from typing import Any, ClassVar, Iterator, List  # noqa: UP035
 
 from kedro.io.cached_dataset import CachedDataset
 from kedro.io.catalog_config_resolver import CatalogConfigResolver
@@ -26,6 +28,7 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
+from kedro.io.shared_memory_dataset import SharedMemoryDataset
 from kedro.logging import _format_rich
 from kedro.utils import _has_rich_handler
 
@@ -56,6 +59,8 @@ class _LazyDataset:
 
 
 class KedroDataCatalog(CatalogProtocol):
+    runtime_patterns: ClassVar = {"{default}": {"type": "MemoryDataset"}}
+
     def __init__(
         self,
         datasets: dict[str, AbstractDataset] | None = None,
@@ -341,7 +346,9 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog.save("boats", df)
         """
         catalog = catalog or {}
-        config_resolver = CatalogConfigResolver(catalog, credentials)
+        config_resolver = CatalogConfigResolver(
+            catalog, credentials, cls.runtime_patterns
+        )
         save_version = save_version or generate_timestamp()
         load_versions = load_versions or {}
 

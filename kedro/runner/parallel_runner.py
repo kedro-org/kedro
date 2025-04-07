@@ -5,16 +5,14 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 from __future__ import annotations
 
 from concurrent.futures import Executor, ProcessPoolExecutor
-from multiprocessing.managers import BaseProxy, SyncManager
+from multiprocessing.managers import SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from kedro.io import (
     CatalogProtocol,
-    DatasetNotFoundError,
     MemoryDataset,
-    SharedMemoryDataset,
 )
 from kedro.runner.runner import AbstractRunner
 
@@ -23,6 +21,7 @@ if TYPE_CHECKING:
 
     from pluggy import PluginManager
 
+    from kedro.io.kedro_data_catalog import SharedMemoryDataCatalog
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
@@ -48,7 +47,6 @@ class ParallelRunner(AbstractRunner):
         self,
         max_workers: int | None = None,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """
         Instantiates the runner by creating a Manager.
@@ -60,18 +58,10 @@ class ParallelRunner(AbstractRunner):
                 cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
-                during the run. This is used to set the default datasets to SharedMemoryDataset
-                for `ParallelRunner`.
-
         Raises:
             ValueError: bad parameters passed
         """
-        default_dataset_pattern = {"{default}": {"type": "SharedMemoryDataset"}}
-        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
-        super().__init__(
-            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
-        )
+        super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
@@ -101,62 +91,15 @@ class ParallelRunner(AbstractRunner):
             )
 
     @classmethod
-    def _validate_catalog(cls, catalog: CatalogProtocol, pipeline: Pipeline) -> None:
+    def _validate_catalog(cls, catalog: SharedMemoryDataCatalog) -> None:
         """Ensure that all datasets are serialisable and that we do not have
         any non proxied memory datasets being used as outputs as their content
         will not be synchronized across threads.
         """
+        catalog.validate_catalog()
 
-        datasets = catalog._datasets
-
-        unserialisable = []
-        for name, dataset in datasets.items():
-            if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
-                unserialisable.append(name)
-                continue
-            try:
-                ForkingPickler.dumps(dataset)
-            except (AttributeError, PicklingError):
-                unserialisable.append(name)
-
-        if unserialisable:
-            raise AttributeError(
-                f"The following datasets cannot be used with multiprocessing: "
-                f"{sorted(unserialisable)}\nIn order to utilize multiprocessing you "
-                f"need to make sure all datasets are serialisable, i.e. datasets "
-                f"should not make use of lambda functions, nested functions, closures "
-                f"etc.\nIf you are using custom decorators ensure they are correctly "
-                f"decorated using functools.wraps()."
-            )
-
-        memory_datasets = []
-        for name, dataset in datasets.items():
-            if (
-                name in pipeline.all_outputs()
-                and isinstance(dataset, MemoryDataset)
-                and not isinstance(dataset, BaseProxy)
-            ):
-                memory_datasets.append(name)
-
-        if memory_datasets:
-            raise AttributeError(
-                f"The following datasets are memory datasets: "
-                f"{sorted(memory_datasets)}\n"
-                f"ParallelRunner does not support output to externally created "
-                f"MemoryDatasets"
-            )
-
-    def _set_manager_datasets(
-        self, catalog: CatalogProtocol, pipeline: Pipeline
-    ) -> None:
-        for dataset in pipeline.datasets():
-            try:
-                catalog.exists(dataset)
-            except DatasetNotFoundError:
-                pass
-        for name, ds in catalog._datasets.items():
-            if isinstance(ds, SharedMemoryDataset):
-                ds.set_manager(self._manager)
+    def _set_manager_datasets(self, catalog: SharedMemoryDataCatalog) -> None:
+        catalog.set_manager_datasets(self._manager)
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """

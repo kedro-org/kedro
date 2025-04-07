@@ -147,6 +147,12 @@ nav:
               - DatasetAlreadyExistsError: api/io/kedro.io.DatasetAlreadyExistsError.md
               - DatasetError: api/io/kedro.io.DatasetError.md
               - DatasetNotFoundError: api/io/kedro.io.DatasetNotFoundError.md
+          - kedro.ipython:
+              - Overview: api/ipython/kedro.ipython.md
+              - load_ipython_extension: api/ipython/kedro.ipython.load_ipython_extension.md
+              - magic_load_node: api/ipython/kedro.ipython.magic_load_node.md
+              - magic_reload_kedro: api/ipython/kedro.ipython.magic_reload_kedro.md
+              - reload_kedro: api/ipython/kedro.ipython.reload_kedro.md
           - kedro.logging: api/kedro.logging.md
           - kedro.pipeline:
               - Overview: api/pipeline/kedro.pipeline.md

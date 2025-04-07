@@ -87,20 +87,7 @@ class AbstractRunner(ABC):
         # Run a warm-up to materialize all datasets in the catalog before run
         for ds in pipeline.datasets():
             if ds in catalog:
-                warmed_up_ds.append(ds)
                 _ = catalog.get(ds)
-
-        # Check if there are any input datasets that aren't in the catalog and
-        # don't match a pattern in the catalog.
-        unsatisfied = pipeline.inputs() - set(warmed_up_ds)
-
-        if unsatisfied:
-            raise ValueError(
-                f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
-            )
-
-        # Register the default dataset pattern with the catalog
-        catalog.config_resolver.add_runtime_patterns(self._extra_dataset_patterns)
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 

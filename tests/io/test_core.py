@@ -360,7 +360,7 @@ class TestCoreFunctions:
         ):
             with pytest.raises(
                 DatasetError,
-                match="Class 'LambdaDataSet' not found, is this a typo?",
+                match="Empty module name. Invalid dataset path: 'LambdaDataSet'. Please check if it's correct.",
             ):
                 parse_dataset_definition(config)
 

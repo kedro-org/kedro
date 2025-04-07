@@ -4,13 +4,8 @@ from typing import Any
 
 from kedro.framework.project import pipelines as _pipelines
 from kedro.io import KedroDataCatalog
+from kedro.io.core import is_parameter
 from kedro.pipeline import Pipeline
-
-
-def is_parameter(dataset_name: str) -> bool:
-    # TODO: when breaking change move it to kedro/io/core.py
-    """Check if dataset is a parameter."""
-    return dataset_name.startswith("params:") or dataset_name == "parameters"
 
 
 class CatalogCommandsMixin:
@@ -21,9 +16,6 @@ class CatalogCommandsMixin:
         self: KedroDataCatalog, pipelines: list[str] | list[Pipeline] | None = None
     ) -> dict:
         """Show datasets per type."""
-
-        # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475
-        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
 
         target_pipelines = pipelines or _pipelines.keys()
 
@@ -47,15 +39,11 @@ class CatalogCommandsMixin:
                 else:
                     default_ds.add(ds_name)
 
-            self.config_resolver.add_runtime_patterns(runtime_pattern)
-
             used_ds_by_type = _group_ds_by_type(
                 pipeline_ds - patterns_ds - default_ds, self
             )
             patterns_ds_by_type = _group_ds_by_type(patterns_ds, self)
             default_ds_by_type = _group_ds_by_type(default_ds, self)
-
-            self.config_resolver.remove_runtime_patterns(runtime_pattern)
 
             data = (
                 ("datasets", used_ds_by_type),

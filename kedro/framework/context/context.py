@@ -135,7 +135,7 @@ def _validate_transcoded_datasets(catalog: CatalogProtocol) -> None:
             `_transcode_split` function.
 
     """
-    for dataset_name in catalog.datasets.keys():
+    for dataset_name in catalog:
         _transcode_split(dataset_name)
 
 

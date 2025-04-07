@@ -55,7 +55,6 @@ When they run, plugins may request information about the current project by crea
 ```python
 from pathlib import Path
 
-from kedro.framework.startup import _get_project_metadata
 from kedro.framework.session import KedroSession
 
 

@@ -122,7 +122,11 @@ nav:
       - CLI REFERENCE:
           - Commands Reference: pages/development/commands_reference.md
       - API DOCUMENTATION:
-          - kedro.config: api/kedro.config.md
+          - kedro.config:
+              - Overview: api/config/kedro.config.md
+              - AbstractConfigLoader: api/config/kedro.config.AbstractConfigLoader.md
+              - OmegaConfigLoader: api/config/kedro.config.OmegaConfigLoader.md
+              - MissingConfigException: api/config/kedro.config.MissingConfigException.md
           - kedro.framework:
               - Overview: api/framework/kedro.framework.md
               - CLI: api/framework/kedro.framework.cli.md

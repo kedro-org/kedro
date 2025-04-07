@@ -29,7 +29,7 @@ dependencies = [
     "pluggy>=1.0",
     "pre-commit-hooks",
     "PyYAML>=4.2,<7.0",
-    "rich>=12.0,<14.0",
+    "rich>=12.0,<15.0",
     "rope>=0.21,<2.0",  # subject to LGPLv3 license
     "toml>=0.10.0",
     "typing_extensions>=4.0",
@@ -56,7 +56,7 @@ test = [
     "behave==1.2.6",
     "coverage[toml]",
     "detect-secrets~=1.5.0",
-    "import-linter==2.2",
+    "import-linter==2.3",
     "ipylab>=1.0.0",
     "ipython~=8.10",
     "jupyterlab_server>=2.11.1",
@@ -71,7 +71,8 @@ test = [
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest>=7.2,<9.0",
-    "s3fs>=2021.4, <2025.3",  # Upper bound set arbitrarily, to be reassessed in late 2024
+    "pytest-asyncio>=0.21,<0.26",
+    "s3fs>=2021.4, <2025.4",
     "requests_mock",
     # mypy related dependencies
     "pandas-stubs",

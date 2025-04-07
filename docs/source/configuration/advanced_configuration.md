@@ -269,7 +269,7 @@ CONFIG_LOADER_ARGS = {
     "custom_resolvers": {
         "add": lambda *my_list: sum(my_list),
         "polars": lambda x: getattr(pl, x),
-        "today": lambda: date_today(),
+        "today": date_today,
     }
 }
 ```

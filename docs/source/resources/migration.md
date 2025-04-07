@@ -5,7 +5,8 @@
 ## Migrate an existing project that uses Kedro 0.19.* to use 1.*
 
 ### Polishing API Surface
-Kedro 1.0.0 made the following private methods `_is_project` and `_find_kedro_project` public. To update, you need to use `is_kedro_project` and `find_kedro_project` respectively.
+- Kedro 1.0.0 made the following private methods `_is_project` and `_find_kedro_project` public. To update, you need to use `is_kedro_project` and `find_kedro_project` respectively.
+- Renamed instances of `extra_params` and `_extra_params` to `runtime_params` in `KedroSession`, `KedroContext` and `PipelineSpecs`. To update, start using `runtime_params` while creating a `KedroSession`, `KedroContext` or while using pipeline hooks like `before_pipeline_run`, `after_pipeline_run` and `on_pipeline_error`.
 
 ## Migrate an existing project that uses Kedro 0.18.* to use 0.19.*
 

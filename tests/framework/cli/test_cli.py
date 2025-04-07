@@ -27,6 +27,7 @@ from kedro.framework.cli.utils import (
     find_run_command,
     forward_command,
     get_pkg_version,
+    validate_conf_source,
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -827,11 +828,11 @@ class TestRunCommand:
             namespace=None,
         )
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, conf_source=None, extra_params=expected
+            env=mocker.ANY, conf_source=None, runtime_params=expected
         )
 
     @mark.parametrize(
-        "cli_arg,expected_extra_params",
+        "cli_arg,expected_runtime_params",
         [
             ("foo=bar", {"foo": "bar"}),
             (
@@ -861,13 +862,13 @@ class TestRunCommand:
             ),
         ],
     )
-    def test_run_extra_params(
+    def test_run_runtime_params(
         self,
         mocker,
         fake_project_cli,
         fake_metadata,
         cli_arg,
-        expected_extra_params,
+        expected_runtime_params,
     ):
         mock_session_create = mocker.patch.object(KedroSession, "create")
 
@@ -877,11 +878,11 @@ class TestRunCommand:
 
         assert not result.exit_code
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
+            env=mocker.ANY, conf_source=None, runtime_params=expected_runtime_params
         )
 
     @mark.parametrize("bad_arg", ["bad", "foo=bar,bad"])
-    def test_bad_extra_params(self, fake_project_cli, fake_metadata, bad_arg):
+    def test_bad_runtime_params(self, fake_project_cli, fake_metadata, bad_arg):
         result = CliRunner().invoke(
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )
@@ -1024,3 +1025,54 @@ class TestRunCommand:
             " does not exist."
         )
         assert expected_output in result.output
+
+
+class TestValidateConfSource:
+    def test_remote_url_validation(self):
+        """Test that remote URLs are not validated for existence"""
+        ctx = MagicMock()
+        param = MagicMock()
+
+        s3_url = "s3://bucket/path"
+        gs_url = "gs://bucket/path"
+        http_url = "http://example.com/path"
+
+        assert validate_conf_source(ctx, param, s3_url) == s3_url
+        assert validate_conf_source(ctx, param, gs_url) == gs_url
+        assert validate_conf_source(ctx, param, http_url) == http_url
+
+        with pytest.raises(
+            click.BadParameter, match="Path 'file://nonexistent' does not exist"
+        ):
+            validate_conf_source(ctx, param, "file://nonexistent")
+
+    def test_exception_handling_in_validator(self, mocker):
+        """Test exception handling in validate_conf_source function"""
+        ctx = MagicMock()
+        param = MagicMock()
+
+        # Mock Path to raise an unexpected exception
+        mock_path = mocker.patch("kedro.framework.cli.utils.Path")
+        mock_path.side_effect = ValueError("Mock error in Path handling")
+
+        with pytest.raises(
+            click.BadParameter,
+            match="Invalid path: somepath. Error: Mock error in Path handling",
+        ):
+            validate_conf_source(ctx, param, "somepath")
+
+    def test_remote_url_direct(self, mocker):
+        """Test that remote URLs are handled directly without using the fake CLI structure"""
+        ctx = mocker.MagicMock()
+        param = mocker.MagicMock()
+
+        from kedro.framework.cli.utils import validate_conf_source
+
+        result = validate_conf_source(ctx, param, "s3://bucket/path")
+        assert result == "s3://bucket/path"
+
+        result = validate_conf_source(ctx, param, "http://example.com/path")
+        assert result == "http://example.com/path"
+
+        result = validate_conf_source(ctx, param, "gs://bucket/path")
+        assert result == "gs://bucket/path"

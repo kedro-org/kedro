@@ -2,11 +2,14 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
+
 ## Documentation changes
 ## Community contributions
 
 ## Breaking changes to the API
 * Private methods `_is_project` and `_find_kedro_project` are changed to `is_kedro_project` and `find_kedro_project`.
+* Renamed instances of `extra_params` and `_extra_params` to `runtime_params`.
 
 ## Migration guide from Kedro 0.19.* to 1.*
 [See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
@@ -14,8 +17,18 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+* Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
+* Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
+## Breaking changes to the API
+## Documentation changes
+
+# Release 0.19.12
+
+## Major features and improvements
 * Added `KedroDataCatalog.filter()` to filter datasets by name and type.
 * Added `Pipeline.grouped_nodes_by_namespace` property which returns a dictionary of nodes grouped by namespace, intended to be used by plugins to facilitate deployment of namespaced nodes together.
+* Added support for cloud storage protocols in `--conf-source`, allowing configuration to be loaded from remote locations such as S3.
 
 ## Bug fixes and other changes
 * Added `DataCatalog` deprecation warning.
@@ -25,13 +38,22 @@
 * Changed the execution of `SequentialRunner` to not use an executor pool to ensure it's single threaded.
 * Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
 * Remove `7: Kedro Viz` from Kedro tools.
+* Updated node grouping API to only group on first level of namespace.
 
-## Breaking changes to the API
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.
 * Added documentation for Kedro's support for Iceberg versioning.
 * Added documentation for Kedro's nodes grouping in deployment.
 * Fixed a minor grammatical error in Kedro-Viz installation instructions to improve documentation clarity.
+* Improved the Kedro VSCode extension documentation.
+* Updated the recommendations for nesting namespaces.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Jacob Pieniazek](https://github.com/jakepenzak)
+* [Lucas Vittor](https://github.com/lvvittor)
+* [Ean Jimenez](https://github.com/Prometean)
+* [Toran Sahu](https://github.com/toransahu)
 
 # Release 0.19.11
 

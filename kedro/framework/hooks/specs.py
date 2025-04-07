@@ -157,7 +157,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "extra_params": Optional[Dict[str, Any]]
+                     "runtime_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -194,7 +194,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "extra_params": Optional[Dict[str, Any]]
+                     "runtime_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -235,7 +235,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "extra_params": Optional[Dict[str, Any]]
+                     "runtime_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,

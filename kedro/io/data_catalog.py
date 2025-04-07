@@ -31,7 +31,7 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
-from kedro.utils import _format_rich, _has_rich_handler
+from kedro.utils import _has_rich_handler
 
 CATALOG_KEY = "catalog"  # Kept to avoid the breaking change
 WORDS_REGEX_PATTERN = re.compile(r"\W+")
@@ -163,7 +163,7 @@ class DataCatalog:
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
         warnings.warn(
-            "`DataCatalog` has been deprecated and will be replaced by `KedroDataCatalog`, in Kedro 1.0.0."
+            "`DataCatalog` has been deprecated and will be replaced by `KedroDataCatalog`, in Kedro 1.0.0. "
             "Currently some `KedroDataCatalog` APIs have been retained for compatibility with `DataCatalog`, including "
             "the `datasets` property and the `get_datasets`, `_get_datasets`, `add`,` list`, `add_feed_dict`, "
             "and `shallow_copy` methods. These will be removed or replaced with updated alternatives in Kedro 1.0.0. "
@@ -400,9 +400,9 @@ class DataCatalog:
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
+            name,
             type(dataset).__name__,
-            extra={"markup": True},
+            extra={"rich_format": ["dark_orange"]},
         )
 
         result = dataset.load()
@@ -442,9 +442,9 @@ class DataCatalog:
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            _format_rich(name, "dark_orange") if self._use_rich_markup else name,
+            name,
             type(dataset).__name__,
-            extra={"markup": True},
+            extra={"rich_format": ["dark_orange"]},
         )
 
         dataset.save(data)

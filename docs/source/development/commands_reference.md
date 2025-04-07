@@ -109,7 +109,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.19.11
+v0.19.12
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -247,7 +247,7 @@ def run(
     node_names = tuple(node_names)
 
     with KedroSession.create(
-        env=env, conf_source=conf_source, extra_params=params
+        env=env, conf_source=conf_source, runtime_params=params
     ) as session:
         session.run(
             tags=tags,

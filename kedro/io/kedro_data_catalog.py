@@ -214,7 +214,7 @@ class KedroDataCatalog(CatalogProtocol):
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
-            self._logger.info(f"Adding input data as a MemoryDataset - {key}")
+            self._logger.debug(f"Adding input data as a MemoryDataset - {key}")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:

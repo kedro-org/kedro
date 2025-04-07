@@ -136,7 +136,7 @@ def _validate_transcoded_datasets(catalog: CatalogProtocol) -> None:
             `_transcode_split` function.
 
     """
-    for dataset_name in catalog._datasets.keys():
+    for dataset_name in catalog:
         _transcode_split(dataset_name)
 
 
@@ -239,7 +239,10 @@ class KedroContext:
         )
 
         parameters = self._get_parameters()
-        self._add_parameters(catalog, parameters)
+
+        # Add parameters data to catalog.
+        for param_name, param_value in parameters.items():
+            catalog[param_name] = param_value
 
         _validate_transcoded_datasets(catalog)
 
@@ -253,18 +256,6 @@ class KedroContext:
         )
         return catalog
 
-    def _add_parameters(
-        self, catalog: CatalogProtocol, parameters: dict[str, Any]
-    ) -> None:
-        """Add datasets to catalog using the data provided through `parameters`.
-
-        Args:
-            catalog: The catalog to which parameters are added.
-            parameters: A dictionary where each key is a parameter name and each value is the corresponding parameter value.
-        """
-        for param_name, param_value in parameters.items():
-            catalog[param_name] = param_value
-
     def _get_parameters(self) -> dict[str, Any]:
         """Returns a dictionary with data to be added in memory as `MemoryDataset`` instances.
         Keys represent parameter names and the values are parameter values."""
@@ -272,7 +263,8 @@ class KedroContext:
         params_dict = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
-            """This recursively adds parameter paths to the `params_dict`,
+            """This recursively adds parameter paths that are defined in `parameters.yml`
+            with the addition of any extra parameters passed at initialization to the `params_dict`,
             whenever `param_value` is a dictionary itself, so that users can
             specify specific nested parameters in their node inputs.
 

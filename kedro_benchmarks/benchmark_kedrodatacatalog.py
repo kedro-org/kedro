@@ -110,15 +110,6 @@ class TimeKedroDataCatalog:
         for i in range(1,1001):
             self.catalog.release(f"dataset_{i}")
 
-    def time_list(self):
-        """Benchmark the time to list all datasets"""
-        self.catalog.list()
-
-    def time_shallow_copy(self):
-        """Benchmark the time to shallow copy the catalog"""
-        # Will be removed
-        self.catalog.shallow_copy()
-
     def time_resolve_factory(self):
         """Benchmark the time to resolve factory"""
         for i in range(1,1001):

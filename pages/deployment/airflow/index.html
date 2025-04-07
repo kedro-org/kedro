@@ -1,0 +1,3928 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.kedro.org/pages/deployment/airflow/">
+      
+      
+        <link rel="prev" href="../distributed/">
+      
+      
+        <link rel="next" href="../amazon_sagemaker/">
+      
+      
+      <link rel="icon" href="https://kedro.org/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+    
+    
+      
+        <title>Airflow - </title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.4af4bdda.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CInter+Regular:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Inter Regular"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/colors.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/globals.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/themes.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="light" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#apache-airflow" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      
+  <img src="../../../assets/kedro-horizontal-color-on-light.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Airflow
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="light" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../introduction/" class="md-tabs__link">
+          
+  
+  
+  Kedro
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../readthedocs.io/projects/kedro-viz" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Kedro-Viz
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://docs.kedro.org/projects/kedro-datasets" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Kedro-Datasets
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      
+  <img src="../../../assets/kedro-horizontal-color-on-light.svg" alt="logo">
+
+    </a>
+    
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Kedro
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Kedro
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    LEARN ABOUT KEDRO
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            LEARN ABOUT KEDRO
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../get_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    First steps
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Learn Kedro with hands-on video
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    TUTORIAL AND BASIC USAGE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            TUTORIAL AND BASIC USAGE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/spaceflights_tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tutorial
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../visualisation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Visualisation with Kedro-Viz
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks_and_ipython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro for notebook users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQs and resources
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    KEDRO PROJECTS
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            KEDRO PROJECTS
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../starters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Customise a new project
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data catalog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nodes_and_pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Nodes and Pipelines
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/telemetry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Anonymous Telemetry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    INTEGRATIONS
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            INTEGRATIONS
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/pyspark_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    PySpark integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/mlflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    How to add MLflow to your Kedro workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/kedro_dvc_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data and pipeline versioning with Kedro and DVC
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/deltalake_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data versioning with Delta Lake
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/iceberg_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data versioning with Iceberg
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    DEVELOPMENT
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            DEVELOPMENT
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/set_up_vscode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Set up Visual Studio Code
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/set_up_pycharm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Set up PyCharm
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debugging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/automated_testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Automated Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/linting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Code formatting and linting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    ADVANCED USAGE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADVANCED USAGE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kedro_project_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Project setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extend_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extend Kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Logging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    DEPLOYMENT
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            DEPLOYMENT
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nodes_grouping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Nodes grouping
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../single_machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Single-machine deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distributed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Distributed deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Airflow
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Airflow
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction-and-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction and strategy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-run-a-kedro-pipeline-on-apache-airflow-with-astronomer" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to run a Kedro pipeline on Apache Airflow with Astronomer
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to run a Kedro pipeline on Apache Airflow with Astronomer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-prepare-and-package-example-kedro-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create, prepare and package example Kedro project
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-process-with-astro-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment process with Astro CLI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-to-astro-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment to Astro Cloud
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-run-a-kedro-pipeline-on-amazon-aws-managed-workflows-for-apache-airflow-mwaa" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kedro-project-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kedro project preparation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-on-awaa" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment on AWAA
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-run-a-kedro-pipeline-on-apache-airflow-using-a-kubernetes-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-multiple-nodes-in-a-single-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running multiple nodes in a single container
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../amazon_sagemaker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Amazon SageMaker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../amazon_emr_serverless/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Amazon EMR Serverless
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../aws_step_functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AWS Step Functions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../azure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Azure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dask/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dask
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../databricks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Databricks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kubeflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kubeflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prefect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Prefect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vertexai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Vertex AI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../argo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Argo Workflow (outdated documentation that needs review)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../aws_batch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AWS Batch (outdated documentation that needs review)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    CONTRIBUTE TO KEDRO
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            CONTRIBUTE TO KEDRO
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contribution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contribution Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    CLI REFERENCE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            CLI REFERENCE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/commands_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Commands Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    API DOCUMENTATION
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            API DOCUMENTATION
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_1" id="__nav_2_10_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.config
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_1">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.config
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.AbstractConfigLoader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractConfigLoader
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.OmegaConfigLoader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    OmegaConfigLoader
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.MissingConfigException/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MissingConfigException
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_2" id="__nav_2_10_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.framework
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_2">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.framework
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Context
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Project
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.session/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Session
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Startup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_3" id="__nav_2_10_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.io
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_3">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.io
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.AbstractDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.AbstractVersionedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractVersionedDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.CachedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CachedDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DataCatalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DataCatalog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.LambdaDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LambdaDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.MemoryDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MemoryDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.Version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Version
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetAlreadyExistsError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetAlreadyExistsError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetNotFoundError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetNotFoundError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_4" id="__nav_2_10_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.ipython
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_4">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.ipython
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.load_ipython_extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    load_ipython_extension
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.magic_load_node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    magic_load_node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.magic_reload_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    magic_reload_kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.reload_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    reload_kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/kedro.logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    kedro.logging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_6" id="__nav_2_10_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_6">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.modular_pipeline.pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    modular_pipeline.pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.Pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.node.Node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.modular_pipeline.ModularPipelineError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModularPipelineError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_7" id="__nav_2_10_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.runner
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_7">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.runner
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.run_node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    run_node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.AbstractRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.SequentialRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SequentialRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.ParallelRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ParallelRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.ThreadRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ThreadRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/kedro.utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    kedro.utils
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../readthedocs.io/projects/kedro-viz" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro-Viz
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://docs.kedro.org/projects/kedro-datasets" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro-Datasets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction-and-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction and strategy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-run-a-kedro-pipeline-on-apache-airflow-with-astronomer" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to run a Kedro pipeline on Apache Airflow with Astronomer
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to run a Kedro pipeline on Apache Airflow with Astronomer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-prepare-and-package-example-kedro-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create, prepare and package example Kedro project
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-process-with-astro-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment process with Astro CLI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-to-astro-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment to Astro Cloud
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-run-a-kedro-pipeline-on-amazon-aws-managed-workflows-for-apache-airflow-mwaa" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kedro-project-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kedro project preparation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-on-awaa" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment on AWAA
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-run-a-kedro-pipeline-on-apache-airflow-using-a-kubernetes-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-multiple-nodes-in-a-single-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running multiple nodes in a single container
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="apache-airflow">Apache Airflow</h1>
+<p>Apache Airflow is a popular open-source workflow management platform. It is a suitable engine to orchestrate and execute a pipeline authored with Kedro, because workflows in Airflow are modelled and organised as <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph">DAGs</a>.</p>
+<h2 id="introduction-and-strategy">Introduction and strategy</h2>
+<p>The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an <a href="https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html">Airflow task</a> while the whole pipeline is converted to an <a href="https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html">Airflow DAG</a>. This approach mirrors the principles of <a href="../distributed/">running Kedro in a distributed environment</a>.</p>
+<p>Each node will be executed within a new Kedro session, which implies that <code>MemoryDataset</code>s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the <a href="https://docs.kedro.org/en/stable/data/index.html"><code>DataCatalog</code></a> and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.</p>
+<p>This guide provides instructions on running a Kedro pipeline on different Airflow platforms. You can jump to the specific sections by clicking the links below, how to run a Kedro pipeline on:</p>
+<ul>
+<li><a href="#how-to-run-a-kedro-pipeline-on-apache-airflow-with-astronomer">Apache Airflow with Astronomer</a></li>
+<li><a href="#how-to-run-a-kedro-pipeline-on-amazon-aws-managed-workflows-for-apache-airflow-mwaa">Amazon AWS Managed Workflows for Apache Airflow (MWAA)</a></li>
+<li><a href="#how-to-run-a-kedro-pipeline-on-apache-airflow-using-a-kubernetes-cluster">Apache Airflow using a Kubernetes cluster</a></li>
+</ul>
+<h2 id="how-to-run-a-kedro-pipeline-on-apache-airflow-with-astronomer">How to run a Kedro pipeline on Apache Airflow with Astronomer</h2>
+<p>The following tutorial shows how to deploy an example <a href="https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html">Spaceflights Kedro project</a> on <a href="https://airflow.apache.org/">Apache Airflow</a> with <a href="https://docs.astronomer.io/astro/cli/overview">Astro CLI</a>, a command-line tool created by <a href="https://www.astronomer.io/">Astronomer</a> that streamlines the creation of local Airflow projects. You will deploy it locally first, and then transition to Astro Cloud.</p>
+<p><a href="https://www.astronomer.io/">Astronomer</a> is a managed Airflow platform which allows users to spin up and run an Airflow cluster in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>To follow this tutorial, ensure you have the following:</p>
+<ul>
+<li>The <a href="https://www.astronomer.io/docs/astro/cli/install-cli">Astro CLI installed</a></li>
+<li>A container service like <a href="https://docs.docker.com/get-docker/">Docker Desktop</a> (v18.09 or higher)</li>
+<li><code>kedro&gt;=0.19</code> installed</li>
+<li><a href="https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow"><code>kedro-airflow&gt;=0.8</code></a> installed. We will use this plugin to convert the Kedro pipeline into an Airflow DAG.</li>
+</ul>
+<h3 id="create-prepare-and-package-example-kedro-project">Create, prepare and package example Kedro project</h3>
+<p>In this section, you will create a new Kedro project equipped with an example pipeline designed to solve a typical data science task: predicting spaceflights prices. You will need to customise this project to ensure compatibility with Airflow, which includes enriching the Kedro <code>DataCatalog</code> with datasets previously stored only in memory and simplifying logging through custom settings. Following these modifications, you will package the project for installation in an Airflow Docker container and generate an Airflow DAG that mirrors our Kedro pipeline.</p>
+<ol>
+<li>
+<p>To create a new Kedro project, select the <code>example=yes</code> option to include example code. Additionally, to implement custom logging, select <code>tools=log</code>. Proceed with the default project name, but feel free to add any other tools as desired:</p>
+<p><code>shell
+kedro new --example=yes --name=new-kedro-project --tools=log</code></p>
+</li>
+<li>
+<p>Navigate to your project's directory, create a new <code>conf/airflow</code> directory for Airflow-specific configurations, and copy the <code>catalog.yml</code> file from <code>conf/base</code> to <code>conf/airflow</code>. This setup allows you to customise the <code>DataCatalog</code> for use with Airflow:</p>
+<p><code>shell
+cd new-kedro-project
+mkdir conf/airflow
+cp conf/base/catalog.yml conf/airflow/catalog.yml</code></p>
+</li>
+<li>
+<p>Open <code>conf/airflow/catalog.yml</code> to see the list of datasets used in the project. Note that additional intermediate datasets (<code>X_train</code>, <code>X_test</code>, <code>y_train</code>, <code>y_test</code>) are stored only in memory. You can locate these in the pipeline description under <code>/src/new_kedro_project/pipelines/data_science/pipeline.py</code>. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our <code>DataCatalog</code>. Instead of repeating similar code for each dataset, you can use <a href="https://docs.kedro.org/en/stable/data/kedro_dataset_factories.html">Dataset Factories</a>, a special syntax that allows defining a catch-all pattern to overwrite the default <code>MemoryDataset</code> creation. Add this code to the end of the file:</p>
+</li>
+</ol>
+<pre><code class="language-yaml">&quot;{base_dataset}&quot;:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/{base_dataset}.csv
+</code></pre>
+<p>In the example here we assume that all Airflow tasks share one disk, but for distributed environments you would need to use non-local file paths.</p>
+<p>Starting with kedro-airflow release version 0.9.0, you can adopt a different strategy instead of following steps 2-3: group nodes that use intermediate <code>MemoryDataset</code>s into larger tasks. This approach allows intermediate data manipulation to occur within a single task, eliminating the need to transfer data between nodes. You can implement this by running <code>kedro airflow create</code> with the <code>--group-in-memory</code> flag on Step 6.</p>
+<ol>
+<li>Open <code>conf/logging.yml</code> and modify the <code>root: handlers</code> section to <code>[console]</code> at the end of the file. By default, Kedro uses the <a href="https://rich.readthedocs.io/en/stable/index.html">Rich library</a> to enhance log output with sophisticated formatting. However, some deployment systems, including Airflow, don't work well with Rich. Therefore, we're adjusting the logging to a simpler console version. For more information on logging in Kedro, you can refer to the <a href="https://docs.kedro.org/en/stable/logging/index.html">Kedro docs</a>.</li>
+</ol>
+<pre><code class="language-shell">root:
+  handlers: [console]
+</code></pre>
+<ol>
+<li>Package the Kedro pipeline as a Python package so you can install it into the Airflow container later on:</li>
+</ol>
+<pre><code class="language-shell">kedro package
+</code></pre>
+<p>This step should produce a wheel file called <code>new_kedro_project-0.1-py3-none-any.whl</code> located at <code>dist/</code>.</p>
+<ol>
+<li>Convert the Kedro pipeline into an Airflow DAG with <code>kedro airflow</code></li>
+</ol>
+<pre><code class="language-shell">kedro airflow create --target-dir=dags/ --env=airflow
+</code></pre>
+<p>This step should produce a <code>.py</code> file called <code>new_kedro_project_airflow_dag.py</code> located at <code>dags/</code>.</p>
+<h3 id="deployment-process-with-astro-cli">Deployment process with Astro CLI</h3>
+<p>In this section, you will start by setting up a new blank Airflow project using Astro and then copy the files prepared in the previous section from the Kedro project. Next, you will need to customise the Dockerfile to enhance logging capabilities and manage the installation of our Kedro package. Finally, you will be able to run and explore the Airflow cluster.</p>
+<ol>
+<li>
+<p>To complete this section, you have to install both the <a href="https://www.astronomer.io/docs/astro/cli/install-cli">Astro CLI</a> and <a href="https://docs.docker.com/get-docker/">Docker Desktop</a>.</p>
+</li>
+<li>
+<p><a href="https://docs.astronomer.io/astro/cli/develop-project">Initialise an Airflow project with Astro</a> in a new folder outside of your Kedro project. Let's call it <code>kedro-airflow-spaceflights</code></p>
+<p><code>shell
+cd ..
+mkdir kedro-airflow-spaceflights
+cd kedro-airflow-spaceflights
+astro dev init</code></p>
+</li>
+<li>
+<p>The folder <code>kedro-airflow-spaceflights</code> will be executed within the Airflow container. To run the Kedro project there, you need to copy several items from the previous section into it:</p>
+</li>
+<li>the <code>/data</code> folder from Step 1, containing sample input datasets for our pipeline. This folder will also store the output results.</li>
+<li>the <code>/conf</code> folder from Steps 2-4, which includes our <code>DataCatalog</code>, parameters, and customised logging files. These files will be used by Kedro during its execution in the Airflow container.</li>
+<li>the <code>.whl</code> file from Step 5, which you will need to install in the Airflow Docker container to execute our project node by node.</li>
+<li>the Airflow DAG from Step 6 for deployment in the Airflow cluster.
+    <code>shell
+    cd ..
+    cp -r new-kedro-project/data kedro-airflow-spaceflights/data
+    cp -r new-kedro-project/conf kedro-airflow-spaceflights/conf
+    mkdir -p kedro-airflow-spaceflights/dist/
+    cp new-kedro-project/dist/new_kedro_project-0.1-py3-none-any.whl kedro-airflow-spaceflights/dist/
+    cp new-kedro-project/dags/new_kedro_project_airflow_dag.py kedro-airflow-spaceflights/dags/</code></li>
+</ol>
+<p>Feel free to completely copy <code>new-kedro-project</code> into <code>kedro-airflow-spaceflights</code> if your project requires frequent updates, DAG recreation, and repackaging. This approach allows you to work with kedro and astro projects in a single folder, eliminating the need to copy kedro files for each development iteration. However, be aware that both projects will share common files such as <code>requirements.txt</code>, <code>README.md</code>, and <code>.gitignore</code>.</p>
+<ol>
+<li>Add a few lines to the <code>Dockerfile</code> located in the <code>kedro-airflow-spaceflights</code> folder to set the environment variable <code>KEDRO_LOGGING_CONFIG</code> to point to <code>conf/logging.yml</code> to enable custom logging in Kedro (note that from Kedro 0.19.6 onwards, this step is unnecessary because Kedro uses the <code>conf/logging.yml</code> file by default) and to install the .whl file of our prepared Kedro project into the Airflow container:</li>
+</ol>
+<pre><code class="language-Dockerfile">ENV KEDRO_LOGGING_CONFIG=&quot;conf/logging.yml&quot; # This line is not needed from Kedro 0.19.6
+
+RUN pip install --user dist/new_kedro_project-0.1-py3-none-any.whl
+</code></pre>
+<ol>
+<li>Navigate to <code>kedro-airflow-spaceflights</code> folder and launch the local Airflow cluster with Astronomer</li>
+</ol>
+<pre><code class="language-shell">cd kedro-airflow-spaceflights
+astro dev start
+</code></pre>
+<ol>
+<li>Visit the Airflow Webserver UI at its default address, http://localhost:8080, using the default login credentials: username and password both set to <code>admin</code>. There, you'll find a list of all DAGs. Navigate to the <code>new-kedro-project</code> DAG, and then press the <code>Trigger DAG</code> play button to initiate it. You can then observe the steps of your project as they run successfully:</li>
+</ol>
+<p><img alt="" src="../../meta/images/kedro_airflow_dag_run.png" /></p>
+<ol>
+<li>The Kedro project was run inside an Airflow Docker container, and the results are stored there as well. To copy these results to your host, first identify the relevant Docker containers by listing them:</li>
+</ol>
+<pre><code class="language-shell">docker ps
+</code></pre>
+<p>Select the container acting as the scheduler and note its ID. Then, use the following command to copy the results, substituting <code>d36ef786892a</code> with the actual container ID:</p>
+<pre><code class="language-shell">docker cp  d36ef786892a:/usr/local/airflow/data/ ./data/
+</code></pre>
+<ol>
+<li>To stop the Astro Airflow environment, you can use the command:</li>
+</ol>
+<pre><code class="language-shell">astro dev stop
+</code></pre>
+<h3 id="deployment-to-astro-cloud">Deployment to Astro Cloud</h3>
+<p>You can easily deploy and run your project on Astro Cloud, the cloud infrastructure provided by Astronomer, by following these steps:</p>
+<ol>
+<li>
+<p>Log in to your account on the <a href="https://www.astronomer.io/">Astronomer portal</a> and create a new deployment if you don't already have one:
+<img alt="" src="../../meta/images/astronomer_new_deployment.png" /></p>
+</li>
+<li>
+<p>Use the Astro CLI to log in to your Astro Cloud account:</p>
+</li>
+</ol>
+<pre><code class="language-shell">astro auth
+</code></pre>
+<p>You will be redirected to enter your login credentials in your browser. Successful login indicates that your terminal is now linked with your Astro Cloud account:</p>
+<p><img alt="" src="../../meta/images/astronomer_connected.png" /></p>
+<ol>
+<li>To deploy your local project to the cloud, navigate to the <code>kedro-airflow-spaceflights</code> folder and run:</li>
+</ol>
+<pre><code class="language-shell">astro deploy
+</code></pre>
+<ol>
+<li>At the end of the deployment process, a link will be provided. Use this link to manage and monitor your project in the cloud:</li>
+</ol>
+<p><img alt="" src="../../meta/images/astronomer_cloud_deployment.png" /></p>
+<h2 id="how-to-run-a-kedro-pipeline-on-amazon-aws-managed-workflows-for-apache-airflow-mwaa">How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)</h2>
+<h3 id="kedro-project-preparation">Kedro project preparation</h3>
+<p>MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it easier to set up, operate, and scale Apache Airflow in the cloud. Deploying a Kedro pipeline to MWAA is similar to Astronomer, but there are some key differences: you need to store your project data in an AWS S3 bucket and make necessary changes to your <code>DataCatalog</code>. Additionally, you must configure how you upload your Kedro configuration, install your Kedro package, and set up the necessary environment variables.
+1. Complete steps 1-4 from the <a href="#create-prepare-and-package-example-kedro-project">Create, prepare and package example Kedro project</a> section.
+2. Your project's data should not reside in the working directory of the Airflow container. Instead, <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html">create an S3 bucket</a> and <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html">upload your data folder from the new-kedro-project folder to your S3 bucket</a>.
+3. Modify the <code>DataCatalog</code> to reference data in your S3 bucket by updating the filepath and add credentials line for each dataset in <code>new-kedro-project/conf/airflow/catalog.yml</code>. Add the S3 prefix to the filepath as shown below:</p>
+<pre><code class="language-shell">companies:
+  type: pandas.CSVDataset
+  filepath: s3://&lt;your_S3_bucket&gt;/data/01_raw/companies.csv
+  credentials: dev_s3
+</code></pre>
+<ol>
+<li><a href="https://docs.aws.amazon.com/keyspaces/latest/devguide/access.credentials.html">Set up AWS credentials</a> to provide read and write access to your S3 bucket. Update <code>new-kedro-project/conf/local/credentials.yml</code> with your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and copy it to the <code>new-kedro-project/conf/airflow/</code> folder:</li>
+</ol>
+<pre><code class="language-shell">dev_s3:
+  client_kwargs:
+    aws_access_key_id: *********************
+    aws_secret_access_key: ******************************************
+</code></pre>
+<ol>
+<li>Add <code>s3fs</code> to your project’s <code>requirements.txt</code> in <code>new-kedro-project</code> to facilitate communication with AWS S3. Some libraries could cause dependency conflicts in the Airflow environment, so make sure to minimise the requirements list and avoid using <code>kedro-viz</code> and <code>pytest</code>.</li>
+</ol>
+<pre><code class="language-shell">s3fs
+</code></pre>
+<ol>
+<li>Follow steps 5-6 from the <a href="#create-prepare-and-package-example-kedro-project">Create, prepare and package example Kedro project</a> section to package your Kedro project and generate an Airflow DAG.</li>
+<li>Update the DAG file <code>new_kedro_project_airflow_dag.py</code> located in the <code>dags/</code> folder by adding <code>conf_source="plugins/conf-new_kedro_project.tar.gz"</code> to the arguments of <code>KedroSession.create()</code> in the Kedro operator execution function. This change is necessary because your Kedro configuration archive will be stored in the <code>plugins/</code> folder, not the root directory:</li>
+</ol>
+<pre><code class="language-shell">    def execute(self, context):
+        configure_project(self.package_name)
+        with KedroSession.create(project_path=self.project_path,
+                                 env=self.env, conf_source=&quot;plugins/conf-new_kedro_project.tar.gz&quot;) as session:
+            session.run(self.pipeline_name, node_names=[self.node_name])
+</code></pre>
+<h3 id="deployment-on-awaa">Deployment on AWAA</h3>
+<ol>
+<li>Archive your three files: <code>new_kedro_project-0.1-py3-none-any.whl</code> and <code>conf-new_kedro_project.tar.gz</code> located in <code>new-kedro-project/dist</code>, and <code>logging.yml</code> located in <code>new-kedro-project/conf/</code> into a file called <code>plugins.zip</code> and upload it to <code>s3://your_S3_bucket</code>.</li>
+</ol>
+<pre><code class="language-shell">zip -j plugins.zip dist/new_kedro_project-0.1-py3-none-any.whl dist/conf-new_kedro_project.tar.gz conf/logging.yml
+</code></pre>
+<p>This archive will be later unpacked to the <code>/plugins</code> folder in the working directory of the Airflow container.</p>
+<ol>
+<li>Create a new <code>requirements.txt</code> file, add the path where your Kedro project will be unpacked in the Airflow container, and upload <code>requirements.txt</code> to <code>s3://your_S3_bucket</code>:</li>
+</ol>
+<pre><code class="language-shell">./plugins/new_kedro_project-0.1-py3-none-any.whl
+</code></pre>
+<p>Libraries from <code>requirements.txt</code> will be installed during container initialisation.</p>
+<ol>
+<li>Upload <code>new_kedro_project_airflow_dag.py</code> from the <code>new-kedro-project/dags</code> to <code>s3://your_S3_bucket/dags</code>.</li>
+<li>Create an empty <code>startup.sh</code> file for container startup commands. Set an environment variable for custom Kedro logging:</li>
+</ol>
+<pre><code class="language-shell">export KEDRO_LOGGING_CONFIG=&quot;plugins/logging.yml&quot;
+</code></pre>
+<ol>
+<li>Set up a new <a href="https://docs.aws.amazon.com/mwaa/latest/userguide/create-environment.html">AWS MWAA environment</a> using the following settings:</li>
+</ol>
+<pre><code class="language-shell">S3 Bucket:
+  s3://your_S3_bucket
+DAGs folder
+  s3://your_S3_bucket/dags
+Plugins file - optional
+  s3://your_S3_bucket/plugins.zip
+Requirements file - optional
+  s3://your_S3_bucket/requrements.txt
+Startup script file - optional
+  s3://your_S3_bucket/startup.sh
+</code></pre>
+<p>On the next page, set the <code>Public network (Internet accessible)</code> option in the <code>Web server access</code> section if you want to access your Airflow UI from the internet. Continue with the default options on the subsequent pages.</p>
+<ol>
+<li>Once the environment is created, use the <code>Open Airflow UI</code> button to access the standard Airflow interface, where you can manage your DAG.</li>
+</ol>
+<h2 id="how-to-run-a-kedro-pipeline-on-apache-airflow-using-a-kubernetes-cluster">How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster</h2>
+<p>If you want to execute your DAG in an isolated environment on Airflow using a Kubernetes cluster, you can use a combination of the <a href="https://pypi.org/project/kedro-airflow/"><code>kedro-airflow</code></a> and <a href="https://pypi.org/project/kedro-docker/"><code>kedro-docker</code></a> plugins.</p>
+<ol>
+<li>
+<p><strong>Package your Kedro project as a Docker container</strong>
+   <a href="https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker">Use the <code>kedro docker init</code> and <code>kedro docker build</code> commands</a> to containerise your Kedro project.</p>
+</li>
+<li>
+<p><strong>Push the Docker image to a container registry</strong>
+   Upload the built Docker image to a cloud container registry, such as AWS ECR, Google Container Registry, or Docker Hub.</p>
+</li>
+<li>
+<p><strong>Generate an Airflow DAG</strong>
+   Run the following command to generate an Airflow DAG:
+   <code>sh
+   kedro airflow create</code>
+   This will create a DAG file that includes the <code>KedroOperator()</code> by default.</p>
+</li>
+<li>
+<p><strong>Modify the DAG to use <code>KubernetesPodOperator</code></strong>
+   To execute each Kedro node in an isolated Kubernetes pod, replace <code>KedroOperator()</code> with <code>KubernetesPodOperator()</code>, as shown in the example below:</p>
+</li>
+</ol>
+<p>```python
+   from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator</p>
+<p>KubernetesPodOperator(
+       task_id=node_name,
+       name=node_name,
+       namespace=NAMESPACE,
+       image=DOCKER_IMAGE,
+       cmds=["kedro"],
+       arguments=["run", f"--nodes={node_name}"],
+       get_logs=True,
+       is_delete_operator_pod=True,  # Cleanup after execution
+       in_cluster=False, # Set to True if Airflow runs inside the Kubernetes cluster
+       do_xcom_push=False,
+       image_pull_policy="Always",
+       # Uncomment the following lines if Airflow is running outside Kubernetes
+       # cluster_context="k3d-your-cluster",  # Specify the Kubernetes context from your kubeconfig
+       # config_file="~/.kube/config",  # Path to your kubeconfig file
+   )
+   ```</p>
+<h3 id="running-multiple-nodes-in-a-single-container">Running multiple nodes in a single container</h3>
+<p>By default, this approach runs each node in an isolated Docker container. However, to reduce computational overhead, you can choose to run multiple nodes together within the same container. If you opt for this, you must modify the DAG accordingly to adjust task dependencies and execution order.</p>
+<p>For example, in the <a href="../../tutorial/spaceflights_tutorial/"><code>spaceflights-pandas</code> tutorial</a>, if you want to execute the first two nodes together, your DAG may look like this:</p>
+<pre><code class="language-python">from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+
+with DAG(...) as dag:
+    tasks = {
+        &quot;preprocess-companies-and-shuttles&quot;: KubernetesPodOperator(
+            task_id=&quot;preprocess-companies-and-shuttles&quot;,
+            name=&quot;preprocess-companies-and-shuttles&quot;,
+            namespace=NAMESPACE,
+            image=DOCKER_IMAGE,
+            cmds=[&quot;kedro&quot;],
+            arguments=[&quot;run&quot;, &quot;--nodes=preprocess-companies-node,preprocess-shuttles-node&quot;],
+            ...
+        ),
+        &quot;create-model-input-table-node&quot;: KubernetesPodOperator(...),
+        ...
+    }
+
+    tasks[&quot;preprocess-companies-and-shuttles&quot;] &gt;&gt; tasks[&quot;create-model-input-table-node&quot;]
+    tasks[&quot;create-model-input-table-node&quot;] &gt;&gt; tasks[&quot;split-data-node&quot;]
+    ...
+</code></pre>
+<p>In this example, we modified the original DAG generated by the <code>kedro airflow create</code> command by replacing <code>KedroOperator()</code> with <code>KubernetesPodOperator()</code>. Additionally, we merged the first two tasks into a single task named <code>preprocess-companies-and-shuttles</code>. This task executes the Docker image running two Kedro nodes: <code>preprocess-companies-node</code> and <code>preprocess-shuttles-node</code>.</p>
+<p>Furthermore, we adjusted the task order at the end of the DAG. Instead of having separate dependencies for the first two tasks, we consolidated them into a single line:</p>
+<pre><code class="language-python">tasks[&quot;preprocess-companies-and-shuttles&quot;] &gt;&gt; tasks[&quot;create-model-input-table-node&quot;]
+</code></pre>
+<p>This ensures that the <code>create-model-input-table-node</code> task runs only after <code>preprocess-companies-and-shuttles</code> has completed.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.tracking", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "content.code.annotate", "content.code.highlight"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>

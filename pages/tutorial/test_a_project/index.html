@@ -1,0 +1,3790 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.kedro.org/pages/tutorial/test_a_project/">
+      
+      
+      
+      
+      <link rel="icon" href="https://kedro.org/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+    
+    
+      
+        <title>Test a Kedro project - </title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.4af4bdda.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CInter+Regular:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Inter Regular"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/colors.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/globals.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/themes.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="light" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#test-a-kedro-project" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      
+  <img src="../../../assets/kedro-horizontal-color-on-light.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Test a Kedro project
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="light" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../introduction/" class="md-tabs__link">
+          
+  
+  
+  Kedro
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../readthedocs.io/projects/kedro-viz" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Kedro-Viz
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://docs.kedro.org/projects/kedro-datasets" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Kedro-Datasets
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      
+  <img src="../../../assets/kedro-horizontal-color-on-light.svg" alt="logo">
+
+    </a>
+    
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Kedro
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Kedro
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    LEARN ABOUT KEDRO
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            LEARN ABOUT KEDRO
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../get_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    First steps
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Learn Kedro with hands-on video
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    TUTORIAL AND BASIC USAGE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            TUTORIAL AND BASIC USAGE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spaceflights_tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tutorial
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../visualisation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Visualisation with Kedro-Viz
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks_and_ipython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro for notebook users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQs and resources
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    KEDRO PROJECTS
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            KEDRO PROJECTS
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../starters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Customise a new project
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data catalog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nodes_and_pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Nodes and Pipelines
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/telemetry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Anonymous Telemetry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    INTEGRATIONS
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            INTEGRATIONS
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/pyspark_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    PySpark integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/mlflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    How to add MLflow to your Kedro workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/kedro_dvc_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data and pipeline versioning with Kedro and DVC
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/deltalake_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data versioning with Delta Lake
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/iceberg_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data versioning with Iceberg
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    DEVELOPMENT
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            DEVELOPMENT
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/set_up_vscode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Set up Visual Studio Code
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/set_up_pycharm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Set up PyCharm
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debugging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/automated_testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Automated Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/linting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Code formatting and linting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    ADVANCED USAGE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADVANCED USAGE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kedro_project_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Project setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extend_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extend Kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Logging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    DEPLOYMENT
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            DEPLOYMENT
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/nodes_grouping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Nodes grouping
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/single_machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Single-machine deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/distributed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Distributed deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/airflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Airflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/amazon_sagemaker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Amazon SageMaker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/amazon_emr_serverless/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Amazon EMR Serverless
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/aws_step_functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AWS Step Functions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/azure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Azure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/dask/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dask
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/databricks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Databricks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/kubeflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kubeflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/prefect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Prefect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/vertexai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Vertex AI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/argo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Argo Workflow (outdated documentation that needs review)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/aws_batch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AWS Batch (outdated documentation that needs review)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    CONTRIBUTE TO KEDRO
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            CONTRIBUTE TO KEDRO
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contribution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contribution Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    CLI REFERENCE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            CLI REFERENCE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/commands_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Commands Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API DOCUMENTATION
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            API DOCUMENTATION
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_1" id="__nav_2_10_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.config
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_1">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.config
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.AbstractConfigLoader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractConfigLoader
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.OmegaConfigLoader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    OmegaConfigLoader
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.MissingConfigException/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MissingConfigException
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_2" id="__nav_2_10_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.framework
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_2">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.framework
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Context
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Project
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.session/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Session
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Startup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_3" id="__nav_2_10_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.io
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_3">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.io
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.AbstractDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.AbstractVersionedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractVersionedDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.CachedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CachedDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DataCatalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DataCatalog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.LambdaDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LambdaDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.MemoryDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MemoryDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.Version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Version
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetAlreadyExistsError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetAlreadyExistsError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetNotFoundError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetNotFoundError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_4" id="__nav_2_10_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.ipython
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_4">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.ipython
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.load_ipython_extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    load_ipython_extension
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.magic_load_node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    magic_load_node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.magic_reload_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    magic_reload_kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.reload_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    reload_kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/kedro.logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    kedro.logging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_6" id="__nav_2_10_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_6">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.modular_pipeline.pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    modular_pipeline.pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.Pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.node.Node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.modular_pipeline.ModularPipelineError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModularPipelineError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_7" id="__nav_2_10_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.runner
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_7">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.runner
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.run_node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    run_node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.AbstractRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.SequentialRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SequentialRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.ParallelRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ParallelRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.ThreadRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ThreadRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/kedro.utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    kedro.utils
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../readthedocs.io/projects/kedro-viz" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro-Viz
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://docs.kedro.org/projects/kedro-datasets" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro-Datasets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#writing-tests-for-kedro-nodes-unit-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Writing tests for Kedro nodes: Unit testing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-tests-for-kedro-pipelines-integration-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Writing tests for Kedro pipelines: Integration testing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing best practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing best practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-to-write-your-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where to write your tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using fixtures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-slicing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pipeline slicing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-your-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run your tests
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="test-a-kedro-project">Test a Kedro project</h1>
+<p>It is important to test our Kedro projects to validate and verify that our nodes and pipelines behave as we expect them to. In this section we look at some example tests for the spaceflights project.</p>
+<p>This section explains the following:</p>
+<ul>
+<li>How to test a Kedro node</li>
+<li>How to test a Kedro pipeline</li>
+<li>Testing best practices</li>
+</ul>
+<p>This section does not cover:</p>
+<ul>
+<li>Automating your tests - instead read our <a href="../../development/automated_testing/">automated testing documentation</a>.</li>
+<li>More advanced features of testing, including <a href="https://realpython.com/python-mock-library/#what-is-mocking">mocking</a> and <a href="https://docs.pytest.org/en/7.1.x/example/parametrize.html">parameterising tests</a>.</li>
+</ul>
+<h2 id="writing-tests-for-kedro-nodes-unit-testing">Writing tests for Kedro nodes: Unit testing</h2>
+<p>Kedro expects node functions to be <a href="https://realpython.com/python-functional-programming/#what-is-functional-programming">pure functions</a>; a pure function is one whose output follows solely from its inputs, without any observable side effects. Testing these functions checks that a node will behave as expected - for a given set of input values, a node will produce the expected output. These tests are referred to as unit tests.</p>
+<p>Let us explore what this looks like in practice. Consider the node function <code>split_data</code> defined in the data science pipeline:</p>
+<details>
+<summary><b>Click to expand</b></summary>
+
+
+<pre><code class="language-python">def split_data(data: pd.DataFrame, parameters: dict[str, Any]) -&gt; Tuple:
+    &quot;&quot;&quot;Splits data into features and targets training and test sets.
+
+    Args:
+        data: Data containing features and target.
+        parameters: Parameters defined in parameters_data_science.yml.
+    Returns:
+        Split data.
+    &quot;&quot;&quot;
+    X = data[parameters[&quot;features&quot;]]
+    y = data[&quot;price&quot;]
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=parameters[&quot;test_size&quot;], random_state=parameters[&quot;random_state&quot;]
+    )
+    return X_train, X_test, y_train, y_test
+</code></pre>
+
+
+</details>
+
+<p>The function takes a pandas <code>DataFrame</code> and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following <a href="https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test">pytest's anatomy of a test</a> which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:</p>
+<ol>
+<li>Arrange: Prepare the inputs <code>data</code> and <code>parameters</code>.</li>
+<li>Act: Make a call to <code>split_data</code> and capture the outputs with <code>X_train</code>, <code>X_test</code>, <code>Y_train</code>, and <code>Y_test</code>.</li>
+<li>Assert: Ensure that the length of the outputs are the same as the expected lengths</li>
+</ol>
+<p>The cleanup step becomes necessary in a test when any of the previous steps make modifications that may influence other tests - e.g. by modifying a file used as input for several tests. This is not the case for the example tests below, and so the cleanup step is omitted.</p>
+<p>Remember to import the function being tested and any necessary modules at the top of the file.</p>
+<p>When we put these steps together, we have the following test:</p>
+<details>
+<summary><b>Click to expand</b></summary>
+
+
+<pre><code class="language-python"># NOTE: This example test is yet to be refactored.
+# A complete version is available under the testing best practices section.
+
+import pandas as pd
+from spaceflights.pipelines.data_science.nodes import split_data
+
+def test_split_data():
+    # Arrange
+    dummy_data = pd.DataFrame(
+        {
+            &quot;engines&quot;: [1, 2, 3],
+            &quot;crew&quot;: [4, 5, 6],
+            &quot;passenger_capacity&quot;: [5, 6, 7],
+            &quot;price&quot;: [120, 290, 30],
+        }
+    )
+
+    dummy_parameters = {
+        &quot;model_options&quot;: {
+            &quot;test_size&quot;: 0.2,
+            &quot;random_state&quot;: 3,
+            &quot;features&quot;: [&quot;engines&quot;, &quot;passenger_capacity&quot;, &quot;crew&quot;],
+        }
+    }
+
+    # Act
+    X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters[&quot;model_options&quot;])
+
+    # Assert
+    assert len(X_train) == 2
+    assert len(y_train) == 2
+    assert len(X_test) == 1
+    assert len(y_test) == 1
+</code></pre>
+
+
+</details>
+
+<p>This test is an example of positive testing - it tests that a valid input produces the expected output. The inverse, testing that an invalid output will be appropriately rejected, is called negative testing and is equally as important.</p>
+<p>Using the same steps as above, we can write the following test to validate an error is thrown when price data is not available:</p>
+<details>
+<summary><b>Click to expand</b></summary>
+
+
+<pre><code class="language-python"># NOTE: This example test is yet to be refactored.
+# A complete version is available under the testing best practices section.
+
+import pandas as pd
+from spaceflights.pipelines.data_science.nodes import split_data
+
+def test_split_data_missing_price():
+    # Arrange
+    dummy_data = pd.DataFrame(
+        {
+            &quot;engines&quot;: [1, 2, 3],
+            &quot;crew&quot;: [4, 5, 6],
+            &quot;passenger_capacity&quot;: [5, 6, 7],
+            # Note the missing price data
+        }
+    )
+
+    dummy_parameters = {
+        &quot;model_options&quot;: {
+            &quot;test_size&quot;: 0.2,
+            &quot;random_state&quot;: 3,
+            &quot;features&quot;: [&quot;engines&quot;, &quot;passenger_capacity&quot;, &quot;crew&quot;],
+        }
+    }
+
+    with pytest.raises(KeyError) as e_info:
+        # Act
+        X_train, X_test, y_train, y_test = split_data(dummy_data, dummy_parameters[&quot;model_options&quot;])
+
+    # Assert
+    assert &quot;price&quot; in str(e_info.value) # checks that the error is about the missing price data
+</code></pre>
+
+</details>
+
+<h2 id="writing-tests-for-kedro-pipelines-integration-testing">Writing tests for Kedro pipelines: Integration testing</h2>
+<p>Writing tests for each node ensures each node will behave as expected when run individually. However, we must also consider how nodes in a pipeline interact with each other - this is called integration testing. Integration testing combines individual units as a group and checks whether they communicate, share data, and work together as expected. Let us look at this in practice.</p>
+<p>Consider the data science pipeline as a whole:</p>
+<details>
+<summary><b>Click to expand</b></summary>
+
+
+<pre><code class="language-python">from kedro.pipeline import Pipeline, node, pipeline
+from .nodes import evaluate_model, split_data, train_model
+
+
+def create_pipeline(**kwargs) -&gt; Pipeline:
+    return pipeline(
+        [
+            node(
+                func=split_data,
+                inputs=[&quot;model_input_table&quot;, &quot;params:model_options&quot;],
+                outputs=[&quot;X_train&quot;, &quot;X_test&quot;, &quot;y_train&quot;, &quot;y_test&quot;],
+                name=&quot;split_data_node&quot;,
+            ),
+            node(
+                func=train_model,
+                inputs=[&quot;X_train&quot;, &quot;y_train&quot;],
+                outputs=&quot;regressor&quot;,
+                name=&quot;train_model_node&quot;,
+            ),
+            node(
+                func=evaluate_model,
+                inputs=[&quot;regressor&quot;, &quot;X_test&quot;, &quot;y_test&quot;],
+                outputs=None,
+                name=&quot;evaluate_model_node&quot;,
+            ),
+        ]
+    )
+</code></pre>
+
+</details>
+
+<p>The pipeline takes a pandas <code>DataFrame</code> and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and evaluate a regression model. With an integration test, we can validate that this sequence of nodes runs as expected.</p>
+<p>From earlier in this tutorial we know a successful pipeline run will conclude with the message <code>Pipeline execution completed successfully.</code> being logged. To validate this is being logged in our tests we make use of pytest's <a href="https://docs.pytest.org/en/7.1.x/how-to/logging.html#caplog-fixture"><code>caplog</code></a> feature to capture logs generated during the execution.</p>
+<p>As we did with our unit tests, we break this down into several steps:</p>
+<ol>
+<li>Arrange: Prepare the runner and its inputs <code>pipeline</code> and <code>catalog</code>, and any additional test setup.</li>
+<li>Act: Run the pipeline.</li>
+<li>Assert: Ensure a successful run message was logged.</li>
+</ol>
+<p>When we put this together, we get the following test:</p>
+<details>
+<summary><b>Click to expand</b></summary>
+
+
+<pre><code class="language-python"># NOTE: This example test is yet to be refactored.
+# A complete version is available under the testing best practices section.
+
+import logging
+import pandas as pd
+from kedro.io import DataCatalog
+from kedro.runner import SequentialRunner
+from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
+
+def test_data_science_pipeline(caplog):    # Note: caplog is passed as an argument
+    # Arrange pipeline
+    pipeline = create_ds_pipeline()
+
+    # Arrange data catalog
+    catalog = DataCatalog()
+
+    dummy_data = pd.DataFrame(
+        {
+            &quot;engines&quot;: [1, 2, 3],
+            &quot;crew&quot;: [4, 5, 6],
+            &quot;passenger_capacity&quot;: [5, 6, 7],
+            &quot;price&quot;: [120, 290, 30],
+        }
+    )
+
+    duummy_parameters = {
+        &quot;model_options&quot;: {
+            &quot;test_size&quot;: 0.2,
+            &quot;random_state&quot;: 3,
+            &quot;features&quot;: [&quot;engines&quot;, &quot;passenger_capacity&quot;, &quot;crew&quot;],
+        }
+    }
+
+    catalog.add_feed_dict(
+        {
+            &quot;model_input_table&quot; : dummy_data,
+            &quot;params:model_options&quot;: dummy_parameters[&quot;model_options&quot;],
+        }
+    )
+
+    # Arrange the log testing setup
+    caplog.set_level(logging.DEBUG, logger=&quot;kedro&quot;) # Ensure all logs produced by Kedro are captured
+    successful_run_msg = &quot;Pipeline execution completed successfully.&quot;
+
+    # Act
+    SequentialRunner().run(pipeline, catalog)
+
+    # Assert
+    assert successful_run_msg in caplog.text
+
+</code></pre>
+
+
+</details>
+
+<h2 id="testing-best-practices">Testing best practices</h2>
+<h3 id="where-to-write-your-tests">Where to write your tests</h3>
+<p>We recommend creating a <code>tests</code> directory within the root directory of your project. The structure should mirror the directory structure of <code>/src/spaceflights</code>:</p>
+<pre><code>src
+│   ...
+└───spaceflights
+│   └───pipelines
+│       └───data_science
+│           │   __init__.py
+│           │   nodes.py
+│           │   pipeline.py
+│
+tests
+|   ...
+└───pipelines
+│   └───data_science
+│       │   test_data_science_pipeline.py
+</code></pre>
+<h3 id="using-fixtures">Using fixtures</h3>
+<p>In our tests, we can see that <code>dummy_data</code> and <code>dummy_parameters</code> have been defined three times with (mostly) the same values. Instead, we can define these outside of our tests as <a href="https://docs.pytest.org/en/6.2.x/fixture.html#fixture">pytest fixtures</a>:</p>
+<details>
+<summary><b>Click to expand</b></summary>
+
+
+<pre><code class="language-python">import pytest
+
+@pytest.fixture
+def dummy_data():
+    return pd.DataFrame(
+        {
+            &quot;engines&quot;: [1, 2, 3],
+            &quot;crew&quot;: [4, 5, 6],
+            &quot;passenger_capacity&quot;: [5, 6, 7],
+            &quot;price&quot;: [120, 290, 30],
+        }
+    )
+
+@pytest.fixture
+def dummy_parameters():
+    parameters = {
+        &quot;model_options&quot;: {
+            &quot;test_size&quot;: 0.2,
+            &quot;random_state&quot;: 3,
+            &quot;features&quot;: [&quot;engines&quot;, &quot;passenger_capacity&quot;, &quot;crew&quot;],
+        }
+    }
+    return parameters
+</code></pre>
+
+
+</details>
+
+<p>We can then access these through the test arguments.</p>
+<pre><code class="language-python">def test_split_data(dummy_data, dummy_parameters):
+        ...
+</code></pre>
+<h3 id="pipeline-slicing">Pipeline slicing</h3>
+<p>In the test <code>test_data_science_pipeline</code> we test the data science pipeline, as currently defined, can be run successfully. However, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using <a href="../../nodes_and_pipelines/slice_a_pipeline/#slice-a-pipeline-by-running-specified-nodes">pipeline slicing</a> to specify the pipeline's start and end:</p>
+<pre><code class="language-python">def test_data_science_pipeline(self):
+    # Arrange pipeline
+    pipeline = create_pipeline().from_nodes(&quot;split_data_node&quot;).to_nodes(&quot;evaluate_model_node&quot;)
+    ...
+</code></pre>
+<p>This ensures that the test will still perform as designed, even with the addition of more nodes to the pipeline.</p>
+<p>After incorporating these testing practices, our test file <code>test_data_science_pipeline.py</code> becomes:</p>
+<details>
+
+
+<pre><code class="language-python"># tests/pipelines/test_data_science_pipeline.py
+
+import logging
+import pandas as pd
+import pytest
+
+from kedro.io import DataCatalog
+from kedro.runner import SequentialRunner
+from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
+from spaceflights.pipelines.data_science.nodes import split_data
+
+@pytest.fixture
+def dummy_data():
+    return pd.DataFrame(
+        {
+            &quot;engines&quot;: [1, 2, 3],
+            &quot;crew&quot;: [4, 5, 6],
+            &quot;passenger_capacity&quot;: [5, 6, 7],
+            &quot;price&quot;: [120, 290, 30],
+        }
+    )
+
+@pytest.fixture
+def dummy_parameters():
+    parameters = {
+        &quot;model_options&quot;: {
+            &quot;test_size&quot;: 0.2,
+            &quot;random_state&quot;: 3,
+            &quot;features&quot;: [&quot;engines&quot;, &quot;passenger_capacity&quot;, &quot;crew&quot;],
+        }
+    }
+    return parameters
+
+
+def test_split_data(dummy_data, dummy_parameters):
+    X_train, X_test, y_train, y_test = split_data(
+        dummy_data, dummy_parameters[&quot;model_options&quot;]
+    )
+    assert len(X_train) == 2
+    assert len(y_train) == 2
+    assert len(X_test) == 1
+    assert len(y_test) == 1
+
+def test_split_data_missing_price(dummy_data, dummy_parameters):
+    dummy_data_missing_price = dummy_data.drop(columns=&quot;price&quot;)
+    with pytest.raises(KeyError) as e_info:
+        X_train, X_test, y_train, y_test = split_data(dummy_data_missing_price, dummy_parameters[&quot;model_options&quot;])
+
+    assert &quot;price&quot; in str(e_info.value)
+
+def test_data_science_pipeline(caplog, dummy_data, dummy_parameters):
+    pipeline = (
+        create_ds_pipeline()
+        .from_nodes(&quot;split_data_node&quot;)
+        .to_nodes(&quot;evaluate_model_node&quot;)
+    )
+    catalog = DataCatalog()
+    catalog.add_feed_dict(
+        {
+            &quot;model_input_table&quot; : dummy_data,
+            &quot;params:model_options&quot;: dummy_parameters[&quot;model_options&quot;],
+        }
+    )
+
+    caplog.set_level(logging.DEBUG, logger=&quot;kedro&quot;)
+    successful_run_msg = &quot;Pipeline execution completed successfully.&quot;
+
+    SequentialRunner().run(pipeline, catalog)
+
+    assert successful_run_msg in caplog.text
+
+</code></pre>
+
+
+</details>
+
+<h2 id="run-your-tests">Run your tests</h2>
+<p>First, confirm that your project has been installed locally. This can be done by navigating to the project root and running the following command:</p>
+<pre><code class="language-bash">pip install -e .
+</code></pre>
+<p>This step allows pytest to accurately resolve the import statements in your test files.</p>
+<blockquote>
+<p><strong>NOTE</strong>: The option <code>-e</code> installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.</p>
+</blockquote>
+<p>Ensure you have <code>pytest</code> installed. Please see our <a href="../../development/automated_testing/">automated testing documentation</a> for more information on getting set up with pytest.</p>
+<p>To run your tests, run <code>pytest</code> from within your project's root directory.</p>
+<pre><code class="language-bash">cd &lt;project_root&gt;
+pytest tests/pipelines/test_data_science_pipeline.py
+</code></pre>
+<p>You should see the following output in your shell.</p>
+<pre><code>============================= test session starts ==============================
+...
+collected 2 items
+
+tests/pipelines/test_data_science_pipeline.py ..                                                  [100%]
+
+============================== 2 passed in 4.38s ===============================
+</code></pre>
+<p>This output indicates that all tests ran without errors in the file <code>tests/pipelines/test_data_science_pipeline.py</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.tracking", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "content.code.annotate", "content.code.highlight"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>

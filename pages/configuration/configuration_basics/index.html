@@ -1,0 +1,3757 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.kedro.org/pages/configuration/configuration_basics/">
+      
+      
+      
+      
+      <link rel="icon" href="https://kedro.org/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+    
+    
+      
+        <title>Configuration - </title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.4af4bdda.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CInter+Regular:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Inter Regular"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/colors.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/globals.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/themes.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="light" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="" class="md-header__button md-logo" aria-label="" data-md-component="logo">
+      
+  <img src="../../../assets/kedro-horizontal-color-on-light.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="light" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../introduction/" class="md-tabs__link">
+          
+  
+  
+  Kedro
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../readthedocs.io/projects/kedro-viz" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Kedro-Viz
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://docs.kedro.org/projects/kedro-datasets" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Kedro-Datasets
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="" class="md-nav__button md-logo" aria-label="" data-md-component="logo">
+      
+  <img src="../../../assets/kedro-horizontal-color-on-light.svg" alt="logo">
+
+    </a>
+    
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Kedro
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Kedro
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    LEARN ABOUT KEDRO
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            LEARN ABOUT KEDRO
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../get_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    First steps
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Learn Kedro with hands-on video
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    TUTORIAL AND BASIC USAGE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            TUTORIAL AND BASIC USAGE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/spaceflights_tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tutorial
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../visualisation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Visualisation with Kedro-Viz
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks_and_ipython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro for notebook users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQs and resources
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    KEDRO PROJECTS
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            KEDRO PROJECTS
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../starters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Customise a new project
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data catalog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nodes_and_pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Nodes and Pipelines
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../telemetry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Anonymous Telemetry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    INTEGRATIONS
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            INTEGRATIONS
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/pyspark_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    PySpark integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/mlflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    How to add MLflow to your Kedro workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/kedro_dvc_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data and pipeline versioning with Kedro and DVC
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/deltalake_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data versioning with Delta Lake
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/iceberg_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data versioning with Iceberg
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    DEVELOPMENT
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            DEVELOPMENT
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/set_up_vscode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Set up Visual Studio Code
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/set_up_pycharm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Set up PyCharm
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debugging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/automated_testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Automated Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/linting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Code formatting and linting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    ADVANCED USAGE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADVANCED USAGE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kedro_project_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Project setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extend_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extend Kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Logging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    DEPLOYMENT
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            DEPLOYMENT
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/nodes_grouping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Nodes grouping
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/single_machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Single-machine deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/distributed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Distributed deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/airflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Airflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/amazon_sagemaker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Amazon SageMaker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/amazon_emr_serverless/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Amazon EMR Serverless
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/aws_step_functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AWS Step Functions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/azure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Azure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/dask/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dask
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/databricks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Databricks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/kubeflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kubeflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/prefect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Prefect
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/vertexai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Vertex AI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/argo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Argo Workflow (outdated documentation that needs review)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/aws_batch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AWS Batch (outdated documentation that needs review)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    CONTRIBUTE TO KEDRO
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            CONTRIBUTE TO KEDRO
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contribution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contribution Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    CLI REFERENCE
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            CLI REFERENCE
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/commands_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Commands Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API DOCUMENTATION
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            API DOCUMENTATION
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_1" id="__nav_2_10_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.config
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_1">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.config
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.AbstractConfigLoader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractConfigLoader
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.OmegaConfigLoader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    OmegaConfigLoader
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config/kedro.config.MissingConfigException/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MissingConfigException
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_2" id="__nav_2_10_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.framework
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_2">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.framework
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Context
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Project
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.session/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Session
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/framework/kedro.framework.startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Startup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_3" id="__nav_2_10_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.io
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_3">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.io
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.AbstractDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.AbstractVersionedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractVersionedDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.CachedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CachedDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DataCatalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DataCatalog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.LambdaDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LambdaDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.MemoryDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MemoryDataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.Version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Version
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetAlreadyExistsError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetAlreadyExistsError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/io/kedro.io.DatasetNotFoundError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DatasetNotFoundError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_4" id="__nav_2_10_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.ipython
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_4">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.ipython
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.load_ipython_extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    load_ipython_extension
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.magic_load_node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    magic_load_node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.magic_reload_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    magic_reload_kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ipython/kedro.ipython.reload_kedro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    reload_kedro
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/kedro.logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    kedro.logging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_6" id="__nav_2_10_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_6">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.modular_pipeline.pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    modular_pipeline.pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.Pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.node.Node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pipeline/kedro.pipeline.modular_pipeline.ModularPipelineError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModularPipelineError
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10_7" id="__nav_2_10_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    kedro.runner
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_7">
+            <span class="md-nav__icon md-icon"></span>
+            kedro.runner
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.run_node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    run_node
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.AbstractRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AbstractRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.SequentialRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SequentialRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.ParallelRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ParallelRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/runner/kedro.runner.ThreadRunner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ThreadRunner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/kedro.utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    kedro.utils
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../readthedocs.io/projects/kedro-viz" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro-Viz
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://docs.kedro.org/projects/kedro-datasets" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kedro-Datasets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#omegaconfigloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      OmegaConfigLoader
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OmegaConfigLoader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omegaconf-vs-kedros-omegaconfigloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      OmegaConf vs. Kedro's OmegaConfigLoader
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration source
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration environments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration environments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#base" class="md-nav__link">
+    <span class="md-ellipsis">
+      Base
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration loading
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration loading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration file names
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration patterns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-use-kedro-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to use Kedro configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to use Kedro configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-change-the-setting-for-a-configuration-source-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to change the setting for a configuration source folder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-change-the-configuration-source-folder-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to change the configuration source folder at runtime
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-read-configuration-from-a-compressed-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to read configuration from a compressed file
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-read-configuration-from-remote-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to read configuration from remote storage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to read configuration from remote storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication-for-remote-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication for remote configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-access-configuration-in-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to access configuration in code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-load-a-data-catalog-with-credentials-in-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to load a data catalog with credentials in code?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-specify-additional-configuration-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to specify additional configuration environments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-change-the-default-overriding-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to change the default overriding environment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-use-only-one-configuration-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to use only one configuration environment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-use-kedro-without-the-rich-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to use Kedro without the rich library
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="configuration">Configuration</h1>
+<p>This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as <a href="../parameters/">parameters</a>, <a href="../credentials/">credentials</a>, the <a href="../../data/data_catalog/">data catalog</a>, and <a href="../../logging/">logging information</a>.</p>
+<p>Kedro makes use of a configuration loader to load any project configuration files, which is {py:class}<code>~kedro.config.OmegaConfigLoader</code> by default since Kedro 0.19.0.</p>
+<pre><code>`ConfigLoader` and `TemplatedConfigLoader` have been removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
+</code></pre>
+<h2 id="omegaconfigloader">OmegaConfigLoader</h2>
+<p><a href="https://omegaconf.readthedocs.io/">OmegaConf</a> is a Python library designed to handle and manage settings. It serves as a YAML-based hierarchical system to organise configurations, which can be structured to accommodate various sources, allowing you to merge settings from multiple locations.</p>
+<p>From Kedro 0.18.5 you can use the {py:class}<code>~kedro.config.OmegaConfigLoader</code> which uses <code>OmegaConf</code> to load data.</p>
+<p><code>OmegaConfigLoader</code> can load <code>YAML</code> and <code>JSON</code> files. Acceptable file extensions are <code>.yml</code>, <code>.yaml</code>, and <code>.json</code>. By default, any configuration files used by the config loaders in Kedro are <code>.yml</code> files.</p>
+<h3 id="omegaconf-vs-kedros-omegaconfigloader"><code>OmegaConf</code> vs. Kedro's <code>OmegaConfigLoader</code></h3>
+<p><code>OmegaConf</code> is a configuration management library in Python that allows you to manage hierarchical configurations. Kedro's <code>OmegaConfigLoader</code> uses <code>OmegaConf</code> for handling configurations.
+This means that when you work with <code>OmegaConfigLoader</code> in Kedro, you are using the capabilities of <code>OmegaConf</code> without directly interacting with it.</p>
+<p><code>OmegaConfigLoader</code> in Kedro is designed to handle more complex configuration setups commonly used in Kedro projects. It automates the process of merging configuration files, such as those for catalogs, and accounts for different environments to make it convenient to manage configurations in a structured way.</p>
+<p>When you need to load configurations manually, such as for exploration in a notebook, you have two options:
+1. Use the <code>OmegaConfigLoader</code> class provided by Kedro.
+2. Directly use the <code>OmegaConf</code> library.</p>
+<p>Kedro's <code>OmegaConfigLoader</code> is designed to handle complex project environments. If your use case involves loading only one configuration file and is straightforward, it may be simpler to use <code>OmegaConf</code> directly.</p>
+<pre><code class="language-python">from omegaconf import OmegaConf
+
+parameters = OmegaConf.load(&quot;/path/to/parameters.yml&quot;)
+</code></pre>
+<p>When your configuration files are complex and contain credentials or templating, Kedro's <code>OmegaConfigLoader</code> is more suitable, as described in more detail in <a href="#how-to-load-a-data-catalog-with-credentials-in-code">How to load a data catalog with credentials in code?</a> and <a href="../advanced_configuration/#how-to-load-a-data-catalog-with-templating-in-code">How to load a data catalog with templating in code?</a>.</p>
+<p>In summary, while both <code>OmegaConf</code> and Kedro's <code>OmegaConfigLoader</code> provide ways to manage configurations, your choice depends on the complexity of your configuration and whether you are working within the context of the Kedro framework.</p>
+<h2 id="configuration-source">Configuration source</h2>
+<p>The configuration source folder is <a href="../../get_started/kedro_concepts/#conf"><code>conf</code></a> by default. We recommend that you keep all configuration files in the default <code>conf</code> folder of a Kedro project.</p>
+<h2 id="configuration-environments">Configuration environments</h2>
+<p>A configuration environment is a way of organising your configuration settings for different stages of your data pipeline. For example, you might have different settings for development, testing, and production environments.</p>
+<p>By default, Kedro projects have a <code>base</code> and a <code>local</code> environment.</p>
+<h3 id="base">Base</h3>
+<p>In Kedro, the base configuration environment refers to the default configuration settings that are used as the foundation for all other configuration environments.</p>
+<p>The <code>base</code> folder contains the default settings that are used across your pipelines, unless they are overridden by a specific environment.</p>
+<pre><code>Do not put private access credentials in the base configuration folder or any other configuration environment folder that is stored in version control.
+</code></pre>
+<h3 id="local">Local</h3>
+<p>The <code>local</code> configuration environment folder should be used for configuration that is either user-specific (e.g. IDE configuration) or protected (e.g. security keys).</p>
+<pre><code>Do not add any local configuration to version control.
+</code></pre>
+<h2 id="configuration-loading">Configuration loading</h2>
+<p>Kedro-specific configuration (e.g., <code>DataCatalog</code> configuration for I/O) is loaded using a configuration loader class, by default, this is {py:class}<code>~kedro.config.OmegaConfigLoader</code>.
+When you interact with Kedro through the command line, e.g. by running <code>kedro run</code>, Kedro loads all project configuration in the configuration source through this configuration loader.</p>
+<p>The loader recursively scans for configuration files inside the <code>conf</code> folder, firstly in <code>conf/base</code> (<code>base</code> being the default environment) and then in <code>conf/local</code> (<code>local</code> being the designated overriding environment).</p>
+<p>Kedro merges configuration information and returns a configuration dictionary according to the following rules:</p>
+<ul>
+<li>If any two configuration files (exception for parameters) located inside the <strong>same</strong> environment path (such as <code>conf/base/</code>) contain the same top-level key, the configuration loader raises a <code>ValueError</code> indicating that duplicates are not allowed.</li>
+<li>If two configuration files contain the same top-level key but are in <strong>different</strong> environment paths (for example, one in <code>conf/base/</code>, another in <code>conf/local/</code>) then the last loaded path (<code>conf/local/</code>) takes precedence as the key value. <code>OmegaConfigLoader.__getitem__</code> does not raise any errors but a <code>DEBUG</code> level log message is emitted with information on the overridden keys.</li>
+<li>If any two parameter configuration files contain the same top-level key, the configuration loader checks the sub-keys for duplicates. If there are any, it raises a <code>ValueError</code> indicating that duplicates are not allowed.</li>
+</ul>
+<p>When using any of the configuration loaders, any top-level keys that start with <code>_</code> are considered hidden (or reserved) and are ignored. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as <a href="https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet">YAML anchors and aliases</a>
+or <a href="../advanced_configuration/#how-to-do-templating-with-the-omegaconfigloader">to enable templating in the catalog when using the <code>OmegaConfigLoader</code></a>.</p>
+<h3 id="configuration-file-names">Configuration file names</h3>
+<p>Configuration files will be matched according to file name and type rules. Suppose the config loader needs to fetch the catalog configuration, it will search according to the following rules:</p>
+<ul>
+<li><em>Either</em> of the following is true:</li>
+<li>filename starts with <code>catalog</code></li>
+<li>file is located in a subfolder whose name is prefixed with <code>catalog</code></li>
+<li><em>And</em> file extension is one of the following: <code>yaml</code>, <code>yml</code>, or <code>json</code></li>
+</ul>
+<h3 id="configuration-patterns">Configuration patterns</h3>
+<p>Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by <code>config_patterns</code> in the configuration loader classes.</p>
+<p>By default, those patterns are set as follows for the configuration of catalog, parameters, logging, credentials:</p>
+<pre><code class="language-python">config_patterns = {
+    &quot;catalog&quot;: [&quot;catalog*&quot;, &quot;catalog*/**&quot;, &quot;**/catalog*&quot;],
+    &quot;parameters&quot;: [&quot;parameters*&quot;, &quot;parameters*/**&quot;, &quot;**/parameters*&quot;],
+    &quot;credentials&quot;: [&quot;credentials*&quot;, &quot;credentials*/**&quot;, &quot;**/credentials*&quot;],
+    &quot;logging&quot;: [&quot;logging*&quot;, &quot;logging*/**&quot;, &quot;**/logging*&quot;],
+}
+</code></pre>
+<p>If you want to change the way configuration is loaded, you can either <a href="../advanced_configuration/#how-to-change-which-configuration-files-are-loaded">customise the config patterns</a> or <a href="../advanced_configuration/#how-to-bypass-the-configuration-loading-rules">bypass the configuration loading</a> as described in the advanced configuration chapter.</p>
+<h2 id="how-to-use-kedro-configuration">How to use Kedro configuration</h2>
+<p>This section contains a set of guidance for the most common configuration requirements of standard Kedro projects:</p>
+<ul>
+<li><a href="#how-to-change-the-setting-for-a-configuration-source-folder">How to change the setting for a configuration source folder</a></li>
+<li><a href="#how-to-change-the-configuration-source-folder-at-runtime">How to change the configuration source folder at runtime</a></li>
+<li><a href="#how-to-read-configuration-from-a-compressed-file">How to read configuration from a compressed file</a></li>
+<li><a href="#how-to-read-configuration-from-remote-storage">How to read configuration from remote storage</a></li>
+<li><a href="#how-to-access-configuration-in-code">How to access configuration in code</a></li>
+<li><a href="#how-to-load-a-data-catalog-with-credentials-in-code">How to load a data catalog with credentials in code?</a></li>
+<li><a href="#how-to-specify-additional-configuration-environments">How to specify additional configuration environments</a></li>
+<li><a href="#how-to-change-the-default-overriding-environment">How to change the default overriding environment</a></li>
+<li><a href="#how-to-use-only-one-configuration-environment">How to use only one configuration environment</a></li>
+</ul>
+<h3 id="how-to-change-the-setting-for-a-configuration-source-folder">How to change the setting for a configuration source folder</h3>
+<p>To store the Kedro project configuration in a different folder to <code>conf</code>, change the configuration source by setting the <code>CONF_SOURCE</code> variable in <a href="../../kedro_project_setup/settings/"><code>src/&lt;package_name&gt;/settings.py</code></a> as follows:</p>
+<pre><code class="language-python">CONF_SOURCE = &quot;new_conf&quot;
+</code></pre>
+<h3 id="how-to-change-the-configuration-source-folder-at-runtime">How to change the configuration source folder at runtime</h3>
+<p>Specify a source folder for the configuration files at runtime using the <a href="../../development/commands_reference/#modifying-a-kedro-run"><code>kedro run</code> CLI command</a> with the <code>--conf-source</code> flag as follows:</p>
+<pre><code class="language-bash">kedro run --conf-source=&lt;path-to-new-conf-folder&gt;
+</code></pre>
+<h3 id="how-to-read-configuration-from-a-compressed-file">How to read configuration from a compressed file</h3>
+<p>You can read configuration from a compressed file in <code>tar.gz</code> or <code>zip</code> format by using the {py:class}<code>~kedro.config.OmegaConfigLoader</code>.</p>
+<p>How to reference a <code>tar.gz</code> file:</p>
+<p>```bash
+kedro run --conf-source=<path-to-compressed-file>.tar.gz</p>
+<pre><code>
+How to reference a `zip` file:
+
+```bash
+kedro run --conf-source=&lt;path-to-compressed-file&gt;.zip
+</code></pre>
+<p>To compress your configuration you can use Kedro's <code>kedro package</code> command which builds the package into the <code>dist/</code> folder of your project, and creates a <code>.whl</code> file, as well as a <code>tar.gz</code> file containing the project configuration. The compressed version of the config files excludes any files inside your <code>local</code> folder.</p>
+<p>Alternatively you can run the command below to create a <code>tar.gz</code> file:</p>
+<pre><code class="language-bash">tar --exclude=local/*.yml -czf &lt;my_conf_name&gt;.tar.gz --directory=&lt;path-to-conf-dir&gt; &lt;conf-dir&gt;
+</code></pre>
+<p>Or the following command to create a <code>zip</code> file:</p>
+<pre><code class="language-bash">zip -x &lt;conf-dir&gt;/local/** -r &lt;my_conf_name&gt;.zip &lt;conf-dir&gt;
+</code></pre>
+<p>For both the <code>tar.gz</code> and <code>zip</code> file, the following structure is expected:</p>
+<pre><code class="language-text">&lt;conf_dir&gt;
+├── base               &lt;-- the files inside may be different, but this is an example of a standard Kedro structure.
+│   └── parameters.yml
+│   └── catalog.yml
+└── local              &lt;-- the top level local folder is required, but no files should be inside when distributed.
+└── README.md          &lt;-- optional but included with the default Kedro conf structure.
+</code></pre>
+<h3 id="how-to-read-configuration-from-remote-storage">How to read configuration from remote storage</h3>
+<p>You can read configuration from remote storage locations using cloud storage protocols. This allows you to separate your configuration from your code and securely store different configurations for various environments or tenants.</p>
+<p>Supported protocols include:
+- Amazon S3 (<code>s3://</code>)
+- Azure Blob Storage (<code>abfs://</code>, <code>abfss://</code>)
+- Google Cloud Storage (<code>gs://</code>, <code>gcs://</code>)
+- HTTP/HTTPS (<code>http://</code>, <code>https://</code>)
+- And other protocols supported by <code>fsspec</code></p>
+<p>To use a remote configuration source, specify the URL when running your Kedro pipeline:</p>
+<pre><code class="language-bash"># Amazon S3
+kedro run --conf-source=s3://my-bucket/configs/
+
+# Azure Blob Storage
+kedro run --conf-source=abfs://container@account/configs/
+
+# Google Cloud Storage
+kedro run --conf-source=gs://my-bucket/configs/
+</code></pre>
+<h4 id="authentication-for-remote-configuration">Authentication for remote configuration</h4>
+<p>Authentication for remote configuration sources must be set up through environment variables or other credential mechanisms provided by the cloud platform. Unlike datasets in the data catalog, you cannot use credentials from <code>credentials.yml</code> for remote configuration sources since those credentials would be part of the configuration you're trying to access.</p>
+<p><strong>Examples of authentication setup:</strong></p>
+<p>Amazon S3:</p>
+<pre><code class="language-bash">  export AWS_ACCESS_KEY_ID=your_access_key
+  export AWS_SECRET_ACCESS_KEY=your_secret_key
+  kedro run --conf-source=s3://my-bucket/configs/
+</code></pre>
+<p>Google Cloud Storage:</p>
+<pre><code>gcloud auth application-default login
+kedro run --conf-source=gs://my-bucket/configs/
+</code></pre>
+<p>Azure Blob Storage:</p>
+<pre><code>export AZURE_STORAGE_ACCOUNT=your_account_name
+export AZURE_STORAGE_KEY=your_account_key
+kedro run --conf-source=abfs://container@account/configs/
+</code></pre>
+<p>For more detailed authentication instructions, refer to the documentation of your cloud provider.</p>
+<p>The remote storage should maintain the same configuration structure as local configuration, with appropriate <code>base</code> and environment folders:</p>
+<pre><code class="language-text">s3://my-bucket/configs/
+├── base/
+│   ├── catalog.yml
+│   └── parameters.yml
+└── prod/
+    └── parameters.yml
+</code></pre>
+<pre><code>While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not currently support reading compressed files directly from cloud storage (e.g., s3://my-bucket/configs.tar.gz).
+</code></pre>
+<h3 id="how-to-access-configuration-in-code">How to access configuration in code</h3>
+<p>To directly access configuration in code, for example to debug, you can do so as follows:</p>
+<pre><code class="language-python">from kedro.config import OmegaConfigLoader
+from kedro.framework.project import settings
+
+# Instantiate an `OmegaConfigLoader` instance with the location of your project configuration.
+conf_path = str(project_path / settings.CONF_SOURCE)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
+
+# This line shows how to access the catalog configuration. You can access other configuration in the same way.
+conf_catalog = conf_loader[&quot;catalog&quot;]
+</code></pre>
+<h3 id="how-to-load-a-data-catalog-with-credentials-in-code">How to load a data catalog with credentials in code?</h3>
+<pre><code>We do not recommend that you load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
+</code></pre>
+<p>Assuming your project contains a catalog and credentials file, each located in <code>base</code> and <code>local</code> environments respectively, you can use the <code>OmegaConfigLoader</code> to load these configurations, and pass them to a <code>DataCatalog</code> object to access the catalog entries with resolved credentials.</p>
+<pre><code class="language-python">from kedro.config import OmegaConfigLoader
+from kedro.framework.project import settings
+from kedro.io import DataCatalog
+
+# Instantiate an `OmegaConfigLoader` instance with the location of your project configuration.
+conf_path = str(project_path / settings.CONF_SOURCE)
+conf_loader = OmegaConfigLoader(
+    conf_source=conf_path, base_env=&quot;base&quot;, default_run_env=&quot;local&quot;
+)
+
+# These lines show how to access the catalog and credentials configurations.
+conf_catalog = conf_loader[&quot;catalog&quot;]
+conf_credentials = conf_loader[&quot;credentials&quot;]
+
+# Fetch the catalog with resolved credentials from the configuration.
+catalog = DataCatalog.from_config(catalog=conf_catalog, credentials=conf_credentials)
+</code></pre>
+<h3 id="how-to-specify-additional-configuration-environments">How to specify additional configuration environments</h3>
+<p>In addition to the two built-in <code>local</code> and <code>base</code> configuration environments, you can create your own. Your project loads <code>conf/base/</code> as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create, such as <code>conf/server/</code> or <code>conf/test/</code>. To use additional configuration environments, run the following command:</p>
+<pre><code class="language-bash">kedro run --env=&lt;your-environment&gt;
+</code></pre>
+<p>If no <code>env</code> option is specified, this will default to using the <code>local</code> environment to overwrite <code>conf/base</code>.</p>
+<p>If you set the <code>KEDRO_ENV</code> environment variable to the name of your environment, Kedro will load that environment for your <code>kedro run</code>, <code>kedro ipython</code>, <code>kedro jupyter notebook</code> and <code>kedro jupyter lab</code> sessions:</p>
+<pre><code class="language-bash">export KEDRO_ENV=&lt;your-environment&gt;
+</code></pre>
+<pre><code>If you both specify the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
+</code></pre>
+<h3 id="how-to-change-the-default-overriding-environment">How to change the default overriding environment</h3>
+<p>By default, <code>local</code> is the overriding environment for <code>base</code>. To change the folder, customise the configuration loader argument settings in <code>src/&lt;package_name&gt;/settings.py</code> and set the <code>CONFIG_LOADER_ARGS</code> key to have a new <code>default_run_env</code> value.</p>
+<p>For example, if you want to override <code>base</code> with configuration in a custom environment called <code>prod</code>, you change the configuration loader arguments in <code>settings.py</code> as follows:</p>
+<pre><code class="language-python">CONFIG_LOADER_ARGS = {&quot;default_run_env&quot;: &quot;prod&quot;}
+</code></pre>
+<h3 id="how-to-use-only-one-configuration-environment">How to use only one configuration environment</h3>
+<p>Customise the configuration loader arguments in <code>settings.py</code> as follows if your project does not have any other environments apart from <code>base</code> (i.e. no <code>local</code> environment to default to):</p>
+<pre><code class="language-python">CONFIG_LOADER_ARGS = {&quot;default_run_env&quot;: &quot;base&quot;}
+</code></pre>
+<h3 id="how-to-use-kedro-without-the-rich-library">How to use Kedro without the rich library</h3>
+<p>If you prefer not to have the <code>rich</code> library in your Kedro project, you have the option to uninstall it. However, it's important to note that versions of the <code>cookiecutter</code> library above 2.3 have a dependency on rich. You will need to downgrade <code>cookiecutter</code> to a version below 2.3 to have Kedro work without <code>rich</code>.</p>
+<p>To uninstall the rich library, run:</p>
+<pre><code class="language-bash">pip uninstall rich
+</code></pre>
+<p>To downgrade cookiecutter to a version that does not require rich, you can specify a version below 2.3. For example:</p>
+<pre><code class="language-bash">pip install cookiecutter==2.2.0
+</code></pre>
+<p>These changes will affect the visual appearance and formatting of Kedro's logging, prompts, and the output of the <code>kedro ipython</code> command. While using a version of <code>cookiecutter</code> below 2.3, the appearance of the prompts will be plain even with <code>rich</code> installed.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.tracking", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "content.code.annotate", "content.code.highlight"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>

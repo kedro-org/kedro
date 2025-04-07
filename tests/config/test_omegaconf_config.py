@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import configparser
+import copy
 import json
 import os
 import re
@@ -44,7 +45,7 @@ def _write_dummy_ini(filepath: Path):
 
 @pytest.fixture
 def base_config(tmp_path):
-    filepath = str(tmp_path / "cars.csv")
+    filepath = tmp_path / "cars.csv"
     return {
         "trains": {"type": "MemoryDataset"},
         "cars": {
@@ -57,7 +58,7 @@ def base_config(tmp_path):
 
 @pytest.fixture
 def local_config(tmp_path):
-    filepath = str(tmp_path / "cars.csv")
+    filepath = tmp_path / "cars.csv"
     return {
         "cars": {
             "type": "pandas.CSVDataset",
@@ -159,7 +160,7 @@ class TestOmegaConfigLoader:
     def test_load_core_config_dict_syntax(self, tmp_path):
         """Make sure core config can be fetched with a dict [] access."""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         params = conf["parameters"]
         catalog = conf["catalog"]
@@ -171,7 +172,7 @@ class TestOmegaConfigLoader:
     def test_load_core_config_get_syntax(self, tmp_path):
         """Make sure core config can be fetched with .get()"""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         params = conf.get("parameters")
         catalog = conf.get("catalog")
@@ -186,7 +187,7 @@ class TestOmegaConfigLoader:
         """Make sure that configs from `local/` override the ones
         from `base/`"""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         params = conf["parameters"]
         catalog = conf["catalog"]
@@ -202,7 +203,7 @@ class TestOmegaConfigLoader:
         """Test config loading if `local/` directory is empty"""
         (tmp_path / _DEFAULT_RUN_ENV).mkdir(exist_ok=True)
         catalog = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )["catalog"]
         assert catalog == base_config
 
@@ -211,7 +212,7 @@ class TestOmegaConfigLoader:
         """Test config loading if the glob patterns cover the same file"""
         (tmp_path / _DEFAULT_RUN_ENV).mkdir(exist_ok=True)
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         catalog1 = conf["catalog"]
         catalog2 = conf["catalog"]
@@ -225,14 +226,14 @@ class TestOmegaConfigLoader:
         )
         with pytest.raises(MissingConfigException, match=pattern.format(".*base")):
             OmegaConfigLoader(
-                str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+                tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
             )["catalog"]
         with pytest.raises(MissingConfigException, match=pattern.format(".*local")):
             proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
             _write_yaml(proj_catalog, base_config)
             print(
                 OmegaConfigLoader(
-                    str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+                    tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
                 )["catalog"]
             )
 
@@ -240,7 +241,7 @@ class TestOmegaConfigLoader:
     def test_nested(self, tmp_path):
         """Test loading the config from subdirectories"""
         config_loader = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         config_loader.default_run_env = "prod"
 
@@ -267,7 +268,7 @@ class TestOmegaConfigLoader:
         )
         with pytest.raises(ValueError, match=pattern):
             OmegaConfigLoader(
-                str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+                tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
             )["catalog"]
 
     @use_config_dir
@@ -300,7 +301,7 @@ class TestOmegaConfigLoader:
 
         with pytest.raises(ValueError) as exc:
             OmegaConfigLoader(
-                str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+                tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
             )["catalog"]
         assert re.search(pattern_catalog_nested, str(exc.value))
         assert re.search(pattern_catalog_local, str(exc.value))
@@ -318,7 +319,7 @@ class TestOmegaConfigLoader:
         pattern = f"Invalid YAML or JSON file {conf_env_path.as_posix()}"
         with pytest.raises(ParserError, match=re.escape(pattern)):
             OmegaConfigLoader(
-                str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+                tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
             )["catalog"]
 
     def test_lots_of_duplicates(self, tmp_path):
@@ -327,7 +328,7 @@ class TestOmegaConfigLoader:
         _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", data)
 
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         pattern = (
             r"Duplicate keys found in "
@@ -342,7 +343,9 @@ class TestOmegaConfigLoader:
         """Check the error if 2 files in the same config dir contain
         the same top-level key"""
         dup_json = tmp_path / _BASE_ENV / "catalog.json"
-        _write_json(dup_json, base_config)
+        cleaned_config = copy.deepcopy(base_config)
+        cleaned_config["cars"]["filepath"] = str(cleaned_config["cars"]["filepath"])
+        _write_json(dup_json, cleaned_config)
 
         pattern = (
             r"Duplicate keys found in "
@@ -350,7 +353,7 @@ class TestOmegaConfigLoader:
             r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
-            OmegaConfigLoader(str(tmp_path))["catalog"]
+            OmegaConfigLoader(tmp_path)["catalog"]
 
     @use_config_dir
     def test_same_namespace_different_key_in_same_dir(self, tmp_path):
@@ -366,7 +369,7 @@ class TestOmegaConfigLoader:
         _write_yaml(dup_yaml_2, config_2)
 
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )["parameters"]
         assert (
             OmegaConf.select(OmegaConf.create(conf), ".namespace1.class1.key1")
@@ -391,7 +394,7 @@ class TestOmegaConfigLoader:
         key = "non-existent-pattern"
         pattern = f"No config patterns were found for '{key}' in your config loader"
         with pytest.raises(KeyError, match=pattern):
-            OmegaConfigLoader(str(tmp_path))[key]
+            OmegaConfigLoader(tmp_path)[key]
 
     @use_config_dir
     def test_cannot_load_non_yaml_or_json_files(self, tmp_path):
@@ -400,7 +403,7 @@ class TestOmegaConfigLoader:
         _write_dummy_ini(db_config_path)
 
         conf = OmegaConfigLoader(
-            str(tmp_path),
+            tmp_path,
             config_patterns=db_patterns,
             base_env=_BASE_ENV,
             default_run_env=_DEFAULT_RUN_ENV,
@@ -427,7 +430,7 @@ class TestOmegaConfigLoader:
         )
         with pytest.raises(MissingConfigException, match=pattern):
             OmegaConfigLoader(
-                str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+                tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
             )["credentials"]
 
     def test_empty_catalog_file(self, tmp_path):
@@ -460,7 +463,7 @@ class TestOmegaConfigLoader:
         }
 
         catalog = OmegaConfigLoader(
-            conf_source=str(tmp_path),
+            conf_source=tmp_path,
             base_env=_BASE_ENV,
             env="dev",
             config_patterns=catalog_patterns,
@@ -487,7 +490,7 @@ class TestOmegaConfigLoader:
 
         load_spy = mocker.spy(OmegaConf, "load")
         catalog = OmegaConfigLoader(
-            conf_source=str(tmp_path),
+            conf_source=tmp_path,
             base_env=_BASE_ENV,
             config_patterns=catalog_patterns,
         )["catalog"]
@@ -517,12 +520,12 @@ class TestOmegaConfigLoader:
         )
         with pytest.raises(ParserError, match=re.escape(msg)):
             OmegaConfigLoader(
-                str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+                tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
             )["catalog"]
 
     def test_customised_config_patterns(self, tmp_path):
         config_loader = OmegaConfigLoader(
-            conf_source=str(tmp_path),
+            conf_source=tmp_path,
             config_patterns={
                 "spark": ["spark*/"],
                 "parameters": ["params*", "params*/**", "**/params*"],
@@ -543,7 +546,7 @@ class TestOmegaConfigLoader:
     def test_default_destructive_merging_strategy(self, tmp_path, mlflow_config):
         mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
         conf = OmegaConfigLoader(
-            str(tmp_path),
+            tmp_path,
             config_patterns=mlflow_patterns,
             base_env=_BASE_ENV,
             default_run_env=_DEFAULT_RUN_ENV,
@@ -560,7 +563,7 @@ class TestOmegaConfigLoader:
     def test_destructive_merging_strategy(self, tmp_path, mlflow_config):
         mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
         conf = OmegaConfigLoader(
-            str(tmp_path),
+            tmp_path,
             config_patterns=mlflow_patterns,
             merge_strategy={"mlflow": "destructive"},
             base_env=_BASE_ENV,
@@ -578,7 +581,7 @@ class TestOmegaConfigLoader:
     def test_soft_merging_strategy(self, tmp_path, mlflow_config):
         mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
         conf = OmegaConfigLoader(
-            str(tmp_path),
+            tmp_path,
             config_patterns=mlflow_patterns,
             merge_strategy={"mlflow": "soft"},
             base_env=_BASE_ENV,
@@ -599,7 +602,7 @@ class TestOmegaConfigLoader:
         mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
         with pytest.raises(ValueError):
             OmegaConfigLoader(
-                str(tmp_path),
+                tmp_path,
                 config_patterns=mlflow_patterns,
                 merge_strategy={"mlflow": "hard"},
                 base_env=_BASE_ENV,
@@ -610,7 +613,7 @@ class TestOmegaConfigLoader:
     def test_adding_extra_keys_to_confloader(self, tmp_path):
         """Make sure extra keys can be added directly to the config loader instance."""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         catalog = conf["catalog"]
         conf["spark"] = {"spark_config": "emr.blabla"}
@@ -623,7 +626,7 @@ class TestOmegaConfigLoader:
         """Make sure core config loading can be bypassed by setting the key and values
         directly on the config loader instance."""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         conf["catalog"] = {"catalog_config": "something_new"}
 
@@ -634,7 +637,7 @@ class TestOmegaConfigLoader:
     def test_load_credentials_from_env_variables(self, tmp_path):
         """Load credentials from environment variables"""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"
@@ -646,7 +649,7 @@ class TestOmegaConfigLoader:
     def test_env_resolver_not_used_for_catalog(self, tmp_path):
         """Check that the oc.env resolver is not used for catalog loading"""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         os.environ["TEST_DATASET"] = "test_dataset"
         with pytest.raises(errors.UnsupportedInterpolationType):
@@ -658,7 +661,7 @@ class TestOmegaConfigLoader:
         """Check that the ``oc.env`` resolver is cleared after loading credentials
         in the case that it was not registered beforehand."""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"
@@ -671,7 +674,7 @@ class TestOmegaConfigLoader:
         """Check that the ``oc.env`` resolver is registered after loading credentials
         in the case that it was registered beforehand"""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         OmegaConf.register_new_resolver("oc.env", oc.env)
         os.environ["TEST_USERNAME"] = "test_user"
@@ -733,7 +736,7 @@ class TestOmegaConfigLoader:
     def test_variable_interpolation_with_correct_env(self, tmp_path):
         """Make sure the parameters is interpolated with the correct environment"""
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         params = conf["parameters"]
         # Making sure it is not override by local/parameters_global.yml
@@ -743,7 +746,7 @@ class TestOmegaConfigLoader:
     def test_runtime_params_override_interpolated_value(self, tmp_path):
         """Make sure interpolated value is updated correctly with runtime_params"""
         conf = OmegaConfigLoader(
-            str(tmp_path),
+            tmp_path,
             base_env=_BASE_ENV,
             default_run_env=_DEFAULT_RUN_ENV,
             runtime_params={"test_env": "dummy"},
@@ -760,7 +763,7 @@ class TestOmegaConfigLoader:
         key = "test_env"
         runtime_params = {key: "dummy"}
         conf = OmegaConfigLoader(
-            str(tmp_path),
+            tmp_path,
             config_patterns={"spark": ["spark*", "spark*/**", "**/spark*"]},
             runtime_params=runtime_params,
             base_env=_BASE_ENV,
@@ -782,7 +785,7 @@ class TestOmegaConfigLoader:
         _write_yaml(tmp_path / _BASE_ENV / "catalog1.yml", {"k1": "v1", "_k2": "v2"})
         _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", {"k3": "v3", "_k2": "v4"})
 
-        conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
         catalog = conf["catalog"]
         assert catalog.keys() == {"k1", "k3"}
 
@@ -806,7 +809,7 @@ class TestOmegaConfigLoader:
         }
         _write_yaml(base_catalog, catalog_config)
 
-        conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_variable_interpolation_in_catalog_with_separate_templates_file(
@@ -824,7 +827,7 @@ class TestOmegaConfigLoader:
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(tmp_catalog, template)
 
-        conf = OmegaConfigLoader(str(tmp_path), base_env=_BASE_ENV)
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV)
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_custom_resolvers(self, tmp_path):
@@ -1026,7 +1029,7 @@ class TestOmegaConfigLoader:
     )
     def test_is_hidden_config(self, tmp_path, hidden_path):
         conf = OmegaConfigLoader(
-            str(tmp_path), base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
         assert conf._is_hidden(hidden_path)
 
@@ -1043,11 +1046,11 @@ class TestOmegaConfigLoader:
         ],
     )
     def test_not_hidden_config(self, conf_source, hidden_path):
-        conf = OmegaConfigLoader(str(conf_source))
+        conf = OmegaConfigLoader(conf_source)
         assert not conf._is_hidden(hidden_path)
 
     def test_ignore_ipynb_checkpoints(self, tmp_path, mocker):
-        conf = OmegaConfigLoader(str(tmp_path), default_run_env=_BASE_ENV)
+        conf = OmegaConfigLoader(tmp_path, default_run_env=_BASE_ENV)
         base_path = tmp_path / _BASE_ENV / "parameters.yml"
         checkpoints_path = (
             tmp_path / _BASE_ENV / ".ipynb_checkpoints" / "parameters.yml"
@@ -1433,7 +1436,7 @@ class TestOmegaConfigLoaderStandalone:
         _write_yaml(base_catalog, catalog_config)
 
         conf = OmegaConfigLoader(
-            str(tmp_path),
+            tmp_path,
         )
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
@@ -1452,7 +1455,7 @@ class TestOmegaConfigLoaderStandalone:
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(tmp_catalog, template)
 
-        conf = OmegaConfigLoader(str(tmp_path))
+        conf = OmegaConfigLoader(tmp_path)
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_globals(self, tmp_path):

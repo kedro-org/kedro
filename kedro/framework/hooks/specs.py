@@ -37,7 +37,7 @@ class DataCatalogSpecs:
             catalog: The catalog that was created.
             conf_catalog: The config from which the catalog was created.
             conf_creds: The credentials conf from which the catalog was created.
-            parameters: The datasets that are added to the catalog after creation.
+            parameters: The parameters that are added to the catalog after creation.
             save_version: The save_version used in ``save`` operations
                 for all datasets in the catalog.
             load_versions: The load_versions used in ``load`` operations

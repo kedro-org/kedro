@@ -169,8 +169,8 @@ class AbstractRunner(ABC):
             the keys are defined by the node outputs.
 
         """
-        free_outputs = pipeline.outputs() - set(catalog.list())
-        missing = {ds for ds in catalog.list() if not catalog.exists(ds)}
+        free_outputs = pipeline.outputs() - set(catalog.keys())
+        missing = {ds for ds in catalog if not catalog.exists(ds)}
         to_build = free_outputs | missing
         to_rerun = pipeline.only_nodes_with_outputs(*to_build) + pipeline.from_inputs(
             *to_build
@@ -178,7 +178,7 @@ class AbstractRunner(ABC):
 
         # We also need any missing datasets that are required to run the
         # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.datasets() - set(catalog.list())
+        unregistered_ds = pipeline.datasets() - set(catalog.keys())
         output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
         input_from_unregistered = to_rerun.inputs() & unregistered_ds
         to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)

@@ -64,13 +64,8 @@ class CatalogCommandsMixin:
     def resolve_patterns(
         self: KedroDataCatalog,
         pipelines: list[Pipeline] | None = None,
-        include_default: bool = False,
     ) -> dict[str, Any]:
         """Resolve catalog factories against pipeline datasets."""
-        # TODO: revise setting default pattern logic based on https://github.com/kedro-org/kedro/issues/4475
-        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
-        if include_default:
-            self.config_resolver.add_runtime_patterns(runtime_pattern)
 
         target_pipelines = pipelines or _pipelines.keys()
 
@@ -95,12 +90,10 @@ class CatalogCommandsMixin:
             if ds_name in explicit_datasets or is_parameter(ds_name):
                 continue
 
+            # TODO: test if credentials are removed
             ds_config = self.config_resolver.resolve_pattern(ds_name)
             if ds_config:
                 explicit_datasets[ds_name] = ds_config
-
-        if include_default:
-            self.config_resolver.remove_runtime_patterns(runtime_pattern)
 
         return explicit_datasets
 

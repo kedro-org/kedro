@@ -1,15 +1,16 @@
 # kedro.logging
 
-## Description
-
 ::: kedro.logging
     options:
-      show_source: true
       docstring_style: google
+      members: false
+      show_source: false
 
-## Classes
 
-### RichHandler
+| Name              | Type   | Description                                      |
+|-------------------|--------|--------------------------------------------------|
+| [`kedro.logging.RichHandler`](#kedro.logging.RichHandler) | Class  | A logging handler for rendering rich output.    |
+
 ::: kedro.logging.RichHandler
     options:
       members: true

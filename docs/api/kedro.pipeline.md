@@ -1,41 +1,37 @@
 # kedro.pipeline
 
-## Description
-
 ::: kedro.pipeline
     options:
-      show_source: true
       docstring_style: google
+      members: false
+      show_source: false
 
-## Functions
+| Name                          | Type       | Description                                      |
+|-------------------------------|------------|--------------------------------------------------|
+| [`kedro.pipeline.node`](#kedro.pipeline.node) | Function   | A decorator to define a node in a Kedro pipeline. |
+| [`kedro.pipeline.modular_pipeline.pipeline`](#kedro.pipeline.modular_pipeline.pipeline) | Function | A helper to create modular pipelines.            |
+| [`kedro.pipeline.Pipeline`](#kedro.pipeline.Pipeline) | Class      | Represents a Kedro pipeline.                    |
+| [`kedro.pipeline.node.Node`](#kedro.pipeline.node.Node) | Class      | Represents a single node in a Kedro pipeline.   |
+| [`kedro.pipeline.modular_pipeline.ModularPipelineError`](#kedro.pipeline.modular_pipeline.ModularPipelineError) | Exception | Raised for errors in modular pipelines.         |
 
-### node
 ::: kedro.pipeline.node
     options:
       show_source: true
 
-### modular_pipeline.pipeline
 ::: kedro.pipeline.modular_pipeline.pipeline
     options:
       show_source: true
 
-## Classes
-
-### Pipeline
 ::: kedro.pipeline.Pipeline
     options:
       members: true
       show_source: true
 
-### Node
 ::: kedro.pipeline.node.Node
     options:
       members: true
       show_source: true
 
-## Exceptions
-
-### ModularPipelineError
 ::: kedro.pipeline.modular_pipeline.ModularPipelineError
     options:
       show_source: true

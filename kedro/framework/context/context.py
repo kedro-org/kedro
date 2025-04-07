@@ -217,7 +217,7 @@ class KedroContext:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
             params = {}
         _update_nested_dict(params, self._extra_params or {})
-        return params
+        return params  # type: ignore
 
     def _get_catalog(
         self,

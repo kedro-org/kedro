@@ -18,7 +18,7 @@ from kedro.framework.project import (
     settings,
 )
 from kedro.framework.session import KedroSession
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import KedroDataCatalog, MemoryDataset
 from kedro.pipeline import node, pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
@@ -547,7 +547,7 @@ def sample_node_multiple_outputs():
     )
 
 
-class LogCatalog(DataCatalog):
+class LogCatalog(KedroDataCatalog):
     def load(self, name: str, version: Optional[str] = None) -> Any:
         dataset = super().load(name=name, version=version)
         logger.info("Catalog load")

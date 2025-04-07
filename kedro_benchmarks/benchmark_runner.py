@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from kedro.io.data_catalog import DataCatalog
+from kedro.io import KedroDataCatalog
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline
 
@@ -47,7 +47,7 @@ def create_data_catalog():
     filepath: benchmarks/data/data.csv
 """
     catalog_conf = yaml.safe_load(catalog_conf)
-    catalog = DataCatalog.from_config(catalog_conf)
+    catalog = KedroDataCatalog.from_config(catalog_conf)
     return catalog
 
 

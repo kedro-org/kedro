@@ -164,7 +164,7 @@ def fake_project_cli(
 
 
 # We use `None` as the first parameter since the default `DATA_CATALOG_CLASS`
-# set in `settings.py` is `DataCatalog`. We do not set `DataCatalog` explicitly
+# set in `settings.py` is `KedroDataCatalog`. We do not set `KedroDataCatalog` explicitly
 # in fixture params to test loading the default class.
 @fixture(scope="module", params=[None, KedroDataCatalog])
 def fake_project_cli_parametrized(

@@ -7,11 +7,14 @@ from __future__ import annotations
 import copy
 import logging
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from parse import parse
 
 from kedro.io.core import DatasetError
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable
 
 Patterns = dict[str, dict[str, Any]]
 
@@ -25,8 +28,9 @@ class CatalogConfigResolver:
         self,
         config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
+        runtime_patterns: Patterns | None = None,
     ):
-        self._runtime_patterns: Patterns = {}
+        self._runtime_patterns = runtime_patterns or {}
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )
@@ -100,7 +104,7 @@ class CatalogConfigResolver:
             raise KeyError(
                 f"Unable to find credentials '{credentials_name}': check your data "
                 "catalog and credentials configuration. See "
-                "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
+                "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog "
                 "for an example."
             ) from exc
 
@@ -195,10 +199,20 @@ class CatalogConfigResolver:
             + list(self._runtime_patterns.keys())
         )
 
+    @classmethod
+    def _get_matches(cls, pattens: Iterable[str], ds_name: str) -> Generator[str]:
+        return (pattern for pattern in pattens if parse(pattern, ds_name))
+
     def match_pattern(self, ds_name: str) -> str | None:
-        """Match a dataset name against patterns in a dictionary."""
-        all_patterns = self.list_patterns()
-        matches = (pattern for pattern in all_patterns if parse(pattern, ds_name))
+        """Match a dataset name against catalog patterns in a dictionary."""
+        matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
+        return next(matches, None)
+
+    def match_default_pattern(self, ds_name: str) -> str | None:
+        """Match a dataset name against default patterns in a dictionary."""
+        default_patters = set(self._default_pattern.keys())
+        default_patters.update(set(self._runtime_patterns.keys()))
+        matches = self._get_matches(default_patters, ds_name)
         return next(matches, None)
 
     def _get_pattern_config(self, pattern: str) -> dict[str, Any]:
@@ -306,7 +320,9 @@ class CatalogConfigResolver:
 
     def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
-        matched_pattern = self.match_pattern(ds_name)
+        matched_pattern = self.match_pattern(ds_name) or self.match_default_pattern(
+            ds_name
+        )
 
         if matched_pattern and ds_name not in self._resolved_configs:
             pattern_config = self._get_pattern_config(matched_pattern)
@@ -327,15 +343,3 @@ class CatalogConfigResolver:
             return ds_config  # type: ignore[no-any-return]
 
         return self._resolved_configs.get(ds_name, {})
-
-    def add_runtime_patterns(self, dataset_patterns: Patterns) -> None:
-        """Add new runtime patterns and re-sort them."""
-        self._runtime_patterns = {**self._runtime_patterns, **dataset_patterns}
-        self._runtime_patterns = self._sort_patterns(self._runtime_patterns)
-
-    def remove_runtime_patterns(self, dataset_patterns: Patterns) -> None:
-        """Remove runtime patterns and re-sort them."""
-        for pattern_name in dataset_patterns:
-            if pattern_name in self._runtime_patterns:
-                del self._runtime_patterns[pattern_name]
-        self._runtime_patterns = self._sort_patterns(self._runtime_patterns)

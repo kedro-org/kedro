@@ -3,6 +3,7 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
+* Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
 ## Breaking changes to the API
 ## Documentation changes
 
@@ -22,6 +23,7 @@
 * Fixed `%load_node` magic command to work with Jupyter Notebook `>=7.2.0`.
 * Remove `7: Kedro Viz` from Kedro tools.
 * Updated node grouping API to only group on first level of namespace.
+* Improved error handling to show root cause during dataset loading.
 
 ## Documentation changes
 * Added documentation for Kedro's support for Delta Lake versioning.

@@ -567,6 +567,16 @@ def parse_dataset_definition(
         )
 
     dataset_type = config.pop(TYPE_KEY)
+
+    # This check prevents the use of dataset types with uppercase 'S' in 'Dataset',
+    # which is no longer supported as of kedro-datasets 2.0
+    if isinstance(dataset_type, str):
+        if dataset_type.endswith("Set"):
+            warnings.warn(
+                f"Since kedro-datasets 2.0, 'Dataset' is spelled with a lowercase 's'. Got '{dataset_type}'.",
+                UserWarning,
+            )
+
     class_obj = None
     error_msg = None
     if isinstance(dataset_type, str):
@@ -630,10 +640,11 @@ def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
     """Try to load an object from a fully-qualified class path.
 
     Raises:
-        DatasetError: If the class is listed in `__all__` but cannot be loaded, indicating missing dependencies.
+        DatasetError: If the class is listed in `__all__` but cannot be loaded,
+        indicating missing dependencies.
 
     Returns:
-        A tuple of (object or None, error message or None).
+        A tuple of (class object or None, error message or None).
     """
     mod_path, _, class_name = class_path.rpartition(".")
     # Check if the module exists

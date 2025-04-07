@@ -742,3 +742,38 @@ class KedroDataCatalog(CatalogProtocol):
                         )
 
         return cur_load_versions, cur_save_version
+
+
+class SharedMemoryDataCatalog(KedroDataCatalog):
+    runtime_patterns: ClassVar = {"{default}": {"type": "SharedMemoryDataset"}}
+
+    def set_manager_datasets(self, manager) -> None:
+        for _, ds in self._datasets.items():
+            if isinstance(ds, SharedMemoryDataset):
+                ds.set_manager(manager)
+
+    def validate_catalog(self) -> None:
+        """Ensure that all datasets are serialisable and that we do not have
+        any non proxied memory datasets being used as outputs as their content
+        will not be synchronized across threads.
+        """
+
+        unserialisable = []
+        for name, dataset in self._datasets.items():
+            if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
+                unserialisable.append(name)
+                continue
+            try:
+                ForkingPickler.dumps(dataset)
+            except (AttributeError, PicklingError):
+                unserialisable.append(name)
+
+        if unserialisable:
+            raise AttributeError(
+                f"The following datasets cannot be used with multiprocessing: "
+                f"{sorted(unserialisable)}\nIn order to utilize multiprocessing you "
+                f"need to make sure all datasets are serialisable, i.e. datasets "
+                f"should not make use of lambda functions, nested functions, closures "
+                f"etc.\nIf you are using custom decorators ensure they are correctly "
+                f"decorated using functools.wraps()."
+            )

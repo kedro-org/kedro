@@ -22,10 +22,18 @@ build:
     - pip install "mkdocstrings-python>=0.29.1"
     # Build the MkDocs documentation
     - mkdocs build
+    # Debugging: List the contents of the site directory
+    - echo "Contents of site directory:"
+    - ls -R site
     # Ensure the output directory exists
     - mkdir -p $READTHEDOCS_OUTPUT/html
-    # Move the built site to the Read the Docs output directory
+    # Copy the built site to the Read the Docs output directory
     - cp -r site/* $READTHEDOCS_OUTPUT/html
+    # Debugging: Verify the contents of the output directory
+    - echo "Contents of $READTHEDOCS_OUTPUT/html:"
+    - ls -R $READTHEDOCS_OUTPUT/html
+    # Debugging: Verify that index.html exists
+    - "if [ ! -f $READTHEDOCS_OUTPUT/html/index.html ]; then echo 'Error: index.html not found!'; exit 1; fi"
 
 mkdocs:
   configuration: mkdocs.yml

@@ -225,7 +225,7 @@ class KedroDataCatalog(CatalogProtocol):
         key: str,
         version: Version | None = None,
         default: AbstractDataset | None = None,
-    ) -> AbstractDataset | None:
+    ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
         If a dataset is not in the collection but matches any pattern

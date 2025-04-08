@@ -146,7 +146,7 @@ class TestInvalidParallelRunner:
 
     def test_task_dataset_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise datasets marked with `_SINGLE_PROCESS`."""
-        catalog.add("A", SingleProcessDataset())
+        catalog["A"] = SingleProcessDataset()
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
 

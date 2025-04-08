@@ -23,7 +23,7 @@ class TestTask:
 
     def test_generator_fail_async(self, mocker, catalog):
         fake_dataset = mocker.Mock()
-        catalog.add("result", fake_dataset)
+        catalog["result"] = fake_dataset
         n = node(generate_one, inputs=None, outputs="result")
 
         with pytest.raises(Exception, match="nodes wrapping generator functions"):

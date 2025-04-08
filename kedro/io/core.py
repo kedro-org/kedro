@@ -1075,7 +1075,7 @@ class CatalogProtocol(Protocol[_C]):
         """Save data to a registered dataset."""
         ...
 
-    def load(self, name: str, version: str | None = None) -> Any:
+    def load(self, ds_name: str, version: str | None = None) -> Any:
         """Load data from a registered dataset."""
         ...
 

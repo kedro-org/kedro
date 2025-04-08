@@ -77,12 +77,12 @@ def _make_catalog(
 
     catalog = KedroDataCatalog(raw_data=raw_data)
     for source in existent:
-        catalog.add(source, LambdaDataset(None, None, lambda: True))
+        catalog[source] = LambdaDataset(None, None, lambda: True)
     for source in non_existent:
-        catalog.add(source, LambdaDataset(None, None, lambda: False))
+        catalog[source] = LambdaDataset(None, None, lambda: False)
     # Some LambdaDataset do not have exists() method
     for source in no_exists_method:
-        catalog.add(source, LambdaDataset(None, None))
+        catalog[source] = LambdaDataset(None, None)
     return catalog
 
 

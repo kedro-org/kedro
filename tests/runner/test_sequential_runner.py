@@ -359,7 +359,7 @@ class TestMemoryDatasetBehaviour:
         )
 
         # Add a regular dataset to the catalog
-        catalog.add("RegularOutput", LambdaDataset(None, None, lambda: True))
+        catalog["RegularOutput"] = LambdaDataset(None, None, lambda: True)
 
         # Run the pipeline
         output = SequentialRunner().run(pipeline_with_memory_datasets, catalog)

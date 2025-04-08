@@ -3,10 +3,11 @@ import re
 import subprocess
 import sys
 import textwrap
+import types
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 import toml
@@ -31,6 +32,30 @@ from kedro.utils import _has_rich_handler
 
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
+
+
+@pytest.fixture
+def fake_kedro_telemetry_modules(mocker):
+    # [TODO: Remove this once kedro_telemetry supports KedroDataCatalog]
+
+    # Create fake plugin module with mocked function
+    fake_plugin = types.ModuleType("kedro_telemetry.plugin")
+    fake_plugin._check_for_telemetry_consent = Mock(return_value=False)
+
+    # Parent module for kedro_telemetry
+    fake_kedro_telemetry = types.ModuleType("kedro_telemetry")
+    fake_kedro_telemetry.plugin = fake_plugin
+
+    # Patch sys.modules in a safe and clean way
+    mocker.patch.dict(
+        "sys.modules",
+        {
+            "kedro_telemetry": fake_kedro_telemetry,
+            "kedro_telemetry.plugin": fake_plugin,
+        },
+    )
+
+    return fake_plugin._check_for_telemetry_consent
 
 
 class BadStore:
@@ -295,7 +320,9 @@ class TestKedroSession:
         env,
         runtime_params,
         fake_username,
+        fake_kedro_telemetry_modules,
     ):
+        # [TODO: Remove fake_kedro_telemetry_modules once kedro_telemetry supports KedroDataCatalog]
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
         mocker.patch("sys.argv", ["kedro", "run", "--params=x"])
         session = KedroSession.create(
@@ -343,7 +370,9 @@ class TestKedroSession:
         fake_session_id,
         mocker,
         fake_username,
+        fake_kedro_telemetry_modules,
     ):
+        # [TODO: Remove fake_kedro_telemetry_modules once kedro_telemetry supports KedroDataCatalog]
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
         mocker.patch("sys.argv", ["kedro", "run", "--params=x"])
         session = KedroSession.create(fake_project)
@@ -807,7 +836,10 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
-    def test_run_non_existent_pipeline(self, fake_project, mock_runner, mocker):
+    def test_run_non_existent_pipeline(
+        self, fake_project, mock_runner, mocker, fake_kedro_telemetry_modules
+    ):
+        # [TODO: Remove fake_kedro_telemetry_modules once kedro_telemetry supports KedroDataCatalog]
         pattern = (
             "Failed to find the pipeline named 'doesnotexist'. "
             "It needs to be generated and returned "
@@ -968,10 +1000,9 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_session_raise_error_with_invalid_runner_instance(
-        self,
-        fake_project,
-        mocker,
+        self, fake_project, mocker, fake_kedro_telemetry_modules
     ):
+        # [TODO: Remove fake_kedro_telemetry_modules once kedro_telemetry supports KedroDataCatalog]
         mocker.patch(
             "kedro.framework.session.session.pipelines",
             return_value={

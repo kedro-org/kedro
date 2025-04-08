@@ -14,8 +14,12 @@ build:
     # Install dependencies
     - pip install -e ".[docs]"
     # Build the MkDocs documentation
-    - mkdocs build
-
+    - mkdocs build --strict
+    # Run a link checker on the built site
+    - linkchecker site --check-extern --no-warnings --ignore=404.html --ignore-url=127.0.0.1
+    # Move the built site to the Read the Docs output directory
+    - mkdir --parents $READTHEDOCS_OUTPUT/html
+    - mv site/* $READTHEDOCS_OUTPUT/html
 
 # Use MkDocs to build the documentation
 mkdocs:

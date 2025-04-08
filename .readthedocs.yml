@@ -10,19 +10,16 @@ build:
   tools:
     python: "3.9"
 
-  jobs:
-    pre_install:
-      # Install MkDocs and its plugins
-      - pip install "mkdocs>=1.6.1"
-      - pip install "mkdocs-material>=9.6.11"
-      - pip install "mkdocs-material-extensions>=1.3.1"
-      - pip install "mkdocs-mermaid2-plugin>=1.2.1"
-      - pip install "mkdocs-autorefs>=1.4.1"
-      - pip install "mkdocs-get-deps>=0.2.0"
-      - pip install "mkdocstrings>=0.29.1"
-      - pip install "mkdocstrings-python>=0.29.1"
-
   commands:
+    # Install MkDocs and its plugins
+    - pip install "mkdocs>=1.6.1"
+    - pip install "mkdocs-material>=9.6.11"
+    - pip install "mkdocs-material-extensions>=1.3.1"
+    - pip install "mkdocs-mermaid2-plugin>=1.2.1"
+    - pip install "mkdocs-autorefs>=1.4.1"
+    - pip install "mkdocs-get-deps>=0.2.0"
+    - pip install "mkdocstrings>=0.29.1"
+    - pip install "mkdocstrings-python>=0.29.1"
     # Build the MkDocs documentation
     - mkdocs build
     # Ensure the output directory exists

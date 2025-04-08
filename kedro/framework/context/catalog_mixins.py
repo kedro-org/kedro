@@ -90,10 +90,12 @@ class CatalogCommandsMixin:
             if ds_name in explicit_datasets or is_parameter(ds_name):
                 continue
 
-            # TODO: test if credentials are removed
             ds_config = self.config_resolver.resolve_pattern(ds_name)
             if ds_config:
-                explicit_datasets[ds_name] = ds_config
+                unresolved_config, _ = self.config_resolver.unresolve_credentials(
+                    ds_name, ds_config
+                )
+                explicit_datasets[ds_name] = unresolved_config
 
         return explicit_datasets
 

@@ -9,19 +9,10 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.9"
-    nodejs: "19"
-  jobs:
-    post_checkout:
-      - git fetch --unshallow || true
-    pre_build:
-      - pip freeze
-      - python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
 
-# Build documentation in the docs/ directory with Sphinx
-sphinx:
-  builder: html
-  configuration: docs/source/conf.py
-  fail_on_warning: true
+# Use MkDocs to build the documentation
+mkdocs:
+  configuration: mkdocs.yml
 
 python:
   install:

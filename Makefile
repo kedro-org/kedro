@@ -29,7 +29,6 @@ pip-compile:
 
 build-docs:
 	uv pip install -e ".[docs]"
-	./docs/build-docs.sh "docs"
 
 show-docs:
 	open docs/build/html/index.html

@@ -328,19 +328,24 @@ class TestCoreFunctions:
         ):
             parse_dataset_definition({"type": dataset_name})
 
+    def test_parse_dataset_definition(self):
+        config = {"type": "LambdaDataset"}
+        dataset, _ = parse_dataset_definition(config)
+        assert dataset is LambdaDataset
+
+    def test_parse_dataset_definition_with_python_class_type(self):
+        config = {"type": MyDataset}
+        parse_dataset_definition(config)
+
     def test_dataset_missing_dependencies(self, mocker):
-        # If the module is found but import the dataset trigger ModuleNotFoundError
         dataset_name = "LambdaDataset"
 
         def side_effect_function(value):
-            if "__all__" in value:
-                return [dataset_name]
-            else:
-                raise ModuleNotFoundError
+            import random_package  # noqa: F401
 
         mocker.patch("kedro.io.core.load_obj", side_effect=side_effect_function)
 
-        pattern = "Please see the documentation on how to install relevant dependencies"
+        pattern = "No module named 'random_package'.*"
         with pytest.raises(DatasetError, match=pattern):
             parse_dataset_definition({"type": dataset_name})
 
@@ -355,18 +360,9 @@ class TestCoreFunctions:
         ):
             with pytest.raises(
                 DatasetError,
-                match="Class 'LambdaDataSet' not found, is this a typo?",
+                match="Empty module name. Invalid dataset path: 'LambdaDataSet'. Please check if it's correct.",
             ):
                 parse_dataset_definition(config)
-
-    def test_parse_dataset_definition(self):
-        config = {"type": "LambdaDataset"}
-        dataset, _ = parse_dataset_definition(config)
-        assert dataset is LambdaDataset
-
-    def test_parse_dataset_definition_with_python_class_type(self):
-        config = {"type": MyDataset}
-        parse_dataset_definition(config)
 
     def test_load_and_save_are_wrapped_once(self):
         assert not getattr(

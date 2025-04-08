@@ -100,7 +100,9 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                   save_args={"index": False})
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
-        self._config_resolver = config_resolver or CatalogConfigResolver()
+        self._config_resolver = config_resolver or CatalogConfigResolver(
+            runtime_patterns=self.runtime_patterns
+        )
         self._datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
         self._load_versions, self._save_version = self._validate_versions(
@@ -219,7 +221,8 @@ class KedroDataCatalog(CatalogProtocol):
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
-            self._logger.debug(f"Adding input data as a MemoryDataset - {key}")
+            default_dataset = self.runtime_patterns.get("{default}", {}).get("type", "")
+            self._logger.debug(f"Adding input data as a {default_dataset} - {key}")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:

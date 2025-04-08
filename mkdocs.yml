@@ -123,52 +123,52 @@ nav:
           - Commands Reference: pages/development/commands_reference.md
       - API DOCUMENTATION:
           - kedro.config:
-              - Overview: api/config/kedro.config.md
-              - AbstractConfigLoader: api/config/kedro.config.AbstractConfigLoader.md
-              - OmegaConfigLoader: api/config/kedro.config.OmegaConfigLoader.md
-              - MissingConfigException: api/config/kedro.config.MissingConfigException.md
+              - Overview: pages/api/config/kedro.config.md
+              - AbstractConfigLoader: pages/api/config/kedro.config.AbstractConfigLoader.md
+              - OmegaConfigLoader: pages/api/config/kedro.config.OmegaConfigLoader.md
+              - MissingConfigException: pages/api/config/kedro.config.MissingConfigException.md
           - kedro.framework:
-              - Overview: api/framework/kedro.framework.md
-              - CLI: api/framework/kedro.framework.cli.md
-              - Context: api/framework/kedro.framework.context.md
-              - Hooks: api/framework/kedro.framework.hooks.md
-              - Project: api/framework/kedro.framework.project.md
-              - Session: api/framework/kedro.framework.session.md
-              - Startup: api/framework/kedro.framework.startup.md
+              - Overview: pages/api/framework/kedro.framework.md
+              - CLI: pages/api/framework/kedro.framework.cli.md
+              - Context: pages/api/framework/kedro.framework.context.md
+              - Hooks: pages/api/framework/kedro.framework.hooks.md
+              - Project: pages/api/framework/kedro.framework.project.md
+              - Session: pages/api/framework/kedro.framework.session.md
+              - Startup: pages/api/framework/kedro.framework.startup.md
           - kedro.io:
-              - Overview: api/io/kedro.io.md
-              - AbstractDataset: api/io/kedro.io.AbstractDataset.md
-              - AbstractVersionedDataset: api/io/kedro.io.AbstractVersionedDataset.md
-              - CachedDataset: api/io/kedro.io.CachedDataset.md
-              - DataCatalog: api/io/kedro.io.DataCatalog.md
-              - LambdaDataset: api/io/kedro.io.LambdaDataset.md
-              - MemoryDataset: api/io/kedro.io.MemoryDataset.md
-              - Version: api/io/kedro.io.Version.md
-              - DatasetAlreadyExistsError: api/io/kedro.io.DatasetAlreadyExistsError.md
-              - DatasetError: api/io/kedro.io.DatasetError.md
-              - DatasetNotFoundError: api/io/kedro.io.DatasetNotFoundError.md
+              - Overview: pages/api/io/kedro.io.md
+              - AbstractDataset: pages/api/io/kedro.io.AbstractDataset.md
+              - AbstractVersionedDataset: pages/api/io/kedro.io.AbstractVersionedDataset.md
+              - CachedDataset: pages/api/io/kedro.io.CachedDataset.md
+              - DataCatalog: pages/api/io/kedro.io.DataCatalog.md
+              - LambdaDataset: pages/api/io/kedro.io.LambdaDataset.md
+              - MemoryDataset: pages/api/io/kedro.io.MemoryDataset.md
+              - Version: pages/api/io/kedro.io.Version.md
+              - DatasetAlreadyExistsError: pages/api/io/kedro.io.DatasetAlreadyExistsError.md
+              - DatasetError: pages/api/io/kedro.io.DatasetError.md
+              - DatasetNotFoundError: pages/api/io/kedro.io.DatasetNotFoundError.md
           - kedro.ipython:
-              - Overview: api/ipython/kedro.ipython.md
-              - load_ipython_extension: api/ipython/kedro.ipython.load_ipython_extension.md
-              - magic_load_node: api/ipython/kedro.ipython.magic_load_node.md
-              - magic_reload_kedro: api/ipython/kedro.ipython.magic_reload_kedro.md
-              - reload_kedro: api/ipython/kedro.ipython.reload_kedro.md
-          - kedro.logging: api/kedro.logging.md
+              - Overview: pages/api/ipython/kedro.ipython.md
+              - load_ipython_extension: pages/api/ipython/kedro.ipython.load_ipython_extension.md
+              - magic_load_node: pages/api/ipython/kedro.ipython.magic_load_node.md
+              - magic_reload_kedro: pages/api/ipython/kedro.ipython.magic_reload_kedro.md
+              - reload_kedro: pages/api/ipython/kedro.ipython.reload_kedro.md
+          - kedro.logging: pages/api/kedro.logging.md
           - kedro.pipeline:
-              - Overview: api/pipeline/kedro.pipeline.md
-              - node: api/pipeline/kedro.pipeline.node.md
-              - modular_pipeline.pipeline: api/pipeline/kedro.pipeline.modular_pipeline.pipeline.md
-              - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
-              - Node: api/pipeline/kedro.pipeline.node.Node.md
-              - ModularPipelineError: api/pipeline/kedro.pipeline.modular_pipeline.ModularPipelineError.md
+              - Overview: pages/api/pipeline/kedro.pipeline.md
+              - node: pages/api/pipeline/kedro.pipeline.node.md
+              - modular_pipeline.pipeline: pages/api/pipeline/kedro.pipeline.modular_pipeline.pipeline.md
+              - Pipeline: pages/api/pipeline/kedro.pipeline.Pipeline.md
+              - Node: pages/api/pipeline/kedro.pipeline.node.Node.md
+              - ModularPipelineError: pages/api/pipeline/kedro.pipeline.modular_pipeline.ModularPipelineError.md
           - kedro.runner:
-              - Overview: api/runner/kedro.runner.md
-              - run_node: api/runner/kedro.runner.run_node.md
-              - AbstractRunner: api/runner/kedro.runner.AbstractRunner.md
-              - SequentialRunner: api/runner/kedro.runner.SequentialRunner.md
-              - ParallelRunner: api/runner/kedro.runner.ParallelRunner.md
-              - ThreadRunner: api/runner/kedro.runner.ThreadRunner.md
-          - kedro.utils: api/kedro.utils.md
+              - Overview: pages/api/runner/kedro.runner.md
+              - run_node: pages/api/runner/kedro.runner.run_node.md
+              - AbstractRunner: pages/api/runner/kedro.runner.AbstractRunner.md
+              - SequentialRunner: pages/api/runner/kedro.runner.SequentialRunner.md
+              - ParallelRunner: pages/api/runner/kedro.runner.ParallelRunner.md
+              - ThreadRunner: pages/api/runner/kedro.runner.ThreadRunner.md
+          - kedro.utils: pages/api/kedro.utils.md
   - Kedro-Viz: readthedocs.io/projects/kedro-viz
   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
 

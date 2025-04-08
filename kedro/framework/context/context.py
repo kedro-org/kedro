@@ -232,9 +232,10 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        composed_catalog_class = compose_classes(catalog_class, CatalogCommandsMixin)
+        if catalog_class is KedroDataCatalog:
+            catalog_class = compose_classes(catalog_class, CatalogCommandsMixin)
 
-        catalog: CatalogProtocol = composed_catalog_class.from_config(
+        catalog: CatalogProtocol = catalog_class.from_config(
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,

@@ -15,9 +15,7 @@ build:
     - pip install -e ".[docs]"
     # Build the MkDocs documentation
     - mkdocs build
-    # Move the built site to the Read the Docs output directory
-    - mkdir --parents $READTHEDOCS_OUTPUT
-    - mv site/* $READTHEDOCS_OUTPUT/html
+
 
 # Use MkDocs to build the documentation
 mkdocs:

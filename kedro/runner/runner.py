@@ -105,7 +105,10 @@ class AbstractRunner(ABC):
         return run_output
 
     def run_only_missing(
-        self, pipeline: Pipeline, catalog: CatalogProtocol, hook_manager: PluginManager
+        self,
+        pipeline: Pipeline,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager | None = None,
     ) -> dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
         datasets provided by ``catalog``, and save results back to the

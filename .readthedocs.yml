@@ -5,10 +5,19 @@
 # Required
 version: 2
 
+# Set the version of Python and other tools you might need
 build:
   os: ubuntu-22.04
   tools:
     python: "3.9"
+  commands:
+    # Install dependencies
+    - pip install -e ".[docs]"
+    # Build the MkDocs documentation
+    - mkdocs build
+    # Move the built site to the Read the Docs output directory
+    - mkdir --parents $READTHEDOCS_OUTPUT
+    - mv site/* $READTHEDOCS_OUTPUT/html
 
 # Use MkDocs to build the documentation
 mkdocs:

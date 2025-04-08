@@ -170,6 +170,9 @@ nav:
               - ParallelRunner: pages/api/runner/kedro.runner.ParallelRunner.md
               - ThreadRunner: pages/api/runner/kedro.runner.ThreadRunner.md
           - kedro.utils: pages/api/kedro.utils.md
+          - kedro.load_ipython_extension: pages/api/kedro.load_ipython_extension.md
+          - kedro.KedroDeprecationWarning: pages/api/kedro.KedroDeprecationWarning.md
+          - kedro.KedroPythonVersionWarning: pages/api/kedro.KedroPythonVersionWarning.md
   - Kedro-Viz: readthedocs.io/projects/kedro-viz
   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
 

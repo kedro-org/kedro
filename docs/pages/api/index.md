@@ -1,17 +1,5 @@
 Kedro is a framework that makes it easy to build robust and scalable data pipelines by providing uniform project templates, data abstraction, configuration and pipeline assembly.
 
-## Functions
-| Name                                   | Description                                      |
-|----------------------------------------|--------------------------------------------------|
-| [`load_ipython_extension`]() |   |
-
-
-## Exceptions
-| Name                                   | Description                                      |
-|----------------------------------------|--------------------------------------------------|
-| [`KedroDeprecationWarning`]() | Custom class for warnings about deprecated Kedro features.  |
-| [`KedroPythonVersionWarning`]() | Custom class for warnings about incompatibilities with Python versions.  |
-
 ## Modules
 
 | Name                                   | Description                                      |
@@ -24,3 +12,15 @@ Kedro is a framework that makes it easy to build robust and scalable data pipeli
 | [`kedro.pipeline`](pipeline/kedro.pipeline.md) | provides functionality to define and execute data-driven pipelines.      |
 | [`kedro.runner`](runner/kedro.runner.md) | provides runners that are able to execute Pipeline instances. |
 | [`kedro.utils`](kedro.utils.md) | This module provides a set of helper functions being used across different components of kedro package.          |
+
+## Functions
+| Name                                   | Description                                      |
+|----------------------------------------|--------------------------------------------------|
+| [`load_ipython_extension`](kedro.load_ipython_extension.md) |   |
+
+
+## Exceptions
+| Name                                   | Description                                      |
+|----------------------------------------|--------------------------------------------------|
+| [`KedroDeprecationWarning`](kedro.KedroDeprecationWarning.md) | Custom class for warnings about deprecated Kedro features.  |
+| [`KedroPythonVersionWarning`](kedro.KedroPythonVersionWarning.md) | Custom class for warnings about incompatibilities with Python versions.  |

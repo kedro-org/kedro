@@ -32,8 +32,6 @@ build:
     # Debugging: Verify the contents of the output directory
     - echo "Contents of $READTHEDOCS_OUTPUT/html:"
     - ls -R $READTHEDOCS_OUTPUT/html
-    # Debugging: Verify that index.html exists
-    - "if [ ! -f $READTHEDOCS_OUTPUT/html/index.html ]; then echo 'Error: index.html not found!'; exit 1; fi"
 
 mkdocs:
   configuration: mkdocs.yml

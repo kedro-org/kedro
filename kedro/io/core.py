@@ -554,13 +554,17 @@ def parse_dataset_definition(
 
     Raises:
         DatasetError: If the function fails to parse the configuration provided.
-
+        KeyError: If the dataset ``type`` key is missing in the configuration provided.
     Returns:
         2-tuple: (Dataset class object, configuration dictionary)
     """
     save_version = save_version or generate_timestamp()
     config = copy.deepcopy(config)
-    dataset_type = config.pop(TYPE_KEY)
+
+    try:
+        dataset_type = config.pop(TYPE_KEY)
+    except KeyError:
+        raise KeyError(f"'{TYPE_KEY}' is missing from dataset catalog configuration")
 
     # This check prevents the use of dataset types with uppercase 'S' in 'Dataset',
     # which is no longer supported as of kedro-datasets 2.0

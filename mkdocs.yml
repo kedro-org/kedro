@@ -122,6 +122,7 @@ nav:
       - CLI REFERENCE:
           - Commands Reference: pages/development/commands_reference.md
       - API DOCUMENTATION:
+          - Kedro API Overview: pages/api/index.md
           - kedro.config:
               - Overview: pages/api/config/kedro.config.md
               - AbstractConfigLoader: pages/api/config/kedro.config.AbstractConfigLoader.md

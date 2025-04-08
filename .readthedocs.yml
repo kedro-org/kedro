@@ -9,6 +9,7 @@ build:
   os: "ubuntu-24.04"
   tools:
     python: "3.9"
+
   jobs:
     pre_install:
       # Install MkDocs and its plugins
@@ -20,6 +21,14 @@ build:
       - pip install "mkdocs-get-deps>=0.2.0"
       - pip install "mkdocstrings>=0.29.1"
       - pip install "mkdocstrings-python>=0.29.1"
+
+  commands:
+    # Build the MkDocs documentation
+    - mkdocs build
+    # Ensure the output directory exists
+    - mkdir --parents $READTHEDOCS_OUTPUT/html
+    # Move the built site to the Read the Docs output directory
+    - mv site/* $READTHEDOCS_OUTPUT/html
 
 mkdocs:
   configuration: mkdocs.yml

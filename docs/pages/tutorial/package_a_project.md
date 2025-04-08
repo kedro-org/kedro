@@ -163,4 +163,4 @@ There are various methods to deploy packaged pipelines via Kedro plugins:
 
 * [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
 * [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.
-* The [Deployment guide](../deployment/index) touches on other deployment targets such as AWS Batch and Prefect, and there is a [range of third-party plugins for deployment](../extend_kedro/plugins.md#community-developed-plugins).
+* The [Deployment guide](../deployment/index.md) touches on other deployment targets such as AWS Batch and Prefect, and there is a [range of third-party plugins for deployment](../extend_kedro/plugins.md#community-developed-plugins).

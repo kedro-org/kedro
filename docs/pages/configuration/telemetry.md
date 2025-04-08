@@ -1,6 +1,6 @@
 # Anonymous Telemetry
 
-To help the [Kedro Project maintainers](/contribution/technical_steering_committee) improve the software,
+To help the [Kedro Project maintainers](../contribution/technical_steering_committee.md) improve the software,
 Kedro can capture anonymised telemetry.
 This data is collected with the sole purpose of improving Kedro by understanding feature usage.
 Importantly, we do not store personal information about you or sensitive data from your project,

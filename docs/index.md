@@ -26,63 +26,61 @@
 
 ## Learn about Kedro
 
-- [Introduction](introduction/index.md)
-- [Get Started](get_started/index.md)
-- [Course](course/index.md)
+- [Introduction](pages/introduction/index.md)
+- [Get Started](pages/get_started/index.md)
+- [Course](pages/course/index.md)
 
 ## Tutorial and Basic Kedro Usage
 
-- [Spaceflights Tutorial](tutorial/spaceflights_tutorial.md)
-- [Visualisation](visualisation/index.md)
-- [Notebooks and IPython](notebooks_and_ipython/index.md)
-- [Resources](resources/index.md)
+- [Spaceflights Tutorial](pages/tutorial/spaceflights_tutorial.md)
+- [Visualisation](pages/visualisation/index.md)
+- [Notebooks and IPython](pages/notebooks_and_ipython/index.md)
+- [Resources](pages/resources/index.md)
 
 ## Kedro Projects
 
-- [Starters](starters/index.md)
-- [Configuration](configuration/index.md)
-- [Data](data/index.md)
-- [Nodes and Pipelines](nodes_and_pipelines/index.md)
-- [Telemetry](configuration/telemetry.md)
+- [Starters](pages/starters/index.md)
+- [Configuration](pages/configuration/index.md)
+- [Data](pages/data/index.md)
+- [Nodes and Pipelines](pages/nodes_and_pipelines/index.md)
+- [Telemetry](pages/configuration/telemetry.md)
 
 ## Integrations
 
-- [PySpark](integrations/pyspark_integration.md)
-- [MLflow](integrations/mlflow.md)
-- [DVC Versioning](integrations/kedro_dvc_versioning.md)
-- [DeltaLake Versioning](integrations/deltalake_versioning.md)
-- [Iceberg Versioning](integrations/iceberg_versioning.md)
+- [PySpark](pages/integrations/pyspark_integration.md)
+- [MLflow](pages/integrations/mlflow.md)
+- [DVC Versioning](pages/integrations/kedro_dvc_versioning.md)
+- [DeltaLake Versioning](pages/integrations/deltalake_versioning.md)
+- [Iceberg Versioning](pages/integrations/iceberg_versioning.md)
 
 ## Development
 
-- [Set Up VSCode](development/set_up_vscode.md)
-- [Set Up PyCharm](development/set_up_pycharm.md)
-- [Debugging](development/debugging.md)
-- [Automated Testing](development/automated_testing.md)
-- [Linting](development/linting.md)
+- [Set Up VSCode](pages/development/set_up_vscode.md)
+- [Set Up PyCharm](pages/development/set_up_pycharm.md)
+- [Debugging](pages/development/debugging.md)
+- [Automated Testing](pages/development/automated_testing.md)
+- [Linting](pages/development/linting.md)
 
 ## Advanced Usage
 
-- [Kedro Project Setup](kedro_project_setup/index.md)
-- [Extend Kedro](extend_kedro/index.md)
-- [Hooks](hooks/index.md)
-- [Logging](logging/index.md)
-- [Deployment](deployment/index.md)
+- [Kedro Project Setup](pages/kedro_project_setup/index.md)
+- [Extend Kedro](pages/extend_kedro/index.md)
+- [Hooks](pages/hooks/index.md)
+- [Logging](pages/logging/index.md)
+- [Deployment](pages/deployment/index.md)
 
 ## Contribute to Kedro
 
-- [Contribution Guide](contribution/index.md)
+- [Contribution Guide](pages/contribution/index.md)
 
 ## CLI Reference
 
-- [Commands Reference](development/commands_reference.md)
+- [Commands Reference](pages/development/commands_reference.md)
 
 
 ## API documentation
 
-<!-- ::: {.autosummary toctree="api" caption="API documentation" template="autosummary/module.rst" recursive=""}
-kedro
-::: -->
+- [API](pages/api/kedro.md)
 
 # Indices and tables
 

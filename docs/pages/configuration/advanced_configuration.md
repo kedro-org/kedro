@@ -6,17 +6,16 @@ By default, Kedro is set up to use the {py:class}`~kedro.config.OmegaConfigLoade
 ## Advanced configuration for Kedro projects
 This page also contains a set of guidance for advanced configuration requirements of standard Kedro projects:
 
-* [How to use a custom config loader](#how-to-use-a-custom-configuration-loader)
-* [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
-* [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
-* [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
-* [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
-* [How to load a data catalog with templating in code?](#how-to-load-a-data-catalog-with-templating-in-code)
-* [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
-* [How to override configuration with runtime parameters with the `OmegaConfigLoader`](#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
-* [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
-* [How to load credentials through environment variables with `OmegaConfigLoader`](#how-to-load-credentials-through-environment-variables)
-* [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
+- [How to use a custom config loader](#how-to-use-a-custom-configuration-loader)
+- [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
+- [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
+- [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
+- [How to load a data catalog with templating in code?](#how-to-load-a-data-catalog-with-templating-in-code)
+- [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
+- [How to override configuration with runtime parameters with the `OmegaConfigLoader`](#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
+- [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
+- [How to load credentials through environment variables with `OmegaConfigLoader`](#how-to-load-credentials-through-environment-variables)
+- [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
 
 
 ### How to use a custom configuration loader

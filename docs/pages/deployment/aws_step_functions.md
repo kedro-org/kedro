@@ -15,7 +15,7 @@ The following discusses how to run the Kedro pipeline from the [spaceflights tut
 
 ## Strategy
 
-The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration. This approach mirrors the principles of [running Kedro in a distributed environment](distributed).
+The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration. This approach mirrors the principles of [running Kedro in a distributed environment](distributed.md).
 
 ## Prerequisites
 
@@ -42,7 +42,7 @@ The deployment process for a Kedro pipeline on AWS Step Functions consists of th
 * Develop the Kedro pipeline locally as normal
 * Create a new configuration environment in which we ensure all nodes' inputs and outputs have a persistent location on S3, since `MemoryDataset` can't be shared between AWS Lambda functions
 * Package the Kedro pipeline as an [AWS Lambda-compliant Docker image](https://docs.aws.amazon.com/lambda/latest/dg/lambda-images.html)
-* Write a script to convert and deploy each Kedro node as an AWS Lambda function. Each function will use the same pipeline Docker image created in the previous step and run a single Kedro node associated with it. This follows the principles laid out in our [distributed deployment guide](distributed).
+* Write a script to convert and deploy each Kedro node as an AWS Lambda function. Each function will use the same pipeline Docker image created in the previous step and run a single Kedro node associated with it. This follows the principles laid out in our [distributed deployment guide](distributed.md).
 * The script above will also convert and deploy the entire Kedro pipeline as an AWS Step Functions State Machine.
 
 The final deployed AWS Step Functions State Machine will have the following visualisation in AWS Management Console:
@@ -123,7 +123,7 @@ All the following steps should be done in the Kedro project's root directory.
 $ kedro package
 ```
 
-For more information, please visit the guide on [packaging Kedro as a Python package](../tutorial/package_a_project).
+For more information, please visit the guide on [packaging Kedro as a Python package](../tutorial/package_a_projec.md).
 
 * **Step 2.2**: Create a `lambda_handler.py` file:
 
@@ -386,4 +386,4 @@ If you go into the state machine and click on `Start Execution`, you will be abl
 
 ## Limitations
 
-Generally speaking, the [limitations on AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) have improved dramatically in recent years. However, it's still worth noting that each Lambda function has a 15-minute timeout, 10GB maximum memory limit and 10GB container image code package size limit. This means, for example, if you have a node that takes longer than 15 minutes to run, you should switch to some other AWS services, such as [AWS Batch](aws_batch) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.
+Generally speaking, the [limitations on AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) have improved dramatically in recent years. However, it's still worth noting that each Lambda function has a 15-minute timeout, 10GB maximum memory limit and 10GB container image code package size limit. This means, for example, if you have a node that takes longer than 15 minutes to run, you should switch to some other AWS services, such as [AWS Batch](aws_batch.md) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.

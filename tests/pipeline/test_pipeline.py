@@ -11,6 +11,7 @@ from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
     OutputNotUniqueError,
+    _match_namespaces,
 )
 from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
 
@@ -472,15 +473,27 @@ class TestValidPipeline:
         [
             (
                 "pipeline_with_namespace_simple",
-                {"namespace_1": set(), "namespace_2": {"namespace_1"}},
+                {"namespace_1": [], "namespace_2": {"namespace_1"}},
             ),
             (
                 "pipeline_with_namespace_partial",
                 {
-                    "namespace_1": set(),
+                    "namespace_1": [],
                     "node_3": {"namespace_1"},
                     "namespace_2": {"node_3"},
                     "node_6": {"namespace_2"},
+                },
+            ),
+            (
+                "pipeline_with_multiple_dependencies_on_one_node",
+                {
+                    "f1": [],
+                    "f2": ["f1"],
+                    "f3": ["f2"],
+                    "f4": ["f2"],
+                    "f5": ["f2"],
+                    "f6": ["f4"],
+                    "f7": ["f2", "f4"],
                 },
             ),
         ],
@@ -927,6 +940,21 @@ def pipeline_with_namespace_nested():
     )
 
 
+@pytest.fixture
+def pipeline_with_multiple_dependencies_on_one_node():
+    return modular_pipeline(
+        [
+            node(identity, "ds1", "ds2", name="f1"),
+            node(lambda x: (x, x), "ds2", ["ds3", "ds4"], name="f2"),
+            node(identity, "ds3", "ds5", name="f3"),
+            node(identity, "ds3", "ds6", name="f4"),
+            node(identity, "ds4", "ds8", name="f5"),
+            node(identity, "ds6", "ds7", name="f6"),
+            node(lambda x, y: x, ["ds3", "ds6"], "ds9", name="f7"),
+        ],
+    )
+
+
 class TestPipelineFilter:
     def test_no_filters(self, complex_pipeline):
         filtered_pipeline = complex_pipeline.filter()
@@ -950,7 +978,7 @@ class TestPipelineFilter:
         assert nodes == expected_nodes
 
     def test_namespace_filter(self, pipeline_with_namespaces):
-        filtered_pipeline = pipeline_with_namespaces.filter(node_namespace="katie")
+        filtered_pipeline = pipeline_with_namespaces.filter(node_namespaces=["katie"])
         nodes = {node.name for node in filtered_pipeline.nodes}
         assert nodes == {"katie.node1", "katie.lisa.node4", "katie.lisa.john.node6"}
 
@@ -1164,7 +1192,7 @@ class TestPipelineFilterHelpers:
             complex_pipeline.to_outputs("Z", "W", "E", "C")
 
     @pytest.mark.parametrize(
-        "target_namespace,expected_namespaces",
+        "target_namespaces,expected_namespaces",
         [
             ("katie", ["katie.lisa.john", "katie.lisa", "katie"]),
             ("lisa", ["lisa.john", "lisa"]),
@@ -1173,30 +1201,34 @@ class TestPipelineFilterHelpers:
             ("katie.lisa.john", ["katie.lisa.john"]),
         ],
     )
-    def test_only_nodes_with_namespace(
-        self, target_namespace, expected_namespaces, pipeline_with_namespaces
+    def test_only_nodes_with_namespaces(
+        self, target_namespaces, expected_namespaces, pipeline_with_namespaces
     ):
-        """Test that only nodes with the matching namespace are returned from the pipeline."""
-        resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespace(
-            target_namespace
-        )
-        for actual_node, expected_namespace in zip(
-            sorted(resulting_pipeline.nodes), expected_namespaces
-        ):
-            assert actual_node.namespace == expected_namespace
+        """Test that only nodes with the matching namespaces are returned from the pipeline."""
+        if not expected_namespaces:
+            with pytest.raises(
+                ValueError, match="Pipeline does not contain nodes with namespaces"
+            ):
+                pipeline_with_namespaces.only_nodes_with_namespaces([target_namespaces])
+        else:
+            resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespaces(
+                [target_namespaces]
+            )
+            actual_namespaces = sorted(
+                node.namespace for node in resulting_pipeline.nodes
+            )
+            assert actual_namespaces == sorted(expected_namespaces)
 
     @pytest.mark.parametrize("namespace", ["katie", None])
     def test_only_nodes_with_unknown_namespace_raises_value_error(self, namespace):
         """
-        Test that the `only_nodes_with_namespace` method raises a ValueError with the expected error message
+        Test that the `only_nodes_with_namespaces` method raises a ValueError with the expected error message
         when a non-existent namespace is provided.
         """
         pipeline = modular_pipeline([node(identity, "A", "B", namespace=namespace)])
-        expected_error_message = (
-            "Pipeline does not contain nodes with namespace 'non_existent'"
-        )
+        expected_error_message = "Pipeline does not contain nodes with the following namespaces: \\['non_existent'\\]"
         with pytest.raises(ValueError, match=expected_error_message):
-            pipeline.only_nodes_with_namespace("non_existent")
+            pipeline.only_nodes_with_namespaces(["non_existent"])
 
 
 class TestPipelineRunnerHelpers:
@@ -1243,3 +1275,17 @@ def test_pipeline_to_json(all_pipeline_input_data):
         assert all(node_output in json_rep for node_output in pipeline_node.outputs)
 
     assert kedro.__version__ in json_rep
+
+
+@pytest.mark.parametrize(
+    "node_namespace,filter_namespace, expected",
+    [
+        ("x.a", "x.a", True),
+        ("x.b", "x.a", False),
+        ("x", "x.a", False),
+        ("x.a", "x", True),
+        ("xx", "x", False),
+    ],
+)
+def test_match_namespaces_helper(filter_namespace, node_namespace, expected):
+    assert _match_namespaces(node_namespace, filter_namespace) == expected

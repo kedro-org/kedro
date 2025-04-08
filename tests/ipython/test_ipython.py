@@ -95,7 +95,7 @@ class TestLoadKedroObjects:
         mock_session_create.assert_called_once_with(
             None,
             env=None,
-            extra_params=None,
+            runtime_params=None,
             conf_source=None,
         )
         _, kwargs = ipython_spy.call_args_list[0]
@@ -132,7 +132,7 @@ class TestLoadKedroObjects:
         mock_session_create.assert_called_once_with(
             fake_metadata.project_path,
             env=dummy_env,
-            extra_params=dummy_dict,
+            runtime_params=dummy_dict,
             conf_source=dummy_conf_source,
         )
         _, kwargs = ipython_spy.call_args_list[0]
@@ -151,7 +151,7 @@ class TestLoadIPythonExtension:
     def test_load_extension_missing_dependency(self, mocker):
         mocker.patch("kedro.ipython.reload_kedro", side_effect=ImportError)
         mocker.patch(
-            "kedro.ipython._find_kedro_project",
+            "kedro.ipython.find_kedro_project",
             return_value=mocker.Mock(),
         )
         mocker.patch("IPython.core.magic.register_line_magic")
@@ -166,7 +166,7 @@ class TestLoadIPythonExtension:
         assert not mock_ipython().push.called
 
     def test_load_extension_not_in_kedro_project(self, mocker, caplog):
-        mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
+        mocker.patch("kedro.ipython.find_kedro_project", return_value=None)
         mocker.patch("IPython.core.magic.register_line_magic")
         mocker.patch("IPython.core.magic_arguments.magic_arguments")
         mocker.patch("IPython.core.magic_arguments.argument")
@@ -185,7 +185,7 @@ class TestLoadIPythonExtension:
         assert expected_message in log_messages
 
     def test_load_extension_register_line_magic(self, mocker, ipython):
-        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.find_kedro_project")
         mock_reload_kedro = mocker.patch("kedro.ipython.reload_kedro")
         load_ipython_extension(ipython)
         mock_reload_kedro.assert_called_once()
@@ -207,13 +207,13 @@ class TestLoadIPythonExtension:
         ],
     )
     def test_line_magic_with_valid_arguments(self, mocker, args, ipython):
-        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
 
         ipython.magic(f"reload_kedro {args}")
 
     def test_line_magic_with_invalid_arguments(self, mocker, ipython):
-        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
         load_ipython_extension(ipython)
 
@@ -251,20 +251,20 @@ class TestProjectPathResolution:
 
     def test_no_path_no_local_namespace_specified(self, mocker):
         mocker.patch(
-            "kedro.ipython._find_kedro_project", return_value=Path("/test").resolve()
+            "kedro.ipython.find_kedro_project", return_value=Path("/test").resolve()
         )
         result = _resolve_project_path()
         expected = Path("/test").resolve()
         assert result == expected
 
     def test_project_path_unresolvable(self, mocker):
-        mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
+        mocker.patch("kedro.ipython.find_kedro_project", return_value=None)
         result = _resolve_project_path()
         expected = None
         assert result == expected
 
     def test_project_path_unresolvable_warning(self, mocker, caplog, ipython):
-        mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
+        mocker.patch("kedro.ipython.find_kedro_project", return_value=None)
         ipython.magic("reload_ext kedro.ipython")
         log_messages = [record.getMessage() for record in caplog.records]
         expected_message = (
@@ -447,12 +447,12 @@ ERROR,
         assert result == dummy_function_with_loop_literal
 
     def test_load_node_magic_with_valid_arguments(self, mocker, ipython):
-        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython._load_node")
         ipython.magic("load_node dummy_node")
 
     def test_load_node_with_invalid_arguments(self, mocker, ipython):
-        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython._load_node")
         load_ipython_extension(ipython)
 
@@ -462,7 +462,7 @@ ERROR,
             ipython.magic("load_node --invalid_arg=dummy_node")
 
     def test_load_node_with_jupyter(self, mocker, ipython):
-        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
         mocker.patch("kedro.ipython._guess_run_environment", return_value="jupyter")
         spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
@@ -475,7 +475,7 @@ ERROR,
 
     @pytest.mark.parametrize("run_env", ["ipython", "vscode"])
     def test_load_node_with_ipython(self, mocker, ipython, run_env):
-        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
         mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)
         spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
@@ -496,7 +496,7 @@ ERROR,
         ],
     )
     def test_load_node_with_other(self, mocker, ipython, run_env, rich_installed):
-        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython.RICH_INSTALLED", rich_installed)
         mocker.patch("kedro.ipython._load_node", return_value=["cell1", "cell2"])
         mocker.patch("kedro.ipython._guess_run_environment", return_value=run_env)

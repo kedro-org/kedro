@@ -118,6 +118,7 @@ class KedroDataCatalog(CatalogProtocol):
         for ds_name, data in raw_data.items():
             self[ds_name] = data  # type: ignore[has-type]
 
+    @property
     def config_resolver(self) -> CatalogConfigResolver:
         return self._config_resolver
 

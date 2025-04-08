@@ -263,7 +263,8 @@ class KedroContext:
         params_dict = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
-            """This recursively adds parameter paths to the `params_dict`,
+            """This recursively adds parameter paths that are defined in `parameters.yml`
+            with the addition of any extra parameters passed at initialization to the `params_dict`,
             whenever `param_value` is a dictionary itself, so that users can
             specify specific nested parameters in their node inputs.
 

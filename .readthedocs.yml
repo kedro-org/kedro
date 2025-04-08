@@ -23,9 +23,9 @@ build:
     # Build the MkDocs documentation
     - mkdocs build
     # Ensure the output directory exists
-    - mkdir --parents $READTHEDOCS_OUTPUT/html
+    - mkdir -p $READTHEDOCS_OUTPUT/html
     # Move the built site to the Read the Docs output directory
-    - mv site/* $READTHEDOCS_OUTPUT/html
+    - cp -r site/* $READTHEDOCS_OUTPUT/html
 
 mkdocs:
   configuration: mkdocs.yml

@@ -10,7 +10,7 @@ In the following chapters, you will learn [how to set up Kedro](../get_started/i
 
 For new and intermediate Kedro users, there's a comprehensive section on [working with Kedro and Jupyter notebooks](../notebooks_and_ipython/index.md).
 
-Use the left-hand table of contents to explore the documentation available for more advanced Kedro usage and deployment. We also recommend the [glossary](../resources/glossary.md) and the [API reference documentation](../api/kedro.md).
+Use the left-hand table of contents to explore the documentation available for more advanced Kedro usage and deployment. We also recommend the [glossary](../resources/glossary.md) and the [API reference documentation](../api/index.md).
 
 > **Note**  
 > We have designed the preliminary documentation and the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) for anyone new to Kedro. The more knowledge of Python you have, the easier you will find the learning curve.  

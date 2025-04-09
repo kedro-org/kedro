@@ -80,7 +80,7 @@
 
 ## API documentation
 
-- [API](pages/api/kedro.md)
+- [API](pages/api/index.md)
 
 # Indices and tables
 

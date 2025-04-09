@@ -174,20 +174,20 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def __getitem__(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
         """Get configuration files by key, load and merge them, and
-        return them in the form of a config dictionary.
+            return them in the form of a config dictionary.
 
-        Args:
-            key: Key of the configuration type to fetch.
+            Args:
+                key: Key of the configuration type to fetch.
 
-        Raises:
-            KeyError: If key provided isn't present in the config_patterns of this
-               ``OmegaConfigLoader`` instance.
-            MissingConfigException: If no configuration files exist matching the patterns
-                mapped to the provided key.
+            Raises:
+                KeyError: If key provided isn't present in the config_patterns of this
+                    ``OmegaConfigLoader`` instance.
+                MissingConfigException: If no configuration files exist matching the patterns
+                    mapped to the provided key.
 
-        Returns:
-            Dict[str, Any]:  A Python dictionary with the combined
-               configuration from all configuration files.
+            Returns:
+                Dict[str, Any]:  A Python dictionary with the combined
+                    configuration from all configuration files.
         """
         # Allow bypassing of loading config from patterns if a key and value have been set
         # explicitly on the ``OmegaConfigLoader`` instance.
@@ -548,11 +548,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
     @staticmethod
     def _resolve_environment_variables(config: DictConfig) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
-        them in-place, clearing the resolver after the operation is complete if
-        it was not registered beforehand.
+            them in-place, clearing the resolver after the operation is complete if
+            it was not registered beforehand.
 
-        Arguments:
-            config {Dict[str, Any]} -- The configuration dictionary to resolve.
+            Args:
+                config (DictConfig): The configuration dictionary to resolve.
         """
         if not OmegaConf.has_resolver("oc.env"):
             OmegaConf.register_new_resolver("oc.env", oc.env)

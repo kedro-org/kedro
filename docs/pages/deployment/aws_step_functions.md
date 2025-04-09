@@ -123,7 +123,7 @@ All the following steps should be done in the Kedro project's root directory.
 $ kedro package
 ```
 
-For more information, please visit the guide on [packaging Kedro as a Python package](../tutorial/package_a_projec.md).
+For more information, please visit the guide on [packaging Kedro as a Python package](../tutorial/package_a_project.md).
 
 * **Step 2.2**: Create a `lambda_handler.py` file:
 

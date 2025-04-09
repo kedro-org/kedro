@@ -490,3 +490,9 @@ class TestPipelineHelper:
         new_nodes = ds_pipeline._map_nodes(pipe=ds_pipeline, namespace="ds")
         for n in new_nodes:
             assert n.namespace == "ds"
+
+    def test_modular_pipeline_error_old_import(self):
+        # Check that the old import still works
+        from kedro.pipeline.modular_pipeline import ModularPipelineError
+
+        assert issubclass(ModularPipelineError, Exception)

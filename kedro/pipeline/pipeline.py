@@ -154,7 +154,33 @@ class Pipeline:
                 provide pipelines among the list of nodes, those pipelines will
                 be expanded and all their nodes will become part of this
                 new pipeline.
+            inputs: A name or collection of input names to be exposed as connection points
+                to other pipelines upstream. This is optional; if not provided, the
+                pipeline inputs are automatically inferred from the pipeline structure.
+                When str or set[str] is provided, the listed input names will stay
+                the same as they are named in the provided pipeline.
+                When dict[str, str] is provided, current input names will be
+                mapped to new names.
+                Must only refer to the pipeline's free inputs.
+            outputs: A name or collection of names to be exposed as connection points
+                to other pipelines downstream. This is optional; if not provided, the
+                pipeline outputs are automatically inferred from the pipeline structure.
+                When str or set[str] is provided, the listed output names will stay
+                the same as they are named in the provided pipeline.
+                When dict[str, str] is provided, current output names will be
+                mapped to new names.
+                Can refer to both the pipeline's free outputs, as well as
+                intermediate results that need to be exposed.
+            parameters: A name or collection of parameters to namespace.
+                When str or set[str] are provided, the listed parameter names will stay
+                the same as they are named in the provided pipeline.
+                When dict[str, str] is provided, current parameter names will be
+                mapped to new names.
+                The parameters can be specified without the `params:` prefix.
             tags: Optional set of tags to be applied to all the pipeline nodes.
+            namespace: A prefix to give to all dataset names,
+                except those explicitly named with the `inputs`/`outputs`
+                arguments, and parameter references (`params:` and `parameters`).
 
         Raises:
             ValueError:
@@ -168,6 +194,8 @@ class Pipeline:
             ConfirmNotUniqueError:
                 When multiple ``Node`` instances attempt to confirm the same
                 dataset.
+            ModularPipelineError: When inputs, outputs or parameters are incorrectly
+                specified, or they do not exist on the original pipeline.
         Example:
         ::
 

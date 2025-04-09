@@ -21,6 +21,10 @@ if TYPE_CHECKING:
 
     from kedro.pipeline.node import Node
 
+from .pipeline import ModularPipelineError
+
+__all__ = ["ModularPipelineError"]
+
 
 def pipeline(  # noqa: PLR0913
     pipe: Iterable[Node | Pipeline] | Pipeline,

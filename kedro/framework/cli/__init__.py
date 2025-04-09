@@ -1,6 +1,6 @@
 """``kedro.framework.cli`` implements commands available from Kedro's CLI."""
 
-# The constant need to be defined first otherwise it causes circular depdencies
+# The constant need to be defined first otherwise it causes circular dependencies
 ORANGE = (255, 175, 0)
 BRIGHT_BLACK = (128, 128, 128)
 

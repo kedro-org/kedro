@@ -13,6 +13,7 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
+from kedro.io.core import is_parameter
 from kedro.io.kedro_data_catalog import KedroDataCatalog, _LazyDataset
 
 if TYPE_CHECKING:
@@ -25,12 +26,6 @@ if TYPE_CHECKING:
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     kwargs.setdefault("save_on_close", False)
     return KedroSession.create(**kwargs)
-
-
-def is_parameter(dataset_name: str) -> bool:
-    # TODO: when breaking change move it to kedro/io/core.py
-    """Check if dataset is a parameter."""
-    return dataset_name.startswith("params:") or dataset_name == "parameters"
 
 
 @click.group(name="Kedro")
@@ -67,7 +62,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     try:
         data_catalog = context.catalog
         datasets_meta = data_catalog._datasets
-        catalog_ds = set(data_catalog.list())
+        catalog_ds = set(data_catalog.keys())
     except Exception as exc:
         raise KedroCliError(
             f"Unable to instantiate Kedro Catalog.\nError: {exc}"
@@ -169,7 +164,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
 
     pipeline_datasets = set(filterfalse(is_parameter, pipeline.datasets()))
 
-    catalog_datasets = set(filterfalse(is_parameter, context.catalog.list()))
+    catalog_datasets = set(filterfalse(is_parameter, context.catalog.keys()))
 
     # Datasets that are missing in Data Catalog
     missing_ds = sorted(pipeline_datasets - catalog_datasets)

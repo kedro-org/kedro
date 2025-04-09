@@ -314,8 +314,7 @@ candidate_modelling_pipeline:
 <summary><b>Click to expand</b></summary>
 
 ```python
-from kedro.pipeline import Pipeline, node
-from kedro.pipeline.modular_pipeline import pipeline
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import evaluate_model, split_data, train_model
 
@@ -444,7 +443,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 The import you added to the code introduces the pipeline wrapper, which enables you to instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters:
 
 ```python
-from kedro.pipeline.modular_pipeline import pipeline
+from kedro.pipeline import pipeline
 ```
 
 The `pipeline()` wrapper method takes the following arguments:

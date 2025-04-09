@@ -7,8 +7,7 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.ipython import (
     load_ipython_extension,
 )
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import node, pipeline
 
 from . import dummy_function_fixtures
 from .dummy_function_fixtures import (
@@ -66,7 +65,7 @@ def mock_kedro_project(mocker, fake_metadata):
 @pytest.fixture
 def dummy_pipelines(dummy_node):
     # return a dict of pipelines
-    return {"dummy_pipeline": modular_pipeline([dummy_node])}
+    return {"dummy_pipeline": pipeline([dummy_node])}
 
 
 def _get_function_definition_literal(func):

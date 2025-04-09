@@ -29,6 +29,7 @@ pip-compile:
 
 build-docs:
 	uv pip install -e ".[docs]"
+	mkdocs serve
 
 show-docs:
 	open docs/build/html/index.html
@@ -58,7 +59,7 @@ databricks-build:
 	python ./tools/databricks_build.py
 
 sign-off:
-	echo "git interpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg
+	echo "git inthttps://github.com/kedro-org/kedro/pull/4647/files#diff-26a89fcd97e55b24ac6c327e233357b2af642d3925075fcd8b31794085e654faerpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg
 	echo '--trailer "Signed-off-by: $$(git config user.name) <$$(git config user.email)>" \c' >> .git/hooks/commit-msg
 	echo '--in-place "$$1"' >> .git/hooks/commit-msg
 	chmod +x .git/hooks/commit-msg

@@ -22,3 +22,8 @@ build:
 
 mkdocs:
   configuration: mkdocs.yml
+
+search:
+  ranking:
+    # Push API docs in the /api directory down the ranking
+    api/*: -5

@@ -230,11 +230,6 @@ class TestKedroContext:
         # the catalog and its dataset should be loaded using absolute path
         # based on the project path
         catalog = dummy_context._get_catalog()
-
-        # [TODO: Need to confirm if from_config present in KedroDataCatalog should not update _datasets
-        # as we used to do it previously ? https://github.com/kedro-org/kedro/pull/4607/files#diff-83c76b6d924034cc585ba09c9fcb10161887b633b74e8b09a91e4803200f0ed9L325]
-        # As we are not updating datasets, catalog._datasets only contain parameters which we do in context._get_catalog() -
-        # https://github.com/kedro-org/kedro/pull/4609/files#diff-e4b25ddcdc5909c6a9871a5477e53597bdbdadb783a37d12409b6e8e9b1743a0R243
         ds_path = catalog["horses"]._filepath
         assert PurePath(ds_path.as_posix()).is_absolute()
         assert (

@@ -81,12 +81,13 @@ class TestKedroDataCatalog:
         with pytest.raises(DatasetError, match=pattern):
             kedro_data_catalog.load("test")
 
-    # [TODO: We are not raising any error but replacing the older dataset ?]
-    # def test_add_dataset_twice(self, kedro_data_catalog, dataset):
-    #     """Check the error when attempting to add the dataset twice"""
-    #     pattern = r"Dataset 'test' has already been registered"
-    #     with pytest.raises(DatasetAlreadyExistsError, match=pattern):
-    #         kedro_data_catalog["test"] = dataset
+    def test_add_dataset_twice(self, kedro_data_catalog, dataset, caplog):
+        """Check the warning when attempting to add the dataset twice"""
+        kedro_data_catalog["test"] = dataset
+        # check the logs
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_msg = "Replacing dataset 'test'"
+        assert any(expected_msg in log_message for log_message in log_messages)
 
     def test_load_from_unregistered(self):
         """Check the error when attempting to load unregistered dataset"""
@@ -132,17 +133,12 @@ class TestKedroDataCatalog:
             kedro_data_catalog.release("wrong_key")
         assert "did you mean" not in str(e.value)
 
-    # [TODO: Should we - Raises:
-    # DatasetNotFoundError: When dataset doesn't exist in the catalog.
-    # Inside get() method or should we handle this individually in other functions where the get() method is called like release, save, load ?]
-    # def test_release_unregistered_typo(self, kedro_data_catalog):
-    #     """Check the error when calling `release` on mistyped dataset"""
-    #     pattern = (
-    #         "Dataset 'text' not found in the catalog"
-    #         " - did you mean one of these instead: test"
-    #     )
-    #     with pytest.raises(DatasetNotFoundError, match=re.escape(pattern)):
-    #         kedro_data_catalog.release("text")
+    def test_release_unregistered_typo(self, kedro_data_catalog):
+        """Check the error when calling `release` on mistyped dataset"""
+        pattern = r"Dataset \'text\' not found in the catalog"
+        with pytest.raises(DatasetNotFoundError, match=pattern) as e:
+            kedro_data_catalog.release("text")
+        assert "did you mean" not in str(e.value)
 
     def test_multi_catalog_keys(self, multi_catalog):
         """Test data catalog which contains multiple datasets"""
@@ -165,13 +161,11 @@ class TestKedroDataCatalog:
         """Test that regex patterns filter datasets accordingly"""
         assert multi_catalog.filter(name_regex=pattern) == expected
 
-    # [TODO: re.compile try catch block is removed. Should we revert and raise Syntax error ?]
-    # def test_multi_catalog_filter_bad_regex(self, multi_catalog):
-    #     """Test that bad regex is caught accordingly"""
-    #     escaped_regex = r"\(\("
-    #     pattern = f"Invalid regular expression provided: '{escaped_regex}'"
-    #     with pytest.raises(SyntaxError, match=pattern):
-    #         multi_catalog.filter("((")
+    def test_multi_catalog_filter_bad_regex(self, multi_catalog):
+        """Test that bad regex is caught accordingly"""
+        pattern = r"missing \)\, unterminated subpattern at position"
+        with pytest.raises(re.error, match=pattern):
+            multi_catalog.filter("((")
 
     @pytest.mark.parametrize(
         "name_regex,type_regex,expected",
@@ -240,13 +234,6 @@ class TestKedroDataCatalog:
         data_catalog_from_config["new_dataset"] = CSVDataset(filepath="some_path")
         assert isinstance(data_catalog_from_config.get("new_dataset"), CSVDataset)
         assert isinstance(data_catalog_from_config.get("boats"), CSVDataset)
-
-    # [TODO: Confirm on whether to make _datasets a @property without setter]
-    # def test_adding_datasets_not_allowed(self, data_catalog_from_config):
-    #     """Check error if user tries to update the datasets attribute"""
-    #     pattern = r"Operation not allowed. Please use KedroDataCatalog.add\(\) instead."
-    #     with pytest.raises(AttributeError, match=pattern):
-    #         data_catalog_from_config._datasets = None
 
     def test_confirm(self, mocker, caplog):
         """Confirm the dataset"""

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
+from kedro import KedroDeprecationWarning
 from kedro.pipeline.pipeline import (
     Pipeline,
     _get_dataset_names_mapping,
@@ -24,6 +26,13 @@ if TYPE_CHECKING:
 from .pipeline import ModularPipelineError
 
 __all__ = ["ModularPipelineError"]
+
+warnings.warn(
+    "The `kedro.pipeline.modular_pipeline` module is deprecated and will be removed "
+    "in 1.0.0. Please use `kedro.pipeline.pipeline` instead.",
+    KedroDeprecationWarning,
+    stacklevel=2,
+)
 
 
 def pipeline(  # noqa: PLR0913
@@ -79,6 +88,13 @@ def pipeline(  # noqa: PLR0913
     Returns:
         A new ``Pipeline`` object.
     """
+
+    warnings.warn(
+        "`kedro.modular_pipeline.pipeline()` has been deprecated and will be removed in Kedro 1.0.0. "
+        "Use `pipeline()` from `kedro.pipeline` instead.",
+        KedroDeprecationWarning,
+    )
+
     if isinstance(pipe, Pipeline):
         # To ensure that we are always dealing with a *copy* of pipe.
         pipe = Pipeline([pipe], tags=tags)

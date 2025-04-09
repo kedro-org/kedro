@@ -1,6 +1,9 @@
 import pytest
+from pytest import warns
 
+from kedro import KedroDeprecationWarning
 from kedro.pipeline import node, pipeline
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.pipeline import ModularPipelineError, Pipeline
 
 # from kedro.Pipeline.Pipeline import Pipeline as Pipeline
@@ -496,3 +499,10 @@ class TestPipelineHelper:
         from kedro.pipeline.modular_pipeline import ModularPipelineError
 
         assert issubclass(ModularPipelineError, Exception)
+
+    def test_modular_pipeline_deprecation(self):
+        with warns(
+            KedroDeprecationWarning,
+            match=r"\`kedro.modular_pipeline.pipeline\(\)\` has been deprecated",
+        ):
+            _ = modular_pipeline([node(identity, "A", "B", name="node1")])

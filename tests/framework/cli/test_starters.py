@@ -229,6 +229,9 @@ def _assert_template_ok(
     kedro_version=version,
     output_dir=".",
 ):
+    # import pdb
+    # pdb.set_trace()
+
     assert result.exit_code == 0, result.output
 
     full_path = (Path(output_dir) / repo_name).resolve()
@@ -381,6 +384,9 @@ class TestNewFromUserPromptsValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new"], input=_make_cli_prompt_input()
         )
+        # import pdb
+        # pdb.set_trace()
+
         _assert_template_ok(result)
         _clean_up_project(Path("./new-kedro-project"))
 

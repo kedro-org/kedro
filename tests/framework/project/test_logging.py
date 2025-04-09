@@ -202,6 +202,7 @@ def test_logger_without_rich_markup():
 
     data = ("dummy",)
     catalog = KedroDataCatalog.from_config({"dummy": {"type": "MemoryDataset"}})
+    catalog._use_rich_markup = False
 
     # Add a custom handler
     custom_handler = CustomHandler()

@@ -281,6 +281,10 @@ class TestCatalogListCommand:
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
 
+# [TODO: CLI code needs update, not sure why this breaks]
+# #         AssertionError: assert not 1
+# # E        +  where 1 = <Result KeyError('csv_test')>.exit_code
+#         assert not result.exit_code
 #     def test_list_factory_generated_datasets(
 #         self,
 #         fake_project_cli,
@@ -315,10 +319,6 @@ class TestCatalogListCommand:
 #             ["catalog", "list"],
 #             obj=fake_metadata,
 #         )
-#         # [TODO: CLI code needs update, not sure why this breaks]
-# #         AssertionError: assert not 1
-# # E        +  where 1 = <Result KeyError('csv_test')>.exit_code
-#         assert not result.exit_code
 #         expected_dict = {
 #             f"Datasets in '{PIPELINE_NAME}' pipeline": {
 #                 "Datasets generated from factories": {

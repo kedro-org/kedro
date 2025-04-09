@@ -280,59 +280,54 @@ class TestCatalogListCommand:
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
+    # [TODO: Uncomment below test once following -
+    # https://github.com/kedro-org/kedro/pull/4646/files/67546ef89aac769b69998def7a64b0cad3d0ca1a#r2036128769]
+    # def test_list_factory_generated_datasets(
+    #     self,
+    #     fake_project_cli,
+    #     fake_metadata,
+    #     fake_load_context,
+    #     mocker,
+    #     mock_pipelines,
+    #     fake_catalog_config,
+    #     fake_credentials_config,
+    # ):
+    #     """Test that datasets generated from factory patterns in the catalog
+    #     are resolved correctly under the correct dataset classes.
+    #     """
+    #     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    #     mocked_context = fake_load_context.return_value
 
-# [TODO: CLI code needs update, not sure why this breaks]
-# #         AssertionError: assert not 1
-# # E        +  where 1 = <Result KeyError('csv_test')>.exit_code
-#         assert not result.exit_code
-#     def test_list_factory_generated_datasets(
-#         self,
-#         fake_project_cli,
-#         fake_metadata,
-#         fake_load_context,
-#         mocker,
-#         mock_pipelines,
-#         fake_catalog_config,
-#         fake_credentials_config,
-#     ):
-#         """Test that datasets generated from factory patterns in the catalog
-#         are resolved correctly under the correct dataset classes.
-#         """
-#         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
-#         mocked_context = fake_load_context.return_value
+    #     mocked_context.catalog = KedroDataCatalog.from_config(
+    #         catalog=fake_catalog_config, credentials=fake_credentials_config
+    #     )
+    #     mocker.patch.object(
+    #         mock_pipelines[PIPELINE_NAME],
+    #         "datasets",
+    #         return_value=set(mocked_context.catalog) # This gives csv_test
+    #         | {"csv_example", "parquet_example"},
+    #     )
 
-#         import pdb
-#         pdb.set_trace()
-
-#         mocked_context.catalog = KedroDataCatalog.from_config(
-#             catalog=fake_catalog_config, credentials=fake_credentials_config
-#         )
-#         mocker.patch.object(
-#             mock_pipelines[PIPELINE_NAME],
-#             "datasets",
-#             return_value=set(mocked_context.catalog) # This gives csv_test
-#             | {"csv_example", "parquet_example"},
-#         )
-
-#         result = CliRunner().invoke(
-#             fake_project_cli,
-#             ["catalog", "list"],
-#             obj=fake_metadata,
-#         )
-#         expected_dict = {
-#             f"Datasets in '{PIPELINE_NAME}' pipeline": {
-#                 "Datasets generated from factories": {
-#                     "pandas.CSVDataset": ["csv_example"],
-#                     "pandas.ParquetDataset": ["parquet_example"],
-#                 },
-#                 "Datasets mentioned in pipeline": {
-#                     "CSVDataset": ["csv_test"],
-#                 },
-#             }
-#         }
-#         key = f"Datasets in '{PIPELINE_NAME}' pipeline"
-#         assert yaml_dump_mock.call_count == 1
-#         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
+    #     result = CliRunner().invoke(
+    #         fake_project_cli,
+    #         ["catalog", "list"],
+    #         obj=fake_metadata,
+    #     )
+    #     assert not result.exit_code
+    #     expected_dict = {
+    #         f"Datasets in '{PIPELINE_NAME}' pipeline": {
+    #             "Datasets generated from factories": {
+    #                 "pandas.CSVDataset": ["csv_example"],
+    #                 "pandas.ParquetDataset": ["parquet_example"],
+    #             },
+    #             "Datasets mentioned in pipeline": {
+    #                 "CSVDataset": ["csv_test"],
+    #             },
+    #         }
+    #     }
+    #     key = f"Datasets in '{PIPELINE_NAME}' pipeline"
+    #     assert yaml_dump_mock.call_count == 1
+    #     assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
 
 def identity(data):

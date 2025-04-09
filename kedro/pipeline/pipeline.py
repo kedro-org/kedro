@@ -377,27 +377,32 @@ class Pipeline:
         This property is intended to be used by deployment plugins to group nodes by namespace.
         """
         grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
+
         for node in self.nodes:
-            if node.namespace:
-                key = node.namespace.split(".")[0]  # only take top level namespace
-            else:
-                key = node.name
+            key = node.namespace.split(".")[0] if node.namespace else node.name
+
             if key not in grouped_nodes:
-                grouped_nodes[key] = {}
-                grouped_nodes[key]["name"] = key
-                grouped_nodes[key]["type"] = "namespace" if node.namespace else "node"
-                grouped_nodes[key]["nodes"] = []
-                grouped_nodes[key]["dependencies"] = set()
+                grouped_nodes[key] = {
+                    "name": key,
+                    "type": "namespace" if node.namespace else "node",
+                    "nodes": [],
+                    "dependencies": [],
+                }
+
             grouped_nodes[key]["nodes"].append(node)
-            dependencies = set()
+
+            # Ensure dependencies are not duplicated on the returned list
+            dependencies = grouped_nodes[key]["dependencies"]
+            unique_dependencies = set(dependencies)
+
             for parent in self.node_dependencies[node]:
-                if parent.namespace:
-                    parent_namespace = parent.namespace.split(".")[0]
-                    if parent_namespace != key:
-                        dependencies.add(parent_namespace)
-                else:
-                    dependencies.add(parent.name)
-            grouped_nodes[key]["dependencies"].update(dependencies)
+                parent_key = (
+                    parent.namespace.split(".")[0] if parent.namespace else parent.name
+                )
+                if parent_key != key and parent_key not in unique_dependencies:
+                    dependencies.append(parent_key)
+                    unique_dependencies.add(parent_key)
+
         return grouped_nodes
 
     def only_nodes(self, *node_names: str) -> Pipeline:

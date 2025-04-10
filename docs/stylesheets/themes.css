@@ -1,0 +1,15 @@
+/* Light Theme */
+[data-md-color-scheme="light"] {
+    --md-default-bg-color: var(--white-200);
+    --md-default-fg-color: var(--black-900);
+    --block-code-bg-color: var(--white-400);
+    --block-code-font-color: var(--black-900);
+}
+
+/* Dark Theme */
+[data-md-color-scheme="dark"] {
+    --md-default-bg-color: var(--slate-800);
+    --md-default-fg-color: var(--white-100);
+    --block-code-bg-color: var(--slate-200);
+    --block-code-font-color: var(--white-200);
+}

@@ -1,0 +1,61 @@
+/* Import the Inter font */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap");
+
+/* Global font settings */
+html {
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 400;
+    line-height: 2rem;
+}
+
+/* Apply the variables to elements */
+body {
+    background-color: var(--md-default-bg-color);
+    color: var(--md-default-fg-color);
+}
+
+.md-typeset h1 {
+    color: var(--md-default-fg-color);
+}
+
+/* Ensure links also inherit the default text color */
+a, p, li, span, div {
+    color: var(--md-default-fg-color);
+}
+
+.md-header {
+    background-color: var(--md-default-bg-color);
+    color: var(--md-default-fg-color);
+}
+
+.md-tabs {
+    background-color: var(--md-default-bg-color);
+    color: var(--md-default-fg-color);
+}
+
+.md-tabs__item--active {
+    font-weight: 600;
+}
+
+.md-typeset blockquote {
+    border-left: 0.2rem solid var(--yellow-300) !important;
+}
+
+/* Style for all <pre> blocks */
+.md-typeset pre code, 
+.md-typeset code {
+    background-color: var(--block-code-bg-color); 
+    color: var(--block-code-font-color);
+}
+
+.md-clipboard {
+    color: var(--block-code-font-color);
+}
+
+.md-sidebar__scrollwrap:hover {
+    scrollbar-color: var(--yellow-300) #0000;
+}

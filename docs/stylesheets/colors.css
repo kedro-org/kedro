@@ -1,0 +1,85 @@
+/* -- Primary -- */
+:root {
+    --black-0: #989898;
+    --black-100: #868686;
+    --black-200: #747474;
+    --black-300: #636363;
+    --black-400: #525252;
+    --black-500: #424242;
+    --black-600: #323232;
+    --black-700: #242424;
+    --black-800: #151515;
+    --black-850: #090909;
+    --black-900: #000;
+    --slate-0: #2b2d2f;
+    --slate-100: #27282a;
+    --slate-200: #242526;
+    --slate-300: #212324;
+    --slate-400: #1e1f21;
+    --slate-500: #1c1e1f;
+    --slate-600: #18191b;
+    --slate-700: #141516;
+    --slate-800: #101112;
+    --slate-900: #0f0f11;
+    --white-0: #fff;
+    --white-100: #f9f9fa;
+    --white-200: #f2f3f4;
+    --white-300: #ecedef;
+    --white-400: #e6e7e9;
+    --white-500: #dfe2e4;
+    --white-600: #d9dcde;
+    --white-700: #d3d6d9;
+    --white-800: #ccd0d3;
+    --white-900: #c6cace;
+  
+    /* -- Primary Transparency -- */
+    --black-900-30: #0000004d; /* black-900 with 30% opacity */
+    --black-900-70: #000000b3; /* black-900 with 70% opacity */
+    --white-900-30: #ffffff4d; /* white-900 with 30% opacity */
+    --white-900-70: #ffffffb3; /* white-900 with 70% opacity */
+    --white-900-85: #ffffffd9; /* white-900 with 85% opacity */
+  
+    /* -- Secondary -- */
+    --grey-0: #fdfdfd;
+    --grey-100: #eaebed;
+    --grey-200: #d5d8da;
+    --grey-300: #c0c5c9;
+    --grey-400: #abb2b7;
+    --grey-500: #97a0a6;
+    --grey-600: #848e95;
+    --grey-700: #717d84;
+    --grey-800: #5e6c74;
+    --grey-900: #4c5b64;
+    --ocean-0: #acccda;
+    --ocean-0-50: #cfdfe7;
+    --ocean-100: #97bac9;
+    --ocean-200: #82a8b8;
+    --ocean-300: #598395;
+    --ocean-400: #2f5f73;
+    --ocean-500: #063b51;
+    --ocean-600: #052f41;
+    --ocean-700: #042331;
+    --ocean-800: #021820;
+    --ocean-900: #021218;
+  
+    /* -- Accents -- */
+    --blue-0: #00e3ff;
+    --blue-300: #00bcff;
+    --blue-600: #0084b2;
+    --blue-900: #005c7d;
+    --green-0: #3bff95;
+    --green-300: #31e27b;
+    --green-600: #229e56;
+    --green-900: #186f3c;
+    --purple-0: #da11ff;
+    --purple-300: #a000bc;
+    --purple-600: #700084;
+    --purple-900: #4e005c;
+    --yellow-0: #ffe300;
+    --yellow-300: #ffbc00;
+    --yellow-600: #b28400;
+    --yellow-900: #7d5c00;
+    --red-0: #f03b3a;
+    --red-100: #dc3938;
+
+  }

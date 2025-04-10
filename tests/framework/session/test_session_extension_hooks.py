@@ -549,7 +549,7 @@ def sample_node_multiple_outputs():
 
 class LogCatalog(KedroDataCatalog):
     def load(self, name: str, version: Optional[str] = None) -> Any:
-        dataset = super().load(name=name, version=version)
+        dataset = super().load(ds_name=name, version=version)
         logger.info("Catalog load")
         return dataset
 

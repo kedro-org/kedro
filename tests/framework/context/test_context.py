@@ -230,7 +230,7 @@ class TestKedroContext:
         # the catalog and its dataset should be loaded using absolute path
         # based on the project path
         catalog = dummy_context._get_catalog()
-        ds_path = catalog._datasets["horses"]._filepath
+        ds_path = catalog["horses"]._filepath
         assert PurePath(ds_path.as_posix()).is_absolute()
         assert (
             ds_path.as_posix() == (dummy_context.project_path / "horses.csv").as_posix()

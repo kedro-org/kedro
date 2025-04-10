@@ -8,6 +8,7 @@
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
 
 ## Upcoming deprecations for Kedro 1.0.0
+* Add deprecation warning for `--namespace` option for `kedro run`. It will be replaced with `--namespaces` option which will allow for running multiple namespaces together.
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
 ## Documentation changes

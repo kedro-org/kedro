@@ -22,7 +22,7 @@ Kedro provides the `kedro pipeline create` command to add the skeleton code for 
 ```
 ### Watch the video
 
-The [hands-on video course](../course/index.md#learn-kedro-with-hands-on-video) walks through data exploration and data processing for the spaceflights data. There are several videos in the playlist that cover the topic starting with the following:
+The [hands-on video course](../getting-started/course.md#learn-kedro-with-hands-on-video) walks through data exploration and data processing for the spaceflights data. There are several videos in the playlist that cover the topic starting with the following:
 
 ```{eval-rst}
 ..  youtube:: bZD8N0yv3Fs

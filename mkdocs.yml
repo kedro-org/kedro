@@ -80,6 +80,8 @@ nav:
           - Concepts:
             #   - Terminology: pages/getting-started/terminology.md
               - Glossary: pages/getting-started/glossary.md
+          - Introduction to Kedro video course: pages/getting-started/course.md
+          - FAQs: pages/getting-started/faq.md
       - TUTORIALS:
           - Kedro Spaceflights tutorial: pages/tutorials/spaceflights_tutorial.md
           - Kedro for Notebook tutorial: pages/tutorials/notebooks_tutorial.md

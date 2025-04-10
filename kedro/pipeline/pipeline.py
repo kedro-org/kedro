@@ -1036,6 +1036,7 @@ class Pipeline:
             inputs=self._process_dataset_names(node._inputs, mapping, namespace),
             outputs=self._process_dataset_names(node._outputs, mapping, namespace),
             namespace=new_namespace,
+            confirms=self._process_dataset_names(node._confirms, mapping, namespace),
         )
 
     def _map_nodes(  # noqa: PLR0913

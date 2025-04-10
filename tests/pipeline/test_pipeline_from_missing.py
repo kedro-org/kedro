@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import DataCatalog, LambdaDataset
+from kedro.io import KedroDataCatalog, LambdaDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
@@ -75,7 +75,7 @@ def _make_catalog(
     non_existent = [] if non_existent is None else non_existent
     no_exists_method = [] if no_exists_method is None else no_exists_method
 
-    catalog = DataCatalog(feed_dict=feed_dict)
+    catalog = KedroDataCatalog(feed_dict=feed_dict)
     for source in existent:
         catalog.add(source, LambdaDataset(None, None, lambda: True))
     for source in non_existent:

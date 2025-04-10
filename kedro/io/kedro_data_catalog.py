@@ -3,9 +3,6 @@ provide ``load`` and ``save`` capabilities from anywhere in the program. To
 use a ``KedroDataCatalog``, you need to instantiate it with a dictionary of datasets.
 Then it will act as a single point of reference for your calls, relaying load and
 save functions to the underlying datasets.
-
-``KedroDataCatalog`` is an experimental feature aimed to replace ``DataCatalog`` in the future.
-Expect possible breaking changes while using it.
 """
 
 from __future__ import annotations

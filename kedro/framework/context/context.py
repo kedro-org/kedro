@@ -14,7 +14,7 @@ from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import CatalogProtocol, DataCatalog  # noqa: TCH001
+from kedro.io import CatalogProtocol, KedroDataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -231,7 +231,7 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        catalog: DataCatalog = settings.DATA_CATALOG_CLASS.from_config(
+        catalog: KedroDataCatalog = settings.DATA_CATALOG_CLASS.from_config(
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,

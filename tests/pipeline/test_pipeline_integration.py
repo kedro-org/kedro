@@ -1,4 +1,4 @@
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 from kedro.pipeline import node, pipeline
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
@@ -40,7 +40,9 @@ class TestTransformPipelineIntegration:
         ) + pipeline(lunch_pipeline, inputs={"food": "NEW_NAME"})
 
         for pipe in [pipeline1, pipeline2, pipeline3]:
-            catalog = DataCatalog({}, feed_dict={"frozen_meat": "frozen_meat_data"})
+            catalog = KedroDataCatalog(
+                {}, feed_dict={"frozen_meat": "frozen_meat_data"}
+            )
             result = SequentialRunner().run(pipe, catalog)
             assert result == {"output": "frozen_meat_data_defrosted_grilled_done"}
 
@@ -73,7 +75,7 @@ class TestTransformPipelineIntegration:
             + pipeline(cook_pipeline, namespace="lunch")
             + pipeline(lunch_pipeline, inputs={"lunch_food": "lunch.grilled_meat"})
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {},
             feed_dict={
                 "breakfast.frozen_meat": "breakfast_frozen_meat",

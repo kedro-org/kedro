@@ -8,14 +8,14 @@ from kedro.config import OmegaConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings, validate_settings
 from kedro.framework.session.store import BaseSessionStore
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 
 
 class MyContext(KedroContext):
     pass
 
 
-class MyDataCatalog(DataCatalog):
+class MyDataCatalog(KedroDataCatalog):
     pass
 
 
@@ -93,7 +93,7 @@ def test_settings_without_configure_project_shows_default_values():
         "base_env": "base",
         "default_run_env": "local",
     }
-    assert settings.DATA_CATALOG_CLASS == DataCatalog
+    assert settings.DATA_CATALOG_CLASS == KedroDataCatalog
 
 
 def test_settings_after_configuring_project_shows_updated_values(

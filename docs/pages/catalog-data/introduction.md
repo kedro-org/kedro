@@ -30,7 +30,7 @@ Further pages describe more advanced concepts:
 
 This section on handing data with Kedro concludes with an advanced use case, illustrated with a tutorial that explains how to create your own custom dataset:
 
-- [Advanced: Tutorial to create a custom datase](how_to_create_a_custom_dataset.md)
+- [Advanced: Tutorial to create a custom datase](../extend/how_to_create_a_custom_dataset.md)
 
 ## `KedroDataCatalog` (experimental feature)
 

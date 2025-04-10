@@ -134,7 +134,7 @@ All project related CLI commands should be run from the project’s root directo
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it via the [`plugin` framework](../extend_kedro/plugins.md). Find the template for the `cli.py` file below.
+The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it via the [`plugin` framework](../extend/plugins.md). Find the template for the `cli.py` file below.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -275,7 +275,7 @@ The following runs [`pip`](https://github.com/pypa/pip) to install all package d
 pip install -r requirements.txt
 ```
 
-For further information, see the [documentation on installing project-specific dependencies](../kedro_project_setup/dependencies.md#install-project-specific-dependencies).
+For further information, see the [documentation on installing project-specific dependencies](../missing/dependencies.md#install-project-specific-dependencies).
 
 
 ### Run the project
@@ -317,7 +317,7 @@ You can also combine these options together, so the following command runs all t
 kedro run --from-nodes=split --to-nodes=predict,report
 ```
 
-This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../nodes_and_pipelines/run_a_pipeline.md#configure-kedro-run-arguments).
+This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../build/run_a_pipeline.md#configure-kedro-run-arguments).
 
 A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../configure/parameters.md).
 
@@ -360,7 +360,7 @@ The above command will take the bundled `.tar.gz` file and do the following:
 
 #### Modular pipelines
 
-##### Create a new [modular pipeline](../nodes_and_pipelines/modular_pipelines.md) in your project
+##### Create a new [modular pipeline](../build/modular_pipelines.md) in your project
 
 ```bash
 kedro pipeline create <pipeline_name>
@@ -485,7 +485,7 @@ The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#wh
 
 * `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
-* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
+* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
+* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../extend/session.md) that orchestrates a pipeline run
 
 To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined.

@@ -46,7 +46,7 @@ documentation on how to install relevant dependencies for kedro_datasets.pandas.
 https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html
 ```
 
-The Kedro Data Catalog is missing [dependencies needed to parse the data](../kedro_project_setup/dependencies.md#install-dependencies-related-to-the-data-catalog). Check that you have [all the project dependencies to `requirements.txt`](./tutorial_template.md#install-project-dependencies) and then call `pip install -r requirements.txt` to install them.
+The Kedro Data Catalog is missing [dependencies needed to parse the data](../missing/dependencies.md#install-dependencies-related-to-the-data-catalog). Check that you have [all the project dependencies to `requirements.txt`](./tutorial_template.md#install-project-dependencies) and then call `pip install -r requirements.txt` to install them.
 
 ### Pipeline run
 

@@ -1,6 +1,6 @@
 # Data versioning with Iceberg
 
-[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM. It is important to note that `pyiceberg` is a fast evolving project and does not support the full range of features that Iceberg tables offer. You can use this tutorial as inspiration to extend the functionality using different compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/), or dataframe technologies such as [Apache Arrow, DuckDB, and more](https://py.iceberg.apache.org/api/#query-the-data) by [creating your own custom datasets](../data/how_to_create_a_custom_dataset.md).
+[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM. It is important to note that `pyiceberg` is a fast evolving project and does not support the full range of features that Iceberg tables offer. You can use this tutorial as inspiration to extend the functionality using different compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/), or dataframe technologies such as [Apache Arrow, DuckDB, and more](https://py.iceberg.apache.org/api/#query-the-data) by [creating your own custom datasets](../extend/how_to_create_a_custom_dataset.md).
 
 ## Prerequisites
 
@@ -47,7 +47,7 @@ catalog = load_catalog(name="default")
 ```
 ## Define a custom dataset to use Iceberg tables
 
-To use the Iceberg tables with Kedro, you will need to define a [custom dataset that uses the `pyiceberg` library](../data/how_to_create_a_custom_dataset.md). Create a new file  called `pyiceberg_dataset.py` in the `src/kedro_iceberg/` directory of your project and copy the following code:
+To use the Iceberg tables with Kedro, you will need to define a [custom dataset that uses the `pyiceberg` library](../extend/how_to_create_a_custom_dataset.md). Create a new file  called `pyiceberg_dataset.py` in the `src/kedro_iceberg/` directory of your project and copy the following code:
 
 ```python
 import pyarrow as pa

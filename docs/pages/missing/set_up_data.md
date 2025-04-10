@@ -127,7 +127,7 @@ When you have finished, close `ipython` session with `exit()`.
 
 {py:mod}`Kedro supports numerous datasets <kedro-datasets:kedro_datasets>` out of the box, but you can also add support for any proprietary data format or filesystem.
 
-You can find further information about [how to add support for custom datasets](../data/how_to_create_a_custom_dataset.md) in specific documentation covering advanced usage.
+You can find further information about [how to add support for custom datasets](../extend/how_to_create_a_custom_dataset.md) in specific documentation covering advanced usage.
 
 ### Supported data locations
 

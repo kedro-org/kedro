@@ -1,8 +1,8 @@
 # Kedro concepts
 
-This page introduces the most basic elements of Kedro. You can find further information about these and more advanced Kedro concepts in the [Kedro glossary](../resources/glossary.md).
+This page introduces the most basic elements of Kedro. You can find further information about these and more advanced Kedro concepts in the [Kedro glossary](../getting-started/glossary.md).
 
-You may prefer to skip to the next section to [create a Kedro project for hands-on Kedro experience](./new_project.md).
+You may prefer to skip to the next section to [create a Kedro project for hands-on Kedro experience](../create/new_project.md).
 
 ## Summary
 
@@ -14,7 +14,7 @@ You may prefer to skip to the next section to [create a Kedro project for hands-
 
 ## Node
 
-In Kedro, a node is a wrapper for a [pure Python function](../resources/glossary.md#node) that names the inputs and outputs of that function. Nodes are the building block of a pipeline, and the output of one node can be the input of another.
+In Kedro, a node is a wrapper for a [pure Python function](../getting-started/glossary.md#node) that names the inputs and outputs of that function. Nodes are the building block of a pipeline, and the output of one node can be the input of another.
 
 Here are two simple nodes as an example:
 
@@ -100,11 +100,11 @@ project-dir          # Parent directory of the template
 
 ### Tool selection and resulting structure
 
-During `kedro new`, you can select which [tools to include in your project](../starters/new_project_tools.md). Each tool adds specific files or folders to the project structure:
+During `kedro new`, you can select which [tools to include in your project](../create/new_project_tools.md). Each tool adds specific files or folders to the project structure:
 
 - **Lint (Ruff)**: Modifies the `pyproject.toml` file to include Ruff configuration settings for linting. It sets up `ruff` under `[tool.ruff]`, defines options like line length, selected rules, and ignored rules, and includes `ruff` as an optional `dev` dependency.
-- **Test (Pytest)**: Adds a `tests` folder for storing unit and integration tests, helping to maintain code quality and ensuring that changes in the codebase do not introduce bugs. For more information about testing in Kedro, visit the [Automated Testing Guide](../development/automated_testing.md).
-- **Log**: Allows specific logging configurations by including a `logging.yml` file inside the `conf` folder. For more information about logging customisation in Kedro, visit the [Logging Customisation Guide](../logging/index.md).
+- **Test (Pytest)**: Adds a `tests` folder for storing unit and integration tests, helping to maintain code quality and ensuring that changes in the codebase do not introduce bugs. For more information about testing in Kedro, visit the [Automated Testing Guide](../develop/automated_testing.md).
+- **Log**: Allows specific logging configurations by including a `logging.yml` file inside the `conf` folder. For more information about logging customisation in Kedro, visit the [Logging Customisation Guide](../develop/logging.md).
 - **Docs (Sphinx)**: Adds a `docs` folder with a Sphinx documentation setup. This folder is typically used to generate technical documentation for the project.
 - **Data Folder**: Adds a `data` folder structure for managing project data. The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders, as outlined [in this data engineering article](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71).
 - **PySpark**: Adds PySpark-specific configuration files.
@@ -119,7 +119,7 @@ Use the `base` subfolder for project-specific settings to share across different
 
 The folder contains three files for the example, but you can add others as you require:
 
--   `catalog.yml` - [Configures the Data Catalog](../data/data_catalog.md#use-the-data-catalog-within-kedro-configuration) with the file paths and load/save configuration needed for different datasets
+-   `catalog.yml` - [Configures the Data Catalog](../catalog-data/data_catalog.md#use-the-data-catalog-within-kedro-configuration) with the file paths and load/save configuration needed for different datasets
 -   `logging.yml` - Uses Python's default [`logging`](https://docs.python.org/3/library/logging.html) library to set up logging (only added if the Log tool is selected).
 -   `parameters.yml` - Allows you to define parameters for machine learning experiments, for example, train/test split and the number of iterations
 

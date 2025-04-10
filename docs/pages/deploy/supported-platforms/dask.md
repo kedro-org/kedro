@@ -10,7 +10,7 @@ Dask offers both a default, single-machine scheduler and a more sophisticated, d
 
 ## Prerequisites
 
-The only additional requirement, beyond what was already required by your Kedro pipeline, is to [install `dask.distributed`](http://distributed.dask.org/en/stable/install.html). To review the full installation instructions, including how to set up Python virtual environments, see our [Get Started guide](../get_started/install.md#installation-prerequisites).
+The only additional requirement, beyond what was already required by your Kedro pipeline, is to [install `dask.distributed`](http://distributed.dask.org/en/stable/install.html). To review the full installation instructions, including how to set up Python virtual environments, see our [Get Started guide](../../getting-started/install.md#installation-prerequisites).
 
 ## How to distribute your Kedro pipeline using Dask
 

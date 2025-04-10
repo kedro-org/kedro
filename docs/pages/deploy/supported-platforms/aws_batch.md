@@ -8,7 +8,7 @@
 
 AWS Batch helps you run massively parallel Kedro pipelines in a cost-effective way, and allows you to parallelise the pipeline execution across multiple compute instances. Each Batch job is run in an isolated Docker container environment.
 
-The following sections are a guide on how to deploy a Kedro project to AWS Batch, and uses the [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) as primary example. The guide assumes that you have already completed the tutorial, and that the project was created with the project name **Kedro Tutorial**.
+The following sections are a guide on how to deploy a Kedro project to AWS Batch, and uses the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) as primary example. The guide assumes that you have already completed the tutorial, and that the project was created with the project name **Kedro Tutorial**.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ To use AWS Batch, ensure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
 - A `name` attribute is set for each Kedro {py:mod}`~kedro.pipeline.node`. Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --nodes=<node_name>`.
-- [All node input/output datasets must be configured in `catalog.yml`](../data/data_catalog_yaml_examples.md) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
+- [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -78,7 +78,7 @@ First, you need to containerise your Kedro project, using any preferred containe
 
 For the purpose of this walk-through, we are going to assume a Docker workflow. We recommend using the [Kedro-Docker plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to streamline the process.  [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./single_machine.md#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
+After you’ve built the Docker image for your project locally, [transfer the image to a container registry](../single_machine.md#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
 
 Alternatively, once you've created a container repository, click the `View Push Commands` button in the top-right corner of the [ECR dashboard](https://console.aws.amazon.com/ecr).
 

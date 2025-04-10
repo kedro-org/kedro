@@ -4,7 +4,7 @@ This section shows how to create a new project with `kedro new` using the [Kedro
 
 ## Create a new project
 
-[Set up Kedro](../get_started/install.md) if you have not already done so.
+[Set up Kedro](../getting-started/install.md) if you have not already done so.
 
 ```{important}
 We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.19.0). To check the version installed, type `kedro -V` in your terminal window.

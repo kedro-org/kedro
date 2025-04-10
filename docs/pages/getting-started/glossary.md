@@ -14,8 +14,6 @@ Data science extracts insights from data by using a combination of domain expert
 ## Kedro
 Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It applies software engineering best-practices to machine learning code, including modularity, separation of concerns and versioning.
 
-[Introduction to Kedro](../introduction/index.md)
-
 ## `KedroContext`
 A Python class that holds the configuration and Kedro’s main functionality.
 
@@ -24,7 +22,7 @@ API documentation for {py:class}`~kedro.framework.context.KedroContext`
 ## `KedroSession`
 A KedroSession allows you to manage the lifecycle of a Kedro run, persist runtime parameters and trace back runtime parameters, such as CLI command flags and environment variables.
 
-[Further information about `KedroSession`](../kedro_project_setup/session.md)
+[Further information about `KedroSession`](../extend/session.md)
 
 ## Kedro-Viz
 You can use Kedro-Viz to visualise your Kedro data pipelines:
@@ -45,7 +43,7 @@ _(See also [Pipeline](#pipeline))_
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, you can create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test and maintain, and are portable so they can be copied and reused between projects.
 
-[Further information about modular pipelines](../nodes_and_pipelines/modular_pipelines.md)
+[Further information about modular pipelines](../build/modular_pipelines.md)
 
 ## Node
 A Kedro node is a wrapper for a pure Python function that names the inputs and outputs of that function.
@@ -54,7 +52,7 @@ A Kedro node is a wrapper for a pure Python function that names the inputs and o
 
 Nodes are the building block of a pipeline. Nodes can be linked when the output of one node is the input of another.
 
-[Further information about nodes](../nodes_and_pipelines/nodes.md)
+[Further information about nodes](../build/nodes.md)
 
 ## Node execution order
 The node execution order is determined by resolving the input and output data dependencies between the nodes. The pipeline determines the node execution order and does not necessarily run the nodes in the order in which they are passed in.
@@ -62,7 +60,7 @@ The node execution order is determined by resolving the input and output data de
 ## Pipeline
 A Kedro pipeline organises the dependencies and execution order of a collection of nodes, and connects inputs and outputs. The pipeline determines the node execution order by resolving dependencies.
 
-[Further information about pipelines](../nodes_and_pipelines/pipeline_introduction.md)
+[Further information about pipelines](../build/pipeline_introduction.md)
 
 **_Chonky pipeline_**: _Chonky is generally used to describe animals that are plump, rounded or simply heavier than average. A chonky pipeline is, likewise, a pipeline that is more bulky than usual._
 
@@ -75,7 +73,7 @@ This is when you run a subset, or a ‘slice’ of a pipeline’s nodes. You can
 * by tagging certain nodes (`pipeline.only_nodes_with_tags`)
 * by specifying certain nodes (`pipeline.only_nodes`)
 
-[Further information about pipeline slicing](../nodes_and_pipelines/slice_a_pipeline.md)
+[Further information about pipeline slicing](../build/slice_a_pipeline.md)
 
 ## Runner
 Runners are different execution mechanisms to run pipelines with the specified data catalog.
@@ -84,12 +82,12 @@ Runners are different execution mechanisms to run pipelines with the specified d
 * The parallel runner allows for concurrency by use of multiprocessing
 * The thread runner uses threading for concurrent execution
 
-[Further information about runners](../nodes_and_pipelines/run_a_pipeline.md)
+[Further information about runners](../build/run_a_pipeline.md)
 
 ## Starters
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused. A Kedro starter is a [Cookiecutter template](https://cookiecutter.readthedocs.io/) that contains the boilerplate code for a Kedro project.
 
-[Further information about Kedro starters](./create/settings.md)
+[Further information about Kedro starters](../missing/settings.md)
 
 ## Tags
 You can apply tags to nodes or pipelines as a means of filtering which are executed.

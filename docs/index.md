@@ -28,7 +28,7 @@
 
 - [Kedro architecture](pages/getting-started/architecture_overview.md)
 - [Kedro's CLI](pages/getting-started/commands_reference.md)
-- [Quickstart](pages/getting-started/quickstart.md)
+<!-- - [Quickstart](pages/getting-started/quickstart.md) -->
 - [Installation](pages/getting-started/install.md)
 - [Glossary](pages/getting-started/glossary.md)
 

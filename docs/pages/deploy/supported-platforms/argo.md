@@ -36,7 +36,7 @@ First, you need to containerise your Kedro project, using any preferred containe
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process. [Instructions for Kedro-Docker are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./single_machine.md#how-to-use-container-registry).
+After you’ve built the Docker image for your project locally, [transfer the image to a container registry](../single_machine.md#how-to-use-container-registry).
 
 ### Create Argo Workflows spec
 

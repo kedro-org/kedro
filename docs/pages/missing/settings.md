@@ -12,9 +12,9 @@ By default, all code in `settings.py` is commented out. When settings are not su
 
 | Setting                     | Default value                                     | Use                                                                                                                |
 | --------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `HOOKS`                     | `tuple()`                                         | Inject additional behaviour into the execution timeline with [project Hooks](../hooks/introduction.md).            |
-| `DISABLE_HOOKS_FOR_PLUGINS` | `tuple()`                                         | Disable [auto-registration of Hooks from plugins](../hooks/introduction.md#disable-auto-registered-plugins-hooks). |
-| `SESSION_STORE_CLASS`       | `kedro.framework.session.session.BaseSessionStore`| Customise how [session data](session.md) is stored.                                                                |
+| `HOOKS`                     | `tuple()`                                         | Inject additional behaviour into the execution timeline with [project Hooks](../extend/hooks/introduction.md).            |
+| `DISABLE_HOOKS_FOR_PLUGINS` | `tuple()`                                         | Disable [auto-registration of Hooks from plugins](../extend/hooks/introduction.md#disable-auto-registered-plugins-hooks). |
+| `SESSION_STORE_CLASS`       | `kedro.framework.session.session.BaseSessionStore`| Customise how [session data](../extend/session.md) is stored.                                                                |
 | `SESSION_STORE_ARGS`        | `dict()`                                          | Keyword arguments for the `SESSION_STORE_CLASS` constructor.                                                       |
 | `CONTEXT_CLASS`             | `kedro.framework.context.KedroContext`            | Customise how Kedro library components are managed.                                                                |
 | `CONF_SOURCE`               | `"conf"`                                          | Directory that holds [configuration](../configure/configuration_basics.md).                                    |
@@ -41,7 +41,7 @@ The `package_name` should be a [valid Python package name](https://peps.python.o
 this value should also be updated.
 
 You can also use `pyproject.toml` to specify settings for functionalities such as [micro-packaging](../missing/micro_packaging.md).
-You can also store the settings for the other tools you've used in your project, such as [`pytest` for automated testing](../development/automated_testing.md).
+You can also store the settings for the other tools you've used in your project, such as [`pytest` for automated testing](../develop/automated_testing.md).
 Consult the respective documentation for the tools you have used to check how you can configure the settings with the `pyproject.toml` file for your project.
 
 ### Use Kedro without the `src` folder

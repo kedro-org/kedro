@@ -43,7 +43,7 @@ Which tools would you like to include in your project? [1-7/1,3/all/none]:
  (none):
 ```
 
-The options are described in more detail in the [documentation about the new project tools](../starters/new_project_tools.md).
+The options are described in more detail in the [documentation about the new project tools](./new_project_tools.md).
 
 Select the tools by number, or `all` or follow the default to add `none`.
 

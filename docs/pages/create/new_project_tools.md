@@ -195,7 +195,7 @@ ruff format path/to/project/root
 ruff check path/to/project/root
 ```
 
-Though it has no impact on how your code works, linting is important for code quality because improves consistency, readability, debugging, and maintainability. To learn more about linting your Kedro projects, check our [linting documentation](../development/linting.md).
+Though it has no impact on how your code works, linting is important for code quality because improves consistency, readability, debugging, and maintainability. To learn more about linting your Kedro projects, check our [linting documentation](../develop/linting.md).
 
 ### Testing
 
@@ -224,7 +224,7 @@ To run your tests, use the following command:
 pytest path/to/your/project/root/tests
 ```
 
-Kedro promotes the use of unit tests to achieve high code quality and maintainability in your projects. To read more about unit testing with Kedro, check our [testing documentation](../development/automated_testing.md#set-up-automated-testing-with-pytest)
+Kedro promotes the use of unit tests to achieve high code quality and maintainability in your projects. To read more about unit testing with Kedro, check our [testing documentation](../develop/automated_testing.md#set-up-automated-testing-with-pytest)
 
 ### Custom logging
 

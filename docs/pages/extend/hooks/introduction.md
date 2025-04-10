@@ -49,7 +49,7 @@ This is what the [`kedro-telemetry` plugin](https://github.com/kedro-org/kedro-p
 To add Hooks to your Kedro project, you must:
 
 * Create or modify the file `src/<package_name>/hooks.py` to define a Hook implementation for the particular Hook specification that describes the point at which you want to inject additional behaviour
-* Register that Hook implementation in the [`src/<package_name>/settings.py`](../missing/settings.md) file under the `HOOKS` key
+* Register that Hook implementation in the [`src/<package_name>/settings.py`](../../missing/settings.md) file under the `HOOKS` key
 
 ### Define the Hook implementation
 The Hook implementation should have the same name as the specification. The Hook must provide a concrete implementation with a subset of the corresponding specification's parameters (you do not need to use them all).
@@ -99,7 +99,7 @@ We recommend that you group related Hook implementations under a namespace, pref
 
 ### Registering the Hook implementation with Kedro
 
-Hook implementations should be registered with Kedro using the [`src/<package_name>/settings.py`](../missing/settings.md) file under the `HOOKS` key.
+Hook implementations should be registered with Kedro using the [`src/<package_name>/settings.py`](../../missing/settings.md) file under the `HOOKS` key.
 
 You can register more than one implementation for the same specification. They will be called in LIFO (last-in, first-out) order.
 
@@ -112,7 +112,7 @@ from <package_name>.hooks import ProjectHooks, DataCatalogHooks
 HOOKS = (ProjectHooks(), DataCatalogHooks())
 ```
 
-Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](../extend_kedro/plugins.md#hooks).
+Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](../plugins.md#hooks).
 
 ```{note}
 Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.

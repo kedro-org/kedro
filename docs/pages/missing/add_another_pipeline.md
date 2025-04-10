@@ -4,7 +4,7 @@ This section explains the following:
 
 * How to add a second Kedro pipeline for data science code that extends the default project pipeline
 * How to 'slice' the project to run just part of the entire pipeline
-* (Optional) How to make a [modular pipeline](../nodes_and_pipelines/modular_pipelines.md)
+* (Optional) How to make a [modular pipeline](../build/modular_pipelines.md)
 * (Optional) How to specify the way the pipeline nodes are run: sequentially or in parallel
 
 
@@ -243,11 +243,11 @@ You can 'slice' the pipeline and specify just the portion you want to run by usi
 kedro run --pipeline=data_science
 ```
 
-There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../getting-started/commands_reference.md#modifying-a-kedro-run).
+There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../build/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../getting-started/commands_reference.md#modifying-a-kedro-run).
 
 ## Modular pipelines
 
-In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../nodes_and_pipelines/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs/outputs/parameters.
+In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../build/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs/outputs/parameters.
 
 Modular pipelines are easier to develop, test and maintain. They are reusable within the same codebase but also portable across projects via [micro-packaging](../missing/micro_packaging.md) as a scalable way to use Kedro pipelines.
 
@@ -520,4 +520,4 @@ kedro run --runner=module.path.to.my.runner
 
 `ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations-and-plugins/pyspark_integration.md) and {class}`Dask<kedro-datasets:kedro_datasets.dask.ParquetDataset>`.
 
-You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
+You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../build/run_a_pipeline.md).

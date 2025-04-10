@@ -13,7 +13,7 @@ In this example, we use a [Kaggle dataset of Pokémon images and types](https://
 
 ## Project setup
 
-We assume that you have already [installed Kedro](../get_started/install.md). Now [create a project](../get_started/new_project.md) (feel free to name your project as you like, but here we will assume the project's repository name is `kedro-pokemon`).
+We assume that you have already [installed Kedro](../getting-started/install.md). Now [create a project](../create/new_project.md) (feel free to name your project as you like, but here we will assume the project's repository name is `kedro-pokemon`).
 
 Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
 
@@ -573,7 +573,7 @@ class ImageDataset(AbstractVersionedDataset):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset constructor, see the implementation of the {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](../catalog-data/data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset constructor, see the implementation of the {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`.
 
 ## How to contribute a custom dataset implementation
 

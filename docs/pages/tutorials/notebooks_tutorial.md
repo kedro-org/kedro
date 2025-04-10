@@ -15,7 +15,7 @@ To create a project, you can run this command:
 kedro new -n spaceflights --tools=viz --example=yes
 ```
 
-You can find more options of `kedro new` from [Create a new Kedro Project](../get_started/new_project.md).
+You can find more options of `kedro new` from [Create a new Kedro Project](../create/new_project.md).
 
 ## Loading the project with `kedro jupyter notebook`
 
@@ -45,8 +45,8 @@ The `kedro jupyter notebook` command launches a notebook with a customised kerne
 
 * `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
-* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
+* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
+* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../extend/session.md) that orchestrates a pipeline run
 
 In addtion, it also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
 
@@ -193,7 +193,7 @@ You can find out more in the API documentation of {py:class}`~kedro.framework.co
 
 ### `pipelines`
 
-`pipelines` is a dictionary containing your project's [registered pipelines](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name):
+`pipelines` is a dictionary containing your project's [registered pipelines](../build/run_a_pipeline.md#run-a-pipeline-by-name):
 
 ```ipython
 pipelines
@@ -292,7 +292,7 @@ You can load the contents of a node in your project into a series of cells using
 - The node needs to have a name
 - The node's inputs need to be persisted
 
-The [section about creating nodes with names](../nodes_and_pipelines/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../tutorials/create_a_pipeline.md#preprocessed-data-registration).
+The [section about creating nodes with names](../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../missing/create_a_pipeline.md#preprocessed-data-registration).
 
 ``` {note}
 The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
@@ -415,7 +415,7 @@ You can also connect an IPython shell to a Kedro project kernel as follows:
 kedro ipython
 ```
 
-The command launches an IPython shell with the extension already loaded and is the same command as  `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../tutorials/set_up_data.md#test-that-kedro-can-load-the-data).
+The command launches an IPython shell with the extension already loaded and is the same command as  `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../missing/set_up_data.md#test-that-kedro-can-load-the-data).
 
 
 Similarly, the following creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected:

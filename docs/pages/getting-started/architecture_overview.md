@@ -20,7 +20,7 @@ As a data pipeline developer, you will interact with a Kedro project, which cons
   * The **`pipelines`**  directory, which contains the source code for your pipelines.
   * **`settings.py`** file contains the settings for the project, such as library component registration, custom hooks registration, etc. All the available settings are listed and explained in the [project settings chapter](../missing/settings.md).
   * **`pipeline_registry.py`** file defines the project pipelines, i.e. pipelines that can be run using `kedro run --pipeline`.
-  * **`__main__.py`** file serves as the main entry point of the project in [package mode](../tutorials/package_a_project.md#package-a-kedro-project).
+  * **`__main__.py`** file serves as the main entry point of the project in [package mode](../missing/package_a_project.md#package-a-kedro-project).
 * **`pyproject.toml`** identifies the project root by providing project metadata, including:
   * `package_name`: A valid Python package name for your project package.
   * `project_name`: A human readable name for your project.
@@ -37,7 +37,7 @@ Kedro framework serves as the interface between a Kedro project and Kedro librar
 
 ## Kedro starter
 
-You can use a [Kedro starter](./create/settings.md) to generate a Kedro project that contains boilerplate code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
+You can use a [Kedro starter](../missing/settings.md) to generate a Kedro project that contains boilerplate code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
 
 ## Kedro library
 

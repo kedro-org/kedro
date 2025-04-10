@@ -1,5 +1,5 @@
 # Customise a new project
-As you saw from the [First steps](../get_started/new_project.md) section, once you have [set up Kedro](../get_started/install.md), you can create a new project with `kedro new` and customise the code added to that project for its tooling and example code requirements.
+As you saw from the [First steps](./new_project.md) section, once you have [set up Kedro](../getting-started/install.md), you can create a new project with `kedro new` and customise the code added to that project for its tooling and example code requirements.
 
 The pages in this section describe in detail the various options available.
 

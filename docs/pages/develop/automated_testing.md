@@ -39,7 +39,7 @@ dev = [
 pip install ."[dev]"
 ```
 
-Alternatively, you can individually install test requirements as you would install other packages with `pip`, making sure you have installed your project locally and your [project's virtual environment is active](../get_started/install.md#create-a-virtual-environment-for-your-kedro-project).
+Alternatively, you can individually install test requirements as you would install other packages with `pip`, making sure you have installed your project locally and your [project's virtual environment is active](../getting-started/install.md#create-a-virtual-environment-for-your-kedro-project).
 
 1. To install your project, navigate to your project root and run the following command:
 
@@ -141,7 +141,7 @@ It can be useful to see how much of your project is covered by tests. For this, 
 
 ### Install `pytest-cov`
 
-Install `pytest` as you would install other packages with pip, making sure your [project's virtual environment is active](../get_started/install.md#create-a-virtual-environment-for-your-kedro-project).
+Install `pytest` as you would install other packages with pip, making sure your [project's virtual environment is active](../getting-started/install.md#create-a-virtual-environment-for-your-kedro-project).
 
 ```bash
 pip install pytest-cov

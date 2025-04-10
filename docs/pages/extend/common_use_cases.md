@@ -8,11 +8,11 @@ The execution timeline of a Kedro pipeline can be thought of as a sequence of ac
 
 At different points in the lifecycle of these components, you might want to add extra behaviour: for example, you could add extra computation for profiling purposes _before_ and _after_ a node runs, or _before_ and _after_ the I/O actions of a dataset, namely the `load` and `save` actions.
 
-This can now achieved by using [Hooks](../hooks/introduction.md), to define the extra behaviour and when in the execution timeline it should be introduced.
+This can now achieved by using [Hooks](./hooks/introduction.md), to define the extra behaviour and when in the execution timeline it should be introduced.
 
 ## Use Case 2: How to integrate Kedro with additional data sources
 
-You can use {py:mod}`datasets <kedro-datasets:kedro_datasets>` to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](../data/how_to_create_a_custom_dataset.md).
+You can use {py:mod}`datasets <kedro-datasets:kedro_datasets>` to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](./how_to_create_a_custom_dataset.md).
 
 ## Use Case 3: How to add or modify CLI commands
 
@@ -39,4 +39,4 @@ Your plugin's implementation can take advantage of other extension mechanisms su
 
 ## Use Case 4: How to customise the initial boilerplate of your project
 
-Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, see the [guide for creating Kedro starters](../starters/create_a_starter.md).
+Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, see the [guide for creating Kedro starters](./create_a_starter.md).

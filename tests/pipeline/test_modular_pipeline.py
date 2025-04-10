@@ -79,6 +79,23 @@ class TestPipelineHelper:
         assert nodes[2]._inputs == {"input1": "PREFIX.H", "input2": "PREFIX.J"}
         assert nodes[2]._outputs == {"K": "PREFIX.L"}
 
+    def test_confirms_namespaced(self):
+        raw_pipeline = modular_pipeline(
+            [
+                node(
+                    identity,
+                    "input_data",
+                    "output_data",
+                    confirms="input_data",
+                    name="node1",
+                )
+            ]
+        )
+        resulting_pipeline = pipeline(raw_pipeline, namespace="ns")
+
+        node_ = resulting_pipeline.nodes[0]
+        assert node_._confirms == "ns.input_data"
+
     def test_prefixing_and_renaming(self):
         """
         Prefixing and renaming at the same time.

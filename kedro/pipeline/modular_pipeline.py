@@ -305,6 +305,7 @@ def pipeline(  # noqa: PLR0913
             inputs=_process_dataset_names(node._inputs),
             outputs=_process_dataset_names(node._outputs),
             namespace=new_namespace,
+            confirms=_process_dataset_names(node._confirms),
         )
         return node_copy
 

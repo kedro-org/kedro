@@ -324,6 +324,13 @@ class TestKedroDataCatalog:
         _ = data_catalog_from_config["cars"]
         assert "cars" in data_catalog_from_config._datasets
 
+    def test_catalogs_eq(self, data_catalog_from_config):
+        expected_catalog = data_catalog_from_config
+        assert data_catalog_from_config == expected_catalog
+
+        data_catalog_copy = deepcopy(data_catalog_from_config)
+        assert not data_catalog_copy == expected_catalog
+
     class TestKedroDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):
             """Test dumping catalog config"""

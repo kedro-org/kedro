@@ -117,6 +117,16 @@ class TestCachedDataset:
     #     ):
     #         _ = KedroDataCatalog.from_config(config, load_versions={"test_ds": "42"})
 
+    def test_for_versioned_key(self):
+        config = {"versioned": True}
+        with pytest.raises(
+            ValueError,
+            match=r"Cached datasets should specify that they are "
+            r"versioned in the 'CachedDataset', not in the "
+            r"wrapped dataset",
+        ):
+            _ = CachedDataset._from_config(config, version="42")
+
     def test_exists(self, cached_ds):
         assert not cached_ds.exists()
         cached_ds.save(42)

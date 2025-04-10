@@ -3,6 +3,7 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
+* Added support for running multiple namespaces within a single session.
 
 ## Documentation changes
 ## Community contributions

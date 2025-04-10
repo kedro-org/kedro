@@ -129,7 +129,7 @@ You now need to install and import datasets from the [`kedro-datasets`](https://
 
 ### Configuration changes in 0.19
 
-The `ConfigLoader` and `TemplatedConfigLoader` classes were deprecated in Kedro 0.18.12 and were removed in Kedro 0.19.0. To use that release or later, you must now adopt the `OmegaConfigLoader`. The [configuration migration guide](../configuration/config_loader_migration.md) outlines the primary distinctions between the old loaders and the OmegaConfigLoader, and provides step-by-step instructions on updating your code base to use the new class effectively.
+The `ConfigLoader` and `TemplatedConfigLoader` classes were deprecated in Kedro 0.18.12 and were removed in Kedro 0.19.0. To use that release or later, you must now adopt the `OmegaConfigLoader`. The [configuration migration guide](../configure/config_loader_migration.md) outlines the primary distinctions between the old loaders and the OmegaConfigLoader, and provides step-by-step instructions on updating your code base to use the new class effectively.
 
 
 #### Changes to the default environments

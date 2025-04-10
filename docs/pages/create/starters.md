@@ -39,10 +39,10 @@ The Kedro team maintains the following starters for a range of Kedro projects:
 
 * [`astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
 * [`databricks-iris`](https://github.com/kedro-org/kedro-starters/tree/main/databricks-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a setup for [Databricks](https://docs.kedro.org/en/stable/deployment/databricks/index.html) deployment.
-* [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pandas` datasets.
-* [`spaceflights-pandas-viz`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pandas` datasets and visualisation and experiment tracking `kedro-viz` features.
-* [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pyspark` datasets.
-* [`spaceflights-pyspark-viz`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pyspark` datasets and visualisation and experiment tracking `kedro-viz` features.
+* [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pandas` datasets.
+* [`spaceflights-pandas-viz`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pandas` datasets and visualisation and experiment tracking `kedro-viz` features.
+* [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pyspark` datasets.
+* [`spaceflights-pyspark-viz`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pyspark` datasets and visualisation and experiment tracking `kedro-viz` features.
 
 ### Archived starters
 
@@ -75,7 +75,7 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 ## Use a starter with a configuration file
 
-By default, when you create a new project using a starter, `kedro new` asks you to enter the `project_name`, which it uses to set the `repo_name` and `python_package` name. This is the same behaviour as when you [create a new empty project](../get_started/new_project.md)
+By default, when you create a new project using a starter, `kedro new` asks you to enter the `project_name`, which it uses to set the `repo_name` and `python_package` name. This is the same behaviour as when you [create a new empty project](../create/new_project.md)
 
 Kedro also allows you to specify a configuration file when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
 
@@ -86,7 +86,7 @@ kedro new --config=my_kedro_project.yml --starter=spaceflights-pandas
 This option is useful when the starter requires more configuration than the default mode requires.
 
 ## Create a custom starter
-You can build your own starters for reuse within a project or team, as described in the [how to create a Kedro starter](../starters/create_a_starter.md) documentation.
+You can build your own starters for reuse within a project or team, as described in the [how to create a Kedro starter](../extend/create_a_starter.md) documentation.
 
 To create a project from a custom starter, run:
 

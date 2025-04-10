@@ -24,65 +24,108 @@
 
 [![OpenSSF Best Practices Badge Program](https://bestpractices.coreinfrastructure.org/projects/6711/badge)](https://bestpractices.coreinfrastructure.org/projects/6711)
 
-## Learn about Kedro
+## Getting started
 
-- [Introduction](pages/introduction/index.md)
-- [Get Started](pages/get_started/index.md)
-- [Course](pages/course/index.md)
+- [Kedro architecture](pages/getting-started/architecture_overview.md)
+- [Kedro's CLI](pages/getting-started/commands_reference.md)
+- [Quickstart](pages/getting-started/quickstart.md)
+- [Installation](pages/getting-started/install.md)
+- [Glossary](pages/getting-started/glossary.md)
 
-## Tutorial and Basic Kedro Usage
+## Tutorials
 
-- [Spaceflights Tutorial](pages/tutorial/spaceflights_tutorial.md)
-- [Visualisation](pages/visualisation/index.md)
-- [Notebooks and IPython](pages/notebooks_and_ipython/index.md)
-- [Resources](pages/resources/index.md)
+- [Kedro Spaceflights tutorial](pages/tutorials/spaceflights_tutorial.md)
+- [Kedro for Notebook tutorial](pages/tutorials/notebooks_tutorial.md)
 
-## Kedro Projects
+## Create
 
-- [Starters](pages/starters/index.md)
-- [Configuration](pages/configuration/index.md)
-- [Data](pages/data/index.md)
-- [Nodes and Pipelines](pages/nodes_and_pipelines/index.md)
-- [Telemetry](pages/configuration/telemetry.md)
+- [Create a Kedro project](pages/create/new_project.md)
+- [Create a minimal Kedro project](pages/create/minimal_kedro_project.md)
+- [Customise a new project](pages/create/customise_project.md)
+- [Kedro starters](pages/create/starters.md)
 
-## Integrations
+## Configure
 
-- [PySpark](pages/integrations/pyspark_integration.md)
-- [MLflow](pages/integrations/mlflow.md)
-- [DVC Versioning](pages/integrations/kedro_dvc_versioning.md)
-- [DeltaLake Versioning](pages/integrations/deltalake_versioning.md)
-- [Iceberg Versioning](pages/integrations/iceberg_versioning.md)
+- [Migration guide for config loaders](pages/configure/config_loader_migration.md)
+- [Advanced configuration](pages/configure/advanced_configuration.md)
+- [Parameters](pages/configure/parameters.md)
+- [Credentials](pages/configure/credentials.md)
 
-## Development
+## Catalog Data
 
-- [Set Up VSCode](pages/development/set_up_vscode.md)
-- [Set Up PyCharm](pages/development/set_up_pycharm.md)
-- [Debugging](pages/development/debugging.md)
-- [Automated Testing](pages/development/automated_testing.md)
-- [Linting](pages/development/linting.md)
+- [Introduction](pages/catalog-data/introduction.md)
+- [Data Catalog YAML examples](pages/catalog-data/data_catalog_yaml_examples.md)
+- [Dataset factories](pages/catalog-data/kedro_dataset_factories.md)
+- [Data and pipeline versioning](pages/catalog-data/kedro_dvc_versioning.md)
+- [Partitioned and incremental datasets](pages/catalog-data/partitioned_and_incremental_datasets.md)
 
-## Advanced Usage
+## Build
 
-- [Kedro Project Setup](pages/kedro_project_setup/index.md)
-- [Extend Kedro](pages/extend_kedro/index.md)
-- [Hooks](pages/hooks/index.md)
-- [Logging](pages/logging/index.md)
-- [Deployment](pages/deployment/index.md)
+- [Nodes](pages/build/nodes.md)
+- [Pipeline object](pages/build/pipeline_introduction.md)
+- [Run a pipeline](pages/build/run_a_pipeline.md)
+- [Modular pipelines](pages/build/modular_pipelines.md)
+- [Reusing pipelines (namespaces)](pages/build/namespaces.md)
+- [Pipeline registry](pages/build/pipeline_registry.md)
+- [Slice a pipeline](pages/build/slice_a_pipeline.md)
 
-## Contribute to Kedro
+## Develop
 
-- [Contribution Guide](pages/contribution/index.md)
+- [Logging](pages/develop/logging.md)
+- [Automated testing](pages/develop/automated_testing.md)
+- [Code formatting and linting](pages/develop/linting.md)
+- [Debugging](pages/develop/debugging.md)
 
-## CLI Reference
+## Deploy
 
-- [Commands Reference](pages/development/commands_reference.md)
+- [Single-machine deployment](pages/deploy/single_machine.md)
+- [Distributed deployment](pages/deploy/distributed.md)
+- Supported platforms:
+  - [Apache Airflow](pages/deploy/supported-platforms/airflow.md)
+  - [Amazon SageMaker](pages/deploy/supported-platforms/amazon_sagemaker.md)
+  - [Amazon EMR Serverless](pages/deploy/supported-platforms/amazon_emr_serverless.md)
+  - [AWS Step Functions](pages/deploy/supported-platforms/aws_step_functions.md)
+  - [Azure ML pipelines](pages/deploy/supported-platforms/azure.md)
+  - [Dask](pages/deploy/supported-platforms/dask.md)
+  - [Kubeflow Pipelines](pages/deploy/supported-platforms/kubeflow.md)
+  - [Prefect](pages/deploy/supported-platforms/prefect.md)
+  - [VertexAI](pages/deploy/supported-platforms/vertexai.md)
+  - [Argo Workflows](pages/deploy/supported-platforms/argo.md)
+  - [AWS Batch](pages/deploy/supported-platforms/aws_batch.md)
 
+## Extend
 
-## API documentation
+- [Use Cases](pages/extend/common_use_cases.md)
+- [Custom datasets](pages/extend/how_to_create_a_custom_dataset.md)
+- [Custom plugins](pages/extend/plugins.md)
+- [Custom starters](pages/extend/create_a_starter.md)
 
-- [API](pages/api/index.md)
+## Reference
 
-# Indices and tables
+- [Kedro API](pages/api/index.md)
+  - [kedro.config](pages/api/config/kedro.config.md)
+  - [kedro.framework](pages/api/framework/kedro.framework.md)
+  - [kedro.io](pages/api/io/kedro.io.md)
+  - [kedro.ipython](pages/api/ipython/kedro.ipython.md)
+  - [kedro.logging](pages/api/kedro.logging.md)
+  - [kedro.pipeline](pages/api/pipeline/kedro.pipeline.md)
+  - [kedro.runner](pages/api/runner/kedro.runner.md)
+  - [kedro.utils](pages/api/kedro.utils.md)
 
-- `genindex`{.interpreted-text role="ref"}
-- `modindex`{.interpreted-text role="ref"}
+## Integration & Plugins
+
+- [PySpark](pages/integrations-and-plugins/pyspark_integration.md)
+- [MLflow](pages/integrations-and-plugins/mlflow.md)
+- [Delta Lake](pages/integrations-and-plugins/deltalake_versioning.md)
+- [Iceberg](pages/integrations-and-plugins/iceberg_versioning.md)
+
+## IDE Support
+
+- [Visual Studio Code](pages/ide/set_up_vscode.md)
+- [PyCharm](pages/ide/set_up_pycharm.md)
+
+## About
+
+- [Kedro's Technical Steering Committee](pages/about/technical_steering_committee.md)
+- [Migration guide](pages/about/migration.md)
+- [Kedro telemetry](pages/about/telemetry.md)

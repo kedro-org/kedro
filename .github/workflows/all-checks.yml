@@ -10,6 +10,7 @@ on:
     branches:
       - main
       - develop
+      - chore/ut-kdc # [TODO: Should remove after UT is completed]
     paths-ignore:
       - "docs/**"
       - '**.md'

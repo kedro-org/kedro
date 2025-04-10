@@ -1047,6 +1047,7 @@ class Pipeline:
         tags: str | Iterable[str] | None = None,
         namespace: str | None = None,
     ) -> list[Node]:
+        """Map namespace to the inputs, outputs, parameters and nodes of the pipeline."""
         if isinstance(pipe, Pipeline):
             # To ensure that we are always dealing with a *copy* of pipe.
             pipe = Pipeline([pipe], tags=tags)

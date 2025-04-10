@@ -1,9 +1,6 @@
 import pytest
-from pytest import warns
 
-from kedro import KedroDeprecationWarning
 from kedro.pipeline import node, pipeline
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.pipeline import ModularPipelineError, Pipeline
 
 # from kedro.Pipeline.Pipeline import Pipeline as Pipeline
@@ -96,6 +93,23 @@ class TestPipelineHelper:
 
         assert nodes[2]._inputs == {"input1": "PREFIX.H", "input2": "PREFIX.J"}
         assert nodes[2]._outputs == {"K": "PREFIX.L"}
+
+    def test_confirms_namespaced(self):
+        raw_pipeline = pipeline(
+            [
+                node(
+                    identity,
+                    "input_data",
+                    "output_data",
+                    confirms="input_data",
+                    name="node1",
+                )
+            ]
+        )
+        resulting_pipeline = pipeline(raw_pipeline, namespace="ns")
+
+        node_ = resulting_pipeline.nodes[0]
+        assert node_._confirms == "ns.input_data"
 
     def test_prefixing_and_renaming(self):
         """
@@ -499,10 +513,3 @@ class TestPipelineHelper:
         from kedro.pipeline.modular_pipeline import ModularPipelineError
 
         assert issubclass(ModularPipelineError, Exception)
-
-    def test_modular_pipeline_deprecation(self):
-        with warns(
-            KedroDeprecationWarning,
-            match=r"\`kedro.modular_pipeline.pipeline\(\)\` has been deprecated",
-        ):
-            _ = modular_pipeline([node(identity, "A", "B", name="node1")])

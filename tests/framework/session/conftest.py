@@ -375,7 +375,7 @@ def mock_settings(mocker, project_hooks):
 @pytest.fixture
 def mock_session(mock_settings, mock_package_name, tmp_path):
     configure_project(mock_package_name)
-    session = KedroSession.create(tmp_path, extra_params={"params:key": "value"})
+    session = KedroSession.create(tmp_path, runtime_params={"params:key": "value"})
     yield session
     session.close()
 

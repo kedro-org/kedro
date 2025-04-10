@@ -372,6 +372,8 @@ class TestCoreFunctions:
             MyOtherVersionedDataset.save.__wrapped__, "__savewrapped__", False
         )
 
+
+class TestAbstractDataset:
     def test_from_config_success(self, mocker):
         mock_class_obj = mocker.Mock()
         mock_ds_instance = mocker.Mock()
@@ -409,6 +411,46 @@ class TestCoreFunctions:
                 load_version=None,
                 save_version=None,
             )
+
+    def test_from_config_class_obj_type_error(self, mocker):
+        mock_class_obj = mocker.Mock()
+        mock_class_obj.__qualname__ = "SomeDataset"
+        mocker.patch(
+            "kedro.io.core.parse_dataset_definition",
+            return_value=(mock_class_obj, {"type": "SomeDataset"}),
+        )
+        mock_class_obj.side_effect = TypeError(
+            "Invalid arguments for class instantiation"
+        )
+
+        with pytest.raises(DatasetError) as exc_info:
+            MyDataset.from_config(
+                name="obj_err_dataset",
+                config={"type": "Invalid"},
+                load_version=None,
+                save_version=None,
+            )
+            assert "must only contain arguments valid" in str(exc_info.value)
+
+    def test_from_config_class_obj_exception(self, mocker):
+        mock_class_obj = mocker.Mock()
+        mock_class_obj.__qualname__ = "SomeDataset"
+        mocker.patch(
+            "kedro.io.core.parse_dataset_definition",
+            return_value=(mock_class_obj, {"type": "SomeDataset"}),
+        )
+        mock_class_obj.side_effect = Exception(
+            "Invalid arguments for class instantiation"
+        )
+
+        with pytest.raises(DatasetError) as exc_info:
+            MyDataset.from_config(
+                name="obj_err_dataset",
+                config={"type": "Invalid"},
+                load_version=None,
+                save_version=None,
+            )
+            assert "Failed to instantiate dataset" in str(exc_info.value)
 
 
 class TestAbstractVersionedDataset:

@@ -147,7 +147,7 @@ class DataValidationHooks:
 
 `Great Expectations` example report:
 
-![](../meta/images/data_validation.png)
+![](../../meta/images/data_validation.png)
 
 ### V3 API
 * Create new checkpoint:
@@ -280,7 +280,7 @@ class PipelineMonitoringHooks:
 
 `Grafana` example page:
 
-![](../meta/images/pipeline_observability.png)
+![](../../meta/images/pipeline_observability.png)
 
 ## Add metrics tracking to your model
 
@@ -347,7 +347,7 @@ class ModelTrackingHooks:
 
 `MLflow` example page:
 
-![](../meta/images/mlflow.png)
+![](../../meta/images/mlflow.png)
 
 ## Modify node inputs using `before_node_run` hook
 

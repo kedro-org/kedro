@@ -16,7 +16,7 @@ You can use {py:mod}`datasets <kedro-datasets:kedro_datasets>` to interface with
 
 ## Use Case 3: How to add or modify CLI commands
 
-If you want to customise a built-in Kedro command, such as `kedro run`, for a specific project, add a `cli.py` file that defines a custom `run()` function. You should add the `cli.py` file at the same level as `settings.py`, which is usually the `src/PROJECT_NAME` directory. See the [template for the `cli.py` file](../development/commands_reference.md#customise-or-override-project-specific-kedro-commands).
+If you want to customise a built-in Kedro command, such as `kedro run`, for a specific project, add a `cli.py` file that defines a custom `run()` function. You should add the `cli.py` file at the same level as `settings.py`, which is usually the `src/PROJECT_NAME` directory. See the [template for the `cli.py` file](../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands).
 
 
 If you want to customise a Kedro command from a command group, such as `kedro pipeline` or `kedro jupyter`, you need to import the corresponding click command group from the Kedro framework `cli`. For `kedro pipeline` commands this would be `from kedro.framework.cli.pipeline import pipeline`, and for `kedro jupyter` commands `from kedro.framework.cli.jupyter import jupyter`. Note that you must still add the `cli` click group from the snippet above, even if you don't modify it.

@@ -246,7 +246,7 @@ class DaskRunner(AbstractRunner):
 
 ### Update CLI implementation
 
-You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../development/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
 
 ```python
 def run(tag, env, ...):
@@ -326,4 +326,4 @@ kedro run --env=dask --runner=kedro_tutorial.runner.DaskRunner
 
 You should start seeing tasks appearing on [Dask's diagnostics dashboard](http://127.0.0.1:8787/status):
 
-![Dask's diagnostics dashboard](../meta/images/dask_diagnostics_dashboard.png)
+![Dask's diagnostics dashboard](../../meta/images/dask_diagnostics_dashboard.png)

@@ -4,7 +4,7 @@
 ## Data Catalog
  The Data Catalog is Kedro's registry of all data sources available for use in the data pipeline. It manages loading and saving of data. The Data Catalog maps the names of node inputs and outputs as keys in a Kedro dataset, which can be specialised for different types of data storage.
 
-[Further information about the Data Catalog](../data/data_catalog.md)
+[Further information about the Data Catalog](../catalog-data/data_catalog.md)
 
 ## Data engineering vs Data science
 Data engineering is the process of wrangling data into a clean and reliable state. Data wrangling is about taking a messy or unrefined source of data and turning it into something useful by parsing and cleaning it.
@@ -89,7 +89,7 @@ Runners are different execution mechanisms to run pipelines with the specified d
 ## Starters
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused. A Kedro starter is a [Cookiecutter template](https://cookiecutter.readthedocs.io/) that contains the boilerplate code for a Kedro project.
 
-[Further information about Kedro starters](../starters/starters.md)
+[Further information about Kedro starters](./create/settings.md)
 
 ## Tags
 You can apply tags to nodes or pipelines as a means of filtering which are executed.

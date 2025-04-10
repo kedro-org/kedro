@@ -83,8 +83,8 @@ conda deactivate
 ### Optional: Integrate Kedro in VS Code with the official extension
 Working in an IDE can be a great productivity boost.
 
-For VS Code Users: Checkout [Set up Visual Studio Code](../development/set_up_vscode.md) and [Kedro VS Code Extension](../development/set_up_vscode.md#kedro-vs-code-extension)
-For PyCharm Users: Checkout [Set up PyCharm](../development/set_up_pycharm.md)
+For VS Code Users: Checkout [Set up Visual Studio Code](../ide/set_up_vscode.md) and [Kedro VS Code Extension](../ide/set_up_vscode.md#kedro-vs-code-extension)
+For PyCharm Users: Checkout [Set up PyCharm](../ide/set_up_pycharm.md)
 
 ## How to install Kedro using `pip`
 

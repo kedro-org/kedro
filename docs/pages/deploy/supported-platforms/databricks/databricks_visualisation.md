@@ -25,8 +25,8 @@ Kedro-Viz can then be launched in a new browser tab with the `%run_viz` line mag
 
 This command presents you with a link to the Kedro-Viz web application.
 
-![databricks_viz_link](../../meta/images/databricks_viz_link.png)
+![databricks_viz_link](../../../meta/images/databricks_viz_link.png)
 
 Clicking this link opens a new browser tab running Kedro-Viz for your project.
 
-![databricks_viz_demo](../../meta/images/databricks_viz_demo.png)
+![databricks_viz_demo](../../../meta/images/databricks_viz_demo.png)

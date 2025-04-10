@@ -39,7 +39,7 @@ Repositories on Docker Hub are set to public visibility by default. You can chan
 The procedure for using other container registries, like AWS ECR or GitLab Container Registry, will be almost identical to the steps described above. However, authentication will be different for each solution.
 
 ## Package-based
-If you prefer not to use containerisation, you can instead package your Kedro project using [`kedro package`](../development/commands_reference.md#deploy-the-project).
+If you prefer not to use containerisation, you can instead package your Kedro project using [`kedro package`](../getting-started/commands_reference.md#deploy-the-project).
 
 Run the following in your project’s root directory:
 
@@ -66,7 +66,7 @@ python -m project_name
 ```
 
 ## CLI-based
-If neither containers nor packages are viable options for your project, you can also run it on a production server by cloning your project codebase to the server using the [Kedro CLI](../development/commands_reference.md).
+If neither containers nor packages are viable options for your project, you can also run it on a production server by cloning your project codebase to the server using the [Kedro CLI](../getting-started/commands_reference.md).
 
 You will need to follow these steps to get your project running:
 

@@ -8,7 +8,7 @@
 
 AWS Batch helps you run massively parallel Kedro pipelines in a cost-effective way, and allows you to parallelise the pipeline execution across multiple compute instances. Each Batch job is run in an isolated Docker container environment.
 
-The following sections are a guide on how to deploy a Kedro project to AWS Batch, and uses the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) as primary example. The guide assumes that you have already completed the tutorial, and that the project was created with the project name **Kedro Tutorial**.
+The following sections are a guide on how to deploy a Kedro project to AWS Batch, and uses the [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) as primary example. The guide assumes that you have already completed the tutorial, and that the project was created with the project name **Kedro Tutorial**.
 
 ## Prerequisites
 
@@ -306,7 +306,7 @@ aws_batch:
 
 #### Update CLI implementation
 
-You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../development/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
 
 ```python
 def run(tag, env, ...):

@@ -47,7 +47,7 @@ CONFIG_LOADER_CLASS = CustomConfigLoader
 
 
 ### How to change which configuration files are loaded
-If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
+If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../missing/settings.md).
 For example, if your `parameters` files are using a `params` naming convention instead of `parameters` (e.g. `params.yml`) you need to update `CONFIG_LOADER_ARGS` as follows:
 
 ```python
@@ -61,7 +61,7 @@ CONFIG_LOADER_ARGS = {
 By changing this setting, the default behaviour for loading parameters will be replaced, while the other configuration patterns will remain in their default state.
 
 ### How to ensure non default configuration files get loaded
-You can add configuration patterns to match files other than `parameters`, `credentials`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
+You can add configuration patterns to match files other than `parameters`, `credentials`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../missing/settings.md).
 For example, if you want to load Spark configuration files you need to update `CONFIG_LOADER_ARGS` as follows:
 
 ```python
@@ -75,7 +75,7 @@ CONFIG_LOADER_ARGS = {
 ### How to bypass the configuration loading rules
 You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters and credentials) as well as additional configuration.
 
-For example, you can [use hooks to load external credentials](../hooks/common_use_cases.md#use-hooks-to-load-external-credentials).
+For example, you can [use hooks to load external credentials](../extend/hooks/common_use_cases.md#use-hooks-to-load-external-credentials).
 
 Alternatively, if you are using config loader as a standalone component, you can override configuration as follows:
 

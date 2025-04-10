@@ -478,7 +478,7 @@ When the node order is resolved, we can see that the node `my_func1_node` is tre
 
 ## Create a Data Catalog YAML configuration file via the CLI
 
-You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
+You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../getting-started/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
 
 This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
 

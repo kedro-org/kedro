@@ -125,13 +125,13 @@ You will now create a repo on Databricks using the following steps:
 - Navigate to the `Repos` tab in the Databricks workspace UI and click `Add Repo`.
 - Keep the `Add Repo` popup open for the following steps.
 
-![Create a new Databricks repo](../../meta/images/databricks_new_repo_popup.png)
+![Create a new Databricks repo](../../../meta/images/databricks_new_repo_popup.png)
 
 2. **Specify your GitHub repo:**
 
 - In the `Git repository URL` field, enter your GitHub repository's URL. This will automatically populate the `Git provider` and `Repository name` fields also.
 
-![Specify GitHub repo details](../../meta/images/databricks_specify_github_repo.png)
+![Specify GitHub repo details](../../../meta/images/databricks_specify_github_repo.png)
 
 3. **Authenticate Databricks with GitHub:**
 
@@ -141,7 +141,7 @@ You will now create a repo on Databricks using the following steps:
 - In the `Token` field, enter your [GitHub personal access token](#create-a-github-personal-access-token).
 - Click the `Save` button to save your new Git credential.
 
-![Authenticate Databricks with GitHub](../../meta/images/databricks_authenticate_repo.png)
+![Authenticate Databricks with GitHub](../../../meta/images/databricks_authenticate_repo.png)
 
 4. **Finish the Repo creation process:**
 
@@ -153,7 +153,7 @@ Now that your project is available in a Databricks Repo, you can run it on a clu
 
 To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 
-![Create a new notebook on Databricks](../../meta/images/databricks_notebook_creation.png)
+![Create a new notebook on Databricks](../../../meta/images/databricks_notebook_creation.png)
 
 ### Copy project data to DBFS using dbutils
 
@@ -240,15 +240,15 @@ session.run()
 
 After completing these steps, your notebook should match the following image:
 
-![Databricks completed notebook](../../meta/images/databricks_notebooks_workflow_finished_notebook.png)
+![Databricks completed notebook](../../../meta/images/databricks_notebooks_workflow_finished_notebook.png)
 
 Run the completed notebook using the `Run All` button in the top right of the UI:
 
-![Databricks notebook run all](../../meta/images/databricks_run_all.png)
+![Databricks notebook run all](../../../meta/images/databricks_run_all.png)
 
 On the first run of your Kedro project, you will be prompted to consent to analytics, type `y` or `N` in the field that appears and press `Enter`:
 
-![Databricks notebook telemetry consent](../../meta/images/databricks_telemetry_consent.png)
+![Databricks notebook telemetry consent](../../../meta/images/databricks_telemetry_consent.png)
 
 You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
 
@@ -269,7 +269,7 @@ The `databricks-iris` starter uses a default 80-20 ratio of training data to tes
 
 In the Databricks workspace, click on the `Repos` tab in the side bar and navigate to `<databricks_username>/iris-databricks/conf/base/`. Open the file `parameters.yml` by double-clicking it. This will take you to a built-in file editor. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7`, your changes will automatically be saved.
 
-![Databricks edit file](../../meta/images/databricks_edit_file.png)
+![Databricks edit file](../../../meta/images/databricks_edit_file.png)
 
 ### Re-run your project
 

@@ -40,7 +40,10 @@ theme:
 
 plugins:
   - search
-  - autorefs
+  - autorefs:
+        enabled: true
+        ignore:
+            - pages/api/
   - mermaid2
   - mkdocstrings:
       handlers:
@@ -218,6 +221,6 @@ nav:
         #   - Release notes: pages/about/release_notes.md
           - Migration guide: pages/about/migration.md
           - Kedro telemetry: pages/about/telemetry.md
-  - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
-  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
+#   - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
+#   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
 

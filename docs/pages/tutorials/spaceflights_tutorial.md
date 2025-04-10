@@ -37,7 +37,7 @@ If you encounter an issue with the tutorial:
 
 ## Terminology
 
-We explain any Kedro-specific terminology as we introduce it, and further information can be found in the [glossary](../resources/glossary.md). Some additional terminology may not be familiar to some readers, such as the concepts below.
+We explain any Kedro-specific terminology as we introduce it, and further information can be found in the [glossary](../getting-started/glossary.md). Some additional terminology may not be familiar to some readers, such as the concepts below.
 
 ### Project root directory
 

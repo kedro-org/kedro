@@ -20,7 +20,7 @@ pip install -U kedro
 This command installs the most recent version of Kedro which also includes `omegaconf` as a dependency.
 
 ### 2. Use the `OmegaConfigLoader`
-To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
+To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../missing/settings.md):
 
 ```diff
 + from kedro.config import OmegaConfigLoader  # new import
@@ -80,7 +80,7 @@ pip install -U kedro
 This command installs the most recent version of Kedro which also includes `omegaconf` as a dependency.
 
 ### 2. Use the `OmegaConfigLoader`
-To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
+To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../missing/settings.md):
 
 ```diff
 + from kedro.config import OmegaConfigLoader  # new import
@@ -185,7 +185,7 @@ folders:
     fea: "04_feature"
 ```
 
-You no longer need to set `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md) to find this `globals.yml` file, because the
+You no longer need to set `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../missing/settings.md) to find this `globals.yml` file, because the
 `OmegaConfigLoader` is configured to pick up files named `globals.yml` by default.
 
 ```diff
@@ -210,7 +210,7 @@ raw_car_data:
 ```
 
 ### 8. Deprecation of Jinja2
-`OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../data/kedro_dataset_factories.md).
+`OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../catalog-data/kedro_dataset_factories.md).
 The following example shows how you can rewrite your Jinja2 configuration to work with `OmegaConfigLoader`:
 
 ```diff

@@ -236,7 +236,7 @@ To use this provided logging configuration, remember to set the `KEDRO_LOGGING_C
 export KEDRO_LOGGING_CONFIG=conf/logging.yml
 ```
 
-To learn more about using logging in your project, or modifying the logging configuration, take a look at our [logging documentation](../logging/index.md).
+To learn more about using logging in your project, or modifying the logging configuration, take a look at our [logging documentation](../develop/logging.md).
 
 ### Documentation
 

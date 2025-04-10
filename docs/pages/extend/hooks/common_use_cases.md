@@ -137,7 +137,7 @@ We recommend using the `after_context_created` Hook to add credentials to the se
 
 Here is the example KeyVault instance, note the KeyVault and secret names:
 
-![](../meta/images/example_azure_keyvault.png)
+![](../../meta/images/example_azure_keyvault.png)
 
 These credentials will be used to access these datasets in the data catalog:
 

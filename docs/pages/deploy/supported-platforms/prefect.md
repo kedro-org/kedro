@@ -252,7 +252,7 @@ Now, having the flow registered, you can use [Prefect Server UI](https://docs-2.
 
 Navigate to http://localhost:4200/deployments to see your registered flow.
 
-![prefect_2_flow_deployment](../meta/images/prefect_2_flow_deployment.png)
+![prefect_2_flow_deployment](../../meta/images/prefect_2_flow_deployment.png)
 
 Click on the flow to open it and then trigger your flow using the "RUN" > "QUICK RUN" button and leave the parameters by default. If you want to run a specific pipeline you can replace the `__default__` value.
 
@@ -260,4 +260,4 @@ Click on the flow to open it and then trigger your flow using the "RUN" > "QUICK
 Be sure that both your Prefect Server and Agent are up and running.
 ```
 
-![prefect_2_flow_details](../meta/images/prefect_2_flow_details.png)
+![prefect_2_flow_details](../../meta/images/prefect_2_flow_details.png)

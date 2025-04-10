@@ -45,7 +45,7 @@ Note your Databricks **username** and **host** as you will need it for the remai
 
 Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
 
-![Find Databricks host and username](../../meta/images/find_databricks_host_and_username.png)
+![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 
 ```{note}
 Your Databricks host must include the protocol (`https://`).
@@ -116,7 +116,7 @@ A Kedro project's configuration and data do not get included when it is packaged
 
 Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data and configuration to a location accessible to Databricks. In this guide, we will store the data on the Databricks File System (DBFS).
 
-The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
+The `databricks-iris` starter contains a [catalog](../../../catalog-data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
 There are several ways to upload data to DBFS: you can use the [DBFS API](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/dbfs), the [`dbutils` module](https://docs.databricks.com/dev-tools/databricks-utils.html) in a Databricks notebook or the [Databricks CLI](https://docs.databricks.com/archive/dev-tools/cli/dbfs-cli.html). In this guide, it is recommended to use the Databricks CLI because of the convenience it offers.
 
@@ -163,7 +163,7 @@ To run your packaged project on Databricks, login to your Databricks account and
 
 In the Databricks workspace, navigate to the `Workflows` tab and click `Create Job` **or** click the `New` button, then `Job`:
 
-![Create Databricks job](../../meta/images/databricks_create_new_job.png)
+![Create Databricks job](../../../meta/images/databricks_create_new_job.png)
 
 ### Create a new job cluster specific to your job
 
@@ -171,7 +171,7 @@ Create a dedicated [job cluster](https://docs.databricks.com/clusters/index.html
 
 **Do not use the default `Job_cluster`, it has not been configured to run this job.**
 
-![Create Databricks job cluster](../../meta/images/databricks_create_job_cluster.png)
+![Create Databricks job cluster](../../../meta/images/databricks_create_job_cluster.png)
 
 Once you click `Add new job cluster`, the configuration page for this cluster appears.
 
@@ -184,7 +184,7 @@ Configure the job cluster with the following settings:
 
 The final configuration for the job cluster should look the same as the following:
 
-![Configure Databricks job cluster](../../meta/images/databricks_configure_job_cluster.png)
+![Configure Databricks job cluster](../../../meta/images/databricks_configure_job_cluster.png)
 
 ### Configure the job
 
@@ -204,7 +204,7 @@ Configure the job with the following settings:
 
 The final configuration for your job should look the same as the following:
 
-![Configure Databricks job](../../meta/images/databricks_configure_new_job.png)
+![Configure Databricks job](../../../meta/images/databricks_configure_new_job.png)
 
 Click `Create` and then `Confirm and create` in the following pop-up asking you to name the job.
 
@@ -212,7 +212,7 @@ Click `Create` and then `Confirm and create` in the following pop-up asking you 
 
 Click `Run now` in the top-right corner of your new job's page to start a run of the job. The status of your run can be viewed in the `Runs` tab of your job's page. Navigate to the `Runs` tab and track the progress of your run:
 
-![Databricks job status](../../meta/images/databricks_job_status.png)
+![Databricks job status](../../../meta/images/databricks_job_status.png)
 
 This page also shows an overview of all past runs of your job. As you only just started your job run, it's status will be `Pending`. A status of `Pending` indicates that the cluster is being started and your code is waiting to run.
 

@@ -10,12 +10,12 @@ A major problem when data pipelines move to production is to build and maintain 
 
 From a Kedro perspective, this means the ability to run each node and retain the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure. Another benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider, such as the use of the [feature store for Amazon SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.
 
-The following discusses how to run the Kedro pipeline from the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) on [AWS Step Functions](https://aws.amazon.com/step-functions/).
+The following discusses how to run the Kedro pipeline from the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) on [AWS Step Functions](https://aws.amazon.com/step-functions/).
 
 
 ## Strategy
 
-The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration. This approach mirrors the principles of [running Kedro in a distributed environment](distributed.md).
+The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration. This approach mirrors the principles of [running Kedro in a distributed environment](../distributed.md).
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ To use AWS Step Functions, ensure you have the following:
 - [Configured AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) on your local machine
 - Generated Kedro project called **Spaceflights Step Functions** using [Kedro Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/).
   - The final project directory's name should be `spaceflights-step-functions`.
-  - You should complete the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) to understand the project's structure.
+  - You should complete the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) to understand the project's structure.
 
 * In this tutorial, we will also be using [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to write our deployment script. To install the `cdk` command, please consult [AWS guide](https://docs.aws.amazon.com/cdk/latest/guide/cli.html). The official method of installation is using [npm](https://www.npmjs.com/):
 
@@ -42,12 +42,12 @@ The deployment process for a Kedro pipeline on AWS Step Functions consists of th
 * Develop the Kedro pipeline locally as normal
 * Create a new configuration environment in which we ensure all nodes' inputs and outputs have a persistent location on S3, since `MemoryDataset` can't be shared between AWS Lambda functions
 * Package the Kedro pipeline as an [AWS Lambda-compliant Docker image](https://docs.aws.amazon.com/lambda/latest/dg/lambda-images.html)
-* Write a script to convert and deploy each Kedro node as an AWS Lambda function. Each function will use the same pipeline Docker image created in the previous step and run a single Kedro node associated with it. This follows the principles laid out in our [distributed deployment guide](distributed.md).
+* Write a script to convert and deploy each Kedro node as an AWS Lambda function. Each function will use the same pipeline Docker image created in the previous step and run a single Kedro node associated with it. This follows the principles laid out in our [distributed deployment guide](../distributed.md).
 * The script above will also convert and deploy the entire Kedro pipeline as an AWS Step Functions State Machine.
 
 The final deployed AWS Step Functions State Machine will have the following visualisation in AWS Management Console:
 
-![](../meta/images/aws_step_functions_state_machine.png)
+![](../../meta/images/aws_step_functions_state_machine.png)
 
 The rest of the tutorial will explain each step in the deployment process above in details.
 
@@ -123,7 +123,7 @@ All the following steps should be done in the Kedro project's root directory.
 $ kedro package
 ```
 
-For more information, please visit the guide on [packaging Kedro as a Python package](../tutorial/package_a_project.md).
+For more information, please visit the guide on [packaging Kedro as a Python package](../../missing/package_a_project.md).
 
 * **Step 2.2**: Create a `lambda_handler.py` file:
 
@@ -376,11 +376,11 @@ $ cdk deploy
 
 After the deployment finishes, when you log into AWS Management Console, you should be able to see an AWS Step Functions State Machine created for your pipeline:
 
-![](../meta/images/aws_step_functions_state_machine_listing.png)
+![](../../meta/images/aws_step_functions_state_machine_listing.png)
 
 As well as the corresponding Lambda functions for each Kedro node:
 
-![](../meta/images/aws_lambda_functions.png)
+![](../../meta/images/aws_lambda_functions.png)
 
 If you go into the state machine and click on `Start Execution`, you will be able to see a full end-to-end (E2E) run of the Kedro pipeline on AWS Step Functions.
 

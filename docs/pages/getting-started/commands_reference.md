@@ -308,7 +308,7 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --namespace=<namespace>`                                 | Run only nodes with the specified namespace                                                                                                                                                                                                             |
 | `kedro run --config=<config_file_name>.yml`                         | Specify all command line options in a named YAML configuration file                                                                                                                                                                                     |
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
-| `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
+| `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configure/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
 | `kedro run --params=<param_key1>=<value1>,<param_key2>=<value2>`    | Does a parametrised run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
 
 You can also combine these options together, so the following command runs all the nodes from `split` to `predict` and `report`:
@@ -319,7 +319,7 @@ kedro run --from-nodes=split --to-nodes=predict,report
 
 This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../nodes_and_pipelines/run_a_pipeline.md#configure-kedro-run-arguments).
 
-A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../configuration/parameters.md).
+A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../configure/parameters.md).
 
 ### Deploy the project
 
@@ -377,7 +377,7 @@ _This command is deprecated and will be removed from Kedro in version 0.20.0._
 kedro micropkg package <package_module_path>
 ```
 
-Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
+Further information is available in the [micro-packaging documentation](../missing/micro_packaging.md).
 
 ##### Pull a micro-package in your project
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
@@ -390,7 +390,7 @@ _This command is deprecated and will be removed from Kedro in version 0.20.0._
 kedro micropkg pull <package_name> (or path to a sdist file)
 ```
 
-Further information is available in [the micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
+Further information is available in [the micro-packaging documentation](../missing/micro_packaging.md).
 
 ##### Delete a modular pipeline
 The following command deletes all the files related to a modular pipeline in your Kedro project.
@@ -399,7 +399,7 @@ The following command deletes all the files related to a modular pipeline in you
 kedro pipeline delete <pipeline_name>
 ```
 
-Further information is available in [the micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
+Further information is available in [the micro-packaging documentation](../missing/micro_packaging.md).
 
 #### Registered pipelines
 
@@ -445,7 +445,7 @@ This command resolves dataset factories in the catalog file with any explicit en
 kedro catalog rank
 ```
 
-The output includes a list of any [dataset factories](../data/kedro_dataset_factories.md) in the catalog, ranked by the priority on which they are matched against.
+The output includes a list of any [dataset factories](../catalog-data/kedro_dataset_factories.md) in the catalog, ranked by the priority on which they are matched against.
 
 #### Data Catalog
 
@@ -483,7 +483,7 @@ kedro ipython
 
 The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
-* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run

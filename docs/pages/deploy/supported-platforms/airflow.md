@@ -4,7 +4,7 @@ Apache Airflow is a popular open-source workflow management platform. It is a su
 
 ## Introduction and strategy
 
-The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted to an [Airflow DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html). This approach mirrors the principles of [running Kedro in a distributed environment](distributed.md).
+The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted to an [Airflow DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html). This approach mirrors the principles of [running Kedro in a distributed environment](../distributed.md).
 
 Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/data/index.html) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
 
@@ -130,7 +130,7 @@ astro dev start
 
 6. Visit the Airflow Webserver UI at its default address, http://localhost:8080, using the default login credentials: username and password both set to `admin`. There, you'll find a list of all DAGs. Navigate to the `new-kedro-project` DAG, and then press the `Trigger DAG` play button to initiate it. You can then observe the steps of your project as they run successfully:
 
-![](../meta/images/kedro_airflow_dag_run.png)
+![](../../meta/images/kedro_airflow_dag_run.png)
 
 7. The Kedro project was run inside an Airflow Docker container, and the results are stored there as well. To copy these results to your host, first identify the relevant Docker containers by listing them:
 ```shell
@@ -153,7 +153,7 @@ astro dev stop
 You can easily deploy and run your project on Astro Cloud, the cloud infrastructure provided by Astronomer, by following these steps:
 
 1. Log in to your account on the [Astronomer portal](https://www.astronomer.io/) and create a new deployment if you don't already have one:
-![](../meta/images/astronomer_new_deployment.png)
+![](../../meta/images/astronomer_new_deployment.png)
 
 2. Use the Astro CLI to log in to your Astro Cloud account:
 ```shell
@@ -161,7 +161,7 @@ astro auth
 ```
 You will be redirected to enter your login credentials in your browser. Successful login indicates that your terminal is now linked with your Astro Cloud account:
 
-![](../meta/images/astronomer_connected.png)
+![](../../meta/images/astronomer_connected.png)
 
 3. To deploy your local project to the cloud, navigate to the `kedro-airflow-spaceflights` folder and run:
 ```shell
@@ -170,7 +170,7 @@ astro deploy
 
 4. At the end of the deployment process, a link will be provided. Use this link to manage and monitor your project in the cloud:
 
-![](../meta/images/astronomer_cloud_deployment.png)
+![](../../meta/images/astronomer_cloud_deployment.png)
 
 ## How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)
 
@@ -287,7 +287,7 @@ If you want to execute your DAG in an isolated environment on Airflow using a Ku
 
 By default, this approach runs each node in an isolated Docker container. However, to reduce computational overhead, you can choose to run multiple nodes together within the same container. If you opt for this, you must modify the DAG accordingly to adjust task dependencies and execution order.
 
-For example, in the [`spaceflights-pandas` tutorial](../tutorial/spaceflights_tutorial.md), if you want to execute the first two nodes together, your DAG may look like this:
+For example, in the [`spaceflights-pandas` tutorial](../../tutorials/spaceflights_tutorial.md), if you want to execute the first two nodes together, your DAG may look like this:
 
 ```python
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator

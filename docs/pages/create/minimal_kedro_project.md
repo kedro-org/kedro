@@ -31,7 +31,7 @@ If you want to see some examples of these files, you can either create a project
 #### `pyproject.toml`
 The `pyproject.toml` file is a crucial component of a Kedro project that serve as the standard way to store build metadata and tool settings for Python projects. It is essential for defining the project's configuration and ensuring proper integration with various tools and libraries.
 
-Particularly, Kedro requires `[tool.kedro]` section in `pyproject.toml`, this describes the [project metadata](../kedro_project_setup/settings.md) in the project.
+Particularly, Kedro requires `[tool.kedro]` section in `pyproject.toml`, this describes the [project metadata](../missing/settings.md) in the project.
 
 Typically, it looks similar to this:
 ```toml
@@ -162,7 +162,7 @@ CONF_SOURCE = "."
 CONFIG_LOADER_ARGS = {"base_env": ".", "default_run_env": "."}
 ```
 
-These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected `conf` folder. For more details, refer to [How to change the setting for a configuration source folder](../configuration/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project](../configuration/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
+These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected `conf` folder. For more details, refer to [How to change the setting for a configuration source folder](../configure/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project](../configure/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
 
 Now, run the pipeline again:
 ```bash

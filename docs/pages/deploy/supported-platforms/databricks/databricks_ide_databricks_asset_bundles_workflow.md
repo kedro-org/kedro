@@ -43,7 +43,7 @@ Note your Databricks **username** and **host** as you will need it for the remai
 
 Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
 
-![Find Databricks host and username](../../meta/images/find_databricks_host_and_username.png)
+![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 
 ```{note}
 Your databricks host must include the protocol (`https://`).
@@ -123,10 +123,10 @@ While it is generally [**not recommended** to utilise **all-purpose compute** fo
 To begin, you need to determine the `cluster_id`. Navigate to the `Compute` tab and select the `View JSON` option.
 
 
-![Find cluster ID through UI](../../meta/images/databricks_cluster_id1.png)
+![Find cluster ID through UI](../../../meta/images/databricks_cluster_id1.png)
 
 You will see the cluster configuration in JSON format, copy the `cluster_id`
-![cluster_id in the JSON view](../../meta/images/databricks_cluster_id2.png)
+![cluster_id in the JSON view](../../../meta/images/databricks_cluster_id2.png)
 
 Next, update `conf/databricks.yml`
 ```diff
@@ -183,4 +183,4 @@ Copy that URL into your browser or go to the `Jobs Run` UI to see the run status
 
 ### Run Databricks Job with Databricks UI
 Alternatively, you can go to the `Workflow` tab and select the desired job to run directly:
-![Run deployed Databricks Job with Databricks UI](../../meta/images/databricks-job-run.png)
+![Run deployed Databricks Job with Databricks UI](../../../meta/images/databricks-job-run.png)

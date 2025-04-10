@@ -1,10 +1,15 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Unified `pipeline()` and `Pipeline` into a single module (`kedro.pipeline`), aligning with the `node()`/`Node` design pattern and improving namespace handling.
+
 ## Bug fixes and other changes
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
-## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 1.0.0
+* The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
+
 ## Documentation changes
 
 # Release 0.19.12

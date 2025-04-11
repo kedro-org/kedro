@@ -103,7 +103,7 @@ def namespace_deprecation_warning(
     ctx: click.Context | None = None,
     param: click.Parameter | None = None,
     value: Any = None,
-) -> Any:
+) -> Any:  # pragma: no cover
     message = (
         "DeprecationWarning: 'kedro run' flag '--namespace' is deprecated "
         "and will be replaced with '--namespaces' from Kedro 1.0.0 to allow running multiple namespaces. "

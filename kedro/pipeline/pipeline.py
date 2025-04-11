@@ -444,28 +444,40 @@ class Pipeline:
         nodes = [self._nodes_by_name[name] for name in node_names]
         return Pipeline(nodes)
 
-    def only_nodes_with_namespace(self, node_namespace: str) -> Pipeline:
+    def only_nodes_with_namespaces(self, node_namespaces: list[str]) -> Pipeline:
         """Creates a new ``Pipeline`` containing only nodes with the specified
-        namespace.
+        namespaces.
 
         Args:
-            node_namespace: One node namespace.
+            node_namespaces: A list of node namespaces.
 
         Raises:
-            ValueError: When pipeline contains no nodes with the specified namespace.
+            ValueError: When pipeline contains no nodes with the specified namespaces.
 
         Returns:
-            A new ``Pipeline`` containing nodes with the specified namespace.
+            A new ``Pipeline`` containing nodes with the specified namespaces.
         """
-        nodes = [
-            n
-            for n in self._nodes
-            if n.namespace and n.namespace.startswith(node_namespace)
-        ]
-        if not nodes:
+        nodes = []
+        unmatched_namespaces = []  # Track namespaces that don't match any nodes
+
+        for node_namespace in node_namespaces:
+            matching_nodes = []
+            for n in self._nodes:
+                if n.namespace and (
+                    n.namespace == node_namespace
+                    or n.namespace.startswith(f"{node_namespace}.")
+                ):
+                    matching_nodes.append(n)
+
+            if not matching_nodes:
+                unmatched_namespaces.append(node_namespace)
+            nodes.extend(matching_nodes)
+
+        if unmatched_namespaces:
             raise ValueError(
-                f"Pipeline does not contain nodes with namespace '{node_namespace}'"
+                f"Pipeline does not contain nodes with the following namespaces: {unmatched_namespaces}"
             )
+
         return Pipeline(nodes)
 
     def _get_nodes_with_inputs_transcode_compatible(
@@ -729,7 +741,7 @@ class Pipeline:
         node_names: Iterable[str] | None = None,
         from_inputs: Iterable[str] | None = None,
         to_outputs: Iterable[str] | None = None,
-        node_namespace: str | None = None,
+        node_namespaces: Iterable[str] | None = None,
     ) -> Pipeline:
         """Creates a new ``Pipeline`` object with the nodes that meet all of the
         specified filtering conditions.
@@ -750,7 +762,7 @@ class Pipeline:
                 of the new ``Pipeline``
             to_outputs: A list of outputs which should be the final outputs of
                 the new ``Pipeline``.
-            node_namespace: One node namespace which should be used to select
+            node_namespaces: A list of node namespaces which should be used to select
                 nodes in the new ``Pipeline``.
 
         Returns:
@@ -773,9 +785,6 @@ class Pipeline:
             >>> pipeline.filter(node_names=["node1", "node3"], from_inputs=["A"])
             >>> # Gives a new pipeline object containing node1 and node3.
         """
-        # Use [node_namespace] so only_nodes_with_namespace can follow the same
-        # *filter_args pattern as the other filtering methods, which all take iterables.
-        node_namespace_iterable = [node_namespace] if node_namespace else None
 
         filter_methods = {
             self.only_nodes_with_tags: tags,
@@ -784,7 +793,9 @@ class Pipeline:
             self.only_nodes: node_names,
             self.from_inputs: from_inputs,
             self.to_outputs: to_outputs,
-            self.only_nodes_with_namespace: node_namespace_iterable,
+            self.only_nodes_with_namespaces: [node_namespaces]
+            if node_namespaces
+            else None,
         }
 
         subset_pipelines = {
@@ -925,6 +936,12 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
             f"Please specify a transcoding option or "
             f"rename the datasets."
         )
+
+
+def _match_namespaces(node_namespace: str, filter_namespace: str) -> bool:
+    return node_namespace.split(".")[
+        : len(filter_namespace.split("."))
+    ] == filter_namespace.split(".")
 
 
 class CircularDependencyError(Exception):

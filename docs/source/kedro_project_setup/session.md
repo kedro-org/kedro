@@ -35,7 +35,7 @@ You can provide the following optional arguments in `KedroSession.create()`:
 - `project_path`: Path to the project root directory
 - `save_on_close`: A boolean value to indicate whether or not to save the session to disk when it's closed
 - `env`: Environment for the `KedroContext`
-- `extra_params`: Optional dictionary containing extra project parameters
+- `runtime_params`: Optional dictionary containing runtime project parameters
 for the underlying **`KedroContext`**; if specified, this will update (and therefore take precedence over) parameters retrieved from the project configuration
 
 ## `bootstrap_project` and `configure_project`

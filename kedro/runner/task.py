@@ -5,8 +5,8 @@ import inspect
 import itertools as it
 import logging
 import multiprocessing
-from collections.abc import Iterable, Iterator
-from typing import TYPE_CHECKING, Any
+from collections.abc import Coroutine, Iterable, Iterator
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from more_itertools import interleave
 
@@ -24,6 +24,8 @@ if TYPE_CHECKING:
     from kedro.pipeline.node import Node
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar("T")
 
 
 class TaskError(Exception):
@@ -52,6 +54,28 @@ class Task:
         self.session_id = session_id
         self.parallel = parallel
 
+    @staticmethod
+    def _run_asyncio_in_thread(coro: Coroutine[None, None, T]) -> T:
+        import threading
+
+        result: dict[str, T] = {}
+        exception: dict[str, Exception] = {}
+
+        def runner() -> None:
+            try:
+                result["value"] = asyncio.run(coro)
+            except Exception as e:
+                exception["error"] = e
+
+        thread = threading.Thread(target=runner)
+        thread.start()
+        thread.join()
+
+        if "error" in exception:
+            raise exception["error"]
+
+        return result["value"]
+
     def execute(self) -> Node:
         if self.is_async and inspect.isgeneratorfunction(self.node.func):
             raise ValueError(
@@ -75,21 +99,54 @@ class Task:
             )
             self.hook_manager = hook_manager
         if self.is_async:
-            import asyncio
+            try:
+                import asyncio
 
-            if asyncio.get_event_loop().is_running():
-                import nest_asyncio
+                if asyncio.get_event_loop().is_running():
+                    # [TODO] Solution 1
+                    # import nest_asyncio
 
-                nest_asyncio.apply()
+                    # # nest_asyncio.apply() modifies the asyncio event loop
+                    # # to be reentrant, allowing loop.run_until_complete()
+                    # # to be called within an already running loop.
+                    # The repo is archived too - https://github.com/erdewit/nest_asyncio
+                    # nest_asyncio.apply()
 
-            node = asyncio.run(
-                self._run_node_async(
+                    # [TODO] Solution 2
+                    # This might be falling back to our previous implementation
+                    # of using threads but it is only for the use case where
+                    # we already have an event loop running like notebook instance
+                    node = self._run_asyncio_in_thread(
+                        self._run_node_async(
+                            self.node,
+                            self.catalog,
+                            self.hook_manager,  # type: ignore[arg-type]
+                            self.session_id,
+                        )
+                    )
+                else:
+                    node = asyncio.run(
+                        self._run_node_async(
+                            self.node,
+                            self.catalog,
+                            self.hook_manager,  # type: ignore[arg-type]
+                            self.session_id,
+                        )
+                    )
+            except TaskError as exc:
+                logger.error(
+                    "Task failed while executing node %s in async mode: %s",
                     self.node,
-                    self.catalog,
-                    self.hook_manager,  # type: ignore[arg-type]
-                    self.session_id,
+                    exc,
                 )
-            )
+                raise exc
+            except Exception as exc:
+                logger.error(
+                    "An exception occurred while executing node %s in async mode: %s",
+                    self.node,
+                    exc,
+                )
+                raise exc
         else:
             node = self._run_node_sequential(
                 self.node,

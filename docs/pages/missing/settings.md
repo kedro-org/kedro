@@ -40,7 +40,6 @@ The `package_name` should be a [valid Python package name](https://peps.python.o
 `kedro_init_version` specifies the version of Kedro the project was created with. When you upgrade to a newer Kedro version,
 this value should also be updated.
 
-You can also use `pyproject.toml` to specify settings for functionalities such as [micro-packaging](../missing/micro_packaging.md).
 You can also store the settings for the other tools you've used in your project, such as [`pytest` for automated testing](../develop/automated_testing.md).
 Consult the respective documentation for the tools you have used to check how you can configure the settings with the `pyproject.toml` file for your project.
 

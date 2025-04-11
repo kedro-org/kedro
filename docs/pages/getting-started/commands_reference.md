@@ -366,19 +366,6 @@ The above command will take the bundled `.tar.gz` file and do the following:
 kedro pipeline create <pipeline_name>
 ```
 
-##### Package a micro-package
-The following command packages all the files related to a micro-package, e.g. a modular pipeline, into a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions):
-
-```{warning}
-_This command is deprecated and will be removed from Kedro in version 0.20.0._
-```
-
-```bash
-kedro micropkg package <package_module_path>
-```
-
-Further information is available in the [micro-packaging documentation](../missing/micro_packaging.md).
-
 ##### Pull a micro-package in your project
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
 
@@ -390,16 +377,12 @@ _This command is deprecated and will be removed from Kedro in version 0.20.0._
 kedro micropkg pull <package_name> (or path to a sdist file)
 ```
 
-Further information is available in [the micro-packaging documentation](../missing/micro_packaging.md).
-
 ##### Delete a modular pipeline
 The following command deletes all the files related to a modular pipeline in your Kedro project.
 
 ```bash
 kedro pipeline delete <pipeline_name>
 ```
-
-Further information is available in [the micro-packaging documentation](../missing/micro_packaging.md).
 
 #### Registered pipelines
 

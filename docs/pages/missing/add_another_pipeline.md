@@ -249,7 +249,6 @@ There are a range of options to run sections of the default pipeline as describe
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../build/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs/outputs/parameters.
 
-Modular pipelines are easier to develop, test and maintain. They are reusable within the same codebase but also portable across projects via [micro-packaging](../missing/micro_packaging.md) as a scalable way to use Kedro pipelines.
 
 ### Optional: Extend the project with namespacing and a modular pipeline
 This is optional code so is **not** provided in the spaceflights starter. If you want to see this in action, you need to copy and paste the code as instructed.

@@ -31,7 +31,7 @@ def __getattr__(name: str) -> Any:
 
         warnings.warn(
             f"{name!r} has been moved to 'kedro.pipeline.transcoding', "
-            f"and the alias will be removed in Kedro 1.0.0",
+            f"and the alias will be removed in Kedro 1.0.0.",
             kedro.KedroDeprecationWarning,
             stacklevel=2,
         )

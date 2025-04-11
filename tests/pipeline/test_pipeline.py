@@ -1199,7 +1199,7 @@ class TestPipelineFilterHelpers:
         test_pipeline = pipeline([node(identity, "A", "B", namespace=namespace)])
         expected_error_message = "Pipeline does not contain nodes with the following namespaces: \\['non_existent'\\]"
         with pytest.raises(ValueError, match=expected_error_message):
-            test_pipeline.only_nodes_with_namespaces("non_existent")
+            test_pipeline.only_nodes_with_namespaces(["non_existent"])
 
 
 class TestPipelineRunnerHelpers:

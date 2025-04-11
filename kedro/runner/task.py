@@ -124,6 +124,16 @@ class Task:
                             self.session_id,
                         )
                     )
+
+                    # [TODO] Solution 3 (RuntimeError: This event loop is already running)
+                    # loop = asyncio.get_running_loop() or asyncio.get_event_loop()
+                    # if loop:
+                    #     node = loop.run_until_complete(self._run_node_async(
+                    #         self.node,
+                    #         self.catalog,
+                    #         self.hook_manager,  # type: ignore[arg-type]
+                    #         self.session_id,
+                    #     ))
                 else:
                     node = asyncio.run(
                         self._run_node_async(

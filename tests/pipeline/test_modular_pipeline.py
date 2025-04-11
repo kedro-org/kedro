@@ -3,7 +3,6 @@ import pytest
 from kedro.pipeline import node, pipeline
 from kedro.pipeline.pipeline import ModularPipelineError, Pipeline
 
-# from kedro.Pipeline.Pipeline import Pipeline as Pipeline
 # Different dummy func based on the number of arguments
 
 

@@ -383,7 +383,7 @@ Further information is available in the [micro-packaging documentation](../nodes
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
 
 ```{warning}
-_This command is deprecated and will be removed from Kedro in version 01.0.0._
+_This command is deprecated and will be removed from Kedro in version 1.0.0._
 ```
 
 ```bash

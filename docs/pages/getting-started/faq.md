@@ -50,7 +50,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How to use global variables with the `OmegaConfigLoader`](../configure/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader)?
 * [How do I use resolvers in the `OmegaConfigLoader`](../configure/advanced_configuration.md#how-to-use-resolvers-in-the-omegaconfigloader)?
 * [How do I load credentials through environment variables](../configure/advanced_configuration.md#how-to-load-credentials-through-environment-variables)?
-* [How do I use Kedro with different project structure?](../missing/settings.md#use-kedro-without-the-src-folder)
+* [How do I use Kedro with different project structure?](../tutorials/settings.md#use-kedro-without-the-src-folder)
 
 
 ## Nodes and pipelines

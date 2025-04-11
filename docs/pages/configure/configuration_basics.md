@@ -116,7 +116,7 @@ This section contains a set of guidance for the most common configuration requir
 * [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
 
 ### How to change the setting for a configuration source folder
-To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../missing/settings.md) as follows:
+To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md) as follows:
 
 ```python
 CONF_SOURCE = "new_conf"

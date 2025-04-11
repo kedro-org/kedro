@@ -11,7 +11,7 @@ From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to 
 ```
 
 ## The basics of `catalog.yml`
-A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../missing/set_up_data.md).
+A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorials/set_up_data.md).
 
 The example below registers two `csv` datasets, and an `xlsx` dataset. The minimum details needed to load and save a file within a local file system are the key, which is name of the dataset, the type of data to indicate the dataset to use (`type`) and the file's location (`filepath`).
 

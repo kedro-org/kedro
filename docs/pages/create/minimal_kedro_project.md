@@ -31,7 +31,7 @@ If you want to see some examples of these files, you can either create a project
 #### `pyproject.toml`
 The `pyproject.toml` file is a crucial component of a Kedro project that serve as the standard way to store build metadata and tool settings for Python projects. It is essential for defining the project's configuration and ensuring proper integration with various tools and libraries.
 
-Particularly, Kedro requires `[tool.kedro]` section in `pyproject.toml`, this describes the [project metadata](../missing/settings.md) in the project.
+Particularly, Kedro requires `[tool.kedro]` section in `pyproject.toml`, this describes the [project metadata](../tutorials/settings.md) in the project.
 
 Typically, it looks similar to this:
 ```toml

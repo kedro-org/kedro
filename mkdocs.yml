@@ -82,7 +82,15 @@ nav:
           - Introduction to Kedro video course: pages/getting-started/course.md
           - FAQs: pages/getting-started/faq.md
       - TUTORIALS:
-          - Kedro Spaceflights tutorial: pages/tutorials/spaceflights_tutorial.md
+          - Kedro Spaceflights tutorial: 
+            - Spaceflight tutorial: pages/tutorials/spaceflights_tutorial.md
+            - Spaceflight tutorial template: pages/tutorials/tutorial_template.md
+            - Set up data: pages/tutorials/set_up_data.md
+            - Create a pipeline: pages/tutorials/create_a_pipeline.md
+            - Add another pipeline: pages/tutorials/add_another_pipeline.md
+            - Settings: pages/tutorials/settings.md
+            - Test a project: pages/tutorials/test_a_project.md
+            - FAQs: pages/tutorials/spaceflights_tutorial_faqs.md
           - Kedro for Notebook tutorial: pages/tutorials/notebooks_tutorial.md
       - CREATE:
           - Create a Kedro project: pages/create/new_project.md

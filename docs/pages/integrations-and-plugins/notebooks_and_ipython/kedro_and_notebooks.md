@@ -292,7 +292,7 @@ You can load the contents of a node in your project into a series of cells using
 - The node needs to have a name
 - The node's inputs need to be persisted
 
-The [section about creating nodes with names](../../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../../missing/create_a_pipeline.md#preprocessed-data-registration).
+The [section about creating nodes with names](../../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../../tutorials/create_a_pipeline.md#preprocessed-data-registration).
 
 ``` {note}
 The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
@@ -415,7 +415,7 @@ You can also connect an IPython shell to a Kedro project kernel as follows:
 kedro ipython
 ```
 
-The command launches an IPython shell with the extension already loaded and is the same command as  `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../../missing/set_up_data.md#test-that-kedro-can-load-the-data).
+The command launches an IPython shell with the extension already loaded and is the same command as  `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../../tutorials/set_up_data.md#test-that-kedro-can-load-the-data).
 
 
 Similarly, the following creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected:

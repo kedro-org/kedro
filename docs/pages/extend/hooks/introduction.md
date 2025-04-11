@@ -49,7 +49,7 @@ This is what the [`kedro-telemetry` plugin](https://github.com/kedro-org/kedro-p
 To add Hooks to your Kedro project, you must:
 
 * Create or modify the file `src/<package_name>/hooks.py` to define a Hook implementation for the particular Hook specification that describes the point at which you want to inject additional behaviour
-* Register that Hook implementation in the [`src/<package_name>/settings.py`](../../missing/settings.md) file under the `HOOKS` key
+* Register that Hook implementation in the [`src/<package_name>/settings.py`](../../tutorials/settings.md) file under the `HOOKS` key
 
 ### Define the Hook implementation
 The Hook implementation should have the same name as the specification. The Hook must provide a concrete implementation with a subset of the corresponding specification's parameters (you do not need to use them all).
@@ -99,7 +99,7 @@ We recommend that you group related Hook implementations under a namespace, pref
 
 ### Registering the Hook implementation with Kedro
 
-Hook implementations should be registered with Kedro using the [`src/<package_name>/settings.py`](../../missing/settings.md) file under the `HOOKS` key.
+Hook implementations should be registered with Kedro using the [`src/<package_name>/settings.py`](../../tutorials/settings.md) file under the `HOOKS` key.
 
 You can register more than one implementation for the same specification. They will be called in LIFO (last-in, first-out) order.
 

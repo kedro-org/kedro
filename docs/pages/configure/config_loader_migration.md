@@ -20,7 +20,7 @@ pip install -U kedro
 This command installs the most recent version of Kedro which also includes `omegaconf` as a dependency.
 
 ### 2. Use the `OmegaConfigLoader`
-To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../missing/settings.md):
+To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../tutorials/settings.md):
 
 ```diff
 + from kedro.config import OmegaConfigLoader  # new import
@@ -80,7 +80,7 @@ pip install -U kedro
 This command installs the most recent version of Kedro which also includes `omegaconf` as a dependency.
 
 ### 2. Use the `OmegaConfigLoader`
-To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../missing/settings.md):
+To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../tutorials/settings.md):
 
 ```diff
 + from kedro.config import OmegaConfigLoader  # new import
@@ -185,7 +185,7 @@ folders:
     fea: "04_feature"
 ```
 
-You no longer need to set `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../missing/settings.md) to find this `globals.yml` file, because the
+You no longer need to set `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md) to find this `globals.yml` file, because the
 `OmegaConfigLoader` is configured to pick up files named `globals.yml` by default.
 
 ```diff

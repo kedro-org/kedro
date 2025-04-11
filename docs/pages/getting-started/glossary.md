@@ -87,7 +87,7 @@ Runners are different execution mechanisms to run pipelines with the specified d
 ## Starters
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused. A Kedro starter is a [Cookiecutter template](https://cookiecutter.readthedocs.io/) that contains the boilerplate code for a Kedro project.
 
-[Further information about Kedro starters](../missing/settings.md)
+[Further information about Kedro starters](../tutorials/settings.md)
 
 ## Tags
 You can apply tags to nodes or pipelines as a means of filtering which are executed.

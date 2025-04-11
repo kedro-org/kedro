@@ -22,7 +22,7 @@ DATA_CATALOG_CLASS = KedroDataCatalog
 
 Once this change is made, you can run your Kedro project as usual.
 
-For more information on `settings.py`, refer to the [Project settings documentation](../missing/settings.md).
+For more information on `settings.py`, refer to the [Project settings documentation](../tutorials/settings.md).
 
 ## How to access datasets in the catalog
 

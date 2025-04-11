@@ -101,15 +101,19 @@ nav:
       - CONFIGURE:
           - Project configuration and settings:
               - Migration guide for config loaders: pages/configure/config_loader_migration.md
+              - Configuration basics: pages/configure/configuration_basics.md
               - Advanced configuration: pages/configure/advanced_configuration.md
           - Parameters: pages/configure/parameters.md
           - Credentials: pages/configure/credentials.md
       - CATALOG DATA:
           - Introduction: pages/catalog-data/introduction.md
+          - Data catalog: pages/catalog-data/data_catalog.md
+          - Kedro data catalog: pages/catalog-data/kedro_data_catalog.md
           - Data Catalog YAML examples: pages/catalog-data/data_catalog_yaml_examples.md
           - Dataset factories: pages/catalog-data/kedro_dataset_factories.md
           - Data and pipeline versioning: pages/catalog-data/kedro_dvc_versioning.md
           - Partitioned and incremental datasets: pages/catalog-data/partitioned_and_incremental_datasets.md
+          - Advanced data catalog usagepages: pages/catalog-data/advanced_data_catalog_usage.md
       - BUILD:
           - Nodes: pages/build/nodes.md
           - Pipeline object: pages/build/pipeline_introduction.md
@@ -125,6 +129,7 @@ nav:
           - Code formatting and linting: pages/develop/linting.md
           - Debugging: pages/develop/debugging.md
       - DEPLOY:
+          - Overview: pages/deploy/index.md
           - How to package your project: pages/deploy/package_a_project.md
           - How to group your nodes effectively: pages/deploy/nodes_grouping.md
           - Single-machine deployment: pages/deploy/single_machine.md
@@ -137,10 +142,12 @@ nav:
               - Azure ML pipelines: pages/deploy/supported-platforms/azure.md
               - Dask: pages/deploy/supported-platforms/dask.md
               - Databricks:
+                - Overview: pages/deploy/supported-platforms/databricks/index.md
                 - Use a Databricks workspace to develop a Kedro project: pages/deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md
                 - Use an IDE and Databricks asset Bundles to deploy a Kedro project: pages/deploy/supported-platforms/databricks/databricks_ide_databricks_asset_bundles_workflow.md
                 - Use a Databricks job to deploy a Kedro project: pages/deploy/supported-platforms/databricks/databricks_deployment_workflow.md
                 - Use an IDE, dbx and Databricks Repos to develop a Kedro project: pages/deploy/supported-platforms/databricks/databricks_dbx_workflow.md
+                - Databricks visualisation: pages/deploy/supported-platforms/databricks/databricks_visualisation.md
               - Kubeflow Pipelines: pages/deploy/supported-platforms/kubeflow.md
               - Prefect: pages/deploy/supported-platforms/prefect.md
               - VertexAI: pages/deploy/supported-platforms/vertexai.md
@@ -214,6 +221,7 @@ nav:
           - IPython and Jupyter:
               - Introduction: pages/integrations-and-plugins/notebooks_and_ipython/index.md
               - Kedro and Jupter Notebook: pages/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md
+              - How to add Kedro to Jupyter Notebook: pages/integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md
           - PySpark: pages/integrations-and-plugins/pyspark_integration.md
           - MLflow: pages/integrations-and-plugins/mlflow.md
         #   - DVC: pages/integrations-and-plugins/dvc.md

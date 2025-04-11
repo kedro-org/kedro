@@ -31,4 +31,4 @@ kedro.pipeline
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.pipeline.pipeline.ModularPipelineError
+   kedro.pipeline.pipeline.PipelineError

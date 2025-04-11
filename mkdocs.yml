@@ -72,9 +72,8 @@ nav:
   - Home: index.md
   - Kedro:
       - GETTING STARTED:
-          - Overview:
-              - Kedro architecture: pages/getting-started/architecture_overview.md
-              - Kedro's CLI: pages/getting-started/commands_reference.md
+          - Kedro architecture: pages/getting-started/architecture_overview.md
+          # - Kedro's CLI: pages/getting-started/commands_reference.md
             #   - Quickstart: pages/getting-started/quickstart.md
           - Installation: pages/getting-started/install.md
           - Concepts: pages/getting-started/kedro_concepts.md
@@ -216,7 +215,7 @@ nav:
               - kedro.load_ipython_extension: pages/api/kedro.load_ipython_extension.md
               - kedro.KedroDeprecationWarning: pages/api/kedro.KedroDeprecationWarning.md
               - kedro.KedroPythonVersionWarning: pages/api/kedro.KedroPythonVersionWarning.md
-    #       - Kedro CLI:
+          - Kedro CLI: pages/getting-started/commands_reference.md
       - INTEGRATION & PLUGINS:
           - IPython and Jupyter:
               - Introduction: pages/integrations-and-plugins/notebooks_and_ipython/index.md

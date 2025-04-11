@@ -159,11 +159,11 @@ To exit the visualisation, close the browser tab. To regain control of the termi
 ## Where next?
 You have completed the section on Kedro project creation for new users. Here are some useful resources to learn more:
 
-* Understand more about Kedro: The following page explains the [fundamental Kedro concepts](../missing/kedro_concepts.md).
+* Understand more about Kedro: The following page explains the [fundamental Kedro concepts](../getting-started/kedro_concepts.md).
 
 * Learn hands-on: If you prefer to learn hands-on, move on to the [spaceflights tutorial](../tutorials/spaceflights_tutorial.md). The tutorial illustrates how to set up a working project, add dependencies, create nodes, register pipelines, set up the Data Catalog, add documentation, and package the project.
 
-* How-to guide for notebook users: The documentation section following the tutorial explains [how to combine Kedro with a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md).
+* How-to guide for notebook users: The documentation section following the tutorial explains [how to combine Kedro with a Jupyter notebook](../integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md).
 
 If you've worked through the documentation listed and are unsure where to go next, review the [Kedro repositories on GitHub](https://github.com/kedro-org) and [Kedro's Slack channels](https://slack.kedro.org).
 

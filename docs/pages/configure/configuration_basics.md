@@ -39,7 +39,7 @@ When your configuration files are complex and contain credentials or templating,
 In summary, while both `OmegaConf` and Kedro's `OmegaConfigLoader` provide ways to manage configurations, your choice depends on the complexity of your configuration and whether you are working within the context of the Kedro framework.
 
 ## Configuration source
-The configuration source folder is [`conf`](../missing/kedro_concepts.md#conf) by default. We recommend that you keep all configuration files in the default `conf` folder of a Kedro project.
+The configuration source folder is [`conf`](../getting-started/kedro_concepts.md#conf) by default. We recommend that you keep all configuration files in the default `conf` folder of a Kedro project.
 
 ## Configuration environments
 A configuration environment is a way of organising your configuration settings for different stages of your data pipeline. For example, you might have different settings for development, testing, and production environments.

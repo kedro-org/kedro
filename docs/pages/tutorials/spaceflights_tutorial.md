@@ -15,7 +15,7 @@ The tutorial takes approximately **30 minutes** to complete. You will work in th
 - [Create a Pipeline](../missing/create_a_pipeline.md)
 - [Add Another Pipeline](../missing/add_another_pipeline.md)
 - [Test a Project](../missing/test_a_project.md)
-- [Package a Project](../missing/package_a_project.md)
+- [Package a Project](../deploy/package_a_project.md)
 - [Spaceflights Tutorial FAQs](spaceflights_tutorial_faqs.md)
 
 ![](../meta/images/moon-rocket.png)

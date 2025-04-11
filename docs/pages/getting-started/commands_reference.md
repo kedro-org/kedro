@@ -275,7 +275,7 @@ The following runs [`pip`](https://github.com/pypa/pip) to install all package d
 pip install -r requirements.txt
 ```
 
-For further information, see the [documentation on installing project-specific dependencies](../missing/dependencies.md#install-project-specific-dependencies).
+For further information, see the [documentation on installing project-specific dependencies](../develop/dependencies.md#install-project-specific-dependencies).
 
 
 ### Run the project
@@ -481,7 +481,7 @@ To start an IPython shell:
 kedro ipython
 ```
 
-The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
+The [Kedro IPython extension](../integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
 * `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components

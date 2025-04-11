@@ -15,7 +15,7 @@ To create a project, you can run this command:
 kedro new -n spaceflights --tools=viz --example=yes
 ```
 
-You can find more options of `kedro new` from [Create a new Kedro Project](../create/new_project.md).
+You can find more options of `kedro new` from [Create a new Kedro Project](../../create/new_project.md).
 
 ## Loading the project with `kedro jupyter notebook`
 
@@ -27,15 +27,15 @@ kedro jupyter notebook
 
 You'll be asked if you want to opt into usage analytics on the first run of your new project. Once you've answered the question with `y` or `n`, your browser window will open with a Jupyter page that lists the folders in your project:
 
-![The initial view in your browser](../meta/images/new_jupyter_browser_window.png)
+![The initial view in your browser](../../meta/images/new_jupyter_browser_window.png)
 
 You can now create a new Jupyter notebook using the **New** dropdown and selecting the **Kedro (iris)** kernel:
 
-![Create a new Jupyter notebook with Kedro (iris) kernel](../meta/images/jupyter_new_notebook.png)
+![Create a new Jupyter notebook with Kedro (iris) kernel](../../meta/images/jupyter_new_notebook.png)
 
 This opens a new browser tab to display the empty notebook:
 
-![Your new Jupyter notebook with Kedro (iris) kernel](../meta/images/new_jupyter_notebook_view.png)
+![Your new Jupyter notebook with Kedro (iris) kernel](../../meta/images/new_jupyter_notebook_view.png)
 
 We recommend that you save your notebook in the `notebooks` folder of your Kedro project.
 
@@ -43,10 +43,10 @@ We recommend that you save your notebook in the `notebooks` folder of your Kedro
 
 The `kedro jupyter notebook` command launches a notebook with a customised kernel that has been extended to make the following project variables available:
 
-* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../catalog-data//data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../../catalog-data//data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
-* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../extend/session.md) that orchestrates a pipeline run
+* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../../build/run_a_pipeline.md#run-a-pipeline-by-name)
+* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../../extend/session.md) that orchestrates a pipeline run
 
 In addtion, it also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
 
@@ -81,7 +81,7 @@ Here are some examples of how to work with the Kedro variables. To explore the f
 
 ### `catalog`
 
-`catalog` can be used to explore your project's [Data Catalog](../catalog-data/data_catalog.md) using methods such as {py:meth}`catalog.list <kedro.io.DataCatalog.list>`, {py:meth}`catalog.load <kedro.io.DataCatalog.load>` and {py:meth}`catalog.save <kedro.io.DataCatalog.save>`.
+`catalog` can be used to explore your project's [Data Catalog](../../catalog-data/data_catalog.md) using methods such as {py:meth}`catalog.list <kedro.io.DataCatalog.list>`, {py:meth}`catalog.load <kedro.io.DataCatalog.load>` and {py:meth}`catalog.save <kedro.io.DataCatalog.save>`.
 
 For example, add the following to a cell in your notebook to run `catalog.list`:
 
@@ -193,7 +193,7 @@ You can find out more in the API documentation of {py:class}`~kedro.framework.co
 
 ### `pipelines`
 
-`pipelines` is a dictionary containing your project's [registered pipelines](../build/run_a_pipeline.md#run-a-pipeline-by-name):
+`pipelines` is a dictionary containing your project's [registered pipelines](../../build/run_a_pipeline.md#run-a-pipeline-by-name):
 
 ```ipython
 pipelines
@@ -292,7 +292,7 @@ You can load the contents of a node in your project into a series of cells using
 - The node needs to have a name
 - The node's inputs need to be persisted
 
-The [section about creating nodes with names](../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../missing/create_a_pipeline.md#preprocessed-data-registration).
+The [section about creating nodes with names](../../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../../missing/create_a_pipeline.md#preprocessed-data-registration).
 
 ``` {note}
 The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
@@ -307,7 +307,7 @@ The line magic will load your node's inputs, imports, and body:
 <details>
 <summary>Click to see an example.</summary>
 
-![jupyter_ipython_load_node](../meta/images/jupyter_ipython_load_node.gif)
+![jupyter_ipython_load_node](../../meta/images/jupyter_ipython_load_node.gif)
 
 </details>
 
@@ -329,7 +329,7 @@ You can display an interactive visualisation of your pipeline directly in your n
 %run_viz
 ```
 
-![View your project's Kedro Viz inside a notebook](../meta/images/run_viz_in_notebook.png)
+![View your project's Kedro Viz inside a notebook](../../meta/images/run_viz_in_notebook.png)
 
 ## Debugging a Kedro project within a notebook
 
@@ -349,7 +349,7 @@ Here is example debugging workflow after discovering a node in your pipeline is 
 <details>
 <summary>Click to the pipeline failure logs.</summary>
 
-![pipeline_error_logs](../meta/images/pipeline_error_logs.png)
+![pipeline_error_logs](../../meta/images/pipeline_error_logs.png)
 
 </details>
 
@@ -360,7 +360,7 @@ Here is example debugging workflow after discovering a node in your pipeline is 
 <details>
 <summary>Click to see this workflow in action.</summary>
 
-![jupyter_ipython_debug_command](../meta/images/jupyter_ipython_debug_command.gif)
+![jupyter_ipython_debug_command](../../meta/images/jupyter_ipython_debug_command.gif)
 
 </details>
 
@@ -375,7 +375,7 @@ You can also set up the debugger to run automatically when an exception occurs b
 <details>
 <summary>Click to see an example.</summary>
 
- ![jupyter_ipython_pdb_command](../meta/images/jupyter_ipython_pdb_command.gif)
+ ![jupyter_ipython_pdb_command](../../meta/images/jupyter_ipython_pdb_command.gif)
 
 </details>
 
@@ -415,7 +415,7 @@ You can also connect an IPython shell to a Kedro project kernel as follows:
 kedro ipython
 ```
 
-The command launches an IPython shell with the extension already loaded and is the same command as  `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../missing/set_up_data.md#test-that-kedro-can-load-the-data).
+The command launches an IPython shell with the extension already loaded and is the same command as  `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../../missing/set_up_data.md#test-that-kedro-can-load-the-data).
 
 
 Similarly, the following creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected:
@@ -431,4 +431,4 @@ jupyter qtconsole --kernel=spaceflights
 ```
 
 This will automatically load the Kedro IPython in a console that supports graphical features such as embedded figures:
-![Plot of example iris data in a Qt Console](../meta/images/jupyter_qtconsole.png)
+![Plot of example iris data in a Qt Console](../../meta/images/jupyter_qtconsole.png)

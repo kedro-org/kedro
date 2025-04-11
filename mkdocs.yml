@@ -77,9 +77,8 @@ nav:
               - Kedro's CLI: pages/getting-started/commands_reference.md
             #   - Quickstart: pages/getting-started/quickstart.md
           - Installation: pages/getting-started/install.md
-          - Concepts:
-            #   - Terminology: pages/getting-started/terminology.md
-              - Glossary: pages/getting-started/glossary.md
+          - Concepts: pages/getting-started/kedro_concepts.md
+          - Glossary: pages/getting-started/glossary.md
           - Introduction to Kedro video course: pages/getting-started/course.md
           - FAQs: pages/getting-started/faq.md
       - TUTORIALS:
@@ -112,12 +111,14 @@ nav:
           - Pipeline registry: pages/build/pipeline_registry.md
           - Slice a pipeline: pages/build/slice_a_pipeline.md
       - DEVELOP:
-        #   - Dependency management: pages/develop/dependency_management.md
+          - Dependency management: pages/develop/dependencies.md
           - Logging: pages/develop/logging.md
           - Automated testing: pages/develop/automated_testing.md
           - Code formatting and linting: pages/develop/linting.md
           - Debugging: pages/develop/debugging.md
       - DEPLOY:
+          - How to package your project: pages/deploy/package_a_project.md
+          - How to group your nodes effectively: pages/deploy/nodes_grouping.md
           - Single-machine deployment: pages/deploy/single_machine.md
           - Distributed deployment: pages/deploy/distributed.md
           - Supported platforms:
@@ -202,7 +203,9 @@ nav:
               - kedro.KedroPythonVersionWarning: pages/api/kedro.KedroPythonVersionWarning.md
     #       - Kedro CLI:
       - INTEGRATION & PLUGINS:
-        #   - IPython and Jupyter: pages/integration-and-plugins/ipython_and_jupyter.md
+          - IPython and Jupyter:
+              - Introduction: pages/integrations-and-plugins/notebooks_and_ipython/index.md
+              - Kedro and Jupter Notebook: pages/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md
           - PySpark: pages/integrations-and-plugins/pyspark_integration.md
           - MLflow: pages/integrations-and-plugins/mlflow.md
         #   - DVC: pages/integrations-and-plugins/dvc.md

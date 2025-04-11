@@ -11,7 +11,7 @@ As a distributed deployment strategy, we recommend the following series of steps
 
 For better dependency management, we encourage you to containerise the entire pipeline/project. We recommend using [Docker](https://www.docker.com/), but you're free to use any preferred container solution available to you. For the purpose of this walk-through, we are going to assume a `Docker` workflow.
 
-Firstly make sure your [project requirements are up-to-date](../missing/dependencies.md) by running:
+Firstly make sure your [project requirements are up-to-date](../develop/dependencies.md) by running:
 
 ```bash
 pip-compile --output-file=<project_root>/requirements.txt --input-file=<project_root>/requirements.txt

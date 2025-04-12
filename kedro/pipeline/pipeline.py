@@ -272,7 +272,8 @@ class Pipeline:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
         self._nodes = tagged_nodes
-        self._toposorter = TopologicalSorter(self.node_dependencies)
+        node_parents = self.node_dependencies
+        self._toposorter = TopologicalSorter(node_parents)
 
         # test for circular dependencies without executing the toposort for efficiency
         try:
@@ -284,6 +285,54 @@ class Pipeline:
 
         self._toposorted_nodes: list[Node] = []
         self._toposorted_groups: list[list[Node]] = []
+        self._validate_namespaces(node_parents)
+
+    def _validate_namespaces(self, node_parents: dict[Node, set[Node]]) -> None:
+        from warnings import warn
+
+        visited: dict[str, int] = dict()
+        path: list[str] = []
+        node_children = defaultdict(set)
+        for child, parents in node_parents.items():
+            for parent in parents:
+                node_children[parent].add(child)
+
+        def dfs(n: Node, last_namespace: str) -> None:
+            curr_namespace = n.namespace or ""
+            if curr_namespace and curr_namespace in visited:
+                warn(
+                    f"Namespace '{curr_namespace}' is interrupted by nodes {path[visited[curr_namespace]:]} and thus invalid.",
+                    UserWarning,
+                )
+
+            # If the current namespace is different from the last namespace and isn't a child namespace,
+            # mark the last namespace and all unrelated parent namespaces as visited to detect potential future interruptions
+            backtracked: dict[str, int] = dict()
+            if (
+                last_namespace
+                and curr_namespace != last_namespace
+                and not curr_namespace.startswith(last_namespace + ".")
+            ):
+                parts = last_namespace.split(".")
+                prefix = ""
+                for p in parts:
+                    prefix += p
+                    if not curr_namespace.startswith(prefix):
+                        backtracked[prefix] = len(path)
+                    prefix += "."
+
+                visited.update(backtracked)
+
+            path.append(n.name)
+            for child in node_children[n]:
+                dfs(child, n.namespace or "")
+            path.pop()
+            for key in backtracked.keys():
+                visited.pop(key, None)
+
+        start = (n for n in node_parents if not node_parents[n])
+        for n in start:
+            dfs(n, "")
 
     def __repr__(self) -> str:  # pragma: no cover
         """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""

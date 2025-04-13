@@ -94,7 +94,9 @@ jupyter = [
 benchmark = [
     "asv"
 ]
-all = [ "kedro[test,docs,jupyter,benchmark]" ]
+format = ["ruff>=0.11.0"]
+lint = ["ruff>=0.11.0"]
+all = [ "kedro[test,docs,jupyter,benchmark,format,lint]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

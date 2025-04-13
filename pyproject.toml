@@ -52,6 +52,21 @@ classifiers = [
 dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
+benchmark = [
+    "asv"
+]
+docs = [
+    "ipykernel>=5.3, <7.0",
+    "Jinja2<3.2.0",
+    "kedro-sphinx-theme==2024.10.3",
+    "sphinx-notfound-page!=1.0.3",  # Required by kedro-sphinx-theme. 1.0.3 results in `AttributeError: 'tuple' object has no attribute 'default'`.
+]
+format = ["ruff>=0.11.0"]
+jupyter = [
+    "ipylab>=1.0.0",
+    "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
+]
+lint = ["ruff>=0.11.0"]
 test = [
     "behave==1.2.6",
     "coverage[toml]",
@@ -81,21 +96,6 @@ test = [
     "types-requests",
     "types-toml",
 ]
-docs = [
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.2.0",
-    "kedro-sphinx-theme==2024.10.3",
-    "sphinx-notfound-page!=1.0.3",  # Required by kedro-sphinx-theme. 1.0.3 results in `AttributeError: 'tuple' object has no attribute 'default'`.
-]
-jupyter = [
-    "ipylab>=1.0.0",
-    "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
-]
-benchmark = [
-    "asv"
-]
-format = ["ruff>=0.11.0"]
-lint = ["ruff>=0.11.0"]
 all = [ "kedro[test,docs,jupyter,benchmark,format,lint]" ]
 
 [project.urls]

@@ -6,6 +6,7 @@
 ## Bug fixes and other changes
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
+* Add Ruff as an optional dependency for development.
 
 ## Upcoming deprecations for Kedro 1.0.0
 * Add deprecation warning for `--namespace` option for `kedro run`. It will be replaced with `--namespaces` option which will allow for running multiple namespaces together.

@@ -18,7 +18,7 @@ from kedro.ipython import (
     magic_load_node,
     reload_kedro,
 )
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import pipeline
 
 from .conftest import (
     dummy_function,
@@ -54,7 +54,7 @@ class TestLoadKedroObjects:
     ):
         pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
-        my_pipelines = {"ds": modular_pipeline([])}
+        my_pipelines = {"ds": pipeline([])}
 
         def my_register_pipeline():
             return my_pipelines
@@ -78,7 +78,7 @@ class TestLoadKedroObjects:
         mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
         pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
-        my_pipelines = {"ds": modular_pipeline([])}
+        my_pipelines = {"ds": pipeline([])}
 
         def my_register_pipeline():
             return my_pipelines
@@ -110,7 +110,7 @@ class TestLoadKedroObjects:
         mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
         pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
-        my_pipelines = {"ds": modular_pipeline([])}
+        my_pipelines = {"ds": pipeline([])}
 
         def my_register_pipeline():
             return my_pipelines

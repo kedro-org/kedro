@@ -99,6 +99,20 @@ def forward_command(
     return wrapit
 
 
+def namespace_deprecation_warning(
+    ctx: click.Context | None = None,
+    param: click.Parameter | None = None,
+    value: Any = None,
+) -> Any:
+    message = (
+        "DeprecationWarning: 'kedro run' flag '--namespace' is deprecated "
+        "and will be replaced with '--namespaces' from Kedro 1.0.0 to allow running multiple namespaces. "
+    )
+    warnings.warn(message, KedroDeprecationWarning)
+    click.secho(message, fg="red")
+    return value
+
+
 def _suggest_cli_command(
     original_command_name: str, existing_command_names: Iterable[str]
 ) -> str:
@@ -225,7 +239,7 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
             or ``package_name`` was not found in that file.
     """
     warnings.warn(
-        "`get_pkg_version()` has been deprecated and will be removed in Kedro 0.20.0",
+        "`get_pkg_version()` has been deprecated and will be removed in Kedro 1.0.0.",
         KedroDeprecationWarning,
     )
     reqs_path = Path(reqs_path).absolute()

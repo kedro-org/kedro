@@ -45,7 +45,7 @@ def _write_dummy_ini(filepath: Path):
 
 @pytest.fixture
 def base_config(tmp_path):
-    filepath = tmp_path / "cars.csv"
+    filepath = str(tmp_path / "cars.csv")
     return {
         "trains": {"type": "MemoryDataset"},
         "cars": {
@@ -58,7 +58,7 @@ def base_config(tmp_path):
 
 @pytest.fixture
 def local_config(tmp_path):
-    filepath = tmp_path / "cars.csv"
+    filepath = str(tmp_path / "cars.csv")
     return {
         "cars": {
             "type": "pandas.CSVDataset",

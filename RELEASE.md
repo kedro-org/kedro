@@ -25,6 +25,9 @@
 ## Bug fixes and other changes
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
+* Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
+## Breaking changes to the API
+
 
 ## Upcoming deprecations for Kedro 1.0.0
 * Add deprecation warning for `--namespace` option for `kedro run`. It will be replaced with `--namespaces` option which will allow for running multiple namespaces together.

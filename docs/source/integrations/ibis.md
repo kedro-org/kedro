@@ -1,6 +1,6 @@
-# How to use Ibis with Kedro for SQL queries
+# Ibis integration
 
-[Ibis](https://ibis-project.org/) is an open-source Python library that provides a high-level, Pythonic interface for SQL queries. It allows users to write SQL queries using Python syntax, which are then translated into actual SQL code for execution on various database backends. Ibis supports multiple database engines including PostgreSQL, MySQL, SQLite, Google BigQuery, and many others.
+[Ibis](https://ibis-project.org/) is an open-source Python library that provides a high-level, Pythonic interface for SQL queries. It allows users to write SQL queries using Python syntax, which are then translated into actual SQL code for execution on various database backends. Ibis supports multiple database engines including PostgreSQL, MySQL, SQLite, Google BigQuery, DuckDB, and many others.
 
 Integrating Ibis with Kedro enables you to efficiently execute SQL queries as part of your data workflows without needing to resort to hardcoded SQL or less flexible methods. This integration provides several benefits:
 
@@ -14,14 +14,16 @@ You will need the following:
 
 - A working Kedro project in a virtual environment
 - Ibis installed in the same virtual environment
-- Access to a supported database (PostgreSQL, MySQL, SQLite, etc.)
 
-To set yourself up, install Ibis and the appropriate database connector:
+To set yourself up, install Ibis and the appropriate database connector. We recommend using DuckDB as it's easy to install and use:
 
 ```bash
 pip install ibis-framework
 
-# Install the appropriate backend connector
+# Install DuckDB connector (recommended)
+pip install 'ibis-framework[duckdb]'
+
+# Or install other backend connectors if needed
 # For PostgreSQL
 pip install 'ibis-framework[postgres]'
 # For MySQL
@@ -36,19 +38,23 @@ pip install 'ibis-framework[bigquery]'
 
 ### Configure database connection
 
-The first step is to configure your database connection in your Kedro project. We recommend storing your database connection parameters in your configuration files.
+The first step is to configure your database connection in your Kedro project. You should store your database connection parameters in your credentials configuration files for better security.
 
-Create a file at `conf/base/db.yml` with your database connection parameters:
+Create or update your file at `conf/local/credentials.yml` with your database connection parameters:
 
 ```yaml
-# conf/base/db.yml
+# conf/local/credentials.yml
 database:
-  type: postgres  # or mysql, sqlite, bigquery, etc.
-  host: localhost
-  port: 5432
-  database: mydatabase
-  username: myuser
-  password: ${DB_PASSWORD}  # Use credentials from environment variables
+  type: duckdb  # or postgres, mysql, sqlite, bigquery, etc.
+  # For DuckDB, you only need to specify the path to the database file
+  path: ${BASE_PATH}/data/database.duckdb
+  
+  # For other databases like PostgreSQL, you would include these parameters:
+  # host: localhost
+  # port: 5432
+  # database: mydatabase
+  # username: myuser
+  # password: ${DB_PASSWORD}  # Use credentials from environment variables
 ```
 
 ### Initialize Ibis connection using a hook
@@ -70,7 +76,9 @@ class IbisHooks:
         db_config = context.config_loader["database"]
         
         # Store the connection in the context for later use
-        if db_config["type"] == "postgres":
+        if db_config["type"] == "duckdb":
+            context.ibis_conn = ibis.duckdb.connect(db_config["path"])
+        elif db_config["type"] == "postgres":
             context.ibis_conn = ibis.postgres.connect(
                 host=db_config["host"],
                 port=db_config["port"],
@@ -105,78 +113,27 @@ from <package_name>.hooks import IbisHooks
 hooks = [IbisHooks()]
 ```
 
-## Creating an Ibis dataset for Kedro's DataCatalog
+## Using the Ibis TableDataset with Kedro's DataCatalog
 
-To integrate Ibis with Kedro's DataCatalog, you can create a custom dataset that handles Ibis tables and query results. Here's an example implementation:
+Kedro provides a built-in `TableDataset` for Ibis in the `kedro-datasets` package. You can use this dataset to integrate Ibis tables with your Kedro pipelines.
 
-```python
-# src/<package_name>/extras/datasets/ibis_dataset.py
-from typing import Any, Dict
+First, install the required package:
 
-from kedro.io import AbstractDataSet
-import ibis
-import pandas as pd
-
-
-class IbisTableDataSet(AbstractDataSet):
-    """``IbisTableDataSet`` loads and saves data from/to a SQL database using Ibis.
-    
-    This dataset represents an Ibis table in a database.
-    """
-
-    def __init__(self, connection, table_name=None, query=None):
-        """Initialize the dataset.
-        
-        Args:
-            connection: An Ibis connection object or a callable that returns one
-            table_name: Name of the table in the database (if loading an existing table)
-            query: An Ibis expression to execute (alternative to table_name)
-        """
-        self._connection = connection
-        self._table_name = table_name
-        self._query = query
-        
-        if not (table_name or query):
-            raise ValueError("Either table_name or query must be provided")
-        if table_name and query:
-            raise ValueError("Only one of table_name or query should be provided")
-
-    def _load(self) -> ibis.expr.types.TableExpr:
-        """Load the data."""
-        conn = self._connection() if callable(self._connection) else self._connection
-        
-        if self._table_name:
-            return conn.table(self._table_name)
-        return self._query
-
-    def _save(self, data: ibis.expr.types.TableExpr) -> None:
-        """Save the Ibis expression results to a table."""
-        if self._table_name:
-            conn = self._connection() if callable(self._connection) else self._connection
-            # Execute the expression and save results to the specified table
-            data.execute().to_sql(self._table_name, conn.con, if_exists="replace")
-
-    def _describe(self) -> Dict[str, Any]:
-        """Return a description of the dataset."""
-        return {
-            "table_name": self._table_name,
-            "has_query": self._query is not None
-        }
+```bash
+pip install "kedro-datasets[ibis]"
 ```
 
-## Configuring the DataCatalog
-
-Now you can configure your DataCatalog to use the Ibis dataset. Add the following to your `conf/base/catalog.yml`:
+Then, configure your DataCatalog to use the Ibis TableDataset. Add the following to your `conf/base/catalog.yml`:
 
 ```yaml
 # conf/base/catalog.yml
 customers_table:
-  type: <package_name>.extras.datasets.ibis_dataset.IbisTableDataSet
+  type: kedro_datasets.ibis.TableDataset
   connection: ${ibis_connection}
   table_name: customers
 
 filtered_customers:
-  type: <package_name>.extras.datasets.ibis_dataset.IbisTableDataSet
+  type: kedro_datasets.ibis.TableDataset
   connection: ${ibis_connection}
   query: ${ibis_query}
 ```
@@ -219,7 +176,7 @@ def filter_customers(customers_table: ibis.expr.types.TableExpr) -> ibis.expr.ty
     filtered = customers_table.filter(customers_table.age > 25)
     
     # Group by customer_id and calculate average purchase amount
-    result = filtered.group_by('customer_id').aggregate(
+    result = filtered.group_by("customer_id").aggregate(
         avg_purchase=filtered.purchase_amount.mean(),
         total_purchases=filtered.purchase_amount.count()
     )
@@ -289,14 +246,39 @@ def create_pipeline(**kwargs):
 - **Handle database errors**: Implement proper error handling for database connection issues
 - **Debug with .compile()**: Use Ibis's `.compile()` method to see the generated SQL
 
-## Example: Complete pipeline with Ibis
+## Example: Complete pipeline with Ibis and DuckDB
 
-Here's a complete example of a Kedro pipeline that uses Ibis for SQL operations:
+Here's a complete example of a Kedro pipeline that uses Ibis with DuckDB for SQL operations:
 
 ```python
 # src/<package_name>/pipelines/data_processing/nodes.py
 import ibis
 from ibis import _
+import pandas as pd
+
+
+def create_sample_data(conn) -> None:
+    """Create sample tables in DuckDB for demonstration."""
+    # Create customers table
+    customers_df = pd.DataFrame({
+        'id': range(1, 11),
+        'name': [f'Customer {i}' for i in range(1, 11)],
+        'age': [25, 40, 35, 28, 52, 19, 31, 45, 33, 60],
+        'lifetime_value': [100.0, 2500.0, 550.0, 1200.0, 3000.0, 50.0, 750.0, 1800.0, 400.0, 5000.0]
+    })
+    
+    # Create orders table
+    orders_df = pd.DataFrame({
+        'order_id': range(1, 21),
+        'customer_id': [1, 2, 2, 3, 4, 5, 5, 5, 6, 7, 7, 8, 8, 8, 9, 9, 10, 10, 10, 10],
+        'order_date': pd.date_range('2023-01-01', periods=20),
+        'amount': [50.0, 100.0, 200.0, 150.0, 300.0, 500.0, 400.0, 600.0, 50.0, 75.0, 
+                  80.0, 200.0, 300.0, 150.0, 100.0, 200.0, 1000.0, 1500.0, 800.0, 1200.0]
+    })
+    
+    # Create tables in DuckDB
+    conn.create_table('customers', customers_df)
+    conn.create_table('orders', orders_df)
 
 
 def load_customers(conn) -> ibis.expr.types.TableExpr:
@@ -341,6 +323,7 @@ from kedro.pipeline import Pipeline, node
 from kedro.pipeline.modular_pipeline import pipeline
 
 from .<package_name>.pipelines.data_processing.nodes import (
+    create_sample_data,
     load_customers,
     load_orders,
     filter_high_value_customers,
@@ -353,6 +336,12 @@ from .<package_name>.pipelines.data_processing.nodes import (
 def create_pipeline(**kwargs):
     return Pipeline(
         [
+            node(
+                func=create_sample_data,
+                inputs="ibis_connection",
+                outputs=None,
+                name="create_sample_data_node",
+            ),
             node(
                 func=load_customers,
                 inputs="ibis_connection",

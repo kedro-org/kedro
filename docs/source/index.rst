@@ -94,17 +94,22 @@ Welcome to Kedro's award-winning documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Development
+
+   development/set_up_vscode
+   development/set_up_pycharm
+   development/debugging
+   development/automated_testing
+   development/linting
+
+.. toctree::
+   :maxdepth: 2
    :caption: Advanced usage
 
    kedro_project_setup/index.md
    extend_kedro/index.md
    hooks/index.md
    logging/index.md
-   development/set_up_vscode
-   development/set_up_pycharm
-   development/automated_testing
-   development/linting
-   development/index.md
    deployment/index.md
 
 .. toctree::
@@ -112,6 +117,12 @@ Welcome to Kedro's award-winning documentation!
    :caption: Contribute to Kedro
 
    contribution/index.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: CLI reference
+
+   development/commands_reference.md
 
 API documentation
 =================

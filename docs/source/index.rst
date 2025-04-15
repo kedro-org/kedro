@@ -3,7 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-
 .. image:: https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png
     :alt: Kedro logo
     :class: kedro-logo
@@ -88,6 +87,9 @@ Welcome to Kedro's award-winning documentation!
 
    integrations/pyspark_integration.md
    integrations/mlflow.md
+   integrations/kedro_dvc_versioning.md
+   integrations/deltalake_versioning.md
+   integrations/iceberg_versioning.md
    integrations/ibis.md
 
 .. toctree::
@@ -98,6 +100,10 @@ Welcome to Kedro's award-winning documentation!
    extend_kedro/index.md
    hooks/index.md
    logging/index.md
+   development/set_up_vscode
+   development/set_up_pycharm
+   development/automated_testing
+   development/linting
    development/index.md
    deployment/index.md
 

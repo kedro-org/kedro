@@ -82,32 +82,7 @@ filtered_customers:
   query: ${ibis_query}
 ```
 
-You'll need to provide the connection and query objects in your `catalog_dict` when creating the `DataCatalog`:
 
-```python
-from kedro.framework.context import KedroContext
-from kedro.framework.hooks import hook_impl
-
-
-class ProjectContext(KedroContext):
-    @hook_impl
-    def register_catalog(self, catalog, credentials, load_versions, save_version, journal):
-        # Get the Ibis connection from the context
-        ibis_connection = lambda: self.ibis_conn
-        
-        # Define an example query
-        def ibis_query():
-            customers = self.ibis_conn.table('customers')
-            return customers.filter(customers.age > 30)
-        
-        # Add these objects to the catalog's dictionary
-        catalog.add_feed_dict({
-            'ibis_connection': ibis_connection,
-            'ibis_query': ibis_query()
-        })
-        
-        return catalog
-```
 
 ## Using Ibis in Kedro nodes
 

@@ -57,62 +57,6 @@ database:
   # password: ${DB_PASSWORD}  # Use credentials from environment variables
 ```
 
-### Initialize Ibis connection using a hook
-
-You can initialize your Ibis connection using a Kedro hook to ensure it's available before your pipeline runs. Create a hook in `src/<package_name>/hooks.py`:
-
-```python
-from kedro.framework.hooks import hook_impl
-import ibis
-
-
-class IbisHooks:
-    @hook_impl
-    def after_context_created(self, context) -> None:
-        """Initialize an Ibis connection using the config
-        defined in project's conf folder.
-        """
-        # Load the database configuration
-        db_config = context.config_loader["database"]
-        
-        # Store the connection in the context for later use
-        if db_config["type"] == "duckdb":
-            context.ibis_conn = ibis.duckdb.connect(db_config["path"])
-        elif db_config["type"] == "postgres":
-            context.ibis_conn = ibis.postgres.connect(
-                host=db_config["host"],
-                port=db_config["port"],
-                database=db_config["database"],
-                user=db_config["username"],
-                password=db_config["password"]
-            )
-        elif db_config["type"] == "mysql":
-            context.ibis_conn = ibis.mysql.connect(
-                host=db_config["host"],
-                port=db_config["port"],
-                database=db_config["database"],
-                user=db_config["username"],
-                password=db_config["password"]
-            )
-        elif db_config["type"] == "sqlite":
-            context.ibis_conn = ibis.sqlite.connect(db_config["database"])
-        elif db_config["type"] == "bigquery":
-            context.ibis_conn = ibis.bigquery.connect(
-                project_id=db_config["project_id"],
-                dataset_id=db_config["dataset_id"]
-            )
-        else:
-            raise ValueError(f"Unsupported database type: {db_config['type']}")
-```
-
-Register your hook in `src/<package_name>/__init__.py`:
-
-```python
-from <package_name>.hooks import IbisHooks
-
-hooks = [IbisHooks()]
-```
-
 ## Using the Ibis TableDataset with Kedro's DataCatalog
 
 Kedro provides a built-in `TableDataset` for Ibis in the `kedro-datasets` package. You can use this dataset to integrate Ibis tables with your Kedro pipelines.

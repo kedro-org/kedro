@@ -2,7 +2,6 @@
    sphinx-quickstart on Mon Dec 18 11:31:24 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-
 .. image:: https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png
     :alt: Kedro logo
     :class: kedro-logo

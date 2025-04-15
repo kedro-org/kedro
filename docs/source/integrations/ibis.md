@@ -111,6 +111,19 @@ customer_orders:
 
 
 
+## Creating a database connection from credentials
+
+To use Ibis in your Kedro nodes, you'll need to create a database connection object from your credentials. You can do this by adding a custom dataset to your catalog that creates and provides an Ibis connection:
+
+```yaml
+# conf/base/catalog.yml
+database_connection:
+  type: kedro_datasets.ibis.IbisConnectionDataset
+  credentials: database  # References the database config in credentials.yml
+```
+
+This will create an Ibis connection object that can be used in your nodes to interact with the database.
+
 ## Using Ibis in Kedro nodes
 
 Now you can use Ibis in your Kedro nodes to perform SQL operations. Here's an example of a node that uses Ibis to transform data:
@@ -284,19 +297,19 @@ def create_pipeline(**kwargs):
         [
             node(
                 func=create_sample_data,
-                inputs="ibis_connection",
+                inputs="database_connection",  # Connection object created from database credentials
                 outputs=None,
                 name="create_sample_data_node",
             ),
             node(
                 func=load_customers,
-                inputs="ibis_connection",
+                inputs="database_connection",  # Connection object created from database credentials
                 outputs="customers_table",
                 name="load_customers_node",
             ),
             node(
                 func=load_orders,
-                inputs="ibis_connection",
+                inputs="database_connection",  # Connection object created from database credentials
                 outputs="orders_table",
                 name="load_orders_node",
             ),

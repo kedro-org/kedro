@@ -88,10 +88,7 @@ Welcome to Kedro's award-winning documentation!
 
    integrations/pyspark_integration.md
    integrations/mlflow.md
-   .. toctree::
-      :maxdepth: 2
-      :caption: Contents:
-   integrations/ibis
+   integrations/ibis.md
 
 .. toctree::
    :maxdepth: 2

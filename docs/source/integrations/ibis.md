@@ -73,13 +73,40 @@ Then, configure your DataCatalog to use the Ibis TableDataset. Add the following
 # conf/base/catalog.yml
 customers_table:
   type: kedro_datasets.ibis.TableDataset
-  connection: ${ibis_connection}
+  credentials: database  # References the database config in credentials.yml
   table_name: customers
 
 filtered_customers:
   type: kedro_datasets.ibis.TableDataset
-  connection: ${ibis_connection}
-  query: ${ibis_query}
+  credentials: database
+  table_name: customers
+  query: SELECT * FROM customers WHERE age > 30
+
+# Example of using Ibis expressions in catalog
+high_value_customers:
+  type: kedro_datasets.ibis.TableDataset
+  credentials: database
+  table_name: customers
+  # Using Ibis expression for filtering
+  ibis_expr: |
+    def query(table):
+        return table.filter(table.lifetime_value > 1000)
+
+customer_orders:
+  type: kedro_datasets.ibis.TableDataset
+  credentials: database
+  table_name: orders
+  # Using Ibis expression for joining and aggregation
+  ibis_expr: |
+    def query(table):
+        customers = context.catalog.load('customers_table')
+        return table.join(
+            customers,
+            table.customer_id == customers.id
+        ).group_by(table.customer_id).aggregate(
+            total_orders=table.order_id.count(),
+            avg_amount=table.amount.mean()
+        )
 ```
 
 

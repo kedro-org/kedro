@@ -18,7 +18,7 @@ from kedro.ipython import (
     magic_load_node,
     reload_kedro,
 )
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import pipeline
 
 from .conftest import (
     dummy_function,
@@ -54,7 +54,7 @@ class TestLoadKedroObjects:
     ):
         pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
-        my_pipelines = {"ds": modular_pipeline([])}
+        my_pipelines = {"ds": pipeline([])}
 
         def my_register_pipeline():
             return my_pipelines
@@ -78,7 +78,7 @@ class TestLoadKedroObjects:
         mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
         pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
-        my_pipelines = {"ds": modular_pipeline([])}
+        my_pipelines = {"ds": pipeline([])}
 
         def my_register_pipeline():
             return my_pipelines
@@ -110,7 +110,7 @@ class TestLoadKedroObjects:
         mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
         pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
-        my_pipelines = {"ds": modular_pipeline([])}
+        my_pipelines = {"ds": pipeline([])}
 
         def my_register_pipeline():
             return my_pipelines
@@ -470,7 +470,7 @@ ERROR,
 
         load_ipython_extension(ipython)
         ipython.magic("load_node dummy_node")
-        calls = [call("cell1", is_jupyter=True), call("cell2", is_jupyter=True)]
+        calls = [call("cell1\n\ncell2")]
         spy.assert_has_calls(calls)
 
     @pytest.mark.parametrize("run_env", ["ipython", "vscode"])

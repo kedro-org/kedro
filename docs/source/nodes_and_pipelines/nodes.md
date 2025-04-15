@@ -235,7 +235,7 @@ Copy the following code to `nodes.py`. The main change is to use a new model `De
 
 ```python
 import logging
-from typing import Any, Dict, Tuple, Iterator
+from typing import Any, Dict, Tuple, Iterator, Generator
 from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
@@ -274,7 +274,7 @@ def split_data(
 
 def make_predictions(
     X_train: pd.DataFrame, X_test: pd.DataFrame, y_train: pd.Series
-) -> pd.Series:
+) -> Generator[pd.Series, None, None]:
     """Use a DecisionTreeClassifier model to make prediction."""
     model = DecisionTreeClassifier()
     model.fit(X_train, y_train)

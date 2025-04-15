@@ -5,7 +5,7 @@ Kedro uses [Python's `logging` library](https://docs.python.org/3/library/loggin
 
 By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`.
 
-# Default logging configuration
+## Default logging configuration
 Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io) to format messages. We also use the Rich traceback handler to render exceptions.
 
 ## How to perform logging in your Kedro project

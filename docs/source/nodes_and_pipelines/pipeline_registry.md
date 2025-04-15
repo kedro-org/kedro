@@ -67,12 +67,14 @@ def register_pipelines() -> Dict[str, Pipeline]:
     pipelines = find_pipelines()
     pipelines["__default__"] = sum(pipelines.values())
     pipelines["data_engineering"] = pipeline(
-        pipelines["data_processing"], namespace="data_engineering"
+        pipelines["data_processing"], tags="data_engineering"
     )
     return pipelines
 ```
-
-On the other hand, adding the same pipeline *before* assigning `pipelines["__default__"] = sum(pipelines.values())` includes it in the default pipeline, so the data engineering pipeline will be run if `kedro run` is called without specifying a pipeline name:
+```{note}
+In the case above, `kedro run --tags data_engineering` will not run the data engineering pipeline, as it is not part of the default pipeline. To run the data engineering pipeline, you need to specify `kedro run --pipeline data_engineering --tags data_engineering`.
+```
+On the other hand, you can also modify pipelines *before* assigning `pipelines["__default__"] = sum(pipelines.values())` which includes it in the default pipeline. For example, you can update the `data_processing` pipeline with the `data_engineering` tag in the `pipeline_registry.py` and also include this change in the default pipeline:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -82,8 +84,8 @@ def register_pipelines() -> Dict[str, Pipeline]:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
     pipelines = find_pipelines()
-    pipelines["data_engineering"] = pipeline(
-        pipelines["data_processing"], namespace="data_engineering"
+    pipelines["data_processing"] = pipeline(
+        pipelines["data_processing"], tags="data_engineering"
     )
     pipelines["__default__"] = sum(pipelines.values())
     return pipelines

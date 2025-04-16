@@ -4,7 +4,7 @@
 Data Catalog will be removed in v1.0.0 release. The documentation is subject to change
 ```
 
-In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
+In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `KedroDataCatalog` class.
 
 This page introduces the basic sections of `catalog.yml`, which is the file Kedro uses to register data sources for a project.
 
@@ -165,7 +165,7 @@ You can check those in {py:mod}`the dataset API documentation <kedro-datasets:ke
 ### Dataset access credentials
 The Data Catalog also works with the `credentials.yml` file in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
 
-Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
+Before instantiating the `KedroDataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `KedroDataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 

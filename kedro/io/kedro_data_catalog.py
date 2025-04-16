@@ -90,6 +90,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         Example:
         ::
+
             >>> from kedro_datasets.pandas import CSVDataset
             >>>
             >>> cars = CSVDataset(filepath="cars.csv",

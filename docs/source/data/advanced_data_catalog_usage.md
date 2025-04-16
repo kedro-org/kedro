@@ -9,12 +9,12 @@ From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to 
 
 ## How to configure the Data Catalog
 
-To use the `DataCatalog` API, construct a `DataCatalog` object programmatically in a file like `catalog.py`.
+To use the `KedroDataCatalog` API, construct a `KedroDataCatalog` object programmatically in a file like `catalog.py`.
 
 In the following code, we use several pre-built data loaders documented in the {py:mod}`kedro-datasets documentation <kedro-datasets:kedro_datasets>`.
 
 ```python
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 from kedro_datasets.pandas import (
     CSVDataset,
     SQLTableDataset,
@@ -22,7 +22,7 @@ from kedro_datasets.pandas import (
     ParquetDataset,
 )
 
-catalog =  DataCatalog(
+catalog =  KedroDataCatalog(
     {
         "bikes": CSVDataset(filepath="../data/01_raw/bikes.csv"),
         "cars": CSVDataset(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
@@ -42,10 +42,10 @@ When using `SQLTableDataset` or `SQLQueryDataset` you must provide a `con` key c
 
 ## How to view the available data sources
 
-To review the `DataCatalog`:
+To review the `KedroDataCatalog`:
 
 ```python
-catalog.list()
+catalog.keys()
 ```
 
 ## How to load datasets programmatically
@@ -115,7 +115,7 @@ Saving `None` to a dataset is not allowed!
 ```
 
 ## How to access a dataset with credentials
-Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
+Before instantiating the `KedroDataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `KedroDataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 
@@ -149,7 +149,7 @@ In an earlier section of the documentation we described how [Kedro enables datas
 If you require programmatic control over load and save versions of a specific dataset, you can instantiate `Version` and pass it as a parameter to the dataset initialisation:
 
 ```python
-from kedro.io import DataCatalog, Version
+from kedro.io import KedroDataCatalog, Version
 from kedro_datasets.pandas import CSVDataset
 import pandas as pd
 
@@ -163,7 +163,7 @@ version = Version(
 test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
-catalog =  DataCatalog({"test_dataset": test_dataset})
+catalog =  KedroDataCatalog({"test_dataset": test_dataset})
 
 # save the dataset to data/01_raw/test.csv/<version>/test.csv
 catalog.save("test_dataset", data1)
@@ -187,7 +187,7 @@ version = Version(
 test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
-catalog =  DataCatalog({"test_dataset": test_dataset})
+catalog =  KedroDataCatalog({"test_dataset": test_dataset})
 
 # save the dataset to data/01_raw/test.csv/my_exact_version/test.csv
 catalog.save("test_dataset", data1)
@@ -220,7 +220,7 @@ version = Version(
 test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
-catalog =  DataCatalog({"test_dataset": test_dataset})
+catalog =  KedroDataCatalog({"test_dataset": test_dataset})
 
 catalog.save("test_dataset", data1)  # emits a UserWarning due to version inconsistency
 

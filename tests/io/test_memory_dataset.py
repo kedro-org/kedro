@@ -1,4 +1,5 @@
 import re
+import sys
 
 import numpy as np
 import pandas as pd
@@ -233,6 +234,17 @@ def test_infer_mode_assign():
         pass
 
     data = DataFrame()
+    copy_mode = _infer_copy_mode(data)
+    assert copy_mode == "assign"
+
+    # Ibis Table Type
+    class Table:
+        pass
+
+    fake_ibis = type(sys)("ibis")
+    fake_ibis.Table = Table
+    sys.modules["ibis"] = fake_ibis
+    data = Table()
     copy_mode = _infer_copy_mode(data)
     assert copy_mode == "assign"
 

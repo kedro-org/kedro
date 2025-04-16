@@ -30,7 +30,8 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
-from kedro.utils import _format_rich, _has_rich_handler
+from kedro.logging import _format_rich
+from kedro.utils import _has_rich_handler
 
 
 class _LazyDataset:

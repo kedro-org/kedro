@@ -1,16 +1,11 @@
 from __future__ import annotations
 
+import asyncio
 import inspect
 import itertools as it
+import logging
 import multiprocessing
 from collections.abc import Iterable, Iterator
-from concurrent.futures import (
-    ALL_COMPLETED,
-    Future,
-    ThreadPoolExecutor,
-    as_completed,
-    wait,
-)
 from typing import TYPE_CHECKING, Any
 
 from more_itertools import interleave
@@ -27,6 +22,8 @@ if TYPE_CHECKING:
 
     from kedro.io import CatalogProtocol
     from kedro.pipeline.node import Node
+
+logger = logging.getLogger(__name__)
 
 
 class TaskError(Exception):
@@ -78,11 +75,15 @@ class Task:
             )
             self.hook_manager = hook_manager
         if self.is_async:
-            node = self._run_node_async(
-                self.node,
-                self.catalog,
-                self.hook_manager,  # type: ignore[arg-type]
-                self.session_id,
+            import asyncio
+
+            node = asyncio.run(
+                self._run_node_async(
+                    self.node,
+                    self.catalog,
+                    self.hook_manager,  # type: ignore[arg-type]
+                    self.session_id,
+                )
             )
         else:
             node = self._run_node_sequential(
@@ -189,66 +190,98 @@ class Task:
             )
         return node
 
-    def _run_node_async(
+    async def _run_node_async(
         self,
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,  # type: ignore[arg-type]
         session_id: str | None = None,
     ) -> Node:
-        with ThreadPoolExecutor() as pool:
-            inputs: dict[str, Future] = {}
-
-            for name in node.inputs:
-                inputs[name] = pool.submit(
-                    self._synchronous_dataset_load, name, node, catalog, hook_manager
-                )
-
-            wait(inputs.values(), return_when=ALL_COMPLETED)
-            inputs = {key: value.result() for key, value in inputs.items()}
-            is_async = True
-            additional_inputs = self._collect_inputs_from_hook(
-                node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        input_tasks: dict[str, asyncio.Task] = {
+            name: asyncio.create_task(
+                self._async_dataset_load(name, node, catalog, hook_manager)
             )
-            inputs.update(additional_inputs)
+            for name in node.inputs
+        }
 
-            outputs = self._call_node_run(
-                node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        # Gather results as they complete
+        inputs = {}
+        for name, input_task in input_tasks.items():
+            try:
+                inputs[name] = await input_task
+            except Exception as exc:  # pragma: no cover
+                logger.error(
+                    "Error loading input '%s' for node '%s': %s",
+                    name,
+                    node.name,
+                    exc,
+                    exc_info=True,
+                )
+                raise
+
+        is_async = True
+        additional_inputs = self._collect_inputs_from_hook(
+            node, catalog, inputs.copy(), is_async, hook_manager, session_id=session_id
+        )
+        inputs.update(additional_inputs)
+
+        outputs = self._call_node_run(
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        )
+
+        output_tasks = {
+            name: asyncio.create_task(
+                self._async_dataset_save(name, data, node, catalog, hook_manager)
             )
+            for name, data in outputs.items()
+        }
 
-            future_dataset_mapping = {}
-            for name, data in outputs.items():
-                hook_manager.hook.before_dataset_saved(
-                    dataset_name=name, data=data, node=node
+        for name, output_task in output_tasks.items():
+            try:
+                await output_task
+            except Exception as exc:
+                logger.error(
+                    "Error saving output '%s' for node '%s': %s",
+                    name,
+                    node.name,
+                    exc,
+                    exc_info=True,
                 )
-                future = pool.submit(catalog.save, name, data)
-                future_dataset_mapping[future] = (name, data)
+                raise
 
-            for future in as_completed(future_dataset_mapping):
-                exception = future.exception()
-                if exception:
-                    raise exception
-                name, data = future_dataset_mapping[future]
-                hook_manager.hook.after_dataset_saved(
-                    dataset_name=name, data=data, node=node
-                )
         return node
 
     @staticmethod
-    def _synchronous_dataset_load(
+    async def _async_dataset_load(
         dataset_name: str,
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,
     ) -> Any:
-        """Minimal wrapper to ensure Hooks are run synchronously
-        within an asynchronous dataset load."""
+        """Asynchronously loads a dataset while ensuring hooks are executed in order."""
         hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)
-        return_ds = catalog.load(dataset_name)
+        return_ds = await asyncio.to_thread(catalog.load, dataset_name)
         hook_manager.hook.after_dataset_loaded(
             dataset_name=dataset_name, data=return_ds, node=node
         )
         return return_ds
+
+    @staticmethod
+    async def _async_dataset_save(
+        dataset_name: str,
+        data: Any,
+        node: Node,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager,
+    ) -> None:
+        """Asynchronously saves a dataset while ensuring hooks are executed in order."""
+        hook_manager.hook.before_dataset_saved(
+            dataset_name=dataset_name, data=data, node=node
+        )
+        await asyncio.to_thread(catalog.save, dataset_name, data)
+        hook_manager.hook.after_dataset_saved(
+            dataset_name=dataset_name, data=data, node=node
+        )
 
     @staticmethod
     def _collect_inputs_from_hook(  # noqa: PLR0913

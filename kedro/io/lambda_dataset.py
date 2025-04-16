@@ -104,7 +104,7 @@ class LambdaDataset(AbstractDataset):
         """
 
         warnings.warn(
-            "`LambdaDataset` has been deprecated and will be removed in Kedro 0.20.0.",
+            "`LambdaDataset` has been deprecated and will be removed in Kedro 1.0.0.",
             KedroDeprecationWarning,
         )
 

@@ -108,6 +108,7 @@ This section contains a set of guidance for the most common configuration requir
 * [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
 * [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
 * [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
+* [How to read configuration from remote storage](#how-to-read-configuration-from-remote-storage)
 * [How to access configuration in code](#how-to-access-configuration-in-code)
 * [How to load a data catalog with credentials in code?](#how-to-load-a-data-catalog-with-credentials-in-code)
 * [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
@@ -166,6 +167,68 @@ For both the `tar.gz` and `zip` file, the following structure is expected:
 │   └── catalog.yml
 └── local              <-- the top level local folder is required, but no files should be inside when distributed.
 └── README.md          <-- optional but included with the default Kedro conf structure.
+```
+
+### How to read configuration from remote storage
+You can read configuration from remote storage locations using cloud storage protocols. This allows you to separate your configuration from your code and securely store different configurations for various environments or tenants.
+
+Supported protocols include:
+- Amazon S3 (`s3://`)
+- Azure Blob Storage (`abfs://`, `abfss://`)
+- Google Cloud Storage (`gs://`, `gcs://`)
+- HTTP/HTTPS (`http://`, `https://`)
+- And other protocols supported by `fsspec`
+
+To use a remote configuration source, specify the URL when running your Kedro pipeline:
+
+```bash
+# Amazon S3
+kedro run --conf-source=s3://my-bucket/configs/
+
+# Azure Blob Storage
+kedro run --conf-source=abfs://container@account/configs/
+
+# Google Cloud Storage
+kedro run --conf-source=gs://my-bucket/configs/
+```
+
+#### Authentication for remote configuration
+Authentication for remote configuration sources must be set up through environment variables or other credential mechanisms provided by the cloud platform. Unlike datasets in the data catalog, you cannot use credentials from `credentials.yml` for remote configuration sources since those credentials would be part of the configuration you're trying to access.
+
+**Examples of authentication setup:**
+
+Amazon S3:
+```bash
+  export AWS_ACCESS_KEY_ID=your_access_key
+  export AWS_SECRET_ACCESS_KEY=your_secret_key
+  kedro run --conf-source=s3://my-bucket/configs/
+```
+Google Cloud Storage:
+```
+gcloud auth application-default login
+kedro run --conf-source=gs://my-bucket/configs/
+```
+Azure Blob Storage:
+```
+export AZURE_STORAGE_ACCOUNT=your_account_name
+export AZURE_STORAGE_KEY=your_account_key
+kedro run --conf-source=abfs://container@account/configs/
+```
+For more detailed authentication instructions, refer to the documentation of your cloud provider.
+
+The remote storage should maintain the same configuration structure as local configuration, with appropriate `base` and environment folders:
+
+```text
+s3://my-bucket/configs/
+├── base/
+│   ├── catalog.yml
+│   └── parameters.yml
+└── prod/
+    └── parameters.yml
+```
+
+```{note}
+While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not currently support reading compressed files directly from cloud storage (e.g., s3://my-bucket/configs.tar.gz).
 ```
 
 ### How to access configuration in code

@@ -109,85 +109,37 @@ assert isinstance(df, pyspark.sql.DataFrame)
 ## Spark and Delta Lake interaction
 
 [Delta Lake](https://delta.io/) is an open-source project that enables building a Lakehouse architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
-To setup PySpark with Delta Lake, have a look at [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python).
+To setup PySpark with Delta Lake, have a look at [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python). You may have to update the `SparkHooks` in your `src/<package_name>/hooks.py` to set up the `SparkSession` with Delta Lake support:
 
-We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding):
+```diff
+from kedro.framework.hooks import hook_impl
+from pyspark import SparkConf
+from pyspark.sql import SparkSession
++ from delta import configure_spark_with_delta_pip
 
-* To create a Delta table, use a `SparkDataset` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table or overwrite it.
-* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataset` and perform the write operations within the node function.
+class SparkHooks:
+    @hook_impl
+    def after_context_created(self, context) -> None:
+        """Initialises a SparkSession using the config
+        defined in project's conf folder.
+        """
 
-As a result, we end up with a catalog that looks like this:
+        # Load the spark configuration in spark.yaml using the config loader
+        parameters = context.config_loader["spark"]
+        spark_conf = SparkConf().setAll(parameters.items())
 
-```yaml
-temperature:
-  type: spark.SparkDataset
-  filepath: data/01_raw/data.csv
-  file_format: "csv"
-  load_args:
-    header: True
-    inferSchema: True
-  save_args:
-    sep: '|'
-    header: True
-
-weather@spark:
-  type: spark.SparkDataset
-  filepath: s3a://my_bucket/03_primary/weather
-  file_format: "delta"
-  save_args:
-    mode: "overwrite"
-    versionAsOf: 0
-
-weather@delta:
-  type: spark.DeltaTableDataset
-  filepath: s3a://my_bucket/03_primary/weather
+        # Initialise the spark session
+        spark_session_conf = (
+            SparkSession.builder.appName(context.project_path.name)
+            .enableHiveSupport()
+            .config(conf=spark_conf)
+        )
+-       _spark_session = spark_session_conf.getOrCreate()
++       _spark_session = configure_spark_with_delta_pip(spark_session_conf).getOrCreate()
+        _spark_session.sparkContext.setLogLevel("WARN")
 ```
 
-The `DeltaTableDataset` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
-
-
-```{note}
-If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, via the DeltaTable API.
-```
-
-```python
-pipeline(
-    [
-        node(
-            func=process_barometer_data, inputs="temperature", outputs="weather@spark"
-        ),
-        node(
-            func=update_meterological_state,
-            inputs="weather@delta",
-            outputs="first_operation_complete",
-        ),
-        node(
-            func=estimate_weather_trend,
-            inputs=["first_operation_complete", "weather@delta"],
-            outputs="second_operation_complete",
-        ),
-    ]
-)
-```
-
-`first_operation_complete` is a `MemoryDataset` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node can simply not return anything:
-
-```python
-pipeline(
-    [
-        node(func=..., inputs="temperature", outputs="weather@spark"),
-        node(func=..., inputs="weather@delta", outputs=None),
-    ]
-)
-```
-
-The following diagram is the visual representation of the workflow explained above:
-
-![Spark and Delta Lake workflow](../meta/images/spark_delta_workflow.png)
-
-```{note}
-This pattern of creating "dummy" datasets to preserve the data flow also applies to other "out of DAG" execution operations such as SQL operations within a node.
-```
+Refer to the more detailed section on Kedro and Delta Lake integration in the [Delta Lake integration guide](./deltalake_versioning.md).
 
 ## Use `MemoryDataset` for intermediary `DataFrame`
 

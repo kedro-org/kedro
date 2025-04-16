@@ -38,13 +38,13 @@ def catalog() -> None:
     """Commands for working with catalog."""
 
 
-@catalog.command("list")
+@catalog.command("list-datasets")
 @env_option
 @click.option(
     "--pipeline",
     "-p",
     type=str,
-    default=None,
+    default="",
     help="Name of the modular pipeline to run. If not set, "
     "the project pipeline is run by default.",
     callback=split_string,
@@ -57,6 +57,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     context = session.load_context()
     catalog = context.catalog
 
+    pipeline = pipeline or None
     datasets_dict = catalog.list_datasets(pipeline)
 
     secho(yaml.dump(datasets_dict))

@@ -967,6 +967,8 @@ _C = TypeVar("_C")
 
 @runtime_checkable
 class CatalogProtocol(Protocol[_C]):
+    """``CatalogProtocol`` is a protocol class for all data catalog implementations"""
+
     _datasets: dict[str, AbstractDataset]
 
     @property

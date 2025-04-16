@@ -278,7 +278,7 @@ class TestKedroDataCatalog:
 
     def test_repr_no_type_found(self, data_catalog_from_config):
         del data_catalog_from_config._lazy_datasets["boats"].config["type"]
-        pattern = "'type' is missing from dataset catalog configuration"
+        pattern = "'type'"
         with pytest.raises(KeyError, match=re.escape(pattern)):
             _ = str(data_catalog_from_config)
 

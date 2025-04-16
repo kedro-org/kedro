@@ -11,7 +11,7 @@ import yaml
 from click import secho
 
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
-from kedro.framework.project import pipelines, settings
+from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.io.core import is_parameter
 from kedro.io.kedro_data_catalog import KedroDataCatalog, _LazyDataset
@@ -127,58 +127,6 @@ def _map_type_to_datasets(
         if dataset_name not in mapping[ds_type]:
             mapping[ds_type].append(dataset_name)
     return mapping
-
-
-@catalog.command("create")
-@env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
-@click.option(
-    "--pipeline",
-    "-p",
-    "pipeline_name",
-    type=str,
-    required=True,
-    help="Name of a pipeline.",
-)
-@click.pass_obj
-def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> None:
-    """Create Data Catalog YAML configuration with missing datasets.
-
-    Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
-    file for each dataset in a registered pipeline if it is missing from
-    the ``KedroDataCatalog``.
-
-    The catalog configuration will be saved to
-    `<conf_source>/<env>/catalog_<pipeline_name>.yml` file.
-    """
-    env = env or "base"
-    session = _create_session(metadata.package_name, env=env)
-    context = session.load_context()
-
-    pipeline = pipelines.get(pipeline_name)
-
-    if not pipeline:
-        existing_pipelines = ", ".join(sorted(pipelines.keys()))
-        raise KedroCliError(
-            f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
-        )
-
-    pipeline_datasets = set(filterfalse(is_parameter, pipeline.datasets()))
-
-    catalog_datasets = set(filterfalse(is_parameter, context.catalog.keys()))
-
-    # Datasets that are missing in Data Catalog
-    missing_ds = sorted(pipeline_datasets - catalog_datasets)
-    if missing_ds:
-        catalog_path = (
-            context.project_path
-            / settings.CONF_SOURCE
-            / env
-            / f"catalog_{pipeline_name}.yml"
-        )
-        _add_missing_datasets_to_catalog(missing_ds, catalog_path)
-        click.echo(f"Data Catalog YAML configuration was created: {catalog_path}")
-    else:
-        click.echo("All datasets are already configured.")
 
 
 def _add_missing_datasets_to_catalog(missing_ds: list[str], catalog_path: Path) -> None:

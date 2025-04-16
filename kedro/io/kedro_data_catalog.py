@@ -382,7 +382,8 @@ class KedroDataCatalog(CatalogProtocol):
         dict[str, str | None],
         str | None,
     ]:
-        """Converts the `KedroDataCatalog` instance into a configuration format suitable for
+        """
+        Converts the `KedroDataCatalog` instance into a configuration format suitable for
         serialization. This includes datasets, credentials, and versioning information.
 
         This method is only applicable to catalogs that contain datasets initialized with static, primitive
@@ -395,9 +396,9 @@ class KedroDataCatalog(CatalogProtocol):
                 catalog: A dictionary mapping dataset names to their unresolved configurations,
                     excluding in-memory datasets.
                 credentials: A dictionary of unresolved credentials extracted from dataset configurations.
-                load_versions: A dictionary mapping dataset names to specific versions to be loaded,
-                    or `None` if no version is set.
+                load_versions: A dictionary mapping dataset names to specific versions to be loaded or `None` if no version is set.
                 save_version: A global version identifier for saving datasets, or `None` if not specified.
+
         Example:
         ::
 

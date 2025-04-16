@@ -106,17 +106,6 @@ class TestCachedDataset:
         catalog = KedroDataCatalog.from_config(config, load_versions={"test_ds": "42"})
         assert catalog["test_ds"]._dataset._version.load == "42"
 
-    # [TODO: Not completely sure on this]
-    # def test_config_bad_version(self):
-    #     config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED_BAD))
-    #     with pytest.raises(
-    #         DatasetError,
-    #         match=r"Cached datasets should specify that they are "
-    #         r"versioned in the 'CachedDataset', not in the "
-    #         r"wrapped dataset",
-    #     ):
-    #         _ = KedroDataCatalog.from_config(config, load_versions={"test_ds": "42"})
-
     def test_for_versioned_key(self):
         config = {"versioned": True}
         with pytest.raises(

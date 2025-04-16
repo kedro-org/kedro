@@ -59,7 +59,7 @@ class _LazyDataset:
 
 
 class KedroDataCatalog(CatalogProtocol):
-    runtime_patterns: ClassVar = {"{default}": {"type": "MemoryDataset"}}
+    runtime_patterns: ClassVar = {"{default}": {"type": "kedro.io.MemoryDataset"}}
 
     def __init__(
         self,
@@ -748,7 +748,7 @@ class KedroDataCatalog(CatalogProtocol):
 
 
 class SharedMemoryDataCatalog(KedroDataCatalog):
-    runtime_patterns: ClassVar = {"{default}": {"type": "SharedMemoryDataset"}}
+    runtime_patterns: ClassVar = {"{default}": {"type": "kedro.io.SharedMemoryDataset"}}
 
     def set_manager_datasets(self, manager) -> None:
         for _, ds in self._datasets.items():

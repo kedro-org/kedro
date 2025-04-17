@@ -29,7 +29,7 @@ def generate_dict():
 class TestRunGeneratorNode:
     def test_generator_fail_async(self, mocker, catalog):
         fake_dataset = mocker.Mock()
-        catalog.add("result", fake_dataset)
+        catalog["result"] = fake_dataset
         n = node(generate_one, inputs=None, outputs="result")
 
         with pytest.raises(Exception, match="nodes wrapping generator functions"):
@@ -37,54 +37,73 @@ class TestRunGeneratorNode:
 
     def test_generator_node_one(self, mocker, catalog):
         fake_dataset = mocker.Mock()
-        catalog.add("result", fake_dataset)
+
+        mocker.patch.object(catalog, "get", return_value=fake_dataset)
+
         n = node(generate_one, inputs=None, outputs="result")
         run_node(n, catalog, _NullPluginManager())
 
         expected = [((i,),) for i in range(10)]
-        assert 10 == fake_dataset.save.call_count
+        assert fake_dataset.save.call_count == 10
         assert fake_dataset.save.call_args_list == expected
 
     def test_generator_node_tuple(self, mocker, catalog):
         left = mocker.Mock()
         right = mocker.Mock()
-        catalog.add("left", left)
-        catalog.add("right", right)
+
+        mocker.patch.object(
+            catalog,
+            "get",
+            side_effect=lambda ds_name: left if ds_name == "left" else right,
+        )
+
         n = node(generate_tuple, inputs=None, outputs=["left", "right"])
         run_node(n, catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
         expected_right = [((i * i,),) for i in range(10)]
-        assert 10 == left.save.call_count
+        assert left.save.call_count == 10
         assert left.save.call_args_list == expected_left
-        assert 10 == right.save.call_count
+        assert right.save.call_count == 10
         assert right.save.call_args_list == expected_right
 
     def test_generator_node_list(self, mocker, catalog):
         left = mocker.Mock()
         right = mocker.Mock()
-        catalog.add("left", left)
-        catalog.add("right", right)
+
+        mocker.patch.object(
+            catalog,
+            "get",
+            side_effect=lambda ds_name: left if ds_name == "left" else right,
+        )
+
         n = node(generate_list, inputs=None, outputs=["left", "right"])
         run_node(n, catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
         expected_right = [((i * i,),) for i in range(10)]
-        assert 10 == left.save.call_count
+
+        assert left.save.call_count == 10
         assert left.save.call_args_list == expected_left
-        assert 10 == right.save.call_count
+        assert right.save.call_count == 10
         assert right.save.call_args_list == expected_right
 
     def test_generator_node_dict(self, mocker, catalog):
         left = mocker.Mock()
         right = mocker.Mock()
-        catalog.add("left", left)
-        catalog.add("right", right)
+
+        mocker.patch.object(
+            catalog,
+            "get",
+            side_effect=lambda ds_name: left if ds_name == "left" else right,
+        )
+
         n = node(generate_dict, inputs=None, outputs={"idx": "left", "square": "right"})
         run_node(n, catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
         expected_right = [((i * i,),) for i in range(10)]
+
         assert 10 == left.save.call_count
         assert left.save.call_args_list == expected_left
         assert 10 == right.save.call_count
@@ -93,8 +112,8 @@ class TestRunGeneratorNode:
     def test_run_node_deprecated(self, mocker, catalog):
         left = mocker.Mock()
         right = mocker.Mock()
-        catalog.add("left", left)
-        catalog.add("right", right)
+        catalog["left"] = left
+        catalog["right"] = right
         n = node(generate_dict, inputs=None, outputs={"idx": "left", "square": "right"})
         with warns(
             KedroDeprecationWarning,

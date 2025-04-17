@@ -451,7 +451,7 @@ The output includes a list of any [dataset factories](../data/kedro_dataset_fact
 
 ##### Create a Data Catalog YAML configuration file
 
-The following command creates a Data Catalog YAML configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
+The following command creates a Data Catalog YAML configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline, if it is missing from the `KedroDataCatalog`.
 
 ```bash
 kedro catalog create --pipeline=<pipeline_name>
@@ -483,7 +483,7 @@ kedro ipython
 
 The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
-* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `catalog` (type {py:class}`~kedro.io.KedroDataCatalog`): [Kedro Data Catalog](../data/kedro_data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run

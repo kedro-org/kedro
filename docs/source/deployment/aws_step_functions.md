@@ -51,7 +51,7 @@ The final deployed AWS Step Functions State Machine will have the following visu
 
 The rest of the tutorial will explain each step in the deployment process above in details.
 
-### Step 1. Create new configuration environment to prepare a compatible `DataCatalog`
+### Step 1. Create new configuration environment to prepare a compatible `KedroDataCatalog`
 
 * Create a `conf/aws` directory in your Kedro project
 * Put a `catalog.yml` file in this directory with the following content

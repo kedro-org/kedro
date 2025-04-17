@@ -62,7 +62,7 @@ For example, the full signature of the {py:meth}` after_catalog_created() <kedro
 @hook_spec
 def after_catalog_created(
     self,
-    catalog: DataCatalog,
+    catalog: KedroDataCatalog,
     conf_catalog: Dict[str, Any],
     conf_creds: Dict[str, Any],
     save_version: str,
@@ -78,7 +78,7 @@ However, if you just want to use this Hook to list the contents of a data catalo
 import logging
 
 from kedro.framework.hooks import hook_impl
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 
 
 class DataCatalogHooks:
@@ -87,7 +87,7 @@ class DataCatalogHooks:
         return logging.getLogger(__name__)
 
     @hook_impl
-    def after_catalog_created(self, catalog: DataCatalog) -> None:
+    def after_catalog_created(self, catalog: KedroDataCatalog) -> None:
         self._logger.info(catalog.list())
 ```
 

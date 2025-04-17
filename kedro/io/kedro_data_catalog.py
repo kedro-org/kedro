@@ -71,7 +71,9 @@ class KedroDataCatalog(CatalogProtocol):
         single point of reference for your calls, relaying load and save
         functions to the underlying datasets.
 
-        Note: ``KedroDataCatalog`` is an experimental feature and is under active development. Therefore, it is possible we'll introduce breaking changes to this class, so be mindful of that if you decide to use it already.
+        Note: ``KedroDataCatalog`` is an experimental feature and is under active development.
+        Therefore, it is possible we'll introduce breaking changes to this class, so be mindful
+        of that if you decide to use it already.
 
         Args:
             datasets: A dictionary of dataset names and dataset instances.
@@ -88,6 +90,7 @@ class KedroDataCatalog(CatalogProtocol):
 
         Example:
         ::
+
             >>> from kedro_datasets.pandas import CSVDataset
             >>>
             >>> cars = CSVDataset(filepath="cars.csv",
@@ -225,7 +228,7 @@ class KedroDataCatalog(CatalogProtocol):
         key: str,
         version: Version | None = None,
         default: AbstractDataset | None = None,
-    ) -> AbstractDataset | None:
+    ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
         If a dataset is not in the collection but matches any pattern
@@ -239,6 +242,9 @@ class KedroDataCatalog(CatalogProtocol):
 
         Returns:
             An instance of AbstractDataset.
+
+        Raises:
+            DatasetNotFoundError: When dataset doesn't exist in the catalog.
         """
         if key not in self._datasets and key not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
@@ -255,6 +261,10 @@ class KedroDataCatalog(CatalogProtocol):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
             dataset = dataset._copy(_version=version)
+
+        if dataset is None:
+            error_msg = f"Dataset '{key}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
 
         return dataset
 
@@ -373,7 +383,8 @@ class KedroDataCatalog(CatalogProtocol):
         dict[str, str | None],
         str | None,
     ]:
-        """Converts the `KedroDataCatalog` instance into a configuration format suitable for
+        """
+        Converts the `KedroDataCatalog` instance into a configuration format suitable for
         serialization. This includes datasets, credentials, and versioning information.
 
         This method is only applicable to catalogs that contain datasets initialized with static, primitive
@@ -382,13 +393,12 @@ class KedroDataCatalog(CatalogProtocol):
         https://github.com/kedro-org/kedro-plugins/issues/950 for the details.
 
         Returns:
-            A tuple containing:
-                catalog: A dictionary mapping dataset names to their unresolved configurations,
-                    excluding in-memory datasets.
-                credentials: A dictionary of unresolved credentials extracted from dataset configurations.
-                load_versions: A dictionary mapping dataset names to specific versions to be loaded,
-                    or `None` if no version is set.
-                save_version: A global version identifier for saving datasets, or `None` if not specified.
+            tuple: A tuple containing:
+                - catalog: A dictionary mapping dataset names to their unresolved configurations, excluding in-memory datasets.
+                - credentials: A dictionary of unresolved credentials extracted from dataset configurations.
+                - load_versions: A dictionary mapping dataset names to specific versions to be loaded or `None` if no version is set.
+                - save_version: A global version identifier for saving datasets, or `None` if not specified.
+
         Example:
         ::
 

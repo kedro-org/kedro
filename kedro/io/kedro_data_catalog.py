@@ -393,11 +393,11 @@ class KedroDataCatalog(CatalogProtocol):
         https://github.com/kedro-org/kedro-plugins/issues/950 for the details.
 
         Returns:
-            A tuple containing:
-                catalog: A dictionary mapping dataset names to their unresolved configurations, excluding in-memory datasets.
-                credentials: A dictionary of unresolved credentials extracted from dataset configurations.
-                load_versions: A dictionary mapping dataset names to specific versions to be loaded or `None` if no version is set.
-                save_version: A global version identifier for saving datasets, or `None` if not specified.
+            tuple: A tuple containing:
+                - catalog: A dictionary mapping dataset names to their unresolved configurations, excluding in-memory datasets.
+                - credentials: A dictionary of unresolved credentials extracted from dataset configurations.
+                - load_versions: A dictionary mapping dataset names to specific versions to be loaded or `None` if no version is set.
+                - save_version: A global version identifier for saving datasets, or `None` if not specified.
 
         Example:
         ::

@@ -493,8 +493,8 @@ class KedroDataCatalog(CatalogProtocol):
         strings are also supported.
 
         Args:
-            name_regex: Optional compiled regex pattern (``re.Pattern``) or string to filter dataset names.
-            type_regex: Optional compiled regex pattern (``re.Pattern``) or string to filter dataset types.
+            name_regex: Optional compiled regex pattern or string to filter dataset names.
+            type_regex: Optional compiled regex pattern or string to filter dataset types.
                 The provided regex is matched against the full dataset type path, for example:
                 `kedro_datasets.pandas.parquet_dataset.ParquetDataset`.
             by_type: Optional dataset type(s) to filter by. This performs an instance type check

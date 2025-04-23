@@ -1,6 +1,6 @@
 # Argo Workflows (outdated documentation that needs review)
 
-> **Important**  
+> **Important**
 > This page contains outdated documentation that has not been tested against recent Kedro releases. If you successfully use Argo Workflows with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
 
 This page explains how to convert your Kedro pipeline to use [Argo Workflows](https://github.com/argoproj/argo-workflows), an open-source container-native workflow engine for orchestrating parallel jobs on [Kubernetes](https://kubernetes.io/).
@@ -25,7 +25,7 @@ To use Argo Workflows, ensure you have the following prerequisites in place:
 - A `name` attribute is set for each Kedro {py:mod}`~kedro.pipeline.node` since it is used to build a DAG
 - [All node input/output datasets must be configured in `catalog.yml`](../data/data_catalog_yaml_examples.md) and refer to an external location (e.g. AWS S3); you cannot use the `MemoryDataset` in your workflow
 
-> **Note**  
+> **Note**
 > Each node will run in its own container.
 
 ## How to run your Kedro pipeline using Argo Workflows

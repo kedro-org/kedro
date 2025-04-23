@@ -46,9 +46,9 @@ a, p, li, span, div {
 }
 
 /* Style for all <pre> blocks */
-.md-typeset pre code, 
+.md-typeset pre code,
 .md-typeset code {
-    background-color: var(--block-code-bg-color); 
+    background-color: var(--block-code-bg-color);
     color: var(--block-code-font-color);
 }
 

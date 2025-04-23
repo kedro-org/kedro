@@ -39,7 +39,7 @@ This following pages provide information for deployment to, or integration with,
 - [Prefect](prefect.md)
 - [Vertex AI](vertexai.md)
 
-> **Warning**  
+> **Warning**
 > We also have legacy documentation pages for the following deployment targets, but these have not been tested against recent Kedro releases and we cannot guarantee them:
 >
 > - for [Argo Workflows](argo.md)

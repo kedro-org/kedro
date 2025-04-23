@@ -44,7 +44,7 @@ Below are examples of commonly used components in the documentation:
 #### 🔔 Note
 
 ```
-> **Note**  
+> **Note**
 > This is a note block to highlight important information.
 ```
 

@@ -46,7 +46,7 @@ For more details and examples of how to use `KedroDataCatalog`, see the Kedro Da
 
 The [documentation](./data_catalog.md) for `DataCatalog` remains relevant as `KedroDataCatalog` retains its core functionality with some enhancements.
 
-> **Note**  
+> **Note**
 > `KedroDataCatalog` is under active development and may undergo breaking changes in future releases. While we encourage you to try it out, please be aware of potential modifications as we continue to improve it. Additionally, all upcoming catalog-related features will be introduced through `KedroDataCatalog` before it replaces `DataCatalog`.
 
 We value your feedback — let us know if you have any thoughts or suggestions regarding `KedroDataCatalog` or potential new features via our [Slack channel](https://kedro-org.slack.com).

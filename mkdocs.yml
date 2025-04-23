@@ -40,7 +40,6 @@ theme:
 
 plugins:
   - search
-  - lint
   - autorefs
   - mermaid2
   - mkdocstrings:

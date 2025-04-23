@@ -40,7 +40,9 @@ show-docs:
 
 linkcheck:
 	uv pip install -e ".[docs]"
-	mkdocs build --strict --site-dir docs/build/linkcheck
+	mkdocs build --strict
+	vale docs
+	linkchecker site/
 
 package: clean install
 	python -m pip install build && python -m build

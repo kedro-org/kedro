@@ -89,7 +89,8 @@ docs = [
     "mkdocs-autorefs>=1.4.1",
     "mkdocs-get-deps>=0.2.0",
     "mkdocstrings>=0.29.1",
-    "mkdocstrings-python>=0.29.1"
+    "mkdocstrings-python>=0.29.1",
+    "mkdocs-link-check>=0.1.0"
 ]
 jupyter = [
     "ipylab>=1.0.0",

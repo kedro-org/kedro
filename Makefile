@@ -27,16 +27,20 @@ e2e-tests-fast:
 pip-compile:
 	pip-compile -q -o -
 
-build-docs:
+serve-docs:
 	uv pip install -e ".[docs]"
 	mkdocs serve
+
+build-docs:
+	uv pip install -e ".[docs]"
+	mkdocs build
 
 show-docs:
 	open docs/build/html/index.html
 
 linkcheck:
-	uv pip install --system "kedro[docs] @ ."
-	./docs/build-docs.sh "linkcheck"
+	uv pip install -e ".[docs]"
+	mkdocs build --strict --site-dir docs/build/linkcheck
 
 package: clean install
 	python -m pip install build && python -m build

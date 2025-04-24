@@ -21,12 +21,12 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
 
-class Node:
+class Node:  # TODO: Too many conditionals in this function, make it work first, then fix this and remove the PLR0912 ignore
     """``Node`` is an auxiliary class facilitating the operations required to
     run user-provided functions as part of Kedro pipelines.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0912
         self,
         func: Callable,
         inputs: str | list[str] | dict[str, str] | None,
@@ -100,6 +100,12 @@ class Node:
                         f"is '{type(_input)}'."
                     )
                 )
+            if "." in _input:
+                raise ValueError(
+                    _node_error_message(
+                        f"Invalid input dataset name '{_input}': '.' characters are not allowed in dataset names."
+                    )
+                )
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
@@ -116,6 +122,12 @@ class Node:
                         f"names of variables used as outputs of the function "
                         f"must be of 'String' type, but {_output} from {outputs} "
                         f"is '{type(_output)}'."
+                    )
+                )
+            if "." in _output:
+                raise ValueError(
+                    _node_error_message(
+                        f"Invalid output dataset name '{_output}': '.' characters are not allowed in dataset names."
                     )
                 )
 

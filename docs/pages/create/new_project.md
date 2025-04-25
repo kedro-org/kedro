@@ -171,21 +171,12 @@ If you've worked through the documentation listed and are unsure where to go nex
 
 Here is a flowchart to help guide your choice of tools and examples you can select:
 
-```{figure} ../meta/images/new-project-tools.png
-:alt: mermaid-General overview diagram for setting up a new Kedro project with tools
-```
-% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
-% flowchart TD
-%     A[Start] --> B[Enter Project Name];
-%     B --> C[Select Tools];
-%
-%     C -->|None| D[None];
-%     C -->|Any combination| E[lint, test, logging, docs, data, PySpark, viz];
-%     C -->|All| F[All];
-%
-%     D --> G[Include Example Pipeline?]
-%     E --> G;
-%     F --> G
-%
-%     G -->|Yes| H[New Project Created];
-%     G -->|No| H;
+![overview diagram for setting up a new Kedro project with tools](../meta/images/new-project-tools.png)
+
+such as the [`kedro-datasets`][kedro-datasets], [`DataCatalog`][kedro.io.DataCatalog], [`Pipeline`][kedro.pipeline.Pipeline], [`Node`][kedro.pipeline.node.Node] and [`KedroContext`][kedro.framework.context.KedroContext].
+
+[kedro-datasets]: https://docs.kedro.org/projects/kedro-datasets/en/stable/
+[kedro.io.DataCatalog]: https://docs.kedro.org/en/stable/kedro.io.html#kedro.io.DataCatalog
+[kedro.pipeline.Pipeline]: https://docs.kedro.org/en/stable/kedro.pipeline.html#kedro.pipeline.Pipeline
+[kedro.pipeline.node.Node]: https://docs.kedro.org/en/stable/kedro.pipeline.node.html#kedro.pipeline.node.Node
+[kedro.framework.context.KedroContext]: https://docs.kedro.org/en/stable/kedro.framework.context.html#kedro.framework.context.KedroContext

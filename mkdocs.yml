@@ -40,17 +40,15 @@ theme:
 
 plugins:
   - search
-  - autorefs:
-        enabled: true
-        ignore:
-            - pages/api/
+  - autorefs
   - mermaid2
   - mkdocstrings:
+      default_handler: python
       handlers:
         python:
           options:
             show_root_toc_entry: true
-            show_source: false #currently doesn't show source at correct level, and not for pydantic models
+            show_source: false
             docstring_style: google
             merge_init_into_class: true
             docstring_section_style: list
@@ -60,8 +58,32 @@ plugins:
               ignore_init_summary: true
               warn_unknown_params: false
               returns_named_value: false
-          paths: [src]
+            paths: [src]
+            import:
+              - https://docs.kedro.org/en/stable/objects.inv
+              - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
 
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - attr_list
+  - md_in_html
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - footnotes
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - attr_list
 
 extra_css:
   - stylesheets/colors.css

@@ -40,9 +40,7 @@ class TestTransformPipelineIntegration:
         ) + pipeline(lunch_pipeline, inputs={"food": "NEW_NAME"})
 
         for pipe in [pipeline1, pipeline2, pipeline3]:
-            catalog = KedroDataCatalog(
-                {}, feed_dict={"frozen_meat": "frozen_meat_data"}
-            )
+            catalog = KedroDataCatalog({}, raw_data={"frozen_meat": "frozen_meat_data"})
             result = SequentialRunner().run(pipe, catalog)
             assert result == {"output": "frozen_meat_data_defrosted_grilled_done"}
 
@@ -77,7 +75,7 @@ class TestTransformPipelineIntegration:
         )
         catalog = KedroDataCatalog(
             {},
-            feed_dict={
+            raw_data={
                 "breakfast.frozen_meat": "breakfast_frozen_meat",
                 "lunch.frozen_meat": "lunch_frozen_meat",
             },

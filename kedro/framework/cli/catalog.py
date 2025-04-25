@@ -13,6 +13,7 @@ from click import secho
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
+from kedro.io.core import is_parameter
 from kedro.io.kedro_data_catalog import KedroDataCatalog, _LazyDataset
 
 if TYPE_CHECKING:
@@ -25,12 +26,6 @@ if TYPE_CHECKING:
 def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     kwargs.setdefault("save_on_close", False)
     return KedroSession.create(**kwargs)
-
-
-def is_parameter(dataset_name: str) -> bool:
-    # TODO: when breaking change move it to kedro/io/core.py
-    """Check if dataset is a parameter."""
-    return dataset_name.startswith("params:") or dataset_name == "parameters"
 
 
 @click.group(name="Kedro")
@@ -67,7 +62,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     try:
         data_catalog = context.catalog
         datasets_meta = data_catalog._datasets
-        catalog_ds = set(data_catalog.list())
+        catalog_ds = set(data_catalog.keys())
     except Exception as exc:
         raise KedroCliError(
             f"Unable to instantiate Kedro Catalog.\nError: {exc}"
@@ -95,8 +90,13 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 
         for ds_name in default_ds:
             if data_catalog.config_resolver.match_pattern(ds_name):
-                ds_config = data_catalog.config_resolver.resolve_pattern(ds_name)
-                factory_ds_by_type[ds_config.get("type", "DefaultDataset")].append(
+                # [TODO: Remove pragma: no cover after https://github.com/kedro-org/kedro/pull/4646#discussion_r2036128769]
+                ds_config = data_catalog.config_resolver.resolve_pattern(
+                    ds_name
+                )  # pragma: no cover
+                factory_ds_by_type[
+                    ds_config.get("type", "DefaultDataset")
+                ].append(  # pragma: no cover
                     ds_name
                 )
 
@@ -126,7 +126,10 @@ def _map_type_to_datasets(
     mapping = defaultdict(list)  # type: ignore[var-annotated]
     for dataset_name in filterfalse(is_parameter, datasets):
         if isinstance(datasets_meta[dataset_name], _LazyDataset):
-            ds_type = str(datasets_meta[dataset_name]).split(".")[-1]
+            # [TODO: Remove pragma: no cover after https://github.com/kedro-org/kedro/pull/4646#discussion_r2036128769]
+            ds_type = str(datasets_meta[dataset_name]).split(".")[
+                -1
+            ]  # pragma: no cover
         else:
             ds_type = datasets_meta[dataset_name].__class__.__name__
         if dataset_name not in mapping[ds_type]:
@@ -169,7 +172,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
 
     pipeline_datasets = set(filterfalse(is_parameter, pipeline.datasets()))
 
-    catalog_datasets = set(filterfalse(is_parameter, context.catalog.list()))
+    catalog_datasets = set(filterfalse(is_parameter, context.catalog.keys()))
 
     # Datasets that are missing in Data Catalog
     missing_ds = sorted(pipeline_datasets - catalog_datasets)

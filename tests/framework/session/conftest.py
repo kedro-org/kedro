@@ -175,7 +175,7 @@ class LoggingHooks:
         catalog: KedroDataCatalog,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
-        feed_dict: dict[str, Any],
+        parameters: dict[str, Any],
         save_version: str,
         load_versions: dict[str, str],
     ):
@@ -185,7 +185,7 @@ class LoggingHooks:
                 "catalog": catalog,
                 "conf_catalog": conf_catalog,
                 "conf_creds": conf_creds,
-                "feed_dict": feed_dict,
+                "parameters": parameters,
                 "save_version": save_version,
                 "load_versions": load_versions,
             },

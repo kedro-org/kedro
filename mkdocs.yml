@@ -141,14 +141,14 @@ nav:
           - Data and pipeline versioning: pages/catalog-data/kedro_dvc_versioning.md
           - Partitioned and incremental datasets: pages/catalog-data/partitioned_and_incremental_datasets.md
           - Advanced data catalog usagepages: pages/catalog-data/advanced_data_catalog_usage.md
-      - BUILD:
-          - Nodes: pages/build/nodes.md
-          - Pipeline object: pages/build/pipeline_introduction.md
-          - Run a pipeline: pages/build/run_a_pipeline.md
-          - Modular pipelines: pages/build/modular_pipelines.md
-          - Reusing pipelines (namespaces): pages/build/namespaces.md
-          - Pipeline registry: pages/build/pipeline_registry.md
-          - Slice a pipeline: pages/build/slice_a_pipeline.md
+      - PIPELINE_BUILD:
+          - Nodes: pages/pipeline-build/nodes.md
+          - Pipeline object: pages/pipeline-build/pipeline_introduction.md
+          - Run a pipeline: pages/pipeline-build/run_a_pipeline.md
+          - Modular pipelines: pages/pipeline-build/modular_pipelines.md
+          - Reusing pipelines (namespaces): pages/pipeline-build/namespaces.md
+          - Pipeline registry: pages/pipeline-build/pipeline_registry.md
+          - Slice a pipeline: pages/pipeline-build/slice_a_pipeline.md
       - DEVELOP:
           - Dependency management: pages/develop/dependencies.md
           - Logging: pages/develop/logging.md

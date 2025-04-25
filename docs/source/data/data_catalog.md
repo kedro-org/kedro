@@ -1,7 +1,7 @@
 # Introduction to the Data Catalog
 
 ```{warning}
-Data Catalog will be removed in v1.0.0 release. The documentation is subject to change
+`DataCatalog` will be replaced with `KedroDataCatalog`  in the v1.0.0 release. All related documentation is currently under development and subject to change.
 ```
 
 In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `KedroDataCatalog` class.

@@ -62,10 +62,15 @@ plugins:
               returns_named_value: false
           paths: [src]
 
+
 extra_css:
   - stylesheets/colors.css
   - stylesheets/globals.css
   - stylesheets/themes.css
+
+extra_javascript:
+  - javascript/readthedocs.js
+  - javascript/deindex-old-docs.js
 
 
 nav:

@@ -10,4 +10,3 @@
 | [`magic_load_node`](kedro.ipython.magic_load_node.md)               | Function   | .                                                                           |
 | [`magic_reload_kedro`](kedro.ipython.magic_reload_kedro.md)         | Function   | .                                                                           |
 | [`reload_kedro`](kedro.ipython.reload_kedro.md)                     | Function   | Function that underlies the `%reload_kedro` Line magic.                     |
-

@@ -1,5 +1,6 @@
 site_name: ""
 site_url: https://docs.kedro.org
+use_directory_urls: true
 
 theme:
   name: material

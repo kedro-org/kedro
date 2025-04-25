@@ -2,7 +2,7 @@ install:
 	uv pip install --system -e .
 
 clean:
-	rm -rf dist site kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
+	rm -rf build dist site kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true

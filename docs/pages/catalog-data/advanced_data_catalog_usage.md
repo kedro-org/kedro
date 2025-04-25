@@ -1,6 +1,6 @@
 # Advanced: Access the Data Catalog in code
 
-You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through {py:class}`~kedro.io.DataCatalog` using an API that allows you to configure data sources in code and use the IO module within notebooks.
+You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through [`DataCatalog`][kedro.io.DataCatalog] using an API that allows you to configure data sources in code and use the IO module within notebooks.
 
 ```{warning}
 Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
@@ -66,9 +66,8 @@ The following steps happened behind the scenes when `load` was called:
 
 ## How to save data programmatically
 
-```{warning}
-This pattern is not recommended unless you are using platform notebook environments (Sagemaker, Databricks etc) or writing unit/integration tests for your Kedro pipeline. Use the YAML approach in preference.
-```
+!!! warning "Memory Dataset Warning"
+    This pattern is not recommended unless you are using platform notebook environments (Sagemaker, Databricks etc) or writing unit/integration tests for your Kedro pipeline. Use the YAML approach in preference.
 
 ### How to save data to memory
 
@@ -110,9 +109,8 @@ To save the processed data in Parquet format:
 catalog.save("ranked", ranked)
 ```
 
-```{warning}
-Saving `None` to a dataset is not allowed!
-```
+!!! warning "Null Value Warning"
+    Saving `None` to a dataset is not allowed!
 
 ## How to access a dataset with credentials
 Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configure/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.

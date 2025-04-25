@@ -576,7 +576,7 @@ def run_node(
 
     """
     warnings.warn(
-        "`run_node()` has been deprecated and will be removed in Kedro 0.20.0",
+        "`run_node()` has been deprecated and will be removed in Kedro 1.0.0.",
         KedroDeprecationWarning,
     )
 

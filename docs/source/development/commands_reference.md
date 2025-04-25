@@ -64,8 +64,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package) (deprecated from version 0.20.0)
-  * [`kedro micropkg pull <package_name>`](#pull-a-micro-package) (deprecated from version 0.20.0)
+  * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package) (deprecated from version 1.0.0)
+  * [`kedro micropkg pull <package_name>`](#pull-a-micro-package) (deprecated from version 1.0.0)
   * [`kedro package`](#deploy-the-project)
   * [`kedro pipeline create <pipeline_name>`](#create-a-new-modular-pipeline-in-your-project)
   * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
@@ -305,7 +305,7 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --tags=<tag_name1>,<tag_name2>`                          | Run only nodes which have any of these tags attached.                                                                                                                                                                                                   |
 | `kedro run --load-versions=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ` | Specify particular dataset versions (timestamp) for loading.                                                                                                                                                                                            |
 | `kedro run --pipeline=<pipeline_name>`                              | Run the whole pipeline by its name                                                                                                                                                                                                                      |
-| `kedro run --namespace=<namespace>`                                 | Run only nodes with the specified namespace                                                                                                                                                                                                             |
+| `kedro run --namespaces=<namespace>`                                 | Run only nodes with the specified namespace                                                                                                                                                                                                             |
 | `kedro run --config=<config_file_name>.yml`                         | Specify all command line options in a named YAML configuration file                                                                                                                                                                                     |
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
 | `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
@@ -335,7 +335,7 @@ See [the Python documentation for further information about packaging](https://p
 Since Kedro 0.17.7 you can pull a micro-package into your Kedro project as follows:
 
 ```{warning}
-_This command is deprecated and will be removed from Kedro in version 0.20.0._
+_This command is deprecated and will be removed from Kedro in version 1.0.0._
 ```
 
 ```bash
@@ -370,7 +370,7 @@ kedro pipeline create <pipeline_name>
 The following command packages all the files related to a micro-package, e.g. a modular pipeline, into a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions):
 
 ```{warning}
-_This command is deprecated and will be removed from Kedro in version 0.20.0._
+_This command is deprecated and will be removed from Kedro in version 1.0.0._
 ```
 
 ```bash
@@ -383,7 +383,7 @@ Further information is available in the [micro-packaging documentation](../nodes
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
 
 ```{warning}
-_This command is deprecated and will be removed from Kedro in version 0.20.0._
+_This command is deprecated and will be removed from Kedro in version 1.0.0._
 ```
 
 ```bash

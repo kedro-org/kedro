@@ -4,8 +4,7 @@ from click.testing import CliRunner
 from kedro_datasets.pandas import CSVDataset
 
 from kedro.io import KedroDataCatalog, MemoryDataset
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import node, pipeline
 
 
 @pytest.fixture
@@ -22,8 +21,8 @@ PIPELINE_NAME = "pipeline"
 @pytest.fixture
 def mock_pipelines(mocker):
     dummy_pipelines = {
-        PIPELINE_NAME: modular_pipeline([]),
-        "second": modular_pipeline([]),
+        PIPELINE_NAME: pipeline([]),
+        "second": pipeline([]),
     }
     return mocker.patch("kedro.framework.cli.catalog.pipelines", dummy_pipelines)
 
@@ -430,7 +429,7 @@ class TestCatalogCreateCommand:
         }
         mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
         mocked_context.project_path = fake_repo_path
-        mock_pipelines[self.PIPELINE_NAME] = modular_pipeline(
+        mock_pipelines[self.PIPELINE_NAME] = pipeline(
             [node(identity, "input_data", "output_data")]
         )
 

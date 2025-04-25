@@ -263,7 +263,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return logging.getLogger(__name__)
 
     def __str__(self) -> str:
-        # TODO: Replace with __repr__ implementation in 0.20.0 release.
+        # TODO: Replace with __repr__ implementation in 1.0.0 release.
         def _to_str(obj: Any, is_root: bool = False) -> str:
             """Returns a string representation where
             1. The root level (i.e. the Dataset.__init__ arguments) are

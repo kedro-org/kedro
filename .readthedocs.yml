@@ -10,15 +10,12 @@ build:
   tools:
     python: "3.9"
 
-  commands:
-    # Install dependencies
-    - pip install -e ".[docs]"
-    # Build the MkDocs documentation
-    - mkdocs build
-    # Ensure the output directory exists
-    - mkdir -p $READTHEDOCS_OUTPUT/html
-    # Move the built site to the Read the Docs output directory
-    - cp -r site/. $READTHEDOCS_OUTPUT/html/
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
 
 mkdocs:
   configuration: mkdocs.yml

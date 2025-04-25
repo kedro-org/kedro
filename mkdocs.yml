@@ -142,7 +142,7 @@ nav:
           - Partitioned and incremental datasets: pages/catalog-data/partitioned_and_incremental_datasets.md
           - Advanced data catalog usagepages: pages/catalog-data/advanced_data_catalog_usage.md
       - PIPELINE_BUILD:
-          - Nodes: pages/pipeline-build/nodes.md
+          - Nodes: pages/catalog-data/advanced_data_catalog_usage.md
           - Pipeline object: pages/pipeline-build/pipeline_introduction.md
           - Run a pipeline: pages/pipeline-build/run_a_pipeline.md
           - Modular pipelines: pages/pipeline-build/modular_pipelines.md

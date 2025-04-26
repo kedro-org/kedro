@@ -128,10 +128,6 @@ class Node:
 
         self._func = func
         self._inputs = inputs
-        # Cache the list version of inputs dictionary to avoid recomputing in the inputs property
-        self._dict_inputs_as_list = None
-        if isinstance(self._inputs, dict):
-            self._dict_inputs_as_list = _dict_inputs_to_list(self._func, self._inputs)
         # The type of _outputs is picked up as possibly being None, however the checks above prevent that
         # ever being the case. Mypy doesn't get that though, so it complains about the assignment of outputs to
         # _outputs with different types.
@@ -251,9 +247,7 @@ class Node:
         """
         self._func = func
 
-        # Update cached inputs list if inputs is a dictionary
-        if isinstance(self._inputs, dict):
-            self._dict_inputs_as_list = _dict_inputs_to_list(self._func, self._inputs)
+        del self.inputs  # clear cached inputs
 
     @property
     def tags(self) -> set[str]:
@@ -312,7 +306,7 @@ class Node:
         """
         return self._namespace
 
-    @property
+    @cached_property
     def inputs(self) -> list[str]:
         """Return node inputs as a list, in the order required to bind them properly to
         the node's function.
@@ -322,7 +316,7 @@ class Node:
 
         """
         if isinstance(self._inputs, dict):
-            return self._dict_inputs_as_list
+            return _dict_inputs_to_list(self._func, self._inputs)
         return _to_list(self._inputs)
 
     @property

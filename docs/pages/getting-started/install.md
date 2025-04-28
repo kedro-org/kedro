@@ -15,9 +15,8 @@
 
 We strongly recommend using `venv` as your virtual environment manager if you don't already use it.
 
-``` {tip}
-[Read more about virtual environments for Python projects](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
-```
+!!! tip
+    [Read more about virtual environments for Python projects](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 
 ### How to create a new virtual environment using `venv`
 

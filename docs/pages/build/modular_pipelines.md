@@ -6,7 +6,6 @@ Kedro supports this concept of modular pipelines with the following tools:
 - [How to create a new blank pipeline using the `kedro pipeline create` command](#how-to-create-a-new-blank-pipeline-using-the-kedro-pipeline-create-command)
 - [How to structure your pipeline creation](#how-to-structure-your-pipeline-creation)
 - [How to use custom new pipeline templates](#how-to-use-custom-new-pipeline-templates)
-- [How to share your pipelines](#how-to-share-your-pipelines)
 
 ## How to create a new blank pipeline using the `kedro pipeline create` command
 

@@ -64,7 +64,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package) (deprecated from version 0.20.0)
   * [`kedro micropkg pull <package_name>`](#pull-a-micro-package) (deprecated from version 0.20.0)
   * [`kedro package`](#deploy-the-project)
   * [`kedro pipeline create <pipeline_name>`](#create-a-new-modular-pipeline-in-your-project)

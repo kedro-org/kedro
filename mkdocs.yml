@@ -230,7 +230,6 @@ nav:
                   - node: pages/api/pipeline/kedro.pipeline.node.md
                   - modular_pipeline.pipeline: pages/api/pipeline/kedro.pipeline.modular_pipeline.pipeline.md
                   - Pipeline: pages/api/pipeline/kedro.pipeline.Pipeline.md
-                  - Node: pages/api/pipeline/kedro.pipeline.node.Node.md
                   - ModularPipelineError: pages/api/pipeline/kedro.pipeline.modular_pipeline.ModularPipelineError.md
               - kedro.runner:
                   - Overview: pages/api/runner/kedro.runner.md

@@ -7,6 +7,7 @@
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
 * Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
+
 ## Breaking changes to the API
 
 
@@ -15,6 +16,7 @@
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
 ## Documentation changes
+* Added non-jupyter environment integration page (e.g. marimo) with dynamic kedro session loading.
 
 # Release 0.19.12
 

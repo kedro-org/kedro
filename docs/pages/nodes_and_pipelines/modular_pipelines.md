@@ -145,7 +145,7 @@ pip install -r requirements.txt
 
 ## How to share your pipelines
 
-> **Warning:** Micro-packaging is deprecated and will be removed from Kedro version 0.20.0.
+> **Warning:** Micro-packaging is deprecated and will be removed from Kedro version 1.0.0.
 
 Pipelines are shareable between Kedro codebases via [micro-packaging](micro_packaging.md), but you must follow a couple of rules to ensure portability:
 

@@ -91,7 +91,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def __init__(  # noqa: PLR0913
         self,
-        conf_source: str,
+        conf_source: str | Path,
         env: str | None = None,
         runtime_params: dict[str, Any] | None = None,
         *,
@@ -101,6 +101,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         custom_resolvers: dict[str, Callable] | None = None,
         merge_strategy: dict[str, str] | None = None,
     ):
+        if isinstance(conf_source, Path):
+            conf_source = str(conf_source)
         """Instantiates a ``OmegaConfigLoader``.
 
         Args:

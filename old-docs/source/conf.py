@@ -141,6 +141,7 @@ type_targets = {
         "kedro.io.memory_dataset.MemoryDataset",
         "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",
+        "kedro.pipeline.pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",

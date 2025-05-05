@@ -67,8 +67,12 @@ class TestTransformPipelineIntegration:
                 namespace="breakfast",
             )
             + breakfast_pipeline
-            + pipeline(cook_pipeline, namespace="lunch")
-            + pipeline(lunch_pipeline, inputs={"lunch_food": "lunch.grilled_meat"})
+            + pipeline(
+                cook_pipeline,
+                outputs={"grilled_meat": "lunch_grilled_meat"},
+                namespace="lunch",
+            )
+            + pipeline(lunch_pipeline, inputs={"lunch_food": "lunch_grilled_meat"})
         )
         catalog = DataCatalog(
             {},

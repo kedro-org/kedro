@@ -100,10 +100,11 @@ class Node:  # TODO: Too many conditionals in this function, make it work first,
                         f"is '{type(_input)}'."
                     )
                 )
-            if "." in _input:
+            if "." in _input and not namespace:
                 raise ValueError(
                     _node_error_message(
-                        f"Invalid input dataset name '{_input}': '.' characters are not allowed in dataset names."
+                        f"Invalid input dataset name '{_input}': '.' characters are only allowed "
+                        f"when indicating a namespace is applied."
                     )
                 )
 
@@ -124,10 +125,11 @@ class Node:  # TODO: Too many conditionals in this function, make it work first,
                         f"is '{type(_output)}'."
                     )
                 )
-            if "." in _output:
+            if "." in _output and not namespace:
                 raise ValueError(
                     _node_error_message(
-                        f"Invalid output dataset name '{_output}': '.' characters are not allowed in dataset names."
+                        f"Invalid output dataset name '{_output}': '.' characters are only allowed "
+                        f"when indicating a namespace is applied."
                     )
                 )
 

@@ -100,13 +100,15 @@ class Node:  # TODO: Too many conditionals in this function, make it work first,
                         f"is '{type(_input)}'."
                     )
                 )
-            if "." in _input and not namespace:
-                raise ValueError(
-                    _node_error_message(
-                        f"Invalid input dataset name '{_input}': '.' characters are only allowed "
-                        f"when indicating a namespace is applied."
+            if "." in _input and not _input.startswith("params:"):
+                input_namespace = ".".join(_input.split(".")[:-1])
+                if not namespace or not input_namespace.startswith(namespace):
+                    raise ValueError(
+                        _node_error_message(
+                            f"Invalid input dataset name '{_input}': '.' characters not allowed "
+                            f"in the node input parameter."
+                        )
                     )
-                )
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
@@ -125,13 +127,15 @@ class Node:  # TODO: Too many conditionals in this function, make it work first,
                         f"is '{type(_output)}'."
                     )
                 )
-            if "." in _output and not namespace:
-                raise ValueError(
-                    _node_error_message(
-                        f"Invalid output dataset name '{_output}': '.' characters are only allowed "
-                        f"when indicating a namespace is applied."
+            if "." in _output and not _output.startswith("params:"):
+                output_namespace = ".".join(_output.split(".")[:-1])
+                if not namespace or not output_namespace.startswith(namespace):
+                    raise ValueError(
+                        _node_error_message(
+                            f"Invalid output dataset name '{_output}': '.' characters not allowed "
+                            f"in the node output parameter."
+                        )
                     )
-                )
 
         if not inputs and not outputs:
             raise ValueError(

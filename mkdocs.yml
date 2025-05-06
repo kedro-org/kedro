@@ -7,7 +7,7 @@ theme:
      # Palette toggle for light mode
     - scheme: light
       toggle:
-        icon: material/brightness-7 
+        icon: material/brightness-7
         name: Switch to dark mode
 
     # Palette toggle for dark mode
@@ -178,4 +178,3 @@ nav:
           - kedro.KedroPythonVersionWarning: pages/api/kedro.KedroPythonVersionWarning.md
   - Kedro-Viz: readthedocs.io/projects/kedro-viz
   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
-

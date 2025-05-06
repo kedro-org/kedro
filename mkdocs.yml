@@ -1,5 +1,7 @@
 site_name: ""
 site_url: https://docs.kedro.org
+repo_name: kedro-org/kedro
+repo_url: https://github.com/kedro-org/kedro
 
 theme:
   name: material
@@ -7,13 +9,13 @@ theme:
      # Palette toggle for light mode
     - scheme: light
       toggle:
-        icon: material/brightness-7
+        icon: material/white-balance-sunny
         name: Switch to dark mode
 
     # Palette toggle for dark mode
     - scheme: dark
       toggle:
-        icon: material/brightness-4
+        icon: material/white-balance-sunny
         name: Switch to light mode
 
   language: en
@@ -68,7 +70,6 @@ extra_css:
 extra_javascript:
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
-
 
 nav:
   - Home: index.md

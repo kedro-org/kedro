@@ -23,18 +23,48 @@ body {
 }
 
 /* Ensure links also inherit the default text color */
-a, p, li, span, div {
+/* p, span, div {
     color: var(--md-default-fg-color);
+} */
+
+.md-header, .md-tabs {
+    background-color: var(--yellow-600);
+    color: var(--black-900) !important;
 }
 
-.md-header {
-    background-color: var(--md-default-bg-color);
-    color: var(--md-default-fg-color);
+/* Header elements positioning */
+.md-header__inner {
+    display: flex;
+    align-items: center;
 }
 
-.md-tabs {
-    background-color: var(--md-default-bg-color);
-    color: var(--md-default-fg-color);
+.md-header__title {
+    flex: 1;
+}
+
+
+@media screen and (min-width: 80em) {
+    .md-search, 
+    .md-header__option,
+    .md-header__source {
+        transform: translateY(100%);
+        z-index: 2;
+    }
+
+    /* Position the elements at tabs level with specific order */
+    .md-search {
+        order: 1;
+    }
+    
+    .md-header__option {
+        order: 2;
+    }
+
+    /* Override Material's default source button styles */
+    .md-header__source {
+        order: 3;
+        margin-left: -0.8rem !important;
+    }
 }
 
 .md-tabs__item--active {
@@ -58,4 +88,43 @@ a, p, li, span, div {
 
 .md-sidebar__scrollwrap:hover {
     scrollbar-color: var(--yellow-300) #0000;
+}
+
+/* Navigation dropdown styles */
+.md-tabs__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1;
+    display: none;
+    min-width: 200px;
+    background-color: var(--yellow-600);
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.md-tabs__item:hover .md-tabs__dropdown {
+    display: block;
+}
+
+.md-tabs__dropdown-list {
+    list-style: none;
+    padding: 0.5rem 0;
+    margin: 0;
+}
+
+.md-tabs__dropdown-item {
+    padding: 0;
+}
+
+.md-tabs__dropdown-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: var(--black-900);
+    text-decoration: none;
+}
+
+.md-tabs__dropdown-link:hover,
+.md-tabs__dropdown-link--active {
+    background-color: var(--yellow-700);
 }

@@ -27,6 +27,10 @@ body {
     color: var(--md-default-fg-color);
 } */
 
+.md-header {
+    padding-top: 24px;
+}
+
 .md-header, .md-tabs {
     background-color: var(--yellow-6);
     color: var(--black-900) !important;
@@ -159,3 +163,23 @@ body {
 .md-tabs__dropdown-link--active {
     background-color: var(--yellow-700);
 }
+
+
+/** MOBILE STYLES */
+@media screen and (max-width: 76.2344em) {
+    .md-nav--primary .md-nav__title[for=__drawer],
+    .md-nav__source  {
+        background-color: var(--yellow-6);
+        color: var(--black-900);
+    }
+
+    .md-nav__list {
+        color: var(--black-900);
+    }
+    
+    .md-nav--primary .md-nav__item--active>.md-nav__link {
+        color: var(--black-900);
+        font-weight: 600;
+    }
+}
+

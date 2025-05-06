@@ -23,7 +23,7 @@ theme:
     text: Inter
     code: Inter Regular
   favicon: "https://kedro.org/images/favicon.ico"
-  logo: assets/kedro-horizontal-color-on-light.svg
+  logo: assets/kedro_logo_black.svg
 
 
   features:

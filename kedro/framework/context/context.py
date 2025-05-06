@@ -216,7 +216,7 @@ class KedroContext:
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
             params = {}
-        _update_nested_dict(params, self._extra_params or {})
+        _update_nested_dict(params, self._runtime_params or {})
         return params  # type: ignore
 
     def _get_catalog(

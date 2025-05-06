@@ -136,7 +136,6 @@ omit = [
     "kedro/extras/extensions/ipython.py",
     "kedro/framework/cli/hooks/specs.py",
     "kedro/framework/hooks/specs.py",
-    "kedro/pipeline/modular_pipeline.py",
     "tests/*",
     "kedro/runner/parallel_runner.py",
     "*/site-packages/*",

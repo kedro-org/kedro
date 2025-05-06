@@ -30,7 +30,6 @@ body {
 .md-header, .md-tabs {
     background-color: var(--yellow-6);
     color: var(--black-900) !important;
-    margin-bottom: 15px;
 }
 
 /* Header elements positioning */
@@ -85,7 +84,7 @@ body {
     .md-search {
         order: 1;
     }
-    
+
     .md-header__option {
         order: 2;
     }
@@ -98,6 +97,8 @@ body {
 
 .md-tabs__item--active {
     font-weight: 600;
+    height: 100%;
+    padding-bottom: 30px;
     border-bottom: 2px solid var(--black-900);
 }
 

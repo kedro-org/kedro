@@ -482,7 +482,7 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_namespaced_inputs(self):
         """Test that inputs with mismatched namespaces raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid input dataset name"):
+        with pytest.raises(ValueError, match="Invalid dataset name"):
             node(
                 func=self.dummy_function,
                 inputs="wrong_namespace.input_dataset",
@@ -492,7 +492,7 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_namespaced_outputs(self):
         """Test that outputs with mismatched namespaces raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid output dataset name"):
+        with pytest.raises(ValueError, match="Invalid dataset name"):
             node(
                 func=self.dummy_function,
                 inputs="namespace.input_dataset",
@@ -512,9 +512,7 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_inputs_with_dot_no_namespace(self):
         """Test that inputs with '.' but no namespace raise a ValueError."""
-        with pytest.raises(
-            ValueError, match="Invalid input dataset name 'input.dataset'"
-        ):
+        with pytest.raises(ValueError, match="Invalid dataset name 'input.dataset'"):
             node(
                 func=self.dummy_function,
                 inputs="input.dataset",
@@ -523,9 +521,7 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_outputs_with_dot_no_namespace(self):
         """Test that outputs with '.' but no namespace raise a ValueError."""
-        with pytest.raises(
-            ValueError, match="Invalid output dataset name 'output.dataset'"
-        ):
+        with pytest.raises(ValueError, match="Invalid dataset name 'output.dataset'"):
             node(
                 func=self.dummy_function,
                 inputs="input_dataset",
@@ -545,7 +541,7 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_multi_level_namespace(self):
         """Test that mismatched multi-level namespaces raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid input dataset name"):
+        with pytest.raises(ValueError, match="Invalid dataset name"):
             node(
                 func=self.dummy_function,
                 inputs="namespace.subnamespace.input_dataset",

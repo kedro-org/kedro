@@ -26,7 +26,7 @@ class Node:  # TODO: Too many conditionals in this function, make it work first,
     run user-provided functions as part of Kedro pipelines.
     """
 
-    def __init__(  # noqa: PLR0913, PLR0912
+    def __init__(  # noqa: PLR0913
         self,
         func: Callable,
         inputs: str | list[str] | dict[str, str] | None,
@@ -100,15 +100,7 @@ class Node:  # TODO: Too many conditionals in this function, make it work first,
                         f"is '{type(_input)}'."
                     )
                 )
-            if "." in _input and not _input.startswith("params:"):
-                input_namespace = ".".join(_input.split(".")[:-1])
-                if not namespace or not input_namespace.startswith(namespace):
-                    raise ValueError(
-                        _node_error_message(
-                            f"Invalid input dataset name '{_input}': '.' characters not allowed "
-                            f"in the node input parameter."
-                        )
-                    )
+            _node_dataset_name_validation(_input, namespace)
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
@@ -127,15 +119,7 @@ class Node:  # TODO: Too many conditionals in this function, make it work first,
                         f"is '{type(_output)}'."
                     )
                 )
-            if "." in _output and not _output.startswith("params:"):
-                output_namespace = ".".join(_output.split(".")[:-1])
-                if not namespace or not output_namespace.startswith(namespace):
-                    raise ValueError(
-                        _node_error_message(
-                            f"Invalid output dataset name '{_output}': '.' characters not allowed "
-                            f"in the node output parameter."
-                        )
-                    )
+            _node_dataset_name_validation(_output, namespace)
 
         if not inputs and not outputs:
             raise ValueError(
@@ -587,6 +571,27 @@ def _node_error_message(msg: str) -> str:
         f"Invalid Node definition: {msg}\n"
         f"Format should be: node(function, inputs, outputs)"
     )
+
+
+def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
+    """Validate the dataset name.
+
+    Args:
+        name: The name of the dataset to be validated.
+        namespace: The namespace of the node.
+
+    Raises:
+        ValueError: If the dataset name is invalid.
+    """
+    if "." in name and not name.startswith("params:"):
+        name_namespace = ".".join(name.split(".")[:-1])
+        if not namespace or not name_namespace.startswith(namespace):
+            raise ValueError(
+                _node_error_message(
+                    f"Invalid dataset name '{name}': '.' characters not allowed "
+                    f"in the node's input or output parameters."
+                )
+            )
 
 
 def node(  # noqa: PLR0913

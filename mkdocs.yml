@@ -72,7 +72,7 @@ extra_javascript:
   - javascript/deindex-old-docs.js
 
 nav:
-  - Home: index.md
+  - Welcome: index.md
   - Kedro:
       - LEARN ABOUT KEDRO:
           - Introduction: pages/introduction/index.md

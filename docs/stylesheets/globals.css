@@ -28,8 +28,9 @@ body {
 } */
 
 .md-header, .md-tabs {
-    background-color: var(--yellow-600);
+    background-color: var(--yellow-6);
     color: var(--black-900) !important;
+    margin-bottom: 15px;
 }
 
 /* Header elements positioning */
@@ -42,6 +43,35 @@ body {
     flex: 1;
 }
 
+/* Style the search box */
+.md-search__form {
+    border-radius: 4px;
+    border: 1px solid var(--yellow-600);
+    display: flex;
+    padding: 8px;
+    align-items: center;
+    gap: 8px;
+    background-color: transparent;
+    height: auto;
+}
+
+/* Style the search input and icon */
+.md-search__input {
+    color: var(--yellow-600);
+    font-size: 16px;
+}
+
+.md-search__icon svg {
+    fill: var(--yellow-600);
+}
+
+.md-search__input::placeholder {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.md-search__icon {
+    color: black !important;
+}
 
 @media screen and (min-width: 80em) {
     .md-search, 
@@ -60,7 +90,6 @@ body {
         order: 2;
     }
 
-    /* Override Material's default source button styles */
     .md-header__source {
         order: 3;
         margin-left: -0.8rem !important;
@@ -69,6 +98,7 @@ body {
 
 .md-tabs__item--active {
     font-weight: 600;
+    border-bottom: 2px solid var(--black-900);
 }
 
 .md-typeset blockquote {

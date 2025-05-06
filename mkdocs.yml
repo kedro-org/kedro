@@ -24,6 +24,8 @@ theme:
     code: Inter Regular
   favicon: "https://kedro.org/images/favicon.ico"
   logo: assets/kedro_logo_black.svg
+  icon:
+    repo: fontawesome/brands/github
 
 
   features:

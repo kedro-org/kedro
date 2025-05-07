@@ -216,7 +216,7 @@ $ docker push <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com/spac
 
 ### Step 3. Write the deployment script
 
-As you will write our deployment script using [AWS CDK in Python](https://docs.aws.amazon.com/cdk/latest/guide/work-with-cdk-python.html), you will have to install some required dependencies from CDK.
+As you will write our deployment script using [AWS CDK in Python](https://docs.aws.amazon.com/cdk/v2/guide/work-with-cdk-python.html), you will have to install some required dependencies from CDK.
 
 * **Step 3.1**: Create a `deploy_requirements.txt` with the following content:
 

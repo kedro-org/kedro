@@ -1,6 +1,8 @@
 # Release 1.0.0
 
 ## Major features and improvements
+* Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
+
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
 * Added support for running multiple namespaces within a single session.
@@ -21,7 +23,6 @@
 
 ## Major features and improvements
 * Unified `pipeline()` and `Pipeline` into a single module (`kedro.pipeline`), aligning with the `node()`/`Node` design pattern and improving namespace handling.
-* Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
 
 ## Bug fixes and other changes
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.

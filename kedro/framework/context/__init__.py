@@ -2,8 +2,8 @@
 project context.
 """
 
+from .catalog_mixins import CatalogCommandsMixin
 from .context import (
-    CatalogCommandsMixin,
     KedroContext,
     KedroContextError,
     compose_classes,

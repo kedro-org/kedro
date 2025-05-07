@@ -86,7 +86,7 @@ class AbstractRunner(ABC):
         """
         # Run a warm-up to materialize all datasets in the catalog before run
         for ds in pipeline.datasets():
-            _ = catalog.get(ds)
+            _ = catalog[ds]
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
@@ -101,7 +101,7 @@ class AbstractRunner(ABC):
 
         # Now we return all pipeline outputs, but we do not load datasets data
         # TODO: Check output for ParallelRunner - whether we can access them after the run
-        run_output = {ds_name: catalog.get(ds_name) for ds_name in pipeline.outputs()}
+        run_output = {ds_name: catalog[ds_name] for ds_name in pipeline.outputs()}
 
         return run_output
 

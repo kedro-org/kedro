@@ -934,7 +934,7 @@ _DS = TypeVar("_DS")
 
 
 @runtime_checkable
-class CatalogProtocol(Protocol[_C]):
+class CatalogProtocol(Protocol[_C, _DS]):
     _datasets: dict[str, _DS]
 
     def __repr__(self) -> str:

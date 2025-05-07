@@ -31,7 +31,7 @@ When working with SQL databases in Kedro, it's helpful to keep the following con
 
 ### 4. Reproducibility & injection risk
 
-- Raw SQL strings can bypass Kedro’s topological sorting and introduce SQL-injection vulnerabilities.  
+- Raw SQL strings can bypass Kedro’s topological sorting and introduce SQL-injection vulnerabilities.
 - Prefer testable, Pythonic expression APIs (Ibis, Spark) over raw SQL queries.
 
 ## Approaches

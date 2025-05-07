@@ -997,7 +997,7 @@ class CatalogProtocol(Protocol[_C, _DS]):
 
 
 @runtime_checkable
-class SharedMemoryCatalogProtocol(CatalogProtocol):
+class SharedMemoryCatalogProtocol(CatalogProtocol, Protocol):
     def set_manager_datasets(self, manager: SyncManager) -> None: ...
 
     def validate_catalog(self) -> None: ...

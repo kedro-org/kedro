@@ -86,11 +86,12 @@ Welcome to Kedro's award-winning documentation!
    :maxdepth: 2
    :caption: Integrations
 
-   integrations/pyspark_integration.md
    integrations/mlflow.md
-   integrations/kedro_dvc_versioning.md
+   integrations/pyspark_integration.md
+   integrations/working_with_sql.md
    integrations/deltalake_versioning.md
    integrations/iceberg_versioning.md
+   integrations/kedro_dvc_versioning.md
 
 .. toctree::
    :maxdepth: 2

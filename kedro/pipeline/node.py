@@ -100,6 +100,7 @@ class Node:
                         f"is '{type(_input)}'."
                     )
                 )
+            _node_dataset_name_validation(_input, namespace)
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
@@ -118,6 +119,7 @@ class Node:
                         f"is '{type(_output)}'."
                     )
                 )
+            _node_dataset_name_validation(_output, namespace)
 
         if not inputs and not outputs:
             raise ValueError(
@@ -571,6 +573,27 @@ def _node_error_message(msg: str) -> str:
         f"Invalid Node definition: {msg}\n"
         f"Format should be: node(function, inputs, outputs)"
     )
+
+
+def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
+    """Validate the dataset name.
+
+    Args:
+        name: The name of the dataset to be validated.
+        namespace: The namespace of the node.
+
+    Raises:
+        ValueError: If the dataset name is invalid.
+    """
+    if "." in name and not name.startswith("params:"):
+        name_namespace = ".".join(name.split(".")[:-1])
+        if not namespace or not name_namespace.startswith(namespace):
+            raise ValueError(
+                _node_error_message(
+                    f"Invalid dataset name '{name}': '.' characters not allowed "
+                    f"in the node's input or output parameters."
+                )
+            )
 
 
 def node(  # noqa: PLR0913

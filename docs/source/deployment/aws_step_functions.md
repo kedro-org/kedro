@@ -27,7 +27,7 @@ To use AWS Step Functions, ensure you have the following:
   - The final project directory's name should be `spaceflights-step-functions`.
   - You should complete the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) to understand the project's structure.
 
-* In this tutorial, we will also be using [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to write our deployment script. To install the `cdk` command, please consult [AWS guide](https://docs.aws.amazon.com/cdk/latest/guide/cli.html). The official method of installation is using [npm](https://www.npmjs.com/):
+* In this tutorial, we will also be using [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to write our deployment script. To install the `cdk` command, please consult [AWS guide](https://docs.aws.amazon.com/cdk/v2/guide/cli.html). The official method of installation is using [npm](https://www.npmjs.com/):
 
 ```console
 $ npm install -g aws-cdk

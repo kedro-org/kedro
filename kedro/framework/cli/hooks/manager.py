@@ -20,9 +20,7 @@ def get_cli_hook_manager() -> PluginManager:
     if _cli_hook_manager is None:
         _cli_hook_manager = CLIHooksManager()
     _cli_hook_manager.trace.root.setwriter(
-        logger.debug
-        if logger.getEffectiveLevel() == logging.DEBUG
-        else None
+        logger.debug if logger.getEffectiveLevel() == logging.DEBUG else None
     )
     _cli_hook_manager.enable_tracing()
     return _cli_hook_manager

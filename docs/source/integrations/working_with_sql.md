@@ -3,7 +3,7 @@
 
 This page outlines the various approaches and recommended practices when building a Kedro pipeline with SQL databases.
 
-## Key Concepts and Assumptions
+## Key concepts and assumptions
 
 When working with SQL databases in Kedro, it's helpful to keep the following concepts front of mind.
 
@@ -26,10 +26,10 @@ When working with SQL databases in Kedro, it's helpful to keep the following con
 
 ### 3. DataFrame-centric
 
-- Kedro’s DAG and built-in datasets are optimized around Python DataFrames.
-- Embedding complex SQL scripts reduces visibility into dependencies and hinders reproducibility. See [DeltaLake](/docs/source/integrations/deltalake_versioning.md) documentation for more on handling `UPSERT`/`MERGE` operations in DeltaLake.
+- Kedro’s DAG and built-in datasets are optimised around Python DataFrames.
+- Embedding complex SQL scripts reduces visibility into dependencies and hinders reproducibility. See [Delta Lake integration guide](./deltalake_versioning.md) for more on handling `UPSERT`/`MERGE` like operations.
 
-### 4. Reproducibility & Injection Risk
+### 4. Reproducibility & injection risk
 
 - Raw SQL strings can bypass Kedro’s topological sorting and introduce SQL-injection vulnerabilities.  
 - Prefer testable, Pythonic expression APIs (Ibis, Spark) over raw SQL queries.
@@ -44,7 +44,7 @@ When working with SQL databases in Kedro, it's helpful to keep the following con
 
 ---
 
-### 1. Pandas SQL (Legacy)
+### 1. Pandas SQL (legacy)
 
 ```yaml
 events_data:
@@ -63,12 +63,12 @@ events_data:
 
   - Loads full tables in memory
   - Bypasses database optimizations
-  - Hard to parameterize/test
+  - Hard to parameterise/test
   - Potential cost/security on large dumps
 
 ---
 
-### 2. Spark-JDBC (Legacy)
+### 2. Spark-JDBC (legacy)
 
 ```yaml
 sales_data:
@@ -91,7 +91,7 @@ sales_data:
 
 ---
 
-### 3. Ibis (Modern)
+### 3. Ibis (modern)
 
 ```{tip}
 Please also check out our [blog on building scalable data pipelines with Kedro and Ibis](https://kedro.org/blog/building-scalable-data-pipelines-with-kedro-and-ibis), [SQL data processing in Kedro ML pipelines](https://kedro.org/blog/sql-data-processing-in-kedro-ml-pipelines), and our [PyData London talk](https://www.youtube.com/watch?v=ffDHdtz_vKc).
@@ -113,8 +113,8 @@ ibis_orders:
 - **Key highlights**
 
   - [SQLGlot](https://github.com/tobymao/sqlglot) translation across 20+ engines
-  - Support for extensions (DuckDB geospatial, PostGIS, Snowflake UDFs, etc.)
-  - Full lazy pushdown (filters, joins, aggregates)
+  - Support for extensions (DuckDB geospatial, PostGIS, Snowflake UDFs and more)
+  - Full lazy push-down (filters, joins, aggregates)
   - Pluggable materialization (table/view/CTE)
   - No JVM/Spark overhead
   - In-memory/mock backends for testing
@@ -126,7 +126,7 @@ ibis_orders:
 - **Cons**
 
   - Some backends may miss niche SQL operations
-  - Migration effort for legacy pipelines may not justify moving functional code, prioritize new pipelines / projects
+  - Migration effort for legacy pipelines may not justify moving functional code, prioritise new pipelines / projects
 
 ```{warning}
 Consult the [Ibis support matrix](https://ibis-project.org/backends/support/matrix) to verify that needed SQL functions are available. You can still write raw SQL for missing features.
@@ -135,7 +135,7 @@ Consult the [Ibis support matrix](https://ibis-project.org/backends/support/matr
 ### Recommended Ibis development workflow
 
 <details>
-<summary>Iterate rapidly locally for instant, low cost feedback. Deploy to production your warehouse for scale—ensuring consistency, testability, and zero drift between environments.</summary>
+<summary>Iterate locally for instant, low cost feedback. Deploy to production your warehouse for scale—ensuring consistency, testability, and zero drift between environments.</summary>
 
 #### DuckDB (or SQLlite) for Development & [CI](https://en.wikipedia.org/wiki/Continuous_integration)
 
@@ -150,16 +150,16 @@ Consult the [Ibis support matrix](https://ibis-project.org/backends/support/matr
      table: orders
    ```
 
-#### Warehouse Backend for Production & [CD](https://en.wikipedia.org/wiki/Continuous_delivery) (e.g. Snowflake or BigQuery)**
+#### Warehouse Backend for Production & [CD](https://en.wikipedia.org/wiki/Continuous_delivery) (for example Snowflake or BigQuery)**
 
-- Swap only your catalog’s backend and credentials
+- Simply swap your catalog’s backend and credentials
 - Same Ibis expressions compile to your warehouse’s SQL
 - Leverage scale, governance, cost controls
    ```yaml
    # conf/prod/catalog.yml
    orders:
      type: ibis.TableDataset
-     backend: snowflake         # or bigquery, etc.
+     backend: snowflake         # or bigquery and more.
      credentials: warehouse_creds
      table: analytics.orders
    ```
@@ -196,7 +196,7 @@ flowchart TD
 ```
 </details>
 
-## Limitations & Design Decisions
+## Limitations and key design decisions
 
 More broadly, there are some wider limitations to be aware of when working with Kedro & SQL:
 

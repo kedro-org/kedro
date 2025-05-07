@@ -8,6 +8,7 @@
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
 * Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
 * Cached `inputs` in `Node` when created from dictionary for better performance.
+* Enabled pluggy tracing only when logging level is set to `DEBUG` to speed up the execution of project runs.
 ## Breaking changes to the API
 
 

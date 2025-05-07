@@ -312,44 +312,18 @@ body {
 .badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 16px;
+    align-items: center;
 }
 
-.badge {
+.badges a {
     display: inline-flex;
-    border-radius: 0.25rem;
-    overflow: hidden;
-    font-size: 0.75rem;
-    font-weight: 500;
-    height: 1.5rem;
-}
-
-.badge-label {
-    padding: 0 0.5rem;
-    background-color: rgba(0, 0, 0, 0.1);
-    display: flex;
     align-items: center;
 }
 
-.badge-value {
-    padding: 0 0.5rem;
-    display: flex;
-    align-items: center;
-}
-
-.badge.green {
-    background-color: #4caf50;
-    color: white;
-}
-
-.badge.blue {
-    background-color: #2196f3;
-    color: white;
-}
-
-.badge.black {
-    background-color: #333;
-    color: white;
+.badges img {
+    height: 20px;
+    width: auto;
 }
 
 /* Responsive adjustments */

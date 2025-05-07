@@ -148,5 +148,9 @@ In general, Hook execution order is not guaranteed and you should not rely on it
 
 Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest/) to implement Kedro's Hook mechanism. We recommend reading their documentation to find out more about the underlying implementation.
 
+```{note}
+When your project's logging level is set to `DEBUG`, the hooks will use `pluggy`'s tracing feature to log the execution of each hook. This is useful for debugging purposes but can be noise and slow down the execution of your pipeline. You can disable this feature by [setting the logging level to `INFO` or higher](../logging/index.html#how-to-show-debug-level-messages).
+```
+
 ### Plugin Hooks
 Plugin Hooks are registered using [`importlib_metadata`'s `EntryPoints` API](https://docs.python.org/3/library/importlib.metadata.html).

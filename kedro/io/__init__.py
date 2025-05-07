@@ -13,6 +13,7 @@ from .core import (
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
+    SharedMemoryCatalogProtocol,
     Version,
 )
 from .kedro_data_catalog import KedroDataCatalog
@@ -33,5 +34,6 @@ __all__ = [
     "LambdaDataset",
     "MemoryDataset",
     "SharedMemoryDataset",
+    "SharedMemoryCatalogProtocol",
     "Version",
 ]

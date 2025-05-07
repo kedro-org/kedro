@@ -11,7 +11,7 @@ import logging
 import re
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, ClassVar, Iterator, List  # noqa: UP035
+from typing import TYPE_CHECKING, Any, ClassVar, Iterator, List  # noqa: UP035
 
 from kedro.io.cached_dataset import CachedDataset
 from kedro.io.catalog_config_resolver import CatalogConfigResolver
@@ -31,6 +31,9 @@ from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.io.shared_memory_dataset import SharedMemoryDataset
 from kedro.logging import _format_rich
 from kedro.utils import _has_rich_handler
+
+if TYPE_CHECKING:
+    from multiprocessing.managers import SyncManager
 
 
 class _LazyDataset:
@@ -755,7 +758,7 @@ class KedroDataCatalog(CatalogProtocol):
 class SharedMemoryDataCatalog(KedroDataCatalog):
     runtime_patterns: ClassVar = {"{default}": {"type": "kedro.io.SharedMemoryDataset"}}
 
-    def set_manager_datasets(self, manager) -> None:
+    def set_manager_datasets(self, manager: SyncManager) -> None:
         for _, ds in self._datasets.items():
             if isinstance(ds, SharedMemoryDataset):
                 ds.set_manager(manager)

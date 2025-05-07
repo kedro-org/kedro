@@ -43,6 +43,7 @@ from kedro.utils import (  # noqa: F401
 
 if TYPE_CHECKING:
     import os
+    from multiprocessing.managers import SyncManager
 
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
@@ -993,3 +994,10 @@ class CatalogProtocol(Protocol[_C, _DS]):
     def exists(self, name: str) -> bool:
         """Checks whether registered dataset exists by calling its `exists()` method."""
         ...
+
+
+@runtime_checkable
+class SharedMemoryCatalogProtocol(CatalogProtocol):
+    def set_manager_datasets(self, manager: SyncManager) -> None: ...
+
+    def validate_catalog(self) -> None: ...

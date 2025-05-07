@@ -11,7 +11,6 @@ from pickle import PicklingError
 from typing import TYPE_CHECKING
 
 from kedro.io import (
-    CatalogProtocol,
     MemoryDataset,
 )
 from kedro.runner.runner import AbstractRunner
@@ -21,7 +20,7 @@ if TYPE_CHECKING:
 
     from pluggy import PluginManager
 
-    from kedro.io.kedro_data_catalog import SharedMemoryDataCatalog
+    from kedro.io import SharedMemoryCatalogProtocol
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
@@ -91,14 +90,14 @@ class ParallelRunner(AbstractRunner):
             )
 
     @classmethod
-    def _validate_catalog(cls, catalog: SharedMemoryDataCatalog) -> None:
+    def _validate_catalog(cls, catalog: SharedMemoryCatalogProtocol) -> None:  # type: ignore[override]
         """Ensure that all datasets are serialisable and that we do not have
         any non proxied memory datasets being used as outputs as their content
         will not be synchronized across threads.
         """
         catalog.validate_catalog()
 
-    def _set_manager_datasets(self, catalog: SharedMemoryDataCatalog) -> None:
+    def _set_manager_datasets(self, catalog: SharedMemoryCatalogProtocol) -> None:  # type: ignore[override]
         catalog.set_manager_datasets(self._manager)
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
@@ -121,7 +120,7 @@ class ParallelRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: CatalogProtocol,
+        catalog: SharedMemoryCatalogProtocol,  # type: ignore[override]
         hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:

@@ -28,7 +28,7 @@ def _create_hook_manager() -> PluginManager:
     manager = PluginManager(HOOK_NAMESPACE)
     manager.trace.root.setwriter(
         logger.debug
-        if logging.getLevelName(logger.getEffectiveLevel()) == "DEBUG"
+        if logger.getEffectiveLevel() == logging.DEBUG
         else None
     )
     manager.enable_tracing()

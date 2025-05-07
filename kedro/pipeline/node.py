@@ -249,6 +249,8 @@ class Node:
         """
         self._func = func
 
+        del self.inputs  # clear cached inputs
+
     @property
     def tags(self) -> set[str]:
         """Return the tags assigned to the node.
@@ -306,7 +308,7 @@ class Node:
         """
         return self._namespace
 
-    @property
+    @cached_property
     def inputs(self) -> list[str]:
         """Return node inputs as a list, in the order required to bind them properly to
         the node's function.

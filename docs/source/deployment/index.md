@@ -20,7 +20,7 @@ If your pipeline is sizeable, you may want to run it across separate machines, s
 %     C -- YES --> D[Use a container-based approach];
 %     C -- NO --> E[Use the CLI or package mode];
 %     A -- NO --> F[Consult the distributed deployment guide];
-%     F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Amazon SageMaker</li><li>AWS Step functions</li><li>Azure</li><li>Dask</li><li>Databricks</li><li>Kubeflow Workflows</li><li>Prefect</li><li>Vertex AI</li>"];
+%     F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Amazon SageMaker</li><li>AWS Step functions</li><li>Azure</li><li>Dask</li><li>Databricks</li><li>Kubeflow Pipelines</li><li>Prefect</li><li>Vertex AI</li>"];
 %     style G text-align:left
 
 This following pages provide information for deployment to, or integration with, the following:
@@ -32,7 +32,7 @@ This following pages provide information for deployment to, or integration with,
 * [Azure](azure.md)
 * [Dask](dask.md)
 * [Databricks](./databricks/index.md)
-* [Kubeflow Workflows](kubeflow.md)
+* [Kubeflow Pipelines](kubeflow.md)
 * [Prefect](prefect.md)
 * [Vertex AI](vertexai.md)
 

@@ -11,6 +11,7 @@
     --icon-fill-color: var(--black-200);
     --text-color: var(--black-700);
     --paragraph-color: var(--black-200);
+    --footer-text-color: var(--black-0);
 }
 
 /* Dark Theme */
@@ -26,4 +27,5 @@
     --icon-fill-color: var(--black-0);
     --text-color: var(--white-600);
     --paragraph-color: var(--white-600-50);
+    --footer-text-color: var(--black-200);
 }

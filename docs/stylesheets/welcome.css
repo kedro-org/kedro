@@ -160,7 +160,6 @@ body {
 }
 
 /* Section styles */
-
 .cards-section-wrapper {
     background-color: var(--cards-section-bg-color);
     width: 100%;
@@ -248,25 +247,26 @@ body {
 
 .footer-top {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
     flex-wrap: wrap;
-    gap: 1rem;
 }
 
 .copyright {
-    color: #666;
+    color: var(--footer-text-color);
     font-size: 0.8125rem;
+    margin-right: 64px;
+    font-size: 14px;
 }
 
 .legal-links {
     display: flex;
-    gap: 1.5rem;
+    gap: 16px;
+    font-size: 14px;
 }
 
 .legal-links a {
-    color: #666;
+    color: var(--footer-text-color);
     text-decoration: none;
     transition: color 0.2s;
 }
@@ -279,6 +279,7 @@ body {
 .social-links {
     display: flex;
     gap: 1rem;
+    margin-left: auto;
 }
 
 .social-links a {

@@ -26,11 +26,12 @@ logger = logging.getLogger(__name__)
 def _create_hook_manager() -> PluginManager:
     """Create a new PluginManager instance and register Kedro's hook specs."""
     manager = PluginManager(HOOK_NAMESPACE)
-    if logging.getLevelName(logger.getEffectiveLevel()) == "DEBUG":
-        # Only enable tracing if the logger is set to DEBUG level
-        # This is to avoid performance overhead when tracing is not needed.
-        manager.trace.root.setwriter(logger.debug)
-        manager.enable_tracing()
+    manager.trace.root.setwriter(
+        logger.debug
+        if logging.getLevelName(logger.getEffectiveLevel()) == "DEBUG"
+        else None
+    )
+    manager.enable_tracing()
     manager.add_hookspecs(NodeSpecs)
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)

@@ -135,7 +135,6 @@ Consult the [Ibis support matrix](https://ibis-project.org/backends/support/matr
 ### Recommended Ibis development workflow
 
 <details>
-
 <summary>Iterate rapidly locally for instant, low cost feedback. Deploy to production your warehouse for scale—ensuring consistency, testability, and zero drift between environments.</summary>
 
 #### DuckDB (or SQLlite) for Development & [CI](https://en.wikipedia.org/wiki/Continuous_integration)

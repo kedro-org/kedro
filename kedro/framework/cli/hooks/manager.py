@@ -19,8 +19,11 @@ def get_cli_hook_manager() -> PluginManager:
     global _cli_hook_manager  # noqa: PLW0603
     if _cli_hook_manager is None:
         _cli_hook_manager = CLIHooksManager()
-    _cli_hook_manager.trace.root.setwriter(logger.debug)
-    _cli_hook_manager.enable_tracing()
+    if logging.getLevelName(logger.getEffectiveLevel()) == "DEBUG":
+        # Only enable tracing if the logger is set to DEBUG level
+        # This is to avoid performance overhead when tracing is not needed.
+        _cli_hook_manager.trace.root.setwriter(logger.debug)
+        _cli_hook_manager.enable_tracing()
     return _cli_hook_manager
 
 

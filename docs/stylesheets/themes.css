@@ -8,9 +8,9 @@
     --card-bg-color: var(--white-0);
     --card-border-color: var(--white-400);
     --welcome-page-bg-color: var(--white-0);
-    --card-title-color: var(--black-700);
-    --card-description-color: var(--black-200);
     --icon-fill-color: var(--black-200);
+    --text-color: var(--black-700);
+    --paragraph-color: var(--black-200);
 }
 
 /* Dark Theme */
@@ -23,7 +23,7 @@
     --card-bg-color: var(--slate-600);
     --card-border-color: var(--slate-0);
     --welcome-page-bg-color: var(--slate-600);
-    --card-title-color: var(--white-600);
-    --card-description-color: var(--white-600-50);
     --icon-fill-color: var(--black-0);
+    --text-color: var(--white-600);
+    --paragraph-color: var(--white-600-50);
 }

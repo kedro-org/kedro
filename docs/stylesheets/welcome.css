@@ -1,14 +1,6 @@
 /* Base styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     font-family: Inter;
-    line-height: 1.6;
-    color: #333;
     background-color: var(--welcome-page-bg-color);
 }
 
@@ -109,33 +101,6 @@ body {
     margin-bottom: 3rem;
 }
 
-h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 2rem;
-    color: #111;
-}
-
-h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    color: #111;
-}
-
-h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #111;
-}
-
-p {
-    color: #666;
-    font-size: 0.875rem;
-}
-
 /* Search bar */
 /* .search-container {
     position: relative;
@@ -171,21 +136,22 @@ p {
 /* Explore link */
 .explore-link {
     text-align: center;
-    margin: 1.5rem 0;
+    margin: 98px 0;
 }
 
 .explore-link a {
-    color: #0066cc;
+    color: var(--text-color);
     text-decoration: none;
-    font-weight: 500;
-    font-size: 0.875rem;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
     display: inline-flex;
     align-items: center;
     transition: color 0.2s;
 }
 
 .explore-link a:hover {
-    color: #004c99;
+    font-weight: 600;
 }
 
 .explore-link .arrow {
@@ -198,11 +164,11 @@ p {
 .cards-section-wrapper {
     background-color: var(--cards-section-bg-color);
     width: 100%;
+    margin-top: 48px;
 }
 
 .cards-section-wrapper section {
-    margin-bottom: 4rem;
-    padding-top: 1rem;
+    margin-bottom: 64px;
 }
 
 .bg-section {
@@ -264,13 +230,13 @@ p {
 .card-title {
     font-size: 16px;
     font-weight: 600;
-    color: var(--card-title-color);
+    color: var(--text-color);
     margin-bottom: 8px;
 }
 
 .card-description {
     font-size: 14px;
-    color: var(--card-description-color);
+    color: var(--paragraph-color);
 }       
 
 /* Footer styles */
@@ -322,6 +288,19 @@ p {
 
 .social-links a:hover {
     color: #333;
+}
+
+/* Font */
+.welcome-title {
+    margin-top: 96px;
+    font-weight: 600;
+}
+
+.section-title {
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 32px;
+    margin-top: 0;
 }
 
 /* Badges */

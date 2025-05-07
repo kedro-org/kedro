@@ -160,7 +160,7 @@ class KedroDataCatalog(CatalogProtocol):
     def __iter__(self) -> Iterator[str]:
         yield from self.keys()
 
-    def __getitem__(self, ds_name: str) -> AbstractDataset:
+    def __getitem__(self, ds_name: str) -> AbstractDataset | None:
         """Get a dataset by name from an internal collection of datasets.
 
         If a dataset is not in the collection but matches any pattern
@@ -171,10 +171,6 @@ class KedroDataCatalog(CatalogProtocol):
 
         Returns:
             An instance of AbstractDataset.
-
-        Raises:
-            DatasetNotFoundError: When a dataset with the given name
-                is not in the collection and does not match patterns.
         """
         return self.get(ds_name)
 
@@ -601,6 +597,8 @@ class KedroDataCatalog(CatalogProtocol):
             >>> catalog.save("cars", df)
         """
         dataset = self.get(ds_name)
+        if dataset is None:
+            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
 
         self._logger.info(
             "Saving data to %s (%s)...",
@@ -641,6 +639,8 @@ class KedroDataCatalog(CatalogProtocol):
         """
         load_version = Version(version, None) if version else None
         dataset = self.get(ds_name, version=load_version)
+        if dataset is None:
+            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
 
         self._logger.info(
             "Loading data from %s (%s)...",
@@ -660,6 +660,8 @@ class KedroDataCatalog(CatalogProtocol):
                 has not yet been registered.
         """
         dataset = self.get(name)
+        if dataset is None:
+            raise DatasetNotFoundError(f"'{name}' datasets not found in the catalog")
         dataset.release()
 
     def confirm(self, name: str) -> None:
@@ -671,6 +673,8 @@ class KedroDataCatalog(CatalogProtocol):
         """
         self._logger.info("Confirming dataset '%s'", name)
         dataset = self.get(name)
+        if dataset is None:
+            raise DatasetNotFoundError(f"'{name}' datasets not found in the catalog")
 
         if hasattr(dataset, "confirm"):
             dataset.confirm()
@@ -689,10 +693,11 @@ class KedroDataCatalog(CatalogProtocol):
             Whether the dataset output exists.
 
         """
-        try:
-            dataset = self.get(name)
-        except DatasetNotFoundError:
+        dataset = self.get(name)
+
+        if dataset is None:
             return False
+
         return dataset.exists()
 
     @staticmethod

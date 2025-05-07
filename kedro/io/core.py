@@ -961,12 +961,12 @@ class CatalogProtocol(Protocol[_C, _DS]):
         """Returns an iterator for the object."""
         ...
 
-    def __getitem__(self, ds_name: str) -> _DS:
+    def __getitem__(self, ds_name: str) -> _DS | None:
         """Get a dataset by name from an internal collection of datasets."""
         ...
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """Adds dataset using the given key as a datset name and the provided data as the value."""
+        """Adds dataset using the given key as a dataset name and the provided data as the value."""
         ...
 
     @classmethod

@@ -92,7 +92,7 @@ class AbstractRunner(ABC):
 
         if self._is_async:
             self._logger.info(
-                "Asynchronous mode is enabled for loading and saving data"
+                "Asynchronous mode is enabled for loading and saving data."
             )
 
         self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]

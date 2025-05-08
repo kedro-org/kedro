@@ -13,6 +13,32 @@ import rich.traceback
 from kedro.utils import _is_databricks
 
 
+class PlainTextHandler(logging.StreamHandler):
+    """A simple handler that outputs log messages with minimal formatting.
+
+    This handler is designed for cases where plain text output without any fancy 
+    formatting, level indicators, timestamps or line wrapping is needed, such as
+    when providing shell command suggestions to users.
+    """
+
+    def __init__(self, stream=None):
+        super().__init__(stream)
+        # Create a formatter that only outputs the message without any additional info
+        self.formatter = logging.Formatter("%(message)s")
+
+    def emit(self, record: LogRecord) -> None:
+        # Skip level indicators entirely and just output the message
+        if record.levelno >= self.level:
+            try:
+                msg = self.formatter.format(record)
+                stream = self.stream
+                stream.write(msg)
+                stream.write(self.terminator)
+                self.flush()
+            except Exception:
+                self.handleError(record)
+
+
 class RichHandler(rich.logging.RichHandler):
     """Identical to rich's logging handler but with a few extra behaviours:
     * warnings issued by the `warnings` module are redirected to logging

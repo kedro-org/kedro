@@ -10,6 +10,7 @@ import copy
 import difflib
 import json
 from collections import Counter, defaultdict
+from dataclasses import dataclass, field
 from graphlib import CycleError, TopologicalSorter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
@@ -129,6 +130,14 @@ class ConfirmNotUniqueError(Exception):
     """
 
     pass
+
+
+@dataclass
+class GroupedNode:
+    name: str
+    type: str  # "namespace" or "node"
+    nodes: list[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
 
 class Pipeline:
@@ -542,29 +551,27 @@ class Pipeline:
         return [list(group) for group in self._toposorted_groups]
 
     @property
-    def grouped_nodes_by_namespace(self) -> dict[str, dict[str, Any]]:
-        """Return a dictionary of the pipeline nodes grouped by top-level namespace with
-        information about the nodes, their type, and dependencies. The structure of the dictionary is:
-        {'node_name/namespace_name' : {'name': 'node_name/namespace_name','type': 'namespace' or 'node','nodes': [list of nodes],'dependencies': [list of dependencies]}}
+    def grouped_nodes_by_namespace(self) -> list[GroupedNode]:
+        """Return a list of grouped nodes by top-level namespace with
+        information about the nodes, their type, and dependencies.
+
         This property is intended to be used by deployment plugins to group nodes by namespace.
         """
-        grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
+        grouped_nodes_map: dict[str, GroupedNode] = {}
 
         for node in self.nodes:
             key = node.namespace.split(".")[0] if node.namespace else node.name
 
-            if key not in grouped_nodes:
-                grouped_nodes[key] = {
-                    "name": key,
-                    "type": "namespace" if node.namespace else "node",
-                    "nodes": [],
-                    "dependencies": [],
-                }
+            if key not in grouped_nodes_map:
+                grouped_nodes_map[key] = GroupedNode(
+                    name=key,
+                    type="namespace" if node.namespace else "node",
+                )
 
-            grouped_nodes[key]["nodes"].append(node)
+            grouped_nodes_map[key].nodes.append(node.name)
 
-            # Ensure dependencies are not duplicated on the returned list
-            dependencies = grouped_nodes[key]["dependencies"]
+            # Ensure dependencies are not duplicated
+            dependencies = grouped_nodes_map[key].dependencies
             unique_dependencies = set(dependencies)
 
             for parent in self.node_dependencies[node]:
@@ -575,7 +582,7 @@ class Pipeline:
                     dependencies.append(parent_key)
                     unique_dependencies.add(parent_key)
 
-        return grouped_nodes
+        return list(grouped_nodes_map.values())
 
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified

@@ -9,6 +9,7 @@ from kedro.pipeline import node, pipeline
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
+    GroupedNode,
     OutputNotUniqueError,
     _match_namespaces,
 )
@@ -379,141 +380,124 @@ class TestValidPipeline:
     @pytest.mark.parametrize(
         "pipeline_name, expected",
         [
-            ("pipeline_with_namespace_simple", ["namespace_1", "namespace_2"]),
-            (
-                "pipeline_with_namespace_partial",
-                ["namespace_1", "node_3", "namespace_2", "node_6"],
-            ),
-        ],
-    )
-    def test_node_grouping_by_namespace_name_type(
-        self, request, pipeline_name, expected
-    ):
-        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
-        {
-            'node_name/namespace_name' : {
-                                            'name': 'node_name/namespace_name',
-                                            'type': 'namespace' or 'node',
-                                            'nodes': [list of nodes],
-                                            'dependencies': [list of dependencies]}
-        }
-        This test checks for the 'name' and 'type' keys in the dictionary.
-        """
-        p = request.getfixturevalue(pipeline_name)
-        grouped = p.grouped_nodes_by_namespace
-        assert set(grouped.keys()) == set(expected)
-        for key in expected:
-            assert grouped[key]["name"] == key
-            assert key.startswith(grouped[key]["type"])
-
-    @pytest.mark.parametrize(
-        "pipeline_name, expected",
-        [
             (
                 "pipeline_with_namespace_simple",
-                {
-                    "namespace_1": [
-                        "namespace_1.node_1",
-                        "namespace_1.node_2",
-                        "namespace_1.node_3",
-                    ],
-                    "namespace_2": [
-                        "namespace_2.node_4",
-                        "namespace_2.node_5",
-                        "namespace_2.node_6",
-                    ],
-                },
+                [
+                    GroupedNode(
+                        name="namespace_1",
+                        type="namespace",
+                        nodes=[
+                            "namespace_1.node_1",
+                            "namespace_1.node_2",
+                            "namespace_1.node_3",
+                        ],
+                        dependencies=[],
+                    ),
+                    GroupedNode(
+                        name="namespace_2",
+                        type="namespace",
+                        nodes=[
+                            "namespace_2.node_4",
+                            "namespace_2.node_5",
+                            "namespace_2.node_6",
+                        ],
+                        dependencies=["namespace_1"],
+                    ),
+                ],
             ),
             (
                 "pipeline_with_namespace_partial",
-                {
-                    "namespace_1": ["namespace_1.node_1", "namespace_1.node_2"],
-                    "node_3": ["node_3"],
-                    "namespace_2": ["namespace_2.node_4", "namespace_2.node_5"],
-                    "node_6": ["node_6"],
-                },
-            ),
-        ],
-    )
-    def test_node_grouping_by_namespace_nodes(self, request, pipeline_name, expected):
-        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
-        {
-            'node_name/namespace_name' : {
-                                            'name': 'node_name/namespace_name',
-                                            'type': 'namespace' or 'node',
-                                            'nodes': [list of nodes],
-                                            'dependencies': [list of dependencies]}
-        }
-        This test checks for the 'nodes' key in the dictionary which should be a list of nodes.
-        """
-        p = request.getfixturevalue(pipeline_name)
-        grouped = p.grouped_nodes_by_namespace
-        for key, value in grouped.items():
-            names = [node.name for node in value["nodes"]]
-            assert set(names) == set(expected[key])
-
-    def test_node_grouping_by_namespace_nested(self, request):
-        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
-        {
-            'node_name/namespace_name' : {
-                                            'name': 'node_name/namespace_name',
-                                            'type': 'namespace' or 'node',
-                                            'nodes': [list of nodes],
-                                            'dependencies': [list of dependencies]}
-        }
-        This test checks if the grouping only occurs on first level of namespaces
-        """
-        p = request.getfixturevalue("pipeline_with_namespace_nested")
-        grouped = p.grouped_nodes_by_namespace
-        assert set(grouped.keys()) == {"level1_1", "level1_2"}
-
-    @pytest.mark.parametrize(
-        "pipeline_name, expected",
-        [
-            (
-                "pipeline_with_namespace_simple",
-                {"namespace_1": set(), "namespace_2": {"namespace_1"}},
-            ),
-            (
-                "pipeline_with_namespace_partial",
-                {
-                    "namespace_1": set(),
-                    "node_3": {"namespace_1"},
-                    "namespace_2": {"node_3"},
-                    "node_6": {"namespace_2"},
-                },
+                [
+                    GroupedNode(
+                        name="namespace_1",
+                        type="namespace",
+                        nodes=["namespace_1.node_1", "namespace_1.node_2"],
+                        dependencies=[],
+                    ),
+                    GroupedNode(
+                        name="node_3",
+                        type="node",
+                        nodes=["node_3"],
+                        dependencies=["namespace_1"],
+                    ),
+                    GroupedNode(
+                        name="namespace_2",
+                        type="namespace",
+                        nodes=["namespace_2.node_4", "namespace_2.node_5"],
+                        dependencies=["node_3"],
+                    ),
+                    GroupedNode(
+                        name="node_6",
+                        type="node",
+                        nodes=["node_6"],
+                        dependencies=["namespace_2"],
+                    ),
+                ],
             ),
             (
                 "pipeline_with_multiple_dependencies_on_one_node",
-                {
-                    "f1": [],
-                    "f2": ["f1"],
-                    "f3": ["f2"],
-                    "f4": ["f2"],
-                    "f5": ["f2"],
-                    "f6": ["f4"],
-                    "f7": ["f2", "f4"],
-                },
+                [
+                    GroupedNode(
+                        name="f1",
+                        type="node",
+                        nodes=["f1"],
+                        dependencies=[],
+                    ),
+                    GroupedNode(
+                        name="f2",
+                        type="node",
+                        nodes=["f2"],
+                        dependencies=["f1"],
+                    ),
+                    GroupedNode(
+                        name="f3",
+                        type="node",
+                        nodes=["f3"],
+                        dependencies=["f2"],
+                    ),
+                    GroupedNode(
+                        name="f4",
+                        type="node",
+                        nodes=["f4"],
+                        dependencies=["f2"],
+                    ),
+                    GroupedNode(
+                        name="f5",
+                        type="node",
+                        nodes=["f5"],
+                        dependencies=["f2"],
+                    ),
+                    GroupedNode(
+                        name="f6",
+                        type="node",
+                        nodes=["f6"],
+                        dependencies=["f4"],
+                    ),
+                    GroupedNode(
+                        name="f7",
+                        type="node",
+                        nodes=["f7"],
+                        dependencies=["f2", "f4"],
+                    ),
+                ],
             ),
         ],
     )
-    def test_node_grouping_by_namespace_dependencies(
+    def test_node_grouping_by_namespace_combined(
         self, request, pipeline_name, expected
     ):
-        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
-        {
-            'node_name/namespace_name' : {
-                                            'name': 'node_name/namespace_name',
-                                            'type': 'namespace' or 'node',
-                                            'nodes': [list of nodes],
-                                            'dependencies': [list of dependencies]}
-        }
-        This test checks for the 'dependencies' in the dictionary which is a list of nodes/namespaces the group depends on.
-        """
+        """Test that grouped_nodes_by_namespace returns correct GroupedNode list with name, type and node names and dependencies."""
         p = request.getfixturevalue(pipeline_name)
         grouped = p.grouped_nodes_by_namespace
-        for key, value in grouped.items():
-            assert set(value["dependencies"]) == set(expected[key])
+
+        assert grouped == expected
+
+    def test_node_grouping_by_namespace_nested(self, request):
+        """Test that nested namespaces are grouped only on first level."""
+        p = request.getfixturevalue("pipeline_with_namespace_nested")
+        grouped = p.grouped_nodes_by_namespace
+
+        assert {g.name for g in grouped} == {"level1_1", "level1_2"}
 
 
 @pytest.fixture

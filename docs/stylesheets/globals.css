@@ -200,6 +200,11 @@ p {
 .md-nav--primary {
     width: 328px;
 
+    /* Hide the Kedro title in the primary sidebar */
+    #__nav_2_label {
+        display: none;
+    }
+
     .md-nav__list {
         background-color: var(--primary-sidebar-bg-color);
         padding: 12px 10px;

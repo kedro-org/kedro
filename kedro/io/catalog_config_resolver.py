@@ -320,11 +320,10 @@ class CatalogConfigResolver:
 
     def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
-        matched_pattern = self.match_pattern(ds_name) or self.match_default_pattern(
-            ds_name
-        )
-
-        if matched_pattern and ds_name not in self._resolved_configs:
+        if ds_name not in self._resolved_configs:
+            matched_pattern = self.match_pattern(ds_name) or self.match_default_pattern(
+                ds_name
+            )
             pattern_config = self._get_pattern_config(matched_pattern)
             ds_config = self._resolve_dataset_config(
                 ds_name, matched_pattern, copy.deepcopy(pattern_config)
@@ -342,4 +341,4 @@ class CatalogConfigResolver:
                 )
             return ds_config  # type: ignore[no-any-return]
 
-        return self._resolved_configs.get(ds_name, {})
+        return self._resolved_configs.get(ds_name)

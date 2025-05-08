@@ -176,7 +176,7 @@ class KedroContext:
         package_name: Package name for the Kedro project the context is
             created for.
         hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
-        extra_params: Optional dictionary containing extra project parameters.
+        runtime_params: Optional dictionary containing runtime project parameters.
             If specified, will update (and therefore take precedence over)
             the parameters retrieved from the project configuration.
 
@@ -187,7 +187,7 @@ class KedroContext:
     env: str | None = field(init=True)
     _package_name: str = field(init=True)
     _hook_manager: PluginManager = field(init=True)
-    _extra_params: dict[str, Any] | None = field(
+    _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
 

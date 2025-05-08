@@ -166,34 +166,8 @@ Consult the [Ibis support matrix](https://ibis-project.org/backends/support/matr
 
 Example pattern:
 
-```mermaid
-flowchart TD
-  subgraph "Git Branches"
-    DEV["dev" branch]
-    PROD["main branch"]
-  end
+[![Development flow](https://mermaid.ink/img/pako:eNqNVN1v2jAQ_1csP0yrBKEkhEAeJhXCqmqtYB3dw5ZpMsklsZrYkePQMsr_Ptvhe0Xam32--33cnbzGEY8B-zjJ-UuUESHRPAgZQlW9SAUpMxTiWyrRSBAWZVCFWD8iFEy-_wxxQio_IW0N0V6YDBTDEjXHEP9qcmeP0-D95IJQdpoNLA7ZGf9YVSxIBTvu8TSYHPBSIKJCXyAWHM1oCTllgHTJOaKSjNrtT6Zc37Wso8A5KZEk5-ne8Ojm2xFpQnMwTlDEWdLR6jpRU2GtivzE-u_x59uLlaXg8TuVe9Famxb5FuK60u1_M0ouPO3o_nEzeYWolpQzhbykgrMCmNz38-4gLyel5GUj8J5HJNcDhZyXugB1VC76CFZqoaCOnoPR1anTxwNQBWIJAs2Uvzo6Z95ijGj6tQaxujp3rS02o7nbTUrbMqGGSOeZJtxtW6A2lyYkkqYP06f57Gl-tHN6sdtmM24YyVcVrdAH9KBM5tWWu4G9DGb_Nxpu4VTQGKvUvIIWLkCoPVd3vNZEIZYZFGo7fXWMiXgOcauJZ7LI78nCoPhIihpCtlFoJWE_OC-wr0MtLHidZnv0uoyJhIASNepiHxWqlSDGvGYS-15_aECwv8av2HecruV5Q8-ze67bH1x7LbzCftd1LBVzXde2Pbffszct_MewXlv9bn_oDBzXdge9gTNQaBBTycVD83WYH2TzFwwqX2Q?type=png)](https://mermaid.live/edit#pako:eNqNVN1v2jAQ_1csP0yrBKEkhEAeJhXCqmqtYB3dw5ZpMsklsZrYkePQMsr_Ptvhe0Xam32--33cnbzGEY8B-zjJ-UuUESHRPAgZQlW9SAUpMxTiWyrRSBAWZVCFWD8iFEy-_wxxQio_IW0N0V6YDBTDEjXHEP9qcmeP0-D95IJQdpoNLA7ZGf9YVSxIBTvu8TSYHPBSIKJCXyAWHM1oCTllgHTJOaKSjNrtT6Zc37Wso8A5KZEk5-ne8Ojm2xFpQnMwTlDEWdLR6jpRU2GtivzE-u_x59uLlaXg8TuVe9Famxb5FuK60u1_M0ouPO3o_nEzeYWolpQzhbykgrMCmNz38-4gLyel5GUj8J5HJNcDhZyXugB1VC76CFZqoaCOnoPR1anTxwNQBWIJAs2Uvzo6Z95ijGj6tQaxujp3rS02o7nbTUrbMqGGSOeZJtxtW6A2lyYkkqYP06f57Gl-tHN6sdtmM24YyVcVrdAH9KBM5tWWu4G9DGb_Nxpu4VTQGKvUvIIWLkCoPVd3vNZEIZYZFGo7fXWMiXgOcauJZ7LI78nCoPhIihpCtlFoJWE_OC-wr0MtLHidZnv0uoyJhIASNepiHxWqlSDGvGYS-15_aECwv8av2HecruV5Q8-ze67bH1x7LbzCftd1LBVzXde2Pbffszct_MewXlv9bn_oDBzXdge9gTNQaBBTycVD83WYH2TzFwwqX2Q)
 
-  subgraph "Catalogs"
-    BASE["conf/base/catalog.yml"]
-    PROD_CFG["conf/prod/catalog.yml"]
-  end
-
-  DEV -->|"uses"| BASE
-  PROD -->|"uses"| PROD_CFG
-
-  subgraph "Runners"
-    CI["Kedro CI (DuckDB)"]
-    RUNNER["Kedro Pipeline Code"]
-    PROD_R["Kedro Prod (Warehouse)"]
-  end
-
-  BASE --> CI
-  CI --> RUNNER
-  PROD_CFG --> PROD_R
-  PROD_R --> RUNNER
-
-  RUNNER -->|"artifacts"| OUTPUT["Analysis & Models"]
-```
 </details>
 
 ## Limitations and key design decisions

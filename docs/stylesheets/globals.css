@@ -248,9 +248,21 @@ p {
 
 /* Secondary sidebar styles */
 .md-nav--secondary {
+    font-size: 16px;
+    font-weight: 400;
+
     .md-nav__title {
-        background-color: transparent;
+        background: transparent;
         box-shadow: none;
+        color: var(--text-secondary-color);    
+    }
+
+    .md-nav__link  {
+        color: var(--text-secondary-color);
+    }
+
+    .md-nav__link--active {
+        color: var(--text-primary-color);
     }
 }
 

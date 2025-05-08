@@ -235,7 +235,7 @@ class KedroSession:
     def load_context(self) -> KedroContext:
         """An instance of the project context."""
         env = self.store.get("env")
-        extra_params = self.store.get("extra_params")
+        runtime_params = self.store.get("runtime_params")
         config_loader = self._get_config_loader()
         context_class = settings.CONTEXT_CLASS
         context = context_class(
@@ -243,7 +243,7 @@ class KedroSession:
             project_path=self._project_path,
             config_loader=config_loader,
             env=env,
-            extra_params=extra_params,
+            runtime_params=runtime_params,
             hook_manager=self._hook_manager,
         )
         self._hook_manager.hook.after_context_created(context=context)

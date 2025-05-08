@@ -218,7 +218,6 @@ nav:
                   - AbstractDataset: pages/api/io/kedro.io.AbstractDataset.md
                   - AbstractVersionedDataset: pages/api/io/kedro.io.AbstractVersionedDataset.md
                   - CachedDataset: pages/api/io/kedro.io.CachedDataset.md
-                  - DataCatalog: pages/api/io/kedro.io.DataCatalog.md
                   - LambdaDataset: pages/api/io/kedro.io.LambdaDataset.md
                   - MemoryDataset: pages/api/io/kedro.io.MemoryDataset.md
                   - Version: pages/api/io/kedro.io.Version.md

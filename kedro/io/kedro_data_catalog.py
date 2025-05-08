@@ -163,7 +163,7 @@ class KedroDataCatalog(CatalogProtocol):
     def __iter__(self) -> Iterator[str]:
         yield from self.keys()
 
-    def __getitem__(self, ds_name: str) -> AbstractDataset | None:
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
         If a dataset is not in the collection but matches any pattern

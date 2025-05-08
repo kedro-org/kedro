@@ -993,7 +993,7 @@ class CatalogProtocol(Protocol[_C, _DS]):
         """Returns an iterator for the object."""
         ...
 
-    def __getitem__(self, ds_name: str) -> _DS | None:
+    def __getitem__(self, ds_name: str) -> _DS:
         """Get a dataset by name from an internal collection of datasets."""
         ...
 

@@ -90,7 +90,7 @@ pip install great-expectations
 from typing import Any, Dict
 
 from kedro.framework.hooks import hook_impl
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 
 import great_expectations as ge
 
@@ -104,7 +104,7 @@ class DataValidationHooks:
 
     @hook_impl
     def before_node_run(
-        self, catalog: DataCatalog, inputs: Dict[str, Any], session_id: str
+        self, catalog: KedroDataCatalog, inputs: Dict[str, Any], session_id: str
     ) -> None:
         """Validate inputs data to a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
@@ -113,7 +113,7 @@ class DataValidationHooks:
 
     @hook_impl
     def after_node_run(
-        self, catalog: DataCatalog, outputs: Dict[str, Any], session_id: str
+        self, catalog: KedroDataCatalog, outputs: Dict[str, Any], session_id: str
     ) -> None:
         """Validate outputs data from a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
@@ -121,7 +121,7 @@ class DataValidationHooks:
         self._run_validation(catalog, outputs, session_id)
 
     def _run_validation(
-        self, catalog: DataCatalog, data: Dict[str, Any], session_id: str
+        self, catalog: KedroDataCatalog, data: Dict[str, Any], session_id: str
     ):
         for dataset_name, dataset_value in data.items():
             if dataset_name not in self.DATASET_EXPECTATION_MAPPING:
@@ -180,7 +180,7 @@ validations:
 from typing import Any, Dict
 
 from kedro.framework.hooks import hook_impl
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 
 import great_expectations as ge
 
@@ -193,7 +193,7 @@ class DataValidationHooks:
 
     @hook_impl
     def before_node_run(
-        self, catalog: DataCatalog, inputs: Dict[str, Any], session_id: str
+        self, catalog: KedroDataCatalog, inputs: Dict[str, Any], session_id: str
     ) -> None:
         """Validate inputs data to a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
@@ -202,7 +202,7 @@ class DataValidationHooks:
 
     @hook_impl
     def after_node_run(
-        self, catalog: DataCatalog, outputs: Dict[str, Any], session_id: str
+        self, catalog: KedroDataCatalog, outputs: Dict[str, Any], session_id: str
     ) -> None:
         """Validate outputs data from a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
@@ -210,7 +210,7 @@ class DataValidationHooks:
         self._run_validation(catalog, outputs, session_id)
 
     def _run_validation(
-        self, catalog: DataCatalog, data: Dict[str, Any], session_id: str
+        self, catalog: KedroDataCatalog, data: Dict[str, Any], session_id: str
     ):
         for dataset_name, dataset_value in data.items():
             if dataset_name not in self.DATASET_CHECKPOINT_MAPPING:
@@ -361,13 +361,13 @@ from typing import Any, Dict, Optional
 
 from kedro.framework.hooks import hook_impl
 from kedro.pipeline.node import Node
-from kedro.io import DataCatalog
+from kedro.io import KedroDataCatalog
 
 
 class NodeInputReplacementHook:
     @hook_impl
     def before_node_run(
-        self, node: Node, catalog: DataCatalog
+        self, node: Node, catalog: KedroDataCatalog
     ) -> dict[str, Any] | None:
         """Replace `first_input` for `my_node`"""
         if node.name == "my_node":
@@ -379,7 +379,7 @@ class NodeInputReplacementHook:
         return None
 ```
 
-Node input overwrites implemented in `before_node_run` affect only a specific node and do not modify the corresponding datasets in the `DataCatalog`.
+Node input overwrites implemented in `before_node_run` affect only a specific node and do not modify the corresponding datasets in the `KedroDataCatalog`.
 
 
 ```{note}

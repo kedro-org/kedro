@@ -10,12 +10,17 @@ build:
   tools:
     python: "3.9"
 
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
+  jobs:
+    post_create_environment:
+      - pip install uv
+    post_install:
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH uv pip install .[docs]
+      # Build the MkDocs documentation
+      - mkdocs build
+      # Ensure the output directory exists
+      - mkdir -p $READTHEDOCS_OUTPUT/html
+      # Move the built site to the Read the Docs output directory
+      - mv site/* $READTHEDOCS_OUTPUT/html
 
 mkdocs:
   configuration: mkdocs.yml

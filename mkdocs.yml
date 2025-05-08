@@ -8,7 +8,7 @@ theme:
      # Palette toggle for light mode
     - scheme: light
       toggle:
-        icon: material/brightness-7 
+        icon: material/brightness-7
         name: Switch to dark mode
 
     # Palette toggle for dark mode
@@ -65,8 +65,6 @@ plugins:
               - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
 
 markdown_extensions:
-  - pymdownx.superfences
-  - pymdownx.highlight
   - attr_list
   - md_in_html
   - pymdownx.inlinehilite
@@ -85,6 +83,12 @@ markdown_extensions:
   - pymdownx.arithmatex:
       generic: true
   - attr_list
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_css:
   - stylesheets/colors.css
@@ -267,6 +271,5 @@ nav:
         #   - Release notes: pages/about/release_notes.md
           - Migration guide: pages/about/migration.md
           - Kedro telemetry: pages/about/telemetry.md
-#   - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
-#   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
-
+  - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
+  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets

@@ -98,7 +98,7 @@ class AbstractRunner(ABC):
         for ds in pipeline.datasets():
             if ds in catalog:
                 warmed_up_ds.append(ds)
-                _ = catalog._get_dataset(ds)
+                _ = catalog.get(ds)
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
@@ -110,10 +110,8 @@ class AbstractRunner(ABC):
             )
 
         # Register the default dataset pattern with the catalog
-        # TODO: replace with catalog.config_resolver.add_runtime_patterns() when removing old catalog
-        catalog = catalog.shallow_copy(
-            extra_dataset_patterns=self._extra_dataset_patterns
-        )
+        if self._extra_dataset_patterns:
+            catalog.config_resolver.add_runtime_patterns(self._extra_dataset_patterns)
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
@@ -172,8 +170,8 @@ class AbstractRunner(ABC):
             the keys are defined by the node outputs.
 
         """
-        free_outputs = pipeline.outputs() - set(catalog.list())
-        missing = {ds for ds in catalog.list() if not catalog.exists(ds)}
+        free_outputs = pipeline.outputs() - set(catalog.keys())
+        missing = {ds for ds in catalog if not catalog.exists(ds)}
         to_build = free_outputs | missing
         to_rerun = pipeline.only_nodes_with_outputs(*to_build) + pipeline.from_inputs(
             *to_build
@@ -181,7 +179,7 @@ class AbstractRunner(ABC):
 
         # We also need any missing datasets that are required to run the
         # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.datasets() - set(catalog.list())
+        unregistered_ds = pipeline.datasets() - set(catalog.keys())
         output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
         input_from_unregistered = to_rerun.inputs() & unregistered_ds
         to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)
@@ -578,7 +576,7 @@ def run_node(
 
     """
     warnings.warn(
-        "`run_node()` has been deprecated and will be removed in Kedro 0.20.0",
+        "`run_node()` has been deprecated and will be removed in Kedro 1.0.0.",
         KedroDeprecationWarning,
     )
 

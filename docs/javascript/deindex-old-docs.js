@@ -39,4 +39,4 @@ if (window.ReadTheDocsEventData !== undefined) {
 // Subscribe to future dispatches of the event (e.g., SPA navigation)
 document.addEventListener("readthedocs-addons-data-ready", function (event) {
     _handleReadTheDocsData(event.detail.data());
-}); 
+});

@@ -12,10 +12,6 @@ If you decide to deploy your Kedro project onto a single machine, you should con
 
 If your pipeline is sizeable, you may want to run it across separate machines, so will need to consult our [guide to distributed deployment](distributed.md).
 
-![Decision making diagram for deploying Kedro projects](../meta/images/deployment-diagram.png)
-
-## Deployment Methods
-
 ```mermaid
 flowchart TD
     A{Can your Kedro pipeline run on a single machine?} -- YES --> B[Consult the single-machine deployment guide]
@@ -23,21 +19,23 @@ flowchart TD
     C -- YES --> D[Use a container-based approach]
     C -- NO --> E[Use the CLI or package mode]
     A -- NO --> F[Consult the distributed deployment guide]
-    F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Amazon SageMaker</li><li>AWS Step functions</li><li>Azure</li><li>Dask</li><li>Databricks</li><li>Kubeflow Workflows</li><li>Prefect</li><li>Vertex AI</li>"]
+    F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Amazon SageMaker</li><li>AWS Step functions</li><li>Azure</li><li>Dask</li><li>Databricks</li><li>Kubeflow Pipelines</li><li>Prefect</li><li>Vertex AI</li>"]
 ```
+
+## Deployment Methods
 
 This following pages provide information for deployment to, or integration with, the following:
 
-- [Airflow](./supported-platforms/airflow.md)
-- [Amazon SageMaker](./supported-platforms/amazon_sagemaker.md)
-- [Amazon EMR Serverless](./supported-platforms/amazon_emr_serverless.md)
-- [AWS Step functions](./supported-platforms/aws_step_functions.md)
-- [Azure](./supported-platforms/azure.md)
-- [Dask](./supported-platforms/dask.md)
-- [Databricks](./supported-platforms/databricks/index.md)
-- [Kubeflow Workflows](./supported-platforms/kubeflow.md)
-- [Prefect](./supported-platforms/prefect.md)
-- [Vertex AI](./supported-platforms/vertexai.md)
+- [Airflow](airflow.md)
+- [Amazon SageMaker](amazon_sagemaker.md)
+- [Amazon EMR Serverless](amazon_emr_serverless.md)
+- [AWS Step functions](aws_step_functions.md)
+- [Azure](azure.md)
+- [Dask](dask.md)
+- [Databricks](./databricks/index.md)
+- [Kubeflow Pipelines](kubeflow.md)
+- [Prefect](prefect.md)
+- [Vertex AI](vertexai.md)
 
 > **Warning**
 > We also have legacy documentation pages for the following deployment targets, but these have not been tested against recent Kedro releases and we cannot guarantee them:

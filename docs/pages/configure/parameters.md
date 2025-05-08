@@ -66,11 +66,8 @@ node(
 )
 ```
 
-In both cases, under the hood parameters are added to the Data Catalog through the method {py:meth}`add_feed_dict() <kedro.io.DataCatalog.add_feed_dict>` in {py:class}`~kedro.io.DataCatalog`, where they live as `MemoryDataset`s. This method is also what the {py:class}`~kedro.framework.context.KedroContext` class uses when instantiating the catalog.
+In both cases, under the hood parameters are added to the Data Catalog as `MemoryDataset`s.
 
-```{note}
-You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
-```
 
 ## How to load parameters in code
 

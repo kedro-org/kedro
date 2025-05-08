@@ -9,27 +9,24 @@ import pytest
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
-    DataCatalog,
     DatasetError,
     KedroDataCatalog,
     MemoryDataset,
 )
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import node, pipeline
 from kedro.runner import ThreadRunner
 from tests.runner.conftest import exception_fn, identity, return_none, sink, source
 
 
 class TestValidThreadRunner:
     def test_thread_run(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
     def test_thread_run_with_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ThreadRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -37,18 +34,17 @@ class TestValidThreadRunner:
         assert result["Z"] == (42, 42, 42)
 
     def test_memory_dataset_input(self, fan_out_fan_in):
-        catalog = DataCatalog({"A": MemoryDataset("42")})
+        catalog = KedroDataCatalog({"A": MemoryDataset("42")})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == ("42", "42", "42")
 
     def test_does_not_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." not in caplog.text
 
-    @pytest.mark.parametrize("catalog_type", [DataCatalog, KedroDataCatalog])
-    def test_thread_run_with_patterns(self, catalog_type):
+    def test_thread_run_with_patterns(self):
         """Test warm-up is done and patterns are resolved before running pipeline.
 
         Without the warm-up "Dataset 'dummy_1' has already been registered" error
@@ -57,7 +53,7 @@ class TestValidThreadRunner:
         """
         catalog_conf = {"{catch_all}": {"type": "MemoryDataset"}}
 
-        catalog = catalog_type.from_config(catalog_conf)
+        catalog = KedroDataCatalog.from_config(catalog_conf)
 
         test_pipeline = pipeline(
             [
@@ -100,7 +96,7 @@ class TestMaxWorkers:
             wraps=ThreadPoolExecutor,
         )
 
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ThreadRunner(max_workers=user_specified_number).run(
             fan_out_fan_in, catalog
         )
@@ -116,7 +112,7 @@ class TestMaxWorkers:
 
 class TestIsAsync:
     def test_thread_run(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         pattern = (
             "'ThreadRunner' doesn't support loading and saving the "
             "node inputs and outputs asynchronously with threads. "
@@ -130,19 +126,17 @@ class TestIsAsync:
 
 class TestInvalidThreadRunner:
     def test_task_exception(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(feed_dict={"A": 42})
-        pipeline = modular_pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
+        catalog["A"] = 42
+        a_pipeline = pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
-            ThreadRunner().run(pipeline, catalog)
+            ThreadRunner().run(a_pipeline, catalog)
 
     def test_node_returning_none(self):
-        pipeline = modular_pipeline(
-            [node(identity, "A", "B"), node(return_none, "B", "C")]
-        )
-        catalog = DataCatalog({"A": MemoryDataset("42")})
+        a_pipeline = pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
+        catalog = KedroDataCatalog({"A": MemoryDataset("42")})
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
-            ThreadRunner().run(pipeline, catalog)
+            ThreadRunner().run(a_pipeline, catalog)
 
 
 class LoggingDataset(AbstractDataset):
@@ -170,17 +164,17 @@ class TestThreadRunnerRelease:
     def test_dont_release_inputs_and_outputs(self):
         log = []
 
-        pipeline = modular_pipeline(
+        a_pipeline = pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "in": LoggingDataset(log, "in", "stuff"),
                 "middle": LoggingDataset(log, "middle"),
                 "out": LoggingDataset(log, "out"),
             }
         )
-        ThreadRunner().run(pipeline, catalog)
+        ThreadRunner().run(a_pipeline, catalog)
 
         # we don't want to see release in or out in here
         assert list(log) == [("load", "in"), ("load", "middle"), ("release", "middle")]
@@ -189,20 +183,20 @@ class TestThreadRunnerRelease:
         runner = ThreadRunner()
         log = []
 
-        pipeline = modular_pipeline(
+        a_pipeline = pipeline(
             [
                 node(source, None, "first"),
                 node(identity, "first", "second"),
                 node(sink, "second", None),
             ]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "first": LoggingDataset(log, "first"),
                 "second": LoggingDataset(log, "second"),
             }
         )
-        runner.run(pipeline, catalog)
+        runner.run(a_pipeline, catalog)
 
         # we want to see "release first" before "load second"
         assert list(log) == [
@@ -216,15 +210,15 @@ class TestThreadRunnerRelease:
         runner = ThreadRunner()
         log = []
 
-        pipeline = modular_pipeline(
+        a_pipeline = pipeline(
             [
                 node(source, None, "dataset"),
                 node(sink, "dataset", None, name="bob"),
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
-        runner.run(pipeline, catalog)
+        catalog = KedroDataCatalog({"dataset": LoggingDataset(log, "dataset")})
+        runner.run(a_pipeline, catalog)
 
         # we want to the release after both the loads
         assert list(log) == [
@@ -236,17 +230,17 @@ class TestThreadRunnerRelease:
     def test_release_transcoded(self):
         log = []
 
-        pipeline = modular_pipeline(
+        a_pipeline = pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "ds@save": LoggingDataset(log, "save"),
                 "ds@load": LoggingDataset(log, "load"),
             }
         )
 
-        ThreadRunner().run(pipeline, catalog)
+        ThreadRunner().run(a_pipeline, catalog)
 
         # we want to see both datasets being released
         assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]
@@ -274,8 +268,8 @@ class TestSuggestResumeScenario:
     ):
         nodes = {n.name: n for n in two_branches_crossed_pipeline.nodes}
         for name in failing_node_names:
-            two_branches_crossed_pipeline -= modular_pipeline([nodes[name]])
-            two_branches_crossed_pipeline += modular_pipeline(
+            two_branches_crossed_pipeline -= pipeline([nodes[name]])
+            two_branches_crossed_pipeline += pipeline(
                 [nodes[name]._copy(func=exception_fn)]
             )
         with pytest.raises(Exception):
@@ -313,8 +307,8 @@ class TestSuggestResumeScenario:
 
         nodes = {n.name: n for n in test_pipeline.nodes}
         for name in failing_node_names:
-            test_pipeline -= modular_pipeline([nodes[name]])
-            test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
+            test_pipeline -= pipeline([nodes[name]])
+            test_pipeline += pipeline([nodes[name]._copy(func=exception_fn)])
 
         with pytest.raises(Exception, match="test exception"):
             ThreadRunner(max_workers=1).run(

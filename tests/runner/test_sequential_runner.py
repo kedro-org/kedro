@@ -9,20 +9,19 @@ import pytest
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
-    DataCatalog,
     DatasetError,
+    KedroDataCatalog,
     LambdaDataset,
     MemoryDataset,
 )
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import node, pipeline
 from kedro.runner import SequentialRunner
 from tests.runner.conftest import exception_fn, identity, sink, source
 
 
 class TestValidSequentialRunner:
     def test_run_with_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -30,18 +29,18 @@ class TestValidSequentialRunner:
         assert result["Z"] == (42, 42, 42)
 
     def test_run_without_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
     def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." in caplog.text
 
     def test_run_twice_giving_same_result(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         patterns_before_run = catalog.config_resolver.list_patterns()
         result_first_run = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
@@ -66,7 +65,7 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert len(outputs) == 1
 
     def test_no_datasets(self, is_async, branchless_pipeline):
-        catalog = DataCatalog({}, {"ds1": 42})
+        catalog = KedroDataCatalog({}, {"ds1": 42})
         outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
         assert outputs["ds3"] == 42
@@ -92,7 +91,7 @@ class TestSeqentialRunnerBranchlessPipeline:
         def _save(arg):
             assert arg == 0
 
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "ds": LambdaDataset(load=_load, save=_save),
                 "dsX": LambdaDataset(load=_load, save=_save),
@@ -112,9 +111,10 @@ class TestSequentialRunnerBranchedPipeline:
         is_async,
         memory_catalog,
         unfinished_outputs_pipeline,
-        pandas_df_feed_dict,
+        pandas_df_raw_data,
     ):
-        memory_catalog.add_feed_dict(pandas_df_feed_dict, replace=True)
+        for df_name, df_value in pandas_df_raw_data.items():
+            memory_catalog[df_name] = df_value
         outputs = SequentialRunner(is_async=is_async).run(
             unfinished_outputs_pipeline, memory_catalog
         )
@@ -132,10 +132,13 @@ class TestSequentialRunnerBranchedPipeline:
         is_async,
         memory_catalog,
         unfinished_outputs_pipeline,
-        conflicting_feed_dict,
+        conflicting_raw_data,
     ):
         """ds1 and ds3 will be replaced with new inputs."""
-        memory_catalog.add_feed_dict(conflicting_feed_dict, replace=True)
+
+        for ds_name, ds_value in conflicting_raw_data.items():
+            memory_catalog[ds_name] = ds_value
+
         outputs = SequentialRunner(is_async=is_async).run(
             unfinished_outputs_pipeline, memory_catalog
         )
@@ -178,10 +181,10 @@ class LoggingDataset(AbstractDataset):
 class TestSequentialRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):
         log = []
-        test_pipeline = modular_pipeline(
+        test_pipeline = pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "in": LoggingDataset(log, "in", "stuff"),
                 "middle": LoggingDataset(log, "middle"),
@@ -195,14 +198,14 @@ class TestSequentialRunnerRelease:
 
     def test_release_at_earliest_opportunity(self, is_async):
         log = []
-        test_pipeline = modular_pipeline(
+        test_pipeline = pipeline(
             [
                 node(source, None, "first"),
                 node(identity, "first", "second"),
                 node(sink, "second", None),
             ]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "first": LoggingDataset(log, "first"),
                 "second": LoggingDataset(log, "second"),
@@ -220,14 +223,14 @@ class TestSequentialRunnerRelease:
 
     def test_count_multiple_loads(self, is_async):
         log = []
-        test_pipeline = modular_pipeline(
+        test_pipeline = pipeline(
             [
                 node(source, None, "dataset"),
                 node(sink, "dataset", None, name="bob"),
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
+        catalog = KedroDataCatalog({"dataset": LoggingDataset(log, "dataset")})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we want to the release after both the loads
@@ -235,10 +238,10 @@ class TestSequentialRunnerRelease:
 
     def test_release_transcoded(self, is_async):
         log = []
-        test_pipeline = modular_pipeline(
+        test_pipeline = pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "ds@save": LoggingDataset(log, "save"),
                 "ds@load": LoggingDataset(log, "load"),
@@ -253,8 +256,8 @@ class TestSequentialRunnerRelease:
     @pytest.mark.parametrize(
         "test_pipeline",
         [
-            modular_pipeline([node(identity, "ds1", "ds2", confirms="ds1")]),
-            modular_pipeline(
+            pipeline([node(identity, "ds1", "ds2", confirms="ds1")]),
+            pipeline(
                 [
                     node(identity, "ds1", "ds2"),
                     node(identity, "ds2", None, confirms="ds1"),
@@ -264,7 +267,7 @@ class TestSequentialRunnerRelease:
     )
     def test_confirms(self, mocker, test_pipeline, is_async):
         fake_dataset_instance = mocker.Mock()
-        catalog = DataCatalog(datasets={"ds1": fake_dataset_instance})
+        catalog = KedroDataCatalog(datasets={"ds1": fake_dataset_instance})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
         fake_dataset_instance.confirm.assert_called_once_with()
 
@@ -291,8 +294,8 @@ class TestSuggestResumeScenario:
     ):
         nodes = {n.name: n for n in two_branches_crossed_pipeline.nodes}
         for name in failing_node_names:
-            two_branches_crossed_pipeline -= modular_pipeline([nodes[name]])
-            two_branches_crossed_pipeline += modular_pipeline(
+            two_branches_crossed_pipeline -= pipeline([nodes[name]])
+            two_branches_crossed_pipeline += pipeline(
                 [nodes[name]._copy(func=exception_fn)]
             )
         with pytest.raises(Exception):
@@ -330,8 +333,8 @@ class TestSuggestResumeScenario:
 
         nodes = {n.name: n for n in test_pipeline.nodes}
         for name in failing_node_names:
-            test_pipeline -= modular_pipeline([nodes[name]])
-            test_pipeline += modular_pipeline([nodes[name]._copy(func=exception_fn)])
+            test_pipeline -= pipeline([nodes[name]])
+            test_pipeline += pipeline([nodes[name]._copy(func=exception_fn)])
 
         with pytest.raises(Exception, match="test exception"):
             SequentialRunner().run(
@@ -345,7 +348,7 @@ class TestSuggestResumeScenario:
 class TestMemoryDatasetBehaviour:
     def test_run_includes_memory_datasets(self, pipeline_with_memory_datasets):
         # Create a catalog with MemoryDataset entries and inputs for the pipeline
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "Input1": LambdaDataset(load=lambda: "data1", save=lambda data: None),
                 "Input2": LambdaDataset(load=lambda: "data2", save=lambda data: None),
@@ -355,7 +358,7 @@ class TestMemoryDatasetBehaviour:
         )
 
         # Add a regular dataset to the catalog
-        catalog.add("RegularOutput", LambdaDataset(None, None, lambda: True))
+        catalog["RegularOutput"] = LambdaDataset(None, None, lambda: True)
 
         # Run the pipeline
         output = SequentialRunner().run(pipeline_with_memory_datasets, catalog)
@@ -365,4 +368,4 @@ class TestMemoryDatasetBehaviour:
         assert "MemOutput2" in output
         assert (
             "RegularOutput" not in output
-        )  # This output is registered in DataCatalog and so should not be in free outputs
+        )  # This output is registered in KedroDataCatalog and so should not be in free outputs

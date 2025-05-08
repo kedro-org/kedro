@@ -113,7 +113,7 @@ nav:
           - Glossary: pages/getting-started/glossary.md
           - FAQs: pages/getting-started/faq.md
       - TUTORIALS:
-          - Kedro Spaceflights tutorial: 
+          - Kedro Spaceflights tutorial:
             - Spaceflight tutorial: pages/tutorials/spaceflights_tutorial.md
             - Spaceflight tutorial template: pages/tutorials/tutorial_template.md
             - Set up data: pages/tutorials/set_up_data.md

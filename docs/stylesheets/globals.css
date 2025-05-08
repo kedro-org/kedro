@@ -267,12 +267,21 @@ p {
 }
 
 /** Style for the main documenation page */
+.md-grid  {
+    max-width: none;
+}
+
 .md-main__inner {
-    margin: 10px;
+    margin: 10px 64px 10px 10px;
 }
 
 /** MOBILE STYLES */
 @media screen and (max-width: 76.2344em) {
+    .md-sidebar--primary,
+    .md-nav--primary {
+        max-width: 242px;
+    }
+
     .md-nav--primary .md-nav__title[for=__drawer],
     .md-nav__source  {
         background-color: var(--yellow-6);

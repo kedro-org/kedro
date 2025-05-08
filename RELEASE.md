@@ -1,6 +1,8 @@
 # Release 1.0.0
 
 ## Major features and improvements
+* Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
+
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
 * Added support for running multiple namespaces within a single session.
@@ -26,6 +28,7 @@
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
 * Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
+* Cached `inputs` in `Node` when created from dictionary for better performance.
 ## Breaking changes to the API
 
 
@@ -34,6 +37,10 @@
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
 ## Documentation changes
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Arnout Verboven](https://github.com/ArnoutVerboven)
 
 # Release 0.19.12
 

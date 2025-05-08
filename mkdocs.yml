@@ -62,8 +62,36 @@ plugins:
               ignore_init_summary: true
               warn_unknown_params: false
               returns_named_value: false
-          paths: [src]
+            paths: [src]
+            import:
+              - https://docs.kedro.org/en/stable/objects.inv
+              - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
 
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - footnotes
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - attr_list
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_css:
   - stylesheets/colors.css
@@ -75,111 +103,177 @@ extra_javascript:
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
 
+
 nav:
-  - Welcome: index.md
+  - Home: index.md
   - Kedro:
-      - LEARN ABOUT KEDRO:
-          - Introduction: pages/introduction/index.md
-          - First steps: pages/get_started/index.md
-          - Learn Kedro with hands-on video: pages/course/index.md
-      - TUTORIAL AND BASIC USAGE:
-          - Tutorial: pages/tutorial/spaceflights_tutorial.md
-          - Visualisation with Kedro-Viz: pages/visualisation/index.md
-          - Kedro for notebook users: pages/notebooks_and_ipython/index.md
-          - FAQs and resources: pages/resources/index.md
-      - KEDRO PROJECTS:
-          - Customise a new project: pages/starters/index.md
-          - Configuration: pages/configuration/index.md
-          - Data catalog: pages/data/index.md
-          - Nodes and Pipelines: pages/nodes_and_pipelines/index.md
-          - Anonymous Telemetry: pages/configuration/telemetry.md
-      - INTEGRATIONS:
-          - PySpark integration: pages/integrations/pyspark_integration.md
-          - How to add MLflow to your Kedro workflow: pages/integrations/mlflow.md
-          - Data and pipeline versioning with Kedro and DVC: pages/integrations/kedro_dvc_versioning.md
-          - Data versioning with Delta Lake: pages/integrations/deltalake_versioning.md
-          - Data versioning with Iceberg: pages/integrations/iceberg_versioning.md
-      - DEVELOPMENT:
-          - Set up Visual Studio Code: pages/development/set_up_vscode.md
-          - Set up PyCharm: pages/development/set_up_pycharm.md
-          - Debugging: pages/development/debugging.md
-          - Automated Testing: pages/development/automated_testing.md
-          - Code formatting and linting: pages/development/linting.md
-      - ADVANCED USAGE:
-          - Project setup: pages/kedro_project_setup/index.md
-          - Extend Kedro: pages/extend_kedro/index.md
-          - Hooks: pages/hooks/index.md
-          - Logging: pages/logging/index.md
-      - DEPLOYMENT:
-          - Introduction: pages/deployment/index.md
-          - Nodes grouping: pages/deployment/nodes_grouping.md
-          - Single-machine deployment: pages/deployment/single_machine.md
-          - Distributed deployment: pages/deployment/distributed.md
-          - Airflow: pages/deployment/airflow.md
-          - Amazon SageMaker: pages/deployment/amazon_sagemaker.md
-          - Amazon EMR Serverless: pages/deployment/amazon_emr_serverless.md
-          - AWS Step Functions: pages/deployment/aws_step_functions.md
-          - Azure: pages/deployment/azure.md
-          - Dask: pages/deployment/dask.md
-          - Databricks: pages/deployment/databricks/index.md
-          - Kubeflow: pages/deployment/kubeflow.md
-          - Prefect: pages/deployment/prefect.md
-          - Vertex AI: pages/deployment/vertexai.md
-          - Argo Workflow (outdated documentation that needs review): pages/deployment/argo.md
-          - AWS Batch (outdated documentation that needs review): pages/deployment/aws_batch.md
-      - CONTRIBUTE TO KEDRO:
-          - Contribution Guide: pages/contribution/index.md
-      - CLI REFERENCE:
-          - Commands Reference: pages/development/commands_reference.md
-      - API DOCUMENTATION:
-          - Kedro API Overview: pages/api/index.md
-          - kedro.config:
-              - Overview: pages/api/config/kedro.config.md
-              - AbstractConfigLoader: pages/api/config/kedro.config.AbstractConfigLoader.md
-              - OmegaConfigLoader: pages/api/config/kedro.config.OmegaConfigLoader.md
-              - MissingConfigException: pages/api/config/kedro.config.MissingConfigException.md
-          - kedro.framework:
-              - Overview: pages/api/framework/kedro.framework.md
-              - CLI: pages/api/framework/kedro.framework.cli.md
-              - Context: pages/api/framework/kedro.framework.context.md
-              - Hooks: pages/api/framework/kedro.framework.hooks.md
-              - Project: pages/api/framework/kedro.framework.project.md
-              - Session: pages/api/framework/kedro.framework.session.md
-              - Startup: pages/api/framework/kedro.framework.startup.md
-          - kedro.io:
-              - Overview: pages/api/io/kedro.io.md
-              - AbstractDataset: pages/api/io/kedro.io.AbstractDataset.md
-              - AbstractVersionedDataset: pages/api/io/kedro.io.AbstractVersionedDataset.md
-              - CachedDataset: pages/api/io/kedro.io.CachedDataset.md
-              - DataCatalog: pages/api/io/kedro.io.DataCatalog.md
-              - LambdaDataset: pages/api/io/kedro.io.LambdaDataset.md
-              - MemoryDataset: pages/api/io/kedro.io.MemoryDataset.md
-              - Version: pages/api/io/kedro.io.Version.md
-              - DatasetAlreadyExistsError: pages/api/io/kedro.io.DatasetAlreadyExistsError.md
-              - DatasetError: pages/api/io/kedro.io.DatasetError.md
-              - DatasetNotFoundError: pages/api/io/kedro.io.DatasetNotFoundError.md
-          - kedro.ipython:
-              - Overview: pages/api/ipython/kedro.ipython.md
-              - load_ipython_extension: pages/api/ipython/kedro.ipython.load_ipython_extension.md
-              - magic_load_node: pages/api/ipython/kedro.ipython.magic_load_node.md
-              - magic_reload_kedro: pages/api/ipython/kedro.ipython.magic_reload_kedro.md
-              - reload_kedro: pages/api/ipython/kedro.ipython.reload_kedro.md
-          - kedro.logging: pages/api/kedro.logging.md
-          - kedro.pipeline:
-              - Overview: pages/api/pipeline/kedro.pipeline.md
-              - node: pages/api/pipeline/kedro.pipeline.node.md
-              - Pipeline: pages/api/pipeline/kedro.pipeline.Pipeline.md
-              - Node: pages/api/pipeline/kedro.pipeline.node.Node.md
-          - kedro.runner:
-              - Overview: pages/api/runner/kedro.runner.md
-              - run_node: pages/api/runner/kedro.runner.run_node.md
-              - AbstractRunner: pages/api/runner/kedro.runner.AbstractRunner.md
-              - SequentialRunner: pages/api/runner/kedro.runner.SequentialRunner.md
-              - ParallelRunner: pages/api/runner/kedro.runner.ParallelRunner.md
-              - ThreadRunner: pages/api/runner/kedro.runner.ThreadRunner.md
-          - kedro.utils: pages/api/kedro.utils.md
-          - kedro.load_ipython_extension: pages/api/kedro.load_ipython_extension.md
-          - kedro.KedroDeprecationWarning: pages/api/kedro.KedroDeprecationWarning.md
-          - kedro.KedroPythonVersionWarning: pages/api/kedro.KedroPythonVersionWarning.md
-  - Kedro-Viz: readthedocs.io/projects/kedro-viz
+      - GETTING STARTED:
+          - Introduction to Kedro: pages/getting-started/course.md
+          - Concepts: pages/getting-started/kedro_concepts.md
+          - Installation: pages/getting-started/install.md
+          - Kedro architecture: pages/getting-started/architecture_overview.md
+          # - Kedro's CLI: pages/getting-started/commands_reference.md
+            #   - Quickstart: pages/getting-started/quickstart.md
+          - Glossary: pages/getting-started/glossary.md
+          - FAQs: pages/getting-started/faq.md
+      - TUTORIALS:
+          - Kedro Spaceflights tutorial:
+            - Spaceflight tutorial: pages/tutorials/spaceflights_tutorial.md
+            - Spaceflight tutorial template: pages/tutorials/tutorial_template.md
+            - Set up data: pages/tutorials/set_up_data.md
+            - Create a pipeline: pages/tutorials/create_a_pipeline.md
+            - Add another pipeline: pages/tutorials/add_another_pipeline.md
+            - Settings: pages/tutorials/settings.md
+            - Test a project: pages/tutorials/test_a_project.md
+            - FAQs: pages/tutorials/spaceflights_tutorial_faqs.md
+          - Kedro for Notebook tutorial: pages/tutorials/notebooks_tutorial.md
+      - CREATE:
+          - Create a Kedro project: pages/create/new_project.md
+          - Create a minimal Kedro project: pages/create/minimal_kedro_project.md
+          - Customise a new project: pages/create/customise_project.md
+          - Kedro tools: pages/create/new_project_tools.md
+          - Kedro starters: pages/create/starters.md
+      - CONFIGURE:
+          - Project configuration and settings:
+              - Configuration basics: pages/configure/configuration_basics.md
+              - Migration guide for config loaders: pages/configure/config_loader_migration.md
+              - Advanced configuration: pages/configure/advanced_configuration.md
+          - Parameters: pages/configure/parameters.md
+          - Credentials: pages/configure/credentials.md
+      - CATALOG DATA:
+          - Introduction: pages/catalog-data/introduction.md
+          - Kedro data catalog: pages/catalog-data/kedro_data_catalog.md
+          - Data Catalog YAML examples: pages/catalog-data/data_catalog_yaml_examples.md
+          - Dataset factories: pages/catalog-data/kedro_dataset_factories.md
+          - Data and pipeline versioning: pages/catalog-data/kedro_dvc_versioning.md
+          - Partitioned and incremental datasets: pages/catalog-data/partitioned_and_incremental_datasets.md
+          - Programmatic usage: pages/catalog-data/advanced_data_catalog_usage.md
+      - BUILD:
+          - Nodes: pages/build/nodes.md
+          - Pipeline object: pages/build/pipeline_introduction.md
+          - Run a pipeline: pages/build/run_a_pipeline.md
+          - Modular pipelines: pages/build/modular_pipelines.md
+          - Reusing pipelines (namespaces): pages/build/namespaces.md
+          - Pipeline registry: pages/build/pipeline_registry.md
+          - Slice a pipeline: pages/build/slice_a_pipeline.md
+      - DEVELOP:
+          - Dependency management: pages/develop/dependencies.md
+          - Logging: pages/develop/logging.md
+          - Automated testing: pages/develop/automated_testing.md
+          - Code formatting and linting: pages/develop/linting.md
+          - Debugging: pages/develop/debugging.md
+      - DEPLOY:
+          - Overview: pages/deploy/index.md
+          - How to package your project: pages/deploy/package_a_project.md
+          - How to group your nodes effectively: pages/deploy/nodes_grouping.md
+          - Single-machine deployment: pages/deploy/single_machine.md
+          - Distributed deployment: pages/deploy/distributed.md
+          - Supported platforms:
+              - Apache Airflow: pages/deploy/supported-platforms/airflow.md
+              - Amazon SageMaker: pages/deploy/supported-platforms/amazon_sagemaker.md
+              - Amazon EMR Serverless: pages/deploy/supported-platforms/amazon_emr_serverless.md
+              - AWS Step Functions: pages/deploy/supported-platforms/aws_step_functions.md
+              - Azure ML pipelines: pages/deploy/supported-platforms/azure.md
+              - Dask: pages/deploy/supported-platforms/dask.md
+              - Databricks:
+                - Overview: pages/deploy/supported-platforms/databricks/index.md
+                - Use a Databricks workspace to develop a Kedro project: pages/deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md
+                - Use an IDE and Databricks asset Bundles to deploy a Kedro project: pages/deploy/supported-platforms/databricks/databricks_ide_databricks_asset_bundles_workflow.md
+                - Use a Databricks job to deploy a Kedro project: pages/deploy/supported-platforms/databricks/databricks_deployment_workflow.md
+                - Use an IDE, dbx and Databricks Repos to develop a Kedro project: pages/deploy/supported-platforms/databricks/databricks_dbx_workflow.md
+                - Databricks visualisation: pages/deploy/supported-platforms/databricks/databricks_visualisation.md
+              - Kubeflow Pipelines: pages/deploy/supported-platforms/kubeflow.md
+              - Prefect: pages/deploy/supported-platforms/prefect.md
+              - VertexAI: pages/deploy/supported-platforms/vertexai.md
+              - Argo Workflows: pages/deploy/supported-platforms/argo.md
+              - AWS Batch: pages/deploy/supported-platforms/aws_batch.md
+      - EXTEND:
+          - Use Cases: pages/extend/common_use_cases.md
+          - Custom datasets: pages/extend/how_to_create_a_custom_dataset.md
+          - Hooks:
+              - Introduction to Hooks: pages/extend/hooks/introduction.md
+              - Common use cases: pages/extend/hooks/common_use_cases.md
+              - Hooks examples: pages/extend/hooks/examples.md
+          - Programmatic usage: pages/extend/session.md
+          - Custom plugins: pages/extend/plugins.md
+          - Custom starters: pages/extend/create_a_starter.md
+      - REFERENCE:
+          - Kedro API:
+              - Overview: pages/api/index.md
+              - kedro.config:
+                  - Overview: pages/api/config/kedro.config.md
+                  - AbstractConfigLoader: pages/api/config/kedro.config.AbstractConfigLoader.md
+                  - OmegaConfigLoader: pages/api/config/kedro.config.OmegaConfigLoader.md
+                  - MissingConfigException: pages/api/config/kedro.config.MissingConfigException.md
+              - kedro.framework:
+                  - Overview: pages/api/framework/kedro.framework.md
+                  - CLI: pages/api/framework/kedro.framework.cli.md
+                  - Context: pages/api/framework/kedro.framework.context.md
+                  - Hooks: pages/api/framework/kedro.framework.hooks.md
+                  - Project: pages/api/framework/kedro.framework.project.md
+                  - Session: pages/api/framework/kedro.framework.session.md
+                  - Startup: pages/api/framework/kedro.framework.startup.md
+              - kedro.io:
+                  - Overview: pages/api/io/kedro.io.md
+                  - AbstractDataset: pages/api/io/kedro.io.AbstractDataset.md
+                  - AbstractVersionedDataset: pages/api/io/kedro.io.AbstractVersionedDataset.md
+                  - CachedDataset: pages/api/io/kedro.io.CachedDataset.md
+                  - DataCatalog: pages/api/io/kedro.io.DataCatalog.md
+                  - LambdaDataset: pages/api/io/kedro.io.LambdaDataset.md
+                  - MemoryDataset: pages/api/io/kedro.io.MemoryDataset.md
+                  - Version: pages/api/io/kedro.io.Version.md
+                  - DatasetAlreadyExistsError: pages/api/io/kedro.io.DatasetAlreadyExistsError.md
+                  - DatasetError: pages/api/io/kedro.io.DatasetError.md
+                  - DatasetNotFoundError: pages/api/io/kedro.io.DatasetNotFoundError.md
+              - kedro.ipython:
+                  - Overview: pages/api/ipython/kedro.ipython.md
+                  - load_ipython_extension: pages/api/ipython/kedro.ipython.load_ipython_extension.md
+                  - magic_load_node: pages/api/ipython/kedro.ipython.magic_load_node.md
+                  - magic_reload_kedro: pages/api/ipython/kedro.ipython.magic_reload_kedro.md
+                  - reload_kedro: pages/api/ipython/kedro.ipython.reload_kedro.md
+              - kedro.logging: pages/api/kedro.logging.md
+              - kedro.pipeline:
+                  - Overview: pages/api/pipeline/kedro.pipeline.md
+                  - node: pages/api/pipeline/kedro.pipeline.node.md
+                  - modular_pipeline.pipeline: pages/api/pipeline/kedro.pipeline.modular_pipeline.pipeline.md
+                  - Pipeline: pages/api/pipeline/kedro.pipeline.Pipeline.md
+                  - ModularPipelineError: pages/api/pipeline/kedro.pipeline.modular_pipeline.ModularPipelineError.md
+              - kedro.runner:
+                  - Overview: pages/api/runner/kedro.runner.md
+                  - run_node: pages/api/runner/kedro.runner.run_node.md
+                  - AbstractRunner: pages/api/runner/kedro.runner.AbstractRunner.md
+                  - SequentialRunner: pages/api/runner/kedro.runner.SequentialRunner.md
+                  - ParallelRunner: pages/api/runner/kedro.runner.ParallelRunner.md
+                  - ThreadRunner: pages/api/runner/kedro.runner.ThreadRunner.md
+              - kedro.utils: pages/api/kedro.utils.md
+              - kedro.load_ipython_extension: pages/api/kedro.load_ipython_extension.md
+              - kedro.KedroDeprecationWarning: pages/api/kedro.KedroDeprecationWarning.md
+              - kedro.KedroPythonVersionWarning: pages/api/kedro.KedroPythonVersionWarning.md
+          - Kedro CLI: pages/getting-started/commands_reference.md
+      - INTEGRATION & PLUGINS:
+          - IPython and Jupyter:
+              - Introduction: pages/integrations-and-plugins/notebooks_and_ipython/index.md
+              - Kedro and Jupyter Notebook: pages/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md
+              - How to add Kedro to Jupyter Notebook: pages/integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md
+          - PySpark: pages/integrations-and-plugins/pyspark_integration.md
+          - MLflow: pages/integrations-and-plugins/mlflow.md
+        #   - DVC: pages/integrations-and-plugins/dvc.md
+          - Delta Lake: pages/integrations-and-plugins/deltalake_versioning.md
+          - Iceberg: pages/integrations-and-plugins/iceberg_versioning.md
+      - IDE SUPPORT:
+          - Visual Studio Code: pages/ide/set_up_vscode.md
+          - PyCharm: pages/ide/set_up_pycharm.md
+      - ABOUT:
+        #   - Community:
+            #   - Kedro Slack: pages/about/community/slack.md
+            #   - Kedro Wizard: pages/about/community/wizard.md
+          - Contributing:
+              - Kedro's Technical Steering Committee: pages/about/technical_steering_committee.md
+            #   - Kedro Maintainer: pages/about/contributing/maintainer.md
+            #   - Contributing on GitHub: pages/about/contributing/github.md
+            #   - Contributing documentation: pages/about/contributing/documentation.md
+        #   - Release notes: pages/about/release_notes.md
+          - Migration guide: pages/about/migration.md
+          - Kedro telemetry: pages/about/telemetry.md
+  - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets

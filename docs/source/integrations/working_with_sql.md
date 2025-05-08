@@ -40,7 +40,7 @@ When working with SQL databases in Kedro, it's helpful to keep the following con
 |----------------|--------|--------------------|
 | **Pandas SQL** | Legacy | Minimal            |
 | **Spark-JDBC** | Legacy | High (JVM/cluster) |
-| **Ibis**       | Modern | Low                |
+| **Ibis**       | Modern | Minimal                |
 
 ---
 

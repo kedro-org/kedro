@@ -208,12 +208,13 @@ class CatalogConfigResolver:
         matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
         return next(matches, None)
 
-    def match_default_pattern(self, ds_name: str) -> str | None:
+    def match_default_pattern(self, ds_name: str) -> str:
         """Match a dataset name against default patterns in a dictionary."""
         default_patters = set(self._default_pattern.keys())
         default_patters.update(set(self._runtime_patterns.keys()))
         matches = self._get_matches(default_patters, ds_name)
-        return next(matches, None)
+        # We assume runtime pattern always matches at the end
+        return next(matches)
 
     def _get_pattern_config(self, pattern: str) -> dict[str, Any]:
         return (
@@ -341,4 +342,4 @@ class CatalogConfigResolver:
                 )
             return ds_config  # type: ignore[no-any-return]
 
-        return self._resolved_configs.get(ds_name)
+        return self._resolved_configs[ds_name]

@@ -253,7 +253,7 @@ class KedroDataCatalog(CatalogProtocol):
         if lazy_dataset:
             self[key] = lazy_dataset.materialize()
 
-        dataset = self._datasets.get(key)
+        dataset = self._datasets[key]
 
         if version and isinstance(dataset, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,

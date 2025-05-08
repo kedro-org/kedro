@@ -140,7 +140,7 @@ body {
 }
 
 .explore-link a {
-    color: var(--text-color);
+    color: var(--text-secondary-color);
     text-decoration: none;
     font-weight: 400;
     font-size: 16px;
@@ -229,13 +229,13 @@ body {
 .card-title {
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--text-secondary-color);
     margin-bottom: 8px;
 }
 
 .card-description {
     font-size: 14px;
-    color: var(--paragraph-color);
+    color: var(--text-primary-color);
 }       
 
 /* Footer styles */

@@ -24,7 +24,7 @@ h1 {
     font-style: normal;
     font-weight: 400;
     line-height: 40px;
-    color: var(--text-color);
+    color: var(--text-secondary-color);
 }
 
 h2 {
@@ -33,7 +33,7 @@ h2 {
     font-style: normal;
     font-weight: 400;
     line-height: 32px;
-    color: var(--text-color);
+    color: var(--text-secondary-color);
 }
 
 h3 {
@@ -42,7 +42,7 @@ h3 {
     font-style: normal;
     font-weight: 400;
     line-height: 28px;
-    color: var(--text-color);
+    color: var(--text-secondary-color);
 }
 
 p {
@@ -51,7 +51,7 @@ p {
     font-style: normal;
     font-weight: 400;
     line-height: 24px;
-    color: var(--text-color);
+    color: var(--text-secondary-color);
 }
 
 .md-typeset h1 {
@@ -195,7 +195,7 @@ p {
     background-color: var(--yellow-700);
 }
 
-/** Style for the primary sidebar navigation */
+/** Primary sidebar style */
 .md-sidebar--primary, 
 .md-nav--primary {
     width: 328px;
@@ -207,7 +207,7 @@ p {
 
     /* Colour for the section labels */
     .md-nav__item--section>.md-nav__link[for] {
-        color: var(--text-color);
+        color: var(--text-secondary-color);
     }
 
     .md-nav__item--section {
@@ -243,6 +243,14 @@ p {
         margin: 0;
         display: block;
         width: 100%;
+    }
+}
+
+/* Secondary sidebar styles */
+.md-nav--secondary {
+    .md-nav__title {
+        background-color: transparent;
+        box-shadow: none;
     }
 }
 

@@ -9,8 +9,8 @@ import pytest
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
-    DataCatalog,
     DatasetError,
+    KedroDataCatalog,
     LambdaDataset,
     MemoryDataset,
 )
@@ -47,7 +47,7 @@ class SingleProcessDataset(AbstractDataset):
 class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
@@ -55,7 +55,7 @@ class TestValidParallelRunner:
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run_with_plugin_manager(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ParallelRunner(is_async=is_async).run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -66,14 +66,14 @@ class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_memory_dataset_input(self, is_async, fan_out_fan_in):
         test_pipeline = pipeline([fan_out_fan_in])
-        catalog = DataCatalog({"A": MemoryDataset("42")})
+        catalog = KedroDataCatalog({"A": MemoryDataset("42")})
         result = ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == ("42", "42", "42")
 
     def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         ParallelRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." in caplog.text
 
@@ -114,7 +114,7 @@ class TestMaxWorkers:
             wraps=ProcessPoolExecutor,
         )
 
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ParallelRunner(
             max_workers=user_specified_number, is_async=is_async
         ).run(fan_out_fan_in, catalog)
@@ -138,19 +138,19 @@ class TestMaxWorkers:
 class TestInvalidParallelRunner:
     def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise the lambda function."""
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         test_pipeline = pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
     def test_task_dataset_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise datasets marked with `_SINGLE_PROCESS`."""
-        catalog.add("A", SingleProcessDataset())
+        catalog["A"] = SingleProcessDataset()
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
 
     def test_task_exception(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(feed_dict={"A": 42})
+        catalog["A"] = 42
         test_pipeline = pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
             ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
@@ -160,7 +160,7 @@ class TestInvalidParallelRunner:
         created MemoryDatasets.
         """
         test_pipeline = pipeline([fan_out_fan_in])
-        catalog = DataCatalog({"C": MemoryDataset()}, {"A": 42})
+        catalog = KedroDataCatalog({"C": MemoryDataset()}, {"A": 42})
         with pytest.raises(AttributeError, match="['C']"):
             ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
@@ -168,7 +168,7 @@ class TestInvalidParallelRunner:
         test_pipeline = pipeline(
             [node(identity, "A", "B"), node(return_none, "B", "C")]
         )
-        catalog = DataCatalog({"A": MemoryDataset("42")})
+        catalog = KedroDataCatalog({"A": MemoryDataset("42")})
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
@@ -185,7 +185,7 @@ class TestInvalidParallelRunner:
             assert arg == 0  # pragma: no cover
 
         # Data set A cannot be serialised
-        catalog = DataCatalog({"A": LambdaDataset(load=_load, save=_save)})
+        catalog = KedroDataCatalog({"A": LambdaDataset(load=_load, save=_save)})
 
         test_pipeline = pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
@@ -195,7 +195,7 @@ class TestInvalidParallelRunner:
         """Memory dataset cannot be serialisable because of data it stores."""
         data = return_not_serialisable(None)
         test_pipeline = pipeline([node(return_not_serialisable, "A", "B")])
-        catalog.add_feed_dict(feed_dict={"A": 42})
+        catalog["A"] = 42
         pattern = (
             rf"{data.__class__!s} cannot be serialised. ParallelRunner implicit "
             rf"memory datasets can only be used with serialisable data"
@@ -210,7 +210,7 @@ class TestInvalidParallelRunner:
         """Test the error raised when `futures` variable is empty,
         but `todo_nodes` is not (can barely happen in real life).
         """
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         runner = ParallelRunner(is_async=is_async)
 
         real_node_deps = fan_out_fan_in.node_dependencies
@@ -257,7 +257,7 @@ ParallelRunnerManager.register("LoggingDataset", LoggingDataset)
 def logging_dataset_catalog():
     log = []
     persistent_dataset = LoggingDataset(log, "in", "stuff")
-    return DataCatalog(
+    return KedroDataCatalog(
         {
             "ds0_A": persistent_dataset,
             "ds0_B": persistent_dataset,
@@ -279,7 +279,7 @@ class TestParallelRunnerRelease:
         test_pipeline = pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "in": runner._manager.LoggingDataset(log, "in", "stuff"),
                 "middle": runner._manager.LoggingDataset(log, "middle"),
@@ -302,7 +302,7 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "first": runner._manager.LoggingDataset(log, "first"),
                 "second": runner._manager.LoggingDataset(log, "second"),
@@ -329,7 +329,7 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {"dataset": runner._manager.LoggingDataset(log, "dataset")}
         )
         runner.run(test_pipeline, catalog)
@@ -348,7 +348,7 @@ class TestParallelRunnerRelease:
         test_pipeline = pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        catalog = DataCatalog(
+        catalog = KedroDataCatalog(
             {
                 "ds@save": LoggingDataset(log, "save"),
                 "ds@load": LoggingDataset(log, "load"),

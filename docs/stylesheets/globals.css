@@ -45,7 +45,7 @@ a, p, li, span, div {
     border-left: 0.2rem solid var(--yellow-300) !important;
 }
 
-/* Style for all <pre> blocks */
+/* The Pre code Component*/
 .md-typeset pre code,
 .md-typeset code {
     background-color: var(--block-code-bg-color);
@@ -58,4 +58,15 @@ a, p, li, span, div {
 
 .md-sidebar__scrollwrap:hover {
     scrollbar-color: var(--yellow-300) #0000;
+}
+
+/* The Tip Component */
+.md-typeset {
+    .admonition.tip {
+        border-color: var(--yellow-300);
+    }
+
+    .tip>.admonition-title {
+        background-color: var(--yellow-300);
+    }
 }

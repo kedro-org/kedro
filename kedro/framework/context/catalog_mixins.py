@@ -69,7 +69,7 @@ class CatalogCommandsMixin:
 
         target_pipelines = pipelines or _pipelines.keys()
 
-        pipeline_datasets = set()
+        pipeline_datasets: set[str] = set()
         for pipe in target_pipelines:
             pl_obj = _pipelines.get(pipe) if isinstance(pipe, str) else pipe
             if pl_obj:
@@ -103,7 +103,7 @@ class CatalogCommandsMixin:
 def _group_ds_by_type(
     datasets: set[str], catalog: KedroDataCatalog
 ) -> dict[str, list[str]]:
-    mapping = {}
+    mapping: dict[str, list[str]] = {}
     for ds_name in datasets:
         if is_parameter(ds_name):
             continue

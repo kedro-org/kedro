@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
     from pluggy import PluginManager
 
-    from kedro.io import CatalogProtocol
+    from kedro.io import CatalogProtocol, SharedMemoryCatalogProtocol
     from kedro.pipeline.node import Node
 
 
@@ -64,7 +64,7 @@ class AbstractRunner(ABC):
     def run(
         self,
         pipeline: Pipeline,
-        catalog: CatalogProtocol,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> dict[str, Any]:
@@ -73,7 +73,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
@@ -86,13 +86,13 @@ class AbstractRunner(ABC):
         """
         # Run a warm-up to materialize all datasets in the catalog before run
         for ds in pipeline.datasets():
-            _ = catalog.get(ds)
+            _ = catalog[ds]
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
         if self._is_async:
             self._logger.info(
-                "Asynchronous mode is enabled for loading and saving data"
+                "Asynchronous mode is enabled for loading and saving data."
             )
 
         self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
@@ -101,14 +101,14 @@ class AbstractRunner(ABC):
 
         # Now we return all pipeline outputs, but we do not load datasets data
         # TODO: Check output for ParallelRunner - whether we can access them after the run
-        run_output = {ds_name: catalog.get(ds_name) for ds_name in pipeline.outputs()}
+        run_output = {ds_name: catalog[ds_name] for ds_name in pipeline.outputs()}
 
         return run_output
 
     def run_only_missing(
         self,
         pipeline: Pipeline,
-        catalog: CatalogProtocol,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
     ) -> dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
@@ -117,7 +117,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be
@@ -154,7 +154,7 @@ class AbstractRunner(ABC):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: CatalogProtocol,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:
@@ -164,7 +164,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
         """
@@ -262,7 +262,7 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         done_nodes: Iterable[Node],
-        catalog: CatalogProtocol,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
     ) -> None:
         """
         Suggest a command to the user to resume a run after it fails.
@@ -272,7 +272,7 @@ class AbstractRunner(ABC):
         Args:
             pipeline: the ``Pipeline`` of the run.
             done_nodes: the ``Node``s that executed successfully.
-            catalog: an implemented instance of ``CatalogProtocol`` of the run.
+            catalog: an implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` of the run.
 
         """
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
@@ -301,7 +301,10 @@ class AbstractRunner(ABC):
 
     @staticmethod
     def _release_datasets(
-        node: Node, catalog: CatalogProtocol, load_counts: dict, pipeline: Pipeline
+        node: Node,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+        load_counts: dict,
+        pipeline: Pipeline,
     ) -> None:
         """Decrement dataset load counts and release any datasets we've finished with"""
         for dataset in node.inputs:
@@ -312,7 +315,9 @@ class AbstractRunner(ABC):
             if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
                 catalog.release(dataset)
 
-    def _validate_catalog(self, catalog: CatalogProtocol) -> None:
+    def _validate_catalog(
+        self, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> None:
         # Add catalog validation logic here if needed
         pass
 
@@ -320,7 +325,9 @@ class AbstractRunner(ABC):
         # Add node validation logic here if needed
         pass
 
-    def _set_manager_datasets(self, catalog: CatalogProtocol) -> None:
+    def _set_manager_datasets(
+        self, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> None:
         # Set up any necessary manager datasets here
         pass
 
@@ -353,7 +360,9 @@ class AbstractRunner(ABC):
 
 
 def _find_nodes_to_resume_from(
-    pipeline: Pipeline, unfinished_nodes: Collection[Node], catalog: CatalogProtocol
+    pipeline: Pipeline,
+    unfinished_nodes: Collection[Node],
+    catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
 ) -> set[str]:
     """Given a collection of unfinished nodes in a pipeline using
     a certain catalog, find the node names to pass to pipeline.from_nodes()
@@ -363,7 +372,7 @@ def _find_nodes_to_resume_from(
     Args:
         pipeline: the ``Pipeline`` to find starting nodes for.
         unfinished_nodes: collection of ``Node``s that have not finished yet
-        catalog: an implemented instance of ``CatalogProtocol`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` of the run.
 
     Returns:
         Set of node names to pass to pipeline.from_nodes() to continue
@@ -381,7 +390,9 @@ def _find_nodes_to_resume_from(
 
 
 def _find_all_nodes_for_resumed_pipeline(
-    pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: CatalogProtocol
+    pipeline: Pipeline,
+    unfinished_nodes: Iterable[Node],
+    catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
 ) -> set[Node]:
     """Breadth-first search approach to finding the complete set of
     ``Node``s which need to run to cover all unfinished nodes,
@@ -391,7 +402,7 @@ def _find_all_nodes_for_resumed_pipeline(
     Args:
         pipeline: the ``Pipeline`` to analyze.
         unfinished_nodes: the iterable of ``Node``s which have not finished yet.
-        catalog: an implemented instance of ``CatalogProtocol`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` of the run.
 
     Returns:
         A set containing all input unfinished ``Node``s and all remaining
@@ -439,12 +450,14 @@ def _nodes_with_external_inputs(nodes_of_interest: Iterable[Node]) -> set[Node]:
     return set(p_nodes_with_external_inputs.nodes)
 
 
-def _enumerate_non_persistent_inputs(node: Node, catalog: CatalogProtocol) -> set[str]:
+def _enumerate_non_persistent_inputs(
+    node: Node, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+) -> set[str]:
     """Enumerate non-persistent input datasets of a ``Node``.
 
     Args:
         node: the ``Node`` to check the inputs of.
-        catalog: an implemented instance of ``CatalogProtocol`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` of the run.
 
     Returns:
         Set of names of non-persistent inputs of given ``Node``.
@@ -509,7 +522,7 @@ def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[
 
 def run_node(
     node: Node,
-    catalog: CatalogProtocol,
+    catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
     hook_manager: PluginManager,
     is_async: bool = False,
     session_id: str | None = None,
@@ -518,7 +531,7 @@ def run_node(
 
     Args:
         node: The ``Node`` to run.
-        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
+        catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` containing the node's inputs and outputs.
         hook_manager: The ``PluginManager`` to activate hooks.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.

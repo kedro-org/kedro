@@ -13,7 +13,7 @@ from attrs import define, field
 from omegaconf import OmegaConf
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
-from kedro.framework.context.catalog_mixins import CatalogCommandsMixin
+from kedro.framework.context import CatalogCommandsMixin
 from kedro.io import CatalogProtocol, KedroDataCatalog
 from kedro.pipeline.transcoding import _transcode_split
 
@@ -235,7 +235,7 @@ class KedroContext:
         if catalog_class is KedroDataCatalog:
             catalog_class = compose_classes(catalog_class, CatalogCommandsMixin)
 
-        catalog: CatalogProtocol = catalog_class.from_config(
+        catalog: CatalogProtocol = catalog_class.from_config(  # type: ignore[attr-defined]
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,
@@ -307,7 +307,7 @@ class KedroContextError(Exception):
     """Error occurred when loading project and running context pipeline."""
 
 
-def compose_classes(base: type, *mixins) -> type:
+def compose_classes(base: type, *mixins: type) -> type:
     """Injecting mixins dynamically"""
     t = (base, *mixins)
     name = f"{base.__name__}With{''.join(x.__name__ for x in mixins)}"

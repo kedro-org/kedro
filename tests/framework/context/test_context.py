@@ -20,6 +20,7 @@ from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
     _is_relative_path,
+    _update_nested_dict,
 )
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.project import (
@@ -230,7 +231,7 @@ class TestKedroContext:
         # the catalog and its dataset should be loaded using absolute path
         # based on the project path
         catalog = dummy_context._get_catalog()
-        ds_path = catalog._datasets["horses"]._filepath
+        ds_path = catalog["horses"]._filepath
         assert PurePath(ds_path.as_posix()).is_absolute()
         assert (
             ds_path.as_posix() == (dummy_context.project_path / "horses.csv").as_posix()
@@ -429,3 +430,35 @@ def test_convert_paths_to_absolute_posix_converts_full_windows_path_to_posix(
     project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
+
+
+@pytest.mark.parametrize(
+    "old_dict, new_dict, expected",
+    [
+        (
+            {
+                "a": 1,
+                "b": 2,
+                "c": {
+                    "d": 3,
+                },
+            },
+            {"c": {"d": 5, "e": 4}},
+            {
+                "a": 1,
+                "b": 2,
+                "c": {"d": 5, "e": 4},
+            },
+        ),
+        ({"a": 1}, {"b": 2}, {"a": 1, "b": 2}),
+        ({"a": 1, "b": 2}, {"b": 3}, {"a": 1, "b": 3}),
+        (
+            {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3}}},
+            {"a": {"a.c": {"a.c.b": 4}}},
+            {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3, "a.c.b": 4}}},
+        ),
+    ],
+)
+def test_update_nested_dict(old_dict: dict, new_dict: dict, expected: dict):
+    _update_nested_dict(old_dict, new_dict)  # _update_nested_dict change dict in place
+    assert old_dict == expected

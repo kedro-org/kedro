@@ -289,7 +289,7 @@ class KedroSession:
         from_inputs: Iterable[str] | None = None,
         to_outputs: Iterable[str] | None = None,
         load_versions: dict[str, str] | None = None,
-        namespace: str | None = None,
+        namespaces: Iterable[str] | None = None,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -313,7 +313,7 @@ class KedroSession:
                 used as an end point of the new ``Pipeline``.
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
-            namespace: The namespace of the nodes that is being run.
+            namespaces: The namespaces of the nodes that are being run.
         Raises:
             ValueError: If the named or `__default__` pipeline is not
                 defined by `register_pipelines`.
@@ -359,7 +359,7 @@ class KedroSession:
             node_names=node_names,
             from_inputs=from_inputs,
             to_outputs=to_outputs,
-            node_namespace=namespace,
+            node_namespaces=namespaces,
         )
 
         record_data = {
@@ -376,7 +376,7 @@ class KedroSession:
             "load_versions": load_versions,
             "runtime_params": runtime_params,
             "pipeline_name": pipeline_name,
-            "namespace": namespace,
+            "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),
         }
 

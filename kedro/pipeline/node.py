@@ -9,6 +9,7 @@ import inspect
 import logging
 import re
 from collections import Counter
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable
 from warnings import warn
 
@@ -99,6 +100,7 @@ class Node:
                         f"is '{type(_input)}'."
                     )
                 )
+            _node_dataset_name_validation(_input, namespace)
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
@@ -117,6 +119,7 @@ class Node:
                         f"is '{type(_output)}'."
                     )
                 )
+            _node_dataset_name_validation(_output, namespace)
 
         if not inputs and not outputs:
             raise ValueError(
@@ -170,7 +173,7 @@ class Node:
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    @property
+    @cached_property
     def _unique_key(self) -> tuple[Any, Any] | Any | tuple:
         def hashable(value: Any) -> tuple[Any, Any] | Any | tuple:
             if isinstance(value, dict):
@@ -246,6 +249,8 @@ class Node:
         """
         self._func = func
 
+        del self.inputs  # clear cached inputs
+
     @property
     def tags(self) -> set[str]:
         """Return the tags assigned to the node.
@@ -303,7 +308,7 @@ class Node:
         """
         return self._namespace
 
-    @property
+    @cached_property
     def inputs(self) -> list[str]:
         """Return node inputs as a list, in the order required to bind them properly to
         the node's function.
@@ -568,6 +573,27 @@ def _node_error_message(msg: str) -> str:
         f"Invalid Node definition: {msg}\n"
         f"Format should be: node(function, inputs, outputs)"
     )
+
+
+def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
+    """Validate the dataset name.
+
+    Args:
+        name: The name of the dataset to be validated.
+        namespace: The namespace of the node.
+
+    Raises:
+        ValueError: If the dataset name is invalid.
+    """
+    if "." in name and not name.startswith("params:"):
+        name_namespace = ".".join(name.split(".")[:-1])
+        if not namespace or not name_namespace.startswith(namespace):
+            raise ValueError(
+                _node_error_message(
+                    f"Invalid dataset name '{name}': '.' characters not allowed "
+                    f"in the node's input or output parameters."
+                )
+            )
 
 
 def node(  # noqa: PLR0913

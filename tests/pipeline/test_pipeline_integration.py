@@ -1,6 +1,5 @@
 from kedro.io import KedroDataCatalog
 from kedro.pipeline import node, pipeline
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
 
 
@@ -22,11 +21,11 @@ class TestTransformPipelineIntegration:
         Two pipelines exist, the dataset names do not match.
         We `transform` them to work together.
         """
-        cook_pipeline = modular_pipeline(
+        cook_pipeline = pipeline(
             [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat")]
         )
 
-        lunch_pipeline = modular_pipeline([node(eat, "food", "output")])
+        lunch_pipeline = pipeline([node(eat, "food", "output")])
 
         pipeline1 = (
             pipeline(cook_pipeline, outputs={"grilled_meat": "food"}) + lunch_pipeline
@@ -40,9 +39,7 @@ class TestTransformPipelineIntegration:
         ) + pipeline(lunch_pipeline, inputs={"food": "NEW_NAME"})
 
         for pipe in [pipeline1, pipeline2, pipeline3]:
-            catalog = KedroDataCatalog(
-                {}, feed_dict={"frozen_meat": "frozen_meat_data"}
-            )
+            catalog = KedroDataCatalog({}, raw_data={"frozen_meat": "frozen_meat_data"})
             result = SequentialRunner().run(pipe, catalog)
             assert result == {"output": "frozen_meat_data_defrosted_grilled_done"}
 
@@ -52,16 +49,14 @@ class TestTransformPipelineIntegration:
         Normally dataset and node names would conflict,
         so we need to `transform` the pipelines.
         """
-        cook_pipeline = modular_pipeline(
+        cook_pipeline = pipeline(
             [
                 node(defrost, "frozen_meat", "meat", name="defrost_node"),
                 node(grill, "meat", "grilled_meat", name="grill_node"),
             ]
         )
-        breakfast_pipeline = modular_pipeline(
-            [node(eat, "breakfast_food", "breakfast_output")]
-        )
-        lunch_pipeline = modular_pipeline([node(eat, "lunch_food", "lunch_output")])
+        breakfast_pipeline = pipeline([node(eat, "breakfast_food", "breakfast_output")])
+        lunch_pipeline = pipeline([node(eat, "lunch_food", "lunch_output")])
 
         # We are using two different mechanisms here for breakfast and lunch,
         # renaming and prefixing pipelines differently.
@@ -72,12 +67,16 @@ class TestTransformPipelineIntegration:
                 namespace="breakfast",
             )
             + breakfast_pipeline
-            + pipeline(cook_pipeline, namespace="lunch")
-            + pipeline(lunch_pipeline, inputs={"lunch_food": "lunch.grilled_meat"})
+            + pipeline(
+                cook_pipeline,
+                outputs={"grilled_meat": "lunch_grilled_meat"},
+                namespace="lunch",
+            )
+            + pipeline(lunch_pipeline, inputs={"lunch_food": "lunch_grilled_meat"})
         )
         catalog = KedroDataCatalog(
             {},
-            feed_dict={
+            raw_data={
                 "breakfast.frozen_meat": "breakfast_frozen_meat",
                 "lunch.frozen_meat": "lunch_frozen_meat",
             },

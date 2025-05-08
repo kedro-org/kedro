@@ -19,7 +19,7 @@ from kedro.framework.project import (
     configure_project,
 )
 from kedro.framework.session import KedroSession
-from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
+from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
 
 if TYPE_CHECKING:
@@ -27,7 +27,6 @@ if TYPE_CHECKING:
 
     from kedro.framework.context.context import KedroContext
     from kedro.io import KedroDataCatalog
-    from kedro.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +115,7 @@ def dummy_dataframe() -> pd.DataFrame:
 
 @pytest.fixture
 def mock_pipeline() -> Pipeline:
-    return modular_pipeline(
+    return pipeline(
         [
             node(identity_node, "cars", "planes", name="node1"),
             node(identity_node, "boats", "ships", name="node2"),
@@ -175,7 +174,7 @@ class LoggingHooks:
         catalog: KedroDataCatalog,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
-        feed_dict: dict[str, Any],
+        parameters: dict[str, Any],
         save_version: str,
         load_versions: dict[str, str],
     ):
@@ -185,7 +184,7 @@ class LoggingHooks:
                 "catalog": catalog,
                 "conf_catalog": conf_catalog,
                 "conf_creds": conf_creds,
-                "feed_dict": feed_dict,
+                "parameters": parameters,
                 "save_version": save_version,
                 "load_versions": load_versions,
             },

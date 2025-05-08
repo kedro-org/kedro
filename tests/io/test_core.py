@@ -328,19 +328,24 @@ class TestCoreFunctions:
         ):
             parse_dataset_definition({"type": dataset_name})
 
+    def test_parse_dataset_definition(self):
+        config = {"type": "LambdaDataset"}
+        dataset, _ = parse_dataset_definition(config)
+        assert dataset is LambdaDataset
+
+    def test_parse_dataset_definition_with_python_class_type(self):
+        config = {"type": MyDataset}
+        parse_dataset_definition(config)
+
     def test_dataset_missing_dependencies(self, mocker):
-        # If the module is found but import the dataset trigger ModuleNotFoundError
         dataset_name = "LambdaDataset"
 
         def side_effect_function(value):
-            if "__all__" in value:
-                return [dataset_name]
-            else:
-                raise ModuleNotFoundError
+            import random_package  # noqa: F401
 
         mocker.patch("kedro.io.core.load_obj", side_effect=side_effect_function)
 
-        pattern = "Please see the documentation on how to install relevant dependencies"
+        pattern = "No module named 'random_package'.*"
         with pytest.raises(DatasetError, match=pattern):
             parse_dataset_definition({"type": dataset_name})
 
@@ -355,18 +360,9 @@ class TestCoreFunctions:
         ):
             with pytest.raises(
                 DatasetError,
-                match="Class 'LambdaDataSet' not found, is this a typo?",
+                match="Empty module name. Invalid dataset path: 'LambdaDataSet'. Please check if it's correct.",
             ):
                 parse_dataset_definition(config)
-
-    def test_parse_dataset_definition(self):
-        config = {"type": "LambdaDataset"}
-        dataset, _ = parse_dataset_definition(config)
-        assert dataset is LambdaDataset
-
-    def test_parse_dataset_definition_with_python_class_type(self):
-        config = {"type": MyDataset}
-        parse_dataset_definition(config)
 
     def test_load_and_save_are_wrapped_once(self):
         assert not getattr(
@@ -375,6 +371,86 @@ class TestCoreFunctions:
         assert not getattr(
             MyOtherVersionedDataset.save.__wrapped__, "__savewrapped__", False
         )
+
+
+class TestAbstractDataset:
+    def test_from_config_success(self, mocker):
+        mock_class_obj = mocker.Mock()
+        mock_ds_instance = mocker.Mock()
+        mock_class_obj.return_value = mock_ds_instance
+
+        mock_parse_ds_definition = mocker.patch(
+            "kedro.io.core.parse_dataset_definition",
+            return_value=(mock_class_obj, {"type": "SomeDataset"}),
+        )
+
+        result = MyDataset.from_config(
+            name="my_dataset",
+            config={"type": "SomeDataset"},
+            load_version=None,
+            save_version=None,
+        )
+
+        mock_parse_ds_definition.assert_called_once_with(
+            {"type": "SomeDataset"}, None, None
+        )
+        assert result == mock_ds_instance
+        mock_class_obj.assert_called_once_with(type="SomeDataset")
+
+    def test_from_config_parse_error(self, mocker):
+        mocker.patch(
+            "kedro.io.core.parse_dataset_definition",
+            side_effect=DatasetError("bad config"),
+        )
+        with pytest.raises(
+            DatasetError, match="An exception occurred when parsing config"
+        ):
+            MyDataset.from_config(
+                name="bad_dataset",
+                config={"type": "Invalid"},
+                load_version=None,
+                save_version=None,
+            )
+
+    def test_from_config_class_obj_type_error(self, mocker):
+        mock_class_obj = mocker.Mock()
+        mock_class_obj.__qualname__ = "SomeDataset"
+        mocker.patch(
+            "kedro.io.core.parse_dataset_definition",
+            return_value=(mock_class_obj, {"type": "SomeDataset"}),
+        )
+        mock_class_obj.side_effect = TypeError(
+            "Invalid arguments for class instantiation"
+        )
+
+        with pytest.raises(DatasetError) as exc_info:
+            MyDataset.from_config(
+                name="obj_err_dataset",
+                config={"type": "Invalid"},
+                load_version=None,
+                save_version=None,
+            )
+            assert "must only contain arguments valid" in str(exc_info.value)
+
+    def test_from_config_class_obj_exception(self, mocker):
+        mock_class_obj = mocker.Mock()
+        mock_class_obj.__qualname__ = "SomeDataset"
+        mocker.patch(
+            "kedro.io.core.parse_dataset_definition",
+            return_value=(mock_class_obj, {"type": "SomeDataset"}),
+        )
+        mock_class_obj.side_effect = Exception(
+            "Invalid arguments for class instantiation"
+        )
+
+        with pytest.raises(DatasetError) as exc_info:
+            MyDataset.from_config(
+                name="obj_err_dataset",
+                config={"type": "Invalid"},
+                load_version=None,
+                save_version=None,
+            )
+            assert "Failed to instantiate dataset" in str(exc_info.value)
 
 
 class TestAbstractVersionedDataset:
@@ -494,6 +570,66 @@ class TestAbstractVersionedDataset:
 
         my_versioned_dataset._release()
         assert my_versioned_dataset._version_cache.currsize == 0
+
+    def test_fetch_latest_load_version_success(self, my_versioned_dataset, mocker):
+        mock_get_versioned_path = mocker.patch(
+            "kedro.io.core.AbstractVersionedDataset._get_versioned_path",
+            return_value="data/08_reporting/*",
+        )
+        mock_glob_func = mocker.patch.object(
+            my_versioned_dataset,
+            "_glob_function",
+            return_value=[
+                "data/08_reporting/2025-04-10/part1.csv",
+                "data/08_reporting/2025-04-10/part2.csv",
+            ],
+        )
+        mock_exists_func = mocker.patch.object(
+            my_versioned_dataset, "_exists_function", return_value=True
+        )
+
+        # Ensure the cache is empty for the test
+        my_versioned_dataset._version_cache = {}
+        result = my_versioned_dataset._fetch_latest_load_version()
+
+        mock_get_versioned_path.assert_called_once_with("*")
+        mock_glob_func.assert_called_once_with(mock_get_versioned_path.return_value)
+        mock_exists_func.call_count == 2
+        assert result == "2025-04-10"
+
+    def test_fetch_latest_load_version_not_found(self, my_versioned_dataset, mocker):
+        mocker.patch(
+            "kedro.io.core.AbstractVersionedDataset._get_versioned_path",
+            return_value="data/08_reporting/*",
+        )
+        mocker.patch.object(
+            my_versioned_dataset,
+            "_glob_function",
+            return_value=[
+                "data/08_reporting/2025-04-10/part1.csv",
+                "data/08_reporting/2025-04-10/part2.csv",
+            ],
+        )
+
+        with pytest.raises(
+            VersionNotFoundError,
+            match="Did not find any versions for MyVersionedDataset",
+        ):
+            my_versioned_dataset._fetch_latest_load_version()
+
+    def test_fetch_latest_load_version_permission_error(
+        self, my_versioned_dataset, mocker
+    ):
+        mocker.patch.object(
+            my_versioned_dataset,
+            "_glob_function",
+            side_effect=PermissionError("insuffient permission"),
+        )
+
+        with pytest.raises(
+            VersionNotFoundError, match="due to insufficient permission"
+        ):
+            my_versioned_dataset._fetch_latest_load_version()
 
 
 class MyLegacyDataset(AbstractDataset):

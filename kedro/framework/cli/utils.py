@@ -225,7 +225,7 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
             or ``package_name`` was not found in that file.
     """
     warnings.warn(
-        "`get_pkg_version()` has been deprecated and will be removed in Kedro 0.20.0",
+        "`get_pkg_version()` has been deprecated and will be removed in Kedro 1.0.0.",
         KedroDeprecationWarning,
     )
     reqs_path = Path(reqs_path).absolute()

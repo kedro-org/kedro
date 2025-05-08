@@ -155,7 +155,7 @@ We can collapse all namespaced pipelines (in our case, it's only `data_science_2
 ![namespaces collapsed](../meta/images/namespaces_collapsed.png)
 
 ```{note}
-You can use `kedro run --namespace=namespace_name` to run only the specific namespace
+You can use `kedro run --namespaces=< namespace1,namespace2 >` to run the specific namespaces
 ```
 
 
@@ -269,11 +269,11 @@ As you can see in the above example, the entire pipeline is namespaced as `data_
 
 You can execute the whole namespaced pipeline with:
 ```bash
-kedro run --namespace=data_processing
+kedro run --namespaces=data_processing
 ```
 Or, you can run the first two nodes with:
 ```bash
-kedro run --namespace=data_processing.preprocessing
+kedro run --namespaces=data_processing.preprocessing
 ```
 Open the visualisation with `kedro viz run` to see the collapsible pipeline parts, which you can toggle with "Collapse pipelines" button on the left panel.
 

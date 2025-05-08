@@ -64,8 +64,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package) (deprecated from version 0.20.0)
-  * [`kedro micropkg pull <package_name>`](#pull-a-micro-package) (deprecated from version 0.20.0)
+  * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package) (deprecated from version 1.0.0)
+  * [`kedro micropkg pull <package_name>`](#pull-a-micro-package) (deprecated from version 1.0.0)
   * [`kedro package`](#deploy-the-project)
   * [`kedro pipeline create <pipeline_name>`](#create-a-new-modular-pipeline-in-your-project)
   * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
@@ -305,7 +305,7 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --tags=<tag_name1>,<tag_name2>`                          | Run only nodes which have any of these tags attached.                                                                                                                                                                                                   |
 | `kedro run --load-versions=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ` | Specify particular dataset versions (timestamp) for loading.                                                                                                                                                                                            |
 | `kedro run --pipeline=<pipeline_name>`                              | Run the whole pipeline by its name                                                                                                                                                                                                                      |
-| `kedro run --namespace=<namespace>`                                 | Run only nodes with the specified namespace                                                                                                                                                                                                             |
+| `kedro run --namespaces=<namespace>`                                 | Run only nodes with the specified namespace                                                                                                                                                                                                             |
 | `kedro run --config=<config_file_name>.yml`                         | Specify all command line options in a named YAML configuration file                                                                                                                                                                                     |
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
 | `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
@@ -335,7 +335,7 @@ See [the Python documentation for further information about packaging](https://p
 Since Kedro 0.17.7 you can pull a micro-package into your Kedro project as follows:
 
 ```{warning}
-_This command is deprecated and will be removed from Kedro in version 0.20.0._
+_This command is deprecated and will be removed from Kedro in version 1.0.0._
 ```
 
 ```bash
@@ -370,7 +370,7 @@ kedro pipeline create <pipeline_name>
 The following command packages all the files related to a micro-package, e.g. a modular pipeline, into a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions):
 
 ```{warning}
-_This command is deprecated and will be removed from Kedro in version 0.20.0._
+_This command is deprecated and will be removed from Kedro in version 1.0.0._
 ```
 
 ```bash
@@ -383,7 +383,7 @@ Further information is available in the [micro-packaging documentation](../nodes
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
 
 ```{warning}
-_This command is deprecated and will be removed from Kedro in version 0.20.0._
+_This command is deprecated and will be removed from Kedro in version 1.0.0._
 ```
 
 ```bash
@@ -451,7 +451,7 @@ The output includes a list of any [dataset factories](../data/kedro_dataset_fact
 
 ##### Create a Data Catalog YAML configuration file
 
-The following command creates a Data Catalog YAML configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
+The following command creates a Data Catalog YAML configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline, if it is missing from the `KedroDataCatalog`.
 
 ```bash
 kedro catalog create --pipeline=<pipeline_name>
@@ -483,7 +483,7 @@ kedro ipython
 
 The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
-* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `catalog` (type {py:class}`~kedro.io.KedroDataCatalog`): [Kedro Data Catalog](../data/kedro_data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run

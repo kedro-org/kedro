@@ -150,7 +150,7 @@ Consult the [Ibis support matrix](https://ibis-project.org/backends/support/matr
      table: orders
    ```
 
-#### Warehouse Backend for Production & [CD](https://en.wikipedia.org/wiki/Continuous_delivery) (for example Snowflake or BigQuery)**
+#### Warehouse Backend for Production & [CD](https://en.wikipedia.org/wiki/Continuous_delivery) (for example Snowflake or BigQuery)
 
 - Simply swap your catalog’s backend and credentials
 - Same Ibis expressions compile to your warehouse’s SQL

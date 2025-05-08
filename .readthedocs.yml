@@ -12,7 +12,7 @@ build:
 
   commands:
     # Install dependencies
-    - pip install -e ".[docs]"
+    - uv pip install -e ".[docs]"
     # Build the MkDocs documentation
     - mkdocs build
     # Ensure the output directory exists

@@ -205,6 +205,15 @@ p {
         display: none;
     }
 
+    /* Colour for the section labels */
+    .md-nav__item--section>.md-nav__link[for] {
+        color: var(--text-color);
+    }
+
+    .md-nav__item--section {
+        margin-top: 0;
+    }
+
     .md-nav__list {
         background-color: var(--primary-sidebar-bg-color);
         padding: 12px 10px;

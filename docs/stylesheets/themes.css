@@ -12,6 +12,8 @@
     --text-color: var(--black-700);
     --paragraph-color: var(--black-200);
     --footer-text-color: var(--black-0);
+    --primary-sidebar-bg-color: var(--white-100);
+    --active-link-bg-color: var(--white-0);
 }
 
 /* Dark Theme */
@@ -28,4 +30,6 @@
     --text-color: var(--white-600);
     --paragraph-color: var(--white-600-50);
     --footer-text-color: var(--black-200);
+    --primary-sidebar-bg-color: var(--slate-600);
+    --active-link-bg-color: var(--slate-200);
 }

@@ -58,11 +58,6 @@ p {
     color: var(--md-default-fg-color);
 }
 
-/* Ensure links also inherit the default text color */
-/* p, span, div {
-    color: var(--md-default-fg-color);
-} */
-
 .md-header {
     padding-top: 24px;
 }
@@ -200,6 +195,47 @@ p {
     background-color: var(--yellow-700);
 }
 
+/** Style for the primary sidebar navigation */
+.md-sidebar--primary, 
+.md-nav--primary {
+    width: 328px;
+
+    .md-nav__list {
+        background-color: var(--primary-sidebar-bg-color);
+        padding: 12px 10px;
+        border-radius: 12px;
+    }
+    
+    .md-nav__link {
+        font-size: 16px;
+        margin: 0px 8px 0px 24px;
+    }
+
+    .md-nav__link[href]:hover,
+    .md-nav__link[href]:focus {
+        font-weight: 600;
+        color: inherit;
+    }
+    
+    .md-nav__link span {
+        padding: 6px 0 6px 0;
+    }
+    
+    .md-nav__link--active {
+        border-radius: 12px;
+        background-color: var(--active-link-bg-color);
+        color: inherit !important;
+        padding: 6px 24px;
+        margin: 0;
+        display: block;
+        width: 100%;
+    }
+}
+
+/** Style for the main documenation page */
+.md-main__inner {
+    margin: 10px;
+}
 
 /** MOBILE STYLES */
 @media screen and (max-width: 76.2344em) {

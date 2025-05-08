@@ -66,6 +66,10 @@ class AbstractRunner(ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(self.__module__)
 
+    @property
+    def _plain_logger(self) -> logging.Logger:
+        return logging.getLogger("kedro.runner.plain")
+
     def run(
         self,
         pipeline: Pipeline,

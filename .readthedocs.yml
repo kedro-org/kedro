@@ -13,7 +13,7 @@ build:
   commands:
     # Install dependencies
     - pip install uv
-    - uv pip install -e ".[docs]"
+    - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH uv pip install .[docs]
     # Build the MkDocs documentation
     - mkdocs build
     # Ensure the output directory exists

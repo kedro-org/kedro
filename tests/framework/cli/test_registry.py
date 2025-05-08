@@ -12,12 +12,15 @@ def pipelines_dict():
     pipelines = {
         "data_engineering": ["split_data_node (split_data)"],
         "data_science": [
-            "train_model (train_model)",
-            "predict (predict)",
-            "report_accuracy (report_accuracy)",
+            "train_model([example_train_x;example_train_y;parameters]) -> [example_model] (train_model)",
+            "predict([example_model;example_test_x]) -> [example_predictions] (predict)",
+            "report_accuracy([example_predictions;example_test_y]) -> None (report_accuracy)",
         ],
-        "data_processing": ["data_processing.split_data_node (split_data)"],
+        "data_processing": [
+            "data_processing.data_processing.split_data_node (split_data)"
+        ],
     }
+
     pipelines["__default__"] = pipelines["data_engineering"] + pipelines["data_science"]
     return pipelines
 

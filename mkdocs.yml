@@ -100,13 +100,13 @@ nav:
   - Home: index.md
   - Kedro:
       - GETTING STARTED:
+          - Introduction to Kedro: pages/getting-started/course.md
+          - Concepts: pages/getting-started/kedro_concepts.md
+          - Installation: pages/getting-started/install.md
           - Kedro architecture: pages/getting-started/architecture_overview.md
           # - Kedro's CLI: pages/getting-started/commands_reference.md
             #   - Quickstart: pages/getting-started/quickstart.md
-          - Installation: pages/getting-started/install.md
-          - Concepts: pages/getting-started/kedro_concepts.md
           - Glossary: pages/getting-started/glossary.md
-          - Introduction to Kedro video course: pages/getting-started/course.md
           - FAQs: pages/getting-started/faq.md
       - TUTORIALS:
           - Kedro Spaceflights tutorial: 
@@ -127,20 +127,19 @@ nav:
           - Kedro starters: pages/create/starters.md
       - CONFIGURE:
           - Project configuration and settings:
-              - Migration guide for config loaders: pages/configure/config_loader_migration.md
               - Configuration basics: pages/configure/configuration_basics.md
+              - Migration guide for config loaders: pages/configure/config_loader_migration.md
               - Advanced configuration: pages/configure/advanced_configuration.md
           - Parameters: pages/configure/parameters.md
           - Credentials: pages/configure/credentials.md
       - CATALOG DATA:
           - Introduction: pages/catalog-data/introduction.md
-          - Data catalog: pages/catalog-data/data_catalog.md
           - Kedro data catalog: pages/catalog-data/kedro_data_catalog.md
           - Data Catalog YAML examples: pages/catalog-data/data_catalog_yaml_examples.md
           - Dataset factories: pages/catalog-data/kedro_dataset_factories.md
           - Data and pipeline versioning: pages/catalog-data/kedro_dvc_versioning.md
           - Partitioned and incremental datasets: pages/catalog-data/partitioned_and_incremental_datasets.md
-          - Advanced data catalog usage: pages/catalog-data/advanced_data_catalog_usage.md
+          - Programmatic usage: pages/catalog-data/advanced_data_catalog_usage.md
       - BUILD:
           - Nodes: pages/build/nodes.md
           - Pipeline object: pages/build/pipeline_introduction.md

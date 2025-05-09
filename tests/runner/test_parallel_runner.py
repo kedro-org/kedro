@@ -11,6 +11,7 @@ from kedro.io import (
     AbstractDataset,
     DataCatalog,
     DatasetError,
+    DatasetNotFoundError,
     LambdaDataset,
     MemoryDataset,
 )
@@ -227,6 +228,23 @@ class TestInvalidParallelRunner:
         pattern = "Unable to schedule new tasks although some nodes have not been run"
         with pytest.raises(RuntimeError, match=pattern):
             runner.run(fan_out_fan_in, catalog)
+
+    def test_set_manager_datasets_with_nonexistent_dataset(self, mocker):
+        """Test that _set_manager_datasets handles datasets that don't exist in catalog."""
+        # Create a pipeline that references a dataset that isn't in the catalog
+        test_pipeline = pipeline([node(identity, "nonexistent_dataset", "output")])
+        catalog = DataCatalog()
+
+        # Mock exists to raise DatasetNotFoundError for our specific dataset
+        mocker.patch.object(
+            catalog,
+            "exists",
+            side_effect=DatasetNotFoundError("Dataset 'nonexistent_dataset' not found")
+        )
+
+        # Create runner and call _set_manager_datasets
+        runner = ParallelRunner()
+        runner._set_manager_datasets(catalog, test_pipeline)
 
 
 class LoggingDataset(AbstractDataset):

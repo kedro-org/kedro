@@ -556,9 +556,6 @@ class Pipeline:
         information about the nodes, their type, and dependencies.
 
         This property is intended to be used by deployment plugins to group nodes by namespace.
-
-        Returns:
-            List[:class:`~kedro.pipeline.GroupedNode`]: A list of grouped nodes.
         """
         grouped_nodes_map: dict[str, GroupedNode] = {}
 

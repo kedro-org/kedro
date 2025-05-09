@@ -279,7 +279,7 @@ class Node:
         Returns:
             Node's name if provided or the name of its function.
         """
-        node_name = self._name or str(self)
+        node_name = self._name or self._func_name
         if self.namespace:
             return f"{self.namespace}.{node_name}"
         return node_name

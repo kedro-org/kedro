@@ -14,7 +14,11 @@ The main methods and properties of `KedroSession` are:
 - `create()`: Create a new instance of ``KedroSession`` with  session data
 - `load_context()`: Instantiate `KedroContext` object
 - `close()`: Close the current session — although we recommend that you [use the session object as a context manager](#create-a-session), which will call `close()` automatically, as opposed to calling the method explicitly
+<<<<<<<< HEAD:docs/pages/kedro_project_setup/session.md
+- `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../nodes_and_pipelines/run_a_pipeline.md) for details
+========
 - `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../build/run_a_pipeline.md) for details
+>>>>>>>> develop:docs/pages/extend/session.md
 
 ## Create a session
 
@@ -35,7 +39,7 @@ You can provide the following optional arguments in `KedroSession.create()`:
 - `project_path`: Path to the project root directory
 - `save_on_close`: A boolean value to indicate whether or not to save the session to disk when it's closed
 - `env`: Environment for the `KedroContext`
-- `runtime_params`: Optional dictionary containing runtime project parameters
+- `extra_params`: Optional dictionary containing extra project parameters
 for the underlying **`KedroContext`**; if specified, this will update (and therefore take precedence over) parameters retrieved from the project configuration
 
 ## `bootstrap_project` and `configure_project`

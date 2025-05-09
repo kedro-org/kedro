@@ -2,7 +2,11 @@
 
 ## Use Hooks to extend a node's behaviour
 
+<<<<<<<< HEAD:docs/pages/hooks/common_use_cases.md
+You can use the [`before_node_run` and `after_node_run` Hooks](../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) to add extra behavior before and after a node's execution. Furthermore, you can apply extra behavior to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes, based on their tags or namespaces: for example, suppose we want to add the following extra behavior to a node:
+========
 You can use the [`before_node_run` and `after_node_run` Hooks](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) to add extra behavior before and after a node's execution. Furthermore, you can apply extra behavior to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes, based on their tags or namespaces: for example, suppose we want to add the following extra behavior to a node:
+>>>>>>>> develop:docs/pages/extend/hooks/common_use_cases.md
 
 ```python
 from kedro.pipeline.node import Node
@@ -220,7 +224,11 @@ You can use Hooks to launch a [post-mortem debugging session](https://docs.pytho
 
 ### Debugging a node
 
+<<<<<<<< HEAD:docs/pages/hooks/common_use_cases.md
+To start a debugging session when an error is raised within your `node` that is not caught, implement the `on_node_error` [Hook specification](../api/framework/kedro.framework.hooks.md):
+========
 To start a debugging session when an error is raised within your `node` that is not caught, implement the `on_node_error` [Hook specification](../../api/framework/kedro.framework.hooks.md):
+>>>>>>>> develop:docs/pages/extend/hooks/common_use_cases.md
 
 ```python
 import pdb
@@ -255,7 +263,11 @@ HOOKS = (PDBNodeDebugHook(),)
 
 ### Debugging a pipeline
 
+<<<<<<<< HEAD:docs/pages/hooks/common_use_cases.md
+To start a debugging session when an error is raised within your `pipeline` that is not caught, implement the `on_pipeline_error` [Hook specification](../api/framework/kedro.framework.hooks.md):
+========
 To start a debugging session when an error is raised within your `pipeline` that is not caught, implement the `on_pipeline_error` [Hook specification](../../api/framework/kedro.framework.hooks.md):
+>>>>>>>> develop:docs/pages/extend/hooks/common_use_cases.md
 
 ```python
 import pdb

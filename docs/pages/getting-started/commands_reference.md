@@ -360,7 +360,11 @@ The above command will take the bundled `.tar.gz` file and do the following:
 
 #### Modular pipelines
 
+<<<<<<<< HEAD:docs/pages/development/commands_reference.md
+##### Create a new [modular pipeline](../nodes_and_pipelines/modular_pipelines.md) in your project
+========
 ##### Create a new [modular pipeline](../build/modular_pipelines.md) in your project
+>>>>>>>> develop:docs/pages/getting-started/commands_reference.md
 
 ```bash
 kedro pipeline create <pipeline_name>

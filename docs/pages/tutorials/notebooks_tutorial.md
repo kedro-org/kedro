@@ -43,7 +43,6 @@ We recommend that you save your notebook in the `notebooks` folder of your Kedro
 
 The `kedro jupyter notebook` command launches a notebook with a customised kernel that has been extended to make the following project variables available:
 
-* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Data Catalog](../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../extend/session.md) that orchestrates a pipeline run
@@ -79,9 +78,6 @@ In [3]: %reload_kedro
 ## Exploring the Kedro project in a notebook
 Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant {doc}`API documentation </api/kedro>` or use the Python {py:func}`dir` function, for example `dir(catalog)`.
 
-### `catalog`
-
-`catalog` can be used to explore your project's [Data Catalog](../catalog-data/data_catalog.md) using methods such as {py:meth}`catalog.list <kedro.io.DataCatalog.list>`, {py:meth}`catalog.load <kedro.io.DataCatalog.load>` and {py:meth}`catalog.save <kedro.io.DataCatalog.save>`.
 
 For example, add the following to a cell in your notebook to run `catalog.list`:
 

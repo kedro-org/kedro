@@ -574,7 +574,7 @@ class Pipeline:
             dependencies = grouped_nodes_map[key].dependencies
             unique_dependencies = set(dependencies)
 
-            for parent in self.node_dependencies[node]:
+            for parent in sorted(self.node_dependencies[node], key=lambda n: n.name):
                 parent_key = (
                     parent.namespace.split(".")[0] if parent.namespace else parent.name
                 )

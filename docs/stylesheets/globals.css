@@ -15,6 +15,8 @@ html {
 /* Apply the variables to elements */
 body {
     background-color: var(--md-default-bg-color);
+    color: var(--text-primary-color);
+    font-size: 16px;
 }
 
 h1, 
@@ -65,13 +67,27 @@ p {
     text-underline-offset: 4px;
 }
 
+.md-header__button.md-logo img {
+    width: 123.37px;
+    height: 32px;
+}
+
 .md-footer {
     display: none;
 }
 
+.md-main {
+    margin-bottom: 48px;
+}
+
+
 .md-header {
     padding: 24px 32px 0 32px;
     border-radius: 0px 0px 12px 12px;
+}
+
+.md-header__inner {
+    padding-bottom: 24px;
 }
 
 .md-header--shadow {
@@ -82,6 +98,7 @@ p {
     background-color: var(--yellow-6);
     color: var(--black-900) !important;
 }
+
 
 /* Header elements positioning */
 .md-header__inner {
@@ -127,7 +144,7 @@ p {
     .md-search, 
     .md-header__option,
     .md-header__source {
-        transform: translateY(100%);
+        transform: translateY(calc(100% + 24px));
         z-index: 2;
     }
 
@@ -138,6 +155,12 @@ p {
 
     .md-header__option {
         order: 2;
+        margin: 0 16px;
+
+        .md-icon {
+            padding-left: 0;
+            padding-right: 0;
+        }
     }
 
     .md-header__source {
@@ -149,7 +172,7 @@ p {
 .md-tabs__item--active {
     font-weight: 600;
     height: 100%;
-    padding-bottom: 30px;
+    padding-bottom: 24px;
     border-bottom: 2px solid var(--black-900);
 }
 
@@ -209,6 +232,10 @@ p {
 .md-tabs__dropdown-link:hover,
 .md-tabs__dropdown-link--active {
     background-color: var(--yellow-700);
+}
+
+.md-tabs__link {
+    font-size: 16px;
 }
 
 /** Primary sidebar style */

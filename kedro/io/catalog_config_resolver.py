@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 Patterns = dict[str, dict[str, Any]]
 
 CREDENTIALS_KEY = "credentials"
+DEFAULT_RUNTIME_PATTERN = {"{default}": {"type": "kedro.io.MemoryDataset"}}
 
 
 class CatalogConfigResolver:
@@ -30,7 +31,7 @@ class CatalogConfigResolver:
         credentials: dict[str, dict[str, Any]] | None = None,
         runtime_patterns: Patterns | None = None,
     ):
-        self._runtime_patterns = runtime_patterns or {}
+        self._runtime_patterns = runtime_patterns or DEFAULT_RUNTIME_PATTERN
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )

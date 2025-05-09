@@ -182,7 +182,7 @@
 /* Card grid */
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(3, 220px);
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
     margin: 0 auto;
     justify-content: center;
@@ -191,7 +191,7 @@
 }
 
 .news-grid {
-    grid-template-columns: repeat(2, 342px);
+    grid-template-columns: repeat(2, 1fr);
     max-width: 800px;
 }
 
@@ -203,6 +203,7 @@
     padding: 24px;
     transition: transform 0.2s, box-shadow 0.2s;
     box-sizing: border-box;
+    text-decoration: none !important;
 }
 
 .card:hover {
@@ -303,7 +304,7 @@
 .section-title {
     font-weight: 600;
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 32px !important;
     margin-top: 0;
 }
 

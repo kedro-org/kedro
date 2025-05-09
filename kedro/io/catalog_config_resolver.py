@@ -31,7 +31,7 @@ class CatalogConfigResolver:
         credentials: dict[str, dict[str, Any]] | None = None,
         runtime_patterns: Patterns | None = None,
     ):
-        if not runtime_patterns:
+        if runtime_patterns is None:
             self._logger.warning(
                 f"Since runtime patterns are not provided, setting"
                 f"the runtime pattern to default value: {DEFAULT_RUNTIME_PATTERN}"

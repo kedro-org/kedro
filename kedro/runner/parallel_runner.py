@@ -1,6 +1,6 @@
 """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
-"""
+  """
 
 from __future__ import annotations
 

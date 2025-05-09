@@ -163,7 +163,7 @@ class KedroDataCatalog(CatalogProtocol):
     def __iter__(self) -> Iterator[str]:
         yield from self.keys()
 
-    def __getitem__(self, ds_name: str) -> AbstractDataset | None:
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
         If a dataset is not in the collection but matches any pattern
@@ -231,32 +231,29 @@ class KedroDataCatalog(CatalogProtocol):
         self,
         key: str,
         version: Version | None = None,
-        default: AbstractDataset | None = None,
-    ) -> AbstractDataset | None:
+    ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
         If a dataset is not in the collection but matches any pattern
+        (by default it will match self.runtime_patterns)
         it is instantiated and added to the collection first, then returned.
 
         Args:
             key: A dataset name.
             version: Optional argument to get a specific version of the dataset.
-            default: Optional argument for default dataset to return in case
-                requested dataset not in the catalog.
 
         Returns:
             An instance of AbstractDataset.
         """
         if key not in self._datasets and key not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(key)
-            if ds_config:
-                self._add_from_config(key, ds_config)
+            self._add_from_config(key, ds_config)
 
         lazy_dataset = self._lazy_datasets.pop(key, None)
         if lazy_dataset:
             self[key] = lazy_dataset.materialize()
 
-        dataset = self._datasets.get(key, None) or default
+        dataset = self._datasets[key]
 
         if version and isinstance(dataset, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,
@@ -599,9 +596,10 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                    'col3': [5, 6]})
             >>> catalog.save("cars", df)
         """
-        dataset = self.get(ds_name)
-        if dataset is None:
+        if ds_name not in self:
             raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
+
+        dataset = self.get(ds_name)
 
         self._logger.info(
             "Saving data to %s (%s)...",
@@ -641,9 +639,9 @@ class KedroDataCatalog(CatalogProtocol):
             >>> df = catalog.load("cars")
         """
         load_version = Version(version, None) if version else None
-        dataset = self.get(ds_name, version=load_version)
-        if dataset is None:
+        if ds_name not in self:
             raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
+        dataset = self.get(ds_name, version=load_version)
 
         self._logger.info(
             "Loading data from %s (%s)...",
@@ -654,52 +652,55 @@ class KedroDataCatalog(CatalogProtocol):
 
         return dataset.load()
 
-    def release(self, name: str) -> None:
+    def release(self, ds_name: str) -> None:
         """Release any cached data associated with a dataset
         Args:
-            name: A dataset to be checked.
+            ds_name: A dataset to be checked.
         Raises:
             DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
         """
-        dataset = self.get(name)
-        if dataset is None:
-            raise DatasetNotFoundError(f"'{name}' datasets not found in the catalog")
+        if ds_name not in self:
+            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
+
+        dataset = self.get(ds_name)
+
         dataset.release()
 
-    def confirm(self, name: str) -> None:
+    def confirm(self, ds_name: str) -> None:
         """Confirm a dataset by its name.
         Args:
-            name: Name of the dataset.
+            ds_name: Name of the dataset.
         Raises:
             DatasetError: When the dataset does not have `confirm` method.
         """
-        self._logger.info("Confirming dataset '%s'", name)
-        dataset = self.get(name)
-        if dataset is None:
-            raise DatasetNotFoundError(f"'{name}' datasets not found in the catalog")
+        self._logger.info("Confirming dataset '%s'", ds_name)
+        if ds_name not in self:
+            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
+
+        dataset = self.get(ds_name)
 
         if hasattr(dataset, "confirm"):
             dataset.confirm()
         else:
-            raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
+            raise DatasetError(f"Dataset '{ds_name}' does not have 'confirm' method")
 
-    def exists(self, name: str) -> bool:
+    def exists(self, ds_name: str) -> bool:
         """Checks whether registered dataset exists by calling its `exists()`
         method. Raises a warning and returns False if `exists()` is not
         implemented.
 
         Args:
-            name: A dataset to be checked.
+            ds_name: A dataset to be checked.
 
         Returns:
             Whether the dataset output exists.
 
         """
-        dataset = self.get(name)
-
-        if dataset is None:
+        if ds_name not in self:
             return False
+
+        dataset = self.get(ds_name)
 
         return dataset.exists()
 

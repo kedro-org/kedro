@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 Patterns = dict[str, dict[str, Any]]
 
 CREDENTIALS_KEY = "credentials"
+DEFAULT_RUNTIME_PATTERN = {"{default}": {"type": "kedro.io.MemoryDataset"}}
 
 
 class CatalogConfigResolver:
@@ -30,7 +31,12 @@ class CatalogConfigResolver:
         credentials: dict[str, dict[str, Any]] | None = None,
         runtime_patterns: Patterns | None = None,
     ):
-        self._runtime_patterns = runtime_patterns or {}
+        if runtime_patterns is None:
+            self._logger.warning(
+                f"Since runtime patterns are not provided, setting"
+                f"the runtime pattern to default value: {DEFAULT_RUNTIME_PATTERN}"
+            )
+        self._runtime_patterns = runtime_patterns or DEFAULT_RUNTIME_PATTERN
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )
@@ -208,12 +214,13 @@ class CatalogConfigResolver:
         matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
         return next(matches, None)
 
-    def match_default_pattern(self, ds_name: str) -> str | None:
+    def match_default_pattern(self, ds_name: str) -> str:
         """Match a dataset name against default patterns in a dictionary."""
         default_patters = set(self._default_pattern.keys())
         default_patters.update(set(self._runtime_patterns.keys()))
         matches = self._get_matches(default_patters, ds_name)
-        return next(matches, None)
+        # We assume runtime pattern always matches at the end
+        return next(matches)
 
     def _get_pattern_config(self, pattern: str) -> dict[str, Any]:
         return (
@@ -320,11 +327,10 @@ class CatalogConfigResolver:
 
     def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
-        matched_pattern = self.match_pattern(ds_name) or self.match_default_pattern(
-            ds_name
-        )
-
-        if matched_pattern and ds_name not in self._resolved_configs:
+        if ds_name not in self._resolved_configs:
+            matched_pattern = self.match_pattern(ds_name) or self.match_default_pattern(
+                ds_name
+            )
             pattern_config = self._get_pattern_config(matched_pattern)
             ds_config = self._resolve_dataset_config(
                 ds_name, matched_pattern, copy.deepcopy(pattern_config)
@@ -342,4 +348,4 @@ class CatalogConfigResolver:
                 )
             return ds_config  # type: ignore[no-any-return]
 
-        return self._resolved_configs.get(ds_name, {})
+        return self._resolved_configs[ds_name]

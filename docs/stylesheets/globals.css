@@ -192,7 +192,7 @@ p {
 }
 
 .md-sidebar__scrollwrap:hover {
-    scrollbar-color: var(--yellow-300) #0000;
+    scrollbar-color: var(--yellow-6) #0000;
 }
 
 /* Navigation dropdown styles */
@@ -359,4 +359,3 @@ p {
         font-weight: 600;
     }
 }
-

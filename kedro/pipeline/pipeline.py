@@ -552,8 +552,8 @@ class Pipeline:
 
     @property
     def grouped_nodes_by_namespace(self) -> list[GroupedNode]:
-        """Return a list of grouped nodes by top-level namespace with
-        information about the nodes, their type, and dependencies.
+        """Return a list of :class:`kedro.pipeline.GroupedNode` objects grouped by top-level namespace,
+        with information about the nodes, their type, and dependencies.
 
         This property is intended to be used by deployment plugins to group nodes by namespace.
         """

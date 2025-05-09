@@ -555,7 +555,7 @@ class Pipeline:
         """Return a list of grouped nodes by top-level namespace with
         information about the nodes, their type, and dependencies.
 
-        This property is intended to be used by deployment plugins to group nodes by namespace.
+        This property is intended to be used by deployment plugins to group nodes by namespaces.
         """
         grouped_nodes_map: dict[str, GroupedNode] = {}
 

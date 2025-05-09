@@ -420,7 +420,7 @@ class KedroDataCatalog(CatalogProtocol):
             if _is_memory_dataset(ds.config.get(TYPE_KEY, "")):
                 continue
             unresolved_config, unresolved_credentials = (
-                self._config_resolver.unresolve_credentials(ds_name, ds.config)
+                self._config_resolver._unresolve_credentials(ds_name, ds.config)
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
@@ -431,7 +431,7 @@ class KedroDataCatalog(CatalogProtocol):
                 continue
             resolved_config = ds.to_config()  # type: ignore[attr-defined]
             unresolved_config, unresolved_credentials = (
-                self._config_resolver.unresolve_credentials(ds_name, resolved_config)
+                self._config_resolver._unresolve_credentials(ds_name, resolved_config)
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)

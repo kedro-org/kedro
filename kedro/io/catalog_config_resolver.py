@@ -22,6 +22,57 @@ CREDENTIALS_KEY = "credentials"
 DEFAULT_RUNTIME_PATTERN = {"{default}": {"type": "kedro.io.MemoryDataset"}}
 
 
+def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
+    """Fetch the specified credentials from the provided credentials dictionary.
+
+    Args:
+        credentials_name: Credentials name.
+        credentials: A dictionary with all credentials.
+
+    Returns:
+        The set of requested credentials.
+
+    Raises:
+        KeyError: When a dataset with the given name has not yet been
+            registered.
+
+    """
+    try:
+        return credentials[credentials_name]
+    except KeyError as exc:
+        raise KeyError(
+            f"Unable to find credentials '{credentials_name}': check your data "
+            "catalog and credentials configuration. See "
+            "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog "
+            "for an example."
+        ) from exc
+
+
+def _resolve_credentials(
+    config: dict[str, Any], credentials: dict[str, Any]
+) -> dict[str, Any]:
+    """Return the dataset configuration where credentials are resolved using
+    credentials dictionary provided.
+
+    Args:
+        config: Original dataset config, which may contain unresolved credentials.
+        credentials: A dictionary with all credentials.
+
+    Returns:
+        The dataset config, where all the credentials are successfully resolved.
+    """
+    config = copy.deepcopy(config)
+
+    def _resolve_value(key: str, value: Any) -> Any:
+        if key == CREDENTIALS_KEY and isinstance(value, str):
+            return _fetch_credentials(value, credentials)
+        if isinstance(value, dict):
+            return {k: _resolve_value(k, v) for k, v in value.items()}
+        return value
+
+    return {k: _resolve_value(k, v) for k, v in config.items()}
+
+
 class CatalogConfigResolver:
     """Resolves dataset configurations based on patterns and credentials."""
 
@@ -40,7 +91,7 @@ class CatalogConfigResolver:
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials
         )
-        self._resolved_configs = self.resolve_credentials(config, credentials)
+        self._resolved_configs = self._resolve_credentials(config, credentials)
 
     @property
     def config(self) -> dict[str, dict[str, Any]]:
@@ -87,57 +138,6 @@ class CatalogConfigResolver:
                 f"Multiple catch-all patterns found in the catalog: {', '.join(catch_all)}. Only one catch-all pattern is allowed, remove the extras."
             )
         return {key: dataset_patterns[key] for key in sorted_keys}
-
-    @staticmethod
-    def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> Any:
-        """Fetch the specified credentials from the provided credentials dictionary.
-
-        Args:
-            credentials_name: Credentials name.
-            credentials: A dictionary with all credentials.
-
-        Returns:
-            The set of requested credentials.
-
-        Raises:
-            KeyError: When a dataset with the given name has not yet been
-                registered.
-
-        """
-        try:
-            return credentials[credentials_name]
-        except KeyError as exc:
-            raise KeyError(
-                f"Unable to find credentials '{credentials_name}': check your data "
-                "catalog and credentials configuration. See "
-                "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog "
-                "for an example."
-            ) from exc
-
-    @classmethod
-    def _resolve_credentials(
-        cls, config: dict[str, Any], credentials: dict[str, Any]
-    ) -> dict[str, Any]:
-        """Return the dataset configuration where credentials are resolved using
-        credentials dictionary provided.
-
-        Args:
-            config: Original dataset config, which may contain unresolved credentials.
-            credentials: A dictionary with all credentials.
-
-        Returns:
-            The dataset config, where all the credentials are successfully resolved.
-        """
-        config = copy.deepcopy(config)
-
-        def _resolve_value(key: str, value: Any) -> Any:
-            if key == CREDENTIALS_KEY and isinstance(value, str):
-                return cls._fetch_credentials(value, credentials)
-            if isinstance(value, dict):
-                return {k: _resolve_value(k, v) for k, v in value.items()}
-            return value
-
-        return {k: _resolve_value(k, v) for k, v in config.items()}
 
     @classmethod
     def _validate_pattern_config(cls, ds_name: str, ds_config: dict[str, Any]) -> None:
@@ -245,9 +245,7 @@ class CatalogConfigResolver:
         for ds_name, ds_config in config.items():
             if cls.is_pattern(ds_name):
                 cls._validate_pattern_config(ds_name, ds_config)
-                dataset_patterns[ds_name] = cls._resolve_credentials(
-                    ds_config, credentials
-                )
+                dataset_patterns[ds_name] = _resolve_credentials(ds_config, credentials)
 
         sorted_patterns = cls._sort_patterns(dataset_patterns)
         if sorted_patterns:
@@ -259,7 +257,7 @@ class CatalogConfigResolver:
         return sorted_patterns, user_default
 
     @classmethod
-    def resolve_credentials(
+    def _resolve_credentials(
         cls,
         config: dict[str, dict[str, Any]] | None,
         credentials: dict[str, dict[str, Any]] | None,
@@ -277,14 +275,12 @@ class CatalogConfigResolver:
                     "make sure that the key is preceded by an underscore."
                 )
             if not cls.is_pattern(ds_name):
-                resolved_configs[ds_name] = cls._resolve_credentials(
-                    ds_config, credentials
-                )
+                resolved_configs[ds_name] = _resolve_credentials(ds_config, credentials)
 
         return resolved_configs
 
     @staticmethod
-    def unresolve_credentials(
+    def _unresolve_credentials(
         cred_name: str, ds_config: dict[str, dict[str, Any]] | None
     ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
         """Extracts and replaces credentials in a dataset configuration with

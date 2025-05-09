@@ -3,8 +3,10 @@
 {% extends "main.html" %}
 {% block tabs %}
 {{ super() }}
+{% endblock %}
 
-<div class="container">
+{% block content %}
+<div class="container welcome-page-container" data-md-component="welcome">
     <header>
         <h1 class="welcome-title">A toolbox for production-ready data science</h1>
         
@@ -237,7 +239,6 @@
         </div>
     </footer>
 </div>
-
 {% endblock %}
-{% block content %}{% endblock %}
+
 {% block footer %}{% endblock %}

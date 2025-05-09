@@ -1,6 +1,9 @@
-/* Base styles */
-body {
-    font-family: Inter;
+/* Target md-content__inner only when it contains .welcome-page-container as a child
+   This ensures these styles only apply to the welcome page and not other pages using md-content__inner */
+.md-content__inner:has(.welcome-page-container) {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
     background-color: var(--welcome-page-bg-color);
 }
 
@@ -293,7 +296,7 @@ body {
 
 /* Font */
 .welcome-title {
-    margin-top: 96px;
+    margin-top: 96px !important;
     font-weight: 600;
 }
 

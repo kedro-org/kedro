@@ -229,7 +229,7 @@ class TestInvalidParallelRunner:
         with pytest.raises(RuntimeError, match=pattern):
             runner.run(fan_out_fan_in, catalog)
 
-    def test_set_manager_datasets_with_nonexistent_dataset(self, mocker):
+    def test_set_manager_datasets_with_nonexistent_dataset(self, is_async, mocker):
         """Test that _set_manager_datasets handles datasets that don't exist in catalog."""
         # Create a pipeline that references a dataset that isn't in the catalog
         test_pipeline = pipeline([node(identity, "nonexistent_dataset", "output")])
@@ -243,7 +243,7 @@ class TestInvalidParallelRunner:
         )
 
         # Create runner and call _set_manager_datasets
-        runner = ParallelRunner()
+        runner = ParallelRunner(is_async=is_async)
         runner._set_manager_datasets(catalog, test_pipeline)
 
 

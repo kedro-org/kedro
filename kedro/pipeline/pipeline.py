@@ -146,7 +146,7 @@ class Pipeline:
         parameters: str | set[str] | dict[str, str] | None = None,
         tags: str | Iterable[str] | None = None,
         namespace: str | None = None,
-        rename: bool = True,
+        prefix_namespace: bool = True,
     ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
@@ -182,6 +182,9 @@ class Pipeline:
             namespace: A prefix to give to all dataset names,
                 except those explicitly named with the `inputs`/`outputs`
                 arguments, and parameter references (`params:` and `parameters`).
+            prefix_namespace: A flag to specify if the inputs and outputs of the nodes 
+                should be prefixed with the namespace. It is set to True by default. It is 
+                useful to turn off when namespacing is used for grouping nodes for deployment purposes.
 
         Raises:
             ValueError:
@@ -233,7 +236,7 @@ class Pipeline:
                 parameters=parameters,
                 tags=tags,
                 namespace=namespace,
-                rename=rename,
+                prefix_namespace=prefix_namespace,
             )
 
         if nodes is None:
@@ -1018,7 +1021,7 @@ class Pipeline:
         return json.dumps(pipeline_versioned)
 
     def _rename(
-        self, name: str, mapping: dict, namespace: str | None, rename: bool
+        self, name: str, mapping: dict, namespace: str | None, prefix_namespace: bool
     ) -> str:
         def _prefix_dataset(name: str) -> str:
             return f"{namespace}.{name}"
@@ -1046,8 +1049,8 @@ class Pipeline:
             (_is_transcode_base_in_mapping, _map_transcode_base),
         ]
 
-        # Add rules for prefixing only if rename is True
-        if rename:
+        # Add rules for prefixing only if prefix_namespace is True
+        if prefix_namespace:
             rules.extend(
                 [
                     # if name refers to a single parameter and a namespace is given, apply prefix
@@ -1073,17 +1076,17 @@ class Pipeline:
         datasets: str | list[str] | dict[str, str] | None,
         mapping: dict,
         namespace: str | None,
-        rename: bool = True,
+        prefix_namespace: bool = True,
     ) -> str | list[str] | dict[str, str] | None:
         if datasets is None:
             return None
         if isinstance(datasets, str):
-            return self._rename(datasets, mapping, namespace, rename)
+            return self._rename(datasets, mapping, namespace, prefix_namespace)
         if isinstance(datasets, list):
-            return [self._rename(name, mapping, namespace, rename) for name in datasets]
+            return [self._rename(name, mapping, namespace, prefix_namespace) for name in datasets]
         if isinstance(datasets, dict):
             return {
-                key: self._rename(value, mapping, namespace, rename)
+                key: self._rename(value, mapping, namespace, prefix_namespace)
                 for key, value in datasets.items()
             }
         raise ValueError(
@@ -1091,7 +1094,7 @@ class Pipeline:
         )  # pragma: no cover
 
     def _copy_node(
-        self, node: Node, mapping: dict, namespace: str | None, rename: bool = True
+        self, node: Node, mapping: dict, namespace: str | None, prefix_namespace: bool = True
     ) -> Node:
         new_namespace = node.namespace
         if namespace:
@@ -1100,14 +1103,14 @@ class Pipeline:
             )
         return node._copy(
             inputs=self._process_dataset_names(
-                node._inputs, mapping, namespace, rename
+                node._inputs, mapping, namespace, prefix_namespace
             ),
             outputs=self._process_dataset_names(
-                node._outputs, mapping, namespace, rename
+                node._outputs, mapping, namespace, prefix_namespace
             ),
             namespace=new_namespace,
             confirms=self._process_dataset_names(
-                node._confirms, mapping, namespace, rename
+                node._confirms, mapping, namespace, prefix_namespace
             ),
         )
 
@@ -1119,7 +1122,7 @@ class Pipeline:
         parameters: str | set[str] | dict[str, str] | None = None,
         tags: str | Iterable[str] | None = None,
         namespace: str | None = None,
-        rename: bool = True,
+        prefix_namespace: bool = True,
     ) -> list[Node]:
         """Map namespace to the inputs, outputs, parameters and nodes of the pipeline."""
         if isinstance(pipe, Pipeline):
@@ -1136,7 +1139,7 @@ class Pipeline:
         _validate_inputs_outputs(inputs.keys(), outputs.keys(), pipe)
 
         mapping = {**inputs, **outputs, **parameters}
-        new_nodes = [self._copy_node(n, mapping, namespace, rename) for n in pipe.nodes]
+        new_nodes = [self._copy_node(n, mapping, namespace, prefix_namespace) for n in pipe.nodes]
         return new_nodes
 
 
@@ -1148,7 +1151,7 @@ def pipeline(  # noqa: PLR0913
     parameters: str | set[str] | dict[str, str] | None = None,
     tags: str | Iterable[str] | None = None,
     namespace: str | None = None,
-    rename: bool = True,
+    prefix_namespace: bool = True,
 ) -> Pipeline:
     r"""Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``\s.
 
@@ -1184,6 +1187,9 @@ def pipeline(  # noqa: PLR0913
         namespace: A prefix to give to all dataset names,
             except those explicitly named with the `inputs`/`outputs`
             arguments, and parameter references (`params:` and `parameters`).
+        prefix_namespace: A flag to specify if the inputs and outputs of the nodes 
+                should be prefixed with the namespace. It is set to True by default. It is 
+                useful to turn off when namespacing is used for grouping nodes for deployment purposes.
 
     Raises:
         ModularPipelineError: When inputs, outputs or parameters are incorrectly
@@ -1202,7 +1208,7 @@ def pipeline(  # noqa: PLR0913
         parameters=parameters,
         tags=tags,
         namespace=namespace,
-        rename=rename,
+        prefix_namespace=prefix_namespace,
     )
 
 

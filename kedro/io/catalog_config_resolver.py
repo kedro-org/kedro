@@ -31,6 +31,11 @@ class CatalogConfigResolver:
         credentials: dict[str, dict[str, Any]] | None = None,
         runtime_patterns: Patterns | None = None,
     ):
+        if not runtime_patterns:
+            self._logger.warning(
+                f"Since runtime patterns are not provided, setting"
+                f"the runtime pattern to default value: {DEFAULT_RUNTIME_PATTERN}"
+            )
         self._runtime_patterns = runtime_patterns or DEFAULT_RUNTIME_PATTERN
         self._dataset_patterns, self._default_pattern = self._extract_patterns(
             config, credentials

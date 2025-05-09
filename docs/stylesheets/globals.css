@@ -65,6 +65,11 @@ p {
     color: inherit;
     text-decoration: underline;
     text-underline-offset: 4px;
+
+    &:hover {
+        color: inherit;
+        font-weight: 600;
+    }
 }
 
 .md-header__button.md-logo img {
@@ -75,11 +80,6 @@ p {
 .md-footer {
     display: none;
 }
-
-.md-main {
-    margin-bottom: 48px;
-}
-
 
 .md-header {
     padding: 24px 32px 0 32px;
@@ -253,7 +253,7 @@ p {
 
     /* Colour for the section labels */
     .md-nav__item--section>.md-nav__link[for] {
-        color: var(--text-secondary-color);
+        color: var(--text-primary-color);
     }
 
     .md-nav__item--section {
@@ -333,7 +333,7 @@ p {
 }
 
 .md-content__inner {
-    padding: 48px 64px 0 64px;
+    padding: 48px 64px 48px 64px;
     margin: 0;
 }
 

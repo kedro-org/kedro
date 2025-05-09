@@ -239,7 +239,7 @@ class TestInvalidParallelRunner:
         mocker.patch.object(
             catalog,
             "exists",
-            side_effect=DatasetNotFoundError("Dataset 'nonexistent_dataset' not found")
+            side_effect=DatasetNotFoundError("Dataset 'nonexistent_dataset' not found"),
         )
 
         # Create runner and call _set_manager_datasets

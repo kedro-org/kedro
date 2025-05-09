@@ -59,7 +59,12 @@ p {
 }
 
 .md-header {
-    padding-top: 24px;
+    padding: 24px 32px 0 32px;
+    border-radius: 0px 0px 12px 12px;
+}
+
+.md-header--shadow {
+    box-shadow: none;
 }
 
 .md-header, .md-tabs {
@@ -199,6 +204,9 @@ p {
 .md-sidebar--primary, 
 .md-nav--primary {
     width: 328px;
+    padding: 0;
+    margin: 10px 0 10px 10px;
+
 
     /* Hide the Kedro title in the primary sidebar */
     #__nav_2_label {
@@ -247,23 +255,34 @@ p {
 }
 
 /* Secondary sidebar styles */
-.md-nav--secondary {
-    font-size: 16px;
-    font-weight: 400;
+.md-sidebar--secondary {
+    margin-top: 48px;
+    margin-right: 64px;
+    padding: 0;
+
 
     .md-nav__title {
         background: transparent;
         box-shadow: none;
         color: var(--text-secondary-color);    
+        font-size: 16px;
+    }
+
+    .md-nav__item {
+        font-size: 16px;
     }
 
     .md-nav__link  {
         color: var(--text-secondary-color);
     }
 
-    .md-nav__link--active {
+    .md-nav__link:hover  {
         color: var(--text-primary-color);
     }
+
+    .md-nav__link--active {
+        color: var(--text-primary-color);
+    }   
 }
 
 /** Style for the main documenation page */
@@ -272,7 +291,12 @@ p {
 }
 
 .md-main__inner {
-    margin: 10px 64px 10px 10px;
+    margin: 0;
+}
+
+.md-content__inner {
+    padding: 48px 64px 0 64px;
+    margin: 0;
 }
 
 /** MOBILE STYLES */

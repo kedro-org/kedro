@@ -35,11 +35,9 @@
 .legal-links a {
     color: var(--footer-text-color);
     text-decoration: none;
-    transition: color 0.2s;
 }
 
 .legal-links a:hover {
-    color: #333;
     text-decoration: underline;
 }
 
@@ -50,12 +48,7 @@
 }
 
 .social-links a {
-    color: #666;
-    transition: color 0.2s;
-}
-
-.social-links a:hover {
-    color: #333;
+    color: var(--social-link-fill-color);
 }
 
 /* Badges */

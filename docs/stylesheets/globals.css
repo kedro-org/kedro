@@ -134,11 +134,11 @@ p {
 }
 
 .md-search__input::placeholder {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--yellow-600);
 }
 
-.md-search__icon {
-    color: black !important;
+.md-search__overlay {
+    display: none;
 }
 
 @media screen and (min-width: 80em) {
@@ -452,4 +452,3 @@ pre:hover .md-clipboard {
 .highlight .sd { /* Docstrings */
     color: var(--text-secondary-color);
 }
-

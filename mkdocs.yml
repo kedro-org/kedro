@@ -27,6 +27,10 @@ theme:
   logo: assets/kedro_logo_black.svg
   icon:
     repo: fontawesome/brands/github
+    admonition:
+      note: octicons/note-16
+      tip: octicons/info-16
+      importannt: octicons/alert-16
 
 
   features:

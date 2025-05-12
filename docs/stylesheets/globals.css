@@ -359,3 +359,24 @@ p {
         font-weight: 600;
     }
 }
+
+/** admonition styles */
+.md-typeset .admonition {
+    background-color: var(--admonition-bg-color);
+    border: 1px solid var(--admonition-border-color) !important;
+    border-radius: 6px;
+    display: flow-root;
+    font-size: 16px;
+    margin: 24px 0;
+    padding: 16px 20px;
+    page-break-inside: avoid;
+
+    .admonition-title {
+        background-color: transparent;
+        padding-bottom: 0;
+    }
+
+    .admonition-title:before {
+        background-color: var(--icon-fill-color);
+    }
+}

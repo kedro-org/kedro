@@ -14,6 +14,8 @@
     --footer-text-color: var(--black-0);
     --primary-sidebar-bg-color: var(--white-100);
     --active-link-bg-color: var(--white-0);
+    --admonition-bg-color: var(--white-100);
+    --admonition-border-color: var(--black-900);
 }
 
 /* Dark Theme */
@@ -32,4 +34,8 @@
     --footer-text-color: var(--black-200);
     --primary-sidebar-bg-color: var(--slate-600);
     --active-link-bg-color: var(--slate-200);
+    --admonition-bg-color: var(--slate-600);
+    --admonition-border-color: var(--white-0);
+
+
 }

@@ -358,11 +358,7 @@ The above command will take the bundled `.tar.gz` file and do the following:
 
 #### Modular pipelines
 
-<<<<<<<< HEAD:docs/pages/development/commands_reference.md
-##### Create a new [modular pipeline](../nodes_and_pipelines/modular_pipelines.md) in your project
-========
 ##### Create a new [modular pipeline](../build/modular_pipelines.md) in your project
->>>>>>>> develop:docs/pages/getting-started/commands_reference.md
 
 ```bash
 kedro pipeline create <pipeline_name>
@@ -378,8 +374,6 @@ _This command is deprecated and will be removed from Kedro in version 1.0.0._
 ```bash
 kedro micropkg package <package_module_path>
 ```
-
-Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
 
 ##### Pull a micro-package in your project
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
@@ -481,7 +475,7 @@ kedro ipython
 
 The [Kedro IPython extension](../integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
-* `catalog` (type {py:class}`~kedro.io.KedroDataCatalog`): [Kedro Data Catalog](../data/kedro_data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `catalog` (type {py:class}`~kedro.io.KedroDataCatalog`): [Kedro Data Catalog](../catalog-data/kedro_data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../extend/session.md) that orchestrates a pipeline run

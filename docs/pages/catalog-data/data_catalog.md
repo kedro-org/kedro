@@ -163,7 +163,7 @@ You can check those in {py:mod}`the dataset API documentation <kedro-datasets:ke
 ### Dataset access credentials
 The Data Catalog also works with the `credentials.yml` file in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
 
-Before instantiating the `KedroDataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `KedroDataCatalog.from_config()` as the `credentials` argument.
+Before instantiating the `KedroDataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configure/credentials.md). The resulting dictionary is then passed into `KedroDataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 

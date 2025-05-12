@@ -277,11 +277,7 @@ r2_score(y_test, y_pred)
 ```
 
 ## Use Kedro configuration
-<<<<<<<< HEAD:docs/pages/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md
-Kedro offers a [configuration loader](../../api/config/kedro.config.OmegaConfigLoader.md) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
-========
 Kedro offers a [configuration loader](../../../api/config/kedro.config.OmegaConfigLoader.md) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
->>>>>>>> develop:docs/pages/integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md
 
 ### Use Kedro's configuration loader to load "magic values"
 To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follows:

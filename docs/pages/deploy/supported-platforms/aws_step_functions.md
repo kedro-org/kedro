@@ -15,11 +15,7 @@ The following discusses how to run the Kedro pipeline from the [spaceflights tut
 
 ## Strategy
 
-<<<<<<<< HEAD:docs/pages/deployment/aws_step_functions.md
-The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration. This approach mirrors the principles of [running Kedro in a distributed environment](distributed.md).
-========
 The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration. This approach mirrors the principles of [running Kedro in a distributed environment](../distributed.md).
->>>>>>>> develop:docs/pages/deploy/supported-platforms/aws_step_functions.md
 
 ## Prerequisites
 
@@ -46,11 +42,7 @@ The deployment process for a Kedro pipeline on AWS Step Functions consists of th
 * Develop the Kedro pipeline locally as normal
 * Create a new configuration environment in which we ensure all nodes' inputs and outputs have a persistent location on S3, since `MemoryDataset` can't be shared between AWS Lambda functions
 * Package the Kedro pipeline as an [AWS Lambda-compliant Docker image](https://docs.aws.amazon.com/lambda/latest/dg/lambda-images.html)
-<<<<<<<< HEAD:docs/pages/deployment/aws_step_functions.md
-* Write a script to convert and deploy each Kedro node as an AWS Lambda function. Each function will use the same pipeline Docker image created in the previous step and run a single Kedro node associated with it. This follows the principles laid out in our [distributed deployment guide](distributed.md).
-========
 * Write a script to convert and deploy each Kedro node as an AWS Lambda function. Each function will use the same pipeline Docker image created in the previous step and run a single Kedro node associated with it. This follows the principles laid out in our [distributed deployment guide](../distributed.md).
->>>>>>>> develop:docs/pages/deploy/supported-platforms/aws_step_functions.md
 * The script above will also convert and deploy the entire Kedro pipeline as an AWS Step Functions State Machine.
 
 The final deployed AWS Step Functions State Machine will have the following visualisation in AWS Management Console:
@@ -126,11 +118,7 @@ In December 2020, [AWS announced that an AWS Lambda function can now use a conta
 $ kedro package
 ```
 
-<<<<<<<< HEAD:docs/pages/deployment/aws_step_functions.md
-For more information, please visit the guide on [packaging Kedro as a Python package](../tutorial/package_a_project.md).
-========
 For more information, please visit the guide on [packaging Kedro as a Python package](../../deploy/package_a_project.md).
->>>>>>>> develop:docs/pages/deploy/supported-platforms/aws_step_functions.md
 
 * **Step 2.2**: Create a `lambda_handler.py` file:
 

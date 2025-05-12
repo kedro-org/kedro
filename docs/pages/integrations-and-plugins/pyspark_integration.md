@@ -16,11 +16,7 @@ spark.scheduler.mode: FAIR
 
 ## Initialise a `SparkSession` using a hook
 
-<<<<<<<< HEAD:docs/pages/integrations/pyspark_integration.md
-Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) using an `after_context_created` [hook](../hooks/introduction.md). This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
-========
 Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) using an `after_context_created` [hook](../extend/hooks/introduction.md). This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
->>>>>>>> develop:docs/pages/integrations-and-plugins/pyspark_integration.md
 
 Below is an example implementation to initialise the `SparkSession` in `src/<package_name>/hooks.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
 

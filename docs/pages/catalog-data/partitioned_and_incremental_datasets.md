@@ -232,7 +232,7 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 ```
 
 !!! note
-    When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../hooks/introduction).
+    When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../extend/hooks/introduction.md).
 
 !!! note
     Lazy saving is the default behaviour, meaning that if a `Callable` type is provided, the dataset will be written _after_ the `after_node_run` hook is executed.

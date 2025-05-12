@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
-    from click import BaseCommand, MultiCommand
 
 from importlib import import_module
 from itertools import chain

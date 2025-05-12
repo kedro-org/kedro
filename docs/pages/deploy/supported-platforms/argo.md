@@ -240,4 +240,3 @@ As an alternative, you can use [Kedro-Argo plugin](https://pypi.org/project/kedr
 
 !!! warning
     The plugin is not supported by the Kedro team and we can't guarantee its workability.
-

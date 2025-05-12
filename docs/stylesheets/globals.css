@@ -19,7 +19,7 @@ body {
     font-size: 16px;
 }
 
-h1, 
+h1,
 .md-typeset h1 {
     font-family: Inter;
     font-size: 32px;
@@ -30,7 +30,7 @@ h1,
     margin-bottom: 32px;
 }
 
-h2, 
+h2,
 .md-typeset h2 {
     font-family: Inter;
     font-size: 24px;
@@ -142,7 +142,7 @@ p {
 }
 
 @media screen and (min-width: 80em) {
-    .md-search, 
+    .md-search,
     .md-header__option,
     .md-header__source {
         transform: translateY(calc(100% + 24px));
@@ -229,7 +229,7 @@ p {
 }
 
 /** Primary sidebar style */
-.md-sidebar--primary, 
+.md-sidebar--primary,
 .md-nav--primary {
     width: 328px;
     padding: 0;
@@ -255,7 +255,7 @@ p {
         padding: 12px 10px;
         border-radius: 12px;
     }
-    
+
     .md-nav__link {
         font-size: 16px;
         margin: 0px 8px 0px 24px;
@@ -266,11 +266,11 @@ p {
         font-weight: 600;
         color: inherit;
     }
-    
+
     .md-nav__link span {
         padding: 6px 0 6px 0;
     }
-    
+
     .md-nav__link--active {
         border-radius: 12px;
         background-color: var(--active-link-bg-color);
@@ -292,7 +292,7 @@ p {
     .md-nav__title {
         background: transparent;
         box-shadow: none;
-        color: var(--text-secondary-color);    
+        color: var(--text-secondary-color);
         font-size: 16px;
     }
 
@@ -310,7 +310,7 @@ p {
 
     .md-nav__link--active {
         color: var(--text-primary-color);
-    }   
+    }
 }
 
 /** Style for the main documenation page */
@@ -343,7 +343,7 @@ p {
     .md-nav__list {
         color: var(--black-900);
     }
-    
+
     .md-nav--primary .md-nav__item--active>.md-nav__link {
         color: var(--black-900);
         font-weight: 600;

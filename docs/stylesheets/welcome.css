@@ -224,7 +224,7 @@
 
 .card-icon svg path {
     stroke: var(--icon-fill-color);
-}   
+}
 
 .card-title {
     font-size: 16px;
@@ -236,7 +236,7 @@
 .card-description {
     font-size: 14px;
     color: var(--text-primary-color);
-}       
+}
 
 /* Font */
 .welcome-title {

@@ -39,7 +39,7 @@ This following pages provide information for deployment to, or integration with,
 
 !!! warning
     We also have legacy documentation pages for the following deployment targets, but these have not been tested against recent Kedro releases and we cannot guarantee them:
-    
+
     - for [Argo Workflows](./supported-platforms/argo.md)
     - for [AWS Batch](./supported-platforms/aws_batch.md)
 

@@ -78,16 +78,16 @@
     .card-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .footer-top {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .social-links {
         margin-top: 1rem;
     }
-    
+
     .main-nav {
         display: none;
     }
@@ -97,29 +97,29 @@
     .card-grid, .news-grid {
         grid-template-columns: 1fr;
     }
-    
+
     h1 {
         font-size: 1.75rem;
     }
-    
+
     .container {
         padding: 1rem;
     }
-    
+
     .bg-section {
         margin: -1rem -1rem 3rem -1rem;
         padding: 1.5rem 1rem;
     }
-    
+
     .badges {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .header-right .version {
         display: none;
     }
-    
+
     .search-small input {
         width: 140px;
     }

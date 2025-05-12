@@ -78,7 +78,8 @@ p {
 }
 
 .md-footer {
-    display: none;
+    background-color: var(--md-default-bg-color);
+    color: var(--text-secondary-color);
 }
 
 .md-header {

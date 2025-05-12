@@ -5,7 +5,7 @@ repo_url: https://github.com/kedro-org/kedro
 
 theme:
   name: material
-  custom_dir: docs/theme_override_home/
+  custom_dir: docs/overrides/
   palette:
      # Palette toggle for light mode
     - scheme: light
@@ -102,6 +102,7 @@ extra_css:
   - stylesheets/colors.css
   - stylesheets/globals.css
   - stylesheets/themes.css
+  - stylesheets/footer.css
   - stylesheets/welcome.css
 
 extra_javascript:

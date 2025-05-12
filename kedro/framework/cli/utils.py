@@ -19,8 +19,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
-
-
 from importlib import import_module
 from itertools import chain
 from pathlib import Path

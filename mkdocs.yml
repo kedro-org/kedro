@@ -30,7 +30,7 @@ theme:
     admonition:
       note: octicons/note-16
       tip: octicons/info-16
-      importannt: octicons/alert-16
+      warning: octicons/alert-16
       example: octicons/code-16
 
   features:

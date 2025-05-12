@@ -43,6 +43,8 @@ This guide provides examples of commonly used MkDocs components (using the Mater
 
 #### Admonitions
 Admonitions are used to highlight different types of information using callouts. Use the appropriate type depending on the message you want to convey.
+For other supported types from MKdocs https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
+
 
 ```
 !!! note
@@ -55,7 +57,7 @@ Admonitions are used to highlight different types of information using callouts.
 ```
 
 ```
-!!! important
+!!! warning
     Pay attention! This is an important message.
 ```
 

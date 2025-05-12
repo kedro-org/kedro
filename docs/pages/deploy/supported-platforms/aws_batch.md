@@ -1,6 +1,6 @@
 # AWS Batch (outdated documentation that needs review)
 
-!!! important
+!!! warning
     This page contains outdated documentation that has not been tested against recent Kedro releases. If you successfully use AWS Batch with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
 
 ## Why would you use AWS Batch?

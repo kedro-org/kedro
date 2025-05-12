@@ -19,6 +19,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
+
+    from click import BaseCommand, MultiCommand
+
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
@@ -143,7 +146,7 @@ def validate_conf_source(ctx: click.Context, param: Any, value: str) -> str | No
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: tuple[str, Sequence[click.MultiCommand]]):
+    def __init__(self, *groups: tuple[str, Sequence[MultiCommand]]):
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
             for title, cli_list in groups
@@ -165,9 +168,9 @@ class CommandCollection(click.CommandCollection):
 
     @staticmethod
     def _merge_same_name_collections(
-        groups: Sequence[click.MultiCommand],
+        groups: Sequence[MultiCommand],
     ) -> list[click.CommandCollection]:
-        named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
+        named_groups: defaultdict[str, list[MultiCommand]] = defaultdict(list)
         helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
             named_groups[group.name].append(group)  # type: ignore[index]
@@ -395,7 +398,7 @@ def _safe_load_entry_point(
         return
 
 
-def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
+def load_entry_points(name: str) -> Sequence[MultiCommand]:
     """Load package entry point commands.
 
     Args:
@@ -573,12 +576,12 @@ class LazyGroup(click.Group):
 
     def get_command(  # type: ignore[override]
         self, ctx: click.Context, cmd_name: str
-    ) -> click.BaseCommand | click.Command | None:
+    ) -> BaseCommand | click.Command | None:
         if cmd_name in self.lazy_subcommands:
             return self._lazy_load(cmd_name)
         return super().get_command(ctx, cmd_name)
 
-    def _lazy_load(self, cmd_name: str) -> click.BaseCommand:
+    def _lazy_load(self, cmd_name: str) -> BaseCommand:
         # lazily loading a command, first get the module name and attribute name
         import_path = self.lazy_subcommands[cmd_name]
         modname, cmd_object_name = import_path.rsplit(".", 1)

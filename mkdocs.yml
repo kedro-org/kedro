@@ -31,7 +31,7 @@ theme:
       note: octicons/note-16
       tip: octicons/info-16
       importannt: octicons/alert-16
-
+      example: octicons/code-16
 
   features:
     - navigation.instant
@@ -39,6 +39,7 @@ theme:
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.tracking
+    - navigation.footer
     - search.suggest
     - search.highlight
     - content.tabs.link

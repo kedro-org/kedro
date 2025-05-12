@@ -185,6 +185,7 @@ p {
 .md-typeset code {
     background-color: var(--block-code-bg-color);
     color: var(--block-code-font-color);
+    /* padding: 16px 12px 12px 20px; */
 }
 
 .md-clipboard {
@@ -370,13 +371,36 @@ p {
     margin: 24px 0;
     padding: 16px 20px;
     page-break-inside: avoid;
+}
 
-    .admonition-title {
-        background-color: transparent;
-        padding-bottom: 0;
-    }
+/** Admonition title styles */
+.md-typeset .admonition .admonition-title {
+    background-color: transparent;
+    padding-bottom: 0;
+}
 
-    .admonition-title:before {
-        background-color: var(--icon-fill-color);
-    }
+/** Admonition title icon styles */
+.md-typeset .admonition .admonition-title:before {
+    background-color: var(--icon-fill-color);
+}
+
+/** Style for exanpandle code blocks */
+.md-typeset details.example {
+    background-color: var(--admonition-bg-color);
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.md-typeset details.example summary {
+    background-color: var(--admonition-bg-color);
+}
+
+.md-typeset details.example summary:before,
+.md-typeset details.example summary:after {
+    background-color: var(--icon-fill-color);
+}
+
+.md-typeset details.example:focus-within {
+    box-shadow: none;
 }

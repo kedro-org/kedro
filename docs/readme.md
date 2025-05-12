@@ -59,6 +59,11 @@ Admonitions are used to highlight different types of information using callouts.
     Pay attention! This is an important message.
 ```
 
+```
+!!! warning
+    Pay attention! This is a warning.
+```
+
 ---
 
 #### Code Blocks

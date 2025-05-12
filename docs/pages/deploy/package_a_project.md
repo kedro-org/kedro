@@ -6,11 +6,8 @@ Kedro also has an advanced feature which supports packaging on a pipeline level 
 
 ## Add documentation to a Kedro project if you have not selected `docs` tool
 
-> **Note**
-> These steps are for projects without the `docs` tool option. You can verify this by looking to see if you don't have a `docs` directory in your project.
-
-> **Important**
-> TO BE UPDATED WITH MKDOCS
+!!! note
+    These steps are for projects without the `docs` tool option. You can verify this by looking to see if you don't have a `docs` directory in your project.
 
 
 ## Package a Kedro project

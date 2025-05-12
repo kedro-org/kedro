@@ -385,6 +385,7 @@ pre:hover .md-clipboard {
     background-color: var(--admonition-bg-color);
     border: 1px solid var(--admonition-border-color) !important;
     border-radius: 6px;
+    color: var(--text-primary-color);
     display: flow-root;
     font-size: 16px;
     margin: 24px 0;
@@ -428,6 +429,17 @@ pre:hover .md-clipboard {
 .highlight .vg, /* Global variables */
 .highlight .vi { /* Instance variables */
     color: var(--text-primary-color);
+}
+
+.highlight .ge,
+.highlight .gh,
+.highlight .go,
+.highlight .gp,
+.highlight .gr,
+.highlight .gs,
+.highlight .gt,
+.highlight .gu {
+        color: var(--text-primary-color);
 }
 
 /* Comment elements in code blocks */

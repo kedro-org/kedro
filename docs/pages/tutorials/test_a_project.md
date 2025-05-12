@@ -420,7 +420,8 @@ pip install -e .
 
 This step allows pytest to accurately resolve the import statements in your test files.
 
->**NOTE**: The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
+!!! note
+    The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
 
 Ensure you have `pytest` installed. Please see our [automated testing documentation](../develop/automated_testing.md) for more information on getting set up with pytest.
 

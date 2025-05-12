@@ -96,8 +96,7 @@ ds_config = catalog.config_resolver.resolve_pattern(ds_name)  # Resolving a data
 patterns = catalog.config_resolver.list_patterns() # Listing all available patterns
 ```
 
-```{note}
-`KedroDataCatalog` does not support all dictionary-specific methods, such as `pop()`, `popitem()`, or deletion by key (`del`).
-```
+!!! note
+    `KedroDataCatalog` does not support all dictionary-specific methods, such as `pop()`, `popitem()`, or deletion by key (`del`).
 
 For a full list of supported methods, refer to the [KedroDataCatalog source code](https://github.com/kedro-org/kedro/blob/main/kedro/io/kedro_data_catalog.py).

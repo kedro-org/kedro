@@ -180,18 +180,6 @@ p {
     border-left: 0.2rem solid var(--yellow-300) !important;
 }
 
-/* Style for all <pre> blocks */
-.md-typeset pre code,
-.md-typeset code {
-    background-color: var(--block-code-bg-color);
-    color: var(--block-code-font-color);
-    /* padding: 16px 12px 12px 20px; */
-}
-
-.md-clipboard {
-    color: var(--block-code-font-color);
-}
-
 .md-sidebar__scrollwrap:hover {
     scrollbar-color: var(--yellow-6) #0000;
 }
@@ -361,6 +349,37 @@ p {
     }
 }
 
+
+/* Style for all non-expandle code blocks */
+.md-typeset pre code,
+.md-typeset code {
+    background-color: var(--admonition-bg-color);
+    color: var(--text-primary-color);
+}
+
+/** copy icon button in code blocks */
+.md-clipboard {
+    color: var(--text-secondary-color);
+}
+
+/** hightlight the copy icon buton on hover */
+.md-clipboard:hover,
+pre:hover .md-clipboard {
+    color: var(--text-primary-color);
+}
+
+/** Style for expandle code blocks */
+.md-typeset details.example {
+    background-color: var(--admonition-bg-color);
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+
+    .md-typeset code {
+        padding: 0;
+    }
+}
+
 /** admonition styles */
 .md-typeset .admonition {
     background-color: var(--admonition-bg-color);
@@ -384,16 +403,9 @@ p {
     background-color: var(--icon-fill-color);
 }
 
-/** Style for exanpandle code blocks */
-.md-typeset details.example {
-    background-color: var(--admonition-bg-color);
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-}
-
 .md-typeset details.example summary {
     background-color: var(--admonition-bg-color);
+    color: var(--text-primary-color);
 }
 
 .md-typeset details.example summary:before,
@@ -404,3 +416,27 @@ p {
 .md-typeset details.example:focus-within {
     box-shadow: none;
 }
+
+/* General text elements in code blocks */
+.highlight .n,  /* Names */
+.highlight .p,  /* Punctuation */
+.highlight .o,  /* Operators */
+.highlight .ow, /* Operator words */
+.highlight .na, /* Attribute names */
+.highlight .nv, /* Variable names */
+.highlight .vc, /* Class names */
+.highlight .vg, /* Global variables */
+.highlight .vi { /* Instance variables */
+    color: var(--text-primary-color);
+}
+
+/* Comment elements in code blocks */
+.highlight .c,  /* General comments */
+.highlight .c1, /* Single-line comments */
+.highlight .ch, /* Hashbang comments */
+.highlight .cm, /* Multiline comments */
+.highlight .cs, /* Special comments */
+.highlight .sd { /* Docstrings */
+    color: var(--text-secondary-color);
+}
+

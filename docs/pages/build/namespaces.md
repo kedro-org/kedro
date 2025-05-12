@@ -74,9 +74,8 @@ model_options_1:
     - company_rating
 ```
 
-```{note}
-In Kedro, you cannot run pipelines with the same node names. In this example, both pipelines have nodes with the same names, so it's impossible to execute them together. However, `base_data_science` is not registered and will not be executed with the `kedro run` command. The `data_science` pipeline, on the other hand, will be executed during `kedro run` because it will be autodiscovered by Kedro, as it was created inside the `create_pipeline()` function.
-```
+!!! note
+    In Kedro, you cannot run pipelines with the same node names. In this example, both pipelines have nodes with the same names, so it's impossible to execute them together. However, `base_data_science` is not registered and will not be executed with the `kedro run` command. The `data_science` pipeline, on the other hand, will be executed during `kedro run` because it will be autodiscovered by Kedro, as it was created inside the `create_pipeline()` function.
 
 If you want to execute `base_data_science` and `data_science` pipelines together or reuse `base_data_science` a few more times, you need to modify the node names. The easiest way to do this is by using namespaces.
 
@@ -84,8 +83,8 @@ If you want to execute `base_data_science` and `data_science` pipelines together
 
 A namespace is a way to isolate nodes, inputs, outputs, and parameters inside your pipeline. If you put `namespace="namespace_name"` attribute inside the `pipeline()` creation function, it will add the `namespace_name.` prefix to all nodes, inputs, outputs, and parameters inside your new pipeline.
 
-```{note}
-If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `pipeline()` creation function. For example:
+!!! note
+    If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `pipeline()` creation function. For example:
 
 ```python
 pipeline(
@@ -154,9 +153,8 @@ We can collapse all namespaced pipelines (in our case, it's only `data_science_2
 
 ![namespaces collapsed](../meta/images/namespaces_collapsed.png)
 
-```{note}
-You can use `kedro run --namespaces=< namespace1,namespace2 >` to run the specific namespaces
-```
+!!! note
+    You can use `kedro run --namespaces=< namespace1,namespace2 >` to run the specific namespaces
 
 
 ### How to namespace all pipelines in a project
@@ -224,7 +222,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 The pipeline will expect the inputs and outputs to be prefixed with the namespace name, that is, `data_processing.`.
 
-```{note}
+!!! note
 From Kedro 0.19.12, you can use the `grouped_nodes_by_namespace` property of the `Pipeline` object to get a dictionary which groups nodes by their top level namespace. Plugin developers are encouraged to use this property to obtain the mapping of namespaced group of nodes to a container or a task in the deployment environment.
 ```
 You can further nest namespaces by assigning namespaces on the node level with the `namespace` argument of the `node()` function. Namespacing at node level should only be done to enhance visualisation by creating collapsible pipeline parts on Kedro Viz. In this case, only the node name will be prefixed with `namespace_name`, while inputs, outputs, and parameters will remain unchanged. This behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).

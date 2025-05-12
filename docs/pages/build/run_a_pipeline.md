@@ -42,9 +42,8 @@ While `ParallelRunner` uses multiprocessing, you can also run the pipeline with 
 kedro run --runner=ThreadRunner
 ```
 
-```{note}
-`SparkDataset` doesn't work correctly with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
-```
+!!! note
+    `SparkDataset` doesn't work correctly with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
 
 For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
 
@@ -52,77 +51,75 @@ For more information on how to maximise concurrency when using Kedro with PySpar
 
 If the built-in Kedro runners do not meet your requirements, you can also define your own runner within your project. For example, you may want to add a dry runner, which lists which nodes would be run without executing them:
 
-<details>
-<summary><b>Click to expand</b></summary>
-
-```python
-# in src/<package_name>/runner.py
-from typing import Any, Dict
-from kedro.io import AbstractDataset, KedroDataCatalog, MemoryDataset
-from kedro.pipeline import Pipeline
-from kedro.runner.runner import AbstractRunner
-from pluggy import PluginManager
+??? example "View code"
+    ```python
+    # in src/<package_name>/runner.py
+    from typing import Any, Dict
+    from kedro.io import AbstractDataset, KedroDataCatalog, MemoryDataset
+    from kedro.pipeline import Pipeline
+    from kedro.runner.runner import AbstractRunner
+    from pluggy import PluginManager
 
 
-class DryRunner(AbstractRunner):
-    """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
-    nodes would be run without actually executing anything. It also checks if all the
-    necessary data exists.
-    """
-
-    def __init__(self, is_async: bool = False, extra_dataset_patterns: Dict[str, Dict[str, Any]] = None):
-        """Instantiates the runner class.
-
-        Args:
-            is_async: If True, the node inputs and outputs are loaded and saved
-                asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the KedroDataCatalog
-                during the run. This is used to set the default datasets.
+    class DryRunner(AbstractRunner):
+        """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
+        nodes would be run without actually executing anything. It also checks if all the
+        necessary data exists.
         """
-        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
-        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
-        super().__init__(is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns)
 
-    def _run(
-        self,
-        pipeline: Pipeline,
-        catalog: KedroDataCatalog,
-        hook_manager: PluginManager = None,
-        session_id: str = None,
-    ) -> None:
-        """The method implementing dry pipeline running.
-        Example logs output using this implementation:
+        def __init__(self, is_async: bool = False, extra_dataset_patterns: Dict[str, Dict[str, Any]] = None):
+            """Instantiates the runner class.
 
-            kedro.runner.dry_runner - INFO - Actual run would execute 3 nodes:
-            node3: identity([A]) -> [B]
-            node2: identity([C]) -> [D]
-            node1: identity([D]) -> [E]
+            Args:
+                is_async: If True, the node inputs and outputs are loaded and saved
+                    asynchronously with threads. Defaults to False.
+                extra_dataset_patterns: Extra dataset factory patterns to be added to the KedroDataCatalog
+                    during the run. This is used to set the default datasets.
+            """
+            default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
+            self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
+            super().__init__(is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns)
 
-        Args:
-            pipeline: The ``Pipeline`` to run.
-            catalog: The ``KedroDataCatalog`` from which to fetch data.
-            hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+        def _run(
+            self,
+            pipeline: Pipeline,
+            catalog: KedroDataCatalog,
+            hook_manager: PluginManager = None,
+            session_id: str = None,
+        ) -> None:
+            """The method implementing dry pipeline running.
+            Example logs output using this implementation:
 
-        """
-        nodes = pipeline.nodes
-        self._logger.info(
-            "Actual run would execute %d nodes:\n%s",
-            len(nodes),
-            pipeline.describe(),
-        )
-        self._logger.info("Checking inputs...")
-        input_names = pipeline.inputs()
+                kedro.runner.dry_runner - INFO - Actual run would execute 3 nodes:
+                node3: identity([A]) -> [B]
+                node2: identity([C]) -> [D]
+                node1: identity([D]) -> [E]
 
-        missing_inputs = [
-            input_name
-            for input_name in input_names
-            if not catalog._get_dataset(input_name).exists()
-        ]
-        if missing_inputs:
-            raise KeyError(f"Datasets {missing_inputs} not found.")
-```
-</details>
+            Args:
+                pipeline: The ``Pipeline`` to run.
+                catalog: The ``KedroDataCatalog`` from which to fetch data.
+                hook_manager: The ``PluginManager`` to activate hooks.
+                session_id: The id of the session.
+
+            """
+            nodes = pipeline.nodes
+            self._logger.info(
+                "Actual run would execute %d nodes:\n%s",
+                len(nodes),
+                pipeline.describe(),
+            )
+            self._logger.info("Checking inputs...")
+            input_names = pipeline.inputs()
+
+            missing_inputs = [
+                input_name
+                for input_name in input_names
+                if not catalog._get_dataset(input_name).exists()
+            ]
+            if missing_inputs:
+                raise KeyError(f"Datasets {missing_inputs} not found.")
+    ```
+
 
 And use it with `kedro run` through the `--runner` flag:
 
@@ -132,9 +129,8 @@ $ kedro run --runner=<package_name>.runner.DryRunner
 
 ## Load and save asynchronously
 
-```{note}
-`ThreadRunner` doesn't support asynchronous load-input or save-output operations.
-```
+!!! note
+    `ThreadRunner` doesn't support asynchronous load-input or save-output operations.
 
 When processing a node, both `SequentialRunner` and `ParallelRunner` perform the following steps in order:
 
@@ -151,35 +147,32 @@ $ kedro run --async
 ...
 ```
 
-```{note}
-All the datasets used in the run have to be [thread-safe](https://www.quora.com/What-is-thread-safety-in-Python) in order for asynchronous loading/saving to work properly.
-```
+!!! note
+    All the datasets used in the run have to be [thread-safe](https://www.quora.com/What-is-thread-safety-in-Python) in order for asynchronous loading/saving to work properly.
 
 ## Run a pipeline by name
 
 To run the pipeline by its name, you need to add your new pipeline to the `register_pipelines()` function in `src/<package_name>/pipeline_registry.py`:
 
-<details>
-<summary><b>Click to expand</b></summary>
+??? example "View code"
+    ```python
+    def register_pipelines():
+        """Register the project's pipelines.
 
-```python
-def register_pipelines():
-    """Register the project's pipelines.
+        Returns:
+            A mapping from pipeline names to ``Pipeline`` objects.
+        """
+        pipelines = find_pipelines()
+        pipelines["__default__"] = sum(pipelines.values())
+        my_pipeline = pipeline(
+            [
+                # your definition goes here
+            ]
+        )
+        pipelines["my_pipeline"] = my_pipeline
+        return pipelines
+    ```
 
-    Returns:
-        A mapping from pipeline names to ``Pipeline`` objects.
-    """
-    pipelines = find_pipelines()
-    pipelines["__default__"] = sum(pipelines.values())
-    my_pipeline = pipeline(
-        [
-            # your definition goes here
-        ]
-    )
-    pipelines["my_pipeline"] = my_pipeline
-    return pipelines
-```
-</details>
 
 Then, from the command line, execute the following:
 
@@ -187,9 +180,9 @@ Then, from the command line, execute the following:
 kedro run --pipeline=my_pipeline
 ```
 
-```{note}
-If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
-```
+!!! note
+    If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
+
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#run-the-project).
 
@@ -203,38 +196,34 @@ Through `KedroDataCatalog`, we can control where inputs are loaded from, where i
 
 In a simple example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, then instantiate `SequentialRunner` and call its `run` method with the pipeline and data catalog instances:
 
-<details>
-<summary><b>Click to expand</b></summary>
+??? example "View code"
+    ```python
+    io = KedroDataCatalog(dict(xs=MemoryDataset()))
+    ```
 
+    ```python
+    io.list()
+    ```
 
-```python
-io = KedroDataCatalog(dict(xs=MemoryDataset()))
-```
+    `Output`:
 
-```python
-io.list()
-```
+    ```console
+    Out[10]: ['xs']
+    ```
 
-`Output`:
+    ```python
+    io.save("xs", [1, 2, 3])
+    ```
 
-```console
-Out[10]: ['xs']
-```
+    ```python
+    SequentialRunner().run(pipeline, catalog=io)
+    ```
 
-```python
-io.save("xs", [1, 2, 3])
-```
+    `Output`:
 
-```python
-SequentialRunner().run(pipeline, catalog=io)
-```
-
-`Output`:
-
-```console
-Out[11]: {'v': 0.666666666666667}
-```
-</details>
+    ```console
+    Out[11]: {'v': 0.666666666666667}
+    ```
 
 
 ## Configure `kedro run` arguments
@@ -270,6 +259,5 @@ This is because the configuration file gets parsed by [Click](https://click.pall
 
 Variable names and arguments in Python may only contain alpha-numeric characters and underscores, so it's not possible to have a dash in the option names when using the configuration file.
 
-```{note}
-If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
-```
+!!! note
+    If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.

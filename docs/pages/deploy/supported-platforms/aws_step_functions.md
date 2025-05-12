@@ -65,65 +65,60 @@ The rest of the tutorial will explain each step in the deployment process above 
 * Put a `catalog.yml` file in this directory with the following content
 * Ensure that you have `s3fs>=0.3.0,<0.5` defined in your `requirements.txt` so the data can be read from S3.
 
-<details>
-<summary><b>Click to expand</b></summary>
+??? example "View code"
+    ```yaml
+    companies:
+      type: pandas.CSVDataset
+      filepath: s3://<your-bucket>/companies.csv
 
-```yaml
-companies:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/companies.csv
+    reviews:
+      type: pandas.CSVDataset
+      filepath: s3://<your-bucket>/reviews.csv
 
-reviews:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/reviews.csv
+    shuttles:
+      type: pandas.ExcelDataset
+      filepath: s3://<your-bucket>/shuttles.xlsx
 
-shuttles:
-  type: pandas.ExcelDataset
-  filepath: s3://<your-bucket>/shuttles.xlsx
+    preprocessed_companies:
+      type: pandas.CSVDataset
+      filepath: s3://<your-bucket>/preprocessed_companies.csv
 
-preprocessed_companies:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/preprocessed_companies.csv
+    preprocessed_shuttles:
+      type: pandas.CSVDataset
+      filepath: s3://<your-bucket>/preprocessed_shuttles.csv
 
-preprocessed_shuttles:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/preprocessed_shuttles.csv
+    model_input_table:
+      type: pandas.CSVDataset
+      filepath: s3://<your-bucket>/model_input_table.csv
 
-model_input_table:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/model_input_table.csv
+    regressor:
+      type: pickle.PickleDataset
+      filepath: s3://<your-bucket>/regressor.pickle
+      versioned: true
 
-regressor:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/regressor.pickle
-  versioned: true
+    X_train:
+      type: pickle.PickleDataset
+      filepath: s3://<your-bucket>/X_train.pickle
 
-X_train:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/X_train.pickle
+    X_test:
+      type: pickle.PickleDataset
+      filepath: s3://<your-bucket>/X_test.pickle
 
-X_test:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/X_test.pickle
+    y_train:
+      type: pickle.PickleDataset
+      filepath: s3://<your-bucket>/y_train.pickle
 
-y_train:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/y_train.pickle
-
-y_test:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/y_test.pickle
-```
-
-</details>
+    y_test:
+      type: pickle.PickleDataset
+      filepath: s3://<your-bucket>/y_test.pickle
+    ```
 
 ### Step 2. Package the Kedro pipeline as an AWS Lambda-compliant Docker image
 
 In December 2020, [AWS announced that an AWS Lambda function can now use a container image up to **10 GB in size**](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) as its deployment package, besides the original zip method. As it has a few [requirements for the container image to work properly](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs), you must build your own custom Docker container image, both to contain the Kedro pipeline and to comply with Lambda's requirements.
 
-```{note}
-All the following steps should be done in the Kedro project's root directory.
-```
+!!! note
+    All the following steps should be done in the Kedro project's root directory.
 
 * **Step 2.1**: Package the Kedro pipeline as a Python package so you can install it into the container later on:
 

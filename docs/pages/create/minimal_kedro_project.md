@@ -100,9 +100,8 @@ At this point, your workingn directory should look like this:
 ```
 
 
-```{note}
-Note we define `source_dir = "."`, usually we keep our source code inside a directory called `src`. For this example, we try to keep the structure minimal so we keep the source code in the root directory
-```
+!!! note
+    Note we define `source_dir = "."`, usually we keep our source code inside a directory called `src`. For this example, we try to keep the structure minimal so we keep the source code in the root directory
 
 ### Step 4: Create `settings.py` and `pipeline_registry.py`
 Next, create a folder named minikedro, which should match the package_name defined in pyproject.toml:

@@ -261,9 +261,8 @@ dev_minio:
     endpoint_url : 'http://localhost:9000'
 ```
 
-```{note}
-The easiest way to setup MinIO is to run a Docker image. After the following command, you can access the MinIO server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
-```
+!!! note
+    The easiest way to setup MinIO is to run a Docker image. After the following command, you can access the MinIO server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
@@ -288,9 +287,9 @@ dev_abs:
 
 ## Load a CSV file stored in a remote location through SSH
 
-```{note}
-This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
-```
+!!! note
+    This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
+
 ```yaml
 cool_dataset:
   type: pandas.CSVDataset
@@ -341,9 +340,8 @@ bikes:
 
 The syntax `&csv` names the following block `csv` and the syntax `<<: *csv` inserts the contents of the block named `csv`. Locally declared keys entirely override inserted ones as seen in `bikes`.
 
-```{note}
-It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
-```
+!!! note
+    It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
 
 You can also nest reusable YAML syntax:
 

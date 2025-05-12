@@ -218,10 +218,9 @@ companies:
 ```
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 
-```{note}
-When manually instantiating `OmegaConfigLoader` in code, runtime parameters passed via the CLI `--params` option will not be available to the resolver. This occurs because the manually created config loader instance doesn't have access to the runtime parameters provided through the CLI.
-If you need to access runtime parameters in code that manually instantiates `OmegaConfigLoader`, you should instead use the Kedro context to access parameters.
-```
+!!! note
+    When manually instantiating `OmegaConfigLoader` in code, runtime parameters passed via the CLI `--params` option will not be available to the resolver. This occurs because the manually created config loader instance doesn't have access to the runtime parameters provided through the CLI.
+    If you need to access runtime parameters in code that manually instantiates `OmegaConfigLoader`, you should instead use the Kedro context to access parameters.
 
 #### How to use `globals` and `runtime_params`
 
@@ -298,9 +297,10 @@ my_polars_dataset:
 `OmegaConf` also comes with some [built-in resolvers](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#built-in-resolvers)
 that you can use with the `OmegaConfigLoader` in Kedro. All built-in resolvers except for [`oc.env`](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-env)
 are enabled by default. `oc.env` is only turned on for loading credentials. You can, however, turn this on for all configurations through your project's `src/<package_name>/settings.py` in a similar way:
-```{note}
-This is an advanced feature and should be used with caution. We do not recommend using environment variables for configurations other than credentials.
-```
+
+!!! note
+    This is an advanced feature and should be used with caution. We do not recommend using environment variables for configurations other than credentials.
+
 ```python
 from omegaconf.resolvers import oc
 
@@ -321,9 +321,8 @@ dev_s3:
     aws_secret_access_key: ${oc.env:AWS_SECRET_ACCESS_KEY}
 ```
 
-```{note}
-Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials.
-```
+!!! note
+    Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials.
 
 ### How to change the merge strategy used by `OmegaConfigLoader`
 By default, `OmegaConfigLoader` merges configuration [in different environments](configuration_basics.md#configuration-environments) as well as runtime parameters in a destructive way. This means that whatever configuration resides in your overriding environment (`local` by default) takes precedence when the same top-level key is present in the base and overriding environment. Any configuration for that key **besides that given in the overriding environment** is discarded.

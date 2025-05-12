@@ -11,9 +11,8 @@ This is why Kedro provides {class}`PartitionedDataset<kedro-datasets:kedro_datas
 * It implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach, and does not attempt to load any partition data until a processing node explicitly requests it.
 * It supports lazy saving by using `Callable`s.
 
-```{note}
-In this section, each individual file inside a given location is called a partition.
-```
+!!! note
+    In this section, each individual file inside a given location is called a partition.
 
 ### How to use `PartitionedDataset`
 
@@ -32,9 +31,8 @@ my_partitioned_dataset:
     load_arg2: value2
 ```
 
-```{note}
-Like any other dataset, `PartitionedDataset` can also be instantiated programmatically in Python:
-```
+!!! note
+    Like any other dataset, `PartitionedDataset` can also be instantiated programmatically in Python:
 
 ```python
 from kedro_datasets.pandas import CSVDataset
@@ -100,9 +98,8 @@ Full notation allows you to specify a dictionary with the full underlying datase
 
 ### Partitioned dataset credentials
 
-```{note}
-Support for `dataset_credentials` key in the credentials for `PartitionedDataset` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
-```
+!!! note
+    Support for `dataset_credentials` key in the credentials for `PartitionedDataset` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 
 Credentials management for `PartitionedDataset` is somewhat special, because it might contain credentials for both `PartitionedDataset` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config (unless such config already has credentials configured), but not the other way around - dataset credentials are never propagated to the filesystem.
 
@@ -207,9 +204,8 @@ def create_partitions() -> Dict[str, Any]:
     }
 ```
 
-```{note}
-Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a `PartitionedDataset`. The simplest safety mechanism could be to use partition IDs with a high chance of uniqueness: for example, the current timestamp.
-```
+!!! note
+    Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a `PartitionedDataset`. The simplest safety mechanism could be to use partition IDs with a high chance of uniqueness: for example, the current timestamp.
 
 ### Partitioned dataset lazy saving
 `PartitionedDataset` also supports lazy saving, where the partition's data is not materialised until it is time to write.
@@ -235,13 +231,11 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
     }
 ```
 
-```{note}
-When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../hooks/introduction).
-```
+!!! note
+    When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../hooks/introduction).
 
-```{note}
-Lazy saving is the default behaviour, meaning that if a `Callable` type is provided, the dataset will be written _after_ the `after_node_run` hook is executed.
-```
+!!! note
+    Lazy saving is the default behaviour, meaning that if a `Callable` type is provided, the dataset will be written _after_ the `after_node_run` hook is executed.
 
 In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (e.g., a TensorFlow model) and you do not intend to save it lazily.
 To disable the lazy saving set `save_lazily` parameter to `False`:
@@ -277,9 +271,8 @@ The `IncrementalDataset` save operation is identical to the [save operation of t
 
 ### Incremental dataset confirm
 
-```{note}
-The checkpoint value *is not* automatically updated when a new set of partitions is successfully loaded or saved.
-```
+!!! note
+    The checkpoint value *is not* automatically updated when a new set of partitions is successfully loaded or saved.
 
 Partitioned dataset checkpoint update is triggered by an explicit `confirms` instruction in one of the nodes downstream. It can be the same node, which processes the partitioned dataset:
 
@@ -373,7 +366,7 @@ my_partitioned_dataset:
     force_checkpoint: 2020-01-01/data.csv
 ```
 
-```{note}
+!!! note
 Specification of `force_checkpoint` is also supported via the shorthand notation, as follows:
 ```
 
@@ -385,7 +378,7 @@ my_partitioned_dataset:
   checkpoint: 2020-01-01/data.csv
 ```
 
-```{note}
+!!! note
 If you need to force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
 ```
 

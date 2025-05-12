@@ -11,19 +11,11 @@ The tutorial takes approximately **30 minutes** to complete. You will work in th
 ## Tutorial steps
 
 - [Tutorial Template](tutorial_template.md)
-<<<<<<<< HEAD:docs/pages/tutorial/spaceflights_tutorial.md
-- [Set Up Data](set_up_data.md)
-- [Create a Pipeline](create_a_pipeline.md)
-- [Add Another Pipeline](add_another_pipeline.md)
-- [Test a Project](test_a_project.md)
-- [Package a Project](package_a_project.md)
-========
 - [Set Up Data](../tutorials/set_up_data.md)
 - [Create a Pipeline](../tutorials/create_a_pipeline.md)
 - [Add Another Pipeline](../tutorials/add_another_pipeline.md)
 - [Test a Project](../tutorials/test_a_project.md)
 - [Package a Project](../deploy/package_a_project.md)
->>>>>>>> develop:docs/pages/tutorials/spaceflights_tutorial.md
 - [Spaceflights Tutorial FAQs](spaceflights_tutorial_faqs.md)
 
 ![](../meta/images/moon-rocket.png)

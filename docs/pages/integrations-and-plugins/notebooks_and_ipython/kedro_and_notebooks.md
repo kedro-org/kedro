@@ -50,9 +50,8 @@ The `kedro jupyter notebook` command launches a notebook with a customised kerne
 
 In addtion, it also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
 
-``` {note}
-If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook` or run `%load_ext kedro.ipython` in a notebook cell.
-```
+!!! note
+    If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook` or run `%load_ext kedro.ipython` in a notebook cell.
 
 ## Loading the project with the `kedro.ipython` extension
 
@@ -172,9 +171,8 @@ INFO     Loading data from 'parameters' (MemoryDataset)...
 }
 ```
 
-```{note}
-If you enable [versioning](../data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, e.g. `catalog.load("preprocessed_shuttles", version="2024-06-05T15.08.09.255Z")`.
-```
+!!! note
+    If you enable [versioning](../data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, e.g. `catalog.load("preprocessed_shuttles", version="2024-06-05T15.08.09.255Z")`.
 
 ### `context`
 
@@ -278,9 +276,8 @@ For more details, run `%reload_kedro?`.
 
 ### `%load_node` line magic
 
-``` {note}
-This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VS Code Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
-```
+!!! note
+    This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VS Code Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
 
 When using this feature in Jupyter Notebook you will need to have the following requirements and minimum versions installed:
 ```yaml
@@ -294,9 +291,8 @@ You can load the contents of a node in your project into a series of cells using
 
 The [section about creating nodes with names](../../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../../tutorials/create_a_pipeline.md#preprocessed-data-registration).
 
-``` {note}
-The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
-```
+!!! note
+    The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
 
 The line magic will load your node's inputs, imports, and body:
 
@@ -319,9 +315,8 @@ You can then run the generated cells to recreate how the node would run in your 
 
 ### `%run_viz` line magic
 
-``` {note}
-If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz) for the project, run `pip install kedro-viz` in your terminal from within the project directory.
-```
+!!! note
+    If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz) for the project, run `pip install kedro-viz` in your terminal from within the project directory.
 
 You can display an interactive visualisation of your pipeline directly in your notebook using the `%run_viz` line magic from within a cell:
 
@@ -364,9 +359,8 @@ Here is example debugging workflow after discovering a node in your pipeline is 
 
 </details>
 
-``` {note}
-The `%load_node` line magic is currently only available for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
-```
+!!! note
+    The `%load_node` line magic is currently only available for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
 
 ---
 

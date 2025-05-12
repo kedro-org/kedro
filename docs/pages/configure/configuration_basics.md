@@ -4,9 +4,8 @@ This section contains detailed information about Kedro project configuration, wh
 
 Kedro makes use of a configuration loader to load any project configuration files, which is {py:class}`~kedro.config.OmegaConfigLoader` by default since Kedro 0.19.0.
 
-```{note}
-`ConfigLoader` and `TemplatedConfigLoader` have been removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
-```
+!!! note
+    `ConfigLoader` and `TemplatedConfigLoader` have been removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
 
 ## OmegaConfigLoader
 
@@ -227,9 +226,8 @@ s3://my-bucket/configs/
     └── parameters.yml
 ```
 
-```{note}
-While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not currently support reading compressed files directly from cloud storage (e.g., s3://my-bucket/configs.tar.gz).
-```
+!!! note
+    While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not currently support reading compressed files directly from cloud storage (e.g., s3://my-bucket/configs.tar.gz).
 
 ### How to access configuration in code
 To directly access configuration in code, for example to debug, you can do so as follows:
@@ -247,9 +245,8 @@ conf_catalog = conf_loader["catalog"]
 ```
 
 ### How to load a data catalog with credentials in code?
-```{note}
-We do not recommend that you load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
-```
+!!! note
+    We do not recommend that you load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
 
 Assuming your project contains a catalog and credentials file, each located in `base` and `local` environments respectively, you can use the `OmegaConfigLoader` to load these configurations, and pass them to a `KedroDataCatalog` object to access the catalog entries with resolved credentials.
 ```python
@@ -286,9 +283,8 @@ If you set the `KEDRO_ENV` environment variable to the name of your environment,
 export KEDRO_ENV=<your-environment>
 ```
 
-```{note}
-If you both specify the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
-```
+!!! note
+    If you both specify the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
 
 ### How to change the default overriding environment
 By default, `local` is the overriding environment for `base`. To change the folder, customise the configuration loader argument settings in `src/<package_name>/settings.py` and set the `CONFIG_LOADER_ARGS` key to have a new `default_run_env` value.

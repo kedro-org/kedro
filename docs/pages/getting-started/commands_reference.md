@@ -77,9 +77,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 The following are Kedro commands that apply globally and can be run from any directory location.
 
-```{note}
-You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
-```
+!!! note
+    You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
 
 ### Get help on Kedro commands
 
@@ -128,9 +127,8 @@ kedro new
 
 ## Customise or override project-specific Kedro commands
 
-```{note}
-All project related CLI commands should be run from the project’s root directory.
-```
+!!! note
+    All project related CLI commands should be run from the project’s root directory.
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 

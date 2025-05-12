@@ -167,14 +167,13 @@ weather@delta:
   filepath: s3a://my_bucket/03_primary/weather
 ```
 
-```{note}
-The `DeltaTableDataset` does not support `save()` operation. Instead, pick the operation you want to perform (`DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`) and write it in your node code instead.
-```
+!!! note
+    The `DeltaTableDataset` does not support `save()` operation. Instead, pick the operation you want to perform (`DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`) and write it in your node code instead.
 
 
-```{note}
-If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, via the DeltaTable API.
-```
+!!! note
+    If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, via the DeltaTable API.
+
 
 ```python
 pipeline(
@@ -211,6 +210,5 @@ The following diagram is the visual representation of the workflow explained abo
 
 ![Spark and Delta Lake workflow](../meta/images/spark_delta_workflow.png)
 
-```{note}
-This pattern of creating "dummy" datasets to preserve the data flow also applies to other "out of DAG" execution operations such as SQL operations within a node.
-```
+!!! note
+    This pattern of creating "dummy" datasets to preserve the data flow also applies to other "out of DAG" execution operations such as SQL operations within a node.

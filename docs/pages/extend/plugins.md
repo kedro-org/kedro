@@ -153,9 +153,8 @@ class MyHooks:
 hooks = MyHooks()
 ```
 
-```{note}
-`hooks` should be an instance of the class defining the Hooks.
-```
+!!! note
+    `hooks` should be an instance of the class defining the Hooks.
 
 ## CLI Hooks
 
@@ -212,9 +211,8 @@ connectors are implementations of the `AbstractDataset`
 There are many community-developed plugins available and a comprehensive list of plugins is published on the [`awesome-kedro`](https://github.com/kedro-org/awesome-kedro) GitHub repository. The list below is a small snapshot of some of those under active maintenance.
 
 
-```{note}
-Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
-```
+!!! note
+    Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 
 - [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei) and [Takieddine Kadiri](https://github.com/takikadiri), facilitates [MLflow](https://www.mlflow.org/) integration within a Kedro project. Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronisation between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial). You can find more information in the [kedro-mlflow documentation](https://kedro-mlflow.readthedocs.io/en/stable/).
 - [kedro-kubeflow](https://github.com/getindata/kedro-kubeflow), by [GetInData](https://github.com/getindata), lets you run and schedule pipelines on Kubernetes clusters using [Kubeflow Pipelines](https://www.kubeflow.org/docs/components/pipelines/overview/)

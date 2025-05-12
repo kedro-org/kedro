@@ -168,9 +168,8 @@ spec:
 ```
 
 
-```{note}
-The Argo Workflows is defined as the dependencies between tasks using a directed-acyclic graph (DAG).
-```
+!!! note
+    The Argo Workflows is defined as the dependencies between tasks using a directed-acyclic graph (DAG).
 
 For the purpose of this walk-through, we will use an AWS S3 bucket for datasets; therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example [Kubernetes Secrets spec is given below](#submit-argo-workflows-spec-to-kubernetes)).
 
@@ -225,9 +224,8 @@ $ cd <project_root>
 $ argo submit --watch templates/argo-<package_name>.yml
 ```
 
-```{note}
-The Argo Workflows should be submitted to the same namespace as the Kubernetes Secrets. Please refer to the Argo CLI help to get more details about the usage.
-```
+!!! note
+    The Argo Workflows should be submitted to the same namespace as the Kubernetes Secrets. Please refer to the Argo CLI help to get more details about the usage.
 
 In order to clean up your Kubernetes cluster you can use the following commands:
 
@@ -240,7 +238,6 @@ $ kubectl delete -f secret.yml
 
 As an alternative, you can use [Kedro-Argo plugin](https://pypi.org/project/kedro-argo/) to convert a Kedro project to Argo Workflows.
 
-```{warning}
-The plugin is not supported by the Kedro team and we can't guarantee its workability.
-```
-</div>
+!!! warning
+    The plugin is not supported by the Kedro team and we can't guarantee its workability.
+

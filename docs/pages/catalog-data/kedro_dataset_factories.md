@@ -37,9 +37,8 @@ node(
 ...
 ```
 
-```{note}
-The factory pattern must always be enclosed in quotes to avoid YAML parsing errors.
-```
+!!! note
+    The factory pattern must always be enclosed in quotes to avoid YAML parsing errors.
 
 Dataset factories is similar to **regular expression** and you can think of it as reversed `f-string`. In this case, the name of the input dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`. Similarly, it resolves `name` to `process` for the output dataset `process_data`.
 
@@ -256,9 +255,7 @@ This command outputs a list of all dataset factories in the catalog, ranked in t
 
 Consider a catalog file with the following patterns:
 
-<details>
-<summary><b>Click to expand</b></summary>
-
+??? example "View code"
 ```yaml
 "{layer}.{dataset_name}":
   type: pandas.CSVDataset
@@ -284,7 +281,6 @@ Consider a catalog file with the following patterns:
   type: pickle.PickleDataset
   filepath: data/01_raw/{default_dataset}.pickle
 ```
-</details>
 
 Running `kedro catalog rank` will result in the following output:
 
@@ -306,94 +302,85 @@ This command is runner agnostic and thus won't take into account any default dat
 
 To illustrate this, consider the following catalog file:
 
-<details>
-<summary><b>Click to expand</b></summary>
+??? example "View code"
+    ```yaml
+    companies:
+      type: pandas.CSVDataset
+      filepath: data/01_raw/companies.csv
 
-```yaml
-companies:
-  type: pandas.CSVDataset
-  filepath: data/01_raw/companies.csv
+    reviews:
+      type: pandas.CSVDataset
+      filepath: data/01_raw/reviews.csv
 
-reviews:
-  type: pandas.CSVDataset
-  filepath: data/01_raw/reviews.csv
+    shuttles:
+      type: pandas.ExcelDataset
+      filepath: data/01_raw/shuttles.xlsx
+      load_args:
+        engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
 
-shuttles:
-  type: pandas.ExcelDataset
-  filepath: data/01_raw/shuttles.xlsx
-  load_args:
-    engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
+    "preprocessed_{name}":
+      type: pandas.ParquetDataset
+      filepath: data/02_intermediate/preprocessed_{name}.parquet
 
-"preprocessed_{name}":
-  type: pandas.ParquetDataset
-  filepath: data/02_intermediate/preprocessed_{name}.parquet
-
-"{default}":
-  type: pandas.ParquetDataset
-  filepath: data/03_primary/{default}.parquet
-```
-</details>
+    "{default}":
+      type: pandas.ParquetDataset
+      filepath: data/03_primary/{default}.parquet
+    ```
 
 and the following pipeline in `pipeline.py`:
 
-<details>
-<summary><b>Click to expand</b></summary>
-
-```python
-def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
-        [
-            node(
-                func=preprocess_companies,
-                inputs="companies",
-                outputs="preprocessed_companies",
-                name="preprocess_companies_node",
-            ),
-            node(
-                func=preprocess_shuttles,
-                inputs="shuttles",
-                outputs="preprocessed_shuttles",
-                name="preprocess_shuttles_node",
-            ),
-            node(
-                func=create_model_input_table,
-                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-                outputs="model_input_table",
-                name="create_model_input_table_node",
-            ),
-        ]
-    )
-```
-</details>
+??? example "View code"
+    ```python
+    def create_pipeline(**kwargs) -> Pipeline:
+        return pipeline(
+            [
+                node(
+                    func=preprocess_companies,
+                    inputs="companies",
+                    outputs="preprocessed_companies",
+                    name="preprocess_companies_node",
+                ),
+                node(
+                    func=preprocess_shuttles,
+                    inputs="shuttles",
+                    outputs="preprocessed_shuttles",
+                    name="preprocess_shuttles_node",
+                ),
+                node(
+                    func=create_model_input_table,
+                    inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
+                    outputs="model_input_table",
+                    name="create_model_input_table_node",
+                ),
+            ]
+        )
+    ```
 
 The resolved catalog output by the command will be as follows:
 
-<details>
-<summary><b>Click to expand</b></summary>
-
-```yaml
-companies:
-  filepath: data/01_raw/companies.csv
-  type: pandas.CSVDataset
-model_input_table:
-  filepath: data/03_primary/model_input_table.parquet
-  type: pandas.ParquetDataset
-preprocessed_companies:
-  filepath: data/02_intermediate/preprocessed_companies.parquet
-  type: pandas.ParquetDataset
-preprocessed_shuttles:
-  filepath: data/02_intermediate/preprocessed_shuttles.parquet
-  type: pandas.ParquetDataset
-reviews:
-  filepath: data/01_raw/reviews.csv
-  type: pandas.CSVDataset
-shuttles:
-  filepath: data/01_raw/shuttles.xlsx
-  load_args:
-    engine: openpyxl
-  type: pandas.ExcelDataset
-```
-</details>
+??? example "View code"
+    ```yaml
+    companies:
+      filepath: data/01_raw/companies.csv
+      type: pandas.CSVDataset
+    model_input_table:
+      filepath: data/03_primary/model_input_table.parquet
+      type: pandas.ParquetDataset
+    preprocessed_companies:
+      filepath: data/02_intermediate/preprocessed_companies.parquet
+      type: pandas.ParquetDataset
+    preprocessed_shuttles:
+      filepath: data/02_intermediate/preprocessed_shuttles.parquet
+      type: pandas.ParquetDataset
+    reviews:
+      filepath: data/01_raw/reviews.csv
+      type: pandas.CSVDataset
+    shuttles:
+      filepath: data/01_raw/shuttles.xlsx
+      load_args:
+        engine: openpyxl
+      type: pandas.ExcelDataset
+    ```
 
 By default this is output to the terminal. However, if you wish to output the resolved catalog to a specific file, you can use the redirection operator `>`:
 

@@ -129,6 +129,5 @@ starter = "plugin:starters"
 
 After that you can use this starter with `kedro new --starter=test_plugin_starter`.
 
-```{note}
-If your starter is stored on a git repository, Kedro defaults to use a tag or branch labelled with your version of Kedro, e.g. `0.18.12`. This means that you can host different versions of your starter template on the same repository, and the correct one will be used automatically. If you prefer not to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
-```
+!!! note
+    If your starter is stored on a git repository, Kedro defaults to use a tag or branch labelled with your version of Kedro, e.g. `0.18.12`. This means that you can host different versions of your starter template on the same repository, and the correct one will be used automatically. If you prefer not to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.

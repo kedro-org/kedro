@@ -242,9 +242,8 @@ Then, run the deployment script in other terminal:
 python register_prefect_flow.py --work_pool_name <work_pool_name> --work_queue_name <work_queue_name>
 ```
 
-```{note}
-Be sure that your Prefect Server is up and running. Verify that the deployment script arguments match the work pool and work queue names.
-```
+!!! note
+    Be sure that your Prefect Server is up and running. Verify that the deployment script arguments match the work pool and work queue names.
 
 ### Run Prefect flow
 
@@ -256,8 +255,7 @@ Navigate to http://localhost:4200/deployments to see your registered flow.
 
 Click on the flow to open it and then trigger your flow using the "RUN" > "QUICK RUN" button and leave the parameters by default. If you want to run a specific pipeline you can replace the `__default__` value.
 
-```{note}
-Be sure that both your Prefect Server and Agent are up and running.
-```
+!!! note
+    Be sure that both your Prefect Server and Agent are up and running.
 
 ![prefect_2_flow_details](../../meta/images/prefect_2_flow_details.png)

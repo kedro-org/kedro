@@ -38,9 +38,8 @@ export KEDRO_LOGGING_CONFIG=<project_root>/conf/logging.yml
 
 After setting the environment variable, any subsequent Kedro commands use the logging configuration file at the specified path.
 
-```{note}
-If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will use the [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml).
-```
+!!! note
+    If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will use the [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml).
 
 ### Change the verbosity of specific parts of Kedro
 
@@ -71,55 +70,50 @@ Please note that adjusting `CONF_SOURCE` or renaming `logging.yml` without updat
 ### How to show DEBUG level messages
 To see `DEBUG` level messages, change the level of logging in your project-specific logging configuration file (`logging.yml`). We provide a `logging.yml` template:
 
-<details>
-<summary><b>Click to expand the <code>logging.yml</code> template</b></summary>
-<code>
+??? example "View code"
+    ```yaml
+    version: 1
 
-```yaml
-version: 1
+    disable_existing_loggers: False
 
-disable_existing_loggers: False
+    formatters:
+      simple:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-formatters:
-  simple:
-    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    handlers:
+      console:
+        class: logging.StreamHandler
+        level: INFO
+        formatter: simple
+        stream: ext://sys.stdout
 
-handlers:
-  console:
-    class: logging.StreamHandler
-    level: INFO
-    formatter: simple
-    stream: ext://sys.stdout
+      info_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: info.log
+        maxBytes: 10485760 # 10MB
+        backupCount: 20
+        encoding: utf8
+        delay: True
 
-  info_file_handler:
-    class: logging.handlers.RotatingFileHandler
-    level: INFO
-    formatter: simple
-    filename: info.log
-    maxBytes: 10485760 # 10MB
-    backupCount: 20
-    encoding: utf8
-    delay: True
+      rich:
+        class: kedro.logging.RichHandler
+        rich_tracebacks: True
+        # Advance options for customisation.
+        # See https://docs.kedro.org/en/stable/logging/index.html#how-to-perform-logging-in-your-kedro-project
+        # tracebacks_show_locals: False
 
-  rich:
-    class: kedro.logging.RichHandler
-    rich_tracebacks: True
-    # Advance options for customisation.
-    # See https://docs.kedro.org/en/stable/logging/index.html#how-to-perform-logging-in-your-kedro-project
-    # tracebacks_show_locals: False
+    loggers:
+      kedro:
+        level: INFO
 
-loggers:
-  kedro:
-    level: INFO
+      your_python_package:
+        level: INFO
 
-  your_python_package:
-    level: INFO
-
-root:
-  handlers: [rich]
-```
-</code>
-</details>
+    root:
+      handlers: [rich]
+    ```
 
 You need to change the line:
 ```diff
@@ -132,9 +126,8 @@ loggers:
 +   level: DEBUG
 ```
 
-```{note}
-The name of a logger corresponds to a key in the `loggers` section of the logging configuration file (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
-```
+!!! note
+    The name of a logger corresponds to a key in the `loggers` section of the logging configuration file (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
 
 By changing the level value to `DEBUG` for the desired logger (e.g. `<your_python_package>`), you will start seeing `DEBUG` level messages in the log output.
 
@@ -151,9 +144,8 @@ The following section illustrates some common examples of how to change your pro
 
 Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
 
-```{note}
-If you want to disable `rich`'s tracebacks, you must set `KEDRO_LOGGING_CONFIG` to point to your local config i.e. `conf/logging.yml`.
-```
+!!! note
+    If you want to disable `rich`'s tracebacks, you must set `KEDRO_LOGGING_CONFIG` to point to your local config i.e. `conf/logging.yml`.
 
 When `rich_tracebacks` is set to `True`, the configuration is propagated to [`rich.traceback.install`](https://rich.readthedocs.io/en/stable/reference/traceback.html#rich.traceback.install). If an argument is compatible with `rich.traceback.install`, it will be passed to the traceback's settings.
 
@@ -202,9 +194,8 @@ If you find that the default wrapping of the log messages is too narrow but do n
 export COLUMNS=120 LINES=25
 ```
 
-```{note}
-You must provide a value for both `COLUMNS` and `LINES` even if you only wish to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINE=25`.
-```
+!!! note
+    You must provide a value for both `COLUMNS` and `LINES` even if you only wish to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINE=25`.
 
 ## How to enable rich logging in Jupyter
 

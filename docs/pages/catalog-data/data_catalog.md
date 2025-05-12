@@ -47,9 +47,8 @@ While the `save_args` parameter in a configuration of the `weather` dataset is d
 To get the extensive list of dataset parameters, see {py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` and navigate to the target parameter in the `__init__` definition for the dataset.
 For those parameters we provide a reference to the underlying library configuration parameters. For example, under the `load_args` parameter section for [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) you can find a reference to the [pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) method defining the full set of the parameters accepted.
 
-```{note}
-Kedro datasets delegate any of the `load_args` / `save_args` directly to the underlying implementation.
-```
+!!! note
+    Kedro datasets delegate any of the `load_args` / `save_args` directly to the underlying implementation.
 
 The example below showcases the configuration of two datasets - `shuttles` of type [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) and `weather` of type [snowflake.SnowparkTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.snowflake.SnowparkTableDataset.html).
 
@@ -156,10 +155,9 @@ test_dataset:
       mode: "a"
 ```
 
-```{note}
-Default load, save and filesystem arguments are defined inside the specific dataset implementations as `DEFAULT_LOAD_ARGS`, `DEFAULT_SAVE_ARGS`, and `DEFAULT_FS_ARGS` respectively.
+!!! note
+    Default load, save and filesystem arguments are defined inside the specific dataset implementations as `DEFAULT_LOAD_ARGS`, `DEFAULT_SAVE_ARGS`, and `DEFAULT_FS_ARGS` respectively.
 You can check those in {py:mod}`the dataset API documentation <kedro-datasets:kedro_datasets>`.
-```
 
 
 ### Dataset access credentials
@@ -214,9 +212,8 @@ A dataset offers versioning support if it extends the {py:class}`~kedro.io.Abstr
 
 To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 
-```{note}
-Note that HTTP(S) is a supported file system in the dataset implementations, but if you use it, you can't also use versioning.
-```
+!!! note
+    Note that HTTP(S) is a supported file system in the dataset implementations, but if you use it, you can't also use versioning.
 
 ## Use the Data Catalog within Kedro configuration
 

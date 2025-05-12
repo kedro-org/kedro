@@ -133,12 +133,24 @@
 }
 
 /* Footer styles for Main page */
+.main-page-footer-container {
+    /** hide the default copy right */
+    .md-footer-meta {
+        display: none;
+    }
 
-/** hide the default copy right */
-.md-footer-meta {
-    display: none;
-}
+    .main-page-footer-bottom {
+        margin: 6px 32px 28px 32px;
+    }
 
-.main-page-footer-bottom {
-    margin: 28px 32px;
+    .md-footer__inner {
+        a {
+            margin: 0;
+        }
+    }
+
+    .md-footer__title {
+        font-size: 16px;
+        margin-bottom: 0;
+    }
 }

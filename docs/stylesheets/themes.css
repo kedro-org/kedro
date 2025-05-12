@@ -1,6 +1,6 @@
 /* Light Theme */
 [data-md-color-scheme="light"] {
-    --md-default-bg-color: var(--white-200);
+    --md-default-bg-color: var(--white-0);
     --md-default-fg-color: var(--black-900);
     --cards-section-bg-color: var(--white-100);
     --card-bg-color: var(--white-0);

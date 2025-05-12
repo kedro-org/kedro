@@ -18,12 +18,12 @@ class TestCatalogConfigResolver:
         """Test unresolve dataset credentials to original format."""
         config = correct_config["catalog"]
         credentials = correct_config["credentials"]
-        resolved_configs = CatalogConfigResolver.resolve_credentials(
+        resolved_configs = CatalogConfigResolver._resolve_credentials(
             config, credentials
         )
 
         unresolved_config, unresolved_credentials = (
-            CatalogConfigResolver.unresolve_credentials(
+            CatalogConfigResolver._unresolve_credentials(
                 cred_name="s3", ds_config=resolved_configs
             )
         )
@@ -35,13 +35,13 @@ class TestCatalogConfigResolver:
         config = correct_config["catalog"]
         credentials = correct_config["credentials"]
 
-        resolved_configs = CatalogConfigResolver.resolve_credentials(
+        resolved_configs = CatalogConfigResolver._resolve_credentials(
             config, credentials
         )
         resolved_configs["cars"]["metadata"] = {"credentials": {}}
 
         unresolved_config, unresolved_credentials = (
-            CatalogConfigResolver.unresolve_credentials(
+            CatalogConfigResolver._unresolve_credentials(
                 cred_name="s3", ds_config=resolved_configs
             )
         )

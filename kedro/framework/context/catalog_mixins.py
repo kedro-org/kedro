@@ -81,7 +81,7 @@ class CatalogCommandsMixin:
             if is_parameter(ds_name):
                 continue
 
-            unresolved_config, _ = self.config_resolver.unresolve_credentials(
+            unresolved_config, _ = self.config_resolver._unresolve_credentials(
                 ds_name, ds.to_config()
             )
             explicit_datasets[ds_name] = unresolved_config
@@ -92,7 +92,7 @@ class CatalogCommandsMixin:
 
             ds_config = self.config_resolver.resolve_pattern(ds_name)
             if ds_config:
-                unresolved_config, _ = self.config_resolver.unresolve_credentials(
+                unresolved_config, _ = self.config_resolver._unresolve_credentials(
                     ds_name, ds_config
                 )
                 explicit_datasets[ds_name] = unresolved_config

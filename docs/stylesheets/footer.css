@@ -26,6 +26,12 @@
   font-size: 14px;
 }
 
+/* Copyright line break styling */
+.copyright-first-line,
+.copyright-second-line {
+  display: inline;
+}
+
 .legal-links {
   display: flex;
   gap: 16px;
@@ -113,52 +119,31 @@
 
 @media (max-width: 600px) {
   .welcome-page-footer-container {
-    margin: 28px 16px;
+    margin: 24px;
+    padding: 0;
   }
 
-  .card-grid,
-  .news-grid {
-    grid-template-columns: 1fr;
-  }
-
-  h1 {
-    font-size: 1.75rem;
-  }
-
-  .container {
-    padding: 1rem;
-  }
-
-  .bg-section {
-    margin: -1rem -1rem 3rem -1rem;
-    padding: 1.5rem 1rem;
-  }
-
-  .badges {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .header-right .version {
-    display: none;
-  }
-
-  .search-small input {
-    width: 140px;
-  }
-
-  .copyright {
-    font-size: 12px;
+  /* Make copyright break into two lines on mobile */
+  .copyright-first-line,
+  .copyright-second-line  {
+    display: block;
+    line-height: 24px;
   }
 
   .legal-links {
-    font-size: 12px;
-    gap: 8px;
+    gap: 16px;
   }
 
   .social-links {
-    gap: 8px;
+    gap: 24px;
+  }
+
+  .badges {
+    display: flex;
+  }
+
+  .badges img {
+    height: 16px;
   }
 }
 

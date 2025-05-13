@@ -305,27 +305,4 @@
     margin-bottom: 16px !important;
     text-align: left;
   }
-
-  .copyright-legal-socials-container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .copyright {
-    margin-right: 0;
-  }
-
-  .legal-links {
-    flex-wrap: wrap;
-  }
-
-  .social-links {
-    margin-left: 0;
-  }
-
-  .badges {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
 }

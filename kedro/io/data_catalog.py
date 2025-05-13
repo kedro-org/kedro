@@ -165,12 +165,11 @@ class DataCatalog:
         """
         if not is_warning_suppressed():
             warnings.warn(
-                "`DataCatalog` will be replaced by `KedroDataCatalog` in Kedro 1.0.0, "
-                "while keeping the `DataCatalog` name. Several APIs currently available, "
+                "Several APIs currently available, "
                 "including `datasets`, `get_datasets`, `_get_datasets`, `add`, `list`, "
-                "`add_feed_dict`, and `shallow_copy`, will be removed or replaced. "
+                "`add_feed_dict`, and `shallow_copy`, will be removed or replaced in Kedro 1.0.0. "
                 "For more details, refer to the documentation: "
-                "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
+                "https://docs.kedro.org/en/0.19.13/data/index.html#kedrodatacatalog-experimental-feature",
                 KedroDeprecationWarning,
                 stacklevel=2,
             )

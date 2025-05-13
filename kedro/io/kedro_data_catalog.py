@@ -103,12 +103,9 @@ class KedroDataCatalog(CatalogProtocol):
         """
         warnings.warn(
             "`KedroDataCatalog` is currently an experimental feature and will replace the existing `DataCatalog` "
-            "in Kedro 1.0.0, while adopting the original `DataCatalog` name. Several APIs have been temporarily "
-            "retained in `KedroDataCatalog` for compatibility with the old `DataCatalog`, including the `datasets` "
-            "property and the `get_datasets`, `_get_datasets`, `add, list`, `add_feed_dict`, and `shallow_copy` "
-            "methods. These will be removed or replaced with updated alternatives in Kedro 1.0.0. "
-            "For more details, refer to the documentation: "
-            "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
+            "in Kedro 1.0.0, while adopting the original `DataCatalog` name. Several APIs will be removed or "
+            "replaced with updated alternatives in Kedro 1.0.0. For more details, refer to the documentation: "
+            "https://docs.kedro.org/en/0.19.13/data/index.html#kedrodatacatalog-experimental-feature",
             KedroDeprecationWarning,
             stacklevel=2,
         )

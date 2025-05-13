@@ -5,11 +5,10 @@ import pytest
 
 import kedro
 from kedro import KedroDeprecationWarning
-from kedro.pipeline import node, pipeline
+from kedro.pipeline import GroupedNodes, node, pipeline
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
-    GroupedNode,
     OutputNotUniqueError,
 )
 from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
@@ -382,7 +381,7 @@ class TestValidPipeline:
             (
                 "pipeline_with_namespace_simple",
                 [
-                    GroupedNode(
+                    GroupedNodes(
                         name="namespace_1",
                         type="namespace",
                         nodes=[
@@ -392,7 +391,7 @@ class TestValidPipeline:
                         ],
                         dependencies=[],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="namespace_2",
                         type="namespace",
                         nodes=[
@@ -407,25 +406,25 @@ class TestValidPipeline:
             (
                 "pipeline_with_namespace_partial",
                 [
-                    GroupedNode(
+                    GroupedNodes(
                         name="namespace_1",
                         type="namespace",
                         nodes=["namespace_1.node_1", "namespace_1.node_2"],
                         dependencies=[],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="node_3",
                         type="node",
                         nodes=["node_3"],
                         dependencies=["namespace_1"],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="namespace_2",
                         type="namespace",
                         nodes=["namespace_2.node_4", "namespace_2.node_5"],
                         dependencies=["node_3"],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="node_6",
                         type="node",
                         nodes=["node_6"],
@@ -436,43 +435,43 @@ class TestValidPipeline:
             (
                 "pipeline_with_multiple_dependencies_on_one_node",
                 [
-                    GroupedNode(
+                    GroupedNodes(
                         name="f1",
                         type="node",
                         nodes=["f1"],
                         dependencies=[],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="f2",
                         type="node",
                         nodes=["f2"],
                         dependencies=["f1"],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="f3",
                         type="node",
                         nodes=["f3"],
                         dependencies=["f2"],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="f4",
                         type="node",
                         nodes=["f4"],
                         dependencies=["f2"],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="f5",
                         type="node",
                         nodes=["f5"],
                         dependencies=["f2"],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="f6",
                         type="node",
                         nodes=["f6"],
                         dependencies=["f4"],
                     ),
-                    GroupedNode(
+                    GroupedNodes(
                         name="f7",
                         type="node",
                         nodes=["f7"],
@@ -485,7 +484,7 @@ class TestValidPipeline:
     def test_node_grouping_by_namespace_combined(
         self, request, pipeline_name, expected
     ):
-        """Test that grouped_nodes_by_namespace returns correct GroupedNode list with name, type and node names and dependencies."""
+        """Test that grouped_nodes_by_namespace returns correct GroupedNodes list with name, type and node names and dependencies."""
         p = request.getfixturevalue(pipeline_name)
         grouped = p.grouped_nodes_by_namespace
 

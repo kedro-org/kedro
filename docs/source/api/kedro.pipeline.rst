@@ -22,7 +22,7 @@ kedro.pipeline
 
    kedro.pipeline.Pipeline
    kedro.pipeline.node.Node
-   kedro.pipeline.pipeline.GroupedNode
+   kedro.pipeline.node.GroupedNodes
 
 .. rubric:: Modules
 

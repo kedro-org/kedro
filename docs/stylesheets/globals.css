@@ -1,77 +1,3 @@
-/* Import the Inter font */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap");
-
-/* Global font settings */
-html {
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-family: "Inter", sans-serif !important;
-  font-weight: 400;
-  line-height: 2rem;
-}
-
-/* Apply the variables to elements */
-body {
-  background-color: var(--md-default-bg-color);
-  color: var(--text-primary-color);
-  font-size: 16px;
-}
-
-h1,
-.md-typeset h1 {
-  font-family: Inter;
-  font-size: 32px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 40px;
-  color: var(--text-primary-color);
-  margin-bottom: 32px;
-}
-
-h2,
-.md-typeset h2 {
-  font-family: Inter;
-  font-size: 24px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 32px;
-  color: var(--text-primary-color);
-  margin: 32px 0 24px 0;
-}
-
-h3,
-.md-typeset h3 {
-  font-family: Inter;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 28px;
-  color: var(--text-primary-color);
-  margin: 24px 0 12px 0;
-}
-
-p {
-  font-family: Inter;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 24px;
-  color: var(--text-primary-color);
-}
-
-.md-typeset a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-
-  &:hover {
-    color: inherit;
-    font-weight: 600;
-  }
-}
-
 .md-header__button.md-logo img {
   width: 123.37px;
   height: 32px;
@@ -235,11 +161,6 @@ p {
   padding: 0;
   margin: 10px 0 10px 10px;
 
-  /* Hide the Kedro title in the primary sidebar */
-  #__nav_2_label {
-    display: none;
-  }
-
   /* Colour for the section labels */
   .md-nav__item--section > .md-nav__link[for] {
     color: var(--text-primary-color);
@@ -330,6 +251,7 @@ p {
   .md-sidebar--primary,
   .md-nav--primary {
     max-width: 242px;
+    margin: 0;
   }
 
   .md-nav--primary .md-nav__title[for="__drawer"],
@@ -452,8 +374,6 @@ pre:hover .md-clipboard {
   color: var(--text-secondary-color);
 }
 
-/* Add these styles to the end of the file */
-
 /* Mobile styles */
 @media screen and (max-width: 768px) {
   .md-header {
@@ -491,30 +411,6 @@ pre:hover .md-clipboard {
   }
 
   .md-search__input {
-    font-size: 14px;
-  }
-
-  .md-typeset h1 {
-    font-size: 24px;
-    line-height: 32px;
-  }
-
-  .md-typeset h2 {
-    font-size: 20px;
-    line-height: 28px;
-  }
-
-  .md-typeset h3 {
-    font-size: 18px;
-    line-height: 24px;
-  }
-
-  .md-typeset p {
-    font-size: 14px;
-    line-height: 20px;
-  }
-
-  .md-tabs__link {
     font-size: 14px;
   }
 }

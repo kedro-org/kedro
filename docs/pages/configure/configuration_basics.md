@@ -63,7 +63,7 @@ Do not add any local configuration to version control.
 ```
 
 ## Configuration loading
-Kedro-specific configuration (e.g., `KedroDataCatalog` configuration for I/O) is loaded using a configuration loader class, by default, this is {py:class}`~kedro.config.OmegaConfigLoader`.
+Kedro-specific configuration (e.g., `DataCatalog` configuration for I/O) is loaded using a configuration loader class, by default, this is {py:class}`~kedro.config.OmegaConfigLoader`.
 When you interact with Kedro through the command line, e.g. by running `kedro run`, Kedro loads all project configuration in the configuration source through this configuration loader.
 
 The loader recursively scans for configuration files inside the `conf` folder, firstly in `conf/base` (`base` being the default environment) and then in `conf/local` (`local` being the designated overriding environment).
@@ -251,11 +251,11 @@ conf_catalog = conf_loader["catalog"]
 We do not recommend that you load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
 ```
 
-Assuming your project contains a catalog and credentials file, each located in `base` and `local` environments respectively, you can use the `OmegaConfigLoader` to load these configurations, and pass them to a `KedroDataCatalog` object to access the catalog entries with resolved credentials.
+Assuming your project contains a catalog and credentials file, each located in `base` and `local` environments respectively, you can use the `OmegaConfigLoader` to load these configurations, and pass them to a `DataCatalog` object to access the catalog entries with resolved credentials.
 ```python
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
 # Instantiate an `OmegaConfigLoader` instance with the location of your project configuration.
 conf_path = str(project_path / settings.CONF_SOURCE)
@@ -268,7 +268,7 @@ conf_catalog = conf_loader["catalog"]
 conf_credentials = conf_loader["credentials"]
 
 # Fetch the catalog with resolved credentials from the configuration.
-catalog = KedroDataCatalog.from_config(catalog=conf_catalog, credentials=conf_credentials)
+catalog = DataCatalog.from_config(catalog=conf_catalog, credentials=conf_credentials)
 ```
 
 ### How to specify additional configuration environments

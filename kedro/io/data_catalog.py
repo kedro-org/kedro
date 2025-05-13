@@ -31,6 +31,7 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
+from kedro.io.warning_utils import is_warning_suppressed
 from kedro.utils import _has_rich_handler
 
 CATALOG_KEY = "catalog"  # Kept to avoid the breaking change
@@ -162,16 +163,17 @@ class DataCatalog:
             >>>                   save_args={"index": False})
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
-        warnings.warn(
-            "`DataCatalog` will be replaced by `KedroDataCatalog` in Kedro 1.0.0, "
-            "while keeping the `DataCatalog` name. Several APIs currently available, "
-            "including `datasets`, `get_datasets`, `_get_datasets`, `add`, `list`, "
-            "`add_feed_dict`, and `shallow_copy`, will be removed or replaced. "
-            "For more details, refer to the documentation: "
-            "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
-            KedroDeprecationWarning,
-            stacklevel=2,
-        )
+        if not is_warning_suppressed():
+            warnings.warn(
+                "`DataCatalog` will be replaced by `KedroDataCatalog` in Kedro 1.0.0, "
+                "while keeping the `DataCatalog` name. Several APIs currently available, "
+                "including `datasets`, `get_datasets`, `_get_datasets`, `add`, `list`, "
+                "`add_feed_dict`, and `shallow_copy`, will be removed or replaced. "
+                "For more details, refer to the documentation: "
+                "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
+                KedroDeprecationWarning,
+                stacklevel=2,
+            )
         self._config_resolver = config_resolver or CatalogConfigResolver()
         # Kept to avoid breaking changes
         if not config_resolver:

@@ -136,7 +136,7 @@ type_targets = {
         "kedro.io.core.CatalogProtocol",
         "kedro.io.core.DatasetError",
         "kedro.io.core.Version",
-        "kedro.io.kedro_data_catalog.KedroDataCatalog",
+        "kedro.io.data_catalog.KedroDataCatalog",
         "kedro.io.memory_dataset.MemoryDataset",
         "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",

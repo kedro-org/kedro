@@ -24,7 +24,7 @@ from kedro.framework.project import (
     validate_settings,
 )
 from kedro.io.core import generate_timestamp
-from kedro.io.kedro_data_catalog import SharedMemoryDataCatalog
+from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 

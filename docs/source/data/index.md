@@ -60,7 +60,7 @@ For more details and examples of how to use `KedroDataCatalog`, see the Kedro Da
 ```{toctree}
 :maxdepth: 1
 
-kedro_data_catalog
+data_catalog
 ```
 
 The [documentation](./data_catalog.md) for `DataCatalog` remains relevant as `KedroDataCatalog` retains its core functionality with some enhancements.

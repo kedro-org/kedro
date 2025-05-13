@@ -28,7 +28,7 @@ from kedro.io.core import (
 
 
 @pytest.fixture
-def kedro_data_catalog(dataset):
+def data_catalog(dataset):
     return KedroDataCatalog(datasets={"test": dataset})
 
 
@@ -58,10 +58,10 @@ def data_catalog_from_config(correct_config):
 
 
 class TestKedroDataCatalog:
-    def test_save_and_load(self, kedro_data_catalog, dummy_dataframe):
+    def test_save_and_load(self, data_catalog, dummy_dataframe):
         """Test saving and reloading the dataset"""
-        kedro_data_catalog.save("test", dummy_dataframe)
-        reloaded_df = kedro_data_catalog.load("test")
+        data_catalog.save("test", dummy_dataframe)
+        reloaded_df = data_catalog.load("test")
 
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
@@ -74,16 +74,16 @@ class TestKedroDataCatalog:
 
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
-    def test_load_error(self, kedro_data_catalog):
+    def test_load_error(self, data_catalog):
         """Check the error when attempting to load a dataset
         from nonexistent source"""
         pattern = r"Failed while loading data from dataset CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
-            kedro_data_catalog.load("test")
+            data_catalog.load("test")
 
-    def test_add_dataset_twice(self, kedro_data_catalog, dataset, caplog):
+    def test_add_dataset_twice(self, data_catalog, dataset, caplog):
         """Check the warning when attempting to add the dataset twice"""
-        kedro_data_catalog["test"] = dataset
+        data_catalog["test"] = dataset
         # check the logs
         log_messages = [record.getMessage() for record in caplog.records]
         expected_msg = "Replacing dataset 'test'"
@@ -103,11 +103,11 @@ class TestKedroDataCatalog:
         with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.save("test", dummy_dataframe)
 
-    def test_exists(self, kedro_data_catalog, dummy_dataframe):
+    def test_exists(self, data_catalog, dummy_dataframe):
         """Test `exists` method invocation"""
-        assert not kedro_data_catalog.exists("test")
-        kedro_data_catalog.save("test", dummy_dataframe)
-        assert kedro_data_catalog.exists("test")
+        assert not data_catalog.exists("test")
+        data_catalog.save("test", dummy_dataframe)
+        assert data_catalog.exists("test")
 
     def test_exists_not_implemented(self, caplog):
         """Test calling `exists` on the dataset, which didn't implement it"""
@@ -122,22 +122,22 @@ class TestKedroDataCatalog:
         )
         assert result is False
 
-    def test_exists_invalid(self, kedro_data_catalog):
+    def test_exists_invalid(self, data_catalog):
         """Check the error when calling `exists` on invalid dataset"""
-        assert not kedro_data_catalog.exists("wrong_key")
+        assert not data_catalog.exists("wrong_key")
 
-    def test_release_unregistered(self, kedro_data_catalog):
+    def test_release_unregistered(self, data_catalog):
         """Check the error when calling `release` on unregistered dataset"""
         pattern = r"Dataset \'wrong_key\' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern) as e:
-            kedro_data_catalog.release("wrong_key")
+            data_catalog.release("wrong_key")
         assert "did you mean" not in str(e.value)
 
-    def test_release_unregistered_typo(self, kedro_data_catalog):
+    def test_release_unregistered_typo(self, data_catalog):
         """Check the error when calling `release` on mistyped dataset"""
         pattern = r"Dataset \'text\' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern) as e:
-            kedro_data_catalog.release("text")
+            data_catalog.release("text")
         assert "did you mean" not in str(e.value)
 
     def test_multi_catalog_keys(self, multi_catalog):
@@ -239,12 +239,12 @@ class TestKedroDataCatalog:
         """Confirm the dataset"""
         with caplog.at_level(logging.INFO):
             mock_ds = mocker.Mock()
-            kedro_data_catalog = KedroDataCatalog(datasets={"mocked": mock_ds})
-            kedro_data_catalog.confirm("mocked")
+            data_catalog = KedroDataCatalog(datasets={"mocked": mock_ds})
+            data_catalog.confirm("mocked")
             mock_ds.confirm.assert_called_once_with()
             assert caplog.record_tuples == [
                 (
-                    "kedro.io.kedro_data_catalog",
+                    "kedro.io.data_catalog",
                     logging.INFO,
                     "Confirming dataset 'mocked'",
                 )
@@ -257,11 +257,11 @@ class TestKedroDataCatalog:
             ("test", "Dataset 'test' does not have 'confirm' method"),
         ],
     )
-    def test_bad_confirm(self, kedro_data_catalog, dataset_name, error_pattern):
+    def test_bad_confirm(self, data_catalog, dataset_name, error_pattern):
         """Test confirming a non-existent dataset or one that
         does not have `confirm` method"""
         with pytest.raises(DatasetError, match=re.escape(error_pattern)):
-            kedro_data_catalog.confirm(dataset_name)
+            data_catalog.confirm(dataset_name)
 
     def test_init_with_raw_data(self, dummy_dataframe, dataset):
         """Test catalog initialisation with raw data"""
@@ -290,28 +290,28 @@ class TestKedroDataCatalog:
                 **correct_config, load_versions={"version": "test_version"}
             )
 
-    def test_get_dataset_matching_pattern(self, kedro_data_catalog):
+    def test_get_dataset_matching_pattern(self, data_catalog):
         """Test get_dataset() when dataset is not in the catalog but pattern matches"""
         match_pattern_ds = "match_pattern_ds"
-        assert match_pattern_ds not in kedro_data_catalog
-        kedro_data_catalog.config_resolver.add_runtime_patterns(
+        assert match_pattern_ds not in data_catalog
+        data_catalog.config_resolver.add_runtime_patterns(
             {"{default}": {"type": "MemoryDataset"}}
         )
-        ds = kedro_data_catalog.get(match_pattern_ds)
+        ds = data_catalog.get(match_pattern_ds)
         assert isinstance(ds, MemoryDataset)
 
-    def test_remove_runtime_pattern(self, kedro_data_catalog):
+    def test_remove_runtime_pattern(self, data_catalog):
         runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
-        kedro_data_catalog.config_resolver.add_runtime_patterns(runtime_pattern)
+        data_catalog.config_resolver.add_runtime_patterns(runtime_pattern)
         match_pattern_ds = "match_pattern_ds"
-        assert match_pattern_ds in kedro_data_catalog
+        assert match_pattern_ds in data_catalog
 
-        kedro_data_catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
-        assert match_pattern_ds not in kedro_data_catalog
+        data_catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
+        assert match_pattern_ds not in data_catalog
 
-    def test_release(self, kedro_data_catalog):
+    def test_release(self, data_catalog):
         """Test release is called without errors"""
-        kedro_data_catalog.release("test")
+        data_catalog.release("test")
 
     def test_dataset_property(self, data_catalog_from_config):
         """Test _dataset attribute returns the same result as dataset property"""
@@ -465,7 +465,7 @@ class TestKedroDataCatalog:
             correct_config["catalog"]["boats"]["type"] = "KedroDataCatalog"
             pattern = (
                 "An exception occurred when parsing config for dataset 'boats':\n"
-                "Dataset type 'kedro.io.kedro_data_catalog.KedroDataCatalog' is invalid: "
+                "Dataset type 'kedro.io.data_catalog.KedroDataCatalog' is invalid: "
                 "all dataset types must extend 'AbstractDataset'"
             )
             with pytest.raises(DatasetError, match=re.escape(pattern)):
@@ -593,11 +593,11 @@ class TestKedroDataCatalog:
         #                 "path": str(tmp_path),
         #             }
         #         }
-        #         kedro_data_catalog = KedroDataCatalog.from_config(catalog=catalog)
-        #         kedro_data_catalog.confirm("ds_to_confirm")
+        #         data_catalog = KedroDataCatalog.from_config(catalog=catalog)
+        #         data_catalog.confirm("ds_to_confirm")
         #         assert caplog.record_tuples == [
         #             (
-        #                 "kedro.io.kedro_data_catalog",
+        #                 "kedro.io.data_catalog",
         #                 logging.INFO,
         #                 "Confirming dataset 'ds_to_confirm'",
         #             )
@@ -614,40 +614,40 @@ class TestKedroDataCatalog:
         def test_bad_confirm(self, correct_config, dataset_name, pattern):
             """Test confirming non existent dataset or the one that
             does not have `confirm` method"""
-            kedro_data_catalog = KedroDataCatalog.from_config(**correct_config)
+            data_catalog = KedroDataCatalog.from_config(**correct_config)
             with pytest.raises(DatasetError, match=re.escape(pattern)):
-                kedro_data_catalog.confirm(dataset_name)
+                data_catalog.confirm(dataset_name)
 
         def test_iteration(self, correct_config):
             """Test iterate through keys, values and items."""
-            kedro_data_catalog = KedroDataCatalog.from_config(**correct_config)
+            data_catalog = KedroDataCatalog.from_config(**correct_config)
 
             for ds_name_cat, ds_name_config in zip(
-                kedro_data_catalog, correct_config["catalog"]
+                data_catalog, correct_config["catalog"]
             ):
                 assert ds_name_cat == ds_name_config
 
             for ds_name_cat, ds_name_config in zip(
-                kedro_data_catalog.keys(), correct_config["catalog"]
+                data_catalog.keys(), correct_config["catalog"]
             ):
                 assert ds_name_cat == ds_name_config
 
-            for ds in kedro_data_catalog.values():
+            for ds in data_catalog.values():
                 assert isinstance(ds, CSVDataset)
 
-            for ds_name, ds in kedro_data_catalog.items():
+            for ds_name, ds in data_catalog.items():
                 assert isinstance(ds, CSVDataset)
                 assert ds_name in correct_config["catalog"]
 
         def test_getitem_setitem(self, correct_config):
             """Test get and set item."""
-            kedro_data_catalog = KedroDataCatalog.from_config(**correct_config)
-            kedro_data_catalog["test"] = 123
-            assert isinstance(kedro_data_catalog["test"], MemoryDataset)
+            data_catalog = KedroDataCatalog.from_config(**correct_config)
+            data_catalog["test"] = 123
+            assert isinstance(data_catalog["test"], MemoryDataset)
 
         def test_ipython_key_completions(self, correct_config):
-            kedro_data_catalog = KedroDataCatalog.from_config(**correct_config)
-            assert kedro_data_catalog._ipython_key_completions_() == list(
+            data_catalog = KedroDataCatalog.from_config(**correct_config)
+            assert data_catalog._ipython_key_completions_() == list(
                 correct_config["catalog"].keys()
             )
 
@@ -727,7 +727,7 @@ class TestKedroDataCatalog:
             )
             correct_config["catalog"]["boats"]["versioned"] = True
             mocker.patch(
-                "kedro.io.kedro_data_catalog.generate_timestamp",
+                "kedro.io.data_catalog.generate_timestamp",
                 side_effect=["first", "second"],
             )
 
@@ -747,7 +747,7 @@ class TestKedroDataCatalog:
             self, correct_config, dummy_dataframe, mocker
         ):
             mocker.patch(
-                "kedro.io.kedro_data_catalog.generate_timestamp", return_value="first"
+                "kedro.io.data_catalog.generate_timestamp", return_value="first"
             )
 
             catalog = KedroDataCatalog.from_config(**correct_config)

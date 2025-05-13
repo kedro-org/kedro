@@ -178,6 +178,7 @@ type_targets = {
         "CatalogConfigResolver",
         "CatalogProtocol",
         "KedroDataCatalog",
+        "suppress_catalog_warning"
     ),
     "py:data": (
         "typing.Any",

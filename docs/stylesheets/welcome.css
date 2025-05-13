@@ -231,8 +231,8 @@
 }
 
 .card-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 16px !important;
+  font-weight: 600 !important;
   color: var(--text-secondary-color);
   margin-bottom: 8px;
 }
@@ -260,31 +260,25 @@
 
 /* Mobile styles */
 @media (max-width: 768px) {
-  .welcome-title {
-    font-size: 20px;
-    line-height: 28px;
-    margin-top: 16px !important;
-    padding: 0 24px;
-  }
-
   .card-grid,
   .news-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 24px;
   }
 
   .cards-section-wrapper {
-    padding-top: 24px;
+    padding: 32px 24px
   }
 
   .cards-section-wrapper section {
-    margin-bottom: 32px;
+    padding: 0;
   }
-
+  
   .card {
     padding: 16px;
-    display: flex;
-    align-items: center;
+    display: flex;;
+    flex-direction: column;
+    align-items: start;
   }
 
   .card-icon {
@@ -292,17 +286,14 @@
     margin-right: 16px;
   }
 
-  .card-description {
-    display: none;
-  }
-
   .explore-link {
     margin: 16px 0;
   }
 
   .section-title {
-    font-size: 18px;
-    margin-bottom: 16px !important;
-    text-align: left;
+    margin-top: 32px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-weight: 600 !important;
   }
 }

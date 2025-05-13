@@ -31,7 +31,7 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
-from kedro.io.warning_utils import is_warning_suppressed
+from kedro.io.warning_utils import is_warning_suppressed, suppress_catalog_warning
 from kedro.utils import _has_rich_handler
 
 CATALOG_KEY = "catalog"  # Kept to avoid the breaking change
@@ -660,16 +660,17 @@ class DataCatalog:
         Returns:
             Copy of the current object.
         """
-        if extra_dataset_patterns:
-            self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
-        return self.__class__(
-            datasets=self._datasets,
-            dataset_patterns=self._config_resolver._dataset_patterns,
-            default_pattern=self._config_resolver._default_pattern,
-            load_versions=self._load_versions,
-            save_version=self._save_version,
-            config_resolver=self._config_resolver,
-        )
+        with suppress_catalog_warning():
+            if extra_dataset_patterns:
+                self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
+            return self.__class__(
+                datasets=self._datasets,
+                dataset_patterns=self._config_resolver._dataset_patterns,
+                default_pattern=self._config_resolver._default_pattern,
+                load_versions=self._load_versions,
+                save_version=self._save_version,
+                config_resolver=self._config_resolver,
+            )
 
     def confirm(self, name: str) -> None:
         """Confirm a dataset by its name.

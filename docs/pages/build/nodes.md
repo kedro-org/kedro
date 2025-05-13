@@ -167,9 +167,9 @@ kedro run --tags=pipeline_tag
 
 This will run only the nodes found within the pipeline tagged with `pipeline_tag`.
 
-```{note}
-Node or tag names must ONLY contain letters, digits, hyphens, underscores and/or periods. Other symbols are not permitted.
-```
+!!! note
+    Node or tag names must ONLY contain letters, digits, hyphens, underscores and/or periods. Other symbols are not permitted.
+
 
 ## How to run a node
 
@@ -185,17 +185,15 @@ The output is as follows:
 Out[2]: {'sum': 5}
 ```
 
-```{note}
-You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
-```
+!!! note
+    You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
 
 ## How to use generator functions in a node
 
-```{warning}
-This documentation section uses the `pandas-iris` starter that is unavailable in Kedro version 0.19.0 and beyond. The latest version of Kedro that supports `pandas-iris` is Kedro 0.18.14: install that or an earlier version to work through this example `pip install kedro==0.18.14`).
+!!! warning
+    This documentation section uses the `pandas-iris` starter that is unavailable in Kedro version 0.19.0 and beyond. The latest version of Kedro that supports `pandas-iris` is Kedro 0.18.14: install that or an earlier version to work through this example `pip install kedro==0.18.14`).
 
 To check the version installed, type `kedro -V` in your terminal window.
-```
 
 [Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255) and are a special kind of function in Python that returns lazy iterators. They are often used for lazy-loading or lazy-saving of data, which can be particularly useful when dealing with large datasets that do not fit entirely into memory. In the context of Kedro, generator functions can be used in nodes to efficiently process and handle such large datasets.
 

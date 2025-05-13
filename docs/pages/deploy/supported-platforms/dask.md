@@ -314,9 +314,8 @@ $ PYTHONPATH=$PWD/src dask-worker 127.0.0.1:8786
 $ PYTHONPATH=$PWD/src dask-worker 127.0.0.1:8786
 ```
 
-```{note}
-The above code snippet assumes each worker is started from the root directory of the Kedro project in a Python environment where all required dependencies are installed.
-```
+!!! note
+    The above code snippet assumes each worker is started from the root directory of the Kedro project in a Python environment where all required dependencies are installed.
 
 You're once again ready to trigger the run. Execute the following command:
 

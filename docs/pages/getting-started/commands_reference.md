@@ -77,9 +77,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 The following are Kedro commands that apply globally and can be run from any directory location.
 
-```{note}
-You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
-```
+!!! note
+    You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
 
 ### Get help on Kedro commands
 
@@ -128,9 +127,8 @@ kedro new
 
 ## Customise or override project-specific Kedro commands
 
-```{note}
-All project related CLI commands should be run from the project’s root directory.
-```
+!!! note
+    All project related CLI commands should be run from the project’s root directory.
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
@@ -377,8 +375,6 @@ _This command is deprecated and will be removed from Kedro in version 1.0.0._
 kedro micropkg package <package_module_path>
 ```
 
-Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
-
 ##### Pull a micro-package in your project
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
 
@@ -479,7 +475,7 @@ kedro ipython
 
 The [Kedro IPython extension](../integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
-* `catalog` (type {py:class}`~kedro.io.KedroDataCatalog`): [Kedro Data Catalog](../data/kedro_data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `catalog` (type {py:class}`~kedro.io.KedroDataCatalog`): [Kedro Data Catalog](../catalog-data/kedro_data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../extend/session.md) that orchestrates a pipeline run

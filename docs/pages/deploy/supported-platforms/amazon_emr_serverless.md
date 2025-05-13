@@ -151,14 +151,10 @@ for more details.
 
 ## Run a job
 
-```{note}
-On making changes to the custom image, and rebuilding and pushing to ECR, be sure to restart the EMR Serverless
-application before submitting a job if your application is **already started**. Otherwise, new changes may not be reflected in the job run.
+!!! note
+    On making changes to the custom image, and rebuilding and pushing to ECR, be sure to restart the EMR Serverless application before submitting a job if your application is **already started**. Otherwise, new changes may not be reflected in the job run.
 
-This may be due to the fact that when the application has started, EMR Serverless keeps a pool of warm resources (also referred to as
-[pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/pre-init-capacity.html))
-ready to run a job, and the nodes may have already used the previous version of the ECR image.
-```
+    This may be due to the fact that when the application has started, EMR Serverless keeps a pool of warm resources (also referred to as [pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/pre-init-capacity.html)) ready to run a job, and the nodes may have already used the previous version of the ECR image.
 
 See details on [how to run a Spark job on EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html).
 
@@ -167,12 +163,11 @@ The following parameters need to be provided:
 - "entryPointArguments" - a list of arguments for running Kedro
 - "sparkSubmitParameters" - set your properties to use the custom Python version
 
-```{note}
-The use of an "entrypoint script" is needed because [EMR Serverless disregards `[CMD]` or `[ENTRYPOINT]` instructions
-in the Dockerfile](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html#considerations).
-We recommend to run Kedro programmatically through an "entrypoint script" to eliminate the need to use, for example,
-a [subprocess](https://docs.python.org/3/library/subprocess.html) to invoke `kedro run`. See [FAQ](#faq) for more details.
-```
+!!! note
+    The use of an "entrypoint script" is needed because [EMR Serverless disregards `[CMD]` or `[ENTRYPOINT]` instructions
+    in the Dockerfile](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html#considerations).
+    We recommend to run Kedro programmatically through an "entrypoint script" to eliminate the need to use, for example,
+    a [subprocess](https://docs.python.org/3/library/subprocess.html) to invoke `kedro run`. See [FAQ](#faq) for more details.
 
 
 Example using AWS CLI:

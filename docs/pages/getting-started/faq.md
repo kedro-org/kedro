@@ -66,7 +66,8 @@ brains behind a layered data-engineering convention as a model of managing data.
 
 Refer to the following table below for a high level guide to each layer's purpose
 
-> **Note**:The data layers don’t have to exist locally in the `data` folder within your project, but we recommend that you structure your S3 buckets or other data stores in a similar way.
+!!! note
+    The data layers don’t have to exist locally in the `data` folder within your project, but we recommend that you structure your S3 buckets or other data stores in a similar way.
 
 ![data_engineering_convention](../meta/images/data_layers.png)
 

@@ -99,9 +99,8 @@ except MissingConfigException:
     parameters = {}
 ```
 
-```{note}
-The `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
-```
+!!! note
+    The `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
 
 [Parameters can then be used on their own or fed in as function inputs](#how-to-use-parameters).
 

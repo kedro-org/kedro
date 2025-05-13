@@ -91,9 +91,8 @@ class DataCatalogHooks:
         self._logger.info(catalog.list())
 ```
 
-```{note}
-The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
-```
+!!! note
+    The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
 
 We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file that you create in your project.
 
@@ -114,9 +113,8 @@ HOOKS = (ProjectHooks(), DataCatalogHooks())
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](../plugins.md#hooks).
 
-```{note}
-Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
-```
+!!! note
+    Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
 
 #### Auto-registered Hook with plugin
 You can auto-register a Hook (pip-installable) by creating a [Kedro plugin](https://docs.kedro.org/en/stable/extend_kedro/plugins.html#hooks). Kedro provides `kedro.hooks` entrypoints to extend this easily.

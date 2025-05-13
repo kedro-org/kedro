@@ -11,8 +11,8 @@ spark.driver.maxResultSize: 3g
 spark.scheduler.mode: FAIR
 ```
 
-> Note
-> Optimal configuration for Spark depends on the setup of your Spark cluster.
+!!! Note
+    Optimal configuration for Spark depends on the setup of your Spark cluster.
 
 ## Initialise a `SparkSession` using a hook
 

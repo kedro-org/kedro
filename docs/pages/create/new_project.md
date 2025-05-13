@@ -173,10 +173,9 @@ Here is a flowchart to help guide your choice of tools and examples you can sele
 
 ![overview diagram for setting up a new Kedro project with tools](../meta/images/new-project-tools.png)
 
-such as the [`kedro-datasets`][kedro-datasets], [`DataCatalog`][kedro.io.DataCatalog], [`Pipeline`][kedro.pipeline.Pipeline], [`Node`][kedro.pipeline.node.Node] and [`KedroContext`][kedro.framework.context.KedroContext].
+such as the [`kedro-datasets`][kedro-datasets], [`Pipeline`][kedro.pipeline.Pipeline], [`Node`][kedro.pipeline.node.Node] and [`KedroContext`][kedro.framework.context.KedroContext].
 
 [kedro-datasets]: https://docs.kedro.org/projects/kedro-datasets/en/stable/
-[kedro.io.DataCatalog]: https://docs.kedro.org/en/stable/kedro.io.html#kedro.io.DataCatalog
 [kedro.pipeline.Pipeline]: https://docs.kedro.org/en/stable/kedro.pipeline.html#kedro.pipeline.Pipeline
 [kedro.pipeline.node.Node]: https://docs.kedro.org/en/stable/kedro.pipeline.node.html#kedro.pipeline.node.Node
 [kedro.framework.context.KedroContext]: https://docs.kedro.org/en/stable/kedro.framework.context.html#kedro.framework.context.KedroContext

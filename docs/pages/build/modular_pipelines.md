@@ -42,9 +42,9 @@ After running this command, a new pipeline with boilerplate folders and files wi
 ```
 
 If you want to delete an existing pipeline, you can use `kedro pipeline delete <pipeline_name>` to do so.
-```{note}
-To see the full list of available CLI options, you can run `kedro pipeline create --help`.
-```
+
+!!! note
+    To see the full list of available CLI options, you can run `kedro pipeline create --help`.
 
 ## How to structure your pipeline creation
 

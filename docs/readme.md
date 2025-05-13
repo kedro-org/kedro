@@ -37,35 +37,54 @@ You can now view the documentation in your browser at:
 
 ---
 
-### 🧩 Components Library
+### Components Library
 
-Below are examples of commonly used components in the documentation:
+This guide provides examples of commonly used MkDocs components (using the Material for MkDocs theme) to help you write clear and consistent documentation.
 
-#### 🔔 Note
+#### Admonitions
+Admonitions are used to highlight different types of information using callouts. Use the appropriate type depending on the message you want to convey.
+For other supported types from MKdocs https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
 
-```
-> **Note**
-> This is a note block to highlight important information.
-```
-
-**Rendered Output:**
 
 ```
-> This is a note block to highlight important information.
+!!! note
+    This is a note for general information.
+```
+
+```
+!!! tip
+    Here's a helpful tip for users.
+```
+
+```
+!!! warning
+    Pay attention! This is an important message.
+```
+
+```
+!!! warning
+    Pay attention! This is a warning.
 ```
 
 ---
 
-#### 💻 Code Block
+#### Code Blocks
+
+Use code blocks to display syntax-highlighted examples. You can also use collapsible blocks for large code snippets.
+
+**Inline code block (not expanded):**
 
 ```python
 def hello_world():
     print("Hello, world!")
 ```
 
-**Rendered Output:**
+**Collapsible (expanding) code block:**
 
-```python
-def hello_world():
-    print("Hello, world!")
+```
+??? example "View code"
+    ```python
+    def hello_world():
+        print("Hello, world!")
+    ```
 ```

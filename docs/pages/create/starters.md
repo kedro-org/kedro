@@ -10,9 +10,9 @@ To create a Kedro project using a starter, apply the `--starter` flag to `kedro 
 kedro new --starter=<path-to-starter>
 ```
 
-```{note}
-`path-to-starter` could be the path to a local directory, a URL to a remote VCS repository supported by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
-```
+!!! note
+    `path-to-starter` could be the path to a local directory, a URL to a remote VCS repository supported by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
+
 
 If you want to use `--starter` as remote VCS repository, run:
 

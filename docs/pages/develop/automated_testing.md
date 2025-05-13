@@ -46,7 +46,8 @@ Alternatively, you can individually install test requirements as you would insta
 ```bash
 pip install -e .
 ```
->**NOTE**: The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
+!!! note
+    he option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
 
 2. Install test requirements one by one:
 ```bash

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{{ super() }}
+
+{% block footer %}
+<div class="main-page-footer-container">
+    <div class="main-page-footer-top">
+        {{ super() }}
+    </div>
+    <div class="main-page-footer-bottom">
+        {% include "partials/copyright-legal-socials.html" %}
+    </div>
+</div>
+{% endblock %}

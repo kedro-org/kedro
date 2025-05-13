@@ -33,9 +33,8 @@ def notebook_run(...):
 
 To inject additional CLI commands intended to be reused across projects, see [our plugin system](./plugins.md). An example of one such command is the `kedro viz run` command introduced by the [Kedro-Viz plugin](https://github.com/kedro-org/kedro-viz). This command is intended to work on every Kedro project which is why it comes from a standalone plugin.
 
-```{note}
-Your plugin's implementation can take advantage of other extension mechanisms such as Hooks.
-```
+!!! note
+    Your plugin's implementation can take advantage of other extension mechanisms such as Hooks.
 
 ## Use Case 4: How to customise the initial boilerplate of your project
 

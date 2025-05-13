@@ -1,0 +1,177 @@
+/* Footer styles for Welcome page */
+
+.welcome-page-footer-container {
+  margin: 28px 32px;
+  padding: 0 1rem;
+}
+
+.welcome-page-footer-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.copyright-legal-socials-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.copyright {
+  color: var(--footer-text-color);
+  font-size: 0.8125rem;
+  margin-right: 64px;
+  font-size: 14px;
+}
+
+/* Copyright line break styling */
+.copyright-first-line,
+.copyright-second-line {
+  display: inline;
+}
+
+.legal-links {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.legal-links a {
+  color: var(--footer-text-color);
+  text-decoration: none;
+}
+
+.legal-links a:hover {
+  text-decoration: underline;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.social-links a {
+  color: var(--social-link-fill-color);
+}
+
+/* Badges */
+.welcome-page-footer-bottom {
+  margin-top: 1.5rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.badges a {
+  display: inline-flex;
+  align-items: center;
+}
+
+.badges img {
+  height: 20px;
+  width: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .social-links {
+    margin-top: 1rem;
+  }
+
+  .main-nav {
+    display: none;
+  }
+
+  .copyright-legal-socials-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .copyright {
+    margin-right: 0;
+  }
+
+  .legal-links {
+    flex-wrap: wrap;
+  }
+
+  .social-links {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .welcome-page-footer-container {
+    margin: 24px;
+    padding: 0;
+  }
+
+  /* Make copyright break into two lines on mobile */
+  .copyright-first-line,
+  .copyright-second-line  {
+    display: block;
+    line-height: 24px;
+  }
+
+  .legal-links {
+    gap: 16px;
+  }
+
+  .social-links {
+    gap: 24px;
+  }
+
+  .badges {
+    display: flex;
+  }
+
+  .badges img {
+    height: 16px;
+  }
+}
+
+/* Footer styles for Main page */
+.main-page-footer-container {
+  /** hide the default copy right */
+  .md-footer-meta {
+    display: none;
+  }
+
+  .main-page-footer-bottom {
+    margin: 6px 32px 28px 32px;
+  }
+
+  .md-footer__inner {
+    a {
+      margin: 0;
+    }
+  }
+
+  .md-footer__title {
+    font-size: 16px;
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-page-footer-container .main-page-footer-bottom {
+    margin: 6px 16px 16px 16px;
+  }
+}

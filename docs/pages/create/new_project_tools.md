@@ -17,9 +17,8 @@ kedro new
 
 This will start the new project creation workflow.
 
-``` {note}
-You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow to skip queries about how you want to customise the project. The flags are described below.
-```
+!!! note
+    You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow to skip queries about how you want to customise the project. The flags are described below.
 
 ### Project name
 The first prompt asks you to input a project name.
@@ -148,13 +147,11 @@ To create a new project using the file to supply details to `kedro new`, run the
 kedro new --config=<path/to/config.yml>
 ```
 
-``` {note}
-Note: When using a configuration file to create a new project, you must provide values for the project name, repository name, and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
-```
+!!! note
+    Note: When using a configuration file to create a new project, you must provide values for the project name, repository name, and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
 
-``` {note}
-When the `--config` flag is used together with `--name`, `--tools`, or `--example`, the values provided directly on the CLI will overwrite those specified in the configuration file.
-```
+!!! note
+    When the `--config` flag is used together with `--name`, `--tools`, or `--example`, the values provided directly on the CLI will overwrite those specified in the configuration file.
 
 ## Kedro tools
 

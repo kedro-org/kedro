@@ -51,19 +51,20 @@ When you add raw data, it is automatically wrapped in a `MemoryDataset` under th
 
 `KedroDataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
 
-```python
-for ds_name in catalog:  # __iter__ defaults to keys
-    pass
+??? example "View code"
+    ```python
+    for ds_name in catalog:  # __iter__ defaults to keys
+        pass
 
-for ds_name in catalog.keys():  # Iterate over dataset names
-    pass
+    for ds_name in catalog.keys():  # Iterate over dataset names
+        pass
 
-for ds in catalog.values():  # Iterate over datasets
-    pass
+    for ds in catalog.values():  # Iterate over datasets
+        pass
 
-for ds_name, ds in catalog.items():  # Iterate over (name, dataset) tuples
-    pass
-```
+    for ds_name, ds in catalog.items():  # Iterate over (name, dataset) tuples
+        pass
+    ```
 
 ## How to get the number of datasets in the catalog
 
@@ -95,8 +96,7 @@ ds_config = catalog.config_resolver.resolve_pattern(ds_name)  # Resolving a data
 patterns = catalog.config_resolver.list_patterns() # Listing all available patterns
 ```
 
-```{note}
-`KedroDataCatalog` does not support all dictionary-specific methods, such as `pop()`, `popitem()`, or deletion by key (`del`).
-```
+!!! note
+    `KedroDataCatalog` does not support all dictionary-specific methods, such as `pop()`, `popitem()`, or deletion by key (`del`).
 
 For a full list of supported methods, refer to the [KedroDataCatalog source code](https://github.com/kedro-org/kedro/blob/main/kedro/io/kedro_data_catalog.py).

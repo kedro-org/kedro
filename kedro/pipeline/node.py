@@ -9,6 +9,7 @@ import inspect
 import logging
 import re
 from collections import Counter
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable
 from warnings import warn
 
@@ -170,7 +171,7 @@ class Node:
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    @property
+    @cached_property
     def _unique_key(self) -> tuple[Any, Any] | Any | tuple:
         def hashable(value: Any) -> tuple[Any, Any] | Any | tuple:
             if isinstance(value, dict):
@@ -246,6 +247,8 @@ class Node:
         """
         self._func = func
 
+        del self.inputs  # clear cached inputs
+
     @property
     def tags(self) -> set[str]:
         """Return the tags assigned to the node.
@@ -303,7 +306,7 @@ class Node:
         """
         return self._namespace
 
-    @property
+    @cached_property
     def inputs(self) -> list[str]:
         """Return node inputs as a list, in the order required to bind them properly to
         the node's function.

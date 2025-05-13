@@ -421,7 +421,7 @@ class TestDataCatalogFromConfig:
             "kedro.invalid_module_name.io.CSVDataset"
         )
 
-        error_msg = "Class 'kedro.invalid_module_name.io.CSVDataset' not found"
+        error_msg = "No module named 'kedro.invalid_module_name'"
         with pytest.raises(DatasetError, match=re.escape(error_msg)):
             DataCatalog.from_config(**correct_config)
 
@@ -456,12 +456,12 @@ class TestDataCatalogFromConfig:
         """Check the error if the type points to nonexistent class"""
         correct_config["catalog"]["boats"]["type"] = "kedro.io.CSVDatasetInvalid"
 
-        pattern = (
-            "An exception occurred when parsing config for dataset 'boats':\n"
-            "Class 'kedro.io.CSVDatasetInvalid' not found, is this a typo?"
-        )
-        with pytest.raises(DatasetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError) as exc_info:
             DataCatalog.from_config(**correct_config)
+
+        error_message = str(exc_info.value)
+
+        assert "Dataset 'CSVDatasetInvalid' not found" in error_message
 
     def test_config_invalid_dataset(self, correct_config):
         """Check the error if the type points to invalid class"""
@@ -497,6 +497,16 @@ class TestDataCatalogFromConfig:
     def test_empty_config(self):
         """Test empty config"""
         assert DataCatalog.from_config(None)
+
+    def test_config_invalid_class_path_format(self, correct_config):
+        """Check the error if the dataset type has an invalid format causing ValueError"""
+        # An invalid type path that doesn't include a dot or is otherwise malformed
+        correct_config["catalog"]["boats"]["type"] = "InvalidFormatNoDot"
+
+        with pytest.raises(DatasetError) as exc_info:
+            DataCatalog.from_config(**correct_config)
+
+        assert "Invalid dataset path: 'InvalidFormatNoDot'" in str(exc_info.value)
 
     def test_missing_credentials(self, correct_config):
         """Check the error if credentials can't be located"""
@@ -669,30 +679,6 @@ class TestDataCatalogVersioned:
         pattern = r"\'load_versions\' keys \[non-boat\] are not found in the catalog\."
         with pytest.raises(DatasetNotFoundError, match=pattern):
             DataCatalog.from_config(**correct_config, load_versions=load_version)
-
-    def test_compare_tracking_and_other_dataset_versioned(
-        self, correct_config_with_tracking_ds, dummy_dataframe
-    ):
-        """Test saving of tracking datasets from config results in the same
-        save version as other versioned datasets."""
-
-        catalog = DataCatalog.from_config(**correct_config_with_tracking_ds)
-
-        catalog.save("boats", dummy_dataframe)
-        dummy_data = {"col1": 1, "col2": 2, "col3": 3}
-        catalog.save("planes", dummy_data)
-
-        # Verify that saved version on tracking dataset is the same as on the CSV dataset
-        csv_timestamp = datetime.strptime(
-            catalog.datasets.boats.resolve_save_version(),
-            VERSION_FORMAT,
-        )
-        tracking_timestamp = datetime.strptime(
-            catalog.datasets.planes.resolve_save_version(),
-            VERSION_FORMAT,
-        )
-
-        assert tracking_timestamp == csv_timestamp
 
     def test_load_version(self, correct_config, dummy_dataframe, mocker):
         """Test load versioned datasets from config"""

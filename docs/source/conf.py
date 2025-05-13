@@ -141,6 +141,7 @@ type_targets = {
         "kedro.io.memory_dataset.MemoryDataset",
         "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",
+        "kedro.pipeline.pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
@@ -276,7 +277,10 @@ html_context = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+# Enable serving static files to expose deindex-old-docs.js at a public URL.
+# This is required so Read the Docs can fetch and execute the script to deindex legacy doc versions.
+# More details: https://github.com/kedro-org/kedro/issues/3741
+html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

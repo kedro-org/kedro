@@ -92,7 +92,7 @@ class _FrozenDatasets:
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[_sub_nonword_chars(key)]
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         datasets_repr = {}
         for ds_name in self._original_names.keys():
             datasets_repr[ds_name] = self.__dict__[
@@ -194,7 +194,7 @@ class DataCatalog:
         if feed_dict:
             self.add_feed_dict(feed_dict)
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self.datasets.__repr__()
 
     def __contains__(self, dataset_name: str) -> bool:

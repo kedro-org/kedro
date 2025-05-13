@@ -118,7 +118,7 @@ By default, Databricks creates a new job cluster for each job. However, there ar
 1. Lack of permissions to create a new cluster.
 2. The need for a quick start with an all-purpose cluster.
 
-While it is generally [**not recommended** to utilise **all-purpose compute** for running jobs](https://docs.databricks.com/en/jobs/compute.html#should-all-purpose-compute-ever-be-used-for-jobs), it is feasible to configure a Databricks job for testing purposes.
+While it is generally [**not recommended** to utilise **all-purpose compute** for running jobs](https://docs.databricks.com/aws/en/jobs/run-classic-jobs#should-all-purpose-compute-ever-be-used-for-jobs), it is feasible to configure a Databricks job for testing purposes.
 
 To begin, you need to determine the `cluster_id`. Navigate to the `Compute` tab and select the `View JSON` option.
 

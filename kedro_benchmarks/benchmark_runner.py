@@ -8,8 +8,7 @@ from pathlib import Path
 import yaml
 
 from kedro.io.data_catalog import DataCatalog
-from kedro.pipeline import node
-from kedro.pipeline.modular_pipeline import pipeline
+from kedro.pipeline import node, pipeline
 
 
 # Simulate an I/O-bound task

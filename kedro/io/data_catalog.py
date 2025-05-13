@@ -163,13 +163,14 @@ class DataCatalog:
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
         warnings.warn(
-            "`DataCatalog` has been deprecated and will be replaced by `KedroDataCatalog`, in Kedro 1.0.0."
-            "Currently some `KedroDataCatalog` APIs have been retained for compatibility with `DataCatalog`, including "
-            "the `datasets` property and the `get_datasets`, `_get_datasets`, `add`,` list`, `add_feed_dict`, "
-            "and `shallow_copy` methods. These will be removed or replaced with updated alternatives in Kedro 1.0.0. "
+            "`DataCatalog` will be replaced by `KedroDataCatalog` in Kedro 1.0.0, "
+            "while keeping the `DataCatalog` name. Several APIs currently available, "
+            "including `datasets`, `get_datasets`, `_get_datasets`, `add`, `list`, "
+            "`add_feed_dict`, and `shallow_copy`, will be removed or replaced. "
             "For more details, refer to the documentation: "
             "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
             KedroDeprecationWarning,
+            stacklevel=2,
         )
         self._config_resolver = config_resolver or CatalogConfigResolver()
         # Kept to avoid breaking changes

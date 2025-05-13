@@ -110,6 +110,7 @@ class KedroDataCatalog(CatalogProtocol):
             "For more details, refer to the documentation: "
             "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
             KedroDeprecationWarning,
+            stacklevel=2,
         )
         self._config_resolver = config_resolver or CatalogConfigResolver()
         # TODO: rename back to _datasets when removing old catalog

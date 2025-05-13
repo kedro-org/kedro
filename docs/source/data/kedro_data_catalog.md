@@ -1,8 +1,8 @@
 # Kedro Data Catalog
-`KedroDataCatalog` retains the core functionality of `DataCatalog`, with a few API enhancements. For a comprehensive understanding, we recommend reviewing the existing `DataCatalog` [documentation](./data_catalog.md) before exploring the additional functionality of `KedroDataCatalog`.
+`DataCatalog` retains the core functionality of `DataCatalog`, with a few API enhancements. For a comprehensive understanding, we recommend reviewing the existing `DataCatalog` [documentation](./data_catalog.md) before exploring the additional functionality of `DataCatalog`.
 
 This page highlights the new features and provides usage examples:
-* [How to make KedroDataCatalog the default catalog for Kedro run](#how-to-make-kedrodatacatalog-the-default-catalog-for-kedro-run)
+* [How to make DataCatalog the default catalog for Kedro run](#how-to-make-DataCatalog-the-default-catalog-for-kedro-run)
 * [How to access datasets in the catalog](#how-to-access-datasets-in-the-catalog)
 * [How to add datasets to the catalog](#how-to-add-datasets-to-the-catalog)
 * [How to iterate trough datasets in the catalog](#how-to-iterate-trough-datasets-in-the-catalog)
@@ -10,14 +10,14 @@ This page highlights the new features and provides usage examples:
 * [How to print the full catalog and individual datasets](#how-to-print-the-full-catalog-and-individual-datasets)
 * [How to access dataset patterns](#how-to-access-dataset-patterns)
 
-## How to make `KedroDataCatalog` the default catalog for Kedro `run`
+## How to make `DataCatalog` the default catalog for Kedro `run`
 
-To set `KedroDataCatalog` as the default catalog for the `kedro run` command and other CLI commands, update your `settings.py` as follows:
+To set `DataCatalog` as the default catalog for the `kedro run` command and other CLI commands, update your `settings.py` as follows:
 
 ```python
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
-DATA_CATALOG_CLASS = KedroDataCatalog
+DATA_CATALOG_CLASS = DataCatalog
 ```
 
 Once this change is made, you can run your Kedro project as usual.
@@ -49,7 +49,7 @@ When you add raw data, it is automatically wrapped in a `MemoryDataset` under th
 
 ## How to iterate trough datasets in the catalog
 
-`KedroDataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
+`DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
 
 ```python
 for ds_name in catalog:  # __iter__ defaults to keys
@@ -87,7 +87,7 @@ Out[2]: kedro_datasets.pandas.excel_dataset.ExcelDataset(filepath=PurePosixPath(
 
 ## How to access dataset patterns
 
-The pattern resolution logic in `KedroDataCatalog` is handled by the `config_resolver`, which can be accessed as a property of the catalog:
+The pattern resolution logic in `DataCatalog` is handled by the `config_resolver`, which can be accessed as a property of the catalog:
 
 ```python
 config_resolver = catalog.config_resolver
@@ -96,7 +96,7 @@ patterns = catalog.config_resolver.list_patterns() # Listing all available patte
 ```
 
 ```{note}
-`KedroDataCatalog` does not support all dictionary-specific methods, such as `pop()`, `popitem()`, or deletion by key (`del`).
+`DataCatalog` does not support all dictionary-specific methods, such as `pop()`, `popitem()`, or deletion by key (`del`).
 ```
 
-For a full list of supported methods, refer to the [KedroDataCatalog source code](https://github.com/kedro-org/kedro/blob/main/kedro/io/data_catalog.py).
+For a full list of supported methods, refer to the [DataCatalog source code](https://github.com/kedro-org/kedro/blob/main/kedro/io/data_catalog.py).

@@ -65,7 +65,7 @@ class DatasetError(Exception):
 
 
 class DatasetNotFoundError(DatasetError):
-    """``DatasetNotFoundError`` raised by ``KedroDataCatalog``
+    """``DatasetNotFoundError`` raised by ``DataCatalog``
     class in case of trying to use a non-existing dataset.
     """
 
@@ -73,8 +73,8 @@ class DatasetNotFoundError(DatasetError):
 
 
 class DatasetAlreadyExistsError(DatasetError):
-    """``DatasetAlreadyExistsError`` raised by ``KedroDataCatalog``
-    class in case of trying to add a dataset which already exists in the ``KedroDataCatalog``.
+    """``DatasetAlreadyExistsError`` raised by ``DataCatalog``
+    class in case of trying to add a dataset which already exists in the ``DataCatalog``.
     """
 
     pass
@@ -89,7 +89,7 @@ class VersionNotFoundError(DatasetError):
 
 
 class VersionAlreadyExistsError(DatasetError):
-    """``VersionAlreadyExistsError`` raised by ``KedroDataCatalog``
+    """``VersionAlreadyExistsError`` raised by ``DataCatalog``
     class when attempting to add a dataset to a catalog with a save version
     that conflicts with the save version already set for the catalog.
     """

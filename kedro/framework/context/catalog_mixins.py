@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from kedro.framework.project import pipelines as _pipelines
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 from kedro.io.core import is_parameter
 from kedro.pipeline import Pipeline
 
@@ -13,7 +13,7 @@ class CatalogCommandsMixin:
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
     def list_datasets(
-        self: KedroDataCatalog, pipelines: list[str] | list[Pipeline] | None = None
+        self: DataCatalog, pipelines: list[str] | list[Pipeline] | None = None
     ) -> dict:
         """Show datasets per type."""
 
@@ -55,14 +55,14 @@ class CatalogCommandsMixin:
 
         return result
 
-    def list_patterns(self: KedroDataCatalog) -> list[str]:
+    def list_patterns(self: DataCatalog) -> list[str]:
         """List all dataset factories in the catalog, ranked by priority
         by which they are matched.
         """
         return self.config_resolver.list_patterns()
 
     def resolve_patterns(
-        self: KedroDataCatalog,
+        self: DataCatalog,
         pipelines: list[Pipeline] | None = None,
     ) -> dict[str, Any]:
         """Resolve catalog factories against pipeline datasets."""
@@ -100,9 +100,7 @@ class CatalogCommandsMixin:
         return explicit_datasets
 
 
-def _group_ds_by_type(
-    datasets: set[str], catalog: KedroDataCatalog
-) -> dict[str, list[str]]:
+def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, list[str]]:
     mapping: dict[str, list[str]] = {}
     for ds_name in datasets:
         if is_parameter(ds_name):

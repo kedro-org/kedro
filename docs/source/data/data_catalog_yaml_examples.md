@@ -367,13 +367,13 @@ In this example, the default `csv` configuration is inserted into `airplanes` an
 
 ## Read the same file using different datasets with transcoding
 
-You might come across a situation where you would like to read the same file using two different `Dataset` implementations. You can achieve this by using transcoding to define separate `KedroDataCatalog` entries that point to the same `filepath`.
+You might come across a situation where you would like to read the same file using two different `Dataset` implementations. You can achieve this by using transcoding to define separate `DataCatalog` entries that point to the same `filepath`.
 
 ### How to use transcoding
 
 Consider an example with Parquet files. Parquet files can be loaded with both the `pandas.ParquetDataset`, and the `spark.SparkDataset` directly. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
 
-To load the same file as both a `pandas.ParquetDataset` and a `spark.SparkDataset`, define two `KedroDataCatalog` entries for the same dataset in your `conf/base/catalog.yml`:
+To load the same file as both a `pandas.ParquetDataset` and a `spark.SparkDataset`, define two `DataCatalog` entries for the same dataset in your `conf/base/catalog.yml`:
 
 ```yaml
 my_dataframe@spark:
@@ -404,7 +404,7 @@ for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the seco
 
 ### How *not* to use transcoding
 
-Kedro pipelines automatically resolve the node execution order and check to ensure there are no circular dependencies in the pipeline. It is during this process that the transcoded datasets are resolved and the transcoding notation `@...` is stripped. This means within the pipeline the datasets `my_dataframe@spark` and `my_dataframe@pandas` are considered to be one `my_dataframe` dataset. The `KedroDataCatalog`, however, treats transcoded entries as separate datasets, as they are only resolved as part of the pipeline resolution process. This results in differences between your defined pipeline in `pipeline.py` and the resolved pipeline that is run by Kedro, and these differences may lead to unintended behaviours. Thus, it is important to be aware of this when using transcoding.
+Kedro pipelines automatically resolve the node execution order and check to ensure there are no circular dependencies in the pipeline. It is during this process that the transcoded datasets are resolved and the transcoding notation `@...` is stripped. This means within the pipeline the datasets `my_dataframe@spark` and `my_dataframe@pandas` are considered to be one `my_dataframe` dataset. The `DataCatalog`, however, treats transcoded entries as separate datasets, as they are only resolved as part of the pipeline resolution process. This results in differences between your defined pipeline in `pipeline.py` and the resolved pipeline that is run by Kedro, and these differences may lead to unintended behaviours. Thus, it is important to be aware of this when using transcoding.
 
 ```{caution}
 Below are some examples where transcoding may produce unwanted side effects and raise errors.
@@ -480,7 +480,7 @@ When the node order is resolved, we can see that the node `my_func1_node` is tre
 
 You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
 
-This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline if it is missing from the `KedroDataCatalog`.
+This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
 
 ```yaml
 # <conf_root>/<env>/catalog/<pipeline_name>.yml

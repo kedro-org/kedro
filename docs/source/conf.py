@@ -136,7 +136,7 @@ type_targets = {
         "kedro.io.core.CatalogProtocol",
         "kedro.io.core.DatasetError",
         "kedro.io.core.Version",
-        "kedro.io.data_catalog.KedroDataCatalog",
+        "kedro.io.data_catalog.DataCatalog",
         "kedro.io.memory_dataset.MemoryDataset",
         "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",
@@ -176,7 +176,7 @@ type_targets = {
         "Patterns",
         "CatalogConfigResolver",
         "CatalogProtocol",
-        "KedroDataCatalog",
+        "DataCatalog",
         "re.Pattern",
     ),
     "py:data": (

@@ -142,7 +142,7 @@ from typing import Any, Dict, Set
 
 import boto3
 
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import Pipeline, Node
 from kedro.runner import ThreadRunner
 
@@ -172,7 +172,7 @@ class AWSBatchRunner(ThreadRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
         hook_manager: PluginManager,
         session_id: str = None,
     ) -> None:

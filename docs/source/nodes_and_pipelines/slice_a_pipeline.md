@@ -310,10 +310,10 @@ To demonstrate this, let us save the intermediate output `n` using a `JSONDatase
 
 ```python
 from kedro_datasets.pandas import JSONDataset
-from kedro.io import KedroDataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset
 
 n_json = JSONDataset(filepath="./data/07_model_output/len.json")
-io = KedroDataCatalog(dict(xs=MemoryDataset([1, 2, 3]), n=n_json))
+io = DataCatalog(dict(xs=MemoryDataset([1, 2, 3]), n=n_json))
 ```
 </details>
 

@@ -9,8 +9,8 @@ import pytest
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
+    DataCatalog,
     DatasetError,
-    KedroDataCatalog,
     MemoryDataset,
 )
 from kedro.pipeline import node, pipeline
@@ -34,7 +34,7 @@ class TestValidThreadRunner:
         assert result["Z"] == (42, 42, 42)
 
     def test_memory_dataset_input(self, fan_out_fan_in):
-        catalog = KedroDataCatalog({"A": MemoryDataset("42")})
+        catalog = DataCatalog({"A": MemoryDataset("42")})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == ("42", "42", "42")
@@ -53,7 +53,7 @@ class TestValidThreadRunner:
         """
         catalog_conf = {"{catch_all}": {"type": "MemoryDataset"}}
 
-        catalog = KedroDataCatalog.from_config(catalog_conf)
+        catalog = DataCatalog.from_config(catalog_conf)
 
         test_pipeline = pipeline(
             [
@@ -133,7 +133,7 @@ class TestInvalidThreadRunner:
 
     def test_node_returning_none(self):
         a_pipeline = pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
-        catalog = KedroDataCatalog({"A": MemoryDataset("42")})
+        catalog = DataCatalog({"A": MemoryDataset("42")})
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
             ThreadRunner().run(a_pipeline, catalog)
@@ -167,7 +167,7 @@ class TestThreadRunnerRelease:
         a_pipeline = pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             {
                 "in": LoggingDataset(log, "in", "stuff"),
                 "middle": LoggingDataset(log, "middle"),
@@ -190,7 +190,7 @@ class TestThreadRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             {
                 "first": LoggingDataset(log, "first"),
                 "second": LoggingDataset(log, "second"),
@@ -217,7 +217,7 @@ class TestThreadRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = KedroDataCatalog({"dataset": LoggingDataset(log, "dataset")})
+        catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
         runner.run(a_pipeline, catalog)
 
         # we want to the release after both the loads
@@ -233,7 +233,7 @@ class TestThreadRunnerRelease:
         a_pipeline = pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             {
                 "ds@save": LoggingDataset(log, "save"),
                 "ds@load": LoggingDataset(log, "load"),

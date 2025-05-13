@@ -11,9 +11,9 @@ from pandas.testing import assert_frame_equal
 
 from kedro.io import (
     CachedDataset,
+    DataCatalog,
     DatasetError,
     DatasetNotFoundError,
-    KedroDataCatalog,
     LambdaDataset,
     MemoryDataset,
 )
@@ -29,14 +29,14 @@ from kedro.io.core import (
 
 @pytest.fixture
 def data_catalog(dataset):
-    return KedroDataCatalog(datasets={"test": dataset})
+    return DataCatalog(datasets={"test": dataset})
 
 
 @pytest.fixture
 def memory_catalog():
     ds1 = MemoryDataset({"data": 42})
     ds2 = MemoryDataset([1, 2, 3, 4, 5])
-    return KedroDataCatalog({"ds1": ds1, "ds2": ds2})
+    return DataCatalog({"ds1": ds1, "ds2": ds2})
 
 
 @pytest.fixture
@@ -49,15 +49,15 @@ def multi_catalog():
     csv_1 = CSVDataset(filepath="abc.csv")
     csv_2 = CSVDataset(filepath="def.csv")
     parq = ParquetDataset(filepath="xyz.parq")
-    return KedroDataCatalog({"abc": csv_1, "def": csv_2, "xyz": parq})
+    return DataCatalog({"abc": csv_1, "def": csv_2, "xyz": parq})
 
 
 @pytest.fixture
 def data_catalog_from_config(correct_config):
-    return KedroDataCatalog.from_config(**correct_config)
+    return DataCatalog.from_config(**correct_config)
 
 
-class TestKedroDataCatalog:
+class TestDataCatalog:
     def test_save_and_load(self, data_catalog, dummy_dataframe):
         """Test saving and reloading the dataset"""
         data_catalog.save("test", dummy_dataframe)
@@ -67,7 +67,7 @@ class TestKedroDataCatalog:
 
     def test_add_save_and_load(self, dataset, dummy_dataframe):
         """Test adding and then saving and reloading the dataset"""
-        catalog = KedroDataCatalog(datasets={})
+        catalog = DataCatalog(datasets={})
         catalog["test"] = dataset
         catalog.save("test", dummy_dataframe)
         reloaded_df = catalog.load("test")
@@ -91,14 +91,14 @@ class TestKedroDataCatalog:
 
     def test_load_from_unregistered(self):
         """Check the error when attempting to load unregistered dataset"""
-        catalog = KedroDataCatalog(datasets={})
+        catalog = DataCatalog(datasets={})
         pattern = r"Dataset 'test' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.load("test")
 
     def test_save_to_unregistered(self, dummy_dataframe):
         """Check the error when attempting to save to unregistered dataset"""
-        catalog = KedroDataCatalog(datasets={})
+        catalog = DataCatalog(datasets={})
         pattern = r"Dataset 'test' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.save("test", dummy_dataframe)
@@ -111,7 +111,7 @@ class TestKedroDataCatalog:
 
     def test_exists_not_implemented(self, caplog):
         """Test calling `exists` on the dataset, which didn't implement it"""
-        catalog = KedroDataCatalog(datasets={"test": LambdaDataset(None, None)})
+        catalog = DataCatalog(datasets={"test": LambdaDataset(None, None)})
         result = catalog.exists("test")
 
         log_record = caplog.records[0]
@@ -239,7 +239,7 @@ class TestKedroDataCatalog:
         """Confirm the dataset"""
         with caplog.at_level(logging.INFO):
             mock_ds = mocker.Mock()
-            data_catalog = KedroDataCatalog(datasets={"mocked": mock_ds})
+            data_catalog = DataCatalog(datasets={"mocked": mock_ds})
             data_catalog.confirm("mocked")
             mock_ds.confirm.assert_called_once_with()
             assert caplog.record_tuples == [
@@ -265,7 +265,7 @@ class TestKedroDataCatalog:
 
     def test_init_with_raw_data(self, dummy_dataframe, dataset):
         """Test catalog initialisation with raw data"""
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             datasets={"ds": dataset}, raw_data={"df": dummy_dataframe}
         )
         assert "ds" in catalog
@@ -286,7 +286,7 @@ class TestKedroDataCatalog:
         """Test load versions include keys missing in the catalog"""
         pattern = "'load_versions' keys [version] are not found in the catalog."
         with pytest.raises(DatasetNotFoundError, match=re.escape(pattern)):
-            KedroDataCatalog.from_config(
+            DataCatalog.from_config(
                 **correct_config, load_versions={"version": "test_version"}
             )
 
@@ -331,12 +331,12 @@ class TestKedroDataCatalog:
         data_catalog_copy = deepcopy(data_catalog_from_config)
         assert not data_catalog_copy == expected_catalog
 
-    class TestKedroDataCatalogToConfig:
+    class TestDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):
             """Test dumping catalog config"""
             config = correct_config_versioned["catalog"]
             credentials = correct_config_versioned["credentials"]
-            catalog = KedroDataCatalog.from_config(config, credentials)
+            catalog = DataCatalog.from_config(config, credentials)
             catalog["resolved_ds"] = dataset
             catalog["memory_ds"] = [1, 2, 3]
             catalog["params:a.b"] = {"abc": "def"}
@@ -392,7 +392,7 @@ class TestKedroDataCatalog:
             # Save version is not None and  set to default
             assert catalog._save_version
 
-    class TestKedroDataCatalogFromConfig:
+    class TestDataCatalogFromConfig:
         def test_from_correct_config(self, data_catalog_from_config, dummy_dataframe):
             """Test populating the data catalog from config"""
             data_catalog_from_config.save("boats", dummy_dataframe)
@@ -408,7 +408,7 @@ class TestKedroDataCatalog:
                 "'type' is missing from dataset catalog configuration"
             )
             with pytest.raises(DatasetError, match=re.escape(pattern)):
-                KedroDataCatalog.from_config(**correct_config)
+                DataCatalog.from_config(**correct_config)
 
         def test_config_invalid_module(self, correct_config):
             """Check the error if the type points to nonexistent module"""
@@ -418,7 +418,7 @@ class TestKedroDataCatalog:
 
             error_msg = "No module named 'kedro.invalid_module_name'"
             with pytest.raises(DatasetError, match=re.escape(error_msg)):
-                KedroDataCatalog.from_config(**correct_config).get("boats")
+                DataCatalog.from_config(**correct_config).get("boats")
 
         def test_config_relative_import(self, correct_config):
             """Check the error if the type points to a relative import"""
@@ -426,7 +426,7 @@ class TestKedroDataCatalog:
 
             pattern = "'type' class path does not support relative paths"
             with pytest.raises(DatasetError, match=re.escape(pattern)):
-                KedroDataCatalog.from_config(**correct_config).get("boats")
+                DataCatalog.from_config(**correct_config).get("boats")
 
         def test_config_import_kedro_datasets(self, correct_config, mocker):
             """Test kedro_datasets default path to the dataset class"""
@@ -444,7 +444,7 @@ class TestKedroDataCatalog:
             correct_config["catalog"]["boats"]["type"] = "kedro.io.CSVDatasetInvalid"
 
             with pytest.raises(DatasetError) as exc_info:
-                KedroDataCatalog.from_config(**correct_config).get("boats")
+                DataCatalog.from_config(**correct_config).get("boats")
 
             error_message = str(exc_info.value)
 
@@ -456,20 +456,20 @@ class TestKedroDataCatalog:
             correct_config["catalog"]["boats"]["type"] = "InvalidFormatNoDot"
 
             with pytest.raises(DatasetError) as exc_info:
-                KedroDataCatalog.from_config(**correct_config).get("boats")
+                DataCatalog.from_config(**correct_config).get("boats")
 
             assert "Invalid dataset path: 'InvalidFormatNoDot'" in str(exc_info.value)
 
         def test_config_invalid_dataset(self, correct_config):
             """Check the error if the type points to invalid class"""
-            correct_config["catalog"]["boats"]["type"] = "KedroDataCatalog"
+            correct_config["catalog"]["boats"]["type"] = "DataCatalog"
             pattern = (
                 "An exception occurred when parsing config for dataset 'boats':\n"
-                "Dataset type 'kedro.io.data_catalog.KedroDataCatalog' is invalid: "
+                "Dataset type 'kedro.io.data_catalog.DataCatalog' is invalid: "
                 "all dataset types must extend 'AbstractDataset'"
             )
             with pytest.raises(DatasetError, match=re.escape(pattern)):
-                KedroDataCatalog.from_config(**correct_config).get("boats")
+                DataCatalog.from_config(**correct_config).get("boats")
 
         def test_config_invalid_arguments(self, correct_config):
             """Check the error if the dataset config contains invalid arguments"""
@@ -479,7 +479,7 @@ class TestKedroDataCatalog:
                 r"the constructor of '.*CSVDataset'"
             )
             with pytest.raises(DatasetError, match=pattern):
-                KedroDataCatalog.from_config(**correct_config).get("boats")
+                DataCatalog.from_config(**correct_config).get("boats")
 
         def test_config_invalid_dataset_config(self, correct_config):
             correct_config["catalog"]["invalid_entry"] = "some string"
@@ -489,11 +489,11 @@ class TestKedroDataCatalog:
                 "make sure that the key is preceded by an underscore."
             )
             with pytest.raises(DatasetError, match=pattern):
-                KedroDataCatalog.from_config(**correct_config)
+                DataCatalog.from_config(**correct_config)
 
         def test_empty_config(self):
             """Test empty config"""
-            assert len(KedroDataCatalog.from_config(None)) == 0
+            assert len(DataCatalog.from_config(None)) == 0
 
         def test_missing_credentials(self, correct_config):
             """Check the error if credentials can't be located"""
@@ -501,7 +501,7 @@ class TestKedroDataCatalog:
             with pytest.raises(
                 KeyError, match=r"Unable to find credentials \'missing\'"
             ):
-                KedroDataCatalog.from_config(**correct_config)
+                DataCatalog.from_config(**correct_config)
 
         def test_link_credentials(self, correct_config, mocker):
             """Test credentials being linked to the relevant dataset"""
@@ -509,7 +509,7 @@ class TestKedroDataCatalog:
             config = deepcopy(correct_config)
             del config["catalog"]["boats"]
 
-            KedroDataCatalog.from_config(**config).get("cars")
+            DataCatalog.from_config(**config).get("cars")
 
             expected_client_kwargs = correct_config["credentials"]["s3_credentials"]
             mock_client.filesystem.assert_called_with("s3", **expected_client_kwargs)
@@ -518,7 +518,7 @@ class TestKedroDataCatalog:
             mock_client = mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec")
             config = deepcopy(correct_config_with_nested_creds)
             del config["catalog"]["boats"]
-            KedroDataCatalog.from_config(**config).get("cars")
+            DataCatalog.from_config(**config).get("cars")
 
             expected_client_kwargs = {
                 "client_kwargs": {
@@ -539,7 +539,7 @@ class TestKedroDataCatalog:
             del correct_config_with_nested_creds["credentials"]["other_credentials"]
             pattern = "Unable to find credentials 'other_credentials'"
             with pytest.raises(KeyError, match=pattern):
-                KedroDataCatalog.from_config(**correct_config_with_nested_creds)
+                DataCatalog.from_config(**correct_config_with_nested_creds)
 
         def test_missing_dependency(self, correct_config, mocker):
             """Test that dependency is missing."""
@@ -553,19 +553,19 @@ class TestKedroDataCatalog:
 
             mocker.patch("kedro.io.core.load_obj", side_effect=dummy_load)
             with pytest.raises(DatasetError, match=pattern):
-                KedroDataCatalog.from_config(**correct_config).get("boats")
+                DataCatalog.from_config(**correct_config).get("boats")
 
         def test_idempotent_catalog(self, correct_config):
             """Test that data catalog instantiations are idempotent"""
-            _ = KedroDataCatalog.from_config(**correct_config)
-            catalog = KedroDataCatalog.from_config(**correct_config)
+            _ = DataCatalog.from_config(**correct_config)
+            catalog = DataCatalog.from_config(**correct_config)
             assert catalog
 
         def test_error_dataset_init(self, bad_config):
             """Check the error when trying to instantiate erroneous dataset"""
             pattern = r"An exception occurred when parsing config for dataset 'bad'"
             with pytest.raises(DatasetError, match=pattern):
-                KedroDataCatalog.from_config(bad_config, None).get("bad")
+                DataCatalog.from_config(bad_config, None).get("bad")
 
         def test_validate_dataset_config(self):
             """Test _validate_dataset_config raises error when wrong dataset config type is passed"""
@@ -574,7 +574,7 @@ class TestKedroDataCatalog:
                 "Hint: If this catalog entry is intended for variable interpolation, make sure that the key is preceded by an underscore."
             )
             with pytest.raises(DatasetError, match=pattern):
-                KedroDataCatalog._validate_dataset_config(
+                DataCatalog._validate_dataset_config(
                     ds_name="bad", ds_config="not_dict"
                 )
 
@@ -593,7 +593,7 @@ class TestKedroDataCatalog:
         #                 "path": str(tmp_path),
         #             }
         #         }
-        #         data_catalog = KedroDataCatalog.from_config(catalog=catalog)
+        #         data_catalog = DataCatalog.from_config(catalog=catalog)
         #         data_catalog.confirm("ds_to_confirm")
         #         assert caplog.record_tuples == [
         #             (
@@ -614,13 +614,13 @@ class TestKedroDataCatalog:
         def test_bad_confirm(self, correct_config, dataset_name, pattern):
             """Test confirming non existent dataset or the one that
             does not have `confirm` method"""
-            data_catalog = KedroDataCatalog.from_config(**correct_config)
+            data_catalog = DataCatalog.from_config(**correct_config)
             with pytest.raises(DatasetError, match=re.escape(pattern)):
                 data_catalog.confirm(dataset_name)
 
         def test_iteration(self, correct_config):
             """Test iterate through keys, values and items."""
-            data_catalog = KedroDataCatalog.from_config(**correct_config)
+            data_catalog = DataCatalog.from_config(**correct_config)
 
             for ds_name_cat, ds_name_config in zip(
                 data_catalog, correct_config["catalog"]
@@ -641,12 +641,12 @@ class TestKedroDataCatalog:
 
         def test_getitem_setitem(self, correct_config):
             """Test get and set item."""
-            data_catalog = KedroDataCatalog.from_config(**correct_config)
+            data_catalog = DataCatalog.from_config(**correct_config)
             data_catalog["test"] = 123
             assert isinstance(data_catalog["test"], MemoryDataset)
 
         def test_ipython_key_completions(self, correct_config):
-            data_catalog = KedroDataCatalog.from_config(**correct_config)
+            data_catalog = DataCatalog.from_config(**correct_config)
             assert data_catalog._ipython_key_completions_() == list(
                 correct_config["catalog"].keys()
             )
@@ -664,7 +664,7 @@ class TestKedroDataCatalog:
             )
             version = fmt.format(d=current_ts, ms=current_ts.microsecond // 1000)
 
-            catalog = KedroDataCatalog.from_config(
+            catalog = DataCatalog.from_config(
                 **correct_config,
                 load_versions={"boats": version},
                 save_version=version,
@@ -699,7 +699,7 @@ class TestKedroDataCatalog:
             to the dataset config"""
             correct_config["catalog"]["boats"]["versioned"] = versioned
             correct_config["catalog"]["boats"]["version"] = True
-            KedroDataCatalog.from_config(**correct_config).get("boats")
+            DataCatalog.from_config(**correct_config).get("boats")
             log_record = caplog.records[0]
             expected_log_message = (
                 "'version' attribute removed from dataset configuration since it "
@@ -716,9 +716,7 @@ class TestKedroDataCatalog:
                 r"\'load_versions\' keys \[non-boat\] are not found in the catalog\."
             )
             with pytest.raises(DatasetNotFoundError, match=pattern):
-                KedroDataCatalog.from_config(
-                    **correct_config, load_versions=load_version
-                )
+                DataCatalog.from_config(**correct_config, load_versions=load_version)
 
         def test_load_version(self, correct_config, dummy_dataframe, mocker):
             """Test load versioned datasets from config"""
@@ -732,11 +730,11 @@ class TestKedroDataCatalog:
             )
 
             # save first version of the dataset
-            catalog = KedroDataCatalog.from_config(**correct_config)
+            catalog = DataCatalog.from_config(**correct_config)
             catalog.save("boats", dummy_dataframe)
 
             # save second version of the dataset
-            catalog = KedroDataCatalog.from_config(**correct_config)
+            catalog = DataCatalog.from_config(**correct_config)
             catalog.save("boats", new_dataframe)
 
             assert_frame_equal(catalog.load("boats", version="first"), dummy_dataframe)
@@ -750,7 +748,7 @@ class TestKedroDataCatalog:
                 "kedro.io.data_catalog.generate_timestamp", return_value="first"
             )
 
-            catalog = KedroDataCatalog.from_config(**correct_config)
+            catalog = DataCatalog.from_config(**correct_config)
             catalog.save("boats", dummy_dataframe)
 
             with pytest.raises(DatasetError):
@@ -761,19 +759,19 @@ class TestKedroDataCatalog:
         ):
             """Test redefining save version when it is already set"""
             # Version is set automatically for the catalog
-            catalog = KedroDataCatalog.from_config(**correct_config)
+            catalog = DataCatalog.from_config(**correct_config)
             with pytest.raises(VersionAlreadyExistsError):
                 catalog["ds_versioned"] = dataset_versioned
 
             # Version is set manually for the catalog
             correct_config["catalog"]["boats"]["versioned"] = True
-            catalog = KedroDataCatalog.from_config(**correct_config)
+            catalog = DataCatalog.from_config(**correct_config)
             with pytest.raises(VersionAlreadyExistsError):
                 catalog["ds_versioned"] = dataset_versioned
 
         def test_set_load_and_save_versions(self, correct_config, dataset_versioned):
             """Test setting load and save versions for catalog based on dataset's versions provided"""
-            catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
+            catalog = DataCatalog(datasets={"ds_versioned": dataset_versioned})
 
             assert (
                 catalog._load_versions["ds_versioned"]
@@ -783,7 +781,7 @@ class TestKedroDataCatalog:
 
         def test_set_same_versions(self, correct_config, dataset_versioned):
             """Test setting the same load and save versions for catalog based on dataset's versions provided"""
-            catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
+            catalog = DataCatalog(datasets={"ds_versioned": dataset_versioned})
             catalog["ds_same_versions"] = dataset_versioned
 
             assert (
@@ -794,7 +792,7 @@ class TestKedroDataCatalog:
 
         def test_redefine_load_version(self, correct_config, dataset_versioned):
             """Test redefining save version when it is already set"""
-            catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
+            catalog = DataCatalog(datasets={"ds_versioned": dataset_versioned})
             dataset_versioned._version = Version(
                 load="another_load_version.csv",
                 save="test_save_version.csv",
@@ -810,7 +808,7 @@ class TestKedroDataCatalog:
 
         def test_redefine_save_version(self, correct_config, dataset_versioned):
             """Test redefining save version when it is already set"""
-            catalog = KedroDataCatalog(datasets={"ds_versioned": dataset_versioned})
+            catalog = DataCatalog(datasets={"ds_versioned": dataset_versioned})
             dataset_versioned._version = Version(
                 load="another_load_version.csv",
                 save="another_save_version.csv",
@@ -822,7 +820,7 @@ class TestKedroDataCatalog:
             self, correct_config, cached_dataset_versioned
         ):
             """Test redefining load and save version with CachedDataset"""
-            catalog = KedroDataCatalog.from_config(**correct_config)
+            catalog = DataCatalog.from_config(**correct_config)
 
             # Redefining save version fails
             with pytest.raises(VersionAlreadyExistsError):

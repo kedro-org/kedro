@@ -13,7 +13,7 @@ from attrs import define, field
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.context import CatalogCommandsMixin
-from kedro.io import CatalogProtocol, KedroDataCatalog
+from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -221,7 +221,7 @@ class KedroContext:
 
     def _get_catalog(
         self,
-        catalog_class: type = KedroDataCatalog,
+        catalog_class: type = DataCatalog,
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
     ) -> CatalogProtocol:
@@ -242,7 +242,7 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        if catalog_class is KedroDataCatalog:
+        if catalog_class is DataCatalog:
             catalog_class = compose_classes(catalog_class, CatalogCommandsMixin)
 
         catalog: CatalogProtocol = catalog_class.from_config(  # type: ignore[attr-defined]

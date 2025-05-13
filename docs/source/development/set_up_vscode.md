@@ -210,7 +210,7 @@ Navigate to Node Functions:
 Click on a node in the Kedro-Viz flowchart, and it will automatically navigate to the corresponding node function in your code.
 ![navigation to node function](../meta/images/viz-vsc-nav-function-node.gif)
 
-Navigate to KedroDataCatalog:
+Navigate to DataCatalog:
 Clicking on a data node in the flowchart will open the corresponding dataset in the Data Catalog.
 ![navigation to dataset](../meta/images/viz-vsc-nav-data-node.gif)
 

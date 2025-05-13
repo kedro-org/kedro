@@ -322,7 +322,7 @@ class KedroSession:
             KedroSessionError: If more than one run is attempted to be executed during
                 a single session.
         Returns:
-            Any node outputs that cannot be processed by the ``KedroDataCatalog``.
+            Any node outputs that cannot be processed by the ``DataCatalog``.
             These are returned in a dictionary, where the keys are defined
             by the node outputs.
         """

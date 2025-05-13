@@ -10,13 +10,12 @@ import copy
 import difflib
 import json
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field
 from graphlib import CycleError, TopologicalSorter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
 
 import kedro
-from kedro.pipeline.node import Node, _to_list
+from kedro.pipeline.node import GroupedNodes, Node, _to_list
 
 from .transcoding import _strip_transcoding, _transcode_split
 
@@ -130,14 +129,6 @@ class ConfirmNotUniqueError(Exception):
     """
 
     pass
-
-
-@dataclass
-class GroupedNode:
-    name: str
-    type: str  # "namespace" or "node"
-    nodes: list[str] = field(default_factory=list)
-    dependencies: list[str] = field(default_factory=list)
 
 
 class Pipeline:
@@ -551,19 +542,19 @@ class Pipeline:
         return [list(group) for group in self._toposorted_groups]
 
     @property
-    def grouped_nodes_by_namespace(self) -> list[GroupedNode]:
+    def grouped_nodes_by_namespace(self) -> list[GroupedNodes]:
         """Return a list of grouped nodes by top-level namespace with
         information about the nodes, their type, and dependencies.
 
         This property is intended to be used by deployment plugins to group nodes by namespaces.
         """
-        grouped_nodes_map: dict[str, GroupedNode] = {}
+        grouped_nodes_map: dict[str, GroupedNodes] = {}
 
         for node in self.nodes:
             key = node.namespace.split(".")[0] if node.namespace else node.name
 
             if key not in grouped_nodes_map:
-                grouped_nodes_map[key] = GroupedNode(
+                grouped_nodes_map[key] = GroupedNodes(
                     name=key,
                     type="namespace" if node.namespace else "node",
                 )

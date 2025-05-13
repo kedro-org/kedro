@@ -2,7 +2,7 @@
 data-driven pipelines.
 """
 
-from .node import Node, node
-from .pipeline import GroupedNode, Pipeline, pipeline
+from .node import GroupedNodes, Node, node
+from .pipeline import Pipeline, pipeline
 
-__all__ = ["node", "pipeline", "Node", "Pipeline", "GroupedNode"]
+__all__ = ["node", "pipeline", "Node", "Pipeline", "GroupedNodes"]

@@ -42,7 +42,7 @@ At present, `DataCatalog` replicates the functionality of `DataCatalog` and is f
 
 For more details and examples of how to use `DataCatalog`, see the Kedro Data Catalog page.
 
-- [DataCatalog (experimental feature)](kedro_data_catalog.md)
+- [DataCatalog (experimental feature)](data_catalog.md)
 
 The [documentation](./data_catalog.md) for `DataCatalog` remains relevant as `DataCatalog` retains its core functionality with some enhancements.
 

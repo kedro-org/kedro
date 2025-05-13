@@ -13,7 +13,7 @@ from attrs import define, field
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from kedro.io import CatalogProtocol, DataCatalog  # noqa: TCH001
+from kedro.io import CatalogProtocol, KedroDataCatalog  # noqa: TCH001
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -135,7 +135,7 @@ def _validate_transcoded_datasets(catalog: CatalogProtocol) -> None:
             `_transcode_split` function.
 
     """
-    for dataset_name in catalog._datasets.keys():
+    for dataset_name in catalog:
         _transcode_split(dataset_name)
 
 
@@ -176,7 +176,7 @@ class KedroContext:
         package_name: Package name for the Kedro project the context is
             created for.
         hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
-        extra_params: Optional dictionary containing extra project parameters.
+        runtime_params: Optional dictionary containing runtime project parameters.
             If specified, will update (and therefore take precedence over)
             the parameters retrieved from the project configuration.
 
@@ -187,7 +187,7 @@ class KedroContext:
     env: str | None = field(init=True)
     _package_name: str = field(init=True)
     _hook_manager: PluginManager = field(init=True)
-    _extra_params: dict[str, Any] | None = field(
+    _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
 
@@ -216,7 +216,7 @@ class KedroContext:
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
             params = {}
-        _update_nested_dict(params, self._extra_params or {})
+        _update_nested_dict(params, self._runtime_params or {})
         return params  # type: ignore
 
     def _get_catalog(
@@ -241,33 +241,40 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        catalog: DataCatalog = settings.DATA_CATALOG_CLASS.from_config(
+        catalog: KedroDataCatalog = settings.DATA_CATALOG_CLASS.from_config(
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,
             save_version=save_version,
         )
 
-        feed_dict = self._get_feed_dict()
-        catalog.add_feed_dict(feed_dict)
+        parameters = self._get_parameters()
+
+        # Add parameters data to catalog.
+        for param_name, param_value in parameters.items():
+            catalog[param_name] = param_value
+
         _validate_transcoded_datasets(catalog)
+
         self._hook_manager.hook.after_catalog_created(
             catalog=catalog,
             conf_catalog=conf_catalog,
             conf_creds=conf_creds,
-            feed_dict=feed_dict,
+            parameters=parameters,
             save_version=save_version,
             load_versions=load_versions,
         )
         return catalog
 
-    def _get_feed_dict(self) -> dict[str, Any]:
-        """Get parameters and return the feed dictionary."""
+    def _get_parameters(self) -> dict[str, Any]:
+        """Returns a dictionary with data to be added in memory as `MemoryDataset`` instances.
+        Keys represent parameter names and the values are parameter values."""
         params = self.params
-        feed_dict = {"parameters": params}
+        params_dict = {"parameters": params}
 
-        def _add_param_to_feed_dict(param_name: str, param_value: Any) -> None:
-            """This recursively adds parameter paths to the `feed_dict`,
+        def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
+            """This recursively adds parameter paths that are defined in `parameters.yml`
+            with the addition of any extra parameters passed at initialization to the `params_dict`,
             whenever `param_value` is a dictionary itself, so that users can
             specify specific nested parameters in their node inputs.
 
@@ -275,20 +282,20 @@ class KedroContext:
 
                 >>> param_name = "a"
                 >>> param_value = {"b": 1}
-                >>> _add_param_to_feed_dict(param_name, param_value)
-                >>> assert feed_dict["params:a"] == {"b": 1}
-                >>> assert feed_dict["params:a.b"] == 1
+                >>> _add_param_to_params_dict(param_name, param_value)
+                >>> assert params_dict["params:a"] == {"b": 1}
+                >>> assert params_dict["params:a.b"] == 1
             """
             key = f"params:{param_name}"
-            feed_dict[key] = param_value
+            params_dict[key] = param_value
             if isinstance(param_value, dict):
                 for key, val in param_value.items():
-                    _add_param_to_feed_dict(f"{param_name}.{key}", val)
+                    _add_param_to_params_dict(f"{param_name}.{key}", val)
 
         for param_name, param_value in params.items():
-            _add_param_to_feed_dict(param_name, param_value)
+            _add_param_to_params_dict(param_name, param_value)
 
-        return feed_dict
+        return params_dict
 
     def _get_config_credentials(self) -> dict[str, Any]:
         """Getter for credentials specified in credentials directory."""

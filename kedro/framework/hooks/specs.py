@@ -25,7 +25,7 @@ class DataCatalogSpecs:
         catalog: CatalogProtocol,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
-        feed_dict: dict[str, Any],
+        parameters: dict[str, Any],
         save_version: str,
         load_versions: dict[str, str],
     ) -> None:
@@ -37,7 +37,7 @@ class DataCatalogSpecs:
             catalog: The catalog that was created.
             conf_catalog: The config from which the catalog was created.
             conf_creds: The credentials conf from which the catalog was created.
-            feed_dict: The feed_dict that was added to the catalog after creation.
+            parameters: The parameters that are added to the catalog after creation.
             save_version: The save_version used in ``save`` operations
                 for all datasets in the catalog.
             load_versions: The load_versions used in ``load`` operations
@@ -157,7 +157,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "extra_params": Optional[Dict[str, Any]]
+                     "runtime_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -194,7 +194,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "extra_params": Optional[Dict[str, Any]]
+                     "runtime_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -235,7 +235,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "extra_params": Optional[Dict[str, Any]]
+                     "runtime_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,

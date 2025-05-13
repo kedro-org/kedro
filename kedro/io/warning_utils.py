@@ -1,5 +1,6 @@
 import threading
 from types import TracebackType
+from typing import Optional
 
 # Thread-local flag to support safe concurrent use
 _catalog_internal_context: threading.local = threading.local()
@@ -12,9 +13,9 @@ class suppress_catalog_warning:
 
     def __exit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
     ) -> None:
         _catalog_internal_context.suppress_warning = False  # type: ignore[attr-defined]
 

@@ -122,9 +122,9 @@ shuttles:
 By using Kedro to load the `catalog.yml` file, you can reference the Data Catalog in your notebook as you load the data for data processing.
 
 ```python
-# Using Kedro's KedroDataCatalog
+# Using Kedro's DataCatalog
 
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
 import yaml
 
@@ -132,8 +132,8 @@ import yaml
 with open("catalog.yml") as f:
     conf_catalog = yaml.safe_load(f)
 
-# Create the KedroDataCatalog instance from the configuration
-catalog = KedroDataCatalog.from_config(conf_catalog)
+# Create the DataCatalog instance from the configuration
+catalog = DataCatalog.from_config(conf_catalog)
 
 # Load the datasets
 companies = catalog.load("companies")
@@ -318,12 +318,12 @@ r2_score(y_test, y_pred)
 ```
 
 ### Use Kedro's configuration loader to load the Data Catalog
-Earlier in the example, we saw how to use Kedro's Data Catalog to load a `yaml` file, with `safe_load` and pass it to the `KedroDataCatalog` class.
+Earlier in the example, we saw how to use Kedro's Data Catalog to load a `yaml` file, with `safe_load` and pass it to the `DataCatalog` class.
 
 ```python
-# Using Kedro's KedroDataCatalog
+# Using Kedro's DataCatalog
 
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
 import yaml
 
@@ -331,8 +331,8 @@ import yaml
 with open("catalog.yml") as f:
     conf_catalog = yaml.safe_load(f)
 
-# Create the KedroDataCatalog instance from the configuration
-catalog = KedroDataCatalog.from_config(conf_catalog)
+# Create the DataCatalog instance from the configuration
+catalog = DataCatalog.from_config(conf_catalog)
 
 # Load the datasets
 ...
@@ -343,16 +343,16 @@ It's also possible to use Kedro's `OmegaConfigLoader`configuration loader to ini
 To load `catalog.yml` the code is as follows:
 
 ```python
-# Now we are using Kedro's ConfigLoader alongside the KedroDataCatalog
+# Now we are using Kedro's ConfigLoader alongside the DataCatalog
 
 from kedro.config import OmegaConfigLoader
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
 conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 
-# Create the KedroDataCatalog instance from the configuration
-catalog = KedroDataCatalog.from_config(conf_catalog)
+# Create the DataCatalog instance from the configuration
+catalog = DataCatalog.from_config(conf_catalog)
 
 # Load the datasets
 companies = catalog.load("companies")
@@ -370,14 +370,14 @@ Code in a Kedro project runs in one or more pipelines, where a pipeline is a ser
 # Use Kedro for data management and configuration
 
 from kedro.config import OmegaConfigLoader
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
 conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 conf_params = conf_loader["parameters"]
 
-# Create the KedroDataCatalog instance from the configuration
-catalog = KedroDataCatalog.from_config(conf_catalog)
+# Create the DataCatalog instance from the configuration
+catalog = DataCatalog.from_config(conf_catalog)
 
 # Load the datasets
 companies = catalog.load("companies")
@@ -544,14 +544,14 @@ And that's it. The notebook code has been refactored into a series of functions.
 ```python
 # Kedro setup for data management and configuration
 from kedro.config import OmegaConfigLoader
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
 conf_loader = OmegaConfigLoader(conf_source=".")
 conf_catalog = conf_loader["catalog"]
 conf_params = conf_loader["parameters"]
 
-# Create the KedroDataCatalog instance from the configuration
-catalog = KedroDataCatalog.from_config(conf_catalog)
+# Create the DataCatalog instance from the configuration
+catalog = DataCatalog.from_config(conf_catalog)
 
 # Load the datasets
 companies = catalog.load("companies")

@@ -89,7 +89,7 @@ def evaluate_model(
 
 ## Input parameter configuration
 
-Parameters that are used by the `KedroDataCatalog` when the pipeline executes are stored in `conf/base/parameters_data_science.yml`:
+Parameters that are used by the `DataCatalog` when the pipeline executes are stored in `conf/base/parameters_data_science.yml`:
 
 <details>
 <summary><b>Click to expand</b></summary>

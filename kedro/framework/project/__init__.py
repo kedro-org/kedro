@@ -137,7 +137,7 @@ class _ProjectSettings(LazySettings):
     )
     _DATA_CATALOG_CLASS = _ImplementsCatalogProtocolValidator(
         "DATA_CATALOG_CLASS",
-        default=_get_default_class("kedro.io.KedroDataCatalog"),
+        default=_get_default_class("kedro.io.DataCatalog"),
     )
 
     def __init__(self, *args: Any, **kwargs: Any):

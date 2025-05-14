@@ -134,7 +134,7 @@
     margin-top: 0;
   }
 
-  .md-nav__list {
+.md-nav--primary .md-nav__title~.md-nav__list {
     background-color: var(--primary-sidebar-bg-color);
     padding: 12px 10px;
     border-radius: 12px;
@@ -346,11 +346,19 @@ pre:hover .md-clipboard {
 
 /** MOBILE STYLES */
 @media screen and (max-width: 76.2344em) {
+    .md-nav--primary .md-nav__item {
+        border-top: none;
+    }
+
     .md-nav--primary .md-nav__title  {
         background-color: var(--yellow-6);
-        color: var(--text-primary-color);
+         color: var(--black-900);
         padding-left: 24px;
         font-size: 20px;
+    }
+
+    .md-nav__icon:after {
+        color: var(--black-900);
     }
 
     .md-nav--primary .md-nav__title[for="__drawer"],

@@ -389,10 +389,10 @@ my_dataframe@pandas:
  When using transcoding you must ensure the filepaths defined for each catalog entry share the same format (for example: CSV, JSON, Parquet). These entries can then be used in the pipeline as follows:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
-        node(name="my_func2_node", func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),
+        Node(name="my_func1_node", func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
+        Node(name="my_func2_node", func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),
     ]
 )
 ```
@@ -415,9 +415,9 @@ Below are some examples where transcoding may produce unwanted side effects and 
 Consider the following pipeline:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="my_dataframe@pandas", outputs="my_dataframe@spark"),
+        Node(name="my_func1_node", func=my_func1, inputs="my_dataframe@pandas", outputs="my_dataframe@spark"),
     ]
 )
 ```
@@ -434,10 +434,10 @@ A node cannot have the same inputs and outputs even if they are transcoded: {'my
 Consider the following pipeline:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
-        node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
+        Node(name="my_func1_node", func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
+        Node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
     ]
 )
 ```
@@ -453,11 +453,11 @@ kedro.pipeline.pipeline.OutputNotUniqueError: Output(s) ['my_dataframe'] are ret
 Consider the following pipeline:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="my_dataframe@spark", outputs="spark_output"),
-        node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
-        node(name="my_func3_node", func=my_func3, inputs="my_dataframe@pandas", outputs="pandas_output"),
+        Node(name="my_func1_node", func=my_func1, inputs="my_dataframe@spark", outputs="spark_output"),
+        Node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
+        Node(name="my_func3_node", func=my_func3, inputs="my_dataframe@pandas", outputs="pandas_output"),
     ]
 )
 ```
@@ -467,9 +467,9 @@ In this example, there is a single dependency between the nodes `my_func3_node` 
 ```python
 resolved_pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="my_dataframe", outputs="spark_output"),
-        node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe"),
-        node(name="my_func3_node", func=my_func3, inputs="my_dataframe", outputs="pandas_output"),
+        Node(name="my_func1_node", func=my_func1, inputs="my_dataframe", outputs="spark_output"),
+        Node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe"),
+        Node(name="my_func3_node", func=my_func3, inputs="my_dataframe", outputs="pandas_output"),
     ]
 )
 ```

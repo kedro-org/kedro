@@ -57,7 +57,7 @@ from kedro.pipeline import Pipeline
 def create_pipeline(**kwargs) -> Pipeline:
     return Pipeline([])
 ```
-Here, you are creating a `create_pipeline()` function that returns a `Pipeline` class instance with the help of the `pipeline` function. You should keep the function name as `create_pipeline()` because this allows kedro to [automatically discover the pipeline](pipeline_registry.md#pipeline-autodiscovery). Otherwise, the pipeline would need to be [registered manually](pipeline_registry.md#the-pipeline-registry).
+Here, you are creating a `create_pipeline()` function that returns a `Pipeline` class instance. You should keep the function name as `create_pipeline()` because this allows kedro to [automatically discover the pipeline](pipeline_registry.md#pipeline-autodiscovery). Otherwise, the pipeline would need to be [registered manually](pipeline_registry.md#the-pipeline-registry).
 
 Before filling `pipeline.py` with nodes, we recommend storing all node functions in `nodes.py`. From our previous example, we should add the functions `mean()`, `mean_sos()` and `variance()` into `nodes.py`:
 

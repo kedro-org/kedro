@@ -142,7 +142,7 @@ When processing a node, both `SequentialRunner` and `ParallelRunner` perform the
 2. Execute node function with the input(s)
 3. Save the output(s)
 
-If a node has multiple inputs or outputs (e.g., `node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
+If a node has multiple inputs or outputs (e.g., `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
 
 ```bash
 $ kedro run --async
@@ -171,7 +171,7 @@ def register_pipelines():
     """
     pipelines = find_pipelines()
     pipelines["__default__"] = sum(pipelines.values())
-    my_pipeline = pipeline(
+    my_pipeline = Pipeline(
         [
             # your definition goes here
         ]

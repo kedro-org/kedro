@@ -13,8 +13,10 @@ from __future__ import annotations
 import difflib
 import logging
 import re
+import warnings
 from typing import Any, Iterator, List  # noqa: UP035
 
+from kedro import KedroDeprecationWarning
 from kedro.io.catalog_config_resolver import CatalogConfigResolver, Patterns
 from kedro.io.core import (
     TYPE_KEY,
@@ -99,6 +101,14 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                   save_args={"index": False})
             >>> catalog = KedroDataCatalog(datasets={"cars": cars})
         """
+        warnings.warn(
+            "`KedroDataCatalog` is currently an experimental feature and will replace the existing `DataCatalog` "
+            "in Kedro 1.0.0, while adopting the original `DataCatalog` name. Several APIs will be removed or "
+            "replaced with updated alternatives in Kedro 1.0.0. For more details, refer to the documentation: "
+            "https://docs.kedro.org/en/0.19.13/data/index.html#kedrodatacatalog-experimental-feature",
+            KedroDeprecationWarning,
+            stacklevel=2,
+        )
         self._config_resolver = config_resolver or CatalogConfigResolver()
         # TODO: rename back to _datasets when removing old catalog
         self.__datasets: dict[str, AbstractDataset] = datasets or {}

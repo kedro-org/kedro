@@ -24,7 +24,7 @@ from kedro.framework.project import (
     validate_settings,
 )
 from kedro.io.core import generate_timestamp
-from kedro.io.kedro_data_catalog import SharedMemoryDataCatalog
+from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
@@ -322,7 +322,7 @@ class KedroSession:
             KedroSessionError: If more than one run is attempted to be executed during
                 a single session.
         Returns:
-            Any node outputs that cannot be processed by the ``KedroDataCatalog``.
+            Any node outputs that cannot be processed by the ``DataCatalog``.
             These are returned in a dictionary, where the keys are defined
             by the node outputs.
         """

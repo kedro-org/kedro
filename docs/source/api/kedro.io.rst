@@ -14,7 +14,7 @@ kedro.io
    kedro.io.AbstractDataset
    kedro.io.AbstractVersionedDataset
    kedro.io.CachedDataset
-   kedro.io.KedroDataCatalog
+   kedro.io.DataCatalog
    kedro.io.LambdaDataset
    kedro.io.MemoryDataset
    kedro.io.Version

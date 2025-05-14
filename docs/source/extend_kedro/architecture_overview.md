@@ -3,7 +3,7 @@
 There are different ways to leverage Kedro in your work, you can:
 
  - Commit to using all of Kedro (framework, project, starters and library); which is preferable to take advantage of the full value proposition of Kedro
- - You can use parts of Kedro, like the KedroDataCatalog (I/O), OmegaConfigLoader, Pipelines and Runner, by using it as a Python library; this best supports a workflow where you don't want to adopt the Kedro project template
+ - You can use parts of Kedro, like the DataCatalog (I/O), OmegaConfigLoader, Pipelines and Runner, by using it as a Python library; this best supports a workflow where you don't want to adopt the Kedro project template
  - Or, you can develop extensions for Kedro e.g. custom starters, plugins, Hooks and more
 
 At a high level, Kedro consists of five main parts:
@@ -46,7 +46,7 @@ Kedro library consists of independent units, each responsible for one aspect of 
 * **{py:class}`~kedro.config.OmegaConfigLoader`** provides utility to parse and load configuration defined in a Kedro project.
 * **{py:mod}`~kedro.pipeline`** provides a collection of abstractions to model data pipelines.
 * **{py:mod}`~kedro.runner`** provides an abstraction for different execution strategy of a data pipeline.
-* **{py:mod}`~kedro.io`** provides a collection of abstractions to handle I/O in a project, including `KedroDataCatalog` and many `Dataset` implementations.
+* **{py:mod}`~kedro.io`** provides a collection of abstractions to handle I/O in a project, including `DataCatalog` and many `Dataset` implementations.
 
 ## Kedro extension
 

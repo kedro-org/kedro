@@ -151,7 +151,7 @@ Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs
 ```python
 from typing import Any, Dict
 
-from kedro.pipeline import node, pipeline
+from kedro.pipeline import Node, Pipeline
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.sql import DataFrame
 
@@ -169,10 +169,10 @@ def predict(model: RandomForestClassifier, testing_data: DataFrame) -> DataFrame
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
-            node(train_model, inputs=["training_data"], outputs="example_classifier"),
-            node(
+            Node(train_model, inputs=["training_data"], outputs="example_classifier"),
+            Node(
                 predict,
                 inputs=dict(model="example_classifier", testing_data="testing_data"),
                 outputs="example_predictions",

@@ -52,10 +52,10 @@ After creating the pipeline with `kedro pipeline create`, you will find template
 
 ```python
 # src/my_project/pipelines/{{pipeline_name}}/pipeline.py
-from kedro.pipeline import Pipeline, pipeline
+from kedro.pipeline import Pipeline
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline([])
+    return Pipeline([])
 ```
 Here, you are creating a `create_pipeline()` function that returns a `Pipeline` class instance with the help of the `pipeline` function. You should keep the function name as `create_pipeline()` because this allows kedro to [automatically discover the pipeline](pipeline_registry.md#pipeline-autodiscovery). Otherwise, the pipeline would need to be [registered manually](pipeline_registry.md#the-pipeline-registry).
 
@@ -77,18 +77,18 @@ Then we can assemble a pipeline from those nodes as follows:
 
 ```python
 # src/my_project/pipelines/{{pipeline_name}}/pipelines.py
-from kedro.pipeline import Pipeline, pipeline, node
+from kedro.pipeline import Pipeline, Node
 
 from .nodes import mean, mean_sos, variance
 # Import node functions from nodes.py located in the same folder
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
-            node(len, "xs", "n"),
-            node(mean, ["xs", "n"], "m", name="mean_node", tags="tag1"),
-            node(mean_sos, ["xs", "n"], "m2", name="mean_sos", tags=["tag1", "tag2"]),
-            node(variance, ["m", "m2"], "v", name="variance_node"),
+            Node(len, "xs", "n"),
+            Node(mean, ["xs", "n"], "m", name="mean_node", tags="tag1"),
+            Node(mean_sos, ["xs", "n"], "m2", name="mean_sos", tags=["tag1", "tag2"]),
+            Node(variance, ["m", "m2"], "v", name="variance_node"),
         ],  # A list of nodes and pipelines combined into a new pipeline
         tags="tag3",  # Optional, each pipeline node will be tagged
         namespace="",  # Optional

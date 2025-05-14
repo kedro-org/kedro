@@ -313,27 +313,27 @@ candidate_modelling_pipeline:
 <summary><b>Click to expand</b></summary>
 
 ```python
-from kedro.pipeline import Pipeline, node, pipeline
+from kedro.pipeline import Pipeline, Node
 
 from .nodes import evaluate_model, split_data, train_model
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    pipeline_instance = pipeline(
+    pipeline_instance = Pipeline(
         [
-            node(
+            Node(
                 func=split_data,
                 inputs=["model_input_table", "params:model_options"],
                 outputs=["X_train", "X_test", "y_train", "y_test"],
                 name="split_data_node",
             ),
-            node(
+            Node(
                 func=train_model,
                 inputs=["X_train", "y_train"],
                 outputs="regressor",
                 name="train_model_node",
             ),
-            node(
+            Node(
                 func=evaluate_model,
                 inputs=["regressor", "X_test", "y_test"],
                 outputs=None,
@@ -341,13 +341,13 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
         ]
     )
-    ds_pipeline_1 = pipeline(
-        pipe=pipeline_instance,
+    ds_pipeline_1 = Pipeline(
+        nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="active_modelling_pipeline",
     )
-    ds_pipeline_2 = pipeline(
-        pipe=pipeline_instance,
+    ds_pipeline_2 = Pipeline(
+        nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="candidate_modelling_pipeline",
     )
@@ -437,22 +437,21 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 </details> <br />
 
-### How it works: the modular `pipeline()` wrapper
-
-The import you added to the code introduces the pipeline wrapper, which enables you to instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters:
+### How it works: the modular arguments in `Pipeline`
 
 ```python
-from kedro.pipeline import pipeline
+from kedro.pipeline import Pipeline
 ```
 
-The `pipeline()` wrapper method takes the following arguments:
+The `Pipeline` class takes the following arguments that allow you to create a reusable pipeline:
 
 | Keyword argument | Description                                                                         |
 | ---------------- | ----------------------------------------------------------------------------------- |
-| `pipe`           | The `Pipeline` object you want to wrap                                              |
+| `nodes `         | Nodes that will be part of the reusable pipeline                                    |
 | `inputs`         | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
 | `outputs`        | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
 | `parameters`     | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
+| `tags`           | Optional set of tags to be applied to all the pipeline nodes                        |
 | `namespace`      | The namespace that will be encapsulated by this pipeline instance                   |
 
 
@@ -464,14 +463,14 @@ You can see this snippet as part of the code you added to the example:
 ```python
 ...
 
-ds_pipeline_1 = pipeline(
-    pipe=pipeline_instance,
+ds_pipeline_1 = Pipeline(
+    nodes=pipeline_instance,
     inputs="model_input_table",
     namespace="active_modelling_pipeline",
 )
 
-ds_pipeline_2 = pipeline(
-    pipe=pipeline_instance,
+ds_pipeline_2 = Pipeline(
+    nodes=pipeline_instance,
     inputs="model_input_table",
     namespace="candidate_modelling_pipeline",
 )

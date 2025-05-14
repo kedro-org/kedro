@@ -123,21 +123,21 @@ following pipeline which takes in a `model_input_table` and outputs two regresso
 `active_modelling_pipeline` and the `candidate_modelling_pipeline` namespaces:
 
 ```python
-from kedro.pipeline import Pipeline, node, pipeline
+from kedro.pipeline import Pipeline, Node
 
 from .nodes import evaluate_model, split_data, train_model
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    pipeline_instance = pipeline(
+    pipeline_instance = Pipeline(
         [
-            node(
+            Node(
                 func=split_data,
                 inputs=["model_input_table", "params:model_options"],
                 outputs=["X_train", "y_train"],
                 name="split_data_node",
             ),
-            node(
+            Node(
                 func=train_model,
                 inputs=["X_train", "y_train"],
                 outputs="regressor",
@@ -145,13 +145,13 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
         ]
     )
-    ds_pipeline_1 = pipeline(
-        pipe=pipeline_instance,
+    ds_pipeline_1 = Pipeline(
+        nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="active_modelling_pipeline",
     )
-    ds_pipeline_2 = pipeline(
-        pipe=pipeline_instance,
+    ds_pipeline_2 = Pipeline(
+        nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="candidate_modelling_pipeline",
     )

@@ -28,7 +28,7 @@ With dataset factory, it can be re-written as:
 
 In runtime, the pattern will be matched against the name of the datasets defined in `inputs` or `outputs`.
 ```python
-node(
+Node(
     func=process_factory,
     inputs="factory_data",
     outputs="process_data",
@@ -83,27 +83,27 @@ from .nodes import create_model_input_table, preprocess_companies, preprocess_sh
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
-            node(
+            Node(
                 func=preprocess_boats,
                 inputs="boats#csv",
                 outputs="preprocessed_boats",
                 name="preprocess_boats_node",
             ),
-            node(
+            Node(
                 func=preprocess_cars,
                 inputs="cars#csv",
                 outputs="preprocessed_cars",
                 name="preprocess_cars_node",
             ),
-            node(
+            Node(
                 func=preprocess_planes,
                 inputs="planes#csv",
                 outputs="preprocessed_planes",
                 name="preprocess_planes_node",
             ),
-            node(
+            Node(
                 func=create_model_input_table,
                 inputs=[
                     "preprocessed_boats",
@@ -341,21 +341,21 @@ and the following pipeline in `pipeline.py`:
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
-            node(
+            Node(
                 func=preprocess_companies,
                 inputs="companies",
                 outputs="preprocessed_companies",
                 name="preprocess_companies_node",
             ),
-            node(
+            Node(
                 func=preprocess_shuttles,
                 inputs="shuttles",
                 outputs="preprocessed_shuttles",
                 name="preprocess_shuttles_node",
             ),
-            node(
+            Node(
                 func=create_model_input_table,
                 inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
                 outputs="model_input_table",

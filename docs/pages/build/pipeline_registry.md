@@ -66,7 +66,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     """
     pipelines = find_pipelines()
     pipelines["__default__"] = sum(pipelines.values())
-    pipelines["data_engineering"] = pipeline(
+    pipelines["data_engineering"] = Pipeline(
         pipelines["data_processing"], tags="data_engineering"
     )
     return pipelines
@@ -84,7 +84,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
     pipelines = find_pipelines()
-    pipelines["data_processing"] = pipeline(
+    pipelines["data_processing"] = Pipeline(
         pipelines["data_processing"], tags="data_engineering"
     )
     pipelines["__default__"] = sum(pipelines.values())

@@ -120,51 +120,52 @@
 /** Primary Sidebar Style */
 .md-sidebar--primary,
 .md-nav--primary {
-  width: 328px;
-  padding: 0;
-  margin: 10px 0 10px 10px;
+    width: 328px;
+    padding: 0;
+    margin: 10px 0 10px 10px;
 
-  /* Colour for the section labels */
-  .md-nav__item--section > .md-nav__link[for] {
-    color: var(--text-primary-color);
-    align-items: center;
-  }
+    /* Colour for the section labels */
+    .md-nav__item--section > .md-nav__link[for] {
+        color: var(--text-primary-color);
+        align-items: center;
+    }
 
-  .md-nav__item--section {
-    margin-top: 0;
-  }
+    .md-nav__item--section {
+        margin-top: 0;
+    }
 
-.md-nav--primary .md-nav__title~.md-nav__list {
-    background-color: var(--primary-sidebar-bg-color);
-    padding: 12px 10px;
-    border-radius: 12px;
-  }
+    .md-nav--primary .md-nav__title~.md-nav__list {
+        background-color: var(--primary-sidebar-bg-color);
+        padding: 12px 10px;
+        border-radius: 12px;
+    }
 
-  .md-nav__link {
-    font-size: 16px;
-    margin: 0px 8px 0px 24px;
-    color: var(--text-primary-color);
-  }
+    .md-nav__link {
+        font-size: 16px;
+        margin: 0px 8px 0px 24px;
+        color: var(--text-primary-color);
+    }
 
-  .md-nav__link[href]:hover,
-  .md-nav__link[href]:focus {
-    font-weight: 600;
-  }
+    .md-nav__link[href]:hover,
+    .md-nav__link[href]:focus {
+        font-weight: 600;
+    }
 
-  .md-nav__link span {
-    padding: 6px 0 6px 0;
-  }
+    .md-nav__link span {
+        padding: 6px 0 6px 0;
+        height: 32px;
+    }
 
-  .md-nav__link--active {
-    border-radius: 12px;
-    background-color: var(--active-link-bg-color);
-    color: inherit !important;
-    padding: 6px 24px;
-    margin: 0;
-    display: block;
-    width: 100%;
-    align-items: center;
-  }
+    .md-nav__link--active {
+        border-radius: 12px;
+        background-color: var(--active-link-bg-color);
+        color: inherit !important;
+        padding: 6px 24px;
+        margin: 0;
+        display: block;
+        width: 100%;
+        align-items: center;
+    }
 }
 
 /* Secondary sidebar styles */

@@ -67,15 +67,17 @@ p {
         font-size: 14px;
         line-height: 20px;
     }
-    
+
   .md-search__input {
     font-size: 14px;
   }
+
   h1,
   .md-typeset h1 {
     font-size: 24px;
     line-height: 32px;
   }
+
   h2,
   .md-typeset h2 {
     font-size: 20px;

@@ -211,7 +211,7 @@ Gives the following output:
 
 ```console
 Invalid Node definition: it must have some `inputs` or `outputs`.
-Format should be: node(function, inputs, outputs)
+Format should be: Node(function, inputs, outputs)
 ```
 
 

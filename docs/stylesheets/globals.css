@@ -164,6 +164,7 @@
   /* Colour for the section labels */
   .md-nav__item--section > .md-nav__link[for] {
     color: var(--text-primary-color);
+    align-items: center;
   }
 
   .md-nav__item--section {
@@ -179,12 +180,12 @@
   .md-nav__link {
     font-size: 16px;
     margin: 0px 8px 0px 24px;
+    color: var(--text-primary-color);
   }
 
   .md-nav__link[href]:hover,
   .md-nav__link[href]:focus {
     font-weight: 600;
-    color: inherit;
   }
 
   .md-nav__link span {
@@ -199,6 +200,7 @@
     margin: 0;
     display: block;
     width: 100%;
+    align-items: center;
   }
 }
 
@@ -246,29 +248,6 @@
   margin: 0;
 }
 
-/** MOBILE STYLES */
-@media screen and (max-width: 76.2344em) {
-  .md-sidebar--primary,
-  .md-nav--primary {
-    max-width: 242px;
-    margin: 0;
-  }
-
-  .md-nav--primary .md-nav__title[for="__drawer"],
-  .md-nav__source {
-    background-color: var(--yellow-6);
-    color: var(--black-900);
-  }
-
-  .md-nav__list {
-    color: var(--black-900);
-  }
-
-  .md-nav--primary .md-nav__item--active > .md-nav__link {
-    color: var(--black-900);
-    font-weight: 600;
-  }
-}
 
 /* Style for all non-expandle code blocks */
 .md-typeset pre code,
@@ -374,43 +353,39 @@ pre:hover .md-clipboard {
   color: var(--text-secondary-color);
 }
 
-/* Mobile styles */
-@media screen and (max-width: 768px) {
-  .md-header {
-    padding: 12px 16px 0 16px;
-  }
+/** MOBILE STYLES */
+@media screen and (max-width: 76.2344em) {
+    .md-nav--primary .md-nav__title  {
+        background-color: var(--yellow-6);
+        color: var(--text-primary-color);
+        padding-left: 24px;
+        font-size: 20px;
+    }
 
-  .md-header__inner {
-    padding-bottom: 12px;
-  }
-
-  .md-content__inner {
-    padding: 16px;
-  }
+    .md-nav--primary .md-nav__title[for="__drawer"],
+    .md-nav__source {
+        background-color: var(--yellow-6);
+        color: var(--black-900);
+    }
 
   .md-sidebar--primary,
   .md-nav--primary {
-    width: 100%;
+    max-width: 242px;
     margin: 0;
   }
 
-  .md-nav__list {
-    padding: 8px;
-  }
-
   .md-nav__link {
-    margin: 0px 4px 0px 12px;
+    margin: 0 !important;
+    font-size: 14px !important;
   }
 
-  .md-nav__link--active {
-    padding: 6px 12px;
-  }
+    .md-content__inner>.highlight {
+        width: 100%;
+        margin: 0;
+    }
 
-  .md-search__form {
-    padding: 6px;
-  }
-
-  .md-search__input {
-    font-size: 14px;
-  }
+    .md-content__inner {
+        padding: 24px;
+        margin: 0;
+    }
 }

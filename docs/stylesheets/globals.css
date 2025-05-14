@@ -342,6 +342,11 @@ pre:hover .md-clipboard {
     order: 3;
     margin-left: -0.8rem !important;
   }
+
+  /** Hide the nav label specifically on desktop version only */
+  #__nav_2_label {
+    display: none;
+  }
 }
 
 /** MOBILE STYLES */

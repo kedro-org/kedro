@@ -28,12 +28,12 @@ def variance(m, m2):
     return m2 - m * m
 
 
-full_pipeline = pipeline(
+full_pipeline = Pipeline(
     [
-        node(len, "xs", "n"),
-        node(mean, ["xs", "n"], "m", name="mean_node", tags="mean"),
-        node(mean_sos, ["xs", "n"], "m2", name="mean_sos", tags=["mean", "variance"]),
-        node(variance, ["m", "m2"], "v", name="variance_node", tags="variance"),
+        Node(len, "xs", "n"),
+        Node(mean, ["xs", "n"], "m", name="mean_node", tags="mean"),
+        Node(mean_sos, ["xs", "n"], "m2", name="mean_sos", tags=["mean", "variance"]),
+        Node(variance, ["m", "m2"], "v", name="variance_node", tags="variance"),
     ]
 )
 ```

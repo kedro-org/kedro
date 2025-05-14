@@ -14,6 +14,7 @@ from attrs import define, field
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import CatalogProtocol, DataCatalog  # noqa: TCH001
+from kedro.io.warning_utils import suppress_catalog_warning
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -241,12 +242,13 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        catalog: DataCatalog = settings.DATA_CATALOG_CLASS.from_config(
-            catalog=conf_catalog,
-            credentials=conf_creds,
-            load_versions=load_versions,
-            save_version=save_version,
-        )
+        with suppress_catalog_warning():
+            catalog: DataCatalog = settings.DATA_CATALOG_CLASS.from_config(
+                catalog=conf_catalog,
+                credentials=conf_creds,
+                load_versions=load_versions,
+                save_version=save_version,
+            )
 
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)

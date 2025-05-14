@@ -1,13 +1,10 @@
+/* Logo Styles */
 .md-header__button.md-logo img {
   width: 123.37px;
   height: 32px;
 }
 
-.md-footer {
-  background-color: var(--md-default-bg-color);
-  color: var(--text-secondary-color);
-}
-
+/* Header Styles */
 .md-header {
   padding: 24px 32px 0 32px;
   border-radius: 0px 0px 12px 12px;
@@ -15,6 +12,12 @@
 
 .md-header__inner {
   padding-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.md-header__title {
+  flex: 1;
 }
 
 .md-header--shadow {
@@ -27,17 +30,7 @@
   color: var(--black-900) !important;
 }
 
-/* Header elements positioning */
-.md-header__inner {
-  display: flex;
-  align-items: center;
-}
-
-.md-header__title {
-  flex: 1;
-}
-
-/* Style the search box */
+/* Search Box Styles */
 .md-search__form {
   border-radius: 4px;
   border: 1px solid var(--yellow-600);
@@ -49,58 +42,21 @@
   height: auto;
 }
 
-/* Style the search input and icon */
 .md-search__input {
   color: var(--yellow-600);
   font-size: 16px;
-}
-
-.md-search__icon svg {
-  fill: var(--yellow-600);
 }
 
 .md-search__input::placeholder {
   color: var(--yellow-600);
 }
 
+.md-search__icon svg {
+  fill: var(--yellow-600);
+}
+
 .md-search__overlay {
   display: none;
-}
-
-@media screen and (min-width: 80em) {
-  .md-search,
-  .md-header__option,
-  .md-header__source {
-    transform: translateY(calc(100% + 24px));
-    z-index: 2;
-  }
-
-  /* Position the elements at tabs level with specific order */
-  .md-search {
-    order: 1;
-  }
-
-  .md-header__option {
-    order: 2;
-    margin: 0 16px;
-
-    .md-icon {
-      padding-left: 0;
-      padding-right: 0;
-    }
-  }
-
-  .md-header__source {
-    order: 3;
-    margin-left: -0.8rem !important;
-  }
-}
-
-.md-tabs__item--active {
-  font-weight: 600;
-  height: 100%;
-  padding-bottom: 24px;
-  border-bottom: 2px solid var(--black-900);
 }
 
 .md-typeset blockquote {
@@ -111,7 +67,7 @@
   scrollbar-color: var(--yellow-6) #0000;
 }
 
-/* Navigation dropdown styles */
+/* Tabs + Navigation dropdown Styles */
 .md-tabs__dropdown {
   position: absolute;
   top: 100%;
@@ -154,7 +110,14 @@
   font-size: 16px;
 }
 
-/** Primary sidebar style */
+.md-tabs__item--active {
+  font-weight: 600;
+  height: 100%;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--black-900);
+}
+
+/** Primary Sidebar Style */
 .md-sidebar--primary,
 .md-nav--primary {
   width: 328px;
@@ -234,7 +197,7 @@
   }
 }
 
-/** Style for the main documenation page */
+/* Main Content Styles */
 .md-grid {
   max-width: none;
 }
@@ -249,7 +212,7 @@
 }
 
 
-/* Style for all non-expandle code blocks */
+/* Code Block Styles */
 .md-typeset pre code,
 .md-typeset code {
   background-color: var(--admonition-bg-color);
@@ -279,7 +242,7 @@ pre:hover .md-clipboard {
   }
 }
 
-/** admonition styles */
+/* Admonition Styles */
 .md-typeset .admonition {
   background-color: var(--admonition-bg-color);
   border: 1px solid var(--admonition-border-color) !important;
@@ -292,13 +255,11 @@ pre:hover .md-clipboard {
   page-break-inside: avoid;
 }
 
-/** Admonition title styles */
 .md-typeset .admonition .admonition-title {
   background-color: transparent;
   padding-bottom: 0;
 }
 
-/** Admonition title icon styles */
 .md-typeset .admonition .admonition-title:before {
   background-color: var(--icon-fill-color);
 }
@@ -317,7 +278,7 @@ pre:hover .md-clipboard {
   box-shadow: none;
 }
 
-/* General text elements in code blocks */
+/* Codeblock Highlight Styles */
 .highlight .n /* Names */,
 .highlight .p /* Punctuation */,
 .highlight .o /* Operators */,
@@ -348,9 +309,39 @@ pre:hover .md-clipboard {
 .highlight .ch /* Hashbang comments */,
 .highlight .cm /* Multiline comments */,
 .highlight .cs /* Special comments */,
-.highlight .sd {
-  /* Docstrings */
+.highlight .sd /* Docstrings */
+{
   color: var(--text-secondary-color);
+}
+
+/* Desktop-specific styles for positioning the search box and header options */
+@media screen and (min-width: 76.2344em) {
+  .md-search,
+  .md-header__option,
+  .md-header__source {
+    transform: translateY(calc(100% + 24px));
+    z-index: 2;
+  }
+
+  /* Position the elements at tabs level with specific order */
+  .md-search {
+    order: 1;
+  }
+
+  .md-header__option {
+    order: 2;
+    margin: 0 16px;
+
+    .md-icon {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .md-header__source {
+    order: 3;
+    margin-left: -0.8rem !important;
+  }
 }
 
 /** MOBILE STYLES */

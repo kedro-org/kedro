@@ -62,7 +62,7 @@ p {
   color: var(--text-primary-color);
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 76.2344em) {
     body {
         font-size: 14px;
         line-height: 20px;

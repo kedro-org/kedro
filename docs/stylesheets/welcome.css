@@ -7,7 +7,7 @@
   background-color: var(--welcome-page-bg-color);
 }
 
-/* Header styles */
+/* Header Styles */
 .main-header {
   background-color: #ffcb05;
   padding: 0.75rem 0;
@@ -55,7 +55,8 @@
   gap: 1rem;
 }
 
-.search-small {
+/* Search Box */
+/* .search-small {
   position: relative;
 }
 
@@ -74,9 +75,9 @@
   top: 50%;
   transform: translateY(-50%);
   color: #666;
-}
+} */
 
-.theme-toggle,
+/* .theme-toggle,
 .github-link {
   background: none;
   border: none;
@@ -85,9 +86,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
+} */
 
-/* Container styles */
+/* Main Content */
 .container {
   width: 100%;
   display: flex;
@@ -95,13 +96,12 @@
   align-items: center;
 }
 
-/* Content header styles */
 .content-header {
   text-align: center;
   margin-bottom: 3rem;
 }
 
-/* Search bar */
+/* Search Container */
 .search-container {
   position: relative;
   max-width: 570px;
@@ -160,7 +160,7 @@
   font-size: 1rem;
 }
 
-/* Section styles */
+/* Section Styles */
 .cards-section-wrapper {
   background-color: var(--cards-section-bg-color);
   width: 100%;
@@ -178,7 +178,7 @@
   padding: 2rem 1rem;
 }
 
-/* Card grid */
+/* Card Grid */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -194,7 +194,7 @@
   max-width: 800px;
 }
 
-/* Card styles */
+/* Card Styles */
 .card {
   background-color: var(--card-bg-color);
   border: 2px solid var(--card-border-color);
@@ -242,7 +242,7 @@
   color: var(--text-primary-color);
 }
 
-/* Font */
+/* Typography for the Welcompage specifically*/
 .welcome-title {
   margin-top: 24px !important;
   font-weight: 600;
@@ -259,7 +259,7 @@
 }
 
 /* Mobile styles */
-@media (max-width: 768px) {
+@media screen and (max-width: 76.2344em)  {
   .card-grid,
   .news-grid {
     grid-template-columns: 1fr;
@@ -273,7 +273,7 @@
   .cards-section-wrapper section {
     padding: 0;
   }
-  
+
   .card {
     padding: 16px;
     display: flex;;

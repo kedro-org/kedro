@@ -15,7 +15,7 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any
 
 import kedro
-from kedro.pipeline.node import Node, _to_list
+from kedro.pipeline.node import GroupedNodes, Node, _to_list
 
 from .transcoding import _strip_transcoding, _transcode_split
 
@@ -542,32 +542,30 @@ class Pipeline:
         return [list(group) for group in self._toposorted_groups]
 
     @property
-    def grouped_nodes_by_namespace(self) -> dict[str, dict[str, Any]]:
-        """Return a dictionary of the pipeline nodes grouped by top-level namespace with
-        information about the nodes, their type, and dependencies. The structure of the dictionary is:
-        {'node_name/namespace_name' : {'name': 'node_name/namespace_name','type': 'namespace' or 'node','nodes': [list of nodes],'dependencies': [list of dependencies]}}
-        This property is intended to be used by deployment plugins to group nodes by namespace.
+    def grouped_nodes_by_namespace(self) -> list[GroupedNodes]:
+        """Return a list of grouped nodes by top-level namespace with
+        information about the nodes, their type, and dependencies.
+
+        This property is intended to be used by deployment plugins to group nodes by namespaces.
         """
-        grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
+        grouped_nodes_map: dict[str, GroupedNodes] = {}
 
         for node in self.nodes:
             key = node.namespace.split(".")[0] if node.namespace else node.name
 
-            if key not in grouped_nodes:
-                grouped_nodes[key] = {
-                    "name": key,
-                    "type": "namespace" if node.namespace else "node",
-                    "nodes": [],
-                    "dependencies": [],
-                }
+            if key not in grouped_nodes_map:
+                grouped_nodes_map[key] = GroupedNodes(
+                    name=key,
+                    type="namespace" if node.namespace else "node",
+                )
 
-            grouped_nodes[key]["nodes"].append(node)
+            grouped_nodes_map[key].nodes.append(node.name)
 
-            # Ensure dependencies are not duplicated on the returned list
-            dependencies = grouped_nodes[key]["dependencies"]
+            # Ensure dependencies are not duplicated
+            dependencies = grouped_nodes_map[key].dependencies
             unique_dependencies = set(dependencies)
 
-            for parent in self.node_dependencies[node]:
+            for parent in sorted(self.node_dependencies[node], key=lambda n: n.name):
                 parent_key = (
                     parent.namespace.split(".")[0] if parent.namespace else parent.name
                 )
@@ -575,7 +573,7 @@ class Pipeline:
                     dependencies.append(parent_key)
                     unique_dependencies.add(parent_key)
 
-        return grouped_nodes
+        return list(grouped_nodes_map.values())
 
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified

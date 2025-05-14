@@ -44,7 +44,7 @@ from kedro.framework.hooks.manager import (
     _register_hooks_entry_points,
 )
 from kedro.framework.project import settings
-from kedro.io import AbstractDataset, KedroDataCatalog
+from kedro.io import AbstractDataset, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import AbstractRunner, run_node
@@ -117,7 +117,7 @@ class DaskRunner(AbstractRunner):
     @staticmethod
     def _run_node(
         node: Node,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
         is_async: bool = False,
         session_id: str = None,
         *dependencies: Node,
@@ -133,7 +133,7 @@ class DaskRunner(AbstractRunner):
 
         Args:
             node: The ``Node`` to run.
-            catalog: A ``KedroDataCatalog`` containing the node's inputs and outputs.
+            catalog: A ``DataCatalog`` containing the node's inputs and outputs.
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
             session_id: The session id of the pipeline run.
@@ -152,7 +152,7 @@ class DaskRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
         hook_manager: PluginManager,
         session_id: str = None,
     ) -> None:
@@ -193,7 +193,7 @@ class DaskRunner(AbstractRunner):
                     catalog.release(dataset)
 
     def run_only_missing(
-        self, pipeline: Pipeline, catalog: KedroDataCatalog
+        self, pipeline: Pipeline, catalog: DataCatalog
     ) -> Dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
         datasets provided by ``catalog``, and save results back to the
@@ -201,14 +201,14 @@ class DaskRunner(AbstractRunner):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``KedroDataCatalog`` from which to fetch data.
+            catalog: The ``DataCatalog`` from which to fetch data.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be
                 satisfied.
 
         Returns:
             Any node outputs that cannot be processed by the
-            ``KedroDataCatalog``. These are returned in a dictionary, where
+            ``DataCatalog``. These are returned in a dictionary, where
             the keys are defined by the node outputs.
         """
         free_outputs = pipeline.outputs() - set(catalog.list())

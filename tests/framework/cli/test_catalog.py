@@ -3,7 +3,7 @@ import yaml
 from click.testing import CliRunner
 from kedro_datasets.pandas import CSVDataset
 
-from kedro.io import KedroDataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node, pipeline
 
 
@@ -211,7 +211,7 @@ class TestCatalogListCommand:
             "not_used": CSVDataset(filepath="test2.csv"),
         }
 
-        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
             "datasets",
@@ -253,7 +253,7 @@ class TestCatalogListCommand:
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         catalog_datasets = {"some_dataset": CSVDataset(filepath="test.csv")}
-        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
             "datasets",
@@ -297,7 +297,7 @@ class TestCatalogListCommand:
     #     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     #     mocked_context = fake_load_context.return_value
 
-    #     mocked_context.catalog = KedroDataCatalog.from_config(
+    #     mocked_context.catalog = DataCatalog.from_config(
     #         catalog=fake_catalog_config, credentials=fake_credentials_config
     #     )
     #     mocker.patch.object(
@@ -427,7 +427,7 @@ class TestCatalogCreateCommand:
             "input_data": CSVDataset(filepath="test.csv"),
             "output_data": CSVDataset(filepath="test2.csv"),
         }
-        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocked_context.project_path = fake_repo_path
         mock_pipelines[self.PIPELINE_NAME] = pipeline(
             [node(identity, "input_data", "output_data")]
@@ -499,7 +499,7 @@ class TestCatalogFactoryCommands:
     ):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
-        mocked_context.catalog = KedroDataCatalog.from_config(
+        mocked_context.catalog = DataCatalog.from_config(
             fake_catalog_with_overlapping_factories
         )
         result = CliRunner().invoke(
@@ -530,7 +530,7 @@ class TestCatalogFactoryCommands:
             "intermediate": MemoryDataset(),
             "not_used": CSVDataset(filepath="test2.csv"),
         }
-        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
 
         result = CliRunner().invoke(
             fake_project_cli, ["catalog", "rank"], obj=fake_metadata
@@ -559,7 +559,7 @@ class TestCatalogFactoryCommands:
             "credentials": fake_credentials_config,
         }
         mocked_context._get_config_credentials.return_value = fake_credentials_config
-        mocked_context.catalog = KedroDataCatalog.from_config(
+        mocked_context.catalog = DataCatalog.from_config(
             catalog=fake_catalog_config, credentials=fake_credentials_config
         )
         placeholder_ds = mocked_context.catalog.config_resolver.list_patterns()
@@ -598,7 +598,7 @@ class TestCatalogFactoryCommands:
         mocked_context.project_path = fake_metadata.project_path
 
         mocked_context.config_loader = {"catalog": fake_catalog_config_with_factories}
-        mocked_context.catalog = KedroDataCatalog.from_config(
+        mocked_context.catalog = DataCatalog.from_config(
             fake_catalog_config_with_factories
         )
 
@@ -646,7 +646,7 @@ class TestCatalogFactoryCommands:
         }
 
         mocked_context.config_loader = {"catalog": catalog_config}
-        mocked_context.catalog = KedroDataCatalog(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
 
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],

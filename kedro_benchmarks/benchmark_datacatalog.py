@@ -1,7 +1,7 @@
 import pandas as pd
 from kedro_datasets.pandas import CSVDataset
 
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
 base_catalog = {
     f"dataset_{i}": {
@@ -31,9 +31,9 @@ runtime_patterns = {
     }
 }
 
-class TimeKedroDataCatalog:
+class TimeDataCatalog:
     def setup(self):
-        self.catalog = KedroDataCatalog.from_config(base_catalog)
+        self.catalog = DataCatalog.from_config(base_catalog)
         self.dataframe = pd.DataFrame({"column": [1, 2, 3]})
         self.dataframe.to_csv("data.csv", index=False)
         self.datasets = {
@@ -45,7 +45,7 @@ class TimeKedroDataCatalog:
 
     def time_init(self):
         """Benchmark the time to initialize the catalog"""
-        KedroDataCatalog.from_config(base_catalog)
+        DataCatalog.from_config(base_catalog)
 
     def time_contains(self):
         """Benchmark the time to check if a dataset exists"""

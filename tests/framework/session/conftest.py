@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from kedro.framework.context.context import KedroContext
-    from kedro.io import KedroDataCatalog
+    from kedro.io import DataCatalog
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +171,7 @@ class LoggingHooks:
     @hook_impl
     def after_catalog_created(
         self,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
         parameters: dict[str, Any],
@@ -194,7 +194,7 @@ class LoggingHooks:
     def before_node_run(
         self,
         node: Node,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
         inputs: dict[str, Any],
         is_async: str,
         session_id: str,
@@ -214,7 +214,7 @@ class LoggingHooks:
     def after_node_run(
         self,
         node: Node,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
         inputs: dict[str, Any],
         outputs: dict[str, Any],
         is_async: str,
@@ -237,7 +237,7 @@ class LoggingHooks:
         self,
         error: Exception,
         node: Node,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
         inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
@@ -256,7 +256,7 @@ class LoggingHooks:
 
     @hook_impl
     def before_pipeline_run(
-        self, run_params: dict[str, Any], pipeline: Pipeline, catalog: KedroDataCatalog
+        self, run_params: dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         logger.info(
             "About to run pipeline",
@@ -269,7 +269,7 @@ class LoggingHooks:
         run_params: dict[str, Any],
         run_result: dict[str, Any],
         pipeline: Pipeline,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
     ) -> None:
         logger.info(
             "Ran pipeline",
@@ -287,7 +287,7 @@ class LoggingHooks:
         error: Exception,
         run_params: dict[str, Any],
         pipeline: Pipeline,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
     ) -> None:
         logger.info(
             "Pipeline error",

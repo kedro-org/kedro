@@ -447,9 +447,11 @@ The `Pipeline` class takes the following arguments that allow you to create a re
 
 | Keyword argument | Description                                                                         |
 | ---------------- | ----------------------------------------------------------------------------------- |
+| `nodes `         | Nodes that will be part of the reusable pipeline                                    |
 | `inputs`         | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
 | `outputs`        | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
 | `parameters`     | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
+| `tags`           | Optional set of tags to be applied to all the pipeline nodes                        |
 | `namespace`      | The namespace that will be encapsulated by this pipeline instance                   |
 
 

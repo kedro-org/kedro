@@ -634,7 +634,7 @@ class Pipeline:
 
         con_components: dict[str, int] = {node.name: -1 for node in self.nodes}
 
-        def dfs(n: str, component: int):
+        def dfs(n: str, component: int) -> None:
             if con_components[n] != -1:
                 return
             con_components[n] = component

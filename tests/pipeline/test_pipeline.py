@@ -543,6 +543,19 @@ class TestValidPipeline:
 
         assert grouped == expected
 
+    def test_group_by_memory_raises_without_memory_datasets(
+        self, pipeline_with_namespace_simple
+    ):
+        with pytest.raises(
+            ValueError,
+            match="'memory_datasets' must be provided when grouping by memory.",
+        ):
+            pipeline_with_namespace_simple.grouped_nodes_custom(group_by="memory")
+
+    def test_group_by_unsupported_strategy(self, pipeline_with_namespace_simple):
+        with pytest.raises(ValueError, match="Unsupported group_by strategy: unknown"):
+            pipeline_with_namespace_simple.grouped_nodes_custom(group_by="unknown")
+
     def test_node_grouping_by_namespace_nested(self, request):
         """Test that nested namespaces are grouped only on first level."""
         p = request.getfixturevalue("pipeline_with_namespace_nested")

@@ -415,7 +415,7 @@ class TestValidPipeline:
                     ),
                     GroupedNodes(
                         name="node_3",
-                        type="node",
+                        type="nodes",
                         nodes=["node_3"],
                         dependencies=["namespace_1"],
                     ),
@@ -427,7 +427,7 @@ class TestValidPipeline:
                     ),
                     GroupedNodes(
                         name="node_6",
-                        type="node",
+                        type="nodes",
                         nodes=["node_6"],
                         dependencies=["namespace_2"],
                     ),
@@ -438,43 +438,43 @@ class TestValidPipeline:
                 [
                     GroupedNodes(
                         name="f1",
-                        type="node",
+                        type="nodes",
                         nodes=["f1"],
                         dependencies=[],
                     ),
                     GroupedNodes(
                         name="f2",
-                        type="node",
+                        type="nodes",
                         nodes=["f2"],
                         dependencies=["f1"],
                     ),
                     GroupedNodes(
                         name="f3",
-                        type="node",
+                        type="nodes",
                         nodes=["f3"],
                         dependencies=["f2"],
                     ),
                     GroupedNodes(
                         name="f4",
-                        type="node",
+                        type="nodes",
                         nodes=["f4"],
                         dependencies=["f2"],
                     ),
                     GroupedNodes(
                         name="f5",
-                        type="node",
+                        type="nodes",
                         nodes=["f5"],
                         dependencies=["f2"],
                     ),
                     GroupedNodes(
                         name="f6",
-                        type="node",
+                        type="nodes",
                         nodes=["f6"],
                         dependencies=["f4"],
                     ),
                     GroupedNodes(
                         name="f7",
-                        type="node",
+                        type="nodes",
                         nodes=["f7"],
                         dependencies=["f2", "f4"],
                     ),
@@ -488,6 +488,58 @@ class TestValidPipeline:
         """Test that grouped_nodes_by_namespace returns correct GroupedNodes list with name, type and node names and dependencies."""
         p = request.getfixturevalue(pipeline_name)
         grouped = p.grouped_nodes_custom(group_by="namespace")
+
+        assert grouped == expected
+
+    def test_node_grouping_by_none(self, pipeline_with_namespace_simple):
+        grouped = pipeline_with_namespace_simple.grouped_nodes_custom(group_by=None)
+
+        expected = [
+            GroupedNodes(
+                name=n.name,
+                type="nodes",
+                nodes=[n.name],
+                dependencies=[
+                    p.name for p in pipeline_with_namespace_simple.node_dependencies[n]
+                ],
+            )
+            for n in pipeline_with_namespace_simple.nodes
+        ]
+
+        assert grouped == expected
+
+    def test_node_grouping_by_memory(self, pipeline_with_namespace_simple):
+        memory_datasets = {"B", "E", "F"}
+
+        grouped = pipeline_with_namespace_simple.grouped_nodes_custom(
+            group_by="memory",
+            memory_datasets=memory_datasets,
+        )
+
+        expected = [
+            GroupedNodes(
+                name="namespace_1.node_1_namespace_1.node_2",
+                type="nodes",
+                nodes=["namespace_1.node_1", "namespace_1.node_2"],
+                dependencies=[],
+            ),
+            GroupedNodes(
+                name="namespace_1.node_3",
+                type="nodes",
+                nodes=["namespace_1.node_3"],
+                dependencies=["namespace_1.node_1_namespace_1.node_2"],
+            ),
+            GroupedNodes(
+                name="namespace_2.node_4_namespace_2.node_5_namespace_2.node_6",
+                type="nodes",
+                nodes=[
+                    "namespace_2.node_4",
+                    "namespace_2.node_5",
+                    "namespace_2.node_6",
+                ],
+                dependencies=["namespace_1.node_3"],
+            ),
+        ]
 
         assert grouped == expected
 

@@ -542,16 +542,18 @@ class Pipeline:
         return [list(group) for group in self._toposorted_groups]
 
     def grouped_nodes_custom(
-        self, group_by: str | None = "namespace", catalog: Any = None
+        self,
+        group_by: str | None = "namespace",
+        memory_datasets: set[str] | None = None,
     ) -> list[GroupedNodes]:
         """Return a list of grouped nodes based on the specified strategy.
 
         Args:
             group_by: Strategy for grouping. Supported values:
                 - "namespace": Groups nodes by their top-level namespace.
-                - "memory": Groups nodes connected via MemoryDatasets.
+                - "memory": Groups nodes connected via datasets from the provided `memory_datasets` set.
                 - None or "none": No grouping, each node is its own group.
-            catalog: Required when group_by is "memory". Used to identify memory datasets.
+            memory_datasets: Required when group_by is "memory". A set of dataset names considered in-memory (not persisted).
 
         Returns:
             A list of GroupedNodes instances.
@@ -561,16 +563,18 @@ class Pipeline:
         if group_by.lower() == "namespace":
             return self._group_by_namespace()
         if group_by.lower() == "memory":
-            if catalog is None:
-                raise ValueError("'catalog' must be provided when grouping by memory.")
-            return self._group_by_memory(catalog)
+            if memory_datasets is None:
+                raise ValueError(
+                    "'memory_datasets' must be provided when grouping by memory."
+                )
+            return self._group_by_memory(memory_datasets)
         raise ValueError(f"Unsupported group_by strategy: {group_by}")
 
     def _group_by_none(self) -> list[GroupedNodes]:
         return [
             GroupedNodes(
                 name=node.name,
-                type="node",
+                type="nodes",
                 nodes=[node.name],
                 dependencies=[
                     parent.name
@@ -591,7 +595,7 @@ class Pipeline:
             if key not in grouped_nodes_map:
                 grouped_nodes_map[key] = GroupedNodes(
                     name=key,
-                    type="namespace" if node.namespace else "node",
+                    type="namespace" if node.namespace else "nodes",
                 )
 
             grouped_nodes_map[key].nodes.append(node.name)
@@ -610,13 +614,7 @@ class Pipeline:
         return list(grouped_nodes_map.values())
 
     # ruff: noqa: PLR0912
-    def _group_by_memory(self, catalog: Any) -> list[GroupedNodes]:
-        memory_datasets = {
-            name
-            for name, ds in catalog._data_sets.items()
-            if getattr(ds, "_is_memory", False)
-        }
-
+    def _group_by_memory(self, memory_datasets: set[str]) -> list[GroupedNodes]:
         adj_list: dict[str, set[str]] = {node.name: set() for node in self.nodes}
         parent_to_children: dict[str, set[str]] = {
             node.name: set() for node in self.nodes
@@ -661,7 +659,7 @@ class Pipeline:
             for node_name in group:
                 node_to_group[node_name] = group_name
             group_map[group_name] = GroupedNodes(
-                name=group_name, type="node", nodes=group, dependencies=[]
+                name=group_name, type="nodes", nodes=group, dependencies=[]
             )
 
         for parent, children in parent_to_children.items():

@@ -107,7 +107,7 @@ class TestCliCommands:
 
         entry_point.load.assert_not_called()
 
-    # [TODO: Revert back once kedro telemetry supports KedroDataCatalog]
+    # [TODO: Revert back once kedro telemetry supports DataCatalog]
     # def test_info_only_kedro_telemetry_plugin_installed(self):
     #     result = CliRunner().invoke(cli, ["info"])
     #     assert result.exit_code == 0

@@ -177,17 +177,17 @@ If you have defined an implementation for the Kedro `before_dataset_saved`/`afte
 ```
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(
+        Node(
             func=process_barometer_data, inputs="temperature", outputs="weather@spark"
         ),
-        node(
+        Node(
             func=update_meterological_state,
             inputs="weather@delta",
             outputs="first_operation_complete",
         ),
-        node(
+        Node(
             func=estimate_weather_trend,
             inputs=["first_operation_complete", "weather@delta"],
             outputs="second_operation_complete",
@@ -199,10 +199,10 @@ pipeline(
 `first_operation_complete` is a `MemoryDataset` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node can simply not return anything:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(func=..., inputs="temperature", outputs="weather@spark"),
-        node(func=..., inputs="weather@delta", outputs=None),
+        Node(func=..., inputs="temperature", outputs="weather@spark"),
+        Node(func=..., inputs="weather@delta", outputs=None),
     ]
 )
 ```

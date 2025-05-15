@@ -89,7 +89,7 @@ def evaluate_model(
 
 ## Input parameter configuration
 
-Parameters that are used by the `KedroDataCatalog` when the pipeline executes are stored in `conf/base/parameters_data_science.yml`:
+Parameters that are used by the `DataCatalog` when the pipeline executes are stored in `conf/base/parameters_data_science.yml`:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -142,21 +142,21 @@ from .nodes import evaluate_model, split_data, train_model
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
-            node(
+            Node(
                 func=split_data,
                 inputs=["model_input_table", "params:model_options"],
                 outputs=["X_train", "X_test", "y_train", "y_test"],
                 name="split_data_node",
             ),
-            node(
+            Node(
                 func=train_model,
                 inputs=["X_train", "y_train"],
                 outputs="regressor",
                 name="train_model_node",
             ),
-            node(
+            Node(
                 func=evaluate_model,
                 inputs=["regressor", "X_test", "y_test"],
                 outputs=None,

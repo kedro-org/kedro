@@ -1,6 +1,6 @@
-"""``KedroDataCatalog`` stores instances of ``AbstractDataset`` implementations to
+"""``DataCatalog`` stores instances of ``AbstractDataset`` implementations to
 provide ``load`` and ``save`` capabilities from anywhere in the program. To
-use a ``KedroDataCatalog``, you need to instantiate it with a dictionary of datasets.
+use a ``DataCatalog``, you need to instantiate it with a dictionary of datasets.
 Then it will act as a single point of reference for your calls, relaying load and
 save functions to the underlying datasets.
 """
@@ -55,7 +55,7 @@ class _LazyDataset:
         )
 
 
-class KedroDataCatalog(CatalogProtocol):
+class DataCatalog(CatalogProtocol):
     def __init__(
         self,
         datasets: dict[str, AbstractDataset] | None = None,
@@ -64,14 +64,14 @@ class KedroDataCatalog(CatalogProtocol):
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> None:
-        """``KedroDataCatalog`` stores instances of ``AbstractDataset``
+        """``DataCatalog`` stores instances of ``AbstractDataset``
         implementations to provide ``load`` and ``save`` capabilities from
-        anywhere in the program. To use a ``KedroDataCatalog``, you need to
+        anywhere in the program. To use a ``DataCatalog``, you need to
         instantiate it with a dictionary of datasets. Then it will act as a
         single point of reference for your calls, relaying load and save
         functions to the underlying datasets.
 
-        Note: ``KedroDataCatalog`` is an experimental feature and is under active development.
+        Note: ``DataCatalog`` is an experimental feature and is under active development.
         Therefore, it is possible we'll introduce breaking changes to this class, so be mindful
         of that if you decide to use it already.
 
@@ -96,7 +96,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> catalog = KedroDataCatalog(datasets={"cars": cars})
+            >>> catalog = DataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver()
         self._datasets: dict[str, AbstractDataset] = datasets or {}
@@ -175,7 +175,7 @@ class KedroDataCatalog(CatalogProtocol):
         return self.get(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """Add dataset to the ``KedroDataCatalog`` using the given key as a datsets name
+        """Add dataset to the ``DataCatalog`` using the given key as a datsets name
         and the provided data as the value.
 
         The value can either be raw data or a Kedro dataset (i.e., an instance of a class
@@ -196,7 +196,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>>                    "col2": [4, 5],
             >>>                    "col3": [5, 6]})
             >>>
-            >>> catalog = KedroDataCatalog()
+            >>> catalog = DataCatalog()
             >>> catalog["data_df"] = df  # Add raw data as a MemoryDataset
             >>>
             >>> assert catalog.load("data_df").equals(df)
@@ -282,10 +282,10 @@ class KedroDataCatalog(CatalogProtocol):
         credentials: dict[str, dict[str, Any]] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
-    ) -> KedroDataCatalog:
-        """Create a ``KedroDataCatalog`` instance from configuration. This is a
+    ) -> DataCatalog:
+        """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
-        ``KedroDataCatalog`` with configuration parsed from configuration files.
+        ``DataCatalog`` with configuration parsed from configuration files.
 
         Args:
             catalog: A dictionary whose keys are the dataset names and
@@ -308,7 +308,7 @@ class KedroDataCatalog(CatalogProtocol):
                 sorted in lexicographical order.
 
         Returns:
-            An instantiated ``KedroDataCatalog`` containing all specified
+            An instantiated ``DataCatalog`` containing all specified
             datasets, created and ready to use.
 
         Raises:
@@ -345,7 +345,7 @@ class KedroDataCatalog(CatalogProtocol):
             >>>      }
             >>> }
             >>>
-            >>> catalog = KedroDataCatalog.from_config(config, credentials)
+            >>> catalog = DataCatalog.from_config(config, credentials)
             >>>
             >>> df = catalog.load("cars")
             >>> catalog.save("boats", df)
@@ -384,7 +384,7 @@ class KedroDataCatalog(CatalogProtocol):
         str | None,
     ]:
         """
-        Converts the `KedroDataCatalog` instance into a configuration format suitable for
+        Converts the `DataCatalog` instance into a configuration format suitable for
         serialization. This includes datasets, credentials, and versioning information.
 
         This method is only applicable to catalogs that contain datasets initialized with static, primitive
@@ -402,7 +402,7 @@ class KedroDataCatalog(CatalogProtocol):
         Example:
         ::
 
-            >>> from kedro.io import KedroDataCatalog
+            >>> from kedro.io import DataCatalog
             >>> from kedro_datasets.pandas import CSVDataset
             >>>
             >>> cars = CSVDataset(
@@ -410,11 +410,11 @@ class KedroDataCatalog(CatalogProtocol):
             >>>     load_args=None,
             >>>     save_args={"index": False}
             >>> )
-            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
             >>>
             >>> config, credentials, load_versions, save_version = catalog.to_config()
             >>>
-            >>> new_catalog = KedroDataCatalog.from_config(config, credentials, load_versions, save_version)
+            >>> new_catalog = DataCatalog.from_config(config, credentials, load_versions, save_version)
         """
         catalog: dict[str, dict[str, Any]] = {}
         credentials: dict[str, dict[str, Any]] = {}
@@ -507,7 +507,7 @@ class KedroDataCatalog(CatalogProtocol):
         ::
 
             >>> import re
-            >>> catalog = KedroDataCatalog()
+            >>> catalog = DataCatalog()
             >>> # get datasets where the substring 'raw' is present
             >>> raw_data = catalog.filter(name_regex='raw')
             >>> # get datasets where names start with 'model_' (precompiled regex)
@@ -575,13 +575,13 @@ class KedroDataCatalog(CatalogProtocol):
 
             >>> import pandas as pd
             >>>
-            >>> from kedro.io import KedroDataCatalog
+            >>> from kedro.io import DataCatalog
             >>> from kedro_datasets.pandas import CSVDataset
             >>>
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
             >>>
             >>> df = pd.DataFrame({'col1': [1, 2],
             >>>                    'col2': [4, 5],
@@ -617,13 +617,13 @@ class KedroDataCatalog(CatalogProtocol):
         Example:
         ::
 
-            >>> from kedro.io import KedroDataCatalog
+            >>> from kedro.io import DataCatalog
             >>> from kedro_datasets.pandas import CSVDataset
             >>>
             >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> catalog = KedroDataCatalog(datasets={'cars': cars})
+            >>> catalog = DataCatalog(datasets={'cars': cars})
             >>>
             >>> df = catalog.load("cars")
         """

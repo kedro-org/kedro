@@ -29,7 +29,7 @@ The function has two inputs (`x` and `y`) and a single output (the sum of the in
 Here is how a node is created with this function:
 
 ```python
-adder_node = node(func=add, inputs=["a", "b"], outputs="sum")
+adder_node = Node(func=add, inputs=["a", "b"], outputs="sum")
 adder_node
 ```
 
@@ -42,10 +42,10 @@ Out[1]: Node(add, ['a', 'b'], 'sum', None)
 You can also add labels to nodes, which will be used to describe them in logs:
 
 ```python
-adder_node = node(func=add, inputs=["a", "b"], outputs="sum")
+adder_node = Node(func=add, inputs=["a", "b"], outputs="sum")
 print(str(adder_node))
 
-adder_node = node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b")
+adder_node = Node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b")
 print(str(adder_node))
 ```
 
@@ -86,7 +86,7 @@ A syntax describes function inputs and outputs. This syntax allows different Pyt
 | `['a', 'b']`               | List output       | `return [a, b]`                     |
 | `dict(key1='a', key2='b')` | Dictionary output | `return dict(key1=a, key2=b)`       |
 
-Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output must be provided).
+Any combinations of the above are possible, except nodes of the form `Node(f, None, None)` (at least a single input or output must be provided).
 
 ## `*args` node functions
 It is common to have functions that take an arbitrary number of inputs, like a function that combines multiple dataframes. You can use the `*args` argument in the node function, while simply declaring the names of the datasets in the node's inputs.

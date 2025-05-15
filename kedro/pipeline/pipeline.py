@@ -541,13 +541,48 @@ class Pipeline:
 
         return [list(group) for group in self._toposorted_groups]
 
-    @property
-    def grouped_nodes_by_namespace(self) -> list[GroupedNodes]:
-        """Return a list of grouped nodes by top-level namespace with
-        information about the nodes, their type, and dependencies.
+    def grouped_nodes_custom(
+        self, group_by: str | None = "namespace", catalog: Any = None
+    ) -> list[GroupedNodes]:
+        """Return a list of grouped nodes based on the specified strategy.
 
-        This property is intended to be used by deployment plugins to group nodes by namespaces.
+        Args:
+            group_by: Strategy for grouping. Supported values:
+                - "namespace": Groups nodes by their top-level namespace.
+                - "memory": Groups nodes connected via MemoryDatasets.
+                - None or "none": No grouping, each node is its own group.
+            catalog: Required when group_by is "memory". Used to identify memory datasets.
+
+        Returns:
+            A list of GroupedNodes instances.
         """
+        if group_by is None or group_by.lower() == "none":
+            return self._group_by_none()
+        if group_by.lower() == "namespace":
+            return self._group_by_namespace()
+        if group_by.lower() == "memory":
+            if catalog is None:
+                raise ValueError("'catalog' must be provided when grouping by memory.")
+            return self._group_by_memory(catalog)
+        raise ValueError(f"Unsupported group_by strategy: {group_by}")
+
+    def _group_by_none(self) -> list[GroupedNodes]:
+        return [
+            GroupedNodes(
+                name=node.name,
+                type="node",
+                nodes=[node.name],
+                dependencies=[
+                    parent.name
+                    for parent in sorted(
+                        self.node_dependencies[node], key=lambda n: n.name
+                    )
+                ],
+            )
+            for node in self.nodes
+        ]
+
+    def _group_by_namespace(self) -> list[GroupedNodes]:
         grouped_nodes_map: dict[str, GroupedNodes] = {}
 
         for node in self.nodes:
@@ -561,7 +596,6 @@ class Pipeline:
 
             grouped_nodes_map[key].nodes.append(node.name)
 
-            # Ensure dependencies are not duplicated
             dependencies = grouped_nodes_map[key].dependencies
             unique_dependencies = set(dependencies)
 
@@ -574,6 +608,72 @@ class Pipeline:
                     unique_dependencies.add(parent_key)
 
         return list(grouped_nodes_map.values())
+
+    # ruff: noqa: PLR0912
+    def _group_by_memory(self, catalog: Any) -> list[GroupedNodes]:
+        memory_datasets = {
+            name
+            for name, ds in catalog._data_sets.items()
+            if getattr(ds, "_is_memory", False)
+        }
+
+        adj_list: dict[str, set[str]] = {node.name: set() for node in self.nodes}
+        parent_to_children: dict[str, set[str]] = {
+            node.name: set() for node in self.nodes
+        }
+        output_to_node = {
+            output: node for node in self.nodes for output in node.outputs
+        }
+
+        for node in self.nodes:
+            for input_ in node.inputs:
+                if input_ in output_to_node:
+                    parent_name = output_to_node[input_].name
+                    parent_to_children[parent_name].add(node.name)
+                    if input_ in memory_datasets:
+                        adj_list[node.name].add(parent_name)
+                        adj_list[parent_name].add(node.name)
+
+        con_components: dict[str, int] = {node.name: -1 for node in self.nodes}
+
+        def dfs(n: str, component: int):
+            if con_components[n] != -1:
+                return
+            con_components[n] = component
+            for neighbour in adj_list[n]:
+                dfs(neighbour, component)
+
+        component_id = 0
+        for node_name in adj_list:
+            if con_components[node_name] == -1:
+                dfs(node_name, component_id)
+                component_id += 1
+
+        groups: list[list[str]] = [[] for _ in range(component_id)]
+        for node_name, comp_id in con_components.items():
+            groups[comp_id].append(node_name)
+
+        node_to_group: dict[str, str] = {}
+        group_map: dict[str, GroupedNodes] = {}
+
+        for group in groups:
+            group_name = "_".join(sorted(group))
+            for node_name in group:
+                node_to_group[node_name] = group_name
+            group_map[group_name] = GroupedNodes(
+                name=group_name, type="node", nodes=group, dependencies=[]
+            )
+
+        for parent, children in parent_to_children.items():
+            parent_group = node_to_group[parent]
+            for child in children:
+                child_group = node_to_group[child]
+                if parent_group != child_group:
+                    deps = group_map[child_group].dependencies
+                    if parent_group not in deps:
+                        deps.append(parent_group)
+
+        return list(group_map.values())
 
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified

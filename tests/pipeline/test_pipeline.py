@@ -487,14 +487,14 @@ class TestValidPipeline:
     ):
         """Test that grouped_nodes_by_namespace returns correct GroupedNodes list with name, type and node names and dependencies."""
         p = request.getfixturevalue(pipeline_name)
-        grouped = p.grouped_nodes_by_namespace
+        grouped = p.grouped_nodes_custom(group_by="namespace")
 
         assert grouped == expected
 
     def test_node_grouping_by_namespace_nested(self, request):
         """Test that nested namespaces are grouped only on first level."""
         p = request.getfixturevalue("pipeline_with_namespace_nested")
-        grouped = p.grouped_nodes_by_namespace
+        grouped = p.grouped_nodes_custom(group_by="namespace")
 
         assert {g.name for g in grouped} == {"level1_1", "level1_2"}
 

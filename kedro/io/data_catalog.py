@@ -230,7 +230,7 @@ class DataCatalog(CatalogProtocol):
     def get(
         self,
         key: str,
-        fallback_to_runtime_pattern=False,
+        fallback_to_runtime_pattern: bool = False,
         version: Version | None = None,
     ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.

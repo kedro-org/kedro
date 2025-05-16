@@ -251,11 +251,11 @@ class DataCatalog(CatalogProtocol):
         Returns:
             An instance of AbstractDataset.
         """
-        if key in self or fallback_to_runtime_pattern:
+        if key not in self and not fallback_to_runtime_pattern:
+            raise DatasetNotFoundError(f"Dataset '{key}' not found in the catalog")
+        elif not (key in self._datasets or key in self._lazy_datasets):
             ds_config = self._config_resolver.resolve_pattern(key)
             self._add_from_config(key, ds_config)
-        else:
-            raise DatasetNotFoundError(f"Dataset '{key}' not found in the catalog")
 
         lazy_dataset = self._lazy_datasets.pop(key, None)
         if lazy_dataset:

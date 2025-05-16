@@ -154,11 +154,11 @@ class DataCatalog(CatalogProtocol):
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """List all datasets registered in the catalog."""
-        return [self.get(key) for key in self]
+        return [self[key] for key in self]
 
     def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
         """List all dataset names and datasets registered in the catalog."""
-        return [(key, self.get(key)) for key in self]
+        return [(key, self[key]) for key in self]
 
     def __iter__(self) -> Iterator[str]:
         yield from self.keys()
@@ -244,13 +244,18 @@ class DataCatalog(CatalogProtocol):
             fallback_to_runtime_pattern: Whether to use runtime pattern to resolve dataset.
             version: Optional argument to get a specific version of the dataset.
 
+        Raises:
+            DatasetError: When the dataset in not in the internal collection, does not match
+                dataset pattern and fallback_to_runtime_pattern is set to False.
 
         Returns:
             An instance of AbstractDataset.
         """
-        if key not in self._datasets and key not in self._lazy_datasets:
+        if key in self or fallback_to_runtime_pattern:
             ds_config = self._config_resolver.resolve_pattern(key)
             self._add_from_config(key, ds_config)
+        else:
+            raise DatasetNotFoundError(f"Dataset '{key}' not found in the catalog")
 
         lazy_dataset = self._lazy_datasets.pop(key, None)
         if lazy_dataset:
@@ -599,10 +604,7 @@ class DataCatalog(CatalogProtocol):
             >>>                    'col3': [5, 6]})
             >>> catalog.save("cars", df)
         """
-        if ds_name not in self:
-            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
-
-        dataset = self.get(ds_name)
+        dataset = self[ds_name]
 
         self._logger.info(
             "Saving data to %s (%s)...",
@@ -642,8 +644,6 @@ class DataCatalog(CatalogProtocol):
             >>> df = catalog.load("cars")
         """
         load_version = Version(version, None) if version else None
-        if ds_name not in self:
-            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
         dataset = self.get(ds_name, version=load_version)
 
         self._logger.info(
@@ -663,10 +663,7 @@ class DataCatalog(CatalogProtocol):
             DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
         """
-        if ds_name not in self:
-            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
-
-        dataset = self.get(ds_name)
+        dataset = self[ds_name]
 
         dataset.release()
 
@@ -675,13 +672,13 @@ class DataCatalog(CatalogProtocol):
         Args:
             ds_name: Name of the dataset.
         Raises:
+            DatasetNotFoundError: When a dataset with the given name
+                has not yet been registered
             DatasetError: When the dataset does not have `confirm` method.
         """
         self._logger.info("Confirming dataset '%s'", ds_name)
-        if ds_name not in self:
-            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
 
-        dataset = self.get(ds_name)
+        dataset = self[ds_name]
 
         if hasattr(dataset, "confirm"):
             dataset.confirm()
@@ -696,14 +693,15 @@ class DataCatalog(CatalogProtocol):
         Args:
             ds_name: A dataset to be checked.
 
+        Raises:
+            DatasetNotFoundError: When a dataset with the given name
+                has not yet been registered
+
         Returns:
             Whether the dataset output exists.
 
         """
-        if ds_name not in self:
-            return False
-
-        dataset = self.get(ds_name)
+        dataset = self[ds_name]
 
         return dataset.exists()
 

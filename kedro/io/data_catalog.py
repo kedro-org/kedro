@@ -133,7 +133,7 @@ class DataCatalog(CatalogProtocol):
         return (
             dataset_name in self._datasets
             or dataset_name in self._lazy_datasets
-            or self._config_resolver.match_pattern(dataset_name) is not None
+            or self._config_resolver.match_dataset_pattern(dataset_name) is not None
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
@@ -230,6 +230,7 @@ class DataCatalog(CatalogProtocol):
     def get(
         self,
         key: str,
+        fallback_to_runtime_pattern=False,
         version: Version | None = None,
     ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
@@ -240,7 +241,9 @@ class DataCatalog(CatalogProtocol):
 
         Args:
             key: A dataset name.
+            fallback_to_runtime_pattern: Whether to use runtime pattern to resolve dataset.
             version: Optional argument to get a specific version of the dataset.
+
 
         Returns:
             An instance of AbstractDataset.
@@ -356,7 +359,7 @@ class DataCatalog(CatalogProtocol):
             for ds_name in load_versions
             if not (
                 ds_name in config_resolver.config
-                or config_resolver.match_pattern(ds_name)
+                or config_resolver.match_dataset_pattern(ds_name)
             )
         ]
         if missing_keys:

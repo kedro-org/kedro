@@ -34,7 +34,7 @@ class CatalogCommandsMixin:
             patterns_ds = set()
             default_ds = set()
             for ds_name in pipeline_ds - catalog_ds:
-                if self.config_resolver.match_pattern(ds_name):
+                if self.config_resolver.match_dataset_pattern(ds_name):
                     patterns_ds.add(ds_name)
                 else:
                     default_ds.add(ds_name)

@@ -209,13 +209,13 @@ class CatalogConfigResolver:
     def _get_matches(cls, pattens: Iterable[str], ds_name: str) -> Generator[str]:
         return (pattern for pattern in pattens if parse(pattern, ds_name))
 
-    def match_pattern(self, ds_name: str) -> str | None:
-        """Match a dataset name against catalog patterns in a dictionary."""
+    def match_dataset_pattern(self, ds_name: str) -> str | None:
+        """Match a dataset name against catalog patterns."""
         matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
         return next(matches, None)
 
     def match_default_pattern(self, ds_name: str) -> str:
-        """Match a dataset name against default patterns in a dictionary."""
+        """Match a dataset name against default and runtime patterns in a dictionary."""
         default_patters = set(self._default_pattern.keys())
         default_patters.update(set(self._runtime_patterns.keys()))
         matches = self._get_matches(default_patters, ds_name)
@@ -324,9 +324,9 @@ class CatalogConfigResolver:
     def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
         if ds_name not in self._resolved_configs:
-            matched_pattern = self.match_pattern(ds_name) or self.match_default_pattern(
+            matched_pattern = self.match_dataset_pattern(
                 ds_name
-            )
+            ) or self.match_default_pattern(ds_name)
             pattern_config = self._get_pattern_config(matched_pattern)
             ds_config = self._resolve_dataset_config(
                 ds_name, matched_pattern, copy.deepcopy(pattern_config)

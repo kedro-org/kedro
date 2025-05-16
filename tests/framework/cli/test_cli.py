@@ -417,7 +417,6 @@ class TestKedroCLI:
             "catalog",
             "ipython",
             "jupyter",
-            "micropkg",
             "package",
             "pipeline",
             "registry",

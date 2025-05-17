@@ -603,3 +603,16 @@ class TestSyncDirs:
         assert (target / "existing" / "common").read_text(encoding="utf-8") == "source"
         assert not (target / "existing" / "target_file").exists()
         assert (target / "new" / "source_file").is_file()
+
+    def test_sync_file_source(self, tmp_path):
+        """Test _sync_dirs when source is a single file."""
+        source_file = tmp_path / "source_file.txt"
+        source_file.write_text("file contents", encoding="utf-8")
+
+        target_dir = tmp_path / "target_dir"
+
+        _sync_dirs(source_file, target_dir)
+
+        copied_file = target_dir / source_file.name
+        assert copied_file.is_file()
+        assert copied_file.read_text(encoding="utf-8") == "file contents"

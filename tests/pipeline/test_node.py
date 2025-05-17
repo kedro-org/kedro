@@ -462,3 +462,89 @@ class TestNames:
         assert str(n) == "biconcat([in2]) -> [out]"
         assert n.name == "biconcat([in2]) -> [out]"
         assert n.short_name == "Biconcat"
+
+
+class TestNodeInputOutputNameValidation:
+    @staticmethod
+    def dummy_function(input_data):
+        return input_data
+
+    def test_valid_namespaced_inputs_and_outputs(self):
+        """Test that valid namespaced inputs and outputs are accepted."""
+        n = node(
+            func=self.dummy_function,
+            inputs="namespace.input_dataset",
+            outputs="namespace.output_dataset",
+            namespace="namespace",
+        )
+        assert n.inputs == ["namespace.input_dataset"]
+        assert n.outputs == ["namespace.output_dataset"]
+
+    def test_invalid_namespaced_inputs(self):
+        """Test that inputs with mismatched namespaces raise a ValueError."""
+        with pytest.raises(ValueError, match="Invalid dataset name"):
+            node(
+                func=self.dummy_function,
+                inputs="wrong_namespace.input_dataset",
+                outputs="namespace.output_dataset",
+                namespace="namespace",
+            )
+
+    def test_invalid_namespaced_outputs(self):
+        """Test that outputs with mismatched namespaces raise a ValueError."""
+        with pytest.raises(ValueError, match="Invalid dataset name"):
+            node(
+                func=self.dummy_function,
+                inputs="namespace.input_dataset",
+                outputs="wrong_namespace.output_dataset",
+                namespace="namespace",
+            )
+
+    def test_valid_params_prefixed_inputs(self):
+        """Test that params-prefixed inputs are accepted."""
+        n = node(
+            func=self.dummy_function,
+            inputs="params:example.param",
+            outputs="output_dataset",
+        )
+        assert n.inputs == ["params:example.param"]
+        assert n.outputs == ["output_dataset"]
+
+    def test_invalid_inputs_with_dot_no_namespace(self):
+        """Test that inputs with '.' but no namespace raise a ValueError."""
+        with pytest.raises(ValueError, match="Invalid dataset name 'input.dataset'"):
+            node(
+                func=self.dummy_function,
+                inputs="input.dataset",
+                outputs="output_dataset",
+            )
+
+    def test_invalid_outputs_with_dot_no_namespace(self):
+        """Test that outputs with '.' but no namespace raise a ValueError."""
+        with pytest.raises(ValueError, match="Invalid dataset name 'output.dataset'"):
+            node(
+                func=self.dummy_function,
+                inputs="input_dataset",
+                outputs="output.dataset",
+            )
+
+    def test_valid_multi_level_namespace(self):
+        """Test that multi-level namespaces are accepted."""
+        n = node(
+            func=self.dummy_function,
+            inputs="namespace.subnamespace.input_dataset",
+            outputs="namespace.subnamespace.output_dataset",
+            namespace="namespace.subnamespace",
+        )
+        assert n.inputs == ["namespace.subnamespace.input_dataset"]
+        assert n.outputs == ["namespace.subnamespace.output_dataset"]
+
+    def test_invalid_multi_level_namespace(self):
+        """Test that mismatched multi-level namespaces raise a ValueError."""
+        with pytest.raises(ValueError, match="Invalid dataset name"):
+            node(
+                func=self.dummy_function,
+                inputs="namespace.subnamespace.input_dataset",
+                outputs="namespace.subnamespace.output_dataset",
+                namespace="namespace.othernamespace",
+            )

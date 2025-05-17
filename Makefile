@@ -2,7 +2,7 @@ install:
 	uv pip install --system -e .
 
 clean:
-	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
+	rm -rf build dist site kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true
@@ -27,16 +27,22 @@ e2e-tests-fast:
 pip-compile:
 	pip-compile -q -o -
 
+serve-docs:
+	uv pip install -e ".[docs]"
+	mkdocs serve
+
 build-docs:
 	uv pip install -e ".[docs]"
-	./docs/build-docs.sh "docs"
+	mkdocs build
 
 show-docs:
-	open docs/build/html/index.html
+	open site/index.html
 
 linkcheck:
-	uv pip install --system "kedro[docs] @ ."
-	./docs/build-docs.sh "linkcheck"
+	uv pip install -e ".[docs]"
+	mkdocs build --strict
+	vale docs
+	linkchecker site/
 
 package: clean install
 	python -m pip install build && python -m build
@@ -59,7 +65,7 @@ databricks-build:
 	python ./tools/databricks_build.py
 
 sign-off:
-	echo "git interpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg
+	echo "git inthttps://github.com/kedro-org/kedro/pull/4647/files#diff-26a89fcd97e55b24ac6c327e233357b2af642d3925075fcd8b31794085e654faerpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg
 	echo '--trailer "Signed-off-by: $$(git config user.name) <$$(git config user.email)>" \c' >> .git/hooks/commit-msg
 	echo '--in-place "$$1"' >> .git/hooks/commit-msg
 	chmod +x .git/hooks/commit-msg

@@ -256,7 +256,6 @@ class Pipeline:
             tagged_nodes = nodes_chain
 
         self._nodes_by_name = {node.name: node for node in tagged_nodes}
-
         _validate_unique_outputs(tagged_nodes)
         _validate_unique_confirms(tagged_nodes)
 
@@ -615,7 +614,6 @@ class Pipeline:
             )
 
         nodes = [self._nodes_by_name[name] for name in node_names]
-
         return Pipeline(nodes)
 
     def only_nodes_with_namespaces(self, node_namespaces: list[str]) -> Pipeline:

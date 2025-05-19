@@ -220,8 +220,7 @@ class DataCatalog(CatalogProtocol):
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
-            default_dataset = self.runtime_patterns.get("{default}", {}).get("type", "")
-            self._logger.debug(f"Adding input data as a {default_dataset} - {key}")
+            self._logger.debug(f"Adding input data {key} as a default MemoryDataset")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:

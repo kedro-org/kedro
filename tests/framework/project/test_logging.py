@@ -8,7 +8,7 @@ import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 from kedro.logging import RichHandler, _format_rich
 from kedro.utils import _has_rich_handler
 
@@ -201,7 +201,7 @@ def test_logger_without_rich_markup():
             self.records.append(record)
 
     data = ("dummy",)
-    catalog = KedroDataCatalog.from_config({"dummy": {"type": "MemoryDataset"}})
+    catalog = DataCatalog.from_config({"dummy": {"type": "MemoryDataset"}})
     catalog._use_rich_markup = False
 
     # Add a custom handler

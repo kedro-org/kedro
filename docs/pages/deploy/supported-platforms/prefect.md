@@ -67,7 +67,7 @@ from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-from kedro.io import KedroDataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline.node import Node
 from kedro.runner import run_node
 
@@ -141,7 +141,7 @@ def kedro_init(
     env: str,
 ):
     """
-    Initializes a Kedro session and returns the KedroDataCatalog and
+    Initializes a Kedro session and returns the DataCatalog and
     KedroSession
     """
     # bootstrap project within task / flow scope
@@ -169,7 +169,7 @@ def kedro_init(
 
 def init_kedro_tasks_by_execution_layer(
     pipeline_name: str,
-    execution_config: Union[None, Dict[str, Union[KedroDataCatalog, str]]] = None,
+    execution_config: Union[None, Dict[str, Union[DataCatalog, str]]] = None,
 ) -> List[List[Callable]]:
     """
     Inits the Kedro tasks ordered topologically in groups, which implies that an earlier group
@@ -177,7 +177,7 @@ def init_kedro_tasks_by_execution_layer(
 
     Args:
         pipeline_name (str): The pipeline name to execute
-        execution_config (Union[None, Dict[str, Union[KedroDataCatalog, str]]], optional):
+        execution_config (Union[None, Dict[str, Union[DataCatalog, str]]], optional):
         The required execution config for each node. Defaults to None.
 
     Returns:
@@ -204,7 +204,7 @@ def init_kedro_tasks_by_execution_layer(
 
 
 def kedro_task(
-    node: Node, task_dict: Union[None, Dict[str, Union[KedroDataCatalog, str]]] = None
+    node: Node, task_dict: Union[None, Dict[str, Union[DataCatalog, str]]] = None
 ):
     run_node(
         node,
@@ -216,7 +216,7 @@ def kedro_task(
 
 def instantiate_task(
     node: Node,
-    execution_config: Union[None, Dict[str, Union[KedroDataCatalog, str]]] = None,
+    execution_config: Union[None, Dict[str, Union[DataCatalog, str]]] = None,
 ) -> Callable:
     """
     Function that wraps a Node inside a task for future execution

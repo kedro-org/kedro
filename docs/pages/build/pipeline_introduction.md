@@ -25,7 +25,7 @@ The following sections explain how to create and use Kedro pipelines:
 In the following example, we construct a simple pipeline that computes the variance of a set of numbers. In practice, pipelines can use more complicated node definitions, and the variables they use usually correspond to entire datasets:
 
 ```python
-from kedro.pipeline import pipeline, node
+from kedro.pipeline import Pipeline, Node
 
 def mean(xs, n):
     return sum(xs) / n
@@ -37,12 +37,12 @@ def variance(m, m2):
     return m2 - m * m
 
 
-variance_pipeline = pipeline(
+variance_pipeline = Pipeline(
     [
-        node(len, "xs", "n"),
-        node(mean, ["xs", "n"], "m", name="mean_node"),
-        node(mean_sos, ["xs", "n"], "m2", name="mean_sos"),
-        node(variance, ["m", "m2"], "v", name="variance_node"),
+        Node(len, "xs", "n"),
+        Node(mean, ["xs", "n"], "m", name="mean_node"),
+        Node(mean_sos, ["xs", "n"], "m2", name="mean_sos"),
+        Node(variance, ["m", "m2"], "v", name="variance_node"),
     ]
 )
 ```
@@ -85,15 +85,15 @@ Outputs: v
 You can merge multiple pipelines as shown below. Note that, in this case, `pipeline_de` and `pipeline_ds` are expanded to a list of their underlying nodes and these are merged together:
 
 ```python
-pipeline_de = pipeline([node(len, "xs", "n"), node(mean, ["xs", "n"], "m")])
+pipeline_de = Pipeline([Node(len, "xs", "n"), Node(mean, ["xs", "n"], "m")])
 
-pipeline_ds = pipeline(
-    [node(mean_sos, ["xs", "n"], "m2"), node(variance, ["m", "m2"], "v")]
+pipeline_ds = Pipeline(
+    [Node(mean_sos, ["xs", "n"], "m2"), Node(variance, ["m", "m2"], "v")]
 )
 
-last_node = node(print, "v", None)
+last_node = Node(print, "v", None)
 
-pipeline_all = pipeline([pipeline_de, pipeline_ds, last_node])
+pipeline_all = Pipeline([pipeline_de, pipeline_ds, last_node])
 print(pipeline_all.describe())
 ```
 
@@ -177,16 +177,16 @@ Out[8]: {'v'}
 You can also tag your pipeline by providing the `tags` argument, which will tag all of the pipeline's nodes. In the following example, both nodes are tagged with `pipeline_tag`.
 
 ```python
-pipeline = pipeline(
-    [node(..., name="node1"), node(..., name="node2")], tags="pipeline_tag"
+pipeline = Pipeline(
+    [Node(..., name="node1"), Node(..., name="node2")], tags="pipeline_tag"
 )
 ```
 
 You can combine pipeline tagging with node tagging. In the following example, `node1` and `node2` are tagged with `pipeline_tag`, while `node2` also has a `node_tag`.
 
 ```python
-pipeline = pipeline(
-    [node(..., name="node1"), node(..., name="node2", tags="node_tag")],
+pipeline = Pipeline(
+    [Node(..., name="node1"), Node(..., name="node2", tags="node_tag")],
     tags="pipeline_tag",
 )
 ```
@@ -202,7 +202,7 @@ In this case, we have a pipeline consisting of a single node with no input and o
 
 ```python
 try:
-    pipeline([node(lambda: print("!"), None, None)])
+    Pipeline([Node(lambda: print("!"), None, None)])
 except Exception as e:
     print(e)
 ```
@@ -211,7 +211,7 @@ Gives the following output:
 
 ```console
 Invalid Node definition: it must have some `inputs` or `outputs`.
-Format should be: node(function, inputs, outputs)
+Format should be: Node(function, inputs, outputs)
 ```
 
 
@@ -224,10 +224,10 @@ The first node captures the relationship of how to calculate `y` from `x` and th
 
 ```python
 try:
-    pipeline(
+    Pipeline(
         [
-            node(lambda x: x + 1, "x", "y", name="first node"),
-            node(lambda y: y - 1, "y", "x", name="second node"),
+            Node(lambda x: x + 1, "x", "y", name="first node"),
+            Node(lambda y: y - 1, "y", "x", name="second node"),
         ]
     )
 except Exception as e:
@@ -244,7 +244,7 @@ Circular dependencies exist among these items: ['first node: <lambda>([x]) -> [y
 Nodes named with dot notation may behave strangely.
 
 ```python
-pipeline([node(lambda x: x, inputs="input1kedro", outputs="output1.kedro")])
+Pipeline([Node(lambda x: x, inputs="input1kedro", outputs="output1.kedro")])
 ```
 
 Nodes that are created with input or output names that contain `.` risk a disconnected pipeline or improperly-formatted Kedro structure.

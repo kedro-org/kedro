@@ -19,7 +19,7 @@ In Kedro, a node is a wrapper for a [pure Python function](../getting-started/gl
 Here are two simple nodes as an example:
 
 ```python
-from kedro.pipeline import node
+from kedro.pipeline import Node
 
 
 # First node
@@ -27,7 +27,7 @@ def return_greeting():
     return "Hello"
 
 
-return_greeting_node = node(func=return_greeting, inputs=None, outputs="my_salutation")
+return_greeting_node = Node(func=return_greeting, inputs=None, outputs="my_salutation")
 
 
 # Second node
@@ -35,8 +35,8 @@ def join_statements(greeting):
     return f"{greeting} Kedro!"
 
 
-join_statements_node = node(
-    join_statements, inputs="my_salutation", outputs="my_message"
+join_statements_node = Node(
+    func=join_statements, inputs="my_salutation", outputs="my_message"
 )
 ```
 
@@ -47,15 +47,15 @@ A pipeline organises the dependencies and execution order of a collection of nod
 Here is a pipeline comprised of the nodes shown above:
 
 ```python
-from kedro.pipeline import pipeline
+from kedro.pipeline import Pipeline
 
 # Assemble nodes into a pipeline
-greeting_pipeline = pipeline([return_greeting_node, join_statements_node])
+greeting_pipeline = Pipeline([return_greeting_node, join_statements_node])
 ```
 
 ## Data Catalog
 
-The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `KedroDataCatalog`, a Kedro class that can be specialised for different types of data storage.
+The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `DataCatalog`, a Kedro class that can be specialised for different types of data storage.
 
 {py:mod}`Kedro provides different built-in datasets <kedro-datasets:kedro_datasets>` for numerous file types and file systems, so you don’t have to write the logic for reading/writing data.
 

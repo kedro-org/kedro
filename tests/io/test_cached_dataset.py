@@ -5,7 +5,7 @@ import pytest
 import yaml
 from kedro_datasets.pandas import CSVDataset
 
-from kedro.io import CachedDataset, DatasetError, KedroDataCatalog, MemoryDataset
+from kedro.io import CachedDataset, DataCatalog, DatasetError, MemoryDataset
 
 YML_CONFIG = """
 test_ds:
@@ -81,7 +81,7 @@ class TestCachedDataset:
 
     def test_from_yaml(self, mocker):
         config = yaml.safe_load(StringIO(YML_CONFIG))
-        catalog = KedroDataCatalog.from_config(config)
+        catalog = DataCatalog.from_config(config)
         assert catalog.keys() == ["test_ds"]
         mock = mocker.Mock()
         assert isinstance(catalog["test_ds"]._dataset, CSVDataset)
@@ -103,7 +103,7 @@ class TestCachedDataset:
 
     def test_config_good_version(self):
         config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED))
-        catalog = KedroDataCatalog.from_config(config, load_versions={"test_ds": "42"})
+        catalog = DataCatalog.from_config(config, load_versions={"test_ds": "42"})
         assert catalog["test_ds"]._dataset._version.load == "42"
 
     def test_for_versioned_key(self):

@@ -1,7 +1,7 @@
 import pytest
 
 from kedro.io import (
-    KedroDataCatalog,
+    DataCatalog,
     LambdaDataset,
 )
 from kedro.pipeline import pipeline
@@ -87,7 +87,7 @@ class TestResumeLogicBehaviour:
         """
         test_pipeline = request.getfixturevalue(pipeline_name)
 
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             dict.fromkeys(
                 test_pipeline.datasets(),
                 LambdaDataset(load=lambda: 42, save=lambda data: None),

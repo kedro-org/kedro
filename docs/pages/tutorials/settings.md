@@ -19,7 +19,7 @@ By default, all code in `settings.py` is commented out. When settings are not su
 | `CONF_SOURCE`               | `"conf"`                                          | Directory that holds [configuration](../configure/configuration_basics.md).                                    |
 | `CONFIG_LOADER_CLASS`       | `kedro.config.ConfigLoader`                       | Customise how project configuration is handled.                                                                    |
 | `CONFIG_LOADER_ARGS`        | `dict()`                                          | Keyword arguments for the `CONFIG_LOADER_CLASS` constructor.                                                       |
-| `DATA_CATALOG_CLASS`        | `kedro.io.KedroDataCatalog`                            | Customise how the [Kedro Data Catalog](../catalog-data/kedro_data_catalog.md) is handled.                                              |
+| `DATA_CATALOG_CLASS`        | `kedro.io.DataCatalog`                            | Customise how the [Data Catalog](../catalog-data/data_catalog.md) is handled.                                              |
 
 ## Project metadata
 The `pyproject.toml` file is the standard way to store build metadata and tool settings for Python projects.

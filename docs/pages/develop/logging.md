@@ -131,6 +131,10 @@ loggers:
 
 By changing the level value to `DEBUG` for the desired logger (e.g. `<your_python_package>`), you will start seeing `DEBUG` level messages in the log output.
 
+```{note}
+When your project's logging level is set to `DEBUG` and you have [hooks enabled in your project](../hooks/index.md), the hooks will use `pluggy`'s tracing feature to log the execution of each hook. This is useful for debugging purposes but can be noisy and slow down the execution of your pipeline. You can disable this feature by setting the logging level to `INFO` or higher.
+```
+
 ## Advanced logging
 
 In addition to the `rich` handler defined in Kedro's framework, we provide two additional handlers in the template.

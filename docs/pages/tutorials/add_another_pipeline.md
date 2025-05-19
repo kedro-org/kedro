@@ -86,7 +86,7 @@ First, take a look at the functions for the data science nodes in `src/spaceflig
 
 ## Input parameter configuration
 
-Parameters that are used by the `KedroDataCatalog` when the pipeline executes are stored in `conf/base/parameters_data_science.yml`:
+Parameters that are used by the `DataCatalog` when the pipeline executes are stored in `conf/base/parameters_data_science.yml`:
 
 
 ??? example "View code"
@@ -418,22 +418,21 @@ First, add namespaces to the modelling component of the data science pipeline to
                         INFO     Pipeline execution completed successfully.
     ```
 
-### How it works: the modular `pipeline()` wrapper
-
-The import you added to the code introduces the pipeline wrapper, which enables you to instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters:
+### How it works: the modular arguments in `Pipeline`
 
 ```python
-from kedro.pipeline import pipeline
+from kedro.pipeline import Pipeline
 ```
 
-The `pipeline()` wrapper method takes the following arguments:
+The `Pipeline` class takes the following arguments that allow you to create a reusable pipeline:
 
 | Keyword argument | Description                                                                         |
 | ---------------- | ----------------------------------------------------------------------------------- |
-| `pipe`           | The `Pipeline` object you want to wrap                                              |
+| `nodes `         | Nodes that will be part of the reusable pipeline                                    |
 | `inputs`         | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
 | `outputs`        | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
 | `parameters`     | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
+| `tags`           | Optional set of tags to be applied to all the pipeline nodes                        |
 | `namespace`      | The namespace that will be encapsulated by this pipeline instance                   |
 
 

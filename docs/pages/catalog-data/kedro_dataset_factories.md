@@ -28,7 +28,7 @@ With dataset factory, it can be re-written as:
 
 In runtime, the pattern will be matched against the name of the datasets defined in `inputs` or `outputs`.
 ```python
-node(
+Node(
     func=process_factory,
     inputs="factory_data",
     outputs="process_data",
@@ -82,27 +82,27 @@ from .nodes import create_model_input_table, preprocess_companies, preprocess_sh
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
-            node(
+            Node(
                 func=preprocess_boats,
                 inputs="boats#csv",
                 outputs="preprocessed_boats",
                 name="preprocess_boats_node",
             ),
-            node(
+            Node(
                 func=preprocess_cars,
                 inputs="cars#csv",
                 outputs="preprocessed_cars",
                 name="preprocess_cars_node",
             ),
-            node(
+            Node(
                 func=preprocess_planes,
                 inputs="planes#csv",
                 outputs="preprocessed_planes",
                 name="preprocess_planes_node",
             ),
-            node(
+            Node(
                 func=create_model_input_table,
                 inputs=[
                     "preprocessed_boats",
@@ -122,21 +122,21 @@ following pipeline which takes in a `model_input_table` and outputs two regresso
 `active_modelling_pipeline` and the `candidate_modelling_pipeline` namespaces:
 
 ```python
-from kedro.pipeline import Pipeline, node, pipeline
+from kedro.pipeline import Pipeline, Node
 
 from .nodes import evaluate_model, split_data, train_model
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    pipeline_instance = pipeline(
+    pipeline_instance = Pipeline(
         [
-            node(
+            Node(
                 func=split_data,
                 inputs=["model_input_table", "params:model_options"],
                 outputs=["X_train", "y_train"],
                 name="split_data_node",
             ),
-            node(
+            Node(
                 func=train_model,
                 inputs=["X_train", "y_train"],
                 outputs="regressor",
@@ -144,13 +144,13 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
         ]
     )
-    ds_pipeline_1 = pipeline(
-        pipe=pipeline_instance,
+    ds_pipeline_1 = Pipeline(
+        nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="active_modelling_pipeline",
     )
-    ds_pipeline_2 = pipeline(
-        pipe=pipeline_instance,
+    ds_pipeline_2 = Pipeline(
+        nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="candidate_modelling_pipeline",
     )

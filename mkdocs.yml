@@ -149,7 +149,7 @@ nav:
           - Credentials: pages/configure/credentials.md
       - Catalog Data:
           - Introduction: pages/catalog-data/introduction.md
-          - Kedro data catalog: pages/catalog-data/kedro_data_catalog.md
+          - Kedro data catalog: pages/catalog-data/data_catalog.md
           - Data Catalog YAML examples: pages/catalog-data/data_catalog_yaml_examples.md
           - Dataset factories: pages/catalog-data/kedro_dataset_factories.md
           - Data and pipeline versioning: pages/catalog-data/kedro_dvc_versioning.md

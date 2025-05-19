@@ -29,7 +29,7 @@ The function has two inputs (`x` and `y`) and a single output (the sum of the in
 Here is how a node is created with this function:
 
 ```python
-adder_node = node(func=add, inputs=["a", "b"], outputs="sum")
+adder_node = Node(func=add, inputs=["a", "b"], outputs="sum")
 adder_node
 ```
 
@@ -42,10 +42,10 @@ Out[1]: Node(add, ['a', 'b'], 'sum', None)
 You can also add labels to nodes, which will be used to describe them in logs:
 
 ```python
-adder_node = node(func=add, inputs=["a", "b"], outputs="sum")
+adder_node = Node(func=add, inputs=["a", "b"], outputs="sum")
 print(str(adder_node))
 
-adder_node = node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b")
+adder_node = Node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b")
 print(str(adder_node))
 ```
 
@@ -86,7 +86,7 @@ A syntax describes function inputs and outputs. This syntax allows different Pyt
 | `['a', 'b']`               | List output       | `return [a, b]`                     |
 | `dict(key1='a', key2='b')` | Dictionary output | `return dict(key1=a, key2=b)`       |
 
-Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output must be provided).
+Any combinations of the above are possible, except nodes of the form `Node(f, None, None)` (at least a single input or output must be provided).
 
 ## `*args` node functions
 It is common to have functions that take an arbitrary number of inputs, like a function that combines multiple dataframes. You can use the `*args` argument in the node function, while simply declaring the names of the datasets in the node's inputs.
@@ -107,16 +107,16 @@ def reporting(**kwargs):
 Then, when it comes to constructing the `Node`, simply pass a dictionary to the node inputs:
 
 ```python
-from kedro.pipeline import node
+from kedro.pipeline import Node
 
 
-uk_reporting_node = node(
+uk_reporting_node = Node(
     reporting,
     inputs={"uk_input1": "uk_input1", "uk_input2": "uk_input2", ...},
     outputs="uk",
 )
 
-ge_reporting_node = node(
+ge_reporting_node = Node(
     reporting,
     inputs={"ge_input1": "ge_input1", "ge_input2": "ge_input2", ...},
     outputs="ge",
@@ -126,19 +126,19 @@ ge_reporting_node = node(
 Alternatively, you can also make use of a helper function that creates the mapping for you, so you can reuse it across your codebase.
 
 ```diff
- from kedro.pipeline import node
+ from kedro.pipeline import Node
 
 
 +mapping = lambda x: {k: k for k in x}
 +
- uk_reporting_node = node(
+ uk_reporting_node = Node(
      reporting,
 -    inputs={"uk_input1": "uk_input1", "uk_input2": "uk_input2", ...},
 +    inputs=mapping(["uk_input1", "uk_input2", ...]),
      outputs="uk",
  )
 
- ge_reporting_node = node(
+ ge_reporting_node = Node(
      reporting,
 -    inputs={"ge_input1": "ge_input1", "ge_input2": "ge_input2", ...},
 +    inputs=mapping(["ge_input1", "ge_input2", ...]),
@@ -154,7 +154,7 @@ Tags might be useful to run part of a pipeline without changing the code. For in
 To tag a node, you can simply specify the `tags` argument:
 
 ```python
-node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tags="node_tag")
+Node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tags="node_tag")
 ```
 
 Moreover, you can [tag all nodes in a `Pipeline`](./pipeline_introduction.md#how-to-tag-a-pipeline). If the pipeline definition contains the `tags=` argument, Kedro will attach the corresponding tag to every node within that pipeline.

@@ -19,7 +19,7 @@ def increase_volume(volume, step):
 
 
 # in pipeline definition
-node(
+Node(
     func=increase_volume,
     inputs=["input_volume", "params:step_size"],
     outputs="output_volume",
@@ -45,7 +45,7 @@ def train_model(data, model):
 
 
 # in pipeline definition
-node(
+Node(
     func=train_model,
     inputs=["input_data", "params:model_params"],
     outputs="output_data",
@@ -61,7 +61,7 @@ def increase_volume(volume, params):
 
 
 # in pipeline definition
-node(
+Node(
     func=increase_volume, inputs=["input_volume", "parameters"], outputs="output_volume"
 )
 ```

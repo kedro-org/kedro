@@ -12,9 +12,9 @@ def pipelines_dict():
     pipelines = {
         "data_engineering": ["split_data_node (split_data)"],
         "data_science": [
-            "train_model([example_train_x;example_train_y;parameters]) -> [example_model] (train_model)",
-            "predict([example_model;example_test_x]) -> [example_predictions] (predict)",
-            "report_accuracy([example_predictions;example_test_y]) -> None (report_accuracy)",
+            "train_model__85bd0f56 (train_model)",
+            "predict__175d0161 (predict)",
+            "report_accuracy__01a91155 (report_accuracy)",
         ],
         "data_processing": [
             "data_processing.data_processing.split_data_node (split_data)"

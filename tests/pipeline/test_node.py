@@ -420,7 +420,7 @@ class TestNames:
     def test_namespaced(self):
         n = node(identity, ["in"], ["out"], namespace="namespace")
         assert str(n) == "identity([in]) -> [out]"
-        assert n.name == "namespace.identity"
+        assert n.name == "namespace.identity__d8883cb5"
         assert n.short_name == "Identity"
 
     def test_named_and_namespaced(self):
@@ -432,25 +432,25 @@ class TestNames:
     def test_function(self):
         n = node(identity, ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"
-        assert n.name == "identity"
+        assert n.name == "identity__d8883cb5"
         assert n.short_name == "Identity"
 
     def test_lambda(self):
         n = node(lambda a: a, ["in"], ["out"])
         assert str(n) == "<lambda>([in]) -> [out]"
-        assert n.name == "<lambda>"
+        assert n.name == "<lambda>__10031dd3"
         assert n.short_name == "<Lambda>"
 
     def test_partial(self):
         n = node(partial(identity), ["in"], ["out"])
         assert str(n) == "<partial>([in]) -> [out]"
-        assert n.name == "<partial>"
+        assert n.name == "partial(identity)__4c160223"
         assert n.short_name == "<Partial>"
 
     def test_updated_partial(self):
         n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"
-        assert n.name == "identity"
+        assert n.name == "partial(identity)__0d5cd1ce"
         assert n.short_name == "Identity"
 
     def test_updated_partial_dict_inputs(self):
@@ -460,7 +460,7 @@ class TestNames:
             ["out"],
         )
         assert str(n) == "biconcat([in2]) -> [out]"
-        assert n.name == "biconcat"
+        assert n.name == "partial(biconcat)__d08e20bb"
         assert n.short_name == "Biconcat"
 
 

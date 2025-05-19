@@ -255,9 +255,7 @@ class Pipeline:
         else:
             tagged_nodes = nodes_chain
 
-        self._nodes_by_name = defaultdict(list)
-        for node in tagged_nodes:
-            self._nodes_by_name[node.name].append(node)
+        self._nodes_by_name = {node.name: node for node in tagged_nodes}
 
         _validate_unique_outputs(tagged_nodes)
         _validate_unique_confirms(tagged_nodes)
@@ -616,15 +614,7 @@ class Pipeline:
                 f"Pipeline does not contain nodes named {list(unregistered_nodes)}."
             )
 
-        nodes = []
-        for name in node_names:
-            nodes_with_name = self._nodes_by_name[name]
-            if len(nodes_with_name) != 1:
-                raise ValueError(
-                    f"Multiple nodes found with name '{name}'. "
-                    "You can give your nodes a unique name using the last argument of 'node()'."
-                )
-            nodes.append(nodes_with_name[0])
+        nodes = [self._nodes_by_name[name] for name in node_names]
 
         return Pipeline(nodes)
 
@@ -1282,15 +1272,15 @@ def _get_param_names_mapping(
 
 
 def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]) -> None:
-    seen_nodes: set[tuple] = set()
-    duplicates: dict[Pipeline | None, set[tuple]] = defaultdict(set)
+    seen_nodes: set[str] = set()
+    duplicates: dict[Pipeline | None, set[str]] = defaultdict(set)
 
     def _check_node(node_: Node, pipeline_: Pipeline | None = None) -> None:
-        unique_key = node_._unique_key
-        if unique_key in seen_nodes:
-            duplicates[pipeline_].add(unique_key)
+        name = node_.name
+        if name in seen_nodes:
+            duplicates[pipeline_].add(name)
         else:
-            seen_nodes.add(unique_key)
+            seen_nodes.add(name)
 
     for each in nodes_or_pipes:
         if isinstance(each, Node):
@@ -1310,8 +1300,9 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]) -> None
             duplicates_info += f"{pipe_repr}:\n{nodes_repr}\n"
 
         raise ValueError(
-            f"Pipeline nodes must have a unique combination of properties (name, inputs, outputs). The following node combinations "
-            f"appear more than once:\n\n{duplicates_info}\n"
+            f"Pipeline nodes must have unique names. The following node names "
+            f"appear more than once:\n\n{duplicates_info}\nYou can name your "
+            f"nodes using the last argument of 'node()'."
         )
 
 

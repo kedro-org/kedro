@@ -5,11 +5,12 @@ of Kedro pipelines.
 from __future__ import annotations
 
 import copy
+import hashlib
 import inspect
 import logging
 import re
 from collections import Counter
-from functools import cached_property
+from functools import cached_property, partial
 from typing import TYPE_CHECKING, Any, Callable
 from warnings import warn
 
@@ -281,10 +282,19 @@ class Node:
         Returns:
             Node's name if provided or the name of its function.
         """
-        node_name = self._name or self._func_name
+        node_name = self._name or self._set_unique_name()
         if self.namespace:
             return f"{self.namespace}.{node_name}"
         return node_name
+
+    def _set_unique_name(self) -> str:
+        """Set a unique name for the node."""
+        base = self._func_name
+        if isinstance(self._func, partial):
+            base = f"partial({self._func.func.__name__})"  # Use the original function's name
+        key = f"{self._func.__module__}.{base}|{self.inputs}|{self.outputs}"
+        suffix = hashlib.sha256(key.encode()).hexdigest()[:8]
+        return f"{base}__{suffix}"
 
     @property
     def short_name(self) -> str:

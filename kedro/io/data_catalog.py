@@ -37,7 +37,34 @@ if TYPE_CHECKING:
 
 
 class _LazyDataset:
-    """A helper class to store AbstractDataset configuration and materialize dataset object."""
+    """
+    A helper class to store `AbstractDataset` configuration and materialize the dataset object.
+
+    This class acts as a placeholder for a dataset, storing its configuration and versioning
+    information. The dataset is only materialized (i.e., instantiated) when explicitly requested,
+    which helps improve performance by deferring the creation of datasets until they are needed.
+
+    Attributes:
+        name (str): The name of the dataset.
+        config (dict[str, Any]): The configuration dictionary for the dataset.
+        load_version (str | None): The version of the dataset to load, if applicable.
+        save_version (str | None): The version of the dataset to save, if applicable.
+
+    Example:
+        >>> from kedro.io.data_catalog import _LazyDataset
+        >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+        >>> lazy_dataset = _LazyDataset(
+        ...     name="example_dataset",
+        ...     config=dataset_config,
+        ...     load_version="2023-01-01T00.00.00",
+        ...     save_version="2023-01-02T00.00.00",
+        ... )
+        >>> print(lazy_dataset)
+        # kedro_datasets.pandas.csv_dataset.CSVDataset
+        >>> materialized_dataset = lazy_dataset.materialize()
+        >>> print(materialized_dataset)
+        # CSVDataset(filepath=example.csv, load_args={}, protocol=file, save_args={'index': False})
+    """
 
     def __init__(
         self,
@@ -46,16 +73,76 @@ class _LazyDataset:
         load_version: str | None = None,
         save_version: str | None = None,
     ):
+        """
+        Initialize a `_LazyDataset` instance.
+
+        Args:
+            name (str): The name of the dataset.
+            config (dict[str, Any]): The configuration dictionary for the dataset.
+            load_version (str | None): The version of the dataset to load, if applicable.
+            save_version (str | None): The version of the dataset to save, if applicable.
+
+        Example:
+            >>> from kedro.io.data_catalog import _LazyDataset
+            >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+            >>> lazy_dataset = _LazyDataset(
+            ...     name="example_dataset",
+            ...     config=dataset_config,
+            ...     load_version="2023-01-01T00.00.00",
+            ...     save_version="2023-01-02T00.00.00",
+            ... )
+            >>> print(lazy_dataset)
+            # kedro_datasets.pandas.csv_dataset.CSVDataset
+        """
         self.name = name
         self.config = config
         self.load_version = load_version
         self.save_version = save_version
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the `_LazyDataset`.
+
+        The representation includes the fully qualified class name of the dataset type
+        as defined in the configuration.
+
+        Returns:
+            str: The fully qualified class name of the dataset type.
+
+        Example:
+            >>> from kedro.io.data_catalog import _LazyDataset
+            >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+            >>> lazy_dataset = _LazyDataset(name="example_dataset", config=dataset_config)
+            >>> print(repr(lazy_dataset))
+            # kedro_datasets.pandas.csv_dataset.CSVDataset
+        """
         class_type, _ = parse_dataset_definition(self.config)
         return f"{class_type.__module__}.{class_type.__qualname__}"
 
     def materialize(self) -> AbstractDataset:
+        """
+        Materialize the `_LazyDataset` into an `AbstractDataset` instance.
+
+        This method uses the stored configuration and versioning information to create
+        an instance of the dataset. The dataset is instantiated using the `from_config`
+        factory method of `AbstractDataset`.
+
+        Returns:
+            AbstractDataset: The instantiated dataset object.
+
+        Example:
+            >>> from kedro.io.data_catalog import _LazyDataset
+            >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+            >>> lazy_dataset = _LazyDataset(
+            ...     name="example_dataset",
+            ...     config=dataset_config,
+            ...     load_version="2023-01-01T00.00.00",
+            ...     save_version="2023-01-02T00.00.00",
+            ... )
+            >>> materialized_dataset = lazy_dataset.materialize()
+            >>> print(materialized_dataset)
+            # CSVDataset(filepath=example.csv, load_args={}, protocol=file, save_args={'index': False})
+        """
         return AbstractDataset.from_config(
             self.name, self.config, self.load_version, self.save_version
         )

@@ -137,7 +137,7 @@
 /* Explore link */
 .explore-link {
   text-align: center;
-  margin: 24px 0;
+  margin: 38px 0 98px 0;
 }
 
 .explore-link a {
@@ -213,7 +213,6 @@
 
 .card-icon {
   margin-bottom: 16px;
-  color: #333;
   width: 32px;
   height: 32px;
   display: flex;
@@ -226,27 +225,22 @@
   height: 100%;
 }
 
-.card-icon svg path {
-  stroke: var(--icon-fill-color);
-}
-
 .card-title {
   font-size: 16px !important;
   font-weight: 600 !important;
-  color: var(--text-secondary-color);
+  color: var(--text-primary-color);
   margin-bottom: 8px;
 }
 
 .card-description {
   font-size: 14px;
-  color: var(--text-primary-color);
+  color: var(--text-secondary-color);
 }
 
 /* Typography for the Welcompage specifically*/
 .welcome-title {
-  margin-top: 24px !important;
-  font-weight: 600;
-  font-size: 24px;
+  margin-top: 92px !important;
+  font-weight: 600 !important;
   text-align: center;
   padding: 0 16px;
 }
@@ -286,8 +280,12 @@
     margin-right: 16px;
   }
 
+  .welcome-title {
+    margin-top: 48px !important;
+  }
+
   .explore-link {
-    margin: 16px 0;
+    margin: 30px 0 54px 0;
   }
 
   .section-title {

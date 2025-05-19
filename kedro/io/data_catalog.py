@@ -693,15 +693,14 @@ class DataCatalog(CatalogProtocol):
         Args:
             ds_name: A dataset to be checked.
 
-        Raises:
-            DatasetNotFoundError: When a dataset with the given name
-                has not yet been registered
-
         Returns:
-            Whether the dataset output exists.
+            Whether the dataset and its output exist.
 
         """
-        dataset = self[ds_name]
+        try:
+            dataset = self[ds_name]
+        except DatasetNotFoundError:
+            return False
 
         return dataset.exists()
 

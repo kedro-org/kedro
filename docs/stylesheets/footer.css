@@ -116,7 +116,7 @@
   }
 
   .md-footer__link:hover {
-    .md-footer__direction, 
+    .md-footer__direction,
     .md-ellipsis,
     .footer__button {
       color: var(--text-hover-color);

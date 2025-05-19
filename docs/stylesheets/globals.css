@@ -233,10 +233,16 @@
 
 
 /* Code Block Styles */
+
+.md-typeset pre {
+  background-color: var(--admonition-bg-color);
+}
+
 .md-typeset pre code,
 .md-typeset code {
   background-color: var(--admonition-bg-color);
   color: var(--text-primary-color);
+  margin: 20px;
 }
 
 /** copy icon button in code blocks */

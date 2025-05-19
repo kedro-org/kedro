@@ -37,14 +37,18 @@
   display: flex;
   padding: 8px;
   align-items: center;
-  gap: 8px;
   background-color: transparent;
   height: auto;
+}
+
+.md-search__inner {
+  width: 200px;
 }
 
 .md-search__input {
   color: var(--yellow-600);
   font-size: 16px;
+   padding-left: 35px !important
 }
 
 .md-search__input::placeholder {
@@ -331,7 +335,7 @@ pre:hover .md-clipboard {
 
   .md-header__option {
     order: 2;
-    margin: 0 16px;
+    margin-left: 16px;
 
     .md-icon {
       padding-left: 0;
@@ -341,7 +345,8 @@ pre:hover .md-clipboard {
 
   .md-header__source {
     order: 3;
-    margin-left: -0.8rem !important;
+    width: 205px;
+    margin-left: 0 !important;
   }
 
   /** Hide the nav label specifically on desktop version only */

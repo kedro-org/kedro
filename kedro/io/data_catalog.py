@@ -1060,19 +1060,95 @@ class DataCatalog(CatalogProtocol):
 
 
 class SharedMemoryDataCatalog(DataCatalog):
+    """
+    A specialized `DataCatalog` for managing datasets in a shared memory context.
+
+    The `SharedMemoryDataCatalog` extends the base `DataCatalog` to support multiprocessing
+    by ensuring that datasets are serializable and synchronized across threads or processes.
+    It provides additional functionality for managing shared memory datasets, such as setting
+    a multiprocessing manager and validating dataset compatibility with multiprocessing.
+
+    Attributes:
+        runtime_patterns (ClassVar): A dictionary defining the default runtime pattern
+            for datasets of type `SharedMemoryDataset`.
+
+    Example:
+        >>> from multiprocessing.managers import SyncManager
+        >>> from kedro.io import MemoryDataset
+        >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
+        >>>
+        >>> # Create a shared memory catalog
+        >>> catalog = SharedMemoryDataCatalog(
+        ...     datasets={"shared_data": MemoryDataset(data=[1, 2, 3])}
+        ... )
+        >>>
+        >>> # Set a multiprocessing manager
+        >>> manager = SyncManager()
+        >>> manager.start()
+        >>> catalog.set_manager_datasets(manager)
+        >>>
+        >>> # Validate the catalog for multiprocessing compatibility
+        >>> catalog.validate_catalog()
+    """
+
     runtime_patterns: ClassVar = {"{default}": {"type": "kedro.io.SharedMemoryDataset"}}
 
     def set_manager_datasets(self, manager: SyncManager) -> None:
+        """
+        Associate a multiprocessing manager with all shared memory datasets in the catalog.
+
+        This method iterates through all datasets in the catalog and sets the provided
+        multiprocessing manager for datasets of type `SharedMemoryDataset`. This ensures
+        that these datasets are properly synchronized across threads or processes.
+
+        Args:
+            manager (SyncManager): A multiprocessing manager to be associated with
+                shared memory datasets.
+
+        Example:
+            >>> from multiprocessing.managers import SyncManager
+            >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
+            >>>
+            >>> catalog = SharedMemoryDataCatalog(
+            ...     datasets={"shared_data": MemoryDataset(data=[1, 2, 3])}
+            ... )
+            >>>
+            >>> manager = SyncManager()
+            >>> manager.start()
+            >>> catalog.set_manager_datasets(manager)
+            >>> print(catalog)
+            # {'shared_data': kedro.io.memory_dataset.MemoryDataset(data='<list>')}
+        """
         for _, ds in self._datasets.items():
             if isinstance(ds, SharedMemoryDataset):
                 ds.set_manager(manager)
 
     def validate_catalog(self) -> None:
-        """Ensure that all datasets are serialisable and that we do not have
-        any non proxied memory datasets being used as outputs as their content
-        will not be synchronized across threads.
         """
+        Validate the catalog to ensure all datasets are serializable and compatible with multiprocessing.
 
+        This method checks that all datasets in the catalog are serializable and do not
+        include non-proxied memory datasets as outputs. Non-serializable datasets or
+        datasets that rely on single-process memory cannot be used in a multiprocessing
+        context. If any such datasets are found, an exception is raised with details.
+
+        Raises:
+            AttributeError: If any datasets are found to be non-serializable or incompatible
+                with multiprocessing.
+
+        Example:
+            >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
+            >>>
+            >>> catalog = SharedMemoryDataCatalog(
+            ...     datasets={"shared_data": MemoryDataset(data=[1, 2, 3])}
+            ... )
+            >>>
+            >>> try:
+            ...     catalog.validate_catalog()
+            ... except AttributeError as e:
+            ...     print(f"Validation failed: {e}")
+            # No error
+        """
         unserialisable = []
         for name, dataset in self._datasets.items():
             if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK

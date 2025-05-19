@@ -182,8 +182,8 @@ class Pipeline:
             namespace: A prefix to give to all dataset names,
                 except those explicitly named with the `inputs`/`outputs`
                 arguments, and parameter references (`params:` and `parameters`).
-            prefix_namespace: A flag to specify if the inputs and outputs of the nodes 
-                should be prefixed with the namespace. It is set to True by default. It is 
+            prefix_namespace: A flag to specify if the inputs, outputs, and parameters of the nodes
+                should be prefixed with the namespace. It is set to True by default. It is
                 useful to turn off when namespacing is used for grouping nodes for deployment purposes.
 
         Raises:
@@ -1092,7 +1092,10 @@ class Pipeline:
         if isinstance(datasets, str):
             return self._rename(datasets, mapping, namespace, prefix_namespace)
         if isinstance(datasets, list):
-            return [self._rename(name, mapping, namespace, prefix_namespace) for name in datasets]
+            return [
+                self._rename(name, mapping, namespace, prefix_namespace)
+                for name in datasets
+            ]
         if isinstance(datasets, dict):
             return {
                 key: self._rename(value, mapping, namespace, prefix_namespace)
@@ -1103,7 +1106,11 @@ class Pipeline:
         )  # pragma: no cover
 
     def _copy_node(
-        self, node: Node, mapping: dict, namespace: str | None, prefix_namespace: bool = True
+        self,
+        node: Node,
+        mapping: dict,
+        namespace: str | None,
+        prefix_namespace: bool = True,
     ) -> Node:
         new_namespace = node.namespace
         if namespace:
@@ -1148,7 +1155,9 @@ class Pipeline:
         _validate_inputs_outputs(inputs.keys(), outputs.keys(), pipe)
 
         mapping = {**inputs, **outputs, **parameters}
-        new_nodes = [self._copy_node(n, mapping, namespace, prefix_namespace) for n in pipe.nodes]
+        new_nodes = [
+            self._copy_node(n, mapping, namespace, prefix_namespace) for n in pipe.nodes
+        ]
         return new_nodes
 
 
@@ -1196,8 +1205,8 @@ def pipeline(  # noqa: PLR0913
         namespace: A prefix to give to all dataset names,
             except those explicitly named with the `inputs`/`outputs`
             arguments, and parameter references (`params:` and `parameters`).
-        prefix_namespace: A flag to specify if the inputs and outputs of the nodes 
-                should be prefixed with the namespace. It is set to True by default. It is 
+        prefix_namespace: A flag to specify if the inputs and outputs of the nodes
+                should be prefixed with the namespace. It is set to True by default. It is
                 useful to turn off when namespacing is used for grouping nodes for deployment purposes.
 
     Raises:

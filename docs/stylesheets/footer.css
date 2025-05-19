@@ -101,9 +101,26 @@
     }
   }
 
+  .md-footer__direction,
+  .md-footer__button  {
+    color: var(--text-secondary-color);
+  }
+
+  .md-ellipsis {
+    color: var(--text-primary-color);
+  }
+
   .md-footer__title {
     font-size: 16px;
     margin-bottom: 0;
+  }
+
+  .md-footer__link:hover {
+    .md-footer__direction, 
+    .md-ellipsis,
+    .footer__button {
+      color: var(--text-hover-color);
+    }
   }
 }
 
@@ -166,6 +183,11 @@
     .md-footer{
       margin: 0;
     }
+
+    .md-footer__link--prev .md-footer__title {
+      display: block;
+    }
+
 
     .main-page-footer-bottom {
       margin: 48px 24px 24px 24px;

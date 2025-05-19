@@ -444,13 +444,13 @@ class TestNames:
     def test_partial(self):
         n = node(partial(identity), ["in"], ["out"])
         assert str(n) == "<partial>([in]) -> [out]"
-        assert n.name == "partial(identity)__4c160223"
+        assert n.name == "partial(identity)__7b43ecf5"
         assert n.short_name == "<Partial>"
 
     def test_updated_partial(self):
         n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"
-        assert n.name == "partial(identity)__0d5cd1ce"
+        assert n.name == "partial(identity)__7b43ecf5"
         assert n.short_name == "Identity"
 
     def test_updated_partial_dict_inputs(self):
@@ -460,7 +460,7 @@ class TestNames:
             ["out"],
         )
         assert str(n) == "biconcat([in2]) -> [out]"
-        assert n.name == "partial(biconcat)__d08e20bb"
+        assert n.name == "partial(biconcat)__59b2bb96"
         assert n.short_name == "Biconcat"
 
 

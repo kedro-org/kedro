@@ -136,6 +136,8 @@ class DataCatalog(CatalogProtocol):
             dataset_name in self._datasets
             or dataset_name in self._lazy_datasets
             or self._config_resolver.match_dataset_pattern(dataset_name) is not None
+            or self._config_resolver.match_user_catch_all_pattern(dataset_name)
+            is not None
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]

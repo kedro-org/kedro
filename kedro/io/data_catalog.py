@@ -234,8 +234,9 @@ class DataCatalog(CatalogProtocol):
     ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
-        If a dataset is not in the collection but matches any pattern
-        (by default it will match self.runtime_patterns)
+        If a dataset is not in the collection but matches dataset pattern
+        (by default) or dataset and default + runtime patterns
+        (if fallback_to_runtime_pattern is enabled)
         it is instantiated and added to the collection first, then returned.
 
         Args:

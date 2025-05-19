@@ -250,3 +250,8 @@ known-first-party = ["kedro"]
 ignore_missing_imports = true
 disable_error_code = ['misc']
 exclude = ['^kedro/templates/', '^docs/', '^features/steps/test_starter/']
+
+[dependency-groups]
+dev = [
+    "pip>=25.1.1",
+]

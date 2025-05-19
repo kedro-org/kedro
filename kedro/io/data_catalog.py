@@ -62,7 +62,9 @@ class _LazyDataset:
 
 
 class DataCatalog(CatalogProtocol):
-    runtime_patterns: ClassVar = {"{default}": {"type": "kedro.io.MemoryDataset"}}
+    default_runtime_patterns: ClassVar = {
+        "{default}": {"type": "kedro.io.MemoryDataset"}
+    }
 
     def __init__(
         self,
@@ -104,7 +106,7 @@ class DataCatalog(CatalogProtocol):
             >>> catalog = DataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver(
-            runtime_patterns=self.runtime_patterns
+            default_runtime_patterns=self.default_runtime_patterns
         )
         self._datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
@@ -354,7 +356,7 @@ class DataCatalog(CatalogProtocol):
         """
         catalog = catalog or {}
         config_resolver = CatalogConfigResolver(
-            catalog, credentials, cls.runtime_patterns
+            catalog, credentials, cls.default_runtime_patterns
         )
         save_version = save_version or generate_timestamp()
         load_versions = load_versions or {}
@@ -561,7 +563,6 @@ class DataCatalog(CatalogProtocol):
     def get_type(self, ds_name: str) -> str:
         """Access dataset type without adding resolved dataset to the catalog."""
         if ds_name not in self:
-            self._logger.warning(f"Dataset `{ds_name}` is missing in the catalog.")
             return ""
 
         if ds_name not in self._datasets and ds_name not in self._lazy_datasets:
@@ -757,7 +758,9 @@ class DataCatalog(CatalogProtocol):
 
 
 class SharedMemoryDataCatalog(DataCatalog):
-    runtime_patterns: ClassVar = {"{default}": {"type": "kedro.io.SharedMemoryDataset"}}
+    default_runtime_patterns: ClassVar = {
+        "{default}": {"type": "kedro.io.SharedMemoryDataset"}
+    }
 
     def set_manager_datasets(self, manager: SyncManager) -> None:
         for _, ds in self._datasets.items():

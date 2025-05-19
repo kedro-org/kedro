@@ -290,14 +290,14 @@ class TestDataCatalog:
                 **correct_config, load_versions={"version": "test_version"}
             )
 
-    def test_get_dataset_matching_pattern(self, data_catalog):
-        """Test get_dataset() when dataset is not in the catalog but pattern matches"""
+    def test_get_dataset_matches_runtime_pattern(self, data_catalog):
+        """Test get_dataset() when dataset is not in the catalog but default pattern matches"""
         match_pattern_ds = "match_pattern_ds"
         assert match_pattern_ds not in data_catalog
-        data_catalog.config_resolver.add_runtime_patterns(
-            {"{default}": {"type": "MemoryDataset"}}
-        )
-        ds = data_catalog.get(match_pattern_ds)
+        pattern = r"Dataset \'match_pattern_ds\' not found in the catalog"
+        with pytest.raises(DatasetNotFoundError, match=pattern):
+            _ = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=False)
+        ds = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=True)
         assert isinstance(ds, MemoryDataset)
 
     def test_release(self, data_catalog):

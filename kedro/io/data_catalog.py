@@ -560,12 +560,12 @@ class DataCatalog(CatalogProtocol):
 
     def get_type(self, ds_name: str) -> str:
         """Access dataset type without adding resolved dataset to the catalog."""
+        if ds_name not in self:
+            self._logger.warning(f"Dataset `{ds_name}` is missing in the catalog.")
+            return ""
+
         if ds_name not in self._datasets and ds_name not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(ds_name)
-            if not ds_config:
-                self._logger.warning(f"Dataset `{ds_name}` is missing in the catalog")
-                return ""
-
             return str(_LazyDataset(ds_name, ds_config))
 
         if ds_name in self._lazy_datasets:

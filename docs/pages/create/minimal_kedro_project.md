@@ -139,13 +139,13 @@ AttributeError: module 'minikedro.pipeline_registry' has no attribute 'register_
 To resolve this issue, add the following code to `pipeline_registry.py`, which defines a simple pipeline to run:
 
 ```python
-from kedro.pipeline import pipeline, node
+from kedro.pipeline import Pipeline, Node
 
 def foo():
     return "dummy"
 
 def register_pipelines():
-    return {"__default__": pipeline([node(foo, None, "dummy_output")])}
+    return {"__default__": Pipeline([Node(foo, None, "dummy_output")])}
 ```
 
 If you attempt to run the pipeline again with `kedro run`, you will see another error:

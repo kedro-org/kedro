@@ -28,12 +28,12 @@ def variance(m, m2):
     return m2 - m * m
 
 
-full_pipeline = pipeline(
+full_pipeline = Pipeline(
     [
-        node(len, "xs", "n"),
-        node(mean, ["xs", "n"], "m", name="mean_node", tags="mean"),
-        node(mean_sos, ["xs", "n"], "m2", name="mean_sos", tags=["mean", "variance"]),
-        node(variance, ["m", "m2"], "v", name="variance_node", tags="variance"),
+        Node(len, "xs", "n"),
+        Node(mean, ["xs", "n"], "m", name="mean_node", tags="mean"),
+        Node(mean_sos, ["xs", "n"], "m2", name="mean_sos", tags=["mean", "variance"]),
+        Node(variance, ["m", "m2"], "v", name="variance_node", tags="variance"),
     ]
 )
 ```
@@ -310,10 +310,10 @@ To demonstrate this, let us save the intermediate output `n` using a `JSONDatase
 
 ```python
 from kedro_datasets.pandas import JSONDataset
-from kedro.io import KedroDataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset
 
 n_json = JSONDataset(filepath="./data/07_model_output/len.json")
-io = KedroDataCatalog(dict(xs=MemoryDataset([1, 2, 3]), n=n_json))
+io = DataCatalog(dict(xs=MemoryDataset([1, 2, 3]), n=n_json))
 ```
 </details>
 

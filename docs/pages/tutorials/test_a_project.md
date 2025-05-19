@@ -155,21 +155,21 @@ from .nodes import evaluate_model, split_data, train_model
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
-            node(
+            Node(
                 func=split_data,
                 inputs=["model_input_table", "params:model_options"],
                 outputs=["X_train", "X_test", "y_train", "y_test"],
                 name="split_data_node",
             ),
-            node(
+            Node(
                 func=train_model,
                 inputs=["X_train", "y_train"],
                 outputs="regressor",
                 name="train_model_node",
             ),
-            node(
+            Node(
                 func=evaluate_model,
                 inputs=["regressor", "X_test", "y_test"],
                 outputs=None,
@@ -201,7 +201,7 @@ When we put this together, we get the following test:
 
 import logging
 import pandas as pd
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
 
@@ -210,7 +210,7 @@ def test_data_science_pipeline(caplog):    # Note: caplog is passed as an argume
     pipeline = create_ds_pipeline()
 
     # Arrange data catalog
-    catalog = KedroDataCatalog()
+    catalog = DataCatalog()
 
     dummy_data = pd.DataFrame(
         {
@@ -341,7 +341,7 @@ import logging
 import pandas as pd
 import pytest
 
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
 from spaceflights.pipelines.data_science.nodes import split_data
@@ -391,7 +391,7 @@ def test_data_science_pipeline(caplog, dummy_data, dummy_parameters):
         .from_nodes("split_data_node")
         .to_nodes("evaluate_model_node")
     )
-    catalog = KedroDataCatalog()
+    catalog = DataCatalog()
     catalog.add_feed_dict(
         {
             "model_input_table" : dummy_data,

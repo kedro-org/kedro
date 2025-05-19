@@ -9,8 +9,8 @@ import pytest
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
+    DataCatalog,
     DatasetError,
-    KedroDataCatalog,
     LambdaDataset,
     MemoryDataset,
 )
@@ -65,7 +65,7 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert len(outputs) == 1
 
     def test_no_datasets(self, is_async, branchless_pipeline):
-        catalog = KedroDataCatalog({}, {"ds1": 42})
+        catalog = DataCatalog({}, {"ds1": 42})
         outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
         assert outputs["ds3"] == 42
@@ -91,7 +91,7 @@ class TestSeqentialRunnerBranchlessPipeline:
         def _save(arg):
             assert arg == 0
 
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             {
                 "ds": LambdaDataset(load=_load, save=_save),
                 "dsX": LambdaDataset(load=_load, save=_save),
@@ -184,7 +184,7 @@ class TestSequentialRunnerRelease:
         test_pipeline = pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             {
                 "in": LoggingDataset(log, "in", "stuff"),
                 "middle": LoggingDataset(log, "middle"),
@@ -205,7 +205,7 @@ class TestSequentialRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             {
                 "first": LoggingDataset(log, "first"),
                 "second": LoggingDataset(log, "second"),
@@ -230,7 +230,7 @@ class TestSequentialRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = KedroDataCatalog({"dataset": LoggingDataset(log, "dataset")})
+        catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we want to the release after both the loads
@@ -241,7 +241,7 @@ class TestSequentialRunnerRelease:
         test_pipeline = pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             {
                 "ds@save": LoggingDataset(log, "save"),
                 "ds@load": LoggingDataset(log, "load"),
@@ -267,7 +267,7 @@ class TestSequentialRunnerRelease:
     )
     def test_confirms(self, mocker, test_pipeline, is_async):
         fake_dataset_instance = mocker.Mock()
-        catalog = KedroDataCatalog(datasets={"ds1": fake_dataset_instance})
+        catalog = DataCatalog(datasets={"ds1": fake_dataset_instance})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
         fake_dataset_instance.confirm.assert_called_once_with()
 
@@ -348,7 +348,7 @@ class TestSuggestResumeScenario:
 class TestMemoryDatasetBehaviour:
     def test_run_includes_memory_datasets(self, pipeline_with_memory_datasets):
         # Create a catalog with MemoryDataset entries and inputs for the pipeline
-        catalog = KedroDataCatalog(
+        catalog = DataCatalog(
             {
                 "Input1": LambdaDataset(load=lambda: "data1", save=lambda data: None),
                 "Input2": LambdaDataset(load=lambda: "data2", save=lambda data: None),
@@ -368,4 +368,4 @@ class TestMemoryDatasetBehaviour:
         assert "MemOutput2" in output
         assert (
             "RegularOutput" not in output
-        )  # This output is registered in KedroDataCatalog and so should not be in free outputs
+        )  # This output is registered in DataCatalog and so should not be in free outputs

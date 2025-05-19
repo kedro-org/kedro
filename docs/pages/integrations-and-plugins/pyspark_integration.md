@@ -90,7 +90,7 @@ Or using the Python API:
 
 ```python
 import pyspark.sql
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 from kedro_datasets.spark import SparkDataset
 
 spark_ds = SparkDataset(
@@ -99,7 +99,7 @@ spark_ds = SparkDataset(
     load_args={"header": True, "inferSchema": True},
     save_args={"sep": "|", "header": True},
 )
-catalog = KedroDataCatalog({"weather": spark_ds})
+catalog = DataCatalog({"weather": spark_ds})
 
 df = catalog.load("weather")
 assert isinstance(df, pyspark.sql.DataFrame)
@@ -142,7 +142,7 @@ Refer to the more detailed section on Kedro and Delta Lake integration in the [D
 
 ## Use `MemoryDataset` for intermediary `DataFrame`
 
-For nodes operating on `DataFrame` that doesn't need to perform Spark actions such as writing the `DataFrame` to storage, we recommend using the default `MemoryDataset` to hold the `DataFrame`. In other words, there is no need to specify it in the `KedroDataCatalog` or `catalog.yml`. This allows you to take advantage of Spark's optimiser and lazy evaluation.
+For nodes operating on `DataFrame` that doesn't need to perform Spark actions such as writing the `DataFrame` to storage, we recommend using the default `MemoryDataset` to hold the `DataFrame`. In other words, there is no need to specify it in the `DataCatalog` or `catalog.yml`. This allows you to take advantage of Spark's optimiser and lazy evaluation.
 
 ## Use `MemoryDataset` with `copy_mode="assign"` for non-`DataFrame` Spark objects
 
@@ -151,7 +151,7 @@ Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs
 ```python
 from typing import Any, Dict
 
-from kedro.pipeline import node, pipeline
+from kedro.pipeline import Node, Pipeline
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.sql import DataFrame
 
@@ -169,10 +169,10 @@ def predict(model: RandomForestClassifier, testing_data: DataFrame) -> DataFrame
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
-            node(train_model, inputs=["training_data"], outputs="example_classifier"),
-            node(
+            Node(train_model, inputs=["training_data"], outputs="example_classifier"),
+            Node(
                 predict,
                 inputs=dict(model="example_classifier", testing_data="testing_data"),
                 outputs="example_predictions",

@@ -121,9 +121,9 @@ Here is the full list of possible scenarios:
 Let's assume that the Kedro pipeline that you are working with contains the node, defined as follows:
 
 ```python
-from kedro.pipeline import node
+from kedro.pipeline import Node
 
-node(concat_partitions, inputs="my_partitioned_dataset", outputs="concatenated_result")
+Node(concat_partitions, inputs="my_partitioned_dataset", outputs="concatenated_result")
 ```
 
 The underlying node function `concat_partitions` might look like this:
@@ -181,9 +181,9 @@ new_partitioned_dataset:
 Here is the node definition:
 
 ```python
-from kedro.pipeline import node
+from kedro.pipeline import Node
 
-node(create_partitions, inputs=None, outputs="new_partitioned_dataset")
+Node(create_partitions, inputs=None, outputs="new_partitioned_dataset")
 ```
 
 The underlying node function is as follows in `create_partitions`:
@@ -284,10 +284,10 @@ The checkpoint value *is not* automatically updated when a new set of partitions
 Partitioned dataset checkpoint update is triggered by an explicit `confirms` instruction in one of the nodes downstream. It can be the same node, which processes the partitioned dataset:
 
 ```python
-from kedro.pipeline import node
+from kedro.pipeline import Node
 
 # process and then confirm `IncrementalDataset` within the same node
-node(
+Node(
     process_partitions,
     inputs="my_partitioned_dataset",
     outputs="my_processed_dataset",
@@ -298,17 +298,17 @@ node(
 Alternatively, confirmation can be deferred to one of the nodes downstream, allowing you to implement extra validations before the loaded partitions are considered successfully processed:
 
 ```python
-from kedro.pipeline import node, pipeline
+from kedro.pipeline import Node, Pipeline
 
-pipeline(
+Pipeline(
     [
-        node(
+        Node(
             func=process_partitions,
             inputs="my_partitioned_dataset",
             outputs="my_processed_dataset",
         ),
         # do something else
-        node(
+        Node(
             func=confirm_partitions,
             # note that the node may not require 'my_partitioned_dataset' as an input
             inputs="my_processed_dataset",
@@ -316,7 +316,7 @@ pipeline(
             confirms="my_partitioned_dataset",
         ),
         # ...
-        node(
+        Node(
             func=do_something_else_with_partitions,
             # will return the same partitions even though they were already confirmed
             inputs=["my_partitioned_dataset", "my_processed_dataset"],

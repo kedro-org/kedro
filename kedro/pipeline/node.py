@@ -10,6 +10,7 @@ import inspect
 import logging
 import re
 from collections import Counter
+from dataclasses import dataclass, field
 from functools import cached_property, partial
 from typing import TYPE_CHECKING, Any, Callable
 from warnings import warn
@@ -20,6 +21,20 @@ from .transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+
+@dataclass
+class GroupedNodes:
+    """Represents a logical group of nodes, typically by namespace
+    or a custom grouping. A group can also consist of a single node.
+    This is used to support deployment—for example, by executing
+    the entire group in a single container run.
+    """
+
+    name: str
+    type: str  # "namespace" or "node"
+    nodes: list[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
 
 class Node:

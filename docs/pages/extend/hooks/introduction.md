@@ -62,7 +62,7 @@ For example, the full signature of the {py:meth}` after_catalog_created() <kedro
 @hook_spec
 def after_catalog_created(
     self,
-    catalog: KedroDataCatalog,
+    catalog: DataCatalog,
     conf_catalog: Dict[str, Any],
     conf_creds: Dict[str, Any],
     save_version: str,
@@ -78,7 +78,7 @@ However, if you just want to use this Hook to list the contents of a data catalo
 import logging
 
 from kedro.framework.hooks import hook_impl
-from kedro.io import KedroDataCatalog
+from kedro.io import DataCatalog
 
 
 class DataCatalogHooks:
@@ -87,7 +87,7 @@ class DataCatalogHooks:
         return logging.getLogger(__name__)
 
     @hook_impl
-    def after_catalog_created(self, catalog: KedroDataCatalog) -> None:
+    def after_catalog_created(self, catalog: DataCatalog) -> None:
         self._logger.info(catalog.list())
 ```
 
@@ -147,6 +147,10 @@ In general, Hook execution order is not guaranteed and you should not rely on it
 ## Under the hood
 
 Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest/) to implement Kedro's Hook mechanism. We recommend reading their documentation to find out more about the underlying implementation.
+
+```{note}
+When your project's logging level is set to `DEBUG`, the hooks will use `pluggy`'s tracing feature to log the execution of each hook. This is useful for debugging purposes but can be noisy and slow down the execution of your pipeline. You can disable this feature by [setting the logging level to `INFO` or higher](../logging/index.md#how-to-show-debug-level-messages).
+```
 
 ### Plugin Hooks
 Plugin Hooks are registered using [`importlib_metadata`'s `EntryPoints` API](https://docs.python.org/3/library/importlib.metadata.html).

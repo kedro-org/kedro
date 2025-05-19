@@ -58,7 +58,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 ```python
 # in src/<package_name>/runner.py
 from typing import Any, Dict
-from kedro.io import AbstractDataset, KedroDataCatalog, MemoryDataset
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
 from pluggy import PluginManager
@@ -76,7 +76,7 @@ class DryRunner(AbstractRunner):
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the KedroDataCatalog
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the DataCatalog
                 during the run. This is used to set the default datasets.
         """
         default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
@@ -86,7 +86,7 @@ class DryRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: KedroDataCatalog,
+        catalog: DataCatalog,
         hook_manager: PluginManager = None,
         session_id: str = None,
     ) -> None:
@@ -100,7 +100,7 @@ class DryRunner(AbstractRunner):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``KedroDataCatalog`` from which to fetch data.
+            catalog: The ``DataCatalog`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
@@ -142,7 +142,7 @@ When processing a node, both `SequentialRunner` and `ParallelRunner` perform the
 2. Execute node function with the input(s)
 3. Save the output(s)
 
-If a node has multiple inputs or outputs (e.g., `node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
+If a node has multiple inputs or outputs (e.g., `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
 
 ```bash
 $ kedro run --async
@@ -171,7 +171,7 @@ def register_pipelines():
     """
     pipelines = find_pipelines()
     pipelines["__default__"] = sum(pipelines.values())
-    my_pipeline = pipeline(
+    my_pipeline = Pipeline(
         [
             # your definition goes here
         ]
@@ -197,9 +197,9 @@ Further information about `kedro run` can be found in the [Kedro CLI documentati
 
 The above definition of pipelines only applies for non-stateful or "pure" pipelines that do not interact with the outside world. In practice, we would like to interact with APIs, databases, files and other sources of data. By combining IO and pipelines, we can tackle these more complex use cases.
 
-By using `KedroDataCatalog` from the IO module we are still able to write pure functions that work with our data and outsource file saving and loading to `KedroDataCatalog`.
+By using `DataCatalog` from the IO module we are still able to write pure functions that work with our data and outsource file saving and loading to `DataCatalog`.
 
-Through `KedroDataCatalog`, we can control where inputs are loaded from, where intermediate variables get persisted and ultimately the location to which output variables are written.
+Through `DataCatalog`, we can control where inputs are loaded from, where intermediate variables get persisted and ultimately the location to which output variables are written.
 
 In a simple example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, then instantiate `SequentialRunner` and call its `run` method with the pipeline and data catalog instances:
 
@@ -208,7 +208,7 @@ In a simple example, we define a `MemoryDataset` called `xs` to store our inputs
 
 
 ```python
-io = KedroDataCatalog(dict(xs=MemoryDataset()))
+io = DataCatalog(dict(xs=MemoryDataset()))
 ```
 
 ```python

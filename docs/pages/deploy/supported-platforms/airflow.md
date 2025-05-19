@@ -6,7 +6,7 @@ Apache Airflow is a popular open-source workflow management platform. It is a su
 
 The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted to an [Airflow DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html). This approach mirrors the principles of [running Kedro in a distributed environment](../distributed.md).
 
-Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`KedroDataCatalog`](https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
+Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/data/index.html#DataCatalog-experimental-feature) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
 
 This guide provides instructions on running a Kedro pipeline on different Airflow platforms. You can jump to the specific sections by clicking the links below, how to run a Kedro pipeline on:
 
@@ -31,7 +31,7 @@ To follow this tutorial, ensure you have the following:
 
 ### Create, prepare and package example Kedro project
 
-In this section, you will create a new Kedro project equipped with an example pipeline designed to solve a typical data science task: predicting spaceflights prices. You will need to customise this project to ensure compatibility with Airflow, which includes enriching the Kedro `KedroDataCatalog` with datasets previously stored only in memory and simplifying logging through custom settings. Following these modifications, you will package the project for installation in an Airflow Docker container and generate an Airflow DAG that mirrors our Kedro pipeline.
+In this section, you will create a new Kedro project equipped with an example pipeline designed to solve a typical data science task: predicting spaceflights prices. You will need to customise this project to ensure compatibility with Airflow, which includes enriching the Kedro `DataCatalog` with datasets previously stored only in memory and simplifying logging through custom settings. Following these modifications, you will package the project for installation in an Airflow Docker container and generate an Airflow DAG that mirrors our Kedro pipeline.
 
 1. To create a new Kedro project, select the `example=yes` option to include example code. Additionally, to implement custom logging, select `tools=log`. Proceed with the default project name, but feel free to add any other tools as desired:
 
@@ -39,7 +39,7 @@ In this section, you will create a new Kedro project equipped with an example pi
     kedro new --example=yes --name=new-kedro-project --tools=log
     ```
 
-2. Navigate to your project's directory, create a new `conf/airflow` directory for Airflow-specific configurations, and copy the `catalog.yml` file from `conf/base` to `conf/airflow`. This setup allows you to customise the `KedroDataCatalog` for use with Airflow:
+2. Navigate to your project's directory, create a new `conf/airflow` directory for Airflow-specific configurations, and copy the `catalog.yml` file from `conf/base` to `conf/airflow`. This setup allows you to customise the `DataCatalog` for use with Airflow:
 
     ```shell
     cd new-kedro-project
@@ -47,7 +47,7 @@ In this section, you will create a new Kedro project equipped with an example pi
     cp conf/base/catalog.yml conf/airflow/catalog.yml
     ```
 
-3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `KedroDataCatalog`. Instead of repeating similar code for each dataset, you can use [Dataset Factories](https://docs.kedro.org/en/stable/data/kedro_dataset_factories.html), a special syntax that allows defining a catch-all pattern to overwrite the default `MemoryDataset` creation. Add this code to the end of the file:
+3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`. Instead of repeating similar code for each dataset, you can use [Dataset Factories](https://docs.kedro.org/en/stable/data/kedro_dataset_factories.html), a special syntax that allows defining a catch-all pattern to overwrite the default `MemoryDataset` creation. Add this code to the end of the file:
 
 ```yaml
 "{base_dataset}":
@@ -99,7 +99,7 @@ In this section, you will start by setting up a new blank Airflow project using 
 
 3. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run the Kedro project there, you need to copy several items from the previous section into it:
 - the `/data` folder from Step 1, containing sample input datasets for our pipeline. This folder will also store the output results.
-- the `/conf` folder from Steps 2-4, which includes our `KedroDataCatalog`, parameters, and customised logging files. These files will be used by Kedro during its execution in the Airflow container.
+- the `/conf` folder from Steps 2-4, which includes our `DataCatalog`, parameters, and customised logging files. These files will be used by Kedro during its execution in the Airflow container.
 - the `.whl` file from Step 5, which you will need to install in the Airflow Docker container to execute our project node by node.
 - the Airflow DAG from Step 6 for deployment in the Airflow cluster.
     ```shell
@@ -175,10 +175,10 @@ astro deploy
 ## How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)
 
 ### Kedro project preparation
-MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it easier to set up, operate, and scale Apache Airflow in the cloud. Deploying a Kedro pipeline to MWAA is similar to Astronomer, but there are some key differences: you need to store your project data in an AWS S3 bucket and make necessary changes to your `KedroDataCatalog`. Additionally, you must configure how you upload your Kedro configuration, install your Kedro package, and set up the necessary environment variables.
+MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it easier to set up, operate, and scale Apache Airflow in the cloud. Deploying a Kedro pipeline to MWAA is similar to Astronomer, but there are some key differences: you need to store your project data in an AWS S3 bucket and make necessary changes to your `DataCatalog`. Additionally, you must configure how you upload your Kedro configuration, install your Kedro package, and set up the necessary environment variables.
 1. Complete steps 1-4 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section.
 2. Your project's data should not reside in the working directory of the Airflow container. Instead, [create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html) and [upload your data folder from the new-kedro-project folder to your S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html).
-3. Modify the `KedroDataCatalog` to reference data in your S3 bucket by updating the filepath and add credentials line for each dataset in `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the filepath as shown below:
+3. Modify the `DataCatalog` to reference data in your S3 bucket by updating the filepath and add credentials line for each dataset in `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the filepath as shown below:
 ```shell
 companies:
   type: pandas.CSVDataset

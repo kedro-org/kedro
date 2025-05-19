@@ -53,7 +53,9 @@ h3,
   margin: 24px 0 12px 0;
 }
 
-p {
+p, 
+.md-typeset thead ,
+.md-typeset td {
   font-family: Inter;
   font-size: 16px;
   font-style: normal;
@@ -62,11 +64,28 @@ p {
   color: var(--text-primary-color);
 }
 
+.md-typeset ol li, 
+.md-typeset ul li {
+    margin-bottom: 0;
+}
+
+
+.md-typeset a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+
+  &:hover {
+    color: var(--text-hover-color);
+  }
+}
+
+
 @media screen and (max-width: 76.2344em) {
-    body {
-        font-size: 14px;
-        line-height: 20px;
-    }
+  body {
+      font-size: 14px;
+      line-height: 20px;
+  }
 
   .md-search__input {
     font-size: 14px;
@@ -91,22 +110,14 @@ p {
   }
 
   p,
-  .md-typeset p {
+  .md-typeset p,
+  .md-typeset thead ,
+  .md-typeset td{
     font-size: 14px;
     line-height: 20px;
   }
 
   .md-tabs__link {
     font-size: 14px;
-  }
-}
-
-.md-typeset a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-
-  &:hover {
-    color: var(--text-hover-color);
   }
 }

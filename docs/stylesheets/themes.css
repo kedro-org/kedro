@@ -16,6 +16,7 @@
     --admonition-bg-color: var(--white-100);
     --admonition-border-color: var(--black-900);
     --social-link-fill-color: #B2B2B2;
+    --md-typeset-table-color: var(--slate-100);
 }
 
 /* Dark Theme */
@@ -36,4 +37,5 @@
     --admonition-bg-color: var(--slate-600);
     --admonition-border-color: var(--white-0);
     --social-link-fill-color: var(--black-400);
+    --md-typeset-table-color: var(--white-800);
 }

@@ -114,7 +114,7 @@ extra_javascript:
 nav:
   - Welcome: index.md
   - Kedro:
-      - Getting Started:
+      - Get Started:
           - Introduction to Kedro: pages/getting-started/course.md
           - Concepts: pages/getting-started/kedro_concepts.md
           - Installation: pages/getting-started/install.md

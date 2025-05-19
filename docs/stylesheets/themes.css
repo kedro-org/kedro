@@ -9,6 +9,7 @@
     --icon-fill-color: var(--black-200);
     --text-secondary-color: var(--black-200);
     --text-primary-color: var(--black-700);
+    --text-hover-color: var(--black-900);
     --footer-text-color: var(--black-0);
     --primary-sidebar-bg-color: var(--white-100);
     --active-link-bg-color: var(--white-0);
@@ -28,6 +29,7 @@
     --icon-fill-color: var(--black-0);
     --text-secondary-color: var(--white-600-50);
     --text-primary-color: var(--white-600);
+    --text-hover-color: var(--white-0);
     --footer-text-color: var(--black-200);
     --primary-sidebar-bg-color: var(--slate-600);
     --active-link-bg-color: var(--slate-200);

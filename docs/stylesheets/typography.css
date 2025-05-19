@@ -107,7 +107,6 @@ p {
   text-underline-offset: 4px;
 
   &:hover {
-    color: inherit;
-    font-weight: 600;
+    color: var(--text-hover-color);
   }
 }

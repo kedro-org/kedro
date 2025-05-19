@@ -48,7 +48,7 @@
 .md-search__input {
   color: var(--yellow-600);
   font-size: 16px;
-   padding-left: 35px !important
+  padding-left: 35px !important
 }
 
 .md-search__input::placeholder {
@@ -184,19 +184,24 @@
 
 /* Secondary sidebar styles */
 .md-sidebar--secondary {
-  margin-top: 48px;
   margin-right: 64px;
-  padding: 0;
 
   .md-nav__title {
     background: transparent;
     box-shadow: none;
     color: var(--text-secondary-color);
     font-size: 16px;
+    font-weight: 400;
+    padding-bottom: 10px;
   }
 
   .md-nav__item {
     font-size: 16px;
+    padding-bottom: 10px;
+  }
+
+  .md-nav {
+    padding-top: 10px;
   }
 
   .md-nav__link {
@@ -204,7 +209,7 @@
   }
 
   .md-nav__link:hover {
-    color: var(--text-primary-color);
+    color: var(--text-hover-color);
   }
 
   .md-nav__link--active {
@@ -242,7 +247,7 @@
 /** hightlight the copy icon buton on hover */
 .md-clipboard:hover,
 pre:hover .md-clipboard {
-  color: var(--text-primary-color);
+  color: var(--text-hover-color);
 }
 
 /** Style for expandle code blocks */

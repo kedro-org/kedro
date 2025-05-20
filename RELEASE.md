@@ -26,6 +26,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Arnout Verboven](https://github.com/ArnoutVerboven)
 * [gabohc](https://github.com/gabohc)
+* [Luis Chaves Rodriguez](https://github.com/lucharo)
 
 # Release 0.19.12
 

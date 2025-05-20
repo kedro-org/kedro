@@ -80,15 +80,17 @@ class CatalogConfigResolver:
         self,
         config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
-        runtime_patterns: Patterns | None = None,
+        default_runtime_patterns: Patterns | None = None,
     ):
-        if runtime_patterns is None:
+        if default_runtime_patterns is None:
             self._logger.warning(
                 f"Since runtime patterns are not provided, setting"
                 f"the runtime pattern to default value: {DEFAULT_RUNTIME_PATTERN}"
             )
-        self._runtime_patterns = runtime_patterns or DEFAULT_RUNTIME_PATTERN
-        self._dataset_patterns, self._default_pattern = self._extract_patterns(
+        self._default_runtime_patterns = (
+            default_runtime_patterns or DEFAULT_RUNTIME_PATTERN
+        )
+        self._dataset_patterns, self._user_catch_all_pattern = self._extract_patterns(
             config, credentials
         )
         self._resolved_configs = self._resolve_credentials(config, credentials)
@@ -201,23 +203,28 @@ class CatalogConfigResolver:
         """List al patterns available in the catalog."""
         return (
             list(self._dataset_patterns.keys())
-            + list(self._default_pattern.keys())
-            + list(self._runtime_patterns.keys())
+            + list(self._user_catch_all_pattern.keys())
+            + list(self._default_runtime_patterns.keys())
         )
 
     @classmethod
     def _get_matches(cls, pattens: Iterable[str], ds_name: str) -> Generator[str]:
         return (pattern for pattern in pattens if parse(pattern, ds_name))
 
-    def match_pattern(self, ds_name: str) -> str | None:
-        """Match a dataset name against catalog patterns in a dictionary."""
+    def match_dataset_pattern(self, ds_name: str) -> str | None:
+        """Match a dataset name against dataset patterns."""
         matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
         return next(matches, None)
 
-    def match_default_pattern(self, ds_name: str) -> str:
-        """Match a dataset name against default patterns in a dictionary."""
-        default_patters = set(self._default_pattern.keys())
-        default_patters.update(set(self._runtime_patterns.keys()))
+    def match_user_catch_all_pattern(self, ds_name: str) -> str | None:
+        """Match a dataset name against user catch all pattern."""
+        user_catch_all_pattern = set(self._user_catch_all_pattern.keys())
+        matches = self._get_matches(user_catch_all_pattern, ds_name)
+        return next(matches, None)
+
+    def match_runtime_pattern(self, ds_name: str) -> str:
+        """Match a dataset name against default runtime pattern."""
+        default_patters = set(self._default_runtime_patterns.keys())
         matches = self._get_matches(default_patters, ds_name)
         # We assume runtime pattern always matches at the end
         return next(matches)
@@ -225,8 +232,8 @@ class CatalogConfigResolver:
     def _get_pattern_config(self, pattern: str) -> dict[str, Any]:
         return (
             self._dataset_patterns.get(pattern)
-            or self._default_pattern.get(pattern)
-            or self._runtime_patterns.get(pattern)
+            or self._user_catch_all_pattern.get(pattern)
+            or self._default_runtime_patterns.get(pattern)
             or {}
         )
 
@@ -324,8 +331,10 @@ class CatalogConfigResolver:
     def resolve_pattern(self, ds_name: str) -> dict[str, Any]:
         """Resolve dataset patterns and return resolved configurations based on the existing patterns."""
         if ds_name not in self._resolved_configs:
-            matched_pattern = self.match_pattern(ds_name) or self.match_default_pattern(
-                ds_name
+            matched_pattern = (
+                self.match_dataset_pattern(ds_name)
+                or self.match_user_catch_all_pattern(ds_name)
+                or self.match_runtime_pattern(ds_name)
             )
             pattern_config = self._get_pattern_config(matched_pattern)
             ds_config = self._resolve_dataset_config(
@@ -334,7 +343,7 @@ class CatalogConfigResolver:
 
             if (
                 self._pattern_specificity(matched_pattern) == 0
-                and matched_pattern in self._default_pattern
+                and matched_pattern in self._user_catch_all_pattern
             ):
                 self._logger.warning(
                     "Config from the dataset factory pattern '%s' in the catalog will be used to "

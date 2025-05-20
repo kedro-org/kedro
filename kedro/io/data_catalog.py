@@ -62,7 +62,9 @@ class _LazyDataset:
 
 
 class DataCatalog(CatalogProtocol):
-    runtime_patterns: ClassVar = {"{default}": {"type": "kedro.io.MemoryDataset"}}
+    default_runtime_patterns: ClassVar = {
+        "{default}": {"type": "kedro.io.MemoryDataset"}
+    }
 
     def __init__(
         self,
@@ -104,7 +106,7 @@ class DataCatalog(CatalogProtocol):
             >>> catalog = DataCatalog(datasets={"cars": cars})
         """
         self._config_resolver = config_resolver or CatalogConfigResolver(
-            runtime_patterns=self.runtime_patterns
+            default_runtime_patterns=self.default_runtime_patterns
         )
         self._datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
@@ -133,7 +135,9 @@ class DataCatalog(CatalogProtocol):
         return (
             dataset_name in self._datasets
             or dataset_name in self._lazy_datasets
-            or self._config_resolver.match_pattern(dataset_name) is not None
+            or self._config_resolver.match_dataset_pattern(dataset_name) is not None
+            or self._config_resolver.match_user_catch_all_pattern(dataset_name)
+            is not None
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
@@ -154,11 +158,11 @@ class DataCatalog(CatalogProtocol):
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """List all datasets registered in the catalog."""
-        return [self.get(key) for key in self]
+        return [self[key] for key in self]
 
     def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
         """List all dataset names and datasets registered in the catalog."""
-        return [(key, self.get(key)) for key in self]
+        return [(key, self[key]) for key in self]
 
     def __iter__(self) -> Iterator[str]:
         yield from self.keys()
@@ -220,8 +224,7 @@ class DataCatalog(CatalogProtocol):
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
-            default_dataset = self.runtime_patterns.get("{default}", {}).get("type", "")
-            self._logger.debug(f"Adding input data as a {default_dataset} - {key}")
+            self._logger.debug(f"Adding input data {key} as a default MemoryDataset")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:
@@ -230,22 +233,31 @@ class DataCatalog(CatalogProtocol):
     def get(
         self,
         key: str,
+        fallback_to_runtime_pattern: bool = False,
         version: Version | None = None,
     ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
-        If a dataset is not in the collection but matches any pattern
-        (by default it will match self.runtime_patterns)
+        If a dataset is not in the collection but matches dataset_pattern or user_catch_all_pattern
+        by default or runtime_patterns if fallback_to_runtime_pattern is enabled
         it is instantiated and added to the collection first, then returned.
 
         Args:
             key: A dataset name.
+            fallback_to_runtime_pattern: Whether to use runtime_pattern to resolve dataset.
             version: Optional argument to get a specific version of the dataset.
+
+        Raises:
+            DatasetNotFoundError: When the dataset in not in the internal collection, does not match
+                dataset_pattern or user_catch_all_pattern and fallback_to_runtime_pattern is
+                set to False.
 
         Returns:
             An instance of AbstractDataset.
         """
-        if key not in self._datasets and key not in self._lazy_datasets:
+        if key not in self and not fallback_to_runtime_pattern:
+            raise DatasetNotFoundError(f"Dataset '{key}' not found in the catalog")
+        elif not (key in self._datasets or key in self._lazy_datasets):
             ds_config = self._config_resolver.resolve_pattern(key)
             self._add_from_config(key, ds_config)
 
@@ -346,7 +358,7 @@ class DataCatalog(CatalogProtocol):
         """
         catalog = catalog or {}
         config_resolver = CatalogConfigResolver(
-            catalog, credentials, cls.runtime_patterns
+            catalog, credentials, cls.default_runtime_patterns
         )
         save_version = save_version or generate_timestamp()
         load_versions = load_versions or {}
@@ -356,7 +368,7 @@ class DataCatalog(CatalogProtocol):
             for ds_name in load_versions
             if not (
                 ds_name in config_resolver.config
-                or config_resolver.match_pattern(ds_name)
+                or config_resolver.match_dataset_pattern(ds_name)
             )
         ]
         if missing_keys:
@@ -551,13 +563,17 @@ class DataCatalog(CatalogProtocol):
         return filtered
 
     def get_type(self, ds_name: str) -> str:
-        """Access dataset type without adding resolved dataset to the catalog."""
+        """Access dataset type without adding resolved dataset to the catalog.
+
+        Raises:
+            DatasetNotFoundError: When the dataset in not in the internal collection, does not match
+                dataset_patterns or user_catch_all_pattern.
+        """
+        if ds_name not in self:
+            raise DatasetNotFoundError(f"Dataset '{ds_name}' not found in the catalog")
+
         if ds_name not in self._datasets and ds_name not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(ds_name)
-            if not ds_config:
-                self._logger.warning(f"Dataset `{ds_name}` is missing in the catalog")
-                return ""
-
             return str(_LazyDataset(ds_name, ds_config))
 
         if ds_name in self._lazy_datasets:
@@ -596,10 +612,7 @@ class DataCatalog(CatalogProtocol):
             >>>                    'col3': [5, 6]})
             >>> catalog.save("cars", df)
         """
-        if ds_name not in self:
-            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
-
-        dataset = self.get(ds_name)
+        dataset = self[ds_name]
 
         self._logger.info(
             "Saving data to %s (%s)...",
@@ -639,8 +652,6 @@ class DataCatalog(CatalogProtocol):
             >>> df = catalog.load("cars")
         """
         load_version = Version(version, None) if version else None
-        if ds_name not in self:
-            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
         dataset = self.get(ds_name, version=load_version)
 
         self._logger.info(
@@ -660,10 +671,7 @@ class DataCatalog(CatalogProtocol):
             DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
         """
-        if ds_name not in self:
-            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
-
-        dataset = self.get(ds_name)
+        dataset = self[ds_name]
 
         dataset.release()
 
@@ -672,13 +680,13 @@ class DataCatalog(CatalogProtocol):
         Args:
             ds_name: Name of the dataset.
         Raises:
+            DatasetNotFoundError: When a dataset with the given name
+                has not yet been registered
             DatasetError: When the dataset does not have `confirm` method.
         """
         self._logger.info("Confirming dataset '%s'", ds_name)
-        if ds_name not in self:
-            raise DatasetNotFoundError(f"'{ds_name}' datasets not found in the catalog")
 
-        dataset = self.get(ds_name)
+        dataset = self[ds_name]
 
         if hasattr(dataset, "confirm"):
             dataset.confirm()
@@ -694,13 +702,13 @@ class DataCatalog(CatalogProtocol):
             ds_name: A dataset to be checked.
 
         Returns:
-            Whether the dataset output exists.
+            Whether the dataset and its output exist.
 
         """
-        if ds_name not in self:
+        try:
+            dataset = self[ds_name]
+        except DatasetNotFoundError:
             return False
-
-        dataset = self.get(ds_name)
 
         return dataset.exists()
 
@@ -757,7 +765,9 @@ class DataCatalog(CatalogProtocol):
 
 
 class SharedMemoryDataCatalog(DataCatalog):
-    runtime_patterns: ClassVar = {"{default}": {"type": "kedro.io.SharedMemoryDataset"}}
+    default_runtime_patterns: ClassVar = {
+        "{default}": {"type": "kedro.io.SharedMemoryDataset"}
+    }
 
     def set_manager_datasets(self, manager: SyncManager) -> None:
         for _, ds in self._datasets.items():

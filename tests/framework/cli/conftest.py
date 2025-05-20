@@ -121,6 +121,7 @@ def fake_project_cli(
     old_settings = settings.as_dict()
     starter_path = Path(__file__).resolve().parents[3]
     starter_path = starter_path / "features" / "steps" / "test_starter"
+    modules_before = sys.modules.copy()
     CliRunner().invoke(
         fake_kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)]
     )
@@ -149,15 +150,9 @@ def fake_project_cli(
         settings.set(key, value)
     sys.path = old_path
 
-    # configure_project does imports that add PACKAGE_NAME.pipelines,
-    # PACKAGE_NAME.settings to sys.modules. These need to be removed.
-    # Ideally we would reset sys.modules to exactly what it was before
-    # running anything, but removal of distutils.build.commands from
-    # sys.modules mysteriously makes some tests for `kedro micropkg package`
-    # fail on Windows, Python 3.7 and 3.8.
-    for module in list(sys.modules.keys()):
-        if module.startswith(PACKAGE_NAME):
-            del sys.modules[module]
+    # Restore sys.modules to its previous state
+    sys.modules.clear()
+    sys.modules.update(modules_before)
 
 
 @fixture

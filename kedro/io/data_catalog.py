@@ -248,7 +248,7 @@ class DataCatalog(CatalogProtocol):
             version: Optional argument to get a specific version of the dataset.
 
         Raises:
-            DatasetError: When the dataset in not in the internal collection, does not match
+            DatasetNotFoundError: When the dataset in not in the internal collection, does not match
                 dataset_pattern or user_catch_all_pattern and fallback_to_runtime_pattern is
                 set to False.
 
@@ -566,7 +566,7 @@ class DataCatalog(CatalogProtocol):
         """Access dataset type without adding resolved dataset to the catalog.
 
         Raises:
-            DatasetError: When the dataset in not in the internal collection, does not match
+            DatasetNotFoundError: When the dataset in not in the internal collection, does not match
                 dataset_patterns or user_catch_all_pattern.
         """
         if ds_name not in self:

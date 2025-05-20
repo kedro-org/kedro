@@ -83,9 +83,9 @@ class CatalogConfigResolver:
     flexible and reusable dataset configurations.
 
     Attributes:
-        _runtime_patterns (Patterns): Runtime patterns used for resolving datasets.
+        _default_runtime_patterns (Patterns): Runtime patterns used for resolving datasets.
         _dataset_patterns (dict): Sorted dataset patterns extracted from the catalog configuration.
-        _default_pattern (dict): Default dataset pattern used as a fallback.
+        _user_catch_all_pattern (dict): User provided catch all pattern.
         _resolved_configs (dict): Resolved dataset configurations with credentials applied.
 
     Example:
@@ -108,35 +108,17 @@ class CatalogConfigResolver:
         self,
         config: dict[str, dict[str, Any]] | None = None,
         credentials: dict[str, dict[str, Any]] | None = None,
-        runtime_patterns: Patterns | None = None,
+        default_runtime_patterns: Patterns | None = None,
     ):
-        """
-        Initialize the `CatalogConfigResolver`.
-
-        Args:
-            config (dict[str, dict[str, Any]] | None): Dataset configurations from the catalog.
-            credentials (dict[str, dict[str, Any]] | None): Credentials for datasets.
-            runtime_patterns (Patterns | None): Runtime patterns for resolving datasets.
-
-        Example:
-            >>> from kedro.io.catalog_config_resolver import CatalogConfigResolver
-            >>> config = {
-            ...     "{namespace}.int_{name}": {
-            ...         "type": "pandas.CSVDataset",
-            ...         "filepath": "{name}.csv",
-            ...     }
-            ... }
-            >>> resolver = CatalogConfigResolver(config=config)
-            >>> resolver._dataset_patterns
-            # {'{namespace}.int_{name}': {'type': 'pandas.CSVDataset', 'filepath': '{name}.csv'}}
-        """
-        if runtime_patterns is None:
+        if default_runtime_patterns is None:
             self._logger.warning(
                 f"Since runtime patterns are not provided, setting"
                 f"the runtime pattern to default value: {DEFAULT_RUNTIME_PATTERN}"
             )
-        self._runtime_patterns = runtime_patterns or DEFAULT_RUNTIME_PATTERN
-        self._dataset_patterns, self._default_pattern = self._extract_patterns(
+        self._default_runtime_patterns = (
+            default_runtime_patterns or DEFAULT_RUNTIME_PATTERN
+        )
+        self._dataset_patterns, self._user_catch_all_pattern = self._extract_patterns(
             config, credentials
         )
         self._resolved_configs = self._resolve_credentials(config, credentials)
@@ -360,60 +342,28 @@ class CatalogConfigResolver:
         """
         return (
             list(self._dataset_patterns.keys())
-            + list(self._default_pattern.keys())
-            + list(self._runtime_patterns.keys())
+            + list(self._user_catch_all_pattern.keys())
+            + list(self._default_runtime_patterns.keys())
         )
 
     @classmethod
     def _get_matches(cls, pattens: Iterable[str], ds_name: str) -> Generator[str]:
         return (pattern for pattern in pattens if parse(pattern, ds_name))
 
-    def match_pattern(self, ds_name: str) -> str | None:
-        """
-        Match a dataset name against catalog patterns in a dictionary.
-
-        Args:
-            ds_name (str): The dataset name to match.
-
-        Returns:
-            str | None: The matched pattern, or None if no match is found.
-
-        Example:
-            >>> config = {
-            ...     "{namespace}.int_{name}": {
-            ...         "type": "pandas.CSVDataset",
-            ...         "filepath": "{name}.csv",
-            ...     }
-            ... }
-            >>> resolver = CatalogConfigResolver(config)
-            >>> resolver.match_pattern("data.int_companies")
-            # '{namespace}.int_{name}'
-        """
+    def match_dataset_pattern(self, ds_name: str) -> str | None:
+        """Match a dataset name against dataset patterns."""
         matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
         return next(matches, None)
 
-    def match_default_pattern(self, ds_name: str) -> str:
-        """
-        Match a dataset name against default patterns in a dictionary.
+    def match_user_catch_all_pattern(self, ds_name: str) -> str | None:
+        """Match a dataset name against user catch all pattern."""
+        user_catch_all_pattern = set(self._user_catch_all_pattern.keys())
+        matches = self._get_matches(user_catch_all_pattern, ds_name)
+        return next(matches, None)
 
-        This method checks if the given dataset name matches any of the default patterns
-        or runtime patterns defined in the catalog. If a match is found, the first matching
-        pattern is returned.
-
-        Args:
-            ds_name (str): The name of the dataset to match.
-
-        Returns:
-            str: The first matching pattern.
-        Example:
-            >>> resolver = CatalogConfigResolver(
-            ...     config={"example": {"type": "MemoryDataset"}}
-            ... )
-            >>> resolver.match_default_pattern("example")
-            # "{default}"
-        """
-        default_patters = set(self._default_pattern.keys())
-        default_patters.update(set(self._runtime_patterns.keys()))
+    def match_runtime_pattern(self, ds_name: str) -> str:
+        """Match a dataset name against default runtime pattern."""
+        default_patters = set(self._default_runtime_patterns.keys())
         matches = self._get_matches(default_patters, ds_name)
         # We assume runtime pattern always matches at the end
         return next(matches)
@@ -442,8 +392,8 @@ class CatalogConfigResolver:
         """
         return (
             self._dataset_patterns.get(pattern)
-            or self._default_pattern.get(pattern)
-            or self._runtime_patterns.get(pattern)
+            or self._user_catch_all_pattern.get(pattern)
+            or self._default_runtime_patterns.get(pattern)
             or {}
         )
 
@@ -636,8 +586,10 @@ class CatalogConfigResolver:
             # {'type': 'pandas.CSVDataset', 'filepath': 'customers.csv'}
         """
         if ds_name not in self._resolved_configs:
-            matched_pattern = self.match_pattern(ds_name) or self.match_default_pattern(
-                ds_name
+            matched_pattern = (
+                self.match_dataset_pattern(ds_name)
+                or self.match_user_catch_all_pattern(ds_name)
+                or self.match_runtime_pattern(ds_name)
             )
             pattern_config = self._get_pattern_config(matched_pattern)
             ds_config = self._resolve_dataset_config(
@@ -646,7 +598,7 @@ class CatalogConfigResolver:
 
             if (
                 self._pattern_specificity(matched_pattern) == 0
-                and matched_pattern in self._default_pattern
+                and matched_pattern in self._user_catch_all_pattern
             ):
                 self._logger.warning(
                     "Config from the dataset factory pattern '%s' in the catalog will be used to "

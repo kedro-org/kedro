@@ -1006,6 +1006,10 @@ class CatalogProtocol(Protocol[_C, _DS]):
         """Create a catalog instance from configuration."""
         ...
 
+    def get(self, key: str, fallback_to_runtime_pattern: bool = False) -> _DS:
+        """Get a dataset by name from an internal collection of datasets."""
+        ...
+
     def save(self, name: str, data: Any) -> None:
         """Save data to a registered dataset."""
         ...

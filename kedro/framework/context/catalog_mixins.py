@@ -107,7 +107,7 @@ class CatalogCommandsMixin:
             patterns_ds = set()
             default_ds = set()
             for ds_name in pipeline_ds - catalog_ds:
-                if self.config_resolver.match_pattern(ds_name):
+                if self.config_resolver.match_dataset_pattern(ds_name):
                     patterns_ds.add(ds_name)
                 else:
                     default_ds.add(ds_name)
@@ -182,11 +182,10 @@ class CatalogCommandsMixin:
                 continue
 
             ds_config = self.config_resolver.resolve_pattern(ds_name)
-            if ds_config:
-                unresolved_config, _ = self.config_resolver._unresolve_credentials(
-                    ds_name, ds_config
-                )
-                explicit_datasets[ds_name] = unresolved_config
+            unresolved_config, _ = self.config_resolver._unresolve_credentials(
+                ds_name, ds_config
+            )
+            explicit_datasets[ds_name] = unresolved_config
 
         return explicit_datasets
 
@@ -219,7 +218,12 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
         if is_parameter(ds_name):
             continue
 
-        str_type = catalog.get_type(ds_name)
+        str_type = (
+            catalog.get_type(ds_name)
+            if ds_name in catalog
+            else catalog.default_runtime_patterns["{default}"]["type"]
+        )
+
         if str_type not in mapping:
             mapping[str_type] = []
 

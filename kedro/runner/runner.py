@@ -86,7 +86,7 @@ class AbstractRunner(ABC):
         """
         # Run a warm-up to materialize all datasets in the catalog before run
         for ds in pipeline.datasets():
-            _ = catalog[ds]
+            _ = catalog.get(ds, fallback_to_runtime_pattern=True)
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 

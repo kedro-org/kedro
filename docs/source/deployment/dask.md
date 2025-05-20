@@ -33,9 +33,10 @@ Copy the contents of the script below into `dask_runner.py`:
 used to distribute execution of ``Node``s in the ``Pipeline`` across
 a Dask cluster, taking into account the inter-``Node`` dependencies.
 """
+
 from collections import Counter
 from itertools import chain
-from typing import Any, Dict
+from typing import Any
 
 from distributed import Client, as_completed, worker_client
 from kedro.framework.hooks.manager import (
@@ -44,7 +45,7 @@ from kedro.framework.hooks.manager import (
     _register_hooks_entry_points,
 )
 from kedro.framework.project import settings
-from kedro.io import AbstractDataset, DataCatalog
+from kedro.io import AbstractDataset, CatalogProtocol
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import AbstractRunner, run_node
@@ -77,7 +78,7 @@ class _DaskDataset(AbstractDataset):
     def _release(self) -> None:
         Client.current().unpublish_dataset(self._name)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return dict(name=self._name)
 
 
@@ -87,7 +88,7 @@ class DaskRunner(AbstractRunner):
     a Dask cluster, taking into account the inter-``Node`` dependencies.
     """
 
-    def __init__(self, client_args: Dict[str, Any] = {}, is_async: bool = False):
+    def __init__(self, client_args: dict[str, Any] = {}, is_async: bool = False):
         """Instantiates the runner by creating a ``distributed.Client``.
 
         Args:
@@ -117,9 +118,9 @@ class DaskRunner(AbstractRunner):
     @staticmethod
     def _run_node(
         node: Node,
-        catalog: DataCatalog,
+        catalog: CatalogProtocol,
         is_async: bool = False,
-        session_id: str = None,
+        session_id: str | None = None,
         *dependencies: Node,
     ) -> Node:
         """Run a single `Node` with inputs from and outputs to the `catalog`.
@@ -133,7 +134,7 @@ class DaskRunner(AbstractRunner):
 
         Args:
             node: The ``Node`` to run.
-            catalog: A ``DataCatalog`` containing the node's inputs and outputs.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
             session_id: The session id of the pipeline run.
@@ -152,10 +153,19 @@ class DaskRunner(AbstractRunner):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: DataCatalog,
-        hook_manager: PluginManager,
-        session_id: str = None,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager | None = None,
+        session_id: str | None = None,
     ) -> None:
+        """Implementation of the abstract interface for running the pipelines.
+
+        Args:
+            pipeline: The ``Pipeline`` to run.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
+        """
+
         nodes = pipeline.nodes
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
@@ -193,22 +203,23 @@ class DaskRunner(AbstractRunner):
                     catalog.release(dataset)
 
     def run_only_missing(
-        self, pipeline: Pipeline, catalog: DataCatalog
-    ) -> Dict[str, Any]:
+        self, pipeline: Pipeline, catalog: CatalogProtocol, hook_manager: PluginManager
+    ) -> dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
         datasets provided by ``catalog``, and save results back to the
         same objects.
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: The ``DataCatalog`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be
                 satisfied.
 
         Returns:
             Any node outputs that cannot be processed by the
-            ``DataCatalog``. These are returned in a dictionary, where
+            catalog. These are returned in a dictionary, where
             the keys are defined by the node outputs.
         """
         free_outputs = pipeline.outputs() - set(catalog.list())
@@ -242,6 +253,10 @@ class DaskRunner(AbstractRunner):
             catalog.add(ds_name, self.create_default_dataset(ds_name))
 
         return self.run(to_rerun, catalog)
+
+    def _get_executor(self, max_workers):
+        # Run sequentially
+        return None
 ```
 
 ### Update CLI implementation
@@ -253,21 +268,21 @@ def run(tag, env, ...):
     """Run the pipeline."""
     runner = runner or "SequentialRunner"
 
-    tag = _get_values_as_tuple(tag) if tag else tag
-    node_names = _get_values_as_tuple(node_names) if node_names else node_names
+    tags = tuple(tags)
+    node_names = tuple(node_names)
 
     with KedroSession.create(env=env, extra_params=params) as session:
         context = session.load_context()
         runner_instance = _instantiate_runner(runner, is_async, context)
         session.run(
-            tags=tag,
+            tags=tags,
             runner=runner_instance,
             node_names=node_names,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
             from_inputs=from_inputs,
             to_outputs=to_outputs,
-            load_versions=load_version,
+            load_versions=load_versions,
             pipeline_name=pipeline,
         )
 ```
@@ -306,22 +321,28 @@ dask_client:
 Next, [set up scheduler and worker processes on your local computer](http://distributed.dask.org/en/stable/quickstart.html#setup-dask-distributed-the-hard-way):
 
 ```bash
-$ dask-scheduler
+$ dask scheduler --host 127.0.0.1 --port 8786
 Scheduler started at 127.0.0.1:8786
 
-$ PYTHONPATH=$PWD/src dask-worker 127.0.0.1:8786
-$ PYTHONPATH=$PWD/src dask-worker 127.0.0.1:8786
-$ PYTHONPATH=$PWD/src dask-worker 127.0.0.1:8786
+$ PYTHONPATH=$PWD/src dask worker 127.0.0.1:8786
+$ PYTHONPATH=$PWD/src dask worker 127.0.0.1:8786
+$ PYTHONPATH=$PWD/src dask worker 127.0.0.1:8786
 ```
 
 ```{note}
 The above code snippet assumes each worker is started from the root directory of the Kedro project in a Python environment where all required dependencies are installed.
 ```
 
+If you're using `pip`, you might need to install your Kedro project with:
+
+```bash
+pip install -e .
+```
+
 You're once again ready to trigger the run. Execute the following command:
 
 ```bash
-kedro run --env=dask --runner=kedro_tutorial.runner.DaskRunner
+kedro run --runner=kedro_tutorial.runner.DaskRunner
 ```
 
 You should start seeing tasks appearing on [Dask's diagnostics dashboard](http://127.0.0.1:8787/status):

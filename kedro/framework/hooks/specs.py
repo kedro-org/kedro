@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from kedro.io import CatalogProtocol
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
+    from multiprocessing.managers import SyncManager
 
 
 class DataCatalogSpecs:
@@ -309,3 +310,20 @@ class KedroContextSpecs:
         Args:
             context: The context that was created.
         """
+        pass
+
+
+class RunnerSpecs:
+    """Namespace that defines all specifications for a runner's lifecycle hooks."""
+
+    @hook_spec
+    def on_parallel_runner_start(self, manager: "SyncManager"): # type: ignore
+        """
+        Hook to be called by the ParallelRunner after its multiprocessing SyncManager is started
+        and before it starts submitting tasks. Allows plugins to receive the manager for
+        creating shared state.
+
+        Args:
+            manager: The multiprocessing.managers.SyncManager instance from the ParallelRunner.
+        """
+        pass # pragma: no cover

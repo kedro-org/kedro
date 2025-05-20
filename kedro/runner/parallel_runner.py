@@ -78,7 +78,8 @@ class ParallelRunner(AbstractRunner):
         self._max_workers = self._validate_max_workers(max_workers)
 
     def __del__(self) -> None:
-        self._manager.shutdown()
+        if hasattr(self, "_manager") and self._manager:
+            self._manager.shutdown()
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]) -> None:
@@ -106,11 +107,9 @@ class ParallelRunner(AbstractRunner):
         any non proxied memory datasets being used as outputs as their content
         will not be synchronized across threads.
         """
-
-        datasets = catalog._datasets
-
+        datasets = getattr(catalog, "_datasets", {})
         unserialisable = []
-        for name, dataset in datasets.items():
+        for name, dataset in datasets.items(): # type: ignore
             if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
                 unserialisable.append(name)
                 continue
@@ -149,14 +148,24 @@ class ParallelRunner(AbstractRunner):
     def _set_manager_datasets(
         self, catalog: CatalogProtocol, pipeline: Pipeline
     ) -> None:
-        for dataset in pipeline.datasets():
+        for dataset_name in pipeline.datasets():
             try:
-                catalog.exists(dataset)
+                if catalog.exists(dataset_name): 
+                    dataset_obj = catalog._get_dataset(dataset_name) # type: ignore
+                    if isinstance(dataset_obj, SharedMemoryDataset):
+                        dataset_obj.set_manager(self._manager)
             except DatasetNotFoundError:
-                pass
-        for name, ds in catalog._datasets.items():
-            if isinstance(ds, SharedMemoryDataset):
-                ds.set_manager(self._manager)
+                self._logger.debug(f"Dataset '{dataset_name}' not found for _set_manager_datasets.")
+            except Exception as e:
+                self._logger.error(f"Error processing '{dataset_name}' in _set_manager_datasets: {e}")
+
+        if hasattr(catalog, "_datasets"):
+            for name, ds in getattr(catalog, "_datasets", {}).items():
+                if isinstance(ds, SharedMemoryDataset):
+                    try:
+                        ds.set_manager(self._manager)
+                    except Exception as e: # pragma: no cover
+                        self._logger.error(f"Error setting manager for SharedMemoryDataset '{name}': {e}")
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
@@ -199,13 +208,28 @@ class ParallelRunner(AbstractRunner):
 
         """
         if not self._is_async:
-            self._logger.info(
-                "Using synchronous mode for loading and saving data. Use the --async flag "
-                "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
-            )
+            self._logger.info("Using synchronous mode for loading and saving data...")
+
+        if hasattr(self, "_set_manager_datasets"):
+            self._logger.debug("ParallelRunner: Calling _set_manager_datasets.")
+            self._set_manager_datasets(catalog, pipeline)
+
+        if hook_manager: 
+            if hasattr(hook_manager.hook, "on_parallel_runner_start"):
+                self._logger.info("ParallelRunner: Calling `on_parallel_runner_start` hook.")
+                try:
+                    hook_manager.hook.on_parallel_runner_start(manager=self._manager)
+                except Exception as e: # pragma: no cover
+                    self._logger.error(f"ParallelRunner: Error during `on_parallel_runner_start`: {e}", exc_info=True)
+            else: # pragma: no cover
+                 self._logger.warning("ParallelRunner: `on_parallel_runner_start` hook spec not found in hook_manager.")
 
         super()._run(
             pipeline=pipeline,
             catalog=catalog,
+            hook_manager=None,
             session_id=session_id,
         )
+
+        if not pipeline.nodes: # pragma: no cover
+            self._logger.info("ParallelRunner: Pipeline is empty, nothing to run (after super()._run call).")

@@ -18,7 +18,7 @@ The main methods and properties of `KedroSession` are:
 
 ## Create a session
 
-The following code creates a `KedroSession` object as a context manager and runs a pipeline inside the context, with session data provided. This script can be called from anywhere in your kedro project as the Kedro project would folder will automatically be located. The session automatically closes after exit:
+The following code creates a `KedroSession` object as a context manager and runs a pipeline inside the context, with session data provided. This script can be called from anywhere in your Kedro project as the root folder will automatically be located. The session automatically closes after exit:
 
 ```python
 from pathlib import Path

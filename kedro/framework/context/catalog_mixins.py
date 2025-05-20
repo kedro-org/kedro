@@ -26,8 +26,7 @@ class CatalogCommandsMixin:
 
     1. Using `compose_classes`:
         >>> from kedro.io import DataCatalog
-        >>> from kedro.framework.context.catalog_mixins import CatalogCommandsMixin
-        >>> from kedro.framework.context import compose_classes
+        >>> from kedro.framework.context import CatalogCommandsMixin, compose_classes
         >>> # DataCatalog instance without CatalogCommandsMixin
         >>> assert not hasattr(DataCatalog(), "list_datasets")
         >>>
@@ -54,7 +53,7 @@ class CatalogCommandsMixin:
 
     2. Creating a new class with inheritance:
         >>> from kedro.io import DataCatalog
-        >>> from kedro.framework.context.catalog_mixins import CatalogCommandsMixin
+        >>> from kedro.framework.context import CatalogCommandsMixin
         >>>
         >>> class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
         ...     pass

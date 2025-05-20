@@ -9,6 +9,7 @@
 * Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
 * Cached `inputs` in `Node` when created from dictionary for better performance.
 * Enabled pluggy tracing only when logging level is set to `DEBUG` to speed up the execution of project runs.
+
 ## Breaking changes to the API
 
 
@@ -18,10 +19,14 @@
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
 ## Documentation changes
+* Updated Dask deployment docs.
+* Added non-jupyter environment integration page (for example Marimo) with dynamic Kedro session loading.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Arnout Verboven](https://github.com/ArnoutVerboven)
+* [gabohc](https://github.com/gabohc)
+* [Luis Chaves Rodriguez](https://github.com/lucharo)
 
 # Release 0.19.12
 

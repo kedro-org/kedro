@@ -110,6 +110,26 @@ class CatalogConfigResolver:
         credentials: dict[str, dict[str, Any]] | None = None,
         default_runtime_patterns: Patterns | None = None,
     ):
+        """
+        Initialize the `CatalogConfigResolver`.
+
+        Args:
+            config (dict[str, dict[str, Any]] | None): Dataset configurations from the catalog.
+            credentials (dict[str, dict[str, Any]] | None): Credentials for datasets.
+            default_runtime_patterns (Patterns | None): Runtime patterns for resolving datasets.
+
+        Example:
+            >>> from kedro.io.catalog_config_resolver import CatalogConfigResolver
+            >>> config = {
+            ...     "{namespace}.int_{name}": {
+            ...         "type": "pandas.CSVDataset",
+            ...         "filepath": "{name}.csv",
+            ...     }
+            ... }
+            >>> resolver = CatalogConfigResolver(config=config)
+            >>> resolver._dataset_patterns
+            # {'{namespace}.int_{name}': {'type': 'pandas.CSVDataset', 'filepath': '{name}.csv'}}
+        """
         if default_runtime_patterns is None:
             self._logger.warning(
                 f"Since runtime patterns are not provided, setting"
@@ -348,21 +368,98 @@ class CatalogConfigResolver:
 
     @classmethod
     def _get_matches(cls, pattens: Iterable[str], ds_name: str) -> Generator[str]:
+        """
+        Find all patterns that match a given dataset name.
+
+        This method iterates over a collection of patterns and checks if the given
+        dataset name matches any of them using the `parse` function.
+
+        Args:
+            pattens (Iterable[str]): A collection of patterns to match against.
+            ds_name (str): The name of the dataset to match.
+
+        Returns:
+            Generator[str]: A generator yielding patterns that match the dataset name.
+
+        Example:
+            >>> patterns = ["{namespace}.int_{name}", "{name}"]
+            >>> matches = CatalogConfigResolver._get_matches(patterns, "data.int_customers")
+            >>> print(list(matches))
+            # ['{namespace}.int_{name}']
+        """
         return (pattern for pattern in pattens if parse(pattern, ds_name))
 
     def match_dataset_pattern(self, ds_name: str) -> str | None:
-        """Match a dataset name against dataset patterns."""
+        """
+        Match a dataset name against dataset patterns.
+
+        This method checks if the given dataset name matches any of the dataset
+        patterns defined in the catalog. If a match is found, the first matching
+        pattern is returned.
+
+        Args:
+            ds_name (str): The name of the dataset to match.
+
+        Returns:
+            str | None: The first matching pattern, or `None` if no match is found.
+
+        Example:
+            >>> config = {
+            ...     "{namespace}.int_{name}": {"type": "pandas.CSVDataset"},
+            ...     "{name}": {"type": "MemoryDataset"},
+            ... }
+            >>> resolver = CatalogConfigResolver(config=config)
+            >>> match = resolver.match_dataset_pattern("data.int_customers")
+            >>> print(match)
+            # {namespace}.int_{name}
+        """
         matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
         return next(matches, None)
 
     def match_user_catch_all_pattern(self, ds_name: str) -> str | None:
-        """Match a dataset name against user catch all pattern."""
+        """
+        Match a dataset name against the user-defined catch-all pattern.
+
+        This method checks if the given dataset name matches any of the user-defined
+        catch-all patterns. If a match is found, the first matching pattern is returned.
+
+        Args:
+            ds_name (str): The name of the dataset to match.
+
+        Returns:
+            str | None: The first matching pattern, or `None` if no match is found.
+
+        Example:
+            >>> config = {"{name}": {"type": "MemoryDataset"}}
+            >>> resolver = CatalogConfigResolver(config=config)
+            >>> match = resolver.match_user_catch_all_pattern("example_dataset")
+            >>> print(match)
+            # {name}
+        """
         user_catch_all_pattern = set(self._user_catch_all_pattern.keys())
         matches = self._get_matches(user_catch_all_pattern, ds_name)
         return next(matches, None)
 
     def match_runtime_pattern(self, ds_name: str) -> str:
-        """Match a dataset name against default runtime pattern."""
+        """
+        Match a dataset name against the default runtime pattern.
+
+        This method checks if the given dataset name matches any of the default
+        runtime patterns. It assumes that a runtime pattern always matches.
+
+        Args:
+            ds_name (str): The name of the dataset to match.
+
+        Returns:
+            str: The first matching runtime pattern.
+
+        Example:
+            >>> runtime_patterns = {"{default_example}": {"type": "MemoryDataset"}}
+            >>> resolver = CatalogConfigResolver(default_runtime_patterns=runtime_patterns)
+            >>> match = resolver.match_runtime_pattern("example_dataset")
+            >>> print(match)
+            # {default_example}
+        """
         default_patters = set(self._default_runtime_patterns.keys())
         matches = self._get_matches(default_patters, ds_name)
         # We assume runtime pattern always matches at the end

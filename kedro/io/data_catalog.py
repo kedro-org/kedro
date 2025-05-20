@@ -238,19 +238,19 @@ class DataCatalog(CatalogProtocol):
     ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
-        If a dataset is not in the collection but matches dataset pattern
-        (by default) or dataset and default + runtime patterns
-        (if fallback_to_runtime_pattern is enabled)
+        If a dataset is not in the collection but matches dataset_pattern or user_catch_all_pattern
+        by default or runtime_patterns if fallback_to_runtime_pattern is enabled
         it is instantiated and added to the collection first, then returned.
 
         Args:
             key: A dataset name.
-            fallback_to_runtime_pattern: Whether to use runtime pattern to resolve dataset.
+            fallback_to_runtime_pattern: Whether to use runtime_pattern to resolve dataset.
             version: Optional argument to get a specific version of the dataset.
 
         Raises:
             DatasetError: When the dataset in not in the internal collection, does not match
-                dataset pattern and fallback_to_runtime_pattern is set to False.
+                dataset_pattern or user_catch_all_pattern and fallback_to_runtime_pattern is
+                set to False.
 
         Returns:
             An instance of AbstractDataset.
@@ -567,7 +567,7 @@ class DataCatalog(CatalogProtocol):
 
         Raises:
             DatasetError: When the dataset in not in the internal collection, does not match
-                dataset pattern or user_catch_all_pattern.
+                dataset_patterns or user_catch_all_pattern.
         """
         if ds_name not in self:
             raise DatasetNotFoundError(f"Dataset '{ds_name}' not found in the catalog")

@@ -7,7 +7,7 @@
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
 * Added support for running multiple namespaces within a single session.
-* Updated `kedro registry describe` to return the node name property instead of creating it's own name for the node.
+* Updated `kedro registry describe` to return the node name property instead of creating its own name for the node.
 
 ## Documentation changes
 ## Community contributions

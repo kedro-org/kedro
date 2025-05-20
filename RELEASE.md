@@ -41,10 +41,12 @@
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
 ## Documentation changes
+* Updated Dask deployment docs.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Arnout Verboven](https://github.com/ArnoutVerboven)
+* [gabohc](https://github.com/gabohc)
 
 # Release 0.19.12
 

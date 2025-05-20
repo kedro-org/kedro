@@ -1,10 +1,10 @@
 # How to use Kedro from Marimo and non-Jupyter environments
 
-This guide explains how to set up Kedro programmatically without relying on IPython magics, making it compatible with non-Jupyter environments (python scripts or streamlit apps) and modern notebook interfaces like [Marimo](https://marimo.io/). Marimo notebooks are reactive notebook with a focus on reproducibility, they are executable as a script and shareable as an app. Reactivity in this case ensures that code and outputs are always in sync.
+This guide explains how to set up Kedro programmatically from non-Jupyter environments (Python scripts or Streamlit apps) and modern notebook interfaces like [Marimo](https://marimo.io/) without relying on IPython magics. Marimo notebooks are reactive notebook with a focus on reproducibility, they are executable as a script and shareable as an app. Reactivity in this case ensures that code and outputs are always in sync.
 
 ## Overview
 
-Kedro Jupyter notebook users rely on the magic command `%load_ext kedro.ipython` to source their catalog, context, pipelines and session objects, see [Kedro and Notebooks](../notebooks_and_ipython/kedro_and_notebooks.md) for more. This magic command automatically finds the location of the root Kedro project, avoiding having users hardcode paths to their configuration files.
+Kedro Jupyter notebook users rely on the magic command `%load_ext kedro.ipython` to source their catalog, context, pipelines and session objects, see [Kedro and Notebooks](../notebooks_and_ipython/kedro_and_notebooks.md) for more. This magic command automatically finds the location of the root Kedro project.
 
 Such magic commands are not available in modern notebook interfaces such as Marimo or in short Python scripts. Yet, using Kedro for sharing configuration, credentials, or the data catalog across a project is still desired when developing data science projects.
 

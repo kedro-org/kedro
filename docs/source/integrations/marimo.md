@@ -4,13 +4,13 @@ This guide explains how to set up Kedro programmatically without relying on IPyt
 
 ## Overview
 
-Kedro Jupyter notebook users rely on the magic command `%load_ext kedro.ipython` to source their catalog, context, pipelines and session objects, see [Kedro and Notebooks](../notebooks_and_ipython/kedro_and_notebooks.md) for more. This magic command automatically finds the location of the root kedro project, avoiding having users hardcode paths to their configuration files.
+Kedro Jupyter notebook users rely on the magic command `%load_ext kedro.ipython` to source their catalog, context, pipelines and session objects, see [Kedro and Notebooks](../notebooks_and_ipython/kedro_and_notebooks.md) for more. This magic command automatically finds the location of the root Kedro project, avoiding having users hardcode paths to their configuration files.
 
-Such magic commands are not available in modern notebook interfaces such as marimo or in simple python scripts. Yet, using Kedro for sharing configuration, credentials or the data catalog across a project is still desired when developing data science projects.
+Such magic commands are not available in modern notebook interfaces such as Marimo or in short Python scripts. Yet, using Kedro for sharing configuration, credentials, or the data catalog across a project is still desired when developing data science projects.
 
-## Dynamically loading kedro config
+## Dynamically loading Kedro config
 
-Instead of relying on magic, use the following script to automatically find the kedro root and load the kedro session objects:
+Instead of relying on magic, use the following script to automatically find the Kedro root and load the Kedro session objects:
 
 ```python
 from pathlib import Path

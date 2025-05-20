@@ -261,7 +261,8 @@ class DataCatalog(CatalogProtocol):
 
     def __contains__(self, dataset_name: str) -> bool:
         """
-        Check if a dataset is registered in the catalog as a materialized dataset or matches a pattern.
+        Check if a dataset is registered in the catalog
+        or matches a dataset/user catch all pattern
 
         Args:
             dataset_name: The name of the dataset to check.
@@ -325,11 +326,42 @@ class DataCatalog(CatalogProtocol):
         return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
-        """List all datasets registered in the catalog."""
+        """
+        Retrieve all datasets registered in the catalog.
+
+        This method returns a list of all dataset instances currently registered
+        in the catalog, including both materialized and lazy datasets.
+
+        Returns:
+            List[AbstractDataset]: A list of dataset instances.
+
+        Example:
+            >>> from kedro.io import DataCatalog, MemoryDataset
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> dataset_values = catalog.values()
+            >>> print(dataset_values)
+            # [kedro.io.memory_dataset.MemoryDataset()]
+        """
         return [self[key] for key in self]
 
     def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
-        """List all dataset names and datasets registered in the catalog."""
+        """
+        Retrieve all dataset names and their corresponding dataset instances.
+
+        This method returns a list of tuples, where each tuple contains a dataset
+        name and its corresponding dataset instance.
+
+        Returns:
+            List[tuple[str, AbstractDataset]]: A list of tuples containing dataset names
+            and their corresponding dataset instances.
+
+        Example:
+            >>> from kedro.io import DataCatalog, MemoryDataset
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> dataset_items = catalog.items()
+            >>> print(dataset_items)
+            # [('example', kedro.io.memory_dataset.MemoryDataset())]
+        """
         return [(key, self[key]) for key in self]
 
     def __iter__(self) -> Iterator[str]:
@@ -451,7 +483,7 @@ class DataCatalog(CatalogProtocol):
                 set to False.
 
         Returns:
-        AbstractDataset: The dataset instance.
+            AbstractDataset: The dataset instance.
 
         Example:
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
@@ -813,11 +845,28 @@ class DataCatalog(CatalogProtocol):
         return filtered
 
     def get_type(self, ds_name: str) -> str:
-        """Access dataset type without adding resolved dataset to the catalog.
+        """
+        Access dataset type without adding resolved dataset to the catalog.
+
+        Args:
+            ds_name (str): The name of the dataset whose type is to be retrieved.
+
+        Returns:
+            str: The fully qualified type of the dataset (e.g., `kedro.io.memory_dataset.MemoryDataset`).
 
         Raises:
             DatasetNotFoundError: When the dataset in not in the internal collection, does not match
                 dataset_patterns or user_catch_all_pattern.
+
+        Example:
+            >>> from kedro.io import DataCatalog, MemoryDataset
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> dataset_type = catalog.get_type("example")
+            >>> print(dataset_type)
+            # kedro.io.memory_dataset.MemoryDataset
+            >>>
+            >>> missing_type = catalog.get_type("nonexistent")
+            # Raises DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
         """
         if ds_name not in self:
             raise DatasetNotFoundError(f"Dataset '{ds_name}' not found in the catalog")

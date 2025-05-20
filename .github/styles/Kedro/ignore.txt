@@ -35,6 +35,7 @@ Pylint
 Serverless
 serverless
 SQLAlchemy
+Streamlit
 tracebacks
 templated
 Templated

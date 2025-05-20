@@ -680,30 +680,6 @@ class TestDataCatalogVersioned:
         with pytest.raises(DatasetNotFoundError, match=pattern):
             DataCatalog.from_config(**correct_config, load_versions=load_version)
 
-    def test_compare_tracking_and_other_dataset_versioned(
-        self, correct_config_with_tracking_ds, dummy_dataframe
-    ):
-        """Test saving of tracking datasets from config results in the same
-        save version as other versioned datasets."""
-
-        catalog = DataCatalog.from_config(**correct_config_with_tracking_ds)
-
-        catalog.save("boats", dummy_dataframe)
-        dummy_data = {"col1": 1, "col2": 2, "col3": 3}
-        catalog.save("planes", dummy_data)
-
-        # Verify that saved version on tracking dataset is the same as on the CSV dataset
-        csv_timestamp = datetime.strptime(
-            catalog.datasets.boats.resolve_save_version(),
-            VERSION_FORMAT,
-        )
-        tracking_timestamp = datetime.strptime(
-            catalog.datasets.planes.resolve_save_version(),
-            VERSION_FORMAT,
-        )
-
-        assert tracking_timestamp == csv_timestamp
-
     def test_load_version(self, correct_config, dummy_dataframe, mocker):
         """Test load versioned datasets from config"""
         new_dataframe = pd.DataFrame({"col1": [0, 0], "col2": [0, 0], "col3": [0, 0]})

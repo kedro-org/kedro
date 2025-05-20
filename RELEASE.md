@@ -7,16 +7,25 @@
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
 * Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
+* Cached `inputs` in `Node` when created from dictionary for better performance.
+* Enabled pluggy tracing only when logging level is set to `DEBUG` to speed up the execution of project runs.
 
 ## Breaking changes to the API
 
 
 ## Upcoming deprecations for Kedro 1.0.0
+* Added a deprecation warning for `KedroDataCatalog` that will replace `DataCatalog` while adopting the original `DataCatalog` name.
 * Add deprecation warning for `--namespace` option for `kedro run`. It will be replaced with `--namespaces` option which will allow for running multiple namespaces together.
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
 ## Documentation changes
+* Updated Dask deployment docs.
 * Added non-jupyter environment integration page (e.g. marimo) with dynamic kedro session loading.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Arnout Verboven](https://github.com/ArnoutVerboven)
+* [gabohc](https://github.com/gabohc)
 
 # Release 0.19.12
 

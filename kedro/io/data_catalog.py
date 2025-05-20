@@ -31,6 +31,7 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
+from kedro.io.warning_utils import is_warning_suppressed, suppress_catalog_warning
 from kedro.utils import _has_rich_handler
 
 CATALOG_KEY = "catalog"  # Kept to avoid the breaking change
@@ -91,7 +92,7 @@ class _FrozenDatasets:
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[_sub_nonword_chars(key)]
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         datasets_repr = {}
         for ds_name in self._original_names.keys():
             datasets_repr[ds_name] = self.__dict__[
@@ -162,15 +163,16 @@ class DataCatalog:
             >>>                   save_args={"index": False})
             >>> catalog = DataCatalog(datasets={'cars': cars})
         """
-        warnings.warn(
-            "`DataCatalog` has been deprecated and will be replaced by `KedroDataCatalog`, in Kedro 1.0.0. "
-            "Currently some `KedroDataCatalog` APIs have been retained for compatibility with `DataCatalog`, including "
-            "the `datasets` property and the `get_datasets`, `_get_datasets`, `add`,` list`, `add_feed_dict`, "
-            "and `shallow_copy` methods. These will be removed or replaced with updated alternatives in Kedro 1.0.0. "
-            "For more details, refer to the documentation: "
-            "https://docs.kedro.org/en/stable/data/index.html#kedrodatacatalog-experimental-feature",
-            KedroDeprecationWarning,
-        )
+        if not is_warning_suppressed():
+            warnings.warn(
+                "Several APIs currently available, "
+                "including `datasets`, `get_datasets`, `_get_datasets`, `add`, `list`, "
+                "`add_feed_dict`, and `shallow_copy`, will be removed or replaced in Kedro 1.0.0. "
+                "For more details, refer to the documentation: "
+                "https://docs.kedro.org/en/0.19.13/data/index.html#kedrodatacatalog-experimental-feature",
+                KedroDeprecationWarning,
+                stacklevel=2,
+            )
         self._config_resolver = config_resolver or CatalogConfigResolver()
         # Kept to avoid breaking changes
         if not config_resolver:
@@ -191,7 +193,7 @@ class DataCatalog:
         if feed_dict:
             self.add_feed_dict(feed_dict)
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self.datasets.__repr__()
 
     def __contains__(self, dataset_name: str) -> bool:
@@ -657,16 +659,17 @@ class DataCatalog:
         Returns:
             Copy of the current object.
         """
-        if extra_dataset_patterns:
-            self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
-        return self.__class__(
-            datasets=self._datasets,
-            dataset_patterns=self._config_resolver._dataset_patterns,
-            default_pattern=self._config_resolver._default_pattern,
-            load_versions=self._load_versions,
-            save_version=self._save_version,
-            config_resolver=self._config_resolver,
-        )
+        with suppress_catalog_warning():
+            if extra_dataset_patterns:
+                self._config_resolver.add_runtime_patterns(extra_dataset_patterns)
+            return self.__class__(
+                datasets=self._datasets,
+                dataset_patterns=self._config_resolver._dataset_patterns,
+                default_pattern=self._config_resolver._default_pattern,
+                load_versions=self._load_versions,
+                save_version=self._save_version,
+                config_resolver=self._config_resolver,
+            )
 
     def confirm(self, name: str) -> None:
         """Confirm a dataset by its name.

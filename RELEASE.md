@@ -20,7 +20,7 @@
 
 ## Documentation changes
 * Updated Dask deployment docs.
-* Added non-jupyter environment integration page (e.g. marimo) with dynamic kedro session loading.
+* Added non-jupyter environment integration page (for example Marimo) with dynamic Kedro session loading.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

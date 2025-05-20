@@ -23,6 +23,7 @@ dbx
 MLflow
 csv
 yaml
+Marimo
 matplotlib
 Matplotlib
 IPython

@@ -1,17 +1,20 @@
-/* Logo Styles */
-.md-header__button.md-logo img {
-  width: 123.37px;
-  height: 32px;
+:root {
+  --logo-nav-padding: 0px;
 }
 
 /* Header Styles */
 .md-header {
-  padding: 24px 32px 0 32px;
+  padding-left: 24px;
   border-radius: 0px 0px 12px 12px;
 }
 
+/*Hide the active title next to the Kedro logo*/
+.md-header__title--active {
+  visibility: hidden;;
+}
+
 .md-header__inner {
-  padding-bottom: 24px;
+  padding-bottom: var(--logo-nav-padding);
   display: flex;
   align-items: center;
 }
@@ -117,7 +120,7 @@
 .md-tabs__item--active {
   font-weight: 600;
   height: 100%;
-  padding-bottom: 24px;
+  padding-bottom: 16px;
   border-bottom: 2px solid var(--black-900);
 }
 
@@ -222,15 +225,13 @@
   max-width: none;
 }
 
+.md-content {
+  padding: 48px 64px 48px 64px;
+}
+
 .md-main__inner {
   margin: 0;
 }
-
-.md-content__inner {
-  padding: 48px 64px 48px 64px;
-  margin: 0;
-}
-
 
 /* Code Block Styles */
 
@@ -345,7 +346,7 @@ pre:hover .md-clipboard {
   .md-search,
   .md-header__option,
   .md-header__source {
-    transform: translateY(calc(100% + 24px));
+    transform: translateY(calc(100% + var(--logo-nav-padding)));
     z-index: 2;
   }
 

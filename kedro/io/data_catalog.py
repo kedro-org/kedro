@@ -563,9 +563,14 @@ class DataCatalog(CatalogProtocol):
         return filtered
 
     def get_type(self, ds_name: str) -> str:
-        """Access dataset type without adding resolved dataset to the catalog."""
+        """Access dataset type without adding resolved dataset to the catalog.
+
+        Raises:
+            DatasetError: When the dataset in not in the internal collection, does not match
+                dataset pattern or user_catch_all_pattern.
+        """
         if ds_name not in self:
-            return ""
+            raise DatasetNotFoundError(f"Dataset '{ds_name}' not found in the catalog")
 
         if ds_name not in self._datasets and ds_name not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(ds_name)

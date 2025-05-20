@@ -107,7 +107,8 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
 
         str_type = (
             catalog.get_type(ds_name)
-            or catalog.default_runtime_patterns["{default}"]["type"]
+            if ds_name in catalog
+            else catalog.default_runtime_patterns["{default}"]["type"]
         )
 
         if str_type not in mapping:

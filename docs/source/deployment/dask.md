@@ -157,6 +157,15 @@ class DaskRunner(AbstractRunner):
         hook_manager: PluginManager | None = None,
         session_id: str | None = None,
     ) -> None:
+        """Implementation of the abstract interface for running the pipelines.
+
+        Args:
+            pipeline: The ``Pipeline`` to run.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
+        """
+
         nodes = pipeline.nodes
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
@@ -203,6 +212,7 @@ class DaskRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be
                 satisfied.

@@ -2,10 +2,12 @@
 
 ## Major features and improvements
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
+* Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
 
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
 * Added support for running multiple namespaces within a single session.
+* Updated `kedro registry describe` to return the node name property instead of creating it's own name for the node.
 
 ## Documentation changes
 ## Community contributions

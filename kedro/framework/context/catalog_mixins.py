@@ -22,7 +22,9 @@ class CatalogCommandsMixin:
         - resolve_patterns: Resolve dataset factories against pipeline datasets.
 
     Usage:
+
     You can integrate this mixin with the `DataCatalog` in two ways:
+    ::
 
     1. Using `compose_classes`:
         >>> from kedro.io import DataCatalog

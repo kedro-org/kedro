@@ -43,15 +43,16 @@ for the underlying **`KedroContext`**; if specified, this will update (and there
 
 ![General overview diagram for KedroSession creation](../meta/images/kedro-session-creation.png)
 
-% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
-% graph LR
-%  subgraph Kedro Startup Flowchart
-%    A[bootstrap_project] -->|Read pyproject.toml| B
-%    A -->|Add project root to sys.path| B[configure_project]
-%    C[Initialize KedroSession]
-%    B --> |Read settings.py| C
-%    B --> |Read pipeline_registry.py| C
-%  end
+```mermaid
+graph LR
+  subgraph Kedro_Startup_Flowchart
+    A[bootstrap_project] -->|Read pyproject.toml| B
+    A -->|Add project root to sys.path| B[configure_project]
+    C[Initialize KedroSession]
+    B --> |Read settings.py| C
+    B --> |Read pipeline_registry.py| C
+  end
+```
 
 Both `bootstrap_project` and `configure_project` handle the setup of a Kedro project, but there are subtle differences: `bootstrap_project` is used for project mode, and `configure_project` is used for packaged mode.
 

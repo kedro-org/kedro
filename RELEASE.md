@@ -14,7 +14,7 @@
 
 
 ## Upcoming deprecations for Kedro 1.0.0
-* Added a deprecation warning for catalog CLI commands. The following commands will be replaced with their alternatives `kedro catalog rank`, `kedro catalog list`, `kedro catalog resolve` and the `kedro catalog create` command will be removed.
+* Added a deprecation warning for catalog CLI commands. The following commands will be replaced with their alternatives - `kedro catalog rank`, `kedro catalog list`, `kedro catalog resolve` and the `kedro catalog create` command will be removed.
 * Added a deprecation warning for `KedroDataCatalog` that will replace `DataCatalog` while adopting the original `DataCatalog` name.
 * Add deprecation warning for `--namespace` option for `kedro run`. It will be replaced with `--namespaces` option which will allow for running multiple namespaces together.
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.

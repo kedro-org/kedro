@@ -96,7 +96,7 @@ class TestPipelineHelper:
     def test_no_prefix_dataset_names(self):
         """
         Check there is no automatic prefixing for dataset of all formats: str, list and dict
-        when prefix_namespace is set to False
+        when prefix_datasets_with_namespace is set to False
         """
         raw_pipeline = pipeline(
             [
@@ -108,7 +108,7 @@ class TestPipelineHelper:
             ]
         )
         resulting_pipeline = pipeline(
-            raw_pipeline, namespace="PREFIX", prefix_namespace=False
+            raw_pipeline, namespace="PREFIX", prefix_datasets_with_namespace=False
         )
         nodes = sorted(resulting_pipeline.nodes)
         assert nodes[0]._inputs == "A"

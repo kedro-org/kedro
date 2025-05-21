@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
-* Added a `prefix_namespace` argument to the `Pipeline` class which allows users to turn on or off the prefixing of the namespace to the node inputs, outputs, and parameters.
+* Added a `prefix_datasets_with_namespace` argument to the `Pipeline` class which allows users to turn on or off the prefixing of the namespace to the node inputs, outputs, and parameters.
 
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.

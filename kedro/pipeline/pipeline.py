@@ -146,7 +146,7 @@ class Pipeline:
         parameters: str | set[str] | dict[str, str] | None = None,
         tags: str | Iterable[str] | None = None,
         namespace: str | None = None,
-        prefix_namespace: bool = True,
+        prefix_datasets_with_namespace: bool = True,
     ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
@@ -182,7 +182,7 @@ class Pipeline:
             namespace: A prefix to give to all dataset names,
                 except those explicitly named with the `inputs`/`outputs`
                 arguments, and parameter references (`params:` and `parameters`).
-            prefix_namespace: A flag to specify if the inputs, outputs, and parameters of the nodes
+            prefix_datasets_with_namespace: A flag to specify if the inputs, outputs, and parameters of the nodes
                 should be prefixed with the namespace. It is set to True by default. It is
                 useful to turn off when namespacing is used for grouping nodes for deployment purposes.
 
@@ -236,7 +236,7 @@ class Pipeline:
                 parameters=parameters,
                 tags=tags,
                 namespace=namespace,
-                prefix_namespace=prefix_namespace,
+                prefix_datasets_with_namespace=prefix_datasets_with_namespace,
             )
 
         if nodes is None:
@@ -1030,7 +1030,11 @@ class Pipeline:
         return json.dumps(pipeline_versioned)
 
     def _rename(
-        self, name: str, mapping: dict, namespace: str | None, prefix_namespace: bool
+        self,
+        name: str,
+        mapping: dict,
+        namespace: str | None,
+        prefix_datasets_with_namespace: bool,
     ) -> str:
         def _prefix_dataset(name: str) -> str:
             return f"{namespace}.{name}"
@@ -1058,8 +1062,8 @@ class Pipeline:
             (_is_transcode_base_in_mapping, _map_transcode_base),
         ]
 
-        # Add rules for prefixing only if prefix_namespace is True
-        if prefix_namespace:
+        # Add rules for prefixing only if prefix_datasets_with_namespace is True
+        if prefix_datasets_with_namespace:
             rules.extend(
                 [
                     # if name refers to a single parameter and a namespace is given, apply prefix
@@ -1085,20 +1089,24 @@ class Pipeline:
         datasets: str | list[str] | dict[str, str] | None,
         mapping: dict,
         namespace: str | None,
-        prefix_namespace: bool = True,
+        prefix_datasets_with_namespace: bool = True,
     ) -> str | list[str] | dict[str, str] | None:
         if datasets is None:
             return None
         if isinstance(datasets, str):
-            return self._rename(datasets, mapping, namespace, prefix_namespace)
+            return self._rename(
+                datasets, mapping, namespace, prefix_datasets_with_namespace
+            )
         if isinstance(datasets, list):
             return [
-                self._rename(name, mapping, namespace, prefix_namespace)
+                self._rename(name, mapping, namespace, prefix_datasets_with_namespace)
                 for name in datasets
             ]
         if isinstance(datasets, dict):
             return {
-                key: self._rename(value, mapping, namespace, prefix_namespace)
+                key: self._rename(
+                    value, mapping, namespace, prefix_datasets_with_namespace
+                )
                 for key, value in datasets.items()
             }
         raise ValueError(
@@ -1110,7 +1118,7 @@ class Pipeline:
         node: Node,
         mapping: dict,
         namespace: str | None,
-        prefix_namespace: bool = True,
+        prefix_datasets_with_namespace: bool = True,
     ) -> Node:
         new_namespace = node.namespace
         if namespace:
@@ -1119,14 +1127,14 @@ class Pipeline:
             )
         return node._copy(
             inputs=self._process_dataset_names(
-                node._inputs, mapping, namespace, prefix_namespace
+                node._inputs, mapping, namespace, prefix_datasets_with_namespace
             ),
             outputs=self._process_dataset_names(
-                node._outputs, mapping, namespace, prefix_namespace
+                node._outputs, mapping, namespace, prefix_datasets_with_namespace
             ),
             namespace=new_namespace,
             confirms=self._process_dataset_names(
-                node._confirms, mapping, namespace, prefix_namespace
+                node._confirms, mapping, namespace, prefix_datasets_with_namespace
             ),
         )
 
@@ -1138,7 +1146,7 @@ class Pipeline:
         parameters: str | set[str] | dict[str, str] | None = None,
         tags: str | Iterable[str] | None = None,
         namespace: str | None = None,
-        prefix_namespace: bool = True,
+        prefix_datasets_with_namespace: bool = True,
     ) -> list[Node]:
         """Map namespace to the inputs, outputs, parameters and nodes of the pipeline."""
         if isinstance(nodes, Pipeline):
@@ -1156,7 +1164,8 @@ class Pipeline:
 
         mapping = {**inputs, **outputs, **parameters}
         new_nodes = [
-            self._copy_node(n, mapping, namespace, prefix_namespace) for n in pipe.nodes
+            self._copy_node(n, mapping, namespace, prefix_datasets_with_namespace)
+            for n in pipe.nodes
         ]
         return new_nodes
 
@@ -1169,7 +1178,7 @@ def pipeline(  # noqa: PLR0913
     parameters: str | set[str] | dict[str, str] | None = None,
     tags: str | Iterable[str] | None = None,
     namespace: str | None = None,
-    prefix_namespace: bool = True,
+    prefix_datasets_with_namespace: bool = True,
 ) -> Pipeline:
     r"""Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``\s.
 
@@ -1205,7 +1214,7 @@ def pipeline(  # noqa: PLR0913
         namespace: A prefix to give to all dataset names,
             except those explicitly named with the `inputs`/`outputs`
             arguments, and parameter references (`params:` and `parameters`).
-        prefix_namespace: A flag to specify if the inputs and outputs of the nodes
+        prefix_datasets_with_namespace: A flag to specify if the inputs and outputs of the nodes
                 should be prefixed with the namespace. It is set to True by default. It is
                 useful to turn off when namespacing is used for grouping nodes for deployment purposes.
 
@@ -1226,7 +1235,7 @@ def pipeline(  # noqa: PLR0913
         parameters=parameters,
         tags=tags,
         namespace=namespace,
-        prefix_namespace=prefix_namespace,
+        prefix_datasets_with_namespace=prefix_datasets_with_namespace,
     )
 
 

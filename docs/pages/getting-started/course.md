@@ -45,43 +45,43 @@ You don't need to register for the course and you can skip around the sections t
 
 ### Part 0: Introduction
 
-1. [Data science in production: the good, the bad and the ugly](https://www.youtube.com/watch?v=DD7JuYKp6BA)
-1. [What is Kedro?](https://www.youtube.com/watch?v=PdNkECqvI58)
-1. [Kedro and data orchestrators](https://www.youtube.com/watch?v=_HH8SCmCP_Q)
-1. [How does Kedro fit into the data science ecosystem?](https://www.youtube.com/watch?v=nAyUqORd9R8)
+1. <a href="https://www.youtube.com/watch?v=DD7JuYKp6BA" target="_blank" rel="noopener">Data science in production: the good, the bad and the ugly</a>
+1. <a href="https://www.youtube.com/watch?v=PdNkECqvI58" target="_blank" rel="noopener">What is Kedro?</a>
+1. <a href="https://www.youtube.com/watch?v=_HH8SCmCP_Q" target="_blank" rel="noopener">Kedro and data orchestrators</a>
+1. <a href="https://www.youtube.com/watch?v=nAyUqORd9R8" target="_blank" rel="noopener">How does Kedro fit into the data science ecosystem?</a>
 
 ### Part 1: Get started with Kedro
 
-1. [Create a Kedro project from scratch?](https://www.youtube.com/watch?v=YBY2Lcz7Gw4)
-1. [The spaceflights starter](https://www.youtube.com/watch?v=K6PhgVyXhWE)
-1. [Use Kedro from Jupyter notebook](https://www.youtube.com/watch?v=3q2RNWLibyY)
-1. [Set up the Kedro Data Catalog](https://www.youtube.com/watch?v=rl2cncGxyts)
-1. [Explore the spaceflights data](https://www.youtube.com/watch?v=bZD8N0yv3Fs)
-1. [Refactor your data processing code into functions](https://www.youtube.com/watch?v=VFcrvnnNas4)
-1. [Create your first data pipeline with Kedro](https://www.youtube.com/watch?v=3YeE_gvDCvw)
-1. [Assemble your nodes into a Kedro pipeline](https://www.youtube.com/watch?v=P__gFG1TmMo)
-1. [Run your Kedro pipeline](https://www.youtube.com/watch?v=sll_LhZE-p8)
-1. [Visualise your data pipeline with Kedro-Viz](https://www.youtube.com/watch?v=KWqSzbHgNW4)
+1. <a href="https://www.youtube.com/watch?v=YBY2Lcz7Gw4" target="_blank" rel="noopener">Create a Kedro project from scratch?</a>
+1. <a href="https://www.youtube.com/watch?v=K6PhgVyXhWE" target="_blank" rel="noopener">The spaceflights starter</a>
+1. <a href="https://www.youtube.com/watch?v=3q2RNWLibyY" target="_blank" rel="noopener">Use Kedro from Jupyter notebook</a>
+1. <a href="https://www.youtube.com/watch?v=rl2cncGxyts" target="_blank" rel="noopener">Set up the Kedro Data Catalog</a>
+1. <a href="https://www.youtube.com/watch?v=bZD8N0yv3Fs" target="_blank" rel="noopener">Explore the spaceflights data</a>
+1. <a href="https://www.youtube.com/watch?v=VFcrvnnNas4" target="_blank" rel="noopener">Refactor your data processing code into functions</a>
+1. <a href="https://www.youtube.com/watch?v=3YeE_gvDCvw" target="_blank" rel="noopener">Create your first data pipeline with Kedro</a>
+1. <a href="https://www.youtube.com/watch?v=P__gFG1TmMo" target="_blank" rel="noopener">Assemble your nodes into a Kedro pipeline</a>
+1. <a href="https://www.youtube.com/watch?v=sll_LhZE-p8" target="_blank" rel="noopener">Run your Kedro pipeline</a>
+1. <a href="https://www.youtube.com/watch?v=KWqSzbHgNW4" target="_blank" rel="noopener">Visualise your data pipeline with Kedro-Viz</a>
 
 ### Part 2: Make complex Kedro pipelines
 
-1. [Merge different dataframes in Kedro](https://www.youtube.com/watch?v=ctTFAeL4JgU)
-1. [Predict prices using machine learning](https://www.youtube.com/watch?v=Y4JvVO2DOJA)
-1. [Refactor your data science code into functions](https://www.youtube.com/watch?v=zvAnE05-agw)
-1. [How to work with parameters in Kedro](https://www.youtube.com/watch?v=eIA12RQMlFY)
-1. [Create a Kedro pipeline with parameters](https://www.youtube.com/watch?v=iRwy-IStfPo)
-1. [Reuse your Kedro pipeline using namespaces](https://www.youtube.com/watch?v=cYHHVAoWZ2E)
-1. [Kedro pipeline runners](https://www.youtube.com/watch?v=_B6R2uOj3-s)
-1. [Create Kedro datasets dynamically using factories](https://www.youtube.com/watch?v=tNE-tdvHNP8)
+1. <a href="https://www.youtube.com/watch?v=ctTFAeL4JgU" target="_blank" rel="noopener">Merge different dataframes in Kedro</a>
+1. <a href="https://www.youtube.com/watch?v=Y4JvVO2DOJA" target="_blank" rel="noopener">Predict prices using machine learning</a>
+1. <a href="https://www.youtube.com/watch?v=zvAnE05-agw" target="_blank" rel="noopener">Refactor your data science code into functions</a>
+1. <a href="https://www.youtube.com/watch?v=eIA12RQMlFY" target="_blank" rel="noopener">How to work with parameters in Kedro</a>
+1. <a href="https://www.youtube.com/watch?v=iRwy-IStfPo" target="_blank" rel="noopener">Create a Kedro pipeline with parameters</a>
+1. <a href="https://www.youtube.com/watch?v=cYHHVAoWZ2E" target="_blank" rel="noopener">Reuse your Kedro pipeline using namespaces</a>
+1. <a href="https://www.youtube.com/watch?v=_B6R2uOj3-s" target="_blank" rel="noopener">Kedro pipeline runners</a>
+1. <a href="https://www.youtube.com/watch?v=tNE-tdvHNP8" target="_blank" rel="noopener">Create Kedro datasets dynamically using factories</a>
 
 ### Part 3: Ship your Kedro project to production
 
-1. [Define your own Kedro environments](https://www.youtube.com/watch?v=9quRBGDOFq8)
-1. [Use S3 and MinIO cloud storage with Kedro](https://www.youtube.com/watch?v=TkoBEQIdHbA)
-1. [Package your Kedro project into a Python wheel](https://www.youtube.com/watch?v=yaoAQVX0iM8)
-1. [Turn your Kedro project into a Docker container](https://www.youtube.com/watch?v=lA-Ivuxmakw&list=PL-JJgymPjK5LddZXbIzp9LWurkLGgB-nY&index=26&t=1s&pp=gAQBiAQB)
-1. [Deploy your Kedro project to Apache Airflow](https://www.youtube.com/watch?v=AhCcnJ1Au70)
+1. <a href="https://www.youtube.com/watch?v=9quRBGDOFq8" target="_blank" rel="noopener">Define your own Kedro environments</a>
+1. <a href="https://www.youtube.com/watch?v=TkoBEQIdHbA" target="_blank" rel="noopener">Use S3 and MinIO cloud storage with Kedro</a>
+1. <a href="https://www.youtube.com/watch?v=yaoAQVX0iM8" target="_blank" rel="noopener">Package your Kedro project into a Python wheel</a>
+1. <a href="https://www.youtube.com/watch?v=lA-Ivuxmakw&list=PL-JJgymPjK5LddZXbIzp9LWurkLGgB-nY&index=26&t=1s&pp=gAQBiAQB" target="_blank" rel="noopener">Turn your Kedro project into a Docker container</a>
+1. <a href="https://www.youtube.com/watch?v=AhCcnJ1Au70" target="_blank" rel="noopener">Deploy your Kedro project to Apache Airflow</a>
 
 ### Part 4: Where next?
 
-[Continue your Kedro journey](https://www.youtube.com/watch?v=JvXhv8_0tlE)
+<a href="https://www.youtube.com/watch?v=JvXhv8_0tlE" target="_blank" rel="noopener">Continue your Kedro journey</a>

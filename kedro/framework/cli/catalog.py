@@ -43,8 +43,15 @@ def catalog() -> None:
 )
 @click.pass_obj
 def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
-    """Show datasets per type."""
+    """
+    Show datasets grouped by type for the specified pipelines.
 
+    This method lists datasets used in the specified pipelines, categorizing them
+    into three groups:
+    - `datasets`: Datasets explicitly defined in the catalog.
+    - `factories`: Datasets resolved from patterns.
+    - `defaults`: Datasets that do not match any pattern or explicit definition.
+    """
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
@@ -57,8 +64,13 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
 @catalog.command("list-patterns")
 @env_option
 @click.pass_obj
-def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
-    """List all dataset factories in the catalog, ranked by priority by which they are matched."""
+def list_patterns(metadata: ProjectMetadata, env: str) -> None:
+    """
+    List all dataset patterns in the catalog, ranked by priority.
+
+    This method retrieves all dataset patterns defined in the catalog,
+    ordered by the priority in which they are matched.
+    """
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
@@ -78,8 +90,13 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
 )
 @click.pass_obj
 def resolve_patterns(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
-    """Resolve catalog factories against pipeline datasets."""
+    """
+    Resolve dataset patterns against pipeline datasets.
 
+    This method resolves dataset patterns for datasets used in the specified pipelines.
+    It includes datasets explicitly defined in the catalog as well as those resolved
+    from patterns.
+    """
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 

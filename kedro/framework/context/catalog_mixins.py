@@ -128,9 +128,9 @@ class CatalogCommandsMixin:
 
     def list_patterns(self: DataCatalog) -> list[str]:
         """
-        List all dataset factories in the catalog, ranked by priority.
+        List all dataset patterns in the catalog, ranked by priority.
 
-        This method retrieves all dataset factories (patterns) defined in the catalog,
+        This method retrieves all dataset patterns defined in the catalog,
         ordered by the priority in which they are matched.
 
         Returns:
@@ -143,7 +143,7 @@ class CatalogCommandsMixin:
         pipelines: list[Pipeline] | None = None,
     ) -> dict[str, Any]:
         """
-        Resolve dataset factories against pipeline datasets.
+        Resolve dataset patterns against pipeline datasets.
 
         This method resolves dataset patterns for datasets used in the specified pipelines.
         It includes datasets explicitly defined in the catalog as well as those resolved

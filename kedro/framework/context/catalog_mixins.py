@@ -13,12 +13,12 @@ class CatalogCommandsMixin:
     A mixin class that provides additional commands for interacting with the `DataCatalog`.
 
     This class adds methods to list datasets, dataset patterns and resolve dataset patterns.
-    It is designed to extend the functionality of the `DataCatalog` for better
-    integration with Kedro pipelines.
+    It is designed to extend the functionality of the `DataCatalog` providing pipeline-based
+    catalog functionality.
 
     Methods:
         - list_datasets: Show datasets per type for specified pipelines.
-        - list_patterns: List all dataset factories in the catalog.
+        - list_patterns: List all dataset patterns in the catalog.
         - resolve_patterns: Resolve dataset factories against pipeline datasets.
 
     Usage:
@@ -135,7 +135,7 @@ class CatalogCommandsMixin:
         ordered by the priority in which they are matched.
 
         Returns:
-            list[str]: A list of dataset factory patterns.
+            list[str]: A list of dataset patterns.
         """
         return self.config_resolver.list_patterns()
 

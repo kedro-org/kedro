@@ -79,7 +79,7 @@ class CatalogConfigResolver:
 
     The `CatalogConfigResolver` is responsible for managing dataset patterns, resolving
     credentials, and dynamically generating dataset configurations. It supports advanced
-    features like pattern matching, default patterns, and runtime patterns, enabling
+    features like pattern matching, user-set catch-all patterns, and runtime patterns, enabling
     flexible and reusable dataset configurations.
 
     Attributes:
@@ -257,15 +257,15 @@ class CatalogConfigResolver:
 
     @classmethod
     def _validate_pattern_config(cls, ds_name: str, ds_config: dict[str, Any]) -> None:
-        """Checks whether a dataset factory pattern configuration is valid - all
-        keys used in the configuration present in the dataset factory pattern name.
+        """Checks whether a dataset pattern configuration is valid - all
+        keys used in the configuration present in the dataset pattern name.
 
         Args:
-            ds_name: Dataset factory pattern name.
+            ds_name: Dataset pattern name.
             ds_config: Dataset pattern configuration.
 
         Raises:
-            DatasetError: when keys used in the configuration do not present in the dataset factory pattern name.
+            DatasetError: when keys used in the configuration do not present in the dataset pattern name.
 
         Example:
             >>> pattern = "{namespace}.int_{name}"
@@ -276,7 +276,7 @@ class CatalogConfigResolver:
             >>> config = {"filepath": "{nam}.csv"}
             >>> CatalogConfigResolver._validate_pattern_config(pattern, config)
             # DatasetError: Incorrect dataset configuration provided. Keys used in the configuration {'{nam}'} should present in
-            # the dataset factory pattern name {namespace}.int_{name}.
+            # the dataset pattern name {namespace}.int_{name}.
         """
         # Find all occurrences of {} in the string including brackets
         search_regex = r"\{.*?\}"
@@ -299,7 +299,7 @@ class CatalogConfigResolver:
             raise DatasetError(
                 f"Incorrect dataset configuration provided. "
                 f"Keys used in the configuration {config_placeholders - name_placeholders} "
-                f"should present in the dataset factory pattern name {ds_name}."
+                f"should present in the dataset pattern name {ds_name}."
             )
 
     @classmethod
@@ -330,7 +330,7 @@ class CatalogConfigResolver:
             # {"filepath": "customers.csv"}
         """
         resolved_vars = parse(pattern, ds_name)
-        # Resolve the factory config for the dataset
+        # Resolve the pattern config for the dataset
         if isinstance(config, dict):
             for key, value in config.items():
                 config[key] = cls._resolve_dataset_config(ds_name, pattern, value)
@@ -470,7 +470,7 @@ class CatalogConfigResolver:
         Retrieve the configuration for a given dataset pattern.
 
         This method searches for the configuration of the specified pattern in the
-        dataset patterns, default patterns, and runtime patterns. If the pattern is
+        dataset patterns, user-set catch-all patterns, and runtime patterns. If the pattern is
         not found in any of these, an empty dictionary is returned.
 
         Args:
@@ -661,7 +661,7 @@ class CatalogConfigResolver:
         Resolve a dataset name to its configuration based on patterns.
 
         This method matches the dataset name against catalog patterns and resolves
-        its configuration. If the dataset name matches a catch-all pattern, a warning
+        its configuration. If the dataset name matches a user-defined catch-all pattern, a warning
         is logged.
 
         Args:
@@ -698,7 +698,7 @@ class CatalogConfigResolver:
                 and matched_pattern in self._user_catch_all_pattern
             ):
                 self._logger.warning(
-                    "Config from the dataset factory pattern '%s' in the catalog will be used to "
+                    "Config from the dataset pattern '%s' in the catalog will be used to "
                     "override the default dataset creation for '%s'",
                     matched_pattern,
                     ds_name,

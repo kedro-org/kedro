@@ -149,6 +149,47 @@ class _LazyDataset:
 
 
 class DataCatalog(CatalogProtocol):
+    """
+    A centralized registry for managing datasets in a Kedro project.
+
+    The `DataCatalog` provides a unified interface for loading and saving datasets,
+    enabling seamless interaction with various data sources and formats. It supports
+    features such as lazy loading, versioning, and dynamic dataset creation using dataset
+    patterns.
+
+    This class is the core component of Kedro's data management system, allowing
+    datasets to be defined, accessed, and manipulated in a consistent and reusable way.
+
+    Attributes:
+        _datasets (dict): A dictionary of fully initialized datasets.
+        _lazy_datasets (dict): A dictionary of `_LazyDataset` instances for deferred initialization.
+        _load_versions (dict): A mapping of dataset names to specific versions to load.
+        _save_version (str | None): The global version string for saving datasets.
+        _config_resolver (CatalogConfigResolver): Resolves dataset patterns and configurations.
+
+    Example:
+        >>> from kedro.io import DataCatalog, MemoryDataset
+        >>>
+        >>> # Define datasets
+        >>> datasets = {
+        ...     "cars": MemoryDataset(data={"type": "car", "capacity": 5}),
+        ...     "planes": MemoryDataset(data={"type": "jet", "capacity": 200}),
+        ... }
+        >>>
+        >>> # Initialize the catalog
+        >>> catalog = DataCatalog(datasets=datasets)
+        >>>
+        >>> # Load data
+        >>> cars_data = catalog.load("cars")
+        >>> print(cars_data)
+        >>>
+        >>> # Save data
+        >>> catalog.save("planes", {"type": "propeller", "capacity": 100})
+        >>> # Check planes data
+        >>> planes_data = catalog.load("planes")
+        >>> print(planes_data)
+    """
+
     default_runtime_patterns: ClassVar = {
         "{default}": {"type": "kedro.io.MemoryDataset"}
     }
@@ -287,7 +328,7 @@ class DataCatalog(CatalogProtocol):
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         """
-        Compare two catalogs based on materialized datasets and dataset patterns.
+        Compare two catalogs based on materialized datasets, lazy datasets and all catalog patterns.
 
         Args:
             other: Another `DataCatalog` instance to compare.
@@ -299,7 +340,7 @@ class DataCatalog(CatalogProtocol):
             >>> catalog1 = DataCatalog(datasets={"example": MemoryDataset()})
             >>> catalog2 = DataCatalog(datasets={"example": MemoryDataset()})
             >>> catalog1 == catalog2
-            # True
+            # False
         """
         return (
             self._datasets,
@@ -313,7 +354,7 @@ class DataCatalog(CatalogProtocol):
 
     def keys(self) -> List[str]:  # noqa: UP006
         """
-        List all dataset names registered in the catalog.
+        List all dataset names registered in the catalog, including both materialized and lazy datasets.
 
         Returns:
             List[str]: A list of all dataset names.
@@ -366,7 +407,7 @@ class DataCatalog(CatalogProtocol):
 
     def __iter__(self) -> Iterator[str]:
         """
-        Iterate over all dataset names in the catalog.
+        Iterate over all dataset names in the catalog, including both materialized and lazy datasets.
 
         Yields:
             str: Dataset names.
@@ -383,8 +424,9 @@ class DataCatalog(CatalogProtocol):
         """
         Get a dataset by name from the catalog.
 
-        If the dataset is not materialized but matches a pattern, it is instantiated
-        and added to the catalog before being returned.
+        If a dataset is not materialized but matches dataset_pattern or user_catch_all_pattern
+        by default or runtime_patterns if fallback_to_runtime_pattern is enabled
+        it is instantiated and added to the catalog first, then returned.
 
         Args:
             ds_name: The name of the dataset.
@@ -448,7 +490,7 @@ class DataCatalog(CatalogProtocol):
 
     def __len__(self) -> int:
         """
-        Get the number of datasets registered in the catalog.
+        Get the number of datasets registered in the catalog, including both materialized and lazy datasets.
 
         Returns:
             int: The number of datasets.
@@ -468,9 +510,9 @@ class DataCatalog(CatalogProtocol):
     ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
-        If a dataset is not in the collection but matches dataset_pattern or user_catch_all_pattern
+        If a dataset is not materialized but matches dataset_pattern or user_catch_all_pattern
         by default or runtime_patterns if fallback_to_runtime_pattern is enabled
-        it is instantiated and added to the collection first, then returned.
+        it is instantiated and added to the catalog first, then returned.
 
         Args:
             key: A dataset name.

@@ -64,7 +64,6 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
         "`kedro catalog list` CLI command is deprecated and will be replaced with "
         "its updated version - `kedro catalog list-datasets` in Kedro 1.0.0.",
         KedroDeprecationWarning,
-        stacklevel=2,
     )
     title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
@@ -167,7 +166,6 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
     warnings.warn(
         "`kedro catalog create` CLI command is deprecated and will be removed in Kedro 1.0.0.",
         KedroDeprecationWarning,
-        stacklevel=2,
     )
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)
@@ -225,7 +223,6 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
         "`kedro catalog rank` CLI command is deprecated and will be replaced with "
         "its updated version - `kedro catalog list-patterns` in Kedro 1.0.0.",
         KedroDeprecationWarning,
-        stacklevel=2,
     )
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
@@ -247,7 +244,6 @@ def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
         "`kedro catalog resolve` CLI command is deprecated and will be replaced with "
         "its updated version - `kedro catalog resolve-patterns` in Kedro 1.0.0.",
         KedroDeprecationWarning,
-        stacklevel=2,
     )
 
     session = _create_session(metadata.package_name, env=env)

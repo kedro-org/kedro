@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from collections import defaultdict
 from itertools import chain, filterfalse
 from typing import TYPE_CHECKING, Any
@@ -10,6 +11,7 @@ import click
 import yaml
 from click import secho
 
+from kedro import KedroDeprecationWarning
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
@@ -58,6 +60,12 @@ def catalog() -> None:
 @click.pass_obj
 def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     """Show datasets per type."""
+    warnings.warn(
+        "`kedro catalog list` CLI command is deprecated and will be replaced with "
+        "its updated version - `kedro catalog list-datasets` in Kedro 1.0.0.",
+        KedroDeprecationWarning,
+        stacklevel=2,
+    )
     title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
     mentioned = "Datasets mentioned in pipeline"
@@ -156,6 +164,11 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name: str, env: str) -> N
     The catalog configuration will be saved to
     `<conf_source>/<env>/catalog_<pipeline_name>.yml` file.
     """
+    warnings.warn(
+        "`kedro catalog create` CLI command is deprecated and will be removed in Kedro 1.0.0.",
+        KedroDeprecationWarning,
+        stacklevel=2,
+    )
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
@@ -208,6 +221,12 @@ def _add_missing_datasets_to_catalog(missing_ds: list[str], catalog_path: Path) 
 @click.pass_obj
 def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
     """List all dataset factories in the catalog, ranked by priority by which they are matched."""
+    warnings.warn(
+        "`kedro catalog rank` CLI command is deprecated and will be replaced with "
+        "its updated version - `kedro catalog list-patterns` in Kedro 1.0.0.",
+        KedroDeprecationWarning,
+        stacklevel=2,
+    )
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
@@ -224,6 +243,12 @@ def rank_catalog_factories(metadata: ProjectMetadata, env: str) -> None:
 def resolve_patterns(metadata: ProjectMetadata, env: str) -> None:
     """Resolve catalog factories against pipeline datasets. Note that this command is runner
     agnostic and thus won't take into account any default dataset creation defined in the runner."""
+    warnings.warn(
+        "`kedro catalog resolve` CLI command is deprecated and will be replaced with "
+        "its updated version - `kedro catalog resolve-patterns` in Kedro 1.0.0.",
+        KedroDeprecationWarning,
+        stacklevel=2,
+    )
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()

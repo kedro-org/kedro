@@ -53,7 +53,7 @@ h3,
   margin: 24px 0 12px 0;
 }
 
-p, 
+p,
 .md-typeset thead ,
 .md-typeset td {
   font-family: Inter;
@@ -64,7 +64,7 @@ p,
   color: var(--text-primary-color);
 }
 
-.md-typeset ol li, 
+.md-typeset ol li,
 .md-typeset ul li {
     margin-bottom: 0;
 }

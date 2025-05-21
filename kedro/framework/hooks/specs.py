@@ -326,4 +326,4 @@ class RunnerSpecs:
         Args:
             manager: The multiprocessing.managers.SyncManager instance from the ParallelRunner.
         """
-        pass # pragma: no cover
+        pass

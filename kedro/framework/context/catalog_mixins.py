@@ -203,6 +203,8 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
         A dictionary mapping dataset types to lists of dataset names.
 
     Example:
+    ::
+
         >>> from kedro.io.data_catalog import DataCatalog
         >>> from kedro.io.memory_dataset import MemoryDataset
         >>> from kedro.framework.context.catalog_mixins import _group_ds_by_type

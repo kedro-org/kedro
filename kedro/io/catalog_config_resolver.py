@@ -89,6 +89,8 @@ class CatalogConfigResolver:
         _resolved_configs (dict): Resolved dataset configurations with credentials applied.
 
     Example:
+    ::
+
         >>> from kedro.io.catalog_config_resolver import CatalogConfigResolver
         >>> config = {
         ...     "{namespace}.int_{name}": {
@@ -119,6 +121,8 @@ class CatalogConfigResolver:
             default_runtime_patterns: Runtime patterns for resolving datasets.
 
         Example:
+        ::
+
             >>> from kedro.io.catalog_config_resolver import CatalogConfigResolver
             >>> config = {
             ...     "{namespace}.int_{name}": {
@@ -152,6 +156,8 @@ class CatalogConfigResolver:
             Resolved dataset configurations.
 
         Example:
+        ::
+
             >>> from kedro.io.catalog_config_resolver import CatalogConfigResolver
             >>> config = {
             ...     "companies": {
@@ -183,6 +189,8 @@ class CatalogConfigResolver:
             True if the string is a pattern, False otherwise.
 
         Example:
+        ::
+
             >>> CatalogConfigResolver.is_pattern("{namespace}.int_{name}")
             # True
             >>> CatalogConfigResolver.is_pattern("example_dataset")
@@ -202,6 +210,8 @@ class CatalogConfigResolver:
             The number of characters outside curly brackets.
 
         Example:
+        ::
+
             >>> CatalogConfigResolver._pattern_specificity("{namespace}.int_{name}")
             # 5
         """
@@ -228,6 +238,8 @@ class CatalogConfigResolver:
             DatasetError: If multiple catch-all patterns are found.
 
         Example:
+        ::
+
             >>> patterns = {
             ...     "{namespace}.int_{name}{a}": {},
             ...     "{namespace}.{name}": {},
@@ -268,6 +280,8 @@ class CatalogConfigResolver:
             DatasetError: when keys used in the configuration do not present in the dataset pattern name.
 
         Example:
+        ::
+
             >>> pattern = "{namespace}.int_{name}"
             >>> config = {"filepath": "{name}.csv"}
             >>> CatalogConfigResolver._validate_pattern_config(pattern, config)
@@ -321,6 +335,8 @@ class CatalogConfigResolver:
             The resolved dataset configuration.
 
         Example:
+        ::
+
             >>> pattern = "{namespace}.int_{name}"
             >>> config = {"filepath": "{name}.csv"}
             >>> resolved_config = CatalogConfigResolver._resolve_dataset_config(
@@ -350,6 +366,8 @@ class CatalogConfigResolver:
             A list of dataset patterns.
 
         Example:
+        ::
+
             >>> config = {
             ...     "{namespace}.int_{name}": {
             ...         "type": "pandas.CSVDataset",
@@ -382,6 +400,8 @@ class CatalogConfigResolver:
             A generator yielding patterns that match the dataset name.
 
         Example:
+        ::
+
             >>> patterns = ["{namespace}.int_{name}", "{name}"]
             >>> matches = CatalogConfigResolver._get_matches(patterns, "data.int_customers")
             >>> print(list(matches))
@@ -404,6 +424,8 @@ class CatalogConfigResolver:
             The first matching pattern, or `None` if no match is found.
 
         Example:
+        ::
+
             >>> config = {
             ...     "{namespace}.int_{name}": {"type": "pandas.CSVDataset"},
             ...     "{name}": {"type": "MemoryDataset"},
@@ -430,6 +452,8 @@ class CatalogConfigResolver:
             The first matching pattern, or `None` if no match is found.
 
         Example:
+        ::
+
             >>> config = {"{name}": {"type": "MemoryDataset"}}
             >>> resolver = CatalogConfigResolver(config=config)
             >>> match = resolver.match_user_catch_all_pattern("example_dataset")
@@ -454,6 +478,8 @@ class CatalogConfigResolver:
             The first matching runtime pattern.
 
         Example:
+        ::
+
             >>> runtime_patterns = {"{default_example}": {"type": "MemoryDataset"}}
             >>> resolver = CatalogConfigResolver(default_runtime_patterns=runtime_patterns)
             >>> match = resolver.match_runtime_pattern("example_dataset")
@@ -481,6 +507,8 @@ class CatalogConfigResolver:
             or an empty dictionary if the pattern is not found.
 
         Example:
+        ::
+
             >>> resolver = CatalogConfigResolver(
             ...     config={"example": {"type": "MemoryDataset"}}
             ... )
@@ -517,6 +545,8 @@ class CatalogConfigResolver:
                 - The default pattern (if a catch-all pattern is found).
 
         Example:
+        ::
+
             >>> config = {
             ...     "{namespace}.int_{name}": {"type": "pandas.CSVDataset"},
             ...     "{name}": {"type": "MemoryDataset"},
@@ -571,6 +601,8 @@ class CatalogConfigResolver:
             DatasetError: If a dataset configuration is invalid (e.g., not a dictionary).
 
         Example:
+        ::
+
             >>> config = {
             ...     "example": {
             ...         "type": "pandas.CSVDataset",
@@ -625,6 +657,7 @@ class CatalogConfigResolver:
                 credentials: A dictionary mapping generated reference keys to the original credentials.
 
         Example:
+        ::
             >>> config = {
             ...     "type": "pandas.CSVDataset",
             ...     "credentials": {"user": "username", "pass": "pass"},
@@ -671,6 +704,8 @@ class CatalogConfigResolver:
             The resolved dataset configuration.
 
         Example:
+        ::
+
             >>> config = {
             ...     "{namespace}.int_{name}": {
             ...         "type": "pandas.CSVDataset",

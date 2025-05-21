@@ -51,6 +51,8 @@ class _LazyDataset:
         save_version (str | None): The version of the dataset to save, if applicable.
 
     Example:
+    ::
+
         >>> from kedro.io.data_catalog import _LazyDataset
         >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
         >>> lazy_dataset = _LazyDataset(
@@ -83,6 +85,8 @@ class _LazyDataset:
             save_version: The version of the dataset to save, if applicable.
 
         Example:
+        ::
+
             >>> from kedro.io.data_catalog import _LazyDataset
             >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
             >>> lazy_dataset = _LazyDataset(
@@ -110,6 +114,8 @@ class _LazyDataset:
             The fully qualified class name of the dataset type.
 
         Example:
+        ::
+
             >>> from kedro.io.data_catalog import _LazyDataset
             >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
             >>> lazy_dataset = _LazyDataset(name="example_dataset", config=dataset_config)
@@ -131,6 +137,8 @@ class _LazyDataset:
             The instantiated dataset object.
 
         Example:
+        ::
+
             >>> from kedro.io.data_catalog import _LazyDataset
             >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
             >>> lazy_dataset = _LazyDataset(
@@ -170,6 +178,8 @@ class DataCatalog(CatalogProtocol):
         _config_resolver: Resolves dataset factory patterns and configurations.
 
     Example:
+    ::
+
         >>> from kedro.io import DataCatalog, MemoryDataset
         >>>
         >>> # Define datasets
@@ -187,7 +197,6 @@ class DataCatalog(CatalogProtocol):
         >>>
         >>> # Save data
         >>> catalog.save("planes", {"type": "propeller", "capacity": 100})
-        >>> # Check planes data
         >>> planes_data = catalog.load("planes")
         >>> print(planes_data)
     """
@@ -225,29 +234,31 @@ class DataCatalog(CatalogProtocol):
                 sorted in lexicographical order.
 
         Example:
-        >>> from kedro.io import DataCatalog, MemoryDataset
-        >>> from kedro_datasets.pandas import CSVDataset
+        ::
 
-        >>> # Define datasets
-        >>> datasets = {
-        ...     "cars": CSVDataset(filepath="cars.csv"),
-        ...     "planes": MemoryDataset(data={"type": "jet", "capacity": 200}),
-        ... }
+            >>> from kedro.io import DataCatalog, MemoryDataset
+            >>> from kedro_datasets.pandas import CSVDataset
 
-        >>> # Define raw data
-        >>> raw_data = {
-        ...     "raw_numbers": [1, 2, 3, 4, 5],
-        ... }
+            >>> # Define datasets
+            >>> datasets = {
+            ...     "cars": CSVDataset(filepath="cars.csv"),
+            ...     "planes": MemoryDataset(data={"type": "jet", "capacity": 200}),
+            ... }
 
-        >>> # Initialize the catalog
-        >>> catalog = DataCatalog(
-        ...     datasets=datasets,
-        ...     raw_data=raw_data,
-        ...     load_versions={"cars": "2023-01-01T00.00.00"},
-        ...     save_version="2023-01-02T00.00.00",
-        ... )
+            >>> # Define raw data
+            >>> raw_data = {
+            ...     "raw_numbers": [1, 2, 3, 4, 5],
+            ... }
 
-        >>> print(catalog)
+            >>> # Initialize the catalog
+            >>> catalog = DataCatalog(
+            ...     datasets=datasets,
+            ...     raw_data=raw_data,
+            ...     load_versions={"cars": "2023-01-01T00.00.00"},
+            ...     save_version="2023-01-02T00.00.00",
+            ... )
+
+            >>> print(catalog)
         """
         self._config_resolver = config_resolver or CatalogConfigResolver(
             default_runtime_patterns=self.default_runtime_patterns
@@ -279,6 +290,8 @@ class DataCatalog(CatalogProtocol):
             CatalogConfigResolver: The configuration resolver for the catalog.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> resolver = catalog.config_resolver
             >>> print(resolver)
@@ -296,6 +309,8 @@ class DataCatalog(CatalogProtocol):
             A string representation of the catalog.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> print(repr(catalog))
             # "{'example': kedro.io.memory_dataset.MemoryDataset()}"
@@ -314,6 +329,8 @@ class DataCatalog(CatalogProtocol):
             True if the dataset is registered or matches a pattern, False otherwise.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> "example" in catalog
             # True
@@ -339,6 +356,8 @@ class DataCatalog(CatalogProtocol):
             True if the catalogs are equivalent, False otherwise.
 
         Example:
+        ::
+
             >>> catalog1 = DataCatalog(datasets={"example": MemoryDataset()})
             >>> catalog2 = DataCatalog(datasets={"example": MemoryDataset()})
             >>> catalog1 == catalog2
@@ -362,6 +381,8 @@ class DataCatalog(CatalogProtocol):
             A list of all dataset names.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> catalog.keys()
             # ['example']
@@ -379,6 +400,8 @@ class DataCatalog(CatalogProtocol):
             A list of dataset instances.
 
         Example:
+        ::
+
             >>> from kedro.io import DataCatalog, MemoryDataset
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> dataset_values = catalog.values()
@@ -398,6 +421,8 @@ class DataCatalog(CatalogProtocol):
             A list of tuples containing dataset names and their corresponding dataset instances.
 
         Example:
+        ::
+
             >>> from kedro.io import DataCatalog, MemoryDataset
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> dataset_items = catalog.items()
@@ -414,6 +439,8 @@ class DataCatalog(CatalogProtocol):
             Dataset names.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> for dataset_name in catalog:
             ...     print(dataset_name)
@@ -436,6 +463,8 @@ class DataCatalog(CatalogProtocol):
             The dataset instance.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> dataset = catalog["example"]
             >>> print(dataset)
@@ -497,6 +526,8 @@ class DataCatalog(CatalogProtocol):
             The number of datasets.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> len(catalog)
             # 1
@@ -529,6 +560,8 @@ class DataCatalog(CatalogProtocol):
             The dataset instance.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> dataset = catalog.get("example")
             >>> print(dataset)
@@ -682,10 +715,14 @@ class DataCatalog(CatalogProtocol):
             A tuple containing:
                 catalog: A dictionary mapping dataset names to their unresolved configurations,
                     excluding in-memory datasets.
+
                 credentials: A dictionary of unresolved credentials extracted from dataset configurations.
+
                 load_versions: A dictionary mapping dataset names to specific versions to be loaded,
                     or `None` if no version is set.
+
                 save_version: A global version identifier for saving datasets, or `None` if not specified.
+
         Example:
         ::
 
@@ -748,6 +785,8 @@ class DataCatalog(CatalogProtocol):
                 "type" key is missing from the configuration.
 
         Example:
+        ::
+
             >>> config = {
             ...     "example_dataset": {
             ...         "type": "pandas.CSVDataset",
@@ -797,6 +836,8 @@ class DataCatalog(CatalogProtocol):
                 required keys like "type" or improperly formatted).
 
         Example:
+        ::
+
             >>> catalog = DataCatalog()
             >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
             >>> catalog._add_from_config("example_dataset", dataset_config)
@@ -902,6 +943,8 @@ class DataCatalog(CatalogProtocol):
                 dataset_patterns or user_catch_all_pattern.
 
         Example:
+        ::
+
             >>> from kedro.io import DataCatalog, MemoryDataset
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> dataset_type = catalog.get_type("example")
@@ -1014,6 +1057,8 @@ class DataCatalog(CatalogProtocol):
                 has not yet been registered.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset(data=[1, 2, 3])})
             >>> catalog.release("example")
         """
@@ -1051,6 +1096,8 @@ class DataCatalog(CatalogProtocol):
             Whether the dataset and its output exist.
 
         Example:
+        ::
+
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset(data=[1, 2, 3])})
             >>> catalog.exists("example")
             True
@@ -1128,6 +1175,8 @@ class SharedMemoryDataCatalog(DataCatalog):
             for datasets of type `kedro.io.SharedMemoryDataset`.
 
     Example:
+    ::
+
         >>> from multiprocessing.managers import SyncManager
         >>> from kedro.io import MemoryDataset
         >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
@@ -1163,6 +1212,8 @@ class SharedMemoryDataCatalog(DataCatalog):
                 shared memory datasets.
 
         Example:
+        ::
+
             >>> from multiprocessing.managers import SyncManager
             >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
             >>>
@@ -1194,6 +1245,8 @@ class SharedMemoryDataCatalog(DataCatalog):
                 with multiprocessing.
 
         Example:
+        ::
+
             >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
             >>>
             >>> catalog = SharedMemoryDataCatalog(

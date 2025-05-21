@@ -29,7 +29,7 @@ pip-compile:
 
 serve-docs:
 	uv pip install -e ".[docs]"
-	mkdocs serve
+	mkdocs serve --open
 
 build-docs:
 	uv pip install -e ".[docs]"
@@ -40,9 +40,13 @@ show-docs:
 
 linkcheck:
 	uv pip install -e ".[docs]"
+	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
 	mkdocs build --strict
-	vale docs
-	linkchecker site/
+
+fix-markdownlint:
+	npm install -g markdownlint-cli2
+	# markdownlint rules are defined in .markdownlint.yaml
+	markdownlint-cli2 --config .markdownlint.yaml --fix "docs/**/*.md"
 
 package: clean install
 	python -m pip install build && python -m build

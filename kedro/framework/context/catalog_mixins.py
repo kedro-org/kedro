@@ -82,11 +82,10 @@ class CatalogCommandsMixin:
         - `defaults`: Datasets that do not match any pattern or explicit definition.
 
         Args:
-            pipelines (list[str] | list[Pipeline] | None): A list of pipeline names or
-                `Pipeline` objects to analyze. If `None`, all pipelines are analyzed.
+            pipelines: A list of pipeline names or `Pipeline` objects to analyze. If `None`, all pipelines are analyzed.
 
         Returns:
-            dict: A dictionary where keys are pipeline names and values are dictionaries
+            A dictionary where keys are pipeline names and values are dictionaries
             containing datasets grouped by type.
         """
         target_pipelines = pipelines or _pipelines.keys()
@@ -135,7 +134,7 @@ class CatalogCommandsMixin:
         ordered by the priority in which they are matched.
 
         Returns:
-            list[str]: A list of dataset patterns.
+            A list of dataset patterns.
         """
         return self.config_resolver.list_patterns()
 
@@ -151,11 +150,11 @@ class CatalogCommandsMixin:
         from patterns.
 
         Args:
-            pipelines (list[Pipeline] | None): A list of `Pipeline` objects to analyze.
+            pipelines: A list of `Pipeline` objects to analyze.
                 If `None`, all pipelines are analyzed.
 
         Returns:
-            dict[str, Any]: A dictionary mapping dataset names to their unresolved configurations.
+            A dictionary mapping dataset names to their unresolved configurations.
         """
         target_pipelines = pipelines or _pipelines.keys()
 
@@ -197,11 +196,11 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
     dataset types (as strings) and the values are lists of dataset names.
 
     Args:
-        datasets (set[str]): A set of dataset names to group.
-        catalog (DataCatalog): The `DataCatalog` instance to retrieve dataset types.
+        datasets: A set of dataset names to group.
+        catalog: The `DataCatalog` instance to retrieve dataset types.
 
     Returns:
-        dict[str, list[str]]: A dictionary mapping dataset types to lists of dataset names.
+        A dictionary mapping dataset types to lists of dataset names.
 
     Example:
         >>> from kedro.io.data_catalog import DataCatalog

@@ -114,9 +114,9 @@ class CatalogConfigResolver:
         Initialize the `CatalogConfigResolver`.
 
         Args:
-            config (dict[str, dict[str, Any]] | None): Dataset configurations from the catalog.
-            credentials (dict[str, dict[str, Any]] | None): Credentials for datasets.
-            default_runtime_patterns (Patterns | None): Runtime patterns for resolving datasets.
+            config: Dataset configurations from the catalog.
+            credentials: Credentials for datasets.
+            default_runtime_patterns: Runtime patterns for resolving datasets.
 
         Example:
             >>> from kedro.io.catalog_config_resolver import CatalogConfigResolver
@@ -149,7 +149,7 @@ class CatalogConfigResolver:
         Get the resolved dataset configurations.
 
         Returns:
-            dict[str, dict[str, Any]]: Resolved dataset configurations.
+            Resolved dataset configurations.
 
         Example:
             >>> from kedro.io.catalog_config_resolver import CatalogConfigResolver
@@ -177,10 +177,10 @@ class CatalogConfigResolver:
         Check if a given string is a pattern. Assume that any name with '{' is a pattern.
 
         Args:
-            pattern (str): The string to check.
+            pattern: The string to check.
 
         Returns:
-            bool: True if the string is a pattern, False otherwise.
+            True if the string is a pattern, False otherwise.
 
         Example:
             >>> CatalogConfigResolver.is_pattern("{namespace}.int_{name}")
@@ -196,10 +196,10 @@ class CatalogConfigResolver:
         Calculate the specificity of a pattern based on characters outside curly brackets.
 
         Args:
-            pattern (str): The pattern to analyze.
+            pattern: The pattern to analyze.
 
         Returns:
-            int: The number of characters outside curly brackets.
+            The number of characters outside curly brackets.
 
         Example:
             >>> CatalogConfigResolver._pattern_specificity("{namespace}.int_{name}")
@@ -219,10 +219,10 @@ class CatalogConfigResolver:
         3. Alphabetically
 
         Args:
-            dataset_patterns (Patterns): A dictionary of dataset patterns.
+            dataset_patterns: A dictionary of dataset patterns.
 
         Returns:
-            Patterns: A sorted dictionary of dataset patterns.
+            A sorted dictionary of dataset patterns.
 
         Raises:
             DatasetError: If multiple catch-all patterns are found.
@@ -313,12 +313,12 @@ class CatalogConfigResolver:
         Resolve dataset configuration based on the provided pattern.
 
         Args:
-            ds_name (str): The dataset name to resolve.
-            pattern (str): The pattern to use for resolution.
-            config (Any): The dataset configuration.
+            ds_name: The dataset name to resolve.
+            pattern: The pattern to use for resolution.
+            config: The dataset configuration.
 
         Returns:
-            Any: The resolved dataset configuration.
+            The resolved dataset configuration.
 
         Example:
             >>> pattern = "{namespace}.int_{name}"
@@ -347,7 +347,7 @@ class CatalogConfigResolver:
         List all patterns available in the catalog.
 
         Returns:
-            list[str]: A list of dataset patterns.
+            A list of dataset patterns.
 
         Example:
             >>> config = {
@@ -375,11 +375,11 @@ class CatalogConfigResolver:
         dataset name matches any of them using the `parse` function.
 
         Args:
-            pattens (Iterable[str]): A collection of patterns to match against.
-            ds_name (str): The name of the dataset to match.
+            pattens: A collection of patterns to match against.
+            ds_name: The name of the dataset to match.
 
         Returns:
-            Generator[str]: A generator yielding patterns that match the dataset name.
+            A generator yielding patterns that match the dataset name.
 
         Example:
             >>> patterns = ["{namespace}.int_{name}", "{name}"]
@@ -398,10 +398,10 @@ class CatalogConfigResolver:
         pattern is returned.
 
         Args:
-            ds_name (str): The name of the dataset to match.
+            ds_name: The name of the dataset to match.
 
         Returns:
-            str | None: The first matching pattern, or `None` if no match is found.
+            The first matching pattern, or `None` if no match is found.
 
         Example:
             >>> config = {
@@ -424,10 +424,10 @@ class CatalogConfigResolver:
         catch-all patterns. If a match is found, the first matching pattern is returned.
 
         Args:
-            ds_name (str): The name of the dataset to match.
+            ds_name: The name of the dataset to match.
 
         Returns:
-            str | None: The first matching pattern, or `None` if no match is found.
+            The first matching pattern, or `None` if no match is found.
 
         Example:
             >>> config = {"{name}": {"type": "MemoryDataset"}}
@@ -448,10 +448,10 @@ class CatalogConfigResolver:
         runtime patterns. It assumes that a runtime pattern always matches.
 
         Args:
-            ds_name (str): The name of the dataset to match.
+            ds_name: The name of the dataset to match.
 
         Returns:
-            str: The first matching runtime pattern.
+            The first matching runtime pattern.
 
         Example:
             >>> runtime_patterns = {"{default_example}": {"type": "MemoryDataset"}}
@@ -474,10 +474,10 @@ class CatalogConfigResolver:
         not found in any of these, an empty dictionary is returned.
 
         Args:
-            pattern (str): The dataset pattern to retrieve the configuration for.
+            pattern: The dataset pattern to retrieve the configuration for.
 
         Returns:
-            dict[str, Any]: The configuration dictionary for the specified pattern,
+            The configuration dictionary for the specified pattern,
             or an empty dictionary if the pattern is not found.
 
         Example:
@@ -508,11 +508,11 @@ class CatalogConfigResolver:
         and sets it as the default pattern.
 
         Args:
-            config (dict[str, dict[str, Any]] | None): The catalog configuration containing dataset patterns.
-            credentials (dict[str, dict[str, Any]] | None): The credentials for datasets.
+            config: The catalog configuration containing dataset patterns.
+            credentials: The credentials for datasets.
 
         Returns:
-            tuple[Patterns, Patterns]: A tuple containing:
+            A tuple containing:
                 - Sorted dataset patterns.
                 - The default pattern (if a catch-all pattern is found).
 
@@ -561,11 +561,11 @@ class CatalogConfigResolver:
         the actual credentials from the provided credentials dictionary.
 
         Args:
-            config (dict[str, dict[str, Any]] | None): The catalog configuration containing datasets.
-            credentials (dict[str, dict[str, Any]] | None): The credentials for datasets.
+            config: The catalog configuration containing datasets.
+            credentials: The credentials for datasets.
 
         Returns:
-            dict[str, dict[str, Any]]: The dataset configurations with resolved credentials.
+            The dataset configurations with resolved credentials.
 
         Raises:
             DatasetError: If a dataset configuration is invalid (e.g., not a dictionary).
@@ -665,10 +665,10 @@ class CatalogConfigResolver:
         is logged.
 
         Args:
-            ds_name (str): The name of the dataset to resolve.
+            ds_name: The name of the dataset to resolve.
 
         Returns:
-            dict[str, Any]: The resolved dataset configuration.
+            The resolved dataset configuration.
 
         Example:
             >>> config = {

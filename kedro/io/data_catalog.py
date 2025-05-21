@@ -77,10 +77,10 @@ class _LazyDataset:
         Initialize a `_LazyDataset` instance.
 
         Args:
-            name (str): The name of the dataset.
-            config (dict[str, Any]): The configuration dictionary for the dataset.
-            load_version (str | None): The version of the dataset to load, if applicable.
-            save_version (str | None): The version of the dataset to save, if applicable.
+            name: The name of the dataset.
+            config: The configuration dictionary for the dataset.
+            load_version: The version of the dataset to load, if applicable.
+            save_version: The version of the dataset to save, if applicable.
 
         Example:
             >>> from kedro.io.data_catalog import _LazyDataset
@@ -107,7 +107,7 @@ class _LazyDataset:
         as defined in the configuration.
 
         Returns:
-            str: The fully qualified class name of the dataset type.
+            The fully qualified class name of the dataset type.
 
         Example:
             >>> from kedro.io.data_catalog import _LazyDataset
@@ -128,7 +128,7 @@ class _LazyDataset:
         factory method of `AbstractDataset`.
 
         Returns:
-            AbstractDataset: The instantiated dataset object.
+            The instantiated dataset object.
 
         Example:
             >>> from kedro.io.data_catalog import _LazyDataset
@@ -161,11 +161,13 @@ class DataCatalog(CatalogProtocol):
     datasets to be defined, accessed, and manipulated in a consistent and reusable way.
 
     Attributes:
-        _datasets (dict): A dictionary of fully initialized datasets.
-        _lazy_datasets (dict): A dictionary of `_LazyDataset` instances for deferred initialization.
-        _load_versions (dict): A mapping of dataset names to specific versions to load.
-        _save_version (str | None): The global version string for saving datasets.
-        _config_resolver (CatalogConfigResolver): Resolves dataset patterns and configurations.
+        default_runtime_patterns (ClassVar): A dictionary defining the default runtime pattern
+            for datasets of type `kedro.io.MemoryDataset`.
+        _datasets: A dictionary of fully initialized datasets.
+        _lazy_datasets: A dictionary of `_LazyDataset` instances for deferred initialization.
+        _load_versions: A mapping of dataset names to specific versions to load.
+        _save_version: The global version string for saving datasets.
+        _config_resolver: Resolves dataset patterns and configurations.
 
     Example:
         >>> from kedro.io import DataCatalog, MemoryDataset
@@ -291,7 +293,7 @@ class DataCatalog(CatalogProtocol):
         in the catalog.
 
         Returns:
-            str: A string representation of the catalog.
+            A string representation of the catalog.
 
         Example:
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
@@ -309,7 +311,7 @@ class DataCatalog(CatalogProtocol):
             dataset_name: The name of the dataset to check.
 
         Returns:
-            bool: True if the dataset is registered or matches a pattern, False otherwise.
+            True if the dataset is registered or matches a pattern, False otherwise.
 
         Example:
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
@@ -334,7 +336,7 @@ class DataCatalog(CatalogProtocol):
             other: Another `DataCatalog` instance to compare.
 
         Returns:
-            bool: True if the catalogs are equivalent, False otherwise.
+            True if the catalogs are equivalent, False otherwise.
 
         Example:
             >>> catalog1 = DataCatalog(datasets={"example": MemoryDataset()})
@@ -357,7 +359,7 @@ class DataCatalog(CatalogProtocol):
         List all dataset names registered in the catalog, including both materialized and lazy datasets.
 
         Returns:
-            List[str]: A list of all dataset names.
+            A list of all dataset names.
 
         Example:
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
@@ -374,7 +376,7 @@ class DataCatalog(CatalogProtocol):
         in the catalog, including both materialized and lazy datasets.
 
         Returns:
-            List[AbstractDataset]: A list of dataset instances.
+            A list of dataset instances.
 
         Example:
             >>> from kedro.io import DataCatalog, MemoryDataset
@@ -393,8 +395,7 @@ class DataCatalog(CatalogProtocol):
         name and its corresponding dataset instance.
 
         Returns:
-            List[tuple[str, AbstractDataset]]: A list of tuples containing dataset names
-            and their corresponding dataset instances.
+            A list of tuples containing dataset names and their corresponding dataset instances.
 
         Example:
             >>> from kedro.io import DataCatalog, MemoryDataset
@@ -410,7 +411,7 @@ class DataCatalog(CatalogProtocol):
         Iterate over all dataset names in the catalog, including both materialized and lazy datasets.
 
         Yields:
-            str: Dataset names.
+            Dataset names.
 
         Example:
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
@@ -432,7 +433,7 @@ class DataCatalog(CatalogProtocol):
             ds_name: The name of the dataset.
 
         Returns:
-            AbstractDataset: The dataset instance.
+            The dataset instance.
 
         Example:
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
@@ -493,7 +494,7 @@ class DataCatalog(CatalogProtocol):
         Get the number of datasets registered in the catalog, including both materialized and lazy datasets.
 
         Returns:
-            int: The number of datasets.
+            The number of datasets.
 
         Example:
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
@@ -525,7 +526,7 @@ class DataCatalog(CatalogProtocol):
                 set to False.
 
         Returns:
-            AbstractDataset: The dataset instance.
+            The dataset instance.
 
         Example:
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
@@ -739,8 +740,8 @@ class DataCatalog(CatalogProtocol):
         with a helpful error message.
 
         Args:
-            ds_name (str): The name of the dataset being validated.
-            ds_config (Any): The configuration of the dataset to validate.
+            ds_name: The name of the dataset being validated.
+            ds_config: The configuration of the dataset to validate.
 
         Raises:
             DatasetError: If the dataset configuration is not a dictionary or if the
@@ -788,8 +789,8 @@ class DataCatalog(CatalogProtocol):
         that will be materialized only when accessed.
 
         Args:
-            ds_name (str): The name of the dataset to be added.
-            ds_config (dict[str, Any]): The configuration dictionary for the dataset.
+            ds_name: The name of the dataset to be added.
+            ds_config: The configuration dictionary for the dataset.
 
         Raises:
             DatasetError: If the provided dataset configuration is invalid (e.g., missing
@@ -891,10 +892,10 @@ class DataCatalog(CatalogProtocol):
         Access dataset type without adding resolved dataset to the catalog.
 
         Args:
-            ds_name (str): The name of the dataset whose type is to be retrieved.
+            ds_name: The name of the dataset whose type is to be retrieved.
 
         Returns:
-            str: The fully qualified type of the dataset (e.g., `kedro.io.memory_dataset.MemoryDataset`).
+            The fully qualified type of the dataset (e.g., `kedro.io.memory_dataset.MemoryDataset`).
 
         Raises:
             DatasetNotFoundError: When the dataset in not in the internal collection, does not match
@@ -1123,8 +1124,8 @@ class SharedMemoryDataCatalog(DataCatalog):
     a multiprocessing manager and validating dataset compatibility with multiprocessing.
 
     Attributes:
-        runtime_patterns (ClassVar): A dictionary defining the default runtime pattern
-            for datasets of type `SharedMemoryDataset`.
+        default_runtime_patterns (ClassVar): A dictionary defining the default runtime pattern
+            for datasets of type `kedro.io.SharedMemoryDataset`.
 
     Example:
         >>> from multiprocessing.managers import SyncManager
@@ -1158,7 +1159,7 @@ class SharedMemoryDataCatalog(DataCatalog):
         that these datasets are properly synchronized across threads or processes.
 
         Args:
-            manager (SyncManager): A multiprocessing manager to be associated with
+            manager: A multiprocessing manager to be associated with
                 shared memory datasets.
 
         Example:

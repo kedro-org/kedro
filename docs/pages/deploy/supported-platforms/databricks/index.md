@@ -39,14 +39,3 @@ Here's a flowchart to guide your choice of workflow:
 
 
 Remember, the best choice of workflow is the one that aligns best with your project's requirements, whether that's quick development, notebook-based coding, or a production-ready setup. Make sure to consider these factors alongside your comfort level with Kedro when making your decision.
-
-
-```{toctree}
-:maxdepth: 1
-
-databricks_notebooks_development_workflow.md
-databricks_ide_databricks_asset_bundles_workflow.md
-databricks_deployment_workflow
-databricks_visualisation
-databricks_dbx_workflow.md
-```

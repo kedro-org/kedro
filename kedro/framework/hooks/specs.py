@@ -317,7 +317,7 @@ class RunnerSpecs:
     """Namespace that defines all specifications for a runner's lifecycle hooks."""
 
     @hook_spec
-    def on_parallel_runner_start(self, manager: "SyncManager"): # type: ignore
+    def on_parallel_runner_start(self, manager: "SyncManager"):  # type: ignore
         """
         Hook to be called by the ParallelRunner after its multiprocessing SyncManager is started
         and before it starts submitting tasks. Allows plugins to receive the manager for

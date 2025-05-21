@@ -35,14 +35,14 @@ def fake_credentials_config(tmp_path):
 @pytest.fixture
 def fake_catalog_config():
     config = {
-        "parquet_{ds_pattern}": {
+        "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataset",
-            "filepath": "data/01_raw/{ds_pattern}.parquet",
+            "filepath": "data/01_raw/{factory_pattern}.parquet",
             "credentials": "db_connection",
         },
-        "csv_{ds_pattern}": {
+        "csv_{factory_pattern}": {
             "type": "pandas.CSVDataset",
-            "filepath": "data/01_raw/{ds_pattern}.csv",
+            "filepath": "data/01_raw/{factory_pattern}.csv",
         },
         "csv_test": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
     }
@@ -96,20 +96,20 @@ def fake_catalog_with_overlapping_factories():
 @pytest.fixture
 def fake_catalog_config_with_factories(fake_metadata):
     config = {
-        "parquet_{ds_pattern}": {
+        "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataset",
-            "filepath": "data/01_raw/{ds_pattern}.parquet",
+            "filepath": "data/01_raw/{factory_pattern}.parquet",
         },
-        "csv_{ds_pattern}": {
+        "csv_{factory_pattern}": {
             "type": "pandas.CSVDataset",
-            "filepath": "data/01_raw/{ds_pattern}.csv",
+            "filepath": "data/01_raw/{factory_pattern}.csv",
         },
         "explicit_ds": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
-        "{ds_pattern}_ds": {
+        "{factory_pattern}_ds": {
             "type": "pandas.ParquetDataset",
-            "filepath": "data/01_raw/{ds_pattern}_ds.parquet",
+            "filepath": "data/01_raw/{factory_pattern}_ds.parquet",
         },
-        "partitioned_{ds_pattern}": {
+        "partitioned_{factory_pattern}": {
             "type": "partitions.PartitionedDataset",
             "path": "data/01_raw",
             "dataset": "pandas.CSVDataset",
@@ -487,9 +487,9 @@ class TestCatalogCreateCommand:
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "fake_load_context")
-class TestCatalogDatasetPatternCommands:
+class TestCatalogFactoryCommands:
     @pytest.mark.usefixtures("mock_pipelines")
-    def test_list_patterns(
+    def test_rank_catalog_factories(
         self,
         fake_project_cli,
         fake_metadata,
@@ -517,7 +517,7 @@ class TestCatalogDatasetPatternCommands:
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0] == expected_patterns_sorted
 
-    def test_list_patterns_with_no_factories(
+    def test_rank_catalog_factories_with_no_factories(
         self,
         fake_project_cli,
         fake_metadata,
@@ -593,7 +593,7 @@ class TestCatalogDatasetPatternCommands:
         fake_catalog_config_with_factories,
         fake_catalog_config_with_factories_resolved,
     ):
-        """Test that explicit catalog entries are not overwritten by dataset pattern config."""
+        """Test that explicit catalog entries are not overwritten by factory config."""
         mocked_context = fake_load_context.return_value
         mocked_context.project_path = fake_metadata.project_path
 

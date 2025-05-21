@@ -16,7 +16,7 @@ base_catalog.update({
         "filepath": "data.csv",
     } for i in range(1, 1001)
 })
-# Add a dataset pattern
+# Add a factory pattern
 base_catalog.update({
     "dataset_factory_{placeholder}": {
         "type": "pandas.CSVDataset",

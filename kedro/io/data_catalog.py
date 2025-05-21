@@ -155,7 +155,7 @@ class DataCatalog(CatalogProtocol):
     The `DataCatalog` provides a unified interface for loading and saving datasets,
     enabling seamless interaction with various data sources and formats. It supports
     features such as lazy loading, versioning, and dynamic dataset creation using dataset
-    patterns.
+    factory patterns.
 
     This class is the core component of Kedro's data management system, allowing
     datasets to be defined, accessed, and manipulated in a consistent and reusable way.
@@ -167,7 +167,7 @@ class DataCatalog(CatalogProtocol):
         _lazy_datasets: A dictionary of `_LazyDataset` instances for deferred initialization.
         _load_versions: A mapping of dataset names to specific versions to load.
         _save_version: The global version string for saving datasets.
-        _config_resolver: Resolves dataset patterns and configurations.
+        _config_resolver: Resolves dataset factory patterns and configurations.
 
     Example:
         >>> from kedro.io import DataCatalog, MemoryDataset
@@ -215,7 +215,7 @@ class DataCatalog(CatalogProtocol):
             datasets: A dictionary of dataset names and dataset instances.
             raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
                 Keys represent dataset names and the values are raw data.
-            config_resolver: An instance of CatalogConfigResolver to resolve dataset patterns and configurations.
+            config_resolver: An instance of CatalogConfigResolver to resolve dataset factory patterns and configurations.
             load_versions: A mapping between dataset names and versions
                 to load. Has no effect on datasets without enabled versioning.
             save_version: Version string to be used for ``save`` operations
@@ -272,7 +272,7 @@ class DataCatalog(CatalogProtocol):
         """
         Get the `CatalogConfigResolver` instance associated with this `DataCatalog`.
 
-        The `CatalogConfigResolver` is responsible for resolving dataset patterns
+        The `CatalogConfigResolver` is responsible for resolving dataset factory patterns
         and configurations dynamically.
 
         Returns:
@@ -330,7 +330,7 @@ class DataCatalog(CatalogProtocol):
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
         """
-        Compare two catalogs based on materialized datasets, lazy datasets and all catalog patterns.
+        Compare two catalogs based on materialized datasets, lazy datasets and all dataset factory patterns.
 
         Args:
             other: Another `DataCatalog` instance to compare.

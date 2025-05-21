@@ -29,7 +29,7 @@ def compute_bound_task(input_data) -> str:
 
 def create_data_catalog():
     """
-    Use dataset pattern to make sure the benchmark cover the slowest path.
+    Use dataset factory pattern to make sure the benchmark cover the slowest path.
     """
     catalog_conf = """
 

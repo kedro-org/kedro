@@ -12,13 +12,13 @@ class CatalogCommandsMixin:
     """
     A mixin class that provides additional commands for interacting with the `DataCatalog`.
 
-    This class adds methods to list datasets, dataset patterns and resolve dataset patterns.
+    This class adds methods to list datasets, dataset factory patterns and resolve dataset factory patterns.
     It is designed to extend the functionality of the `DataCatalog` providing pipeline-based
     catalog functionality.
 
     Methods:
         - list_datasets: Show datasets per type for specified pipelines.
-        - list_patterns: List all dataset patterns in the catalog.
+        - list_patterns: List all dataset factory patterns in the catalog.
         - resolve_patterns: Resolve dataset factories against pipeline datasets.
 
     Usage:
@@ -78,7 +78,7 @@ class CatalogCommandsMixin:
         This method lists datasets used in the specified pipelines, categorizing them
         into three groups:
         - `datasets`: Datasets explicitly defined in the catalog.
-        - `factories`: Datasets resolved from patterns.
+        - `factories`: Datasets resolved from dataset factory patterns.
         - `defaults`: Datasets that do not match any pattern or explicit definition.
 
         Args:
@@ -128,13 +128,13 @@ class CatalogCommandsMixin:
 
     def list_patterns(self: DataCatalog) -> list[str]:
         """
-        List all dataset patterns in the catalog, ranked by priority.
+        List all dataset factory patterns in the catalog, ranked by priority.
 
-        This method retrieves all dataset patterns defined in the catalog,
+        This method retrieves all dataset factory patterns defined in the catalog,
         ordered by the priority in which they are matched.
 
         Returns:
-            A list of dataset patterns.
+            A list of dataset factory patterns.
         """
         return self.config_resolver.list_patterns()
 
@@ -143,11 +143,11 @@ class CatalogCommandsMixin:
         pipelines: list[Pipeline] | None = None,
     ) -> dict[str, Any]:
         """
-        Resolve dataset patterns against pipeline datasets.
+        Resolve dataset factory patterns against pipeline datasets.
 
-        This method resolves dataset patterns for datasets used in the specified pipelines.
+        This method resolves dataset factory patterns for datasets used in the specified pipelines.
         It includes datasets explicitly defined in the catalog as well as those resolved
-        from patterns.
+        from dataset factory patterns.
 
         Args:
             pipelines: A list of `Pipeline` objects to analyze.

@@ -75,16 +75,16 @@ def _resolve_credentials(
 
 class CatalogConfigResolver:
     """
-    Resolves dataset configurations based on patterns and credentials.
+    Resolves dataset configurations based on dataset factory patterns and credentials.
 
-    The `CatalogConfigResolver` is responsible for managing dataset patterns, resolving
+    The `CatalogConfigResolver` is responsible for managing dataset factory patterns, resolving
     credentials, and dynamically generating dataset configurations. It supports advanced
     features like pattern matching, user-set catch-all patterns, and runtime patterns, enabling
     flexible and reusable dataset configurations.
 
     Attributes:
         _default_runtime_patterns (Patterns): Runtime patterns used for resolving datasets.
-        _dataset_patterns (dict): Sorted dataset patterns extracted from the catalog configuration.
+        _dataset_patterns (dict): Sorted dataset factory patterns extracted from the catalog configuration.
         _user_catch_all_pattern (dict): User provided catch all pattern.
         _resolved_configs (dict): Resolved dataset configurations with credentials applied.
 

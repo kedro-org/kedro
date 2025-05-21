@@ -4,7 +4,7 @@ If you like to learn from video, you can follow our [hands-on course "Introducti
 
 The course is structured into sections and these are each broken into short videos that cover specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) and get hands-on with the example. Along the way, you'll learn key Kedro concepts like datasets and the Kedro Data Catalog, nodes and pipelines, and configuration management.
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/DD7JuYKp6BA" frameborder="0" allowfullscreen></iframe>
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/DD7JuYKp6BA" frameborder="0" allowfullscreen></iframe>
 
 ## Who is this course for?
 

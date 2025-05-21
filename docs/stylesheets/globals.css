@@ -378,31 +378,39 @@ pre:hover .md-clipboard {
 
 /** MOBILE STYLES */
 @media screen and (max-width: 76.2344em) {
-    .md-nav--primary .md-nav__item {
-        border-top: none;
-    }
+  .md-nav--primary .md-nav__item {
+      border-top: none;
+  }
 
-    .md-nav--primary .md-nav__title  {
-        background-color: var(--yellow-6);
-         color: var(--black-900);
-        padding-left: 24px;
-        font-size: 20px;
-    }
-
-    .md-nav__icon:after {
+  .md-nav--primary .md-nav__title  {
+      background-color: var(--yellow-6);
         color: var(--black-900);
-    }
+      padding-left: 24px;
+      font-size: 20px;
+  }
 
-    .md-nav--primary .md-nav__title[for="__drawer"],
-    .md-nav__source {
-        background-color: var(--yellow-6);
-        color: var(--black-900);
-    }
+  .md-nav__icon:after {
+      color: var(--black-900);
+  }
+
+  .md-nav--primary .md-nav__title[for="__drawer"],
+  .md-nav__source {
+      background-color: var(--yellow-6);
+      color: var(--black-900);
+  }
+
+  iframe {
+      height: 260px;
+  }
 
   .md-sidebar--primary,
   .md-nav--primary {
     max-width: 242px;
     margin: 0;
+  }
+
+  .md-content {
+    padding: 0;
   }
 
   .md-nav__link {

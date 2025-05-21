@@ -146,7 +146,7 @@ type_targets = {
         "kedro.runner.runner.AbstractRunner",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
-        "kedro.context.CatalogCommandsMixin",
+        "kedro.framework.context.CatalogCommandsMixin",
         "abc.ABC",
         "Path",
         "pathlib.Path",
@@ -365,6 +365,8 @@ KEDRO_MODULES = [
     "kedro.runner",
     "kedro.config",
     "kedro_datasets",
+    "kedro.framework",
+    "kedro.framework.context"
 ]
 
 

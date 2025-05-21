@@ -75,8 +75,7 @@ In [3]: %reload_kedro
 ```
 
 ## Exploring the Kedro project in a notebook
-Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant {doc}`API documentation </api/kedro>` or use the Python {py:func}`dir` function, for example `dir(catalog)`.
-
+Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](../api/index.md) or use the Python `dir` function, for example `dir(catalog)`.
 
 For example, add the following to a cell in your notebook to run `catalog.list`:
 

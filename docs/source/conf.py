@@ -178,6 +178,11 @@ type_targets = {
         "CatalogProtocol",
         "DataCatalog",
         "re.Pattern",
+        "SharedMemoryDataCatalog",
+        "SharedMemoryCatalogProtocol",
+        "CatalogCommandsMixin",
+        "_C",
+        "_DS"
     ),
     "py:data": (
         "typing.Any",

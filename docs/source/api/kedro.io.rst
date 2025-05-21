@@ -17,6 +17,7 @@ kedro.io
    kedro.io.DataCatalog
    kedro.io.LambdaDataset
    kedro.io.MemoryDataset
+   kedro.io.SharedMemoryDataCatalog
    kedro.io.Version
 
 .. rubric:: Exceptions

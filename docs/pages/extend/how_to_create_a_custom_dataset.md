@@ -559,12 +559,9 @@ We provide additional examples of [how to use parameters through the data catalo
 
 ## How to contribute a custom dataset implementation
 
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro-datasets` package in
-[`kedro-plugins` repository](https://github.com/kedro-org/kedro-plugins) where you can add a new custom dataset
-implementation to share it with others. You can find out more in the [Kedro contribution guide on GitHub](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro-datasets` package in the [`kedro-plugins` repository](https://github.com/kedro-org/kedro-plugins), where you can add a new custom dataset implementation to share with others. You can find more information in the [Kedro contribution guide on GitHub](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
 
 To contribute your custom dataset:
-
 1. Add your dataset package to `kedro-plugins/kedro-datasets/kedro_datasets/`.
 
 For example, in our `ImageDataset` example, the directory structure should be:
@@ -576,12 +573,23 @@ kedro-plugins/kedro-datasets/kedro_datasets/image
 ```
 
 2. If the dataset is complex, create a `README.md` file to explain how it works and document its API.
+3. Core datasets should be accompanied by full test coverage in `kedro-plugins/kedro-datasets/tests/`.
+4. Datasets should also be added to the documentation.
+    To ensure your dataset appears correctly in the documentation you need to:
 
-3. The dataset should be accompanied by full test coverage in `kedro-plugins/kedro-datasets/tests/`.
+    1. Ensure your dataset class has a markdown-parseable docstring.
+    2. Add an entry to the table in `index.md` within either:
+        - `docs/pages/api/kedro_datasets/` (for core datasets), or
+        - `docs/pages/api/kedro_datasets_experimental/` (for experimental datasets).
+    3. Create a markdown file for your dataset in the corresponding directory.
+    4. Add your dataset's markdown file to the navigation section of `mkdocs.yml`.
 
-4. Make a pull request against the `main` branch of [Kedro's plugin repository](https://github.com/kedro-org/kedro-plugins).
+5. Make a pull request against the `main` branch of the [Kedro plugins repository](https://github.com/kedro-org/kedro-plugins).
 
-!!! note
-    There are two special considerations when contributing a dataset:
-    1. Add the dataset to `kedro_datasets.rst` so it shows up in the API documentation.
-    2. Add the dataset to `kedro-plugins/kedro-datasets/static/jsonschema/kedro-catalog-X.json` for IDE validation.
+!!! info
+    There are two types of datasets you can contribute: **core** and **experimental**.
+
+    - **Core datasets** are officially maintained by the Kedro Technical Steering Committee (TSC) and must meet high standards, including full documentation, 100% test coverage, cross-platform support, and compatibility with supported Python versions.
+    - **Experimental datasets** are community-contributed and more flexible. They are not officially maintained and can be in early stages or less thoroughly tested.
+
+    Read the full details about the dataset types and what the contribution process is for each in [the `kedro-dataset` contribution guide](https://github.com/kedro-org/kedro-plugins/blob/75c553b/kedro-datasets/CONTRIBUTING.md).

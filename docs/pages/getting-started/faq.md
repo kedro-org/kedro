@@ -12,8 +12,8 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
   Yes, users are expected to have Git installed when working with Kedro. This is a prerequisite for the `kedro new` flow. If Git is not installed, use the following workaround: `kedro new -s https://github.com/kedro-org/kedro-starters/archive/0.18.6.zip --directory=pandas-iris`
 
 ## Kedro documentation
-* {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
-* {py:mod}`Where can I find the documentation for Kedro's datasets <kedro-datasets:kedro_datasets>`?
+* [Where can I find the documentation about Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/)
+* [Where can I find the documentation for Kedro's datasets](https://docs.kedro.org/projects/kedro-datasets/en/latest/)
 
 ## Working with Notebooks
 

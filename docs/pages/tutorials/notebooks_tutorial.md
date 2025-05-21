@@ -43,9 +43,9 @@ We recommend that you save your notebook in the `notebooks` folder of your Kedro
 
 The `kedro jupyter notebook` command launches a notebook with a customised kernel that has been extended to make the following project variables available:
 
-* `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
+* `context` (type [kedro.framework.context.KedroContext][]): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../extend/session.md) that orchestrates a pipeline run
+* `session` (type [kedro.framework.session.session.KedroSession][]): [Kedro session](../extend/session.md) that orchestrates a pipeline run
 
 In addtion, it also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
 
@@ -183,7 +183,7 @@ You should see output like this, according to your username and path:
 PosixPath('/Users/username/kedro_projects/spaceflights')
 ```
 
-You can find out more in the API documentation of {py:class}`~kedro.framework.context.KedroContext`.
+You can find out more in the API documentation of [kedro.framework.context.KedroContext][].
 
 ### `pipelines`
 
@@ -241,7 +241,7 @@ You can also specify the following optional arguments for `session.run`:
 | Argument name   | Accepted types   | Description                                                                                                                                          |
 | --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `tags`          | `Iterable[str]`  | Construct the pipeline using nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags  |
-| `runner`        | `AbstractRunner` | An instance of Kedro {py:class}`~kedro.runner.AbstractRunner`. Can be an instance of a {py:class}`~kedro.runner.ParallelRunner`          |
+| `runner`        | `AbstractRunner` | An instance of Kedro [kedro.runner.AbstractRunner][]. Can be an instance of a [kedro.runner.ParallelRunner][]          |
 | `node_names`    | `Iterable[str]`  | Run nodes with specified names                                                                                                                  |
 | `from_nodes`    | `Iterable[str]`  | A list of node names which should be used as a starting point                                                                                        |
 | `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                            |

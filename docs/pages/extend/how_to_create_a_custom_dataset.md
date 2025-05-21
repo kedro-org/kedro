@@ -1,10 +1,10 @@
 # Advanced: Tutorial to create a custom dataset
 
-{py:mod}`Kedro supports many datasets <kedro-datasets:kedro_datasets>` out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
+[Kedro supports many datasets](https://docs.kedro.org/projects/kedro-datasets/en/latest/) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## AbstractDataset
 
-If you are a contributor and would like to submit a new dataset, you must extend the {py:class}`~kedro.io.AbstractDataset` interface or {py:class}`~kedro.io.AbstractVersionedDataset` interface if you plan to support versioning. It requires subclasses to implement the `load` and `save` methods while providing wrappers that enrich the corresponding methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
+If you are a contributor and would like to submit a new dataset, you must extend the [kedro.io.AbstractDataset][] interface or [kedro.io.AbstractVersionedDataset][] interface if you plan to support versioning. It requires subclasses to implement the `load` and `save` methods while providing wrappers that enrich the corresponding methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
 
 
 ## Scenario
@@ -29,7 +29,7 @@ Consult the [Pillow documentation](https://pillow.readthedocs.io/en/stable/insta
 
 ## The anatomy of a dataset
 
-At the minimum, a valid Kedro dataset needs to subclass the base {py:class}`~kedro.io.AbstractDataset` and provide an implementation for the following abstract methods:
+At the minimum, a valid Kedro dataset needs to subclass the base [kedro.io.AbstractDataset][] and provide an implementation for the following abstract methods:
 
 * `load`
 * `save`
@@ -38,7 +38,7 @@ At the minimum, a valid Kedro dataset needs to subclass the base {py:class}`~ked
 `AbstractDataset` is generically typed with an input data type for saving data, and an output data type for loading data.
 This typing is optional however, and defaults to `Any` type.
 
-The `_EPHEMERAL` boolean attribute in `AbstractDataset` indicates if a dataset is persistent. For example, in the case of {py:class}`~kedro.io.MemoryDataset`, which is not persistent, it is set to True. By default, `_EPHEMERAL` is set to False.
+The `_EPHEMERAL` boolean attribute in `AbstractDataset` indicates if a dataset is persistent. For example, in the case of [kedro.io.MemoryDataset][], which is not persistent, it is set to True. By default, `_EPHEMERAL` is set to False.
 
 !!! note
     The parameter to specify the location of the data file/folder must be called either `filename`, `filepath`, or `path` in the constructor function of the custom dataset class to comply with the Kedro convention.
@@ -302,7 +302,7 @@ $ ls -la data/01_raw/pokemon-images-and-types/images/images/*.png | wc -l
     Versioning doesn't work with `PartitionedDataset`. You can't use both of them at the same time.
 
 To add versioning support to the new dataset we need to extend the
- {py:class}`~kedro.io.AbstractVersionedDataset` to:
+ [kedro.io.AbstractVersionedDataset][] to:
 
 * Accept a `version` keyword argument as part of the constructor
 * Adapt the `load` and `save` method to use the versioned data path obtained from `_get_load_path` and `_get_save_path` respectively
@@ -495,9 +495,9 @@ Inspect the content of the data directory to find a new version of the data, wri
 
 ## Thread-safety
 
-Kedro datasets should work with the {py:class}`~kedro.runner.SequentialRunner` and the {py:class}`~kedro.runner.ParallelRunner`, so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
+Kedro datasets should work with the [kedro.runner.SequentialRunner][] and the [kedro.runner.ParallelRunner][], so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
-There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro {py:class}`~kedro.runner.ParallelRunner`. For parallelism within a Kedro project that uses Spark, use {py:class}`~kedro.runner.ThreadRunner` instead.
+There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [kedro.runner.ParallelRunner][]. For parallelism within a Kedro project that uses Spark, use [kedro.runner.ThreadRunner][] instead.
 
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an IPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 

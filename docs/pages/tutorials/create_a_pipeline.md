@@ -191,7 +191,7 @@ Each of the nodes outputs a new dataset (`preprocessed_companies` and `preproces
     filepath: data/02_intermediate/preprocessed_shuttles.parquet
     ```
 
-If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the {py:class}`~kedro.io.MemoryDataset` class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
+If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the [kedro.io.MemoryDataset][] class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
 
 
 ## Create a table for model input

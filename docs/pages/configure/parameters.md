@@ -106,7 +106,7 @@ except MissingConfigException:
 
 ## How to specify parameters at runtime
 
-Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to {py:class}`~kedro.framework.context.KedroContext` parameters and made available to pipeline nodes.
+Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [kedro.framework.context.KedroContext][] parameters and made available to pipeline nodes.
 
 Each key-value pair is split on the first equals sign. The following example is a valid command:
 

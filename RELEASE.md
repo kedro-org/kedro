@@ -19,7 +19,7 @@
 * Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead.
 * Renamed `ModularPipelineError` to `PipelineError`.
 * `Pipeline.grouped_nodes_by_namespace()` now returns a list of `GroupedNodes` instead of a dictionary. This change improves type safety and consistency for deployment plugin integrations.
-* The micro-packaging feature and the corresponding `micropkg` CLI command has been removed.
+* The micro-packaging feature and the corresponding `micropkg` CLI command have been removed.
 
 ## Migration guide from Kedro 0.19.* to 1.*
 [See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).

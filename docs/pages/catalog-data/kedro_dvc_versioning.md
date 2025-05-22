@@ -10,14 +10,16 @@ This tutorial assumes you have experience with the Git CLI and Kedro CLI command
 
 For this example, you will be using a Kedro `spaceflights-pandas` starter project, which includes pre-configured datasets and pipelines. To create this starter project locally, use the command:
 
-`kedro new --starter=spaceflights-pandas --name=space-dvc`
+```bash
+uvx kedro new --starter=spaceflights-pandas --name=space-dvc
+```
 
 For more information about starter projects, see the [Kedro starters documentation](https://docs.kedro.org/en/stable/starters/starters.html) page.
 
-To use DVC as a Python library, install it using `pip` or `conda`, for example:
+To use DVC as a Python library, first install it using your tool of choice, for example:
 
 ```bash
-`pip install dvc`
+uv pip install dvc
 ```
 
 Since DVC works alongside Git to track data changes, initialise the Kedro project as a git repository:

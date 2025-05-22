@@ -541,19 +541,16 @@ class Pipeline:
 
         return [list(group) for group in self._toposorted_groups]
 
-    def grouped_nodes_custom(
+    def group_nodes_custom(
         self,
         group_by: str | None = "namespace",
-        memory_datasets: set[str] | None = None,
     ) -> list[GroupedNodes]:
         """Return a list of grouped nodes based on the specified strategy.
 
         Args:
             group_by: Strategy for grouping. Supported values:
                 - "namespace": Groups nodes by their top-level namespace.
-                - "memory": Groups nodes connected via datasets from the provided `memory_datasets` set.
                 - None or "none": No grouping, each node is its own group.
-            memory_datasets: Required when group_by is "memory". A set of dataset names considered in-memory (not persisted).
 
         Returns:
             A list of GroupedNodes instances.
@@ -562,12 +559,6 @@ class Pipeline:
             return self._group_by_none()
         if group_by.lower() == "namespace":
             return self._group_by_namespace()
-        if group_by.lower() == "memory":
-            if memory_datasets is None:
-                raise ValueError(
-                    "'memory_datasets' must be provided when grouping by memory."
-                )
-            return self._group_by_memory(memory_datasets)
         raise ValueError(f"Unsupported group_by strategy: {group_by}")
 
     def _group_by_none(self) -> list[GroupedNodes]:

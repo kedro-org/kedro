@@ -609,66 +609,6 @@ class Pipeline:
 
         return list(grouped_nodes_map.values())
 
-    # ruff: noqa: PLR0912
-    def _group_by_memory(self, memory_datasets: set[str]) -> list[GroupedNodes]:
-        adj_list: dict[str, set[str]] = {node.name: set() for node in self.nodes}
-        parent_to_children: dict[str, set[str]] = {
-            node.name: set() for node in self.nodes
-        }
-        output_to_node = {
-            output: node for node in self.nodes for output in node.outputs
-        }
-
-        for node in self.nodes:
-            for input_ in node.inputs:
-                if input_ in output_to_node:
-                    parent_name = output_to_node[input_].name
-                    parent_to_children[parent_name].add(node.name)
-                    if input_ in memory_datasets:
-                        adj_list[node.name].add(parent_name)
-                        adj_list[parent_name].add(node.name)
-
-        con_components: dict[str, int] = {node.name: -1 for node in self.nodes}
-
-        def dfs(n: str, component: int) -> None:
-            if con_components[n] != -1:
-                return
-            con_components[n] = component
-            for neighbour in adj_list[n]:
-                dfs(neighbour, component)
-
-        component_id = 0
-        for node_name in adj_list:
-            if con_components[node_name] == -1:
-                dfs(node_name, component_id)
-                component_id += 1
-
-        groups: list[list[str]] = [[] for _ in range(component_id)]
-        for node_name, comp_id in con_components.items():
-            groups[comp_id].append(node_name)
-
-        node_to_group: dict[str, str] = {}
-        group_map: dict[str, GroupedNodes] = {}
-
-        for group in groups:
-            group_name = "_".join(sorted(group))
-            for node_name in group:
-                node_to_group[node_name] = group_name
-            group_map[group_name] = GroupedNodes(
-                name=group_name, type="nodes", nodes=group, dependencies=[]
-            )
-
-        for parent, children in parent_to_children.items():
-            parent_group = node_to_group[parent]
-            for child in children:
-                child_group = node_to_group[child]
-                if parent_group != child_group:
-                    deps = group_map[child_group].dependencies
-                    if parent_group not in deps:
-                        deps.append(parent_group)
-
-        return list(group_map.values())
-
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified
         nodes by name.

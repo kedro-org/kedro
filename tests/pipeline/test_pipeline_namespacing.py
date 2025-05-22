@@ -93,6 +93,33 @@ class TestPipelineHelper:
         assert nodes[2]._inputs == {"input1": "PREFIX.H", "input2": "PREFIX.J"}
         assert nodes[2]._outputs == {"K": "PREFIX.L"}
 
+    def test_no_prefix_dataset_names(self):
+        """
+        Check there is no automatic prefixing for dataset of all formats: str, list and dict
+        when prefix_datasets_with_namespace is set to False
+        """
+        raw_pipeline = pipeline(
+            [
+                node(identity, "A", "B", name="node1"),
+                node(biconcat, ["C", "D"], ["E", "F"], name="node2"),
+                node(
+                    biconcat, {"input1": "H", "input2": "J"}, {"K": "L"}, name="node3"
+                ),
+            ]
+        )
+        resulting_pipeline = pipeline(
+            raw_pipeline, namespace="PREFIX", prefix_datasets_with_namespace=False
+        )
+        nodes = sorted(resulting_pipeline.nodes)
+        assert nodes[0]._inputs == "A"
+        assert nodes[0]._outputs == "B"
+
+        assert nodes[1]._inputs == ["C", "D"]
+        assert nodes[1]._outputs == ["E", "F"]
+
+        assert nodes[2]._inputs == {"input1": "H", "input2": "J"}
+        assert nodes[2]._outputs == {"K": "L"}
+
     def test_confirms_namespaced(self):
         raw_pipeline = pipeline(
             [

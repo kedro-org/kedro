@@ -220,6 +220,10 @@ class DataCatalog(CatalogProtocol):
         single point of reference for your calls, relaying load and save
         functions to the underlying datasets.
 
+        Note: ``DataCatalog`` is an experimental feature and is under active development.
+        Therefore, it is possible we'll introduce breaking changes to this class, so be mindful
+        of that if you decide to use it already.
+
         Args:
             datasets: A dictionary of dataset names and dataset instances.
             raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
@@ -539,6 +543,7 @@ class DataCatalog(CatalogProtocol):
         key: str,
         fallback_to_runtime_pattern: bool = False,
         version: Version | None = None,
+        default: AbstractDataset | None = None,
     ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
@@ -550,6 +555,8 @@ class DataCatalog(CatalogProtocol):
             key: A dataset name.
             fallback_to_runtime_pattern: Whether to use runtime_pattern to resolve dataset.
             version: Optional argument to get a specific version of the dataset.
+            default: Optional argument for default dataset to return in case
+                requested dataset not in the catalog.
 
         Raises:
             DatasetNotFoundError: When the dataset in not in the internal collection, does not match
@@ -571,7 +578,8 @@ class DataCatalog(CatalogProtocol):
             raise DatasetNotFoundError(f"Dataset '{key}' not found in the catalog")
         elif not (key in self._datasets or key in self._lazy_datasets):
             ds_config = self._config_resolver.resolve_pattern(key)
-            self._add_from_config(key, ds_config)
+            if ds_config:
+                self._add_from_config(key, ds_config)
 
         lazy_dataset = self._lazy_datasets.pop(key, None)
         if lazy_dataset:
@@ -583,6 +591,10 @@ class DataCatalog(CatalogProtocol):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
             dataset = dataset._copy(_version=version)
+
+        if dataset is None:
+            error_msg = f"Dataset '{key}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
 
         return dataset
 

@@ -2,10 +2,13 @@
 
 ## Major features and improvements
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
+* Added a `prefix_datasets_with_namespace` argument to the `Pipeline` class which allows users to turn on or off the prefixing of the namespace to the node inputs, outputs, and parameters.
+* Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
 
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
 * Added support for running multiple namespaces within a single session.
+* Updated `kedro registry describe` to return the node name property instead of creating its own name for the node.
 
 ## Documentation changes
 ## Community contributions
@@ -15,6 +18,7 @@
 * Renamed instances of `extra_params` and `_extra_params` to `runtime_params`.
 * Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead.
 * Renamed `ModularPipelineError` to `PipelineError`.
+* `Pipeline.grouped_nodes_by_namespace()` now returns a list of `GroupedNodes` instead of a dictionary. This change improves type safety and consistency for deployment plugin integrations.
 
 ## Migration guide from Kedro 0.19.* to 1.*
 [See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
@@ -29,6 +33,7 @@
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
 * Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
 * Cached `inputs` in `Node` when created from dictionary for better performance.
+* Enabled pluggy tracing only when logging level is set to `DEBUG` to speed up the execution of project runs.
 ## Breaking changes to the API
 
 
@@ -37,10 +42,12 @@
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
 ## Documentation changes
+* Updated Dask deployment docs.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Arnout Verboven](https://github.com/ArnoutVerboven)
+* [gabohc](https://github.com/gabohc)
 
 # Release 0.19.12
 

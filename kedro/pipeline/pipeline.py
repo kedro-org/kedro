@@ -15,7 +15,7 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any
 
 import kedro
-from kedro.pipeline.node import Node, _to_list
+from kedro.pipeline.node import GroupedNodes, Node, _to_list
 
 from .transcoding import _strip_transcoding, _transcode_split
 
@@ -146,6 +146,7 @@ class Pipeline:
         parameters: str | set[str] | dict[str, str] | None = None,
         tags: str | Iterable[str] | None = None,
         namespace: str | None = None,
+        prefix_datasets_with_namespace: bool = True,
     ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
@@ -181,6 +182,9 @@ class Pipeline:
             namespace: A prefix to give to all dataset names,
                 except those explicitly named with the `inputs`/`outputs`
                 arguments, and parameter references (`params:` and `parameters`).
+            prefix_datasets_with_namespace: A flag to specify if the inputs, outputs, and parameters of the nodes
+                should be prefixed with the namespace. It is set to True by default. It is
+                useful to turn off when namespacing is used for grouping nodes for deployment purposes.
 
         Raises:
             ValueError:
@@ -232,6 +236,7 @@ class Pipeline:
                 parameters=parameters,
                 tags=tags,
                 namespace=namespace,
+                prefix_datasets_with_namespace=prefix_datasets_with_namespace,
             )
 
         if nodes is None:
@@ -542,32 +547,30 @@ class Pipeline:
         return [list(group) for group in self._toposorted_groups]
 
     @property
-    def grouped_nodes_by_namespace(self) -> dict[str, dict[str, Any]]:
-        """Return a dictionary of the pipeline nodes grouped by top-level namespace with
-        information about the nodes, their type, and dependencies. The structure of the dictionary is:
-        {'node_name/namespace_name' : {'name': 'node_name/namespace_name','type': 'namespace' or 'node','nodes': [list of nodes],'dependencies': [list of dependencies]}}
-        This property is intended to be used by deployment plugins to group nodes by namespace.
+    def grouped_nodes_by_namespace(self) -> list[GroupedNodes]:
+        """Return a list of grouped nodes by top-level namespace with
+        information about the nodes, their type, and dependencies.
+
+        This property is intended to be used by deployment plugins to group nodes by namespaces.
         """
-        grouped_nodes: dict[str, dict[str, Any]] = defaultdict(dict)
+        grouped_nodes_map: dict[str, GroupedNodes] = {}
 
         for node in self.nodes:
             key = node.namespace.split(".")[0] if node.namespace else node.name
 
-            if key not in grouped_nodes:
-                grouped_nodes[key] = {
-                    "name": key,
-                    "type": "namespace" if node.namespace else "node",
-                    "nodes": [],
-                    "dependencies": [],
-                }
+            if key not in grouped_nodes_map:
+                grouped_nodes_map[key] = GroupedNodes(
+                    name=key,
+                    type="namespace" if node.namespace else "node",
+                )
 
-            grouped_nodes[key]["nodes"].append(node)
+            grouped_nodes_map[key].nodes.append(node.name)
 
-            # Ensure dependencies are not duplicated on the returned list
-            dependencies = grouped_nodes[key]["dependencies"]
+            # Ensure dependencies are not duplicated
+            dependencies = grouped_nodes_map[key].dependencies
             unique_dependencies = set(dependencies)
 
-            for parent in self.node_dependencies[node]:
+            for parent in sorted(self.node_dependencies[node], key=lambda n: n.name):
                 parent_key = (
                     parent.namespace.split(".")[0] if parent.namespace else parent.name
                 )
@@ -575,7 +578,7 @@ class Pipeline:
                     dependencies.append(parent_key)
                     unique_dependencies.add(parent_key)
 
-        return grouped_nodes
+        return list(grouped_nodes_map.values())
 
     def only_nodes(self, *node_names: str) -> Pipeline:
         """Create a new ``Pipeline`` which will contain only the specified
@@ -1026,7 +1029,13 @@ class Pipeline:
 
         return json.dumps(pipeline_versioned)
 
-    def _rename(self, name: str, mapping: dict, namespace: str | None) -> str:
+    def _rename(
+        self,
+        name: str,
+        mapping: dict,
+        namespace: str | None,
+        prefix_datasets_with_namespace: bool,
+    ) -> str:
         def _prefix_dataset(name: str) -> str:
             return f"{namespace}.{name}"
 
@@ -1051,11 +1060,21 @@ class Pipeline:
             (_is_all_parameters, lambda n: n),
             # if transcode base is mapped to a new name, update with new base
             (_is_transcode_base_in_mapping, _map_transcode_base),
-            # if name refers to a single parameter and a namespace is given, apply prefix
-            (lambda n: bool(namespace) and _is_single_parameter(n), _prefix_param),
-            # if namespace given for a dataset, prefix name using that namespace
-            (lambda n: bool(namespace), _prefix_dataset),
         ]
+
+        # Add rules for prefixing only if prefix_datasets_with_namespace is True
+        if prefix_datasets_with_namespace:
+            rules.extend(
+                [
+                    # if name refers to a single parameter and a namespace is given, apply prefix
+                    (
+                        lambda n: bool(namespace) and _is_single_parameter(n),
+                        _prefix_param,
+                    ),
+                    # if namespace given for a dataset, prefix name using that namespace
+                    (lambda n: bool(namespace), _prefix_dataset),
+                ]
+            )
 
         for predicate, processor in rules:
             if predicate(name):  # type: ignore[no-untyped-call]
@@ -1070,33 +1089,53 @@ class Pipeline:
         datasets: str | list[str] | dict[str, str] | None,
         mapping: dict,
         namespace: str | None,
+        prefix_datasets_with_namespace: bool = True,
     ) -> str | list[str] | dict[str, str] | None:
         if datasets is None:
             return None
         if isinstance(datasets, str):
-            return self._rename(datasets, mapping, namespace)
+            return self._rename(
+                datasets, mapping, namespace, prefix_datasets_with_namespace
+            )
         if isinstance(datasets, list):
-            return [self._rename(name, mapping, namespace) for name in datasets]
+            return [
+                self._rename(name, mapping, namespace, prefix_datasets_with_namespace)
+                for name in datasets
+            ]
         if isinstance(datasets, dict):
             return {
-                key: self._rename(value, mapping, namespace)
+                key: self._rename(
+                    value, mapping, namespace, prefix_datasets_with_namespace
+                )
                 for key, value in datasets.items()
             }
         raise ValueError(
             f"Unexpected input {datasets} of type {type(datasets)}"
         )  # pragma: no cover
 
-    def _copy_node(self, node: Node, mapping: dict, namespace: str | None) -> Node:
+    def _copy_node(
+        self,
+        node: Node,
+        mapping: dict,
+        namespace: str | None,
+        prefix_datasets_with_namespace: bool = True,
+    ) -> Node:
         new_namespace = node.namespace
         if namespace:
             new_namespace = (
                 f"{namespace}.{node.namespace}" if node.namespace else namespace
             )
         return node._copy(
-            inputs=self._process_dataset_names(node._inputs, mapping, namespace),
-            outputs=self._process_dataset_names(node._outputs, mapping, namespace),
+            inputs=self._process_dataset_names(
+                node._inputs, mapping, namespace, prefix_datasets_with_namespace
+            ),
+            outputs=self._process_dataset_names(
+                node._outputs, mapping, namespace, prefix_datasets_with_namespace
+            ),
             namespace=new_namespace,
-            confirms=self._process_dataset_names(node._confirms, mapping, namespace),
+            confirms=self._process_dataset_names(
+                node._confirms, mapping, namespace, prefix_datasets_with_namespace
+            ),
         )
 
     def _map_nodes(  # noqa: PLR0913
@@ -1107,6 +1146,7 @@ class Pipeline:
         parameters: str | set[str] | dict[str, str] | None = None,
         tags: str | Iterable[str] | None = None,
         namespace: str | None = None,
+        prefix_datasets_with_namespace: bool = True,
     ) -> list[Node]:
         """Map namespace to the inputs, outputs, parameters and nodes of the pipeline."""
         if isinstance(nodes, Pipeline):
@@ -1123,7 +1163,10 @@ class Pipeline:
         _validate_inputs_outputs(inputs.keys(), outputs.keys(), pipe)
 
         mapping = {**inputs, **outputs, **parameters}
-        new_nodes = [self._copy_node(n, mapping, namespace) for n in pipe.nodes]
+        new_nodes = [
+            self._copy_node(n, mapping, namespace, prefix_datasets_with_namespace)
+            for n in pipe.nodes
+        ]
         return new_nodes
 
 
@@ -1135,6 +1178,7 @@ def pipeline(  # noqa: PLR0913
     parameters: str | set[str] | dict[str, str] | None = None,
     tags: str | Iterable[str] | None = None,
     namespace: str | None = None,
+    prefix_datasets_with_namespace: bool = True,
 ) -> Pipeline:
     r"""Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``\s.
 
@@ -1170,6 +1214,9 @@ def pipeline(  # noqa: PLR0913
         namespace: A prefix to give to all dataset names,
             except those explicitly named with the `inputs`/`outputs`
             arguments, and parameter references (`params:` and `parameters`).
+        prefix_datasets_with_namespace: A flag to specify if the inputs and outputs of the nodes
+                should be prefixed with the namespace. It is set to True by default. It is
+                useful to turn off when namespacing is used for grouping nodes for deployment purposes.
 
     Raises:
         PipelineError: When inputs, outputs or parameters are incorrectly
@@ -1188,6 +1235,7 @@ def pipeline(  # noqa: PLR0913
         parameters=parameters,
         tags=tags,
         namespace=namespace,
+        prefix_datasets_with_namespace=prefix_datasets_with_namespace,
     )
 
 

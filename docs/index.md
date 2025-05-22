@@ -1,6 +1,6 @@
 ![Kedro logo](https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png)
 
-# Welcome to Kedro\'s award-winning documentation!
+# Welcome to Kedro's award-winning documentation!
 
 [![GitHub Actions - Main Branch](https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main)](https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Amain)
 

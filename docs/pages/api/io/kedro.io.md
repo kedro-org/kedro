@@ -14,6 +14,7 @@
 | [`DataCatalog`](kedro.io.DataCatalog.md)        | Class      | Manages datasets used in a Kedro pipeline.      |
 | [`LambdaDataset`](kedro.io.LambdaDataset.md)    | Class      | Dataset wrapper for inline data transformations.|
 | [`MemoryDataset`](kedro.io.MemoryDataset.md)    | Class      | Dataset for storing data in memory.             |
+| [`SharedMemoryDataCatalog`](kedro.io.SharedMemoryDataCatalog.md)    | Class      | A specialized `DataCatalog` for managing datasets in a shared memory context. |
 | [`Version`](kedro.io.Version.md)                | Class      | Represents dataset version information.         |
 | [`DatasetAlreadyExistsError`](kedro.io.DatasetAlreadyExistsError.md) | Exception | Raised when a dataset already exists.           |
 | [`DatasetError`](kedro.io.DatasetError.md)      | Exception  | General dataset-related error.                  |

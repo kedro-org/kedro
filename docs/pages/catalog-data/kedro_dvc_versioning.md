@@ -25,13 +25,13 @@ uv pip install dvc
 Since DVC works alongside Git to track data changes, initialise the Kedro project as a git repository:
 
 ```bash
-`git init`
+git init
 ```
 
 Then, initialise DVC in the project:
 
 ```bash
-`dvc init`
+dvc init
 ```
 
 This will create the `.dvc` directory inside the project. You should see a message such as:

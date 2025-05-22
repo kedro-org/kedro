@@ -85,7 +85,16 @@ If you want to execute `base_data_science` and `data_science` pipelines together
 A namespace is a way to isolate nodes, inputs, outputs, and parameters inside your pipeline. If you put `namespace="namespace_name"` attribute inside the `Pipeline` class, it will add the `namespace_name.` prefix to all nodes, inputs, outputs, and parameters inside your new pipeline.
 
 ```{note}
-If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `Pipeline` class. For example:
+If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you can disable it by setting the `prefix_datasets_with_namespace` parameter to `False`. This will keep the original names of your inputs, outputs, and parameters. However, the nodes will still be prefixed with the namespace name. For example:
+
+```python
+Pipeline(
+    [Node(...), Node(...), Node(...)],
+    namespace="your_namespace_name",
+    prefix_datasets_with_namespace=False,
+)
+```
+Alternatively, you can also specify the mapping of the inputs, outputs, and parameters inside the corresponding parameters of the `Pipeline` class. For example:
 
 ```python
 Pipeline(
@@ -95,6 +104,7 @@ Pipeline(
     outputs={"first_output_to_not_be_prefixed", "second_output_to_not_be_prefixed"},
     parameters={"first_parameter_to_not_be_prefixed", "second_parameter_to_not_be_prefixed"},
 )
+```
 ```
 
 Let's extend our previous example and try to reuse the `base_data_science` pipeline one more time by creating another pipeline based on it. First, we should use the `kedro pipeline create` command to create a new blank pipeline named `data_science_2`:
@@ -220,9 +230,9 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
         ],
         namespace="data_processing",
+        prefix_datasets_with_namespace=False,  # Optional, by default True
     )
 ```
-The pipeline will expect the inputs and outputs to be prefixed with the namespace name, that is, `data_processing.`.
 
 ```{note}
 From Kedro 0.19.12, you can use the `grouped_nodes_by_namespace` property of the `Pipeline` object to get a dictionary which groups nodes by their top level namespace. Plugin developers are encouraged to use this property to obtain the mapping of namespaced group of nodes to a container or a task in the deployment environment.
@@ -262,10 +272,11 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
         ],
         namespace="data_processing",
+        prefix_datasets_with_namespace=False,  # Optional, by default True
     )
 ```
 
-As you can see in the above example, the entire pipeline is namespaced as `data_processing`, while the first two nodes are also namespaced as `data_processing.preprocessing`. This will allow you to collapse the nested `preprocessing` namespace in Kedro-Viz for better visualisation, but the inputs and outputs of the pipeline will still expect the prefix `data_processing.`.
+As you can see in the above example, the entire pipeline is namespaced as `data_processing`, while the first two nodes are also namespaced as `data_processing.preprocessing`. This will allow you to collapse the nested `preprocessing` namespace in Kedro-Viz for better visualisation.
 
 You can execute the whole namespaced pipeline with:
 ```bash

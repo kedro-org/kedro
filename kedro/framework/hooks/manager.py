@@ -1,4 +1,6 @@
-# FILE: kedro/framework/hooks/manager.py
+"""This module provides an utility function to retrieve the global hook_manager singleton
+in a Kedro's execution process.
+"""
 
 import logging
 from collections.abc import Iterable
@@ -8,7 +10,6 @@ from typing import Any
 from pluggy import PluginManager
 
 from .markers import HOOK_NAMESPACE
-# Ensure all specs, including RunnerSpecs, are imported
 from .specs import (
     DataCatalogSpecs,
     DatasetSpecs,
@@ -18,11 +19,11 @@ from .specs import (
     RunnerSpecs,
 )
 
-_PLUGIN_HOOKS = "kedro.hooks"
+_PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
+
 logger = logging.getLogger(__name__)
 
 
-# MODIFIED _create_hook_manager
 def _create_hook_manager(enable_tracing: bool = True) -> PluginManager:
     """Create a new PluginManager instance and register Kedro's hook specs.
 
@@ -49,9 +50,19 @@ def _create_hook_manager(enable_tracing: bool = True) -> PluginManager:
 
 
 def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:
+    """Register all hooks as specified in ``hooks`` with the global ``hook_manager``.
+
+    Args:
+        hook_manager: Hook manager instance to register the hooks with.
+        hooks: Hooks that need to be registered.
+
+    """
     for hooks_collection in hooks:
+        # Sometimes users might call hook registration more than once, in which
+        # case hooks have already been registered, so we perform a simple check
+        # here to avoid an error being raised and break user's workflow.
         if not hook_manager.is_registered(hooks_collection):
-            if isclass(hooks_collection):  # type: ignore
+            if isclass(hooks_collection):
                 raise TypeError(
                     "KedroSession expects hooks to be registered as instances. "
                     "Have you forgotten the `()` when registering a hook class ?"
@@ -60,17 +71,34 @@ def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:
 
 
 def _register_hooks_entry_points(
-        hook_manager: PluginManager, disabled_plugins: Iterable[str]
+    hook_manager: PluginManager, disabled_plugins: Iterable[str]
 ) -> None:
+    """Register pluggy hooks from python package entrypoints.
+
+    Args:
+        hook_manager: Hook manager instance to register the hooks with.
+        disabled_plugins: An iterable returning the names of plugins
+            which hooks must not be registered; any already registered
+            hooks will be unregistered.
+
+    """
     already_registered = hook_manager.get_plugins()
+    # Method name is misleading:
+    # entry points are standard and don't require setuptools,
+    # see https://packaging.python.org/en/latest/specifications/entry-points/
     hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
     disabled_plugins = set(disabled_plugins)
 
+    # Get list of plugin/distinfo tuples for all registered plugins.
     plugininfo = hook_manager.list_plugin_distinfo()
     plugin_names = set()
     disabled_plugin_names = set()
     for plugin, dist in plugininfo:
         if dist.project_name in disabled_plugins:
+            # `unregister()` is used instead of `set_blocked()` because
+            # we want to disable hooks for specific plugin based on project
+            # name and not `entry_point` name. Also, we log project names with
+            # version for which hooks were registered.
             hook_manager.unregister(plugin=plugin)
             disabled_plugin_names.add(f"{dist.project_name}-{dist.version}")
         elif plugin not in already_registered:
@@ -81,6 +109,7 @@ def _register_hooks_entry_points(
             "Hooks are disabled for plugin(s): %s",
             ", ".join(sorted(disabled_plugin_names)),
         )
+
     if plugin_names:
         logger.debug(
             "Registered hooks from %d installed plugin(s): %s",
@@ -90,6 +119,9 @@ def _register_hooks_entry_points(
 
 
 class _NullPluginManager:
+    """This class creates an empty ``hook_manager`` that will ignore all calls to hooks,
+    allowing the runner to function if no ``hook_manager`` has been instantiated."""
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         pass
 

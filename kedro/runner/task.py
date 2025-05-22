@@ -2,30 +2,24 @@ from __future__ import annotations
 
 import inspect
 import itertools as it
-import logging # Make sure logging is imported
-import multiprocessing
+import logging
 from collections.abc import Iterable, Iterator
-# from concurrent.futures import ( # No longer needed here, AbstractRunner handles futures
-#     ALL_COMPLETED,
-#     Future,
-#     ThreadPoolExecutor,
-#     as_completed,
-#     wait,
-# )
+from concurrent.futures import (
+    ALL_COMPLETED,
+    Future,
+    ThreadPoolExecutor,
+    as_completed,
+    wait,
+)
 from typing import TYPE_CHECKING, Any
 
-# from more_itertools import interleave # No longer needed here
+from more_itertools import interleave
 
-from kedro.framework.hooks.manager import (
-    _create_hook_manager,
-    _register_hooks,
-    _register_hooks_entry_points,
-    _NullPluginManager, # Ensure this is imported
-)
-from kedro.framework.project import settings
+from kedro.framework.hooks.manager import _NullPluginManager
 
-if TYPE_CHECKING: # pragma: no cover
-    from pluggy import PluginManager as PluggyPluginManager # Alias to avoid conflict
+if TYPE_CHECKING:
+    from pluggy import PluginManager
+
     from kedro.io import CatalogProtocol
     from kedro.pipeline.node import Node
 
@@ -33,7 +27,9 @@ if TYPE_CHECKING: # pragma: no cover
 class TaskError(Exception):
     """``TaskError`` raised by ``Task``
     in case of failure of provided task arguments
+
     """
+
     pass
 
 
@@ -43,23 +39,17 @@ class Task:
         node: Node,
         catalog: CatalogProtocol,
         is_async: bool,
-        hook_manager: PluggyPluginManager | _NullPluginManager | None = None,
+        hook_manager: PluginManager | _NullPluginManager | None = None,
         session_id: str | None = None,
-        # parallel: bool = False, # Removed as per previous fix
     ):
         self.node = node
         self.catalog = catalog
         self.hook_manager = hook_manager
         self.is_async = is_async
         self.session_id = session_id
-        # self.parallel = parallel # Removed
 
     def execute(self) -> Node:
-        """
-        This method is the core execution logic for the task.
-        It's called by __call__ when the executor runs the task.
-        """
-        if self.is_async and inspect.isgeneratorfunction(self.node.func): # pragma: no cover
+        if self.is_async and inspect.isgeneratorfunction(self.node.func):
             raise ValueError(
                 f"Async data loading and saving does not work with "
                 f"nodes wrapping generator functions. Please make "
@@ -68,68 +58,42 @@ class Task:
             )
 
         effective_hook_manager = self.hook_manager
-        if not effective_hook_manager: # pragma: no cover
+        if not effective_hook_manager:
             logging.getLogger(__name__).warning(
                 "Task executing without a provided hook_manager. "
-                "Shared hooks may not function correctly in parallel mode. "
                 "Falling back to _NullPluginManager."
             )
             effective_hook_manager = _NullPluginManager()
 
-
-        if self.is_async: # pragma: no cover
-            # _run_node_async was part of AbstractRunner, Task should focus on sequential logic
-            # and let the runner handle async execution of loads/saves if needed.
-            # For simplicity in Task, we'll assume sequential load/save for now,
-            # or the runner would need to manage async calls around the Task's synchronous parts.
-            # The original `_run_node_async` was complex and better suited to the runner.
-            # Reverting to sequential run within the task for clarity.
-            # If async load/save for a single task is needed, it's more intricate.
-            node = self._run_node_sequential(
+        if self.is_async:
+            node = self._run_node_async(
                 self.node,
                 self.catalog,
-                effective_hook_manager, # type: ignore
+                effective_hook_manager,
                 self.session_id,
             )
-
         else:
             node = self._run_node_sequential(
                 self.node,
                 self.catalog,
-                effective_hook_manager, # type: ignore
+                effective_hook_manager,
                 self.session_id,
             )
 
-        for name in node.confirms: # pragma: no cover
+        for name in node.confirms:
             self.catalog.confirm(name)
 
         return node
 
     def __call__(self) -> Node:
         """Make the class instance callable by ProcessPoolExecutor."""
-        # This is the entry point when the executor runs the task.
-        # It should call the main execution logic.
         return self.execute()
-
-    @staticmethod
-    def _bootstrap_subprocess(
-        package_name: str, logging_config: dict[str, Any] | None = None
-    ) -> None: # pragma: no cover
-        from kedro.framework.project import configure_logging, configure_project
-
-        configure_project(package_name)
-        if logging_config:
-            configure_logging(logging_config)
-
-    # _run_node_synchronization is removed from Task, as ParallelRunner now prepares
-    # and passes the correct hook_manager. If a fallback is truly needed for some
-    # other direct Task usage, it would be separate.
 
     def _run_node_sequential(
         self,
         node: Node,
         catalog: CatalogProtocol,
-        hook_manager: PluggyPluginManager | _NullPluginManager,
+        hook_manager: PluginManager | _NullPluginManager,
         session_id: str | None = None,
     ) -> Node:
         inputs = {}
@@ -141,24 +105,30 @@ class Task:
                 dataset_name=name, data=inputs[name], node=node
             )
 
-        is_async_for_hooks = False # Inside the task, load/save is sequential for now
+        is_async = False
 
         additional_inputs = self._collect_inputs_from_hook(
-            node, catalog, inputs, is_async_for_hooks, hook_manager, session_id=session_id
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
         )
         inputs.update(additional_inputs)
 
         outputs = self._call_node_run(
-            node, catalog, inputs, is_async_for_hooks, hook_manager, session_id=session_id
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
         )
 
         items: Iterable = outputs.items()
-        # The `isinstance(d, Iterator)` check for generator nodes
-        # should ideally be handled by the runner if it wants to stream data.
-        # For Task, we assume outputs are complete data for saving.
-        # If you need to support generator nodes directly within Task's scope for saving,
-        # the interleave logic would be needed here.
-        # For now, keeping it simpler as the error wasn't about this part.
+        # if all outputs are iterators, then the node is a generator node
+        if all(isinstance(d, Iterator) for d in outputs.values()):
+            # Python dictionaries are ordered, so we are sure
+            # the keys and the chunk streams are in the same order
+            # [a, b, c]
+            keys = list(outputs.keys())
+            # [Iterator[chunk_a], Iterator[chunk_b], Iterator[chunk_c]]
+            streams = list(outputs.values())
+            # zip an endless cycle of the keys
+            # with an interleaved iterator of the streams
+            # [(a, chunk_a), (b, chunk_b), ...] until all outputs complete
+            items = zip(it.cycle(keys), interleave(*streams))
 
         for name, data in items:
             hook_manager.hook.before_dataset_saved(
@@ -170,42 +140,101 @@ class Task:
             )
         return node
 
-    # _run_node_async is removed from Task as it's more complex and relates to how the
-    # *runner* manages async I/O, not the task itself which focuses on a single node's logic.
-    # The `is_async` flag on Task init now mainly signals to hooks.
+    def _run_node_async(
+        self,
+        node: Node,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager | _NullPluginManager,
+        session_id: str | None = None,
+    ) -> Node:
+        with ThreadPoolExecutor() as pool:
+            inputs: dict[str, Future] = {}
 
-    # _synchronous_dataset_load is also removed as it was part of the Task's _run_node_async logic.
+            for name in node.inputs:
+                inputs[name] = pool.submit(
+                    self._synchronous_dataset_load, name, node, catalog, hook_manager
+                )
+
+            wait(inputs.values(), return_when=ALL_COMPLETED)
+            inputs = {key: value.result() for key, value in inputs.items()}
+            is_async = True
+
+            additional_inputs = self._collect_inputs_from_hook(
+                node, catalog, inputs, is_async, hook_manager, session_id=session_id
+            )
+            inputs.update(additional_inputs)
+
+            outputs = self._call_node_run(
+                node, catalog, inputs, is_async, hook_manager, session_id=session_id
+            )
+
+            future_dataset_mapping = {}
+            for name, data in outputs.items():
+                hook_manager.hook.before_dataset_saved(
+                    dataset_name=name, data=data, node=node
+                )
+                future = pool.submit(catalog.save, name, data)
+                future_dataset_mapping[future] = (name, data)
+
+            for future in as_completed(future_dataset_mapping):
+                exception = future.exception()
+                if exception:
+                    raise exception
+                name, data = future_dataset_mapping[future]
+                hook_manager.hook.after_dataset_saved(
+                    dataset_name=name, data=data, node=node
+                )
+        return node
+
+    @staticmethod
+    def _synchronous_dataset_load(
+        dataset_name: str,
+        node: Node,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager | _NullPluginManager,
+    ) -> Any:
+        """Minimal wrapper to ensure Hooks are run synchronously
+        within an asynchronous dataset load."""
+        hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)
+        return_ds = catalog.load(dataset_name)
+        hook_manager.hook.after_dataset_loaded(
+            dataset_name=dataset_name, data=return_ds, node=node
+        )
+        return return_ds
 
     @staticmethod
     def _collect_inputs_from_hook(  # noqa: PLR0913
         node: Node,
         catalog: CatalogProtocol,
         inputs: dict[str, Any],
-        is_async: bool, # This now refers to the hook context, not internal Task async
-        hook_manager: PluggyPluginManager | _NullPluginManager,
+        is_async: bool,
+        hook_manager: PluginManager | _NullPluginManager,
         session_id: str | None = None,
     ) -> dict[str, Any]:
-        inputs_copy = ( # Renamed to avoid conflict with built-in
+        inputs = (
             inputs.copy()
-        )
+        )  # shallow copy to prevent in-place modification by the hook
         hook_response = hook_manager.hook.before_node_run(
             node=node,
             catalog=catalog,
-            inputs=inputs_copy, # Pass the copy
+            inputs=inputs,
             is_async=is_async,
             session_id=session_id,
         )
 
         additional_inputs = {}
-        if hook_response is not None:
+        if (
+            hook_response is not None
+        ):  # all hooks on a _NullPluginManager will return None instead of a list
             for response in hook_response:
-                if response is not None and not isinstance(response, dict): # pragma: no cover
+                if response is not None and not isinstance(response, dict):
                     response_type = type(response).__name__
                     raise TypeError(
                         f"'before_node_run' must return either None or a dictionary mapping "
                         f"dataset names to updated values, got '{response_type}' instead."
                     )
                 additional_inputs.update(response or {})
+
         return additional_inputs
 
     @staticmethod
@@ -213,8 +242,8 @@ class Task:
         node: Node,
         catalog: CatalogProtocol,
         inputs: dict[str, Any],
-        is_async: bool, # This now refers to the hook context
-        hook_manager: PluggyPluginManager | _NullPluginManager,
+        is_async: bool,
+        hook_manager: PluginManager | _NullPluginManager,
         session_id: str | None = None,
     ) -> dict[str, Any]:
         try:

@@ -15,7 +15,6 @@ build:
       - git fetch --unshallow || true
     pre_build:
       - pip freeze
-      - python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

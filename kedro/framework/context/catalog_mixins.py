@@ -9,14 +9,87 @@ from kedro.pipeline import Pipeline
 
 
 class CatalogCommandsMixin:
+    """
+    A mixin class that provides additional commands for interacting with the `DataCatalog`.
+
+    This class adds methods to list datasets, dataset factory patterns and resolve dataset factory patterns.
+    It is designed to extend the functionality of the `DataCatalog` providing pipeline-based
+    catalog functionality.
+
+    Methods:
+        - list_datasets: Show datasets per type for specified pipelines.
+        - list_patterns: List all dataset factory patterns in the catalog.
+        - resolve_patterns: Resolve dataset factories against pipeline datasets.
+
+    Usage:
+
+    You can integrate this mixin with the `DataCatalog` in two ways:
+    ::
+
+    1. Using `compose_classes`:
+        >>> from kedro.io import DataCatalog
+        >>> from kedro.framework.context import CatalogCommandsMixin, compose_classes
+        >>> # DataCatalog instance without CatalogCommandsMixin
+        >>> assert not hasattr(DataCatalog(), "list_datasets")
+        >>>
+        >>> # Compose a new class combining DataCatalog and CatalogCommandsMixin
+        >>> catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
+        >>>
+        >>> # Create a catalog instance from configuration
+        >>> catalog = catalog_class.from_config(
+        ...     {
+        ...         "cars": {
+        ...             "type": "pandas.CSVDataset",
+        ...             "filepath": "cars.csv",
+        ...             "save_args": {"index": False},
+        ...         }
+        ...     }
+        ... )
+        >>>
+        >>> # Assert that the catalog has the `list_datasets` method
+        >>> assert hasattr(
+        ...     catalog, "list_datasets"
+        ... ), "list_datasets method is not available"
+        >>> print("list_datasets method is available!")
+        # list_datasets method is available!
+
+    2. Creating a new class with inheritance:
+        >>> from kedro.io import DataCatalog
+        >>> from kedro.framework.context import CatalogCommandsMixin
+        >>>
+        >>> class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
+        ...     pass
+        >>>
+        >>> catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
+        >>> assert hasattr(
+        ...     catalog, "list_datasets"
+        ... ), "list_datasets method is not available"
+        >>> print("list_datasets method is available!")
+        # list_datasets method is available!
+    """
+
     @property
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
     def list_datasets(
         self: DataCatalog, pipelines: list[str] | list[Pipeline] | None = None
     ) -> dict:
-        """Show datasets per type."""
+        """
+        Show datasets grouped by type for the specified pipelines.
 
+        This method lists datasets used in the specified pipelines, categorizing them
+        into three groups:
+        - `datasets`: Datasets explicitly defined in the catalog.
+        - `factories`: Datasets resolved from dataset factory patterns.
+        - `defaults`: Datasets that do not match any pattern or explicit definition.
+
+        Args:
+            pipelines: A list of pipeline names or `Pipeline` objects to analyze. If `None`, all pipelines are analyzed.
+
+        Returns:
+            A dictionary where keys are pipeline names and values are dictionaries
+            containing datasets grouped by type.
+        """
         target_pipelines = pipelines or _pipelines.keys()
 
         result = {}
@@ -56,8 +129,14 @@ class CatalogCommandsMixin:
         return result
 
     def list_patterns(self: DataCatalog) -> list[str]:
-        """List all dataset factories in the catalog, ranked by priority
-        by which they are matched.
+        """
+        List all dataset factory patterns in the catalog, ranked by priority.
+
+        This method retrieves all dataset factory patterns defined in the catalog,
+        ordered by the priority in which they are matched.
+
+        Returns:
+            A list of dataset factory patterns.
         """
         return self.config_resolver.list_patterns()
 
@@ -65,8 +144,20 @@ class CatalogCommandsMixin:
         self: DataCatalog,
         pipelines: list[Pipeline] | None = None,
     ) -> dict[str, Any]:
-        """Resolve catalog factories against pipeline datasets."""
+        """
+        Resolve dataset factory patterns against pipeline datasets.
 
+        This method resolves dataset factory patterns for datasets used in the specified pipelines.
+        It includes datasets explicitly defined in the catalog as well as those resolved
+        from dataset factory patterns.
+
+        Args:
+            pipelines: A list of `Pipeline` objects to analyze.
+                If `None`, all pipelines are analyzed.
+
+        Returns:
+            A dictionary mapping dataset names to their unresolved configurations.
+        """
         target_pipelines = pipelines or _pipelines.keys()
 
         pipeline_datasets: set[str] = set()
@@ -100,6 +191,30 @@ class CatalogCommandsMixin:
 
 
 def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, list[str]]:
+    """
+    Group datasets by their type.
+
+    This utility function groups datasets into a dictionary where the keys are
+    dataset types (as strings) and the values are lists of dataset names.
+
+    Args:
+        datasets: A set of dataset names to group.
+        catalog: The `DataCatalog` instance to retrieve dataset types.
+
+    Returns:
+        A dictionary mapping dataset types to lists of dataset names.
+
+    Example:
+    ::
+
+        >>> from kedro.io.data_catalog import DataCatalog
+        >>> from kedro.io.memory_dataset import MemoryDataset
+        >>> from kedro.framework.context.catalog_mixins import _group_ds_by_type
+        >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+        >>> datasets = {"example"}
+        >>> _group_ds_by_type(datasets, catalog)
+        # {'kedro.io.memory_dataset.MemoryDataset': ['example']}
+    """
     mapping: dict[str, list[str]] = {}
     for ds_name in datasets:
         if is_parameter(ds_name):

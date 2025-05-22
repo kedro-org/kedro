@@ -134,9 +134,11 @@ type_targets = {
         "kedro.io.core.AbstractDataset",
         "kedro.io.core.AbstractVersionedDataset",
         "kedro.io.core.CatalogProtocol",
+        "kedro.io.core.SharedMemoryCatalogProtocol",
         "kedro.io.core.DatasetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
+        "kedro.io.data_catalog.SharedMemoryDataCatalog",
         "kedro.io.memory_dataset.MemoryDataset",
         "kedro.io.partitioned_dataset.PartitionedDataset",
         "kedro.pipeline.pipeline.Pipeline",
@@ -144,6 +146,7 @@ type_targets = {
         "kedro.runner.runner.AbstractRunner",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
+        "kedro.framework.context.CatalogCommandsMixin",
         "abc.ABC",
         "Path",
         "pathlib.Path",
@@ -178,6 +181,12 @@ type_targets = {
         "CatalogProtocol",
         "DataCatalog",
         "re.Pattern",
+        "SharedMemoryDataCatalog",
+        "SharedMemoryCatalogProtocol",
+        "CatalogCommandsMixin",
+        "_C",
+        "_DS",
+        "_LazyDataset",
     ),
     "py:data": (
         "typing.Any",
@@ -356,6 +365,8 @@ KEDRO_MODULES = [
     "kedro.runner",
     "kedro.config",
     "kedro_datasets",
+    "kedro.framework",
+    "kedro.framework.context"
 ]
 
 

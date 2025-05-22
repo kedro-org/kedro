@@ -16,7 +16,7 @@ from .core import (
     SharedMemoryCatalogProtocol,
     Version,
 )
-from .data_catalog import DataCatalog
+from .data_catalog import DataCatalog, SharedMemoryDataCatalog
 from .lambda_dataset import LambdaDataset
 from .memory_dataset import MemoryDataset
 from .shared_memory_dataset import SharedMemoryDataset
@@ -34,6 +34,7 @@ __all__ = [
     "LambdaDataset",
     "MemoryDataset",
     "SharedMemoryDataset",
+    "SharedMemoryDataCatalog",
     "SharedMemoryCatalogProtocol",
     "Version",
 ]

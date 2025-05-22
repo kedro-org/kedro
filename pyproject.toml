@@ -88,7 +88,7 @@ docs = [
     "mkdocs-get-deps>=0.2.0",
     "mkdocstrings>=0.29.1",
     "mkdocstrings-python>=0.29.1",
-    "griffe==1.6.0"  # Required for hatch run docs:build to work.
+    "griffe==1.6.0"  # Required by mkdocstrings-python for API documentation generation.
 ]
 jupyter = [
     "ipylab>=1.0.0",

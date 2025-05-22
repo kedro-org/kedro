@@ -138,7 +138,8 @@ nav:
           - Credentials: pages/configure/credentials.md
       - CATALOG DATA:
           - Introduction: pages/catalog-data/introduction.md
-          - Kedro data catalog: pages/catalog-data/data_catalog.md
+          - Data catalog: pages/catalog-data/data_catalog.md
+          - Kedro Data catalog: pages/catalog-data/kedro_data_catalog.md
           - Data Catalog YAML examples: pages/catalog-data/data_catalog_yaml_examples.md
           - Dataset factories: pages/catalog-data/kedro_dataset_factories.md
           - Data and pipeline versioning: pages/catalog-data/kedro_dvc_versioning.md
@@ -217,6 +218,7 @@ nav:
                   - DataCatalog: pages/api/io/kedro.io.DataCatalog.md
                   - LambdaDataset: pages/api/io/kedro.io.LambdaDataset.md
                   - MemoryDataset: pages/api/io/kedro.io.MemoryDataset.md
+                  - SharedMemoryDataCatalog: pages/api/io/kedro.io.SharedMemoryDataCatalog.md
                   - Version: pages/api/io/kedro.io.Version.md
                   - DatasetAlreadyExistsError: pages/api/io/kedro.io.DatasetAlreadyExistsError.md
                   - DatasetError: pages/api/io/kedro.io.DatasetError.md

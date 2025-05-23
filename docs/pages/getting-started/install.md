@@ -37,18 +37,22 @@ uv run kedro run --pipeline __default__
 
 ## How to verify your Kedro installation
 
-To check that Kedro is installed:
-
-```bash
-kedro info
-```
-
 !!! note
 
     For the sake of brevity, the rest of the Kedro documentation assumes
     that you either run `kedro` through your project management tool,
     for example executing `uv run kedro`,
     or that the appropriate virtual environment is activated.
+    If you get "command not found" errors or other unexpected results,
+    double check that you are adding the prefixes required by your tooling
+    or follow standard troubleshooting steps first to verify that
+    the proper environment is activated.
+
+To check that Kedro is installed:
+
+```bash
+kedro info
+```
 
 You should see an ASCII art graphic and the Kedro version number. For example:
 

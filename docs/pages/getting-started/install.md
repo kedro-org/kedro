@@ -309,7 +309,7 @@ scikit-learn~=1.0
 
 ## Other setup steps
 
-### How to integrate Kedro in VS Code with the official extension
+### How to integrate Kedro in your IDE
 Working in an IDE can be a great productivity boost.
 
 For VS Code Users: Check out [Set up Visual Studio Code](../ide/set_up_vscode.md) and [Kedro VS Code Extension](../ide/set_up_vscode.md#kedro-vs-code-extension).

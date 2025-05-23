@@ -10,8 +10,6 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import TYPE_CHECKING, Any
 
-from pluggy import PluginManager
-
 from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
 from kedro.io import (
     CatalogProtocol,
@@ -23,6 +21,8 @@ from kedro.runner.runner import AbstractRunner
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from pluggy import PluginManager
 
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node

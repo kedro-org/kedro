@@ -10,7 +10,7 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import TYPE_CHECKING, Any
 
-from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
+from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.io import (
     CatalogProtocol,
     DatasetNotFoundError,
@@ -77,7 +77,7 @@ class ParallelRunner(AbstractRunner):
         self._manager.start()
 
         self._max_workers = self._validate_max_workers(max_workers)
-        self._subprocess_hook_manager: PluginManager | _NullPluginManager | None = None
+        self._subprocess_hook_manager: PluginManager | None = None
 
     def __del__(self) -> None:
         if hasattr(self, "_manager") and self._manager:
@@ -197,9 +197,12 @@ class ParallelRunner(AbstractRunner):
 
     def _prepare_subprocess_hook_manager(
         self, main_hook_manager: PluginManager
-    ) -> PluginManager | _NullPluginManager:
+    ) -> PluginManager | None:
         """Prepare a hook manager for subprocesses by collecting picklable hook
-        implementations from the main process hooks."""
+        implementations from the main process hooks.
+
+        Returns None if no picklable hooks are available, which will cause
+        subprocesses to use their own _NullPluginManager."""
         if self._subprocess_hook_manager is not None:
             return self._subprocess_hook_manager
 
@@ -215,9 +218,9 @@ class ParallelRunner(AbstractRunner):
         if not picklable_hook_providers:
             self._logger.info(
                 "No picklable hook implementations provided by plugins for subprocesses. "
-                "Using NullPluginManager."
+                "Subprocesses will use NullPluginManager."
             )
-            self._subprocess_hook_manager = _NullPluginManager()
+            self._subprocess_hook_manager = None
             return self._subprocess_hook_manager
 
         # Create a new hook manager for subprocesses without tracing
@@ -257,14 +260,14 @@ class ParallelRunner(AbstractRunner):
             except Exception as e:
                 self._logger.error(
                     f"Subprocess hook manager is not picklable after registration: {e}. "
-                    f"Falling back to NullPluginManager for subprocesses."
+                    f"Subprocesses will use NullPluginManager."
                 )
-                child_manager = _NullPluginManager()
+                child_manager = None
         else:
             self._logger.info(
-                "No picklable hooks were registered. Using NullPluginManager for subprocesses."
+                "No picklable hooks were registered. Subprocesses will use NullPluginManager."
             )
-            child_manager = _NullPluginManager()
+            child_manager = None
 
         self._subprocess_hook_manager = child_manager
         return self._subprocess_hook_manager
@@ -300,7 +303,7 @@ class ParallelRunner(AbstractRunner):
 
         self._set_manager_datasets(catalog, pipeline)
 
-        subprocess_hook_manager_to_use: PluginManager | _NullPluginManager
+        subprocess_hook_manager: PluginManager | None
         if hook_manager:
             # Call the new hook to allow plugins to prepare for parallel execution
             if hasattr(hook_manager.hook, "on_parallel_runner_start"):
@@ -314,18 +317,17 @@ class ParallelRunner(AbstractRunner):
                         f"Error during `on_parallel_runner_start`: {e}", exc_info=True
                     )
 
-            subprocess_hook_manager_to_use = self._prepare_subprocess_hook_manager(
-                hook_manager
-            )
+            prepared_manager = self._prepare_subprocess_hook_manager(hook_manager)
+            subprocess_hook_manager = prepared_manager
         else:
             self._logger.info(
                 "No main hook manager provided; using NullPluginManager for subprocesses."
             )
-            subprocess_hook_manager_to_use = _NullPluginManager()
+            subprocess_hook_manager = None
 
         super()._run(
             pipeline=pipeline,
             catalog=catalog,
-            hook_manager=subprocess_hook_manager_to_use,
+            hook_manager=subprocess_hook_manager,
             session_id=session_id,
         )

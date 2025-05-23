@@ -18,7 +18,7 @@
 * Renamed instances of `extra_params` and `_extra_params` to `runtime_params`.
 * Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead.
 * Renamed `ModularPipelineError` to `PipelineError`.
-* `Pipeline.grouped_nodes_by_namespace()` now returns a list of `GroupedNodes` instead of a dictionary. This change improves type safety and consistency for deployment plugin integrations.
+* `Pipeline.grouped_nodes_by_namespace()` was replaced with `group_nodes_by(group_by)`, which supports multiple strategies and returns a list of `GroupedNodes`, improving type safety and consistency for deployment plugin integrations.
 
 ## Migration guide from Kedro 0.19.* to 1.*
 [See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).

@@ -546,7 +546,7 @@ class Pipeline:
 
         return [list(group) for group in self._toposorted_groups]
 
-    def group_nodes_custom(
+    def group_nodes_by(
         self,
         group_by: str | None = "namespace",
     ) -> list[GroupedNodes]:

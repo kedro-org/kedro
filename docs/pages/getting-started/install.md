@@ -318,7 +318,15 @@ For PyCharm Users: Checkout [Set up PyCharm](../ide/set_up_pycharm.md).
 
 ### How to upgrade Kedro
 
-The best way to safely upgrade is to check our [release notes](https://github.com/kedro-org/kedro/blob/main/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
+Kedro follows the [Semantic Versioning](https://semver.org/) paradigm.
+Upgrades between bugfix or patch releases of the same minor series are expected to not require any special user action,
+otherwise it's considered a bug.
+Upgrades between minor releases of the 0.x series, or major releases after 1.0, can include backwards-incompatible changes
+that may require some user intervention to achieve a clean upgrade.
+
+The best way to safely upgrade when backwards-incompatible changes are expected
+is to check our [release notes](https://github.com/kedro-org/kedro/blob/main/RELEASE.md).
+Follow the steps in the migration guide included for that specific release.
 
 Apart from installing the latest version (see above),
 when migrating an existing project to a newer Kedro version

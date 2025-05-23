@@ -15,6 +15,7 @@ from concurrent.futures import (
     FIRST_COMPLETED,
     Executor,
     Future,
+    ProcessPoolExecutor,
     wait,
 )
 from itertools import chain
@@ -260,6 +261,8 @@ class AbstractRunner(ABC):
                         is_async=self._is_async,
                         session_id=session_id,
                     )
+                    if isinstance(executor, ProcessPoolExecutor):
+                        task.parallel = True
                     futures.add(executor.submit(task))
                 if not futures:
                     if todo_nodes:

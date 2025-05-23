@@ -4,7 +4,6 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 
 from __future__ import annotations
 
-import logging
 from concurrent.futures import Executor, ProcessPoolExecutor
 from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
@@ -13,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 from pluggy import PluginManager
 
-from kedro.framework.hooks.manager import _NullPluginManager, _create_hook_manager
+from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
 from kedro.io import (
     CatalogProtocol,
     DatasetNotFoundError,
@@ -205,7 +204,9 @@ class ParallelRunner(AbstractRunner):
             return self._subprocess_hook_manager
 
         picklable_hook_providers = []
-        if hasattr(main_hook_manager.hook, "get_picklable_hook_implementations_for_subprocess"):
+        if hasattr(
+            main_hook_manager.hook, "get_picklable_hook_implementations_for_subprocess"
+        ):
             results = main_hook_manager.hook.get_picklable_hook_implementations_for_subprocess()
             for provider_iterable in results:
                 if provider_iterable:

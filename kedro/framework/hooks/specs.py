@@ -5,7 +5,8 @@ For more information about these specifications, please visit
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any
 
 from .markers import hook_spec
 

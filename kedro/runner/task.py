@@ -34,7 +34,7 @@ class TaskError(Exception):
 
 
 class Task:
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         node: Node,
         catalog: CatalogProtocol,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import itertools as it
-import multiprocessing
+import logging
 from collections.abc import Iterable, Iterator
 from concurrent.futures import (
     ALL_COMPLETED,
@@ -15,12 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 from more_itertools import interleave
 
-from kedro.framework.hooks.manager import (
-    _create_hook_manager,
-    _register_hooks,
-    _register_hooks_entry_points,
-)
-from kedro.framework.project import settings
+from kedro.framework.hooks.manager import _NullPluginManager
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -39,21 +34,19 @@ class TaskError(Exception):
 
 
 class Task:
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         node: Node,
         catalog: CatalogProtocol,
         is_async: bool,
-        hook_manager: PluginManager | None = None,
+        hook_manager: PluginManager | _NullPluginManager | None = None,
         session_id: str | None = None,
-        parallel: bool = False,
     ):
         self.node = node
         self.catalog = catalog
         self.hook_manager = hook_manager
         self.is_async = is_async
         self.session_id = session_id
-        self.parallel = parallel
 
     def execute(self) -> Node:
         if self.is_async and inspect.isgeneratorfunction(self.node.func):
@@ -64,31 +57,26 @@ class Task:
                 f"in node {self.node!s}."
             )
 
-        if not self.hook_manager and not self.parallel:
-            raise TaskError(
-                "No hook_manager provided. This is only allowed when running a ``Task`` with ``ParallelRunner``."
+        effective_hook_manager = self.hook_manager
+        if not effective_hook_manager:
+            logging.getLogger(__name__).warning(
+                "Task executing without a provided hook_manager. "
+                "Falling back to _NullPluginManager."
             )
+            effective_hook_manager = _NullPluginManager()
 
-        if self.parallel:
-            from kedro.framework.project import LOGGING, PACKAGE_NAME
-
-            hook_manager = Task._run_node_synchronization(
-                package_name=PACKAGE_NAME,
-                logging_config=LOGGING,  # type: ignore[arg-type]
-            )
-            self.hook_manager = hook_manager
         if self.is_async:
             node = self._run_node_async(
                 self.node,
                 self.catalog,
-                self.hook_manager,  # type: ignore[arg-type]
+                effective_hook_manager,
                 self.session_id,
             )
         else:
             node = self._run_node_sequential(
                 self.node,
                 self.catalog,
-                self.hook_manager,  # type: ignore[arg-type]
+                effective_hook_manager,
                 self.session_id,
             )
 
@@ -101,48 +89,11 @@ class Task:
         """Make the class instance callable by ProcessPoolExecutor."""
         return self.execute()
 
-    @staticmethod
-    def _bootstrap_subprocess(
-        package_name: str, logging_config: dict[str, Any] | None = None
-    ) -> None:
-        from kedro.framework.project import configure_logging, configure_project
-
-        configure_project(package_name)
-        if logging_config:
-            configure_logging(logging_config)
-
-    @staticmethod
-    def _run_node_synchronization(
-        package_name: str | None = None,
-        logging_config: dict[str, Any] | None = None,
-    ) -> Any:
-        """Run a single `Node` with inputs from and outputs to the `catalog`.
-
-        A ``PluginManager`` instance is created in each subprocess because the
-        ``PluginManager`` can't be serialised.
-
-        Args:
-            package_name: The name of the project Python package.
-            logging_config: A dictionary containing logging configuration.
-
-        Returns:
-            The node argument.
-
-        """
-        if multiprocessing.get_start_method() == "spawn" and package_name:
-            Task._bootstrap_subprocess(package_name, logging_config)
-
-        hook_manager = _create_hook_manager()
-        _register_hooks(hook_manager, settings.HOOKS)
-        _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
-
-        return hook_manager
-
     def _run_node_sequential(
         self,
         node: Node,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | _NullPluginManager,
         session_id: str | None = None,
     ) -> Node:
         inputs = {}
@@ -193,7 +144,7 @@ class Task:
         self,
         node: Node,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,  # type: ignore[arg-type]
+        hook_manager: PluginManager | _NullPluginManager,
         session_id: str | None = None,
     ) -> Node:
         with ThreadPoolExecutor() as pool:
@@ -240,7 +191,7 @@ class Task:
         dataset_name: str,
         node: Node,
         catalog: CatalogProtocol,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | _NullPluginManager,
     ) -> Any:
         """Minimal wrapper to ensure Hooks are run synchronously
         within an asynchronous dataset load."""
@@ -257,7 +208,7 @@ class Task:
         catalog: CatalogProtocol,
         inputs: dict[str, Any],
         is_async: bool,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | _NullPluginManager,
         session_id: str | None = None,
     ) -> dict[str, Any]:
         inputs = (
@@ -292,7 +243,7 @@ class Task:
         catalog: CatalogProtocol,
         inputs: dict[str, Any],
         is_async: bool,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager | _NullPluginManager,
         session_id: str | None = None,
     ) -> dict[str, Any]:
         try:

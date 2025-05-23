@@ -10,6 +10,9 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import TYPE_CHECKING, Any
 
+from pluggy import PluginManager
+
+from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
 from kedro.io import (
     CatalogProtocol,
     DatasetNotFoundError,
@@ -20,8 +23,6 @@ from kedro.runner.runner import AbstractRunner
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-
-    from pluggy import PluginManager
 
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
@@ -76,9 +77,11 @@ class ParallelRunner(AbstractRunner):
         self._manager.start()
 
         self._max_workers = self._validate_max_workers(max_workers)
+        self._subprocess_hook_manager: PluginManager | _NullPluginManager | None = None
 
     def __del__(self) -> None:
-        self._manager.shutdown()
+        if hasattr(self, "_manager") and self._manager:
+            self._manager.shutdown()
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]) -> None:
@@ -107,7 +110,7 @@ class ParallelRunner(AbstractRunner):
         will not be synchronized across threads.
         """
 
-        datasets = catalog._datasets
+        datasets = getattr(catalog, "_datasets", {})
 
         unserialisable = []
         for name, dataset in datasets.items():
@@ -149,14 +152,31 @@ class ParallelRunner(AbstractRunner):
     def _set_manager_datasets(
         self, catalog: CatalogProtocol, pipeline: Pipeline
     ) -> None:
-        for dataset in pipeline.datasets():
+        for dataset_name in pipeline.datasets():
             try:
-                catalog.exists(dataset)
+                if catalog.exists(dataset_name):
+                    dataset = catalog.get(dataset_name)
+                    if isinstance(dataset, SharedMemoryDataset):
+                        dataset.set_manager(self._manager)
             except DatasetNotFoundError:
-                pass
-        for name, ds in catalog._datasets.items():
-            if isinstance(ds, SharedMemoryDataset):
-                ds.set_manager(self._manager)
+                self._logger.debug(
+                    f"Dataset '{dataset_name}' not found for _set_manager_datasets."
+                )
+            except Exception as e:
+                self._logger.error(
+                    f"Error for '{dataset_name}' in _set_manager_datasets: {e}"
+                )
+
+        # Also process datasets already in the catalog
+        if hasattr(catalog, "_datasets"):
+            for name, dataset in getattr(catalog, "_datasets", {}).items():
+                if isinstance(dataset, SharedMemoryDataset):
+                    try:
+                        dataset.set_manager(self._manager)
+                    except Exception as e:
+                        self._logger.error(
+                            f"Error setting manager for SharedMemoryDataset '{name}': {e}"
+                        )
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
@@ -174,6 +194,80 @@ class ParallelRunner(AbstractRunner):
 
     def _get_executor(self, max_workers: int) -> Executor:
         return ProcessPoolExecutor(max_workers=max_workers)
+
+    def _prepare_subprocess_hook_manager(
+        self, main_hook_manager: PluginManager
+    ) -> PluginManager | _NullPluginManager:
+        """Prepare a hook manager for subprocesses by collecting picklable hook
+        implementations from the main process hooks."""
+        if self._subprocess_hook_manager is not None:
+            return self._subprocess_hook_manager
+
+        picklable_hook_providers = []
+        if hasattr(
+            main_hook_manager.hook, "get_picklable_hook_implementations_for_subprocess"
+        ):
+            results = main_hook_manager.hook.get_picklable_hook_implementations_for_subprocess()
+            for provider_iterable in results:
+                if provider_iterable:
+                    picklable_hook_providers.extend(provider_iterable)
+
+        if not picklable_hook_providers:
+            self._logger.info(
+                "No picklable hook implementations provided by plugins for subprocesses. "
+                "Using NullPluginManager."
+            )
+            self._subprocess_hook_manager = _NullPluginManager()
+            return self._subprocess_hook_manager
+
+        # Create a new hook manager for subprocesses without tracing
+        # to ensure it can be pickled
+        child_manager = _create_hook_manager(enable_tracing=False)
+
+        registered_count = 0
+        for provider_instance in picklable_hook_providers:
+            try:
+                ForkingPickler.dumps(provider_instance)
+                if not child_manager.is_registered(provider_instance):
+                    child_manager.register(provider_instance)
+                    registered_count += 1
+                    self._logger.debug(
+                        f"Registered picklable hook provider "
+                        f"'{type(provider_instance).__name__}' for subprocess."
+                    )
+            except PicklingError:
+                self._logger.warning(
+                    f"Hook provider '{type(provider_instance).__name__}' "
+                    f"is not picklable, skipping."
+                )
+            except Exception as e:
+                self._logger.error(
+                    f"Failed to register picklable hook provider "
+                    f"'{type(provider_instance).__name__}': {e}"
+                )
+
+        if registered_count > 0:
+            self._logger.info(
+                f"Successfully registered {registered_count} picklable hook(s) "
+                f"for subprocesses."
+            )
+            # Verify the child manager is picklable
+            try:
+                ForkingPickler.dumps(child_manager)
+            except Exception as e:
+                self._logger.error(
+                    f"Subprocess hook manager is not picklable after registration: {e}. "
+                    f"Falling back to NullPluginManager for subprocesses."
+                )
+                child_manager = _NullPluginManager()
+        else:
+            self._logger.info(
+                "No picklable hooks were registered. Using NullPluginManager for subprocesses."
+            )
+            child_manager = _NullPluginManager()
+
+        self._subprocess_hook_manager = child_manager
+        return self._subprocess_hook_manager
 
     def _run(
         self,
@@ -204,8 +298,34 @@ class ParallelRunner(AbstractRunner):
                 "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
             )
 
+        self._set_manager_datasets(catalog, pipeline)
+
+        subprocess_hook_manager_to_use: PluginManager | _NullPluginManager
+        if hook_manager:
+            # Call the new hook to allow plugins to prepare for parallel execution
+            if hasattr(hook_manager.hook, "on_parallel_runner_start"):
+                self._logger.info("Calling `on_parallel_runner_start` hook.")
+                try:
+                    hook_manager.hook.on_parallel_runner_start(
+                        manager=self._manager, catalog=catalog
+                    )
+                except Exception as e:
+                    self._logger.error(
+                        f"Error during `on_parallel_runner_start`: {e}", exc_info=True
+                    )
+
+            subprocess_hook_manager_to_use = self._prepare_subprocess_hook_manager(
+                hook_manager
+            )
+        else:
+            self._logger.info(
+                "No main hook manager provided; using NullPluginManager for subprocesses."
+            )
+            subprocess_hook_manager_to_use = _NullPluginManager()
+
         super()._run(
             pipeline=pipeline,
             catalog=catalog,
+            hook_manager=subprocess_hook_manager_to_use,
             session_id=session_id,
         )

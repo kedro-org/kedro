@@ -5,11 +5,14 @@ For more information about these specifications, please visit
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
 from .markers import hook_spec
 
 if TYPE_CHECKING:
+    from multiprocessing.managers import SyncManager
+
     from kedro.framework.context import KedroContext
     from kedro.io import CatalogProtocol
     from kedro.pipeline import Pipeline
@@ -25,7 +28,7 @@ class DataCatalogSpecs:
         catalog: CatalogProtocol,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
-        parameters: dict[str, Any],
+        feed_dict: dict[str, Any],
         save_version: str,
         load_versions: dict[str, str],
     ) -> None:
@@ -37,7 +40,7 @@ class DataCatalogSpecs:
             catalog: The catalog that was created.
             conf_catalog: The config from which the catalog was created.
             conf_creds: The credentials conf from which the catalog was created.
-            parameters: The parameters that are added to the catalog after creation.
+            feed_dict: The feed_dict that was added to the catalog after creation.
             save_version: The save_version used in ``save`` operations
                 for all datasets in the catalog.
             load_versions: The load_versions used in ``load`` operations
@@ -157,7 +160,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "runtime_params": Optional[Dict[str, Any]]
+                     "extra_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -194,7 +197,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "runtime_params": Optional[Dict[str, Any]]
+                     "extra_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -235,7 +238,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "runtime_params": Optional[Dict[str, Any]]
+                     "extra_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -309,3 +312,34 @@ class KedroContextSpecs:
         Args:
             context: The context that was created.
         """
+        pass
+
+
+class RunnerSpecs:
+    """Namespace that defines all specifications for a runner's lifecycle hooks."""
+
+    @hook_spec
+    def on_parallel_runner_start(
+        self, manager: SyncManager, catalog: CatalogProtocol
+    ) -> None:
+        """Hook to be invoked by the ParallelRunner after its multiprocessing SyncManager
+        is started and before it starts submitting tasks. Allows plugins to receive
+        the manager for creating shared state, and the main catalog for reference.
+
+        Args:
+            manager: The multiprocessing.managers.SyncManager instance from the ParallelRunner.
+            catalog: The main DataCatalog instance from the KedroSession.
+        """
+        pass
+
+    @hook_spec
+    def get_picklable_hook_implementations_for_subprocess(self) -> Iterable[Any] | None:
+        """Allows hook providers to return picklable hook instances for ParallelRunner
+        subprocesses. These instances will be registered with a new PluginManager in
+        each subprocess. They should rely on shared state (e.g., via SyncManager) for
+        coordination.
+
+        Returns:
+            An iterable of picklable hook implementation objects, or None.
+        """
+        pass

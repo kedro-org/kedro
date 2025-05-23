@@ -485,7 +485,7 @@ class TestValidPipeline:
     def test_node_grouping_by_namespace_combined(
         self, request, pipeline_name, expected
     ):
-        """Test that grouped_nodes_by_namespace returns correct GroupedNodes list with name, type and node names and dependencies."""
+        """Test that group_nodes_by returns correct GroupedNodes list with name, type and node names and dependencies."""
         p = request.getfixturevalue(pipeline_name)
         grouped = p.group_nodes_by(group_by="namespace")
 

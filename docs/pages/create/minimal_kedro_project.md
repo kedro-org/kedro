@@ -71,7 +71,7 @@ mkdir minikedro
 Navigate into your newly created project directory:
 
 ```bash
-cd minikiedro
+cd minikedro
 ```
 
 ### Step 2: Initialise `pyproject.toml`

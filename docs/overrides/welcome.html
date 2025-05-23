@@ -1,0 +1,237 @@
+<!-- Custom HTML site displayed as the Home chapter -->
+
+{% extends "main.html" %}
+{% block tabs %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="container welcome-page-container" data-md-component="welcome">
+    <header>
+        <h1 class="welcome-title">A toolbox for production-ready data science</h1>
+
+        <!-- currently there is no way to include the search in the custom HTML -->
+        <!-- see more here: https://github.com/squidfunk/mkdocs-material/issues/6307 -->
+        <!-- <div class="search-container">
+            <input type="text" placeholder="Search documentation">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div> -->
+
+        <div class="explore-link">
+            <a href="pages/getting-started/course">Explore the docs <span class="arrow">›</span></a>
+        </div>
+    </header>
+
+    <div class="cards-section-wrapper">
+        <section>
+            <h3 class="section-title">Get started</h3>
+
+            <div class="card-grid">
+                <a href="pages/getting-started/course" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M11.333 24.0785V7.82227L24.1021 15.9504L11.333 24.0785ZM13.0082 21.0171L20.9945 15.9504L13.0082 10.8837V21.0171Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Introduction to Kedro</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+
+                <a href="pages/getting-started/kedro_concepts" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M3.17969 14.2818L9.35912 3.32031L15.5386 14.2818H3.17969ZM9.38562 27.6792C8.00158 27.6792 6.8201 27.1912 5.84119 26.2151C4.86228 25.239 4.37282 24.058 4.37282 22.6719C4.37282 21.2648 4.86228 20.0767 5.84119 19.1074C6.8201 18.1382 8.00158 17.6536 9.38562 17.6536C10.7754 17.6536 11.9583 18.1416 12.9343 19.1177C13.9104 20.0938 14.3984 21.2767 14.3984 22.6664C14.3984 24.0561 13.9104 25.239 12.9343 26.2151C11.9583 27.1912 10.7754 27.6792 9.38562 27.6792ZM9.38562 26.004C10.315 26.004 11.1036 25.6801 11.7515 25.0322C12.3993 24.3844 12.7233 23.5958 12.7233 22.6664C12.7233 21.7371 12.3993 20.9484 11.7515 20.3006C11.1036 19.6527 10.315 19.3288 9.38562 19.3288C8.45627 19.3288 7.66765 19.6527 7.01979 20.3006C6.37192 20.9484 6.04799 21.7371 6.04799 22.6664C6.04799 23.5958 6.37192 24.3844 7.01979 25.0322C7.66765 25.6801 8.45627 26.004 9.38562 26.004ZM6.04712 12.6066H12.684L9.35912 6.75951L6.04712 12.6066ZM17.6797 27.6792V17.6536H27.7053V27.6792H17.6797ZM19.3548 26.004H26.0301V19.3288H19.3548V26.004ZM22.6925 14.2818C21.648 13.4202 20.7408 12.6656 19.9707 12.0177C19.2006 11.3698 18.5643 10.7745 18.0618 10.2318C17.5592 9.68908 17.184 9.16472 16.9361 8.65875C16.6882 8.15275 16.5643 7.6177 16.5643 7.05361C16.5643 6.15617 16.8694 5.40575 17.4797 4.80235C18.0899 4.19892 18.8574 3.89721 19.7822 3.89721C20.3331 3.89721 20.8584 4.02956 21.3582 4.29425C21.858 4.55891 22.3027 4.94879 22.6925 5.46388C23.0822 4.95163 23.5298 4.56247 24.0352 4.29638C24.5406 4.03027 25.0674 3.89721 25.6155 3.89721C26.5285 3.89721 27.2909 4.20576 27.9028 4.82285C28.5147 5.43991 28.8206 6.19632 28.8206 7.09208C28.8206 7.64763 28.6967 8.17627 28.4488 8.67798C28.201 9.17969 27.8257 9.69977 27.3232 10.2382C26.8206 10.7767 26.1843 11.3698 25.4142 12.0177C24.6442 12.6656 23.7369 13.4202 22.6925 14.2818ZM22.6925 12.0904C24.4081 10.7172 25.5792 9.67869 26.2057 8.97498C26.8322 8.27127 27.1455 7.65304 27.1455 7.12028C27.1455 6.66595 27.0075 6.29438 26.7316 6.00558C26.4556 5.71678 26.093 5.57238 25.6437 5.57238C25.3602 5.57238 25.0814 5.65492 24.8073 5.82001C24.5332 5.98508 24.1693 6.28175 23.7155 6.71001L22.6925 7.69204L21.6694 6.71001C21.2179 6.2665 20.8546 5.96601 20.5795 5.80854C20.3044 5.6511 20.0249 5.57238 19.7412 5.57238C19.2834 5.57238 18.9187 5.71037 18.647 5.98635C18.3753 6.26232 18.2395 6.63175 18.2395 7.09461C18.2395 7.64448 18.5527 8.27127 19.1792 8.97498C19.8057 9.67869 20.9768 10.7172 22.6925 12.0904Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Kedro Concepts</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+
+                <a href="pages/tutorials/spaceflights_tutorial" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M10.6664 23.5026L3.12793 15.9642L10.7023 8.39844L11.8937 9.5984L5.52103 15.971L11.8595 22.3095L10.6664 23.5026ZM21.2971 23.5385L20.1057 22.3386L26.4784 15.9659L20.1399 9.6189L21.333 8.42577L28.8715 15.9642L21.2971 23.5385Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Tutorials</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+
+                <a href="pages/getting-started/install" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M16 21.164L10.4206 15.5846L11.6137 14.3864L15.1624 17.9265V6H16.8375V17.9265L20.3863 14.3864L21.5794 15.5846L16 21.164ZM6 25.9999V19.9248H7.67517V24.3248H24.3248V19.9248H25.9999V25.9999H6Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Installation</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+
+                <a href="pages/getting-started/commands_reference" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M8.4683 21.684C9.64426 21.684 10.7884 21.8212 11.9007 22.0955C13.013 22.3699 14.1122 22.7928 15.1982 23.3643V9.71988C14.2193 9.04352 13.1478 8.52942 11.9837 8.17758C10.8195 7.82571 9.64772 7.64978 8.4683 7.64978C7.60734 7.64978 6.77359 7.73967 5.96703 7.91944C5.16048 8.09922 4.39651 8.35058 3.67513 8.67351V22.5592C4.33382 22.2686 5.09138 22.0501 5.9478 21.9036C6.8042 21.7572 7.64437 21.684 8.4683 21.684ZM16.8734 23.3643C17.9629 22.7928 19.0486 22.3699 20.1307 22.0955C21.2127 21.8212 22.3464 21.684 23.5316 21.684C24.3555 21.684 25.2002 21.7549 26.0657 21.8968C26.9313 22.0387 27.6843 22.231 28.3247 22.4737V8.67284C27.6364 8.31729 26.882 8.05789 26.0616 7.89464C25.2411 7.7314 24.3991 7.64978 23.5356 7.64978C22.3459 7.64978 21.1815 7.82571 20.0422 8.17758C18.9029 8.52942 17.8466 9.04352 16.8734 9.71988V23.3643ZM16.0316 25.8463C14.9205 25.0532 13.7216 24.4426 12.435 24.0147C11.1484 23.5868 9.82614 23.3728 8.4683 23.3728C7.34808 23.3728 6.18698 23.5631 4.985 23.9437C3.783 24.3244 2.788 24.7691 2 25.2779V7.58401C2.84271 7.08601 3.84063 6.69328 4.99377 6.40581C6.1469 6.11834 7.30508 5.97461 8.4683 5.97461C9.82221 5.97461 11.1392 6.16251 12.4192 6.53831C13.6992 6.91409 14.9048 7.47662 16.0358 8.22591C17.1521 7.47662 18.3455 6.91409 19.6162 6.53831C20.8868 6.16251 22.192 5.97461 23.5316 5.97461C24.6948 5.97461 25.8508 6.12062 26.9997 6.41264C28.1485 6.70466 29.1486 7.09512 29.9999 7.58401V25.2779C29.2255 24.76 28.234 24.313 27.0251 23.9369C25.8163 23.5608 24.6518 23.3728 23.5316 23.3728C22.1723 23.3728 20.8602 23.589 19.5954 24.0215C18.3306 24.454 17.1427 25.0623 16.0316 25.8463ZM18.5897 12.8327V11.4036C19.3144 11.0669 20.073 10.8143 20.8653 10.6459C21.6576 10.4776 22.4803 10.3934 23.3333 10.3934C23.8683 10.3934 24.388 10.4314 24.8922 10.5075C25.3965 10.5835 25.9025 10.684 26.4102 10.8088V12.1557C25.911 11.9814 25.4149 11.8549 24.9217 11.7763C24.4286 11.6976 23.8991 11.6583 23.3333 11.6583C22.4803 11.6583 21.6542 11.7596 20.8551 11.9622C20.0559 12.1647 19.3008 12.4549 18.5897 12.8327ZM18.5897 20.1404V18.672C19.2974 18.3398 20.0538 18.0907 20.8589 17.9246C21.664 17.7585 22.4888 17.6754 23.3333 17.6754C23.8683 17.6754 24.388 17.7135 24.8922 17.7895C25.3965 17.8656 25.9025 17.966 26.4102 18.0908V19.4378C25.911 19.2634 25.4149 19.1369 24.9217 19.0583C24.4286 18.9797 23.8991 18.9404 23.3333 18.9404C22.4803 18.9404 21.6542 19.0425 20.8551 19.2468C20.0559 19.451 19.3008 19.7489 18.5897 20.1404ZM18.5897 16.4993V15.0447C19.3144 14.7079 20.073 14.4554 20.8653 14.287C21.6576 14.1186 22.4803 14.0344 23.3333 14.0344C23.8683 14.0344 24.388 14.0724 24.8922 14.1485C25.3965 14.2246 25.9025 14.325 26.4102 14.4498V15.7968C25.911 15.6224 25.4149 15.4959 24.9217 15.4173C24.4286 15.3387 23.8991 15.2993 23.3333 15.2993C22.4803 15.2993 21.6542 15.4049 20.8551 15.616C20.0559 15.8271 19.3008 16.1216 18.5897 16.4993Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">References</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+
+                <a href="pages/getting-started/faq" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M29 7V22C29 24.2091 27.2091 26 25 26H14.333L9 30V26H7C4.79086 26 3 24.2091 3 22V7C3 4.79086 4.79086 3 7 3H25C27.2091 3 29 4.79086 29 7ZM25 5C26.1046 5 27 5.89543 27 7V22C27 23.1046 26.1046 24 25 24H13.667L11 26V24H7C5.89543 24 5 23.1046 5 22V7C5 5.89543 5.89543 5 7 5H25ZM17 18H15V20H17V18ZM16 8C13.7909 8 12 9.79086 12 12H14L14.0055 11.8507C14.0818 10.8159 14.9456 10 16 10C17.1046 10 18 10.8954 18 12C18 13.1046 17.1046 14 16 14L15.8834 14.0067C15.386 14.0645 15 14.4872 15 15V17H17V15.873L17.1553 15.8306C18.8012 15.335 20 13.8075 20 12C20 9.79086 18.2091 8 16 8Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">FAQs</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h3 class="section-title">Join the Kedro community</h3>
+
+            <div class="card-grid">
+                <a href="https://kedro-org.slack.com" target="_blank" rel="noopener" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M19 2C20.6569 2 22 3.34315 22 5V12C22 13.6569 20.6569 15 19 15C17.3431 15 16 13.6569 16 12V5C16 3.34315 17.3431 2 19 2Z" fill="#989898"/>
+                            <path d="M26 9C27.6569 9 29 10.3431 29 12C29 13.6569 27.6569 15 26 15H23V12C23 10.3431 24.3431 9 26 9Z" fill="#989898"/>
+                            <path d="M15 19C15 17.3431 13.6569 16 12 16C10.3431 16 9 17.3431 9 19V26C9 27.6569 10.3431 29 12 29C13.6569 29 15 27.6569 15 26V19Z" fill="#989898"/>
+                            <path d="M8 19V16H5C3.34315 16 2 17.3431 2 19C2 20.6569 3.34315 22 5 22C6.65685 22 8 20.6569 8 19Z" fill="#989898"/>
+                            <path d="M22 26C22 24.3431 20.6569 23 19 23H16V26C16 27.6569 17.3431 29 19 29C20.6569 29 22 27.6569 22 26Z" fill="#989898"/>
+                            <path d="M29 19C29 17.3431 27.6569 16 26 16H19C17.3431 16 16 17.3431 16 19C16 20.6569 17.3431 22 19 22H26C27.6569 22 29 20.6569 29 19Z" fill="#989898"/>
+                            <path d="M15 12C15 10.3431 13.6569 9 12 9H5C3.34315 9 2 10.3431 2 12C2 13.6569 3.34315 15 5 15H12C13.6569 15 15 13.6569 15 12Z" fill="#989898"/>
+                            <path d="M15 5C15 3.34315 13.6569 2 12 2C10.3431 2 9 3.34315 9 5C9 6.65685 10.3431 8 12 8H15V5Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Slack</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+
+                <a href="https://github.com/kedro-org/kedro" target="_blank" rel="noopener" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M16.0002 2C8.26787 2 2 8.42607 2 16.3544C2 22.6964 6.01104 28.0767 11.5747 29.9751C12.2747 30.1067 12.5295 29.6643 12.5295 29.2835C12.5295 28.9433 12.5183 28.0403 12.5113 26.8419C8.61647 27.7099 7.79466 24.9183 7.79466 24.9183C7.15906 23.2592 6.24065 22.8182 6.24065 22.8182C4.96943 21.9278 6.33725 21.9446 6.33725 21.9446C7.74146 22.0468 8.48067 23.4244 8.48067 23.4244C9.72949 25.6183 11.7581 24.9841 12.5547 24.6173C12.6835 23.6904 13.0447 23.0576 13.4451 22.6992C10.3371 22.3352 7.06806 21.1046 7.06806 15.604C7.06806 14.0373 7.61406 12.7549 8.50867 11.7525C8.36447 11.3885 7.88427 9.92969 8.64587 7.95287C8.64587 7.95287 9.82189 7.56786 12.4959 9.42568C13.6117 9.10648 14.8101 8.94688 16.0002 8.94128C17.1902 8.94688 18.3872 9.10648 19.5058 9.42568C22.1784 7.56786 23.3516 7.95287 23.3516 7.95287C24.116 9.92969 23.6358 11.3899 23.4916 11.7525C24.3876 12.7549 24.9309 14.0373 24.9309 15.604C24.9309 21.12 21.6562 22.3324 18.5384 22.688C19.041 23.1304 19.4876 24.0068 19.4876 25.3453C19.4876 27.2633 19.4708 28.8131 19.4708 29.2835C19.4708 29.6671 19.7228 30.1137 20.434 29.9737C25.9921 28.0711 30.0003 22.695 30.0003 16.3544C30.0003 8.42607 23.731 2 16.0002 2Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">GitHub</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+
+                <a href="https://www.youtube.com/@kedro-python" target="_blank" rel="noopener" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M31.7 9.6002C31.7 9.6002 31.4 7.4002 30.4 6.4002C29.2 5.1002 27.8 5.1002 27.2 5.0002C22.7 4.7002 16 4.7002 16 4.7002C16 4.7002 9.3 4.7002 4.8 5.0002C4.2 5.1002 2.8 5.1002 1.6 6.4002C0.6 7.4002 0.3 9.6002 0.3 9.6002C0.3 9.6002 0 12.2002 0 14.8002V17.2002C0 19.8002 0.3 22.4002 0.3 22.4002C0.3 22.4002 0.6 24.6002 1.6 25.6002C2.8 26.9002 4.4 26.8002 5.1 27.0002C7.7 27.2002 16 27.3002 16 27.3002C16 27.3002 22.7 27.3002 27.2 27.0002C27.8 26.9002 29.2 26.9002 30.4 25.6002C31.4 24.6002 31.7 22.4002 31.7 22.4002C31.7 22.4002 32 19.8002 32 17.2002V14.8002C32 12.2002 31.7 9.6002 31.7 9.6002ZM12.7 20.2002V11.2002L21.3 15.7002L12.7 20.2002Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">YouTube</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h3 class="section-title">Latest news</h3>
+
+            <div class="card-grid news-grid">
+                <a href="https://kedro.org/blog" target="_blank" rel="noopener" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M4.66699 27.3337V4.66699H21.0873L27.3337 10.9133V27.3337H4.66699ZM6.34233 25.6583H25.6583V11.8517H20.149V6.34233H6.34233V25.6583ZM9.65333 21.8243H22.3473V20.149H9.65333V21.8243ZM9.65333 11.8517H16.0003V10.1763H9.65333V11.8517ZM9.65333 16.838H22.3473V15.1627H9.65333V16.838Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Kedro Blog</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+
+                <a href="https://github.com/kedro-org/kedro/releases" target="_blank" rel="noopener" class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M11.7843 29.1543L9.4048 25.1081L4.77404 24.1406L5.2561 19.503L2.23047 16.0005L5.2561 12.5116L4.77404 7.88258L9.4048 6.90651L11.7843 2.84668L15.9996 4.71508L20.215 2.84668L22.6167 6.90651L27.2338 7.88258L26.7432 12.5116L29.7688 16.0005L26.7432 19.503L27.2338 24.1406L22.6167 25.1081L20.215 29.1542L15.9996 27.2859L11.7843 29.1543ZM12.5227 26.9748L15.9996 25.5201L19.5398 26.9748L21.6082 23.7116L25.3877 22.7988L25.027 18.927L27.6065 16.0005L25.027 13.0329L25.3877 9.15261L21.6082 8.28938L19.4988 5.02611L15.9996 6.48081L12.4595 5.02611L10.3911 8.28938L6.6116 9.15261L6.97227 13.0329L4.3928 16.0005L6.97227 18.927L6.6116 22.8398L10.3911 23.7116L12.5227 26.9748ZM14.586 20.1235L21.6714 13.074L20.4424 11.9031L14.586 17.7321L11.5706 14.6586L10.3279 15.8876L14.586 20.1235Z" fill="#989898"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Release Notes</h3>
+                        <p class="card-description">This is a short description of what this section contains.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block footer %}
+
+<footer>
+     <div class="welcome-page-footer-container">
+        <div class="welcome-page-footer-top">
+            {% include "partials/copyright-legal-socials.html" %}
+        </div>
+        <div class="welcome-page-footer-bottom">
+            <div class="badges">
+                <a href="https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Amain" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main" alt="GitHub Actions - Main Branch">
+                </a>
+                <a href="https://github.com/kedro-org/kedro/actions/workflows/all-checks.yml?query=branch%3Adevelop" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?branch=develop&label=develop" alt="GitHub Actions - Develop Branch">
+                </a>
+                <a href="https://opensource.org/license/apache2-0-php/" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License is Apache 2.0">
+                </a>
+                <a href="https://pypi.org/project/kedro/" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/badge/3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg" alt="Python version 3.9, 3.10, 3.11, 3.12, 3.13">
+                </a>
+                <a href="https://pypi.org/project/kedro/" target="_blank" rel="noopener">
+                    <img src="https://badge.fury.io/py/kedro.svg" alt="PyPI package version">
+                </a>
+                <a href="https://anaconda.org/conda-forge/kedro" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/conda/vn/conda-forge/kedro.svg" alt="Conda package version">
+                </a>
+                <a href="https://docs.kedro.org/" target="_blank" rel="noopener">
+                    <img src="https://readthedocs.org/projects/kedro/badge/?version=stable" alt="Docs build status">
+                </a>
+                <a href="https://slack.kedro.org" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack" alt="Kedro's Slack organisation">
+                </a>
+                <a href="https://linen-slack.kedro.org/" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/badge/slack-archive-blueviolet.svg?label=Kedro%20Slack%20" alt="Kedro's Slack archive">
+                </a>
+                <a href="https://github.com/astral-sh/ruff" target="_blank" rel="noopener">
+                    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Linted and Formatted with Ruff">
+                </a>
+                <a href="https://bestpractices.coreinfrastructure.org/projects/6711" target="_blank" rel="noopener">
+                    <img src="https://bestpractices.coreinfrastructure.org/projects/6711/badge" alt="OpenSSF Best Practices Badge Program">
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% endblock %}

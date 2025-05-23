@@ -1,7 +1,7 @@
 # AWS Batch (outdated documentation that needs review)
 
-> **Important**
-> This page contains outdated documentation that has not been tested against recent Kedro releases. If you successfully use AWS Batch with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
+!!! warning
+    This page contains outdated documentation that has not been tested against recent Kedro releases. If you successfully use AWS Batch with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
 
 ## Why would you use AWS Batch?
 [AWS Batch](https://aws.amazon.com/batch/) is optimised for batch computing and applications that scale with the number of jobs running in parallel. It manages job execution and compute resources, and dynamically provisions the optimal quantity and type. AWS Batch can assist with planning, scheduling, and executing your batch computing workloads, using [Amazon EC2](https://aws.amazon.com/ec2/) On-Demand and [Spot Instances](https://aws.amazon.com/ec2/spot/), and it has native integration with [CloudWatch](https://aws.amazon.com/cloudwatch/) for log collection.
@@ -15,60 +15,56 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 To use AWS Batch, ensure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
-- A `name` attribute is set for each Kedro {py:mod}`~kedro.pipeline.node`. Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --nodes=<node_name>`.
+- A `name` attribute is set for each Kedro [Node][kedro.pipeline.node]. Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --nodes=<node_name>`.
 - [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
-<details>
-<summary><b>Click to expand</b></summary>
+??? example "View code"
+    ```yaml
+    companies:
+    type: pandas.CSVDataset
+    filepath: s3://<your-bucket>/companies.csv
 
-```yaml
-companies:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/companies.csv
+    reviews:
+    type: pandas.CSVDataset
+    filepath: s3://<your-bucket>/reviews.csv
 
-reviews:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/reviews.csv
+    shuttles:
+    type: pandas.ExcelDataset
+    filepath: s3://<your-bucket>/shuttles.xlsx
 
-shuttles:
-  type: pandas.ExcelDataset
-  filepath: s3://<your-bucket>/shuttles.xlsx
+    preprocessed_companies:
+    type: pandas.CSVDataset
+    filepath: s3://<your-bucket>/preprocessed_companies.csv
 
-preprocessed_companies:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/preprocessed_companies.csv
+    preprocessed_shuttles:
+    type: pandas.CSVDataset
+    filepath: s3://<your-bucket>/preprocessed_shuttles.csv
 
-preprocessed_shuttles:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/preprocessed_shuttles.csv
+    model_input_table:
+    type: pandas.CSVDataset
+    filepath: s3://<your-bucket>/model_input_table.csv
 
-model_input_table:
-  type: pandas.CSVDataset
-  filepath: s3://<your-bucket>/model_input_table.csv
+    regressor:
+    type: pickle.PickleDataset
+    filepath: s3://<your-bucket>/regressor.pickle
+    versioned: true
 
-regressor:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/regressor.pickle
-  versioned: true
+    X_train:
+    type: pickle.PickleDataset
+    filepath: s3://<your-bucket>/X_train.pickle
 
-X_train:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/X_train.pickle
+    X_test:
+    type: pickle.PickleDataset
+    filepath: s3://<your-bucket>/X_test.pickle
 
-X_test:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/X_test.pickle
+    y_train:
+    type: pickle.PickleDataset
+    filepath: s3://<your-bucket>/y_train.pickle
 
-y_train:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/y_train.pickle
-
-y_test:
-  type: pickle.PickleDataset
-  filepath: s3://<your-bucket>/y_test.pickle
-```
-
-</details>
+    y_test:
+    type: pickle.PickleDataset
+    filepath: s3://<your-bucket>/y_test.pickle
+    ```
 
 ## How to run a Kedro pipeline using AWS Batch
 
@@ -98,9 +94,8 @@ Job definitions provide the template for resources needed for running a job. Cre
 
 Next you need a compute environment where the work will be executed. Create a _managed_, on-demand one named `spaceflights_env` and let it choose to create new service and instance roles if you don't have any yet. Having a managed environment means that AWS will automatically handle the scaling of your instances.
 
-```{note}
-This compute environment won't contain any instances until you trigger the pipeline run. Therefore, creating it does not incur any immediate costs.
-```
+!!! note
+    This compute environment won't contain any instances until you trigger the pipeline run. Therefore, creating it does not incur any immediate costs.
 
 #### Create AWS Batch job queue
 
@@ -110,9 +105,8 @@ A job queue is the bridge between the submitted jobs and the compute environment
 
 Ensure you have the necessary AWS credentials in place before moving on, so that your pipeline can access and interact with the AWS services. Check out [the AWS CLI documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for instructions on how to set this up.
 
-```{note}
-You should configure the default region to match the region where you've created the Batch resources.
-```
+!!! note
+    You should configure the default region to match the region where you've created the Batch resources.
 
 
 ### Submit AWS Batch jobs

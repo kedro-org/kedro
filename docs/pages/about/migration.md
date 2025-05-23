@@ -2,7 +2,7 @@
 
 [See the release notes on GitHub](https://github.com/kedro-org/kedro/releases/) for comprehensive information about the content of each Kedro release.
 
-## Migrate an existing project that uses Kedro 0.19.* to use 1.*
+## Migrate an existing project that uses Kedro 0.19.\* to use 1.\*
 
 ### Polishing API Surface
 - Kedro 1.0.0 made the following private methods `_is_project` and `_find_kedro_project` public. To update, you need to use `is_kedro_project` and `find_kedro_project` respectively.
@@ -11,7 +11,7 @@
 - Renamed the first argument to the `pipeline()` function from `pipe` to `nodes` to be consistent with the argument names of the `Pipeline` class.
 - Renamed `ModularPipelineError` to `PipelineError`.
 
-## Migrate an existing project that uses Kedro 0.18.* to use 0.19.*
+## Migrate an existing project that uses Kedro 0.18.\* to use 0.19.\*
 
 ### Custom syntax for `--params` was removed
 [Kedro 0.19.0](https://github.com/kedro-org/kedro/releases/tag/0.19.0) removed the custom Kedro syntax for `--params`. To update, you need to use the OmegaConf syntax instead by replacing `:` with `=`.

@@ -7,17 +7,17 @@ A Kedro starter contains code in the form of a [Cookiecutter](https://cookiecutt
 To create a Kedro project using a starter, apply the `--starter` flag to `kedro new`. For example:
 
 ```bash
-kedro new --starter=<path-to-starter>
+uvx kedro new --starter=<path-to-starter>
 ```
 
-```{note}
-`path-to-starter` could be the path to a local directory, a URL to a remote VCS repository supported by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
-```
+!!! note
+    `path-to-starter` could be the path to a local directory, a URL to a remote VCS repository supported by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
+
 
 If you want to use `--starter` as remote VCS repository, run:
 
 ```bash
-kedro new --starter git+https://github.com/kedro-org/kedro-starters.git --directory spaceflights-pandas
+uvx kedro new --starter git+https://github.com/kedro-org/kedro-starters.git --directory spaceflights-pandas
 ```
 
 ## Starter aliases
@@ -25,7 +25,7 @@ kedro new --starter git+https://github.com/kedro-org/kedro-starters.git --direct
 We provide aliases for common starters maintained by the Kedro team so that you don't have to specify the full path. For example, to create a project using the `spaceflights-pandas` starter:
 
 ```bash
-kedro new --starter=spaceflights-pandas
+uvx kedro new --starter=spaceflights-pandas
 ```
 To list all the aliases we support:
 
@@ -65,7 +65,7 @@ The latest version of Kedro that supports these starters is Kedro 0.18.14.
 By default, Kedro will use the latest version available in the repository. If you want to use a specific version of a starter, you can pass a `--checkout` argument to the command:
 
 ```bash
-kedro new --starter=spaceflights-pandas --checkout=0.1.0
+uvx kedro new --starter=spaceflights-pandas --checkout=0.1.0
 ```
 
 The `--checkout` value can point to a branch, tag or commit in the starter repository.
@@ -80,7 +80,7 @@ By default, when you create a new project using a starter, `kedro new` asks you 
 Kedro also allows you to specify a configuration file when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
 
 ```bash
-kedro new --config=my_kedro_project.yml --starter=spaceflights-pandas
+uvx kedro new --config=my_kedro_project.yml --starter=spaceflights-pandas
 ```
 
 This option is useful when the starter requires more configuration than the default mode requires.
@@ -91,5 +91,5 @@ You can build your own starters for reuse within a project or team, as described
 To create a project from a custom starter, run:
 
 ```bash
-kedro new --starter=<path-to-starter> --directory <directory>
+uvx kedro new --starter=<path-to-starter> --directory <directory>
 ```

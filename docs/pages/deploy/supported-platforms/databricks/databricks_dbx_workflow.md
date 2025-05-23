@@ -15,9 +15,8 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 If you prefer to develop a projects in notebooks rather than an in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
 
-``` {note}
-[Databricks now recommends](https://docs.databricks.com/en/archive/dev-tools/dbx/index.html) that you use now use Databricks asset bundles instead of dbx. This Kedro deployment documentation has not yet been updated but you may wish to consult [What are Databricks Asset Bundles?](https://docs.databricks.com/en/dev-tools/bundles/index.html) and [Migrate from dbx to bundles](https://docs.databricks.com/en/archive/dev-tools/dbx/dbx-migrate.html) for further information.
-```
+!!! note
+    [Databricks now recommends](https://docs.databricks.com/en/archive/dev-tools/dbx/index.html) that you use now use Databricks asset bundles instead of dbx. This Kedro deployment documentation has not yet been updated but you may wish to consult [What are Databricks Asset Bundles?](https://docs.databricks.com/en/dev-tools/bundles/index.html) and [Migrate from dbx to bundles](https://docs.databricks.com/en/archive/dev-tools/dbx/dbx-migrate.html) for further information.
 
 ## What this page covers
 
@@ -46,9 +45,8 @@ Find your Databricks username in the top right of the workspace UI and the host 
 
 ![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 
-```{note}
-Your databricks host must include the protocol (`https://`).
-```
+!!! note
+    Your databricks host must include the protocol (`https://`).
 
 ### Install Kedro and dbx in a new virtual environment
 
@@ -81,9 +79,8 @@ pip install kedro dbx --upgrade
 3. Enter your token and Databricks host when prompted.
 4. Run `databricks fs ls dbfs:/` at the command line to verify your authentication.
 
-```{note}
-dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks Repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
-```
+!!! note
+    dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks Repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
 
 ### Create a new Kedro project
 
@@ -95,9 +92,8 @@ kedro new --starter=databricks-iris
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
 
- ```{note}
-If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
- ```
+!!! note
+    If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
 
 ### Create a Repo on Databricks
 
@@ -133,9 +129,8 @@ This command will sync your local directory (`--source .`) with your Repo (`--de
 
 `dbx sync` will automatically sync any further changes made in your local project directory with your Databricks Repo while it runs.
 
-```{note}
-Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing, not in the editor that Databricks Repos provides.
-```
+!!! note
+    Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing, not in the editor that Databricks Repos provides.
 
 ### Create a `conf/local` directory in your Databricks Repo
 
@@ -266,9 +261,8 @@ Return to your Databricks notebook. Re-run the third and fourth cells in your no
 
 You can see that your model's accuracy has changed now that you are using a different classifier to produce the result.
 
-```{note}
-If your cluster terminates, you must re-run your entire notebook, as libraries installed using `%pip install ...` are ephemeral. If not, repeating this step is only necessary if your project's requirements change.
-```
+!!! note
+    If your cluster terminates, you must re-run your entire notebook, as libraries installed using `%pip install ...` are ephemeral. If not, repeating this step is only necessary if your project's requirements change.
 
 ## Summary
 

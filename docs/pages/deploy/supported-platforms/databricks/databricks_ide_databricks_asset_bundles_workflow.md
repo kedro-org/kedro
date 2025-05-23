@@ -1,8 +1,7 @@
 # Use an IDE and Databricks Asset Bundles to deploy a Kedro project
 
-```{note}
-The `dbx` package was deprecated by Databricks, and dbx workflow documentation is moved to a [new page](./databricks_dbx_workflow.md).
-```
+!!! note
+    The `dbx` package was deprecated by Databricks, and dbx workflow documentation is moved to a [new page](./databricks_dbx_workflow.md).
 
 This guide demonstrates a workflow for developing a Kedro Project on Databricks using Databricks Asset Bundles. You will learn how to develop your project using a local environment, then use `kedro-databricks` and Databricks Asset Bundle to package your code for running pipelines on Databricks. To learn more about Databricks Asset Bundles and customisation, read [What are Databricks Asset Bundles](https://docs.databricks.com/en/dev-tools/bundles/index.html).
 
@@ -16,9 +15,8 @@ By working in your local environment, you can take advantage of features within 
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
 
-```{note}
-If you prefer to develop projects in notebooks rather than in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
-```
+!!! note
+    If you prefer to develop projects in notebooks rather than in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
 
 ## What this page covers
 
@@ -45,9 +43,9 @@ Find your Databricks username in the top right of the workspace UI and the host 
 
 ![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 
-```{note}
-Your databricks host must include the protocol (`https://`).
-```
+!!! note
+    Your databricks host must include the protocol (`https://`).
+
 ### Install Kedro and Databricks CLI in a new virtual environment
 In your local development environment, create a virtual environment for this tutorial using Conda:
 
@@ -82,9 +80,8 @@ kedro new --starter=databricks-iris
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
 
- ```{note}
-If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
- ```
+!!! note
+    If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
 
 ## Create the Databricks Asset Bundles using `kedro-databricks`
 

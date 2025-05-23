@@ -6,7 +6,7 @@ A Hook consists of a Hook specification, and Hook implementation.
 
 ## Hook specifications
 
-Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. Currently, the following Hook specifications are provided in {py:mod}`~kedro.framework.hooks`:
+Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. Currently, the following Hook specifications are provided in [kedro.framework.hooks][]:
 
 * `after_context_created`
 * `after_catalog_created`
@@ -30,7 +30,7 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 
 * `<noun>` refers to the relevant component in the Kedro execution timeline that throws the error.
 
-{py:mod}`~kedro.framework.hooks` lists the full specifications for which you can inject additional behaviours by providing an implementation.
+The full specifications for which you can inject additional behaviours by providing an implementation are listed in [kedro.framework.hooks][].
 
 This diagram illustrates the execution order of hooks during `kedro run`:
 ![kedro run hook execution order](../../meta/images/kedro_run_lifecycle.png)
@@ -56,7 +56,7 @@ The Hook implementation should have the same name as the specification. The Hook
 
 To declare a Hook implementation, use the `@hook_impl` decorator.
 
-For example, the full signature of the {py:meth}` after_catalog_created() <kedro.framework.hooks.specs.DataCatalogSpecs.after_catalog_created>` Hook specification is:
+For example, the full signature of the [`after_catalog_created`][kedro.framework.hooks.specs.DataCatalogSpecs.after_catalog_created] Hook specification is:
 
 ```python
 @hook_spec
@@ -91,9 +91,8 @@ class DataCatalogHooks:
         self._logger.info(catalog.list())
 ```
 
-```{note}
-The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
-```
+!!! note
+    The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
 
 We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file that you create in your project.
 
@@ -114,9 +113,8 @@ HOOKS = (ProjectHooks(), DataCatalogHooks())
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](../plugins.md#hooks).
 
-```{note}
-Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
-```
+!!! note
+    Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
 
 #### Auto-registered Hook with plugin
 You can auto-register a Hook (pip-installable) by creating a [Kedro plugin](https://docs.kedro.org/en/stable/extend_kedro/plugins.html#hooks). Kedro provides `kedro.hooks` entrypoints to extend this easily.

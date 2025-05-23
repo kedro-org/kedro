@@ -1,0 +1,297 @@
+/* Target md-content__inner only when it contains .welcome-page-container as a child
+   This ensures these styles only apply to the welcome page and not other pages using md-content__inner */
+.md-content__inner:has(.welcome-page-container) {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  background-color: var(--welcome-page-bg-color);
+}
+
+/* Header Styles */
+.main-header {
+  background-color: #ffcb05;
+  padding: 0.75rem 0;
+}
+
+.header-container {
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-right: 2rem;
+}
+
+.logo svg {
+  margin-right: 0.5rem;
+}
+
+.main-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.main-nav a {
+  color: #333;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.main-nav a.active {
+  font-weight: 600;
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Search Box */
+/* .search-small {
+  position: relative;
+}
+
+.search-small input {
+  padding: 0.375rem 0.75rem 0.375rem 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  width: 180px;
+}
+
+.search-small svg {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+} */
+
+/* .theme-toggle,
+.github-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */
+
+/* Main Content */
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* Search Container */
+.search-container {
+  position: relative;
+  max-width: 570px;
+  margin: 0 auto 1.5rem;
+  padding: 0 16px;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background-color: #f9f9f9;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #c0c0c0;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Explore link */
+.explore-link {
+  text-align: center;
+  margin: 38px 0 98px 0;
+}
+
+.explore-link a {
+  color: var(--text-secondary-color);
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.explore-link a:hover {
+  font-weight: 600;
+}
+
+.explore-link .arrow {
+  margin-left: 0.25rem;
+  font-size: 1rem;
+}
+
+/* Section Styles */
+.cards-section-wrapper {
+  background-color: var(--cards-section-bg-color);
+  width: 100%;
+  padding-top: 48px;
+}
+
+.cards-section-wrapper section {
+  margin-bottom: 48px;
+  padding: 0 16px;
+}
+
+.bg-section {
+  background-color: #f9f9fa;
+  margin: -1rem -1rem 4rem -1rem;
+  padding: 2rem 1rem;
+}
+
+/* Card Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 0 auto;
+  justify-content: center;
+  place-items: center;
+  max-width: 800px;
+}
+
+.news-grid {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 800px;
+}
+
+/* Card Styles */
+.card {
+  background-color: var(--card-bg-color);
+  border: 2px solid var(--card-border-color);
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  text-decoration: none !important;
+  width: 100%;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px -3px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+  margin-bottom: 16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.card-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary-color);
+  margin-bottom: 8px;
+}
+
+.card-description {
+  font-size: 14px;
+  color: var(--text-secondary-color);
+}
+
+/* Typography for the Welcompage specifically*/
+.welcome-title {
+  margin-top: 92px !important;
+  font-weight: 600 !important;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.section-title {
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24px !important;
+  margin-top: 0;
+}
+
+/* Mobile styles */
+@media screen and (max-width: 76.2344em)  {
+  .card-grid,
+  .news-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .cards-section-wrapper {
+    padding: 32px 24px
+  }
+
+  .cards-section-wrapper section {
+    padding: 0;
+  }
+
+  .card {
+    padding: 16px;
+    display: flex;;
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .card-icon {
+    margin-bottom: 0;
+    margin-right: 16px;
+  }
+
+  .welcome-title {
+    margin-top: 48px !important;
+  }
+
+  .explore-link {
+    margin: 30px 0 54px 0;
+  }
+
+  .section-title {
+    margin-top: 32px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-weight: 600 !important;
+  }
+}

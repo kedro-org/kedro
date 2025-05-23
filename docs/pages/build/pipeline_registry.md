@@ -25,13 +25,12 @@ def register_pipelines() -> Dict[str, Pipeline]:
 
 As a reminder, [running `kedro run` without the `--pipeline` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
 
-```{note}
-The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
-```
+!!! note
+    The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
 
 ## Pipeline autodiscovery
 
-In the above example, you need to update the `register_pipelines()` function whenever you create a pipeline that should be returned as part of the project's pipelines. Since Kedro 0.18.3, you can achieve the same result with less code using {py:meth}` find_pipelines() <kedro.framework.project.find_pipelines>`. The [updated pipeline registry](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) contains no project-specific code:
+In the above example, you need to update the `register_pipelines()` function whenever you create a pipeline that should be returned as part of the project's pipelines. Since Kedro 0.18.3, you can achieve the same result with less code using [`find_pipelines()`][kedro.framework.project.find_pipelines]. The [updated pipeline registry](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) contains no project-specific code:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -71,9 +70,9 @@ def register_pipelines() -> Dict[str, Pipeline]:
     )
     return pipelines
 ```
-```{note}
-In the case above, `kedro run --tags data_engineering` will not run the data engineering pipeline, as it is not part of the default pipeline. To run the data engineering pipeline, you need to specify `kedro run --pipeline data_engineering --tags data_engineering`.
-```
+!!! note
+    In the case above, `kedro run --tags data_engineering` will not run the data engineering pipeline, as it is not part of the default pipeline. To run the data engineering pipeline, you need to specify `kedro run --pipeline data_engineering --tags data_engineering`.
+
 On the other hand, you can also modify pipelines *before* assigning `pipelines["__default__"] = sum(pipelines.values())` which includes it in the default pipeline. For example, you can update the `data_processing` pipeline with the `data_engineering` tag in the `pipeline_registry.py` and also include this change in the default pipeline:
 
 ```python

@@ -60,9 +60,8 @@ Specify the **Run / Debug Configuration** name in the **Name** field, and edit t
 
 ![](../meta/images/pycharm_edit_py_run_config.png)
 
-```{note}
-**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../develop/logging.md).
-```
+!!! note
+    **Emulate terminal in output console** enables PyCharm to show [rich terminal output](../develop/logging.md).
 
 To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar (if that toolbar is not visible, you can enable it by going to **View > Toolbar**). Click the green triangle:
 
@@ -90,9 +89,8 @@ Then click the bug button in the toolbar (![](../meta/images/pycharm_debugger_bu
 
 ## Advanced: Remote SSH interpreter
 
-```{note}
-This section uses features supported in PyCharm Professional Edition only.
-```
+!!! note
+    This section uses features supported in PyCharm Professional Edition only.
 
 Firstly, add an SSH interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **SSH Interpreter** and fill in details of the remote computer:
 
@@ -119,9 +117,8 @@ Click **OK** and then select **Remote Run** from the toolbar and click **Run** t
 
 ## Advanced: Docker interpreter
 
-```{note}
-This section uses features supported by PyCharm Professional Edition only.
-```
+!!! note
+    This section uses features supported by PyCharm Professional Edition only.
 
 First, add a Docker interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **Docker Interpreter** and then choose the target Docker image:
 

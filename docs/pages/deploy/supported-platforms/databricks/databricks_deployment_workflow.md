@@ -47,9 +47,8 @@ Find your Databricks username in the top right of the workspace UI and the host 
 
 ![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 
-```{note}
-Your Databricks host must include the protocol (`https://`).
-```
+!!! note
+    Your Databricks host must include the protocol (`https://`).
 
 ### Install Kedro and the Databricks CLI in a new virtual environment
 
@@ -94,9 +93,8 @@ kedro new --starter=databricks-iris
 
 This command creates a new Kedro project using the `databricks-iris` starter template. Name your new project `iris-databricks` for consistency with the rest of this guide.
 
- ```{note}
- If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
- ```
+!!! note
+    If you are not using the `databricks-iris` starter to create a Kedro project, **and** you are working with a version of Kedro **earlier than 0.19.0**, then you should [disable file-based logging](https://docs.kedro.org/en/0.18.14/logging/logging.html#disable-file-based-logging) to prevent Kedro from attempting to write to the read-only file system.
 
 ### Package your project
 
@@ -110,9 +108,8 @@ This command generates a `.whl` file in the `dist` directory within your project
 
 ### Upload project data and configuration to DBFS
 
-```{note}
-A Kedro project's configuration and data do not get included when it is packaged. They must be stored somewhere accessible to allow your packaged project to run.
-```
+!!! note
+    A Kedro project's configuration and data do not get included when it is packaged. They must be stored somewhere accessible to allow your packaged project to run.
 
 Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data and configuration to a location accessible to Databricks. In this guide, we will store the data on the Databricks File System (DBFS).
 
@@ -146,9 +143,8 @@ You should see the contents of the project's `data/` directory printed to your t
 08_reporting
 ```
 
-```{note}
- If you are not using the `databricks-iris` starter to create a Kedro project, then you should make sure your catalog entries point to the DBFS storage.
- ```
+!!! note
+    If you are not using the `databricks-iris` starter to create a Kedro project, then you should make sure your catalog entries point to the DBFS storage.
 
 ## Deploy and run your Kedro project using the workspace UI
 

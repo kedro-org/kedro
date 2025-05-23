@@ -546,13 +546,43 @@ class Pipeline:
 
         return [list(group) for group in self._toposorted_groups]
 
-    @property
-    def grouped_nodes_by_namespace(self) -> list[GroupedNodes]:
-        """Return a list of grouped nodes by top-level namespace with
-        information about the nodes, their type, and dependencies.
+    def group_nodes_by(
+        self,
+        group_by: str | None = "namespace",
+    ) -> list[GroupedNodes]:
+        """Return a list of grouped nodes based on the specified strategy.
 
-        This property is intended to be used by deployment plugins to group nodes by namespaces.
+        Args:
+            group_by: Strategy for grouping. Supported values:
+                - "namespace": Groups nodes by their top-level namespace.
+                - None or "none": No grouping, each node is its own group.
+
+        Returns:
+            A list of GroupedNodes instances.
         """
+        if group_by is None or group_by.lower() == "none":
+            return self._group_by_none()
+        if group_by.lower() == "namespace":
+            return self._group_by_namespace()
+        raise ValueError(f"Unsupported group_by strategy: {group_by}")
+
+    def _group_by_none(self) -> list[GroupedNodes]:
+        return [
+            GroupedNodes(
+                name=node.name,
+                type="nodes",
+                nodes=[node.name],
+                dependencies=[
+                    parent.name
+                    for parent in sorted(
+                        self.node_dependencies[node], key=lambda n: n.name
+                    )
+                ],
+            )
+            for node in self.nodes
+        ]
+
+    def _group_by_namespace(self) -> list[GroupedNodes]:
         grouped_nodes_map: dict[str, GroupedNodes] = {}
 
         for node in self.nodes:
@@ -561,12 +591,11 @@ class Pipeline:
             if key not in grouped_nodes_map:
                 grouped_nodes_map[key] = GroupedNodes(
                     name=key,
-                    type="namespace" if node.namespace else "node",
+                    type="namespace" if node.namespace else "nodes",
                 )
 
             grouped_nodes_map[key].nodes.append(node.name)
 
-            # Ensure dependencies are not duplicated
             dependencies = grouped_nodes_map[key].dependencies
             unique_dependencies = set(dependencies)
 

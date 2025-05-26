@@ -1,5 +1,5 @@
 install:
-	uv pip install --system -e .
+	uv pip install -e .
 
 clean:
 	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
@@ -35,7 +35,7 @@ show-docs:
 	open docs/build/html/index.html
 
 linkcheck:
-	uv pip install --system "kedro[docs] @ ."
+	uv pip install "kedro[docs] @ ."
 	./docs/build-docs.sh "linkcheck"
 
 package: clean install
@@ -43,7 +43,7 @@ package: clean install
 
 install-test-requirements:
 	python -m pip install "uv==0.4.29"
-	uv pip install --system "kedro[test] @ ."
+	uv pip install "kedro[test] @ ."
 
 install-pre-commit:
 	pre-commit install --install-hooks

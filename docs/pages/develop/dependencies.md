@@ -41,9 +41,8 @@ pip install "kedro-datasets[<group>-<dataset>]"
 
 For example, your workflow might require the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas-exceldataset]"`.
 
-```{note}
-From `kedro-datasets` version 3.0.0 onwards, the names of the optional dataset-level dependencies have been normalised to follow [PEP 685](https://peps.python.org/pep-0685/). The '.' character has been replaced with a '-' character and the names are in lowercase. For example, if you had `kedro-datasets[pandas.ExcelDataset]` in your requirements file, it would have to be changed to `kedro-datasets[pandas-exceldataset]`.
-```
+!!! note
+    From `kedro-datasets` version 3.0.0 onwards, the names of the optional dataset-level dependencies have been normalised to follow [PEP 685](https://peps.python.org/pep-0685/). The '.' character has been replaced with a '-' character and the names are in lowercase. For example, if you had `kedro-datasets[pandas.ExcelDataset]` in your requirements file, it would have to be changed to `kedro-datasets[pandas-exceldataset]`.
 
 ## Reproducible environments
 To ensure that the project dependencies and the transitive dependencies are pinned to specific versions, use [`pip-tools`](https://pypi.org/project/pip-tools/) to compile `requirements.txt` file into a `requirements.lock` file.
@@ -63,6 +62,5 @@ This will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-
 to use `pip`'s Hash Checking Mode or `--upgrade-package` to update specific packages to the latest or specific versions.
 [Check out the `pip-tools` documentation](https://pypi.org/project/pip-tools/) for more information.
 
-```{note}
-The `requirements.txt` file contains "source" requirements, while `requirements.lock` contains the compiled version of those and requires no manual updates. If you need to update the dependencies, update the `requirements.txt` file and re-run the `pip-compile` command.
-```
+!!! note
+    The `requirements.txt` file contains "source" requirements, while `requirements.lock` contains the compiled version of those and requires no manual updates. If you need to update the dependencies, update the `requirements.txt` file and re-run the `pip-compile` command.

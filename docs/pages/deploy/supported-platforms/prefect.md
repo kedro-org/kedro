@@ -4,8 +4,8 @@ This page explains how to run your Kedro pipeline using [Prefect 2.0](https://ww
 
 The scope of this documentation is the deployment to a self hosted [Prefect Server](https://docs-2.prefect.io/latest/guides/host/), which is an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends Prefect 2.0. We will use an [Agent that dequeues submitted flow runs from a Work Queue](https://docs-2.prefect.io/latest/concepts/deployments/#workers-and-work-pools).
 
-> **Note**
-> This deployment has been tested using Kedro 0.18.10 with Prefect version 2.10.17. If you want to deploy with Prefect 1.0, we recommend you review [earlier versions of Kedro's Prefect deployment documentation](https://docs.kedro.org/en/0.18.9/deployment/prefect.html).
+!!! note
+    This deployment has been tested using Kedro 0.18.10 with Prefect version 2.10.17. If you want to deploy with Prefect 1.0, we recommend you review [earlier versions of Kedro's Prefect deployment documentation](https://docs.kedro.org/en/0.18.9/deployment/prefect.html).
 
 ## Prerequisites
 
@@ -23,8 +23,8 @@ prefect config set PREFECT_API_URL="http://127.0.0.1:4200/api"
 
 For each new Kedro project you create, you need to decide whether to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file stored in the project root.
 
-> **Important**
-> When you run a Kedro project locally, you are asked on the first `kedro` command for the project, but in this use case, the project will hang unless you follow these instructions.
+!!! warning
+    When you run a Kedro project locally, you are asked on the first `kedro` command for the project, but in this use case, the project will hang unless you follow these instructions.
 
 Create a `.telemetry` file manually and put it in the **root of your Kedro project** and add your preference to give or decline consent. To do this, specify either `true` (to give consent) or `false`. The example given below accepts Kedro's usage analytics.
 
@@ -242,9 +242,8 @@ Then, run the deployment script in other terminal:
 python register_prefect_flow.py --work_pool_name <work_pool_name> --work_queue_name <work_queue_name>
 ```
 
-```{note}
-Be sure that your Prefect Server is up and running. Verify that the deployment script arguments match the work pool and work queue names.
-```
+!!! note
+    Be sure that your Prefect Server is up and running. Verify that the deployment script arguments match the work pool and work queue names.
 
 ### Run Prefect flow
 
@@ -256,8 +255,7 @@ Navigate to http://localhost:4200/deployments to see your registered flow.
 
 Click on the flow to open it and then trigger your flow using the "RUN" > "QUICK RUN" button and leave the parameters by default. If you want to run a specific pipeline you can replace the `__default__` value.
 
-```{note}
-Be sure that both your Prefect Server and Agent are up and running.
-```
+!!! note
+    Be sure that both your Prefect Server and Agent are up and running.
 
 ![prefect_2_flow_details](../../meta/images/prefect_2_flow_details.png)

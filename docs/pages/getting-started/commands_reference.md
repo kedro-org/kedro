@@ -10,35 +10,33 @@ If you are using macOS or Linux, you can set up your shell to autocomplete `kedr
 echo $0
 ```
 
-<details>
-<summary>If you are using Bash (click to expand)</summary>
-<br/>
-Add the following to your <code>~/.bashrc</code> (or just run it on the command line):
 
-```bash
-eval "$(_KEDRO_COMPLETE=bash_source kedro)"
-```
-</details>
+??? example "If you are using Bash (click to expand)"
+    <br/>
+    Add the following to your <code>~/.bashrc</code> (or just run it on the command line):
 
-<details>
-<summary>If you are using Z shell (ZSh) (click to expand)</summary>
-<br/>
-Add the following to <code>~/.zshrc</code>:
+    ```bash
+    eval "$(_KEDRO_COMPLETE=bash_source kedro)"
+    ```
 
-```bash
-eval "$(_KEDRO_COMPLETE=zsh_source kedro)"
-```
-</details>
 
-<details>
-<summary>If you are using Fish (click to expand)</summary>
-<br/>
-Add the following to <code>~/.config/fish/completions/foo-bar.fish</code>:
+??? example "If you are using Z shell (ZSh) (click to expand)"
+    <br/>
+    Add the following to <code>~/.zshrc</code>:
 
-```bash
-eval (env _KEDRO_COMPLETE=fish_source kedro)
-```
-</details>
+    ```bash
+    eval "$(_KEDRO_COMPLETE=zsh_source kedro)"
+    ```
+
+
+??? example "If you are using Fish (click to expand)"
+    <br/>
+    Add the following to <code>~/.config/fish/completions/foo-bar.fish</code>:
+
+    ```bash
+    eval (env _KEDRO_COMPLETE=fish_source kedro)
+    ```
+
 
 ## Invoke Kedro CLI from Python (optional)
 You can invoke the Kedro CLI as a Python module:
@@ -75,9 +73,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 The following are Kedro commands that apply globally and can be run from any directory location.
 
-```{note}
-You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
-```
+!!! note
+    You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
 
 ### Get help on Kedro commands
 
@@ -126,142 +123,138 @@ kedro new
 
 ## Customise or override project-specific Kedro commands
 
-```{note}
-All project related CLI commands should be run from the project’s root directory.
-```
+!!! note
+    All project related CLI commands should be run from the project’s root directory.
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
 The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it via the [`plugin` framework](../extend/plugins.md). Find the template for the `cli.py` file below.
 
-<details>
-<summary><b>Click to expand</b></summary>
-
-```
-"""Command line tools for manipulating a Kedro project.
-Intended to be invoked via `kedro`."""
-import click
-from kedro.framework.cli.project import (
-    ASYNC_ARG_HELP,
-    CONFIG_FILE_HELP,
-    CONF_SOURCE_HELP,
-    FROM_INPUTS_HELP,
-    FROM_NODES_HELP,
-    LOAD_VERSION_HELP,
-    NODE_ARG_HELP,
-    PARAMS_ARG_HELP,
-    PIPELINE_ARG_HELP,
-    RUNNER_ARG_HELP,
-    TAG_ARG_HELP,
-    TO_NODES_HELP,
-    TO_OUTPUTS_HELP,
-)
-from kedro.framework.cli.utils import (
-    CONTEXT_SETTINGS,
-    _config_file_callback,
-    _split_params,
-    _split_load_versions,
-    env_option,
-    split_string,
-    split_node_names,
-)
-from kedro.framework.session import KedroSession
-from kedro.utils import load_obj
+??? example "Click to expand"
+    ```
+    """Command line tools for manipulating a Kedro project.
+    Intended to be invoked via `kedro`."""
+    import click
+    from kedro.framework.cli.project import (
+        ASYNC_ARG_HELP,
+        CONFIG_FILE_HELP,
+        CONF_SOURCE_HELP,
+        FROM_INPUTS_HELP,
+        FROM_NODES_HELP,
+        LOAD_VERSION_HELP,
+        NODE_ARG_HELP,
+        PARAMS_ARG_HELP,
+        PIPELINE_ARG_HELP,
+        RUNNER_ARG_HELP,
+        TAG_ARG_HELP,
+        TO_NODES_HELP,
+        TO_OUTPUTS_HELP,
+    )
+    from kedro.framework.cli.utils import (
+        CONTEXT_SETTINGS,
+        _config_file_callback,
+        _split_params,
+        _split_load_versions,
+        env_option,
+        split_string,
+        split_node_names,
+    )
+    from kedro.framework.session import KedroSession
+    from kedro.utils import load_obj
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
-def cli():
-    """Command line tools for manipulating a Kedro project."""
+    @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
+    def cli():
+        """Command line tools for manipulating a Kedro project."""
 
 
-@cli.command()
-@click.option(
-    "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
-)
-@click.option(
-    "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=split_string
-)
-@click.option(
-    "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_node_names
-)
-@click.option(
-    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
-)
-@click.option("--nodes", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
-@click.option(
-    "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
-)
-@click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
-@env_option
-@click.option("--tags", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
-@click.option(
-    "--load-versions",
-    "-lv",
-    type=str,
-    multiple=True,
-    help=LOAD_VERSION_HELP,
-    callback=_split_load_versions,
-)
-@click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
-@click.option(
-    "--config",
-    "-c",
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-    help=CONFIG_FILE_HELP,
-    callback=_config_file_callback,
-)
-@click.option(
-    "--conf-source",
-    type=click.Path(exists=True, file_okay=False, resolve_path=True),
-    help=CONF_SOURCE_HELP,
-)
-@click.option(
-    "--params",
-    type=click.UNPROCESSED,
-    default="",
-    help=PARAMS_ARG_HELP,
-    callback=_split_params,
-)
-def run(
-    tags,
-    env,
-    runner,
-    is_async,
-    node_names,
-    to_nodes,
-    from_nodes,
-    from_inputs,
-    to_outputs,
-    load_versions,
-    pipeline,
-    config,
-    conf_source,
-    params,
-):
-    """Run the pipeline."""
+    @cli.command()
+    @click.option(
+        "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
+    )
+    @click.option(
+        "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=split_string
+    )
+    @click.option(
+        "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_node_names
+    )
+    @click.option(
+        "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
+    )
+    @click.option("--nodes", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
+    @click.option(
+        "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
+    )
+    @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
+    @env_option
+    @click.option("--tags", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
+    @click.option(
+        "--load-versions",
+        "-lv",
+        type=str,
+        multiple=True,
+        help=LOAD_VERSION_HELP,
+        callback=_split_load_versions,
+    )
+    @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
+    @click.option(
+        "--config",
+        "-c",
+        type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+        help=CONFIG_FILE_HELP,
+        callback=_config_file_callback,
+    )
+    @click.option(
+        "--conf-source",
+        type=click.Path(exists=True, file_okay=False, resolve_path=True),
+        help=CONF_SOURCE_HELP,
+    )
+    @click.option(
+        "--params",
+        type=click.UNPROCESSED,
+        default="",
+        help=PARAMS_ARG_HELP,
+        callback=_split_params,
+    )
+    def run(
+        tags,
+        env,
+        runner,
+        is_async,
+        node_names,
+        to_nodes,
+        from_nodes,
+        from_inputs,
+        to_outputs,
+        load_versions,
+        pipeline,
+        config,
+        conf_source,
+        params,
+    ):
+        """Run the pipeline."""
 
-    runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-    tags = tuple(tags)
-    node_names = tuple(node_names)
+        runner = load_obj(runner or "SequentialRunner", "kedro.runner")
+        tags = tuple(tags)
+        node_names = tuple(node_names)
 
-    with KedroSession.create(
-        env=env, conf_source=conf_source, extra_params=params
-    ) as session:
-        session.run(
-            tags=tags,
-            runner=runner(is_async=is_async),
-            node_names=node_names,
-            from_nodes=from_nodes,
-            to_nodes=to_nodes,
-            from_inputs=from_inputs,
-            to_outputs=to_outputs,
-            load_versions=load_versions,
-            pipeline_name=pipeline,
-        )
+        with KedroSession.create(
+            env=env, conf_source=conf_source, extra_params=params
+        ) as session:
+            session.run(
+                tags=tags,
+                runner=runner(is_async=is_async),
+                node_names=node_names,
+                from_nodes=from_nodes,
+                to_nodes=to_nodes,
+                from_inputs=from_inputs,
+                to_outputs=to_outputs,
+                load_versions=load_versions,
+                pipeline_name=pipeline,
+            )
 
 
-```
-</details>
+    ```
 
 ### Project setup
 
@@ -430,9 +423,9 @@ kedro ipython
 
 The [Kedro IPython extension](../integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
-* `catalog` (type {py:class}`~kedro.io.DataCatalog`): [Kedro Data Catalog](../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
-* `context` (type {py:class}`~kedro.framework.context.KedroContext`): Kedro project context that provides access to Kedro's library components
+* `catalog` (type [kedro.io.DataCatalog][]): [Data Catalog](../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `context` (type [kedro.framework.context.KedroContext][]): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type {py:class}`~kedro.framework.session.session.KedroSession`): [Kedro session](../extend/session.md) that orchestrates a pipeline run
+* `session` (type [kedro.framework.session.session.KedroSession][]): [Kedro session](../extend/session.md) that orchestrates a pipeline run
 
 To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined.

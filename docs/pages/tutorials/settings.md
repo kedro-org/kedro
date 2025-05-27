@@ -4,9 +4,8 @@
 
 A Kedro project's `settings.py` file contains the application settings for the project, including registration of Hooks and library components. This page explains how settings work, and which settings are available.
 
-```{note}
-Application settings is distinct from [run time configuration](../configure/configuration_basics.md), which is stored in the `conf` folder and can vary by configuration environment, and [pyproject.toml](#project-metadata) , which provides project metadata and build configuration.
-```
+!!! note
+    Application settings is distinct from [run time configuration](../configure/configuration_basics.md), which is stored in the `conf` folder and can vary by configuration environment, and [pyproject.toml](#project-metadata) , which provides project metadata and build configuration.
 
 By default, all code in `settings.py` is commented out. When settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.
 
@@ -20,7 +19,7 @@ By default, all code in `settings.py` is commented out. When settings are not su
 | `CONF_SOURCE`               | `"conf"`                                          | Directory that holds [configuration](../configure/configuration_basics.md).                                    |
 | `CONFIG_LOADER_CLASS`       | `kedro.config.ConfigLoader`                       | Customise how project configuration is handled.                                                                    |
 | `CONFIG_LOADER_ARGS`        | `dict()`                                          | Keyword arguments for the `CONFIG_LOADER_CLASS` constructor.                                                       |
-| `DATA_CATALOG_CLASS`        | `kedro.io.DataCatalog`                            | Customise how the [Kedro Data Catalog](../catalog-data/data_catalog.md) is handled.                                              |
+| `DATA_CATALOG_CLASS`        | `kedro.io.DataCatalog`                            | Customise how the [Data Catalog](../catalog-data/data_catalog.md) is handled.                                              |
 
 ## Project metadata
 The `pyproject.toml` file is the standard way to store build metadata and tool settings for Python projects.

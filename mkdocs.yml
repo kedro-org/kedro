@@ -1,20 +1,22 @@
 site_name: ""
 site_url: https://docs.kedro.org
-use_directory_urls: true
+repo_name: kedro-org/kedro
+repo_url: https://github.com/kedro-org/kedro
 
 theme:
   name: material
+  custom_dir: docs/overrides/
   palette:
      # Palette toggle for light mode
     - scheme: light
       toggle:
-        icon: material/brightness-7
+        icon: material/white-balance-sunny
         name: Switch to dark mode
 
     # Palette toggle for dark mode
     - scheme: dark
       toggle:
-        icon: material/brightness-4
+        icon: material/white-balance-sunny
         name: Switch to light mode
 
   language: en
@@ -22,8 +24,14 @@ theme:
     text: Inter
     code: Inter Regular
   favicon: "https://kedro.org/images/favicon.ico"
-  logo: assets/kedro-horizontal-color-on-light.svg
-
+  logo: assets/kedro_logo_black.svg
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      note: octicons/note-16
+      tip: octicons/info-16
+      warning: octicons/alert-16
+      example: octicons/code-16
 
   features:
     - navigation.instant
@@ -31,6 +39,7 @@ theme:
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.tracking
+    - navigation.footer
     - search.suggest
     - search.highlight
     - content.tabs.link
@@ -44,12 +53,11 @@ plugins:
   - autorefs
   - mermaid2
   - mkdocstrings:
-      default_handler: python
       handlers:
         python:
           options:
             show_root_toc_entry: true
-            show_source: false
+            show_source: false #currently doesn't show source at correct level, and not for pydantic models
             docstring_style: google
             merge_init_into_class: true
             docstring_section_style: list
@@ -80,6 +88,7 @@ markdown_extensions:
       custom_checkbox: true
   - toc:
       permalink: true
+      title: Contents
   - pymdownx.arithmatex:
       generic: true
   - attr_list
@@ -93,7 +102,10 @@ markdown_extensions:
 extra_css:
   - stylesheets/colors.css
   - stylesheets/globals.css
+  - stylesheets/typography.css
   - stylesheets/themes.css
+  - stylesheets/footer.css
+  - stylesheets/welcome.css
 
 extra_javascript:
   - javascript/readthedocs.js
@@ -101,9 +113,9 @@ extra_javascript:
 
 
 nav:
-  - Home: index.md
+  - Welcome: index.md
   - Kedro:
-      - GETTING STARTED:
+      - Get Started:
           - Introduction to Kedro: pages/getting-started/course.md
           - Concepts: pages/getting-started/kedro_concepts.md
           - Installation: pages/getting-started/install.md
@@ -112,7 +124,7 @@ nav:
             #   - Quickstart: pages/getting-started/quickstart.md
           - Glossary: pages/getting-started/glossary.md
           - FAQs: pages/getting-started/faq.md
-      - TUTORIALS:
+      - Tutorials:
           - Kedro Spaceflights tutorial:
             - Spaceflight tutorial: pages/tutorials/spaceflights_tutorial.md
             - Spaceflight tutorial template: pages/tutorials/tutorial_template.md
@@ -123,20 +135,20 @@ nav:
             - Test a project: pages/tutorials/test_a_project.md
             - FAQs: pages/tutorials/spaceflights_tutorial_faqs.md
           - Kedro for Notebook tutorial: pages/tutorials/notebooks_tutorial.md
-      - CREATE:
+      - Create:
           - Create a Kedro project: pages/create/new_project.md
           - Create a minimal Kedro project: pages/create/minimal_kedro_project.md
           - Customise a new project: pages/create/customise_project.md
           - Kedro tools: pages/create/new_project_tools.md
           - Kedro starters: pages/create/starters.md
-      - CONFIGURE:
+      - Configure:
           - Project configuration and settings:
               - Configuration basics: pages/configure/configuration_basics.md
               - Migration guide for config loaders: pages/configure/config_loader_migration.md
               - Advanced configuration: pages/configure/advanced_configuration.md
           - Parameters: pages/configure/parameters.md
           - Credentials: pages/configure/credentials.md
-      - CATALOG DATA:
+      - Catalog Data:
           - Introduction: pages/catalog-data/introduction.md
           - Kedro data catalog: pages/catalog-data/data_catalog.md
           - Data Catalog YAML examples: pages/catalog-data/data_catalog_yaml_examples.md
@@ -144,7 +156,7 @@ nav:
           - Data and pipeline versioning: pages/catalog-data/kedro_dvc_versioning.md
           - Partitioned and incremental datasets: pages/catalog-data/partitioned_and_incremental_datasets.md
           - Programmatic usage: pages/catalog-data/advanced_data_catalog_usage.md
-      - BUILD:
+      - Build:
           - Nodes: pages/build/nodes.md
           - Pipeline object: pages/build/pipeline_introduction.md
           - Run a pipeline: pages/build/run_a_pipeline.md
@@ -152,13 +164,13 @@ nav:
           - Reusing pipelines (namespaces): pages/build/namespaces.md
           - Pipeline registry: pages/build/pipeline_registry.md
           - Slice a pipeline: pages/build/slice_a_pipeline.md
-      - DEVELOP:
+      - Develop:
           - Dependency management: pages/develop/dependencies.md
           - Logging: pages/develop/logging.md
           - Automated testing: pages/develop/automated_testing.md
           - Code formatting and linting: pages/develop/linting.md
           - Debugging: pages/develop/debugging.md
-      - DEPLOY:
+      - Deploy:
           - Overview: pages/deploy/index.md
           - How to package your project: pages/deploy/package_a_project.md
           - How to group your nodes effectively: pages/deploy/nodes_grouping.md
@@ -183,7 +195,7 @@ nav:
               - VertexAI: pages/deploy/supported-platforms/vertexai.md
               - Argo Workflows: pages/deploy/supported-platforms/argo.md
               - AWS Batch: pages/deploy/supported-platforms/aws_batch.md
-      - EXTEND:
+      - Extend:
           - Use Cases: pages/extend/common_use_cases.md
           - Custom datasets: pages/extend/how_to_create_a_custom_dataset.md
           - Hooks:
@@ -193,7 +205,7 @@ nav:
           - Programmatic usage: pages/extend/session.md
           - Custom plugins: pages/extend/plugins.md
           - Custom starters: pages/extend/create_a_starter.md
-      - REFERENCE:
+      - Reference:
           - Kedro API:
               - Overview: pages/api/index.md
               - kedro.config:
@@ -230,6 +242,7 @@ nav:
               - kedro.pipeline:
                   - Overview: pages/api/pipeline/kedro.pipeline.md
                   - node: pages/api/pipeline/kedro.pipeline.node.md
+                  - Pipeline: pages/api/pipeline/kedro.pipeline.Pipeline.md
               - kedro.runner:
                   - Overview: pages/api/runner/kedro.runner.md
                   - run_node: pages/api/runner/kedro.runner.run_node.md
@@ -242,7 +255,7 @@ nav:
               - kedro.KedroDeprecationWarning: pages/api/kedro.KedroDeprecationWarning.md
               - kedro.KedroPythonVersionWarning: pages/api/kedro.KedroPythonVersionWarning.md
           - Kedro CLI: pages/getting-started/commands_reference.md
-      - INTEGRATION & PLUGINS:
+      - Integration & Plugins:
           - IPython and Jupyter:
               - Introduction: pages/integrations-and-plugins/notebooks_and_ipython/index.md
               - Kedro and Jupyter Notebook: pages/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md
@@ -252,10 +265,10 @@ nav:
         #   - DVC: pages/integrations-and-plugins/dvc.md
           - Delta Lake: pages/integrations-and-plugins/deltalake_versioning.md
           - Iceberg: pages/integrations-and-plugins/iceberg_versioning.md
-      - IDE SUPPORT:
+      - IDE Support:
           - Visual Studio Code: pages/ide/set_up_vscode.md
           - PyCharm: pages/ide/set_up_pycharm.md
-      - ABOUT:
+      - About:
         #   - Community:
             #   - Kedro Slack: pages/about/community/slack.md
             #   - Kedro Wizard: pages/about/community/wizard.md

@@ -42,9 +42,8 @@ except MissingConfigException:
     credentials = {}
 ```
 
-```{note}
-The `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
-```
+!!! note
+    The `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
 
 ## How to work with AWS credentials
 

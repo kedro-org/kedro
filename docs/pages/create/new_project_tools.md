@@ -12,14 +12,13 @@ There is a [flowchart to illustrate the choices available](#flowchart-illustrati
 Navigate to the directory in which you would like to create your new Kedro project, and run the following command:
 
 ```bash
-kedro new
+uvx kedro new
 ```
 
 This will start the new project creation workflow.
 
-``` {note}
-You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow to skip queries about how you want to customise the project. The flags are described below.
-```
+!!! note
+    You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow to skip queries about how you want to customise the project. The flags are described below.
 
 ### Project name
 The first prompt asks you to input a project name.
@@ -27,7 +26,7 @@ The first prompt asks you to input a project name.
 To skip this step and name the project directly, add it to `kedro new` as follows:
 
 ```bash
-kedro new --name=spaceflights
+uvx kedro new --name=spaceflights
 ```
 
 ### Tools
@@ -96,7 +95,7 @@ A list of available tools can also be accessed by running `kedro new --help`
 To skip this step and select tools directly, add the tools selection to `kedro new` as follows:
 
 ```bash
-kedro new --tools=<your tool selection>
+uvx kedro new --tools=<your tool selection>
 ```
 
 To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, `pyspark`, and `viz`.
@@ -116,7 +115,7 @@ Each starter example is tailored to demonstrate the capabilities and integration
 To skip this step and make a choice of example code directly, add the your preference to `kedro new` as follows:
 
 ```bash
-kedro new --example=y
+uvx kedro new --example=y
 ```
 
 ## Specify tools using YAML configuration
@@ -145,16 +144,14 @@ As an alternative to the interactive project creation workflow, you can also sup
 To create a new project using the file to supply details to `kedro new`, run the following command:
 
 ```bash
-kedro new --config=<path/to/config.yml>
+uvx kedro new --config=<path/to/config.yml>
 ```
 
-``` {note}
-Note: When using a configuration file to create a new project, you must provide values for the project name, repository name, and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
-```
+!!! note
+    Note: When using a configuration file to create a new project, you must provide values for the project name, repository name, and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
 
-``` {note}
-When the `--config` flag is used together with `--name`, `--tools`, or `--example`, the values provided directly on the CLI will overwrite those specified in the configuration file.
-```
+!!! note
+    When the `--config` flag is used together with `--name`, `--tools`, or `--example`, the values provided directly on the CLI will overwrite those specified in the configuration file.
 
 ## Kedro tools
 
@@ -167,7 +164,7 @@ The available tools include: [linting](#linting), [testing](#testing), [custom l
 The Kedro linting tool introduces [`ruff`](https://docs.astral.sh/ruff/) as dependency in your new project's requirements. After project creation, make sure these are installed by running the following command from the project root:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 The linting tool will configure `ruff` with the following settings by default:
@@ -202,7 +199,7 @@ Though it has no impact on how your code works, linting is important for code qu
 This tool introduces the `tests` directory to the new project's structure, containing the file `test_run.py` with an example unit test. [`Pytest`](https://docs.pytest.org/en/7.4.x/) is added as a dependency in your new project's requirements. After project creation, make sure it is installed by running the following command from your project root:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 The tool leverages `pytest` with the following configuration:

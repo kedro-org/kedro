@@ -197,9 +197,8 @@ from my_project.hooks import AzureSecretsHook
 HOOKS = (AzureSecretsHook(),)
 ```
 
-```{note}
-Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
-```
+!!! note
+    Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
 
 ## Use Hooks to read `metadata` from `DataCatalog`
 Use the `after_catalog_created` Hook to access `metadata` to extend Kedro.
@@ -216,7 +215,7 @@ class MetadataHook:
 ```
 
 ## Use Hooks to debug your pipeline
-You can use Hooks to launch a [post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](../hooks/introduction.md) when an error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
+You can use Hooks to launch a [post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](./introduction.md) when an error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
 
 ### Debugging a node
 

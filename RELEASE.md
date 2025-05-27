@@ -27,6 +27,16 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 1.0.0
+## Documentation changes
+## Community contributions
+
+
+# Release 0.19.13
+
+## Major features and improvements
 * Unified `pipeline()` and `Pipeline` into a single module (`kedro.pipeline`), aligning with the `node()`/`Node` design pattern and improving namespace handling.
 
 ## Bug fixes and other changes
@@ -35,20 +45,24 @@
 * Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
 * Cached `inputs` in `Node` when created from dictionary for better performance.
 * Enabled pluggy tracing only when logging level is set to `DEBUG` to speed up the execution of project runs.
-## Breaking changes to the API
-
 
 ## Upcoming deprecations for Kedro 1.0.0
+* Added a deprecation warning for catalog CLI commands. The following commands will be replaced with their alternatives - `kedro catalog rank`, `kedro catalog list`, `kedro catalog resolve` and the `kedro catalog create` command will be removed.
+* Added a deprecation warning for `KedroDataCatalog` that will replace `DataCatalog` while adopting the original `DataCatalog` name.
 * Add deprecation warning for `--namespace` option for `kedro run`. It will be replaced with `--namespaces` option which will allow for running multiple namespaces together.
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
+**Note**: On March 20th, a security vulnerability, CVE-2024-12215, was identified in Kedro. This issue stems from the deprecated micropackaging functionality, which is scheduled for removal in the upcoming Kedro 1.0 release. While we agree with the CVE assigned, this vulnerability only poses a risk if you pull a malicious micropackage from an untrusted source. If you're concerned, we recommend avoiding the micropackaging feature for now and upgrading to Kedro 1.0 once it's released.
+
 ## Documentation changes
 * Updated Dask deployment docs.
+* Added non-jupyter environment integration page (for example Marimo) with dynamic Kedro session loading.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Arnout Verboven](https://github.com/ArnoutVerboven)
 * [gabohc](https://github.com/gabohc)
+* [Luis Chaves Rodriguez](https://github.com/lucharo)
 
 # Release 0.19.12
 

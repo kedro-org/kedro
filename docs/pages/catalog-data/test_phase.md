@@ -47,8 +47,7 @@ Try using each via: `kedro run`, Python API, IPython, and Jupyter Notebook.
 - Inspect dataset types
 
 2. Pattern Resolution
-- Test pattern resolution (dataset-specific, user catch-all, runtime-defined)
-- Override patterns at runtime
+- Test pattern resolution (dataset-specific, user catch-all, runtime)
 
 3. Catalog Serialization
 - Convert a KedroDataCatalog instance to config (`to_config`)
@@ -58,7 +57,7 @@ Try using each via: `kedro run`, Python API, IPython, and Jupyter Notebook.
 - Trigger and validate catalog-related hooks (e.g., `after_catalog_created`)
 
 5. Pipeline Execution
-- Run pipelines using different runners:
+- Run pipelines using different runners (sequential, thread and parallel):
   - `kedro run`
   - Python API (runner.run() / session.run())
 - Validate runner outputs
@@ -84,7 +83,7 @@ The new `DataCatalog` introduces a helper class called `_LazyDataset` to improve
 This approach reduces startup overhead, especially when working with large catalogs, since only the datasets you actually use are initialized.
 
 ### When is `_LazyDataset` used?
-When you instantiate a `DataCatalog` from a config file (such as `catalog.yaml`), Kedro doesn't immediately create all the underlying dataset objects. Instead, it wraps each dataset in a `_LazyDataset` and registers it in the catalog.
+When you instantiate a `DataCatalog` from a config file (such as `catalog.yml`), Kedro doesn't immediately create all the underlying dataset objects. Instead, it wraps each dataset in a `_LazyDataset` and registers it in the catalog.
 These placeholders are automatically materialized when a dataset is accessed for the first time-either directly or during pipeline execution.
 
 ```ipython
@@ -128,7 +127,144 @@ This lazy loading mechanism is especially beneficial before runtime, during the 
 Although `_LazyDataset` is not exposed to end users and doesn't affect your usual catalog usage, it's a useful concept to understand when debugging catalog behavior or troubleshooting dataset instantiation issues.
 
 ## Dataset factories
-Explain resolution logic
+The concept of dataset factories remains the same in the updated DataCatalog, but the implementation has been significantly simplified. Dataset factories allow you to generalize configuration patterns and reduce boilerplate by dynamically resolving datasets based on matching names used in your pipeline.
+
+The catalog now supports only three types of factory patterns:
+
+1. Dataset patterns
+2. User catch-all pattern
+3. Default runtime patterns
+
+### Types of patterns
+
+1. Dataset patterns
+
+Dataset patterns are defined explicitly in the catalog.yml using placeholders such as `{name}_data`.
+
+
+```yaml
+"{name}_data":
+  type: pandas.CSVDataset
+  filepath: data/01_raw/{name}_data.csv
+```
+
+This allows any dataset named `something_data` to be dynamically resolved using the pattern.
+
+2. User catch-all pattern
+
+A user catch-all pattern acts as a fallback when no dataset patterns match. It also uses a placeholder like `{default_dataset}`.
+
+```yaml
+"{default_dataset}":
+  type: pandas.CSVDataset
+  filepath: data/{default_dataset}.csv
+```
+
+```{note}
+Only **one** user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
+```
+
+3. Default runtime patterns
+
+Default runtime patterns are built-in patterns used by Kedro when datasets are not defined in the catalog, often for intermediate datasets generated during a pipeline run.
+
+They are defined per catalog type:
+```python
+# For DataCatalog
+default_runtime_patterns: ClassVar = {
+    "{default}": {"type": "kedro.io.MemoryDataset"}
+}
+
+# For  SharedMemoryDataCatalog
+default_runtime_patterns: ClassVar = {
+    "{default}": {"type": "kedro.io.SharedMemoryDataset"}
+}
+```
+
+These patterns enable automatic creation of in-memory or shared-memory datasets during execution.
+
+### Patterns resolution order
+When the `DataCatalog` is initialized, it scans the configuration to extract and validate any dataset patterns and user catch-all pattern.
+
+When resolving a dataset name, Kedro uses the following order of precedence:
+
+1. Dataset patterns:
+Specific patterns defined in the `catalog.yml`. These are the most explicit and are matched first.
+
+2. User catch-all pattern:
+A general fallback pattern (e.g., `{default_dataset}`) that is matched if no dataset patterns apply. Only one user catch-all pattern is allowed. Multiple will raise a `DatasetError`.
+
+3. Default runtime patterns:
+Internal fallback behavior provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (e.g., `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
+
+### How resolution works in practice
+
+By default, runtime patterns are not used when calling `catalog.get()` unless explicitly enabled using the `fallback_to_runtime_pattern=True` flag.
+
+**Case 1: Dataset pattern only**
+
+```yaml
+"{dataset_name}#csv":
+  type: pandas.CSVDataset
+  filepath: data/01_raw/{dataset_name}.csv
+```
+
+```ipython
+In [1]: catalog.get("reviews#csv")
+Out[1]: kedro_datasets.pandas.csv_dataset.CSVDataset(filepath=.../data/01_raw/reviews.csv'), protocol='file', load_args={}, save_args={'index': False})
+
+In [2]: catalog.get("nonexistent")
+DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog
+```
+
+Enable fallback to use runtime defaults:
+```yaml
+In [3]: catalog.get("nonexistent", fallback_to_runtime_pattern=True)
+Out[3]: kedro.io.memory_dataset.MemoryDataset()
+```
+
+**Case 2: Adding a user catch-all pattern**
+
+```yaml
+"{dataset_name}#csv":
+  type: pandas.CSVDataset
+  filepath: data/01_raw/{dataset_name}.csv
+
+"{default_dataset}":
+  type: pandas.CSVDataset
+  filepath: data/{default_dataset}.csv
+```
+
+```ipython
+In [1]: catalog.get("reviews#csv")
+Out[1]: CSVDataset(filepath=.../data/01_raw/reviews.csv)
+
+In [2]: catalog.get("nonexistent")
+WARNING: Config from the dataset pattern '{default_dataset}' in the catalog will be used to override the default dataset creation for 'nonexistent'
+Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
+```
+
+**Default vs runtime behavior**
+- Default behavior: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
+- Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
+
+```{note}
+Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
+```
+
+### User facing API
+
+The logic behind pattern resolution is handled by the internal `CatalogConfigResolver`, available as a property on the catalog (`catalog.config_resolver`).
+
+Here are a few APIs might be useful for custom use-cases:
+- `catalog_config_resolver.match_dataset_pattern()` - checks if the dataset name matches any dataset pattern
+- `catalog_config_resolver.match_user_catch_all_pattern()` - checks if dataset name matches the user defined catch all pattern
+- `catalog_config_resolver.match_runtime_pattern()` - checks if dataset name matches the default runtime pattern
+- `catalog_config_resolver.resolve_pattern()` -  resolves a dataset name to its configuration based on patterns in the order explained above
+- `catalog_config_resolver.list_patterns()` - lists all patterns available in the catalog
+- `catalog_config_resolver.is_pattern()` - checks if a given string is a pattern
+
+Refer to the method docstrings for more detailed examples and usage.s.
 
 ## Catalog and CLI commands
 list_datasets
@@ -270,9 +406,10 @@ To reconstruct the catalog later:
 new_catalog = DataCatalog.from_config(config, credentials, load_versions, save_version)
 ```
 
-**Note:** This method only works for datasets with static, serializable parameters.
-For example, you can serialize credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`.
+```{note}
+This method only works for datasets with static, serializable parameters. For example, you can serialize credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`.
 In-memory datasets are excluded.
+```
 
 
 ### How to filter catalog datasets

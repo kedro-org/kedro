@@ -95,7 +95,6 @@ def info() -> None:
         "catalog": "kedro.framework.cli.catalog.catalog",
         "ipython": "kedro.framework.cli.project.ipython",
         "run": "kedro.framework.cli.project.run",
-        "micropkg": "kedro.framework.cli.micropkg.micropkg",
         "package": "kedro.framework.cli.project.package",
         "jupyter": "kedro.framework.cli.jupyter.jupyter",
         "pipeline": "kedro.framework.cli.pipeline.pipeline",

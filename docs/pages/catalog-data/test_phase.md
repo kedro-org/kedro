@@ -91,49 +91,47 @@ Run method output
 SharedMemoryDataCatalog
 
 ## DataCatalog API
-New `DataCatalog` retains most of the core functionality of old `DataCatalog`, with a few API enhancements.
+The new DataCatalog retains the core functionality of the previous version, with several enhancements to the API.
 
-Here are the new and updated features and with the usage examples:
-* [How to access datasets in the catalog](#how-to-access-datasets-in-the-catalog)
-* [How to add datasets to the catalog](#how-to-add-datasets-to-the-catalog)
-* [How to iterate trough datasets in the catalog](#how-to-iterate-trough-datasets-in-the-catalog)
-* [How to get the number of datasets in the catalog](#how-to-get-the-number-of-datasets-in-the-catalog)
-* [How to print the full catalog and individual datasets](#how-to-print-the-full-catalog-and-individual-datasets)
-* [How to access dataset patterns](#how-to-access-dataset-patterns)
-* [How to save catalog to config](#how-to-save-catalog-to-config)
-* [How to filter catalog datasets](#how-to-filter-catalog-datasets)
-* [How to get dataset type](#how-to-get-dataset-type)
+Below are the new and updated features, along with usage examples:
+* [Accessing datasets](#how-to-access-datasets-in-the-catalog)
+* [Adding datasets](#how-to-add-datasets-to-the-catalog)
+* [Iterating through datasets](#how-to-iterate-trough-datasets-in-the-catalog)
+* [Counting datasets](#how-to-get-the-number-of-datasets-in-the-catalog)
+* [Printing the catalog](#how-to-print-the-full-catalog-and-individual-datasets)
+* [Accessing dataset patterns](#how-to-access-dataset-patterns)
+* [Saving catalog to config](#how-to-save-catalog-to-config)
+* [Filtering datasets](#how-to-filter-catalog-datasets)
+* [Getting dataset type](#how-to-get-dataset-type)
 
 ### How to access datasets in the catalog
 
-You can check if dataset is in catalog using `__contains__` method. It returns True if a dataset is registered in the catalog
-or matches a dataset/user catch all pattern.
+You can check whether a dataset exists using the `in` operator (`__contains__` method):
 
-```console
->>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
->>> "example" in catalog
-True
->>> "nonexistent" in catalog
-False
+```python
+catalog = DataCatalog(datasets={"example": MemoryDataset()})
+"example" in catalog  # True
+"nonexistent" in catalog  # False
 ```
 
-You can retrieve a dataset from the catalog using either the dictionary-like syntax or the `get` method:
+This checks if:
+
+- The dataset is explicitly defined,
+- It matches a dataset_pattern or user_catch_all_pattern.
+
+To retrieve datasets, use standard dictionary-style access or the `.get()` method:
 
 ```python
 reviews_ds = catalog["reviews"]
 intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=True)
 ```
 
-Both methods allow you to get a dataset by name from an internal collection of datasets.
-
-If a dataset is not materialized but matches dataset_pattern or user_catch_all_pattern it is instantiated and added to the catalog first, then returned. In
-
-`get()` method also allows to enable `fallback_to_runtime_pattern` option and provide `version` argument.
-If `fallback_to_runtime_pattern` is enabled catalog `runtime_pattern` will be used to resolve a dataset.
-That means that in case the above conditions are not met `DataCatalog` will fall back to `MemoryDataset` and `SharedMemoryDataCatalog` to `SharedMemoryDataset`.
-
-When the dataset in not in the internal collection, does not match dataset_pattern or user_catch_all_pattern and `fallback_to_runtime_pattern` is set to `False`
-`DatasetNotFoundError` is raised.
+- Both methods retrieve a dataset by name from the catalog’s internal collection.
+- If the dataset isn’t materialized but matches a configured pattern, it's instantiated and returned.
+- The `.get()` method accepts:
+  - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
+  - `version`: Specify dataset version if versioning is enabled.
+- If no match is found and fallback is disabled, a `DatasetNotFoundError` is raised.
 
 ### How to add datasets to the catalog
 
@@ -143,24 +141,24 @@ The new API allows you to add datasets as well as raw data directly to the catal
 from kedro_datasets.pandas import CSVDataset
 
 bikes_ds = CSVDataset(filepath="../data/01_raw/bikes.csv")
-catalog["bikes"] = bikes_ds  # Adding a dataset
-catalog["cars"] = ["Ferrari", "Audi"]  # Adding raw data
-```
+catalog["bikes"] = bikes_ds  # Add dataset instance
 
-When you add raw data, it is automatically wrapped in a `MemoryDataset` under the hood.
+catalog["cars"] = ["Ferrari", "Audi"]  # Add raw data
+```
+When raw data is added, it's automatically wrapped in a `MemoryDataset`.
 
 ### How to iterate trough datasets in the catalog
 
 `DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
 
 ```python
-for ds_name in catalog:  # __iter__ defaults to keys
+for ds_name in catalog:  # Default iteration over keys
     pass
 
 for ds_name in catalog.keys():  # Iterate over dataset names
     pass
 
-for ds in catalog.values():  # Iterate over datasets
+for ds in catalog.values():  # Iterate over dataset instances
     pass
 
 for ds_name, ds in catalog.items():  # Iterate over (name, dataset) tuples
@@ -169,7 +167,7 @@ for ds_name, ds in catalog.items():  # Iterate over (name, dataset) tuples
 
 ### How to get the number of datasets in the catalog
 
-You can get the number of datasets in the catalog using the `len()` function:
+Use Python’s built-in `len()` function:
 
 ```python
 ds_count = len(catalog)
@@ -193,34 +191,17 @@ The pattern resolution logic in `DataCatalog` is handled by the `config_resolver
 
 ```python
 config_resolver = catalog.config_resolver
-ds_config = catalog.config_resolver.resolve_pattern(ds_name)  # Resolving a dataset pattern
-patterns = catalog.config_resolver.list_patterns() # Listing all available patterns
+ds_config = catalog.config_resolver.resolve_pattern(ds_name)  # Resolve specific pattern
+patterns = catalog.config_resolver.list_patterns() # List all patterns
 ```
 
 ```{note}
-`DataCatalog` does not support all dictionary-specific methods, such as `pop()`, `popitem()`, or deletion by key (`del`).
+`DataCatalog` does **not** support all dictionary methods, such as `pop()`, `popitem()`, or `del`.
 ```
 
 ### How to save catalog to config
 
-Converts the `DataCatalog` instance into a configuration format suitable for
-        serialization. This includes datasets, credentials, and versioning information.
-
-        This method is only applicable to catalogs that contain datasets initialized with static, primitive
-        parameters. For example, it will work fine if one passes credentials as dictionary to
-        `GBQQueryDataset` but not as `google.auth.credentials.Credentials` object.
-
-        Returns:
-            A tuple containing:
-                catalog: A dictionary mapping dataset names to their unresolved configurations,
-                    excluding in-memory datasets.
-
-                credentials: A dictionary of unresolved credentials extracted from dataset configurations.
-
-                load_versions: A dictionary mapping dataset names to specific versions to be loaded,
-                    or `None` if no version is set.
-
-                save_version: A global version identifier for saving datasets, or `None` if not specified.
+You can serialize a `DataCatalog` into configuration format (e.g., for saving to a YAML file) using `.to_config()`:
 
 ```python
 from kedro.io import DataCatalog
@@ -228,76 +209,62 @@ from kedro_datasets.pandas import CSVDataset
 
 cars = CSVDataset(
      filepath="cars.csv",
-     load_args=None,
      save_args={"index": False}
  )
 catalog = DataCatalog(datasets={'cars': cars})
 
 config, credentials, load_versions, save_version = catalog.to_config()
+```
 
+To reconstruct the catalog later:
+```python
 new_catalog = DataCatalog.from_config(config, credentials, load_versions, save_version)
 ```
 
+**Note:** This method only works for datasets with static, serializable parameters.
+For example, you can serialize credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`.
+In-memory datasets are excluded.
+
+
 ### How to filter catalog datasets
 
-`filter()` allows filtering dataset names registered in the catalog based on name and/or type.
-
-        This method allows filtering datasets by their names and/or types. Regular expressions
-        should be precompiled before passing them to `name_regex` or `type_regex`, but plain
-        strings are also supported.
-
-        Args:
-            name_regex: Optional compiled regex pattern or string to filter dataset names.
-            type_regex: Optional compiled regex pattern or string to filter dataset types.
-                The provided regex is matched against the full dataset type path, for example:
-                `kedro_datasets.pandas.parquet_dataset.ParquetDataset`.
-            by_type: Optional dataset type(s) to filter by. This performs an instance type check
-                rather than a regex match. It can be a single dataset type or a list of types.
-
-        Returns:
-            A list of dataset names that match the filtering criteria.
+Use the `.filter()` method to retrieve dataset names that match specific criteria:
 
 ```python
- import re
-catalog = DataCatalog()
-# get datasets where the substring 'raw' is present
-raw_data = catalog.filter(name_regex='raw')
-# get datasets where names start with 'model_' (precompiled regex)
-model_datasets = catalog.filter(name_regex=re.compile('^model_'))
-# get datasets of a specific type using type_regex
-csv_datasets = catalog.filter(type_regex='pandas.excel_dataset.ExcelDataset')
-# get datasets where names contain 'train' and type matches 'CSV' in the path
-catalog.filter(name_regex="train", type_regex="CSV")
-# get datasets where names include 'data' and are of a specific type
-from kedro_datasets.pandas import SQLQueryDataset
-catalog.filter(name_regex="data", by_type=SQLQueryDataset)
-# get datasets where names include 'data' and are of multiple specific types
+import re
 from kedro.io import MemoryDataset
-catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])
+from kedro_datasets.pandas import SQLQueryDataset
+
+catalog.filter(name_regex="raw")  # Names containing 'raw'
+catalog.filter(name_regex=re.compile("^model_"))  # Regex match (precompiled)
+catalog.filter(type_regex="pandas.excel_dataset.ExcelDataset")  # Match by type string
+catalog.filter(name_regex="train", type_regex="CSV")  # Name + type
+catalog.filter(name_regex="data", by_type=SQLQueryDataset)  # Exact type match
+catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])  # Multiple types
 ```
 
+**Args:**
+- name_regex: Dataset names to match (string or re.Pattern).
+- type_regex: Match full class path of dataset types.
+- by_type: Dataset class(es) to match using isinstance.
+
+**Returns:**
+- A list of matching dataset names.
+
 ### How to get dataset type
-Access dataset type without adding resolved dataset to the catalog.
-
-        Args:
-            ds_name: The name of the dataset whose type is to be retrieved.
-
-        Returns:
-            The fully qualified type of the dataset (e.g., `kedro.io.memory_dataset.MemoryDataset`).
-
-        Raises:
-            DatasetNotFoundError: When the dataset in not in the internal collection, does not match
-                dataset_patterns or user_catch_all_pattern.
+You can check the dataset type without materializing or adding it to the catalog:
 
 ```python
 from kedro.io import DataCatalog, MemoryDataset
+
 catalog = DataCatalog(datasets={"example": MemoryDataset()})
 dataset_type = catalog.get_type("example")
-print(dataset_type)
-            # kedro.io.memory_dataset.MemoryDataset
+print(dataset_type)  # kedro.io.memory_dataset.MemoryDataset
+```
 
-missing_type = catalog.get_type("nonexistent")
-Raises DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
+If the dataset is not present and no patterns match, the method raises:
+```python
+DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
 ```
 
 # Deprecated API

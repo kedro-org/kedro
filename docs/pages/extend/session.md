@@ -16,6 +16,7 @@ The main methods and properties of `KedroSession` are:
 - `close()`: Close the current session — although we recommend that you [use the session object as a context manager](#create-a-session), which will call `close()` automatically, as opposed to calling the method explicitly
 - `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../build/run_a_pipeline.md) for details
 
+
 ## Create a session
 
 The following code creates a `KedroSession` object as a context manager and runs a pipeline inside the context, with session data provided. This script can be called from anywhere in your Kedro project as the root folder will automatically be located. The session automatically closes after exit:
@@ -43,22 +44,23 @@ You can provide the following optional arguments in `KedroSession.create()`:
 - `project_path`: Path to the project root directory
 - `save_on_close`: A boolean value to indicate whether or not to save the session to disk when it's closed
 - `env`: Environment for the `KedroContext`
-- `runtime_params`: Optional dictionary containing runtime project parameters
+- `extra_params`: Optional dictionary containing extra project parameters
 for the underlying **`KedroContext`**; if specified, this will update (and therefore take precedence over) parameters retrieved from the project configuration
 
 ## `bootstrap_project` and `configure_project`
 
 ![General overview diagram for KedroSession creation](../meta/images/kedro-session-creation.png)
 
-% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
-% graph LR
-%  subgraph Kedro Startup Flowchart
-%    A[bootstrap_project] -->|Read pyproject.toml| B
-%    A -->|Add project root to sys.path| B[configure_project]
-%    C[Initialize KedroSession]
-%    B --> |Read settings.py| C
-%    B --> |Read pipeline_registry.py| C
-%  end
+```mermaid
+graph LR
+  subgraph Kedro_Startup_Flowchart
+    A[bootstrap_project] -->|Read pyproject.toml| B
+    A -->|Add project root to sys.path| B[configure_project]
+    C[Initialize KedroSession]
+    B --> |Read settings.py| C
+    B --> |Read pipeline_registry.py| C
+  end
+```
 
 Both `bootstrap_project` and `configure_project` handle the setup of a Kedro project, but there are subtle differences: `bootstrap_project` is used for project mode, and `configure_project` is used for packaged mode.
 

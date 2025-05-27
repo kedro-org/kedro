@@ -9,7 +9,7 @@ You can also create a new Kedro project with a starter that adds code for a comm
 To create a basic Kedro project containing the default code needed to set up your own nodes and pipelines, navigate to your preferred directory and type:
 
 ```bash
-kedro new
+uvx kedro new
 ```
 
 ### Project name
@@ -79,7 +79,7 @@ no ⮐
 You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=My-Project --tools=none --example=n
+uvx kedro new --name=My-Project --tools=none --example=n
 ```
 
 2. To create a spaceflights project called `spaceflights` with Kedro Viz features and example code:
@@ -94,7 +94,7 @@ yes ⮐
 You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=spaceflights --tools=viz --example=y
+uvx kedro new --name=spaceflights --tools=viz --example=y
 ```
 
 3. To create a project, called `testproject` containing linting, documentation, and PySpark, but no example code:
@@ -109,7 +109,7 @@ no ⮐
 You can also enter this in a single line as follows:
 
 ```bash
-kedro new --name=testproject --tools=lint,docs,pyspark --example=n
+uvx kedro new --name=testproject --tools=lint,docs,pyspark --example=n
 ```
 
 ### Telemetry consent
@@ -123,7 +123,7 @@ When creating your new Kedro project, use the values `yes` or `no` to register c
 Whichever options you selected for tools and example code, once `kedro new` has completed, the next step is to navigate to the project folder (`cd <project-name>`) and install dependencies with `pip` as follows:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 Now run the project:
@@ -143,7 +143,7 @@ This section swiftly introduces project visualisation using Kedro-Viz. See the {
 The Kedro-Viz package needs to be installed into your virtual environment separately as it is not part of the standard Kedro installation:
 
 ```bash
-pip install kedro-viz
+uv pip install kedro-viz
 ```
 
 To start Kedro-Viz, navigate to the project folder (`cd <project-name>`) and enter the following in your terminal:
@@ -173,10 +173,9 @@ Here is a flowchart to help guide your choice of tools and examples you can sele
 
 ![overview diagram for setting up a new Kedro project with tools](../meta/images/new-project-tools.png)
 
-such as the [`kedro-datasets`][kedro-datasets], [`DataCatalog`][kedro.io.DataCatalog], [`Pipeline`][kedro.pipeline.Pipeline], [`Node`][kedro.pipeline.node.Node] and [`KedroContext`][kedro.framework.context.KedroContext].
+such as the [`kedro-datasets`][kedro-datasets], [`Pipeline`][kedro.pipeline.Pipeline], [`Node`][kedro.pipeline.node.Node] and [`KedroContext`][kedro.framework.context.KedroContext].
 
 [kedro-datasets]: https://docs.kedro.org/projects/kedro-datasets/en/stable/
-[kedro.io.DataCatalog]: https://docs.kedro.org/en/stable/kedro.io.html#kedro.io.DataCatalog
 [kedro.pipeline.Pipeline]: https://docs.kedro.org/en/stable/kedro.pipeline.html#kedro.pipeline.Pipeline
 [kedro.pipeline.node.Node]: https://docs.kedro.org/en/stable/kedro.pipeline.node.html#kedro.pipeline.node.Node
 [kedro.framework.context.KedroContext]: https://docs.kedro.org/en/stable/kedro.framework.context.html#kedro.framework.context.KedroContext

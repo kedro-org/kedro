@@ -26,22 +26,22 @@ flowchart TD
 
 This following pages provide information for deployment to, or integration with, the following:
 
-- [Airflow](airflow.md)
-- [Amazon SageMaker](amazon_sagemaker.md)
-- [Amazon EMR Serverless](amazon_emr_serverless.md)
-- [AWS Step functions](aws_step_functions.md)
-- [Azure](azure.md)
-- [Dask](dask.md)
-- [Databricks](./databricks/index.md)
-- [Kubeflow Pipelines](kubeflow.md)
-- [Prefect](prefect.md)
-- [Vertex AI](vertexai.md)
+- [Airflow](./supported-platforms/airflow.md)
+- [Amazon SageMaker](./supported-platforms/amazon_sagemaker.md)
+- [Amazon EMR Serverless](./supported-platforms/amazon_emr_serverless.md)
+- [AWS Step functions](./supported-platforms/aws_step_functions.md)
+- [Azure](./supported-platforms/azure.md)
+- [Dask](./supported-platforms/dask.md)
+- [Databricks](./supported-platforms/databricks/index.md)
+- [Kubeflow Pipelines](./supported-platforms/kubeflow.md)
+- [Prefect](./supported-platforms/prefect.md)
+- [Vertex AI](./supported-platforms/vertexai.md)
 
-> **Warning**
-> We also have legacy documentation pages for the following deployment targets, but these have not been tested against recent Kedro releases and we cannot guarantee them:
->
-> - for [Argo Workflows](./supported-platforms/argo.md)
-> - for [AWS Batch](./supported-platforms/aws_batch.md)
+!!! warning
+    We also have legacy documentation pages for the following deployment targets, but these have not been tested against recent Kedro releases and we cannot guarantee them:
+
+    - for [Argo Workflows](./supported-platforms/argo.md)
+    - for [AWS Batch](./supported-platforms/aws_batch.md)
 
 ## Effective node grouping for deployment
 

@@ -38,7 +38,7 @@ to a local directory called `mlflow_runs`.
 > **Note**
 > If you want to use a more sophisticated setup, have a look at the documentation of
 [MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/), [the official MLflow tracking server 5 minute overview](https://mlflow.org/docs/latest/getting-started/tracking-server-overview/index),
-and [the MLflow tracking server documentation](https://mlflow.org/docs/latest/tracking.html#logging-to-a-tracking-server).
+and [the MLflow tracking server documentation](https://mlflow.org/docs/latest/tracking/server).
 
 
 ## Simple use cases
@@ -87,7 +87,7 @@ If you open your tracking server UI you will observe a result like this:
 Notice that `kedro-mlflow` used a subset of the `run_params` as tags for the MLflow run,
 and logged the Kedro parameters as MLflow parameters.
 
-Check out [the official kedro-mlflow tutorial](https://kedro-mlflow.readthedocs.io/en/stable/source/03_getting_started/02_first_steps.html)
+Check out [the official kedro-mlflow tutorial](https://kedro-mlflow.readthedocs.io/en/stable/source/02_getting_started/02_quickstart/02_first_steps.html)
 for more detailed steps.
 
 ### Artifact tracking in MLflow using `kedro-mlflow`

@@ -11,7 +11,7 @@
 | [`AbstractDataset`](kedro.io.AbstractDataset.md) | Class      | Base class for all Kedro datasets.              |
 | [`AbstractVersionedDataset`](kedro.io.AbstractVersionedDataset.md) | Class | Base class for versioned datasets.              |
 | [`CachedDataset`](kedro.io.CachedDataset.md)    | Class      | Dataset wrapper for caching data in memory.     |
-| [Kedro Data Catalog](../../catalog-data/data_catalog.md)        | Class      | Manages datasets used in a Kedro pipeline.      |
+| [`DataCatalog`](kedro.io.DataCatalog.md)        | Class      | Manages datasets used in a Kedro pipeline.      |
 | [`LambdaDataset`](kedro.io.LambdaDataset.md)    | Class      | Dataset wrapper for inline data transformations.|
 | [`MemoryDataset`](kedro.io.MemoryDataset.md)    | Class      | Dataset for storing data in memory.             |
 | [`Version`](kedro.io.Version.md)                | Class      | Represents dataset version information.         |

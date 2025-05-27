@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
+* Added a `prefix_datasets_with_namespace` argument to the `Pipeline` class which allows users to turn on or off the prefixing of the namespace to the node inputs, outputs, and parameters.
 * Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
 
 ## Bug fixes and other changes
@@ -17,7 +18,8 @@
 * Renamed instances of `extra_params` and `_extra_params` to `runtime_params`.
 * Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead.
 * Renamed `ModularPipelineError` to `PipelineError`.
-* `Pipeline.grouped_nodes_by_namespace()` now returns a list of `GroupedNodes` instead of a dictionary. This change improves type safety and consistency for deployment plugin integrations.
+* `Pipeline.grouped_nodes_by_namespace()` was replaced with `group_nodes_by(group_by)`, which supports multiple strategies and returns a list of `GroupedNodes`, improving type safety and consistency for deployment plugin integrations.
+* The micro-packaging feature and the corresponding `micropkg` CLI command have been removed.
 
 ## Migration guide from Kedro 0.19.* to 1.*
 [See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).

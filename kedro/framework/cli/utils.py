@@ -99,20 +99,6 @@ def forward_command(
     return wrapit
 
 
-def namespace_deprecation_warning(
-    ctx: click.Context | None = None,
-    param: click.Parameter | None = None,
-    value: Any = None,
-) -> Any:
-    message = (
-        "DeprecationWarning: 'kedro run' flag '--namespace' is deprecated "
-        "and will be replaced with '--namespaces' from Kedro 1.0.0 to allow running multiple namespaces. "
-    )
-    warnings.warn(message, KedroDeprecationWarning)
-    click.secho(message, fg="red")
-    return value
-
-
 def _suggest_cli_command(
     original_command_name: str, existing_command_names: Iterable[str]
 ) -> str:

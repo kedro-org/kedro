@@ -1,0 +1,41 @@
+/* Light Theme */
+[data-md-color-scheme="light"] {
+    --md-default-bg-color: var(--white-0);
+    --md-default-fg-color: var(--black-900);
+    --cards-section-bg-color: var(--white-100);
+    --card-bg-color: var(--white-0);
+    --card-border-color: var(--white-400);
+    --welcome-page-bg-color: var(--white-0);
+    --icon-fill-color: var(--black-200);
+    --text-secondary-color: var(--black-200);
+    --text-primary-color: var(--black-700);
+    --text-hover-color: var(--black-900);
+    --footer-text-color: var(--black-0);
+    --primary-sidebar-bg-color: var(--white-100);
+    --active-link-bg-color: var(--white-0);
+    --admonition-bg-color: var(--white-100);
+    --admonition-border-color: var(--black-900);
+    --social-link-fill-color: #B2B2B2;
+    --md-typeset-table-color: var(--slate-100);
+}
+
+/* Dark Theme */
+[data-md-color-scheme="dark"] {
+    --md-default-bg-color: var(--slate-900);
+    --md-default-fg-color: var(--white-100);
+    --cards-section-bg-color: var(--slate-900);
+    --card-bg-color: var(--slate-600);
+    --card-border-color: var(--slate-0);
+    --welcome-page-bg-color: var(--slate-600);
+    --icon-fill-color: var(--black-0);
+    --text-secondary-color: var(--white-600-50);
+    --text-primary-color: var(--white-600);
+    --text-hover-color: var(--white-0);
+    --footer-text-color: var(--black-200);
+    --primary-sidebar-bg-color: var(--slate-600);
+    --active-link-bg-color: var(--slate-200);
+    --admonition-bg-color: var(--slate-600);
+    --admonition-border-color: var(--white-0);
+    --social-link-fill-color: var(--black-400);
+    --md-typeset-table-color: var(--white-800);
+}

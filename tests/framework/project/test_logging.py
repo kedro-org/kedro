@@ -226,6 +226,7 @@ def test_logger_with_invalid_markup_args():
     with pytest.raises(TypeError):
         root_logger.warning("dummy %s", var, extra={"rich_format": "invalid_arg"})
 
+
 def test_rich_format_with_list(capsys, mocker):
     root_logger = logging.getLogger()
     root_logger.handlers.clear()

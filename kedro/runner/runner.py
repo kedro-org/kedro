@@ -19,6 +19,7 @@ from concurrent.futures import (
     wait,
 )
 from itertools import chain
+from time import perf_counter
 from typing import TYPE_CHECKING, Any
 
 from pluggy import PluginManager
@@ -126,9 +127,14 @@ class AbstractRunner(ABC):
                 "Asynchronous mode is enabled for loading and saving data"
             )
 
+        start_time = perf_counter()
         self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
+        end_time = perf_counter()
+        run_duration = end_time - start_time
 
-        self._logger.info("Pipeline execution completed successfully.")
+        self._logger.info(
+            f"Pipeline execution completed successfully in {run_duration:.1f} sec."
+        )
 
         # Identify MemoryDataset in the catalog
         memory_datasets = {

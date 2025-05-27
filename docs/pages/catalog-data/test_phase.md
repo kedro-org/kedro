@@ -1,13 +1,17 @@
 # Goal
 
-Before the release of `DataCatalog` version 1.0, we aim to validate its usability, functionality, and effectiveness through user testing. The primary objectives are to identify what works well, detect any pain points, and determine necessary adjustments before the final release.
+Before the release of `DataCatalog` version 1.0, we aim to validate its usability, functionality, and effectiveness through user testing. Our objectives are to:
 
-This page provides the installation guide, highlights testing scenarios and new/updated/deprecated features with usage examples:
+- Identify what works well
+- Uncover pain points
+- Determine improvements needed before the final release
+
+This document includes installation instructions, suggested testing scenarios, and an overview of new, updated, and deprecated features, with usage examples:
 * [Installation](#installation)
-* [Suggested testing scenarios](#suggested-testing-scenarios)
-* [Catalog API and related components updates](#catalog-api-and-related-components-updates)
-  * [Lazy loading](#lazy-loading)
-  * [Dataset factories](#dataset-factories)
+* [Suggested Testing Scenarios](#suggested-testing-scenarios)
+* [Catalog API and related Updates](#catalog-api-and-related-updates)
+  * [Lazy Loading](#lazy-loading)
+  * [Dataset Factories](#dataset-factories)
   * [Catalog and CLI commands](#catalog-and-cli-commands)
   * [Runners](#runners)
   * [DataCatalog API](#datacatalog-api)
@@ -15,56 +19,59 @@ This page provides the installation guide, highlights testing scenarios and new/
 
 # Installation
 
-1. Install `kedro` from `feature-1.0.0` branch
-```console
+1. Install `kedro` from  the `feature-1.0.0` branch
+```bash
 git clone https://github.com/kedro-org/kedro.git
+cd kedro
 git fetch origin feature-1.0.0
 git checkout feature-1.0.0
 pip install .
 ```
-2. Install kedro-viz (not require but maybe helpful for testing)
-You will need a different `kedro-viz` build compatible with the new catalog:
+2. (Optional) Install compatible kedro-viz for testing:
 ```console
 pip install git+https://github.com/kedro-org/kedro-viz.git@chore/compat-dc#subdirectory=package
 ```
 
-# Suggested testing scenarios
+# Suggested Testing Scenarios
 
-Here we are suggesting a few testing scenarios but our main focus is let to users to interact with the catalog as they would in real-world projects and try their own scenarios.
+These suggested scenarios aim to guide your testing, but we encourage you to explore the catalog as you would in a real project.
 
-Please test them via kedro run, Python API, ipython and jupyter notebook when possible.
+Try using each via: `kedro run`, Python API, IPython, and Jupyter Notebook.
 
 1. Catalog API
-Accessing datasets and data.
-Loading/saving datasets.
-Iterating over datasets.
-Checking the dataset presence in the catalog.
-Filter dataset names in the catalog based on name/type.
-Access dataset type.
+- Access and manipulate datasets
+- Load and save data
+- Iterate through catalog entries
+- Check dataset presence
+- Filter datasets by name or type
+- Inspect dataset types
 
-2. Pattern Resolution Testing
-Resolving pattern configurations (dataset-specific, user catch-all, runtime).
-Redefining runtime patterns.
+2. Pattern Resolution
+- Test pattern resolution (dataset-specific, user catch-all, runtime-defined)
+- Override patterns at runtime
 
-3. Catalog serialization/deserialization
-Convert KedroDataCatalog instance into a configuration format (to_config).
-Loading catalog from saves config
+3. Catalog Serialization
+- Convert a KedroDataCatalog instance to config (`to_config`)
+- Load a catalog from a saved config
 
 4. Hooks
-Utilize catalog-related hooks (e.g., after_catalog_created).
+- Trigger and validate catalog-related hooks (e.g., `after_catalog_created`)
 
 5. Pipeline Execution
-Run pipelines with different execution runners (kedro run, Python API).
-Validate runner.run() / session.run() outputs.
+- Run pipelines using different runners:
+  - `kedro run`
+  - Python API (runner.run() / session.run())
+- Validate runner outputs
 
-6. CLI Testing
-Test new CLI commands (interactive environment + Python API usage).
+6. CLI Features
+- Test new catalo CLI commands
+- Try both interactive and scripted usage
 
 7. Versioning
-Test versioning functionality works as expected
+- Validate dataset versioning functionality
 
-8. User-Focused Testing
-Interact with the catalog as you would in real-world for your projects.
+8. Real-World Scenarios
+Use the catalog as you would in a production project
 
 # Catalog API and related components updates
 

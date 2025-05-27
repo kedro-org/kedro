@@ -543,7 +543,6 @@ class DataCatalog(CatalogProtocol):
         key: str,
         fallback_to_runtime_pattern: bool = False,
         version: Version | None = None,
-        default: AbstractDataset | None = None,
     ) -> AbstractDataset:
         """Get a dataset by name from an internal collection of datasets.
 
@@ -555,8 +554,6 @@ class DataCatalog(CatalogProtocol):
             key: A dataset name.
             fallback_to_runtime_pattern: Whether to use runtime_pattern to resolve dataset.
             version: Optional argument to get a specific version of the dataset.
-            default: Optional argument for default dataset to return in case
-                requested dataset not in the catalog.
 
         Raises:
             DatasetNotFoundError: When the dataset in not in the internal collection, does not match

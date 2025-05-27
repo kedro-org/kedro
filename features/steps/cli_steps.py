@@ -2,7 +2,6 @@
 
 import json
 import shutil
-import textwrap
 from pathlib import Path
 from time import sleep, time
 
@@ -726,19 +725,6 @@ def check_reqs_generated(context: behave.runner.Context):
 def check_dependency_in_reqs(context: behave.runner.Context, dependency: str):
     reqs_path = context.root_project_dir / "requirements.txt"
     assert dependency in reqs_path.read_text()
-
-
-@given("I have micro-packaging settings in pyproject.toml")
-def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
-    pyproject_toml_path = context.root_project_dir / "pyproject.toml"
-    project_toml_str = textwrap.dedent(
-        """
-        [tool.kedro.micropkg.package]
-        "pipelines.data_science" = {alias = "ds"}
-        """
-    )
-    with pyproject_toml_path.open(mode="a") as file:
-        file.write(project_toml_str)
 
 
 @given("I have executed the load_node magic command")

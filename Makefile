@@ -27,21 +27,20 @@ e2e-tests-fast:
 pip-compile:
 	pip-compile -q -o -
 
-serve-docs:
+install-docs-requirements:
 	uv pip install -e ".[docs]"
+
+serve-docs: install-docs-requirements
 	mkdocs serve --open
 
-build-docs:
-	uv pip install -e ".[docs]"
+build-docs: install-docs-requirements
 	mkdocs build
 
 show-docs:
 	open site/index.html
 
-linkcheck:
-	uv pip install -e ".[docs]"
+linkcheck: install-docs-requirements
 	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
-
 	mkdocs build --strict
 	# lychee checks for broken external links in the built site
 	lychee --exclude "@.lycheeignore" site/

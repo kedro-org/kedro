@@ -42,8 +42,8 @@ show-docs:
 linkcheck: install-docs-requirements
 	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
 	mkdocs build --strict
-	# lychee checks for broken external links in the built site
-	lychee --exclude "@.lycheeignore" site/
+	# lychee checks for broken external links in the built site, with max concurrency set to 32
+	lychee --max-concurrency 32 --exclude "@.lycheeignore" site/
 
 fix-markdownlint:
 	npm install -g markdownlint-cli2

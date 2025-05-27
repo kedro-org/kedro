@@ -223,4 +223,4 @@ def test_logger_with_invalid_markup_args():
     root_logger.addHandler(rich_handler)
     var = "dummy"
     with pytest.raises(TypeError):
-        root_logger.warn("dummy %s", var, extra={"rich_format": "invalid_arg"})
+        root_logger.warning("dummy %s", var, extra={"rich_format": "invalid_arg"})

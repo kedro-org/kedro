@@ -88,6 +88,7 @@ markdown_extensions:
       custom_checkbox: true
   - toc:
       permalink: true
+      title: Contents
   - pymdownx.arithmatex:
       generic: true
   - attr_list

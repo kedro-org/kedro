@@ -14,6 +14,7 @@ build:
     post_create_environment:
       - pip install uv
     post_install:
+      - export SITE_URL="https://kedro.readthedocs.io/en/${READTHEDOCS_VERSION_NAME}/"
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH uv pip install .[docs]
       # Build the MkDocs documentation
       - mkdocs build

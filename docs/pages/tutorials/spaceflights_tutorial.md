@@ -24,7 +24,7 @@ Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="http
 
 ## Watch the video
 
-<iframe width="100%" height="315" src="https://www.youtube.com/embed/YBY2Lcz7Gw4" frameborder="0" allowfullscreen></iframe>
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/YBY2Lcz7Gw4" frameborder="0" allowfullscreen></iframe>
 
 ## Get help
 

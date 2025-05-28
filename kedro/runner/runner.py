@@ -100,7 +100,6 @@ class AbstractRunner(ABC):
         self._logger.info("Pipeline execution completed successfully.")
 
         # Now we return all pipeline outputs, but we do not load datasets data
-        # TODO: Check output for ParallelRunner - whether we can access them after the run
         run_output = {ds_name: catalog[ds_name] for ds_name in pipeline.outputs()}
 
         return run_output

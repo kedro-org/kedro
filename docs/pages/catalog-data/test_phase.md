@@ -266,14 +266,94 @@ Here are a few APIs might be useful for custom use-cases:
 
 Refer to the method docstrings for more detailed examples and usage.s.
 
-## Catalog and CLI commands
+## Catalog and CLI commands (work in progress)
 list_datasets
 list_patterns
 resolve_patterns
 
 ## Runners
-Run method output
-SharedMemoryDataCatalog
+
+The runners in Kedro have been simplified and made more consistent, especially around how pipeline outputs are handled and how parallel execution works.
+
+1. Consistent `runner.run()` behavior
+The `run()` method now always returns all pipeline outputs, regardless of how the catalog is set up. It returns only the dataset names, not the data itself. You still need to load the data from the catalog manually.
+2. Support for `SharedMemoryDataCatalog` in `ParallelRunner`
+`ParallelRunner` is now only compatible with `SharedMemoryDataCatalog`, a special catalog designed for multiprocessing.
+This catalog:
+- Extends the standard `DataCatalog`
+- Ensures datasets are multiprocessing-safe
+- Supports inter-process communication by using shared memory
+- Manages synchronization and serialization of datasets across multiple processes
+
+### What does it mean in practice
+
+1. `runner.run()` returns dataset names only
+The output of `runner.run()` is now a list of dataset names that were produced by the pipeline.
+To access the actual data, you must load it from the catalog:
+
+```python
+from kedro.framework.project import pipelines
+from kedro.io import DataCatalog
+from kedro.runner import SequentialRunner
+
+# Assume this is loaded from your catalog.yml or similar
+catalog_config = """
+...
+"""
+
+catalog = DataCatalog.from_config(catalog_config)
+default = pipelines.get("__default__")
+
+runner = SequentialRunner()
+result = runner.run(pipeline=default, catalog=catalog)
+
+# Load actual data for outputs
+for output_ds in result:
+    data = catalog[output_ds].load()
+```
+
+This approach keeps the runner logic lightweight and consistent across execution modes.
+
+2. Parallel execution requires `SharedMemoryDataCatalog`
+
+When using Kedro from the CLI (e.g., `kedro run`), the framework will automatically select the correct catalog type based on the runner.
+
+```bash
+# These just work out of the box
+kedro run
+kedro run -r ThreadRunner
+kedro run -r ParallelRunner
+```
+
+However, if you're using the Python API, you need to explicitly use `SharedMemoryDataCatalog` when working with `ParallelRunner`:
+
+```python
+from kedro.framework.project import pipelines
+from kedro.io import SharedMemoryDataCatalog
+from kedro.runner import ParallelRunner
+
+# Assume this is loaded from your catalog.yml or similar
+catalog_config = """
+...
+"""
+
+catalog = SharedMemoryDataCatalog.from_config(catalog_config)
+default = pipelines.get("__default__")
+
+runner = ParallelRunner()
+result = runner.run(pipeline=default, catalog=catalog)
+
+# Load actual data
+for output_ds in result:
+    data = catalog[output_ds].load()
+```
+
+**Summary**
+- `runner.run()` always returns a list of dataset names - all pipeline outputs
+- The actual dataset contents must be loaded manually from the catalog
+- `ParallelRunner` requires the use of `SharedMemoryDataCatalog` for multiprocessing support
+- When using `kedro run`, Kedro automatically selects the appropriate catalog
+- When using the Python API, you must manually specify the correct catalog (`DataCatalog` or `SharedMemoryDataCatalog`) depending on the runner
 
 ## DataCatalog API
 The new DataCatalog retains the core functionality of the previous version, with several enhancements to the API.
@@ -453,7 +533,7 @@ If the dataset is not present and no patterns match, the method raises:
 DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
 ```
 
-# Deprecated API
+# Deprecated API (work in progress)
 
 catalog.list()
 Create catalog CLI command

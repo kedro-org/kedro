@@ -1,5 +1,9 @@
 {% extends "main.html" %}
 
+{% block extrahead %}
+  <base href="{{ base_url }}/">
+{% endblock %}
+
 {% block content %}
 <div class="md-content">
   <h1>404 - Page not found</h1>

@@ -7,10 +7,6 @@ This page contains a set of examples to help you structure your YAML configurati
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
 
-```{contents} Table of Contents
-:depth: 3
-```
-
 ## Load data from a local binary file using `utf-8` encoding
 
 The `open_args_load` and `open_args_save` parameters are passed to the filesystem `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation respectively.

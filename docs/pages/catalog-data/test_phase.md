@@ -362,9 +362,64 @@ companies#csv:
 If no pipelines are specified, the `__default__` pipeline is used.
 ```
 
-### Usage
+### Implementation details and Python API usage
 
-### Implementation details and usage via Python API
+To ensure a consistent experience across the CLI, interactive environments (like IPython or Jupyter), and the Python API, we introduced pipeline-aware catalog commands using a mixin-based design.
+
+At the core of this implementation is the `CatalogCommandsMixin` - a mixin class that extends the DataCatalog with additional methods for working with dataset factory patterns and pipeline-specific datasets.
+
+**Why use a mixin?**
+The goal was to keep pipeline logic decoupled from the core `DataCatalog`, while still providing seamless access to helpful methods utilizing pipelines.
+
+This mixin approach allows these commands to be injected only when needed - avoiding unnecessary overhead in simpler catalog use cases.
+
+**What This Means in Practice**
+You don't need to do anything if:
+- You're using Kedro via CLI, or
+- Working inside an interactive environment (e.g. IPython, Jupyter Notebook).
+
+Kedro automatically composes the catalog with `CatalogCommandsMixin` behind the scenes when initializing the session.
+
+If you're working outside a Kedro session and want to access the extra catalog commands, you have two options:
+
+**Option 1: Compose the catalog class dynamically**
+
+```python
+from kedro.io import DataCatalog
+from kedro.framework.context import CatalogCommandsMixin, compose_classes
+
+# Compose a new catalog class with the mixin
+CatalogWithCommands = compose_classes(DataCatalog, CatalogCommandsMixin)
+
+# Create a catalog instance from config or dictionary
+catalog = CatalogWithCommands.from_config({
+    "cars": {
+        "type": "pandas.CSVDataset",
+        "filepath": "cars.csv",
+        "save_args": {"index": False}
+    }
+})
+
+assert hasattr(catalog, "list_datasets")
+print("list_datasets method is available!")
+```
+
+**Option 2: Subclass the catalog with the mixin**
+
+```python
+from kedro.io import DataCatalog, MemoryDataset
+from kedro.framework.context import CatalogCommandsMixin
+
+class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
+    pass
+
+catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
+
+assert hasattr(catalog, "list_datasets")
+print("list_datasets method is available!")
+```
+
+This design keeps your project flexible and modular, while offering a powerful set of pipeline-aware catalog inspection tools when you need them.
 
 ## Runners
 

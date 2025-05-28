@@ -39,38 +39,38 @@ These suggested scenarios aim to guide your testing, but we encourage you to exp
 Try using each via: `kedro run`, Python API, IPython, and Jupyter Notebook.
 
 1. Catalog API
-   - Access and manipulate datasets
-   - Load and save data
-   - Iterate through catalog entries
-   - Check dataset presence
-   - Filter datasets by name or type
-   - Inspect dataset types
+    - Access and manipulate datasets
+    - Load and save data
+    - Iterate through catalog entries
+    - Check dataset presence
+    - Filter datasets by name or type
+    - Inspect dataset types
 
 2. Pattern Resolution
-   - Test pattern resolution (dataset-specific, user catch-all, runtime)
+    - Test pattern resolution (dataset-specific, user catch-all, runtime)
 
 3. Catalog Serialization
-   - Convert a KedroDataCatalog instance to config (`to_config`)
-   - Load a catalog from a saved config
+    - Convert a KedroDataCatalog instance to config (`to_config`)
+    - Load a catalog from a saved config
 
 4. Hooks
-   - Trigger and validate catalog-related hooks (e.g., `after_catalog_created`)
+    - Trigger and validate catalog-related hooks (e.g., `after_catalog_created`)
 
 5. Pipeline Execution
-   - Run pipelines using different runners (sequential, thread and parallel):
-     - `kedro run`
-     - Python API (runner.run() / session.run())
-   - Validate runner outputs
+    - Run pipelines using different runners (sequential, thread and parallel):
+        - `kedro run`
+        - Python API (runner.run() / session.run())
+    - Validate runner outputs
 
 6. CLI Features
-   - Test new catalog CLI commands
-   - Try both interactive and scripted usage
+    - Test new catalog CLI commands
+    - Try both interactive and scripted usage
 
 7. Versioning
-   - Validate dataset versioning functionality
+    - Validate dataset versioning functionality
 
 8. Real-World Scenarios
-   - Use the catalog as you would in a production project
+    - Use the catalog as you would in a production project
 
 # Catalog API and related components updates
 

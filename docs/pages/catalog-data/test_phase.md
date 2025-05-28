@@ -1,4 +1,4 @@
-# Data Catalog Test Phase Goal
+# Data Catalog Test Phase
 
 Before the release of `DataCatalog` version 1.0, we aim to validate its usability, functionality, and effectiveness through user testing. Our objectives are to:
 

@@ -437,8 +437,8 @@ This catalog:
 
 ### What does it mean in practice
 
-1. `runner.run()` returns dataset names only
-The output of `runner.run()` is now a list of dataset names that were produced by the pipeline.
+1. The output of `runner.run()` is now a list of dataset names that were produced by the pipeline.
+
 To access the actual data, you must load it from the catalog:
 
 ```python
@@ -464,7 +464,7 @@ for output_ds in result:
 
 This approach keeps the runner logic lightweight and consistent across execution modes.
 
-2. Parallel execution requires `SharedMemoryDataCatalog`
+2. Parallel execution requires `SharedMemoryDataCatalog`.
 
 When using Kedro from the CLI (e.g., `kedro run`), the framework will automatically select the correct catalog type based on the runner.
 

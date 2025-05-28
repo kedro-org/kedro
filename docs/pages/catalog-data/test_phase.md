@@ -266,10 +266,105 @@ Here are a few APIs might be useful for custom use-cases:
 
 Refer to the method docstrings for more detailed examples and usage.s.
 
-## Catalog and CLI commands (work in progress)
-list_datasets
-list_patterns
-resolve_patterns
+## Catalog and CLI commands
+
+The new DataCatalog provides three powerful pipeline-based commands, accessible via both the CLI and interactive environment. These tools help inspect how datasets are resolved and managed within your pipeline.
+
+1. List datasets
+
+Lists all datasets used in the specified pipeline(s), grouped by how they are defined.
+- datasets: Explicitly defined in catalog.yml
+- factories: Resolved using dataset factory patterns
+- defaults: Handled by user catch-all or default runtime patterns
+
+CLI:
+```bash
+kedro catalog list-datasets -p data_processing
+```
+
+Interactive environment:
+```ipython
+In [1]: catalog.list_datasets(pipelines=["data_processing", "data_science"])
+```
+
+Example output:
+```yaml
+data_processing:
+  datasets:
+    kedro_datasets.pandas.excel_dataset.ExcelDataset:
+    - shuttles
+    kedro_datasets.pandas.parquet_dataset.ParquetDataset:
+    - preprocessed_shuttles
+    - model_input_table
+  defaults:
+    kedro.io.MemoryDataset:
+    - preprocessed_companies
+  factories:
+    kedro_datasets.pandas.csv_dataset.CSVDataset:
+    - companies#csv
+    - reviews-01_raw#csv
+```
+
+```{note}
+If no pipelines are specified, the `__default__` pipeline is used.
+```
+
+2. List patterns
+
+Lists all dataset factory patterns defined in the catalog, ordered by priority.
+
+CLI:
+```bash
+kedro catalog list-patterns
+```
+
+Interactive environment:
+```ipython
+In [1]: catalog.list_patterns()
+```
+
+Example output:
+```yaml
+- '{name}-{folder}#csv'
+- '{name}_data'
+- out-{dataset_name}
+- '{dataset_name}#csv'
+- in-{dataset_name}
+- '{default}'
+```
+
+3. Resolve patterns
+
+Resolves datasets used in the pipeline against all dataset patterns, returning their full catalog configuration. It includes datasets explicitly defined in the catalog as well as those resolved from dataset factory patterns.
+
+CLI command:
+```bash
+kedro catalog resolve-patterns -p data_processing
+```
+
+Interactive environment:
+```ipython
+In [1]: catalog.resolve_patterns(pipelines=["data_processing"])
+```
+
+Example output:
+```yaml
+companies#csv:
+  type: pandas.CSVDataset
+  filepath: ...data/01_raw/companies.csv
+  credentials: companies#csv_credentials
+  metadata:
+    kedro-viz:
+      layer: training
+```
+
+```{note}
+If no pipelines are specified, the `__default__` pipeline is used.
+```
+
+### Usage
+
+### Implementation details and usage via Python API
 
 ## Runners
 

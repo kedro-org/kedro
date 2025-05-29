@@ -58,6 +58,7 @@
 - [Dataset factories](pages/catalog-data/kedro_dataset_factories.md)
 - [Data and pipeline versioning](pages/catalog-data/kedro_dvc_versioning.md)
 - [Partitioned and incremental datasets](pages/catalog-data/partitioned_and_incremental_datasets.md)
+- [Data Catalog test phase](pages/catalog-data/test_phase.md)
 
 ## Build
 

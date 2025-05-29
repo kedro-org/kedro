@@ -137,8 +137,9 @@ The catalog now supports only three types of factory patterns:
 
 ### Types of patterns
 
-1. Dataset patterns
-Dataset patterns are defined explicitly in the catalog.yml using placeholders such as `{name}_data`.
+**Dataset patterns**
+
+Dataset patterns are defined explicitly in the `catalog.yml` using placeholders such as `{name}_data`.
 ```yaml
 "{name}_data":
   type: pandas.CSVDataset
@@ -146,7 +147,8 @@ Dataset patterns are defined explicitly in the catalog.yml using placeholders su
 ```
 This allows any dataset named `something_data` to be dynamically resolved using the pattern.
 
-2. User catch-all pattern
+**User catch-all pattern**
+
 A user catch-all pattern acts as a fallback when no dataset patterns match. It also uses a placeholder like `{default_dataset}`.
 ```yaml
 "{default_dataset}":
@@ -157,7 +159,8 @@ A user catch-all pattern acts as a fallback when no dataset patterns match. It a
 Only one user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
 ```
 
-3. Default runtime patterns
+**Default runtime patterns**
+
 Default runtime patterns are built-in patterns used by Kedro when datasets are not defined in the catalog, often for intermediate datasets generated during a pipeline run.
 They are defined per catalog type:
 ```python

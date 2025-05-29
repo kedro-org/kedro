@@ -80,6 +80,10 @@ p,
   }
 }
 
+/* remove underline only for tabbed-labels */
+.tabbed-labels.tabbed-labels--linked a {
+  text-decoration: none;
+}
 
 @media screen and (max-width: 76.2344em) {
   body {

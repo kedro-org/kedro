@@ -137,37 +137,31 @@ The catalog now supports only three types of factory patterns:
 
 ### Types of patterns
 
-**Dataset patterns**
+1. Dataset patterns
 
 Dataset patterns are defined explicitly in the catalog.yml using placeholders such as `{name}_data`.
-
-
 ```yaml
 "{name}_data":
   type: pandas.CSVDataset
   filepath: data/01_raw/{name}_data.csv
 ```
-
 This allows any dataset named `something_data` to be dynamically resolved using the pattern.
 
-**User catch-all pattern**
+2. User catch-all pattern
 
 A user catch-all pattern acts as a fallback when no dataset patterns match. It also uses a placeholder like `{default_dataset}`.
-
 ```yaml
 "{default_dataset}":
   type: pandas.CSVDataset
   filepath: data/{default_dataset}.csv
 ```
-
 ```{note}
 Only one user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
 ```
 
-**Default runtime patterns**
+3. Default runtime patterns
 
 Default runtime patterns are built-in patterns used by Kedro when datasets are not defined in the catalog, often for intermediate datasets generated during a pipeline run.
-
 They are defined per catalog type:
 ```python
 # For DataCatalog
@@ -180,7 +174,6 @@ default_runtime_patterns: ClassVar = {
     "{default}": {"type": "kedro.io.SharedMemoryDataset"}
 }
 ```
-
 These patterns enable automatic creation of in-memory or shared-memory datasets during execution.
 
 ### Patterns resolution order
@@ -250,7 +243,7 @@ Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
 - Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
 
 ```{note}
-Enabling fallback_to_runtime_pattern=True is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
+Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
 ```
 
 ### User facing API
@@ -434,11 +427,10 @@ The `run()` method now always returns all pipeline outputs, regardless of how th
 2. Support for `SharedMemoryDataCatalog` in `ParallelRunner`
 `ParallelRunner` is now only compatible with `SharedMemoryDataCatalog`, a special catalog designed for multiprocessing.
 This catalog:
-
-- Extends the standard `DataCatalog`
-- Ensures datasets are multiprocessing-safe
-- Supports inter-process communication by using shared memory
-- Manages synchronization and serialization of datasets across multiple processes
+     - Extends the standard `DataCatalog`
+     - Ensures datasets are multiprocessing-safe
+     - Supports inter-process communication by using shared memory
+     - Manages synchronization and serialization of datasets across multiple processes
 
 ### What does it mean in practice
 

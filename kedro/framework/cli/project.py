@@ -63,6 +63,8 @@ param_group.param1:value1."""
 INPUT_FILE_HELP = """Name of the requirements file to compile."""
 OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
 CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
+ONLY_MISSING_OUTPUTS_HELP = """Run only nodes with missing outputs. 
+If all outputs of a node exist and are persisted, skip the node execution."""
 
 
 @click.group(name="Kedro")
@@ -207,6 +209,11 @@ def package(metadata: ProjectMetadata) -> None:
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
+@click.option(
+    "--only-missing-outputs",
+    is_flag=True,
+    help=ONLY_MISSING_OUTPUTS_HELP,
+)
 def run(  # noqa: PLR0913
     tags: str,
     env: str,
@@ -223,6 +230,7 @@ def run(  # noqa: PLR0913
     conf_source: str,
     params: dict[str, Any],
     namespaces: str,
+    only_missing_outputs: bool,
 ) -> dict[str, Any]:
     """Run the pipeline."""
 
@@ -244,4 +252,5 @@ def run(  # noqa: PLR0913
             load_versions=load_versions,
             pipeline_name=pipeline,
             namespaces=namespaces,
+            only_missing_outputs=only_missing_outputs,
         )

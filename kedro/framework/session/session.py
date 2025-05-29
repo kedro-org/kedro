@@ -289,6 +289,7 @@ class KedroSession:
         to_outputs: Iterable[str] | None = None,
         load_versions: dict[str, str] | None = None,
         namespaces: Iterable[str] | None = None,
+        only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -313,6 +314,7 @@ class KedroSession:
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
             namespaces: The namespaces of the nodes that are being run.
+            only_missing_outputs: Run only nodes with missing outputs.
         Raises:
             ValueError: If the named or `__default__` pipeline is not
                 defined by `register_pipelines`.
@@ -377,6 +379,7 @@ class KedroSession:
             "pipeline_name": pipeline_name,
             "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),
+            "only_missing_outputs": only_missing_outputs,
         }
 
         catalog = context._get_catalog(
@@ -396,9 +399,14 @@ class KedroSession:
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
         try:
-            run_result = runner.run(
-                filtered_pipeline, catalog, hook_manager, session_id
-            )
+            if only_missing_outputs:
+                run_result = runner.run_incremental(
+                    filtered_pipeline, catalog, hook_manager, session_id
+                )
+            else:
+                run_result = runner.run(
+                    filtered_pipeline, catalog, hook_manager, session_id
+                )
             self._run_called = True
         except Exception as error:
             hook_manager.hook.on_pipeline_error(

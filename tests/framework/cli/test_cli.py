@@ -593,6 +593,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -633,6 +634,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -673,6 +675,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -704,6 +707,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=["fake_namespace"],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -728,6 +732,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -768,6 +773,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name="pipeline1",
             namespaces=[],
+            only_missing_outputs=False,
         )
 
     @mark.parametrize("config_flag", ["--config", "-c"])
@@ -833,6 +839,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name="pipeline1",
             namespaces=[],
+            only_missing_outputs=False,
         )
         mock_session_create.assert_called_once_with(
             env=mocker.ANY, conf_source=None, runtime_params=expected

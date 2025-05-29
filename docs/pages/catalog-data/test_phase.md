@@ -10,11 +10,11 @@ This document includes installation instructions, suggested testing scenarios, a
 - [Installation](#installation)
 - [Suggested Testing Scenarios](#suggested-testing-scenarios)
 - [Catalog API and Related Components Updates](#catalog-api-and-related-components-updates)
-  - [Dataset Factories](#dataset-factories)
-  - [Catalog and CLI commands](#catalog-and-cli-commands)
-  - [Runners](#runners)
-  - [DataCatalog API](#datacatalog-api)
-  - [Deprecated API](#deprecated-api)
+    - [Dataset Factories](#dataset-factories)
+    - [Catalog and CLI commands](#catalog-and-cli-commands)
+    - [Runners](#runners)
+    - [DataCatalog API](#datacatalog-api)
+    - [Deprecated API](#deprecated-api)
 
 # Installation
 

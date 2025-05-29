@@ -1,6 +1,6 @@
 # Data Catalog Test Phase
 
-Before the release of `DataCatalog` version 1.0, we aim to validate its usability, functionality, and effectiveness through user testing. Our objectives are to:
+Before the release of `DataCatalog` version 1.0.0, we aim to validate its usability, functionality, and effectiveness through user testing. Our objectives are to:
 
 - Identify what works well
 - Uncover pain points
@@ -678,7 +678,7 @@ DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
 
 # Deprecated API
 
-The following DataCatalog methods and CLI commands are deprecated and should no longer be used.
+The following `DataCatalog` methods and CLI commands are deprecated and should no longer be used.
 Where applicable, alternatives are suggested:
 
 - `catalog._get_dataset()` – Internal method; no longer needed. Use catalog.get() instead.

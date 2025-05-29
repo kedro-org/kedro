@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 from .markers import hook_spec
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable  # MOVED HERE
+    from collections.abc import Iterable
     from multiprocessing.managers import SyncManager
 
     from kedro.framework.context import KedroContext

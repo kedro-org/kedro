@@ -9,7 +9,7 @@ Before the release of `DataCatalog` version 1.0, we aim to validate its usabilit
 This document includes installation instructions, suggested testing scenarios, and an overview of new, updated, and deprecated features, with usage examples:
 - [Installation](#installation)
 - [Suggested Testing Scenarios](#suggested-testing-scenarios)
-- [Catalog API and related Updates](#catalog-api-and-related-updates)
+- [Catalog API and Related Components Updates](#catalog-api-and-related-components-updates)
     - [Lazy Loading](#lazy-loading)
     - [Dataset Factories](#dataset-factories)
     - [Catalog and CLI commands](#catalog-and-cli-commands)

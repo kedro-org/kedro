@@ -86,7 +86,7 @@ This approach reduces startup overhead, especially when working with large catal
 When you instantiate a `DataCatalog` from a config file (such as `catalog.yml`), Kedro doesn't immediately create all the underlying dataset objects. Instead, it wraps each dataset in a `_LazyDataset` and registers it in the catalog.
 These placeholders are automatically materialized when a dataset is accessed for the first time-either directly or during pipeline execution.
 
-```ipython
+```bash
 In [1]: catalog
 Out[1]: {
   'shuttles': kedro_datasets.pandas.excel_dataset.ExcelDataset
@@ -138,7 +138,6 @@ The catalog now supports only three types of factory patterns:
 ### Types of patterns
 
 1. Dataset patterns
-
 Dataset patterns are defined explicitly in the catalog.yml using placeholders such as `{name}_data`.
 ```yaml
 "{name}_data":
@@ -148,7 +147,6 @@ Dataset patterns are defined explicitly in the catalog.yml using placeholders su
 This allows any dataset named `something_data` to be dynamically resolved using the pattern.
 
 2. User catch-all pattern
-
 A user catch-all pattern acts as a fallback when no dataset patterns match. It also uses a placeholder like `{default_dataset}`.
 ```yaml
 "{default_dataset}":
@@ -160,7 +158,6 @@ Only one user catch-all pattern is allowed per catalog. If more are specified, a
 ```
 
 3. Default runtime patterns
-
 Default runtime patterns are built-in patterns used by Kedro when datasets are not defined in the catalog, often for intermediate datasets generated during a pipeline run.
 They are defined per catalog type:
 ```python
@@ -202,7 +199,7 @@ By default, runtime patterns are not used when calling `catalog.get()` unless ex
   filepath: data/01_raw/{dataset_name}.csv
 ```
 
-```ipython
+```bash
 In [1]: catalog.get("reviews#csv")
 Out[1]: kedro_datasets.pandas.csv_dataset.CSVDataset(filepath=.../data/01_raw/reviews.csv'), protocol='file', load_args={}, save_args={'index': False})
 
@@ -211,7 +208,7 @@ DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog
 ```
 
 Enable fallback to use runtime defaults:
-```ipython
+```bash
 In [3]: catalog.get("nonexistent", fallback_to_runtime_pattern=True)
 Out[3]: kedro.io.memory_dataset.MemoryDataset()
 ```
@@ -228,7 +225,7 @@ Out[3]: kedro.io.memory_dataset.MemoryDataset()
   filepath: data/{default_dataset}.csv
 ```
 
-```ipython
+```bash
 In [1]: catalog.get("reviews#csv")
 Out[1]: CSVDataset(filepath=.../data/01_raw/reviews.csv)
 
@@ -279,7 +276,7 @@ kedro catalog list-datasets -p data_processing
 ```
 
 Interactive environment:
-```ipython
+```bash
 In [1]: catalog.list_datasets(pipelines=["data_processing", "data_science"])
 ```
 
@@ -315,7 +312,7 @@ kedro catalog list-patterns
 ```
 
 Interactive environment:
-```ipython
+```bash
 In [1]: catalog.list_patterns()
 ```
 
@@ -339,7 +336,7 @@ kedro catalog resolve-patterns -p data_processing
 ```
 
 Interactive environment:
-```ipython
+```bash
 In [1]: catalog.resolve_patterns(pipelines=["data_processing"])
 ```
 

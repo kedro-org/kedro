@@ -127,6 +127,13 @@ class TestCliCommands:
         assert result.exit_code == 0
         assert "-h, --help     Show this message and exit." in result.output
 
+    def test_run_help_shows_only_missing_outputs(self, fake_project_cli):
+        """Test that run --help shows the --only-missing-outputs option"""
+        result = CliRunner().invoke(fake_project_cli, ["run", "--help"])
+        assert result.exit_code == 0
+        assert "--only-missing-outputs" in result.output
+        assert "Run only nodes with missing outputs" in result.output
+
 
 class TestCommandCollection:
     def test_found(self):

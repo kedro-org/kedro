@@ -369,3 +369,132 @@ class TestMemoryDatasetBehaviour:
         assert (
             "RegularOutput" not in output
         )  # This output is registered in DataCatalog and so should not be in free outputs
+
+
+class TestRunIncremental:
+    def test_run_incremental_all_outputs_missing(
+        self, unfinished_outputs_pipeline, catalog, mocker
+    ):
+        """Test run_incremental when all outputs are missing"""
+        # Mock catalog.exists to return False for all outputs
+        catalog.exists = mocker.Mock(return_value=False)
+
+        # Create datasets that will be needed
+        catalog["ds1"] = MemoryDataset({"data": 42})
+        catalog["ds2"] = MemoryDataset([1, 2, 3, 4, 5])
+        catalog["ds3"] = pd.DataFrame({"test": [1, 2]})
+        catalog["ds4"] = MemoryDataset()
+
+        runner = SequentialRunner()
+        spy_run = mocker.spy(runner, "run")
+
+        result = runner.run_incremental(unfinished_outputs_pipeline, catalog)
+
+        # Should have called regular run with the full pipeline
+        spy_run.assert_called_once()
+        call_args = spy_run.call_args[0]
+        pipeline_arg = call_args[0]
+
+        # Should include all nodes since all outputs are missing
+        assert len(pipeline_arg.nodes) == len(unfinished_outputs_pipeline.nodes)
+
+        # Check outputs
+        assert "ds8" in result
+        assert "ds5" in result
+        assert "ds6" in result
+
+    def test_run_incremental_some_outputs_exist(
+        self, unfinished_outputs_pipeline, catalog, mocker
+    ):
+        """Test run_incremental when some outputs already exist"""
+
+        # Mock catalog.exists to return True for some outputs
+        def mock_exists(dataset_name):
+            # Say ds5 and ds6 already exist
+            return dataset_name in ["ds5", "ds6"]
+
+        catalog.exists = mocker.Mock(side_effect=mock_exists)
+
+        # Create only the datasets needed for the remaining pipeline
+        catalog["ds1"] = MemoryDataset({"data": 42})
+        catalog["ds4"] = MemoryDataset()
+
+        runner = SequentialRunner()
+        spy_run = mocker.spy(runner, "run")
+
+        result = runner.run_incremental(unfinished_outputs_pipeline, catalog)
+
+        # Should have called regular run with a filtered pipeline
+        spy_run.assert_called_once()
+        call_args = spy_run.call_args[0]
+        pipeline_arg = call_args[0]
+
+        # Should only include nodes that produce ds8 (since ds5 and ds6 exist)
+        node_names = {n.name for n in pipeline_arg.nodes}
+        # Based on the pipeline, only node1 and node5 should run to produce ds8
+        assert "node1" in node_names  # produces ds8
+        assert "node5" in node_names  # produces ds4 which is input to node1
+        assert "node4" not in node_names  # produces ds5 which already exists
+        assert "node3" not in node_names  # produces ds6 and ds7 which exist
+
+        # Only ds8 should be in the output since others exist
+        assert "ds8" in result
+        assert "ds5" not in result  # Already exists
+        assert "ds6" not in result  # Already exists
+
+    def test_run_incremental_all_outputs_exist(
+        self, unfinished_outputs_pipeline, catalog, mocker
+    ):
+        """Test run_incremental when all outputs already exist"""
+        # Mock catalog.exists to return True for all outputs
+        catalog.exists = mocker.Mock(return_value=True)
+
+        runner = SequentialRunner()
+        spy_run = mocker.spy(runner, "run")
+
+        result = runner.run_incremental(unfinished_outputs_pipeline, catalog)
+
+        # Should have called regular run with an empty pipeline
+        spy_run.assert_called_once()
+        call_args = spy_run.call_args[0]
+        pipeline_arg = call_args[0]
+
+        # Pipeline should be empty since all outputs exist
+        assert len(pipeline_arg.nodes) == 0
+
+        # Result should be empty
+        assert result == {}
+
+    def test_run_incremental_with_transcoding(self, mocker):
+        """Test run_incremental with transcoded datasets"""
+        catalog = DataCatalog()
+
+        # Create a pipeline with transcoding
+        test_pipeline = pipeline(
+            [
+                node(identity, "input", "output@pandas"),
+                node(identity, "output@spark", "final_output"),
+            ]
+        )
+
+        def mock_exists(dataset_name):
+            return dataset_name == "output@pandas"
+
+        catalog.exists = mocker.Mock(side_effect=mock_exists)
+        catalog["input"] = MemoryDataset("test_data")
+        catalog["output@spark"] = MemoryDataset()
+
+        runner = SequentialRunner()
+        spy_run = mocker.spy(runner, "run")
+
+        runner.run_incremental(test_pipeline, catalog)
+
+        # Should only run the second node since output@pandas exists
+        spy_run.assert_called_once()
+        call_args = spy_run.call_args[0]
+        pipeline_arg = call_args[0]
+
+        assert len(pipeline_arg.nodes) == 1
+        first_node = next(iter(pipeline_arg.nodes))
+        assert first_node.inputs == ["output@spark"]
+        assert first_node.outputs == ["final_output"]

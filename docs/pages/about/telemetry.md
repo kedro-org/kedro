@@ -62,4 +62,4 @@ To withdraw consent, you have a few options:
    pip uninstall kedro-telemetry
    ```
 !!! note
-   This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
+    This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).

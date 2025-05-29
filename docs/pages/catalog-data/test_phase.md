@@ -10,12 +10,12 @@ This document includes installation instructions, suggested testing scenarios, a
 - [Installation](#installation)
 - [Suggested Testing Scenarios](#suggested-testing-scenarios)
 - [Catalog API and related Updates](#catalog-api-and-related-updates)
-  - [Lazy Loading](#lazy-loading)
-  - [Dataset Factories](#dataset-factories)
-  - [Catalog and CLI commands](#catalog-and-cli-commands)
-  - [Runners](#runners)
-  - [DataCatalog API](#datacatalog-api)
-  - [Deprecated API](#deprecated-api)
+    - [Lazy Loading](#lazy-loading)
+    - [Dataset Factories](#dataset-factories)
+    - [Catalog and CLI commands](#catalog-and-cli-commands)
+    - [Runners](#runners)
+    - [DataCatalog API](#datacatalog-api)
+    - [Deprecated API](#deprecated-api)
 
 # Installation
 
@@ -127,7 +127,7 @@ This lazy loading mechanism is especially beneficial before runtime, during the 
 Although `_LazyDataset` is not exposed to end users and doesn't affect your usual catalog usage, it's a useful concept to understand when debugging catalog behavior or troubleshooting dataset instantiation issues.
 
 ## Dataset factories
-The concept of dataset factories remains the same in the updated DataCatalog, but the implementation has been significantly simplified. Dataset factories allow you to generalize configuration patterns and reduce boilerplate by dynamically resolving datasets based on matching names used in your pipeline.
+The concept of dataset factories remains the same in the updated `DataCatalog`, but the implementation has been significantly simplified. Dataset factories allow you to generalize configuration patterns and reduce boilerplate by dynamically resolving datasets based on matching names used in your pipeline.
 
 The catalog now supports only three types of factory patterns:
 
@@ -137,7 +137,7 @@ The catalog now supports only three types of factory patterns:
 
 ### Types of patterns
 
-1. Dataset patterns
+**Dataset patterns**
 
 Dataset patterns are defined explicitly in the catalog.yml using placeholders such as `{name}_data`.
 
@@ -150,7 +150,7 @@ Dataset patterns are defined explicitly in the catalog.yml using placeholders su
 
 This allows any dataset named `something_data` to be dynamically resolved using the pattern.
 
-2. User catch-all pattern
+**User catch-all pattern**
 
 A user catch-all pattern acts as a fallback when no dataset patterns match. It also uses a placeholder like `{default_dataset}`.
 
@@ -161,10 +161,10 @@ A user catch-all pattern acts as a fallback when no dataset patterns match. It a
 ```
 
 ```{note}
-Only **one** user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
+Only one user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
 ```
 
-3. Default runtime patterns
+**Default runtime patterns**
 
 Default runtime patterns are built-in patterns used by Kedro when datasets are not defined in the catalog, often for intermediate datasets generated during a pipeline run.
 
@@ -175,7 +175,7 @@ default_runtime_patterns: ClassVar = {
     "{default}": {"type": "kedro.io.MemoryDataset"}
 }
 
-# For  SharedMemoryDataCatalog
+# For SharedMemoryDataCatalog
 default_runtime_patterns: ClassVar = {
     "{default}": {"type": "kedro.io.SharedMemoryDataset"}
 }
@@ -188,13 +188,13 @@ When the `DataCatalog` is initialized, it scans the configuration to extract and
 
 When resolving a dataset name, Kedro uses the following order of precedence:
 
-1. Dataset patterns:
+1. **Dataset patterns:**
 Specific patterns defined in the `catalog.yml`. These are the most explicit and are matched first.
 
-2. User catch-all pattern:
+2. **User catch-all pattern:**
 A general fallback pattern (e.g., `{default_dataset}`) that is matched if no dataset patterns apply. Only one user catch-all pattern is allowed. Multiple will raise a `DatasetError`.
 
-3. Default runtime patterns:
+3. **Default runtime patterns:**
 Internal fallback behavior provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (e.g., `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
 
 ### How resolution works in practice
@@ -218,7 +218,7 @@ DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog
 ```
 
 Enable fallback to use runtime defaults:
-```yaml
+```ipython
 In [3]: catalog.get("nonexistent", fallback_to_runtime_pattern=True)
 Out[3]: kedro.io.memory_dataset.MemoryDataset()
 ```
@@ -245,11 +245,11 @@ Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
 ```
 
 **Default vs runtime behavior**
-- Default behavior: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
-- Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
+    - Default behavior: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
+    - Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
 
 ```{note}
-Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
+Enabling fallback_to_runtime_pattern=True is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
 ```
 
 ### User facing API
@@ -257,7 +257,7 @@ Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced use
 The logic behind pattern resolution is handled by the internal `CatalogConfigResolver`, available as a property on the catalog (`catalog.config_resolver`).
 
 Here are a few APIs might be useful for custom use-cases:
-- `catalog_config_resolver.match_dataset_pattern()` - checks if the dataset name matches any dataset pattern
+- `catalog_config_resolver.match_dataset_pattern()`: checks if the dataset name matches any dataset pattern
 - `catalog_config_resolver.match_user_catch_all_pattern()` - checks if dataset name matches the user defined catch all pattern
 - `catalog_config_resolver.match_runtime_pattern()` - checks if dataset name matches the default runtime pattern
 - `catalog_config_resolver.resolve_pattern()` -  resolves a dataset name to its configuration based on patterns in the order explained above

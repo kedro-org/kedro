@@ -945,6 +945,7 @@ class TestRunCommand:
             load_versions=lv_dict,
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
     def test_fail_split_load_versions(self, fake_project_cli, fake_metadata):
@@ -1007,6 +1008,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
     def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):

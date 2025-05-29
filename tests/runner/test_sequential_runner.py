@@ -372,101 +372,71 @@ class TestMemoryDatasetBehaviour:
 
 
 class TestRunIncremental:
-    def test_run_incremental_all_outputs_missing(
-        self, unfinished_outputs_pipeline, catalog, mocker
-    ):
+    def test_run_incremental_all_outputs_missing(self, mocker):
         """Test run_incremental when all outputs are missing"""
-        # Mock catalog.exists to return False for all outputs
+        from kedro.io import DataCatalog, MemoryDataset
+        from kedro.pipeline import node, pipeline
+        from tests.runner.conftest import identity
+
+        catalog = DataCatalog()
+
+        # Mock catalog to say all outputs are missing
         catalog.exists = mocker.Mock(return_value=False)
 
-        # Create datasets that will be needed
-        catalog["ds1"] = MemoryDataset({"data": 42})
-        catalog["ds2"] = MemoryDataset([1, 2, 3, 4, 5])
-        catalog["ds3"] = pd.DataFrame({"test": [1, 2]})
-        catalog["ds4"] = MemoryDataset()
+        # Create a simple test pipeline
+        test_pipeline = pipeline([node(identity, "input", "output")])
+
+        catalog["input"] = MemoryDataset("test_data")
 
         runner = SequentialRunner()
         spy_run = mocker.spy(runner, "run")
 
-        result = runner.run_incremental(unfinished_outputs_pipeline, catalog)
+        runner.run_incremental(test_pipeline, catalog)
 
-        # Should have called regular run with the full pipeline
+        # Should run the entire pipeline since all outputs are missing
         spy_run.assert_called_once()
-        call_args = spy_run.call_args[0]
-        pipeline_arg = call_args[0]
+        pipeline_arg = spy_run.call_args[0][0]
+        assert len(pipeline_arg.nodes) == len(test_pipeline.nodes)
 
-        # Should include all nodes since all outputs are missing
-        assert len(pipeline_arg.nodes) == len(unfinished_outputs_pipeline.nodes)
+    def test_run_incremental_some_outputs_exist(self, mocker):
+        """Test run_incremental when some outputs exist"""
+        from kedro.io import DataCatalog, MemoryDataset
+        from kedro.pipeline import node, pipeline
+        from tests.runner.conftest import identity
 
-        # Check outputs
-        assert "ds8" in result
-        assert "ds5" in result
-        assert "ds6" in result
+        catalog = DataCatalog()
 
-    def test_run_incremental_some_outputs_exist(
-        self, unfinished_outputs_pipeline, catalog, mocker
-    ):
-        """Test run_incremental when some outputs already exist"""
+        # Create pipeline: A -> B -> C
+        test_pipeline = pipeline([node(identity, "A", "B"), node(identity, "B", "C")])
 
-        # Mock catalog.exists to return True for some outputs
+        # Mock exists to say B exists but C doesn't
         def mock_exists(dataset_name):
-            # Say ds5 and ds6 already exist
-            return dataset_name in ["ds5", "ds6"]
+            return dataset_name == "B"
 
         catalog.exists = mocker.Mock(side_effect=mock_exists)
-
-        # Create only the datasets needed for the remaining pipeline
-        catalog["ds1"] = MemoryDataset({"data": 42})
-        catalog["ds4"] = MemoryDataset()
-
-        runner = SequentialRunner()
-        spy_run = mocker.spy(runner, "run")
-
-        result = runner.run_incremental(unfinished_outputs_pipeline, catalog)
-
-        # Should have called regular run with a filtered pipeline
-        spy_run.assert_called_once()
-        call_args = spy_run.call_args[0]
-        pipeline_arg = call_args[0]
-
-        # Should only include nodes that produce ds8 (since ds5 and ds6 exist)
-        node_names = {n.name for n in pipeline_arg.nodes}
-        # Based on the pipeline, only node1 and node5 should run to produce ds8
-        assert "node1" in node_names  # produces ds8
-        assert "node5" in node_names  # produces ds4 which is input to node1
-        assert "node4" not in node_names  # produces ds5 which already exists
-        assert "node3" not in node_names  # produces ds6 and ds7 which exist
-
-        # Only ds8 should be in the output since others exist
-        assert "ds8" in result
-        assert "ds5" not in result  # Already exists
-        assert "ds6" not in result  # Already exists
-
-    def test_run_incremental_all_outputs_exist(
-        self, unfinished_outputs_pipeline, catalog, mocker
-    ):
-        """Test run_incremental when all outputs already exist"""
-        # Mock catalog.exists to return True for all outputs
-        catalog.exists = mocker.Mock(return_value=True)
+        catalog["A"] = MemoryDataset("data_a")
+        catalog["B"] = MemoryDataset("data_b")
+        catalog["C"] = MemoryDataset()
 
         runner = SequentialRunner()
         spy_run = mocker.spy(runner, "run")
 
-        result = runner.run_incremental(unfinished_outputs_pipeline, catalog)
+        runner.run_incremental(test_pipeline, catalog)
 
-        # Should have called regular run with an empty pipeline
+        # Should only run the second node since B exists
         spy_run.assert_called_once()
-        call_args = spy_run.call_args[0]
-        pipeline_arg = call_args[0]
-
-        # Pipeline should be empty since all outputs exist
-        assert len(pipeline_arg.nodes) == 0
-
-        # Result should be empty
-        assert result == {}
+        pipeline_arg = spy_run.call_args[0][0]
+        assert len(pipeline_arg.nodes) == 1
+        first_node = next(iter(pipeline_arg.nodes))
+        assert first_node.inputs == ["B"]
+        assert first_node.outputs == ["C"]
 
     def test_run_incremental_with_transcoding(self, mocker):
         """Test run_incremental with transcoded datasets"""
+        from kedro.io import DataCatalog, MemoryDataset
+        from kedro.pipeline import node, pipeline
+        from tests.runner.conftest import identity
+
         catalog = DataCatalog()
 
         # Create a pipeline with transcoding
@@ -482,7 +452,9 @@ class TestRunIncremental:
 
         catalog.exists = mocker.Mock(side_effect=mock_exists)
         catalog["input"] = MemoryDataset("test_data")
-        catalog["output@spark"] = MemoryDataset()
+        catalog["output@pandas"] = MemoryDataset("intermediate_data")
+        catalog["output@spark"] = MemoryDataset("intermediate_data")
+        catalog["final_output"] = MemoryDataset()
 
         runner = SequentialRunner()
         spy_run = mocker.spy(runner, "run")

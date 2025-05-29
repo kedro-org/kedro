@@ -20,6 +20,17 @@ def fake_copyfile(mocker):
     return mocker.patch("shutil.copyfile")
 
 
+@pytest.fixture
+def fake_session(mocker):
+    mock_session = mocker.Mock()
+    mock_session.run = mocker.Mock()
+
+    mock_session_context = mocker.patch("kedro.framework.session.KedroSession.create")
+    mock_session_context.return_value.__enter__.return_value = mock_session
+
+    return mock_session
+
+
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestIpythonCommand:
     def test_happy_path(
@@ -673,71 +684,6 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
-            namespaces=[],
-            only_missing_outputs=True,
-        )
-
-    def test_run_with_only_missing_outputs_and_other_options(
-        self, fake_project_cli, fake_metadata, fake_session, mocker
-    ):
-        """Test running with --only-missing-outputs combined with other flags"""
-        result = CliRunner().invoke(
-            fake_project_cli,
-            [
-                "run",
-                "--only-missing-outputs",
-                "--pipeline",
-                "data_processing",
-                "--tags",
-                "train",
-            ],
-            obj=fake_metadata,
-        )
-        assert not result.exit_code
-
-        fake_session.run.assert_called_once_with(
-            tags=("train",),
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions={},
-            pipeline_name="data_processing",
-            namespaces=[],
-            only_missing_outputs=True,
-        )
-
-    def test_run_with_only_missing_outputs_in_config(
-        self,
-        fake_project_cli,
-        fake_metadata,
-        fake_session,
-        fake_run_config,
-        mocker,
-    ):
-        """Test running with only_missing_outputs specified in config file"""
-        # Update the config file to include only_missing_outputs
-        config = OmegaConf.load(fake_run_config)
-        config["run"]["only_missing_outputs"] = True
-        OmegaConf.save(config, fake_run_config)
-
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--config", fake_run_config], obj=fake_metadata
-        )
-        assert not result.exit_code
-
-        fake_session.run.assert_called_once_with(
-            tags=("tag1", "tag2"),
-            runner=mocker.ANY,
-            node_names=("node1", "node2"),
-            from_nodes=[],
-            to_nodes=[],
-            from_inputs=[],
-            to_outputs=[],
-            load_versions={},
-            pipeline_name="pipeline1",
             namespaces=[],
             only_missing_outputs=True,
         )

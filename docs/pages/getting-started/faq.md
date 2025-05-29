@@ -9,11 +9,11 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * **How can I check the version of Kedro installed?**
   To check the version installed, type `kedro -V` in your terminal window.
 * **Do I need Git installed to use Kedro?**
-  Yes, users are expected to have Git installed when working with Kedro. This is a prerequisite for the `kedro new` flow. If Git is not installed, use the following workaround: `kedro new -s https://github.com/kedro-org/kedro-starters/archive/0.18.6.zip --directory=pandas-iris`
+  Yes, users are expected to have Git installed when working with Kedro. This is a prerequisite for the `kedro new` flow. If Git is not installed, use the following workaround: `uvx kedro new -s https://github.com/kedro-org/kedro-starters/archive/0.18.6.zip --directory=pandas-iris`
 
 ## Kedro documentation
-* {doc}`Where can I find the documentation about Kedro-Viz<kedro-viz:kedro-viz_visualisation>`?
-* {py:mod}`Where can I find the documentation for Kedro's datasets <kedro-datasets:kedro_datasets>`?
+* [Where can I find the documentation about Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/)
+* [Where can I find the documentation for Kedro's datasets](https://docs.kedro.org/projects/kedro-datasets/en/latest/)
 
 ## Working with Notebooks
 
@@ -66,7 +66,8 @@ brains behind a layered data-engineering convention as a model of managing data.
 
 Refer to the following table below for a high level guide to each layer's purpose
 
-> **Note**:The data layers don’t have to exist locally in the `data` folder within your project, but we recommend that you structure your S3 buckets or other data stores in a similar way.
+!!! note
+    The data layers don’t have to exist locally in the `data` folder within your project, but we recommend that you structure your S3 buckets or other data stores in a similar way.
 
 ![data_engineering_convention](../meta/images/data_layers.png)
 

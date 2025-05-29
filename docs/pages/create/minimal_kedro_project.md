@@ -62,15 +62,7 @@ The `pipeline_registry.py` file is essential for managing the pipelines within y
 ## Creating a Minimal Kedro Project Step-by-Step
 This guide will walk you through the process of creating a minimal Kedro project, allowing you to successfully run `kedro run` with just three files.
 
-### Step 1: Install Kedro
-
-First, ensure that Python is installed on your machine. Then, install Kedro using pip:
-
-```bash
-pip install kedro
-```
-
-### Step 2: Create a New Kedro Project
+### Step 1: Create a New Kedro Project
 Create a new directory for your project:
 ```bash
 mkdir minikedro
@@ -79,11 +71,19 @@ mkdir minikedro
 Navigate into your newly created project directory:
 
 ```bash
-cd minikiedro
+cd minikedro
 ```
 
-### Step 3: Create `pyproject.toml`
-Create a new file named `pyproject.toml` in the project directory with the following content:
+### Step 2: Initialise `pyproject.toml`
+
+Next, create a new file named `pyproject.toml` in the project directory with some basic project metadata,
+for example using `uv init`:
+
+```
+uv init --bare --lib
+```
+
+And add the following contents:
 
 ```toml
 [tool.kedro]
@@ -100,8 +100,16 @@ At this point, your workingn directory should look like this:
 ```
 
 
-```{note}
-Note we define `source_dir = "."`, usually we keep our source code inside a directory called `src`. For this example, we try to keep the structure minimal so we keep the source code in the root directory
+!!! note
+    Note we define `source_dir = "."`, usually we keep our source code inside a directory called `src`.
+    For this example, we try to keep the structure minimal so we keep the source code in the root directory
+
+### Step 3: Install Kedro
+
+Next, declare Kedro as a dependency for your project and install it:
+
+```bash
+uv add kedro
 ```
 
 ### Step 4: Create `settings.py` and `pipeline_registry.py`

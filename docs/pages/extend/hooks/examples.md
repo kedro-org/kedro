@@ -382,9 +382,8 @@ class NodeInputReplacementHook:
 Node input overwrites implemented in `before_node_run` affect only a specific node and do not modify the corresponding datasets in the `DataCatalog`.
 
 
-```{note}
-In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
-```
+!!! note
+    In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
 
 
 Once you have implemented a new Hook you must register it as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro), and then run Kedro.

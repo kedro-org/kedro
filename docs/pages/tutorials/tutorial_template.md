@@ -4,19 +4,11 @@ This section shows how to create a new project with `kedro new` using the [Kedro
 
 ## Create a new project
 
-[Set up Kedro](../getting-started/install.md) if you have not already done so.
-
-```{important}
-We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.19.0). To check the version installed, type `kedro -V` in your terminal window.
-```
-
 Navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas). The project will be populated with a complete set of working example code:
 
 ```bash
-kedro new --starter=spaceflights-pandas
+uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```
-
-When prompted for a project name, you should accept the default choice (`Spaceflights`) as the rest of this tutorial assumes that project name.
 
 After Kedro has created the project, navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 
@@ -24,44 +16,22 @@ After Kedro has created the project, navigate to the [project root directory](./
 cd spaceflights
 ```
 
-## Install project dependencies
-
-Kedro projects have a `requirements.txt` file to specify their dependencies and enable sharable projects by ensuring consistency across Python packages and versions.
-
-The spaceflights project dependencies are stored in `requirements.txt`(you may find that the versions differ slightly depending on the version of Kedro):
-
-```text
-# code quality packages
-ipython~=8.10; python_version >= '3.8'
-ruff==0.1.8
-
-# notebook tooling
-jupyter~=1.0
-jupyterlab_server>=2.11.1
-jupyterlab~=3.0
-
-# Pytest + useful extensions
-pytest-cov~=3.0
-pytest-mock>=1.7.1, <2.0
-pytest~=7.2
-
-# Kedro dependencies and datasets to work with different data formats (including CSV, Excel, and Parquet)
-kedro~=0.19.0
-kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset]>=3.0
-kedro-telemetry>=0.3.1
-kedro-viz~=6.0 # Visualise pipelines
-
-# For modeling in the data science pipeline
-scikit-learn~=1.0
-```
-
-### Install the dependencies
-
-To install all the project-specific dependencies, run the following from the project root directory:
+Next, to create a virtual environment and install the dependencies, run
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
+
+Finally, verify that your installation is correct:
+
+```bash
+uv run kedro info
+```
+
+See the documentation for more information and alternative methods to [set up Kedro](../getting-started/install.md).
+
+!!! tip
+    We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.19.0). To check the version installed, type `kedro -V` in your terminal window.
 
 ## Optional: logging and configuration
 

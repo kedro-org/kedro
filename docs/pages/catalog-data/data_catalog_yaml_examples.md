@@ -2,10 +2,10 @@
 
 This page contains a set of examples to help you structure your YAML configuration file in `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
-```{warning}
-Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
-From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
-```
+!!! Warning
+    Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+    From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
+
 
 ```{contents} Table of Contents
 :depth: 3
@@ -261,9 +261,8 @@ dev_minio:
     endpoint_url : 'http://localhost:9000'
 ```
 
-```{note}
-The easiest way to setup MinIO is to run a Docker image. After the following command, you can access the MinIO server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
-```
+!!! note
+    The easiest way to setup MinIO is to run a Docker image. After the following command, you can access the MinIO server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
@@ -288,9 +287,9 @@ dev_abs:
 
 ## Load a CSV file stored in a remote location through SSH
 
-```{note}
-This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
-```
+!!! note
+    This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
+
 ```yaml
 cool_dataset:
   type: pandas.CSVDataset
@@ -341,9 +340,8 @@ bikes:
 
 The syntax `&csv` names the following block `csv` and the syntax `<<: *csv` inserts the contents of the block named `csv`. Locally declared keys entirely override inserted ones as seen in `bikes`.
 
-```{note}
-It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
-```
+!!! note
+    It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
 
 You can also nest reusable YAML syntax:
 

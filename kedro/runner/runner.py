@@ -150,11 +150,11 @@ class AbstractRunner(ABC):
         return run_output
 
     def run_incremental(
-            self,
-            pipeline: Pipeline,
-            catalog: CatalogProtocol,
-            hook_manager: PluginManager | None = None,
-            session_id: str | None = None,
+        self,
+        pipeline: Pipeline,
+        catalog: CatalogProtocol,
+        hook_manager: PluginManager | None = None,
+        session_id: str | None = None,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.

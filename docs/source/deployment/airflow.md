@@ -61,7 +61,7 @@ Starting with kedro-airflow release version 0.9.0, you can adopt a different str
 
 4. Open `conf/logging.yml` and modify the `root: handlers` section to `[console]` at the end of the file. By default, Kedro uses the [Rich library](https://rich.readthedocs.io/en/stable/index.html) to enhance log output with sophisticated formatting. However, some deployment systems, including Airflow, don't work well with Rich. Therefore, we're adjusting the logging to a simpler console version. For more information on logging in Kedro, you can refer to the [Kedro docs](https://docs.kedro.org/en/stable/logging/index.html).
 
-> ⚠️ **Note**: This step is optional for recent versions of Airflow, as the compatibility issue has been fixed.
+> ⚠️ **Note**: This step is optional for Airflow from version `2.11.0` onward, as the compatibility issue has been confirmed fixed at least from this version.
 
 ```shell
 root:

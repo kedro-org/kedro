@@ -11,7 +11,7 @@ echo $0
 ```
 
 
-??? example "If you are using Bash (click to expand)"
+=== "If you are using Bash"
     <br/>
     Add the following to your <code>~/.bashrc</code> (or just run it on the command line):
 
@@ -20,7 +20,7 @@ echo $0
     ```
 
 
-??? example "If you are using Z shell (ZSh) (click to expand)"
+=== "If you are using Z shell (ZSh)"
     <br/>
     Add the following to <code>~/.zshrc</code>:
 
@@ -29,7 +29,7 @@ echo $0
     ```
 
 
-??? example "If you are using Fish (click to expand)"
+=== "If you are using Fish"
     <br/>
     Add the following to <code>~/.config/fish/completions/foo-bar.fish</code>:
 

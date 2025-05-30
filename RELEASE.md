@@ -33,7 +33,8 @@
 ## Upcoming deprecations for Kedro 1.0.0
 ## Documentation changes
 ## Community contributions
-
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Yury Fedotov](https://github.com/yury-fedotov)
 
 # Release 0.19.13
 

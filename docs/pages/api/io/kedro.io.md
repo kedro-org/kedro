@@ -8,12 +8,13 @@
 
 | Name                                   | Type       | Description                                      |
 |----------------------------------------|------------|--------------------------------------------------|
-| [`AbstractDataset`](kedro.io.AbstractDataset.md) | Class      | Base class for all Kedro datasets.              |
-| [`AbstractVersionedDataset`](kedro.io.AbstractVersionedDataset.md) | Class | Base class for versioned datasets.              |
-| [`CachedDataset`](kedro.io.CachedDataset.md)    | Class      | Dataset wrapper for caching data in memory.     |
-| [`LambdaDataset`](kedro.io.LambdaDataset.md)    | Class      | Dataset wrapper for inline data transformations.|
-| [`MemoryDataset`](kedro.io.MemoryDataset.md)    | Class      | Dataset for storing data in memory.             |
-| [`Version`](kedro.io.Version.md)                | Class      | Represents dataset version information.         |
-| [`DatasetAlreadyExistsError`](kedro.io.DatasetAlreadyExistsError.md) | Exception | Raised when a dataset already exists.           |
-| [`DatasetError`](kedro.io.DatasetError.md)      | Exception  | General dataset-related error.                  |
-| [`DatasetNotFoundError`](kedro.io.DatasetNotFoundError.md) | Exception | Raised when a dataset is not found.             |
+| [`kedro.io.AbstractDataset`][] | Class      | Base class for all Kedro datasets.              |
+| [`kedro.io.AbstractVersionedDataset`][] | Class | Base class for versioned datasets.              |
+| [`kedro.io.CachedDataset`][]    | Class      | Dataset wrapper for caching data in memory.     |
+| [`kedro.io.DataCatalog`][] | Class | Manages datasets used in a Kedro pipeline. |
+| [`kedro.io.LambdaDataset`][]    | Class      | Dataset wrapper for inline data transformations.|
+| [`kedro.io.MemoryDataset`][]    | Class      | Dataset for storing data in memory.             |
+| [`kedro.io.Version`][]                | Class      | Represents dataset version information.         |
+| [`kedro.io.DatasetAlreadyExistsError`][] | Exception | Raised when a dataset already exists.           |
+| [`kedro.io.DatasetError`][]      | Exception  | General dataset-related error.                  |
+| [`kedro.io.DatasetNotFoundError`][] | Exception | Raised when a dataset is not found.             |

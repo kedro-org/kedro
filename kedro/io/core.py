@@ -344,22 +344,22 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         """
 
         # Save the original __init__ method of the subclass
-        init_func: Callable = cls.__init__
+        # init_func: Callable = cls.__init__
 
-        @wraps(init_func)
-        def new_init(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
-            """Executes the original __init__, then save the arguments used
-            to initialize the instance.
-            """
-            # Call the original __init__ method
-            init_func(self, *args, **kwargs)
-            # Capture and save the arguments passed to the original __init__
-            self._init_args = getcallargs(init_func, self, *args, **kwargs)
+        # @wraps(init_func)
+        # def new_init(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+        #     """Executes the original __init__, then save the arguments used
+        #     to initialize the instance.
+        #     """
+        #     # Call the original __init__ method
+        #     init_func(self, *args, **kwargs)
+        #     # Capture and save the arguments passed to the original __init__
+        #     self._init_args = getcallargs(init_func, self, *args, **kwargs)
 
-        # Replace the subclass's __init__ with the new_init
-        # A hook for subclasses to capture initialization arguments and save them
-        # in the AbstractDataset._init_args field
-        cls.__init__ = new_init  # type: ignore[method-assign]
+        # # Replace the subclass's __init__ with the new_init
+        # # A hook for subclasses to capture initialization arguments and save them
+        # # in the AbstractDataset._init_args field
+        # cls.__init__ = new_init  # type: ignore[method-assign]
 
         super().__init_subclass__(**kwargs)
 

@@ -132,23 +132,23 @@ kedro run --from-nodes=mean_node
 Similarly, you can specify the nodes which should be used to end a pipeline. For example:
 
 ??? example "View code"
-```python
-    print(full_pipeline.to_nodes("mean_node").describe())
+    ```python
+        print(full_pipeline.to_nodes("mean_node").describe())
+        ```
+
+        `Output`:
+
+        ```console
+        #### Pipeline execution order ####
+        Name: None
+        Inputs: xs
+
+        len([xs]) -> [n]
+        mean_node
+
+        Outputs: m
+        ##################################
     ```
-
-    `Output`:
-
-    ```console
-    #### Pipeline execution order ####
-    Name: None
-    Inputs: xs
-
-    len([xs]) -> [n]
-    mean_node
-
-    Outputs: m
-    ##################################
-```
 
 As you can see, this will slice the pipeline, so it runs from the beginning and ends with the specified node:
 

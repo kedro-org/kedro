@@ -340,6 +340,12 @@ pre:hover .md-clipboard {
   color: var(--text-secondary-color);
 }
 
+.md-typeset__table {
+  td {
+    min-width: 200px;
+  }
+}
+
 /* Desktop-specific styles for positioning the search box and header options */
 @media screen and (min-width: 76.2344em) {
   .md-search,
@@ -374,6 +380,8 @@ pre:hover .md-clipboard {
   #__nav_2_label {
     display: none;
   }
+
+
 }
 
 /** MOBILE STYLES */

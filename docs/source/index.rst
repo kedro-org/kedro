@@ -92,6 +92,7 @@ Welcome to Kedro's award-winning documentation!
    integrations/kedro_dvc_versioning.md
    integrations/deltalake_versioning.md
    integrations/iceberg_versioning.md
+   integrations/ibis.md
 
 .. toctree::
    :maxdepth: 2

@@ -227,9 +227,9 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             f"{TYPE_KEY}": f"{type(self).__module__}.{type(self).__name__}"
         }
 
-        if self._init_args:  # type: ignore[attr-defined]
-            self._init_args.pop("self", None)  # type: ignore[attr-defined]
-            return_config.update(self._init_args)  # type: ignore[attr-defined]
+        # if self._init_args:  # type: ignore[attr-defined]
+            # self._init_args.pop("self", None)  # type: ignore[attr-defined]
+            # return_config.update(self._init_args)  # type: ignore[attr-defined]
 
         if type(self).__name__ == "CachedDataset":
             cached_ds = return_config.pop("dataset")

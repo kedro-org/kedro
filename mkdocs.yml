@@ -280,5 +280,5 @@ nav:
         #   - Release notes: pages/about/release_notes.md
           - Migration guide: pages/about/migration.md
           - Kedro telemetry: pages/about/telemetry.md
-  - Kedro-Viz: https://readthedocs.io/projects/kedro-viz
-  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets
+  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/feature-12.0/pages/
+  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/pages/api/kedro_datasets/

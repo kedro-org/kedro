@@ -27,22 +27,28 @@ e2e-tests-fast:
 pip-compile:
 	pip-compile -q -o -
 
-serve-docs:
+install-docs-requirements:
 	uv pip install -e ".[docs]"
-	mkdocs serve
 
-build-docs:
-	uv pip install -e ".[docs]"
+serve-docs: install-docs-requirements
+	mkdocs serve --open
+
+build-docs: install-docs-requirements
 	mkdocs build
 
 show-docs:
 	open site/index.html
 
-linkcheck:
-	uv pip install -e ".[docs]"
+linkcheck: install-docs-requirements
+	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
 	mkdocs build --strict
-	vale docs
-	linkchecker site/
+	# lychee checks for broken external links in the built site, with max concurrency set to 32
+	lychee --max-concurrency 32 --exclude "@.lycheeignore" site/
+
+fix-markdownlint:
+	npm install -g markdownlint-cli2
+	# markdownlint rules are defined in .markdownlint.yaml
+	markdownlint-cli2 --config .markdownlint.yaml --fix "docs/**/*.md"
 
 package: clean install
 	python -m pip install build && python -m build

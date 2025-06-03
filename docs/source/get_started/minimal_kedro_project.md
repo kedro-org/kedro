@@ -57,7 +57,7 @@ Even if you do not have any settings, an empty `settings.py` is still required. 
 #### `pipeline_registry.py`
 The `pipeline_registry.py` file is essential for managing the pipelines within your Kedro project. It provides a centralized way to register and access all pipelines defined in the project. Here are its key features:
 - Pipeline Registration: The file must contain a top-level function called `register_pipelines()` that returns a mapping from pipeline names to Pipeline objects. This function is crucial because it enables the Kedro CLI and other tools to discover and run the defined pipelines.
-- Autodiscovery of Pipelines: Since Kedro 0.18.3, you can use the [`find_pipeline`](../nodes_and_pipelines/pipeline_registry.md#pipeline-autodiscovery) function to automatically discover pipelines defined in your project without manually updating the registry each time you create a new pipeline.
+- Autodiscovery of Pipelines: Since Kedro 0.18.3, you can use the [`find_pipelines`](../nodes_and_pipelines/pipeline_registry.md#pipeline-autodiscovery) function to automatically discover pipelines defined in your project without manually updating the registry each time you create a new pipeline.
 
 ## Creating a Minimal Kedro Project Step-by-Step
 This guide will walk you through the process of creating a minimal Kedro project, allowing you to successfully run `kedro run` with just three files.
@@ -79,7 +79,7 @@ mkdir minikedro
 Navigate into your newly created project directory:
 
 ```bash
-cd minikiedro
+cd minikedro
 ```
 
 ### Step 3: Create `pyproject.toml`
@@ -93,7 +93,7 @@ kedro_init_version = "0.19.9"
 source_dir = "."
 ```
 
-At this point, your workingn directory should look like this:
+At this point, your working directory should look like this:
 ```bash
 .
 ├── pyproject.toml

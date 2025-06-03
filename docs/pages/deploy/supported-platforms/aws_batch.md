@@ -166,7 +166,7 @@ class AWSBatchRunner(ThreadRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        session_id: str = None,
+        run_id: str = None,
     ) -> None:
         nodes = pipeline.nodes
         node_dependencies = pipeline.node_dependencies
@@ -207,7 +207,7 @@ class AWSBatchRunner(ThreadRunner):
                         node,
                         node_to_job,
                         node_dependencies[node],
-                        session_id,
+                        run_id,
                     )
                     futures.add(future)
 
@@ -233,11 +233,11 @@ def _submit_job(
     node: Node,
     node_to_job: Dict[Node, str],
     node_dependencies: Set[Node],
-    session_id: str,
+    run_id: str,
 ) -> Node:
     self._logger.info("Submitting the job for node: %s", str(node))
 
-    job_name = f"kedro_{session_id}_{node.name}".replace(".", "-")
+    job_name = f"kedro_{run_id}_{node.name}".replace(".", "-")
     depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
     command = ["kedro", "run", "--nodes", node.name]
 

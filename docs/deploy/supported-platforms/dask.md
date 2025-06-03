@@ -120,7 +120,7 @@ class DaskRunner(AbstractRunner):
         node: Node,
         catalog: CatalogProtocol,
         is_async: bool = False,
-        session_id: str | None = None,
+        run_id: str | None = None,
         *dependencies: Node,
     ) -> Node:
         """Run a single `Node` with inputs from and outputs to the `catalog`.
@@ -137,7 +137,7 @@ class DaskRunner(AbstractRunner):
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            session_id: The session id of the pipeline run.
+            run_id: The run id of the pipeline run.
             dependencies: The upstream ``Node``s to allow Dask to handle
                 dependency tracking. Their values are not actually used.
 
@@ -148,14 +148,14 @@ class DaskRunner(AbstractRunner):
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
-        return run_node(node, catalog, hook_manager, is_async, session_id)
+        return run_node(node, catalog, hook_manager, is_async, run_id)
 
     def _run(
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """Implementation of the abstract interface for running the pipelines.
 
@@ -163,7 +163,7 @@ class DaskRunner(AbstractRunner):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
         """
 
         nodes = pipeline.nodes
@@ -181,7 +181,7 @@ class DaskRunner(AbstractRunner):
                 node,
                 catalog,
                 self._is_async,
-                session_id,
+                run_id,
                 *dependencies,
             )
 

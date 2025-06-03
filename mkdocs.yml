@@ -1,5 +1,5 @@
 site_name: ""
-site_url: https://docs.kedro.org
+site_url: !ENV [SITE_URL, 'https://docs.kedro.org/en/develop/']
 repo_name: kedro-org/kedro
 repo_url: https://github.com/kedro-org/kedro
 

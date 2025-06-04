@@ -188,19 +188,7 @@ class AbstractRunner(ABC):
             node_has_missing_output = False
 
             for output in node.outputs:
-                # Check if dataset is ephemeral (like MemoryDataset)
-                is_ephemeral = False
-                if output in catalog._datasets:
-                    dataset = catalog._datasets[output]
-                    # Safely check for _EPHEMERAL attribute or known ephemeral types
-                    is_ephemeral = (
-                            getattr(dataset, '_EPHEMERAL', False) or
-                            isinstance(dataset, (MemoryDataset, SharedMemoryDataset))
-                    )
-
-                # For ephemeral datasets, consider them as "existing"
-                # since they're meant to be recreated each run
-                if not is_ephemeral and not catalog.exists(output):
+                if not catalog.exists(output):
                     missing.append(output)
                     node_has_missing_output = True
                     break

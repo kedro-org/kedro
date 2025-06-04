@@ -182,13 +182,48 @@ class AbstractRunner(ABC):
 
         """
         missing = []
+        skipped_nodes = []
+
         for node in pipeline.nodes:
+            node_has_missing_output = False
+
             for output in node.outputs:
-                if not catalog.exists(output):
+                # Check if dataset is ephemeral (like MemoryDataset)
+                is_ephemeral = False
+                if output in catalog._datasets:
+                    dataset = catalog._datasets[output]
+                    # Safely check for _EPHEMERAL attribute or known ephemeral types
+                    is_ephemeral = (
+                            getattr(dataset, '_EPHEMERAL', False) or
+                            isinstance(dataset, (MemoryDataset, SharedMemoryDataset))
+                    )
+
+                # For ephemeral datasets, consider them as "existing"
+                # since they're meant to be recreated each run
+                if not is_ephemeral and not catalog.exists(output):
                     missing.append(output)
+                    node_has_missing_output = True
                     break
 
+            if not node_has_missing_output:
+                skipped_nodes.append(node.name)
+
+        # Log the results
+        if skipped_nodes:
+            self._logger.info(
+                f"Skipping {len(skipped_nodes)} nodes with existing outputs: {', '.join(skipped_nodes)}"
+            )
+
         to_run = pipeline.only_nodes_with_outputs(*missing)
+
+        if len(to_run.nodes) < len(pipeline.nodes):
+            self._logger.info(
+                f"Running {len(to_run.nodes)} out of {len(pipeline.nodes)} nodes "
+                f"(skipped {len(pipeline.nodes) - len(to_run.nodes)} nodes)"
+            )
+        else:
+            self._logger.info(f"Running all {len(pipeline.nodes)} nodes (no outputs to skip)")
+
         return self.run(to_run, catalog, hook_manager, session_id)
 
     def run_only_missing(

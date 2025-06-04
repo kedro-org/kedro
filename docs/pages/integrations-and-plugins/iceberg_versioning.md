@@ -219,7 +219,7 @@ parent_id: [[null,9089827653240705573,5091346767047746426]]
 is_current_ancestor: [[true,true,true]]
 ```
 
-Alternatively, you can also call the `history()` method from the `pyiceberg.table.Table` object directly which shows a more consise output:
+Alternatively, you can also call the `history()` method from the `pyiceberg.table.Table` object directly which shows a more concise output:
 
 ```python
 In [4]: model_input_table.table.history()

@@ -59,7 +59,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-To use a new set of parameters, you should create a second parameters file to ovewrite parameters specified in  `conf/base/parameters.yml`. To overwrite the parameter `model_options`, create a file  `conf/base/parameters_data_science.yml` and add a parameter called `model_options_1`:
+To use a new set of parameters, you should create a second parameters file to overwrite parameters specified in  `conf/base/parameters.yml`. To overwrite the parameter `model_options`, create a file  `conf/base/parameters_data_science.yml` and add a parameter called `model_options_1`:
 
 ```python
 #conf/base/parameters.yml

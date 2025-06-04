@@ -227,7 +227,7 @@ Kedro promotes the use of unit tests to achieve high code quality and maintainab
 
 Selecting the custom logging tool introduces the file `logging.yml` to your project's `conf` directory. This tool allows you to customise your logging configuration instead of using [Kedro's default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). The populated `conf/logging.yml` provides two additional logging handlers: `console` and `info_file_handler`, as well as `rich` that is available in the default configuration, though only `info_file_handler` and `rich` are used.
 
-To use this provided logging configuration, remember to set the `KEDRO_LOGGING_CONFIG` environment variable to point to `logging.yml` by naviagting to your project root and running the following command:
+To use this provided logging configuration, remember to set the `KEDRO_LOGGING_CONFIG` environment variable to point to `logging.yml` by navigating to your project root and running the following command:
 
 ```bash
 export KEDRO_LOGGING_CONFIG=conf/logging.yml

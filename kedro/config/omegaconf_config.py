@@ -194,7 +194,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Allow bypassing of loading config from patterns if a key and value have been set
         # explicitly on the ``OmegaConfigLoader`` instance.
 
-        # Re-register runtime params resolver incase it was previously deactivated
+        # Re-register runtime params resolver in case it was previously deactivated
         self._register_runtime_params_resolver()
 
         if key in self:

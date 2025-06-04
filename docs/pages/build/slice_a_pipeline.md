@@ -320,7 +320,7 @@ We can avoid re-calculating `n` (and all other results that have already been sa
     SequentialRunner().run_only_missing(full_pipeline, io)
     ```
 
-    `Ouput`:
+    `Output`:
 
     ```console
     Out[18]: {'v': 0.666666666666667}

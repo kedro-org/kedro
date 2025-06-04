@@ -236,7 +236,7 @@ DAGs folder
 Plugins file - optional
   s3://your_S3_bucket/plugins.zip
 Requirements file - optional
-  s3://your_S3_bucket/requrements.txt
+  s3://your_S3_bucket/requirements.txt
 Startup script file - optional
   s3://your_S3_bucket/startup.sh
 ```

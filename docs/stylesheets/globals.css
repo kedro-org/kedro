@@ -250,7 +250,7 @@
   color: var(--text-secondary-color);
 }
 
-/** hightlight the copy icon buton on hover */
+/** highlight the copy icon button on hover */
 .md-clipboard:hover,
 pre:hover .md-clipboard {
   color: var(--text-hover-color);

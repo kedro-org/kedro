@@ -210,7 +210,9 @@ class AbstractRunner(ABC):
                 f"(skipped {len(pipeline.nodes) - len(to_run.nodes)} nodes)"
             )
         else:
-            self._logger.info(f"Running all {len(pipeline.nodes)} nodes (no outputs to skip)")
+            self._logger.info(
+                f"Running all {len(pipeline.nodes)} nodes (no outputs to skip)"
+            )
 
         return self.run(to_run, catalog, hook_manager, session_id)
 

@@ -16,6 +16,7 @@ from .specs import (
     KedroContextSpecs,
     NodeSpecs,
     PipelineSpecs,
+    RunnerSpecs,
 )
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
@@ -23,18 +24,28 @@ _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed pl
 logger = logging.getLogger(__name__)
 
 
-def _create_hook_manager() -> PluginManager:
-    """Create a new PluginManager instance and register Kedro's hook specs."""
+def _create_hook_manager(enable_tracing: bool = True) -> PluginManager:
+    """Create a new PluginManager instance and register Kedro's hook specs.
+
+    Args:
+        enable_tracing: If True (default), enables pluggy's tracing and sets a log writer.
+                        Should be set to False when creating managers for subprocesses
+                        that need to be picklable (e.g., for ParallelRunner).
+    """
     manager = PluginManager(HOOK_NAMESPACE)
-    manager.trace.root.setwriter(
-        logger.debug if logger.getEffectiveLevel() == logging.DEBUG else None
-    )
-    manager.enable_tracing()
+
+    if enable_tracing:
+        manager.trace.root.setwriter(
+            logger.debug if logger.getEffectiveLevel() <= logging.DEBUG else None
+        )
+        manager.enable_tracing()
+
     manager.add_hookspecs(NodeSpecs)
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)
     manager.add_hookspecs(DatasetSpecs)
     manager.add_hookspecs(KedroContextSpecs)
+    manager.add_hookspecs(RunnerSpecs)
     return manager
 
 

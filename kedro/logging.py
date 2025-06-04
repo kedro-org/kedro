@@ -10,7 +10,7 @@ import rich.logging
 import rich.pretty
 import rich.traceback
 
-from kedro.utils import _is_databricks
+from kedro.utils import _format_rich, _is_databricks
 
 
 class RichHandler(rich.logging.RichHandler):
@@ -81,6 +81,6 @@ class RichHandler(rich.logging.RichHandler):
                 raise TypeError("rich_format only accept non-empty list as an argument")
 
 
-def _format_rich(value: str, markup: str) -> str:
-    """Format string with rich markup"""
-    return f"[{markup}]{value}[/{markup}]"
+# def _format_rich(value: str, markup: str) -> str:
+#    """Format string with rich markup"""
+#    return f"[{markup}]{value}[/{markup}]"

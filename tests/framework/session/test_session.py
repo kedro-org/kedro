@@ -717,8 +717,21 @@ class TestKedroSession:
             "kedro.framework.session.session._create_hook_manager"
         ).return_value.hook
 
-        ds_mock = mocker.Mock(**{"datasets.return_value": ["ds_1", "ds_2"]})
-        filter_mock = mocker.Mock(**{"filter.return_value": ds_mock})
+        mock_node1 = mocker.Mock()
+        mock_node1.name = "test_node_1"
+        mock_node1.outputs = ["output1"]
+
+        mock_node2 = mocker.Mock()
+        mock_node2.name = "test_node_2"
+        mock_node2.outputs = ["output2"]
+
+        ds_mock = mocker.Mock()
+        ds_mock.nodes = [mock_node1, mock_node2]
+        ds_mock.datasets.return_value = ["ds_1", "ds_2"]
+
+        filter_mock = mocker.Mock()
+        filter_mock.filter.return_value = ds_mock
+
         pipelines_ret = {
             _FAKE_PIPELINE_NAME: filter_mock,
             "__default__": filter_mock,
@@ -1056,12 +1069,18 @@ class TestKedroSession:
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
 
+        # Create mock nodes with STRING names (critical fix)
+        mock_node1 = mocker.Mock()
+        mock_node1.name = "node_with_missing_output"  # Must be string for join()
+        mock_node1.outputs = ["output1"]
+
+        mock_node2 = mocker.Mock()
+        mock_node2.name = "node_with_existing_output"  # Must be string for join()
+        mock_node2.outputs = ["output2"]
+
         # Mock the pipeline and its filtering
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
-        mock_pipeline.nodes = [
-            mocker.Mock(outputs=["output1"]),
-            mocker.Mock(outputs=["output2"]),
-        ]
+        mock_pipeline.nodes = [mock_node1, mock_node2]
 
         # Mock catalog.exists to return False for output1, True for output2
         def mock_exists(output):
@@ -1071,11 +1090,14 @@ class TestKedroSession:
 
         # Mock only_nodes_with_outputs to return a filtered pipeline
         mock_filtered_pipeline = mocker.Mock()
-        mock_filtered_pipeline.nodes = [mock_pipeline.nodes[0]]  # Only first node
+        mock_filtered_pipeline.nodes = [mock_node1]  # Only first node
         mock_pipeline.only_nodes_with_outputs.return_value = mock_filtered_pipeline
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, only_missing_outputs=True)
+
+        # Should call only_nodes_with_outputs with missing outputs
+        mock_pipeline.only_nodes_with_outputs.assert_called_once_with("output1")
 
         # Should call regular run with the filtered pipeline
         mock_runner.run.assert_called_once_with(

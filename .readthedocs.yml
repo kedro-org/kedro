@@ -16,10 +16,7 @@ build:
     post_install:
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH uv pip install .[docs]
       # Build the MkDocs documentation
-      - |
-          SITE_URL="https://docs.kedro.org/en/4806/"
-          echo "SITE_URL is $SITE_URL"
-          SITE_URL="$SITE_URL" mkdocs build
+      - SITE_URL="https://docs.kedro.org/en/4806/" mkdocs build
       # Ensure the output directory exists
       - mkdir -p $READTHEDOCS_OUTPUT/html
       # Move the built site to the Read the Docs output directory

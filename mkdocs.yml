@@ -281,4 +281,4 @@ nav:
           - Migration guide: about/migration.md
           - Kedro telemetry: about/telemetry.md
   - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/feature-12.0/
-  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/
+  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/

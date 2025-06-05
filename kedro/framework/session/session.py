@@ -33,6 +33,8 @@ if TYPE_CHECKING:
     from kedro.config import AbstractConfigLoader
     from kedro.framework.context import KedroContext
     from kedro.framework.session.store import BaseSessionStore
+    from kedro.io import CatalogProtocol
+    from kedro.pipeline import Pipeline
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
@@ -277,7 +279,9 @@ class KedroSession:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def _filter_pipeline_for_missing_outputs(self, pipeline, catalog):
+    def _filter_pipeline_for_missing_outputs(
+        self, pipeline: Pipeline, catalog: CatalogProtocol
+    ) -> tuple[Pipeline, int]:
         """Filter pipeline to only include nodes with missing outputs.
 
         Args:

@@ -1332,7 +1332,7 @@ def _get_param_names_mapping(
         # a set[str] of names will stay the same
         {"params:param_1": "params:param_1", "params:param_2": "params:param_2"}
         >>> _get_param_names_mapping({"param_1": "new_name_for_param_1"})
-        # a dict[str, str] of names will map key to valu
+        # a dict[str, str] of names will map key to value
         {"params:param_1": "params:new_name_for_param_1"}
     """
     params = {}

@@ -232,7 +232,7 @@ from kedro.framework.hooks import hook_impl
 class PDBNodeDebugHook:
     """A hook class for creating a post mortem debugging with the PDB debugger
     whenever an error is triggered within a node. The local scope from when the
-    exception occured is available within this debugging session.
+    exception occurred is available within this debugging session.
     """
 
     @hook_impl
@@ -267,7 +267,7 @@ from kedro.framework.hooks import hook_impl
 class PDBPipelineDebugHook:
     """A hook class for creating a post mortem debugging with the PDB debugger
     whenever an error is triggered within a pipeline. The local scope from when the
-    exception occured is available within this debugging session.
+    exception occurred is available within this debugging session.
     """
 
     @hook_impl

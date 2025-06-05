@@ -1009,7 +1009,7 @@ class CatalogProtocol(Protocol[_C]):
         ...
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """Adds dataset using the given key as a datset name and the provided data as the value."""
+        """Adds dataset using the given key as a dataset name and the provided data as the value."""
         ...
 
     def __len__(self) -> int:

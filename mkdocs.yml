@@ -1,5 +1,5 @@
 site_name: ""
-site_url: https://docs.kedro.org
+site_url: https://docs.kedro.org/en/stable/
 repo_name: kedro-org/kedro
 repo_url: https://github.com/kedro-org/kedro
 
@@ -280,5 +280,5 @@ nav:
         #   - Release notes: about/release_notes.md
           - Migration guide: about/migration.md
           - Kedro telemetry: about/telemetry.md
-  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/feature-12.0/pages/
-  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/pages/api/kedro_datasets/
+  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/feature-12.0/
+  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/

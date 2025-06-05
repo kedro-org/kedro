@@ -105,7 +105,7 @@ def _infer_copy_mode(data: Any) -> str:
     try:
         import ibis
     except ImportError:  # pragma: no cover
-        ibis = None  # tpye: ignore[assignment] # pragma: no cover
+        ibis = None  # type: ignore[assignment] # pragma: no cover
 
     if pd and isinstance(data, pd.DataFrame) or np and isinstance(data, np.ndarray):
         copy_mode = "copy"

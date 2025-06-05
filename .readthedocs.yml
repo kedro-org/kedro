@@ -19,7 +19,6 @@ build:
       - |
           SITE_URL="https://docs.kedro.org/en/4806/"
           echo "SITE_URL is $SITE_URL"
-          python -c 'import mkdocs.config; c=mkdocs.config.load_config(); print("[MKDOCS] Resolved site_url:", c["site_url"] )'
           SITE_URL="$SITE_URL" mkdocs build
       # Ensure the output directory exists
       - mkdir -p $READTHEDOCS_OUTPUT/html

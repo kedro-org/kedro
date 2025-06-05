@@ -1055,16 +1055,32 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
+
+        # Mock the pipeline and its filtering
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mock_pipeline.nodes = [
+            mocker.Mock(outputs=["output1"]),
+            mocker.Mock(outputs=["output2"]),
+        ]
+
+        # Mock catalog.exists to return False for output1, True for output2
+        def mock_exists(output):
+            return output == "output2"
+
+        mock_catalog.exists.side_effect = mock_exists
+
+        # Mock only_nodes_with_outputs to return a filtered pipeline
+        mock_filtered_pipeline = mocker.Mock()
+        mock_filtered_pipeline.nodes = [mock_pipeline.nodes[0]]  # Only first node
+        mock_pipeline.only_nodes_with_outputs.return_value = mock_filtered_pipeline
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, only_missing_outputs=True)
 
-        # Should call run_incremental instead of run
-        mock_runner.run_incremental.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
+        # Should call regular run with the filtered pipeline
+        mock_runner.run.assert_called_once_with(
+            mock_filtered_pipeline, mock_catalog, session._hook_manager, fake_session_id
         )
-        mock_runner.run.assert_not_called()
 
         record_data = {
             "session_id": fake_session_id,
@@ -1086,7 +1102,9 @@ class TestKedroSession:
         }
 
         mock_hook.before_pipeline_run.assert_called_once_with(
-            run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
+            run_params=record_data,
+            pipeline=mock_filtered_pipeline,
+            catalog=mock_catalog,
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
@@ -1116,11 +1134,9 @@ class TestKedroSession:
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, only_missing_outputs=False)
 
-        # Should call regular run, not run_incremental
         mock_runner.run.assert_called_once_with(
             mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
         )
-        mock_runner.run_incremental.assert_not_called()
 
 
 @pytest.fixture

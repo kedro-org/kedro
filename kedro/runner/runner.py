@@ -155,67 +155,6 @@ class AbstractRunner(ABC):
 
         return run_output
 
-    def run_incremental(
-        self,
-        pipeline: Pipeline,
-        catalog: CatalogProtocol,
-        hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
-    ) -> dict[str, Any]:
-        """Run the ``Pipeline`` using the datasets provided by ``catalog``
-        and save results back to the same objects.
-        Existing intermediate outputs are not processed.
-
-        Args:
-            pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
-            hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
-
-        Raises:
-            ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
-
-        Returns:
-            Any node outputs that cannot be processed by the catalog.
-            These are returned in a dictionary, where the keys are defined
-            by the node outputs.
-
-        """
-        missing = []
-        skipped_nodes = []
-
-        for node in pipeline.nodes:
-            node_has_missing_output = False
-
-            for output in node.outputs:
-                if not catalog.exists(output):
-                    missing.append(output)
-                    node_has_missing_output = True
-                    break
-
-            if not node_has_missing_output:
-                skipped_nodes.append(node.name)
-
-        # Log the results
-        if skipped_nodes:
-            self._logger.info(
-                f"Skipping {len(skipped_nodes)} nodes with existing outputs: {', '.join(skipped_nodes)}"
-            )
-
-        to_run = pipeline.only_nodes_with_outputs(*missing)
-
-        if len(to_run.nodes) < len(pipeline.nodes):
-            self._logger.info(
-                f"Running {len(to_run.nodes)} out of {len(pipeline.nodes)} nodes "
-                f"(skipped {len(pipeline.nodes) - len(to_run.nodes)} nodes)"
-            )
-        else:
-            self._logger.info(
-                f"Running all {len(pipeline.nodes)} nodes (no outputs to skip)"
-            )
-
-        return self.run(to_run, catalog, hook_manager, session_id)
-
     def run_only_missing(
         self, pipeline: Pipeline, catalog: CatalogProtocol, hook_manager: PluginManager
     ) -> dict[str, Any]:

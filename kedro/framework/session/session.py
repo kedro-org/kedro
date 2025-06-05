@@ -363,6 +363,49 @@ class KedroSession:
             node_namespaces=namespaces,
         )
 
+        # Store original node count for logging
+        original_node_count = len(filtered_pipeline.nodes)
+
+        catalog = context._get_catalog(
+            save_version=save_version,
+            load_versions=load_versions,
+        )
+
+        # Apply missing outputs filtering if requested
+        if only_missing_outputs:
+            missing = []
+            skipped_nodes = []
+
+            for node in filtered_pipeline.nodes:
+                node_has_missing_output = False
+
+                for output in node.outputs:
+                    if not catalog.exists(output):
+                        missing.append(output)
+                        node_has_missing_output = True
+                        break
+
+                if not node_has_missing_output:
+                    skipped_nodes.append(node.name)
+
+            # Log the results
+            if skipped_nodes:
+                self._logger.info(
+                    f"Skipping {len(skipped_nodes)} nodes with existing outputs: {', '.join(skipped_nodes)}"
+                )
+
+            filtered_pipeline = filtered_pipeline.only_nodes_with_outputs(*missing)
+
+            if len(filtered_pipeline.nodes) < original_node_count:
+                self._logger.info(
+                    f"Running {len(filtered_pipeline.nodes)} out of {original_node_count} nodes "
+                    f"(skipped {original_node_count - len(filtered_pipeline.nodes)} nodes)"
+                )
+            else:
+                self._logger.info(
+                    f"Running all {original_node_count} nodes (no outputs to skip)"
+                )
+
         record_data = {
             "session_id": session_id,
             "project_path": self._project_path.as_posix(),
@@ -382,11 +425,6 @@ class KedroSession:
             "only_missing_outputs": only_missing_outputs,
         }
 
-        catalog = context._get_catalog(
-            save_version=save_version,
-            load_versions=load_versions,
-        )
-
         # Run the runner
         hook_manager = self._hook_manager
         runner = runner or SequentialRunner()
@@ -399,14 +437,9 @@ class KedroSession:
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
         try:
-            if only_missing_outputs:
-                run_result = runner.run_incremental(
-                    filtered_pipeline, catalog, hook_manager, session_id
-                )
-            else:
-                run_result = runner.run(
-                    filtered_pipeline, catalog, hook_manager, session_id
-                )
+            run_result = runner.run(
+                filtered_pipeline, catalog, hook_manager, session_id
+            )
             self._run_called = True
         except Exception as error:
             hook_manager.hook.on_pipeline_error(

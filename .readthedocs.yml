@@ -15,9 +15,8 @@ build:
       - pip install uv
     post_install:
       - |
-          export SITE_URL="https://kedro.readthedocs.io/en/${READTHEDOCS_VERSION_NAME}/"
-          echo "SITE_URL is $SITE_URL"
-          python -c "import mkdocs.config; c=mkdocs.config.load_config(); print(f'Resolved site_url: {c[\"site_url\"]}')"
+          echo "SITE_URL is https://kedro.readthedocs.io/en/${READTHEDOCS_VERSION_NAME}/"
+          SITE_URL="https://kedro.readthedocs.io/en/${READTHEDOCS_VERSION_NAME}/" python -c "import mkdocs.config; c=mkdocs.config.load_config(); print(f'Resolved site_url: {c[\"site_url\"]}')"
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH uv pip install .[docs]
       # Build the MkDocs documentation
       - mkdocs build

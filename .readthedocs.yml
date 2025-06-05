@@ -17,12 +17,9 @@ build:
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH uv pip install .[docs]
       # Build the MkDocs documentation
       - |
-          if [ "$READTHEDOCS_CANONICAL_DOMAIN" = "docs.kedro.org" ]; then
-            SITE_URL="https://docs.kedro.org/en/${READTHEDOCS_VERSION_NAME}/"
-          else
-            SITE_URL="https://${READTHEDOCS_PROJECT}--${READTHEDOCS_VERSION_NAME}.${READTHEDOCS_DOMAIN}/en/${READTHEDOCS_VERSION_NAME}/"
-          fi
+          SITE_URL="https://docs.kedro.org/en/4806/"
           echo "SITE_URL is $SITE_URL"
+          python -c 'import mkdocs.config; c=mkdocs.config.load_config(); print("[MKDOCS] Resolved site_url:", c["site_url"] )'
           SITE_URL="$SITE_URL" mkdocs build
       # Ensure the output directory exists
       - mkdir -p $READTHEDOCS_OUTPUT/html

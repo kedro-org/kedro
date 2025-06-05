@@ -1160,6 +1160,89 @@ class TestKedroSession:
             mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
         )
 
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_with_only_missing_outputs_all_missing(
+        self,
+        fake_project,
+        fake_session_id,
+        mock_context_class,
+        mock_runner,
+        mocker,
+    ):
+        """Test running the project with only_missing_outputs=True when all outputs are missing"""
+        mock_hook = mocker.patch(
+            "kedro.framework.session.session._create_hook_manager"
+        ).return_value.hook
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_catalog = mock_context._get_catalog.return_value
+        mock_runner.__name__ = "SequentialRunner"
+
+        mock_node1 = mocker.Mock()
+        mock_node1.name = "node_with_missing_output_1"
+        mock_node1.outputs = ["output1"]
+
+        mock_node2 = mocker.Mock()
+        mock_node2.name = "node_with_missing_output_2"
+        mock_node2.outputs = ["output2"]
+
+        # Mock the pipeline and its filtering
+        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mock_pipeline.nodes = [mock_node1, mock_node2]
+
+        # Mock catalog.exists to return False for ALL outputs (all missing)
+        def mock_exists(output):
+            return False  # All outputs are missing
+
+        mock_catalog.exists.side_effect = mock_exists
+
+        # Mock only_nodes_with_outputs to return the same pipeline (no nodes skipped)
+        mock_filtered_pipeline = mocker.Mock()
+        mock_filtered_pipeline.nodes = [mock_node1, mock_node2]  # All nodes run
+        mock_pipeline.only_nodes_with_outputs.return_value = mock_filtered_pipeline
+
+        with KedroSession.create(fake_project) as session:
+            session.run(runner=mock_runner, only_missing_outputs=True)
+
+        # Should call only_nodes_with_outputs with all missing outputs
+        mock_pipeline.only_nodes_with_outputs.assert_called_once_with(
+            "output1", "output2"
+        )
+
+        mock_runner.run.assert_called_once_with(
+            mock_filtered_pipeline, mock_catalog, session._hook_manager, fake_session_id
+        )
+
+        record_data = {
+            "session_id": fake_session_id,
+            "project_path": fake_project.as_posix(),
+            "env": mock_context.env,
+            "kedro_version": kedro_version,
+            "tags": None,
+            "from_nodes": None,
+            "to_nodes": None,
+            "node_names": None,
+            "from_inputs": None,
+            "to_outputs": None,
+            "load_versions": None,
+            "runtime_params": {},
+            "pipeline_name": None,
+            "namespaces": None,
+            "runner": mock_runner.__name__,
+            "only_missing_outputs": True,
+        }
+
+        mock_hook.before_pipeline_run.assert_called_once_with(
+            run_params=record_data,
+            pipeline=mock_filtered_pipeline,
+            catalog=mock_catalog,
+        )
+
 
 @pytest.fixture
 def fake_project_with_logging_file_handler(fake_project):

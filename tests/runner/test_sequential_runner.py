@@ -273,7 +273,7 @@ class TestSequentialRunnerRelease:
 
 
 class TestOnlyMissingOutputs:
-    def test_only_missing_outputs_all_outputs_missing(self, mocker):
+    def test_only_missing_outputs_all_outputs_missing(self, mocker, caplog):
         """Test only_missing_outputs when all outputs are missing"""
         from kedro.io import DataCatalog, MemoryDataset
         from kedro.pipeline import node, pipeline
@@ -294,11 +294,9 @@ class TestOnlyMissingOutputs:
 
         # Should call the filter method
         spy_filter.assert_called_once()
-        # Pipeline should not be filtered since all outputs are missing
-        filtered_pipeline = spy_filter.return_value
-        assert len(filtered_pipeline.nodes) == len(test_pipeline.nodes)
+        assert "Running all 1 nodes (no outputs to skip)" in caplog.text
 
-    def test_only_missing_outputs_some_outputs_exist(self, mocker):
+    def test_only_missing_outputs_some_outputs_exist(self, mocker, caplog):
         """Test only_missing_outputs when some outputs exist"""
         from kedro.io import DataCatalog, MemoryDataset
         from kedro.pipeline import node, pipeline
@@ -330,11 +328,9 @@ class TestOnlyMissingOutputs:
 
         # Should call the filter method
         spy_filter.assert_called_once()
-        # Should only run the second node since B exists
-        filtered_pipeline = spy_filter.return_value
-        assert len(filtered_pipeline.nodes) == 1
-        first_node = next(iter(filtered_pipeline.nodes))
-        assert first_node.name == "node2"
+        # Should skip node1 and run node2
+        assert "Skipping 1 nodes with existing outputs: node1" in caplog.text
+        assert "Running 1 out of 2 nodes (skipped 1 nodes)" in caplog.text
 
     def test_only_missing_outputs_false_does_not_filter(self, mocker):
         """Test that only_missing_outputs=False does not filter the pipeline"""

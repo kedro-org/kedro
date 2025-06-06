@@ -73,6 +73,7 @@ class AbstractRunner(ABC):
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
         session_id: str | None = None,
+        only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -82,6 +83,7 @@ class AbstractRunner(ABC):
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
+            only_missing_outputs: Run only nodes with missing outputs.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
@@ -92,6 +94,10 @@ class AbstractRunner(ABC):
             by the node outputs.
 
         """
+        # Apply missing outputs filtering if requested
+        if only_missing_outputs:
+            pipeline = self._filter_pipeline_for_missing_outputs(pipeline, catalog)
+
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, not including extra dataset patterns
         # Run a warm-up to materialize all datasets in the catalog before run
@@ -154,6 +160,54 @@ class AbstractRunner(ABC):
             )
 
         return run_output
+
+    def _filter_pipeline_for_missing_outputs(
+        self, pipeline: Pipeline, catalog: CatalogProtocol
+    ) -> Pipeline:
+        """Filter pipeline to only include nodes with missing outputs.
+
+        Args:
+            pipeline: The pipeline to filter.
+            catalog: The data catalog to check for existing outputs.
+
+        Returns:
+            The filtered pipeline.
+        """
+        original_node_count = len(pipeline.nodes)
+        missing = []
+        skipped_nodes = []
+
+        for node in pipeline.nodes:
+            node_has_missing_output = False
+
+            for output in node.outputs:
+                if not catalog.exists(output):
+                    missing.append(output)
+                    node_has_missing_output = True
+                    break
+
+            if not node_has_missing_output:
+                skipped_nodes.append(node.name)
+
+        # Log the results
+        if skipped_nodes:
+            self._logger.info(
+                f"Skipping {len(skipped_nodes)} nodes with existing outputs: {', '.join(skipped_nodes)}"
+            )
+
+        filtered_pipeline = pipeline.only_nodes_with_outputs(*missing)
+
+        if len(filtered_pipeline.nodes) < original_node_count:
+            self._logger.info(
+                f"Running {len(filtered_pipeline.nodes)} out of {original_node_count} nodes "
+                f"(skipped {original_node_count - len(filtered_pipeline.nodes)} nodes)"
+            )
+        else:
+            self._logger.info(
+                f"Running all {original_node_count} nodes (no outputs to skip)"
+            )
+
+        return filtered_pipeline
 
     def run_only_missing(
         self, pipeline: Pipeline, catalog: CatalogProtocol, hook_manager: PluginManager

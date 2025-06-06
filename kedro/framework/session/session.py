@@ -363,11 +363,6 @@ class KedroSession:
             node_namespaces=namespaces,
         )
 
-        catalog = context._get_catalog(
-            save_version=save_version,
-            load_versions=load_versions,
-        )
-
         record_data = {
             "session_id": session_id,
             "project_path": self._project_path.as_posix(),
@@ -386,6 +381,11 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
             "only_missing_outputs": only_missing_outputs,
         }
+
+        catalog = context._get_catalog(
+            save_version=save_version,
+            load_versions=load_versions,
+        )
 
         # Run the runner
         hook_manager = self._hook_manager

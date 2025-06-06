@@ -272,6 +272,89 @@ class TestSequentialRunnerRelease:
         fake_dataset_instance.confirm.assert_called_once_with()
 
 
+class TestOnlyMissingOutputs:
+    def test_only_missing_outputs_all_outputs_missing(self, mocker):
+        """Test only_missing_outputs when all outputs are missing"""
+        from kedro.io import DataCatalog, MemoryDataset
+        from kedro.pipeline import node, pipeline
+        from tests.runner.conftest import identity
+
+        catalog = DataCatalog()
+        # Mock catalog to say all outputs are missing
+        catalog.exists = mocker.Mock(return_value=False)
+
+        # Create a simple test pipeline
+        test_pipeline = pipeline([node(identity, "input", "output")])
+        catalog["input"] = MemoryDataset("test_data")
+
+        runner = SequentialRunner()
+        spy_filter = mocker.spy(runner, "_filter_pipeline_for_missing_outputs")
+
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # Should call the filter method
+        spy_filter.assert_called_once()
+        # Pipeline should not be filtered since all outputs are missing
+        filtered_pipeline = spy_filter.return_value
+        assert len(filtered_pipeline.nodes) == len(test_pipeline.nodes)
+
+    def test_only_missing_outputs_some_outputs_exist(self, mocker):
+        """Test only_missing_outputs when some outputs exist"""
+        from kedro.io import DataCatalog, MemoryDataset
+        from kedro.pipeline import node, pipeline
+        from tests.runner.conftest import identity
+
+        catalog = DataCatalog()
+
+        # Create pipeline: A -> B -> C
+        test_pipeline = pipeline(
+            [
+                node(identity, "A", "B", name="node1"),
+                node(identity, "B", "C", name="node2"),
+            ]
+        )
+
+        # Mock exists to say B exists but C doesn't
+        def mock_exists(dataset_name):
+            return dataset_name == "B"
+
+        catalog.exists = mocker.Mock(side_effect=mock_exists)
+        catalog["A"] = MemoryDataset("data_a")
+        catalog["B"] = MemoryDataset("data_b")
+        catalog["C"] = MemoryDataset()
+
+        runner = SequentialRunner()
+        spy_filter = mocker.spy(runner, "_filter_pipeline_for_missing_outputs")
+
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # Should call the filter method
+        spy_filter.assert_called_once()
+        # Should only run the second node since B exists
+        filtered_pipeline = spy_filter.return_value
+        assert len(filtered_pipeline.nodes) == 1
+        first_node = next(iter(filtered_pipeline.nodes))
+        assert first_node.name == "node2"
+
+    def test_only_missing_outputs_false_does_not_filter(self, mocker):
+        """Test that only_missing_outputs=False does not filter the pipeline"""
+        from kedro.io import DataCatalog, MemoryDataset
+        from kedro.pipeline import node, pipeline
+        from tests.runner.conftest import identity
+
+        catalog = DataCatalog()
+        test_pipeline = pipeline([node(identity, "input", "output")])
+        catalog["input"] = MemoryDataset("test_data")
+
+        runner = SequentialRunner()
+        spy_filter = mocker.spy(runner, "_filter_pipeline_for_missing_outputs")
+
+        runner.run(test_pipeline, catalog, only_missing_outputs=False)
+
+        # Should not call the filter method when only_missing_outputs=False
+        spy_filter.assert_not_called()
+
+
 class TestSuggestResumeScenario:
     @pytest.mark.parametrize(
         "failing_node_names,expected_pattern",

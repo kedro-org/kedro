@@ -33,8 +33,6 @@ if TYPE_CHECKING:
     from kedro.config import AbstractConfigLoader
     from kedro.framework.context import KedroContext
     from kedro.framework.session.store import BaseSessionStore
-    from kedro.io import CatalogProtocol
-    from kedro.pipeline import Pipeline
 
 
 def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
@@ -279,54 +277,6 @@ class KedroSession:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def _filter_pipeline_for_missing_outputs(
-        self, pipeline: Pipeline, catalog: CatalogProtocol
-    ) -> tuple[Pipeline, int]:
-        """Filter pipeline to only include nodes with missing outputs.
-
-        Args:
-            pipeline: The pipeline to filter.
-            catalog: The data catalog to check for existing outputs.
-
-        Returns:
-            A tuple containing the filtered pipeline and the original node count.
-        """
-        original_node_count = len(pipeline.nodes)
-        missing = []
-        skipped_nodes = []
-
-        for node in pipeline.nodes:
-            node_has_missing_output = False
-
-            for output in node.outputs:
-                if not catalog.exists(output):
-                    missing.append(output)
-                    node_has_missing_output = True
-                    break
-
-            if not node_has_missing_output:
-                skipped_nodes.append(node.name)
-
-        # Log the results
-        if skipped_nodes:
-            self._logger.info(
-                f"Skipping {len(skipped_nodes)} nodes with existing outputs: {', '.join(skipped_nodes)}"
-            )
-
-        filtered_pipeline = pipeline.only_nodes_with_outputs(*missing)
-
-        if len(filtered_pipeline.nodes) < original_node_count:
-            self._logger.info(
-                f"Running {len(filtered_pipeline.nodes)} out of {original_node_count} nodes "
-                f"(skipped {original_node_count - len(filtered_pipeline.nodes)} nodes)"
-            )
-        else:
-            self._logger.info(
-                f"Running all {original_node_count} nodes (no outputs to skip)"
-            )
-
-        return filtered_pipeline, original_node_count
-
     def run(  # noqa: PLR0913
         self,
         pipeline_name: str | None = None,
@@ -413,19 +363,10 @@ class KedroSession:
             node_namespaces=namespaces,
         )
 
-        # Store original node count for logging
-        original_node_count = len(filtered_pipeline.nodes)
-
         catalog = context._get_catalog(
             save_version=save_version,
             load_versions=load_versions,
         )
-
-        # Apply missing outputs filtering if requested
-        if only_missing_outputs:
-            filtered_pipeline, original_node_count = (
-                self._filter_pipeline_for_missing_outputs(filtered_pipeline, catalog)
-            )
 
         record_data = {
             "session_id": session_id,
@@ -459,7 +400,11 @@ class KedroSession:
         )
         try:
             run_result = runner.run(
-                filtered_pipeline, catalog, hook_manager, session_id
+                filtered_pipeline,
+                catalog,
+                hook_manager,
+                session_id,
+                only_missing_outputs=only_missing_outputs,
             )
             self._run_called = True
         except Exception as error:

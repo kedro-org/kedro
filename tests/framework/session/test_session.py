@@ -689,7 +689,11 @@ class TestKedroSession:
             run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
         )
         mock_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
+            mock_pipeline,
+            mock_catalog,
+            session._hook_manager,
+            fake_session_id,
+            only_missing_outputs=False,
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,
@@ -771,7 +775,11 @@ class TestKedroSession:
             run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
         )
         mock_thread_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
+            mock_pipeline,
+            mock_catalog,
+            session._hook_manager,
+            fake_session_id,
+            only_missing_outputs=False,
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,
@@ -842,7 +850,11 @@ class TestKedroSession:
             catalog=mock_catalog,
         )
         mock_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
+            mock_pipeline,
+            mock_catalog,
+            session._hook_manager,
+            fake_session_id,
+            only_missing_outputs=False,
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,
@@ -1005,7 +1017,11 @@ class TestKedroSession:
         session.run(runner=fixed_runner, pipeline_name=fake_pipeline_name)
 
         fixed_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
+            mock_pipeline,
+            mock_catalog,
+            session._hook_manager,
+            fake_session_id,
+            only_missing_outputs=False,
         )
 
         record_data["runner"] = "MockRunner"
@@ -1068,40 +1084,18 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
-
-        # Create mock nodes with STRING names (critical fix)
-        mock_node1 = mocker.Mock()
-        mock_node1.name = "node_with_missing_output"  # Must be string for join()
-        mock_node1.outputs = ["output1"]
-
-        mock_node2 = mocker.Mock()
-        mock_node2.name = "node_with_existing_output"  # Must be string for join()
-        mock_node2.outputs = ["output2"]
-
-        # Mock the pipeline and its filtering
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
-        mock_pipeline.nodes = [mock_node1, mock_node2]
-
-        # Mock catalog.exists to return False for output1, True for output2
-        def mock_exists(output):
-            return output == "output2"
-
-        mock_catalog.exists.side_effect = mock_exists
-
-        # Mock only_nodes_with_outputs to return a filtered pipeline
-        mock_filtered_pipeline = mocker.Mock()
-        mock_filtered_pipeline.nodes = [mock_node1]  # Only first node
-        mock_pipeline.only_nodes_with_outputs.return_value = mock_filtered_pipeline
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, only_missing_outputs=True)
 
-        # Should call only_nodes_with_outputs with missing outputs
-        mock_pipeline.only_nodes_with_outputs.assert_called_once_with("output1")
-
-        # Should call regular run with the filtered pipeline
+        # Should pass only_missing_outputs=True to the runner
         mock_runner.run.assert_called_once_with(
-            mock_filtered_pipeline, mock_catalog, session._hook_manager, fake_session_id
+            mock_pipeline,
+            mock_catalog,
+            session._hook_manager,
+            fake_session_id,
+            only_missing_outputs=True,
         )
 
         record_data = {
@@ -1125,7 +1119,7 @@ class TestKedroSession:
 
         mock_hook.before_pipeline_run.assert_called_once_with(
             run_params=record_data,
-            pipeline=mock_filtered_pipeline,
+            pipeline=mock_pipeline,
             catalog=mock_catalog,
         )
 
@@ -1157,7 +1151,11 @@ class TestKedroSession:
             session.run(runner=mock_runner, only_missing_outputs=False)
 
         mock_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
+            mock_pipeline,
+            mock_catalog,
+            session._hook_manager,
+            fake_session_id,
+            only_missing_outputs=False,
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
@@ -1182,40 +1180,18 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
-
-        mock_node1 = mocker.Mock()
-        mock_node1.name = "node_with_missing_output_1"
-        mock_node1.outputs = ["output1"]
-
-        mock_node2 = mocker.Mock()
-        mock_node2.name = "node_with_missing_output_2"
-        mock_node2.outputs = ["output2"]
-
-        # Mock the pipeline and its filtering
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
-        mock_pipeline.nodes = [mock_node1, mock_node2]
-
-        # Mock catalog.exists to return False for ALL outputs (all missing)
-        def mock_exists(output):
-            return False  # All outputs are missing
-
-        mock_catalog.exists.side_effect = mock_exists
-
-        # Mock only_nodes_with_outputs to return the same pipeline (no nodes skipped)
-        mock_filtered_pipeline = mocker.Mock()
-        mock_filtered_pipeline.nodes = [mock_node1, mock_node2]  # All nodes run
-        mock_pipeline.only_nodes_with_outputs.return_value = mock_filtered_pipeline
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, only_missing_outputs=True)
 
-        # Should call only_nodes_with_outputs with all missing outputs
-        mock_pipeline.only_nodes_with_outputs.assert_called_once_with(
-            "output1", "output2"
-        )
-
+        # Should pass only_missing_outputs=True to the runner
         mock_runner.run.assert_called_once_with(
-            mock_filtered_pipeline, mock_catalog, session._hook_manager, fake_session_id
+            mock_pipeline,
+            mock_catalog,
+            session._hook_manager,
+            fake_session_id,
+            only_missing_outputs=True,
         )
 
         record_data = {
@@ -1239,7 +1215,7 @@ class TestKedroSession:
 
         mock_hook.before_pipeline_run.assert_called_once_with(
             run_params=record_data,
-            pipeline=mock_filtered_pipeline,
+            pipeline=mock_pipeline,
             catalog=mock_catalog,
         )
 

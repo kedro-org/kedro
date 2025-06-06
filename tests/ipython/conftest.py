@@ -74,7 +74,7 @@ def _get_function_definition_literal(func):
 
 
 @pytest.fixture
-def dummy_function_defintion():
+def dummy_function_definition():
     return _get_function_definition_literal(dummy_function)
 
 

@@ -193,7 +193,7 @@ class TestCatalogListCommand:
         )
         assert expected_output in result.output
 
-    def test_no_param_datasets_in_respose(
+    def test_no_param_datasets_in_response(
         self,
         fake_project_cli,
         fake_metadata,

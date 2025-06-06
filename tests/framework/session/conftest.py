@@ -197,7 +197,7 @@ class LoggingHooks:
         catalog: DataCatalog,
         inputs: dict[str, Any],
         is_async: str,
-        session_id: str,
+        run_id: str,
     ) -> None:
         logger.info(
             "About to run node",
@@ -206,7 +206,7 @@ class LoggingHooks:
                 "catalog": catalog,
                 "inputs": inputs,
                 "is_async": is_async,
-                "session_id": session_id,
+                "run_id": run_id,
             },
         )
 
@@ -218,7 +218,7 @@ class LoggingHooks:
         inputs: dict[str, Any],
         outputs: dict[str, Any],
         is_async: str,
-        session_id: str,
+        run_id: str,
     ) -> None:
         logger.info(
             "Ran node",
@@ -228,7 +228,7 @@ class LoggingHooks:
                 "inputs": inputs,
                 "outputs": outputs,
                 "is_async": is_async,
-                "session_id": session_id,
+                "run_id": run_id,
             },
         )
 
@@ -240,7 +240,7 @@ class LoggingHooks:
         catalog: DataCatalog,
         inputs: dict[str, Any],
         is_async: bool,
-        session_id: str,
+        run_id: str,
     ):
         logger.info(
             "Node error",
@@ -250,7 +250,7 @@ class LoggingHooks:
                 "catalog": catalog,
                 "inputs": inputs,
                 "is_async": is_async,
-                "session_id": session_id,
+                "run_id": run_id,
             },
         )
 

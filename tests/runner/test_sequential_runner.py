@@ -56,7 +56,7 @@ class TestValidSequentialRunner:
 
 
 @pytest.mark.parametrize("is_async", [False, True])
-class TestSeqentialRunnerBranchlessPipeline:
+class TestSequentialRunnerBranchlessPipeline:
     def test_no_input_seq(self, is_async, branchless_no_input_pipeline, catalog):
         outputs = SequentialRunner(is_async=is_async).run(
             branchless_no_input_pipeline, catalog
@@ -124,7 +124,7 @@ class TestSequentialRunnerBranchedPipeline:
         assert isinstance(outputs["ds8"], dict)
         # the pipeline runs ds1->ds4->ds8
         assert outputs["ds8"]["data"] == 42
-        # the pipline runs ds3
+        # the pipeline runs ds3
         assert isinstance(outputs["ds6"], pd.DataFrame)
 
     def test_conflict_feed_catalog(

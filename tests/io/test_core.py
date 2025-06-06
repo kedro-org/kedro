@@ -623,7 +623,7 @@ class TestAbstractVersionedDataset:
         mocker.patch.object(
             my_versioned_dataset,
             "_glob_function",
-            side_effect=PermissionError("insuffient permission"),
+            side_effect=PermissionError("insufficient permission"),
         )
 
         with pytest.raises(

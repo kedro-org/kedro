@@ -58,21 +58,36 @@ jobs:
           uv pip install --system build
       - name: Build package
         run: make package
+
+      # ──────────────────────────────────────────────────────────────────────
+      # DETERMINE IF THIS VERSION IS A PRE-RELEASE
+      # (checks kedro_version for “a”, “b”, or “rc” anywhere in the string)
+      - name: Determine if version is pre-release
+        id: detect_prerelease
+        run: |
+          if [[ "${{ needs.check-version.outputs.kedro_version }}" =~ (a|b|rc) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Extract release notes from RELEASE.md
         id: extract
         run: |
           python tools/github_actions/extract_release_notes.py \
-          "RELEASE.md" \
-          "Release ${{needs.check-version.outputs.kedro_version}}"
+            "RELEASE.md" \
+            "Release ${{ needs.check-version.outputs.kedro_version }}"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{needs.check-version.outputs.kedro_version}}
-          name: ${{needs.check-version.outputs.kedro_version}}
+          tag_name: ${{ needs.check-version.outputs.kedro_version }}
+          name: ${{ needs.check-version.outputs.kedro_version }}
           body_path: release_body.txt
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.detect_prerelease.outputs.is_prerelease }}
           token: ${{ secrets.GH_TAGGING_TOKEN }}
+
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

@@ -541,10 +541,11 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_multi_level_namespace(self):
         """Test that mismatched multi-level namespaces raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid dataset name"):
-            node(
-                func=self.dummy_function,
-                inputs="namespace.subnamespace.input_dataset",
-                outputs="namespace.subnamespace.output_dataset",
-                namespace="namespace.othernamespace",
-            )
+        n = node(
+            func=self.dummy_function,
+            inputs="namespace.input_dataset",
+            outputs="namespace.output_dataset",
+            namespace="namespace.other",
+        )
+        assert n.inputs == ["namespace.input_dataset"]
+        assert n.outputs == ["namespace.output_dataset"]

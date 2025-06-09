@@ -92,7 +92,7 @@ class TestMaxWorkers:
             (1, 2, 2),
         ],
     )
-    def test_specified_max_workers_bellow_cpu_cores_count(
+    def test_specified_max_workers_below_cpu_cores_count(
         self,
         is_async,
         mocker,
@@ -120,7 +120,9 @@ class TestMaxWorkers:
         ).run(fan_out_fan_in, catalog)
         assert result == {"Z": (42, 42, 42)}
 
-        executor_cls_mock.assert_called_once_with(max_workers=expected_number)
+        executor_cls_mock.assert_called_once()
+        call_args = executor_cls_mock.call_args
+        assert call_args.kwargs["max_workers"] == expected_number
 
     def test_max_worker_windows(self, mocker):
         """The ProcessPoolExecutor on Python 3.7+

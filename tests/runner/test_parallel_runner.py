@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
@@ -434,3 +435,30 @@ class TestSuggestResumeScenario:
                 hook_manager=_create_hook_manager(),
             )
         assert re.search(expected_pattern, caplog.text)
+
+
+class TestMultiprocessingGetExecutorContextSelection:
+    def test_get_executor_default(self, mocker):
+        mocker.patch.dict(os.environ, {}, clear=True)
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert hasattr(executor, "_mp_context")
+
+    @pytest.mark.parametrize("context", ["fork", "spawn"])
+    def test_get_executor_valid_context(self, mocker, context):
+        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": context})
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert executor._mp_context.get_start_method() == context
+
+    def test_get_executor_invalid_context(self, mocker):
+        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": "invalid"})
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert hasattr(executor, "_mp_context")

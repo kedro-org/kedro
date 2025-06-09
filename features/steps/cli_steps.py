@@ -653,7 +653,7 @@ def check_error_message_printed(context, msg):
 
 @then("there should be an additional cell in the jupyter notebook")
 def check_additional_cell_added(context):
-    """Check that an addiitonal cell has been added compared to notebook
+    """Check that an additional cell has been added compared to notebook
     coded by TEST_JUPYTER_ORG.
     """
     with open(

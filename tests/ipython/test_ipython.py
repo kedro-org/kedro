@@ -305,7 +305,7 @@ class TestLoadNodeMagic:
     def test_load_node(
         self,
         mocker,
-        dummy_function_defintion,
+        dummy_function_definition,
         dummy_pipelines,
     ):
         # wraps all the other functions
@@ -322,7 +322,7 @@ from logging import config  # noqa
 import logging as dummy_logging  # noqa
 import logging.config  # noqa Dummy import"""
 
-        node_func_definition = dummy_function_defintion
+        node_func_definition = dummy_function_definition
         node_func_call = "dummy_function(dummy_input, my_input)"
 
         expected_cells = [
@@ -429,9 +429,9 @@ ERROR,
         result = _prepare_node_inputs(node_bound_arguments)
         assert result == expected
 
-    def test_prepare_function_body(self, dummy_function_defintion):
+    def test_prepare_function_body(self, dummy_function_definition):
         result = _prepare_function_body(dummy_function)
-        assert result == dummy_function_defintion
+        assert result == dummy_function_definition
 
     @pytest.mark.skip("lambda function is not supported yet.")
     def test_get_lambda_function_body(self, lambda_node):

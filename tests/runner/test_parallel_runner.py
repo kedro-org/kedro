@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
 
@@ -448,6 +449,8 @@ class TestMultiprocessingGetExecutorContextSelection:
 
     @pytest.mark.parametrize("context", ["fork", "spawn"])
     def test_get_executor_valid_context(self, mocker, context):
+        if context == "fork" and sys.platform == "win32":
+            pytest.skip("fork context is not available on Windows")
         mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": context})
         runner = ParallelRunner()
         executor = runner._get_executor(2)

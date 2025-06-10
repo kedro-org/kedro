@@ -604,7 +604,10 @@ def _node_error_message(msg: str) -> str:
 
 
 def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
-    """Validate the dataset name.
+    """Validate the dataset name. The node inputs and outputs should not contain
+    '.' characters. This is to ensure that the dot notation is reserved for Kedro's
+    namespaces. If there's a namespace provided, the dataset name
+    should match the top-level namespace.
 
     Args:
         name: The name of the dataset to be validated.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from typing import Any
 
@@ -275,10 +276,6 @@ class TestSequentialRunnerRelease:
 class TestOnlyMissingOutputs:
     def test_only_missing_outputs_all_outputs_missing(self, mocker, caplog):
         """Test only_missing_outputs when all outputs are missing"""
-        from kedro.io import DataCatalog, MemoryDataset
-        from kedro.pipeline import node, pipeline
-        from tests.runner.conftest import identity
-
         catalog = DataCatalog()
         # Mock catalog to say all outputs are missing
         catalog.exists = mocker.Mock(return_value=False)
@@ -298,10 +295,6 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_some_outputs_exist(self, mocker, caplog):
         """Test only_missing_outputs when final output exists (all nodes skipped)"""
-        from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
-        from kedro.pipeline import node, pipeline
-        from tests.runner.conftest import identity
-
         catalog = DataCatalog()
 
         # Create pipeline: A -> B -> C
@@ -334,10 +327,6 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_some_outputs_missing(self, mocker, caplog):
         """Test only_missing_outputs when final output is missing (nodes run)"""
-        from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
-        from kedro.pipeline import node, pipeline
-        from tests.runner.conftest import identity
-
         catalog = DataCatalog()
 
         # Create pipeline: A -> B -> C
@@ -370,10 +359,6 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_false_does_not_filter(self, mocker):
         """Test that only_missing_outputs=False does not filter the pipeline"""
-        from kedro.io import DataCatalog, MemoryDataset
-        from kedro.pipeline import node, pipeline
-        from tests.runner.conftest import identity
-
         catalog = DataCatalog()
         test_pipeline = pipeline([node(identity, "input", "output")])
         catalog["input"] = MemoryDataset("test_data")
@@ -388,9 +373,8 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_avoids_wasteful_nodes(self, mocker, caplog):
         """Test that nodes producing only wasteful outputs are skipped"""
-        from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
-        from kedro.pipeline import node, pipeline
-        from tests.runner.conftest import identity
+        # Set caplog to capture DEBUG level logs
+        caplog.set_level(logging.DEBUG)
 
         catalog = DataCatalog()
 
@@ -436,10 +420,14 @@ class TestOnlyMissingOutputs:
         )
         assert "Running 2 out of 4 nodes (skipped 2 nodes)" in caplog.text
 
+        # Check that the debug log for removing wasteful nodes was hit
+        assert (
+            "Removing node 'nodeA' as it only produces outputs consumed by skipped nodes"
+            in caplog.text
+        )
+
     def test_only_missing_outputs_multi_output_node_warning(self, mocker, caplog):
         """Test warning for nodes that produce both needed and wasteful outputs"""
-        from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
-        from kedro.pipeline import node, pipeline
 
         def multi_output_func(x):
             return x, x  # Produces two identical outputs
@@ -481,10 +469,6 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_complex_topology(self, mocker, caplog):
         """Test complex pipeline topology with multiple branches and shared nodes"""
-        from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
-        from kedro.pipeline import node, pipeline
-        from tests.runner.conftest import identity
-
         catalog = DataCatalog()
 
         # Complex topology:
@@ -529,9 +513,8 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_no_wasteful_optimization_needed(self, mocker, caplog):
         """Test case where initial filtering is already optimal"""
-        from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
-        from kedro.pipeline import node, pipeline
-        from tests.runner.conftest import identity
+        # Set caplog to capture DEBUG level logs
+        caplog.set_level(logging.DEBUG)
 
         catalog = DataCatalog()
 
@@ -560,6 +543,44 @@ class TestOnlyMissingOutputs:
         # Should call wasteful removal but no nodes should be removed
         spy_wasteful.assert_called_once()
         assert "Running all 2 nodes (no outputs to skip)" in caplog.text
+
+    def test_only_missing_outputs_debug_logging(self, mocker, caplog):
+        """Test that debug logging for removing wasteful nodes is properly logged"""
+        # Set caplog to capture DEBUG level logs
+        caplog.set_level(logging.DEBUG, logger="kedro.runner")
+
+        catalog = DataCatalog()
+
+        # Create a simple pipeline where one node will be removed
+        # nodeA -> memA -> nodeB -> persistentB (exists)
+        # This should result in both nodes being skipped
+        test_pipeline = pipeline(
+            [
+                node(identity, "input", "memA", name="nodeA"),
+                node(identity, "memA", "persistentB", name="nodeB"),
+            ]
+        )
+
+        # Mock exists: persistentB exists
+        catalog.exists = mocker.Mock(return_value=True)
+        catalog["input"] = MemoryDataset("input_data")
+        catalog["memA"] = MemoryDataset()
+        catalog["persistentB"] = LambdaDataset(
+            load=lambda: "dataB", save=lambda x: None
+        )
+
+        runner = SequentialRunner()
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # Check that the debug log for removing wasteful nodes was hit
+        debug_logs = [
+            record.message for record in caplog.records if record.levelname == "DEBUG"
+        ]
+        assert any(
+            "Removing node 'nodeA' as it only produces outputs consumed by skipped nodes"
+            in log
+            for log in debug_logs
+        )
 
 
 class TestSuggestResumeScenario:

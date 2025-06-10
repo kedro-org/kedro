@@ -164,54 +164,56 @@ class AbstractRunner(ABC):
     def _filter_pipeline_for_missing_outputs(
         self, pipeline: Pipeline, catalog: CatalogProtocol
     ) -> Pipeline:
-        """Filter pipeline to only include nodes with missing persistent outputs.
+        """Filter pipeline to only include nodes needed to produce missing persistent outputs.
 
         Args:
             pipeline: The pipeline to filter.
             catalog: The data catalog to check for existing outputs.
 
         Returns:
-            The filtered pipeline.
+            The filtered pipeline containing only nodes needed for missing persistent outputs.
         """
         original_node_count = len(pipeline.nodes)
-        missing = []
-        skipped_nodes = []
 
-        for node in pipeline.nodes:
-            node_has_missing_persistent_output = False
+        # Find missing persistent outputs from pipeline outputs only
+        missing_persistent_outputs = []
 
-            for output in node.outputs:
-                # Check if output is in catalog
-                if output in catalog:
-                    dataset = catalog._datasets[output]
-                    is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+        for output in pipeline.outputs():
+            if output in catalog:
+                dataset = catalog._datasets[output]
+                is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
 
-                    # Only check existence for non-ephemeral (persistent) datasets
-                    if not is_ephemeral and not catalog.exists(output):
-                        missing.append(output)
-                        node_has_missing_persistent_output = True
-                        break
-                else:
-                    # Dataset not in catalog = missing persistent output
-                    missing.append(output)
-                    node_has_missing_persistent_output = True
-                    break
+                # Only check existence for persistent datasets
+                if not is_ephemeral and not catalog.exists(output):
+                    missing_persistent_outputs.append(output)
+            else:
+                # Dataset not in catalog are missing persistent output
+                missing_persistent_outputs.append(output)
 
-            if not node_has_missing_persistent_output:
-                skipped_nodes.append(node.name)
-
-        # Log the results
-        if skipped_nodes:
+        # If no persistent outputs are missing, return empty pipeline
+        if not missing_persistent_outputs:
             self._logger.info(
-                f"Skipping {len(skipped_nodes)} nodes with existing persistent outputs: {', '.join(skipped_nodes)}"
+                f"Skipping all {original_node_count} nodes (all persistent outputs exist)"
             )
+            # Return empty pipeline by filtering to no nodes
+            return pipeline.filter(node_names=[])
 
-        filtered_pipeline = pipeline.only_nodes_with_outputs(*missing)
+        # This ensures upstream nodes producing ephemeral datasets are included
+        filtered_pipeline = pipeline.to_outputs(*missing_persistent_outputs)
 
-        if len(filtered_pipeline.nodes) < original_node_count:
+        skipped_count = original_node_count - len(filtered_pipeline.nodes)
+        if skipped_count > 0:
+            # Find which nodes were skipped for logging
+            original_node_names = {node.name for node in pipeline.nodes}
+            filtered_node_names = {node.name for node in filtered_pipeline.nodes}
+            skipped_node_names = original_node_names - filtered_node_names
+
+            self._logger.info(
+                f"Skipping {skipped_count} nodes with existing persistent outputs: {', '.join(sorted(skipped_node_names))}"
+            )
             self._logger.info(
                 f"Running {len(filtered_pipeline.nodes)} out of {original_node_count} nodes "
-                f"(skipped {original_node_count - len(filtered_pipeline.nodes)} nodes)"
+                f"(skipped {skipped_count} nodes)"
             )
         else:
             self._logger.info(

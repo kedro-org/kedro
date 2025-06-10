@@ -38,17 +38,17 @@ class ExampleHook:
         (
             NodeSpecs,
             "before_node_run",
-            ("node", "catalog", "inputs", "is_async", "session_id"),
+            ("node", "catalog", "inputs", "is_async", "run_id"),
         ),
         (
             NodeSpecs,
             "after_node_run",
-            ("node", "catalog", "inputs", "outputs", "is_async", "session_id"),
+            ("node", "catalog", "inputs", "outputs", "is_async", "run_id"),
         ),
         (
             NodeSpecs,
             "on_node_error",
-            ("error", "node", "catalog", "inputs", "is_async", "session_id"),
+            ("error", "node", "catalog", "inputs", "is_async", "run_id"),
         ),
         (PipelineSpecs, "before_pipeline_run", ("run_params", "pipeline", "catalog")),
         (PipelineSpecs, "after_pipeline_run", ("run_params", "pipeline", "catalog")),

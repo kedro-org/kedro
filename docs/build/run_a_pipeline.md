@@ -85,7 +85,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
             pipeline: Pipeline,
             catalog: KedroDataCatalog,
             hook_manager: PluginManager = None,
-            session_id: str = None,
+            run_id: str = None,
         ) -> None:
             """The method implementing dry pipeline running.
             Example logs output using this implementation:
@@ -99,7 +99,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
                 pipeline: The ``Pipeline`` to run.
                 catalog: The ``KedroDataCatalog`` from which to fetch data.
                 hook_manager: The ``PluginManager`` to activate hooks.
-                session_id: The id of the session.
+                run_id: The id of the run.
 
             """
             nodes = pipeline.nodes

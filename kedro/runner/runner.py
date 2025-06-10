@@ -73,6 +73,7 @@ class AbstractRunner(ABC):
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
         session_id: str | None = None,
+        run_id: str | None = None,
         only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
@@ -83,6 +84,7 @@ class AbstractRunner(ABC):
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
+            run_id: The id of the run.
             only_missing_outputs: Run only nodes with missing outputs.
 
         Raises:
@@ -132,7 +134,7 @@ class AbstractRunner(ABC):
             )
 
         start_time = perf_counter()
-        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
+        self._run(pipeline, catalog, hook_or_null_manager, run_id)  # type: ignore[arg-type]
         end_time = perf_counter()
         run_duration = end_time - start_time
 
@@ -270,7 +272,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
          inputs have already been checked and normalized by run().
@@ -280,7 +282,7 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
         """
 
         nodes = pipeline.nodes
@@ -306,7 +308,7 @@ class AbstractRunner(ABC):
                         catalog=catalog,
                         hook_manager=hook_manager,
                         is_async=self._is_async,
-                        session_id=session_id,
+                        run_id=run_id,
                     ).execute()
                     done_nodes.add(node)
                 except Exception:
@@ -330,7 +332,7 @@ class AbstractRunner(ABC):
                         catalog=catalog,
                         hook_manager=hook_manager,
                         is_async=self._is_async,
-                        session_id=session_id,
+                        run_id=run_id,
                     )
                     if isinstance(executor, ProcessPoolExecutor):
                         task.parallel = True
@@ -628,7 +630,7 @@ def run_node(
     catalog: CatalogProtocol,
     hook_manager: PluginManager,
     is_async: bool = False,
-    session_id: str | None = None,
+    run_id: str | None = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -638,7 +640,7 @@ def run_node(
         hook_manager: The ``PluginManager`` to activate hooks.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
-        session_id: The session id of the pipeline run.
+        run_id: The run id of the pipeline run.
 
     Raises:
         ValueError: Raised if is_async is set to True for nodes wrapping
@@ -666,7 +668,7 @@ def run_node(
         catalog=catalog,
         hook_manager=hook_manager,
         is_async=is_async,
-        session_id=session_id,
+        run_id=run_id,
     )
     node = task.execute()
     return node

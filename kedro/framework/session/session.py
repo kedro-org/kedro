@@ -403,7 +403,7 @@ class KedroSession:
                 filtered_pipeline,
                 catalog,
                 hook_manager,
-                session_id,
+                run_id=session_id,
                 only_missing_outputs=only_missing_outputs,
             )
             self._run_called = True

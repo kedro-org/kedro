@@ -224,7 +224,7 @@ class AbstractRunner(ABC):
 
         # Apply wasteful node removal optimisation
         # Find nodes that only produce outputs consumed by skipped nodes
-        optimised_pipeline = self._remove_wasteful_nodes_enhanced(
+        optimised_pipeline = self._remove_wasteful_nodes(
             filtered_pipeline, pipeline, catalog, skipped_nodes
         )
 
@@ -249,7 +249,7 @@ class AbstractRunner(ABC):
 
         return optimised_pipeline
 
-    def _remove_wasteful_nodes_enhanced(
+    def _remove_wasteful_nodes(
         self,
         filtered_pipeline: Pipeline,
         original_pipeline: Pipeline,

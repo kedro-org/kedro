@@ -164,7 +164,7 @@ class AbstractRunner(ABC):
     def _filter_pipeline_for_missing_outputs(
         self, pipeline: Pipeline, catalog: CatalogProtocol
     ) -> Pipeline:
-        """Filter pipeline to only include nodes with missing outputs.
+        """Filter pipeline to only include nodes with missing persistent outputs.
 
         Args:
             pipeline: The pipeline to filter.
@@ -178,21 +178,32 @@ class AbstractRunner(ABC):
         skipped_nodes = []
 
         for node in pipeline.nodes:
-            node_has_missing_output = False
+            node_has_missing_persistent_output = False
 
             for output in node.outputs:
-                if not catalog.exists(output):
+                # Check if output is in catalog
+                if output in catalog:
+                    dataset = catalog._datasets[output]
+                    is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+
+                    # Only check existence for non-ephemeral (persistent) datasets
+                    if not is_ephemeral and not catalog.exists(output):
+                        missing.append(output)
+                        node_has_missing_persistent_output = True
+                        break
+                else:
+                    # Dataset not in catalog = missing persistent output
                     missing.append(output)
-                    node_has_missing_output = True
+                    node_has_missing_persistent_output = True
                     break
 
-            if not node_has_missing_output:
+            if not node_has_missing_persistent_output:
                 skipped_nodes.append(node.name)
 
         # Log the results
         if skipped_nodes:
             self._logger.info(
-                f"Skipping {len(skipped_nodes)} nodes with existing outputs: {', '.join(skipped_nodes)}"
+                f"Skipping {len(skipped_nodes)} nodes with existing persistent outputs: {', '.join(skipped_nodes)}"
             )
 
         filtered_pipeline = pipeline.only_nodes_with_outputs(*missing)

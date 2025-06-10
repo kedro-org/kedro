@@ -355,6 +355,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             init_func(self, *args, **kwargs)
             # Capture and save the arguments passed to the original __init__
             self._init_args = getcallargs(init_func, self, *args, **kwargs)
+            self._init_args.pop("self", None)  # removed to prevent recursion
 
         # Replace the subclass's __init__ with the new_init
         # A hook for subclasses to capture initialization arguments and save them

@@ -692,7 +692,7 @@ class TestKedroSession:
             mock_pipeline,
             mock_catalog,
             session._hook_manager,
-            fake_session_id,
+            run_id=fake_session_id,
             only_missing_outputs=False,
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
@@ -778,7 +778,7 @@ class TestKedroSession:
             mock_pipeline,
             mock_catalog,
             session._hook_manager,
-            fake_session_id,
+            run_id=fake_session_id,
             only_missing_outputs=False,
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
@@ -853,7 +853,7 @@ class TestKedroSession:
             mock_pipeline,
             mock_catalog,
             session._hook_manager,
-            fake_session_id,
+            run_id=fake_session_id,
             only_missing_outputs=False,
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
@@ -1020,7 +1020,7 @@ class TestKedroSession:
             mock_pipeline,
             mock_catalog,
             session._hook_manager,
-            fake_session_id,
+            run_id=fake_session_id,
             only_missing_outputs=False,
         )
 
@@ -1094,7 +1094,7 @@ class TestKedroSession:
             mock_pipeline,
             mock_catalog,
             session._hook_manager,
-            fake_session_id,
+            run_id=fake_session_id,
             only_missing_outputs=True,
         )
 
@@ -1154,7 +1154,7 @@ class TestKedroSession:
             mock_pipeline,
             mock_catalog,
             session._hook_manager,
-            fake_session_id,
+            run_id=fake_session_id,
             only_missing_outputs=False,
         )
 
@@ -1190,7 +1190,7 @@ class TestKedroSession:
             mock_pipeline,
             mock_catalog,
             session._hook_manager,
-            fake_session_id,
+            run_id=fake_session_id,
             only_missing_outputs=True,
         )
 

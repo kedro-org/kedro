@@ -251,7 +251,7 @@ class AbstractRunner(ABC):
         nodes_to_keep = set()
 
         # Build a map of which nodes consume each dataset
-        consumers = {}
+        consumers: dict[str, set[str]] = {}
         for node in original_pipeline.nodes:
             for input_ds in node.inputs:
                 if input_ds not in consumers:
@@ -286,13 +286,12 @@ class AbstractRunner(ABC):
 
             if should_keep:
                 nodes_to_keep.add(node.name)
-            elif wasteful_outputs:
-                # Log warning about wasteful computation
-                self._logger.warning(
-                    f"Node '{node.name}' produces outputs {wasteful_outputs} that are only "
-                    f"consumed by skipped nodes, but must run to produce other needed outputs"
-                )
-                nodes_to_keep.add(node.name)
+                # Log warning if node has wasteful outputs but must still run
+                if wasteful_outputs:
+                    self._logger.warning(
+                        f"Node '{node.name}' produces outputs {wasteful_outputs} that are only "
+                        f"consumed by skipped nodes, but must run to produce other needed outputs"
+                    )
 
         # Return pipeline with only the nodes we want to keep
         return filtered_pipeline.filter(node_names=list(nodes_to_keep))

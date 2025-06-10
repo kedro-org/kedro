@@ -170,53 +170,73 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The pipeline to filter.
-            catalog: The data catalog to check for existing outputs.
+            catalog: The data catalogue to check for existing outputs.
 
         Returns:
             The filtered pipeline containing only nodes needed for missing persistent outputs.
         """
         original_node_count = len(pipeline.nodes)
 
-        # Find missing persistent outputs from pipeline outputs only
-        missing_persistent_outputs = []
+        # First, identify all nodes that need to run based on their outputs
+        nodes_to_run = set()
+        skipped_nodes = set()
 
-        for output in pipeline.outputs():
-            if output in catalog:
-                dataset = catalog._datasets[output]
-                is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+        for node in pipeline.nodes:
+            node_has_missing_persistent_output = False
 
-                # Only check existence for persistent datasets
-                if not is_ephemeral and not catalog.exists(output):
-                    missing_persistent_outputs.append(output)
+            for output in node.outputs:
+                if output in catalog:
+                    dataset = catalog._datasets[output]
+                    is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+
+                    # Only check existence for persistent datasets
+                    if not is_ephemeral and not catalog.exists(output):
+                        node_has_missing_persistent_output = True
+                        break
+                else:
+                    # Dataset not in catalogue - treat as missing persistent output
+                    node_has_missing_persistent_output = True
+                    break
+
+            if node_has_missing_persistent_output:
+                nodes_to_run.add(node)
             else:
-                # Dataset not in catalog are missing persistent output
-                missing_persistent_outputs.append(output)
+                # All persistent outputs exist for this node
+                skipped_nodes.add(node)
 
-        # If no persistent outputs are missing, return empty pipeline
-        if not missing_persistent_outputs:
+        # If no nodes need to run, return empty pipeline
+        if not nodes_to_run:
             self._logger.info(
                 f"Skipping all {original_node_count} nodes (all persistent outputs exist)"
             )
-            # Return empty pipeline by filtering to no nodes
             return pipeline.filter(node_names=[])
 
-        # Get initial filtered pipeline using existing logic
-        initial_filtered = pipeline.to_outputs(*missing_persistent_outputs)
+        # Now we need to ensure we include all upstream dependencies of nodes_to_run
+        # Get all upstream nodes required for nodes that need to run
+        required_nodes = set(nodes_to_run)
+        for node in nodes_to_run:
+            # Add all upstream dependencies
+            upstream_pipeline = pipeline.to_nodes(node.name)
+            required_nodes.update(upstream_pipeline.nodes)
 
-        # Enhanced filtering: remove nodes that only produce wasteful outputs
-        optimised_pipeline = self._remove_wasteful_nodes(
-            initial_filtered, pipeline, catalog, missing_persistent_outputs
+        # Create filtered pipeline with required nodes
+        filtered_pipeline = pipeline.filter(node_names=[n.name for n in required_nodes])
+
+        # Apply wasteful node removal optimisation
+        # Find nodes that only produce outputs consumed by skipped nodes
+        optimised_pipeline = self._remove_wasteful_nodes_enhanced(
+            filtered_pipeline, pipeline, catalog, skipped_nodes
         )
 
         skipped_count = original_node_count - len(optimised_pipeline.nodes)
         if skipped_count > 0:
-            # Find which nodes were skipped for logging
-            original_node_names = {node.name for node in pipeline.nodes}
-            optimised_node_names = {node.name for node in optimised_pipeline.nodes}
-            skipped_node_names = original_node_names - optimised_node_names
+            skipped_node_names = {node.name for node in pipeline.nodes} - {
+                node.name for node in optimised_pipeline.nodes
+            }
 
             self._logger.info(
-                f"Skipping {skipped_count} nodes with existing persistent outputs: {', '.join(sorted(skipped_node_names))}"
+                f"Skipping {skipped_count} nodes with existing persistent outputs: "
+                f"{', '.join(sorted(skipped_node_names))}"
             )
             self._logger.info(
                 f"Running {len(optimised_pipeline.nodes)} out of {original_node_count} nodes "
@@ -229,34 +249,33 @@ class AbstractRunner(ABC):
 
         return optimised_pipeline
 
-    def _remove_wasteful_nodes(
+    def _remove_wasteful_nodes_enhanced(
         self,
         filtered_pipeline: Pipeline,
         original_pipeline: Pipeline,
         catalog: CatalogProtocol,
-        missing_persistent_outputs: list[str],
+        skipped_nodes: set[Node],
     ) -> Pipeline:
         """Remove nodes that only produce outputs consumed by skipped nodes.
 
         Args:
             filtered_pipeline: The initially filtered pipeline
             original_pipeline: The original full pipeline
-            catalog: The data catalog
-            missing_persistent_outputs: List of missing persistent outputs
+            catalog: The data catalogue
+            skipped_nodes: Set of nodes that will be skipped
 
         Returns:
             Optimised pipeline with wasteful nodes removed
         """
-        filtered_node_names = {node.name for node in filtered_pipeline.nodes}
         nodes_to_keep = set()
 
         # Build a map of which nodes consume each dataset
-        consumers: dict[str, set[str]] = {}
+        consumers: dict[str, set[Node]] = {}
         for node in original_pipeline.nodes:
             for input_ds in node.inputs:
                 if input_ds not in consumers:
                     consumers[input_ds] = set()
-                consumers[input_ds].add(node.name)
+                consumers[input_ds].add(node)
 
         # Check each node in the filtered pipeline
         for node in filtered_pipeline.nodes:
@@ -264,21 +283,20 @@ class AbstractRunner(ABC):
             wasteful_outputs = []
 
             for output in node.outputs:
-                # Always keep if output is a missing persistent output we need
-                if output in missing_persistent_outputs:
-                    should_keep = True
-                    continue
-
-                # Always keep if output is a final pipeline output
-                if output in original_pipeline.outputs():
-                    should_keep = True
-                    continue
-
-                # Check if this output is consumed by any node in filtered pipeline
+                # Check if any consumers of this output are in the filtered pipeline
                 output_consumers = consumers.get(output, set())
-                consumed_by_filtered_node = bool(output_consumers & filtered_node_names)
 
-                if consumed_by_filtered_node:
+                # Check if at least one consumer will run
+                has_running_consumer = any(
+                    consumer in filtered_pipeline.nodes
+                    and consumer not in skipped_nodes
+                    for consumer in output_consumers
+                )
+
+                # Also keep if it's a final pipeline output
+                is_final_output = output in original_pipeline.outputs()
+
+                if has_running_consumer or is_final_output:
                     should_keep = True
                 else:
                     # This output is only consumed by skipped nodes (wasteful)
@@ -292,6 +310,10 @@ class AbstractRunner(ABC):
                         f"Node '{node.name}' produces outputs {wasteful_outputs} that are only "
                         f"consumed by skipped nodes, but must run to produce other needed outputs"
                     )
+            else:
+                self._logger.debug(
+                    f"Removing node '{node.name}' as it only produces outputs consumed by skipped nodes"
+                )
 
         # Return pipeline with only the nodes we want to keep
         return filtered_pipeline.filter(node_names=list(nodes_to_keep))

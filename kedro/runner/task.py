@@ -45,14 +45,14 @@ class Task:
         catalog: CatalogProtocol,
         is_async: bool,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
         parallel: bool = False,
     ):
         self.node = node
         self.catalog = catalog
         self.hook_manager = hook_manager
         self.is_async = is_async
-        self.session_id = session_id
+        self.run_id = run_id
         self.parallel = parallel
 
     def execute(self) -> Node:
@@ -82,14 +82,14 @@ class Task:
                 self.node,
                 self.catalog,
                 self.hook_manager,  # type: ignore[arg-type]
-                self.session_id,
+                self.run_id,
             )
         else:
             node = self._run_node_sequential(
                 self.node,
                 self.catalog,
                 self.hook_manager,  # type: ignore[arg-type]
-                self.session_id,
+                self.run_id,
             )
 
         for name in node.confirms:
@@ -143,7 +143,7 @@ class Task:
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> Node:
         inputs = {}
 
@@ -157,12 +157,12 @@ class Task:
         is_async = False
 
         additional_inputs = self._collect_inputs_from_hook(
-            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+            node, catalog, inputs, is_async, hook_manager, run_id=run_id
         )
         inputs.update(additional_inputs)
 
         outputs = self._call_node_run(
-            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+            node, catalog, inputs, is_async, hook_manager, run_id=run_id
         )
 
         items: Iterable = outputs.items()
@@ -194,7 +194,7 @@ class Task:
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,  # type: ignore[arg-type]
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> Node:
         with ThreadPoolExecutor() as pool:
             inputs: dict[str, Future] = {}
@@ -209,12 +209,12 @@ class Task:
             is_async = True
 
             additional_inputs = self._collect_inputs_from_hook(
-                node, catalog, inputs, is_async, hook_manager, session_id=session_id
+                node, catalog, inputs, is_async, hook_manager, run_id=run_id
             )
             inputs.update(additional_inputs)
 
             outputs = self._call_node_run(
-                node, catalog, inputs, is_async, hook_manager, session_id=session_id
+                node, catalog, inputs, is_async, hook_manager, run_id=run_id
             )
 
             future_dataset_mapping = {}
@@ -258,7 +258,7 @@ class Task:
         inputs: dict[str, Any],
         is_async: bool,
         hook_manager: PluginManager,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
         inputs = (
             inputs.copy()
@@ -268,7 +268,7 @@ class Task:
             catalog=catalog,
             inputs=inputs,
             is_async=is_async,
-            session_id=session_id,
+            run_id=run_id,
         )
 
         additional_inputs = {}
@@ -293,7 +293,7 @@ class Task:
         inputs: dict[str, Any],
         is_async: bool,
         hook_manager: PluginManager,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
         try:
             outputs = node.run(inputs)
@@ -304,7 +304,7 @@ class Task:
                 catalog=catalog,
                 inputs=inputs,
                 is_async=is_async,
-                session_id=session_id,
+                run_id=run_id,
             )
             raise exc
         hook_manager.hook.after_node_run(
@@ -313,6 +313,6 @@ class Task:
             inputs=inputs,
             outputs=outputs,
             is_async=is_async,
-            session_id=session_id,
+            run_id=run_id,
         )
         return outputs

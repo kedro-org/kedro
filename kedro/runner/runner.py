@@ -67,12 +67,14 @@ class AbstractRunner(ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(self.__module__)
 
-    def run(
+    def run(  # noqa: PLR0913
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
+        session_id: str | None = None,
         run_id: str | None = None,
+        only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -81,7 +83,9 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
             run_id: The id of the run.
+            only_missing_outputs: Run only nodes with missing outputs.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
@@ -92,6 +96,10 @@ class AbstractRunner(ABC):
             by the node outputs.
 
         """
+        # Apply missing outputs filtering if requested
+        if only_missing_outputs:
+            pipeline = self._filter_pipeline_for_missing_outputs(pipeline, catalog)
+
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, not including extra dataset patterns
         # Run a warm-up to materialize all datasets in the catalog before run
@@ -154,6 +162,161 @@ class AbstractRunner(ABC):
             )
 
         return run_output
+
+    def _filter_pipeline_for_missing_outputs(
+        self, pipeline: Pipeline, catalog: CatalogProtocol
+    ) -> Pipeline:
+        """Filter pipeline to only include nodes needed to produce missing persistent outputs.
+
+        Args:
+            pipeline: The pipeline to filter.
+            catalog: The data catalogue to check for existing outputs.
+
+        Returns:
+            The filtered pipeline containing only nodes needed for missing persistent outputs.
+        """
+        original_node_count = len(pipeline.nodes)
+
+        # First, identify all nodes that need to run based on their outputs
+        nodes_to_run = set()
+        skipped_nodes = set()
+
+        for node in pipeline.nodes:
+            node_has_missing_persistent_output = False
+
+            for output in node.outputs:
+                if output in catalog:
+                    dataset = catalog._datasets[output]
+                    is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+
+                    # Only check existence for persistent datasets
+                    if not is_ephemeral and not catalog.exists(output):
+                        node_has_missing_persistent_output = True
+                        break
+                else:
+                    # Dataset not in catalogue - treat as missing persistent output
+                    node_has_missing_persistent_output = True
+                    break
+
+            if node_has_missing_persistent_output:
+                nodes_to_run.add(node)
+            else:
+                # All persistent outputs exist for this node
+                skipped_nodes.add(node)
+
+        # If no nodes need to run, return empty pipeline
+        if not nodes_to_run:
+            self._logger.info(
+                f"Skipping all {original_node_count} nodes (all persistent outputs exist)"
+            )
+            return pipeline.filter(node_names=[])
+
+        # Now we need to ensure we include all upstream dependencies of nodes_to_run
+        # Get all upstream nodes required for nodes that need to run
+        required_nodes = set(nodes_to_run)
+        for node in nodes_to_run:
+            # Add all upstream dependencies
+            upstream_pipeline = pipeline.to_nodes(node.name)
+            required_nodes.update(upstream_pipeline.nodes)
+
+        # Create filtered pipeline with required nodes
+        filtered_pipeline = pipeline.filter(node_names=[n.name for n in required_nodes])
+
+        # Apply wasteful node removal optimisation
+        # Find nodes that only produce outputs consumed by skipped nodes
+        optimised_pipeline = self._remove_wasteful_nodes(
+            filtered_pipeline, pipeline, catalog, skipped_nodes
+        )
+
+        skipped_count = original_node_count - len(optimised_pipeline.nodes)
+        if skipped_count > 0:
+            skipped_node_names = {node.name for node in pipeline.nodes} - {
+                node.name for node in optimised_pipeline.nodes
+            }
+
+            self._logger.info(
+                f"Skipping {skipped_count} nodes with existing persistent outputs: "
+                f"{', '.join(sorted(skipped_node_names))}"
+            )
+            self._logger.info(
+                f"Running {len(optimised_pipeline.nodes)} out of {original_node_count} nodes "
+                f"(skipped {skipped_count} nodes)"
+            )
+        else:
+            self._logger.info(
+                f"Running all {original_node_count} nodes (no outputs to skip)"
+            )
+
+        return optimised_pipeline
+
+    def _remove_wasteful_nodes(
+        self,
+        filtered_pipeline: Pipeline,
+        original_pipeline: Pipeline,
+        catalog: CatalogProtocol,
+        skipped_nodes: set[Node],
+    ) -> Pipeline:
+        """Remove nodes that only produce outputs consumed by skipped nodes.
+
+        Args:
+            filtered_pipeline: The initially filtered pipeline
+            original_pipeline: The original full pipeline
+            catalog: The data catalogue
+            skipped_nodes: Set of nodes that will be skipped
+
+        Returns:
+            Optimised pipeline with wasteful nodes removed
+        """
+        nodes_to_keep = set()
+
+        # Build a map of which nodes consume each dataset
+        consumers: dict[str, set[Node]] = {}
+        for node in original_pipeline.nodes:
+            for input_ds in node.inputs:
+                if input_ds not in consumers:
+                    consumers[input_ds] = set()
+                consumers[input_ds].add(node)
+
+        # Check each node in the filtered pipeline
+        for node in filtered_pipeline.nodes:
+            should_keep = False
+            wasteful_outputs = []
+
+            for output in node.outputs:
+                # Check if any consumers of this output are in the filtered pipeline
+                output_consumers = consumers.get(output, set())
+
+                # Check if at least one consumer will run
+                has_running_consumer = any(
+                    consumer in filtered_pipeline.nodes
+                    and consumer not in skipped_nodes
+                    for consumer in output_consumers
+                )
+
+                # Also keep if it's a final pipeline output
+                is_final_output = output in original_pipeline.outputs()
+
+                if has_running_consumer or is_final_output:
+                    should_keep = True
+                else:
+                    # This output is only consumed by skipped nodes (wasteful)
+                    wasteful_outputs.append(output)
+
+            if should_keep:
+                nodes_to_keep.add(node.name)
+                # Log warning if node has wasteful outputs but must still run
+                if wasteful_outputs:
+                    self._logger.warning(
+                        f"Node '{node.name}' produces outputs {wasteful_outputs} that are only "
+                        f"consumed by skipped nodes, but must run to produce other needed outputs"
+                    )
+            else:
+                self._logger.debug(
+                    f"Removing node '{node.name}' as it only produces outputs consumed by skipped nodes"
+                )
+
+        # Return pipeline with only the nodes we want to keep
+        return filtered_pipeline.filter(node_names=list(nodes_to_keep))
 
     def run_only_missing(
         self, pipeline: Pipeline, catalog: CatalogProtocol, hook_manager: PluginManager

@@ -104,24 +104,24 @@ class DataValidationHooks:
 
     @hook_impl
     def before_node_run(
-        self, catalog: DataCatalog, inputs: Dict[str, Any], session_id: str
+        self, catalog: DataCatalog, inputs: Dict[str, Any], run_id: str
     ) -> None:
         """Validate inputs data to a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
         """
-        self._run_validation(catalog, inputs, session_id)
+        self._run_validation(catalog, inputs, run_id)
 
     @hook_impl
     def after_node_run(
-        self, catalog: DataCatalog, outputs: Dict[str, Any], session_id: str
+        self, catalog: DataCatalog, outputs: Dict[str, Any], run_id: str
     ) -> None:
         """Validate outputs data from a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
         """
-        self._run_validation(catalog, outputs, session_id)
+        self._run_validation(catalog, outputs, run_id)
 
     def _run_validation(
-        self, catalog: DataCatalog, data: Dict[str, Any], session_id: str
+        self, catalog: DataCatalog, data: Dict[str, Any], run_id: str
     ):
         for dataset_name, dataset_value in data.items():
             if dataset_name not in self.DATASET_EXPECTATION_MAPPING:
@@ -139,7 +139,7 @@ class DataValidationHooks:
             expectation_context.run_validation_operator(
                 "action_list_operator",
                 assets_to_validate=[batch],
-                session_id=session_id,
+                run_id=run_id,
             )
 ```
 
@@ -193,24 +193,24 @@ class DataValidationHooks:
 
     @hook_impl
     def before_node_run(
-        self, catalog: DataCatalog, inputs: Dict[str, Any], session_id: str
+        self, catalog: DataCatalog, inputs: Dict[str, Any], run_id: str
     ) -> None:
         """Validate inputs data to a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
         """
-        self._run_validation(catalog, inputs, session_id)
+        self._run_validation(catalog, inputs, run_id)
 
     @hook_impl
     def after_node_run(
-        self, catalog: DataCatalog, outputs: Dict[str, Any], session_id: str
+        self, catalog: DataCatalog, outputs: Dict[str, Any], run_id: str
     ) -> None:
         """Validate outputs data from a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
         """
-        self._run_validation(catalog, outputs, session_id)
+        self._run_validation(catalog, outputs, run_id)
 
     def _run_validation(
-        self, catalog: DataCatalog, data: Dict[str, Any], session_id: str
+        self, catalog: DataCatalog, data: Dict[str, Any], run_id: str
     ):
         for dataset_name, dataset_value in data.items():
             if dataset_name not in self.DATASET_CHECKPOINT_MAPPING:
@@ -228,7 +228,7 @@ class DataValidationHooks:
                         "runtime_batch_identifier_name": dataset_name
                     },
                 },
-                run_name=session_id,
+                run_name=run_id,
             )
 ```
 
@@ -310,9 +310,9 @@ class ModelTrackingHooks:
     @hook_impl
     def before_pipeline_run(self, run_params: Dict[str, Any]) -> None:
         """Hook implementation to start an MLflow run
-        with the session_id of the Kedro pipeline run.
+        with the run_id of the Kedro pipeline run.
         """
-        mlflow.start_run(run_name=run_params["session_id"])
+        mlflow.start_run(run_name=run_params["run_id"])
         mlflow.log_params(run_params)
 
     @hook_impl

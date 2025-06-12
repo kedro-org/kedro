@@ -74,6 +74,7 @@ plugins:
 
 markdown_extensions:
   - attr_list
+  - mkdocs-click
   - md_in_html
   - pymdownx.inlinehilite
   - pymdownx.snippets

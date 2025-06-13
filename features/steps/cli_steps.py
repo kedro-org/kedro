@@ -2,6 +2,9 @@
 
 import json
 import shutil
+import subprocess
+import sys
+import textwrap
 from pathlib import Path
 from time import sleep, time
 
@@ -751,3 +754,17 @@ def pip_install_project_and_dev_dependencies(context):
         env=context.env,
         cwd=str(context.root_project_dir),
     )
+
+
+@given("I uninstall the rich module in the virtual environment")
+def step_uninstall_rich(context):
+    result = subprocess.run(  # noqa: S603
+        [sys.executable, "-m", "pip", "uninstall", "-y", "rich"],
+        capture_output=True,
+        text=True,
+        check=False,
+        shell=False,
+    )
+    assert (
+        result.returncode == 0 or "not installed" in result.stdout.lower()
+    ), f"Failed to uninstall rich:\n{result.stdout}\n{result.stderr}"

@@ -553,7 +553,7 @@ class TestNodeInputOutputNameValidation:
     def test_mismatched_namespace(self):
         """Test that mismatched namespaces in inputs and outputs raise a ValueError."""
         with pytest.raises(
-            ValueError, match="Invalid dataset name 'namespace.input_dataset'"
+            ValueError, match="Invalid dataset name 'other_namespace.output_dataset'"
         ):
             node(
                 func=self.dummy_function,

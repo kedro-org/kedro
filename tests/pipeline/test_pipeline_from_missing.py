@@ -6,19 +6,7 @@ from kedro.framework.hooks import _create_hook_manager
 from kedro.io import DataCatalog, LambdaDataset
 from kedro.pipeline import node, pipeline
 from kedro.runner import SequentialRunner
-
-
-# Different dummy func based on the number of arguments
-def constant_output():
-    return "output"  # pragma: no cover
-
-
-def identity(input1: str):
-    return input1  # pragma: no cover
-
-
-def biconcat(input1: str, input2: str):
-    return input1 + input2  # pragma: no cover
+from tests.testing_utils import biconcat, constant_output, identity
 
 
 @pytest.fixture

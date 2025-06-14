@@ -5,6 +5,7 @@ from kedro_datasets.pandas import CSVDataset
 
 from kedro.io import DataCatalog, KedroDataCatalog, MemoryDataset
 from kedro.pipeline import node, pipeline
+from tests.testing_utils import identity
 
 
 @pytest.fixture
@@ -355,10 +356,6 @@ class TestCatalogListCommand:
         key = f"Datasets in '{PIPELINE_NAME}' pipeline"
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
-
-
-def identity(data):
-    return data  # pragma: no cover
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")

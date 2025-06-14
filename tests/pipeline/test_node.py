@@ -5,23 +5,7 @@ from typing import Callable
 import pytest
 
 from kedro.pipeline import node
-
-
-# Different dummy func based on the number of arguments
-def constant_output():
-    return "output"  # pragma: no cover
-
-
-def identity(input1: str):
-    return input1  # pragma: no cover
-
-
-def biconcat(input1: str, input2: str):
-    return input1 + input2  # pragma: no cover
-
-
-def triconcat(input1: str, input2: str, input3: str):
-    return input1 + input2 + input3  # pragma: no cover
+from tests.testing_utils import biconcat, constant_output, identity, triconcat
 
 
 @pytest.fixture

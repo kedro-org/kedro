@@ -8,7 +8,6 @@ import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any
 
-import pandas as pd
 import pytest
 import toml
 import yaml
@@ -30,6 +29,7 @@ from kedro.framework.project import (
 )
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
+from tests.testing_utils import dummy_dataframe
 
 MOCK_PACKAGE_NAME = "mock_package_name"
 
@@ -156,9 +156,7 @@ def mock_settings(mocker):
     return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
 
-@pytest.fixture
-def dummy_dataframe():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+dummy_dataframe = pytest.fixture(dummy_dataframe)
 
 
 expected_message_middle = (

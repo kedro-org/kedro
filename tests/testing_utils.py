@@ -1,0 +1,77 @@
+"""Common utility functions for testing."""
+
+from typing import Any
+
+import pandas as pd
+
+
+def identity(input1: str) -> str:
+    """Return the input unchanged."""
+    return input1  # pragma: no cover
+
+
+def biconcat(input1: str, input2: str) -> str:
+    """Concatenate two strings."""
+    return input1 + input2  # pragma: no cover
+
+
+def triconcat(input1: str, input2: str, input3: str) -> str:
+    """Concatenate three strings."""
+    return input1 + input2 + input3  # pragma: no cover
+
+
+def constant_output() -> str:
+    """Return a constant output string."""
+    return "output"  # pragma: no cover
+
+
+def dummy_dataframe():
+    """Return a dummy pandas DataFrame for testing."""
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
+def dummy_dataframe_simple():
+    """Return a simple dummy pandas DataFrame for testing."""
+    return pd.DataFrame({"test": [1, 2]})
+
+
+# Runner test utilities
+def source() -> str:
+    """Return a constant source value."""
+    return "stuff"
+
+
+def sink(arg: Any) -> None:
+    """No-op sink function."""
+    pass
+
+
+def fan_in(*args: Any) -> tuple[Any, ...]:
+    """Return all arguments as a tuple."""
+    return args
+
+
+def first_arg(*args: Any) -> Any:
+    """Return the first argument."""
+    return args[0]
+
+
+def exception_fn(*args: Any) -> None:
+    """Raise a test exception."""
+    raise Exception("test exception")
+
+
+def return_none(arg: Any) -> None:
+    """Return None."""
+    arg = None
+    return arg
+
+
+def return_not_serialisable(arg: Any) -> Any:
+    """Return a non-serializable object (lambda)."""
+    return lambda x: x
+
+
+def multi_input_list_output(arg1: Any, arg2: Any, arg3: Any = None) -> list:
+    """Return first two arguments as a list."""
+    return [arg1, arg2]

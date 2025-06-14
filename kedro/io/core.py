@@ -24,6 +24,7 @@ from typing import (  # noqa: UP035
     Generic,
     Iterator,
     List,
+    Literal,
     Protocol,
     TypeVar,
     runtime_checkable,
@@ -1097,3 +1098,6 @@ class CatalogProtocol(Protocol[_C]):
     ) -> tuple[dict[str, str], str | None]:
         """Validates and synchronises dataset versions for loading and saving."""
         ...
+
+
+TCopyMode = Literal["deepcopy", "copy", "assign"]

@@ -92,6 +92,7 @@ Requires you only to specify a class of the underlying dataset either as a strin
 #### Full notation
 
 Full notation allows you to specify a dictionary with the full underlying dataset definition _except_ the following arguments:
+
 * The argument that receives the partition path (`filepath` by default) - if specified, a `UserWarning` will be emitted stating that this value will be overridden by individual partition paths
 * `credentials` key - specifying it will result in a `DatasetError` being raised; dataset credentials should be passed into the `credentials` argument of the `PartitionedDataset` rather than the underlying dataset definition - see the section below on [partitioned dataset credentials](#partitioned-dataset-credentials) for details
 * `versioned` flag - specifying it will result in a `DatasetError` being raised; versioning cannot be enabled for the underlying datasets
@@ -367,25 +368,21 @@ my_partitioned_dataset:
 ```
 
 !!! note
-Specification of `force_checkpoint` is also supported via the shorthand notation, as follows:
-```
-
-```yaml
-my_partitioned_dataset:
-  type: partitions.IncrementalDataset
-  path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
-  checkpoint: 2020-01-01/data.csv
-```
+    Specification of `force_checkpoint` is also supported via the shorthand notation, as follows:
+    ```yaml
+    my_partitioned_dataset:
+    type: partitions.IncrementalDataset
+    path: s3://my-bucket-name/path/to/folder
+    dataset: pandas.CSVDataset
+    checkpoint: 2020-01-01/data.csv
+    ```
 
 !!! note
-If you need to force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
-```
-
-```yaml
-my_partitioned_dataset:
-  type: partitions.IncrementalDataset
-  path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
-  checkpoint: ""
-```
+    If you need to force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
+    ```yaml
+    my_partitioned_dataset:
+    type: partitions.IncrementalDataset
+    path: s3://my-bucket-name/path/to/folder
+    dataset: pandas.CSVDataset
+    checkpoint: ""
+    ```

@@ -103,7 +103,7 @@ Parameters that are used by the `DataCatalog` when the pipeline executes are sto
         - iata_approved
         - company_rating
         - review_scores_rating
-    ``
+    ```
 
 Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
 
@@ -158,7 +158,7 @@ The data science pipeline is defined in `src/spaceflights/pipelines/data_science
                 ),
             ]
         )
-    ``
+    ```
 
 
 ## Test the pipelines
@@ -260,7 +260,6 @@ First, add namespaces to the modelling component of the data science pipeline to
     type: pickle.PickleDataset
     filepath: data/06_models/regressor_candidate.pickle
     versioned: true
-
     ```
 
 2. Update the parameters file for the data science pipeline in `conf/base/parameters_data_science.yml` to replace the existing contents for `model_options` with the following for the two instances of the template pipeline:

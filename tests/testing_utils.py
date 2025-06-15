@@ -1,23 +1,25 @@
 """Common utility functions for testing."""
 
-from typing import Any
+from typing import Any, NoReturn, TypeVar
 
 import pandas as pd
 
+T = TypeVar("T")
 
-def identity(input1: str) -> str:
+
+def identity(input1: T) -> T:
     """Return the input unchanged."""
     return input1  # pragma: no cover
 
 
 def biconcat(input1: str, input2: str) -> str:
     """Concatenate two strings."""
-    return input1 + input2  # pragma: no cover
+    return f"{input1}{input2}"  # pragma: no cover
 
 
 def triconcat(input1: str, input2: str, input3: str) -> str:
     """Concatenate three strings."""
-    return input1 + input2 + input3  # pragma: no cover
+    return f"{input1}{input2}{input3}"  # pragma: no cover
 
 
 def constant_output() -> str:
@@ -56,15 +58,14 @@ def first_arg(*args: Any) -> Any:
     return args[0]
 
 
-def exception_fn(*args: Any) -> None:
+def exception_fn(*args: Any) -> NoReturn:
     """Raise a test exception."""
     raise Exception("test exception")
 
 
 def return_none(arg: Any) -> None:
     """Return None."""
-    arg = None
-    return arg
+    return None
 
 
 def return_not_serialisable(arg: Any) -> Any:

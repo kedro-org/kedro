@@ -265,7 +265,7 @@ Here is the full implementation of our basic `ImageDataset`:
 
 Currently, the `ImageDataset` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-Kedro's {class}`PartitionedDataset<kedro-datasets:kedro_datasets.partitions.PartitionedDataset>` is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+Kedro's [PartitionedDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.PartitionedDataset/) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
 
 To use `PartitionedDataset` with `ImageDataset` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataset` loads all PNG files from the data directory using `ImageDataset`:
 
@@ -497,7 +497,7 @@ Inspect the content of the data directory to find a new version of the data, wri
 
 Kedro datasets should work with the [kedro.runner.SequentialRunner][] and the [kedro.runner.ParallelRunner][], so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
-There is one dataset that is an exception: {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`. The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [kedro.runner.ParallelRunner][]. For parallelism within a Kedro project that uses Spark, use [kedro.runner.ThreadRunner][] instead.
+There is one dataset that is an exception: [SparkDatase](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkDataset/). The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [kedro.runner.ParallelRunner][]. For parallelism within a Kedro project that uses Spark, use [kedro.runner.ThreadRunner][] instead.
 
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an IPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 
@@ -555,7 +555,7 @@ class ImageDataset(AbstractVersionedDataset):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](../catalog-data/data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset constructor, see the implementation of the {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>`.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](../catalog-data/data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset constructor, see the implementation of the [SparkDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkDataset/).
 
 ## How to contribute a custom dataset implementation
 

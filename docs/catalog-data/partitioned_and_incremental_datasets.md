@@ -2,9 +2,9 @@
 
 ## Partitioned datasets
 
-Distributed systems play an increasingly important role in ETL data pipelines. They increase the processing throughput, enabling us to work with much larger volumes of input data. A situation may arise where your Kedro node needs to read the data from a directory full of uniform files of the same type like JSON or CSV. Tools like `PySpark` and the corresponding {class}`SparkDataset<kedro-datasets:kedro_datasets.spark.SparkDataset>` cater for such use cases but may not always be possible.
+Distributed systems play an increasingly important role in ETL data pipelines. They increase the processing throughput, enabling us to work with much larger volumes of input data. A situation may arise where your Kedro node needs to read the data from a directory full of uniform files of the same type like JSON or CSV. Tools like `PySpark` and the corresponding [SparkDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkDataset/) cater for such use cases but may not always be possible.
 
-This is why Kedro provides {class}`PartitionedDataset<kedro-datasets:kedro_datasets.partitions.PartitionedDataset>` with the following features:
+This is why Kedro provides [PartitionedDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.PartitionedDataset/) with the following features:
 
 * `PartitionedDataset` can recursively load/save all or specific files from a given location.
 * It is platform agnostic, and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and many more.
@@ -254,7 +254,7 @@ new_partitioned_dataset:
 
 ## Incremental datasets
 
-{class}`IncrementalDataset<kedro-datasets:kedro_datasets.partitions.IncrementalDataset>` is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, that is, each subsequent pipeline run should process just the partitions which were not processed by the previous runs.
+[IncrementalDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.IncrementalDataset/) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, that is, each subsequent pipeline run should process just the partitions which were not processed by the previous runs.
 
 This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
 

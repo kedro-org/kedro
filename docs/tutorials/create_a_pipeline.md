@@ -176,7 +176,7 @@ You should see output similar to the following:
 
 ## Preprocessed data registration
 
-Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format {class}`pandas.ParquetDataset<kedro-datasets:kedro_datasets.pandas.ParquetDataset>` because they are registered within the [Data Catalog](../getting-started/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format [pandas.ParquetDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.ParquetDataset/) because they are registered within the [Data Catalog](../getting-started/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
 
 
 ??? example "View code"

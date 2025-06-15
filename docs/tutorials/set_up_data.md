@@ -97,7 +97,6 @@ You should see output such as the following:
     2  57015     Russian Federation      Type V5     Quantum  ...                f                        f  $1,715.0      19032
     3  14035               Barbados      Type V5      Plasma  ...                f                        f  $4,770.0       8238
     4  10036  Sao Tome and Principe      Type V2      Plasma  ...                f                        f  $2,820.0      30342
-
     ```
 
 When you have finished, close `ipython` session with `exit()`.
@@ -106,10 +105,10 @@ When you have finished, close `ipython` session with `exit()`.
 
 ### Watch the video
 
-```{eval-rst}
-..  youtube:: rl2cncGxyts
-    :width: 100%
-```
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/rl2cncGxyts" 
+frameborder="0" allowfullscreen></iframe>
+
+
 
 ### Custom data
 

@@ -260,30 +260,25 @@ See the [PySpark integration documentation](https://docs.kedro.org/en/stable/int
 
 The `viz` tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
 In addition, `viz` will also add setup for experiment tracking and plotting datasets.
-See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
+See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/latest/index.html) for more information on using this tool.
 
 ## Flowchart illustration
 
 Here is a flowchart to help illustrate some example choice of tools you can select:
 
-![Example diagram of specific tool choices](../meta/images/project-tools-choices.png)
-
-% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
-% flowchart TD
-%     A[Start] --> B[Enter Project Name: Example Project];
-%     B --> C3[Select Tools: None];
-%     B --> C1[Select Tools: lint, docs, PySpark];
-%     B --> C2[Select Tools: All];
-%
-%     C1 --> D1[Include Example Pipeline?];
-%     C2 --> D2[Include Example Pipeline?];
-%     C3 --> D3[Include Example Pipeline?];
-%
-%     D1 -->|Yes| E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes];
-%     D1 -->|No| E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No];
-%
-%     D2 -->|Yes| F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: Yes];
-%     D2 -->|No| F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: No];
-%
-%     D3 -->|Yes| G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes];
-%     D3 -->|No| G2[New Project Created\nName: Example Project\nTools: None\nExample: No];
+```mermaid
+flowchart TD
+    A[Start] --> B[Enter Project Name: Example Project]
+    B --> C3[Select Tools: None]
+    B --> C1[Select Tools: lint, docs, PySpark]
+    B --> C2[Select Tools: All]
+    C1 --> D1[Include Example Pipeline?]
+    C2 --> D2[Include Example Pipeline?]
+    C3 --> D3[Include Example Pipeline?]
+    D1 -- Yes --> E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes]
+    D1 -- No --> E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No]
+    D2 -- Yes --> F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz\nExample: Yes]
+    D2 -- No --> F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz\nExample: No]
+    D3 -- Yes --> G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes]
+    D3 -- No --> G2[New Project Created\nName: Example Project\nTools: None\nExample: No]
+```

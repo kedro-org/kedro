@@ -46,47 +46,47 @@ The `_EPHEMERAL` boolean attribute in `AbstractDataset` indicates if a dataset i
 Here is an example skeleton for `ImageDataset`:
 
 ??? example "View code"
-```python
-from typing import Any, Dict
+    ```python
+    from typing import Any, Dict
 
-import numpy as np
+    import numpy as np
 
-from kedro.io import AbstractDataset
+    from kedro.io import AbstractDataset
 
 
-class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
-    """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
+    class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
+        """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
-    Example:
-    ::
+        Example:
+        ::
 
-        >>> ImageDataset(filepath='/img/file/path.png')
-    """
-
-    def __init__(self, filepath: str):
-        """Creates a new instance of ImageDataset to load / save image data at the given filepath.
-
-        Args:
-            filepath: The location of the image file to load / save data.
+            >>> ImageDataset(filepath='/img/file/path.png')
         """
-        self._filepath = filepath
 
-    def load(self) -> np.ndarray:
-        """Loads data from the image file.
+        def __init__(self, filepath: str):
+            """Creates a new instance of ImageDataset to load / save image data at the given filepath.
 
-        Returns:
-            Data from the image file as a numpy array.
-        """
-        ...
+            Args:
+                filepath: The location of the image file to load / save data.
+            """
+            self._filepath = filepath
 
-    def save(self, data: np.ndarray) -> None:
-        """Saves image data to the specified filepath"""
-        ...
+        def load(self) -> np.ndarray:
+            """Loads data from the image file.
 
-    def _describe(self) -> Dict[str, Any]:
-        """Returns a dict that describes the attributes of the dataset"""
-        ...
-```
+            Returns:
+                Data from the image file as a numpy array.
+            """
+            ...
+
+        def save(self, data: np.ndarray) -> None:
+            """Saves image data to the specified filepath"""
+            ...
+
+        def _describe(self) -> Dict[str, Any]:
+            """Returns a dict that describes the attributes of the dataset"""
+            ...
+    ```
 
 Create a subfolder called `datasets` in `src/kedro_pokemon/` to store the dataset definition `image_dataset.py`, adding `__init__.py` to make Python treat the directory as a package that you can import from:
 
@@ -103,45 +103,45 @@ Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.rea
 Here is the implementation of the `load` method using `fsspec` and `Pillow` to read the data of a single image into a `numpy` array:
 
 ??? example "View code"
-```python
-from pathlib import PurePosixPath
-from typing import Any, Dict
+    ```python
+    from pathlib import PurePosixPath
+    from typing import Any, Dict
 
-import fsspec
-import numpy as np
-from PIL import Image
+    import fsspec
+    import numpy as np
+    from PIL import Image
 
-from kedro.io import AbstractDataset
-from kedro.io.core import get_filepath_str, get_protocol_and_path
+    from kedro.io import AbstractDataset
+    from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
-class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
-    def __init__(self, filepath: str):
-        """Creates a new instance of ImageDataset to load / save image data for given filepath.
+    class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
+        def __init__(self, filepath: str):
+            """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
-        Args:
-            filepath: The location of the image file to load / save data.
-        """
-        # parse the path and protocol (e.g. file, http, s3, etc.)
-        protocol, path = get_protocol_and_path(filepath)
-        self._protocol = protocol
-        self._filepath = PurePosixPath(path)
-        self._fs = fsspec.filesystem(self._protocol)
+            Args:
+                filepath: The location of the image file to load / save data.
+            """
+            # parse the path and protocol (e.g. file, http, s3, etc.)
+            protocol, path = get_protocol_and_path(filepath)
+            self._protocol = protocol
+            self._filepath = PurePosixPath(path)
+            self._fs = fsspec.filesystem(self._protocol)
 
-    def load(self) -> np.ndarray:
-        """Loads data from the image file.
+        def load(self) -> np.ndarray:
+            """Loads data from the image file.
 
-        Returns:
-            Data from the image file as a numpy array
-        """
-        # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
-        load_path = get_filepath_str(self._filepath, self._protocol)
-        with self._fs.open(load_path) as f:
-            image = Image.open(f).convert("RGBA")
-            return np.asarray(image)
+            Returns:
+                Data from the image file as a numpy array
+            """
+            # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
+            load_path = get_filepath_str(self._filepath, self._protocol)
+            with self._fs.open(load_path) as f:
+                image = Image.open(f).convert("RGBA")
+                return np.asarray(image)
 
-    ...
-```
+        ...
+    ```
 
 To test this out, let's add a dataset to the data catalog to load Pikachu's image.
 
@@ -206,60 +206,60 @@ class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
 Here is the full implementation of our basic `ImageDataset`:
 
 ??? example "View code"
-```python
-from pathlib import PurePosixPath
-from typing import Any, Dict
+    ```python
+    from pathlib import PurePosixPath
+    from typing import Any, Dict
 
-import fsspec
-import numpy as np
-from PIL import Image
+    import fsspec
+    import numpy as np
+    from PIL import Image
 
-from kedro.io import AbstractDataset
-from kedro.io.core import get_filepath_str, get_protocol_and_path
+    from kedro.io import AbstractDataset
+    from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
-class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
-    """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
+    class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
+        """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
-    Example:
-    ::
+        Example:
+        ::
 
-        >>> ImageDataset(filepath='/img/file/path.png')
-    """
-
-    def __init__(self, filepath: str):
-        """Creates a new instance of ImageDataset to load / save image data for given filepath.
-
-        Args:
-            filepath: The location of the image file to load / save data.
+            >>> ImageDataset(filepath='/img/file/path.png')
         """
-        protocol, path = get_protocol_and_path(filepath)
-        self._protocol = protocol
-        self._filepath = PurePosixPath(path)
-        self._fs = fsspec.filesystem(self._protocol)
 
-    def load(self) -> np.ndarray:
-        """Loads data from the image file.
+        def __init__(self, filepath: str):
+            """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
-        Returns:
-            Data from the image file as a numpy array
-        """
-        load_path = get_filepath_str(self._filepath, self._protocol)
-        with self._fs.open(load_path, mode="r") as f:
-            image = Image.open(f).convert("RGBA")
-            return np.asarray(image)
+            Args:
+                filepath: The location of the image file to load / save data.
+            """
+            protocol, path = get_protocol_and_path(filepath)
+            self._protocol = protocol
+            self._filepath = PurePosixPath(path)
+            self._fs = fsspec.filesystem(self._protocol)
 
-    def save(self, data: np.ndarray) -> None:
-        """Saves image data to the specified filepath."""
-        save_path = get_filepath_str(self._filepath, self._protocol)
-        with self._fs.open(save_path, mode="wb") as f:
-            image = Image.fromarray(data)
-            image.save(f)
+        def load(self) -> np.ndarray:
+            """Loads data from the image file.
 
-    def _describe(self) -> Dict[str, Any]:
-        """Returns a dict that describes the attributes of the dataset."""
-        return dict(filepath=self._filepath, protocol=self._protocol)
-```
+            Returns:
+                Data from the image file as a numpy array
+            """
+            load_path = get_filepath_str(self._filepath, self._protocol)
+            with self._fs.open(load_path, mode="r") as f:
+                image = Image.open(f).convert("RGBA")
+                return np.asarray(image)
+
+        def save(self, data: np.ndarray) -> None:
+            """Saves image data to the specified filepath."""
+            save_path = get_filepath_str(self._filepath, self._protocol)
+            with self._fs.open(save_path, mode="wb") as f:
+                image = Image.fromarray(data)
+                image.save(f)
+
+        def _describe(self) -> Dict[str, Any]:
+            """Returns a dict that describes the attributes of the dataset."""
+            return dict(filepath=self._filepath, protocol=self._protocol)
+    ```
 
 ## Integration with `PartitionedDataset`
 
@@ -311,145 +311,145 @@ The following amends the full implementation of our basic `ImageDataset`. It now
 
 
 ??? example "View code"
-```python
-from pathlib import PurePosixPath
-from typing import Any, Dict
+    ```python
+    from pathlib import PurePosixPath
+    from typing import Any, Dict
 
-import fsspec
-import numpy as np
-from PIL import Image
+    import fsspec
+    import numpy as np
+    from PIL import Image
 
-from kedro.io import AbstractVersionedDataset
-from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
+    from kedro.io import AbstractVersionedDataset
+    from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
-class ImageDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
-    """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
+    class ImageDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
+        """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
-    Example:
-    ::
+        Example:
+        ::
 
-        >>> ImageDataset(filepath='/img/file/path.png')
-    """
-
-    def __init__(self, filepath: str, version: Version = None):
-        """Creates a new instance of ImageDataset to load / save image data for given filepath.
-
-        Args:
-            filepath: The location of the image file to load / save data.
-            version: The version of the dataset being saved and loaded.
+            >>> ImageDataset(filepath='/img/file/path.png')
         """
-        protocol, path = get_protocol_and_path(filepath)
-        self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol)
 
-        super().__init__(
-            filepath=PurePosixPath(path),
-            version=version,
-            exists_function=self._fs.exists,
-            glob_function=self._fs.glob,
-        )
+        def __init__(self, filepath: str, version: Version = None):
+            """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
-    def load(self) -> np.ndarray:
-        """Loads data from the image file.
+            Args:
+                filepath: The location of the image file to load / save data.
+                version: The version of the dataset being saved and loaded.
+            """
+            protocol, path = get_protocol_and_path(filepath)
+            self._protocol = protocol
+            self._fs = fsspec.filesystem(self._protocol)
 
-        Returns:
-            Data from the image file as a numpy array
-        """
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        with self._fs.open(load_path, mode="r") as f:
-            image = Image.open(f).convert("RGBA")
-            return np.asarray(image)
+            super().__init__(
+                filepath=PurePosixPath(path),
+                version=version,
+                exists_function=self._fs.exists,
+                glob_function=self._fs.glob,
+            )
 
-    def save(self, data: np.ndarray) -> None:
-        """Saves image data to the specified filepath."""
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        with self._fs.open(save_path, mode="wb") as f:
-            image = Image.fromarray(data)
-            image.save(f)
+        def load(self) -> np.ndarray:
+            """Loads data from the image file.
 
-    def _describe(self) -> Dict[str, Any]:
-        """Returns a dict that describes the attributes of the dataset."""
-        return dict(
-            filepath=self._filepath, version=self._version, protocol=self._protocol
-        )
-```
+            Returns:
+                Data from the image file as a numpy array
+            """
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+            with self._fs.open(load_path, mode="r") as f:
+                image = Image.open(f).convert("RGBA")
+                return np.asarray(image)
+
+        def save(self, data: np.ndarray) -> None:
+            """Saves image data to the specified filepath."""
+            save_path = get_filepath_str(self._get_save_path(), self._protocol)
+            with self._fs.open(save_path, mode="wb") as f:
+                image = Image.fromarray(data)
+                image.save(f)
+
+        def _describe(self) -> Dict[str, Any]:
+            """Returns a dict that describes the attributes of the dataset."""
+            return dict(
+                filepath=self._filepath, version=self._version, protocol=self._protocol
+            )
+    ```
 
 The difference between the original `ImageDataset` and the versioned `ImageDataset` is as follows:
 
 <!-- Generated by saving the original and versioned examples to a file and running `diff original.py versioned.py -U -1` -->
 ??? example "View code"
-```diff
- from pathlib import PurePosixPath
- from typing import Any, Dict
+    ```diff
+    from pathlib import PurePosixPath
+    from typing import Any, Dict
 
- import fsspec
- import numpy as np
- from PIL import Image
+    import fsspec
+    import numpy as np
+    from PIL import Image
 
--from kedro.io import AbstractDataset
--from kedro.io.core import get_filepath_str, get_protocol_and_path
-+from kedro.io import AbstractVersionedDataset
-+from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
+    -from kedro.io import AbstractDataset
+    -from kedro.io.core import get_filepath_str, get_protocol_and_path
+    +from kedro.io import AbstractVersionedDataset
+    +from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
--class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
-+class ImageDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
-     """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
+    -class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
+    +class ImageDataset(AbstractVersionedDataset[np.ndarray, np.ndarray]):
+        """``ImageDataset`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
-     Example:
-     ::
+        Example:
+        ::
 
-         >>> ImageDataset(filepath='/img/file/path.png')
-     """
+            >>> ImageDataset(filepath='/img/file/path.png')
+        """
 
--    def __init__(self, filepath: str):
-+    def __init__(self, filepath: str, version: Version = None):
-         """Creates a new instance of ImageDataset to load / save image data for given filepath.
+    -    def __init__(self, filepath: str):
+    +    def __init__(self, filepath: str, version: Version = None):
+            """Creates a new instance of ImageDataset to load / save image data for given filepath.
 
-         Args:
-             filepath: The location of the image file to load / save data.
-+            version: The version of the dataset being saved and loaded.
-         """
-         protocol, path = get_protocol_and_path(filepath)
-         self._protocol = protocol
--        self._filepath = PurePosixPath(path)
-         self._fs = fsspec.filesystem(self._protocol)
+            Args:
+                filepath: The location of the image file to load / save data.
+    +            version: The version of the dataset being saved and loaded.
+            """
+            protocol, path = get_protocol_and_path(filepath)
+            self._protocol = protocol
+    -        self._filepath = PurePosixPath(path)
+            self._fs = fsspec.filesystem(self._protocol)
 
-+        super().__init__(
-+            filepath=PurePosixPath(path),
-+            version=version,
-+            exists_function=self._fs.exists,
-+            glob_function=self._fs.glob,
-+        )
-+
-     def load(self) -> np.ndarray:
-         """Loads data from the image file.
+    +        super().__init__(
+    +            filepath=PurePosixPath(path),
+    +            version=version,
+    +            exists_function=self._fs.exists,
+    +            glob_function=self._fs.glob,
+    +        )
+    +
+        def load(self) -> np.ndarray:
+            """Loads data from the image file.
 
-         Returns:
-             Data from the image file as a numpy array
-         """
--        load_path = get_filepath_str(self._filepath, self._protocol)
-+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-         with self._fs.open(load_path, mode="r") as f:
-             image = Image.open(f).convert("RGBA")
-             return np.asarray(image)
+            Returns:
+                Data from the image file as a numpy array
+            """
+    -        load_path = get_filepath_str(self._filepath, self._protocol)
+    +        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+            with self._fs.open(load_path, mode="r") as f:
+                image = Image.open(f).convert("RGBA")
+                return np.asarray(image)
 
-     def save(self, data: np.ndarray) -> None:
-         """Saves image data to the specified filepath."""
--        save_path = get_filepath_str(self._filepath, self._protocol)
-+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
-         with self._fs.open(save_path, mode="wb") as f:
-             image = Image.fromarray(data)
-             image.save(f)
+        def save(self, data: np.ndarray) -> None:
+            """Saves image data to the specified filepath."""
+    -        save_path = get_filepath_str(self._filepath, self._protocol)
+    +        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+            with self._fs.open(save_path, mode="wb") as f:
+                image = Image.fromarray(data)
+                image.save(f)
 
-     def _describe(self) -> Dict[str, Any]:
-         """Returns a dict that describes the attributes of the dataset."""
--        return dict(filepath=self._filepath, protocol=self._protocol)
-+        return dict(
-+            filepath=self._filepath, version=self._version, protocol=self._protocol
-+        )
-```
+        def _describe(self) -> Dict[str, Any]:
+            """Returns a dict that describes the attributes of the dataset."""
+    -        return dict(filepath=self._filepath, protocol=self._protocol)
+    +        return dict(
+    +            filepath=self._filepath, version=self._version, protocol=self._protocol
+    +        )
+    ```
 
 To test the code, you need to enable versioning support in the data catalog:
 

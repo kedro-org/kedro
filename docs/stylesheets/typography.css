@@ -54,6 +54,7 @@ h3,
 }
 
 p,
+.md-typeset,
 .md-typeset thead ,
 .md-typeset td {
   font-family: Inter;

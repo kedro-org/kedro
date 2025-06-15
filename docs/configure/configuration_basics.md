@@ -50,16 +50,15 @@ In Kedro, the base configuration environment refers to the default configuration
 
 The `base` folder contains the default settings that are used across your pipelines, unless they are overridden by a specific environment.
 
-```{warning}
-Do not put private access credentials in the base configuration folder or any other configuration environment folder that is stored in version control.
-```
+!!! warning
+    Do not put private access credentials in the base configuration folder or any other configuration environment folder that is stored in version control.
 
 ### Local
 The `local` configuration environment folder should be used for configuration that is either user-specific (e.g. IDE configuration) or protected (e.g. security keys).
 
-```{warning}
-Do not add any local configuration to version control.
-```
+!!! warning
+    Do not add any local configuration to version control.
+
 
 ## Configuration loading
 Kedro-specific configuration (e.g., [kedro.io.DataCatalog][] configuration for I/O) is loaded using a configuration loader class, by default, this is [kedro.config.OmegaConfigLoader][].
@@ -133,7 +132,7 @@ You can read configuration from a compressed file in `tar.gz` or `zip` format by
 
 How to reference a `tar.gz` file:
 
- ```bash
+```bash
 kedro run --conf-source=<path-to-compressed-file>.tar.gz
 ```
 

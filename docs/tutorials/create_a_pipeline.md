@@ -24,10 +24,9 @@ The data processing pipeline prepares the data for model building by combining t
 
 The [hands-on video course](../getting-started/course.md#learn-kedro-with-hands-on-video) walks through data exploration and data processing for the spaceflights data. There are several videos in the playlist that cover the topic starting with the following:
 
-```{eval-rst}
-..  youtube:: bZD8N0yv3Fs
-    :width: 100%
-```
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/bZD8N0yv3Fs"
+frameborder="0" allowfullscreen></iframe>
+
 
 ## Data preprocessing node functions
 
@@ -177,7 +176,7 @@ You should see output similar to the following:
 
 ## Preprocessed data registration
 
-Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format {class}`pandas.ParquetDataset<kedro-datasets:kedro_datasets.pandas.ParquetDataset>` because they are registered within the [Data Catalog](../getting-started/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format [pandas.ParquetDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.ParquetDataset/) because they are registered within the [Data Catalog](../getting-started/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
 
 
 ??? example "View code"
@@ -325,10 +324,8 @@ To exit, close the browser tab. To regain control of the terminal, enter `^+c` o
 
 ### Watch the video
 
-```{eval-rst}
-..  youtube:: KWqSzbHgNW4
-    :width: 100%
-```
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/KWqSzbHgNW4"
+frameborder="0" allowfullscreen></iframe>
 
 ## Checkpoint
 

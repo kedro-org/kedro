@@ -105,7 +105,7 @@ When you have finished, close `ipython` session with `exit()`.
 
 ### Watch the video
 
-<iframe width="100%" height="460" src="https://www.youtube.com/embed/rl2cncGxyts" 
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/rl2cncGxyts"
 frameborder="0" allowfullscreen></iframe>
 
 

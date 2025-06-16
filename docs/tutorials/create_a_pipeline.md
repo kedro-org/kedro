@@ -24,7 +24,7 @@ The data processing pipeline prepares the data for model building by combining t
 
 The [hands-on video course](../getting-started/course.md#learn-kedro-with-hands-on-video) walks through data exploration and data processing for the spaceflights data. There are several videos in the playlist that cover the topic starting with the following:
 
-<iframe width="100%" height="460" src="https://www.youtube.com/embed/bZD8N0yv3Fs" 
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/bZD8N0yv3Fs"
 frameborder="0" allowfullscreen></iframe>
 
 
@@ -324,7 +324,7 @@ To exit, close the browser tab. To regain control of the terminal, enter `^+c` o
 
 ### Watch the video
 
-<iframe width="100%" height="460" src="https://www.youtube.com/embed/KWqSzbHgNW4" 
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/KWqSzbHgNW4"
 frameborder="0" allowfullscreen></iframe>
 
 ## Checkpoint

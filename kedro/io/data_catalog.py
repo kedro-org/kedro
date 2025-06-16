@@ -477,7 +477,7 @@ class DataCatalog(CatalogProtocol):
         return self.get(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """Add dataset to the ``DataCatalog`` using the given key as a datsets name
+        """Add dataset to the ``DataCatalog`` using the given key as a dataset's name
         and the provided data as the value.
 
         The value can either be raw data or a Kedro dataset (i.e., an instance of a class

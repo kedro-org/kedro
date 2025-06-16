@@ -32,7 +32,7 @@ class GroupedNodes:
     """
 
     name: str
-    type: str  # "namespace" or "node"
+    type: str  # "namespace" or "nodes"
     nodes: list[str] = field(default_factory=list)
     dependencies: list[str] = field(default_factory=list)
 

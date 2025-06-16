@@ -70,7 +70,7 @@ test = [
     "pytest-mock>=1.7.1, <4.0",
     "pytest-xdist[psutil]~=2.2.1",
     "pytest>=7.2,<9.0",
-    "s3fs>=2021.4, <2025.4",
+    "s3fs>=2021.4, <2025.6",
     "requests_mock",
     # mypy related dependencies
     "pandas-stubs",
@@ -88,7 +88,7 @@ docs = [
     "mkdocs-get-deps>=0.2.0",
     "mkdocstrings>=0.29.1",
     "mkdocstrings-python>=0.29.1",
-    "linkchecker>=10.2.1",
+    "griffe"  # Required by mkdocstrings-python for API documentation generation.
 ]
 jupyter = [
     "ipylab>=1.0.0",

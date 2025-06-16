@@ -19,6 +19,7 @@ from concurrent.futures import (
     wait,
 )
 from itertools import chain
+from time import perf_counter
 from typing import TYPE_CHECKING, Any
 
 from pluggy import PluginManager
@@ -66,7 +67,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -75,7 +76,7 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
@@ -95,9 +96,14 @@ class AbstractRunner(ABC):
                 "Asynchronous mode is enabled for loading and saving data."
             )
 
-        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
+        start_time = perf_counter()
+        self._run(pipeline, catalog, hook_or_null_manager, run_id)  # type: ignore[arg-type]
+        end_time = perf_counter()
+        run_duration = end_time - start_time
 
-        self._logger.info("Pipeline execution completed successfully.")
+        self._logger.info(
+            f"Pipeline execution completed successfully in {run_duration:.1f} sec."
+        )
 
         # Now we return all pipeline outputs, but we do not load datasets data
         run_output = {ds_name: catalog[ds_name] for ds_name in pipeline.outputs()}
@@ -155,7 +161,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
          inputs have already been checked and normalized by run().
@@ -165,7 +171,7 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
         """
 
         nodes = pipeline.nodes
@@ -191,7 +197,7 @@ class AbstractRunner(ABC):
                         catalog=catalog,
                         hook_manager=hook_manager,
                         is_async=self._is_async,
-                        session_id=session_id,
+                        run_id=run_id,
                     ).execute()
                     done_nodes.add(node)
                 except Exception:
@@ -215,7 +221,7 @@ class AbstractRunner(ABC):
                         catalog=catalog,
                         hook_manager=hook_manager,
                         is_async=self._is_async,
-                        session_id=session_id,
+                        run_id=run_id,
                     )
                     if isinstance(executor, ProcessPoolExecutor):
                         task.parallel = True
@@ -524,7 +530,7 @@ def run_node(
     catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
     hook_manager: PluginManager,
     is_async: bool = False,
-    session_id: str | None = None,
+    run_id: str | None = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -534,7 +540,7 @@ def run_node(
         hook_manager: The ``PluginManager`` to activate hooks.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
-        session_id: The session id of the pipeline run.
+        run_id: The run id of the pipeline run.
 
     Raises:
         ValueError: Raised if is_async is set to True for nodes wrapping
@@ -562,7 +568,7 @@ def run_node(
         catalog=catalog,
         hook_manager=hook_manager,
         is_async=is_async,
-        session_id=session_id,
+        run_id=run_id,
     )
     node = task.execute()
     return node

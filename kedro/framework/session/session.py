@@ -406,7 +406,7 @@ class KedroSession:
         )
         try:
             run_result = runner.run(
-                filtered_pipeline, catalog, hook_manager, session_id
+                filtered_pipeline, catalog, hook_manager, run_id=session_id
             )
             self._run_called = True
         except Exception as error:

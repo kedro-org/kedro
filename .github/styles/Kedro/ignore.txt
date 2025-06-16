@@ -23,6 +23,7 @@ dbx
 MLflow
 csv
 yaml
+Marimo
 matplotlib
 Matplotlib
 IPython
@@ -34,6 +35,7 @@ Pylint
 Serverless
 serverless
 SQLAlchemy
+Streamlit
 tracebacks
 templated
 Templated

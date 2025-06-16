@@ -415,7 +415,7 @@ class TestValidPipeline:
                     ),
                     GroupedNodes(
                         name="node_3",
-                        type="node",
+                        type="nodes",
                         nodes=["node_3"],
                         dependencies=["namespace_1"],
                     ),
@@ -427,7 +427,7 @@ class TestValidPipeline:
                     ),
                     GroupedNodes(
                         name="node_6",
-                        type="node",
+                        type="nodes",
                         nodes=["node_6"],
                         dependencies=["namespace_2"],
                     ),
@@ -438,43 +438,43 @@ class TestValidPipeline:
                 [
                     GroupedNodes(
                         name="f1",
-                        type="node",
+                        type="nodes",
                         nodes=["f1"],
                         dependencies=[],
                     ),
                     GroupedNodes(
                         name="f2",
-                        type="node",
+                        type="nodes",
                         nodes=["f2"],
                         dependencies=["f1"],
                     ),
                     GroupedNodes(
                         name="f3",
-                        type="node",
+                        type="nodes",
                         nodes=["f3"],
                         dependencies=["f2"],
                     ),
                     GroupedNodes(
                         name="f4",
-                        type="node",
+                        type="nodes",
                         nodes=["f4"],
                         dependencies=["f2"],
                     ),
                     GroupedNodes(
                         name="f5",
-                        type="node",
+                        type="nodes",
                         nodes=["f5"],
                         dependencies=["f2"],
                     ),
                     GroupedNodes(
                         name="f6",
-                        type="node",
+                        type="nodes",
                         nodes=["f6"],
                         dependencies=["f4"],
                     ),
                     GroupedNodes(
                         name="f7",
-                        type="node",
+                        type="nodes",
                         nodes=["f7"],
                         dependencies=["f2", "f4"],
                     ),
@@ -485,16 +485,37 @@ class TestValidPipeline:
     def test_node_grouping_by_namespace_combined(
         self, request, pipeline_name, expected
     ):
-        """Test that grouped_nodes_by_namespace returns correct GroupedNodes list with name, type and node names and dependencies."""
+        """Test that group_nodes_by returns correct GroupedNodes list with name, type and node names and dependencies."""
         p = request.getfixturevalue(pipeline_name)
-        grouped = p.grouped_nodes_by_namespace
+        grouped = p.group_nodes_by(group_by="namespace")
 
         assert grouped == expected
+
+    def test_node_grouping_by_none(self, pipeline_with_namespace_simple):
+        grouped = pipeline_with_namespace_simple.group_nodes_by(group_by=None)
+
+        expected = [
+            GroupedNodes(
+                name=n.name,
+                type="nodes",
+                nodes=[n.name],
+                dependencies=[
+                    p.name for p in pipeline_with_namespace_simple.node_dependencies[n]
+                ],
+            )
+            for n in pipeline_with_namespace_simple.nodes
+        ]
+
+        assert grouped == expected
+
+    def test_group_by_unsupported_strategy(self, pipeline_with_namespace_simple):
+        with pytest.raises(ValueError, match="Unsupported group_by strategy: unknown"):
+            pipeline_with_namespace_simple.group_nodes_by(group_by="unknown")
 
     def test_node_grouping_by_namespace_nested(self, request):
         """Test that nested namespaces are grouped only on first level."""
         p = request.getfixturevalue("pipeline_with_namespace_nested")
-        grouped = p.grouped_nodes_by_namespace
+        grouped = p.group_nodes_by(group_by="namespace")
 
         assert {g.name for g in grouped} == {"level1_1", "level1_2"}
 

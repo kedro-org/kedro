@@ -1,4 +1,3 @@
-
 tmp/
 # CMake
 cmake-build-debug/
@@ -160,8 +159,7 @@ kedro.db
 .pytest_cache/
 kedro/html
 docs/tmp-build-artifacts
-docs/build
-!docs/pages/build
+!docs/build
 docs/temp
 docs/node_modules
 docs/source/04_user_guide/source/.ipynb

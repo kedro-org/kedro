@@ -8,9 +8,8 @@ import click
 import pytest
 from click.testing import CliRunner
 from omegaconf import OmegaConf
-from pytest import fixture, mark, raises, warns
+from pytest import fixture, mark, raises
 
-from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.cli import (
@@ -26,7 +25,6 @@ from kedro.framework.cli.utils import (
     _clean_pycache,
     find_run_command,
     forward_command,
-    get_pkg_version,
     validate_conf_source,
 )
 from kedro.framework.session import KedroSession
@@ -240,26 +238,6 @@ class TestForwardCommand:
 
 
 class TestCliUtils:
-    def test_get_pkg_version(self, requirements_file):
-        """Test get_pkg_version(), which extracts package version
-        from the provided requirements file."""
-        sa_version = "SQLAlchemy>=1.2.0, <2.0"
-        assert get_pkg_version(requirements_file, "SQLAlchemy") == sa_version
-        assert get_pkg_version(requirements_file, "pandas") == "pandas==0.23.0"
-        assert get_pkg_version(requirements_file, "toposort") == "toposort"
-        with raises(KedroCliError):
-            get_pkg_version(requirements_file, "nonexistent")
-        with raises(KedroCliError):
-            non_existent_file = str(requirements_file) + "-nonexistent"
-            get_pkg_version(non_existent_file, "pandas")
-
-    def test_get_pkg_version_deprecated(self, requirements_file):
-        with warns(
-            KedroDeprecationWarning,
-            match=r"\`get_pkg_version\(\)\` has been deprecated",
-        ):
-            _ = get_pkg_version(requirements_file, "pandas")
-
     def test_clean_pycache(self, tmp_path, mocker):
         """Test `clean_pycache` utility function"""
         source = Path(tmp_path)

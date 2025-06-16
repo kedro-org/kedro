@@ -79,7 +79,7 @@ For example, you can [use hooks to load external credentials](../extend/hooks/co
 
 Alternatively, if you are using config loader as a standalone component, you can override configuration as follows:
 
-```{code-block} python
+```python
 :lineno-start: 10
 :emphasize-lines: 8
 
@@ -193,7 +193,6 @@ my_param: "${globals: nonexistent_global, 23}"
 If there are duplicate keys in the globals files in your base and runtime environments, the values in the runtime environment
 overwrite the values in your base environment.
 
-(runtime-params)=
 ### How to override configuration with runtime parameters with the `OmegaConfigLoader`
 
 Kedro allows you to [specify runtime parameters for the `kedro run` command with the `--params` CLI option](parameters.md#how-to-specify-parameters-at-runtime). These runtime parameters

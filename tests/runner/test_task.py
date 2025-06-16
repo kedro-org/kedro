@@ -44,13 +44,13 @@ class TestTask:
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        session_id = "fake_session_id"
+        run_id = "fake_run_id"
         package_name = mocker.sentinel.package_name
 
         task = Task(
             node=node_,
             catalog=catalog,
-            session_id=session_id,
+            run_id=run_id,
             is_async=is_async,
             parallel=True,
         )
@@ -66,13 +66,13 @@ class TestTask:
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        session_id = "fake_session_id"
+        run_id = "fake_run_id"
         package_name = mocker.sentinel.package_name
 
         task = Task(
             node=node_,
             catalog=catalog,
-            session_id=session_id,
+            run_id=run_id,
             is_async=is_async,
             parallel=True,
         )
@@ -82,14 +82,14 @@ class TestTask:
     def test_raise_task_exception(self, mocker):
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        session_id = "fake_session_id"
+        run_id = "fake_run_id"
 
         with pytest.raises(TaskError, match="No hook_manager provided."):
             task = Task(
                 node=node_,
                 catalog=catalog,
                 is_async=False,
-                session_id=session_id,
+                run_id=run_id,
                 parallel=False,
             )
             task.execute()

@@ -539,8 +539,8 @@ class TestNodeInputOutputNameValidation:
         assert n.inputs == ["namespace.subnamespace.input_dataset"]
         assert n.outputs == ["namespace.subnamespace.output_dataset"]
 
-    def test_invalid_multi_level_namespace(self):
-        """Test that mismatched multi-level namespaces raise a ValueError."""
+    def test_only_top_level_namespace_match(self):
+        """Test that node level namespace specification doesn't throw the error."""
         n = node(
             func=self.dummy_function,
             inputs="namespace.input_dataset",

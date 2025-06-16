@@ -7,7 +7,6 @@
 
 | Submodule                          | Description                                                                 |
 |------------------------------------|-----------------------------------------------------------------------------|
-| [`kedro.framework.cli.catalog`](#kedro.framework.cli.catalog) | A collection of CLI commands for working with Kedro catalog.               |
 | [`kedro.framework.cli.cli`](#kedro.framework.cli.cli)         | `kedro` is a CLI for managing Kedro projects.                               |
 | [`kedro.framework.cli.hooks`](#kedro.framework.cli.hooks)     | Provides primitives to use hooks to extend KedroCLI's behavior.            |
 | [`kedro.framework.cli.jupyter`](#kedro.framework.cli.jupyter) | A collection of helper functions to integrate with Jupyter/IPython.        |

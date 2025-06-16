@@ -250,7 +250,7 @@ class AbstractRunner(ABC):
                 )
                 return True
 
-        # Dataset not in catalog - could be a dataset factory pattern
+        # Dataset not in catalog
         try:
             if output in catalog:
                 return not catalog.exists(output)
@@ -272,10 +272,10 @@ class AbstractRunner(ABC):
         Returns:
             Set of all required nodes including dependencies.
         """
-        required_nodes = set()
-        visited = set()
+        required_nodes: set[Node] = set()
+        visited: set[Node] = set()
 
-        def add_node_with_dependencies(node):
+        def add_node_with_dependencies(node: Node) -> None:
             """Recursively add a node and all its upstream dependencies."""
             if node in visited:
                 return

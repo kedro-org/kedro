@@ -533,6 +533,72 @@ class TestOnlyMissingOutputs:
         assert "Assuming it's missing" in caplog.text
         assert "Running all 1 nodes" in caplog.text
 
+    def test_only_missing_outputs_catalog_contains_exception(self, mocker, caplog):
+        """Test that exceptions when checking if output is in catalog are handled gracefully"""
+        catalog = DataCatalog()
+
+        # Create a simple pipeline
+        test_pipeline = pipeline(
+            [
+                node(identity, "input", "output", name="node1"),
+            ]
+        )
+
+        # Setup catalog
+        catalog["input"] = MemoryDataset("test_data")
+
+        # Mock __contains__ to raise an exception for the output dataset
+        original_contains = catalog.__contains__
+
+        def mock_contains(name):
+            if name == "output":
+                raise Exception("Test exception in __contains__")
+            return original_contains(name)
+
+        catalog.__contains__ = mocker.Mock(side_effect=mock_contains)
+
+        # Mock exists to ensure we don't get the exception from there
+        catalog.exists = mocker.Mock(return_value=False)
+
+        runner = SequentialRunner()
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # Should treat the dataset as missing and run the node
+        assert "Running all 1 nodes" in caplog.text
+
+    def test_only_missing_outputs_circular_dependencies(self, mocker, caplog):
+        """Test handling of circular dependencies to trigger visited node check"""
+        catalog = DataCatalog()
+
+        # Create a pipeline with shared dependencies that could lead to revisiting nodes
+        # A -> B -> D
+        # A -> C -> D
+        # D is missing, so we need A, B, C, and D
+        # When processing dependencies of D, we might visit A twice (via B and C paths)
+        test_pipeline = pipeline(
+            [
+                node(identity, "A", "B", name="nodeAB"),
+                node(identity, "A", "C", name="nodeAC"),
+                node(lambda x, y: x, ["B", "C"], "D", name="nodeD"),
+            ]
+        )
+
+        # Mock exists: D doesn't exist
+        def mock_exists(dataset_name):
+            return dataset_name != "D"
+
+        catalog.exists = mocker.Mock(side_effect=mock_exists)
+        catalog["A"] = MemoryDataset("data_a")
+        catalog["B"] = MemoryDataset()
+        catalog["C"] = MemoryDataset()
+        catalog["D"] = LambdaDataset(load=lambda: None, save=lambda x: None)
+
+        runner = SequentialRunner()
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # All nodes should run since D is missing
+        assert "Running all 3 nodes" in caplog.text
+
 
 class TestSuggestResumeScenario:
     @pytest.mark.parametrize(

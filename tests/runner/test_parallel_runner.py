@@ -47,7 +47,7 @@ class SingleProcessDataset(AbstractDataset):
 class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
@@ -55,7 +55,7 @@ class TestValidParallelRunner:
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run_with_plugin_manager(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ParallelRunner(is_async=is_async).run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -73,7 +73,7 @@ class TestValidParallelRunner:
         assert result["Z"] == ("42", "42", "42")
 
     def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         ParallelRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." in caplog.text
 
@@ -114,7 +114,7 @@ class TestMaxWorkers:
             wraps=ProcessPoolExecutor,
         )
 
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = ParallelRunner(
             max_workers=user_specified_number, is_async=is_async
         ).run(fan_out_fan_in, catalog)
@@ -138,19 +138,19 @@ class TestMaxWorkers:
 class TestInvalidParallelRunner:
     def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise the lambda function."""
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         test_pipeline = pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
     def test_task_dataset_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise datasets marked with `_SINGLE_PROCESS`."""
-        catalog.add("A", SingleProcessDataset())
+        catalog["A"] = SingleProcessDataset()
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
 
     def test_task_exception(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(feed_dict={"A": 42})
+        catalog["A"] = 42
         test_pipeline = pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
             ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
@@ -195,7 +195,7 @@ class TestInvalidParallelRunner:
         """Memory dataset cannot be serialisable because of data it stores."""
         data = return_not_serialisable(None)
         test_pipeline = pipeline([node(return_not_serialisable, "A", "B")])
-        catalog.add_feed_dict(feed_dict={"A": 42})
+        catalog["A"] = 42
         pattern = (
             rf"{data.__class__!s} cannot be serialised. ParallelRunner implicit "
             rf"memory datasets can only be used with serialisable data"
@@ -210,7 +210,7 @@ class TestInvalidParallelRunner:
         """Test the error raised when `futures` variable is empty,
         but `todo_nodes` is not (can barely happen in real life).
         """
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         runner = ParallelRunner(is_async=is_async)
 
         real_node_deps = fan_out_fan_in.node_dependencies

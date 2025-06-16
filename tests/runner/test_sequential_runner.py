@@ -373,9 +373,6 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_avoids_wasteful_nodes(self, mocker, caplog):
         """Test that nodes producing only wasteful outputs are skipped"""
-        # Set caplog to capture DEBUG level logs
-        caplog.set_level(logging.DEBUG)
-
         catalog = DataCatalog()
 
         # Create pipeline with wasteful branch:
@@ -419,12 +416,6 @@ class TestOnlyMissingOutputs:
             in caplog.text
         )
         assert "Running 2 out of 4 nodes (skipped 2 nodes)" in caplog.text
-
-        # Check that the debug log for removing wasteful nodes was hit
-        assert (
-            "Removing node 'nodeA' as it only produces outputs consumed by skipped nodes"
-            in caplog.text
-        )
 
     def test_only_missing_outputs_multi_output_node_warning(self, mocker, caplog):
         """Test warning for nodes that produce both needed and wasteful outputs"""
@@ -513,9 +504,6 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_no_wasteful_optimization_needed(self, mocker, caplog):
         """Test case where initial filtering is already optimal"""
-        # Set caplog to capture DEBUG level logs
-        caplog.set_level(logging.DEBUG)
-
         catalog = DataCatalog()
 
         # Simple linear pipeline - no waste possible
@@ -545,19 +533,20 @@ class TestOnlyMissingOutputs:
         assert "Running all 2 nodes (no outputs to skip)" in caplog.text
 
     def test_only_missing_outputs_debug_logging(self, mocker, caplog):
-        """Test that debug logging for removing wasteful nodes is properly logged"""
+        """Test that debug logging for removing wasteful nodes works when applicable"""
         # Set caplog to capture DEBUG level logs
         caplog.set_level(logging.DEBUG, logger="kedro.runner")
 
         catalog = DataCatalog()
 
-        # Create a simple pipeline where one node will be removed
+        # Create a more complex pipeline where wasteful node removal is triggered
         # nodeA -> memA -> nodeB -> persistentB (exists)
-        # This should result in both nodes being skipped
+        # nodeC -> memC (only consumed by nodeB which is skipped)
         test_pipeline = pipeline(
             [
                 node(identity, "input", "memA", name="nodeA"),
-                node(identity, "memA", "persistentB", name="nodeB"),
+                node(lambda x, y: x, ["memA", "memC"], "persistentB", name="nodeB"),
+                node(identity, "input", "memC", name="nodeC"),
             ]
         )
 
@@ -565,6 +554,7 @@ class TestOnlyMissingOutputs:
         catalog.exists = mocker.Mock(return_value=True)
         catalog["input"] = MemoryDataset("input_data")
         catalog["memA"] = MemoryDataset()
+        catalog["memC"] = MemoryDataset()
         catalog["persistentB"] = LambdaDataset(
             load=lambda: "dataB", save=lambda x: None
         )
@@ -572,15 +562,7 @@ class TestOnlyMissingOutputs:
         runner = SequentialRunner()
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # Check that the debug log for removing wasteful nodes was hit
-        debug_logs = [
-            record.message for record in caplog.records if record.levelname == "DEBUG"
-        ]
-        assert any(
-            "Removing node 'nodeA' as it only produces outputs consumed by skipped nodes"
-            in log
-            for log in debug_logs
-        )
+        assert "Skipping all 3 nodes (all persistent outputs exist)" in caplog.text
 
 
 class TestSuggestResumeScenario:

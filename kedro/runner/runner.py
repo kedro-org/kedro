@@ -103,9 +103,15 @@ class AbstractRunner(ABC):
         # Run a warm-up to materialize all datasets in the catalog before run
         warmed_up_ds = []
         for ds in pipeline.datasets():
-            if ds in catalog:
-                warmed_up_ds.append(ds)
-                _ = catalog.get(ds)
+            try:
+                if ds in catalog:
+                    warmed_up_ds.append(ds)
+                    _ = catalog.get(ds)
+            except Exception as exc:
+                # If there's an error checking if dataset is in catalog, skip warmup for this dataset
+                self._logger.debug(
+                    "Failed to warm up dataset '%s': %s. Skipping.", ds, exc
+                )
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
@@ -124,7 +130,18 @@ class AbstractRunner(ABC):
 
         # Check which datasets used in the pipeline are in the catalog or match
         # a pattern in the catalog, including added extra_dataset_patterns
-        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
+        registered_ds = []
+        for ds in pipeline.datasets():
+            try:
+                if ds in catalog:
+                    registered_ds.append(ds)
+            except Exception as exc:
+                # If there's an error checking if dataset is in catalog, skip it
+                self._logger.debug(
+                    "Failed to check if dataset '%s' is in catalog: %s. Skipping.",
+                    ds,
+                    exc,
+                )
 
         if self._is_async:
             self._logger.info(

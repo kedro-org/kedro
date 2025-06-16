@@ -535,60 +535,55 @@ class TestOnlyMissingOutputs:
 
     def test_only_missing_outputs_catalog_contains_exception(self, mocker, caplog):
         """Test that exceptions when checking if output is in catalog are handled gracefully"""
-        catalog = DataCatalog()
 
-        # Create a simple pipeline
-        test_pipeline = pipeline(
-            [
-                node(identity, "input", "output", name="node1"),
-            ]
-        )
+        # Create a DataCatalog subclass that raises an exception in __contains__
+        class ExceptionCatalog(DataCatalog):
+            def __contains__(self, dataset_name):
+                if dataset_name == "output":
+                    raise KeyError("Simulated catalog error")
+                return super().__contains__(dataset_name)
 
-        # Setup catalog
+        catalog = ExceptionCatalog()
         catalog["input"] = MemoryDataset("test_data")
 
-        # Mock __contains__ to raise an exception for the output dataset
-        original_contains = catalog.__contains__
-
-        def mock_contains(name):
-            if name == "output":
-                raise Exception("Test exception in __contains__")
-            return original_contains(name)
-
-        catalog.__contains__ = mocker.Mock(side_effect=mock_contains)
-
-        # Mock exists to ensure we don't get the exception from there
-        catalog.exists = mocker.Mock(return_value=False)
+        # Create a simple pipeline
+        test_pipeline = pipeline([node(identity, "input", "output", name="node1")])
 
         runner = SequentialRunner()
-        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+        result = runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
         # Should treat the dataset as missing and run the node
-        assert "Running all 1 nodes" in caplog.text
+        assert "output" in result
+        assert result["output"] == "test_data"
 
     def test_only_missing_outputs_circular_dependencies(self, mocker, caplog):
         """Test handling of circular dependencies to trigger visited node check"""
         catalog = DataCatalog()
 
-        # Create a pipeline with shared dependencies that could lead to revisiting nodes
-        # A -> B -> D
-        # A -> C -> D
-        # D is missing, so we need A, B, C, and D
-        # When processing dependencies of D, we might visit A twice (via B and C paths)
+        # Create a diamond dependency that will cause shared_node to be visited twice:
+        # shared_node -> shared_output
+        # nodeB: shared_output -> B
+        # nodeC: shared_output -> C
+        # nodeD: B, C -> D (missing)
+        #
+        # When tracing D's dependencies, shared_node will be reached via both B and C
         test_pipeline = pipeline(
             [
-                node(identity, "A", "B", name="nodeAB"),
-                node(identity, "A", "C", name="nodeAC"),
-                node(lambda x, y: x, ["B", "C"], "D", name="nodeD"),
+                node(lambda: "shared_data", None, "shared_output", name="shared_node"),
+                node(lambda x: f"b_{x}", "shared_output", "B", name="nodeB"),
+                node(lambda x: f"c_{x}", "shared_output", "C", name="nodeC"),
+                node(lambda b, c: f"{b}+{c}", ["B", "C"], "D", name="nodeD"),
             ]
         )
 
-        # Mock exists: D doesn't exist
+        # Mock exists: only D doesn't exist
         def mock_exists(dataset_name):
             return dataset_name != "D"
 
         catalog.exists = mocker.Mock(side_effect=mock_exists)
-        catalog["A"] = MemoryDataset("data_a")
+
+        # Set up all datasets
+        catalog["shared_output"] = MemoryDataset()
         catalog["B"] = MemoryDataset()
         catalog["C"] = MemoryDataset()
         catalog["D"] = LambdaDataset(load=lambda: None, save=lambda x: None)
@@ -596,8 +591,8 @@ class TestOnlyMissingOutputs:
         runner = SequentialRunner()
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # All nodes should run since D is missing
-        assert "Running all 3 nodes" in caplog.text
+        # All 4 nodes should run since D is missing
+        assert "Running all 4 nodes" in caplog.text
 
 
 class TestSuggestResumeScenario:

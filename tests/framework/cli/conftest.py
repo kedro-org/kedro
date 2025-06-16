@@ -17,7 +17,6 @@ from click.testing import CliRunner
 from pytest import fixture
 
 from kedro import __version__ as kedro_version
-from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.cli import cli
 from kedro.framework.cli.jupyter import jupyter_cli
 from kedro.framework.cli.pipeline import pipeline_cli
@@ -103,7 +102,6 @@ def fake_kedro_cli():
         sources=[
             cli,
             create_cli,
-            catalog_cli,
             jupyter_cli,
             pipeline_cli,
             project_group,

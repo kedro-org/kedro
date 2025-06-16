@@ -600,34 +600,16 @@ class TestOnlyMissingOutputs:
         catalog = DataCatalog()
         catalog["input"] = MemoryDataset("test_data")
 
-        # Track when we're inside _is_output_missing
-        in_is_output_missing = False
-
         # Original __contains__ method
         original_contains = catalog.__contains__
 
         def mock_contains(dataset_name):
-            # Only raise exception for "output" when we're in _is_output_missing
-            if dataset_name == "output" and in_is_output_missing:
-                raise RuntimeError("Error in catalog contains check")
+            # When checking "output", raise an exception to test exception handling
+            if dataset_name == "output":
+                raise KeyError("Simulated catalog error")
             return original_contains(dataset_name)
 
         catalog.__contains__ = mock_contains
-
-        # Patch _is_output_missing to set our flag
-        original_method = SequentialRunner._is_output_missing
-
-        def wrapped_is_output_missing(self, output, cat):
-            nonlocal in_is_output_missing
-            in_is_output_missing = True
-            try:
-                return original_method(self, output, cat)
-            finally:
-                in_is_output_missing = False
-
-        mocker.patch.object(
-            SequentialRunner, "_is_output_missing", wrapped_is_output_missing
-        )
 
         # Create pipeline
         test_pipeline = pipeline([node(identity, "input", "output", name="node1")])
@@ -636,8 +618,12 @@ class TestOnlyMissingOutputs:
         result = runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
         # Should treat the dataset as missing and run the node
+        # The exception should be caught and the output should be treated as missing
         assert "output" in result
         assert result["output"] == "test_data"
+
+        # The node should run since the output is treated as missing due to the exception
+        assert "Running all 1 nodes" in caplog.text
 
 
 class TestSuggestResumeScenario:

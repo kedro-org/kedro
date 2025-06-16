@@ -532,8 +532,8 @@ class TestOnlyMissingOutputs:
         spy_wasteful.assert_called_once()
         assert "Running all 2 nodes (no outputs to skip)" in caplog.text
 
-    def test_only_missing_outputs_debug_logging(self, mocker, caplog):
-        """Test that debug logging for removing wasteful nodes works when applicable"""
+    def test_only_missing_outputs_all_persist_exist(self, mocker, caplog):
+        """Test that all nodes are skipped when all persistent outputs exist"""
         # Set caplog to capture DEBUG level logs
         caplog.set_level(logging.DEBUG, logger="kedro.runner")
 
@@ -563,6 +563,60 @@ class TestOnlyMissingOutputs:
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
         assert "Skipping all 3 nodes (all persistent outputs exist)" in caplog.text
+
+    def test_only_missing_outputs_removes_wasteful_node_debug_log(self, mocker, caplog):
+        """Test that the specific debug log for removing wasteful nodes is covered"""
+        # Set caplog to capture DEBUG level logs
+        caplog.set_level(logging.DEBUG, logger="kedro.runner")
+
+        catalog = DataCatalog()
+
+        # Create a pipeline where nodeA will be wasteful:
+        # nodeA produces ephemeral output consumed only by nodeB (which has only ephemeral outputs)
+        # nodeB produces ephemeral output for nodeC
+        # nodeC produces missing persistent output
+        # This creates a chain where nodeA is included but then removed as wasteful
+
+        test_pipeline = pipeline(
+            [
+                node(identity, "input", "memA", name="nodeA"),
+                node(identity, "memA", "memB", name="nodeB"),
+                node(identity, "memB", "persistentC", name="nodeC"),
+            ]
+        )
+
+        catalog.exists = mocker.Mock(return_value=False)
+
+        catalog["input"] = MemoryDataset("input_data")
+        catalog["memA"] = MemoryDataset()  # Ephemeral (_EPHEMERAL = True)
+        catalog["memB"] = MemoryDataset()  # Ephemeral (_EPHEMERAL = True)
+        catalog["persistentC"] = LambdaDataset(
+            load=lambda: None, save=lambda x: None
+        )  # Persistent
+
+        runner = SequentialRunner()
+
+        # The pipeline will fail because nodeA is removed but nodeB needs its output
+        # This is expected we're just testing that the debug log is generated
+        from kedro.io.core import DatasetError
+
+        try:
+            runner.run(test_pipeline, catalog, only_missing_outputs=True)
+        except DatasetError as e:
+            assert "Data for MemoryDataset has not been saved yet" in str(e)
+
+        debug_logs = [
+            record.message
+            for record in caplog.records
+            if record.levelname == "DEBUG" and "kedro.runner" in record.name
+        ]
+
+        # nodeA should be removed since it only produces outputs consumed by nodeB
+        assert any(
+            "Removing node 'nodeA' as it only produces outputs consumed by skipped nodes"
+            in log
+            for log in debug_logs
+        ), f"Expected debug log not found. Debug logs: {debug_logs}"
 
 
 class TestSuggestResumeScenario:

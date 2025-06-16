@@ -49,9 +49,8 @@ Tools
 4) Docs: A Sphinx documentation setup
 5) Data Folder: A folder structure for data management
 6) PySpark: Configuration for working with PySpark
-7) Kedro-Viz: Kedro's native visualisation tool
 
-Which tools would you like to include in your project? [1-7/1,3/all/none]:
+Which tools would you like to include in your project? [1-6/1,3/all/none]:
  [none]:
 ```
 

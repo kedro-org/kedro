@@ -13,7 +13,7 @@ You will need the following:
 
 - A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas-viz` starter. If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
 - The MLflow client installed into the same virtual environment. For the purposes of this tutorial,
-  you can use MLflow {external+mlflow:doc}`in its simplest configuration <tracking>`.
+  you can use [MLflow](https://mlflow.org/docs/latest/)`in its simplest configuration <tracking>`.
 
 To set yourself up, create a new Kedro project:
 
@@ -149,7 +149,7 @@ you can modify it as follows:
 ```
 
 The `kedro-mlflow` Hook will log the model as part of the run
-in {external+mlflow:doc}`the standard MLflow Model format <models>`.
+in [MLflow](https://mlflow.org/docs/latest/)`the standard MLflow Model format <models>`.
 
 If you also want to _register_ it
 (hence store it in the MLflow Model Registry)

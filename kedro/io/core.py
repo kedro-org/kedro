@@ -228,7 +228,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         }
 
         if self._init_args:  # type: ignore[attr-defined]
-            self._init_args.pop("self", None)  # type: ignore[attr-defined]
             return_config.update(self._init_args)  # type: ignore[attr-defined]
 
         if type(self).__name__ == "CachedDataset":

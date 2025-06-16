@@ -67,12 +67,11 @@ class AbstractRunner(ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(self.__module__)
 
-    def run(  # noqa: PLR0913
+    def run(
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
         run_id: str | None = None,
         only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
@@ -83,7 +82,6 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
             run_id: The id of the run.
             only_missing_outputs: Run only nodes with missing outputs.
 

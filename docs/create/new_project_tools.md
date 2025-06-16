@@ -77,8 +77,6 @@ A list of available tools can also be accessed by running `kedro new --help`
                       6) PySpark: Provides set up configuration for working
                       with PySpark
 
-                      7) Kedro Viz: Provides Kedro's native visualisation tool
-
                       Example usage:
 
                       kedro new --tools=lint,test,log,docs,data,pyspark,viz
@@ -102,8 +100,8 @@ To specify your desired tools you must provide them by name as a comma separated
 ### Example code
 In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. If you select `yes`, the example code included depends upon your previous choice of tools, as follows:
 
-* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark or Kedro Viz.
-* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools, unless you also selected Kedro Viz.
+* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark
+* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools.
 
 Each starter example is tailored to demonstrate the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
 

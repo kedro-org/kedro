@@ -415,7 +415,6 @@ class TestKedroCLI:
         assert kedro_cli.project_groups == [project_commands]
         # Assert that the lazy commands are listed properly
         assert kedro_cli.project_groups[0].list_commands(None) == [
-            "catalog",
             "ipython",
             "jupyter",
             "package",

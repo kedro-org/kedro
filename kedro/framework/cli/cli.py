@@ -92,7 +92,6 @@ def info() -> None:
     name="Kedro",
     lazy_subcommands={
         "registry": "kedro.framework.cli.registry.registry",
-        "catalog": "kedro.framework.cli.catalog.catalog",
         "ipython": "kedro.framework.cli.project.ipython",
         "run": "kedro.framework.cli.project.run",
         "package": "kedro.framework.cli.project.package",

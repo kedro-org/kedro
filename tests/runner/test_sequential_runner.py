@@ -371,93 +371,6 @@ class TestOnlyMissingOutputs:
         # Should not call the filter method when only_missing_outputs=False
         spy_filter.assert_not_called()
 
-    def test_only_missing_outputs_avoids_wasteful_nodes(self, mocker, caplog):
-        """Test that nodes producing only wasteful outputs are skipped"""
-        catalog = DataCatalog()
-
-        # Create pipeline with wasteful branch:
-        # input -> nodeA -> memA -> nodeB -> persistentA (exists)
-        # input -> nodeC -> memC -> nodeD -> persistentC (missing)
-        test_pipeline = pipeline(
-            [
-                node(identity, "input", "memA", name="nodeA"),
-                node(identity, "memA", "persistentA", name="nodeB"),
-                node(identity, "input", "memC", name="nodeC"),
-                node(identity, "memC", "persistentC", name="nodeD"),
-            ]
-        )
-
-        # Mock exists: persistentA exists, persistentC missing
-        def mock_exists(dataset_name):
-            return dataset_name == "persistentA"
-
-        catalog.exists = mocker.Mock(side_effect=mock_exists)
-        catalog["input"] = MemoryDataset("input_data")
-        catalog["memA"] = MemoryDataset()
-        catalog["memC"] = MemoryDataset()
-        catalog["persistentA"] = LambdaDataset(
-            load=lambda: "dataA", save=lambda x: None
-        )
-        catalog["persistentC"] = LambdaDataset(load=lambda: None, save=lambda x: None)
-
-        runner = SequentialRunner()
-        spy_filter = mocker.spy(runner, "_filter_pipeline_for_missing_outputs")
-        spy_wasteful = mocker.spy(runner, "_remove_wasteful_nodes")
-
-        runner.run(test_pipeline, catalog, only_missing_outputs=True)
-
-        # Should call both filter methods
-        spy_filter.assert_called_once()
-        spy_wasteful.assert_called_once()
-
-        # Should skip nodeA and nodeB (wasteful branch) but run nodeC and nodeD
-        assert (
-            "Skipping 2 nodes with existing persistent outputs: nodeA, nodeB"
-            in caplog.text
-        )
-        assert "Running 2 out of 4 nodes (skipped 2 nodes)" in caplog.text
-
-    def test_only_missing_outputs_multi_output_node_warning(self, mocker, caplog):
-        """Test warning for nodes that produce both needed and wasteful outputs"""
-
-        def multi_output_func(x):
-            return x, x  # Produces two identical outputs
-
-        catalog = DataCatalog()
-
-        # Create pipeline where one node produces multiple outputs:
-        # input -> multiNode -> (memA, memB)
-        # memA -> nodeA -> persistentA (exists)
-        # memB -> nodeB -> persistentB (missing)
-        test_pipeline = pipeline(
-            [
-                node(multi_output_func, "input", ["memA", "memB"], name="multiNode"),
-                node(identity, "memA", "persistentA", name="nodeA"),
-                node(identity, "memB", "persistentB", name="nodeB"),
-            ]
-        )
-
-        # Mock exists: persistentA exists, persistentB missing
-        def mock_exists(dataset_name):
-            return dataset_name == "persistentA"
-
-        catalog.exists = mocker.Mock(side_effect=mock_exists)
-        catalog["input"] = MemoryDataset("input_data")
-        catalog["memA"] = MemoryDataset()
-        catalog["memB"] = MemoryDataset()
-        catalog["persistentA"] = LambdaDataset(
-            load=lambda: "dataA", save=lambda x: None
-        )
-        catalog["persistentB"] = LambdaDataset(load=lambda: None, save=lambda x: None)
-
-        runner = SequentialRunner()
-        runner.run(test_pipeline, catalog, only_missing_outputs=True)
-
-        # Should warn about the wasteful output but still run the node
-        assert "Node 'multiNode' produces outputs ['memA']" in caplog.text
-        assert "consumed by skipped nodes" in caplog.text
-        assert "must run to produce other needed outputs" in caplog.text
-
     def test_only_missing_outputs_complex_topology(self, mocker, caplog):
         """Test complex pipeline topology with multiple branches and shared nodes"""
         catalog = DataCatalog()
@@ -524,12 +437,10 @@ class TestOnlyMissingOutputs:
         catalog["persistent"] = LambdaDataset(load=lambda: None, save=lambda x: None)
 
         runner = SequentialRunner()
-        spy_wasteful = mocker.spy(runner, "_remove_wasteful_nodes")
 
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # Should call wasteful removal but no nodes should be removed
-        spy_wasteful.assert_called_once()
+        # All nodes should run since persistent output is missing
         assert "Running all 2 nodes (no outputs to skip)" in caplog.text
 
     def test_only_missing_outputs_all_persist_exist(self, mocker, caplog):
@@ -539,7 +450,7 @@ class TestOnlyMissingOutputs:
 
         catalog = DataCatalog()
 
-        # Create a more complex pipeline where wasteful node removal is triggered
+        # Create a more complex pipeline where node removal is triggered
         # nodeA -> memA -> nodeB -> persistentB (exists)
         # nodeC -> memC (only consumed by nodeB which is skipped)
         test_pipeline = pipeline(
@@ -564,59 +475,63 @@ class TestOnlyMissingOutputs:
 
         assert "Skipping all 3 nodes (all persistent outputs exist)" in caplog.text
 
-    def test_only_missing_outputs_removes_wasteful_node_debug_log(self, mocker, caplog):
-        """Test that the specific debug log for removing wasteful nodes is covered"""
-        # Set caplog to capture DEBUG level logs
-        caplog.set_level(logging.DEBUG, logger="kedro.runner")
-
+    def test_only_missing_outputs_with_dataset_factory(self, mocker, caplog):
+        """Test that dataset factory patterns are handled correctly"""
         catalog = DataCatalog()
 
-        # Create a pipeline where nodeA will be wasteful:
-        # nodeA produces ephemeral output consumed only by nodeB (which has only ephemeral outputs)
-        # nodeB produces ephemeral output for nodeC
-        # nodeC produces missing persistent output
-        # This creates a chain where nodeA is included but then removed as wasteful
-
+        # Create a pipeline with dataset factory pattern
         test_pipeline = pipeline(
             [
-                node(identity, "input", "memA", name="nodeA"),
-                node(identity, "memA", "memB", name="nodeB"),
-                node(identity, "memB", "persistentC", name="nodeC"),
+                node(identity, "input", "output_{param}", name="node1"),
             ]
         )
 
+        # Setup catalog with input dataset
+        catalog["input"] = MemoryDataset("test_data")
+
+        # Mock the catalog to simulate dataset factory behavior
+        # When checking if 'output_{param}' is in catalog, return True (factory will handle it)
+        original_contains = catalog.__contains__
+
+        def mock_contains(name):
+            if name == "output_{param}":
+                return True
+            return original_contains(name)
+
+        catalog.__contains__ = mocker.Mock(side_effect=mock_contains)
         catalog.exists = mocker.Mock(return_value=False)
 
-        catalog["input"] = MemoryDataset("input_data")
-        catalog["memA"] = MemoryDataset()  # Ephemeral (_EPHEMERAL = True)
-        catalog["memB"] = MemoryDataset()  # Ephemeral (_EPHEMERAL = True)
-        catalog["persistentC"] = LambdaDataset(
-            load=lambda: None, save=lambda x: None
-        )  # Persistent
+        runner = SequentialRunner()
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # Should run the node since output doesn't exist
+        assert "Running all 1 nodes" in caplog.text
+
+    def test_only_missing_outputs_exception_handling(self, mocker, caplog):
+        """Test that exceptions during existence check are handled gracefully"""
+        catalog = DataCatalog()
+
+        # Create a simple pipeline
+        test_pipeline = pipeline(
+            [
+                node(identity, "input", "output", name="node1"),
+            ]
+        )
+
+        # Setup catalog
+        catalog["input"] = MemoryDataset("test_data")
+        catalog["output"] = LambdaDataset(load=lambda: None, save=lambda x: None)
+
+        # Mock exists to raise an exception
+        catalog.exists = mocker.Mock(side_effect=Exception("Test exception"))
 
         runner = SequentialRunner()
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # The pipeline will fail because nodeA is removed but nodeB needs its output
-        # This is expected we're just testing that the debug log is generated
-        from kedro.io.core import DatasetError
-
-        try:
-            runner.run(test_pipeline, catalog, only_missing_outputs=True)
-        except DatasetError as e:
-            assert "Data for MemoryDataset has not been saved yet" in str(e)
-
-        debug_logs = [
-            record.message
-            for record in caplog.records
-            if record.levelname == "DEBUG" and "kedro.runner" in record.name
-        ]
-
-        # nodeA should be removed since it only produces outputs consumed by nodeB
-        assert any(
-            "Removing node 'nodeA' as it only produces outputs consumed by skipped nodes"
-            in log
-            for log in debug_logs
-        ), f"Expected debug log not found. Debug logs: {debug_logs}"
+        # Should treat the dataset as missing and run the node
+        assert "Could not check existence of output" in caplog.text
+        assert "Assuming it's missing" in caplog.text
+        assert "Running all 1 nodes" in caplog.text
 
 
 class TestSuggestResumeScenario:

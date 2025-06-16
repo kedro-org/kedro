@@ -231,7 +231,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         }
 
         if self._init_args:  # type: ignore[attr-defined]
-            self._init_args.pop("self", None)  # type: ignore[attr-defined]
             return_config.update(self._init_args)  # type: ignore[attr-defined]
 
         if type(self).__name__ == "CachedDataset":
@@ -358,6 +357,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             init_func(self, *args, **kwargs)
             # Capture and save the arguments passed to the original __init__
             self._init_args = getcallargs(init_func, self, *args, **kwargs)
+            self._init_args.pop("self", None)  # removed to prevent recursion
 
         # Replace the subclass's __init__ with the new_init
         # A hook for subclasses to capture initialization arguments and save them

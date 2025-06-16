@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import pprint
 import shutil
@@ -11,6 +12,7 @@ from typing import Any
 import fsspec
 import pandas as pd
 import pytest
+from kedro_datasets.pandas import CSVDataset
 
 from kedro.io.core import (
     AbstractDataset,
@@ -762,3 +764,24 @@ class TestLegacyLoadAndSave:
         Path(my_legacy_dataset._filepath.as_posix()).unlink()
         my_legacy_versioned_dataset.save(dummy_data)
         assert my_legacy_versioned_dataset.exists()
+
+
+class CustomCSVDataSet(CSVDataset):
+    """Dataset that exposes __dict__, reproducing past recursion issue if 'self' is in _init_args."""
+
+    def _describe(self) -> dict[str, Any]:
+        return self.__dict__  # unsafe if _init_args contains self
+
+
+def test_no_self_in_init_args_allows_safe_describe():
+    dataset = CustomCSVDataSet(filepath="some/path.csv", save_args={"index": False})
+
+    # If 'self' is wrongly included, this will cause RecursionError
+    description = dataset._describe()
+
+    # force deeper inspection to simulate real-world issues
+    json.dumps(description, default=str)
+
+    assert isinstance(description, dict)
+    assert "_init_args" in description
+    assert "self" not in description["_init_args"]

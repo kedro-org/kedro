@@ -77,7 +77,7 @@ class ThreadRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """The method implementing threaded pipeline running.
 
@@ -85,7 +85,7 @@ class ThreadRunner(AbstractRunner):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -95,5 +95,5 @@ class ThreadRunner(AbstractRunner):
             pipeline=pipeline,
             catalog=catalog,
             hook_manager=hook_manager,
-            session_id=session_id,
+            run_id=run_id,
         )

@@ -185,7 +185,7 @@ class TestPipelineUnregistered:
         new_pipeline = _from_missing(branched_pipeline, catalog, hook_manager)
         assert _pipelines_equal(branched_pipeline, new_pipeline)
 
-    def test_ignore_unneccessary_unreg(self, branched_pipeline, hook_manager):
+    def test_ignore_unnecessary_unreg(self, branched_pipeline, hook_manager):
         """Unregistered (node-to-node) data sources should not trigger
         reruns, unless necessary to recreate registered data sources.
         """

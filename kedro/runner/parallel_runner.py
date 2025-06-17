@@ -122,7 +122,7 @@ class ParallelRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: SharedMemoryCatalogProtocol,  # type: ignore[override]
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """The method implementing parallel pipeline running.
 
@@ -130,7 +130,7 @@ class ParallelRunner(AbstractRunner):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
 
         Raises:
             AttributeError: When the provided pipeline is not suitable for
@@ -149,5 +149,5 @@ class ParallelRunner(AbstractRunner):
         super()._run(
             pipeline=pipeline,
             catalog=catalog,
-            session_id=session_id,
+            run_id=run_id,
         )

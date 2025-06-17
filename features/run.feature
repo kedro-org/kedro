@@ -68,3 +68,11 @@ Feature: Run Project
     When I execute the kedro command "run"
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run
+
+  Scenario: Run kedro run without rich installed
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter "default"
+    And I uninstall the rich module in the virtual environment
+    When I execute the kedro command "run"
+    Then I should get a successful exit code
+    And the logs should show that 4 nodes were run

@@ -37,9 +37,8 @@ Tools
 4) Docs: A Sphinx documentation setup
 5) Data Folder: A folder structure for data management
 6) PySpark: Configuration for working with PySpark
-7) Kedro-Viz: Kedro's native visualisation tool
 
-Which tools would you like to include in your project? [1-7/1,3/all/none]:
+Which tools would you like to include in your project? [1-6/1,3/all/none]:
  (none):
 ```
 
@@ -58,10 +57,8 @@ Would you like to include an example pipeline? :
 
 If you say `yes`, the example code included depends upon your previous choice of tools, as follows:
 
-* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark or Kedro Viz.
-* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools, unless you also selected Kedro Viz.
-* [Kedro Viz spaceflights starter (`spaceflights-pandas-viz`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): Added if Kedro Viz was one of your tools choices, unless you also selected PySpark.
-* [Full feature spaceflights starter (`spaceflights-pyspark-viz`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz): Added if you selected all available tools, including PySpark and Kedro Viz.
+* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark.
+* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools.
 
 Each starter example is tailored to demonstrate the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
 
@@ -94,7 +91,7 @@ yes ⮐
 You can also enter this in a single line as follows:
 
 ```bash
-uvx kedro new --name=spaceflights --tools=viz --example=y
+uvx kedro new --name=spaceflights --tools=lint --example=y
 ```
 
 3. To create a project, called `testproject` containing linting, documentation, and PySpark, but no example code:
@@ -138,7 +135,7 @@ kedro run
 
 ## Visualise a Kedro project
 
-This section swiftly introduces project visualisation using Kedro-Viz. See the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
+This section swiftly introduces project visualisation using Kedro-Viz. See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/latest/) for more detail.
 
 The Kedro-Viz package needs to be installed into your virtual environment separately as it is not part of the standard Kedro installation:
 

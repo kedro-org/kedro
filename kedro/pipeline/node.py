@@ -9,6 +9,7 @@ import hashlib
 import inspect
 import logging
 import re
+import warnings
 from collections import Counter
 from dataclasses import dataclass, field
 from functools import cached_property, partial
@@ -622,11 +623,11 @@ def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
         if not namespace or not name_namespace.startswith(
             namespace.split(".")[0]
         ):  # match with top level namespace
-            raise ValueError(
-                _node_error_message(
-                    f"Invalid dataset name '{name}': '.' characters not allowed "
-                    f"in the node's input or output parameters."
-                )
+            warnings.warn(
+                f"Dataset name '{name}' contains '.' characters, which is "
+                f"not recommended as the dot notation is reserved for automatic "
+                f"namespacing in Kedro. Consider using a different naming convention.",
+                UserWarning,
             )
 
 

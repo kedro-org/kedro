@@ -638,6 +638,43 @@ class TestOnlyMissingOutputs:
         # Should run because persistent output is missing
         assert "Running all 1 nodes" in caplog.text
 
+    def test_is_persistent_and_missing_catalog_get_exception(self, mocker, caplog):
+        """Test _is_persistent_and_missing when catalog.get() raises an exception (lines 254-255)"""
+        import logging
+
+        runner = SequentialRunner()
+
+        # Set log level to DEBUG on the runner's logger
+        # The logger name is based on the module of the runner instance
+        logger_name = runner.__module__
+        caplog.set_level(logging.DEBUG, logger=logger_name)
+
+        # Create a mock catalog
+        catalog = mocker.Mock(spec=DataCatalog)
+
+        # Mock the _datasets attribute to return an empty dict (dataset not in _datasets)
+        catalog._datasets = {}
+
+        # Make the dataset "in" catalog via pattern matching
+        catalog.__contains__ = mocker.Mock(return_value=True)
+
+        # Make catalog.get() raise an exception
+        catalog.get = mocker.Mock(side_effect=Exception("Failed to create dataset"))
+
+        # Mock catalog.exists() to return False (dataset doesn't exist)
+        catalog.exists = mocker.Mock(return_value=False)
+
+        # This should trigger the exception handling and debug log at lines 254-255
+        result = runner._is_persistent_and_missing("factory_output", catalog)
+
+        # Should return True (not ephemeral and doesn't exist)
+        assert result is True
+
+        # Check that debug message was logged
+        assert (
+            "Could not get dataset factory_output to check if ephemeral" in caplog.text
+        )
+
     def test_node_has_missing_output(self, mocker):
         """Test _node_has_missing_output method (lines 272-275)"""
         runner = SequentialRunner()

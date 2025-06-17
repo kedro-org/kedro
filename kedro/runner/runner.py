@@ -249,7 +249,8 @@ class AbstractRunner(ABC):
         is_ephemeral = False
         try:
             ds = catalog.get(output)
-            is_ephemeral = hasattr(ds, "_EPHEMERAL") and ds._EPHEMERAL
+            if ds is not None:
+                is_ephemeral = hasattr(ds, "_EPHEMERAL") and ds._EPHEMERAL
         except Exception as e:
             self._logger.debug(
                 f"Could not get dataset {output} to check if ephemeral: {e}"

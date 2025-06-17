@@ -68,6 +68,7 @@ class AbstractRunner(ABC):
         catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
         run_id: str | None = None,
+        only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -77,6 +78,7 @@ class AbstractRunner(ABC):
             catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             run_id: The id of the run.
+            only_missing_outputs: Run only nodes with missing outputs.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
@@ -85,6 +87,10 @@ class AbstractRunner(ABC):
             Dictionary with pipeline outputs, where keys are dataset names
             and values are dataset object.
         """
+        # Apply missing outputs filtering if requested
+        if only_missing_outputs:
+            pipeline = self._filter_pipeline_for_missing_outputs(pipeline, catalog)
+
         # Run a warm-up to materialize all datasets in the catalog before run
         for ds in pipeline.datasets():
             _ = catalog.get(ds, fallback_to_runtime_pattern=True)
@@ -109,6 +115,96 @@ class AbstractRunner(ABC):
         run_output = {ds_name: catalog[ds_name] for ds_name in pipeline.outputs()}
 
         return run_output
+
+    def _filter_pipeline_for_missing_outputs(
+        self, pipeline: Pipeline, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> Pipeline:
+        """Filter pipeline to only include nodes needed to produce missing persistent outputs."""
+        original_node_count = len(pipeline.nodes)
+
+        # First identify which persistent outputs are missing
+        missing_persistent_outputs = set()
+
+        for node in pipeline.nodes:
+            for output in node.outputs:
+                # Check if it's a persistent dataset that's missing
+                if self._is_persistent_and_missing(output, catalog):
+                    missing_persistent_outputs.add(output)
+
+        # If no persistent outputs are missing, skip everything
+        if not missing_persistent_outputs:
+            self._logger.info(
+                f"Skipping all {original_node_count} nodes (all persistent outputs exist)"
+            )
+            return Pipeline([])
+
+        # Use Kedro's built-in method to get only nodes needed for missing outputs
+        # This automatically handles dependencies and excludes wasteful nodes
+        required_pipeline = pipeline.to_outputs(*missing_persistent_outputs)
+
+        # Log the results
+        skipped_count = original_node_count - len(required_pipeline.nodes)
+        if skipped_count > 0:
+            skipped_names = {n.name for n in pipeline.nodes} - {
+                n.name for n in required_pipeline.nodes
+            }
+            self._logger.info(
+                f"Skipping {skipped_count} nodes with existing persistent outputs: "
+                f"{', '.join(sorted(skipped_names))}"
+            )
+            self._logger.info(
+                f"Running {len(required_pipeline.nodes)} out of {original_node_count} nodes "
+                f"(skipped {skipped_count} nodes)"
+            )
+        else:
+            self._logger.info(
+                f"Running all {original_node_count} nodes (no outputs to skip)"
+            )
+
+        return required_pipeline
+
+    def _is_persistent_and_missing(self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol) -> bool:
+        """Check if an output is a persistent dataset that doesn't exist.
+
+        Args:
+            output: The output dataset name.
+            catalog: The data catalogue to check.
+
+        Returns:
+            True if the output is persistent and missing.
+        """
+        # First check if it's explicitly in the catalog
+        try:
+            dataset = catalog.get(output)
+        except Exception as e:
+            # If materialization fails (e.g., bad config), we cannot know
+            # its properties. The safest "fail fast" behavior is to let
+            # the exception propagate.
+            self._logger.error(
+                f"Failed to instantiate dataset '{output}' to check its persistence. "
+                f"Please check your catalog configuration. Error: {e}"
+            )
+            raise
+
+        if dataset is not None:
+            # It's explicitly in the catalog
+            is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+            if is_ephemeral:
+                return False
+
+            # It's persistent - check existence
+            return not catalog.exists(output)
+
+        if output not in catalog:
+            # Not in catalog and no factory - will be MemoryDataset (ephemeral)
+            return False
+
+        # Matches a factory pattern - check if it would be ephemeral
+        ds = catalog.get(output)
+        is_ephemeral = ds is not None and hasattr(ds, "_EPHEMERAL") and ds._EPHEMERAL
+
+        # Return based on ephemeral status and existence
+        return False if is_ephemeral else not catalog.exists(output)
 
     def run_only_missing(
         self,

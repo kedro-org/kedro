@@ -594,36 +594,53 @@ class TestOnlyMissingOutputs:
         # All 4 nodes should run since D is missing
         assert "Running all 4 nodes" in caplog.text
 
-    def test_only_missing_outputs_exception_in_is_output_missing(self, mocker, caplog):
-        """Test exception in catalog.__contains__ within _is_output_missing method"""
+    def test_only_missing_outputs_factory_pattern_exists(self, mocker):
+        """Test the factory pattern path in _is_output_missing for coverage"""
+        from kedro.io.catalog_config_resolver import CatalogConfigResolver
 
-        catalog = DataCatalog()
+        # Set up a real factory pattern using CatalogConfigResolver
+        catalog_config = {"output_{suffix}": {"type": "MemoryDataset"}}
+        config_resolver = CatalogConfigResolver(catalog_config)
+        catalog = DataCatalog(config_resolver=config_resolver)
         catalog["input"] = MemoryDataset("test_data")
 
-        # Original __contains__ method
-        original_contains = catalog.__contains__
+        # Mock exists to return False (dataset doesn't exist)
+        catalog.exists = mocker.Mock(return_value=False)
 
-        def mock_contains(dataset_name):
-            # When checking "output", raise an exception to test exception handling
-            if dataset_name == "output":
-                raise KeyError("Simulated catalog error")
-            return original_contains(dataset_name)
-
-        catalog.__contains__ = mock_contains
-
-        # Create pipeline
-        test_pipeline = pipeline([node(identity, "input", "output", name="node1")])
+        # Create pipeline - use "output_test" to match the pattern
+        test_pipeline = pipeline([node(identity, "input", "output_test", name="node1")])
 
         runner = SequentialRunner()
         result = runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # Should treat the dataset as missing and run the node
-        # The exception should be caught and the output should be treated as missing
-        assert "output" in result
-        assert result["output"] == "test_data"
+        # Should call exists on the factory-handled dataset
+        catalog.exists.assert_called_with("output_test")
 
-        # The node should run since the output is treated as missing due to the exception
-        assert "Running all 1 nodes" in caplog.text
+        # Should treat as missing and run the node
+        assert "output_test" in result
+        assert result["output_test"] == "test_data"
+
+    def test_only_missing_outputs_factory_pattern_exists_true(self, mocker):
+        """Test the factory pattern path when dataset exists"""
+        from kedro.io.catalog_config_resolver import CatalogConfigResolver
+
+        # Set up a real factory pattern using CatalogConfigResolver
+        catalog_config = {"output_{suffix}": {"type": "MemoryDataset"}}
+        config_resolver = CatalogConfigResolver(catalog_config)
+        catalog = DataCatalog(config_resolver=config_resolver)
+        catalog["input"] = MemoryDataset("test_data")
+
+        # Mock exists to return True (dataset exists)
+        catalog.exists = mocker.Mock(return_value=True)
+
+        # Create pipeline - use "output_test" to match the pattern
+        test_pipeline = pipeline([node(identity, "input", "output_test", name="node1")])
+
+        runner = SequentialRunner()
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # Should call exists on the factory-handled dataset
+        catalog.exists.assert_called_with("output_test")
 
 
 class TestSuggestResumeScenario:

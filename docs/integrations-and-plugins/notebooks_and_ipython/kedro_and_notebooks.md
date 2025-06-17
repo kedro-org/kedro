@@ -258,7 +258,7 @@ You can execute one *successful* run per session, as there's a one-to-one mappin
 
 ## Kedro line magics
 
-{external+ipython:doc}`Line magics <interactive/magics>` are commands that provide a concise way of performing tasks in an interactive session. Kedro provides several line magic commands to simplify working with Kedro projects in interactive environments.
+[Line magics](https://ipython.readthedocs.io/en/8.21.0/interactive/magics.html) are commands that provide a concise way of performing tasks in an interactive session. Kedro provides several line magic commands to simplify working with Kedro projects in interactive environments.
 
 ### `%reload_kedro` line magic
 

@@ -55,10 +55,9 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro new`](#create-a-new-kedro-project)
 
 * Project-specific Kedro commands
-  * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
-  * [`kedro catalog resolve`](#resolve-dataset-factories-in-the-catalog)
-  * [`kedro catalog rank`](#rank-dataset-factories-in-the-catalog)
-  * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
+  * [`kedro catalog list-datasets`](#lists-all-datasets-used-in-the-specified-pipelines)
+  * [`kedro catalog resolve-patterns`](#resolve-dataset-factories-in-the-catalog)
+  * [`kedro catalog list-patterns`](#list-all-dataset-factory-patterns-defined-in-the-catalog-ordered-by-priority)
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
@@ -356,50 +355,55 @@ The output includes all the nodes in the pipeline. If no pipeline name is provid
 kedro registry list
 ```
 
-#### Datasets
+#### Data Catalog
 
-##### List datasets per pipeline per type
+##### Lists all datasets used in the specified pipelines
+
+This command lists all datasets used in the specified pipeline(s), grouped by how they are defined.
+
+- datasets: Explicitly defined in catalog.yml
+- factories: Resolved using dataset factory patterns
+- defaults: Handled by user catch-all or default runtime patterns
 
 ```bash
-kedro catalog list
+kedro catalog list-datasets
 ```
-The results include datasets that are/aren't used by a specific pipeline.
 
 The command also accepts an optional `--pipeline` argument that allows you to specify the pipeline name(s) (comma-separated values) in order to filter datasets used only by those named pipeline(s). For example:
 
 ```bash
-kedro catalog list --pipeline=ds,de
+kedro catalog list-datasets --pipeline=ds,de
+```
+
+```{note}
+If no pipelines are specified, the `__default__` pipeline is used.
 ```
 
 ##### Resolve dataset factories in the catalog
 
+This command resolves datasets used in the pipeline against all dataset patterns, returning their full catalog configuration. It includes datasets explicitly defined in the catalog as well as those resolved from dataset factory patterns.
+
 ```bash
-kedro catalog resolve
+kedro catalog resolve-patterns
 ```
 
-This command resolves dataset factories in the catalog file with any explicit entries in the pipeline. The output includes datasets explicitly mentioned in your catalog files and any datasets mentioned in the project's pipelines that match a dataset factory.
-
-##### Rank dataset factories in the catalog
+The command also accepts an optional `--pipeline` argument that allows you to specify the pipeline name(s) (comma-separated values).
 
 ```bash
-kedro catalog rank
+kedro catalog resolve-patterns --pipeline=ds,de
+```
+
+```{note}
+If no pipelines are specified, the `__default__` pipeline is used.
+```
+
+##### List all dataset factory patterns defined in the catalog ordered by priority
+
+```bash
+kedro catalog list-patterns
 ```
 
 The output includes a list of any [dataset factories](../catalog-data/kedro_dataset_factories.md) in the catalog, ranked by the priority on which they are matched against.
-
-#### Data Catalog
-
-##### Create a Data Catalog YAML configuration file
-
-The following command creates a Data Catalog YAML configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
-
-```bash
-kedro catalog create --pipeline=<pipeline_name>
-```
-
-The command also accepts an optional `--env` argument that allows you to specify a configuration environment (defaults to `base`).
-
-The command creates the following file: `<conf_root>/<env>/catalog_<pipeline_name>.yml`
 
 #### Notebooks
 

@@ -476,18 +476,10 @@ class TestOnlyMissingOutputs:
         # Should run the node since the persistent output doesn't exist
         assert "Running all 1 nodes" in caplog.text
 
-    def test_only_missing_outputs_exception_handling(self, mocker, caplog):
-        """Test that exceptions during existence check are handled gracefully"""
+    def test_only_missing_outputs_exception_during_exists(self, mocker):
+        """Test that exceptions during existence check fail fast."""
         catalog = DataCatalog()
-
-        # Create a simple pipeline
-        test_pipeline = pipeline(
-            [
-                node(identity, "input", "output", name="node1"),
-            ]
-        )
-
-        # Setup catalog
+        test_pipeline = pipeline([node(identity, "input", "output")])
         catalog["input"] = MemoryDataset("test_data")
         catalog["output"] = LambdaDataset(load=lambda: None, save=lambda x: None)
 
@@ -495,17 +487,13 @@ class TestOnlyMissingOutputs:
         catalog.exists = mocker.Mock(side_effect=Exception("Test exception"))
 
         runner = SequentialRunner()
-        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+        # The run should fail fast, not continue with a warning.
+        with pytest.raises(Exception, match="Test exception"):
+            runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # Should treat the dataset as missing and run the node
-        assert "Could not check existence of output" in caplog.text
-        assert "Assuming it's missing" in caplog.text
-        assert "Running all 1 nodes" in caplog.text
+    def test_only_missing_outputs_exception_during_contains(self, mocker):
+        """Test that exceptions during catalog containment check fail fast."""
 
-    def test_only_missing_outputs_catalog_contains_exception(self, mocker):
-        """Test that exceptions when checking if output is in catalog are handled gracefully"""
-
-        # Create a DataCatalog subclass that raises an exception in __contains__
         class ExceptionCatalog(DataCatalog):
             def __contains__(self, dataset_name):
                 if dataset_name == "output":
@@ -514,16 +502,12 @@ class TestOnlyMissingOutputs:
 
         catalog = ExceptionCatalog()
         catalog["input"] = MemoryDataset("test_data")
-
-        # Create a simple pipeline
-        test_pipeline = pipeline([node(identity, "input", "output", name="node1")])
+        test_pipeline = pipeline([node(identity, "input", "output")])
 
         runner = SequentialRunner()
-        result = runner.run(test_pipeline, catalog, only_missing_outputs=True)
-
-        # Should treat the dataset as not in catalog (undefined, ephemeral)
-        # So nothing should run
-        assert result == {}
+        # The run should fail fast, not gracefully assume the dataset is ephemeral.
+        with pytest.raises(KeyError, match="Simulated catalog error"):
+            runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
     def test_only_missing_outputs_diamond_dependency(self, mocker, caplog):
         """Test handling of diamond dependencies with shared upstream nodes"""
@@ -590,7 +574,8 @@ class TestOnlyMissingOutputs:
         # Test exception during exists check
         catalog._datasets = {"error_output": mock_dataset}
         catalog.exists = mocker.Mock(side_effect=Exception("Test error"))
-        assert runner._is_persistent_and_missing("error_output", catalog)
+        with pytest.raises(Exception, match="Test error"):
+            runner._is_persistent_and_missing("error_output", catalog)
 
     def test_only_missing_outputs_factory_pattern_ephemeral(self, mocker, caplog):
         """Test factory pattern that creates ephemeral datasets"""
@@ -638,42 +623,17 @@ class TestOnlyMissingOutputs:
         # Should run because persistent output is missing
         assert "Running all 1 nodes" in caplog.text
 
-    def test_is_persistent_and_missing_catalog_get_exception(self, mocker, caplog):
+    def test_is_persistent_and_missing_exception_during_get(self, mocker):
         """Test _is_persistent_and_missing when catalog.get() raises an exception"""
-        import logging
-
         runner = SequentialRunner()
-
-        # Set log level to DEBUG on the runner's logger
-        # The logger name is based on the module of the runner instance
-        logger_name = runner.__module__
-        caplog.set_level(logging.DEBUG, logger=logger_name)
-
-        # Create a mock catalog
         catalog = mocker.Mock(spec=DataCatalog)
-
-        # Mock the _datasets attribute to return an empty dict (dataset not in _datasets)
         catalog._datasets = {}
-
-        # Make the dataset "in" catalog via pattern matching
         catalog.__contains__ = mocker.Mock(return_value=True)
-
-        # Make catalog.get() raise an exception
         catalog.get = mocker.Mock(side_effect=Exception("Failed to create dataset"))
 
-        # Mock catalog.exists() to return False (dataset doesn't exist)
-        catalog.exists = mocker.Mock(return_value=False)
-
-        # This should trigger the exception handling and debug log
-        result = runner._is_persistent_and_missing("factory_output", catalog)
-
-        # Should return True (not ephemeral and doesn't exist)
-        assert result is True
-
-        # Check that debug message was logged
-        assert (
-            "Could not get dataset factory_output to check if ephemeral" in caplog.text
-        )
+        # The method should fail fast, not gracefully handle the exception.
+        with pytest.raises(Exception, match="Failed to create dataset"):
+            runner._is_persistent_and_missing("factory_output", catalog)
 
 
 class TestSuggestResumeScenario:

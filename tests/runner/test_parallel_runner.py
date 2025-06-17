@@ -438,30 +438,30 @@ class TestSuggestResumeScenario:
         assert re.search(expected_pattern, caplog.text)
 
 
-#class TestMultiprocessingGetExecutorContextSelection:
-#    def test_get_executor_default(self, mocker):
-#        mocker.patch.dict(os.environ, {}, clear=True)
-#        runner = ParallelRunner()
-#        executor = runner._get_executor(2)
-#
-#        assert isinstance(executor, ProcessPoolExecutor)
-#        assert hasattr(executor, "_mp_context")
-#
-#    @pytest.mark.parametrize("context", ["fork", "spawn"])
-#    def test_get_executor_valid_context(self, mocker, context):
-#        if context == "fork" and sys.platform == "win32":
-#            pytest.skip("fork context is not available on Windows")
-#        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": context})
-#        runner = ParallelRunner()
-#        executor = runner._get_executor(2)
-#
-#        assert isinstance(executor, ProcessPoolExecutor)
-#        assert executor._mp_context.get_start_method() == context
-#
-#    def test_get_executor_invalid_context(self, mocker):
-#        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": "invalid"})
-#        runner = ParallelRunner()
-#        executor = runner._get_executor(2)
-#
-#        assert isinstance(executor, ProcessPoolExecutor)
-#        assert hasattr(executor, "_mp_context")
+class TestMultiprocessingGetExecutorContextSelection:
+    def test_get_executor_default(self, mocker):
+        mocker.patch.dict(os.environ, {}, clear=True)
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert hasattr(executor, "_mp_context")
+
+    @pytest.mark.parametrize("context", ["fork", "spawn"])
+    def test_get_executor_valid_context(self, mocker, context):
+        if sys.platform == "win32":
+            pytest.skip("fork context is not available on Windows")
+        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": context})
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert executor._mp_context.get_start_method() == context
+
+    def test_get_executor_invalid_context(self, mocker):
+        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": "invalid"})
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert hasattr(executor, "_mp_context")

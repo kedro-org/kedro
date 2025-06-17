@@ -181,49 +181,99 @@ class AbstractRunner(ABC):
     def _filter_pipeline_for_missing_outputs(
         self, pipeline: Pipeline, catalog: CatalogProtocol
     ) -> Pipeline:
-        """Filter pipeline to only include nodes needed to produce missing persistent outputs.
-
-        Args:
-            pipeline: The pipeline to filter.
-            catalog: The data catalogue to check for existing outputs.
-
-        Returns:
-            The filtered pipeline containing only nodes needed for missing persistent outputs.
-        """
+        """Filter pipeline to only include nodes needed to produce missing persistent outputs."""
         original_node_count = len(pipeline.nodes)
 
-        # Build a map of which nodes produce which outputs for efficient lookup
-        node_by_output = {}
+        # First identify which persistent outputs are missing
+        missing_persistent_outputs = set()
+
         for node in pipeline.nodes:
             for output in node.outputs:
-                node_by_output[output] = node
+                # Check if it's a persistent dataset that's missing
+                if self._is_persistent_and_missing(output, catalog):
+                    missing_persistent_outputs.add(output)
 
-        # First pass: identify nodes with missing outputs
-        nodes_with_missing_outputs = set()
-
-        for node in pipeline.nodes:
-            if self._node_has_missing_output(node, catalog):
-                nodes_with_missing_outputs.add(node)
-
-        # If no nodes have missing outputs, skip everything
-        if not nodes_with_missing_outputs:
+        # If no persistent outputs are missing, skip everything
+        if not missing_persistent_outputs:
             self._logger.info(
                 f"Skipping all {original_node_count} nodes (all persistent outputs exist)"
             )
-            return pipeline.filter(node_names=[])
+            return Pipeline([])
 
-        # Second pass: find all dependencies
-        required_nodes = self._find_required_nodes(
-            nodes_with_missing_outputs, node_by_output
-        )
+        # Use Kedro's built-in method to get only nodes needed for missing outputs
+        # This automatically handles dependencies and excludes wasteful nodes
+        required_pipeline = pipeline.to_outputs(*missing_persistent_outputs)
 
-        # Create the filtered pipeline
-        filtered_pipeline = pipeline.filter(node_names=[n.name for n in required_nodes])
+        # Log the results
+        skipped_count = original_node_count - len(required_pipeline.nodes)
+        if skipped_count > 0:
+            skipped_names = {n.name for n in pipeline.nodes} - {
+                n.name for n in required_pipeline.nodes
+            }
+            self._logger.info(
+                f"Skipping {skipped_count} nodes with existing persistent outputs: "
+                f"{', '.join(sorted(skipped_names))}"
+            )
+            self._logger.info(
+                f"Running {len(required_pipeline.nodes)} out of {original_node_count} nodes "
+                f"(skipped {skipped_count} nodes)"
+            )
+        else:
+            self._logger.info(
+                f"Running all {original_node_count} nodes (no outputs to skip)"
+            )
 
-        # Log what we're doing
-        self._log_pipeline_filtering(pipeline, filtered_pipeline, original_node_count)
+        return required_pipeline
 
-        return filtered_pipeline
+    def _is_persistent_and_missing(self, output: str, catalog: CatalogProtocol) -> bool:
+        """Check if an output is a persistent dataset that doesn't exist.
+
+        Args:
+            output: The output dataset name.
+            catalog: The data catalogue to check.
+
+        Returns:
+            True if the output is persistent and missing.
+        """
+        # First check if it's explicitly in the catalog
+        dataset = catalog._datasets.get(output)
+
+        if dataset is not None:
+            # It's explicitly in the catalog
+            is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+            if is_ephemeral:
+                return False
+
+            # It's persistent - check existence
+            try:
+                return not catalog.exists(output)
+            except Exception as e:
+                self._logger.warning(
+                    f"Could not check existence of {output}: {e}. Assuming it's missing."
+                )
+                return True
+
+        # Dataset not explicitly in catalog - check factory patterns
+        try:
+            if output not in catalog:
+                # Not in catalog and no factory - will be MemoryDataset (ephemeral)
+                return False
+        except Exception:
+            # Can't determine - assume not a persistent output
+            return False
+
+        # Matches a factory pattern - check if it would be ephemeral
+        is_ephemeral = False
+        try:
+            ds = catalog._get_dataset(output)
+            is_ephemeral = hasattr(ds, "_EPHEMERAL") and ds._EPHEMERAL
+        except Exception as e:
+            self._logger.debug(
+                f"Could not get dataset {output} to check if ephemeral: {e}"
+            )
+
+        # Return based on ephemeral status and existence
+        return False if is_ephemeral else not catalog.exists(output)
 
     def _node_has_missing_output(self, node: Node, catalog: CatalogProtocol) -> bool:
         """Check if a node has any missing persistent outputs.

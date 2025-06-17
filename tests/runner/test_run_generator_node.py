@@ -2,6 +2,7 @@ from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
 
+
 def generate_one():
     yield from range(10)
 

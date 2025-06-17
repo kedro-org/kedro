@@ -259,21 +259,6 @@ class AbstractRunner(ABC):
         # Return based on ephemeral status and existence
         return False if is_ephemeral else not catalog.exists(output)
 
-    def _node_has_missing_output(self, node: Node, catalog: CatalogProtocol) -> bool:
-        """Check if a node has any missing persistent outputs.
-
-        Args:
-            node: The node to check.
-            catalog: The data catalogue to check for existing outputs.
-
-        Returns:
-            True if the node has at least one missing persistent output.
-        """
-        for output in node.outputs:
-            if self._is_output_missing(output, catalog):
-                return True
-        return False
-
     def _is_output_missing(self, output: str, catalog: CatalogProtocol) -> bool:
         """Check if a specific output is missing.
 
@@ -310,72 +295,6 @@ class AbstractRunner(ABC):
         except Exception:
             # If we can't determine, assume it's missing to be safe
             return True
-
-    def _find_required_nodes(
-        self, nodes_with_missing_outputs: set[Node], node_by_output: dict[str, Node]
-    ) -> set[Node]:
-        """Find all nodes required to produce the missing outputs.
-
-        Args:
-            nodes_with_missing_outputs: Nodes that have missing outputs.
-            node_by_output: Mapping from output names to nodes that produce them.
-
-        Returns:
-            Set of all required nodes including dependencies.
-        """
-        required_nodes: set[Node] = set()
-        visited: set[Node] = set()
-
-        def add_node_with_dependencies(node: Node) -> None:
-            """Recursively add a node and all its upstream dependencies."""
-            if node in visited:
-                return
-            visited.add(node)
-            required_nodes.add(node)
-
-            # Find all nodes that produce this node's inputs
-            for input_name in node.inputs:
-                if input_name in node_by_output:
-                    add_node_with_dependencies(node_by_output[input_name])
-
-        # Start from nodes with missing outputs and add all their dependencies
-        for node in nodes_with_missing_outputs:
-            add_node_with_dependencies(node)
-
-        return required_nodes
-
-    def _log_pipeline_filtering(
-        self,
-        original_pipeline: Pipeline,
-        filtered_pipeline: Pipeline,
-        original_count: int,
-    ) -> None:
-        """Log information about pipeline filtering.
-
-        Args:
-            original_pipeline: The original unfiltered pipeline.
-            filtered_pipeline: The filtered pipeline.
-            original_count: Original number of nodes.
-        """
-        skipped_count = original_count - len(filtered_pipeline.nodes)
-
-        if skipped_count > 0:
-            skipped_node_names = {node.name for node in original_pipeline.nodes} - {
-                node.name for node in filtered_pipeline.nodes
-            }
-
-            self._logger.info(
-                f"Skipping {skipped_count} nodes with existing persistent outputs: "
-                f"{', '.join(sorted(skipped_node_names))}"
-            )
-            self._logger.info(
-                f"Running {len(filtered_pipeline.nodes)} out of {original_count} nodes "
-                f"(skipped {skipped_count} nodes)"
-            )
-        else:
-            self._logger.info(
-                f"Running all {original_count} nodes (no outputs to skip)"
-            )
 
     def run_only_missing(
         self, pipeline: Pipeline, catalog: CatalogProtocol, hook_manager: PluginManager

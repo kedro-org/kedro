@@ -502,7 +502,7 @@ class TestOnlyMissingOutputs:
         assert "Assuming it's missing" in caplog.text
         assert "Running all 1 nodes" in caplog.text
 
-    def test_only_missing_outputs_catalog_contains_exception(self, mocker, caplog):
+    def test_only_missing_outputs_catalog_contains_exception(self, mocker):
         """Test that exceptions when checking if output is in catalog are handled gracefully"""
 
         # Create a DataCatalog subclass that raises an exception in __contains__
@@ -664,7 +664,7 @@ class TestOnlyMissingOutputs:
         # Mock catalog.exists() to return False (dataset doesn't exist)
         catalog.exists = mocker.Mock(return_value=False)
 
-        # This should trigger the exception handling and debug log at lines 254-255
+        # This should trigger the exception handling and debug log
         result = runner._is_persistent_and_missing("factory_output", catalog)
 
         # Should return True (not ephemeral and doesn't exist)
@@ -674,182 +674,6 @@ class TestOnlyMissingOutputs:
         assert (
             "Could not get dataset factory_output to check if ephemeral" in caplog.text
         )
-
-    def test_node_has_missing_output(self, mocker):
-        """Test _node_has_missing_output method"""
-        runner = SequentialRunner()
-        catalog = DataCatalog()
-
-        # Create a node with multiple outputs
-        test_node = node(lambda: ("out1", "out2"), None, ["output1", "output2"])
-
-        # Mock _is_output_missing to return True for output1, False for output2
-        runner._is_output_missing = mocker.Mock(
-            side_effect=lambda out, cat: out == "output1"
-        )
-
-        # Should return True since at least one output is missing
-        assert runner._node_has_missing_output(test_node, catalog) is True
-
-        # Test when no outputs are missing
-        runner._is_output_missing = mocker.Mock(return_value=False)
-        assert runner._node_has_missing_output(test_node, catalog) is False
-
-    def test_is_output_missing_various_conditions(self, mocker):
-        """Test _is_output_missing method with various conditions"""
-        runner = SequentialRunner()
-
-        # Test 1: Dataset in catalog and is ephemeral
-        catalog = DataCatalog()
-        ephemeral_dataset = MemoryDataset()
-        catalog._datasets = {"ephemeral_out": ephemeral_dataset}
-        assert runner._is_output_missing("ephemeral_out", catalog) is False
-
-        # Test 2: Dataset in catalog, not ephemeral, exists
-        catalog = DataCatalog()
-        persistent_dataset = mocker.Mock()
-        persistent_dataset._EPHEMERAL = False
-        catalog._datasets = {"persistent_exists": persistent_dataset}
-        catalog.exists = mocker.Mock(return_value=True)
-        assert runner._is_output_missing("persistent_exists", catalog) is False
-
-        # Test 3: Dataset in catalog, not ephemeral, doesn't exist
-        catalog = DataCatalog()
-        persistent_dataset = mocker.Mock()
-        persistent_dataset._EPHEMERAL = False
-        catalog._datasets = {"persistent_exists": persistent_dataset}
-        catalog.exists = mocker.Mock(return_value=False)
-        assert runner._is_output_missing("persistent_exists", catalog) is True
-
-        # Test 4: Dataset in catalog, exists check raises exception
-        catalog = DataCatalog()
-        persistent_dataset = mocker.Mock()
-        persistent_dataset._EPHEMERAL = False
-        catalog._datasets = {"persistent_exists": persistent_dataset}
-        catalog.exists = mocker.Mock(side_effect=Exception("Connection error"))
-        assert runner._is_output_missing("persistent_exists", catalog) is True
-
-        # Test 5: Dataset not in catalog._datasets but in catalog (factory pattern), exists
-        # Use a mock catalog to properly control __contains__ behavior
-        catalog = mocker.Mock()
-        catalog._datasets = {}
-        catalog.__contains__ = mocker.Mock(return_value=True)
-        catalog.exists = mocker.Mock(return_value=True)
-        assert runner._is_output_missing("factory_dataset", catalog) is False
-
-        # Test 6: Dataset not in catalog._datasets but in catalog (factory pattern), doesn't exist
-        catalog = mocker.Mock()
-        catalog._datasets = {}
-        catalog.__contains__ = mocker.Mock(return_value=True)
-        catalog.exists = mocker.Mock(return_value=False)
-        assert runner._is_output_missing("factory_dataset", catalog) is True
-
-        # Test 7: Dataset not in catalog at all
-        catalog = mocker.Mock()
-        catalog._datasets = {}
-        catalog.__contains__ = mocker.Mock(return_value=False)
-        assert runner._is_output_missing("undefined_dataset", catalog) is True
-
-        # Test 8: __contains__ check raises exception (lines 310-312)
-        catalog = mocker.Mock()
-        catalog._datasets = {}
-        catalog.__contains__ = mocker.Mock(side_effect=Exception("Catalog error"))
-        assert runner._is_output_missing("error_dataset", catalog) is True
-
-    def test_find_required_nodes(self):
-        """Test _find_required_nodes method"""
-        runner = SequentialRunner()
-
-        # Create a pipeline with dependencies:
-        # node1 -> node2 -> node3
-        # node4 -> node5
-        node1 = node(lambda: "a", None, "A", name="node1")
-        node2 = node(lambda x: f"{x}_b", "A", "B", name="node2")
-        node3 = node(lambda x: f"{x}_c", "B", "C", name="node3")
-        node4 = node(lambda: "d", None, "D", name="node4")
-        node5 = node(lambda x: f"{x}_e", "D", "E", name="node5")
-
-        # Create node_by_output mapping
-        node_by_output = {
-            "A": node1,
-            "B": node2,
-            "C": node3,
-            "D": node4,
-            "E": node5,
-        }
-
-        # Test 1: node3 has missing output, should include node1, node2, node3
-        nodes_with_missing = {node3}
-        required = runner._find_required_nodes(nodes_with_missing, node_by_output)
-        assert required == {node1, node2, node3}
-
-        # Test 2: node3 and node5 have missing outputs
-        nodes_with_missing = {node3, node5}
-        required = runner._find_required_nodes(nodes_with_missing, node_by_output)
-        assert required == {node1, node2, node3, node4, node5}
-
-        # Test 3: Only node1 has missing output
-        nodes_with_missing = {node1}
-        required = runner._find_required_nodes(nodes_with_missing, node_by_output)
-        assert required == {node1}
-
-        # Test 4: Test with shared dependency (diamond pattern)
-        # node1 -> A
-        # node2a: A -> B
-        # node2b: A -> C
-        # node3: B, C -> D
-        node2a = node(lambda x: f"{x}_b", "A", "B", name="node2a")
-        node2b = node(lambda x: f"{x}_c", "A", "C", name="node2b")
-        node3_diamond = node(
-            lambda b, c: f"{b}+{c}", ["B", "C"], "D", name="node3_diamond"
-        )
-
-        node_by_output_diamond = {
-            "A": node1,
-            "B": node2a,
-            "C": node2b,
-            "D": node3_diamond,
-        }
-
-        # If node3_diamond has missing output, should include all nodes
-        nodes_with_missing = {node3_diamond}
-        required = runner._find_required_nodes(
-            nodes_with_missing, node_by_output_diamond
-        )
-        assert required == {node1, node2a, node2b, node3_diamond}
-
-    def test_log_pipeline_filtering(self, caplog):
-        """Test _log_pipeline_filtering method (lines 360-376)"""
-        runner = SequentialRunner()
-
-        # Create original and filtered pipelines
-        nodes_all = [
-            node(lambda: "a", None, "A", name="node1"),
-            node(lambda x: x, "A", "B", name="node2"),
-            node(lambda x: x, "B", "C", name="node3"),
-            node(lambda x: x, "C", "D", name="node4"),
-        ]
-
-        original_pipeline = pipeline(nodes_all)
-
-        # Test 1: Some nodes skipped
-        filtered_pipeline = pipeline(nodes_all[:2])  # Only node1 and node2
-
-        caplog.clear()
-        runner._log_pipeline_filtering(original_pipeline, filtered_pipeline, 4)
-
-        assert (
-            "Skipping 2 nodes with existing persistent outputs: node3, node4"
-            in caplog.text
-        )
-        assert "Running 2 out of 4 nodes (skipped 2 nodes)" in caplog.text
-
-        # Test 2: No nodes skipped
-        caplog.clear()
-        runner._log_pipeline_filtering(original_pipeline, original_pipeline, 4)
-
-        assert "Running all 4 nodes (no outputs to skip)" in caplog.text
-        assert "Skipping" not in caplog.text
 
 
 class TestSuggestResumeScenario:

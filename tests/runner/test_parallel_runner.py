@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import re
+import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
 
@@ -92,7 +94,7 @@ class TestMaxWorkers:
             (1, 2, 2),
         ],
     )
-    def test_specified_max_workers_bellow_cpu_cores_count(
+    def test_specified_max_workers_below_cpu_cores_count(
         self,
         is_async,
         mocker,
@@ -120,7 +122,9 @@ class TestMaxWorkers:
         ).run(fan_out_fan_in, shared_memory_catalog)
         assert set(result) == {"Z"}
 
-        executor_cls_mock.assert_called_once_with(max_workers=expected_number)
+        executor_cls_mock.assert_called_once()
+        call_args = executor_cls_mock.call_args
+        assert call_args.kwargs["max_workers"] == expected_number
 
     def test_max_worker_windows(self, mocker):
         """The ProcessPoolExecutor on Python 3.7+
@@ -441,3 +445,36 @@ class TestSuggestResumeScenario:
                 hook_manager=_create_hook_manager(),
             )
         assert re.search(expected_pattern, caplog.text)
+
+
+class TestMultiprocessingGetExecutorContextSelection:
+    def test_get_executor_default(self, mocker):
+        if sys.platform == "win32" and sys.version_info < (3, 11):
+            pytest.skip("fork context is not available on Windows")
+        mocker.patch.dict(os.environ, {}, clear=True)
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert hasattr(executor, "_mp_context")
+
+    @pytest.mark.parametrize("context", ["fork", "spawn"])
+    def test_get_executor_valid_context(self, mocker, context):
+        if sys.platform == "win32":
+            pytest.skip("fork context is not available on Windows")
+        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": context})
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert executor._mp_context.get_start_method() == context
+
+    def test_get_executor_invalid_context(self, mocker):
+        if sys.platform == "win32" and sys.version_info < (3, 11):
+            pytest.skip("fork context is not available on Windows")
+        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": "invalid"})
+        runner = ParallelRunner()
+        executor = runner._get_executor(2)
+
+        assert isinstance(executor, ProcessPoolExecutor)
+        assert hasattr(executor, "_mp_context")

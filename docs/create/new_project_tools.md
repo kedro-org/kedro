@@ -49,9 +49,8 @@ Tools
 4) Docs: A Sphinx documentation setup
 5) Data Folder: A folder structure for data management
 6) PySpark: Configuration for working with PySpark
-7) Kedro-Viz: Kedro's native visualisation tool
 
-Which tools would you like to include in your project? [1-7/1,3/all/none]:
+Which tools would you like to include in your project? [1-6/1,3/all/none]:
  [none]:
 ```
 
@@ -78,8 +77,6 @@ A list of available tools can also be accessed by running `kedro new --help`
                       6) PySpark: Provides set up configuration for working
                       with PySpark
 
-                      7) Kedro Viz: Provides Kedro's native visualisation tool
-
                       Example usage:
 
                       kedro new --tools=lint,test,log,docs,data,pyspark,viz
@@ -103,10 +100,8 @@ To specify your desired tools you must provide them by name as a comma separated
 ### Example code
 In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. If you select `yes`, the example code included depends upon your previous choice of tools, as follows:
 
-* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark or Kedro Viz.
-* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools, unless you also selected Kedro Viz.
-* [Kedro Viz spaceflights starter (`spaceflights-pandas-viz`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): Added if Kedro Viz was one of your tools choices, unless you also selected PySpark.
-* [Full feature spaceflights starter (`spaceflights-pyspark-viz`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz): Added if you selected all available tools, including PySpark and Kedro Viz.
+* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark
+* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools.
 
 Each starter example is tailored to demonstrate the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
 
@@ -157,7 +152,7 @@ uvx kedro new --config=<path/to/config.yml>
 
 Tools in Kedro serve as modular functionalities that enhance a foundational project template. They provide a means to tailor your Kedro project to meet your unique requirements. When creating a new project, you may select one or more of the available tools, or none at all.
 
-The available tools include: [linting](#linting), [testing](#testing), [custom logging](#custom-logging), [documentation](#documentation), [data structure](#data-structure), [PySpark](#pyspark), and [Kedro-Viz](#kedro-viz).
+The available tools include: [linting](#linting), [testing](#testing), [custom logging](#custom-logging), [documentation](#documentation), [data structure](#data-structure), [PySpark](#pyspark).
 
 ### Linting
 
@@ -260,30 +255,25 @@ See the [PySpark integration documentation](https://docs.kedro.org/en/stable/int
 
 The `viz` tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
 In addition, `viz` will also add setup for experiment tracking and plotting datasets.
-See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
+See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/latest/index.html) for more information on using this tool.
 
 ## Flowchart illustration
 
 Here is a flowchart to help illustrate some example choice of tools you can select:
 
-![Example diagram of specific tool choices](../meta/images/project-tools-choices.png)
-
-% Mermaid code, see https://github.com/kedro-org/kedro/wiki/Render-Mermaid-diagrams
-% flowchart TD
-%     A[Start] --> B[Enter Project Name: Example Project];
-%     B --> C3[Select Tools: None];
-%     B --> C1[Select Tools: lint, docs, PySpark];
-%     B --> C2[Select Tools: All];
-%
-%     C1 --> D1[Include Example Pipeline?];
-%     C2 --> D2[Include Example Pipeline?];
-%     C3 --> D3[Include Example Pipeline?];
-%
-%     D1 -->|Yes| E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes];
-%     D1 -->|No| E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No];
-%
-%     D2 -->|Yes| F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: Yes];
-%     D2 -->|No| F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz \nExample: No];
-%
-%     D3 -->|Yes| G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes];
-%     D3 -->|No| G2[New Project Created\nName: Example Project\nTools: None\nExample: No];
+```mermaid
+flowchart TD
+    A[Start] --> B[Enter Project Name: Example Project]
+    B --> C3[Select Tools: None]
+    B --> C1[Select Tools: lint, docs, PySpark]
+    B --> C2[Select Tools: All]
+    C1 --> D1[Include Example Pipeline?]
+    C2 --> D2[Include Example Pipeline?]
+    C3 --> D3[Include Example Pipeline?]
+    D1 -- Yes --> E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes]
+    D1 -- No --> E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No]
+    D2 -- Yes --> F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz\nExample: Yes]
+    D2 -- No --> F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz\nExample: No]
+    D3 -- Yes --> G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes]
+    D3 -- No --> G2[New Project Created\nName: Example Project\nTools: None\nExample: No]
+```

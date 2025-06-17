@@ -88,6 +88,7 @@ docs = [
     "mkdocs-get-deps>=0.2.0",
     "mkdocstrings>=0.29.1",
     "mkdocstrings-python>=0.29.1",
+    "mkdocs-click",
     "griffe"  # Required by mkdocstrings-python for API documentation generation.
 ]
 jupyter = [

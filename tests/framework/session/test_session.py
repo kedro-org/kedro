@@ -724,7 +724,7 @@ class TestKedroSession:
         }
         mocker.patch("kedro.framework.session.session.pipelines", pipelines_ret)
         mocker.patch(
-            "kedro.io.data_catalog.CatalogConfigResolver.match_pattern",
+            "kedro.io.data_catalog.CatalogConfigResolver.match_dataset_pattern",
             return_value=match_pattern,
         )
 

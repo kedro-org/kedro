@@ -639,7 +639,7 @@ class TestOnlyMissingOutputs:
         assert "Running all 1 nodes" in caplog.text
 
     def test_is_persistent_and_missing_catalog_get_exception(self, mocker, caplog):
-        """Test _is_persistent_and_missing when catalog.get() raises an exception (lines 254-255)"""
+        """Test _is_persistent_and_missing when catalog.get() raises an exception"""
         import logging
 
         runner = SequentialRunner()
@@ -676,7 +676,7 @@ class TestOnlyMissingOutputs:
         )
 
     def test_node_has_missing_output(self, mocker):
-        """Test _node_has_missing_output method (lines 272-275)"""
+        """Test _node_has_missing_output method"""
         runner = SequentialRunner()
         catalog = DataCatalog()
 
@@ -696,16 +696,17 @@ class TestOnlyMissingOutputs:
         assert runner._node_has_missing_output(test_node, catalog) is False
 
     def test_is_output_missing_various_conditions(self, mocker):
-        """Test _is_output_missing method with various conditions (lines 287-312)"""
+        """Test _is_output_missing method with various conditions"""
         runner = SequentialRunner()
-        catalog = DataCatalog()
 
         # Test 1: Dataset in catalog and is ephemeral
+        catalog = DataCatalog()
         ephemeral_dataset = MemoryDataset()
         catalog._datasets = {"ephemeral_out": ephemeral_dataset}
         assert runner._is_output_missing("ephemeral_out", catalog) is False
 
         # Test 2: Dataset in catalog, not ephemeral, exists
+        catalog = DataCatalog()
         persistent_dataset = mocker.Mock()
         persistent_dataset._EPHEMERAL = False
         catalog._datasets = {"persistent_exists": persistent_dataset}
@@ -713,29 +714,50 @@ class TestOnlyMissingOutputs:
         assert runner._is_output_missing("persistent_exists", catalog) is False
 
         # Test 3: Dataset in catalog, not ephemeral, doesn't exist
+        catalog = DataCatalog()
+        persistent_dataset = mocker.Mock()
+        persistent_dataset._EPHEMERAL = False
+        catalog._datasets = {"persistent_exists": persistent_dataset}
         catalog.exists = mocker.Mock(return_value=False)
         assert runner._is_output_missing("persistent_exists", catalog) is True
 
         # Test 4: Dataset in catalog, exists check raises exception
+        catalog = DataCatalog()
+        persistent_dataset = mocker.Mock()
+        persistent_dataset._EPHEMERAL = False
+        catalog._datasets = {"persistent_exists": persistent_dataset}
         catalog.exists = mocker.Mock(side_effect=Exception("Connection error"))
         assert runner._is_output_missing("persistent_exists", catalog) is True
 
-        # Test 5: Dataset not in catalog._datasets but in catalog (factory pattern)
+        # Test 5: Dataset not in catalog._datasets but in catalog (factory pattern), exists
+        # Use a mock catalog to properly control __contains__ behavior
+        catalog = mocker.Mock()
+        catalog._datasets = {}
+        catalog.__contains__ = mocker.Mock(return_value=True)
+        catalog.exists = mocker.Mock(return_value=True)
+        assert runner._is_output_missing("factory_dataset", catalog) is False
+
+        # Test 6: Dataset not in catalog._datasets but in catalog (factory pattern), doesn't exist
+        catalog = mocker.Mock()
         catalog._datasets = {}
         catalog.__contains__ = mocker.Mock(return_value=True)
         catalog.exists = mocker.Mock(return_value=False)
         assert runner._is_output_missing("factory_dataset", catalog) is True
 
-        # Test 6: Dataset not in catalog at all
+        # Test 7: Dataset not in catalog at all
+        catalog = mocker.Mock()
+        catalog._datasets = {}
         catalog.__contains__ = mocker.Mock(return_value=False)
         assert runner._is_output_missing("undefined_dataset", catalog) is True
 
-        # Test 7: __contains__ check raises exception
+        # Test 8: __contains__ check raises exception (lines 310-312)
+        catalog = mocker.Mock()
+        catalog._datasets = {}
         catalog.__contains__ = mocker.Mock(side_effect=Exception("Catalog error"))
         assert runner._is_output_missing("error_dataset", catalog) is True
 
     def test_find_required_nodes(self):
-        """Test _find_required_nodes method (lines 326-345)"""
+        """Test _find_required_nodes method"""
         runner = SequentialRunner()
 
         # Create a pipeline with dependencies:

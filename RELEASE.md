@@ -235,9 +235,12 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Fixed a bug when `OmegaConfigLoader` is printed, there are few missing arguments.
 * Fixed a bug when where iterating `OmegaConfigLoader`'s `keys` return empty dictionary.
 
+
 ## Upcoming deprecations for Kedro 1.0.0
 * The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 1.0.0.
 * `LambdaDataset` is deprecated and will be removed in Kedro 1.0.0.
+* The CLI commands `kedro catalog list`, `kedro catalog create`, `kedro catalog command`, and `kedro catalog resolve` are deprecated and will be removed in Kedro 1.0.0.
+* The method `run_node()` is deprecated and will be removed in Kedro 1.0.0.
 
 ## Documentation changes
 * Improved documentation for configuring dataset parameters in the data catalog

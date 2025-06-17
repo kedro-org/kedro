@@ -248,7 +248,7 @@ class AbstractRunner(ABC):
         # Matches a factory pattern - check if it would be ephemeral
         is_ephemeral = False
         try:
-            ds = catalog._get_dataset(output)
+            ds = catalog.get(output)
             is_ephemeral = hasattr(ds, "_EPHEMERAL") and ds._EPHEMERAL
         except Exception as e:
             self._logger.debug(

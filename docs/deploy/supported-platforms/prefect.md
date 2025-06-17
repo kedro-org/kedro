@@ -68,8 +68,9 @@ from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from kedro.io import DataCatalog, MemoryDataset
+from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
-from kedro.runner import run_node
+from kedro.runner import SequentialRunner
 
 from prefect import flow, task, get_run_logger
 from prefect.deployments import Deployment
@@ -206,8 +207,9 @@ def init_kedro_tasks_by_execution_layer(
 def kedro_task(
     node: Node, task_dict: Union[None, Dict[str, Union[DataCatalog, str]]] = None
 ):
-    run_node(
-        node,
+    runner = SequentialRunner()
+    runner.run(
+        Pipeline([node]),
         task_dict["catalog"],
         _create_hook_manager(),
         task_dict["sess_id"],

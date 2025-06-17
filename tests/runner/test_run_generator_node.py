@@ -1,11 +1,6 @@
-import pytest
-from pytest import warns
-
-from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.pipeline import node
-from kedro.runner import run_node
-
+from kedro.pipeline import Pipeline, node
+from kedro.runner import SequentialRunner
 
 def generate_one():
     yield from range(10)
@@ -27,21 +22,14 @@ def generate_dict():
 
 
 class TestRunGeneratorNode:
-    def test_generator_fail_async(self, mocker, catalog):
-        fake_dataset = mocker.Mock()
-        catalog["result"] = fake_dataset
-        n = node(generate_one, inputs=None, outputs="result")
-
-        with pytest.raises(Exception, match="nodes wrapping generator functions"):
-            run_node(n, catalog, _NullPluginManager(), is_async=True)
-
     def test_generator_node_one(self, mocker, catalog):
         fake_dataset = mocker.Mock()
 
         mocker.patch.object(catalog, "get", return_value=fake_dataset)
 
         n = node(generate_one, inputs=None, outputs="result")
-        run_node(n, catalog, _NullPluginManager())
+        runner = SequentialRunner()
+        runner.run(Pipeline([n]), catalog, _NullPluginManager())
 
         expected = [((i,),) for i in range(10)]
         assert fake_dataset.save.call_count == 10
@@ -58,7 +46,8 @@ class TestRunGeneratorNode:
         )
 
         n = node(generate_tuple, inputs=None, outputs=["left", "right"])
-        run_node(n, catalog, _NullPluginManager())
+        runner = SequentialRunner()
+        runner.run(Pipeline([n]), catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
         expected_right = [((i * i,),) for i in range(10)]
@@ -78,7 +67,8 @@ class TestRunGeneratorNode:
         )
 
         n = node(generate_list, inputs=None, outputs=["left", "right"])
-        run_node(n, catalog, _NullPluginManager())
+        runner = SequentialRunner()
+        runner.run(Pipeline([n]), catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
         expected_right = [((i * i,),) for i in range(10)]
@@ -99,7 +89,8 @@ class TestRunGeneratorNode:
         )
 
         n = node(generate_dict, inputs=None, outputs={"idx": "left", "square": "right"})
-        run_node(n, catalog, _NullPluginManager())
+        runner = SequentialRunner()
+        runner.run(Pipeline([n]), catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
         expected_right = [((i * i,),) for i in range(10)]
@@ -108,15 +99,3 @@ class TestRunGeneratorNode:
         assert left.save.call_args_list == expected_left
         assert 10 == right.save.call_count
         assert right.save.call_args_list == expected_right
-
-    def test_run_node_deprecated(self, mocker, catalog):
-        left = mocker.Mock()
-        right = mocker.Mock()
-        catalog["left"] = left
-        catalog["right"] = right
-        n = node(generate_dict, inputs=None, outputs={"idx": "left", "square": "right"})
-        with warns(
-            KedroDeprecationWarning,
-            match=r"\`run_node\(\)\` has been deprecated",
-        ):
-            run_node(n, catalog, _NullPluginManager())

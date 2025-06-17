@@ -4,7 +4,9 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 
 from __future__ import annotations
 
+import os
 from concurrent.futures import Executor, ProcessPoolExecutor
+from multiprocessing import get_context
 from multiprocessing.managers import SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
@@ -115,7 +117,11 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _get_executor(self, max_workers: int) -> Executor:
-        return ProcessPoolExecutor(max_workers=max_workers)
+        context = os.environ.get("KEDRO_MP_CONTEXT")
+        if context and context not in {"fork", "spawn"}:
+            context = None
+        ctx = get_context(context)
+        return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx)
 
     def _run(
         self,

@@ -539,7 +539,7 @@ class TestNodeInputOutputNameValidation:
         assert n.inputs == ["namespace.subnamespace.input_dataset"]
         assert n.outputs == ["namespace.subnamespace.output_dataset"]
 
-    def test_only_top_level_namespace_match(self):
+    def test_dataset_namespace_matches_pipeline_namespace(self):
         """Test that node level namespace specification doesn't throw the error."""
         n = node(
             func=self.dummy_function,

@@ -142,7 +142,7 @@ class CatalogCommandsMixin:
 
     def resolve_patterns(
         self: DataCatalog,
-        pipelines: list[Pipeline] | None = None,
+        pipelines: Union[list[Pipeline], None] = None,
     ) -> dict[str, Any]:
         """
         Resolve dataset factory patterns against pipeline datasets.

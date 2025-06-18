@@ -1,11 +1,5 @@
 # Introduction to the Data Catalog
 
-!!! warning
-    `DataCatalog` and all related documentation is currently under development and subject to change. Several APIs currently available,
-    including `datasets`, `get_datasets`, `_get_datasets`, `add`, `list`, `add_feed_dict`, and `shallow_copy`,
-    will be removed or replaced in the v1.0.0 release.
-
-
 In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
 
 This page introduces the basic sections of `catalog.yml`, which is the file Kedro uses to register data sources for a project.

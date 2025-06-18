@@ -218,27 +218,21 @@ class AbstractRunner(ABC):
         Returns:
             True if the output is persistent and missing.
         """
-        # First check if it's explicitly in the catalog
-        dataset = catalog._datasets.get(output)
-
-        if dataset is not None:
-            # It's explicitly in the catalog
-            is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
-            if is_ephemeral:
-                return False
-
-            # It's persistent - check existence
-            return not catalog.exists(output)
-
+        # First check if it's in the catalog at all
         if output not in catalog:
             # Not in catalog and no factory - will be MemoryDataset (ephemeral)
             return False
 
-        # Check if it would be ephemeral
-        ds = catalog.get(output)
-        is_ephemeral = ds is not None and hasattr(ds, "_EPHEMERAL") and ds._EPHEMERAL
+        # Get the dataset
+        dataset = catalog.get(output)
 
-        return False if is_ephemeral else not catalog.exists(output)
+        # Check if it's ephemeral
+        is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+        if is_ephemeral:
+            return False
+
+        # It's persistent - check existence
+        return not catalog.exists(output)
 
     def _is_output_missing(self, output: str, catalog: CatalogProtocol) -> bool:
         """Check if a specific output is missing.

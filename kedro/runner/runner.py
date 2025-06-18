@@ -158,7 +158,9 @@ class AbstractRunner(ABC):
 
         return required_pipeline
 
-    def _is_persistent_and_missing(self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol) -> bool:
+    def _is_persistent_and_missing(
+        self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> bool:
         """Check if an output is a persistent dataset that doesn't exist.
 
         Args:

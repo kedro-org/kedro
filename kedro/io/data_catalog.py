@@ -29,8 +29,7 @@ from kedro.io.core import (
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.io.shared_memory_dataset import SharedMemoryDataset
-from kedro.logging import _format_rich
-from kedro.utils import _has_rich_handler
+from kedro.utils import _format_rich, _has_rich_handler
 
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager

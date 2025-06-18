@@ -4,7 +4,11 @@
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
 * Added a `prefix_datasets_with_namespace` argument to the `Pipeline` class which allows users to turn on or off the prefixing of the namespace to the node inputs, outputs, and parameters.
 * Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
+<<<<<<< feat/run-only-missing-into-1.0
 * Introduced a `--only-missing-outputs` CLI flag for `kedro run` to intelligently skip nodes if all their persistent outputs already exist, significantly speeding up iterative runs.
+=======
+* Added an option to select which multiprocessing start method is going to be used on `ParallelRunner` via the `KEDRO_MP_CONTEXT` environment variable.
+>>>>>>> feature-1.0.0
 
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
@@ -30,7 +34,10 @@
 
 ## Major features and improvements
 * Added execution time to pipeline completion log.
+
 ## Bug fixes and other changes
+* Fixed a recursion error in custom datasets when `_describe()` accessed `self.__dict__`.
+
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 1.0.0
 ## Documentation changes

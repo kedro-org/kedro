@@ -118,7 +118,6 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
 | `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configure/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
 | `kedro run --params=<param_key1>=<value1>,<param_key2>=<value2>`    | Does a parametrised run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
-| `kedro run --only-missing-outputs`                                  | Run only nodes that produce missing persistent outputs. Skip nodes with existing outputs and their unnecessary upstream dependencies.                                                                                                             |
 
 ```bash
 kedro run --from-nodes=split --to-nodes=predict,report

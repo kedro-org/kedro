@@ -14,12 +14,12 @@ from kedro.io import (
     DataCatalog,
     DatasetError,
     DatasetNotFoundError,
-    LambdaDataset,
     MemoryDataset,
 )
 from kedro.io.core import (
     _DEFAULT_PACKAGES,
     VERSION_FORMAT,
+    AbstractDataset,
     Version,
     VersionAlreadyExistsError,
     generate_timestamp,
@@ -55,6 +55,20 @@ def multi_catalog():
 @pytest.fixture
 def data_catalog_from_config(correct_config):
     return DataCatalog.from_config(**correct_config)
+
+
+class NonExistentDataset(AbstractDataset):
+    def __init__(self):
+        pass
+
+    def _load(self):
+        pass
+
+    def _save(self, data):
+        pass
+
+    def _describe(self):
+        return {}
 
 
 class TestDataCatalog:
@@ -111,13 +125,13 @@ class TestDataCatalog:
 
     def test_exists_not_implemented(self, caplog):
         """Test calling `exists` on the dataset, which didn't implement it"""
-        catalog = DataCatalog(datasets={"test": LambdaDataset(None, None)})
+        catalog = DataCatalog(datasets={"test": NonExistentDataset()})
         result = catalog.exists("test")
 
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "'exists()' not implemented for 'LambdaDataset'. "
+            "'exists()' not implemented for 'NonExistentDataset'. "
             "Assuming output does not exist." in log_record.message
         )
         assert result is False

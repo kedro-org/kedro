@@ -11,7 +11,6 @@ from kedro.io import (
     AbstractDataset,
     DataCatalog,
     DatasetError,
-    LambdaDataset,
     MemoryDataset,
 )
 from kedro.pipeline import node, pipeline
@@ -82,7 +81,9 @@ class TestSequentialRunnerBranchlessPipeline:
         with pytest.raises(DatasetError, match=pattern):
             SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
-    def test_result_saved_not_returned(self, is_async, saving_result_pipeline):
+    def test_result_saved_not_returned(
+        self, is_async, saving_result_pipeline, persistent_test_dataset
+    ):
         """The pipeline runs ds->dsX but save does not save the output."""
 
         def _load():
@@ -93,8 +94,8 @@ class TestSequentialRunnerBranchlessPipeline:
 
         catalog = DataCatalog(
             {
-                "ds": LambdaDataset(load=_load, save=_save),
-                "dsX": LambdaDataset(load=_load, save=_save),
+                "ds": persistent_test_dataset(load=_load, save=_save),
+                "dsX": persistent_test_dataset(load=_load, save=_save),
             }
         )
         output = SequentialRunner(is_async=is_async).run(
@@ -346,19 +347,25 @@ class TestSuggestResumeScenario:
 
 
 class TestMemoryDatasetBehaviour:
-    def test_run_includes_memory_datasets(self, pipeline_with_memory_datasets):
+    def test_run_includes_memory_datasets(
+        self, pipeline_with_memory_datasets, persistent_test_dataset
+    ):
         # Create a catalog with MemoryDataset entries and inputs for the pipeline
         catalog = DataCatalog(
             {
-                "Input1": LambdaDataset(load=lambda: "data1", save=lambda data: None),
-                "Input2": LambdaDataset(load=lambda: "data2", save=lambda data: None),
+                "Input1": persistent_test_dataset(
+                    load=lambda: "data1", save=lambda data: None
+                ),
+                "Input2": persistent_test_dataset(
+                    load=lambda: "data2", save=lambda data: None
+                ),
                 "MemOutput1": MemoryDataset(),
                 "MemOutput2": MemoryDataset(),
             }
         )
 
         # Add a regular dataset to the catalog
-        catalog["RegularOutput"] = LambdaDataset(None, None, lambda: True)
+        catalog["RegularOutput"] = persistent_test_dataset(None, None, lambda: True)
 
         # Run the pipeline
         output = SequentialRunner().run(pipeline_with_memory_datasets, catalog)

@@ -227,6 +227,7 @@ nav:
                   - Startup: api/framework/kedro.framework.startup.md
               - kedro.io:
                   - Overview: api/io/kedro.io.md
+                  - DataCatalog: api/io/kedro.io.DataCatalog.md
                   - AbstractDataset: api/io/kedro.io.AbstractDataset.md
                   - AbstractVersionedDataset: api/io/kedro.io.AbstractVersionedDataset.md
                   - CachedDataset: api/io/kedro.io.CachedDataset.md

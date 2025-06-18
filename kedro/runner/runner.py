@@ -247,7 +247,7 @@ class AbstractRunner(ABC):
         output_to_node, node_consumers = self._build_dependency_maps(pipeline)
 
         # Determine which nodes need to run
-        nodes_to_run = set()
+        nodes_to_run: set[Node] = set()
         for node in sorted_nodes:
             should_run = (
                 self._should_run_for_final_output(node, pipeline, catalog)

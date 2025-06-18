@@ -30,12 +30,18 @@
 # Upcoming Release
 
 ## Major features and improvements
-* Added execution time to pipeline completion log.
 ## Bug fixes and other changes
-* Fixed a recursion error in custom datasets when `_describe()` accessed `self.__dict__`.
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 1.0.0
 ## Documentation changes
+## Community contributions
+
+# Release 0.19.14
+
+## Major features and improvements
+* Added execution time to pipeline completion log.
+## Bug fixes and other changes
+* Fixed a recursion error in custom datasets when `_describe()` accessed `self.__dict__`.
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Yury Fedotov](https://github.com/yury-fedotov)

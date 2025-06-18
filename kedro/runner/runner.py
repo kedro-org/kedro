@@ -234,43 +234,6 @@ class AbstractRunner(ABC):
         # It's persistent - check existence
         return not catalog.exists(output)
 
-    def _is_output_missing(self, output: str, catalog: CatalogProtocol) -> bool:
-        """Check if a specific output is missing.
-
-        Args:
-            output: The output dataset name.
-            catalog: The data catalogue to check.
-
-        Returns:
-            True if the output is missing or couldn't be checked.
-        """
-        dataset = catalog._datasets.get(output)
-
-        if dataset is not None:
-            # Dataset is in the catalog - check if it's ephemeral
-            is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
-            if is_ephemeral:
-                return False
-
-            # It's a persistent dataset - check if it exists
-            try:
-                return not catalog.exists(output)
-            except Exception as e:
-                self._logger.warning(
-                    f"Could not check existence of {output}: {e}. Assuming it's missing."
-                )
-                return True
-
-        # Dataset not in catalog
-        try:
-            if output in catalog:
-                return not catalog.exists(output)
-            # Not in catalog and no factory - treat as missing
-            return True
-        except Exception:
-            # If we can't determine, assume it's missing to be safe
-            return True
-
     @abstractmethod  # pragma: no cover
     def _get_executor(self, max_workers: int) -> Executor | None:
         """Abstract method to provide the correct executor (e.g., ThreadPoolExecutor, ProcessPoolExecutor or None if running sequentially)."""

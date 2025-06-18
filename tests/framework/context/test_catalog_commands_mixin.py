@@ -120,7 +120,7 @@ def fake_catalog_with_overlapping_factories():
 
 
 @pytest.fixture
-def DataCatalogwithfactories(fake_catalog_config, fake_credentials_config):
+def DataCatalogWithFactories(fake_catalog_config, fake_credentials_config):
     """
     Fixture to create a DataCatalog with factories.
     """
@@ -138,7 +138,7 @@ def DataCatalogwithfactories(fake_catalog_config, fake_credentials_config):
 
 
 @pytest.fixture
-def DataCatalogwithoverlappingfactories(fake_catalog_with_overlapping_factories):
+def DataCatalogWithOverlappingFactories(fake_catalog_with_overlapping_factories):
     """
     Fixture to create a DataCatalog with overlapping factories.
     """
@@ -156,16 +156,16 @@ def DataCatalogwithoverlappingfactories(fake_catalog_with_overlapping_factories)
 class TestCatalogCommands:
     def test_list_datasets(
         self,
-        DataCatalogwithfactories,
+        DataCatalogWithFactories,
         fake_pipeline,
         expected_fake_config_list_datasets_output,
     ):
-        catalog = DataCatalogwithfactories
+        catalog = DataCatalogWithFactories
         result = catalog.list_datasets(pipelines=fake_pipeline)["pipeline_0"]
         assert result == expected_fake_config_list_datasets_output
 
-    def test_list_patterns(self, DataCatalogwithfactories):
-        catalog = DataCatalogwithfactories
+    def test_list_patterns(self, DataCatalogWithFactories):
+        catalog = DataCatalogWithFactories
         patterns = catalog.list_patterns()
         expected_patterns = {
             "parquet_{factory_pattern}",
@@ -175,14 +175,14 @@ class TestCatalogCommands:
         assert set(patterns) == expected_patterns
 
     def test_resolve_patterns(
-        self, DataCatalogwithfactories, fake_pipeline, fake_catalog_config_resolved
+        self, DataCatalogWithFactories, fake_pipeline, fake_catalog_config_resolved
     ):
-        catalog = DataCatalogwithfactories
+        catalog = DataCatalogWithFactories
         resolved_patterns = catalog.resolve_patterns(pipelines=[fake_pipeline])
         assert resolved_patterns == fake_catalog_config_resolved
 
-    def test_patterns_order(self, DataCatalogwithoverlappingfactories):
-        catalog = DataCatalogwithoverlappingfactories
+    def test_patterns_order(self, DataCatalogWithOverlappingFactories):
+        catalog = DataCatalogWithOverlappingFactories
         # Ordered list of expected patterns
         expected_patterns_list = [
             "an_example_{place}_{holder}",

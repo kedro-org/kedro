@@ -191,46 +191,6 @@ class AbstractRunner(ABC):
         # Return based on ephemeral status and existence
         return False if is_ephemeral else not catalog.exists(output)
 
-    def run_only_missing(
-        self,
-        pipeline: Pipeline,
-        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
-        hook_manager: PluginManager | None = None,
-    ) -> dict[str, Any]:
-        """Run only the missing outputs from the ``Pipeline`` using the
-        datasets provided by ``catalog``, and save results back to the
-        same objects.
-
-        Args:
-            pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
-            hook_manager: The ``PluginManager`` to activate hooks.
-        Raises:
-            ValueError: Raised when ``Pipeline`` inputs cannot be
-                satisfied.
-
-        Returns:
-            Any node outputs that cannot be processed by the
-            catalog. These are returned in a dictionary, where
-            the keys are defined by the node outputs.
-
-        """
-        free_outputs = pipeline.outputs() - set(catalog.keys())
-        missing = {ds for ds in catalog if not catalog.exists(ds)}
-        to_build = free_outputs | missing
-        to_rerun = pipeline.only_nodes_with_outputs(*to_build) + pipeline.from_inputs(
-            *to_build
-        )
-
-        # We also need any missing datasets that are required to run the
-        # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.datasets() - set(catalog.keys())
-        output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
-        input_from_unregistered = to_rerun.inputs() & unregistered_ds
-        to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)
-
-        return self.run(to_rerun, catalog, hook_manager)
-
     @abstractmethod  # pragma: no cover
     def _get_executor(self, max_workers: int) -> Executor | None:
         """Abstract method to provide the correct executor (e.g., ThreadPoolExecutor, ProcessPoolExecutor or None if running sequentially)."""

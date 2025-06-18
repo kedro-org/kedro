@@ -245,7 +245,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Upcoming deprecations for Kedro 1.0.0
 * The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 1.0.0.
 * `LambdaDataset` is deprecated and will be removed in Kedro 1.0.0.
-* The CLI commands `kedro catalog list`, `kedro catalog create`, `kedro catalog command`, and `kedro catalog resolve` are deprecated and will be removed in Kedro 1.0.0.
 * The method `run_node()` is deprecated and will be removed in Kedro 1.0.0.
 
 ## Documentation changes

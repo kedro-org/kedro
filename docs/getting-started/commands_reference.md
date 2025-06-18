@@ -193,9 +193,8 @@ The command also accepts an optional `--pipeline` argument that allows you to sp
 kedro catalog list-datasets --pipeline=ds,de
 ```
 
-```{note}
-If no pipelines are specified, the `__default__` pipeline is used.
-```
+!!! note
+    If no pipelines are specified, the `__default__` pipeline is used.
 
 ##### Resolve dataset factories in the catalog
 
@@ -211,9 +210,8 @@ The command also accepts an optional `--pipeline` argument that allows you to sp
 kedro catalog resolve-patterns --pipeline=ds,de
 ```
 
-```{note}
-If no pipelines are specified, the `__default__` pipeline is used.
-```
+!!! note
+    If no pipelines are specified, the `__default__` pipeline is used.
 
 ##### List all dataset factory patterns defined in the catalog ordered by priority
 

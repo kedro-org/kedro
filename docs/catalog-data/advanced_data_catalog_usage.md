@@ -354,16 +354,6 @@ catalog.filter(name_regex="data", by_type=SQLQueryDataset)  # Exact type match
 catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])  # Multiple types
 ```
 
-**Args:**
-
-- name_regex: Dataset names to match (string or re.Pattern).
-- type_regex: Match full class path of dataset types.
-- by_type: Dataset class(es) to match using isinstance.
-
-**Returns:**
-
-- A list of matching dataset names.
-
 ## How to get dataset type
 You can check the dataset type without materializing or adding it to the catalog:
 

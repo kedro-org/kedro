@@ -111,52 +111,163 @@ class AbstractRunner(ABC):
 
         return run_output
 
-    def _filter_pipeline_for_missing_outputs(
-        self, pipeline: Pipeline, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
-    ) -> Pipeline:
-        """Filter pipeline to only include nodes needed to produce missing persistent outputs."""
-        original_node_count = len(pipeline.nodes)
+    def _build_dependency_maps(
+        self, pipeline: Pipeline
+    ) -> tuple[dict[str, Node], dict[Node, set[Node]]]:
+        """Build mappings for efficient node dependency lookups.
 
-        # First identify which persistent outputs are missing
-        missing_persistent_outputs = set()
+        Returns:
+            Tuple of (output_to_node, node_consumers) mappings.
+        """
+        output_to_node: dict[str, Node] = {}
+        node_consumers: dict[Node, set[Node]] = {node: set() for node in pipeline.nodes}
 
         for node in pipeline.nodes:
             for output in node.outputs:
-                # Check if it's a persistent dataset that's missing
-                if self._is_persistent_and_missing(output, catalog):
-                    missing_persistent_outputs.add(output)
+                output_to_node[output] = node
 
-        # If no persistent outputs are missing, skip everything
-        if not missing_persistent_outputs:
+        # Build consumer relationships
+        for node in pipeline.nodes:
+            for inp in node.inputs:
+                if inp in output_to_node:
+                    producer = output_to_node[inp]
+                    node_consumers[producer].add(node)
+
+        return output_to_node, node_consumers
+
+    def _should_run_for_final_output(
+        self,
+        node: Node,
+        pipeline: Pipeline,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+    ) -> bool:
+        """Check if node should run because it produces missing final outputs."""
+        for output in node.outputs:
+            if output in pipeline.outputs():
+                if self._is_persistent_and_missing(output, catalog):
+                    self._logger.debug(
+                        f"Node '{node.name}' must run: produces missing final output '{output}'"
+                    )
+                    return True
+        return False
+
+    def _is_output_needed_by_consumer(
+        self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> bool:
+        """Check if an output needs to be (re)generated for a consumer."""
+        if output not in catalog:
+            # Not in catalog - will be MemoryDataset (ephemeral)
+            return True
+
+        dataset = catalog.get(output)
+        if getattr(dataset, "_EPHEMERAL", False):
+            # Ephemeral output - must be generated
+            return True
+
+        # Persistent dataset - check if it exists
+        return not catalog.exists(output)
+
+    def _should_run_for_downstream_consumer(
+        self,
+        node: Node,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+        nodes_to_run: set[Node],
+        node_consumers: dict[Node, set[Node]],
+    ) -> bool:
+        """Check if node should run because downstream consumers need its outputs."""
+        for consumer in node_consumers[node]:
+            if consumer in nodes_to_run:
+                for output in node.outputs:
+                    if output in consumer.inputs:
+                        if self._is_output_needed_by_consumer(output, catalog):
+                            self._logger.debug(
+                                f"Node '{node.name}' must run: produces '{output}' "
+                                f"needed by running consumer '{consumer.name}'"
+                            )
+                            return True
+        return False
+
+    def _should_run_for_own_missing_output(
+        self, node: Node, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> bool:
+        """Check if node should run because it has missing persistent outputs."""
+        for output in node.outputs:
+            if self._is_persistent_and_missing(output, catalog):
+                self._logger.debug(
+                    f"Node '{node.name}' must run: has missing output '{output}'"
+                )
+                return True
+        return False
+
+    def _log_filtering_results(
+        self,
+        original_node_count: int,
+        filtered_pipeline: Pipeline,
+        all_nodes: list[Node],
+    ) -> None:
+        """Log the results of pipeline filtering."""
+        final_node_count = len(filtered_pipeline.nodes)
+
+        if final_node_count == 0:
             self._logger.info(
                 f"Skipping all {original_node_count} nodes (all persistent outputs exist)"
             )
-            return Pipeline([])
+            return
 
-        # Use Kedro's built-in method to get only nodes needed for missing outputs
-        # This automatically handles dependencies and excludes wasteful nodes
-        required_pipeline = pipeline.to_outputs(*missing_persistent_outputs)
-
-        # Log the results
-        skipped_count = original_node_count - len(required_pipeline.nodes)
+        skipped_count = original_node_count - final_node_count
         if skipped_count > 0:
-            skipped_names = {n.name for n in pipeline.nodes} - {
-                n.name for n in required_pipeline.nodes
-            }
+            all_node_names = {n.name for n in all_nodes}
+            running_node_names = {n.name for n in filtered_pipeline.nodes}
+            skipped_names = all_node_names - running_node_names
             self._logger.info(
-                f"Skipping {skipped_count} nodes with existing persistent outputs: "
+                f"Skipping {skipped_count} nodes with existing outputs: "
                 f"{', '.join(sorted(skipped_names))}"
             )
-            self._logger.info(
-                f"Running {len(required_pipeline.nodes)} out of {original_node_count} nodes "
-                f"(skipped {skipped_count} nodes)"
-            )
-        else:
-            self._logger.info(
-                f"Running all {original_node_count} nodes (no outputs to skip)"
+
+        self._logger.info(
+            f"Running {final_node_count} out of {original_node_count} nodes"
+        )
+
+    def _filter_pipeline_for_missing_outputs(
+        self, pipeline: Pipeline, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> Pipeline:
+        """Filter pipeline using reverse topological order for O(N + E) complexity."""
+        original_node_count = len(pipeline.nodes)
+
+        # Get nodes in reverse topological order
+        sorted_nodes = list(pipeline.nodes)
+        sorted_nodes.reverse()
+
+        # Build dependency mappings
+        output_to_node, node_consumers = self._build_dependency_maps(pipeline)
+
+        # Determine which nodes need to run
+        nodes_to_run = set()
+        for node in sorted_nodes:
+            should_run = (
+                self._should_run_for_final_output(node, pipeline, catalog)
+                or self._should_run_for_downstream_consumer(
+                    node, catalog, nodes_to_run, node_consumers
+                )
+                or self._should_run_for_own_missing_output(node, catalog)
             )
 
-        return required_pipeline
+            if should_run:
+                nodes_to_run.add(node)
+
+        # Create filtered pipeline
+        if not nodes_to_run:
+            self._log_filtering_results(
+                original_node_count, Pipeline([]), pipeline.nodes
+            )
+            return Pipeline([])
+
+        filtered_pipeline = pipeline.filter(node_names=[n.name for n in nodes_to_run])
+        self._log_filtering_results(
+            original_node_count, filtered_pipeline, pipeline.nodes
+        )
+
+        return filtered_pipeline
 
     def _is_persistent_and_missing(
         self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol

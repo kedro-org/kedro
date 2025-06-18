@@ -217,6 +217,7 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
     """
     mapping: dict[str, list[str]] = {}
     for ds_name in datasets:
+        # print(f"Processing dataset: {ds_name}")
         if is_parameter(ds_name):
             continue
 

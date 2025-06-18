@@ -13,7 +13,6 @@ from kedro.io import (
     AbstractDataset,
     DataCatalog,
     DatasetError,
-    LambdaDataset,
     MemoryDataset,
 )
 from kedro.pipeline import node, pipeline
@@ -177,7 +176,9 @@ class TestInvalidParallelRunner:
         with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
-    def test_dataset_not_serialisable(self, is_async, fan_out_fan_in):
+    def test_dataset_not_serialisable(
+        self, is_async, fan_out_fan_in, persistent_test_dataset
+    ):
         """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """
@@ -189,7 +190,7 @@ class TestInvalidParallelRunner:
             assert arg == 0  # pragma: no cover
 
         # Data set A cannot be serialised
-        catalog = DataCatalog({"A": LambdaDataset(load=_load, save=_save)})
+        catalog = DataCatalog({"A": persistent_test_dataset(load=_load, save=_save)})
 
         test_pipeline = pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):

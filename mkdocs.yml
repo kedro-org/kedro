@@ -227,7 +227,6 @@ nav:
                   - AbstractDataset: api/io/kedro.io.AbstractDataset.md
                   - AbstractVersionedDataset: api/io/kedro.io.AbstractVersionedDataset.md
                   - CachedDataset: api/io/kedro.io.CachedDataset.md
-                  - LambdaDataset: api/io/kedro.io.LambdaDataset.md
                   - MemoryDataset: api/io/kedro.io.MemoryDataset.md
                   - Version: api/io/kedro.io.Version.md
                   - DatasetAlreadyExistsError: api/io/kedro.io.DatasetAlreadyExistsError.md

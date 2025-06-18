@@ -309,9 +309,8 @@ ds_config = catalog.config_resolver.resolve_pattern(ds_name)  # Resolve specific
 patterns = catalog.config_resolver.list_patterns() # List all patterns
 ```
 
-```{note}
-`DataCatalog` does not support all dictionary methods, such as `pop()`, `popitem()`, or `del`.
-```
+!!! note
+    `DataCatalog` does not support all dictionary methods, such as `pop()`, `popitem()`, or `del`.
 
 ## How to save catalog to config
 
@@ -335,10 +334,8 @@ To reconstruct the catalog later:
 new_catalog = DataCatalog.from_config(config, credentials, load_versions, save_version)
 ```
 
-```{note}
-This method only works for datasets with static, serializable parameters. For example, you can serialize credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`.
-In-memory datasets are excluded.
-```
+!!! note
+    This method only works for datasets with static, serializable parameters. For example, you can serialize credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`. In-memory datasets are excluded.
 
 ## How to filter catalog datasets
 
@@ -379,7 +376,7 @@ print(dataset_type)  # kedro.io.memory_dataset.MemoryDataset
 ```
 
 If the dataset is not present and no patterns match, the method raises:
+
 ```python
 DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
-```
 ```

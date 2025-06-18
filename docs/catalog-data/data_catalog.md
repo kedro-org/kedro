@@ -39,6 +39,7 @@ shuttles:
 ### Configuring dataset parameters in `catalog.yml`
 
 The dataset configuration in `catalog.yml` is defined as follows:
+
 1. The top-level key is the dataset name used as a dataset identifier in the catalog - `shuttles`, `weather` in the example below.
 2. The next level includes multiple keys. The first one is the mandatory key - `type` which defines the type of dataset to use.
 The rest of the keys are dataset parameters and vary depending on the implementation.

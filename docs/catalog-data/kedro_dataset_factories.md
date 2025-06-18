@@ -71,9 +71,9 @@ A user catch-all pattern acts as a fallback when no dataset patterns match. It a
   type: pandas.CSVDataset
   filepath: data/{default_dataset}.csv
 ```
-```{note}
-Only one user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
-```
+
+!!! note
+    Only one user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
 
 **Default runtime patterns**
 
@@ -158,9 +158,8 @@ Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
 - Default behavior: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
 - Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
 
-```{note}
-Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
-```
+!!! note
+    Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
 
 ## How to generalise datasets of the same type
 
@@ -413,9 +412,8 @@ data_processing:
     - reviews-01_raw#csv
 ```
 
-```{note}
-If no pipelines are specified, the `__default__` pipeline is used.
-```
+!!! note
+    If no pipelines are specified, the `__default__` pipeline is used.
 
 **List patterns**
 
@@ -466,9 +464,8 @@ companies#csv:
       layer: training
 ```
 
-```{note}
-If no pipelines are specified, the `__default__` pipeline is used.
-```
+!!! note
+    If no pipelines are specified, the `__default__` pipeline is used.
 
 ### Implementation details and Python API usage
 
@@ -477,11 +474,13 @@ To ensure a consistent experience across the CLI, interactive environments (like
 At the core of this implementation is the `CatalogCommandsMixin` - a mixin class that extends the DataCatalog with additional methods for working with dataset factory patterns and pipeline-specific datasets.
 
 **Why use a mixin?**
+
 The goal was to keep pipeline logic decoupled from the core `DataCatalog`, while still providing seamless access to helpful methods utilizing pipelines.
 
 This mixin approach allows these commands to be injected only when needed - avoiding unnecessary overhead in simpler catalog use cases.
 
-**What This Means in Practice**
+**What This Means in Practice?**
+
 You don't need to do anything if:
 
 - You're using Kedro via CLI, or

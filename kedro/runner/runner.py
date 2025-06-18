@@ -174,17 +174,7 @@ class AbstractRunner(ABC):
             True if the output is persistent and missing.
         """
         # First check if it's explicitly in the catalog
-        try:
-            dataset = catalog.get(output)
-        except Exception as e:
-            # If materialization fails (e.g., bad config), we cannot know
-            # its properties. The safest "fail fast" behavior is to let
-            # the exception propagate.
-            self._logger.error(
-                f"Failed to instantiate dataset '{output}' to check its persistence. "
-                f"Please check your catalog configuration. Error: {e}"
-            )
-            raise
+        dataset = catalog._datasets.get(output)
 
         if dataset is not None:
             # It's explicitly in the catalog

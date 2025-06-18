@@ -18,11 +18,11 @@ from pathlib import Path
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from kedro.framework.project import configure_project
-from kedro.utils import _find_kedro_project
+from kedro.utils import find_kedro_project
 
 # Get project root
 current_dir = Path(__file__).resolve().parent
-project_root = _find_kedro_project(current_dir)
+project_root = find_kedro_project(current_dir)
 bootstrap_project(Path(project_root))
 
 # Create and use the session

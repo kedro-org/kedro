@@ -1,3 +1,31 @@
+# Release 1.0.0
+
+## Major features and improvements
+* Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
+* Added a `prefix_datasets_with_namespace` argument to the `Pipeline` class which allows users to turn on or off the prefixing of the namespace to the node inputs, outputs, and parameters.
+* Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
+* Added an option to select which multiprocessing start method is going to be used on `ParallelRunner` via the `KEDRO_MP_CONTEXT` environment variable.
+
+## Bug fixes and other changes
+* Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
+* Added support for running multiple namespaces within a single session.
+* Updated `kedro registry describe` to return the node name property instead of creating its own name for the node.
+
+## Documentation changes
+## Community contributions
+
+## Breaking changes to the API
+* Private methods `_is_project` and `_find_kedro_project` are changed to `is_kedro_project` and `find_kedro_project`.
+* Renamed instances of `extra_params` and `_extra_params` to `runtime_params`.
+* Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead.
+* Renamed `ModularPipelineError` to `PipelineError`.
+* `Pipeline.grouped_nodes_by_namespace()` was replaced with `group_nodes_by(group_by)`, which supports multiple strategies and returns a list of `GroupedNodes`, improving type safety and consistency for deployment plugin integrations.
+* The micro-packaging feature and the corresponding `micropkg` CLI command have been removed.
+* Renamed `session_id` parameter to `run_id` in all runner methods and hooks to improve API clarity and prepare for future multi-run session support.
+
+## Migration guide from Kedro 0.19.* to 1.*
+[See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+
 # Upcoming Release
 
 ## Major features and improvements

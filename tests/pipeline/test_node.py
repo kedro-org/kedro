@@ -420,7 +420,7 @@ class TestNames:
     def test_namespaced(self):
         n = node(identity, ["in"], ["out"], namespace="namespace")
         assert str(n) == "identity([in]) -> [out]"
-        assert n.name == "namespace.identity([in]) -> [out]"
+        assert re.match(r"^namespace\.identity__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
 
     def test_named_and_namespaced(self):
@@ -432,25 +432,25 @@ class TestNames:
     def test_function(self):
         n = node(identity, ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"
-        assert n.name == "identity([in]) -> [out]"
+        assert re.match(r"^identity__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
 
     def test_lambda(self):
         n = node(lambda a: a, ["in"], ["out"])
         assert str(n) == "<lambda>([in]) -> [out]"
-        assert n.name == "<lambda>([in]) -> [out]"
+        assert re.match(r"^<lambda>__[0-9a-f]{8}$", n.name)
         assert n.short_name == "<Lambda>"
 
     def test_partial(self):
         n = node(partial(identity), ["in"], ["out"])
         assert str(n) == "<partial>([in]) -> [out]"
-        assert n.name == "<partial>([in]) -> [out]"
+        assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "<Partial>"
 
     def test_updated_partial(self):
         n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"
-        assert n.name == "identity([in]) -> [out]"
+        assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
 
     def test_updated_partial_dict_inputs(self):
@@ -460,5 +460,115 @@ class TestNames:
             ["out"],
         )
         assert str(n) == "biconcat([in2]) -> [out]"
-        assert n.name == "biconcat([in2]) -> [out]"
+        assert re.match(r"^partial\(biconcat\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Biconcat"
+
+
+class TestNodeInputOutputNameValidation:
+    @staticmethod
+    def dummy_function(input_data):
+        return input_data
+
+    def test_valid_namespaced_inputs_and_outputs(self):
+        """Test that valid namespaced inputs and outputs are accepted."""
+        n = node(
+            func=self.dummy_function,
+            inputs="namespace.input_dataset",
+            outputs="namespace.output_dataset",
+            namespace="namespace",
+        )
+        assert n.inputs == ["namespace.input_dataset"]
+        assert n.outputs == ["namespace.output_dataset"]
+
+    def test_invalid_namespaced_inputs(self):
+        """Test that inputs with mismatched namespaces raise a ValueError."""
+        with pytest.warns(
+            UserWarning,
+            match="Dataset name 'wrong_namespace.input_dataset' contains '.' characters",
+        ):
+            node(
+                func=self.dummy_function,
+                inputs="wrong_namespace.input_dataset",
+                outputs="namespace.output_dataset",
+                namespace="namespace",
+            )
+
+    def test_invalid_namespaced_outputs(self):
+        """Test that outputs with mismatched namespaces raise a ValueError."""
+        with pytest.warns(
+            UserWarning,
+            match="Dataset name 'wrong_namespace.output_dataset' contains '.' characters",
+        ):
+            node(
+                func=self.dummy_function,
+                inputs="namespace.input_dataset",
+                outputs="wrong_namespace.output_dataset",
+                namespace="namespace",
+            )
+
+    def test_valid_params_prefixed_inputs(self):
+        """Test that params-prefixed inputs are accepted."""
+        n = node(
+            func=self.dummy_function,
+            inputs="params:example.param",
+            outputs="output_dataset",
+        )
+        assert n.inputs == ["params:example.param"]
+        assert n.outputs == ["output_dataset"]
+
+    def test_invalid_inputs_with_dot_no_namespace(self):
+        """Test that inputs with '.' but no namespace raise a ValueError."""
+        with pytest.warns(
+            UserWarning, match="Dataset name 'input.dataset' contains '.' characters"
+        ):
+            node(
+                func=self.dummy_function,
+                inputs="input.dataset",
+                outputs="output_dataset",
+            )
+
+    def test_invalid_outputs_with_dot_no_namespace(self):
+        """Test that outputs with '.' but no namespace raise a ValueError."""
+        with pytest.warns(
+            UserWarning, match="Dataset name 'output.dataset' contains '.' characters"
+        ):
+            node(
+                func=self.dummy_function,
+                inputs="input_dataset",
+                outputs="output.dataset",
+            )
+
+    def test_valid_multi_level_namespace(self):
+        """Test that multi-level namespaces are accepted."""
+        n = node(
+            func=self.dummy_function,
+            inputs="namespace.subnamespace.input_dataset",
+            outputs="namespace.subnamespace.output_dataset",
+            namespace="namespace.subnamespace",
+        )
+        assert n.inputs == ["namespace.subnamespace.input_dataset"]
+        assert n.outputs == ["namespace.subnamespace.output_dataset"]
+
+    def test_dataset_namespace_matches_pipeline_namespace(self):
+        """Test that node level namespace specification doesn't throw the error."""
+        n = node(
+            func=self.dummy_function,
+            inputs="namespace.input_dataset",
+            outputs="namespace.output_dataset",
+            namespace="namespace.other",
+        )
+        assert n.inputs == ["namespace.input_dataset"]
+        assert n.outputs == ["namespace.output_dataset"]
+
+    def test_mismatched_namespace(self):
+        """Test that mismatched namespaces in inputs and outputs raise a UserWarning."""
+        with pytest.warns(
+            UserWarning,
+            match="Dataset name 'other_namespace.output_dataset' contains '.' characters",
+        ):
+            node(
+                func=self.dummy_function,
+                inputs="namespace.input_dataset",
+                outputs="other_namespace.output_dataset",
+                namespace="namespace",
+            )

@@ -195,7 +195,7 @@ class TestPipelineHooks:
         call_record = on_node_error_calls[0]
         _assert_hook_call_record_has_expected_parameters(
             call_record,
-            ["error", "node", "catalog", "inputs", "is_async", "session_id"],
+            ["error", "node", "catalog", "inputs", "is_async", "run_id"],
         )
         expected_error = ValueError("broken")
         assert_exceptions_equal(call_record.error, expected_error)
@@ -218,7 +218,7 @@ class TestNodeHooks:
         assert len(before_node_run_calls) == 1
         call_record = before_node_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["node", "catalog", "inputs", "is_async", "session_id"]
+            call_record, ["node", "catalog", "inputs", "is_async", "run_id"]
         )
         # sanity check a couple of important parameters
         assert call_record.inputs["cars"].to_dict() == dummy_dataframe.to_dict()
@@ -231,7 +231,7 @@ class TestNodeHooks:
         call_record = after_node_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
             call_record,
-            ["node", "catalog", "inputs", "outputs", "is_async", "session_id"],
+            ["node", "catalog", "inputs", "outputs", "is_async", "run_id"],
         )
         # sanity check a couple of important parameters
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
@@ -252,7 +252,7 @@ class TestNodeHooks:
         for call_record in on_node_error_records:
             _assert_hook_call_record_has_expected_parameters(
                 call_record,
-                ["error", "node", "catalog", "inputs", "is_async", "session_id"],
+                ["error", "node", "catalog", "inputs", "is_async", "run_id"],
             )
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)
@@ -549,7 +549,7 @@ def sample_node_multiple_outputs():
 
 class LogCatalog(DataCatalog):
     def load(self, name: str, version: Optional[str] = None) -> Any:
-        dataset = super().load(name=name, version=version)
+        dataset = super().load(ds_name=name, version=version)
         logger.info("Catalog load")
         return dataset
 

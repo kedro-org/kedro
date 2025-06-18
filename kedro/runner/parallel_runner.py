@@ -4,7 +4,9 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 
 from __future__ import annotations
 
+import os
 from concurrent.futures import Executor, ProcessPoolExecutor
+from multiprocessing import get_context
 from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
@@ -173,14 +175,18 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _get_executor(self, max_workers: int) -> Executor:
-        return ProcessPoolExecutor(max_workers=max_workers)
+        context = os.environ.get("KEDRO_MP_CONTEXT")
+        if context and context not in {"fork", "spawn"}:
+            context = None
+        ctx = get_context(context)
+        return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx)
 
     def _run(
         self,
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """The method implementing parallel pipeline running.
 
@@ -188,7 +194,7 @@ class ParallelRunner(AbstractRunner):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
 
         Raises:
             AttributeError: When the provided pipeline is not suitable for
@@ -207,5 +213,5 @@ class ParallelRunner(AbstractRunner):
         super()._run(
             pipeline=pipeline,
             catalog=catalog,
-            session_id=session_id,
+            run_id=run_id,
         )

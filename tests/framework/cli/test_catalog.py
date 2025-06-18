@@ -3,7 +3,7 @@ import yaml
 from click.testing import CliRunner
 from kedro_datasets.pandas import CSVDataset
 
-from kedro.io import DataCatalog, KedroDataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node, pipeline
 
 
@@ -153,13 +153,11 @@ def fake_catalog_config_with_factories_resolved():
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
 )
 class TestCatalogListCommand:
-    def test_list_all_pipelines(
-        self, fake_project_cli_parametrized, fake_metadata, mocker
-    ):
+    def test_list_all_pipelines(self, fake_project_cli, fake_metadata, mocker):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized, ["catalog", "list"], obj=fake_metadata
+            fake_project_cli, ["catalog", "list"], obj=fake_metadata
         )
 
         assert not result.exit_code
@@ -169,13 +167,11 @@ class TestCatalogListCommand:
         }
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_list_specific_pipelines(
-        self, fake_project_cli_parametrized, fake_metadata, mocker
-    ):
+    def test_list_specific_pipelines(self, fake_project_cli, fake_metadata, mocker):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list", "--pipeline", PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -184,9 +180,9 @@ class TestCatalogListCommand:
         expected_dict = {f"Datasets in '{PIPELINE_NAME}' pipeline": {}}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_not_found_pipeline(self, fake_project_cli_parametrized, fake_metadata):
+    def test_not_found_pipeline(self, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list", "--pipeline", "fake"],
             obj=fake_metadata,
         )
@@ -197,23 +193,14 @@ class TestCatalogListCommand:
         )
         assert expected_output in result.output
 
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
-    def test_no_param_datasets_in_respose(
+    def test_no_param_datasets_in_response(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         mocker,
         mock_pipelines,
-        catalog_type,
     ):
-        # TODO: remove pytest.mark.parametrize after removing old catalog
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         catalog_datasets = {
@@ -224,7 +211,7 @@ class TestCatalogListCommand:
             "not_used": CSVDataset(filepath="test2.csv"),
         }
 
-        mocked_context.catalog = catalog_type(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
             "datasets",
@@ -232,7 +219,7 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list"],
             obj=fake_metadata,
         )
@@ -252,30 +239,21 @@ class TestCatalogListCommand:
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
     def test_default_dataset(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         mocker,
         mock_pipelines,
-        catalog_type,
     ):
         """Test that datasets that are found in `Pipeline.datasets()`,
         but not in the catalog, are outputted under the key "DefaultDataset".
         """
-        # TODO: remove pytest.mark.parametrize after removing old catalog
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         catalog_datasets = {"some_dataset": CSVDataset(filepath="test.csv")}
-        mocked_context.catalog = catalog_type(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
             "datasets",
@@ -283,7 +261,7 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "list"],
             obj=fake_metadata,
         )
@@ -301,60 +279,54 @@ class TestCatalogListCommand:
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
-    def test_list_factory_generated_datasets(
-        self,
-        fake_project_cli_parametrized,
-        fake_metadata,
-        fake_load_context,
-        mocker,
-        mock_pipelines,
-        fake_catalog_config,
-        fake_credentials_config,
-        catalog_type,
-    ):
-        """Test that datasets generated from factory patterns in the catalog
-        are resolved correctly under the correct dataset classes.
-        """
-        # TODO: remove pytest.mark.parametrize after removing old catalog
-        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
-        mocked_context = fake_load_context.return_value
-        mocked_context.catalog = catalog_type.from_config(
-            catalog=fake_catalog_config, credentials=fake_credentials_config
-        )
-        mocker.patch.object(
-            mock_pipelines[PIPELINE_NAME],
-            "datasets",
-            return_value=mocked_context.catalog._datasets.keys()
-            | {"csv_example", "parquet_example"},
-        )
+    # [TODO: Uncomment below test once following -
+    # https://github.com/kedro-org/kedro/pull/4646/files/67546ef89aac769b69998def7a64b0cad3d0ca1a#r2036128769]
+    # def test_list_factory_generated_datasets(
+    #     self,
+    #     fake_project_cli,
+    #     fake_metadata,
+    #     fake_load_context,
+    #     mocker,
+    #     mock_pipelines,
+    #     fake_catalog_config,
+    #     fake_credentials_config,
+    # ):
+    #     """Test that datasets generated from factory patterns in the catalog
+    #     are resolved correctly under the correct dataset classes.
+    #     """
+    #     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    #     mocked_context = fake_load_context.return_value
 
-        result = CliRunner().invoke(
-            fake_project_cli_parametrized,
-            ["catalog", "list"],
-            obj=fake_metadata,
-        )
-        assert not result.exit_code
-        expected_dict = {
-            f"Datasets in '{PIPELINE_NAME}' pipeline": {
-                "Datasets generated from factories": {
-                    "pandas.CSVDataset": ["csv_example"],
-                    "pandas.ParquetDataset": ["parquet_example"],
-                },
-                "Datasets mentioned in pipeline": {
-                    "CSVDataset": ["csv_test"],
-                },
-            }
-        }
-        key = f"Datasets in '{PIPELINE_NAME}' pipeline"
-        assert yaml_dump_mock.call_count == 1
-        assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
+    #     mocked_context.catalog = DataCatalog.from_config(
+    #         catalog=fake_catalog_config, credentials=fake_credentials_config
+    #     )
+    #     mocker.patch.object(
+    #         mock_pipelines[PIPELINE_NAME],
+    #         "datasets",
+    #         return_value=set(mocked_context.catalog) # This gives csv_test
+    #         | {"csv_example", "parquet_example"},
+    #     )
+
+    #     result = CliRunner().invoke(
+    #         fake_project_cli,
+    #         ["catalog", "list"],
+    #         obj=fake_metadata,
+    #     )
+    #     assert not result.exit_code
+    #     expected_dict = {
+    #         f"Datasets in '{PIPELINE_NAME}' pipeline": {
+    #             "Datasets generated from factories": {
+    #                 "pandas.CSVDataset": ["csv_example"],
+    #                 "pandas.ParquetDataset": ["parquet_example"],
+    #             },
+    #             "Datasets mentioned in pipeline": {
+    #                 "CSVDataset": ["csv_test"],
+    #             },
+    #         }
+    #     }
+    #     key = f"Datasets in '{PIPELINE_NAME}' pipeline"
+    #     assert yaml_dump_mock.call_count == 1
+    #     assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
 
 def identity(data):
@@ -375,20 +347,16 @@ class TestCatalogCreateCommand:
         for file in catalog_path.glob("catalog_*"):
             file.unlink()
 
-    def test_pipeline_argument_is_required(self, fake_project_cli_parametrized):
-        result = CliRunner().invoke(
-            fake_project_cli_parametrized, ["catalog", "create"]
-        )
+    def test_pipeline_argument_is_required(self, fake_project_cli):
+        result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
         assert result.exit_code
         expected_output = "Error: Missing option '--pipeline' / '-p'."
         assert expected_output in result.output
 
     @pytest.mark.usefixtures("fake_load_context")
-    def test_not_found_pipeline(
-        self, fake_project_cli_parametrized, fake_metadata, mock_pipelines
-    ):
+    def test_not_found_pipeline(self, fake_project_cli, fake_metadata, mock_pipelines):
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", "fake"],
             obj=fake_metadata,
         )
@@ -403,7 +371,7 @@ class TestCatalogCreateCommand:
         assert expected_output in result.output
 
     def test_catalog_is_created_in_base_by_default(
-        self, fake_project_cli_parametrized, fake_metadata, fake_repo_path, catalog_path
+        self, fake_project_cli, fake_metadata, fake_repo_path, catalog_path
     ):
         main_catalog_path = fake_repo_path / "conf" / "base" / "catalog.yml"
         main_catalog_config = yaml.safe_load(main_catalog_path.read_text())
@@ -412,7 +380,7 @@ class TestCatalogCreateCommand:
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -431,13 +399,13 @@ class TestCatalogCreateCommand:
 
     @pytest.mark.parametrize("catalog_path", ["local"], indirect=True)
     def test_catalog_is_created_in_correct_env(
-        self, fake_project_cli_parametrized, fake_metadata, catalog_path
+        self, fake_project_cli, fake_metadata, catalog_path
     ):
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         env = catalog_path.name
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME, "--env", env],
             obj=fake_metadata,
         )
@@ -445,30 +413,21 @@ class TestCatalogCreateCommand:
         assert not result.exit_code
         assert data_catalog_file.is_file()
 
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
     def test_no_missing_datasets(
         self,
-        fake_project_cli_parametrized,
+        fake_project_cli,
         fake_metadata,
         fake_load_context,
         fake_repo_path,
         mock_pipelines,
-        catalog_type,
     ):
-        # TODO: remove pytest.mark.parametrize after removing old catalog
         mocked_context = fake_load_context.return_value
 
         catalog_datasets = {
             "input_data": CSVDataset(filepath="test.csv"),
             "output_data": CSVDataset(filepath="test2.csv"),
         }
-        mocked_context.catalog = catalog_type(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocked_context.project_path = fake_repo_path
         mock_pipelines[self.PIPELINE_NAME] = pipeline(
             [node(identity, "input_data", "output_data")]
@@ -479,7 +438,7 @@ class TestCatalogCreateCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli_parametrized,
+            fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
             obj=fake_metadata,
         )
@@ -529,13 +488,6 @@ class TestCatalogCreateCommand:
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "fake_load_context")
 class TestCatalogFactoryCommands:
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
     @pytest.mark.usefixtures("mock_pipelines")
     def test_rank_catalog_factories(
         self,
@@ -544,12 +496,10 @@ class TestCatalogFactoryCommands:
         mocker,
         fake_load_context,
         fake_catalog_with_overlapping_factories,
-        catalog_type,
     ):
-        # TODO: remove pytest.mark.parametrize after removing old catalog
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
-        mocked_context.catalog = catalog_type.from_config(
+        mocked_context.catalog = DataCatalog.from_config(
             fake_catalog_with_overlapping_factories
         )
         result = CliRunner().invoke(
@@ -567,21 +517,12 @@ class TestCatalogFactoryCommands:
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0] == expected_patterns_sorted
 
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
     def test_rank_catalog_factories_with_no_factories(
         self,
         fake_project_cli,
         fake_metadata,
         fake_load_context,
-        catalog_type,
     ):
-        # TODO: remove pytest.mark.parametrize after removing old catalog
         mocked_context = fake_load_context.return_value
 
         catalog_datasets = {
@@ -589,7 +530,7 @@ class TestCatalogFactoryCommands:
             "intermediate": MemoryDataset(),
             "not_used": CSVDataset(filepath="test2.csv"),
         }
-        mocked_context.catalog = catalog_type(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
 
         result = CliRunner().invoke(
             fake_project_cli, ["catalog", "rank"], obj=fake_metadata
@@ -599,13 +540,6 @@ class TestCatalogFactoryCommands:
         expected_output = "There are no dataset factories in the catalog."
         assert expected_output in result.output
 
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
     @pytest.mark.usefixtures("mock_pipelines")
     def test_catalog_resolve(
         self,
@@ -617,10 +551,8 @@ class TestCatalogFactoryCommands:
         fake_catalog_config,
         fake_catalog_config_resolved,
         fake_credentials_config,
-        catalog_type,
     ):
         """Test that datasets factories are correctly resolved to the explicit datasets in the pipeline."""
-        # TODO: remove pytest.mark.parametrize after removing old catalog
         mocked_context = fake_load_context.return_value
         mocked_context.config_loader = {
             "catalog": fake_catalog_config,
@@ -650,13 +582,6 @@ class TestCatalogFactoryCommands:
         for ds in placeholder_ds:
             assert ds not in result.output
 
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
     @pytest.mark.usefixtures("mock_pipelines")
     def test_catalog_resolve_nested_config(
         self,
@@ -667,15 +592,13 @@ class TestCatalogFactoryCommands:
         mock_pipelines,
         fake_catalog_config_with_factories,
         fake_catalog_config_with_factories_resolved,
-        catalog_type,
     ):
         """Test that explicit catalog entries are not overwritten by factory config."""
-        # TODO: remove pytest.mark.parametrize after removing old catalog
         mocked_context = fake_load_context.return_value
         mocked_context.project_path = fake_metadata.project_path
 
         mocked_context.config_loader = {"catalog": fake_catalog_config_with_factories}
-        mocked_context.catalog = catalog_type.from_config(
+        mocked_context.catalog = DataCatalog.from_config(
             fake_catalog_config_with_factories
         )
 
@@ -695,13 +618,6 @@ class TestCatalogFactoryCommands:
 
         assert resolved_config == fake_catalog_config_with_factories_resolved
 
-    @pytest.mark.parametrize(
-        "catalog_type",
-        [
-            DataCatalog,
-            KedroDataCatalog,
-        ],
-    )
     @pytest.mark.usefixtures("mock_pipelines")
     def test_no_param_datasets_in_resolve(
         self,
@@ -710,9 +626,7 @@ class TestCatalogFactoryCommands:
         fake_load_context,
         mocker,
         mock_pipelines,
-        catalog_type,
     ):
-        # TODO: remove pytest.mark.parametrize after removing old catalog
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
 
@@ -732,7 +646,7 @@ class TestCatalogFactoryCommands:
         }
 
         mocked_context.config_loader = {"catalog": catalog_config}
-        mocked_context.catalog = catalog_type(datasets=catalog_datasets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
 
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],

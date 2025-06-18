@@ -157,6 +157,8 @@ nav:
           - Data and pipeline versioning: catalog-data/kedro_dvc_versioning.md
           - Partitioned and incremental datasets: catalog-data/partitioned_and_incremental_datasets.md
           - Programmatic usage: catalog-data/advanced_data_catalog_usage.md
+          - Lazy loading: catalog-data/lazy_loading.md
+          - Deprecated API: docs/catalog-data/deprecated_api.md
           - Test phase: catalog-data/test_phase.md
       - Build:
           - Nodes: build/nodes.md

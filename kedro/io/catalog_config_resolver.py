@@ -136,7 +136,7 @@ class CatalogConfigResolver:
         """
         if default_runtime_patterns is None:
             self._logger.warning(
-                f"Since runtime patterns are not provided, setting"
+                f"Since runtime patterns are not provided, setting "
                 f"the runtime pattern to default value: {DEFAULT_RUNTIME_PATTERN}"
             )
         self._default_runtime_patterns = (

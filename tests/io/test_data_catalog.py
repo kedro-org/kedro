@@ -322,6 +322,21 @@ class TestDataCatalog:
         data_catalog_copy = deepcopy(data_catalog_from_config)
         assert not data_catalog_copy == expected_catalog
 
+    def test_get_returns_none_dataset_raises(self):
+        catalog = DataCatalog(datasets={})
+        catalog._datasets["bad_ds"] = None
+        with pytest.raises(
+            DatasetNotFoundError, match="Dataset 'bad_ds' not found in the catalog"
+        ):
+            catalog.get("bad_ds")
+
+    def test_get_type_missing_dataset_raises(self):
+        catalog = DataCatalog(datasets={})
+        with pytest.raises(
+            DatasetNotFoundError, match="Dataset 'missing_ds' not found in the catalog"
+        ):
+            catalog.get_type("missing_ds")
+
     class TestDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):
             """Test dumping catalog config"""

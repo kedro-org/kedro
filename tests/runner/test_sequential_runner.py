@@ -81,7 +81,9 @@ class TestSequentialRunnerBranchlessPipeline:
         with pytest.raises(DatasetError, match=pattern):
             SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
-    def test_saved_output_is_returned_by_runner(self, is_async, saving_result_pipeline):
+    def test_saved_output_is_returned_by_runner(
+        self, is_async, saving_result_pipeline, persistent_test_dataset
+    ):
         def _load():
             return 0
 

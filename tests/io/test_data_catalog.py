@@ -330,11 +330,12 @@ class TestDataCatalog:
         ):
             catalog.get("bad_ds")
 
-    def test_validate_versions_none_dataset(self):
-        load_versions = {"test_ds": "v1"}
-        save_version = "v1"
-        result = DataCatalog._validate_versions(None, load_versions, save_version)
-        assert result == (load_versions, save_version)
+    def test_get_type_missing_dataset_raises(self):
+        catalog = DataCatalog(datasets={})
+        with pytest.raises(
+            DatasetNotFoundError, match="Dataset 'missing_ds' not found in the catalog"
+        ):
+            catalog.get_type("missing_ds")
 
     class TestDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):

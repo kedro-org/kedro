@@ -5,7 +5,6 @@ import pytest
 from kedro.io import (
     AbstractDataset,
     DataCatalog,
-    LambdaDataset,
     MemoryDataset,
     SharedMemoryDataCatalog,
 )
@@ -77,13 +76,7 @@ def create_persistent_dataset(request):
     """Factory fixture to create appropriate persistent dataset based on runner type"""
 
     def _create_dataset(exists_result=False):
-        runner_class = request.node.callspec.params.get("runner_class")
-        if runner_class == ParallelRunner:
-            # Use serializable dataset for ParallelRunner
-            return DummyDataset(exists_result=exists_result)
-        else:
-            # Use LambdaDataset for other runners
-            return LambdaDataset(load=lambda: None, save=lambda x: None)
+        return DummyDataset(exists_result=exists_result)
 
     return _create_dataset
 

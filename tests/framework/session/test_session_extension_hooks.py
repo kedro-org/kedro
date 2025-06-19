@@ -464,20 +464,19 @@ def mock_session_with_broken_before_node_run_hooks(
 class TestBeforeNodeRunHookWithInputUpdates:
     """Test the behavior of `before_node_run_hook` when updating node inputs."""
 
-    # TODO: Fix test
-    # def test_correct_input_update(
-    #     self,
-    #     mock_session_with_before_node_run_hooks,
-    #     dummy_dataframe,
-    # ):
-    #     context = mock_session_with_before_node_run_hooks.load_context()
-    #     catalog = context.catalog
-    #     catalog.save("cars", dummy_dataframe)
-    #     catalog.save("boats", dummy_dataframe)
-    #
-    #     result = mock_session_with_before_node_run_hooks.run()
-    #     assert isinstance(result["planes"], MockDatasetReplacement)
-    #     assert isinstance(result["ships"], pd.DataFrame)
+    def test_correct_input_update(
+        self,
+        mock_session_with_before_node_run_hooks,
+        dummy_dataframe,
+    ):
+        context = mock_session_with_before_node_run_hooks.load_context()
+        catalog = context.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        result = mock_session_with_before_node_run_hooks.run()
+        assert isinstance(result["planes"].load(), MockDatasetReplacement)
+        assert isinstance(result["ships"].load(), pd.DataFrame)
 
     @SKIP_ON_WINDOWS_AND_MACOS
     def test_correct_input_update_parallel(
@@ -491,8 +490,8 @@ class TestBeforeNodeRunHookWithInputUpdates:
         catalog.save("boats", dummy_dataframe)
 
         result = mock_session_with_before_node_run_hooks.run(runner=ParallelRunner())
-        assert isinstance(result["planes"], MockDatasetReplacement)
-        assert isinstance(result["ships"], pd.DataFrame)
+        assert isinstance(result["planes"].load(), MockDatasetReplacement)
+        assert isinstance(result["ships"].load(), pd.DataFrame)
 
     def test_broken_input_update(
         self, mock_session_with_broken_before_node_run_hooks, dummy_dataframe

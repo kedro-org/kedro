@@ -489,7 +489,9 @@ class TestBeforeNodeRunHookWithInputUpdates:
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
 
-        result = mock_session_with_before_node_run_hooks.run(runner=ParallelRunner())
+        # We need ParallelRunner object to exist to retrieve data from SharedMemoryDataset
+        runner = ParallelRunner()
+        result = mock_session_with_before_node_run_hooks.run(runner=runner)
         assert isinstance(result["planes"].load(), MockDatasetReplacement)
         assert isinstance(result["ships"].load(), pd.DataFrame)
 

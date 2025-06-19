@@ -5,7 +5,6 @@ import pytest
 from kedro.io import (
     AbstractDataset,
     DataCatalog,
-    LambdaDataset,
     MemoryDataset,
     SharedMemoryDataCatalog,
 )
@@ -15,10 +14,10 @@ from tests.runner.conftest import identity
 
 
 class DummyDataset(AbstractDataset):
-    """A dummy dataset for ParallelRunner tests."""
+    """A dummy dataset for tests."""
 
-    def __init__(self, exists_result=False):
-        self._data = None
+    def __init__(self, exists_result=False, initial_data=None):
+        self._data = initial_data
         self._exists_result = exists_result
 
     def _save(self, data):
@@ -58,6 +57,11 @@ def mixed_node_func(x):
     return (x, x + "_persistent")
 
 
+def identity_with_default(x="default_value"):
+    """Identity function that returns a default value if input is None"""
+    return x if x is not None else "default_value"
+
+
 @pytest.fixture
 def create_catalog(request):
     """Factory fixture to create appropriate catalog based on runner type"""
@@ -77,13 +81,7 @@ def create_persistent_dataset(request):
     """Factory fixture to create appropriate persistent dataset based on runner type"""
 
     def _create_dataset(exists_result=False):
-        runner_class = request.node.callspec.params.get("runner_class")
-        if runner_class == ParallelRunner:
-            # Use serializable dataset for ParallelRunner
-            return DummyDataset(exists_result=exists_result)
-        else:
-            # Use LambdaDataset for other runners
-            return LambdaDataset(load=lambda: None, save=lambda x: None)
+            return DummyDataset(exists_result=exists_result, initial_data="test_data")
 
     return _create_dataset
 
@@ -115,7 +113,8 @@ class TestOnlyMissingOutputs:
 
         # Should call the filter method
         spy_filter.assert_called_once()
-        assert "Running all 1 nodes (no outputs to skip)" in caplog.text
+        # Updated assertion to match new log format
+        assert "Running 1 out of 1 nodes" in caplog.text
 
     def test_only_missing_outputs_some_outputs_exist(
         self, runner_class, create_catalog, create_persistent_dataset, mocker, caplog
@@ -169,7 +168,7 @@ class TestOnlyMissingOutputs:
         )
 
         catalog["A"] = MemoryDataset("data_a")
-        catalog["B"] = MemoryDataset("data_b")
+        catalog["B"] = MemoryDataset("data_b")  # Ephemeral intermediate
         # Make C a persistent dataset that doesn't exist
         catalog["C"] = create_persistent_dataset(exists_result=False)
 
@@ -184,8 +183,93 @@ class TestOnlyMissingOutputs:
 
         # Should call the filter method
         spy_filter.assert_called_once()
-        # Since C is missing, all nodes needed to produce C should run
-        assert "Running all 2 nodes (no outputs to skip)" in caplog.text
+        # Since C is missing and B is ephemeral, all nodes needed to produce C should run
+        assert "Running 2 out of 2 nodes" in caplog.text
+
+    def test_only_missing_outputs_granular_skipping(
+        self, runner_class, create_catalog, create_persistent_dataset, mocker, caplog
+    ):
+        """Test granular skipping: skip upstream nodes whose persistent outputs exist"""
+        catalog = create_catalog()
+
+        # Create pipeline: A -> B -> C
+        # Where B is persistent and exists, C is persistent and missing
+        test_pipeline = pipeline(
+            [
+                node(identity_with_default, "A", "B", name="node1"),
+                node(identity_with_default, "B", "C", name="node2"),
+            ]
+        )
+
+        catalog["A"] = MemoryDataset("data_a")
+        # Make B a persistent dataset that exists
+        catalog["B"] = create_persistent_dataset(exists_result=True)
+        # Make C a persistent dataset that doesn't exist
+        catalog["C"] = create_persistent_dataset(exists_result=False)
+
+        # Only mock exists for non-ParallelRunner
+        if runner_class != ParallelRunner:
+
+            def mock_exists(dataset_name):
+                return dataset_name == "B"  # B exists, C doesn't
+
+            catalog.exists = mocker.Mock(side_effect=mock_exists)
+
+        runner = runner_class()
+        spy_filter = mocker.spy(runner, "_filter_pipeline_for_missing_outputs")
+
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # Should call the filter method
+        spy_filter.assert_called_once()
+
+        # NEW BEHAVIOR: Since B exists and is persistent, node1 should be skipped
+        # Only node2 should run to produce the missing C
+        assert "Skipping 1 nodes with existing outputs: node1" in caplog.text
+        assert "Running 1 out of 2 nodes" in caplog.text
+
+    def test_only_missing_outputs_complex_granular_skipping(
+        self, runner_class, create_catalog, create_persistent_dataset, mocker, caplog
+    ):
+        """Test complex pipeline with mix of existing and missing persistent outputs"""
+        catalog = create_catalog()
+
+        # Pipeline:
+        # input -> nodeA -> persistentA (exists)
+        # persistentA -> nodeB -> persistentB (missing)
+        # input -> nodeC -> persistentC (exists)
+        # persistentC -> nodeD -> persistentD (missing)
+        test_pipeline = pipeline(
+            [
+                node(identity_with_default, "input", "persistentA", name="nodeA"),
+                node(identity_with_default, "persistentA", "persistentB", name="nodeB"),
+                node(identity_with_default, "input", "persistentC", name="nodeC"),
+                node(identity_with_default, "persistentC", "persistentD", name="nodeD"),
+            ]
+        )
+
+        catalog["input"] = MemoryDataset("data")
+        catalog["persistentA"] = create_persistent_dataset(exists_result=True)
+        catalog["persistentB"] = create_persistent_dataset(exists_result=False)
+        catalog["persistentC"] = create_persistent_dataset(exists_result=True)
+        catalog["persistentD"] = create_persistent_dataset(exists_result=False)
+
+        # Only mock exists for non-ParallelRunner
+        if runner_class != ParallelRunner:
+
+            def mock_exists(dataset_name):
+                return dataset_name in ["persistentA", "persistentC"]
+
+            catalog.exists = mocker.Mock(side_effect=mock_exists)
+
+        runner = runner_class()
+        runner.run(test_pipeline, catalog, only_missing_outputs=True)
+
+        # Should skip nodeA and nodeC (their outputs exist)
+        # Should run nodeB and nodeD (their outputs are missing)
+        log_text = caplog.text
+        assert "Skipping 2 nodes with existing outputs: nodeA, nodeC" in log_text
+        assert "Running 2 out of 4 nodes" in log_text
 
     def test_only_missing_outputs_false_does_not_filter(
         self, runner_class, create_catalog, mocker
@@ -247,16 +331,13 @@ class TestOnlyMissingOutputs:
 
         # Should skip nodeA, nodeB but run nodeC, nodeD, nodeE, nodeF
         log_text = caplog.text
-        assert (
-            "Skipping 2 nodes with existing persistent outputs: nodeA, nodeB"
-            in log_text
-        )
-        assert "Running 4 out of 6 nodes (skipped 2 nodes)" in log_text
+        assert "Skipping 2 nodes with existing outputs: nodeA, nodeB" in log_text
+        assert "Running 4 out of 6 nodes" in log_text
 
     def test_only_missing_outputs_wasteful_node_optimization(
         self, runner_class, create_catalog, create_persistent_dataset, mocker, caplog
     ):
-        """Test that wasteful nodes are automatically excluded by pipeline.to_outputs()"""
+        """Test that wasteful nodes are automatically excluded"""
         catalog = create_catalog()
 
         # Pipeline structure:
@@ -335,7 +416,7 @@ class TestOnlyMissingOutputs:
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
         # Should run the node since the persistent output doesn't exist
-        assert "Running all 1 nodes" in caplog.text
+        assert "Running 1 out of 1 nodes" in caplog.text
 
     def test_only_missing_outputs_catalog_contains_exception(
         self, runner_class, create_catalog, mocker
@@ -415,8 +496,8 @@ class TestOnlyMissingOutputs:
         runner = runner_class()
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # All 4 nodes should run since D is missing
-        assert "Running all 4 nodes" in caplog.text
+        # All 4 nodes should run since D is missing and all intermediates are ephemeral
+        assert "Running 4 out of 4 nodes" in caplog.text
 
     def test_is_persistent_and_missing_ephemeral_dataset(
         self, runner_class, create_catalog, mocker
@@ -532,4 +613,4 @@ class TestOnlyMissingOutputs:
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
         # Should run because persistent output is missing
-        assert "Running all 1 nodes" in caplog.text
+        assert "Running 1 out of 1 nodes" in caplog.text

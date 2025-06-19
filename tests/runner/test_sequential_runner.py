@@ -25,13 +25,13 @@ class TestValidSequentialRunner:
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
         assert "Z" in result
-        assert result["Z"] == (42, 42, 42)
+        assert result["Z"].load() == (42, 42, 42)
 
     def test_run_without_plugin_manager(self, fan_out_fan_in, catalog):
         catalog["A"] = 42
         result = SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
-        assert result["Z"] == (42, 42, 42)
+        assert result["Z"].load() == (42, 42, 42)
 
     def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
         catalog["A"] = 42
@@ -67,25 +67,21 @@ class TestSequentialRunnerBranchlessPipeline:
         catalog = DataCatalog({}, {"ds1": 42})
         outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
-        assert outputs["ds3"] == 42
+        assert outputs["ds3"].load() == 42
 
     def test_no_feed(self, is_async, memory_catalog, branchless_pipeline):
         outputs = SequentialRunner(is_async=is_async).run(
             branchless_pipeline, memory_catalog
         )
         assert "ds3" in outputs
-        assert outputs["ds3"]["data"] == 42
+        assert outputs["ds3"].load()["data"] == 42
 
     def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
             SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
-    def test_result_saved_not_returned(
-        self, is_async, saving_result_pipeline, persistent_test_dataset
-    ):
-        """The pipeline runs ds->dsX but save does not save the output."""
-
+    def test_saved_output_is_returned_by_runner(self, is_async, saving_result_pipeline):
         def _load():
             return 0
 
@@ -102,7 +98,8 @@ class TestSequentialRunnerBranchlessPipeline:
             saving_result_pipeline, catalog
         )
 
-        assert output == {}
+        assert "dsX" in output
+        assert output["dsX"].load() == 0
 
 
 @pytest.mark.parametrize("is_async", [False, True])
@@ -121,12 +118,12 @@ class TestSequentialRunnerBranchedPipeline:
         )
         assert set(outputs.keys()) == {"ds8", "ds5", "ds6"}
         # the pipeline runs ds2->ds5
-        assert outputs["ds5"] == [1, 2, 3, 4, 5]
-        assert isinstance(outputs["ds8"], dict)
+        assert outputs["ds5"].load() == [1, 2, 3, 4, 5]
+        assert isinstance(outputs["ds8"].load(), dict)
         # the pipeline runs ds1->ds4->ds8
-        assert outputs["ds8"]["data"] == 42
+        assert outputs["ds8"].load()["data"] == 42
         # the pipeline runs ds3
-        assert isinstance(outputs["ds6"], pd.DataFrame)
+        assert isinstance(outputs["ds6"].load(), pd.DataFrame)
 
     def test_conflict_feed_catalog(
         self,
@@ -143,15 +140,13 @@ class TestSequentialRunnerBranchedPipeline:
         outputs = SequentialRunner(is_async=is_async).run(
             unfinished_outputs_pipeline, memory_catalog
         )
-        assert isinstance(outputs["ds8"], dict)
-        assert outputs["ds8"]["data"] == 0
-        assert isinstance(outputs["ds6"], pd.DataFrame)
+        assert isinstance(outputs["ds8"].load(), dict)
+        assert outputs["ds8"].load()["data"] == 0
+        assert isinstance(outputs["ds6"].load(), pd.DataFrame)
 
     def test_unsatisfied_inputs(self, is_async, unfinished_outputs_pipeline, catalog):
         """ds1, ds2 and ds3 were not specified."""
-        with pytest.raises(
-            ValueError, match=rf"not found in the {catalog.__class__.__name__}"
-        ):
+        with pytest.raises(DatasetError, match="has not been saved yet"):
             SequentialRunner(is_async=is_async).run(
                 unfinished_outputs_pipeline, catalog
             )

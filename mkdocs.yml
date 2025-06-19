@@ -157,6 +157,9 @@ nav:
           - Data and pipeline versioning: catalog-data/kedro_dvc_versioning.md
           - Partitioned and incremental datasets: catalog-data/partitioned_and_incremental_datasets.md
           - Programmatic usage: catalog-data/advanced_data_catalog_usage.md
+          - Lazy loading: catalog-data/lazy_loading.md
+          - Deprecated API: catalog-data/deprecated_api.md
+          - Test phase: catalog-data/test_phase.md
       - Build:
           - Nodes: build/nodes.md
           - Pipeline object: build/pipeline_introduction.md
@@ -224,6 +227,7 @@ nav:
                   - Startup: api/framework/kedro.framework.startup.md
               - kedro.io:
                   - Overview: api/io/kedro.io.md
+                  - DataCatalog: api/io/kedro.io.DataCatalog.md
                   - AbstractDataset: api/io/kedro.io.AbstractDataset.md
                   - AbstractVersionedDataset: api/io/kedro.io.AbstractVersionedDataset.md
                   - CachedDataset: api/io/kedro.io.CachedDataset.md

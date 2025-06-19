@@ -39,8 +39,10 @@
 
 ## Major features and improvements
 * Added execution time to pipeline completion log.
+
 ## Bug fixes and other changes
 * Fixed a recursion error in custom datasets when `_describe()` accessed `self.__dict__`.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Yury Fedotov](https://github.com/yury-fedotov)

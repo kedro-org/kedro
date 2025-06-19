@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import warnings
 from concurrent.futures import Executor, ThreadPoolExecutor
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from kedro.runner.runner import AbstractRunner
 
@@ -28,7 +28,6 @@ class ThreadRunner(AbstractRunner):
         self,
         max_workers: int | None = None,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """
         Instantiates the runner.
@@ -40,10 +39,6 @@ class ThreadRunner(AbstractRunner):
             is_async: If True, set to False, because `ThreadRunner`
                 doesn't support loading and saving the node inputs and
                 outputs asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
-                during the run. This is used to set the default datasets to MemoryDataset
-                for `ThreadRunner`.
-
         Raises:
             ValueError: bad parameters passed
         """
@@ -53,11 +48,7 @@ class ThreadRunner(AbstractRunner):
                 "node inputs and outputs asynchronously with threads. "
                 "Setting 'is_async' to False."
             )
-        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
-        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
-        super().__init__(
-            is_async=False, extra_dataset_patterns=self._extra_dataset_patterns
-        )
+        super().__init__(is_async=False)
 
         self._max_workers = self._validate_max_workers(max_workers)
 

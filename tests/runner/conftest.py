@@ -3,7 +3,7 @@ from random import random
 import pandas as pd
 import pytest
 
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset, SharedMemoryDataCatalog
 from kedro.pipeline import node, pipeline
 from tests.conftest import PersistentTestDataset
 
@@ -61,6 +61,11 @@ def pandas_df_raw_data():
 @pytest.fixture
 def catalog():
     return DataCatalog()
+
+
+@pytest.fixture
+def shared_memory_catalog():
+    return SharedMemoryDataCatalog()
 
 
 @pytest.fixture

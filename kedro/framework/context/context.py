@@ -12,8 +12,8 @@ from warnings import warn
 from attrs import define, field
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
-from kedro.framework.project import settings
-from kedro.io import CatalogProtocol, DataCatalog  # noqa: TCH001
+from kedro.framework.context import CatalogCommandsMixin
+from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
 
 if TYPE_CHECKING:
@@ -221,6 +221,7 @@ class KedroContext:
 
     def _get_catalog(
         self,
+        catalog_class: type = DataCatalog,
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
     ) -> CatalogProtocol:
@@ -241,7 +242,10 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        catalog: DataCatalog = settings.DATA_CATALOG_CLASS.from_config(
+        if catalog_class is DataCatalog:
+            catalog_class = compose_classes(catalog_class, CatalogCommandsMixin)
+
+        catalog: CatalogProtocol = catalog_class.from_config(  # type: ignore[attr-defined]
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,
@@ -311,3 +315,10 @@ class KedroContext:
 
 class KedroContextError(Exception):
     """Error occurred when loading project and running context pipeline."""
+
+
+def compose_classes(base: type, *mixins: type) -> type:
+    """Injecting mixins dynamically"""
+    t = (base, *mixins)
+    name = f"{base.__name__}With{''.join(x.__name__ for x in mixins)}"
+    return type(name, t, {})

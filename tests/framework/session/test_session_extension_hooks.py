@@ -490,8 +490,10 @@ class TestBeforeNodeRunHookWithInputUpdates:
         catalog.save("boats", dummy_dataframe)
 
         result = mock_session_with_before_node_run_hooks.run(runner=ParallelRunner())
-        assert isinstance(result["planes"].load(), MockDatasetReplacement)
-        assert isinstance(result["ships"].load(), pd.DataFrame)
+        assert "planes" in result
+        assert "ships" in result
+        assert isinstance(catalog["planes"].load(), MockDatasetReplacement)
+        assert isinstance(catalog["ships"].load(), pd.DataFrame)
 
     def test_broken_input_update(
         self, mock_session_with_broken_before_node_run_hooks, dummy_dataframe

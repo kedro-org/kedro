@@ -81,7 +81,7 @@ def create_persistent_dataset(request):
     """Factory fixture to create appropriate persistent dataset based on runner type"""
 
     def _create_dataset(exists_result=False):
-            return DummyDataset(exists_result=exists_result, initial_data="test_data")
+        return DummyDataset(exists_result=exists_result, initial_data="test_data")
 
     return _create_dataset
 

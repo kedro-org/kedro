@@ -135,20 +135,23 @@ class AbstractRunner(ABC):
 
         return output_to_node, node_consumers
 
-    def _should_run_for_final_output(
-        self,
-        node: Node,
-        pipeline: Pipeline,
-        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+    def _should_run_for_no_outputs(self, node: Node) -> bool:
+        """Check if node should run because it has no outputs."""
+        if not node.outputs:
+            self._logger.debug(f"Node '{node.name}' must run: has no outputs")
+            return True
+        return False
+
+    def _should_run_for_own_missing_output(
+        self, node: Node, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
     ) -> bool:
-        """Check if node should run because it produces missing final outputs."""
+        """Check if node should run because it has missing persistent outputs."""
         for output in node.outputs:
-            if output in pipeline.outputs():
-                if self._is_persistent_and_missing(output, catalog):
-                    self._logger.debug(
-                        f"Node '{node.name}' must run: produces missing final output '{output}'"
-                    )
-                    return True
+            if self._is_persistent_and_missing(output, catalog):
+                self._logger.debug(
+                    f"Node '{node.name}' must run: has missing output '{output}'"
+                )
+                return True
         return False
 
     def _is_output_needed_by_consumer(
@@ -185,18 +188,6 @@ class AbstractRunner(ABC):
                                 f"needed by running consumer '{consumer.name}'"
                             )
                             return True
-        return False
-
-    def _should_run_for_own_missing_output(
-        self, node: Node, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
-    ) -> bool:
-        """Check if node should run because it has missing persistent outputs."""
-        for output in node.outputs:
-            if self._is_persistent_and_missing(output, catalog):
-                self._logger.debug(
-                    f"Node '{node.name}' must run: has missing output '{output}'"
-                )
-                return True
         return False
 
     def _log_filtering_results(
@@ -244,15 +235,26 @@ class AbstractRunner(ABC):
         # Determine which nodes need to run
         nodes_to_run: set[Node] = set()
         for node in sorted_nodes:
-            should_run = (
-                self._should_run_for_final_output(node, pipeline, catalog)
-                or self._should_run_for_downstream_consumer(
-                    node, catalog, nodes_to_run, node_consumers
-                )
-                or self._should_run_for_own_missing_output(node, catalog)
-            )
+            run_this_node = False
 
-            if should_run:
+            # Always run nodes with no outputs
+            if self._should_run_for_no_outputs(node):
+                run_this_node = True
+
+            # Run if node produces a persistent output that is missing
+            if not run_this_node:
+                if self._should_run_for_own_missing_output(node, catalog):
+                    run_this_node = True
+
+            # Run if node produces output needed by downstream node that will run
+            # This handles both ephemeral and missing persistent outputs
+            if not run_this_node:
+                if self._should_run_for_downstream_consumer(
+                    node, catalog, nodes_to_run, node_consumers
+                ):
+                    run_this_node = True
+
+            if run_this_node:
                 nodes_to_run.add(node)
 
         # Create filtered pipeline

@@ -12,7 +12,6 @@ from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
     DatasetError,
-    LambdaDataset,
     MemoryDataset,
     SharedMemoryDataCatalog,
 )
@@ -184,7 +183,9 @@ class TestInvalidParallelRunner:
         with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(test_pipeline, shared_memory_catalog)
 
-    def test_dataset_not_serialisable(self, is_async, fan_out_fan_in):
+    def test_dataset_not_serialisable(
+        self, is_async, fan_out_fan_in, persistent_test_dataset
+    ):
         """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """
@@ -197,7 +198,7 @@ class TestInvalidParallelRunner:
 
         # Data set A cannot be serialised
         shared_memory_catalog = SharedMemoryDataCatalog(
-            {"A": LambdaDataset(load=_load, save=_save)}
+            {"A": persistent_test_dataset(load=_load, save=_save)}
         )
 
         test_pipeline = pipeline([fan_out_fan_in])

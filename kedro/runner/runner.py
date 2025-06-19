@@ -231,7 +231,7 @@ class AbstractRunner(ABC):
     def _filter_pipeline_for_missing_outputs(
         self, pipeline: Pipeline, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
     ) -> Pipeline:
-        """Filter pipeline using reverse topological order for O(N + E) complexity."""
+        """Filter pipeline using reverse topological order."""
         original_node_count = len(pipeline.nodes)
 
         # Get nodes in reverse topological order

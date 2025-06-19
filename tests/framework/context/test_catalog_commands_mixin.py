@@ -1,6 +1,9 @@
 import pytest
 
-from kedro.framework.context.catalog_mixins import CatalogCommandsMixin
+from kedro.framework.context.catalog_mixins import (
+    CatalogCommandsMixin,
+    _group_ds_by_type,
+)
 from kedro.framework.context.context import compose_classes
 from kedro.io import DataCatalog
 from kedro.io.memory_dataset import MemoryDataset
@@ -164,6 +167,37 @@ class TestCatalogCommands:
         result = catalog.list_datasets(pipelines=fake_pipeline)["pipeline_0"]
         assert result == expected_fake_config_list_datasets_output
 
+    def test_list_datasets_default_pipeline(
+        self, DataCatalogWithFactories, monkeypatch
+    ):
+        # Simulate _pipelines.keys() returning a default pipeline
+        from kedro.framework import project
+
+        fake_pipeline = Pipeline(
+            [
+                Node(
+                    func=lambda x: x,
+                    inputs="csv_test",
+                    outputs="memory_output",
+                    name="n1",
+                ),
+            ]
+        )
+
+        monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
+
+        catalog = DataCatalogWithFactories
+        result = catalog.list_datasets()  # No pipeline arg provided
+        assert "default" in result
+        assert "datasets" in result["default"]
+
+    def test_list_datasets_empty_pipeline(self, DataCatalogWithFactories):
+        catalog = DataCatalogWithFactories
+        result = catalog.list_datasets(pipelines=[])
+        assert isinstance(result, dict)
+        # Should be empty if no pipelines are passed
+        assert result == {}
+
     def test_list_patterns(self, DataCatalogWithFactories):
         catalog = DataCatalogWithFactories
         patterns = catalog.list_patterns()
@@ -181,6 +215,12 @@ class TestCatalogCommands:
         resolved_patterns = catalog.resolve_patterns(pipelines=[fake_pipeline])
         assert resolved_patterns == fake_catalog_config_resolved
 
+    def test_resolve_patterns_skips_parameters(self, DataCatalogWithFactories):
+        catalog = DataCatalogWithFactories
+        # Confirm 'params:fake_param' is excluded
+        resolved = catalog.resolve_patterns()
+        assert "params:fake_param" not in resolved
+
     def test_patterns_order(self, DataCatalogWithOverlappingFactories):
         catalog = DataCatalogWithOverlappingFactories
         # Ordered list of expected patterns
@@ -193,3 +233,9 @@ class TestCatalogCommands:
         ]
         pattern_list = catalog.list_patterns()
         assert pattern_list == expected_patterns_list
+
+    def test_group_ds_by_type_falls_back_to_default(self, DataCatalogWithFactories):
+        # Dataset not in catalog; should fallback to default type
+        catalog = DataCatalogWithFactories
+        grouped = _group_ds_by_type({"nonexistent_dataset"}, catalog)
+        assert "kedro.io.MemoryDataset" in grouped or "{default}" in grouped

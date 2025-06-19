@@ -250,7 +250,6 @@ nav:
                   - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
               - kedro.runner:
                   - Overview: api/runner/kedro.runner.md
-                  - run_node: api/runner/kedro.runner.run_node.md
                   - AbstractRunner: api/runner/kedro.runner.AbstractRunner.md
                   - SequentialRunner: api/runner/kedro.runner.SequentialRunner.md
                   - ParallelRunner: api/runner/kedro.runner.ParallelRunner.md

@@ -4,11 +4,9 @@ implementations.
 
 from __future__ import annotations
 
-import inspect
 import logging
 import os
 import sys
-import warnings
 from abc import ABC, abstractmethod
 from collections import Counter, deque
 from concurrent.futures import (
@@ -24,7 +22,6 @@ from typing import TYPE_CHECKING, Any
 
 from pluggy import PluginManager
 
-from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import CatalogProtocol, MemoryDataset, SharedMemoryDataset
 from kedro.pipeline import Pipeline
@@ -554,52 +551,3 @@ def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[
     sub_pipeline = pipeline.only_nodes(*node_names)
     initial_nodes = sub_pipeline.grouped_nodes[0]
     return initial_nodes
-
-
-def run_node(
-    node: Node,
-    catalog: CatalogProtocol,
-    hook_manager: PluginManager,
-    is_async: bool = False,
-    run_id: str | None = None,
-) -> Node:
-    """Run a single `Node` with inputs from and outputs to the `catalog`.
-
-    Args:
-        node: The ``Node`` to run.
-        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
-        hook_manager: The ``PluginManager`` to activate hooks.
-        is_async: If True, the node inputs and outputs are loaded and saved
-            asynchronously with threads. Defaults to False.
-        run_id: The run id of the pipeline run.
-
-    Raises:
-        ValueError: Raised if is_async is set to True for nodes wrapping
-            generator functions.
-
-    Returns:
-        The node argument.
-
-    """
-    warnings.warn(
-        "`run_node()` has been deprecated and will be removed in Kedro 1.0.0.",
-        KedroDeprecationWarning,
-    )
-
-    if is_async and inspect.isgeneratorfunction(node.func):
-        raise ValueError(
-            f"Async data loading and saving does not work with "
-            f"nodes wrapping generator functions. Please make "
-            f"sure you don't use `yield` anywhere "
-            f"in node {node!s}."
-        )
-
-    task = Task(
-        node=node,
-        catalog=catalog,
-        hook_manager=hook_manager,
-        is_async=is_async,
-        run_id=run_id,
-    )
-    node = task.execute()
-    return node

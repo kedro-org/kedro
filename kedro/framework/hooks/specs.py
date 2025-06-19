@@ -59,7 +59,6 @@ class NodeSpecs:
         run_id: str,
     ) -> dict[str, Any] | None:
         """Hook to be invoked before a node runs.
-        The arguments received are the same as those used by ``kedro.runner.run_node``
 
         Args:
             node: The ``Node`` to run.
@@ -88,8 +87,6 @@ class NodeSpecs:
         run_id: str,
     ) -> None:
         """Hook to be invoked after a node runs.
-        The arguments received are the same as those used by ``kedro.runner.run_node``
-        as well as the ``outputs`` of the node run.
 
         Args:
             node: The ``Node`` that ran.

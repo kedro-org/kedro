@@ -20,8 +20,6 @@ from itertools import chain
 from time import perf_counter
 from typing import TYPE_CHECKING, Any
 
-from pluggy import PluginManager
-
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.pipeline import Pipeline
 from kedro.runner.task import Task

@@ -6,7 +6,7 @@
 ## Documentation changes
 ## Community contributions
 
-# [PRE-RELEASE] 1.0.0rc1
+# Release 1.0.0rc1
 
 ## Major features and improvements
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.

@@ -26,7 +26,7 @@ from kedro.io.core import (
     parse_dataset_definition,
     validate_on_forbidden_chars,
 )
-from kedro.io.lambda_dataset import LambdaDataset
+from kedro.io.memory_dataset import MemoryDataset
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
 # Excludes None, as None values are not shown in the str representation.
@@ -323,7 +323,7 @@ class TestCoreFunctions:
     def test_dataset_name_typo(self, mocker):
         # If the module doesn't exist, it return None instead ModuleNotFoundError
         mocker.patch("kedro.io.core.load_obj", return_value=None)
-        dataset_name = "lAmbDaDaTAsET"
+        dataset_name = "MeMoRyDaTaSeT"
 
         with pytest.raises(
             DatasetError, match=f"Class '{dataset_name}' not found, is this a typo?"
@@ -331,16 +331,16 @@ class TestCoreFunctions:
             parse_dataset_definition({"type": dataset_name})
 
     def test_parse_dataset_definition(self):
-        config = {"type": "LambdaDataset"}
+        config = {"type": "MemoryDataset"}
         dataset, _ = parse_dataset_definition(config)
-        assert dataset is LambdaDataset
+        assert dataset is MemoryDataset
 
     def test_parse_dataset_definition_with_python_class_type(self):
         config = {"type": MyDataset}
         parse_dataset_definition(config)
 
     def test_dataset_missing_dependencies(self, mocker):
-        dataset_name = "LambdaDataset"
+        dataset_name = "MemoryDataset"
 
         def side_effect_function(value):
             import random_package  # noqa: F401
@@ -353,7 +353,7 @@ class TestCoreFunctions:
 
     def test_parse_dataset_definition_invalid_uppercase_s_in_dataset(self):
         """Test that an invalid dataset type with uppercase 'S' in 'Dataset' raises a warning"""
-        config = {"type": "LambdaDataSet"}  # Invalid type with uppercase 'S'
+        config = {"type": "MemoryDataSet"}  # Invalid type with uppercase 'S'
 
         # Check that the warning is issued
         with pytest.warns(
@@ -362,7 +362,7 @@ class TestCoreFunctions:
         ):
             with pytest.raises(
                 DatasetError,
-                match="Empty module name. Invalid dataset path: 'LambdaDataSet'. Please check if it's correct.",
+                match="Empty module name. Invalid dataset path: 'MemoryDataSet'. Please check if it's correct.",
             ):
                 parse_dataset_definition(config)
 
@@ -453,6 +453,30 @@ class TestAbstractDataset:
                 save_version=None,
             )
             assert "Failed to instantiate dataset" in str(exc_info.value)
+
+    def test_exists_exception_handling(self, mocker):
+        """Test that exists() properly handles exceptions from _exists()."""
+        dataset = MyDataset("test_path")
+
+        mocker.patch.object(dataset, "_exists", side_effect=Exception("Test exception"))
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.exists()
+
+        assert "Failed during exists check for dataset" in str(exc_info.value)
+        assert "Test exception" in str(exc_info.value)
+
+    def test_release_exception_handling(self, mocker):
+        """Test that release() properly handles exceptions from _release()."""
+        dataset = MyDataset("test_path")
+
+        mocker.patch.object(
+            dataset, "_release", side_effect=Exception("Test release exception")
+        )
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.release()
+
+        assert "Failed during release for dataset" in str(exc_info.value)
+        assert "Test release exception" in str(exc_info.value)
 
 
 class TestAbstractVersionedDataset:

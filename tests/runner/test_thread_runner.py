@@ -23,7 +23,7 @@ class TestValidThreadRunner:
         catalog["A"] = 42
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
-        assert result["Z"] == (42, 42, 42)
+        assert result["Z"].load() == (42, 42, 42)
 
     def test_thread_run_with_plugin_manager(self, fan_out_fan_in, catalog):
         catalog["A"] = 42
@@ -31,13 +31,13 @@ class TestValidThreadRunner:
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
         assert "Z" in result
-        assert result["Z"] == (42, 42, 42)
+        assert result["Z"].load() == (42, 42, 42)
 
     def test_memory_dataset_input(self, fan_out_fan_in):
         catalog = DataCatalog({"A": MemoryDataset("42")})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
-        assert result["Z"] == ("42", "42", "42")
+        assert result["Z"].load() == ("42", "42", "42")
 
     def test_does_not_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
         catalog["A"] = 42
@@ -100,7 +100,7 @@ class TestMaxWorkers:
         result = ThreadRunner(max_workers=user_specified_number).run(
             fan_out_fan_in, catalog
         )
-        assert result == {"Z": (42, 42, 42)}
+        assert result["Z"].load() == (42, 42, 42)
 
         executor_cls_mock.assert_called_once_with(max_workers=expected_number)
 
@@ -121,7 +121,7 @@ class TestIsAsync:
         with pytest.warns(UserWarning, match=pattern):
             result = ThreadRunner(is_async=True).run(fan_out_fan_in, catalog)
         assert "Z" in result
-        assert result["Z"] == (42, 42, 42)
+        assert result["Z"].load() == (42, 42, 42)
 
 
 class TestInvalidThreadRunner:

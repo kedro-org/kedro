@@ -111,84 +111,182 @@ class AbstractRunner(ABC):
 
         return run_output
 
-    def _build_dependency_maps(
-        self, pipeline: Pipeline
-    ) -> tuple[dict[str, Node], dict[Node, set[Node]]]:
-        """Build mappings for efficient node dependency lookups.
+    def _filter_pipeline_for_missing_outputs(
+        self, pipeline: Pipeline, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> Pipeline:
+        """Filter pipeline to only include nodes that need to run.
+
+        Uses reverse topological order to determine which nodes need to run
+        """
+        original_node_count = len(pipeline.nodes)
+
+        # Get nodes in reverse topological order
+        sorted_nodes = list(pipeline.nodes)
+        sorted_nodes.reverse()
+
+        # Build node mapping
+        node_children = self._build_node_children_map(pipeline)
+
+        # Determine which nodes need to run
+        nodes_to_run = self._determine_nodes_to_run(
+            sorted_nodes, catalog, node_children
+        )
+
+        # Create filtered pipeline
+        if not nodes_to_run:
+            self._log_filtering_results(
+                original_node_count, Pipeline([]), pipeline.nodes
+            )
+            return Pipeline([])
+
+        filtered_pipeline = pipeline.filter(node_names=[n.name for n in nodes_to_run])
+        self._log_filtering_results(
+            original_node_count, filtered_pipeline, pipeline.nodes
+        )
+
+        return filtered_pipeline
+
+    def _build_node_children_map(self, pipeline: Pipeline) -> dict[Node, set[Node]]:
+        """Build mapping of nodes to their children.
 
         Returns:
-            Tuple of (output_to_node, node_consumers) mappings.
+            Dictionary mapping each node to set of its child nodes.
         """
-        output_to_node: dict[str, Node] = {}
-        node_consumers: dict[Node, set[Node]] = {node: set() for node in pipeline.nodes}
+        # Empty children set
+        node_children: dict[Node, set[Node]] = {node: set() for node in pipeline.nodes}
 
+        # Build map for efficient lookup
+        output_to_node: dict[str, Node] = {}
         for node in pipeline.nodes:
             for output in node.outputs:
                 output_to_node[output] = node
 
-        # Build consumer relationships
+        # Build children relationships
         for node in pipeline.nodes:
-            for inp in node.inputs:
-                if inp in output_to_node:
-                    producer = output_to_node[inp]
-                    node_consumers[producer].add(node)
+            for input_dataset in node.inputs:
+                if input_dataset in output_to_node:
+                    parent = output_to_node[input_dataset]
+                    node_children[parent].add(node)
 
-        return output_to_node, node_consumers
+        return node_children
 
-    def _should_run_for_no_outputs(self, node: Node) -> bool:
-        """Check if node should run because it has no outputs."""
+    def _determine_nodes_to_run(
+        self,
+        sorted_nodes: list[Node],
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+        node_children: dict[Node, set[Node]],
+    ) -> set[Node]:
+        """Determine which nodes need to run based on missing outputs logic."""
+        nodes_to_run: set[Node] = set()
+
+        for node in sorted_nodes:
+            if self._should_node_run(node, catalog, nodes_to_run, node_children):
+                nodes_to_run.add(node)
+
+        return nodes_to_run
+
+    def _should_node_run(
+        self,
+        node: Node,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+        nodes_to_run: set[Node],
+        node_children: dict[Node, set[Node]],
+    ) -> bool:
+        """Check if a node should run based on various criteria."""
+        # Always run nodes with no outputs
         if not node.outputs:
             self._logger.debug(f"Node '{node.name}' must run: has no outputs")
             return True
+
+        # Run if node has missing persistent outputs
+        if self._has_missing_persistent_outputs(node, catalog):
+            return True
+
+        # Run if node's outputs are needed by children that will run
+        if self._outputs_needed_by_children(node, catalog, nodes_to_run, node_children):
+            return True
+
         return False
 
-    def _should_run_for_own_missing_output(
+    def _has_missing_persistent_outputs(
         self, node: Node, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
     ) -> bool:
-        """Check if node should run because it has missing persistent outputs."""
+        """Check if node has any persistent outputs that don't exist."""
         for output in node.outputs:
-            if self._is_persistent_and_missing(output, catalog):
+            if self._is_dataset_missing(output, catalog):
                 self._logger.debug(
                     f"Node '{node.name}' must run: has missing output '{output}'"
                 )
                 return True
         return False
 
-    def _is_output_needed_by_consumer(
-        self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
-    ) -> bool:
-        """Check if an output needs to be (re)generated for a consumer."""
-        if output not in catalog:
-            # Not in catalog - will be MemoryDataset (ephemeral)
-            return True
-
-        dataset = catalog.get(output)
-        if getattr(dataset, "_EPHEMERAL", False):
-            # Ephemeral output - must be generated
-            return True
-
-        # Persistent dataset - check if it exists
-        return not catalog.exists(output)
-
-    def _should_run_for_downstream_consumer(
+    def _outputs_needed_by_children(
         self,
         node: Node,
         catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         nodes_to_run: set[Node],
-        node_consumers: dict[Node, set[Node]],
+        node_children: dict[Node, set[Node]],
     ) -> bool:
-        """Check if node should run because downstream consumers need its outputs."""
-        for consumer in node_consumers[node]:
-            if consumer in nodes_to_run:
-                for output in node.outputs:
-                    if output in consumer.inputs:
-                        if self._is_output_needed_by_consumer(output, catalog):
-                            self._logger.debug(
-                                f"Node '{node.name}' must run: produces '{output}' "
-                                f"needed by running consumer '{consumer.name}'"
-                            )
-                            return True
+        """Check if any of node's outputs are needed by children that will run."""
+        children = node_children.get(node, set())
+
+        # Only check children that are scheduled to run
+        running_children = children & nodes_to_run
+
+        for child in running_children:
+            # Find datasets that connect this node to the child
+            shared_datasets = set(node.outputs) & set(child.inputs)
+
+            for dataset in shared_datasets:
+                if self._is_dataset_ephemeral_or_missing(dataset, catalog):
+                    self._logger.debug(
+                        f"Node '{node.name}' must run: produces '{dataset}' "
+                        f"needed by running child '{child.name}'"
+                    )
+                    return True
+
         return False
+
+    def _is_dataset_missing(
+        self, dataset_name: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> bool:
+        """Check if a dataset is persistent and doesn't exist.
+
+        Returns False for ephemeral datasets or existing persistent datasets.
+        """
+        # Not in catalog it will be MemoryDataset
+        if dataset_name not in catalog:
+            return False
+
+        dataset = catalog.get(dataset_name)
+
+        # Ephemeral datasets aren't considered "missing"
+        if getattr(dataset, "_EPHEMERAL", False):
+            return False
+
+        # Check if persistent dataset exists
+        return not catalog.exists(dataset_name)
+
+    def _is_dataset_ephemeral_or_missing(
+        self, dataset_name: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> bool:
+        """Check if a dataset is ephemeral or missing.
+
+        This is used to determine if a parent node needs to run to provide
+        data for a child node.
+        """
+        # Not in catalog it will be MemoryDataset
+        if dataset_name not in catalog:
+            return True
+
+        dataset = catalog.get(dataset_name)
+
+        # Ephemeral datasets always need to be made
+        if getattr(dataset, "_EPHEMERAL", False):
+            return True
+
+        # Persistent datasets need to be made if they don't exist
+        return not catalog.exists(dataset_name)
 
     def _log_filtering_results(
         self,
@@ -218,86 +316,6 @@ class AbstractRunner(ABC):
         self._logger.info(
             f"Running {final_node_count} out of {original_node_count} nodes"
         )
-
-    def _filter_pipeline_for_missing_outputs(
-        self, pipeline: Pipeline, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
-    ) -> Pipeline:
-        """Filter pipeline using reverse topological order."""
-        original_node_count = len(pipeline.nodes)
-
-        # Get nodes in reverse topological order
-        sorted_nodes = list(pipeline.nodes)
-        sorted_nodes.reverse()
-
-        # Build dependency mappings
-        output_to_node, node_consumers = self._build_dependency_maps(pipeline)
-
-        # Determine which nodes need to run
-        nodes_to_run: set[Node] = set()
-        for node in sorted_nodes:
-            run_this_node = False
-
-            # Always run nodes with no outputs
-            if self._should_run_for_no_outputs(node):
-                run_this_node = True
-
-            # Run if node produces a persistent output that is missing
-            if not run_this_node:
-                if self._should_run_for_own_missing_output(node, catalog):
-                    run_this_node = True
-
-            # Run if node produces output needed by downstream node that will run
-            # This handles both ephemeral and missing persistent outputs
-            if not run_this_node:
-                if self._should_run_for_downstream_consumer(
-                    node, catalog, nodes_to_run, node_consumers
-                ):
-                    run_this_node = True
-
-            if run_this_node:
-                nodes_to_run.add(node)
-
-        # Create filtered pipeline
-        if not nodes_to_run:
-            self._log_filtering_results(
-                original_node_count, Pipeline([]), pipeline.nodes
-            )
-            return Pipeline([])
-
-        filtered_pipeline = pipeline.filter(node_names=[n.name for n in nodes_to_run])
-        self._log_filtering_results(
-            original_node_count, filtered_pipeline, pipeline.nodes
-        )
-
-        return filtered_pipeline
-
-    def _is_persistent_and_missing(
-        self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
-    ) -> bool:
-        """Check if an output is a persistent dataset that doesn't exist.
-
-        Args:
-            output: The output dataset name.
-            catalog: The data catalogue to check.
-
-        Returns:
-            True if the output is persistent and missing.
-        """
-        # First check if it's in the catalog at all
-        if output not in catalog:
-            # Not in catalog and no factory - will be MemoryDataset (ephemeral)
-            return False
-
-        # Get the dataset
-        dataset = catalog.get(output)
-
-        # Check if it's ephemeral
-        is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
-        if is_ephemeral:
-            return False
-
-        # It's persistent - check existence
-        return not catalog.exists(output)
 
     @abstractmethod  # pragma: no cover
     def _get_executor(self, max_workers: int) -> Executor | None:

@@ -11,7 +11,6 @@ from kedro.io import (
     AbstractDataset,
     DataCatalog,
     DatasetError,
-    LambdaDataset,
     MemoryDataset,
 )
 from kedro.pipeline import node, pipeline
@@ -21,26 +20,26 @@ from tests.runner.conftest import exception_fn, identity, sink, source
 
 class TestValidSequentialRunner:
     def test_run_with_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
         assert "Z" in result
-        assert result["Z"] == (42, 42, 42)
+        assert result["Z"].load() == (42, 42, 42)
 
     def test_run_without_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         result = SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
-        assert result["Z"] == (42, 42, 42)
+        assert result["Z"].load() == (42, 42, 42)
 
     def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." in caplog.text
 
     def test_run_twice_giving_same_result(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict({"A": 42})
+        catalog["A"] = 42
         patterns_before_run = catalog.config_resolver.list_patterns()
         result_first_run = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
@@ -56,7 +55,7 @@ class TestValidSequentialRunner:
 
 
 @pytest.mark.parametrize("is_async", [False, True])
-class TestSeqentialRunnerBranchlessPipeline:
+class TestSequentialRunnerBranchlessPipeline:
     def test_no_input_seq(self, is_async, branchless_no_input_pipeline, catalog):
         outputs = SequentialRunner(is_async=is_async).run(
             branchless_no_input_pipeline, catalog
@@ -68,23 +67,23 @@ class TestSeqentialRunnerBranchlessPipeline:
         catalog = DataCatalog({}, {"ds1": 42})
         outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
-        assert outputs["ds3"] == 42
+        assert outputs["ds3"].load() == 42
 
     def test_no_feed(self, is_async, memory_catalog, branchless_pipeline):
         outputs = SequentialRunner(is_async=is_async).run(
             branchless_pipeline, memory_catalog
         )
         assert "ds3" in outputs
-        assert outputs["ds3"]["data"] == 42
+        assert outputs["ds3"].load()["data"] == 42
 
     def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
             SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
-    def test_result_saved_not_returned(self, is_async, saving_result_pipeline):
-        """The pipeline runs ds->dsX but save does not save the output."""
-
+    def test_saved_output_is_returned_by_runner(
+        self, is_async, saving_result_pipeline, persistent_test_dataset
+    ):
         def _load():
             return 0
 
@@ -93,15 +92,16 @@ class TestSeqentialRunnerBranchlessPipeline:
 
         catalog = DataCatalog(
             {
-                "ds": LambdaDataset(load=_load, save=_save),
-                "dsX": LambdaDataset(load=_load, save=_save),
+                "ds": persistent_test_dataset(load=_load, save=_save),
+                "dsX": persistent_test_dataset(load=_load, save=_save),
             }
         )
         output = SequentialRunner(is_async=is_async).run(
             saving_result_pipeline, catalog
         )
 
-        assert output == {}
+        assert "dsX" in output
+        assert output["dsX"].load() == 0
 
 
 @pytest.mark.parametrize("is_async", [False, True])
@@ -111,42 +111,44 @@ class TestSequentialRunnerBranchedPipeline:
         is_async,
         memory_catalog,
         unfinished_outputs_pipeline,
-        pandas_df_feed_dict,
+        pandas_df_raw_data,
     ):
-        memory_catalog.add_feed_dict(pandas_df_feed_dict, replace=True)
+        for df_name, df_value in pandas_df_raw_data.items():
+            memory_catalog[df_name] = df_value
         outputs = SequentialRunner(is_async=is_async).run(
             unfinished_outputs_pipeline, memory_catalog
         )
         assert set(outputs.keys()) == {"ds8", "ds5", "ds6"}
         # the pipeline runs ds2->ds5
-        assert outputs["ds5"] == [1, 2, 3, 4, 5]
-        assert isinstance(outputs["ds8"], dict)
+        assert outputs["ds5"].load() == [1, 2, 3, 4, 5]
+        assert isinstance(outputs["ds8"].load(), dict)
         # the pipeline runs ds1->ds4->ds8
-        assert outputs["ds8"]["data"] == 42
-        # the pipline runs ds3
-        assert isinstance(outputs["ds6"], pd.DataFrame)
+        assert outputs["ds8"].load()["data"] == 42
+        # the pipeline runs ds3
+        assert isinstance(outputs["ds6"].load(), pd.DataFrame)
 
     def test_conflict_feed_catalog(
         self,
         is_async,
         memory_catalog,
         unfinished_outputs_pipeline,
-        conflicting_feed_dict,
+        conflicting_raw_data,
     ):
         """ds1 and ds3 will be replaced with new inputs."""
-        memory_catalog.add_feed_dict(conflicting_feed_dict, replace=True)
+
+        for ds_name, ds_value in conflicting_raw_data.items():
+            memory_catalog[ds_name] = ds_value
+
         outputs = SequentialRunner(is_async=is_async).run(
             unfinished_outputs_pipeline, memory_catalog
         )
-        assert isinstance(outputs["ds8"], dict)
-        assert outputs["ds8"]["data"] == 0
-        assert isinstance(outputs["ds6"], pd.DataFrame)
+        assert isinstance(outputs["ds8"].load(), dict)
+        assert outputs["ds8"].load()["data"] == 0
+        assert isinstance(outputs["ds6"].load(), pd.DataFrame)
 
     def test_unsatisfied_inputs(self, is_async, unfinished_outputs_pipeline, catalog):
         """ds1, ds2 and ds3 were not specified."""
-        with pytest.raises(
-            ValueError, match=rf"not found in the {catalog.__class__.__name__}"
-        ):
+        with pytest.raises(DatasetError, match="has not been saved yet"):
             SequentialRunner(is_async=is_async).run(
                 unfinished_outputs_pipeline, catalog
             )
@@ -342,19 +344,25 @@ class TestSuggestResumeScenario:
 
 
 class TestMemoryDatasetBehaviour:
-    def test_run_includes_memory_datasets(self, pipeline_with_memory_datasets):
+    def test_run_includes_memory_datasets(
+        self, pipeline_with_memory_datasets, persistent_test_dataset
+    ):
         # Create a catalog with MemoryDataset entries and inputs for the pipeline
         catalog = DataCatalog(
             {
-                "Input1": LambdaDataset(load=lambda: "data1", save=lambda data: None),
-                "Input2": LambdaDataset(load=lambda: "data2", save=lambda data: None),
+                "Input1": persistent_test_dataset(
+                    load=lambda: "data1", save=lambda data: None
+                ),
+                "Input2": persistent_test_dataset(
+                    load=lambda: "data2", save=lambda data: None
+                ),
                 "MemOutput1": MemoryDataset(),
                 "MemOutput2": MemoryDataset(),
             }
         )
 
         # Add a regular dataset to the catalog
-        catalog.add("RegularOutput", LambdaDataset(None, None, lambda: True))
+        catalog["RegularOutput"] = persistent_test_dataset(None, None, lambda: True)
 
         # Run the pipeline
         output = SequentialRunner().run(pipeline_with_memory_datasets, catalog)

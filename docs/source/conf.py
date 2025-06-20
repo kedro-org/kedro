@@ -266,6 +266,7 @@ linkcheck_ignore = [
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://github.com/kedro-org/kedro/tree/main/docs/source",
     "https://github.com/kedro-org/kedro/tree/main/docs/source/notebooks_and_ipython/notebook-example",
+    "https://github.com/kedro-org/kedro/blob/main/kedro/io/kedro_data_catalog.py"
 ]
 
 # Comment out settings to fix Client Rate Limit Error 429

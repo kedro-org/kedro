@@ -63,6 +63,7 @@ class AbstractRunner(ABC):
         catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
         run_id: str | None = None,
+        only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -72,6 +73,7 @@ class AbstractRunner(ABC):
             catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
             run_id: The id of the run.
+            only_missing_outputs: Run only nodes with missing outputs.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
@@ -80,6 +82,10 @@ class AbstractRunner(ABC):
             Dictionary with pipeline outputs, where keys are dataset names
             and values are dataset object.
         """
+        # Apply missing outputs filtering if requested
+        if only_missing_outputs:
+            pipeline = self._filter_pipeline_for_missing_outputs(pipeline, catalog)
+
         # Run a warm-up to materialize all datasets in the catalog before run
         for ds in pipeline.datasets():
             _ = catalog.get(ds, fallback_to_runtime_pattern=True)
@@ -105,45 +111,193 @@ class AbstractRunner(ABC):
 
         return run_output
 
-    def run_only_missing(
-        self,
-        pipeline: Pipeline,
-        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
-        hook_manager: PluginManager | None = None,
-    ) -> dict[str, Any]:
-        """Run only the missing outputs from the ``Pipeline`` using the
-        datasets provided by ``catalog``, and save results back to the
-        same objects.
-
-        Args:
-            pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
-            hook_manager: The ``PluginManager`` to activate hooks.
-        Raises:
-            ValueError: Raised when ``Pipeline`` inputs cannot be
-                satisfied.
+    def _build_dependency_maps(
+        self, pipeline: Pipeline
+    ) -> tuple[dict[str, Node], dict[Node, set[Node]]]:
+        """Build mappings for efficient node dependency lookups.
 
         Returns:
-            Any node outputs that cannot be processed by the
-            catalog. These are returned in a dictionary, where
-            the keys are defined by the node outputs.
-
+            Tuple of (output_to_node, node_consumers) mappings.
         """
-        free_outputs = pipeline.outputs() - set(catalog.keys())
-        missing = {ds for ds in catalog if not catalog.exists(ds)}
-        to_build = free_outputs | missing
-        to_rerun = pipeline.only_nodes_with_outputs(*to_build) + pipeline.from_inputs(
-            *to_build
+        output_to_node: dict[str, Node] = {}
+        node_consumers: dict[Node, set[Node]] = {node: set() for node in pipeline.nodes}
+
+        for node in pipeline.nodes:
+            for output in node.outputs:
+                output_to_node[output] = node
+
+        # Build consumer relationships
+        for node in pipeline.nodes:
+            for inp in node.inputs:
+                if inp in output_to_node:
+                    producer = output_to_node[inp]
+                    node_consumers[producer].add(node)
+
+        return output_to_node, node_consumers
+
+    def _should_run_for_no_outputs(self, node: Node) -> bool:
+        """Check if node should run because it has no outputs."""
+        if not node.outputs:
+            self._logger.debug(f"Node '{node.name}' must run: has no outputs")
+            return True
+        return False
+
+    def _should_run_for_own_missing_output(
+        self, node: Node, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> bool:
+        """Check if node should run because it has missing persistent outputs."""
+        for output in node.outputs:
+            if self._is_persistent_and_missing(output, catalog):
+                self._logger.debug(
+                    f"Node '{node.name}' must run: has missing output '{output}'"
+                )
+                return True
+        return False
+
+    def _is_output_needed_by_consumer(
+        self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> bool:
+        """Check if an output needs to be (re)generated for a consumer."""
+        if output not in catalog:
+            # Not in catalog - will be MemoryDataset (ephemeral)
+            return True
+
+        dataset = catalog.get(output)
+        if getattr(dataset, "_EPHEMERAL", False):
+            # Ephemeral output - must be generated
+            return True
+
+        # Persistent dataset - check if it exists
+        return not catalog.exists(output)
+
+    def _should_run_for_downstream_consumer(
+        self,
+        node: Node,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+        nodes_to_run: set[Node],
+        node_consumers: dict[Node, set[Node]],
+    ) -> bool:
+        """Check if node should run because downstream consumers need its outputs."""
+        for consumer in node_consumers[node]:
+            if consumer in nodes_to_run:
+                for output in node.outputs:
+                    if output in consumer.inputs:
+                        if self._is_output_needed_by_consumer(output, catalog):
+                            self._logger.debug(
+                                f"Node '{node.name}' must run: produces '{output}' "
+                                f"needed by running consumer '{consumer.name}'"
+                            )
+                            return True
+        return False
+
+    def _log_filtering_results(
+        self,
+        original_node_count: int,
+        filtered_pipeline: Pipeline,
+        all_nodes: list[Node],
+    ) -> None:
+        """Log the results of pipeline filtering."""
+        final_node_count = len(filtered_pipeline.nodes)
+
+        if final_node_count == 0:
+            self._logger.info(
+                f"Skipping all {original_node_count} nodes (all persistent outputs exist)"
+            )
+            return
+
+        skipped_count = original_node_count - final_node_count
+        if skipped_count > 0:
+            all_node_names = {n.name for n in all_nodes}
+            running_node_names = {n.name for n in filtered_pipeline.nodes}
+            skipped_names = all_node_names - running_node_names
+            self._logger.info(
+                f"Skipping {skipped_count} nodes with existing outputs: "
+                f"{', '.join(sorted(skipped_names))}"
+            )
+
+        self._logger.info(
+            f"Running {final_node_count} out of {original_node_count} nodes"
         )
 
-        # We also need any missing datasets that are required to run the
-        # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.datasets() - set(catalog.keys())
-        output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
-        input_from_unregistered = to_rerun.inputs() & unregistered_ds
-        to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)
+    def _filter_pipeline_for_missing_outputs(
+        self, pipeline: Pipeline, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> Pipeline:
+        """Filter pipeline using reverse topological order."""
+        original_node_count = len(pipeline.nodes)
 
-        return self.run(to_rerun, catalog, hook_manager)
+        # Get nodes in reverse topological order
+        sorted_nodes = list(pipeline.nodes)
+        sorted_nodes.reverse()
+
+        # Build dependency mappings
+        output_to_node, node_consumers = self._build_dependency_maps(pipeline)
+
+        # Determine which nodes need to run
+        nodes_to_run: set[Node] = set()
+        for node in sorted_nodes:
+            run_this_node = False
+
+            # Always run nodes with no outputs
+            if self._should_run_for_no_outputs(node):
+                run_this_node = True
+
+            # Run if node produces a persistent output that is missing
+            if not run_this_node:
+                if self._should_run_for_own_missing_output(node, catalog):
+                    run_this_node = True
+
+            # Run if node produces output needed by downstream node that will run
+            # This handles both ephemeral and missing persistent outputs
+            if not run_this_node:
+                if self._should_run_for_downstream_consumer(
+                    node, catalog, nodes_to_run, node_consumers
+                ):
+                    run_this_node = True
+
+            if run_this_node:
+                nodes_to_run.add(node)
+
+        # Create filtered pipeline
+        if not nodes_to_run:
+            self._log_filtering_results(
+                original_node_count, Pipeline([]), pipeline.nodes
+            )
+            return Pipeline([])
+
+        filtered_pipeline = pipeline.filter(node_names=[n.name for n in nodes_to_run])
+        self._log_filtering_results(
+            original_node_count, filtered_pipeline, pipeline.nodes
+        )
+
+        return filtered_pipeline
+
+    def _is_persistent_and_missing(
+        self, output: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> bool:
+        """Check if an output is a persistent dataset that doesn't exist.
+
+        Args:
+            output: The output dataset name.
+            catalog: The data catalogue to check.
+
+        Returns:
+            True if the output is persistent and missing.
+        """
+        # First check if it's in the catalog at all
+        if output not in catalog:
+            # Not in catalog and no factory - will be MemoryDataset (ephemeral)
+            return False
+
+        # Get the dataset
+        dataset = catalog.get(output)
+
+        # Check if it's ephemeral
+        is_ephemeral = getattr(dataset, "_EPHEMERAL", False)
+        if is_ephemeral:
+            return False
+
+        # It's persistent - check existence
+        return not catalog.exists(output)
 
     @abstractmethod  # pragma: no cover
     def _get_executor(self, max_workers: int) -> Executor | None:

@@ -17,7 +17,6 @@
 | [`kedro.framework.cli.starters`](#kedro.framework.cli.starters) | `kedro` is a CLI for managing Kedro projects.                               |
 | [`kedro.framework.cli.utils`](#kedro.framework.cli.utils)     | Utilities for use with click.                                              |
 
-
 ::: kedro.framework.cli.catalog
     options:
       members: true

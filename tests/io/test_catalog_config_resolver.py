@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from kedro.io import CatalogConfigResolver
@@ -195,3 +197,28 @@ class TestCatalogConfigResolver:
     def test_resolve_dataset_config(self, ds_name, pattern, config, expected_config):
         result = CatalogConfigResolver._resolve_dataset_config(ds_name, pattern, config)
         assert result == expected_config
+
+    def test_init_warning_for_no_default_runtime_pattern(self, caplog):
+        """Test warning is logged when default_runtime_pattern is None"""
+        with caplog.at_level(logging.WARNING):
+            CatalogConfigResolver(
+                config={}, credentials={}, default_runtime_patterns=None
+            )
+            assert "Since runtime patterns are not provided" in caplog.text
+
+    def test_retrieve_already_resolved_config(self):
+        """Test retrieving already resolved config."""
+        config = {
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "s3://example_dataset.csv",
+                "credentials": "db_credentials",
+            }
+        }
+        credentials = {"db_credentials": {"user": "username", "pass": "pass"}}
+        resolver = CatalogConfigResolver(config, credentials)
+        assert "cars" in resolver._resolved_configs
+        assert (
+            resolver.resolve_pattern(ds_name="cars")
+            == resolver._resolved_configs["cars"]
+        )

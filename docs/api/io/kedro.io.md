@@ -12,7 +12,6 @@
 | [`kedro.io.AbstractVersionedDataset`][] | Class | Base class for versioned datasets.              |
 | [`kedro.io.CachedDataset`][]    | Class      | Dataset wrapper for caching data in memory.     |
 | [`kedro.io.DataCatalog`][] | Class | Manages datasets used in a Kedro pipeline. |
-| [`kedro.io.LambdaDataset`][]    | Class      | Dataset wrapper for inline data transformations.|
 | [`kedro.io.MemoryDataset`][]    | Class      | Dataset for storing data in memory.             |
 | [`kedro.io.Version`][]                | Class      | Represents dataset version information.         |
 | [`kedro.io.DatasetAlreadyExistsError`][] | Exception | Raised when a dataset already exists.           |

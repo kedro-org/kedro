@@ -17,7 +17,6 @@ from .core import (
     Version,
 )
 from .data_catalog import DataCatalog, SharedMemoryDataCatalog
-from .lambda_dataset import LambdaDataset
 from .memory_dataset import MemoryDataset
 from .shared_memory_dataset import SharedMemoryDataset
 
@@ -31,7 +30,6 @@ __all__ = [
     "DatasetError",
     "DatasetNotFoundError",
     "DataCatalog",
-    "LambdaDataset",
     "MemoryDataset",
     "SharedMemoryDataset",
     "SharedMemoryDataCatalog",

@@ -1,4 +1,12 @@
-# Release 1.0.0
+# Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 1.0.0
+## Documentation changes
+## Community contributions
+
+# [PRE-RELEASE] 1.0.0rc1
 
 ## Major features and improvements
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
@@ -27,7 +35,7 @@
 ## Migration guide from Kedro 0.19.* to 1.*
 [See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
 
-# Upcoming Release
+# Release 0.19.14
 
 ## Major features and improvements
 * Added execution time to pipeline completion log.
@@ -35,9 +43,6 @@
 ## Bug fixes and other changes
 * Fixed a recursion error in custom datasets when `_describe()` accessed `self.__dict__`.
 
-## Breaking changes to the API
-## Upcoming deprecations for Kedro 1.0.0
-## Documentation changes
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Yury Fedotov](https://github.com/yury-fedotov)
@@ -238,9 +243,11 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Fixed a bug when `OmegaConfigLoader` is printed, there are few missing arguments.
 * Fixed a bug when where iterating `OmegaConfigLoader`'s `keys` return empty dictionary.
 
+
 ## Upcoming deprecations for Kedro 1.0.0
 * The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 1.0.0.
 * `LambdaDataset` is deprecated and will be removed in Kedro 1.0.0.
+* The method `run_node()` is deprecated and will be removed in Kedro 1.0.0.
 
 ## Documentation changes
 * Improved documentation for configuring dataset parameters in the data catalog

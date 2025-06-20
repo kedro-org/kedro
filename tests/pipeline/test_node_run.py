@@ -1,14 +1,13 @@
 import pytest
 
-from kedro.io import LambdaDataset
 from kedro.pipeline import node
 
 
 @pytest.fixture
-def mocked_dataset(mocker):
+def mocked_dataset(mocker, persistent_test_dataset):
     load = mocker.Mock(return_value=42)
     save = mocker.Mock()
-    return LambdaDataset(load, save)
+    return persistent_test_dataset(load, save)
 
 
 def one_in_one_out(arg):
@@ -42,7 +41,7 @@ def test_valid_nodes(valid_nodes_with_inputs):
 def test_run_got_dataframe(mocked_dataset):
     """Check an exception when non-dictionary (class object) is passed."""
     pattern = r"Node.run\(\) expects a dictionary or None, "
-    pattern += r"but got <class \'kedro.io.lambda_dataset.LambdaDataset\'> instead"
+    pattern += r"but got <class \'tests.conftest.PersistentTestDataset\'> instead"
     with pytest.raises(ValueError, match=pattern):
         node(one_in_one_out, {"arg": "ds1"}, "A").run(mocked_dataset)
 
@@ -108,7 +107,7 @@ class TestNodeRunInvalidInput:
 class TestNodeRunInvalidOutput:
     def test_miss_matching_output_types(self, mocked_dataset):
         pattern = "The node output is a dictionary, whereas the function "
-        pattern += "output is <class 'kedro.io.lambda_dataset.LambdaDataset'>."
+        pattern += "output is <class 'tests.conftest.PersistentTestDataset'>."
         with pytest.raises(ValueError, match=pattern):
             node(one_in_one_out, "ds1", {"a": "ds"}).run({"ds1": mocked_dataset})
 
@@ -123,15 +122,20 @@ class TestNodeRunInvalidOutput:
     def test_node_not_list_output(self, mocked_dataset):
         pattern = r"The node definition contains a list of outputs "
         pattern += r"\['B', 'C'\], whereas the node function returned "
-        pattern += r"a 'LambdaDataset'"
+        pattern += r"a 'PersistentTestDataset'"
         with pytest.raises(ValueError, match=pattern):
             node(one_in_one_out, "ds1", ["B", "C"]).run({"ds1": mocked_dataset})
 
-    def test_node_wrong_num_of_outputs(self, mocker, mocked_dataset):
+    def test_node_wrong_num_of_outputs(
+        self, mocker, mocked_dataset, persistent_test_dataset
+    ):
         def one_in_two_out(arg):
             load = mocker.Mock(return_value=42)
             save = mocker.Mock()
-            return [LambdaDataset(load, save), LambdaDataset(load, save)]
+            return [
+                persistent_test_dataset(load, save),
+                persistent_test_dataset(load, save),
+            ]
 
         pattern = r"The node function returned 2 output\(s\), whereas "
         pattern += r"the node definition contains 3 output\(s\)\."

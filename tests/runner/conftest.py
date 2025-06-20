@@ -3,8 +3,9 @@ from random import random
 import pandas as pd
 import pytest
 
-from kedro.io import DataCatalog, LambdaDataset, MemoryDataset, SharedMemoryDataCatalog
+from kedro.io import DataCatalog, MemoryDataset, SharedMemoryDataCatalog
 from kedro.pipeline import node, pipeline
+from tests.conftest import PersistentTestDataset
 
 
 def source():
@@ -82,7 +83,7 @@ def persistent_dataset_catalog():
     def _save(arg):
         pass
 
-    persistent_dataset = LambdaDataset(load=_load, save=_save)
+    persistent_dataset = PersistentTestDataset(load=_load, save=_save)
     return DataCatalog(
         {
             "ds0_A": persistent_dataset,

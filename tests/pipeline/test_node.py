@@ -482,7 +482,10 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_namespaced_inputs(self):
         """Test that inputs with mismatched namespaces raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid dataset name"):
+        with pytest.warns(
+            UserWarning,
+            match="Dataset name 'wrong_namespace.input_dataset' contains '.' characters",
+        ):
             node(
                 func=self.dummy_function,
                 inputs="wrong_namespace.input_dataset",
@@ -492,7 +495,10 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_namespaced_outputs(self):
         """Test that outputs with mismatched namespaces raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid dataset name"):
+        with pytest.warns(
+            UserWarning,
+            match="Dataset name 'wrong_namespace.output_dataset' contains '.' characters",
+        ):
             node(
                 func=self.dummy_function,
                 inputs="namespace.input_dataset",
@@ -512,7 +518,9 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_inputs_with_dot_no_namespace(self):
         """Test that inputs with '.' but no namespace raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid dataset name 'input.dataset'"):
+        with pytest.warns(
+            UserWarning, match="Dataset name 'input.dataset' contains '.' characters"
+        ):
             node(
                 func=self.dummy_function,
                 inputs="input.dataset",
@@ -521,7 +529,9 @@ class TestNodeInputOutputNameValidation:
 
     def test_invalid_outputs_with_dot_no_namespace(self):
         """Test that outputs with '.' but no namespace raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid dataset name 'output.dataset'"):
+        with pytest.warns(
+            UserWarning, match="Dataset name 'output.dataset' contains '.' characters"
+        ):
             node(
                 func=self.dummy_function,
                 inputs="input_dataset",
@@ -539,12 +549,26 @@ class TestNodeInputOutputNameValidation:
         assert n.inputs == ["namespace.subnamespace.input_dataset"]
         assert n.outputs == ["namespace.subnamespace.output_dataset"]
 
-    def test_invalid_multi_level_namespace(self):
-        """Test that mismatched multi-level namespaces raise a ValueError."""
-        with pytest.raises(ValueError, match="Invalid dataset name"):
+    def test_dataset_namespace_matches_pipeline_namespace(self):
+        """Test that node level namespace specification doesn't throw the error."""
+        n = node(
+            func=self.dummy_function,
+            inputs="namespace.input_dataset",
+            outputs="namespace.output_dataset",
+            namespace="namespace.other",
+        )
+        assert n.inputs == ["namespace.input_dataset"]
+        assert n.outputs == ["namespace.output_dataset"]
+
+    def test_mismatched_namespace(self):
+        """Test that mismatched namespaces in inputs and outputs raise a UserWarning."""
+        with pytest.warns(
+            UserWarning,
+            match="Dataset name 'other_namespace.output_dataset' contains '.' characters",
+        ):
             node(
                 func=self.dummy_function,
-                inputs="namespace.subnamespace.input_dataset",
-                outputs="namespace.subnamespace.output_dataset",
-                namespace="namespace.othernamespace",
+                inputs="namespace.input_dataset",
+                outputs="other_namespace.output_dataset",
+                namespace="namespace",
             )

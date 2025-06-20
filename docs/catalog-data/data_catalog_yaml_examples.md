@@ -469,17 +469,3 @@ resolved_pipeline(
 ```
 
 When the node order is resolved, we can see that the node `my_func1_node` is treated as dependent on the node `my_func2_node`. This pipeline will still run without any errors, but one should be careful about creating hidden dependencies as they can decrease performance, for example, when using the `ParallelRunner`.
-
-## Create a Data Catalog YAML configuration file via the CLI
-
-You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../getting-started/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
-
-This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
-
-```yaml
-# <conf_root>/<env>/catalog/<pipeline_name>.yml
-rockets:
-  type: MemoryDataset
-scooters:
-  type: MemoryDataset
-```

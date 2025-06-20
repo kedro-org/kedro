@@ -48,7 +48,7 @@ from kedro.framework.project import settings
 from kedro.io import AbstractDataset, CatalogProtocol
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
-from kedro.runner import AbstractRunner, run_node
+from kedro.runner import AbstractRunner, SequentialRunner
 from pluggy import PluginManager
 
 
@@ -125,7 +125,7 @@ class DaskRunner(AbstractRunner):
     ) -> Node:
         """Run a single `Node` with inputs from and outputs to the `catalog`.
 
-        Wraps ``run_node`` to accept the set of ``Node``s that this node
+        Wraps ``SequentialRunner.run()`` to accept the set of ``Node``s that this node
         depends on. When ``dependencies`` are futures, Dask ensures that
         the upstream node futures are completed before running ``node``.
 
@@ -148,7 +148,8 @@ class DaskRunner(AbstractRunner):
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
-        return run_node(node, catalog, hook_manager, is_async, run_id)
+        runner = SequentialRunner()
+        return runner.run(Pipeline([node]), catalog, hook_manager, is_async, run_id)
 
     def _run(
         self,

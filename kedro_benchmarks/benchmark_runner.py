@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from kedro.io import DataCatalog
+from kedro.io.data_catalog import DataCatalog
 from kedro.pipeline import node, pipeline
 
 

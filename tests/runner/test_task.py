@@ -21,7 +21,7 @@ class TestTask:
 
     def test_generator_fail_async(self, mocker, catalog):
         fake_dataset = mocker.Mock()
-        catalog["result"] = fake_dataset
+        catalog.add("result", fake_dataset)
         n = node(generate_one, inputs=None, outputs="result")
 
         with pytest.raises(Exception, match="nodes wrapping generator functions"):
@@ -44,13 +44,13 @@ class TestTask:
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
         task = Task(
             node=node_,
             catalog=catalog,
-            run_id=run_id,
+            session_id=session_id,
             is_async=is_async,
             parallel=True,
         )
@@ -66,13 +66,13 @@ class TestTask:
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
         task = Task(
             node=node_,
             catalog=catalog,
-            run_id=run_id,
+            session_id=session_id,
             is_async=is_async,
             parallel=True,
         )
@@ -82,14 +82,14 @@ class TestTask:
     def test_raise_task_exception(self, mocker):
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
+        session_id = "fake_session_id"
 
         with pytest.raises(TaskError, match="No hook_manager provided."):
             task = Task(
                 node=node_,
                 catalog=catalog,
                 is_async=False,
-                run_id=run_id,
+                session_id=session_id,
                 parallel=False,
             )
             task.execute()

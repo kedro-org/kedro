@@ -32,7 +32,7 @@ Kedro is an open-source Python framework hosted by the [LF AI & Data Foundation]
 To install Kedro from the Python Package Index (PyPI) run:
 
 ```
-uv pip install kedro
+pip install kedro
 ```
 
 It is also possible to install Kedro using `conda`:
@@ -46,7 +46,7 @@ Our [Get Started guide](https://docs.kedro.org/en/stable/get_started/install.htm
 ### Installation from source
 To access the latest Kedro version before its official release, install it from the `main` branch.
 ```
-uv pip install git+https://github.com/kedro-org/kedro@main
+pip install git+https://github.com/kedro-org/kedro@main
 ```
 
 ## What are the main features of Kedro?

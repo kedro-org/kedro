@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import os
 import re
-import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
 
@@ -11,9 +9,10 @@ import pytest
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
+    DataCatalog,
     DatasetError,
+    LambdaDataset,
     MemoryDataset,
-    SharedMemoryDataCatalog,
 )
 from kedro.pipeline import node, pipeline
 from kedro.runner import ParallelRunner
@@ -47,35 +46,35 @@ class SingleProcessDataset(AbstractDataset):
 
 class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
-    def test_parallel_run(self, is_async, fan_out_fan_in, shared_memory_catalog):
-        shared_memory_catalog["A"] = 42
-        result = ParallelRunner(is_async=is_async).run(
-            fan_out_fan_in, shared_memory_catalog
-        )
-        assert set(result) == {"Z"}
+    def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
+        catalog.add_feed_dict({"A": 42})
+        result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
+        assert "Z" in result
+        assert len(result["Z"]) == 3
+        assert result["Z"] == (42, 42, 42)
 
     @pytest.mark.parametrize("is_async", [False, True])
-    def test_parallel_run_with_plugin_manager(
-        self, is_async, fan_out_fan_in, shared_memory_catalog
-    ):
-        shared_memory_catalog["A"] = 42
+    def test_parallel_run_with_plugin_manager(self, is_async, fan_out_fan_in, catalog):
+        catalog.add_feed_dict({"A": 42})
         result = ParallelRunner(is_async=is_async).run(
-            fan_out_fan_in, shared_memory_catalog, hook_manager=_create_hook_manager()
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
-        assert set(result) == {"Z"}
+        assert "Z" in result
+        assert len(result["Z"]) == 3
+        assert result["Z"] == (42, 42, 42)
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_memory_dataset_input(self, is_async, fan_out_fan_in):
         test_pipeline = pipeline([fan_out_fan_in])
-        shared_memory_catalog = SharedMemoryDataCatalog({"A": MemoryDataset("42")})
-        result = ParallelRunner(is_async=is_async).run(
-            test_pipeline, shared_memory_catalog
-        )
-        assert set(result) == {"Z"}
+        catalog = DataCatalog({"A": MemoryDataset("42")})
+        result = ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
+        assert "Z" in result
+        assert len(result["Z"]) == 3
+        assert result["Z"] == ("42", "42", "42")
 
-    def test_log_not_using_async(self, fan_out_fan_in, shared_memory_catalog, caplog):
-        shared_memory_catalog["A"] = 42
-        ParallelRunner().run(fan_out_fan_in, shared_memory_catalog)
+    def test_log_not_using_async(self, fan_out_fan_in, catalog, caplog):
+        catalog.add_feed_dict({"A": 42})
+        ParallelRunner().run(fan_out_fan_in, catalog)
         assert "Using synchronous mode for loading and saving data." in caplog.text
 
 
@@ -93,12 +92,12 @@ class TestMaxWorkers:
             (1, 2, 2),
         ],
     )
-    def test_specified_max_workers_below_cpu_cores_count(
+    def test_specified_max_workers_bellow_cpu_cores_count(
         self,
         is_async,
         mocker,
         fan_out_fan_in,
-        shared_memory_catalog,
+        catalog,
         cpu_cores,
         user_specified_number,
         expected_number,
@@ -115,15 +114,13 @@ class TestMaxWorkers:
             wraps=ProcessPoolExecutor,
         )
 
-        shared_memory_catalog["A"] = 42
+        catalog.add_feed_dict({"A": 42})
         result = ParallelRunner(
             max_workers=user_specified_number, is_async=is_async
-        ).run(fan_out_fan_in, shared_memory_catalog)
-        assert set(result) == {"Z"}
+        ).run(fan_out_fan_in, catalog)
+        assert result == {"Z": (42, 42, 42)}
 
-        executor_cls_mock.assert_called_once()
-        call_args = executor_cls_mock.call_args
-        assert call_args.kwargs["max_workers"] == expected_number
+        executor_cls_mock.assert_called_once_with(max_workers=expected_number)
 
     def test_max_worker_windows(self, mocker):
         """The ProcessPoolExecutor on Python 3.7+
@@ -139,53 +136,44 @@ class TestMaxWorkers:
 
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
-    def test_task_node_validation(
-        self, is_async, fan_out_fan_in, shared_memory_catalog
-    ):
+    def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise the lambda function."""
-        shared_memory_catalog["A"] = 42
+        catalog.add_feed_dict({"A": 42})
         test_pipeline = pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
-            ParallelRunner(is_async=is_async).run(test_pipeline, shared_memory_catalog)
+            ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
-    def test_task_dataset_validation(
-        self, is_async, fan_out_fan_in, shared_memory_catalog
-    ):
+    def test_task_dataset_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise datasets marked with `_SINGLE_PROCESS`."""
-        shared_memory_catalog["A"] = SingleProcessDataset()
+        catalog.add("A", SingleProcessDataset())
         with pytest.raises(AttributeError):
-            ParallelRunner(is_async=is_async).run(fan_out_fan_in, shared_memory_catalog)
+            ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
 
-    def test_task_exception(self, is_async, fan_out_fan_in, shared_memory_catalog):
-        shared_memory_catalog["A"] = 42
+    def test_task_exception(self, is_async, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(feed_dict={"A": 42})
         test_pipeline = pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
-            ParallelRunner(is_async=is_async).run(test_pipeline, shared_memory_catalog)
+            ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
     def test_memory_dataset_output(self, is_async, fan_out_fan_in):
-        """MemoryDataset can be used as output in SharedMemoryDataCatalog."""
+        """ParallelRunner does not support output to externally
+        created MemoryDatasets.
+        """
         test_pipeline = pipeline([fan_out_fan_in])
-        shared_memory_catalog = SharedMemoryDataCatalog(
-            {"C": MemoryDataset()}, {"A": 42}
-        )
-
-        result = ParallelRunner(is_async=is_async).run(
-            test_pipeline, shared_memory_catalog
-        )
-        assert set(result) == {"Z"}
+        catalog = DataCatalog({"C": MemoryDataset()}, {"A": 42})
+        with pytest.raises(AttributeError, match="['C']"):
+            ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
     def test_node_returning_none(self, is_async):
         test_pipeline = pipeline(
             [node(identity, "A", "B"), node(return_none, "B", "C")]
         )
-        shared_memory_catalog = SharedMemoryDataCatalog({"A": MemoryDataset("42")})
+        catalog = DataCatalog({"A": MemoryDataset("42")})
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
-            ParallelRunner(is_async=is_async).run(test_pipeline, shared_memory_catalog)
+            ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
-    def test_dataset_not_serialisable(
-        self, is_async, fan_out_fan_in, persistent_test_dataset
-    ):
+    def test_dataset_not_serialisable(self, is_async, fan_out_fan_in):
         """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """
@@ -197,34 +185,32 @@ class TestInvalidParallelRunner:
             assert arg == 0  # pragma: no cover
 
         # Data set A cannot be serialised
-        shared_memory_catalog = SharedMemoryDataCatalog(
-            {"A": persistent_test_dataset(load=_load, save=_save)}
-        )
+        catalog = DataCatalog({"A": LambdaDataset(load=_load, save=_save)})
 
         test_pipeline = pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
-            ParallelRunner(is_async=is_async).run(test_pipeline, shared_memory_catalog)
+            ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
-    def test_memory_dataset_not_serialisable(self, is_async, shared_memory_catalog):
+    def test_memory_dataset_not_serialisable(self, is_async, catalog):
         """Memory dataset cannot be serialisable because of data it stores."""
         data = return_not_serialisable(None)
         test_pipeline = pipeline([node(return_not_serialisable, "A", "B")])
-        shared_memory_catalog["A"] = 42
+        catalog.add_feed_dict(feed_dict={"A": 42})
         pattern = (
             rf"{data.__class__!s} cannot be serialised. ParallelRunner implicit "
             rf"memory datasets can only be used with serialisable data"
         )
 
         with pytest.raises(DatasetError, match=pattern):
-            ParallelRunner(is_async=is_async).run(test_pipeline, shared_memory_catalog)
+            ParallelRunner(is_async=is_async).run(test_pipeline, catalog)
 
     def test_unable_to_schedule_all_nodes(
-        self, mocker, is_async, fan_out_fan_in, shared_memory_catalog
+        self, mocker, is_async, fan_out_fan_in, catalog
     ):
         """Test the error raised when `futures` variable is empty,
         but `todo_nodes` is not (can barely happen in real life).
         """
-        shared_memory_catalog["A"] = 42
+        catalog.add_feed_dict({"A": 42})
         runner = ParallelRunner(is_async=is_async)
 
         real_node_deps = fan_out_fan_in.node_dependencies
@@ -240,7 +226,7 @@ class TestInvalidParallelRunner:
 
         pattern = "Unable to schedule new tasks although some nodes have not been run"
         with pytest.raises(RuntimeError, match=pattern):
-            runner.run(fan_out_fan_in, shared_memory_catalog)
+            runner.run(fan_out_fan_in, catalog)
 
 
 class LoggingDataset(AbstractDataset):
@@ -268,10 +254,10 @@ ParallelRunnerManager.register("LoggingDataset", LoggingDataset)
 
 
 @pytest.fixture
-def logging_dataset_shared_memory_catalog():
+def logging_dataset_catalog():
     log = []
     persistent_dataset = LoggingDataset(log, "in", "stuff")
-    return SharedMemoryDataCatalog(
+    return DataCatalog(
         {
             "ds0_A": persistent_dataset,
             "ds0_B": persistent_dataset,
@@ -293,14 +279,14 @@ class TestParallelRunnerRelease:
         test_pipeline = pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        shared_memory_catalog = SharedMemoryDataCatalog(
+        catalog = DataCatalog(
             {
                 "in": runner._manager.LoggingDataset(log, "in", "stuff"),
                 "middle": runner._manager.LoggingDataset(log, "middle"),
                 "out": runner._manager.LoggingDataset(log, "out"),
             }
         )
-        ParallelRunner().run(test_pipeline, shared_memory_catalog)
+        ParallelRunner().run(test_pipeline, catalog)
 
         # we don't want to see release in or out in here
         assert list(log) == [("load", "in"), ("load", "middle"), ("release", "middle")]
@@ -316,13 +302,13 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        shared_memory_catalog = SharedMemoryDataCatalog(
+        catalog = DataCatalog(
             {
                 "first": runner._manager.LoggingDataset(log, "first"),
                 "second": runner._manager.LoggingDataset(log, "second"),
             }
         )
-        runner.run(test_pipeline, shared_memory_catalog)
+        runner.run(test_pipeline, catalog)
 
         # we want to see "release first" before "load second"
         assert list(log) == [
@@ -343,10 +329,10 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        shared_memory_catalog = SharedMemoryDataCatalog(
+        catalog = DataCatalog(
             {"dataset": runner._manager.LoggingDataset(log, "dataset")}
         )
-        runner.run(test_pipeline, shared_memory_catalog)
+        runner.run(test_pipeline, catalog)
 
         # we want to the release after both the loads
         assert list(log) == [
@@ -362,14 +348,14 @@ class TestParallelRunnerRelease:
         test_pipeline = pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        shared_memory_catalog = SharedMemoryDataCatalog(
+        catalog = DataCatalog(
             {
                 "ds@save": LoggingDataset(log, "save"),
                 "ds@load": LoggingDataset(log, "load"),
             }
         )
 
-        ParallelRunner().run(test_pipeline, shared_memory_catalog)
+        ParallelRunner().run(test_pipeline, catalog)
 
         # we want to see both datasets being released
         assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]
@@ -391,7 +377,7 @@ class TestSuggestResumeScenario:
         self,
         caplog,
         two_branches_crossed_pipeline,
-        logging_dataset_shared_memory_catalog,
+        logging_dataset_catalog,
         failing_node_names,
         expected_pattern,
     ):
@@ -404,7 +390,7 @@ class TestSuggestResumeScenario:
         with pytest.raises(Exception):
             ParallelRunner().run(
                 two_branches_crossed_pipeline,
-                logging_dataset_shared_memory_catalog,
+                logging_dataset_catalog,
                 hook_manager=_create_hook_manager(),
             )
         assert re.search(expected_pattern, caplog.text)
@@ -424,7 +410,7 @@ class TestSuggestResumeScenario:
         self,
         caplog,
         two_branches_crossed_pipeline_variable_inputs,
-        logging_dataset_shared_memory_catalog,
+        logging_dataset_catalog,
         failing_node_names,
         expected_pattern,
     ):
@@ -442,40 +428,7 @@ class TestSuggestResumeScenario:
         with pytest.raises(Exception, match="test exception"):
             ParallelRunner().run(
                 test_pipeline,
-                logging_dataset_shared_memory_catalog,
+                logging_dataset_catalog,
                 hook_manager=_create_hook_manager(),
             )
         assert re.search(expected_pattern, caplog.text)
-
-
-class TestMultiprocessingGetExecutorContextSelection:
-    def test_get_executor_default(self, mocker):
-        if sys.platform == "win32" and sys.version_info < (3, 11):
-            pytest.skip("fork context is not available on Windows")
-        mocker.patch.dict(os.environ, {}, clear=True)
-        runner = ParallelRunner()
-        executor = runner._get_executor(2)
-
-        assert isinstance(executor, ProcessPoolExecutor)
-        assert hasattr(executor, "_mp_context")
-
-    @pytest.mark.parametrize("context", ["fork", "spawn"])
-    def test_get_executor_valid_context(self, mocker, context):
-        if sys.platform == "win32":
-            pytest.skip("fork context is not available on Windows")
-        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": context})
-        runner = ParallelRunner()
-        executor = runner._get_executor(2)
-
-        assert isinstance(executor, ProcessPoolExecutor)
-        assert executor._mp_context.get_start_method() == context
-
-    def test_get_executor_invalid_context(self, mocker):
-        if sys.platform == "win32" and sys.version_info < (3, 11):
-            pytest.skip("fork context is not available on Windows")
-        mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": "invalid"})
-        runner = ParallelRunner()
-        executor = runner._get_executor(2)
-
-        assert isinstance(executor, ProcessPoolExecutor)
-        assert hasattr(executor, "_mp_context")

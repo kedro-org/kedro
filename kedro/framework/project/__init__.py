@@ -21,6 +21,7 @@ from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
 from kedro.io import CatalogProtocol
+from kedro.io.warning_utils import suppress_catalog_warning
 from kedro.pipeline import Pipeline, pipeline
 
 if TYPE_CHECKING:
@@ -71,12 +72,13 @@ class _ImplementsCatalogProtocolValidator(Validator):
         protocol = CatalogProtocol
         for name in self.names:
             setting_value = getattr(settings, name)
-            if not isinstance(setting_value(), protocol):
-                raise ValidationError(
-                    f"Invalid value '{setting_value.__module__}.{setting_value.__qualname__}' "
-                    f"received for setting '{name}'. It must implement "
-                    f"'{protocol.__module__}.{protocol.__qualname__}'."
-                )
+            with suppress_catalog_warning():
+                if not isinstance(setting_value(), protocol):
+                    raise ValidationError(
+                        f"Invalid value '{setting_value.__module__}.{setting_value.__qualname__}' "
+                        f"received for setting '{name}'. It must implement "
+                        f"'{protocol.__module__}.{protocol.__qualname__}'."
+                    )
 
 
 class _HasSharedParentClassValidator(Validator):

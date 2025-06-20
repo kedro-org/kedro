@@ -195,7 +195,7 @@ class TestPipelineHooks:
         call_record = on_node_error_calls[0]
         _assert_hook_call_record_has_expected_parameters(
             call_record,
-            ["error", "node", "catalog", "inputs", "is_async", "run_id"],
+            ["error", "node", "catalog", "inputs", "is_async", "session_id"],
         )
         expected_error = ValueError("broken")
         assert_exceptions_equal(call_record.error, expected_error)
@@ -218,7 +218,7 @@ class TestNodeHooks:
         assert len(before_node_run_calls) == 1
         call_record = before_node_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["node", "catalog", "inputs", "is_async", "run_id"]
+            call_record, ["node", "catalog", "inputs", "is_async", "session_id"]
         )
         # sanity check a couple of important parameters
         assert call_record.inputs["cars"].to_dict() == dummy_dataframe.to_dict()
@@ -231,7 +231,7 @@ class TestNodeHooks:
         call_record = after_node_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
             call_record,
-            ["node", "catalog", "inputs", "outputs", "is_async", "run_id"],
+            ["node", "catalog", "inputs", "outputs", "is_async", "session_id"],
         )
         # sanity check a couple of important parameters
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
@@ -252,7 +252,7 @@ class TestNodeHooks:
         for call_record in on_node_error_records:
             _assert_hook_call_record_has_expected_parameters(
                 call_record,
-                ["error", "node", "catalog", "inputs", "is_async", "run_id"],
+                ["error", "node", "catalog", "inputs", "is_async", "session_id"],
             )
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)
@@ -475,8 +475,8 @@ class TestBeforeNodeRunHookWithInputUpdates:
         catalog.save("boats", dummy_dataframe)
 
         result = mock_session_with_before_node_run_hooks.run()
-        assert isinstance(result["planes"].load(), MockDatasetReplacement)
-        assert isinstance(result["ships"].load(), pd.DataFrame)
+        assert isinstance(result["planes"], MockDatasetReplacement)
+        assert isinstance(result["ships"], pd.DataFrame)
 
     @SKIP_ON_WINDOWS_AND_MACOS
     def test_correct_input_update_parallel(
@@ -489,11 +489,9 @@ class TestBeforeNodeRunHookWithInputUpdates:
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
 
-        # We need ParallelRunner object to exist to retrieve data from SharedMemoryDataset
-        runner = ParallelRunner()
-        result = mock_session_with_before_node_run_hooks.run(runner=runner)
-        assert isinstance(result["planes"].load(), MockDatasetReplacement)
-        assert isinstance(result["ships"].load(), pd.DataFrame)
+        result = mock_session_with_before_node_run_hooks.run(runner=ParallelRunner())
+        assert isinstance(result["planes"], MockDatasetReplacement)
+        assert isinstance(result["ships"], pd.DataFrame)
 
     def test_broken_input_update(
         self, mock_session_with_broken_before_node_run_hooks, dummy_dataframe
@@ -551,7 +549,7 @@ def sample_node_multiple_outputs():
 
 class LogCatalog(DataCatalog):
     def load(self, name: str, version: Optional[str] = None) -> Any:
-        dataset = super().load(ds_name=name, version=version)
+        dataset = super().load(name=name, version=version)
         logger.info("Catalog load")
         return dataset
 

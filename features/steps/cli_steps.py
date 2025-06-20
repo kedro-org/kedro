@@ -4,6 +4,7 @@ import json
 import shutil
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from time import sleep, time
 
@@ -655,7 +656,7 @@ def check_error_message_printed(context, msg):
 
 @then("there should be an additional cell in the jupyter notebook")
 def check_additional_cell_added(context):
-    """Check that an additional cell has been added compared to notebook
+    """Check that an addiitonal cell has been added compared to notebook
     coded by TEST_JUPYTER_ORG.
     """
     with open(
@@ -727,6 +728,19 @@ def check_reqs_generated(context: behave.runner.Context):
 def check_dependency_in_reqs(context: behave.runner.Context, dependency: str):
     reqs_path = context.root_project_dir / "requirements.txt"
     assert dependency in reqs_path.read_text()
+
+
+@given("I have micro-packaging settings in pyproject.toml")
+def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
+    pyproject_toml_path = context.root_project_dir / "pyproject.toml"
+    project_toml_str = textwrap.dedent(
+        """
+        [tool.kedro.micropkg.package]
+        "pipelines.data_science" = {alias = "ds"}
+        """
+    )
+    with pyproject_toml_path.open(mode="a") as file:
+        file.write(project_toml_str)
 
 
 @given("I have executed the load_node magic command")

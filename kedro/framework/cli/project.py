@@ -17,6 +17,7 @@ from kedro.framework.cli.utils import (
     call,
     env_option,
     forward_command,
+    namespace_deprecation_warning,
     split_node_names,
     split_string,
     validate_conf_source,
@@ -53,7 +54,7 @@ command arguments from. If command line arguments are provided, they will
 override the loaded ones."""
 PIPELINE_ARG_HELP = """Name of the registered pipeline to run.
 If not set, the '__default__' pipeline is run."""
-NAMESPACES_ARG_HELP = """Run only node namespaces with specified names."""
+NAMESPACE_ARG_HELP = """Name of the node namespace to run."""
 PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
 to the context initialiser. Items must be separated by comma, keys - by colon or equals sign,
 example: param1=value1,param2=value2. Each parameter is split by the first comma,
@@ -181,12 +182,12 @@ def package(metadata: ProjectMetadata) -> None:
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
 @click.option(
-    "--namespaces",
+    "--namespace",
     "-ns",
     type=str,
-    default="",
-    help=NAMESPACES_ARG_HELP,
-    callback=split_node_names,
+    default=None,
+    help=NAMESPACE_ARG_HELP,
+    callback=namespace_deprecation_warning,
 )
 @click.option(
     "--config",
@@ -222,7 +223,7 @@ def run(  # noqa: PLR0913
     config: str,
     conf_source: str,
     params: dict[str, Any],
-    namespaces: str,
+    namespace: str,
 ) -> dict[str, Any]:
     """Run the pipeline."""
 
@@ -231,7 +232,7 @@ def run(  # noqa: PLR0913
     tuple_node_names = tuple(node_names)
 
     with KedroSession.create(
-        env=env, conf_source=conf_source, runtime_params=params
+        env=env, conf_source=conf_source, extra_params=params
     ) as session:
         return session.run(
             tags=tuple_tags,
@@ -243,5 +244,5 @@ def run(  # noqa: PLR0913
             to_outputs=to_outputs,
             load_versions=load_versions,
             pipeline_name=pipeline,
-            namespaces=namespaces,
+            namespace=namespace,
         )

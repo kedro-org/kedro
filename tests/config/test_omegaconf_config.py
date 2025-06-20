@@ -756,7 +756,7 @@ class TestOmegaConfigLoader:
 
     @use_config_dir
     @use_credentials_env_variable_yml
-    def test_runtime_params_not_propagate_non_parameters_config(self, tmp_path):
+    def test_runtime_params_not_propogate_non_parameters_config(self, tmp_path):
         """Make sure `catalog`, `credentials`, `logging` or any config other than
         `parameters` are not updated by `runtime_params`."""
         # https://github.com/kedro-org/kedro/pull/2467

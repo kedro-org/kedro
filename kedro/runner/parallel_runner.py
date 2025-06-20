@@ -4,16 +4,17 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 
 from __future__ import annotations
 
-import os
 from concurrent.futures import Executor, ProcessPoolExecutor
-from multiprocessing import get_context
-from multiprocessing.managers import SyncManager
+from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from kedro.io import (
+    CatalogProtocol,
+    DatasetNotFoundError,
     MemoryDataset,
+    SharedMemoryDataset,
 )
 from kedro.runner.runner import AbstractRunner
 
@@ -22,7 +23,6 @@ if TYPE_CHECKING:
 
     from pluggy import PluginManager
 
-    from kedro.io import SharedMemoryCatalogProtocol
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
@@ -48,6 +48,7 @@ class ParallelRunner(AbstractRunner):
         self,
         max_workers: int | None = None,
         is_async: bool = False,
+        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """
         Instantiates the runner by creating a Manager.
@@ -59,10 +60,18 @@ class ParallelRunner(AbstractRunner):
                 cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
+            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
+                during the run. This is used to set the default datasets to SharedMemoryDataset
+                for `ParallelRunner`.
+
         Raises:
             ValueError: bad parameters passed
         """
-        super().__init__(is_async=is_async)
+        default_dataset_pattern = {"{default}": {"type": "SharedMemoryDataset"}}
+        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
+        super().__init__(
+            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
+        )
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
@@ -92,15 +101,62 @@ class ParallelRunner(AbstractRunner):
             )
 
     @classmethod
-    def _validate_catalog(cls, catalog: SharedMemoryCatalogProtocol) -> None:  # type: ignore[override]
+    def _validate_catalog(cls, catalog: CatalogProtocol, pipeline: Pipeline) -> None:
         """Ensure that all datasets are serialisable and that we do not have
         any non proxied memory datasets being used as outputs as their content
         will not be synchronized across threads.
         """
-        catalog.validate_catalog()
 
-    def _set_manager_datasets(self, catalog: SharedMemoryCatalogProtocol) -> None:  # type: ignore[override]
-        catalog.set_manager_datasets(self._manager)
+        datasets = catalog._datasets
+
+        unserialisable = []
+        for name, dataset in datasets.items():
+            if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
+                unserialisable.append(name)
+                continue
+            try:
+                ForkingPickler.dumps(dataset)
+            except (AttributeError, PicklingError):
+                unserialisable.append(name)
+
+        if unserialisable:
+            raise AttributeError(
+                f"The following datasets cannot be used with multiprocessing: "
+                f"{sorted(unserialisable)}\nIn order to utilize multiprocessing you "
+                f"need to make sure all datasets are serialisable, i.e. datasets "
+                f"should not make use of lambda functions, nested functions, closures "
+                f"etc.\nIf you are using custom decorators ensure they are correctly "
+                f"decorated using functools.wraps()."
+            )
+
+        memory_datasets = []
+        for name, dataset in datasets.items():
+            if (
+                name in pipeline.all_outputs()
+                and isinstance(dataset, MemoryDataset)
+                and not isinstance(dataset, BaseProxy)
+            ):
+                memory_datasets.append(name)
+
+        if memory_datasets:
+            raise AttributeError(
+                f"The following datasets are memory datasets: "
+                f"{sorted(memory_datasets)}\n"
+                f"ParallelRunner does not support output to externally created "
+                f"MemoryDatasets"
+            )
+
+    def _set_manager_datasets(
+        self, catalog: CatalogProtocol, pipeline: Pipeline
+    ) -> None:
+        for dataset in pipeline.datasets():
+            try:
+                catalog.exists(dataset)
+            except DatasetNotFoundError:
+                pass
+        for name, ds in catalog._datasets.items():
+            if isinstance(ds, SharedMemoryDataset):
+                ds.set_manager(self._manager)
 
     def _get_required_workers_count(self, pipeline: Pipeline) -> int:
         """
@@ -117,26 +173,22 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _get_executor(self, max_workers: int) -> Executor:
-        context = os.environ.get("KEDRO_MP_CONTEXT")
-        if context and context not in {"fork", "spawn"}:
-            context = None
-        ctx = get_context(context)
-        return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx)
+        return ProcessPoolExecutor(max_workers=max_workers)
 
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: SharedMemoryCatalogProtocol,  # type: ignore[override]
+        catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        run_id: str | None = None,
+        session_id: str | None = None,
     ) -> None:
         """The method implementing parallel pipeline running.
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``SharedMemoryCatalogProtocol`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            run_id: The id of the run.
+            session_id: The id of the session.
 
         Raises:
             AttributeError: When the provided pipeline is not suitable for
@@ -155,5 +207,5 @@ class ParallelRunner(AbstractRunner):
         super()._run(
             pipeline=pipeline,
             catalog=catalog,
-            run_id=run_id,
+            session_id=session_id,
         )

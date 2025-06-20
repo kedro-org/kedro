@@ -5,6 +5,7 @@ from __future__ import annotations
 import difflib
 import importlib
 import logging
+import re
 import shlex
 import shutil
 import subprocess
@@ -12,6 +13,7 @@ import sys
 import textwrap
 import traceback
 import typing
+import warnings
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -25,6 +27,8 @@ from typing import IO, Any, Callable
 import click
 import importlib_metadata
 from omegaconf import OmegaConf
+
+from kedro import KedroDeprecationWarning
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
@@ -93,6 +97,20 @@ def forward_command(
         return func
 
     return wrapit
+
+
+def namespace_deprecation_warning(
+    ctx: click.Context | None = None,
+    param: click.Parameter | None = None,
+    value: Any = None,
+) -> Any:
+    message = (
+        "DeprecationWarning: 'kedro run' flag '--namespace' is deprecated "
+        "and will be replaced with '--namespaces' from Kedro 1.0.0 to allow running multiple namespaces. "
+    )
+    warnings.warn(message, KedroDeprecationWarning)
+    click.secho(message, fg="red")
+    return value
 
 
 def _suggest_cli_command(
@@ -204,6 +222,38 @@ class CommandCollection(click.CommandCollection):
                         click.style(f"\n{title} from {group.name}", fg="green")
                     )
                     group.format_commands(ctx, formatter)
+
+
+def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
+    """Get package version from requirements.txt.
+
+    Args:
+        reqs_path: Path to requirements.txt file.
+        package_name: Package to search for.
+
+    Returns:
+        Package and its version as specified in requirements.txt.
+
+    Raises:
+        KedroCliError: If the file specified in ``reqs_path`` does not exist
+            or ``package_name`` was not found in that file.
+    """
+    warnings.warn(
+        "`get_pkg_version()` has been deprecated and will be removed in Kedro 1.0.0.",
+        KedroDeprecationWarning,
+    )
+    reqs_path = Path(reqs_path).absolute()
+    if not reqs_path.is_file():
+        raise KedroCliError(f"Given path '{reqs_path}' is not a regular file.")
+
+    pattern = re.compile(package_name + r"([^\w]|$)")
+    with reqs_path.open("r", encoding="utf-8") as reqs_file:
+        for req_line in reqs_file:
+            req_line = req_line.strip()  # noqa: PLW2901
+            if pattern.search(req_line):
+                return req_line
+
+    raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
 def _update_verbose_flag(ctx: click.Context, param: Any, value: bool) -> None:

@@ -1,4 +1,12 @@
-# Release 1.0.0
+# Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 1.0.0
+## Documentation changes
+## Community contributions
+
+# [PRE-RELEASE] 1.0.0rc1
 
 ## Major features and improvements
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
@@ -25,15 +33,6 @@
 
 ## Migration guide from Kedro 0.19.* to 1.*
 [See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
-
-# Upcoming Release
-
-## Major features and improvements
-## Bug fixes and other changes
-## Breaking changes to the API
-## Upcoming deprecations for Kedro 1.0.0
-## Documentation changes
-## Community contributions
 
 # Release 0.19.14
 

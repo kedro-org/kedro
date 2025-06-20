@@ -32,7 +32,7 @@
 * `Pipeline.grouped_nodes_by_namespace()` was replaced with `group_nodes_by(group_by)`, which supports multiple strategies and returns a list of `GroupedNodes`, improving type safety and consistency for deployment plugin integrations.
 * The micro-packaging feature and the corresponding `micropkg` CLI command have been removed.
 * Renamed `session_id` parameter to `run_id` in all runner methods and hooks to improve API clarity and prepare for future multi-run session support.
-* Removed the following DataCatalog methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
+* Removed the following `DataCatalog` methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
 * Removed the CLI command `kedro catalog create`.
 * Changed the output of `runner.run()` — it now always returns all pipeline outputs, regardless of catalog configuration.
 

@@ -5,11 +5,12 @@ import pytest
 
 import kedro
 from kedro import KedroDeprecationWarning
-from kedro.pipeline import node, pipeline
+from kedro.pipeline import GroupedNodes, node, pipeline
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
     OutputNotUniqueError,
+    _match_namespaces,
 )
 from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
 
@@ -378,141 +379,145 @@ class TestValidPipeline:
     @pytest.mark.parametrize(
         "pipeline_name, expected",
         [
-            ("pipeline_with_namespace_simple", ["namespace_1", "namespace_2"]),
-            (
-                "pipeline_with_namespace_partial",
-                ["namespace_1", "node_3", "namespace_2", "node_6"],
-            ),
-        ],
-    )
-    def test_node_grouping_by_namespace_name_type(
-        self, request, pipeline_name, expected
-    ):
-        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
-        {
-            'node_name/namespace_name' : {
-                                            'name': 'node_name/namespace_name',
-                                            'type': 'namespace' or 'node',
-                                            'nodes': [list of nodes],
-                                            'dependencies': [list of dependencies]}
-        }
-        This test checks for the 'name' and 'type' keys in the dictionary.
-        """
-        p = request.getfixturevalue(pipeline_name)
-        grouped = p.grouped_nodes_by_namespace
-        assert set(grouped.keys()) == set(expected)
-        for key in expected:
-            assert grouped[key]["name"] == key
-            assert key.startswith(grouped[key]["type"])
-
-    @pytest.mark.parametrize(
-        "pipeline_name, expected",
-        [
             (
                 "pipeline_with_namespace_simple",
-                {
-                    "namespace_1": [
-                        "namespace_1.node_1",
-                        "namespace_1.node_2",
-                        "namespace_1.node_3",
-                    ],
-                    "namespace_2": [
-                        "namespace_2.node_4",
-                        "namespace_2.node_5",
-                        "namespace_2.node_6",
-                    ],
-                },
+                [
+                    GroupedNodes(
+                        name="namespace_1",
+                        type="namespace",
+                        nodes=[
+                            "namespace_1.node_1",
+                            "namespace_1.node_2",
+                            "namespace_1.node_3",
+                        ],
+                        dependencies=[],
+                    ),
+                    GroupedNodes(
+                        name="namespace_2",
+                        type="namespace",
+                        nodes=[
+                            "namespace_2.node_4",
+                            "namespace_2.node_5",
+                            "namespace_2.node_6",
+                        ],
+                        dependencies=["namespace_1"],
+                    ),
+                ],
             ),
             (
                 "pipeline_with_namespace_partial",
-                {
-                    "namespace_1": ["namespace_1.node_1", "namespace_1.node_2"],
-                    "node_3": ["node_3"],
-                    "namespace_2": ["namespace_2.node_4", "namespace_2.node_5"],
-                    "node_6": ["node_6"],
-                },
-            ),
-        ],
-    )
-    def test_node_grouping_by_namespace_nodes(self, request, pipeline_name, expected):
-        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
-        {
-            'node_name/namespace_name' : {
-                                            'name': 'node_name/namespace_name',
-                                            'type': 'namespace' or 'node',
-                                            'nodes': [list of nodes],
-                                            'dependencies': [list of dependencies]}
-        }
-        This test checks for the 'nodes' key in the dictionary which should be a list of nodes.
-        """
-        p = request.getfixturevalue(pipeline_name)
-        grouped = p.grouped_nodes_by_namespace
-        for key, value in grouped.items():
-            names = [node.name for node in value["nodes"]]
-            assert set(names) == set(expected[key])
-
-    def test_node_grouping_by_namespace_nested(self, request):
-        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
-        {
-            'node_name/namespace_name' : {
-                                            'name': 'node_name/namespace_name',
-                                            'type': 'namespace' or 'node',
-                                            'nodes': [list of nodes],
-                                            'dependencies': [list of dependencies]}
-        }
-        This test checks if the grouping only occurs on first level of namespaces
-        """
-        p = request.getfixturevalue("pipeline_with_namespace_nested")
-        grouped = p.grouped_nodes_by_namespace
-        assert set(grouped.keys()) == {"level1_1", "level1_2"}
-
-    @pytest.mark.parametrize(
-        "pipeline_name, expected",
-        [
-            (
-                "pipeline_with_namespace_simple",
-                {"namespace_1": set(), "namespace_2": {"namespace_1"}},
-            ),
-            (
-                "pipeline_with_namespace_partial",
-                {
-                    "namespace_1": set(),
-                    "node_3": {"namespace_1"},
-                    "namespace_2": {"node_3"},
-                    "node_6": {"namespace_2"},
-                },
+                [
+                    GroupedNodes(
+                        name="namespace_1",
+                        type="namespace",
+                        nodes=["namespace_1.node_1", "namespace_1.node_2"],
+                        dependencies=[],
+                    ),
+                    GroupedNodes(
+                        name="node_3",
+                        type="nodes",
+                        nodes=["node_3"],
+                        dependencies=["namespace_1"],
+                    ),
+                    GroupedNodes(
+                        name="namespace_2",
+                        type="namespace",
+                        nodes=["namespace_2.node_4", "namespace_2.node_5"],
+                        dependencies=["node_3"],
+                    ),
+                    GroupedNodes(
+                        name="node_6",
+                        type="nodes",
+                        nodes=["node_6"],
+                        dependencies=["namespace_2"],
+                    ),
+                ],
             ),
             (
                 "pipeline_with_multiple_dependencies_on_one_node",
-                {
-                    "f1": [],
-                    "f2": ["f1"],
-                    "f3": ["f2"],
-                    "f4": ["f2"],
-                    "f5": ["f2"],
-                    "f6": ["f4"],
-                    "f7": ["f2", "f4"],
-                },
+                [
+                    GroupedNodes(
+                        name="f1",
+                        type="nodes",
+                        nodes=["f1"],
+                        dependencies=[],
+                    ),
+                    GroupedNodes(
+                        name="f2",
+                        type="nodes",
+                        nodes=["f2"],
+                        dependencies=["f1"],
+                    ),
+                    GroupedNodes(
+                        name="f3",
+                        type="nodes",
+                        nodes=["f3"],
+                        dependencies=["f2"],
+                    ),
+                    GroupedNodes(
+                        name="f4",
+                        type="nodes",
+                        nodes=["f4"],
+                        dependencies=["f2"],
+                    ),
+                    GroupedNodes(
+                        name="f5",
+                        type="nodes",
+                        nodes=["f5"],
+                        dependencies=["f2"],
+                    ),
+                    GroupedNodes(
+                        name="f6",
+                        type="nodes",
+                        nodes=["f6"],
+                        dependencies=["f4"],
+                    ),
+                    GroupedNodes(
+                        name="f7",
+                        type="nodes",
+                        nodes=["f7"],
+                        dependencies=["f2", "f4"],
+                    ),
+                ],
             ),
         ],
     )
-    def test_node_grouping_by_namespace_dependencies(
+    def test_node_grouping_by_namespace_combined(
         self, request, pipeline_name, expected
     ):
-        """Test for pipeline.grouped_nodes_by_namespace which returns a dictionary with the following structure:
-        {
-            'node_name/namespace_name' : {
-                                            'name': 'node_name/namespace_name',
-                                            'type': 'namespace' or 'node',
-                                            'nodes': [list of nodes],
-                                            'dependencies': [list of dependencies]}
-        }
-        This test checks for the 'dependencies' in the dictionary which is a list of nodes/namespaces the group depends on.
-        """
+        """Test that group_nodes_by returns correct GroupedNodes list with name, type and node names and dependencies."""
         p = request.getfixturevalue(pipeline_name)
-        grouped = p.grouped_nodes_by_namespace
-        for key, value in grouped.items():
-            assert set(value["dependencies"]) == set(expected[key])
+        grouped = p.group_nodes_by(group_by="namespace")
+
+        assert grouped == expected
+
+    def test_node_grouping_by_none(self, pipeline_with_namespace_simple):
+        grouped = pipeline_with_namespace_simple.group_nodes_by(group_by=None)
+
+        expected = [
+            GroupedNodes(
+                name=n.name,
+                type="nodes",
+                nodes=[n.name],
+                dependencies=[
+                    p.name for p in pipeline_with_namespace_simple.node_dependencies[n]
+                ],
+            )
+            for n in pipeline_with_namespace_simple.nodes
+        ]
+
+        assert grouped == expected
+
+    def test_group_by_unsupported_strategy(self, pipeline_with_namespace_simple):
+        with pytest.raises(ValueError, match="Unsupported group_by strategy: unknown"):
+            pipeline_with_namespace_simple.group_nodes_by(group_by="unknown")
+
+    def test_node_grouping_by_namespace_nested(self, request):
+        """Test that nested namespaces are grouped only on first level."""
+        p = request.getfixturevalue("pipeline_with_namespace_nested")
+        grouped = p.group_nodes_by(group_by="namespace")
+
+        assert {g.name for g in grouped} == {"level1_1", "level1_2"}
 
 
 @pytest.fixture
@@ -948,7 +953,7 @@ class TestPipelineFilter:
         assert nodes == expected_nodes
 
     def test_namespace_filter(self, pipeline_with_namespaces):
-        filtered_pipeline = pipeline_with_namespaces.filter(node_namespace="katie")
+        filtered_pipeline = pipeline_with_namespaces.filter(node_namespaces=["katie"])
         nodes = {node.name for node in filtered_pipeline.nodes}
         assert nodes == {"katie.node1", "katie.lisa.node4", "katie.lisa.john.node6"}
 
@@ -1162,7 +1167,7 @@ class TestPipelineFilterHelpers:
             complex_pipeline.to_outputs("Z", "W", "E", "C")
 
     @pytest.mark.parametrize(
-        "target_namespace,expected_namespaces",
+        "target_namespaces,expected_namespaces",
         [
             ("katie", ["katie.lisa.john", "katie.lisa", "katie"]),
             ("lisa", ["lisa.john", "lisa"]),
@@ -1171,30 +1176,34 @@ class TestPipelineFilterHelpers:
             ("katie.lisa.john", ["katie.lisa.john"]),
         ],
     )
-    def test_only_nodes_with_namespace(
-        self, target_namespace, expected_namespaces, pipeline_with_namespaces
+    def test_only_nodes_with_namespaces(
+        self, target_namespaces, expected_namespaces, pipeline_with_namespaces
     ):
-        """Test that only nodes with the matching namespace are returned from the pipeline."""
-        resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespace(
-            target_namespace
-        )
-        for actual_node, expected_namespace in zip(
-            sorted(resulting_pipeline.nodes), expected_namespaces
-        ):
-            assert actual_node.namespace == expected_namespace
+        """Test that only nodes with the matching namespaces are returned from the pipeline."""
+        if not expected_namespaces:
+            with pytest.raises(
+                ValueError, match="Pipeline does not contain nodes with namespaces"
+            ):
+                pipeline_with_namespaces.only_nodes_with_namespaces([target_namespaces])
+        else:
+            resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespaces(
+                [target_namespaces]
+            )
+            actual_namespaces = sorted(
+                node.namespace for node in resulting_pipeline.nodes
+            )
+            assert actual_namespaces == sorted(expected_namespaces)
 
     @pytest.mark.parametrize("namespace", ["katie", None])
     def test_only_nodes_with_unknown_namespace_raises_value_error(self, namespace):
         """
-        Test that the `only_nodes_with_namespace` method raises a ValueError with the expected error message
+        Test that the `only_nodes_with_namespaces` method raises a ValueError with the expected error message
         when a non-existent namespace is provided.
         """
         test_pipeline = pipeline([node(identity, "A", "B", namespace=namespace)])
-        expected_error_message = (
-            "Pipeline does not contain nodes with namespace 'non_existent'"
-        )
+        expected_error_message = "Pipeline does not contain nodes with the following namespaces: \\['non_existent'\\]"
         with pytest.raises(ValueError, match=expected_error_message):
-            test_pipeline.only_nodes_with_namespace("non_existent")
+            test_pipeline.only_nodes_with_namespaces(["non_existent"])
 
 
 class TestPipelineRunnerHelpers:
@@ -1241,3 +1250,17 @@ def test_pipeline_to_json(all_pipeline_input_data):
         assert all(node_output in json_rep for node_output in pipeline_node.outputs)
 
     assert kedro.__version__ in json_rep
+
+
+@pytest.mark.parametrize(
+    "node_namespace,filter_namespace, expected",
+    [
+        ("x.a", "x.a", True),
+        ("x.b", "x.a", False),
+        ("x", "x.a", False),
+        ("x.a", "x", True),
+        ("xx", "x", False),
+    ],
+)
+def test_match_namespaces_helper(filter_namespace, node_namespace, expected):
+    assert _match_namespaces(node_namespace, filter_namespace) == expected

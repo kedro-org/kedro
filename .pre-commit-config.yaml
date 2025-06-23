@@ -22,6 +22,7 @@ repos:
           - id: trailing-whitespace
           - id: end-of-file-fixer
           - id: check-yaml # Checks yaml files for parseable syntax.
+            args: [--unsafe] # Allow custom YAML tags (!!python/name) used by MkDocs for extensions
             exclude: "^kedro/templates/|^features/steps/test_starter/"
           - id: check-json # Checks json files for parseable syntax.
           - id: check-added-large-files

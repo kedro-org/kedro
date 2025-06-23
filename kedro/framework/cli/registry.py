@@ -46,7 +46,7 @@ def describe_registered_pipeline(
     nodes = []
     for node in pipeline_obj.nodes:
         namespace = f"{node.namespace}." if node.namespace else ""
-        nodes.append(f"{namespace}{node.name} ({node._func_name})")
+        nodes.append(f"{namespace}{node._name or node._func_name} ({node._func_name})")
     result = {"Nodes": nodes}
 
     click.echo(yaml.dump(result))

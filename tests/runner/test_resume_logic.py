@@ -2,6 +2,7 @@ import pytest
 
 from kedro.io import (
     DataCatalog,
+    LambdaDataset,
 )
 from kedro.pipeline import pipeline
 from kedro.runner.runner import (
@@ -79,7 +80,6 @@ class TestResumeLogicBehaviour:
         remaining_node_names,
         expected_result,
         request,
-        persistent_test_dataset,
     ):
         """
         Test suggestion for pipelines where all datasets are persisted:
@@ -90,7 +90,7 @@ class TestResumeLogicBehaviour:
         catalog = DataCatalog(
             dict.fromkeys(
                 test_pipeline.datasets(),
-                persistent_test_dataset(load=lambda: 42, save=lambda data: None),
+                LambdaDataset(load=lambda: 42, save=lambda data: None),
             )
         )
 

@@ -31,7 +31,7 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.project import LOGGING  # noqa: F401
 from kedro.framework.startup import bootstrap_project
-from kedro.utils import find_kedro_project, is_kedro_project
+from kedro.utils import _find_kedro_project, _is_project
 
 LOGO = rf"""
  _            _
@@ -95,6 +95,7 @@ def info() -> None:
         "catalog": "kedro.framework.cli.catalog.catalog",
         "ipython": "kedro.framework.cli.project.ipython",
         "run": "kedro.framework.cli.project.run",
+        "micropkg": "kedro.framework.cli.micropkg.micropkg",
         "package": "kedro.framework.cli.project.package",
         "jupyter": "kedro.framework.cli.jupyter.jupyter",
         "pipeline": "kedro.framework.cli.pipeline.pipeline",
@@ -130,7 +131,7 @@ class KedroCLI(CommandCollection):
 
     def __init__(self, project_path: Path):
         self._metadata = None  # running in package mode
-        if is_kedro_project(project_path):
+        if _is_project(project_path):
             self._metadata = bootstrap_project(project_path)
         self._cli_hook_manager = get_cli_hook_manager()
 
@@ -256,5 +257,7 @@ def main() -> None:  # pragma: no cover
     commands to `kedro`'s before invoking the CLI.
     """
     _init_plugins()
-    cli_collection = KedroCLI(project_path=find_kedro_project(Path.cwd()) or Path.cwd())
+    cli_collection = KedroCLI(
+        project_path=_find_kedro_project(Path.cwd()) or Path.cwd()
+    )
     cli_collection()

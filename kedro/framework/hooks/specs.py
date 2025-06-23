@@ -25,7 +25,7 @@ class DataCatalogSpecs:
         catalog: CatalogProtocol,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
-        parameters: dict[str, Any],
+        feed_dict: dict[str, Any],
         save_version: str,
         load_versions: dict[str, str],
     ) -> None:
@@ -37,7 +37,7 @@ class DataCatalogSpecs:
             catalog: The catalog that was created.
             conf_catalog: The config from which the catalog was created.
             conf_creds: The credentials conf from which the catalog was created.
-            parameters: The parameters that are added to the catalog after creation.
+            feed_dict: The feed_dict that was added to the catalog after creation.
             save_version: The save_version used in ``save`` operations
                 for all datasets in the catalog.
             load_versions: The load_versions used in ``load`` operations
@@ -56,9 +56,10 @@ class NodeSpecs:
         catalog: CatalogProtocol,
         inputs: dict[str, Any],
         is_async: bool,
-        run_id: str,
+        session_id: str,
     ) -> dict[str, Any] | None:
         """Hook to be invoked before a node runs.
+        The arguments received are the same as those used by ``kedro.runner.run_node``
 
         Args:
             node: The ``Node`` to run.
@@ -67,7 +68,7 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
-            run_id: The id of the run.
+            session_id: The id of the session.
 
         Returns:
             Either None or a dictionary mapping dataset name(s) to new value(s).
@@ -84,9 +85,11 @@ class NodeSpecs:
         inputs: dict[str, Any],
         outputs: dict[str, Any],
         is_async: bool,
-        run_id: str,
+        session_id: str,
     ) -> None:
         """Hook to be invoked after a node runs.
+        The arguments received are the same as those used by ``kedro.runner.run_node``
+        as well as the ``outputs`` of the node run.
 
         Args:
             node: The ``Node`` that ran.
@@ -98,7 +101,7 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual computed output data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
-            run_id: The id of the run.
+            session_id: The id of the session.
         """
         pass
 
@@ -110,7 +113,7 @@ class NodeSpecs:
         catalog: CatalogProtocol,
         inputs: dict[str, Any],
         is_async: bool,
-        run_id: str,
+        session_id: str,
     ) -> None:
         """Hook to be invoked if a node run throws an uncaught error.
         The signature of this error hook should match the signature of ``before_node_run``
@@ -124,7 +127,7 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
-            run_id: The id of the run.
+            session_id: The id of the session.
         """
         pass
 
@@ -143,7 +146,7 @@ class PipelineSpecs:
                 Should have the following schema::
 
                    {
-                     "run_id": str
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -154,7 +157,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "runtime_params": Optional[Dict[str, Any]]
+                     "extra_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -180,7 +183,7 @@ class PipelineSpecs:
                 Should have the following schema::
 
                    {
-                     "run_id": str
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -191,7 +194,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "runtime_params": Optional[Dict[str, Any]]
+                     "extra_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,
@@ -221,7 +224,7 @@ class PipelineSpecs:
                 Should have the following schema::
 
                    {
-                     "run_id": str
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -232,7 +235,7 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "runtime_params": Optional[Dict[str, Any]]
+                     "extra_params": Optional[Dict[str, Any]]
                      "pipeline_name": str,
                      "namespace": Optional[str],
                      "runner": str,

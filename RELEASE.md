@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Added `--only-missing-outputs` CLI flag to `kedro run`. This flag skips nodes when all their persistent outputs exist.
+* Removed the `AbstractRunner.run_only_missing()` method, an older and not very used API for partial runs. Please use `--only-missing-outputs` CLI to run partial pipelines instead.
 
 ## Bug fixes and other changes
 ## Breaking changes to the API

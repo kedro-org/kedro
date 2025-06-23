@@ -67,21 +67,21 @@ def branched_pipeline():
 
 
 def _make_catalog(
-    existent=None, non_existent=None, no_exists_method=None, feed_dict=None
+    existent=None, non_existent=None, no_exists_method=None, raw_data=None
 ):
     """Creates a catalog of existent and non-existent Datasets."""
     existent = [] if existent is None else existent
     non_existent = [] if non_existent is None else non_existent
     no_exists_method = [] if no_exists_method is None else no_exists_method
 
-    catalog = DataCatalog(feed_dict=feed_dict)
+    catalog = DataCatalog(raw_data=raw_data)
     for source in existent:
-        catalog.add(source, LambdaDataset(None, None, lambda: True))
+        catalog[source] = LambdaDataset(None, None, lambda: True)
     for source in non_existent:
-        catalog.add(source, LambdaDataset(None, None, lambda: False))
+        catalog[source] = LambdaDataset(None, None, lambda: False)
     # Some LambdaDataset do not have exists() method
     for source in no_exists_method:
-        catalog.add(source, LambdaDataset(None, None))
+        catalog[source] = LambdaDataset(None, None)
     return catalog
 
 
@@ -115,8 +115,8 @@ class TestPipelineMissing:
         assert _pipeline_contains(new_pipeline, [])
 
     def test_none_missing_feeddict_only(self, branched_pipeline, hook_manager):
-        feed_dict = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6}
-        catalog = _make_catalog(feed_dict=feed_dict)
+        raw_data = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6}
+        catalog = _make_catalog(raw_data=raw_data)
         new_pipeline = _from_missing(branched_pipeline, catalog, hook_manager)
         assert _pipeline_contains(new_pipeline, [])
 
@@ -165,13 +165,6 @@ class TestPipelineMissing:
         )
         assert expected_msg in log_msgs
 
-    def test_catalog_and_feed_dict(self, branched_pipeline, hook_manager):
-        """Mix of feed_dict and non-existent F."""
-        catalog = _make_catalog(non_existent=["F"], existent=["D", "E"])
-        catalog.add_feed_dict({"A": 1, "B": 2, "C": 3})
-        new_pipeline = _from_missing(branched_pipeline, catalog, hook_manager)
-        assert _pipeline_contains(new_pipeline, ["split", "right_out"])
-
 
 class TestPipelineUnregistered:
     def test_propagate_up(self, branched_pipeline, hook_manager):
@@ -192,7 +185,7 @@ class TestPipelineUnregistered:
         new_pipeline = _from_missing(branched_pipeline, catalog, hook_manager)
         assert _pipelines_equal(branched_pipeline, new_pipeline)
 
-    def test_ignore_unneccessary_unreg(self, branched_pipeline, hook_manager):
+    def test_ignore_unnecessary_unreg(self, branched_pipeline, hook_manager):
         """Unregistered (node-to-node) data sources should not trigger
         reruns, unless necessary to recreate registered data sources.
         """

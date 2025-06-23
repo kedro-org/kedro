@@ -4,11 +4,9 @@ implementations.
 
 from __future__ import annotations
 
-import inspect
 import logging
 import os
 import sys
-import warnings
 from abc import ABC, abstractmethod
 from collections import Counter, deque
 from concurrent.futures import (
@@ -24,7 +22,6 @@ from typing import TYPE_CHECKING, Any
 
 from pluggy import PluginManager
 
-from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import CatalogProtocol, MemoryDataset, SharedMemoryDataset
 from kedro.pipeline import Pipeline
@@ -72,7 +69,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -81,7 +78,7 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
@@ -99,7 +96,7 @@ class AbstractRunner(ABC):
         for ds in pipeline.datasets():
             if ds in catalog:
                 warmed_up_ds.append(ds)
-                _ = catalog._get_dataset(ds)
+                _ = catalog.get(ds)
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
@@ -111,10 +108,8 @@ class AbstractRunner(ABC):
             )
 
         # Register the default dataset pattern with the catalog
-        # TODO: replace with catalog.config_resolver.add_runtime_patterns() when removing old catalog
-        catalog = catalog.shallow_copy(
-            extra_dataset_patterns=self._extra_dataset_patterns
-        )
+        if self._extra_dataset_patterns:
+            catalog.config_resolver.add_runtime_patterns(self._extra_dataset_patterns)
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
@@ -128,7 +123,7 @@ class AbstractRunner(ABC):
             )
 
         start_time = perf_counter()
-        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
+        self._run(pipeline, catalog, hook_or_null_manager, run_id)  # type: ignore[arg-type]
         end_time = perf_counter()
         run_duration = end_time - start_time
 
@@ -178,8 +173,8 @@ class AbstractRunner(ABC):
             the keys are defined by the node outputs.
 
         """
-        free_outputs = pipeline.outputs() - set(catalog.list())
-        missing = {ds for ds in catalog.list() if not catalog.exists(ds)}
+        free_outputs = pipeline.outputs() - set(catalog.keys())
+        missing = {ds for ds in catalog if not catalog.exists(ds)}
         to_build = free_outputs | missing
         to_rerun = pipeline.only_nodes_with_outputs(*to_build) + pipeline.from_inputs(
             *to_build
@@ -187,7 +182,7 @@ class AbstractRunner(ABC):
 
         # We also need any missing datasets that are required to run the
         # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.datasets() - set(catalog.list())
+        unregistered_ds = pipeline.datasets() - set(catalog.keys())
         output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
         input_from_unregistered = to_rerun.inputs() & unregistered_ds
         to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)
@@ -205,7 +200,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
          inputs have already been checked and normalized by run().
@@ -215,7 +210,7 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
         """
 
         nodes = pipeline.nodes
@@ -241,7 +236,7 @@ class AbstractRunner(ABC):
                         catalog=catalog,
                         hook_manager=hook_manager,
                         is_async=self._is_async,
-                        session_id=session_id,
+                        run_id=run_id,
                     ).execute()
                     done_nodes.add(node)
                 except Exception:
@@ -265,7 +260,7 @@ class AbstractRunner(ABC):
                         catalog=catalog,
                         hook_manager=hook_manager,
                         is_async=self._is_async,
-                        session_id=session_id,
+                        run_id=run_id,
                     )
                     if isinstance(executor, ProcessPoolExecutor):
                         task.parallel = True
@@ -556,52 +551,3 @@ def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[
     sub_pipeline = pipeline.only_nodes(*node_names)
     initial_nodes = sub_pipeline.grouped_nodes[0]
     return initial_nodes
-
-
-def run_node(
-    node: Node,
-    catalog: CatalogProtocol,
-    hook_manager: PluginManager,
-    is_async: bool = False,
-    session_id: str | None = None,
-) -> Node:
-    """Run a single `Node` with inputs from and outputs to the `catalog`.
-
-    Args:
-        node: The ``Node`` to run.
-        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
-        hook_manager: The ``PluginManager`` to activate hooks.
-        is_async: If True, the node inputs and outputs are loaded and saved
-            asynchronously with threads. Defaults to False.
-        session_id: The session id of the pipeline run.
-
-    Raises:
-        ValueError: Raised if is_async is set to True for nodes wrapping
-            generator functions.
-
-    Returns:
-        The node argument.
-
-    """
-    warnings.warn(
-        "`run_node()` has been deprecated and will be removed in Kedro 1.0.0.",
-        KedroDeprecationWarning,
-    )
-
-    if is_async and inspect.isgeneratorfunction(node.func):
-        raise ValueError(
-            f"Async data loading and saving does not work with "
-            f"nodes wrapping generator functions. Please make "
-            f"sure you don't use `yield` anywhere "
-            f"in node {node!s}."
-        )
-
-    task = Task(
-        node=node,
-        catalog=catalog,
-        hook_manager=hook_manager,
-        is_async=is_async,
-        session_id=session_id,
-    )
-    node = task.execute()
-    return node

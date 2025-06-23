@@ -2,14 +2,10 @@
 
 This page contains a set of examples to help you structure your YAML configuration file in `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
-```{warning}
-Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
-From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
-```
+!!! Warning
+    Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+    From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
-```{contents} Table of Contents
-:depth: 3
-```
 
 ## Load data from a local binary file using `utf-8` encoding
 
@@ -210,7 +206,7 @@ scooters_query:
     index_col: [name]
 ```
 
-When you use {class}`pandas.SQLTableDataset<kedro-datasets:kedro_datasets.pandas.SQLTableDataset>`, or {class}`pandas.SQLQueryDataset<kedro-datasets:kedro_datasets.pandas.SQLQueryDataset>` you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
+When you use [pandas.SQLTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.SQLTableDataset/), or [pandas.SQLQueryDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.SQLQueryDataset/) you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
 
 `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataset` only).
 
@@ -261,9 +257,8 @@ dev_minio:
     endpoint_url : 'http://localhost:9000'
 ```
 
-```{note}
-The easiest way to setup MinIO is to run a Docker image. After the following command, you can access the MinIO server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
-```
+!!! note
+    The easiest way to setup MinIO is to run a Docker image. After the following command, you can access the MinIO server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
@@ -288,9 +283,9 @@ dev_abs:
 
 ## Load a CSV file stored in a remote location through SSH
 
-```{note}
-This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
-```
+!!! note
+    This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
+
 ```yaml
 cool_dataset:
   type: pandas.CSVDataset
@@ -341,9 +336,8 @@ bikes:
 
 The syntax `&csv` names the following block `csv` and the syntax `<<: *csv` inserts the contents of the block named `csv`. Locally declared keys entirely override inserted ones as seen in `bikes`.
 
-```{note}
-It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
-```
+!!! note
+    It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
 
 You can also nest reusable YAML syntax:
 
@@ -389,10 +383,10 @@ my_dataframe@pandas:
  When using transcoding you must ensure the filepaths defined for each catalog entry share the same format (for example: CSV, JSON, Parquet). These entries can then be used in the pipeline as follows:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
-        node(name="my_func2_node", func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),
+        Node(name="my_func1_node", func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
+        Node(name="my_func2_node", func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),
     ]
 )
 ```
@@ -415,9 +409,9 @@ Below are some examples where transcoding may produce unwanted side effects and 
 Consider the following pipeline:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="my_dataframe@pandas", outputs="my_dataframe@spark"),
+        Node(name="my_func1_node", func=my_func1, inputs="my_dataframe@pandas", outputs="my_dataframe@spark"),
     ]
 )
 ```
@@ -434,10 +428,10 @@ A node cannot have the same inputs and outputs even if they are transcoded: {'my
 Consider the following pipeline:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
-        node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
+        Node(name="my_func1_node", func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
+        Node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
     ]
 )
 ```
@@ -453,11 +447,11 @@ kedro.pipeline.pipeline.OutputNotUniqueError: Output(s) ['my_dataframe'] are ret
 Consider the following pipeline:
 
 ```python
-pipeline(
+Pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="my_dataframe@spark", outputs="spark_output"),
-        node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
-        node(name="my_func3_node", func=my_func3, inputs="my_dataframe@pandas", outputs="pandas_output"),
+        Node(name="my_func1_node", func=my_func1, inputs="my_dataframe@spark", outputs="spark_output"),
+        Node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe@pandas"),
+        Node(name="my_func3_node", func=my_func3, inputs="my_dataframe@pandas", outputs="pandas_output"),
     ]
 )
 ```
@@ -467,9 +461,9 @@ In this example, there is a single dependency between the nodes `my_func3_node` 
 ```python
 resolved_pipeline(
     [
-        node(name="my_func1_node", func=my_func1, inputs="my_dataframe", outputs="spark_output"),
-        node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe"),
-        node(name="my_func3_node", func=my_func3, inputs="my_dataframe", outputs="pandas_output"),
+        Node(name="my_func1_node", func=my_func1, inputs="my_dataframe", outputs="spark_output"),
+        Node(name="my_func2_node", func=my_func2, inputs="pandas_input", outputs="my_dataframe"),
+        Node(name="my_func3_node", func=my_func3, inputs="my_dataframe", outputs="pandas_output"),
     ]
 )
 ```
@@ -478,7 +472,7 @@ When the node order is resolved, we can see that the node `my_func1_node` is tre
 
 ## Create a Data Catalog YAML configuration file via the CLI
 
-You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
+You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../getting-started/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
 
 This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
 

@@ -1,17 +1,22 @@
 # Introduction to the Data Catalog
 
+!!! warning
+    `DataCatalog` and all related documentation is currently under development and subject to change. Several APIs currently available,
+    including `datasets`, `get_datasets`, `_get_datasets`, `add`, `list`, `add_feed_dict`, and `shallow_copy`,
+    will be removed or replaced in the v1.0.0 release.
+
 
 In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
 
 This page introduces the basic sections of `catalog.yml`, which is the file Kedro uses to register data sources for a project.
 
-```{warning}
-Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
-From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
-```
+!!! warning
+    Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+    From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a      lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
+
 
 ## The basics of `catalog.yml`
-A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorial/set_up_data.md).
+A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorials/set_up_data.md).
 
 The example below registers two `csv` datasets, and an `xlsx` dataset. The minimum details needed to load and save a file within a local file system are the key, which is name of the dataset, the type of data to indicate the dataset to use (`type`) and the file's location (`filepath`).
 
@@ -37,16 +42,15 @@ The dataset configuration in `catalog.yml` is defined as follows:
 1. The top-level key is the dataset name used as a dataset identifier in the catalog - `shuttles`, `weather` in the example below.
 2. The next level includes multiple keys. The first one is the mandatory key - `type` which defines the type of dataset to use.
 The rest of the keys are dataset parameters and vary depending on the implementation.
-To get the extensive list of dataset parameters, see {py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` and navigate to the `__init__` method of the target dataset.
+To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/).and navigate to the `__init__` method of the target dataset.
 3. Some dataset parameters can be further configured depending on the libraries underlying the dataset implementation.
 In the example below, a configuration of the `shuttles` dataset includes the `load_args` parameter which is defined by the `pandas` option for loading CSV files.
 While the `save_args` parameter in a configuration of the `weather` dataset is defined by the `snowpark` `saveAsTable` method.
-To get the extensive list of dataset parameters, see {py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` and navigate to the target parameter in the `__init__` definition for the dataset.
+To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/). and navigate to the target parameter in the `__init__` definition for the dataset.
 For those parameters we provide a reference to the underlying library configuration parameters. For example, under the `load_args` parameter section for [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) you can find a reference to the [pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) method defining the full set of the parameters accepted.
 
-```{note}
-Kedro datasets delegate any of the `load_args` / `save_args` directly to the underlying implementation.
-```
+!!! note
+    Kedro datasets delegate any of the `load_args` / `save_args` directly to the underlying implementation.
 
 The example below showcases the configuration of two datasets - `shuttles` of type [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) and `weather` of type [snowflake.SnowparkTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.snowflake.SnowparkTableDataset.html).
 
@@ -74,7 +78,7 @@ weather: # Dataset name
 
 Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet files, Feather files, HDF5 files, JSON documents, pickled objects, SQL tables, SQL queries, and more. They are supported using libraries such as pandas, PySpark, NetworkX, and Matplotlib.
 
-{py:mod}`The kedro-datasets package documentation <kedro-datasets:kedro_datasets>` contains a comprehensive list of all available file types.
+[kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/) contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 
@@ -153,16 +157,15 @@ test_dataset:
       mode: "a"
 ```
 
-```{note}
-Default load, save and filesystem arguments are defined inside the specific dataset implementations as `DEFAULT_LOAD_ARGS`, `DEFAULT_SAVE_ARGS`, and `DEFAULT_FS_ARGS` respectively.
-You can check those in {py:mod}`the dataset API documentation <kedro-datasets:kedro_datasets>`.
-```
+!!! note
+    Default load, save and filesystem arguments are defined inside the specific dataset implementations as `DEFAULT_LOAD_ARGS`, `DEFAULT_SAVE_ARGS`, and `DEFAULT_FS_ARGS` respectively.
+You can check those in the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/).
 
 
 ### Dataset access credentials
 The Data Catalog also works with the `credentials.yml` file in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
 
-Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
+Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configure/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 
@@ -207,19 +210,18 @@ kedro run --load-versions=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
 where `--load-versions` is dataset name and version timestamp separated by `:`.
 
-A dataset offers versioning support if it extends the {py:class}`~kedro.io.AbstractVersionedDataset` class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
+A dataset offers versioning support if it extends the [kedro.io.AbstractVersionedDataset][] class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
 
 To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 
-```{note}
-Note that HTTP(S) is a supported file system in the dataset implementations, but if you use it, you can't also use versioning.
-```
+!!! note
+    Note that HTTP(S) is a supported file system in the dataset implementations, but if you use it, you can't also use versioning.
 
 ## Use the Data Catalog within Kedro configuration
 
 Kedro configuration enables you to organise your project for different stages of your data pipeline. For example, you might need different Data Catalog settings for development, testing, and production environments.
 
-By default, Kedro has a `base` and a `local` folder for configuration. The Data Catalog configuration is loaded using a configuration loader class which recursively scans for configuration files inside the `conf` folder, firstly in `conf/base` and then in `conf/local` (which is the designated overriding environment). Kedro merges the configuration information and returns a configuration dictionary according to rules set out in the [configuration documentation](../configuration/configuration_basics.md).
+By default, Kedro has a `base` and a `local` folder for configuration. The Data Catalog configuration is loaded using a configuration loader class which recursively scans for configuration files inside the `conf` folder, firstly in `conf/base` and then in `conf/local` (which is the designated overriding environment). Kedro merges the configuration information and returns a configuration dictionary according to rules set out in the [configuration documentation](../configure/configuration_basics.md).
 
 In summary, if you need to configure your datasets for different environments, you can create both `conf/base/catalog.yml` and `conf/local/catalog.yml`. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while adding a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets while you are using them for prototyping data pipeline(s).
 

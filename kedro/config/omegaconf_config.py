@@ -183,18 +183,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         Raises:
             KeyError: If key provided isn't present in the config_patterns of this
-                ``OmegaConfigLoader`` instance.
+               ``OmegaConfigLoader`` instance.
             MissingConfigException: If no configuration files exist matching the patterns
                 mapped to the provided key.
 
         Returns:
             Dict[str, Any]:  A Python dictionary with the combined
-                configuration from all configuration files.
+               configuration from all configuration files.
         """
         # Allow bypassing of loading config from patterns if a key and value have been set
         # explicitly on the ``OmegaConfigLoader`` instance.
 
-        # Re-register runtime params resolver in case it was previously deactivated
+        # Re-register runtime params resolver incase it was previously deactivated
         self._register_runtime_params_resolver()
 
         if key in self:
@@ -553,8 +553,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         them in-place, clearing the resolver after the operation is complete if
         it was not registered beforehand.
 
-        Args:
-            config (DictConfig): The configuration dictionary to resolve.
+        Arguments:
+            config {Dict[str, Any]} -- The configuration dictionary to resolve.
         """
         if not OmegaConf.has_resolver("oc.env"):
             OmegaConf.register_new_resolver("oc.env", oc.env)

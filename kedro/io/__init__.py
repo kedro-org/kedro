@@ -13,10 +13,11 @@ from .core import (
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
-    SharedMemoryCatalogProtocol,
     Version,
 )
-from .data_catalog import DataCatalog, SharedMemoryDataCatalog
+from .data_catalog import DataCatalog
+from .kedro_data_catalog import KedroDataCatalog
+from .lambda_dataset import LambdaDataset
 from .memory_dataset import MemoryDataset
 from .shared_memory_dataset import SharedMemoryDataset
 
@@ -25,14 +26,14 @@ __all__ = [
     "AbstractVersionedDataset",
     "CachedDataset",
     "CatalogProtocol",
+    "DataCatalog",
     "CatalogConfigResolver",
     "DatasetAlreadyExistsError",
     "DatasetError",
     "DatasetNotFoundError",
-    "DataCatalog",
+    "KedroDataCatalog",
+    "LambdaDataset",
     "MemoryDataset",
     "SharedMemoryDataset",
-    "SharedMemoryDataCatalog",
-    "SharedMemoryCatalogProtocol",
     "Version",
 ]

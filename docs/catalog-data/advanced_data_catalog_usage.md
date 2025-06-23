@@ -6,6 +6,24 @@ You can define a Data Catalog in two ways. Most use cases can be through a YAML 
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
+This page contains a set of guides for advanced usage of the `DataCatalog` API in Kedro, including how to configure, access, manipulate, and persist datasets programmatically:
+
+- [How to configure the Data Catalog](#how-to-configure-the-data-catalog)
+- [How to access datasets in the catalog](#how-to-access-datasets-in-the-catalog)
+- [How to add datasets to the catalog](#how-to-add-datasets-to-the-catalog)
+- [How to iterate through datasets in the catalog](#how-to-iterate-trough-datasets-in-the-catalog)
+- [How to get the number of datasets in the catalog](#how-to-get-the-number-of-datasets-in-the-catalog)
+- [How to print the full catalog and individual datasets](#how-to-print-the-full-catalog-and-individual-datasets)
+- [How to load datasets programmatically](#how-to-load-datasets-programmatically)
+- [How to save data programmatically](#how-to-save-data-programmatically)
+    - [How to save data to memory](#how-to-save-data-to-memory)
+    - [How to save data to a SQL database for querying](#how-to-save-data-to-a-sql-database-for-querying)
+    - [How to save data in Parquet](#how-to-save-data-in-parquet)
+- [How to access a dataset with credentials](#how-to-access-a-dataset-with-credentials)
+- [How to version a dataset using the Code API](#how-to-version-a-dataset-using-the-code-api)
+- [How to save catalog to config](#how-to-save-catalog-to-config)
+- [How to filter catalog datasets](#how-to-filter-catalog-datasets)
+- [How to get dataset type](#how-to-get-dataset-type)
 
 ## How to configure the Data Catalog
 
@@ -109,7 +127,7 @@ Use Python’s built-in `len()` function:
 ds_count = len(catalog)
 ```
 
-### How to print the full catalog and individual datasets
+## How to print the full catalog and individual datasets
 
 To print the catalog or an individual dataset programmatically, use the `print()` function or in an interactive environment like IPython or JupyterLab, simply enter the variable:
 
@@ -186,6 +204,7 @@ catalog.save("ranked", ranked)
     Saving `None` to a dataset is not allowed!
 
 ## How to access a dataset with credentials
+
 Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configure/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:

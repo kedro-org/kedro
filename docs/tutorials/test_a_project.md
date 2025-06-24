@@ -185,7 +185,7 @@ When we put this together, we get the following test:
 
     import logging
     import pandas as pd
-    from kedro.io import KedroDataCatalog
+    from kedro.io import DataCatalog
     from kedro.runner import SequentialRunner
     from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
 
@@ -194,7 +194,7 @@ When we put this together, we get the following test:
         pipeline = create_ds_pipeline()
 
         # Arrange data catalog
-        catalog = KedroDataCatalog()
+        catalog = DataCatalog()
 
         dummy_data = pd.DataFrame(
             {
@@ -318,7 +318,7 @@ After incorporating these testing practices, our test file `test_data_science_pi
     import pandas as pd
     import pytest
 
-    from kedro.io import KedroDataCatalog
+    from kedro.io import DataCatalog
     from kedro.runner import SequentialRunner
     from spaceflights.pipelines.data_science import create_pipeline as create_ds_pipeline
     from spaceflights.pipelines.data_science.nodes import split_data
@@ -368,7 +368,7 @@ After incorporating these testing practices, our test file `test_data_science_pi
             .from_nodes("split_data_node")
             .to_nodes("evaluate_model_node")
         )
-        catalog = KedroDataCatalog()
+        catalog = DataCatalog()
         catalog.add_feed_dict(
             {
                 "model_input_table" : dummy_data,

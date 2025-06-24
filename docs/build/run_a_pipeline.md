@@ -207,7 +207,7 @@ In a simple example, we define a `MemoryDataset` called `xs` to store our inputs
 
 ??? example "View code"
     ```python
-    io = KedroDataCatalog(dict(xs=MemoryDataset()))
+    io = DataCatalog(dict(xs=MemoryDataset()))
     ```
 
     ```python

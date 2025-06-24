@@ -1,5 +1,4 @@
-# Upcoming Release
-
+# Upcoming Release 1.0.0
 ## Major features and improvements
 * Added `--only-missing-outputs` CLI flag to `kedro run`. This flag skips nodes when all their persistent outputs exist.
 * Removed the `AbstractRunner.run_only_missing()` method, an older and not very used API for partial runs. Please use `--only-missing-outputs` CLI to run partial pipelines instead.
@@ -10,7 +9,7 @@
 ## Documentation changes
 ## Community contributions
 
-# [PRE-RELEASE] 1.0.0rc1
+# Release 1.0.0rc1
 
 ## Major features and improvements
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
@@ -24,6 +23,8 @@
 * Updated `kedro registry describe` to return the node name property instead of creating its own name for the node.
 
 ## Documentation changes
+* Updated the `DataCatalog` documentation with improved structure and detailed description of new features.
+
 ## Community contributions
 
 ## Breaking changes to the API
@@ -34,6 +35,9 @@
 * `Pipeline.grouped_nodes_by_namespace()` was replaced with `group_nodes_by(group_by)`, which supports multiple strategies and returns a list of `GroupedNodes`, improving type safety and consistency for deployment plugin integrations.
 * The micro-packaging feature and the corresponding `micropkg` CLI command have been removed.
 * Renamed `session_id` parameter to `run_id` in all runner methods and hooks to improve API clarity and prepare for future multi-run session support.
+* Removed the following `DataCatalog` methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
+* Removed the CLI command `kedro catalog create`.
+* Changed the output of `runner.run()` — it now always returns all pipeline outputs, regardless of catalog configuration.
 
 ## Migration guide from Kedro 0.19.* to 1.*
 [See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).

@@ -14,12 +14,12 @@ from kedro.io import (
     DataCatalog,
     DatasetError,
     DatasetNotFoundError,
-    LambdaDataset,
     MemoryDataset,
 )
 from kedro.io.core import (
     _DEFAULT_PACKAGES,
     VERSION_FORMAT,
+    AbstractDataset,
     Version,
     VersionAlreadyExistsError,
     generate_timestamp,
@@ -55,6 +55,20 @@ def multi_catalog():
 @pytest.fixture
 def data_catalog_from_config(correct_config):
     return DataCatalog.from_config(**correct_config)
+
+
+class NonExistentDataset(AbstractDataset):
+    def __init__(self):
+        pass
+
+    def _load(self):
+        pass
+
+    def _save(self, data):
+        pass
+
+    def _describe(self):
+        return {}
 
 
 class TestDataCatalog:
@@ -111,13 +125,13 @@ class TestDataCatalog:
 
     def test_exists_not_implemented(self, caplog):
         """Test calling `exists` on the dataset, which didn't implement it"""
-        catalog = DataCatalog(datasets={"test": LambdaDataset(None, None)})
+        catalog = DataCatalog(datasets={"test": NonExistentDataset()})
         result = catalog.exists("test")
 
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "'exists()' not implemented for 'LambdaDataset'. "
+            "'exists()' not implemented for 'NonExistentDataset'. "
             "Assuming output does not exist." in log_record.message
         )
         assert result is False
@@ -290,24 +304,15 @@ class TestDataCatalog:
                 **correct_config, load_versions={"version": "test_version"}
             )
 
-    def test_get_dataset_matching_pattern(self, data_catalog):
-        """Test get_dataset() when dataset is not in the catalog but pattern matches"""
+    def test_get_dataset_matches_runtime_pattern(self, data_catalog):
+        """Test get_dataset() when dataset is not in the catalog but default pattern matches"""
         match_pattern_ds = "match_pattern_ds"
         assert match_pattern_ds not in data_catalog
-        data_catalog.config_resolver.add_runtime_patterns(
-            {"{default}": {"type": "MemoryDataset"}}
-        )
-        ds = data_catalog.get(match_pattern_ds)
+        pattern = r"Dataset \'match_pattern_ds\' not found in the catalog"
+        with pytest.raises(DatasetNotFoundError, match=pattern):
+            _ = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=False)
+        ds = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=True)
         assert isinstance(ds, MemoryDataset)
-
-    def test_remove_runtime_pattern(self, data_catalog):
-        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
-        data_catalog.config_resolver.add_runtime_patterns(runtime_pattern)
-        match_pattern_ds = "match_pattern_ds"
-        assert match_pattern_ds in data_catalog
-
-        data_catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
-        assert match_pattern_ds not in data_catalog
 
     def test_release(self, data_catalog):
         """Test release is called without errors"""
@@ -330,6 +335,21 @@ class TestDataCatalog:
 
         data_catalog_copy = deepcopy(data_catalog_from_config)
         assert not data_catalog_copy == expected_catalog
+
+    def test_get_returns_none_dataset_raises(self):
+        catalog = DataCatalog(datasets={})
+        catalog._datasets["bad_ds"] = None
+        with pytest.raises(
+            DatasetNotFoundError, match="Dataset 'bad_ds' not found in the catalog"
+        ):
+            catalog.get("bad_ds")
+
+    def test_get_type_missing_dataset_raises(self):
+        catalog = DataCatalog(datasets={})
+        with pytest.raises(
+            DatasetNotFoundError, match="Dataset 'missing_ds' not found in the catalog"
+        ):
+            catalog.get_type("missing_ds")
 
     class TestDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):

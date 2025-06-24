@@ -43,7 +43,7 @@ class TestRunGeneratorNode:
         mocker.patch.object(
             catalog,
             "get",
-            side_effect=lambda ds_name: left if ds_name == "left" else right,
+            side_effect=lambda ds_name, **kwargs: left if ds_name == "left" else right,
         )
 
         n = node(generate_tuple, inputs=None, outputs=["left", "right"])
@@ -64,7 +64,7 @@ class TestRunGeneratorNode:
         mocker.patch.object(
             catalog,
             "get",
-            side_effect=lambda ds_name: left if ds_name == "left" else right,
+            side_effect=lambda ds_name, **kwargs: left if ds_name == "left" else right,
         )
 
         n = node(generate_list, inputs=None, outputs=["left", "right"])
@@ -86,7 +86,7 @@ class TestRunGeneratorNode:
         mocker.patch.object(
             catalog,
             "get",
-            side_effect=lambda ds_name: left if ds_name == "left" else right,
+            side_effect=lambda ds_name, **kwargs: left if ds_name == "left" else right,
         )
 
         n = node(generate_dict, inputs=None, outputs={"idx": "left", "square": "right"})

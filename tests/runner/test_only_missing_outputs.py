@@ -119,9 +119,7 @@ class TestOnlyMissingOutputs:
 
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # Should call the filter method
         spy_filter.assert_called_once()
-        # Updated assertion to match new log format
         assert "Running 1 out of 1 nodes" in caplog.text
 
     def test_only_missing_outputs_some_outputs_exist(
@@ -201,8 +199,6 @@ class TestOnlyMissingOutputs:
 
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # NEW BEHAVIOR: Since B exists and is persistent, node1 should be skipped
-        # Only node2 should run to produce the missing C
         assert "Skipping 1 nodes with existing outputs: node1" in caplog.text
         assert "Running 1 out of 2 nodes" in caplog.text
 
@@ -331,7 +327,7 @@ class TestOnlyMissingOutputs:
         runner = runner_class()
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
-        # All nodes should be skipped including nodeC (wasteful node)
+        # All nodes should be skipped including nodeC
         assert "Skipping all 3 nodes (all persistent outputs exist)" in caplog.text
 
     def test_only_missing_outputs_with_dataset_factory(
@@ -340,11 +336,9 @@ class TestOnlyMissingOutputs:
         """Test that dataset factory patterns are handled correctly"""
         from kedro.io.catalog_config_resolver import CatalogConfigResolver
 
-        # Special handling for catalog with config resolver
         runner_class_param = runner_class
         if runner_class_param == ParallelRunner:
             # For ParallelRunner, we need to use SharedMemoryDataCatalog
-            # So skip this test as it doesn't support config_resolver in the same way
             pytest.skip(
                 "ParallelRunner doesn't support config_resolver in the same way"
             )
@@ -361,7 +355,6 @@ class TestOnlyMissingOutputs:
         catalog["input"] = MemoryDataset("test_data")
 
         # Mock exists to return False (dataset doesn't exist)
-        # KEEP this mock - it's for factory-created datasets, not DummyDataset
         catalog.exists = mocker.Mock(return_value=False)
 
         # Create a pipeline with dataset factory pattern
@@ -381,8 +374,6 @@ class TestOnlyMissingOutputs:
         self, runner_class, create_catalog
     ):
         """Test that exceptions in catalog.__contains__ are NOT caught"""
-
-        # Create appropriate catalog subclass based on runner type
         if runner_class == ParallelRunner:
 
             class ExceptionCatalog(SharedMemoryDataCatalog):
@@ -406,7 +397,7 @@ class TestOnlyMissingOutputs:
 
         runner = runner_class()
 
-        # Should raise the exception, not handle it
+        # Should raise the exception
         with pytest.raises(KeyError, match="Simulated catalog error"):
             runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
@@ -416,7 +407,6 @@ class TestOnlyMissingOutputs:
         """Test handling of diamond dependencies with shared upstream nodes"""
         catalog = create_catalog()
 
-        # Create a diamond dependency using regular functions for ParallelRunner
         if runner_class == ParallelRunner:
             test_pipeline = pipeline(
                 [
@@ -450,19 +440,17 @@ class TestOnlyMissingOutputs:
         # All 4 nodes should run since D is missing and all intermediates are ephemeral
         assert "Running 4 out of 4 nodes" in caplog.text
 
-    def test_is_persistent_and_missing_ephemeral_dataset(
-        self, runner_class, create_catalog
-    ):
-        """Test that ephemeral datasets (MemoryDataset) are not considered persistent."""
+    def test_is_dataset_missing_ephemeral_dataset(self, runner_class, create_catalog):
+        """Test that ephemeral datasets (MemoryDataset) are not considered missing."""
         runner = runner_class()
         catalog = create_catalog()
 
         # Use public API instead of _datasets
         catalog["mem_output"] = MemoryDataset()
 
-        assert not runner._is_persistent_and_missing("mem_output", catalog)
+        assert not runner._is_dataset_missing("mem_output", catalog)
 
-    def test_is_persistent_and_missing_persistent_exists(
+    def test_is_dataset_missing_persistent_exists(
         self, runner_class, create_catalog, create_persistent_dataset
     ):
         """Test that persistent datasets that exist are not considered missing."""
@@ -472,9 +460,9 @@ class TestOnlyMissingOutputs:
         # Use public API instead of _datasets
         catalog["persist_output"] = create_persistent_dataset(exists_result=True)
 
-        assert not runner._is_persistent_and_missing("persist_output", catalog)
+        assert not runner._is_dataset_missing("persist_output", catalog)
 
-    def test_is_persistent_and_missing_persistent_not_exists(
+    def test_is_dataset_missing_persistent_not_exists(
         self, runner_class, create_catalog, create_persistent_dataset
     ):
         """Test that persistent datasets that don't exist are considered missing."""
@@ -484,17 +472,16 @@ class TestOnlyMissingOutputs:
         # Use public API instead of _datasets
         catalog["persist_output"] = create_persistent_dataset(exists_result=False)
 
-        assert runner._is_persistent_and_missing("persist_output", catalog)
+        assert runner._is_dataset_missing("persist_output", catalog)
 
     def test_is_persistent_and_missing_undefined_dataset(
         self, runner_class, create_catalog
     ):
-        """Test that undefined datasets (not in catalog, no factory) are not considered persistent."""
+        """Test that undefined datasets (not in catalog) are not considered missing."""
         runner = runner_class()
         catalog = create_catalog()
 
-        # Just test that it's not in catalog - no need to mock _datasets
-        assert not runner._is_persistent_and_missing("undefined_output", catalog)
+        assert not runner._is_dataset_missing("undefined_output", catalog)
 
     def test_only_missing_outputs_factory_pattern_ephemeral(
         self, runner_class, create_catalog, caplog
@@ -518,8 +505,7 @@ class TestOnlyMissingOutputs:
         """Test node with mix of persistent and ephemeral outputs"""
         catalog = create_catalog()
 
-        # Node produces both ephemeral and persistent outputs
-        # Use regular function for ParallelRunner
+        # Node creates both ephemeral and persistent outputs
         if runner_class == ParallelRunner:
             test_pipeline = pipeline(
                 [
@@ -575,7 +561,6 @@ class TestOnlyMissingOutputs:
 
         runner = runner_class()
 
-        # Set the log level to DEBUG for the runner's logger
         logger_name = runner._logger.name
         caplog.set_level(logging.DEBUG, logger=logger_name)
 
@@ -586,7 +571,7 @@ class TestOnlyMissingOutputs:
         assert "Skipping 2 nodes with existing outputs: node1, node3" in caplog.text
         assert "Running 1 out of 3 nodes" in caplog.text
 
-    def test_only_missing_outputs_ephemeral_intermediate_needed_by_consumer(
+    def test_only_missing_outputs_ephemeral_intermediate_needed_by_child(
         self, runner_class, create_catalog, create_persistent_dataset, mocker, caplog
     ):
         """Test when an output is not in catalog but needed by a downstream node"""
@@ -595,26 +580,26 @@ class TestOnlyMissingOutputs:
         # Create a pipeline where 'ephemeral_data' is not defined in catalog
         test_pipeline = pipeline(
             [
-                node(identity, "input", "ephemeral_data", name="producer"),
-                node(identity, "ephemeral_data", "persistent_output", name="consumer"),
+                node(identity, "input", "ephemeral_data", name="child"),
+                node(identity, "ephemeral_data", "persistent_output", name="parent"),
             ]
         )
 
         catalog["input"] = MemoryDataset("test_data")
-        # Note: 'ephemeral_data' is NOT in the catalog - it will be a MemoryDataset
         catalog["persistent_output"] = create_persistent_dataset(exists_result=False)
 
         runner = runner_class()
 
-        # Spy on the method to verify it's called
-        spy_is_output_needed = mocker.spy(runner, "_is_output_needed_by_consumer")
+        is_ephemeral_or_missing = mocker.spy(
+            runner, "_is_dataset_ephemeral_or_missing"
+        )
 
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 
         assert "Running 2 out of 2 nodes" in caplog.text
 
         # Verify the method was called for the ephemeral output
-        spy_is_output_needed.assert_any_call("ephemeral_data", catalog)
+        is_ephemeral_or_missing.assert_any_call("ephemeral_data", catalog)
 
     def test_only_missing_outputs_complex_with_no_output_nodes(
         self, runner_class, create_catalog, create_persistent_dataset, caplog
@@ -640,7 +625,6 @@ class TestOnlyMissingOutputs:
 
         runner = runner_class()
 
-        # Set the log level to DEBUG for the runner's logger
         logger_name = runner._logger.name
         caplog.set_level(logging.DEBUG, logger=logger_name)
 

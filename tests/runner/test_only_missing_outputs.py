@@ -590,9 +590,7 @@ class TestOnlyMissingOutputs:
 
         runner = runner_class()
 
-        is_ephemeral_or_missing = mocker.spy(
-            runner, "_is_dataset_ephemeral_or_missing"
-        )
+        is_ephemeral_or_missing = mocker.spy(runner, "_is_dataset_ephemeral_or_missing")
 
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 

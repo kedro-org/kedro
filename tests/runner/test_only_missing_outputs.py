@@ -12,6 +12,9 @@ from kedro.io import (
 )
 from kedro.pipeline import node, pipeline
 from kedro.runner import ParallelRunner, SequentialRunner, ThreadRunner
+from kedro.runner.runner import (
+    is_persistent_dataset_missing,
+)
 from tests.runner.conftest import identity
 
 
@@ -442,46 +445,42 @@ class TestOnlyMissingOutputs:
 
     def test_is_dataset_missing_ephemeral_dataset(self, runner_class, create_catalog):
         """Test that ephemeral datasets (MemoryDataset) are not considered missing."""
-        runner = runner_class()
         catalog = create_catalog()
 
         # Use public API instead of _datasets
         catalog["mem_output"] = MemoryDataset()
 
-        assert not runner._is_dataset_missing("mem_output", catalog)
+        assert not is_persistent_dataset_missing("mem_output", catalog)
 
     def test_is_dataset_missing_persistent_exists(
         self, runner_class, create_catalog, create_persistent_dataset
     ):
         """Test that persistent datasets that exist are not considered missing."""
-        runner = runner_class()
         catalog = create_catalog()
 
         # Use public API instead of _datasets
         catalog["persist_output"] = create_persistent_dataset(exists_result=True)
 
-        assert not runner._is_dataset_missing("persist_output", catalog)
+        assert not is_persistent_dataset_missing("persist_output", catalog)
 
     def test_is_dataset_missing_persistent_not_exists(
         self, runner_class, create_catalog, create_persistent_dataset
     ):
         """Test that persistent datasets that don't exist are considered missing."""
-        runner = runner_class()
         catalog = create_catalog()
 
         # Use public API instead of _datasets
         catalog["persist_output"] = create_persistent_dataset(exists_result=False)
 
-        assert runner._is_dataset_missing("persist_output", catalog)
+        assert is_persistent_dataset_missing("persist_output", catalog)
 
     def test_is_persistent_and_missing_undefined_dataset(
         self, runner_class, create_catalog
     ):
         """Test that undefined datasets (not in catalog) are not considered missing."""
-        runner = runner_class()
         catalog = create_catalog()
 
-        assert not runner._is_dataset_missing("undefined_output", catalog)
+        assert not is_persistent_dataset_missing("undefined_output", catalog)
 
     def test_only_missing_outputs_factory_pattern_ephemeral(
         self, runner_class, create_catalog, caplog
@@ -590,7 +589,8 @@ class TestOnlyMissingOutputs:
 
         runner = runner_class()
 
-        is_ephemeral_or_missing = mocker.spy(runner, "_is_dataset_ephemeral_or_missing")
+        import kedro.runner.runner
+        is_ephemeral_or_missing = mocker.spy(kedro.runner.runner, "_is_dataset_ephemeral_or_missing")
 
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 

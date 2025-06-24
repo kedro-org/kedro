@@ -62,12 +62,11 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 ??? example "View code"
     ```python
     # in src/<package_name>/runner.py
-    from typing import Any, Dict
-    from kedro.io import AbstractDataset, KedroDataCatalog, MemoryDataset
+    from kedro.io import DataCatalog
     from kedro.pipeline import Pipeline
     from kedro.runner.runner import AbstractRunner
     from pluggy import PluginManager
-
+    from concurrent.futures import Executor
 
     class DryRunner(AbstractRunner):
         """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
@@ -75,23 +74,25 @@ If the built-in Kedro runners do not meet your requirements, you can also define
         necessary data exists.
         """
 
-        def __init__(self, is_async: bool = False, extra_dataset_patterns: Dict[str, Dict[str, Any]] = None):
+        def __init__(self, is_async: bool = False):
             """Instantiates the runner class.
 
             Args:
                 is_async: If True, the node inputs and outputs are loaded and saved
                     asynchronously with threads. Defaults to False.
-                extra_dataset_patterns: Extra dataset factory patterns to be added to the KedroDataCatalog
-                    during the run. This is used to set the default datasets.
             """
-            default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
-            self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
-            super().__init__(is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns)
+            super().__init__(is_async=is_async)
+
+        def _get_executor(self, max_workers: int) -> Executor | None:
+            """Method to provide the correct executor (e.g., ThreadPoolExecutor,
+            ProcessPoolExecutor or None if running sequentially).
+            """
+            return None
 
         def _run(
             self,
             pipeline: Pipeline,
-            catalog: KedroDataCatalog,
+            catalog: DataCatalog,
             hook_manager: PluginManager = None,
             run_id: str = None,
         ) -> None:
@@ -105,7 +106,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 
             Args:
                 pipeline: The ``Pipeline`` to run.
-                catalog: The ``KedroDataCatalog`` from which to fetch data.
+                catalog: The ``DataCatalog`` from which to fetch data.
                 hook_manager: The ``PluginManager`` to activate hooks.
                 run_id: The id of the run.
 
@@ -122,7 +123,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
             missing_inputs = [
                 input_name
                 for input_name in input_names
-                if not catalog._get_dataset(input_name).exists()
+                if not catalog.get(input_name).exists()
             ]
             if missing_inputs:
                 raise KeyError(f"Datasets {missing_inputs} not found.")

@@ -1,0 +1,41 @@
+# .lycheeignore: URLs and patterns to skip during lychee link checking
+# For details: https://github.com/lycheeverse/lychee#ignoring-links
+# Common: docs.kedro.org, localhost, GitHub users/orgs (rate limits)
+https://docs.kedro.org/
+https://docs.kedro.org/*
+http://127.0.0.1:8000/
+http://127.0.0.1:8000/*
+http://127.0.0.1:8787/
+http://127.0.0.1:8787/*
+https://github.com/comym
+https://github.com/datajoely
+https://github.com/vladimir-mck
+https://github.com/dmder
+https://github.com/ankatiyar
+https://github.com/bru5
+https://github.com/nikos-kal
+https://github.com/amandakys
+https://github.com/deepyaman
+https://github.com/antonymilne
+https://github.com/marrrcin
+https://github.com/mzjp2
+https://github.com/DimedS
+https://github.com/921kiyo
+https://github.com/merelcht
+https://github.com/misamae
+https://github.com/lrcouto
+https://github.com/richardwestenra
+https://github.com/tynandebold
+https://github.com/idanov
+https://github.com/Pet3ris
+https://github.com/studioswong
+https://github.com/noklam
+https://github.com/Huongg
+https://github.com/AhdraMeraliQB
+https://github.com/jitu5
+https://github.com/tolomea
+https://github.com/stichbury
+https://github.com/kedro-org
+https://github.com/gbraccialli-qb
+https://github.com/bruceaphilp
+https://github.com/kedro-plugins

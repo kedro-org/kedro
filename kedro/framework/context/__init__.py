@@ -2,6 +2,16 @@
 project context.
 """
 
-from .context import KedroContext, KedroContextError
+from .catalog_mixins import CatalogCommandsMixin
+from .context import (
+    KedroContext,
+    KedroContextError,
+    compose_classes,
+)
 
-__all__ = ["KedroContext", "KedroContextError"]
+__all__ = [
+    "KedroContext",
+    "KedroContextError",
+    "CatalogCommandsMixin",
+    "compose_classes",
+]

@@ -233,7 +233,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 
 !!! note
-    From Kedro 0.19.12, you can use the `grouped_nodes_by_namespace` property of the `Pipeline` object to get a dictionary which groups nodes by their top level namespace. Plugin developers are encouraged to use this property to obtain the mapping of namespaced group of nodes to a container or a task in the deployment environment.
+    From Kedro 1.0.0, use the `group_nodes_by(group_by)` method on the `Pipeline` object to group nodes according to a chosen strategy, such as by `top-level` namespace. This replaces the older `grouped_nodes_by_namespace()` method and returns a list of `GroupedNodes` for improved type safety and consistency. Plugin developers are encouraged to use this method to obtain structured groupings of nodes for deployment environments. To treat each node as a separate group, pass `group_by=None`.
 
 You can further nest namespaces by assigning namespaces on the node level with the `namespace` argument of the `Node` class. Namespacing at node level should only be done to enhance visualisation by creating collapsible pipeline parts on Kedro Viz. In this case, only the node name will be prefixed with `namespace_name`, while inputs, outputs, and parameters will remain unchanged. This behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).
 

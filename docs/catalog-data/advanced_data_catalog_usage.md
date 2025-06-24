@@ -21,6 +21,7 @@ This page contains a set of guides for advanced usage of the `DataCatalog` API i
     - [How to save data in Parquet](#how-to-save-data-in-parquet)
 - [How to access a dataset with credentials](#how-to-access-a-dataset-with-credentials)
 - [How to version a dataset using the Code API](#how-to-version-a-dataset-using-the-code-api)
+- [How to access dataset patterns](#how-to-access-dataset-patterns)
 - [How to save catalog to config](#how-to-save-catalog-to-config)
 - [How to filter catalog datasets](#how-to-filter-catalog-datasets)
 - [How to get dataset type](#how-to-get-dataset-type)
@@ -317,8 +318,9 @@ catalog.save("test_dataset", data1)  # emits a UserWarning due to version incons
 # raises DatasetError since the data/01_raw/test.csv/exact_load_version/test.csv
 # file does not exist
 reloaded = catalog.load("test_dataset")
+```
 
-### How to access dataset patterns
+## How to access dataset patterns
 
 The pattern resolution logic in `DataCatalog` is handled by the `config_resolver`, which can be accessed as a property of the catalog:
 

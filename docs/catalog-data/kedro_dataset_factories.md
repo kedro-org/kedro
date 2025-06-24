@@ -479,7 +479,7 @@ The goal was to keep pipeline logic decoupled from the core `DataCatalog`, while
 
 This mixin approach allows these commands to be injected only when needed - avoiding unnecessary overhead in simpler catalog use cases.
 
-**What This Means in Practice?**
+**What this means in practice?**
 
 You don't need to do anything if:
 

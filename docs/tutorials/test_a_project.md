@@ -213,12 +213,8 @@ When we put this together, we get the following test:
             }
         }
 
-        catalog.add_feed_dict(
-            {
-                "model_input_table" : dummy_data,
-                "params:model_options": dummy_parameters["model_options"],
-            }
-        )
+        catalog["model_input_table"] = dummy_data
+        catalog["params:model_options"] = dummy_parameters["model_options"]
 
         # Arrange the log testing setup
         caplog.set_level(logging.DEBUG, logger="kedro") # Ensure all logs produced by Kedro are captured
@@ -369,12 +365,9 @@ After incorporating these testing practices, our test file `test_data_science_pi
             .to_nodes("evaluate_model_node")
         )
         catalog = DataCatalog()
-        catalog.add_feed_dict(
-            {
-                "model_input_table" : dummy_data,
-                "params:model_options": dummy_parameters["model_options"],
-            }
-        )
+
+        catalog["model_input_table"] = dummy_data
+        catalog["params:model_options"] = dummy_parameters["model_options"]
 
         caplog.set_level(logging.DEBUG, logger="kedro")
         successful_run_msg = "Pipeline execution completed successfully."

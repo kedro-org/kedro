@@ -4,7 +4,7 @@
 
 ## Migrate an existing project that uses Kedro 0.19.\* and 0.18.\* to use 1.\*
 
-### Using Kedro project through framework
+### Using Kedro as a framework
 If you're using Kedro as a framework, you need to update your Kedro project to use Kedro 1.0.0. To do this, you need to follow these steps:
 
 - Update your project's `kedro_init_version` in `pyproject.toml` to `1.0.0`:
@@ -60,6 +60,7 @@ Also, if you're using the `pipeline()` function, make sure to rename the first a
 - pipeline(pipe=[node1, node2])
 + pipeline(nodes=[node1, node2])
 ```
+
 - `--namespace` argument in `kedro run` command was removed in favour of `--namespaces` which accepts multiple namespaces. If you used the `--namespace` argument, you need to change it to `--namespaces` and pass a comma-separated list of namespaces. For example, if you used this command:
 ```bash
 kedro run --namespace=preprocessing
@@ -69,12 +70,14 @@ You should now use the following:
 ```bash
 kedro run --namespaces=preprocessing
 ```
+
 - If you were using the experimental `KedroDataCatalog` class, it was renamed to `DataCatalog` in Kedro 1.0.0. You would need to remove the following lines from your `settings.py` file:
 
 ```diff
 - from kedro.io import KedroDataCatalog
 - DATA_CATALOG_CLASS = KedroDataCatalog
 ```
+
 - `kedro catalog create` command was removed in Kedro 1.0.0.
 
 
@@ -92,10 +95,21 @@ with KedroSession.create(
 ) as session:
     session.run()
 ```
-- If you were using the experimental `KedroDataCatalog` class, it
+- The following `DataCatalog` methods and CLI commands have been removed in Kedro version **`1.0`**.
+Please update your code and workflows accordingly. Where possible, recommended alternatives are provided.
+
+| Deprecated Item           | Type        | Replacement / Notes                                                |
+| ------------------------- | ----------- | ------------------------------------------------------------------ |
+| `catalog._get_dataset()`  | Method      | Internal use only; use `catalog.get()` instead                     |
+| `catalog.add_all()`       | Method      | Prefer explicit catalog construction or use `catalog.add()`        |
+| `catalog.add_feed_dict()` | Method      | Use `catalog["my_dataset"] = ...` (dict-style assignment)          |
+| `catalog.list()`          | Method      | Replaced by `catalog.filter()`                                     |
+| `catalog.shallow_copy()`  | Method      | Removed; no longer needed after internal refactor                  |
 
 
-### Polishing API Surface
+### Other API changes
+The following API changes might be relevant to advanced users of Kedro or plugin developers:
+
 - Kedro 1.0.0 made the following private methods `_is_project` and `_find_kedro_project` public. To update, you need to use `is_kedro_project` and `find_kedro_project` respectively.
 - Renamed instances of `extra_params` and `_extra_params` to `runtime_params` in `KedroSession`, `KedroContext` and `PipelineSpecs`. To update, start using `runtime_params` while creating a `KedroSession`, `KedroContext` or while using pipeline hooks like `before_pipeline_run`, `after_pipeline_run` and `on_pipeline_error`.
 - Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead. Change any imports to use `kedro.pipeline` instead of `kedro.modular_pipeline`.

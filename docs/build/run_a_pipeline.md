@@ -66,7 +66,6 @@ If the built-in Kedro runners do not meet your requirements, you can also define
     from kedro.pipeline import Pipeline
     from kedro.runner.runner import AbstractRunner
     from pluggy import PluginManager
-    from concurrent.futures import Executor
 
     class DryRunner(AbstractRunner):
         """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
@@ -83,10 +82,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
             """
             super().__init__(is_async=is_async)
 
-        def _get_executor(self, max_workers: int) -> Executor | None:
-            """Method to provide the correct executor (e.g., ThreadPoolExecutor,
-            ProcessPoolExecutor or None if running sequentially).
-            """
+        def _get_executor(self, max_workers: int) -> None:
             return None
 
         def _run(

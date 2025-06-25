@@ -2,7 +2,98 @@
 
 [See the release notes on GitHub](https://github.com/kedro-org/kedro/releases/) for comprehensive information about the content of each Kedro release.
 
-## Migrate an existing project that uses Kedro 0.19.\* to use 1.\*
+## Migrate an existing project that uses Kedro 0.19.\* and 0.18.\* to use 1.\*
+
+### Using Kedro project through framework
+If you're using Kedro as a framework, you need to update your Kedro project to use Kedro 1.0.0. To do this, you need to follow these steps:
+
+- Update your project's `kedro_init_version` in `pyproject.toml` to `1.0.0`:
+
+```diff
+[tool.kedro]
+package_name = "my_project"
+project_name = "my-project"
+- kedro_init_version = "0.19.14"
++ kedro_init_version = "1.0.0"
+```
+
+- Update your `src/pipelines/<pipeline_name>/pipeline.py` file to use `Node()` and `Pipeline()` to initialise your nodes and pipelines. While the wrapper functions `node()` and `pipeline()` still work, `Node()` and `Pipeline()` is the preferred way to create nodes and pipelines in Kedro 1.0.0. If the `pipeline()` function is used, make sure it is imported from `kedro.pipeline` instead of `kedro.modular_pipeline`.
+
+```diff
+- from kedro.pipeline.modular_pipeline import node, pipeline  # Old import
++ from kedro.pipeline import Node, Pipeline  # New import
+
+
+from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+-    return pipeline(
++    return Pipeline(
+        [
+-            node(
++            Node(
+                func=preprocess_companies,
+                inputs="companies",
+                outputs="preprocessed_companies",
+                name="preprocess_companies_node",
+            ),
+-            node(
++            Node(
+                func=preprocess_shuttles,
+                inputs="shuttles",
+                outputs="preprocessed_shuttles",
+                name="preprocess_shuttles_node",
+            ),
+-            node(
++            Node(
+                func=create_model_input_table,
+                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
+                outputs="model_input_table",
+                name="create_model_input_table_node",
+            ),
+        ]
+    )
+```
+Also, if you're using the `pipeline()` function, make sure to rename the first argument from `pipe` to `nodes` to be consistent with the argument names of the `Pipeline` class.
+```diff
+- pipeline(pipe=[node1, node2])
++ pipeline(nodes=[node1, node2])
+```
+- `--namespace` argument in `kedro run` command was removed in favour of `--namespaces` which accepts multiple namespaces. If you used the `--namespace` argument, you need to change it to `--namespaces` and pass a comma-separated list of namespaces. For example, if you used this command:
+```bash
+kedro run --namespace=preprocessing
+```
+You should now use the following:
+
+```bash
+kedro run --namespaces=preprocessing
+```
+- If you were using the experimental `KedroDataCatalog` class, it was renamed to `DataCatalog` in Kedro 1.0.0. You would need to remove the following lines from your `settings.py` file:
+
+```diff
+- from kedro.io import KedroDataCatalog
+- DATA_CATALOG_CLASS = KedroDataCatalog
+```
+- `kedro catalog create` command was removed in Kedro 1.0.0.
+
+
+
+### Using Kedro as a library
+If you're using Kedro as a library, you might need to make the following changes to your workflow:
+
+- Use `runtime_params` instead `extra_params` in `KedroSession`:
+
+```diff
+with KedroSession.create(
+    project_path=project_path,
+-    extra_params={"param1": "value1", "param2": "value2"},
++    runtime_params={"param1": "value1", "param2": "value2"},
+) as session:
+    session.run()
+```
+- If you were using the experimental `KedroDataCatalog` class, it
+
 
 ### Polishing API Surface
 - Kedro 1.0.0 made the following private methods `_is_project` and `_find_kedro_project` public. To update, you need to use `is_kedro_project` and `find_kedro_project` respectively.
@@ -10,6 +101,7 @@
 - Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead. Change any imports to use `kedro.pipeline` instead of `kedro.modular_pipeline`.
 - Renamed the first argument to the `pipeline()` function from `pipe` to `nodes` to be consistent with the argument names of the `Pipeline` class.
 - Renamed `ModularPipelineError` to `PipelineError`.
+
 
 ## Migrate an existing project that uses Kedro 0.18.\* to use 0.19.\*
 

@@ -590,7 +590,10 @@ class TestOnlyMissingOutputs:
         runner = runner_class()
 
         import kedro.runner.runner
-        is_ephemeral_or_missing = mocker.spy(kedro.runner.runner, "_is_dataset_ephemeral_or_missing")
+
+        is_ephemeral_or_missing = mocker.spy(
+            kedro.runner.runner, "_is_dataset_ephemeral_or_missing"
+        )
 
         runner.run(test_pipeline, catalog, only_missing_outputs=True)
 

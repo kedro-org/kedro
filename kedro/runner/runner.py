@@ -626,7 +626,7 @@ def _has_missing_persistent_outputs(
 ) -> bool:
     """Check if node has any persistent outputs that don't exist."""
     for output in node.outputs:
-        if is_persistent_dataset_missing(output, catalog):
+        if _is_persistent_dataset_missing(output, catalog):
             logger.debug(f"Node '{node.name}' must run: has missing output '{output}'")
             return True
     return False
@@ -660,7 +660,7 @@ def _outputs_needed_by_children(
     return False
 
 
-def is_persistent_dataset_missing(
+def _is_persistent_dataset_missing(
     dataset_name: str, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
 ) -> bool:
     """Check if a dataset is persistent and doesn't exist.

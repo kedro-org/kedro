@@ -13,7 +13,7 @@ from kedro.io import (
 from kedro.pipeline import node, pipeline
 from kedro.runner import ParallelRunner, SequentialRunner, ThreadRunner
 from kedro.runner.runner import (
-    is_persistent_dataset_missing,
+    _is_persistent_dataset_missing,
 )
 from tests.runner.conftest import identity
 
@@ -450,7 +450,7 @@ class TestOnlyMissingOutputs:
         # Use public API instead of _datasets
         catalog["mem_output"] = MemoryDataset()
 
-        assert not is_persistent_dataset_missing("mem_output", catalog)
+        assert not _is_persistent_dataset_missing("mem_output", catalog)
 
     def test_is_dataset_missing_persistent_exists(
         self, runner_class, create_catalog, create_persistent_dataset
@@ -461,7 +461,7 @@ class TestOnlyMissingOutputs:
         # Use public API instead of _datasets
         catalog["persist_output"] = create_persistent_dataset(exists_result=True)
 
-        assert not is_persistent_dataset_missing("persist_output", catalog)
+        assert not _is_persistent_dataset_missing("persist_output", catalog)
 
     def test_is_dataset_missing_persistent_not_exists(
         self, runner_class, create_catalog, create_persistent_dataset
@@ -472,7 +472,7 @@ class TestOnlyMissingOutputs:
         # Use public API instead of _datasets
         catalog["persist_output"] = create_persistent_dataset(exists_result=False)
 
-        assert is_persistent_dataset_missing("persist_output", catalog)
+        assert _is_persistent_dataset_missing("persist_output", catalog)
 
     def test_is_persistent_and_missing_undefined_dataset(
         self, runner_class, create_catalog
@@ -480,7 +480,7 @@ class TestOnlyMissingOutputs:
         """Test that undefined datasets (not in catalog) are not considered missing."""
         catalog = create_catalog()
 
-        assert not is_persistent_dataset_missing("undefined_output", catalog)
+        assert not _is_persistent_dataset_missing("undefined_output", catalog)
 
     def test_only_missing_outputs_factory_pattern_ephemeral(
         self, runner_class, create_catalog, caplog

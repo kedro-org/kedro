@@ -55,7 +55,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
-Also, if you're using the `pipeline()` function, make sure to rename the first argument from `pipe` to `nodes` to be consistent with the argument names of the `Pipeline` class.
+- If you're using the `pipeline()` function, make sure to rename the first argument from `pipe` to `nodes` to be consistent with the argument names of the `Pipeline` class.
 ```diff
 - pipeline(pipe=[node1, node2])
 + pipeline(nodes=[node1, node2])
@@ -85,7 +85,7 @@ kedro run --namespaces=preprocessing
 ### Using Kedro as a library
 If you're using Kedro as a library, you might need to make the following changes to your workflow:
 
-- Use `runtime_params` instead `extra_params` in `KedroSession`:
+- Rename the `extra_params` argument to `runtime_params` in `KedroSession`:
 
 ```diff
 with KedroSession.create(

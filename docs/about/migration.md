@@ -70,16 +70,13 @@ You should now use the following:
 ```bash
 kedro run --namespaces=preprocessing
 ```
-
+- `kedro catalog create` command was removed in Kedro 1.0.0.
 - If you were using the experimental `KedroDataCatalog` class, it was renamed to `DataCatalog` in Kedro 1.0.0. You would need to remove the following lines from your `settings.py` file:
 
 ```diff
 - from kedro.io import KedroDataCatalog
 - DATA_CATALOG_CLASS = KedroDataCatalog
 ```
-
-- `kedro catalog create` command was removed in Kedro 1.0.0.
-
 
 
 ### Using Kedro as a library

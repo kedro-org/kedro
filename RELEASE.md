@@ -40,7 +40,7 @@
 * Changed the output of `runner.run()` — it now always returns all pipeline outputs, regardless of catalog configuration.
 
 ## Migration guide from Kedro 0.19.* to 1.*
-[See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+[See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/unreleased/about/migration/).
 
 # Release 0.19.14
 
@@ -374,7 +374,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added documentation about `kedro run` and hook execution order.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
-[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/unreleased/about/migration).
 
 # Release 0.19.1
 
@@ -382,7 +382,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Loosened pin for `kedro-telemetry` to fix dependency issues in `0.19.0`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
-[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/unreleased/about/migration).
 
 
 # Release 0.19.0
@@ -448,7 +448,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * The starters `pandas-iris`, `pyspark-iris`, `pyspark`, and `standalone-datacatalog` have been archived.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
-[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+[See the migration guide for 0.19 in the Kedro documentation](https://docs.kedro.org/en/unreleased/about/migration/).
 
 
 ### Logging

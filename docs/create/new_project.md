@@ -167,8 +167,19 @@ If you've worked through the documentation listed and are unsure where to go nex
 ## Flowchart of general choice of tools
 
 Here is a flowchart to help guide your choice of tools and examples you can select:
-
-![overview diagram for setting up a new Kedro project with tools](../meta/images/new-project-tools.png)
+```mermaid
+flowchart TD
+    A["Start"] --> B["Enter Project Name"]
+    B --> C["Select Tools"]
+    C -->|None| D["None"]
+    C -->|"Any combination"| E["lint, test, logging, docs, data, PySpark"]
+    C -->|All| F["All"]
+    D --> G["Include Example Pipeline?"]
+    E --> G
+    F --> G
+    G -->|Yes| H["New Project Created"]
+    G -->|No| H
+```
 
 such as the [`kedro-datasets`][kedro-datasets], [`Pipeline`][kedro.pipeline.Pipeline], [`Node`][kedro.pipeline.node.Node] and [`KedroContext`][kedro.framework.context.KedroContext].
 

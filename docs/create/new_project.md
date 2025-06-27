@@ -79,19 +79,19 @@ You can also enter this in a single line as follows:
 uvx kedro new --name=My-Project --tools=none --example=n
 ```
 
-2. To create a spaceflights project called `spaceflights` with Kedro Viz features and example code:
+2. To create a spaceflights project called `spaceflights` with test setup and example code:
 
 ```text
 kedro new ⮐
 spaceflights ⮐
-7 ⮐
+2 ⮐
 yes ⮐
 ```
 
 You can also enter this in a single line as follows:
 
 ```bash
-uvx kedro new --name=spaceflights --tools=lint --example=y
+uvx kedro new --name=spaceflights --tools=test --example=y
 ```
 
 3. To create a project, called `testproject` containing linting, documentation, and PySpark, but no example code:

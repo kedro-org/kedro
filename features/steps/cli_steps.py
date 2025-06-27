@@ -767,3 +767,13 @@ def step_uninstall_rich(context):
     assert (
         result.returncode == 0 or "not installed" in result.stdout.lower()
     ), f"Failed to uninstall rich:\n{result.stdout}\n{result.stderr}"
+
+
+@when('I delete the file "{filepath}" from the project')
+def delete_project_file(context, filepath):
+    """Deletes a specified file within the root_project_dir."""
+    file_to_delete = context.root_project_dir / filepath
+    if file_to_delete.is_file():
+        file_to_delete.unlink()
+    elif file_to_delete.is_dir():
+        shutil.rmtree(file_to_delete)

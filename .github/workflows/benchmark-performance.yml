@@ -28,20 +28,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install asv  # Install ASV
 
-      - name: Run ASV benchmarks on PR branch
+      - name: Run ASV benchmarks
         run: |
           cd kedro
-
-          echo "--- Fetching main branch for comparison ---"
-          git fetch origin main:main
-
-          echo "--- Setting up ASV machine profile ---"
-          asv machine --machine=github-actions
-
-          echo "--- Running benchmark comparison between main and HEAD ---"
-          # This command runs the benchmark on the latest commit of 'main'
-          # and the latest commit of your current branch (HEAD).
-          asv run --show-stderr -v --machine=github-actions main..HEAD
+          asv machine 
+          asv run
 
       - name: Set git email and name
         run: |

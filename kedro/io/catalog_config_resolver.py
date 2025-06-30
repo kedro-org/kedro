@@ -384,9 +384,9 @@ class CatalogConfigResolver:
         )
 
         # All patterns excluding duplicates
-        for p in self._default_runtime_patterns.keys():
-            if p not in patterns:
-                patterns.append(p)
+        for pattern in self._default_runtime_patterns.keys():
+            if pattern not in patterns:
+                patterns.append(pattern)
 
         return patterns
 

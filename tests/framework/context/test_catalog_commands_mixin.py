@@ -33,6 +33,24 @@ def fake_catalog_config():
 
 
 @pytest.fixture
+def fake_catalog_config_with_default_pattern():
+    config = {
+        "parquet_{factory_pattern}": {
+            "type": "pandas.ParquetDataset",
+            "filepath": "data/01_raw/{factory_pattern}.parquet",
+            "credentials": "db_connection",
+        },
+        "csv_{factory_pattern}": {
+            "type": "pandas.CSVDataset",
+            "filepath": "data/01_raw/{factory_pattern}.csv",
+        },
+        "csv_test": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "{default}": {"type": "pandas.CSVDataset"},
+    }
+    return config
+
+
+@pytest.fixture
 def expected_fake_config_list_datasets_output():
     return {
         "datasets": {"kedro_datasets.pandas.csv_dataset.CSVDataset": ["csv_test"]},
@@ -41,6 +59,18 @@ def expected_fake_config_list_datasets_output():
             "kedro_datasets.pandas.parquet_dataset.ParquetDataset": ["parquet_example"],
         },
         "defaults": {"kedro.io.MemoryDataset": ["memory_output"]},
+    }
+
+
+@pytest.fixture
+def expected_fake_config_with_default_pattern_list_datasets_output():
+    return {
+        "datasets": {"kedro_datasets.pandas.csv_dataset.CSVDataset": ["csv_test"]},
+        "factories": {
+            "kedro_datasets.pandas.csv_dataset.CSVDataset": ["csv_example"],
+            "kedro_datasets.pandas.parquet_dataset.ParquetDataset": ["parquet_example"],
+        },
+        "defaults": {"kedro_datasets.pandas.csv_dataset.CSVDataset": ["memory_output"]},
     }
 
 
@@ -166,6 +196,25 @@ class TestCatalogCommands:
         catalog = DataCatalogWithFactories
         result = catalog.list_datasets(pipelines=fake_pipeline)["pipeline_0"]
         assert result == expected_fake_config_list_datasets_output
+
+    def test_list_datasets_with_default_pattern(
+        self,
+        fake_pipeline,
+        fake_catalog_config_with_default_pattern,
+        fake_credentials_config,
+        expected_fake_config_with_default_pattern_list_datasets_output,
+    ):
+        catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
+
+        catalog = catalog_class.from_config(
+            catalog=fake_catalog_config_with_default_pattern,
+            credentials=fake_credentials_config,
+            load_versions=None,
+            save_version=None,
+        )
+
+        result = catalog.list_datasets(pipelines=fake_pipeline)["pipeline_0"]
+        assert result == expected_fake_config_with_default_pattern_list_datasets_output
 
     def test_list_datasets_default_pipeline(
         self, DataCatalogWithFactories, monkeypatch

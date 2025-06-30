@@ -8,6 +8,7 @@ from pathlib import Path
 import yaml
 
 from kedro.io import DataCatalog
+from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline import node, pipeline
 
 
@@ -27,12 +28,7 @@ def compute_bound_task(input_data) -> str:
     return "dummy"
 
 
-def create_data_catalog():
-    """
-    Use dataset factory pattern to make sure the benchmark cover the slowest path.
-    """
-    catalog_conf = """
-
+CATALOG_CONFIG = """
 'output_{pattern}':
     type: pandas.CSVDataset
     filepath: benchmarks/data/'{pattern}.csv'
@@ -45,9 +41,7 @@ def create_data_catalog():
     type: pandas.CSVDataset
     filepath: benchmarks/data/data.csv
 """
-    catalog_conf = yaml.safe_load(catalog_conf)
-    catalog = DataCatalog.from_config(catalog_conf)
-    return catalog
+CATALOG_CONFIG_DATA = yaml.safe_load(CATALOG_CONFIG)
 
 
 def create_io_bound_node(inputs=None, outputs=None, name=None):
@@ -96,6 +90,13 @@ def create_compute_bound_pipeline():
     return dummy_pipeline
 
 
+def _get_catalog(runner_name):
+    """Instantiate the correct catalog based on the runner type."""
+    if runner_name == "ParallelRunner":
+        return SharedMemoryDataCatalog.from_config(CATALOG_CONFIG_DATA)
+    return DataCatalog.from_config(CATALOG_CONFIG_DATA)
+
+
 class RunnerMemorySuite:
     params = (
         "SequentialRunner",
@@ -113,14 +114,14 @@ class RunnerMemorySuite:
             f.write("col1,col2\n1,2\n")
 
     def mem_runners(self, runner):
-        catalog = create_data_catalog()
+        catalog = _get_catalog(runner)
         test_pipeline = create_compute_bound_pipeline()
         runner_module = importlib.import_module("kedro.runner")
         runner_obj = getattr(runner_module, runner)()
         runner_obj.run(test_pipeline, catalog=catalog)
 
     def peakmem_runners(self, runner):
-        catalog = create_data_catalog()
+        catalog = _get_catalog(runner)
         test_pipeline = create_compute_bound_pipeline()
         runner_module = importlib.import_module("kedro.runner")
         runner_obj = getattr(runner_module, runner)()
@@ -144,7 +145,7 @@ class RunnerTimeSuite:
             f.write("col1,col2\n1,2\n")
 
     def time_compute_bound_runner(self, runner):
-        catalog = create_data_catalog()
+        catalog = _get_catalog(runner)
         test_pipeline = create_compute_bound_pipeline()
         runner_module = importlib.import_module("kedro.runner")
         runner_obj = getattr(runner_module, runner)()
@@ -152,7 +153,7 @@ class RunnerTimeSuite:
 
     def time_io_bound_runner(self, runner):
         """IO bound pipeline"""
-        catalog = create_data_catalog()
+        catalog = _get_catalog(runner)
         test_pipeline = create_io_bound_pipeline()
         runner_module = importlib.import_module("kedro.runner")
         runner_obj = getattr(runner_module, runner)()

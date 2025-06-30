@@ -31,8 +31,8 @@ jobs:
       - name: Run ASV benchmarks
         run: |
           cd kedro
-          asv machine 
-          asv run
+          asv machine --machine=github-actions
+          asv run -v --machine=github-actions
 
       - name: Set git email and name
         run: |

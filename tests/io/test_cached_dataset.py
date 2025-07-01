@@ -135,8 +135,10 @@ class TestCachedDataset:
 
     def test_str(self):
         assert (
-            str(CachedDataset(MemoryDataset(42))) == "CachedDataset(cache={}, "
-            "dataset={'data': <int>})"
+            str(CachedDataset(MemoryDataset(42)))
+            == """kedro.io.cached_dataset.CachedDataset("""
+            """dataset="kedro.io.memory_dataset.MemoryDataset(data='<int>')", """
+            """cache='kedro.io.memory_dataset.MemoryDataset()')"""
         )
 
     def test_release(self, cached_ds):

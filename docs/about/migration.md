@@ -2,7 +2,7 @@
 
 [See the release notes on GitHub](https://github.com/kedro-org/kedro/releases/) for comprehensive information about the content of each Kedro release.
 
-## Migrate an existing project that uses Kedro 0.19.\* and 0.18.\* to use 1.\*
+## Migrate an existing project that uses Kedro 0.19.\* to use 1.\*
 
 ### Using Kedro as a framework
 If you're using Kedro as a framework, you need to update your Kedro project to use Kedro 1.0.0. To do this, you need to follow these steps:

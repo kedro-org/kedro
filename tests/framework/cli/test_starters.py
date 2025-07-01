@@ -158,13 +158,14 @@ def _assert_requirements_ok(
                         "select": ["F", "W", "E", "I", "UP", "PL", "T201"],
                         "ignore": ["E501"],
                     },
-                     "format": {"docstring-code-format": True},
+                    "format": {"docstring-code-format": True},
                 },
             }
         }
         assert expected["tool"]["ruff"] == pyproject_config["tool"]["ruff"]
         assert (
-            "ruff~=0.12.0" in pyproject_config["project"]["optional-dependencies"]["dev"]
+            "ruff~=0.12.0"
+            in pyproject_config["project"]["optional-dependencies"]["dev"]
         )
 
     if "2" in tools_list:

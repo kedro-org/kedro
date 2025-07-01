@@ -112,6 +112,7 @@ The following API changes might be relevant to advanced users of Kedro or plugin
 - Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead. Change any imports to use `kedro.pipeline` instead of `kedro.modular_pipeline`.
 - Renamed the first argument to the `pipeline()` function from `pipe` to `nodes` to be consistent with the argument names of the `Pipeline` class.
 - Renamed `ModularPipelineError` to `PipelineError`.
+- The `session_id` parameter has been renamed to `run_id` in all runner methods and hooks.
 
 
 ## Migrate an existing project that uses Kedro 0.18.\* to use 0.19.\*

@@ -283,7 +283,7 @@ class _ProjectLogging(UserDict):
         it defaults to setting project logs at INFO level."""
         # Ensure "loggers" exists in self.data
         if "loggers" not in self.data:
-            self.data["loggers"] = {}
+            self.data["loggers"] = {}  # pragma: no cover
         if package_name not in self.data["loggers"]:
             self.data["loggers"][package_name] = {"level": "INFO"}
             self.configure(self.data)

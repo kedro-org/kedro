@@ -761,7 +761,7 @@ class DataCatalog(CatalogProtocol):
         for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
             if _is_memory_dataset(ds):  # type: ignore[arg-type]
                 continue
-            resolved_config = ds.to_config()  # type: ignore[attr-defined]
+            resolved_config = ds._init_config()  # type: ignore[attr-defined]
             unresolved_config, unresolved_credentials = (
                 self._config_resolver._unresolve_credentials(ds_name, resolved_config)
             )

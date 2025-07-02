@@ -173,7 +173,7 @@ class CatalogCommandsMixin:
                 continue
 
             unresolved_config, _ = self.config_resolver._unresolve_credentials(
-                ds_name, ds.to_config()
+                ds_name, ds._init_config()
             )
             explicit_datasets[ds_name] = unresolved_config
 

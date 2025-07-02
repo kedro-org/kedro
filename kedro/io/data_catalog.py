@@ -451,7 +451,7 @@ class DataCatalog(CatalogProtocol):
         """
         yield from self.keys()
 
-    def __getitem__(self, ds_name: str) -> AbstractDataset:
+    def __getitem__(self, ds_name: str) -> AbstractDataset | None:
         """
         Get a dataset by name from the catalog.
 
@@ -463,7 +463,7 @@ class DataCatalog(CatalogProtocol):
             ds_name: The name of the dataset.
 
         Returns:
-            The dataset instance.
+            The dataset instance if found, otherwise None.
 
         Example:
         ::
@@ -921,7 +921,7 @@ class DataCatalog(CatalogProtocol):
             filtered_types = []
             for ds_name in filtered:
                 # Retrieve the dataset type
-                str_type = self.get_type(ds_name)
+                str_type = self.get_type(ds_name) or ""
                 # Match against type_regex and apply by_type filtering
                 if (not type_regex or re.search(type_regex, str_type)) and (
                     not by_type_set or str_type in by_type_set

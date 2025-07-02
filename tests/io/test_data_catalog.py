@@ -342,6 +342,10 @@ class TestDataCatalog:
         catalog._datasets["bad_ds"] = None
         assert catalog.get("bad_ds") is None
 
+    def test_get_missing_dataset(self):
+        catalog = DataCatalog(datasets={})
+        assert catalog.get("missing_ds") is None
+
     def test_get_type_missing_dataset(self):
         catalog = DataCatalog(datasets={})
         assert catalog.get_type("missing_ds") is None

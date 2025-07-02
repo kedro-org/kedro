@@ -19,8 +19,6 @@
 #
 import re
 
-from kedro.framework.cli.utils import find_stylesheets
-
 from {{ cookiecutter.python_package }} import __version__ as release
 
 # -- Project information -----------------------------------------------------
@@ -91,7 +89,7 @@ pygments_style = "sphinx"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "kedro-sphinx-theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -219,6 +217,3 @@ def skip(app, what, name, obj, skip, options):
 def setup(app):
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
-    # add Kedro stylesheets
-    for stylesheet in find_stylesheets():
-        app.add_css_file(stylesheet)

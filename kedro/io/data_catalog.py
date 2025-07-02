@@ -542,7 +542,7 @@ class DataCatalog(CatalogProtocol):
         key: str,
         fallback_to_runtime_pattern: bool = False,
         version: Version | None = None,
-    ) -> AbstractDataset:
+    ) -> AbstractDataset | None:
         """Get a dataset by name from an internal collection of datasets.
 
         If a dataset is not materialized but matches dataset_pattern or user_catch_all_pattern
@@ -554,13 +554,8 @@ class DataCatalog(CatalogProtocol):
             fallback_to_runtime_pattern: Whether to use runtime_pattern to resolve dataset.
             version: Optional argument to get a specific version of the dataset.
 
-        Raises:
-            DatasetNotFoundError: When the dataset in not in the internal collection, does not match
-                dataset_pattern or user_catch_all_pattern and fallback_to_runtime_pattern is
-                set to False.
-
         Returns:
-            The dataset instance.
+            The dataset instance if found, otherwise None.
 
         Example:
         ::
@@ -569,10 +564,15 @@ class DataCatalog(CatalogProtocol):
             >>> dataset = catalog.get("example")
             >>> print(dataset)
             # MemoryDataset()
+            >>>
+            >>> missing = catalog.get("nonexistent")
+            >>> print(missing)
+            # None
         """
         if key not in self and not fallback_to_runtime_pattern:
-            raise DatasetNotFoundError(f"Dataset '{key}' not found in the catalog")
-        elif not (key in self._datasets or key in self._lazy_datasets):
+            return None
+
+        if not (key in self._datasets or key in self._lazy_datasets):
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
                 self._add_from_config(key, ds_config)
@@ -587,10 +587,6 @@ class DataCatalog(CatalogProtocol):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
             dataset = dataset._copy(_version=version)
-
-        if dataset is None:
-            error_msg = f"Dataset '{key}' not found in the catalog"
-            raise DatasetNotFoundError(error_msg)
 
         return dataset
 
@@ -1005,6 +1001,10 @@ class DataCatalog(CatalogProtocol):
         """
         dataset = self[ds_name]
 
+        if dataset is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
+
         self._logger.info(
             "Saving data to %s (%s)...",
             _format_rich(ds_name, "dark_orange") if self._use_rich_markup else ds_name,
@@ -1045,6 +1045,10 @@ class DataCatalog(CatalogProtocol):
         load_version = Version(version, None) if version else None
         dataset = self.get(ds_name, version=load_version)
 
+        if dataset is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
+
         self._logger.info(
             "Loading data from %s (%s)...",
             _format_rich(ds_name, "dark_orange") if self._use_rich_markup else ds_name,
@@ -1070,6 +1074,10 @@ class DataCatalog(CatalogProtocol):
         """
         dataset = self[ds_name]
 
+        if dataset is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
+
         dataset.release()
 
     def confirm(self, ds_name: str) -> None:
@@ -1084,6 +1092,10 @@ class DataCatalog(CatalogProtocol):
         self._logger.info("Confirming dataset '%s'", ds_name)
 
         dataset = self[ds_name]
+
+        if dataset is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
 
         if hasattr(dataset, "confirm"):
             dataset.confirm()
@@ -1108,12 +1120,8 @@ class DataCatalog(CatalogProtocol):
             >>> catalog.exists("example")
             True
         """
-        try:
-            dataset = self[ds_name]
-        except DatasetNotFoundError:
-            return False
-
-        return dataset.exists()
+        dataset = self[ds_name]
+        return dataset.exists() if dataset else False
 
     @staticmethod
     def _validate_versions(

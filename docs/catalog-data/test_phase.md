@@ -207,7 +207,7 @@ In [1]: catalog.get("reviews#csv")
 Out[1]: kedro_datasets.pandas.csv_dataset.CSVDataset(filepath=.../data/01_raw/reviews.csv'), protocol='file', load_args={}, save_args={'index': False})
 
 In [2]: catalog.get("nonexistent")
-DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog
+In [2]:
 ```
 
 Enable fallback to use runtime defaults:
@@ -538,7 +538,7 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 - The `.get()` method accepts:
   - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
   - `version`: Specify dataset version if versioning is enabled.
-- If no match is found and fallback is disabled, a `DatasetNotFoundError` is raised.
+- If no match is found and fallback is disabled, `None` is returned.
 
 #### How to add datasets to the catalog
 
@@ -671,10 +671,8 @@ dataset_type = catalog.get_type("example")
 print(dataset_type)  # kedro.io.memory_dataset.MemoryDataset
 ```
 
-If the dataset is not present and no patterns match, the method raises:
-```python
-DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
-```
+If the dataset is not present and no patterns match, the method returns `None`.
+
 
 ## Deprecated API
 

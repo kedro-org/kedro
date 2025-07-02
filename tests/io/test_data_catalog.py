@@ -346,10 +346,7 @@ class TestDataCatalog:
 
     def test_get_type_missing_dataset_raises(self):
         catalog = DataCatalog(datasets={})
-        with pytest.raises(
-            DatasetNotFoundError, match="Dataset 'missing_ds' not found in the catalog"
-        ):
-            catalog.get_type("missing_ds")
+        assert catalog.get_type("missing_ds") is None
 
     class TestDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):

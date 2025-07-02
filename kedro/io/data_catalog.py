@@ -936,7 +936,7 @@ class DataCatalog(CatalogProtocol):
 
         return filtered
 
-    def get_type(self, ds_name: str) -> str:
+    def get_type(self, ds_name: str) -> str | None:
         """
         Access dataset type without adding resolved dataset to the catalog.
 
@@ -944,11 +944,8 @@ class DataCatalog(CatalogProtocol):
             ds_name: The name of the dataset whose type is to be retrieved.
 
         Returns:
-            The fully qualified type of the dataset (e.g., `kedro.io.memory_dataset.MemoryDataset`).
-
-        Raises:
-            DatasetNotFoundError: When the dataset in not in the internal collection, does not match
-                dataset_patterns or user_catch_all_pattern.
+            The fully qualified type of the dataset (e.g., `kedro.io.memory_dataset.MemoryDataset`)
+            or None if dataset does not match dataset_patterns or user_catch_all_pattern.
 
         Example:
         ::
@@ -960,10 +957,11 @@ class DataCatalog(CatalogProtocol):
             # kedro.io.memory_dataset.MemoryDataset
             >>>
             >>> missing_type = catalog.get_type("nonexistent")
-            # Raises DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
+            >>> print(missing_type)
+            # None
         """
         if ds_name not in self:
-            raise DatasetNotFoundError(f"Dataset '{ds_name}' not found in the catalog")
+            return None
 
         if ds_name not in self._datasets and ds_name not in self._lazy_datasets:
             ds_config = self._config_resolver.resolve_pattern(ds_name)

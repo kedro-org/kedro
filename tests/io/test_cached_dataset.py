@@ -153,3 +153,7 @@ class TestCachedDataset:
         mocked_memory_dataset = mocker.patch("kedro.io.cached_dataset.MemoryDataset")
         CachedDataset(MemoryDataset(), copy_mode="assign")
         mocked_memory_dataset.assert_called_once_with(copy_mode="assign")
+
+    def test_describe(self, cached_ds):
+        assert "cache" in cached_ds._describe()
+        assert "dataset" in cached_ds._describe()

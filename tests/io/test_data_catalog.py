@@ -308,9 +308,10 @@ class TestDataCatalog:
         """Test get_dataset() when dataset is not in the catalog but default pattern matches"""
         match_pattern_ds = "match_pattern_ds"
         assert match_pattern_ds not in data_catalog
-        pattern = r"Dataset \'match_pattern_ds\' not found in the catalog"
-        with pytest.raises(DatasetNotFoundError, match=pattern):
-            _ = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=False)
+
+        ds = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=False)
+        assert ds is None
+
         ds = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=True)
         assert isinstance(ds, MemoryDataset)
 
@@ -336,20 +337,18 @@ class TestDataCatalog:
         data_catalog_copy = deepcopy(data_catalog_from_config)
         assert not data_catalog_copy == expected_catalog
 
-    def test_get_returns_none_dataset_raises(self):
+    def test_get_returns_none_dataset(self):
         catalog = DataCatalog(datasets={})
         catalog._datasets["bad_ds"] = None
-        with pytest.raises(
-            DatasetNotFoundError, match="Dataset 'bad_ds' not found in the catalog"
-        ):
-            catalog.get("bad_ds")
+        assert catalog.get("bad_ds") is None
 
-    def test_get_type_missing_dataset_raises(self):
+    def test_get_missing_dataset(self):
         catalog = DataCatalog(datasets={})
-        with pytest.raises(
-            DatasetNotFoundError, match="Dataset 'missing_ds' not found in the catalog"
-        ):
-            catalog.get_type("missing_ds")
+        assert catalog.get("missing_ds") is None
+
+    def test_get_type_missing_dataset(self):
+        catalog = DataCatalog(datasets={})
+        assert catalog.get_type("missing_ds") is None
 
     class TestDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):

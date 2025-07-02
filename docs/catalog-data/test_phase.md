@@ -673,7 +673,6 @@ print(dataset_type)  # kedro.io.memory_dataset.MemoryDataset
 
 If the dataset is not present and no patterns match, the method returns `None`.
 
-
 ## Deprecated API
 
 The following `DataCatalog` methods and CLI commands are deprecated and should no longer be used.

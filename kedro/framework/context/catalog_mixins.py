@@ -71,24 +71,36 @@ class CatalogCommandsMixin:
     @property
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
-    def list_datasets(
+    def summarize_datasets(
         self: DataCatalog, pipelines: Union[list[str], list[Pipeline], None] = None
     ) -> dict:
         """
-        Show datasets grouped by type for the specified pipelines.
+        Summarize datasets used in the specified pipelines, grouped by type.
 
-        This method lists datasets used in the specified pipelines, categorizing them
-        into three groups:
+        This method provides a structured summary of datasets used in the selected pipelines,
+        categorizing them into three groups:
         - `datasets`: Datasets explicitly defined in the catalog.
         - `factories`: Datasets resolved from dataset factory patterns.
         - `defaults`: Datasets that do not match any pattern or explicit definition.
 
         Args:
-            pipelines: A list of pipeline names or `Pipeline` objects to analyze. If `None`, all pipelines are analyzed.
+            pipelines: A list of pipeline names or `Pipeline` objects to analyze.
+                If `None`, all pipelines are analyzed.
 
         Returns:
             A dictionary where keys are pipeline names and values are dictionaries
             containing datasets grouped by type.
+
+        Example output:
+        {
+            "data_processing": {
+                "datasets": {
+                    "kedro_datasets.pandas.parquet_dataset.ParquetDataset": ["model_input_table"]
+                },
+                "factories": {},
+                "defaults": {"kedro.io.MemoryDataset": ["preprocessed_companies"]}
+            }
+        }
         """
         target_pipelines = pipelines or _pipelines.keys()
 

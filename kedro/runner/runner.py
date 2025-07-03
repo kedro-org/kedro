@@ -85,10 +85,24 @@ class AbstractRunner(ABC):
         # Apply missing outputs filtering if requested
         if only_missing_outputs:
             pipeline = self._filter_pipeline_for_missing_outputs(pipeline, catalog)
-
+        
+        # Check which datasets used in the pipeline are in the catalog or match
+        # a pattern in the catalog, not including extra dataset patterns
         # Run a warm-up to materialize all datasets in the catalog before run
+        warmed_up_ds = []
         for ds in pipeline.datasets():
+            if ds in catalog:
+                warmed_up_ds.append(ds)
             _ = catalog.get(ds, fallback_to_runtime_pattern=True)
+        
+        # Check if there are any input datasets that aren't in the catalog and
+        # don't match a pattern in the catalog.
+        unsatisfied = pipeline.inputs() - set(warmed_up_ds)
+
+        if unsatisfied:
+            raise ValueError(
+                f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
+            )
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 

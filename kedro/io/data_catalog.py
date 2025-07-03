@@ -316,9 +316,13 @@ class DataCatalog(CatalogProtocol):
 
             >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
             >>> print(repr(catalog))
-            # "{'example': kedro.io.memory_dataset.MemoryDataset()}"
+            # "example: kedro.io.memory_dataset.MemoryDataset()"
         """
-        return repr(self._lazy_datasets | self._datasets)
+        combined = self._lazy_datasets | self._datasets
+        lines = []
+        for key, dataset in combined.items():
+            lines.append(f"'{key}': {dataset!r}")
+        return "\n".join(lines)
 
     def __contains__(self, dataset_name: str) -> bool:
         """

@@ -44,7 +44,7 @@ def catalog() -> None:
 @click.pass_obj
 def summarise_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     """
-    summarise datasets used in the specified pipelines, grouped by type.
+    Summarise datasets used in the specified pipelines, grouped by type.
 
     This command provides a structured overview of datasets used in the selected pipelines,
     categorizing them into three groups:

@@ -75,7 +75,7 @@ class CatalogCommandsMixin:
         self: DataCatalog, pipelines: Union[list[str], list[Pipeline], None] = None
     ) -> dict:
         """
-        summarise datasets used in the specified pipelines, grouped by type.
+        Summarise datasets used in the specified pipelines, grouped by type.
 
         This method provides a structured summary of datasets used in the selected pipelines,
         categorizing them into three groups:

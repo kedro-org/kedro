@@ -30,7 +30,7 @@ def catalog() -> None:
     """Commands for working with catalog."""
 
 
-@catalog.command("list-datasets")
+@catalog.command("summarize-datasets")
 @env_option
 @click.option(
     "--pipeline",
@@ -42,12 +42,12 @@ def catalog() -> None:
     callback=split_string,
 )
 @click.pass_obj
-def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
+def summarize_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     """
-    Show datasets grouped by type for the specified pipelines.
+    Summarize datasets used in the specified pipelines, grouped by type.
 
-    This method lists datasets used in the specified pipelines, categorizing them
-    into three groups:
+    This command provides a structured overview of datasets used in the selected pipelines,
+    categorizing them into three groups:
     - `datasets`: Datasets explicitly defined in the catalog.
     - `factories`: Datasets resolved from dataset factory patterns.
     - `defaults`: Datasets that do not match any pattern or explicit definition.
@@ -56,7 +56,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     context = session.load_context()
 
     p = pipeline or None
-    datasets_dict = context.catalog.list_datasets(p)  # type: ignore
+    datasets_dict = context.catalog.summarize_datasets(p)  # type: ignore
 
     secho(yaml.dump(datasets_dict))
 

@@ -17,7 +17,7 @@ class CatalogCommandsMixin:
     catalog functionality.
 
     Methods:
-        - list_datasets: Show datasets per type for specified pipelines.
+        - summarize_datasets: Show datasets per type for specified pipelines.
         - list_patterns: List all dataset factory patterns in the catalog.
         - resolve_patterns: Resolve dataset factories against pipeline datasets.
 
@@ -30,7 +30,7 @@ class CatalogCommandsMixin:
         >>> from kedro.io import DataCatalog
         >>> from kedro.framework.context import CatalogCommandsMixin, compose_classes
         >>> # DataCatalog instance without CatalogCommandsMixin
-        >>> assert not hasattr(DataCatalog(), "list_datasets")
+        >>> assert not hasattr(DataCatalog(), "summarize_datasets")
         >>>
         >>> # Compose a new class combining DataCatalog and CatalogCommandsMixin
         >>> catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
@@ -46,12 +46,12 @@ class CatalogCommandsMixin:
         ...     }
         ... )
         >>>
-        >>> # Assert that the catalog has the `list_datasets` method
+        >>> # Assert that the catalog has the `summarize_datasets` method
         >>> assert hasattr(
-        ...     catalog, "list_datasets"
-        ... ), "list_datasets method is not available"
-        >>> print("list_datasets method is available!")
-        # list_datasets method is available!
+        ...     catalog, "summarize_datasets"
+        ... ), "summarize_datasets method is not available"
+        >>> print("summarize_datasets method is available!")
+        # summarize_datasets method is available!
 
     2. Creating a new class with inheritance:
         >>> from kedro.io import DataCatalog
@@ -62,10 +62,10 @@ class CatalogCommandsMixin:
         >>>
         >>> catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
         >>> assert hasattr(
-        ...     catalog, "list_datasets"
-        ... ), "list_datasets method is not available"
-        >>> print("list_datasets method is available!")
-        # list_datasets method is available!
+        ...     catalog, "summarize_datasets"
+        ... ), "summarize_datasets method is not available"
+        >>> print("summarize_datasets method is available!")
+        # summarize_datasets method is available!
     """
 
     @property

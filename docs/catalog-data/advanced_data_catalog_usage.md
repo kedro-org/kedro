@@ -86,7 +86,7 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 - The `.get()` method accepts:
   - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
   - `version`: Specify dataset version if versioning is enabled.
-- If no match is found and fallback is disabled, a `DatasetNotFoundError` is raised.
+- If no match is found and fallback is disabled, `None` is returned.
 
 ## How to add datasets to the catalog
 
@@ -386,8 +386,4 @@ dataset_type = catalog.get_type("example")
 print(dataset_type)  # kedro.io.memory_dataset.MemoryDataset
 ```
 
-If the dataset is not present and no patterns match, the method raises:
-
-```python
-DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
-```
+If the dataset is not present and no patterns match, the method returns `None`.

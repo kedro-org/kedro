@@ -184,13 +184,13 @@ This command lists all datasets used in the specified pipeline(s), grouped by ho
 - defaults: Handled by user catch-all or default runtime patterns
 
 ```bash
-kedro catalog summarize-datasets
+kedro catalog summarise-datasets
 ```
 
 The command also accepts an optional `--pipeline` argument that allows you to specify the pipeline name(s) (comma-separated values) in order to filter datasets used only by those named pipeline(s). For example:
 
 ```bash
-kedro catalog summarize-datasets --pipeline=ds,de
+kedro catalog summarise-datasets --pipeline=ds,de
 ```
 
 !!! note

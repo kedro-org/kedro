@@ -30,7 +30,7 @@ def catalog() -> None:
     """Commands for working with catalog."""
 
 
-@catalog.command("summarize-datasets")
+@catalog.command("summarise-datasets")
 @env_option
 @click.option(
     "--pipeline",
@@ -42,9 +42,9 @@ def catalog() -> None:
     callback=split_string,
 )
 @click.pass_obj
-def summarize_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
+def summarise_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     """
-    Summarize datasets used in the specified pipelines, grouped by type.
+    summarise datasets used in the specified pipelines, grouped by type.
 
     This command provides a structured overview of datasets used in the selected pipelines,
     categorizing them into three groups:
@@ -56,7 +56,7 @@ def summarize_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> No
     context = session.load_context()
 
     p = pipeline or None
-    datasets_dict = context.catalog.summarize_datasets(p)  # type: ignore
+    datasets_dict = context.catalog.summarise_datasets(p)  # type: ignore
 
     secho(yaml.dump(datasets_dict))
 

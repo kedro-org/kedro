@@ -21,8 +21,8 @@ def mock_session():
         yield mock_catalog
 
 
-def test_list_datasets_cli(runner, mock_session, fake_project_cli, fake_metadata):
-    mock_session.list_datasets.return_value = {
+def test_summarize_datasets_cli(runner, mock_session, fake_project_cli, fake_metadata):
+    mock_session.summarize_datasets.return_value = {
         "pipeline1": {
             "datasets": {"CSVDataSet": ["input1.csv"]},
             "factories": {},
@@ -32,14 +32,14 @@ def test_list_datasets_cli(runner, mock_session, fake_project_cli, fake_metadata
 
     result = runner.invoke(
         fake_project_cli,
-        ["catalog", "list-datasets", "--pipeline", "pipeline1", "--env", "local"],
+        ["catalog", "summarize-datasets", "--pipeline", "pipeline1", "--env", "local"],
         obj=fake_metadata,
     )
 
     assert result.exit_code == 0
     assert "pipeline1" in result.output
     assert "datasets" in result.output
-    mock_session.list_datasets.assert_called_once_with(["pipeline1"])
+    mock_session.summarize_datasets.assert_called_once_with(["pipeline1"])
 
 
 def test_list_patterns_cli(runner, mock_session, fake_project_cli, fake_metadata):

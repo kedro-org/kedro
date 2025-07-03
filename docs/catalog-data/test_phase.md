@@ -17,7 +17,7 @@ This document includes installation instructions, suggested testing scenarios, a
     - [DataCatalog API](#datacatalog-api)
     - [Deprecated API](#deprecated-api)
 
-# Installation
+## Installation
 
 1. Install `kedro` from  the `feature-1.0.0` branch
 ```bash
@@ -32,7 +32,7 @@ pip install .
 pip install git+https://github.com/kedro-org/kedro-viz.git@chore/compat-dc#subdirectory=package
 ```
 
-# Suggested Testing Scenarios
+## Suggested Testing Scenarios
 
 These suggested scenarios aim to guide your testing, but we encourage you to explore the catalog as you would in a real project.
 
@@ -72,17 +72,17 @@ Try using each via: `kedro run`, Python API, IPython, and Jupyter Notebook.
 8. Real-World Scenarios
     - Use the catalog as you would in a production project
 
-# Catalog API and related components updates
+## Catalog API and related components updates
 
-## Lazy loading
+### Lazy loading
 
 The new `DataCatalog` introduces a helper class called `_LazyDataset` to improve performance and optimize dataset loading.
 
-### What is `_LazyDataset`?
+#### What is `_LazyDataset`?
 `_LazyDataset` is a lightweight internal class that stores the configuration and versioning information of a dataset without immediately instantiating it. This allows the catalog to defer actual dataset creation (also called materialization) until it is explicitly accessed.
 This approach reduces startup overhead, especially when working with large catalogs, since only the datasets you actually use are initialized.
 
-### When is `_LazyDataset` used?
+#### When is `_LazyDataset` used?
 When you instantiate a `DataCatalog` from a config file (such as `catalog.yml`), Kedro doesn't immediately create all the underlying dataset objects. Instead, it wraps each dataset in a `_LazyDataset` and registers it in the catalog.
 These placeholders are automatically materialized when a dataset is accessed for the first time-either directly or during pipeline execution.
 
@@ -117,7 +117,7 @@ Out[3]: {
 }
 ```
 
-### When is this useful?
+#### When is this useful?
 This lazy loading mechanism is especially beneficial before runtime, during the warm-up phase of a pipeline. You can force materialization of all datasets early on to:
 
 - Catch configuration or import errors
@@ -126,7 +126,7 @@ This lazy loading mechanism is especially beneficial before runtime, during the 
 
 Although `_LazyDataset` is not exposed to end users and doesn't affect your usual catalog usage, it's a useful concept to understand when debugging catalog behavior or troubleshooting dataset instantiation issues.
 
-## Dataset factories
+### Dataset factories
 The concept of dataset factories remains the same in the updated `DataCatalog`, but the implementation has been significantly simplified. Dataset factories allow you to generalize configuration patterns and reduce boilerplate by dynamically resolving datasets based on matching names used in your pipeline.
 
 The catalog now supports only three types of factory patterns:
@@ -135,7 +135,7 @@ The catalog now supports only three types of factory patterns:
 2. User catch-all pattern
 3. Default runtime patterns
 
-### Types of patterns
+#### Types of patterns
 
 **Dataset patterns**
 
@@ -176,7 +176,7 @@ default_runtime_patterns: ClassVar = {
 ```
 These patterns enable automatic creation of in-memory or shared-memory datasets during execution.
 
-### Patterns resolution order
+#### Patterns resolution order
 When the `DataCatalog` is initialized, it scans the configuration to extract and validate any dataset patterns and user catch-all pattern.
 
 When resolving a dataset name, Kedro uses the following order of precedence:
@@ -190,7 +190,7 @@ A general fallback pattern (e.g., `{default_dataset}`) that is matched if no dat
 3. **Default runtime patterns:**
 Internal fallback behavior provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (e.g., `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
 
-### How resolution works in practice
+#### How resolution works in practice
 
 By default, runtime patterns are not used when calling `catalog.get()` unless explicitly enabled using the `fallback_to_runtime_pattern=True` flag.
 
@@ -207,7 +207,7 @@ In [1]: catalog.get("reviews#csv")
 Out[1]: kedro_datasets.pandas.csv_dataset.CSVDataset(filepath=.../data/01_raw/reviews.csv'), protocol='file', load_args={}, save_args={'index': False})
 
 In [2]: catalog.get("nonexistent")
-DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog
+In [2]:
 ```
 
 Enable fallback to use runtime defaults:
@@ -246,7 +246,7 @@ Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
 Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
 ```
 
-### User facing API
+#### User facing API
 
 The logic behind pattern resolution is handled by the internal `CatalogConfigResolver`, available as a property on the catalog (`catalog.config_resolver`).
 
@@ -261,7 +261,7 @@ Here are a few APIs might be useful for custom use-cases:
 
 Refer to the method docstrings for more detailed examples and usage.
 
-## Catalog and CLI commands
+### Catalog and CLI commands
 
 The new DataCatalog provides three powerful pipeline-based commands, accessible via both the CLI and interactive environment. These tools help inspect how datasets are resolved and managed within your pipeline.
 
@@ -358,7 +358,7 @@ companies#csv:
 If no pipelines are specified, the `__default__` pipeline is used.
 ```
 
-### Implementation details and Python API usage
+#### Implementation details and Python API usage
 
 To ensure a consistent experience across the CLI, interactive environments (like IPython or Jupyter), and the Python API, we introduced pipeline-aware catalog commands using a mixin-based design.
 
@@ -418,7 +418,7 @@ print("list_datasets method is available!")
 
 This design keeps your project flexible and modular, while offering a powerful set of pipeline-aware catalog inspection tools when you need them.
 
-## Runners
+### Runners
 
 The runners in Kedro have been simplified and made more consistent, especially around how pipeline outputs are handled and how parallel execution works.
 
@@ -432,7 +432,7 @@ This catalog:
      - Supports inter-process communication by using shared memory
      - Manages synchronization and serialization of datasets across multiple processes
 
-### What does it mean in practice
+#### What does it mean in practice
 
 1. The output of `runner.run()` is now a list of dataset names that were produced by the pipeline.
 To access the actual data, you must load it from the catalog:
@@ -496,7 +496,7 @@ for output_ds in result:
 - When using `kedro run`, Kedro automatically selects the appropriate catalog
 - When using the Python API, you must manually specify the correct catalog (`DataCatalog` or `SharedMemoryDataCatalog`) depending on the runner
 
-## DataCatalog API
+### DataCatalog API
 The new DataCatalog retains the core functionality of the previous version, with several enhancements to the API.
 
 Below are the new and updated features, along with usage examples:
@@ -511,7 +511,7 @@ Below are the new and updated features, along with usage examples:
 - [Filtering datasets](#how-to-filter-catalog-datasets)
 - [Getting dataset type](#how-to-get-dataset-type)
 
-### How to access datasets in the catalog
+#### How to access datasets in the catalog
 
 You can check whether a dataset exists using the `in` operator (`__contains__` method):
 
@@ -538,9 +538,9 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 - The `.get()` method accepts:
   - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
   - `version`: Specify dataset version if versioning is enabled.
-- If no match is found and fallback is disabled, a `DatasetNotFoundError` is raised.
+- If no match is found and fallback is disabled, `None` is returned.
 
-### How to add datasets to the catalog
+#### How to add datasets to the catalog
 
 The new API allows you to add datasets as well as raw data directly to the catalog:
 
@@ -554,7 +554,7 @@ catalog["cars"] = ["Ferrari", "Audi"]  # Add raw data
 ```
 When raw data is added, it's automatically wrapped in a `MemoryDataset`.
 
-### How to iterate trough datasets in the catalog
+#### How to iterate trough datasets in the catalog
 
 `DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
 
@@ -572,7 +572,7 @@ for ds_name, ds in catalog.items():  # Iterate over (name, dataset) tuples
     pass
 ```
 
-### How to get the number of datasets in the catalog
+#### How to get the number of datasets in the catalog
 
 Use Python’s built-in `len()` function:
 
@@ -580,7 +580,7 @@ Use Python’s built-in `len()` function:
 ds_count = len(catalog)
 ```
 
-### How to print the full catalog and individual datasets
+#### How to print the full catalog and individual datasets
 
 To print the catalog or an individual dataset programmatically, use the `print()` function or in an interactive environment like IPython or JupyterLab, simply enter the variable:
 
@@ -592,7 +592,7 @@ In [2]: catalog["shuttles"]
 Out[2]: kedro_datasets.pandas.excel_dataset.ExcelDataset(filepath=PurePosixPath('/data/01_raw/shuttles.xlsx'), protocol='file', load_args={'engine': 'openpyxl'}, save_args={'index': False}, writer_args={'engine': 'openpyxl'})
 ```
 
-### How to access dataset patterns
+#### How to access dataset patterns
 
 The pattern resolution logic in `DataCatalog` is handled by the `config_resolver`, which can be accessed as a property of the catalog:
 
@@ -606,7 +606,7 @@ patterns = catalog.config_resolver.list_patterns() # List all patterns
 `DataCatalog` does not support all dictionary methods, such as `pop()`, `popitem()`, or `del`.
 ```
 
-### How to save catalog to config
+#### How to save catalog to config
 
 You can serialize a `DataCatalog` into configuration format (e.g., for saving to a YAML file) using `.to_config()`:
 
@@ -633,7 +633,7 @@ This method only works for datasets with static, serializable parameters. For ex
 In-memory datasets are excluded.
 ```
 
-### How to filter catalog datasets
+#### How to filter catalog datasets
 
 Use the `.filter()` method to retrieve dataset names that match specific criteria:
 
@@ -660,7 +660,7 @@ catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])  # M
 
 - A list of matching dataset names.
 
-### How to get dataset type
+#### How to get dataset type
 You can check the dataset type without materializing or adding it to the catalog:
 
 ```python
@@ -671,12 +671,9 @@ dataset_type = catalog.get_type("example")
 print(dataset_type)  # kedro.io.memory_dataset.MemoryDataset
 ```
 
-If the dataset is not present and no patterns match, the method raises:
-```python
-DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog.
-```
+If the dataset is not present and no patterns match, the method returns `None`.
 
-# Deprecated API
+## Deprecated API
 
 The following `DataCatalog` methods and CLI commands are deprecated and should no longer be used.
 Where applicable, alternatives are suggested:

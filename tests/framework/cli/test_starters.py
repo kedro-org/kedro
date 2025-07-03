@@ -154,15 +154,18 @@ def _assert_requirements_ok(
                 "ruff": {
                     "line-length": 88,
                     "show-fixes": True,
-                    "select": ["F", "W", "E", "I", "UP", "PL", "T201"],
-                    "ignore": ["E501"],
+                    "lint": {
+                        "select": ["F", "W", "E", "I", "UP", "PL", "T201"],
+                        "ignore": ["E501"],
+                    },
                     "format": {"docstring-code-format": True},
-                }
+                },
             }
         }
         assert expected["tool"]["ruff"] == pyproject_config["tool"]["ruff"]
         assert (
-            "ruff~=0.1.8" in pyproject_config["project"]["optional-dependencies"]["dev"]
+            "ruff~=0.12.0"
+            in pyproject_config["project"]["optional-dependencies"]["dev"]
         )
 
     if "2" in tools_list:

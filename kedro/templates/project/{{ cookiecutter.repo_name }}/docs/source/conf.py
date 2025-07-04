@@ -19,8 +19,6 @@
 #
 import re
 
-from kedro.framework.cli.utils import find_stylesheets
-
 from {{ cookiecutter.python_package }} import __version__ as release
 
 # -- Project information -----------------------------------------------------
@@ -219,6 +217,3 @@ def skip(app, what, name, obj, skip, options):
 def setup(app):
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
-    # add Kedro stylesheets
-    for stylesheet in find_stylesheets():
-        app.add_css_file(stylesheet)

@@ -68,13 +68,6 @@ def python_call(
     call([sys.executable, "-m", module, *list(arguments)], **kwargs)
 
 
-def find_stylesheets() -> Iterable[str]:  # pragma: no cover
-    # TODO: Deprecate this function in favour of kedro-sphinx-theme
-    """Fetch all stylesheets used in the official Kedro documentation"""
-    css_path = Path(__file__).resolve().parents[1] / "html" / "_static" / "css"
-    return (str(css_path / "copybutton.css"),)
-
-
 def forward_command(
     group: Any, name: str | None = None, forward_help: bool = False
 ) -> Any:

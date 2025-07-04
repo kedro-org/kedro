@@ -376,9 +376,9 @@ Refer to the method docstrings for more detailed examples and usage.
 
 The DataCatalog provides three powerful pipeline-based commands, accessible via both the CLI and interactive environment. These tools help inspect how datasets are resolved and managed within your pipeline.
 
-**List datasets**
+**Describe datasets**
 
-Lists all datasets used in the specified pipeline(s), grouped by how they are defined.
+Describes datasets used in the specified pipeline(s), grouped by how they are defined.
 
 - datasets: Explicitly defined in catalog.yml
 - factories: Resolved using dataset factory patterns
@@ -386,12 +386,12 @@ Lists all datasets used in the specified pipeline(s), grouped by how they are de
 
 CLI:
 ```bash
-kedro catalog list-datasets -p data_processing
+kedro catalog describe-datasets -p data_processing
 ```
 
 Interactive environment:
 ```bash
-In [1]: catalog.list_datasets(pipelines=["data_processing", "data_science"])
+In [1]: catalog.describe_datasets(pipelines=["data_processing", "data_science"])
 ```
 
 Example output:
@@ -508,8 +508,8 @@ catalog = CatalogWithCommands.from_config({
     }
 })
 
-assert hasattr(catalog, "list_datasets")
-print("list_datasets method is available!")
+assert hasattr(catalog, "describe_datasets")
+print("describe_datasets method is available!")
 ```
 
 **Option 2: Subclass the catalog with the mixin**
@@ -523,8 +523,8 @@ class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
 
 catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
 
-assert hasattr(catalog, "list_datasets")
-print("list_datasets method is available!")
+assert hasattr(catalog, "describe_datasets")
+print("describe_datasets method is available!")
 ```
 
 This design keeps your project flexible and modular, while offering a powerful set of pipeline-aware catalog inspection tools when you need them.

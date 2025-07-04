@@ -17,7 +17,7 @@ class CatalogCommandsMixin:
     catalog functionality.
 
     Methods:
-        - summarise_datasets: Show datasets per type for specified pipelines.
+        - describe_datasets: Show datasets per type for specified pipelines.
         - list_patterns: List all dataset factory patterns in the catalog.
         - resolve_patterns: Resolve dataset factories against pipeline datasets.
 
@@ -30,7 +30,7 @@ class CatalogCommandsMixin:
         >>> from kedro.io import DataCatalog
         >>> from kedro.framework.context import CatalogCommandsMixin, compose_classes
         >>> # DataCatalog instance without CatalogCommandsMixin
-        >>> assert not hasattr(DataCatalog(), "summarise_datasets")
+        >>> assert not hasattr(DataCatalog(), "describe_datasets")
         >>>
         >>> # Compose a new class combining DataCatalog and CatalogCommandsMixin
         >>> catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
@@ -46,12 +46,12 @@ class CatalogCommandsMixin:
         ...     }
         ... )
         >>>
-        >>> # Assert that the catalog has the `summarise_datasets` method
+        >>> # Assert that the catalog has the `describe_datasets` method
         >>> assert hasattr(
-        ...     catalog, "summarise_datasets"
-        ... ), "summarise_datasets method is not available"
-        >>> print("summarise_datasets method is available!")
-        # summarise_datasets method is available!
+        ...     catalog, "describe_datasets"
+        ... ), "describe_datasets method is not available"
+        >>> print("describe_datasets method is available!")
+        # describe_datasets method is available!
 
     2. Creating a new class with inheritance:
         >>> from kedro.io import DataCatalog
@@ -62,20 +62,20 @@ class CatalogCommandsMixin:
         >>>
         >>> catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
         >>> assert hasattr(
-        ...     catalog, "summarise_datasets"
-        ... ), "summarise_datasets method is not available"
-        >>> print("summarise_datasets method is available!")
-        # summarise_datasets method is available!
+        ...     catalog, "describe_datasets"
+        ... ), "describe_datasets method is not available"
+        >>> print("describe_datasets method is available!")
+        # describe_datasets method is available!
     """
 
     @property
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
-    def summarise_datasets(
+    def describe_datasets(
         self: DataCatalog, pipelines: Union[list[str], list[Pipeline], None] = None
     ) -> dict:
         """
-        Summarise datasets used in the specified pipelines, grouped by type.
+        Describe datasets used in the specified pipelines, grouped by type.
 
         This method provides a structured summary of datasets used in the selected pipelines,
         categorizing them into three groups:

@@ -51,7 +51,7 @@ def fake_catalog_config_with_default_pattern():
 
 
 @pytest.fixture
-def expected_fake_config_summarise_datasets_output():
+def expected_fake_config_describe_datasets_output():
     return {
         "datasets": {"kedro_datasets.pandas.csv_dataset.CSVDataset": ["csv_test"]},
         "factories": {
@@ -63,7 +63,7 @@ def expected_fake_config_summarise_datasets_output():
 
 
 @pytest.fixture
-def expected_fake_config_with_default_pattern_summarise_datasets_output():
+def expected_fake_config_with_default_pattern_describe_datasets_output():
     return {
         "datasets": {"kedro_datasets.pandas.csv_dataset.CSVDataset": ["csv_test"]},
         "factories": {
@@ -187,22 +187,22 @@ def DataCatalogWithOverlappingFactories(fake_catalog_with_overlapping_factories)
 
 
 class TestCatalogCommands:
-    def test_summarise_datasets(
+    def test_describe_datasets(
         self,
         DataCatalogWithFactories,
         fake_pipeline,
-        expected_fake_config_summarise_datasets_output,
+        expected_fake_config_describe_datasets_output,
     ):
         catalog = DataCatalogWithFactories
-        result = catalog.summarise_datasets(pipelines=fake_pipeline)["pipeline_0"]
-        assert result == expected_fake_config_summarise_datasets_output
+        result = catalog.describe_datasets(pipelines=fake_pipeline)["pipeline_0"]
+        assert result == expected_fake_config_describe_datasets_output
 
-    def test_summarise_datasets_with_default_pattern(
+    def test_describe_datasets_with_default_pattern(
         self,
         fake_pipeline,
         fake_catalog_config_with_default_pattern,
         fake_credentials_config,
-        expected_fake_config_with_default_pattern_summarise_datasets_output,
+        expected_fake_config_with_default_pattern_describe_datasets_output,
     ):
         catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
 
@@ -213,13 +213,12 @@ class TestCatalogCommands:
             save_version=None,
         )
 
-        result = catalog.summarise_datasets(pipelines=fake_pipeline)["pipeline_0"]
+        result = catalog.describe_datasets(pipelines=fake_pipeline)["pipeline_0"]
         assert (
-            result
-            == expected_fake_config_with_default_pattern_summarise_datasets_output
+            result == expected_fake_config_with_default_pattern_describe_datasets_output
         )
 
-    def test_summarise_datasets_default_pipeline(
+    def test_describe_datasets_default_pipeline(
         self, DataCatalogWithFactories, monkeypatch
     ):
         # Simulate _pipelines.keys() returning a default pipeline
@@ -239,13 +238,13 @@ class TestCatalogCommands:
         monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
 
         catalog = DataCatalogWithFactories
-        result = catalog.summarise_datasets()  # No pipeline arg provided
+        result = catalog.describe_datasets()  # No pipeline arg provided
         assert "default" in result
         assert "datasets" in result["default"]
 
-    def test_summarise_datasets_empty_pipeline(self, DataCatalogWithFactories):
+    def test_describe_datasets_empty_pipeline(self, DataCatalogWithFactories):
         catalog = DataCatalogWithFactories
-        result = catalog.summarise_datasets(pipelines=[])
+        result = catalog.describe_datasets(pipelines=[])
         assert isinstance(result, dict)
         # Should be empty if no pipelines are passed
         assert result == {}

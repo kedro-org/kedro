@@ -10,6 +10,7 @@ import copy
 import difflib
 import json
 from collections import Counter, defaultdict
+from functools import cached_property
 from graphlib import CycleError, TopologicalSorter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
@@ -277,8 +278,7 @@ class Pipeline:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
         self._nodes = tagged_nodes
-        node_parents = self.node_dependencies
-        self._toposorter = TopologicalSorter(node_parents)
+        self._toposorter = TopologicalSorter(self.node_dependencies)
 
         # test for circular dependencies without executing the toposort for efficiency
         try:
@@ -290,7 +290,7 @@ class Pipeline:
 
         self._toposorted_nodes: list[Node] = []
         self._toposorted_groups: list[list[Node]] = []
-        self._validate_namespaces(node_parents)
+        self._validate_namespaces(self.node_dependencies)
 
     def _validate_namespaces(self, node_parents: dict[Node, set[Node]]) -> None:
         from warnings import warn
@@ -495,7 +495,7 @@ class Pipeline:
             set_to_string(self.inputs()), nodes_as_string, set_to_string(self.outputs())
         )
 
-    @property
+    @cached_property
     def node_dependencies(self) -> dict[Node, set[Node]]:
         """All dependencies of nodes where the first Node has a direct dependency on
         the second Node.
@@ -512,7 +512,7 @@ class Pipeline:
 
         return dependencies
 
-    @property
+    @cached_property
     def nodes(self) -> list[Node]:
         """Return a list of the pipeline nodes in topological order, i.e. if
         node A needs to be run before node B, it will appear earlier in the
@@ -527,7 +527,7 @@ class Pipeline:
 
         return list(self._toposorted_nodes)
 
-    @property
+    @cached_property
     def grouped_nodes(self) -> list[list[Node]]:
         """Return a list of the pipeline nodes in topologically ordered groups,
         i.e. if node A needs to be run before node B, it will appear in an

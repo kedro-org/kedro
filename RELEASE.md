@@ -18,6 +18,7 @@
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
 * Added support for running multiple namespaces within a single session.
 * Updated `kedro registry describe` to return the node name property instead of creating its own name for the node.
+* Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines
 
 ## Documentation changes
 * Updated the `DataCatalog` documentation with improved structure and detailed description of new features.

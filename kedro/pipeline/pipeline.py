@@ -312,14 +312,14 @@ class Pipeline:
                 if child not in visited:
                     visited.add(child)
                     queue.append((child, [*path, child]))
-        return []
+        return []  # pragma: no cover
 
     def _validate_namespaces(self) -> None:
         from warnings import warn
 
         node_parents: dict[Node, set[Node]] = self.node_dependencies
 
-        # TODO: See if this can become a persistent trie-like datastructure
+        # Here we keep all visited namespaces for each node
         seen_namespaces: dict[Node, dict[str, set[Node]]] = defaultdict(dict)
         for node in self.nodes:
             visited: dict[str, set[Node]] = defaultdict(set)

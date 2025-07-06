@@ -13,6 +13,27 @@ def branching(x):
     return x, x
 
 
+def dummy(*args):
+    return args[0]
+
+
+def create_a_big_pipeline(N=30, M=20) -> Pipeline:
+    layers = []
+    prev = "input_0"
+    for layer in range(M):
+        fanout = [f"w{layer}_{i}" for i in range(N)]
+        workers = [
+            node(
+                dummy, prev, o, name=f"worker_{layer}_{i}"
+            )  # namespace intentionally None
+            for i, o in enumerate(fanout)
+        ]
+        merge = node(dummy, fanout, f"input_{layer+1}", name=f"merge_{layer}")
+        layers.extend([*workers, merge])
+        prev = f"input_{layer+1}"
+    return Pipeline(layers)
+
+
 def test_pipeline_with_interrupted_namespace():
     # Create a pipeline with an interrupted namespace
     nodes = [
@@ -44,6 +65,14 @@ def test_pipeline_with_continuous_namespace():
     with warnings.catch_warnings():
         warnings.simplefilter("error")  # Convert warnings to exceptions
         Pipeline(nodes)
+
+    def test_big_pipeline():
+        # Create a big pipeline with many layers of parallel paths
+
+        # No warning should be raised
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")  # Convert warnings to exceptions
+            create_a_big_pipeline()
 
 
 def test_pipeline_with_child_namespace():

@@ -17,7 +17,7 @@ def pipelines_dict():
             "report_accuracy__01a91155 (report_accuracy)",
         ],
         "data_processing": [
-            "data_processing.data_processing.split_data_node (split_data)"
+            "data_processing.split_data_node (split_data)"
         ],
     }
 

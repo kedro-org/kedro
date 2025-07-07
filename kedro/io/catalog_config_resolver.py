@@ -378,11 +378,17 @@ class CatalogConfigResolver:
             >>> print(resolver.list_patterns())
             # ['{namespace}.int_{name}', '{default}']
         """
-        return (
-            list(self._dataset_patterns.keys())
-            + list(self._user_catch_all_pattern.keys())
-            + list(self._default_runtime_patterns.keys())
+        # User defined patterns
+        patterns = list(self._dataset_patterns.keys()) + list(
+            self._user_catch_all_pattern.keys()
         )
+
+        # All patterns excluding duplicates
+        for pattern in self._default_runtime_patterns.keys():
+            if pattern not in patterns:
+                patterns.append(pattern)
+
+        return patterns
 
     @classmethod
     def _get_matches(cls, pattens: Iterable[str], ds_name: str) -> Generator[str]:

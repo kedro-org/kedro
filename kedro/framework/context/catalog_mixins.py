@@ -17,7 +17,7 @@ class CatalogCommandsMixin:
     catalog functionality.
 
     Methods:
-        - list_datasets: Show datasets per type for specified pipelines.
+        - describe_datasets: Show datasets per type for specified pipelines.
         - list_patterns: List all dataset factory patterns in the catalog.
         - resolve_patterns: Resolve dataset factories against pipeline datasets.
 
@@ -30,7 +30,7 @@ class CatalogCommandsMixin:
         >>> from kedro.io import DataCatalog
         >>> from kedro.framework.context import CatalogCommandsMixin, compose_classes
         >>> # DataCatalog instance without CatalogCommandsMixin
-        >>> assert not hasattr(DataCatalog(), "list_datasets")
+        >>> assert not hasattr(DataCatalog(), "describe_datasets")
         >>>
         >>> # Compose a new class combining DataCatalog and CatalogCommandsMixin
         >>> catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
@@ -46,12 +46,12 @@ class CatalogCommandsMixin:
         ...     }
         ... )
         >>>
-        >>> # Assert that the catalog has the `list_datasets` method
+        >>> # Assert that the catalog has the `describe_datasets` method
         >>> assert hasattr(
-        ...     catalog, "list_datasets"
-        ... ), "list_datasets method is not available"
-        >>> print("list_datasets method is available!")
-        # list_datasets method is available!
+        ...     catalog, "describe_datasets"
+        ... ), "describe_datasets method is not available"
+        >>> print("describe_datasets method is available!")
+        # describe_datasets method is available!
 
     2. Creating a new class with inheritance:
         >>> from kedro.io import DataCatalog
@@ -62,33 +62,45 @@ class CatalogCommandsMixin:
         >>>
         >>> catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
         >>> assert hasattr(
-        ...     catalog, "list_datasets"
-        ... ), "list_datasets method is not available"
-        >>> print("list_datasets method is available!")
-        # list_datasets method is available!
+        ...     catalog, "describe_datasets"
+        ... ), "describe_datasets method is not available"
+        >>> print("describe_datasets method is available!")
+        # describe_datasets method is available!
     """
 
     @property
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
-    def list_datasets(
+    def describe_datasets(
         self: DataCatalog, pipelines: Union[list[str], list[Pipeline], None] = None
     ) -> dict:
         """
-        Show datasets grouped by type for the specified pipelines.
+        Describe datasets used in the specified pipelines, grouped by type.
 
-        This method lists datasets used in the specified pipelines, categorizing them
-        into three groups:
+        This method provides a structured summary of datasets used in the selected pipelines,
+        categorizing them into three groups:
         - `datasets`: Datasets explicitly defined in the catalog.
         - `factories`: Datasets resolved from dataset factory patterns.
         - `defaults`: Datasets that do not match any pattern or explicit definition.
 
         Args:
-            pipelines: A list of pipeline names or `Pipeline` objects to analyze. If `None`, all pipelines are analyzed.
+            pipelines: A list of pipeline names or `Pipeline` objects to analyze.
+                If `None`, all pipelines are analyzed.
 
         Returns:
             A dictionary where keys are pipeline names and values are dictionaries
             containing datasets grouped by type.
+
+        Example output:
+        {
+            "data_processing": {
+                "datasets": {
+                    "kedro_datasets.pandas.parquet_dataset.ParquetDataset": ["model_input_table"]
+                },
+                "factories": {},
+                "defaults": {"kedro.io.MemoryDataset": ["preprocessed_companies"]}
+            }
+        }
         """
         target_pipelines = pipelines or _pipelines.keys()
 
@@ -173,7 +185,7 @@ class CatalogCommandsMixin:
                 continue
 
             unresolved_config, _ = self.config_resolver._unresolve_credentials(
-                ds_name, ds.to_config()
+                ds_name, ds._init_config()
             )
             explicit_datasets[ds_name] = unresolved_config
 
@@ -220,11 +232,12 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
         if is_parameter(ds_name):
             continue
 
-        str_type = (
-            catalog.get_type(ds_name)
-            if ds_name in catalog
-            else catalog.default_runtime_patterns["{default}"]["type"]
-        )
+        str_type = None
+        if ds_name in catalog:
+            str_type = catalog.get_type(ds_name)
+
+        if str_type is None:
+            str_type = catalog.default_runtime_patterns["{default}"]["type"]
 
         if str_type not in mapping:
             mapping[str_type] = []

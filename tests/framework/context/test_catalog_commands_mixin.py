@@ -33,7 +33,25 @@ def fake_catalog_config():
 
 
 @pytest.fixture
-def expected_fake_config_list_datasets_output():
+def fake_catalog_config_with_default_pattern():
+    config = {
+        "parquet_{factory_pattern}": {
+            "type": "pandas.ParquetDataset",
+            "filepath": "data/01_raw/{factory_pattern}.parquet",
+            "credentials": "db_connection",
+        },
+        "csv_{factory_pattern}": {
+            "type": "pandas.CSVDataset",
+            "filepath": "data/01_raw/{factory_pattern}.csv",
+        },
+        "csv_test": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "{default}": {"type": "pandas.CSVDataset"},
+    }
+    return config
+
+
+@pytest.fixture
+def expected_fake_config_describe_datasets_output():
     return {
         "datasets": {"kedro_datasets.pandas.csv_dataset.CSVDataset": ["csv_test"]},
         "factories": {
@@ -41,6 +59,18 @@ def expected_fake_config_list_datasets_output():
             "kedro_datasets.pandas.parquet_dataset.ParquetDataset": ["parquet_example"],
         },
         "defaults": {"kedro.io.MemoryDataset": ["memory_output"]},
+    }
+
+
+@pytest.fixture
+def expected_fake_config_with_default_pattern_describe_datasets_output():
+    return {
+        "datasets": {"kedro_datasets.pandas.csv_dataset.CSVDataset": ["csv_test"]},
+        "factories": {
+            "kedro_datasets.pandas.csv_dataset.CSVDataset": ["csv_example"],
+            "kedro_datasets.pandas.parquet_dataset.ParquetDataset": ["parquet_example"],
+        },
+        "defaults": {"kedro_datasets.pandas.csv_dataset.CSVDataset": ["memory_output"]},
     }
 
 
@@ -157,17 +187,38 @@ def DataCatalogWithOverlappingFactories(fake_catalog_with_overlapping_factories)
 
 
 class TestCatalogCommands:
-    def test_list_datasets(
+    def test_describe_datasets(
         self,
         DataCatalogWithFactories,
         fake_pipeline,
-        expected_fake_config_list_datasets_output,
+        expected_fake_config_describe_datasets_output,
     ):
         catalog = DataCatalogWithFactories
-        result = catalog.list_datasets(pipelines=fake_pipeline)["pipeline_0"]
-        assert result == expected_fake_config_list_datasets_output
+        result = catalog.describe_datasets(pipelines=fake_pipeline)["pipeline_0"]
+        assert result == expected_fake_config_describe_datasets_output
 
-    def test_list_datasets_default_pipeline(
+    def test_describe_datasets_with_default_pattern(
+        self,
+        fake_pipeline,
+        fake_catalog_config_with_default_pattern,
+        fake_credentials_config,
+        expected_fake_config_with_default_pattern_describe_datasets_output,
+    ):
+        catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
+
+        catalog = catalog_class.from_config(
+            catalog=fake_catalog_config_with_default_pattern,
+            credentials=fake_credentials_config,
+            load_versions=None,
+            save_version=None,
+        )
+
+        result = catalog.describe_datasets(pipelines=fake_pipeline)["pipeline_0"]
+        assert (
+            result == expected_fake_config_with_default_pattern_describe_datasets_output
+        )
+
+    def test_describe_datasets_default_pipeline(
         self, DataCatalogWithFactories, monkeypatch
     ):
         # Simulate _pipelines.keys() returning a default pipeline
@@ -187,13 +238,13 @@ class TestCatalogCommands:
         monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
 
         catalog = DataCatalogWithFactories
-        result = catalog.list_datasets()  # No pipeline arg provided
+        result = catalog.describe_datasets()  # No pipeline arg provided
         assert "default" in result
         assert "datasets" in result["default"]
 
-    def test_list_datasets_empty_pipeline(self, DataCatalogWithFactories):
+    def test_describe_datasets_empty_pipeline(self, DataCatalogWithFactories):
         catalog = DataCatalogWithFactories
-        result = catalog.list_datasets(pipelines=[])
+        result = catalog.describe_datasets(pipelines=[])
         assert isinstance(result, dict)
         # Should be empty if no pipelines are passed
         assert result == {}

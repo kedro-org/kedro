@@ -24,6 +24,7 @@ from typing import IO, Any, Callable
 
 import click
 import importlib_metadata
+from click import MultiCommand
 from omegaconf import OmegaConf
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
@@ -132,7 +133,7 @@ def validate_conf_source(ctx: click.Context, param: Any, value: str) -> str | No
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: tuple[str, Sequence[click.MultiCommand]]):
+    def __init__(self, *groups: tuple[str, Sequence[MultiCommand]]):
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
             for title, cli_list in groups
@@ -154,9 +155,9 @@ class CommandCollection(click.CommandCollection):
 
     @staticmethod
     def _merge_same_name_collections(
-        groups: Sequence[click.MultiCommand],
+        groups: Sequence[MultiCommand],
     ) -> list[click.CommandCollection]:
-        named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
+        named_groups: defaultdict[str, list[MultiCommand]] = defaultdict(list)
         helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
             named_groups[group.name].append(group)  # type: ignore[index]
@@ -352,7 +353,7 @@ def _safe_load_entry_point(
         return
 
 
-def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
+def load_entry_points(name: str) -> Sequence[MultiCommand]:
     """Load package entry point commands.
 
     Args:

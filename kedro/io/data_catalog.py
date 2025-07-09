@@ -212,16 +212,12 @@ class DataCatalog(CatalogProtocol):
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> None:
-        """``DataCatalog`` stores instances of ``AbstractDataset``
-        implementations to provide ``load`` and ``save`` capabilities from
-        anywhere in the program. To use a ``DataCatalog``, you need to
-        instantiate it with a dictionary of datasets. Then it will act as a
-        single point of reference for your calls, relaying load and save
-        functions to the underlying datasets.
+        """Initializes a ``DataCatalog`` to manage datasets with loading, saving, and versioning capabilities.
 
-        Note: ``DataCatalog`` is an experimental feature and is under active development.
-        Therefore, it is possible we'll introduce breaking changes to this class, so be mindful
-        of that if you decide to use it already.
+
+        This catalog combines datasets passed directly via the `datasets` argument and dynamic datasets
+        resolved from config (e.g., from YAML). Additionally, raw in-memory data can be registered via
+        the `raw_data` argument and will automatically be wrapped as `MemoryDataset` instances.
 
         Args:
             datasets: A dictionary of dataset names and dataset instances.
@@ -235,6 +231,9 @@ class DataCatalog(CatalogProtocol):
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
+
+        Raises:
+            DatasetError: If a dataset name appears in both `datasets` and in the `config_resolver`.
 
         Example:
         ::
@@ -485,8 +484,10 @@ class DataCatalog(CatalogProtocol):
         return self.get(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """Add dataset to the ``DataCatalog`` using the given key as a dataset's name
-        and the provided data as the value.
+        """Registers a dataset or raw data into the catalog using the specified name.
+
+        If the name already exists, the dataset will be replaced and relevant internal mappings
+        (lazy datasets, config, versions) will be cleared to avoid conflicts.
 
         The value can either be raw data or a Kedro dataset (i.e., an instance of a class
         inheriting from ``AbstractDataset``). If raw data is provided, it will be automatically
@@ -494,7 +495,8 @@ class DataCatalog(CatalogProtocol):
 
         Args:
             key: Name of the dataset.
-            value: Raw data or an instance of a class inheriting from ``AbstractDataset``.
+            value: Either an instance of `AbstractDataset`, `_LazyDataset`, or raw data (e.g., DataFrame, list).
+                If raw data is provided, it is automatically wrapped as a `MemoryDataset`.
 
         Example:
         ::

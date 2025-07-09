@@ -881,7 +881,7 @@ class TestRunCommand:
         assert result.exit_code
         assert (
             "Item `bad` must contain a key and a value separated by `=`."
-            in result.stdout
+            in result.stderr
         )
 
     @mark.parametrize("bad_arg", ["=", "=value", " =value"])
@@ -890,7 +890,7 @@ class TestRunCommand:
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )
         assert result.exit_code
-        assert "Parameter key cannot be an empty string" in result.stdout
+        assert "Parameter key cannot be an empty string" in result.stderr
 
     @mark.parametrize(
         "lv_input, lv_dict",

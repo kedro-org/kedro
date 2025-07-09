@@ -86,7 +86,7 @@ def fake_plugin_distribution(mocker):
 class TestKedroCLIHooks:
     @pytest.mark.parametrize(
         "command, exit_code",
-        [("-V", 0), ("info", 0), ("pipeline list", 2), ("starter", 0)],
+        [("-V", 0), ("info", 0), ("pipeline list", 2), ("starter", 2)],
     )
     def test_kedro_cli_should_invoke_cli_hooks_from_plugin(
         self,

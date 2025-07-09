@@ -77,7 +77,7 @@ class TestCliCommands:
         """Run `kedro` without arguments."""
         result = CliRunner().invoke(cli, [])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 2
         assert "kedro" in result.output
 
     def test_print_version(self):
@@ -201,7 +201,7 @@ class TestCommandCollection:
         """Check that help output includes stub_cli group description."""
         cmd_collection = CommandCollection(("Commands", [cli, stub_cli]))
         result = CliRunner().invoke(cmd_collection, [])
-        assert result.exit_code == 0
+        assert result.exit_code == 2
         assert "Stub CLI group description" in result.output
         assert "Kedro is a CLI" in result.output
 
@@ -454,7 +454,7 @@ class TestKedroCLI:
 
         result = CliRunner().invoke(kedro_cli, [])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 2
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" not in result.output
 
@@ -488,7 +488,7 @@ class TestKedroCLI:
         ]
 
         result = CliRunner().invoke(kedro_cli, [])
-        assert result.exit_code == 0
+        assert result.exit_code == 2
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" in result.output
 

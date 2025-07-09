@@ -514,6 +514,10 @@ class DataCatalog(CatalogProtocol):
         """
         if key in self._datasets:
             self._logger.warning("Replacing dataset '%s'", key)
+            self._datasets.pop(key, None)
+            self._lazy_datasets.pop(key, None)
+            self._config_resolver.config.pop(key, None)
+            self._load_versions.pop(key, None)
         if isinstance(value, AbstractDataset):
             self._load_versions, self._save_version = self._validate_versions(
                 {key: value}, self._load_versions, self._save_version

@@ -11,6 +11,7 @@ from pandas.testing import assert_frame_equal
 
 from kedro.io import (
     CachedDataset,
+    CatalogConfigResolver,
     DataCatalog,
     DatasetError,
     DatasetNotFoundError,
@@ -286,6 +287,22 @@ class TestDataCatalog:
         assert "df" in catalog
         assert isinstance(catalog["ds"], CSVDataset)
         assert isinstance(catalog["df"], MemoryDataset)
+
+    def test_init_raises_error_on_duplicate_dataset_name_from_config(self):
+        # Dataset defined explicitly
+        datasets = {
+            "shared_name": MemoryDataset(data="explicit"),
+        }
+
+        # Config resolver also returns the same dataset name
+        config = {
+            "shared_name": {"type": "MemoryDataset", "data": "from_config"},
+        }
+
+        config_resolver = CatalogConfigResolver(config=config)
+
+        with pytest.raises(DatasetError, match="Cannot register dataset 'shared_name'"):
+            DataCatalog(datasets=datasets, config_resolver=config_resolver)
 
     def test_repr(self, data_catalog_from_config):
         assert data_catalog_from_config.__repr__() == str(data_catalog_from_config)
@@ -856,3 +873,31 @@ class TestDataCatalog:
                 == "test_load_version.csv"
             )
             assert catalog._save_version
+
+        def test_setitem_replaces_dataset_and_cleans_internal_state(self, caplog):
+            # Initial dataset and versions
+            catalog = DataCatalog(
+                datasets={"my_data": MemoryDataset(data=123)},
+                load_versions={"my_data": "v1"},
+            )
+
+            # Simulate config resolver registering the same dataset
+            catalog._config_resolver.config["my_data"] = {"type": "MemoryDataset"}
+
+            # Confirm internal state is populated
+            assert "my_data" in catalog._datasets
+            assert "my_data" in catalog._load_versions
+            assert "my_data" in catalog._config_resolver.config
+
+            # Replace the dataset
+            with caplog.at_level(logging.WARNING):
+                catalog["my_data"] = MemoryDataset(data=456)
+
+            # Confirm warning was logged
+            assert "Replacing dataset 'my_data'" in caplog.text
+
+            # Internal state should be cleaned and updated
+            assert isinstance(catalog._datasets["my_data"], MemoryDataset)
+            assert catalog._datasets["my_data"].load() == 456
+            assert "my_data" not in catalog._config_resolver.config
+            assert "my_data" not in catalog._load_versions

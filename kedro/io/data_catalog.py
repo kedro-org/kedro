@@ -214,10 +214,13 @@ class DataCatalog(CatalogProtocol):
     ) -> None:
         """Initializes a ``DataCatalog`` to manage datasets with loading, saving, and versioning capabilities.
 
-
         This catalog combines datasets passed directly via the `datasets` argument and dynamic datasets
         resolved from config (e.g., from YAML). Additionally, raw in-memory data can be registered via
         the `raw_data` argument and will automatically be wrapped as `MemoryDataset` instances.
+
+        If a dataset name is present in both `datasets` and the resolved config, the dataset from `datasets`
+        takes precedence. A warning is logged, and the config-defined dataset is skipped and removed from
+        the internal config.
 
         Args:
             datasets: A dictionary of dataset names and dataset instances.
@@ -231,9 +234,6 @@ class DataCatalog(CatalogProtocol):
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
-
-        Raises:
-            DatasetError: If a dataset name appears in both `datasets` and in the `config_resolver`.
 
         Example:
         ::
@@ -273,13 +273,15 @@ class DataCatalog(CatalogProtocol):
 
         self._use_rich_markup = _has_rich_handler()
 
-        for ds_name, ds_config in self._config_resolver.config.items():
+        for ds_name in list(self._config_resolver.config):
             if ds_name in self._datasets:
-                raise DatasetError(
+                self._logger.warning(
                     f"Cannot register dataset '{ds_name}' from config: a dataset with the same name "
                     f"was already provided in the `datasets` argument."
                 )
-            self._add_from_config(ds_name, ds_config)
+                self._config_resolver.config.pop(ds_name)
+            else:
+                self._add_from_config(ds_name, self._config_resolver.config[ds_name])
 
         raw_data = raw_data or {}
         for ds_name, data in raw_data.items():
@@ -519,7 +521,7 @@ class DataCatalog(CatalogProtocol):
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
-        if key in self._datasets:
+        if key in self._datasets or key in self._lazy_datasets:
             self._logger.warning("Replacing dataset '%s'", key)
             self._datasets.pop(key, None)
             self._lazy_datasets.pop(key, None)

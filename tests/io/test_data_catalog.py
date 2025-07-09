@@ -288,21 +288,32 @@ class TestDataCatalog:
         assert isinstance(catalog["ds"], CSVDataset)
         assert isinstance(catalog["df"], MemoryDataset)
 
-    def test_init_raises_error_on_duplicate_dataset_name_from_config(self):
-        # Dataset defined explicitly
-        datasets = {
-            "shared_name": MemoryDataset(data="explicit"),
-        }
+    def test_init_warns_and_removes_conflicting_datasets_from_config(self, caplog):
+        # Prepare conflicting dataset name
+        config_resolver = CatalogConfigResolver(
+            {
+                "existing_ds": {"type": "MemoryDataset", "data": "from_config"},
+                "new_ds": {"type": "MemoryDataset", "data": "new_data"},
+            }
+        )
 
-        # Config resolver also returns the same dataset name
-        config = {
-            "shared_name": {"type": "MemoryDataset", "data": "from_config"},
-        }
+        datasets = {"existing_ds": MemoryDataset(data="from_datasets")}
 
-        config_resolver = CatalogConfigResolver(config=config)
+        with caplog.at_level(logging.WARNING):
+            catalog = DataCatalog(datasets=datasets, config_resolver=config_resolver)
 
-        with pytest.raises(DatasetError, match="Cannot register dataset 'shared_name'"):
-            DataCatalog(datasets=datasets, config_resolver=config_resolver)
+        # 'existing_ds' should not be added from config
+        assert "Cannot register dataset 'existing_ds' from config" in caplog.text
+        assert "existing_ds" in catalog
+        assert catalog.load("existing_ds") == "from_datasets"
+
+        # 'new_ds' should be added from config
+        assert "new_ds" in catalog
+        assert catalog.load("new_ds") == "new_data"
+
+        # Config should no longer contain the skipped dataset
+        assert "existing_ds" not in config_resolver.config
+        assert "new_ds" in config_resolver.config
 
     def test_repr(self, data_catalog_from_config):
         assert data_catalog_from_config.__repr__() == str(data_catalog_from_config)
@@ -874,30 +885,17 @@ class TestDataCatalog:
             )
             assert catalog._save_version
 
-        def test_setitem_replaces_dataset_and_cleans_internal_state(self, caplog):
-            # Initial dataset and versions
-            catalog = DataCatalog(
-                datasets={"my_data": MemoryDataset(data=123)},
-                load_versions={"my_data": "v1"},
+        def test_setitem_replaces_dataset_and_clears_state(self):
+            config_resolver = CatalogConfigResolver(
+                {"my_dataset": {"type": "MemoryDataset", "data": "from_config"}}
             )
+            catalog = DataCatalog(config_resolver=config_resolver)
+            catalog._load_versions = {"my_dataset": "old_version"}
 
-            # Simulate config resolver registering the same dataset
-            catalog._config_resolver.config["my_data"] = {"type": "MemoryDataset"}
+            catalog["my_dataset"] = MemoryDataset(data="new_data")
 
-            # Confirm internal state is populated
-            assert "my_data" in catalog._datasets
-            assert "my_data" in catalog._load_versions
-            assert "my_data" in catalog._config_resolver.config
-
-            # Replace the dataset
-            with caplog.at_level(logging.WARNING):
-                catalog["my_data"] = MemoryDataset(data=456)
-
-            # Confirm warning was logged
-            assert "Replacing dataset 'my_data'" in caplog.text
-
-            # Internal state should be cleaned and updated
-            assert isinstance(catalog._datasets["my_data"], MemoryDataset)
-            assert catalog._datasets["my_data"].load() == 456
-            assert "my_data" not in catalog._config_resolver.config
-            assert "my_data" not in catalog._load_versions
+            assert "my_dataset" in catalog._datasets
+            assert catalog.load("my_dataset") == "new_data"
+            assert "my_dataset" not in catalog._lazy_datasets
+            assert "my_dataset" not in catalog._config_resolver.config
+            assert "my_dataset" not in catalog._load_versions

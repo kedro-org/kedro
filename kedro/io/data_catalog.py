@@ -275,6 +275,11 @@ class DataCatalog(CatalogProtocol):
         self._use_rich_markup = _has_rich_handler()
 
         for ds_name, ds_config in self._config_resolver.config.items():
+            if ds_name in self._datasets:
+                raise DatasetError(
+                    f"Cannot register dataset '{ds_name}' from config: a dataset with the same name "
+                    f"was already provided in the `datasets` argument."
+                )
             self._add_from_config(ds_name, ds_config)
 
         raw_data = raw_data or {}

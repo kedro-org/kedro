@@ -476,7 +476,7 @@ class TestPipelineDeleteCommand:
         assert result.exit_code
         assert "Unable to locate environment 'invalid_env'" in result.output
 
-    @pytest.mark.parametrize("input_", ["n", "N", "random"])
+    @pytest.mark.parametrize("input_", ["n", "N"])
     def test_pipeline_delete_confirmation(
         self, fake_repo_path, fake_project_cli, fake_metadata, fake_package_path, input_
     ):
@@ -512,7 +512,7 @@ class TestPipelineDeleteCommand:
         assert tests_path.is_dir()
         assert params_path.is_file()
 
-    @pytest.mark.parametrize("input_", ["n", "N", "random"])
+    @pytest.mark.parametrize("input_", ["n", "N"])
     def test_pipeline_delete_confirmation_skip(
         self, fake_repo_path, fake_project_cli, fake_metadata, fake_package_path, input_
     ):

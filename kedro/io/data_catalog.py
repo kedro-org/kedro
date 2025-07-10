@@ -212,16 +212,15 @@ class DataCatalog(CatalogProtocol):
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> None:
-        """``DataCatalog`` stores instances of ``AbstractDataset``
-        implementations to provide ``load`` and ``save`` capabilities from
-        anywhere in the program. To use a ``DataCatalog``, you need to
-        instantiate it with a dictionary of datasets. Then it will act as a
-        single point of reference for your calls, relaying load and save
-        functions to the underlying datasets.
+        """Initializes a ``DataCatalog`` to manage datasets with loading, saving, and versioning capabilities.
 
-        Note: ``DataCatalog`` is an experimental feature and is under active development.
-        Therefore, it is possible we'll introduce breaking changes to this class, so be mindful
-        of that if you decide to use it already.
+        This catalog combines datasets passed directly via the `datasets` argument and dynamic datasets
+        resolved from config (e.g., from YAML). Additionally, raw in-memory data can be registered via
+        the `raw_data` argument and will automatically be wrapped as `MemoryDataset` instances.
+
+        If a dataset name is present in both `datasets` and the resolved config, the dataset from `datasets`
+        takes precedence. A warning is logged, and the config-defined dataset is skipped and removed from
+        the internal config.
 
         Args:
             datasets: A dictionary of dataset names and dataset instances.
@@ -274,8 +273,15 @@ class DataCatalog(CatalogProtocol):
 
         self._use_rich_markup = _has_rich_handler()
 
-        for ds_name, ds_config in self._config_resolver.config.items():
-            self._add_from_config(ds_name, ds_config)
+        for ds_name in list(self._config_resolver.config):
+            if ds_name in self._datasets:
+                self._logger.warning(
+                    f"Cannot register dataset '{ds_name}' from config: a dataset with the same name "
+                    f"was already provided in the `datasets` argument."
+                )
+                self._config_resolver.config.pop(ds_name)
+            else:
+                self._add_from_config(ds_name, self._config_resolver.config[ds_name])
 
         raw_data = raw_data or {}
         for ds_name, data in raw_data.items():
@@ -480,8 +486,10 @@ class DataCatalog(CatalogProtocol):
         return self.get(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """Add dataset to the ``DataCatalog`` using the given key as a dataset's name
-        and the provided data as the value.
+        """Registers a dataset or raw data into the catalog using the specified name.
+
+        If the name already exists, the dataset will be replaced and relevant internal mappings
+        (lazy datasets, config, versions) will be cleared to avoid conflicts.
 
         The value can either be raw data or a Kedro dataset (i.e., an instance of a class
         inheriting from ``AbstractDataset``). If raw data is provided, it will be automatically
@@ -489,7 +497,8 @@ class DataCatalog(CatalogProtocol):
 
         Args:
             key: Name of the dataset.
-            value: Raw data or an instance of a class inheriting from ``AbstractDataset``.
+            value: Either an instance of `AbstractDataset`, `_LazyDataset`, or raw data (e.g., DataFrame, list).
+                If raw data is provided, it is automatically wrapped as a `MemoryDataset`.
 
         Example:
         ::
@@ -512,8 +521,12 @@ class DataCatalog(CatalogProtocol):
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
-        if key in self._datasets:
+        if key in self._datasets or key in self._lazy_datasets:
             self._logger.warning("Replacing dataset '%s'", key)
+            self._datasets.pop(key, None)
+            self._lazy_datasets.pop(key, None)
+            self._config_resolver.config.pop(key, None)
+            self._load_versions.pop(key, None)
         if isinstance(value, AbstractDataset):
             self._load_versions, self._save_version = self._validate_versions(
                 {key: value}, self._load_versions, self._save_version

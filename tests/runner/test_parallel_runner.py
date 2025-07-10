@@ -165,9 +165,8 @@ class TestInvalidParallelRunner:
     def test_memory_dataset_output(self, is_async, fan_out_fan_in):
         """MemoryDataset can be used as output in SharedMemoryDataCatalog."""
         test_pipeline = pipeline([fan_out_fan_in])
-        shared_memory_catalog = SharedMemoryDataCatalog(
-            {"C": MemoryDataset()}, {"A": 42}
-        )
+        shared_memory_catalog = SharedMemoryDataCatalog({"C": MemoryDataset()})
+        shared_memory_catalog["A"] = 42
 
         result = ParallelRunner(is_async=is_async).run(
             test_pipeline, shared_memory_catalog

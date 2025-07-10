@@ -79,7 +79,10 @@ def make_catalog(persistent_test_dataset):
         non_existent = [] if non_existent is None else non_existent
         no_exists_method = [] if no_exists_method is None else no_exists_method
 
-        catalog = DataCatalog(raw_data=raw_data)
+        catalog = DataCatalog()
+        if raw_data:
+            for ds_name, data in raw_data.items():
+                catalog[ds_name] = data
         for source in existent:
             catalog[source] = persistent_test_dataset(None, None, lambda: True)
         for source in non_existent:

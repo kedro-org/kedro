@@ -13,6 +13,7 @@ on:
 jobs:
   unit-tests:
     runs-on: ${{ inputs.os }}
+    timeout-minutes: 56 # equal to max + 3*std over the last ~1000 successful runs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import IO, Any, Callable
 
 import click
-
 import importlib_metadata
 from omegaconf import OmegaConf
 
@@ -332,12 +331,9 @@ def _check_module_importable(module_name: str) -> None:
 
 def _get_entry_points(name: str) -> Any:
     """Get all kedro related entry points"""
-    x = importlib_metadata.entry_points().select(  # type: ignore[no-untyped-call]
+    return importlib_metadata.entry_points().select(  # type: ignore[no-untyped-call]
         group=ENTRY_POINT_GROUPS[name]
     )
-    print(x)
-    print(type(x))
-    return x
 
 
 def _safe_load_entry_point(

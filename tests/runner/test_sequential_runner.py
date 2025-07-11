@@ -64,7 +64,8 @@ class TestSequentialRunnerBranchlessPipeline:
         assert len(outputs) == 1
 
     def test_no_datasets(self, is_async, branchless_pipeline):
-        catalog = DataCatalog({}, {"ds1": 42})
+        catalog = DataCatalog()
+        catalog["ds1"] = 42
         outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
         assert outputs["ds3"].load() == 42

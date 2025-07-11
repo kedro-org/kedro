@@ -283,5 +283,5 @@ nav:
         #   - Release notes: about/release_notes.md
           - Migration guide: about/migration.md
           - Kedro telemetry: about/telemetry.md
-  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/feature-branch-mkdocs/
-  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/
+  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
+  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/stable/

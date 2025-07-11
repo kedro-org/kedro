@@ -8,9 +8,8 @@ import click
 import pytest
 from click.testing import CliRunner
 from omegaconf import OmegaConf
-from pytest import fixture, mark, raises, warns
+from pytest import fixture, mark, raises
 
-from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.cli import (
@@ -26,7 +25,6 @@ from kedro.framework.cli.utils import (
     _clean_pycache,
     find_run_command,
     forward_command,
-    get_pkg_version,
     validate_conf_source,
 )
 from kedro.framework.session import KedroSession
@@ -126,6 +124,13 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["-h"])
         assert result.exit_code == 0
         assert "-h, --help     Show this message and exit." in result.output
+
+    def test_run_help_shows_only_missing_outputs(self, fake_project_cli):
+        """Test that run --help shows the --only-missing-outputs option"""
+        result = CliRunner().invoke(fake_project_cli, ["run", "--help"])
+        assert result.exit_code == 0
+        assert "--only-missing-outputs" in result.output
+        assert "Run only nodes with missing outputs" in result.output
 
 
 class TestCommandCollection:
@@ -240,26 +245,6 @@ class TestForwardCommand:
 
 
 class TestCliUtils:
-    def test_get_pkg_version(self, requirements_file):
-        """Test get_pkg_version(), which extracts package version
-        from the provided requirements file."""
-        sa_version = "SQLAlchemy>=1.2.0, <2.0"
-        assert get_pkg_version(requirements_file, "SQLAlchemy") == sa_version
-        assert get_pkg_version(requirements_file, "pandas") == "pandas==0.23.0"
-        assert get_pkg_version(requirements_file, "toposort") == "toposort"
-        with raises(KedroCliError):
-            get_pkg_version(requirements_file, "nonexistent")
-        with raises(KedroCliError):
-            non_existent_file = str(requirements_file) + "-nonexistent"
-            get_pkg_version(non_existent_file, "pandas")
-
-    def test_get_pkg_version_deprecated(self, requirements_file):
-        with warns(
-            KedroDeprecationWarning,
-            match=r"\`get_pkg_version\(\)\` has been deprecated",
-        ):
-            _ = get_pkg_version(requirements_file, "pandas")
-
     def test_clean_pycache(self, tmp_path, mocker):
         """Test `clean_pycache` utility function"""
         source = Path(tmp_path)
@@ -586,6 +571,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -626,6 +612,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -666,6 +653,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -697,6 +685,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=["fake_namespace"],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -721,6 +710,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -761,6 +751,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name="pipeline1",
             namespaces=[],
+            only_missing_outputs=False,
         )
 
     @mark.parametrize("config_flag", ["--config", "-c"])
@@ -826,6 +817,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name="pipeline1",
             namespaces=[],
+            only_missing_outputs=False,
         )
         mock_session_create.assert_called_once_with(
             env=mocker.ANY, conf_source=None, runtime_params=expected
@@ -938,6 +930,7 @@ class TestRunCommand:
             load_versions=lv_dict,
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
     def test_fail_split_load_versions(self, fake_project_cli, fake_metadata):
@@ -1000,6 +993,7 @@ class TestRunCommand:
             load_versions={},
             pipeline_name=None,
             namespaces=[],
+            only_missing_outputs=False,
         )
 
     def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):

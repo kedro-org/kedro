@@ -35,6 +35,14 @@ You can alternatively run the nodes within the pipeline concurrently, using a `P
 kedro run --runner=ParallelRunner
 ```
 
+For the `ParallelRunner`, it is possible to manually select which multiprocessing start method is going to be used.
+
+- `fork`: The child process is created as a copy of the parent process. This is fast but can cause issues with libraries that use threads or manage internal state. Default on most Unix systems.
+
+- `spawn`: The child process starts fresh, importing the main module and only inheriting necessary resources. This is safer and more compatible with many libraries, but requires all objects to be picklable. Default on Windows and macOS (Python 3.8+).
+
+To control which multiprocessing start method is going to be used by `ParallelRunner`, you can set the value `spawn` or `fork` to the `KEDRO_MP_CONTEXT` environment variable. If neither of those is set, the runner will use the system's default.
+
 #### Multithreading
 While `ParallelRunner` uses multiprocessing, you can also run the pipeline with multithreading for concurrent execution by specifying `ThreadRunner` as follows:
 
@@ -54,12 +62,10 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 ??? example "View code"
     ```python
     # in src/<package_name>/runner.py
-    from typing import Any, Dict
-    from kedro.io import AbstractDataset, KedroDataCatalog, MemoryDataset
+    from kedro.io import DataCatalog
     from kedro.pipeline import Pipeline
     from kedro.runner.runner import AbstractRunner
     from pluggy import PluginManager
-
 
     class DryRunner(AbstractRunner):
         """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
@@ -67,23 +73,22 @@ If the built-in Kedro runners do not meet your requirements, you can also define
         necessary data exists.
         """
 
-        def __init__(self, is_async: bool = False, extra_dataset_patterns: Dict[str, Dict[str, Any]] = None):
+        def __init__(self, is_async: bool = False):
             """Instantiates the runner class.
 
             Args:
                 is_async: If True, the node inputs and outputs are loaded and saved
                     asynchronously with threads. Defaults to False.
-                extra_dataset_patterns: Extra dataset factory patterns to be added to the KedroDataCatalog
-                    during the run. This is used to set the default datasets.
             """
-            default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
-            self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
-            super().__init__(is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns)
+            super().__init__(is_async=is_async)
+
+        def _get_executor(self, max_workers: int) -> None:
+            return None
 
         def _run(
             self,
             pipeline: Pipeline,
-            catalog: KedroDataCatalog,
+            catalog: DataCatalog,
             hook_manager: PluginManager = None,
             run_id: str = None,
         ) -> None:
@@ -97,7 +102,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 
             Args:
                 pipeline: The ``Pipeline`` to run.
-                catalog: The ``KedroDataCatalog`` from which to fetch data.
+                catalog: The ``DataCatalog`` from which to fetch data.
                 hook_manager: The ``PluginManager`` to activate hooks.
                 run_id: The id of the run.
 
@@ -114,7 +119,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
             missing_inputs = [
                 input_name
                 for input_name in input_names
-                if not catalog._get_dataset(input_name).exists()
+                if not catalog.get(input_name).exists()
             ]
             if missing_inputs:
                 raise KeyError(f"Datasets {missing_inputs} not found.")
@@ -198,7 +203,7 @@ In a simple example, we define a `MemoryDataset` called `xs` to store our inputs
 
 ??? example "View code"
     ```python
-    io = KedroDataCatalog(dict(xs=MemoryDataset()))
+    io = DataCatalog(dict(xs=MemoryDataset()))
     ```
 
     ```python
@@ -261,3 +266,80 @@ Variable names and arguments in Python may only contain alphanumeric characters 
 
 !!! note
     If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
+
+## Running pipelines programmatically with runners
+
+Kedro runners provide a consistent interface for executing pipelines, whether you're using sequential, threaded, or parallel execution. This section explains how to run pipelines using the Python API and how to handle pipeline outputs.
+
+### Output from `runner.run()`
+
+* The `runner.run()` method **always returns a list of pipeline output dataset names**, regardless of your catalog setup.
+* It **does not return the actual data** — you must explicitly load each dataset from the catalog afterward.
+
+```python
+from kedro.framework.project import pipelines
+from kedro.io import DataCatalog
+from kedro.runner import SequentialRunner
+
+# Load your catalog configuration (e.g., from YAML)
+catalog = DataCatalog.from_config(catalog_config)
+
+pipeline = pipelines.get("__default__")
+runner = SequentialRunner()
+
+# Run the pipeline
+output_dataset_names = runner.run(pipeline=pipeline, catalog=catalog)
+
+# Load data for each output
+for ds_name in output_dataset_names:
+    data = catalog[ds_name].load()
+```
+
+### Using `ParallelRunner` with `SharedMemoryDataCatalog`
+
+To support multiprocessing, `ParallelRunner` requires a special catalog: **`SharedMemoryDataCatalog`**.
+
+This catalog:
+
+* Extends `DataCatalog`
+* Ensures datasets are safe for multiprocessing
+* Uses shared memory for inter-process communication
+
+```python
+from kedro.framework.project import pipelines
+from kedro.io import SharedMemoryDataCatalog
+from kedro.runner import ParallelRunner
+
+# Load catalog config for multiprocessing context
+catalog = SharedMemoryDataCatalog.from_config(catalog_config)
+
+pipeline = pipelines.get("__default__")
+runner = ParallelRunner()
+
+# Run the pipeline
+output_dataset_names = runner.run(pipeline=pipeline, catalog=catalog)
+
+# Load output data
+for ds_name in output_dataset_names:
+    data = catalog[ds_name].load()
+```
+
+### CLI usage
+
+When using the CLI, Kedro **automatically selects the correct catalog** for the chosen runner.
+
+```bash
+kedro run                         # Uses SequentialRunner and DataCatalog
+kedro run -r ThreadRunner         # Uses ThreadRunner and DataCatalog
+kedro run -r ParallelRunner       # Uses ParallelRunner and SharedMemoryDataCatalog
+```
+
+You don’t need to worry about which catalog to use — Kedro takes care of that behind the scenes.
+
+### Summary
+
+* `runner.run()` always returns output **dataset names**, not the data itself
+* Use `catalog[ds_name].load()` to get the actual data
+* `ParallelRunner` requires `SharedMemoryDataCatalog` for multiprocessing
+* The Kedro CLI selects the correct catalog automatically
+* When using the Python API, **you must choose the appropriate catalog yourself**

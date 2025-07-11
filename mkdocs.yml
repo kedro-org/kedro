@@ -74,6 +74,7 @@ plugins:
 
 markdown_extensions:
   - attr_list
+  - mkdocs-click
   - md_in_html
   - pymdownx.inlinehilite
   - pymdownx.snippets
@@ -156,6 +157,9 @@ nav:
           - Data and pipeline versioning: catalog-data/kedro_dvc_versioning.md
           - Partitioned and incremental datasets: catalog-data/partitioned_and_incremental_datasets.md
           - Programmatic usage: catalog-data/advanced_data_catalog_usage.md
+          - Lazy loading: catalog-data/lazy_loading.md
+          - Deprecated API: catalog-data/deprecated_api.md
+          - Test phase: catalog-data/test_phase.md
       - Build:
           - Nodes: build/nodes.md
           - Pipeline object: build/pipeline_introduction.md
@@ -223,10 +227,10 @@ nav:
                   - Startup: api/framework/kedro.framework.startup.md
               - kedro.io:
                   - Overview: api/io/kedro.io.md
+                  - DataCatalog: api/io/kedro.io.DataCatalog.md
                   - AbstractDataset: api/io/kedro.io.AbstractDataset.md
                   - AbstractVersionedDataset: api/io/kedro.io.AbstractVersionedDataset.md
                   - CachedDataset: api/io/kedro.io.CachedDataset.md
-                  - LambdaDataset: api/io/kedro.io.LambdaDataset.md
                   - MemoryDataset: api/io/kedro.io.MemoryDataset.md
                   - Version: api/io/kedro.io.Version.md
                   - DatasetAlreadyExistsError: api/io/kedro.io.DatasetAlreadyExistsError.md
@@ -245,7 +249,6 @@ nav:
                   - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
               - kedro.runner:
                   - Overview: api/runner/kedro.runner.md
-                  - run_node: api/runner/kedro.runner.run_node.md
                   - AbstractRunner: api/runner/kedro.runner.AbstractRunner.md
                   - SequentialRunner: api/runner/kedro.runner.SequentialRunner.md
                   - ParallelRunner: api/runner/kedro.runner.ParallelRunner.md
@@ -280,5 +283,5 @@ nav:
         #   - Release notes: about/release_notes.md
           - Migration guide: about/migration.md
           - Kedro telemetry: about/telemetry.md
-  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/feature-branch-mkdocs/
-  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/
+  - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
+  - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/stable/

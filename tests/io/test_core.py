@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import pprint
 import shutil
@@ -11,6 +12,7 @@ from typing import Any
 import fsspec
 import pandas as pd
 import pytest
+from kedro_datasets.pandas import CSVDataset
 
 from kedro.io.core import (
     AbstractDataset,
@@ -24,7 +26,7 @@ from kedro.io.core import (
     parse_dataset_definition,
     validate_on_forbidden_chars,
 )
-from kedro.io.lambda_dataset import LambdaDataset
+from kedro.io.memory_dataset import MemoryDataset
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
 # Excludes None, as None values are not shown in the str representation.
@@ -210,15 +212,20 @@ class TestCoreFunctions:
     def test_str_representation(self, var):
         var_str = pprint.pformat(var)
         filepath_str = pprint.pformat(PurePosixPath("."))
-        assert str(MyDataset(var=var)) == f"MyDataset(filepath=., var={var})"
+        assert (
+            str(MyDataset(var=var))
+            == f"tests.io.test_core.MyDataset(filepath={filepath_str}, var={var_str})"
+        )
         assert (
             repr(MyDataset(var=var))
             == f"tests.io.test_core.MyDataset(filepath={filepath_str}, var={var_str})"
         )
 
     def test_str_representation_none(self):
-        assert str(MyDataset()) == "MyDataset(filepath=.)"
         filepath_str = pprint.pformat(PurePosixPath("."))
+        assert (
+            str(MyDataset()) == f"tests.io.test_core.MyDataset(filepath={filepath_str})"
+        )
         assert (
             repr(MyDataset())
             == f"tests.io.test_core.MyDataset(filepath={filepath_str})"
@@ -321,7 +328,7 @@ class TestCoreFunctions:
     def test_dataset_name_typo(self, mocker):
         # If the module doesn't exist, it return None instead ModuleNotFoundError
         mocker.patch("kedro.io.core.load_obj", return_value=None)
-        dataset_name = "lAmbDaDaTAsET"
+        dataset_name = "MeMoRyDaTaSeT"
 
         with pytest.raises(
             DatasetError, match=f"Class '{dataset_name}' not found, is this a typo?"
@@ -329,16 +336,16 @@ class TestCoreFunctions:
             parse_dataset_definition({"type": dataset_name})
 
     def test_parse_dataset_definition(self):
-        config = {"type": "LambdaDataset"}
+        config = {"type": "MemoryDataset"}
         dataset, _ = parse_dataset_definition(config)
-        assert dataset is LambdaDataset
+        assert dataset is MemoryDataset
 
     def test_parse_dataset_definition_with_python_class_type(self):
         config = {"type": MyDataset}
         parse_dataset_definition(config)
 
     def test_dataset_missing_dependencies(self, mocker):
-        dataset_name = "LambdaDataset"
+        dataset_name = "MemoryDataset"
 
         def side_effect_function(value):
             import random_package  # noqa: F401
@@ -351,7 +358,7 @@ class TestCoreFunctions:
 
     def test_parse_dataset_definition_invalid_uppercase_s_in_dataset(self):
         """Test that an invalid dataset type with uppercase 'S' in 'Dataset' raises a warning"""
-        config = {"type": "LambdaDataSet"}  # Invalid type with uppercase 'S'
+        config = {"type": "MemoryDataSet"}  # Invalid type with uppercase 'S'
 
         # Check that the warning is issued
         with pytest.warns(
@@ -360,7 +367,7 @@ class TestCoreFunctions:
         ):
             with pytest.raises(
                 DatasetError,
-                match="Empty module name. Invalid dataset path: 'LambdaDataSet'. Please check if it's correct.",
+                match="Empty module name. Invalid dataset path: 'MemoryDataSet'. Please check if it's correct.",
             ):
                 parse_dataset_definition(config)
 
@@ -452,6 +459,30 @@ class TestAbstractDataset:
             )
             assert "Failed to instantiate dataset" in str(exc_info.value)
 
+    def test_exists_exception_handling(self, mocker):
+        """Test that exists() properly handles exceptions from _exists()."""
+        dataset = MyDataset("test_path")
+
+        mocker.patch.object(dataset, "_exists", side_effect=Exception("Test exception"))
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.exists()
+
+        assert "Failed during exists check for dataset" in str(exc_info.value)
+        assert "Test exception" in str(exc_info.value)
+
+    def test_release_exception_handling(self, mocker):
+        """Test that release() properly handles exceptions from _release()."""
+        dataset = MyDataset("test_path")
+
+        mocker.patch.object(
+            dataset, "_release", side_effect=Exception("Test release exception")
+        )
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.release()
+
+        assert "Failed during release for dataset" in str(exc_info.value)
+        assert "Test release exception" in str(exc_info.value)
+
 
 class TestAbstractVersionedDataset:
     def test_version_str_repr(self, load_version, save_version):
@@ -484,7 +515,9 @@ class TestAbstractVersionedDataset:
 
     def test_no_versions(self, my_versioned_dataset):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for MyVersionedDataset\(.+\)"
+        pattern = (
+            r"Did not find any versions for tests.io.test_core.MyVersionedDataset\(.+\)"
+        )
         with pytest.raises(DatasetError, match=pattern):
             my_versioned_dataset.load()
 
@@ -519,7 +552,7 @@ class TestAbstractVersionedDataset:
         corresponding json file for a given save version already exists."""
         my_versioned_dataset.save(dummy_data)
         pattern = (
-            r"Save path \'.+\' for MyVersionedDataset\(.+\) must "
+            r"Save path \'.+\' for tests.io.test_core.MyVersionedDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
@@ -539,7 +572,7 @@ class TestAbstractVersionedDataset:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"MyVersionedDataset\(.+\)"
+            r"tests.io.test_core.MyVersionedDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             my_versioned_dataset.save(dummy_data)
@@ -613,7 +646,7 @@ class TestAbstractVersionedDataset:
 
         with pytest.raises(
             VersionNotFoundError,
-            match="Did not find any versions for MyVersionedDataset",
+            match="Did not find any versions for tests.io.test_core.MyVersionedDataset",
         ):
             my_versioned_dataset._fetch_latest_load_version()
 
@@ -738,7 +771,7 @@ class TestLegacyLoadAndSave:
         pattern = (
             f"Save version '{save_version}' did not match "
             f"load version '{load_version}' for "
-            r"MyLegacyVersionedDataset\(.+\)"
+            r"tests.io.test_core.MyLegacyVersionedDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             my_legacy_versioned_dataset.save(dummy_data)
@@ -762,3 +795,24 @@ class TestLegacyLoadAndSave:
         Path(my_legacy_dataset._filepath.as_posix()).unlink()
         my_legacy_versioned_dataset.save(dummy_data)
         assert my_legacy_versioned_dataset.exists()
+
+
+class CustomCSVDataSet(CSVDataset):
+    """Dataset that exposes __dict__, reproducing past recursion issue if 'self' is in _init_args."""
+
+    def _describe(self) -> dict[str, Any]:
+        return self.__dict__  # unsafe if _init_args contains self
+
+
+def test_no_self_in_init_args_allows_safe_describe():
+    dataset = CustomCSVDataSet(filepath="some/path.csv", save_args={"index": False})
+
+    # If 'self' is wrongly included, this will cause RecursionError
+    description = dataset._describe()
+
+    # force deeper inspection to simulate real-world issues
+    json.dumps(description, default=str)
+
+    assert isinstance(description, dict)
+    assert "_init_args" in description
+    assert "self" not in description["_init_args"]

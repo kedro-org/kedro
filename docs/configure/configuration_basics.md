@@ -50,16 +50,15 @@ In Kedro, the base configuration environment refers to the default configuration
 
 The `base` folder contains the default settings that are used across your pipelines, unless they are overridden by a specific environment.
 
-```{warning}
-Do not put private access credentials in the base configuration folder or any other configuration environment folder that is stored in version control.
-```
+!!! warning
+    Do not put private access credentials in the base configuration folder or any other configuration environment folder that is stored in version control.
 
 ### Local
 The `local` configuration environment folder should be used for configuration that is either user-specific (e.g. IDE configuration) or protected (e.g. security keys).
 
-```{warning}
-Do not add any local configuration to version control.
-```
+!!! warning
+    Do not add any local configuration to version control.
+
 
 ## Configuration loading
 Kedro-specific configuration (e.g., [kedro.io.DataCatalog][] configuration for I/O) is loaded using a configuration loader class, by default, this is [kedro.config.OmegaConfigLoader][].
@@ -133,7 +132,7 @@ You can read configuration from a compressed file in `tar.gz` or `zip` format by
 
 How to reference a `tar.gz` file:
 
- ```bash
+```bash
 kedro run --conf-source=<path-to-compressed-file>.tar.gz
 ```
 
@@ -301,21 +300,3 @@ Customise the configuration loader arguments in `settings.py` as follows if your
 ```python
 CONFIG_LOADER_ARGS = {"default_run_env": "base"}
 ```
-
-### How to use Kedro without the rich library
-
-If you prefer not to have the `rich` library in your Kedro project, you have the option to uninstall it. However, it's important to note that versions of the `cookiecutter` library above 2.3 have a dependency on rich. You will need to downgrade `cookiecutter` to a version below 2.3 to have Kedro work without `rich`.
-
-To uninstall the rich library, run:
-
-```bash
-pip uninstall rich
-```
-
-To downgrade cookiecutter to a version that does not require rich, you can specify a version below 2.3. For example:
-
-```bash
-pip install cookiecutter==2.2.0
-```
-
-These changes will affect the visual appearance and formatting of Kedro's logging, prompts, and the output of the `kedro ipython` command. While using a version of `cookiecutter` below 2.3, the appearance of the prompts will be plain even with `rich` installed.

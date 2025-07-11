@@ -3,7 +3,7 @@
 Sometimes it is desirable to run a subset, or a 'slice' of a pipeline's nodes. There are two primary ways to achieve this:
 
 
-1. **Visually through Kedro-Viz:** This approach allows you to visually choose and slice pipeline nodes, which then generates a run command for executing the slice within your Kedro project. Detailed steps on how to achieve this are available in the Kedro-Viz documentation: [Slice a Pipeline](https://docs.kedro.org/projects/kedro-viz/en/stable/slice_a_pipeline.html).
+1. **Visually through Kedro-Viz:** This approach allows you to visually choose and slice pipeline nodes, which then generates a run command for executing the slice within your Kedro project. Detailed steps on how to achieve this are available in the Kedro-Viz documentation: [Slice a Pipeline](https://docs.kedro.org/projects/kedro-viz/en/latest/slice_a_pipeline.html).
 
 ![](../meta/images/slice_pipeline_kedro_viz.gif)
 
@@ -271,10 +271,10 @@ To demonstrate this, let us save the intermediate output `n` using a `JSONDatase
 ??? example "View code"
     ```python
     from kedro_datasets.pandas import JSONDataset
-    from kedro.io import KedroDataCatalog, MemoryDataset
+    from kedro.io import DataCatalog, MemoryDataset
 
     n_json = JSONDataset(filepath="./data/07_model_output/len.json")
-    io = KedroDataCatalog(dict(xs=MemoryDataset([1, 2, 3]), n=n_json))
+    io = DataCatalog(dict(xs=MemoryDataset([1, 2, 3]), n=n_json))
     ```
 
 Because `n` was not saved previously, checking for its existence returns `False`:

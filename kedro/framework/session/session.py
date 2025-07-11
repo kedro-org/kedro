@@ -24,7 +24,8 @@ from kedro.framework.project import (
     validate_settings,
 )
 from kedro.io.core import generate_timestamp
-from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.io.data_catalog import SharedMemoryDataCatalog
+from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
 if TYPE_CHECKING:
@@ -289,6 +290,7 @@ class KedroSession:
         to_outputs: Iterable[str] | None = None,
         load_versions: dict[str, str] | None = None,
         namespaces: Iterable[str] | None = None,
+        only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -313,6 +315,7 @@ class KedroSession:
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
             namespaces: The namespaces of the nodes that are being run.
+            only_missing_outputs: Run only nodes with missing outputs.
         Raises:
             ValueError: If the named or `__default__` pipeline is not
                 defined by `register_pipelines`.
@@ -377,27 +380,40 @@ class KedroSession:
             "pipeline_name": pipeline_name,
             "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),
+            "only_missing_outputs": only_missing_outputs,
         }
 
-        catalog = context._get_catalog(
-            save_version=save_version,
-            load_versions=load_versions,
-        )
-
-        # Run the runner
-        hook_manager = self._hook_manager
         runner = runner or SequentialRunner()
         if not isinstance(runner, AbstractRunner):
             raise KedroSessionError(
                 "KedroSession expect an instance of Runner instead of a class."
                 "Have you forgotten the `()` at the end of the statement?"
             )
+
+        catalog_class = (
+            SharedMemoryDataCatalog
+            if isinstance(runner, ParallelRunner)
+            else settings.DATA_CATALOG_CLASS
+        )
+
+        catalog = context._get_catalog(
+            catalog_class=catalog_class,
+            save_version=save_version,
+            load_versions=load_versions,
+        )
+
+        # Run the runner
+        hook_manager = self._hook_manager
         hook_manager.hook.before_pipeline_run(
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
         try:
             run_result = runner.run(
-                filtered_pipeline, catalog, hook_manager, run_id=session_id
+                filtered_pipeline,
+                catalog,
+                hook_manager,
+                run_id=session_id,
+                only_missing_outputs=only_missing_outputs,
             )
             self._run_called = True
         except Exception as error:

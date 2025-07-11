@@ -37,9 +37,8 @@ Tools
 4) Docs: A Sphinx documentation setup
 5) Data Folder: A folder structure for data management
 6) PySpark: Configuration for working with PySpark
-7) Kedro-Viz: Kedro's native visualisation tool
 
-Which tools would you like to include in your project? [1-7/1,3/all/none]:
+Which tools would you like to include in your project? [1-6/1,3/all/none]:
  (none):
 ```
 
@@ -58,10 +57,8 @@ Would you like to include an example pipeline? :
 
 If you say `yes`, the example code included depends upon your previous choice of tools, as follows:
 
-* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark or Kedro Viz.
-* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools, unless you also selected Kedro Viz.
-* [Kedro Viz spaceflights starter (`spaceflights-pandas-viz`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): Added if Kedro Viz was one of your tools choices, unless you also selected PySpark.
-* [Full feature spaceflights starter (`spaceflights-pyspark-viz`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark-viz): Added if you selected all available tools, including PySpark and Kedro Viz.
+* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark.
+* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools.
 
 Each starter example is tailored to demonstrate the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
 
@@ -82,19 +79,19 @@ You can also enter this in a single line as follows:
 uvx kedro new --name=My-Project --tools=none --example=n
 ```
 
-2. To create a spaceflights project called `spaceflights` with Kedro Viz features and example code:
+2. To create a spaceflights project called `spaceflights` with test setup and example code:
 
 ```text
 kedro new ⮐
 spaceflights ⮐
-7 ⮐
+2 ⮐
 yes ⮐
 ```
 
 You can also enter this in a single line as follows:
 
 ```bash
-uvx kedro new --name=spaceflights --tools=viz --example=y
+uvx kedro new --name=spaceflights --tools=test --example=y
 ```
 
 3. To create a project, called `testproject` containing linting, documentation, and PySpark, but no example code:
@@ -138,7 +135,7 @@ kedro run
 
 ## Visualise a Kedro project
 
-This section swiftly introduces project visualisation using Kedro-Viz. See the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
+This section swiftly introduces project visualisation using Kedro-Viz. See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/latest/) for more detail.
 
 The Kedro-Viz package needs to be installed into your virtual environment separately as it is not part of the standard Kedro installation:
 
@@ -170,12 +167,16 @@ If you've worked through the documentation listed and are unsure where to go nex
 ## Flowchart of general choice of tools
 
 Here is a flowchart to help guide your choice of tools and examples you can select:
-
-![overview diagram for setting up a new Kedro project with tools](../meta/images/new-project-tools.png)
-
-such as the [`kedro-datasets`][kedro-datasets], [`Pipeline`][kedro.pipeline.Pipeline], [`Node`][kedro.pipeline.node.Node] and [`KedroContext`][kedro.framework.context.KedroContext].
-
-[kedro-datasets]: https://docs.kedro.org/projects/kedro-datasets/en/stable/
-[kedro.pipeline.Pipeline]: https://docs.kedro.org/en/stable/kedro.pipeline.html#kedro.pipeline.Pipeline
-[kedro.pipeline.node.Node]: https://docs.kedro.org/en/stable/kedro.pipeline.node.html#kedro.pipeline.node.Node
-[kedro.framework.context.KedroContext]: https://docs.kedro.org/en/stable/kedro.framework.context.html#kedro.framework.context.KedroContext
+```mermaid
+flowchart TD
+    A["Start"] --> B["Enter Project Name"]
+    B --> C["Select Tools"]
+    C -->|None| D["None"]
+    C -->|"Any combination"| E["lint, test, logging, docs, data, PySpark"]
+    C -->|All| F["All"]
+    D --> G["Include Example Pipeline?"]
+    E --> G
+    F --> G
+    G -->|Yes| H["New Project Created"]
+    G -->|No| H
+```

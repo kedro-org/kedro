@@ -104,13 +104,13 @@ Pipeline(
     parameters={"first_parameter_to_not_be_prefixed", "second_parameter_to_not_be_prefixed"},
 )
 ```
-```
 
 Let's extend our previous example and try to reuse the `base_data_science` pipeline one more time by creating another pipeline based on it. First, we should use the `kedro pipeline create` command to create a new blank pipeline named `data_science_2`:
 
 ```python
 kedro pipeline create data_science_2
 ```
+
 Then, we need to modify the `src/project_name/pipelines/data_science_2/pipeline.py` file to create a pipeline in a similar way to the example above. We will import `base_data_science` from the code above and use a namespace to isolate our nodes:
 
 ```python
@@ -233,8 +233,8 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 
 !!! note
-From Kedro 0.19.12, you can use the `grouped_nodes_by_namespace` property of the `Pipeline` object to get a dictionary which groups nodes by their top level namespace. Plugin developers are encouraged to use this property to obtain the mapping of namespaced group of nodes to a container or a task in the deployment environment.
-```
+    From Kedro 1.0.0, use the `group_nodes_by(group_by)` method on the `Pipeline` object to group nodes according to a chosen strategy, such as by `top-level` namespace. This replaces the older `grouped_nodes_by_namespace()` method and returns a list of `GroupedNodes` for improved type safety and consistency. Plugin developers are encouraged to use this method to obtain structured groupings of nodes for deployment environments. To treat each node as a separate group, pass `group_by=None`.
+
 You can further nest namespaces by assigning namespaces on the node level with the `namespace` argument of the `Node` class. Namespacing at node level should only be done to enhance visualisation by creating collapsible pipeline parts on Kedro Viz. In this case, only the node name will be prefixed with `namespace_name`, while inputs, outputs, and parameters will remain unchanged. This behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).
 
 For example, if you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorials/add_another_pipeline.md#data-science-pipeline) into the same collapsible namespace for visualisation, you can update your pipeline like this:
@@ -290,6 +290,5 @@ Open the visualisation with `kedro viz run` to see the collapsible pipeline part
 <br>
 
 
-```{warning}
-The use of `namespace` at node level is not recommended for grouping your nodes for deployment as this behaviour differs from defining `namespace` at `Pipeline` level. When defining namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.
-```
+!!! warning
+    The use of `namespace` at node level is not recommended for grouping your nodes for deployment as this behaviour differs from defining `namespace` at `Pipeline` level. When defining namespaces at the node level, they behave similarly to tags and do not guarantee execution consistency.

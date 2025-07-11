@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Iterator, List  # noqa: UP035
+from multiprocessing.reduction import ForkingPickler
+from pickle import PicklingError
+from typing import TYPE_CHECKING, Any, ClassVar, Iterator, List  # noqa: UP035
 
 from kedro.io.cached_dataset import CachedDataset
 from kedro.io.catalog_config_resolver import CatalogConfigResolver
@@ -26,12 +28,44 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
-from kedro.logging import _format_rich
-from kedro.utils import _has_rich_handler
+from kedro.io.shared_memory_dataset import SharedMemoryDataset
+from kedro.utils import _format_rich, _has_rich_handler
+
+if TYPE_CHECKING:
+    from multiprocessing.managers import SyncManager
 
 
 class _LazyDataset:
-    """A helper class to store AbstractDataset configuration and materialize dataset object."""
+    """
+    A helper class to store `AbstractDataset` configuration and materialize the dataset object.
+
+    This class acts as a placeholder for a dataset, storing its configuration and versioning
+    information. The dataset is only materialized (i.e., instantiated) when explicitly requested,
+    which helps improve performance by deferring the creation of datasets until they are needed.
+
+    Attributes:
+        name (str): The name of the dataset.
+        config (dict[str, Any]): The configuration dictionary for the dataset.
+        load_version (str | None): The version of the dataset to load, if applicable.
+        save_version (str | None): The version of the dataset to save, if applicable.
+
+    Example:
+    ::
+
+        >>> from kedro.io.data_catalog import _LazyDataset
+        >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+        >>> lazy_dataset = _LazyDataset(
+        ...     name="example_dataset",
+        ...     config=dataset_config,
+        ...     load_version="2023-01-01T00.00.00",
+        ...     save_version="2023-01-02T00.00.00",
+        ... )
+        >>> print(lazy_dataset)
+        # kedro_datasets.pandas.csv_dataset.CSVDataset
+        >>> materialized_dataset = lazy_dataset.materialize()
+        >>> print(materialized_dataset)
+        # CSVDataset(filepath=example.csv, load_args={}, protocol=file, save_args={'index': False})
+    """
 
     def __init__(
         self,
@@ -40,22 +74,136 @@ class _LazyDataset:
         load_version: str | None = None,
         save_version: str | None = None,
     ):
+        """
+        Initialize a `_LazyDataset` instance.
+
+        Args:
+            name: The name of the dataset.
+            config: The configuration dictionary for the dataset.
+            load_version: The version of the dataset to load, if applicable.
+            save_version: The version of the dataset to save, if applicable.
+
+        Example:
+        ::
+
+            >>> from kedro.io.data_catalog import _LazyDataset
+            >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+            >>> lazy_dataset = _LazyDataset(
+            ...     name="example_dataset",
+            ...     config=dataset_config,
+            ...     load_version="2023-01-01T00.00.00",
+            ...     save_version="2023-01-02T00.00.00",
+            ... )
+            >>> print(lazy_dataset)
+            # kedro_datasets.pandas.csv_dataset.CSVDataset
+        """
         self.name = name
         self.config = config
         self.load_version = load_version
         self.save_version = save_version
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the `_LazyDataset`.
+
+        The representation includes the fully qualified class name of the dataset type
+        as defined in the configuration.
+
+        Returns:
+            The fully qualified class name of the dataset type.
+
+        Example:
+        ::
+
+            >>> from kedro.io.data_catalog import _LazyDataset
+            >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+            >>> lazy_dataset = _LazyDataset(name="example_dataset", config=dataset_config)
+            >>> print(repr(lazy_dataset))
+            # kedro_datasets.pandas.csv_dataset.CSVDataset
+        """
         class_type, _ = parse_dataset_definition(self.config)
         return f"{class_type.__module__}.{class_type.__qualname__}"
 
     def materialize(self) -> AbstractDataset:
+        """
+        Materialize the `_LazyDataset` into an `AbstractDataset` instance.
+
+        This method uses the stored configuration and versioning information to create
+        an instance of the dataset. The dataset is instantiated using the `from_config`
+        factory method of `AbstractDataset`.
+
+        Returns:
+            The instantiated dataset object.
+
+        Example:
+        ::
+
+            >>> from kedro.io.data_catalog import _LazyDataset
+            >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+            >>> lazy_dataset = _LazyDataset(
+            ...     name="example_dataset",
+            ...     config=dataset_config,
+            ...     load_version="2023-01-01T00.00.00",
+            ...     save_version="2023-01-02T00.00.00",
+            ... )
+            >>> materialized_dataset = lazy_dataset.materialize()
+            >>> print(materialized_dataset)
+            # CSVDataset(filepath=example.csv, load_args={}, protocol=file, save_args={'index': False})
+        """
         return AbstractDataset.from_config(
             self.name, self.config, self.load_version, self.save_version
         )
 
 
 class DataCatalog(CatalogProtocol):
+    """
+    A centralized registry for managing datasets in a Kedro project.
+
+    The `DataCatalog` provides a unified interface for loading and saving datasets,
+    enabling seamless interaction with various data sources and formats. It supports
+    features such as lazy loading, versioning, and dynamic dataset creation using dataset
+    factory patterns.
+
+    This class is the core component of Kedro's data management system, allowing
+    datasets to be defined, accessed, and manipulated in a consistent and reusable way.
+
+    Attributes:
+        default_runtime_patterns (ClassVar): A dictionary defining the default runtime pattern
+            for datasets of type `kedro.io.MemoryDataset`.
+        _datasets: A dictionary of fully initialized datasets.
+        _lazy_datasets: A dictionary of `_LazyDataset` instances for deferred initialization.
+        _load_versions: A mapping of dataset names to specific versions to load.
+        _save_version: The global version string for saving datasets.
+        _config_resolver: Resolves dataset factory patterns and configurations.
+
+    Example:
+    ::
+
+        >>> from kedro.io import DataCatalog, MemoryDataset
+        >>>
+        >>> # Define datasets
+        >>> datasets = {
+        ...     "cars": MemoryDataset(data={"type": "car", "capacity": 5}),
+        ...     "planes": MemoryDataset(data={"type": "jet", "capacity": 200}),
+        ... }
+        >>>
+        >>> # Initialize the catalog
+        >>> catalog = DataCatalog(datasets=datasets)
+        >>>
+        >>> # Load data
+        >>> cars_data = catalog.load("cars")
+        >>> print(cars_data)
+        >>>
+        >>> # Save data
+        >>> catalog.save("planes", {"type": "propeller", "capacity": 100})
+        >>> planes_data = catalog.load("planes")
+        >>> print(planes_data)
+    """
+
+    default_runtime_patterns: ClassVar = {
+        "{default}": {"type": "kedro.io.MemoryDataset"}
+    }
+
     def __init__(
         self,
         datasets: dict[str, AbstractDataset] | None = None,
@@ -64,22 +212,21 @@ class DataCatalog(CatalogProtocol):
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
     ) -> None:
-        """``DataCatalog`` stores instances of ``AbstractDataset``
-        implementations to provide ``load`` and ``save`` capabilities from
-        anywhere in the program. To use a ``DataCatalog``, you need to
-        instantiate it with a dictionary of datasets. Then it will act as a
-        single point of reference for your calls, relaying load and save
-        functions to the underlying datasets.
+        """Initializes a ``DataCatalog`` to manage datasets with loading, saving, and versioning capabilities.
 
-        Note: ``DataCatalog`` is an experimental feature and is under active development.
-        Therefore, it is possible we'll introduce breaking changes to this class, so be mindful
-        of that if you decide to use it already.
+        This catalog combines datasets passed directly via the `datasets` argument and dynamic datasets
+        resolved from config (e.g., from YAML). Additionally, raw in-memory data can be registered via
+        the `raw_data` argument and will automatically be wrapped as `MemoryDataset` instances.
+
+        If a dataset name is present in both `datasets` and the resolved config, the dataset from `datasets`
+        takes precedence. A warning is logged, and the config-defined dataset is skipped and removed from
+        the internal config.
 
         Args:
             datasets: A dictionary of dataset names and dataset instances.
             raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
                 Keys represent dataset names and the values are raw data.
-            config_resolver: An instance of CatalogConfigResolver to resolve dataset patterns and configurations.
+            config_resolver: An instance of CatalogConfigResolver to resolve dataset factory patterns and configurations.
             load_versions: A mapping between dataset names and versions
                 to load. Has no effect on datasets without enabled versioning.
             save_version: Version string to be used for ``save`` operations
@@ -91,14 +238,33 @@ class DataCatalog(CatalogProtocol):
         Example:
         ::
 
+            >>> from kedro.io import DataCatalog, MemoryDataset
             >>> from kedro_datasets.pandas import CSVDataset
-            >>>
-            >>> cars = CSVDataset(filepath="cars.csv",
-            >>>                   load_args=None,
-            >>>                   save_args={"index": False})
-            >>> catalog = DataCatalog(datasets={"cars": cars})
+
+            >>> # Define datasets
+            >>> datasets = {
+            ...     "cars": CSVDataset(filepath="cars.csv"),
+            ...     "planes": MemoryDataset(data={"type": "jet", "capacity": 200}),
+            ... }
+
+            >>> # Define raw data
+            >>> raw_data = {
+            ...     "raw_numbers": [1, 2, 3, 4, 5],
+            ... }
+
+            >>> # Initialize the catalog
+            >>> catalog = DataCatalog(
+            ...     datasets=datasets,
+            ...     raw_data=raw_data,
+            ...     load_versions={"cars": "2023-01-01T00.00.00"},
+            ...     save_version="2023-01-02T00.00.00",
+            ... )
+
+            >>> print(catalog)
         """
-        self._config_resolver = config_resolver or CatalogConfigResolver()
+        self._config_resolver = config_resolver or CatalogConfigResolver(
+            default_runtime_patterns=self.default_runtime_patterns
+        )
         self._datasets: dict[str, AbstractDataset] = datasets or {}
         self._lazy_datasets: dict[str, _LazyDataset] = {}
         self._load_versions, self._save_version = self._validate_versions(
@@ -107,8 +273,15 @@ class DataCatalog(CatalogProtocol):
 
         self._use_rich_markup = _has_rich_handler()
 
-        for ds_name, ds_config in self._config_resolver.config.items():
-            self._add_from_config(ds_name, ds_config)
+        for ds_name in list(self._config_resolver.config):
+            if ds_name in self._datasets:
+                self._logger.warning(
+                    f"Cannot register dataset '{ds_name}' from config: a dataset with the same name "
+                    f"was already provided in the `datasets` argument."
+                )
+                self._config_resolver.config.pop(ds_name)
+            else:
+                self._add_from_config(ds_name, self._config_resolver.config[ds_name])
 
         raw_data = raw_data or {}
         for ds_name, data in raw_data.items():
@@ -116,21 +289,93 @@ class DataCatalog(CatalogProtocol):
 
     @property
     def config_resolver(self) -> CatalogConfigResolver:
+        """
+        Get the `CatalogConfigResolver` instance associated with this `DataCatalog`.
+
+        The `CatalogConfigResolver` is responsible for resolving dataset factory patterns
+        and configurations dynamically.
+
+        Returns:
+            CatalogConfigResolver: The configuration resolver for the catalog.
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> resolver = catalog.config_resolver
+            >>> print(resolver)
+        """
         return self._config_resolver
 
     def __repr__(self) -> str:
-        return repr(self._lazy_datasets | self._datasets)
+        """
+        Return a string representation of the `DataCatalog`.
+
+        The representation includes both lazy and fully initialized datasets
+        in the catalog.
+
+        Returns:
+            A string representation of the catalog.
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> print(repr(catalog))
+            # "example: kedro.io.memory_dataset.MemoryDataset()"
+        """
+        combined = self._lazy_datasets | self._datasets
+        lines = []
+        for key, dataset in combined.items():
+            lines.append(f"'{key}': {dataset!r}")
+        return "\n".join(lines)
 
     def __contains__(self, dataset_name: str) -> bool:
-        """Check if an item is in the catalog as a materialised dataset or pattern."""
+        """
+        Check if a dataset is registered in the catalog
+        or matches a dataset/user catch all pattern
+
+        Args:
+            dataset_name: The name of the dataset to check.
+
+        Returns:
+            True if the dataset is registered or matches a pattern, False otherwise.
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> "example" in catalog
+            # True
+            >>> "nonexistent" in catalog
+            # False
+        """
         return (
             dataset_name in self._datasets
             or dataset_name in self._lazy_datasets
-            or self._config_resolver.match_pattern(dataset_name) is not None
+            or self._config_resolver.match_dataset_pattern(dataset_name) is not None
+            or self._config_resolver.match_user_catch_all_pattern(dataset_name)
+            is not None
         )
 
     def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
-        """Compares two catalogs based on materialised datasets and datasets patterns."""
+        """
+        Compare two catalogs based on materialized datasets, lazy datasets and all dataset factory patterns.
+
+        Args:
+            other: Another `DataCatalog` instance to compare.
+
+        Returns:
+            True if the catalogs are equivalent, False otherwise.
+
+        Example:
+        ::
+
+            >>> catalog1 = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> catalog2 = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> catalog1 == catalog2
+            # False
+        """
         return (
             self._datasets,
             self._lazy_datasets,
@@ -142,41 +387,109 @@ class DataCatalog(CatalogProtocol):
         )
 
     def keys(self) -> List[str]:  # noqa: UP006
-        """List all dataset names registered in the catalog."""
+        """
+        List all dataset names registered in the catalog, including both materialized and lazy datasets.
+
+        Returns:
+            A list of all dataset names.
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> catalog.keys()
+            # ['example']
+        """
         return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
-        """List all datasets registered in the catalog."""
-        return [self.get(key) for key in self]
+        """
+        Retrieve all datasets registered in the catalog.
 
-    def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
-        """List all dataset names and datasets registered in the catalog."""
-        return [(key, self.get(key)) for key in self]
-
-    def __iter__(self) -> Iterator[str]:
-        yield from self.keys()
-
-    def __getitem__(self, ds_name: str) -> AbstractDataset:
-        """Get a dataset by name from an internal collection of datasets.
-
-        If a dataset is not in the collection but matches any pattern
-        it is instantiated and added to the collection first, then returned.
-
-        Args:
-            ds_name: A dataset name.
+        This method returns a list of all dataset instances currently registered
+        in the catalog, including both materialized and lazy datasets.
 
         Returns:
-            An instance of AbstractDataset.
+            A list of dataset instances.
 
-        Raises:
-            DatasetNotFoundError: When a dataset with the given name
-                is not in the collection and does not match patterns.
+        Example:
+        ::
+
+            >>> from kedro.io import DataCatalog, MemoryDataset
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> dataset_values = catalog.values()
+            >>> print(dataset_values)
+            # [kedro.io.memory_dataset.MemoryDataset()]
+        """
+        return [self[key] for key in self]
+
+    def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
+        """
+        Retrieve all dataset names and their corresponding dataset instances.
+
+        This method returns a list of tuples, where each tuple contains a dataset
+        name and its corresponding dataset instance.
+
+        Returns:
+            A list of tuples containing dataset names and their corresponding dataset instances.
+
+        Example:
+        ::
+
+            >>> from kedro.io import DataCatalog, MemoryDataset
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> dataset_items = catalog.items()
+            >>> print(dataset_items)
+            # [('example', kedro.io.memory_dataset.MemoryDataset())]
+        """
+        return [(key, self[key]) for key in self]
+
+    def __iter__(self) -> Iterator[str]:
+        """
+        Iterate over all dataset names in the catalog, including both materialized and lazy datasets.
+
+        Yields:
+            Dataset names.
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> for dataset_name in catalog:
+            ...     print(dataset_name)
+            # example
+        """
+        yield from self.keys()
+
+    def __getitem__(self, ds_name: str) -> AbstractDataset | None:
+        """
+        Get a dataset by name from the catalog.
+
+        If a dataset is not materialized but matches dataset_pattern or user_catch_all_pattern
+        by default or runtime_patterns if fallback_to_runtime_pattern is enabled
+        it is instantiated and added to the catalog first, then returned.
+
+        Args:
+            ds_name: The name of the dataset.
+
+        Returns:
+            The dataset instance if found, otherwise None.
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> dataset = catalog["example"]
+            >>> print(dataset)
+            # MemoryDataset()
         """
         return self.get(ds_name)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        """Add dataset to the ``DataCatalog`` using the given key as a dataset's name
-        and the provided data as the value.
+        """Registers a dataset or raw data into the catalog using the specified name.
+
+        If the name already exists, the dataset will be replaced and relevant internal mappings
+        (lazy datasets, config, versions) will be cleared to avoid conflicts.
 
         The value can either be raw data or a Kedro dataset (i.e., an instance of a class
         inheriting from ``AbstractDataset``). If raw data is provided, it will be automatically
@@ -184,7 +497,8 @@ class DataCatalog(CatalogProtocol):
 
         Args:
             key: Name of the dataset.
-            value: Raw data or an instance of a class inheriting from ``AbstractDataset``.
+            value: Either an instance of `AbstractDataset`, `_LazyDataset`, or raw data (e.g., DataFrame, list).
+                If raw data is provided, it is automatically wrapped as a `MemoryDataset`.
 
         Example:
         ::
@@ -207,8 +521,12 @@ class DataCatalog(CatalogProtocol):
             >>>
             >>> assert catalog.load("data_csv_dataset").equals(df)
         """
-        if key in self._datasets:
+        if key in self._datasets or key in self._lazy_datasets:
             self._logger.warning("Replacing dataset '%s'", key)
+            self._datasets.pop(key, None)
+            self._lazy_datasets.pop(key, None)
+            self._config_resolver.config.pop(key, None)
+            self._load_versions.pop(key, None)
         if isinstance(value, AbstractDataset):
             self._load_versions, self._save_version = self._validate_versions(
                 {key: value}, self._load_versions, self._save_version
@@ -217,36 +535,61 @@ class DataCatalog(CatalogProtocol):
         elif isinstance(value, _LazyDataset):
             self._lazy_datasets[key] = value
         else:
-            self._logger.debug(f"Adding input data as a MemoryDataset - {key}")
+            self._logger.debug(f"Adding input data {key} as a default MemoryDataset")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:
+        """
+        Get the number of datasets registered in the catalog, including both materialized and lazy datasets.
+
+        Returns:
+            The number of datasets.
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> len(catalog)
+            # 1
+        """
         return len(self.keys())
 
     def get(
         self,
         key: str,
+        fallback_to_runtime_pattern: bool = False,
         version: Version | None = None,
-        default: AbstractDataset | None = None,
-    ) -> AbstractDataset:
+    ) -> AbstractDataset | None:
         """Get a dataset by name from an internal collection of datasets.
 
-        If a dataset is not in the collection but matches any pattern
-        it is instantiated and added to the collection first, then returned.
+        If a dataset is not materialized but matches dataset_pattern or user_catch_all_pattern
+        by default or runtime_patterns if fallback_to_runtime_pattern is enabled
+        it is instantiated and added to the catalog first, then returned.
 
         Args:
             key: A dataset name.
+            fallback_to_runtime_pattern: Whether to use runtime_pattern to resolve dataset.
             version: Optional argument to get a specific version of the dataset.
-            default: Optional argument for default dataset to return in case
-                requested dataset not in the catalog.
 
         Returns:
-            An instance of AbstractDataset.
+            The dataset instance if found, otherwise None.
 
-        Raises:
-            DatasetNotFoundError: When dataset doesn't exist in the catalog.
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> dataset = catalog.get("example")
+            >>> print(dataset)
+            # MemoryDataset()
+            >>>
+            >>> missing = catalog.get("nonexistent")
+            >>> print(missing)
+            # None
         """
-        if key not in self._datasets and key not in self._lazy_datasets:
+        if key not in self and not fallback_to_runtime_pattern:
+            return None
+
+        if not (key in self._datasets or key in self._lazy_datasets):
             ds_config = self._config_resolver.resolve_pattern(key)
             if ds_config:
                 self._add_from_config(key, ds_config)
@@ -255,16 +598,12 @@ class DataCatalog(CatalogProtocol):
         if lazy_dataset:
             self[key] = lazy_dataset.materialize()
 
-        dataset = self._datasets.get(key, None) or default
+        dataset = self._datasets[key]
 
         if version and isinstance(dataset, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
             dataset = dataset._copy(_version=version)
-
-        if dataset is None:
-            error_msg = f"Dataset '{key}' not found in the catalog"
-            raise DatasetNotFoundError(error_msg)
 
         return dataset
 
@@ -351,7 +690,9 @@ class DataCatalog(CatalogProtocol):
             >>> catalog.save("boats", df)
         """
         catalog = catalog or {}
-        config_resolver = CatalogConfigResolver(catalog, credentials)
+        config_resolver = CatalogConfigResolver(
+            catalog, credentials, cls.default_runtime_patterns
+        )
         save_version = save_version or generate_timestamp()
         load_versions = load_versions or {}
 
@@ -360,7 +701,7 @@ class DataCatalog(CatalogProtocol):
             for ds_name in load_versions
             if not (
                 ds_name in config_resolver.config
-                or config_resolver.match_pattern(ds_name)
+                or config_resolver.match_dataset_pattern(ds_name)
             )
         ]
         if missing_keys:
@@ -383,8 +724,7 @@ class DataCatalog(CatalogProtocol):
         dict[str, str | None],
         str | None,
     ]:
-        """
-        Converts the `DataCatalog` instance into a configuration format suitable for
+        """Converts the `DataCatalog` instance into a configuration format suitable for
         serialization. This includes datasets, credentials, and versioning information.
 
         This method is only applicable to catalogs that contain datasets initialized with static, primitive
@@ -393,11 +733,16 @@ class DataCatalog(CatalogProtocol):
         https://github.com/kedro-org/kedro-plugins/issues/950 for the details.
 
         Returns:
-            tuple: A tuple containing:
-                - catalog: A dictionary mapping dataset names to their unresolved configurations, excluding in-memory datasets.
-                - credentials: A dictionary of unresolved credentials extracted from dataset configurations.
-                - load_versions: A dictionary mapping dataset names to specific versions to be loaded or `None` if no version is set.
-                - save_version: A global version identifier for saving datasets, or `None` if not specified.
+            A tuple containing:
+                catalog: A dictionary mapping dataset names to their unresolved configurations,
+                    excluding in-memory datasets.
+
+                credentials: A dictionary of unresolved credentials extracted from dataset configurations.
+
+                load_versions: A dictionary mapping dataset names to specific versions to be loaded,
+                    or `None` if no version is set.
+
+                save_version: A global version identifier for saving datasets, or `None` if not specified.
 
         Example:
         ::
@@ -424,7 +769,7 @@ class DataCatalog(CatalogProtocol):
             if _is_memory_dataset(ds.config.get(TYPE_KEY, "")):
                 continue
             unresolved_config, unresolved_credentials = (
-                self._config_resolver.unresolve_credentials(ds_name, ds.config)
+                self._config_resolver._unresolve_credentials(ds_name, ds.config)
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
@@ -433,9 +778,9 @@ class DataCatalog(CatalogProtocol):
         for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
             if _is_memory_dataset(ds):  # type: ignore[arg-type]
                 continue
-            resolved_config = ds.to_config()  # type: ignore[attr-defined]
+            resolved_config = ds._init_config()  # type: ignore[attr-defined]
             unresolved_config, unresolved_credentials = (
-                self._config_resolver.unresolve_credentials(ds_name, resolved_config)
+                self._config_resolver._unresolve_credentials(ds_name, resolved_config)
             )
             catalog[ds_name] = unresolved_config
             credentials.update(unresolved_credentials)
@@ -445,6 +790,41 @@ class DataCatalog(CatalogProtocol):
 
     @staticmethod
     def _validate_dataset_config(ds_name: str, ds_config: Any) -> None:
+        """
+        Validate the configuration of a dataset in the catalog.
+
+        This method ensures that the dataset configuration is a dictionary and contains
+        the required "type" key. If the configuration is invalid, it raises a `DatasetError`
+        with a helpful error message.
+
+        Args:
+            ds_name: The name of the dataset being validated.
+            ds_config: The configuration of the dataset to validate.
+
+        Raises:
+            DatasetError: If the dataset configuration is not a dictionary or if the
+                "type" key is missing from the configuration.
+
+        Example:
+        ::
+
+            >>> config = {
+            ...     "example_dataset": {
+            ...         "type": "pandas.CSVDataset",
+            ...         "filepath": "example.csv",
+            ...     }
+            ... }
+            >>> DataCatalog._validate_dataset_config(
+            ...     "example_dataset", config["example_dataset"]
+            ... )
+            # No error raised
+
+            >>> invalid_config = {"example_dataset": {"filepath": "example.csv"}}
+            >>> DataCatalog._validate_dataset_config(
+            ...     "example_dataset", invalid_config["example_dataset"]
+            ... )
+            # Raises DatasetError: "'type' is missing from dataset catalog configuration."
+        """
         if not isinstance(ds_config, dict):
             raise DatasetError(
                 f"Catalog entry '{ds_name}' is not a valid dataset configuration. "
@@ -461,14 +841,29 @@ class DataCatalog(CatalogProtocol):
             )
 
     def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
-        """Create a LazyDataset instance and add it to the catalog.
+        """
+        Create a `_LazyDataset` instance from the provided configuration and add it to the catalog.
+
+        This method validates the dataset configuration, creates a `_LazyDataset` instance,
+        and registers it in the catalog. The `_LazyDataset` is a placeholder for a dataset
+        that will be materialized only when accessed.
 
         Args:
-            ds_name: A dataset name.
-            ds_config: A dataset configuration.
+            ds_name: The name of the dataset to be added.
+            ds_config: The configuration dictionary for the dataset.
 
         Raises:
-            DatasetError: When a dataset configuration provided is not valid.
+            DatasetError: If the provided dataset configuration is invalid (e.g., missing
+                required keys like "type" or improperly formatted).
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog()
+            >>> dataset_config = {"type": "pandas.CSVDataset", "filepath": "example.csv"}
+            >>> catalog._add_from_config("example_dataset", dataset_config)
+            >>> "example_dataset" in catalog
+            # True
         """
         self._validate_dataset_config(ds_name, ds_config)
         ds = _LazyDataset(
@@ -543,11 +938,7 @@ class DataCatalog(CatalogProtocol):
             filtered_types = []
             for ds_name in filtered:
                 # Retrieve the dataset type
-                if ds_name in self._lazy_datasets:
-                    str_type = str(self._lazy_datasets[ds_name])
-                else:
-                    class_type = type(self._datasets[ds_name])
-                    str_type = f"{class_type.__module__}.{class_type.__qualname__}"
+                str_type = self.get_type(ds_name) or ""
                 # Match against type_regex and apply by_type filtering
                 if (not type_regex or re.search(type_regex, str_type)) and (
                     not by_type_set or str_type in by_type_set
@@ -557,6 +948,43 @@ class DataCatalog(CatalogProtocol):
             return filtered_types
 
         return filtered
+
+    def get_type(self, ds_name: str) -> str | None:
+        """
+        Access dataset type without adding resolved dataset to the catalog.
+
+        Args:
+            ds_name: The name of the dataset whose type is to be retrieved.
+
+        Returns:
+            The fully qualified type of the dataset (e.g., `kedro.io.memory_dataset.MemoryDataset`)
+            or None if dataset does not match dataset_patterns or user_catch_all_pattern.
+
+        Example:
+        ::
+
+            >>> from kedro.io import DataCatalog, MemoryDataset
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
+            >>> dataset_type = catalog.get_type("example")
+            >>> print(dataset_type)
+            # kedro.io.memory_dataset.MemoryDataset
+            >>>
+            >>> missing_type = catalog.get_type("nonexistent")
+            >>> print(missing_type)
+            # None
+        """
+        if ds_name not in self:
+            return None
+
+        if ds_name not in self._datasets and ds_name not in self._lazy_datasets:
+            ds_config = self._config_resolver.resolve_pattern(ds_name)
+            return str(_LazyDataset(ds_name, ds_config))
+
+        if ds_name in self._lazy_datasets:
+            return str(self._lazy_datasets[ds_name])
+
+        class_type = type(self._datasets[ds_name])
+        return f"{class_type.__module__}.{class_type.__qualname__}"
 
     def save(self, ds_name: str, data: Any) -> None:
         """Save data to a registered dataset.
@@ -588,7 +1016,11 @@ class DataCatalog(CatalogProtocol):
             >>>                    'col3': [5, 6]})
             >>> catalog.save("cars", df)
         """
-        dataset = self.get(ds_name)
+        dataset = self[ds_name]
+
+        if dataset is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
 
         self._logger.info(
             "Saving data to %s (%s)...",
@@ -630,6 +1062,10 @@ class DataCatalog(CatalogProtocol):
         load_version = Version(version, None) if version else None
         dataset = self.get(ds_name, version=load_version)
 
+        if dataset is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
+
         self._logger.info(
             "Loading data from %s (%s)...",
             _format_rich(ds_name, "dark_orange") if self._use_rich_markup else ds_name,
@@ -639,49 +1075,70 @@ class DataCatalog(CatalogProtocol):
 
         return dataset.load()
 
-    def release(self, name: str) -> None:
+    def release(self, ds_name: str) -> None:
         """Release any cached data associated with a dataset
         Args:
-            name: A dataset to be checked.
+            ds_name: A dataset to be checked.
         Raises:
             DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
+
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset(data=[1, 2, 3])})
+            >>> catalog.release("example")
         """
-        dataset = self.get(name)
+        dataset = self[ds_name]
+
+        if dataset is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
+
         dataset.release()
 
-    def confirm(self, name: str) -> None:
+    def confirm(self, ds_name: str) -> None:
         """Confirm a dataset by its name.
         Args:
-            name: Name of the dataset.
+            ds_name: Name of the dataset.
         Raises:
+            DatasetNotFoundError: When a dataset with the given name
+                has not yet been registered
             DatasetError: When the dataset does not have `confirm` method.
         """
-        self._logger.info("Confirming dataset '%s'", name)
-        dataset = self.get(name)
+        self._logger.info("Confirming dataset '%s'", ds_name)
+
+        dataset = self[ds_name]
+
+        if dataset is None:
+            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            raise DatasetNotFoundError(error_msg)
 
         if hasattr(dataset, "confirm"):
             dataset.confirm()
         else:
-            raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")
+            raise DatasetError(f"Dataset '{ds_name}' does not have 'confirm' method")
 
-    def exists(self, name: str) -> bool:
+    def exists(self, ds_name: str) -> bool:
         """Checks whether registered dataset exists by calling its `exists()`
         method. Raises a warning and returns False if `exists()` is not
         implemented.
 
         Args:
-            name: A dataset to be checked.
+            ds_name: A dataset to be checked.
 
         Returns:
-            Whether the dataset output exists.
+            Whether the dataset and its output exist.
 
+        Example:
+        ::
+
+            >>> catalog = DataCatalog(datasets={"example": MemoryDataset(data=[1, 2, 3])})
+            >>> catalog.exists("example")
+            True
         """
-        try:
-            dataset = self.get(name)
-        except DatasetNotFoundError:
-            return False
-        return dataset.exists()
+        dataset = self[ds_name]
+        return dataset.exists() if dataset else False
 
     @staticmethod
     def _validate_versions(
@@ -733,3 +1190,122 @@ class DataCatalog(CatalogProtocol):
                         )
 
         return cur_load_versions, cur_save_version
+
+
+class SharedMemoryDataCatalog(DataCatalog):
+    """
+    A specialized `DataCatalog` for managing datasets in a shared memory context.
+
+    The `SharedMemoryDataCatalog` extends the base `DataCatalog` to support multiprocessing
+    by ensuring that datasets are serializable and synchronized across threads or processes.
+    It provides additional functionality for managing shared memory datasets, such as setting
+    a multiprocessing manager and validating dataset compatibility with multiprocessing.
+
+    Attributes:
+        default_runtime_patterns (ClassVar): A dictionary defining the default runtime pattern
+            for datasets of type `kedro.io.SharedMemoryDataset`.
+
+    Example:
+    ::
+
+        >>> from multiprocessing.managers import SyncManager
+        >>> from kedro.io import MemoryDataset
+        >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
+        >>>
+        >>> # Create a shared memory catalog
+        >>> catalog = SharedMemoryDataCatalog(
+        ...     datasets={"shared_data": MemoryDataset(data=[1, 2, 3])}
+        ... )
+        >>>
+        >>> # Set a multiprocessing manager
+        >>> manager = SyncManager()
+        >>> manager.start()
+        >>> catalog.set_manager_datasets(manager)
+        >>>
+        >>> # Validate the catalog for multiprocessing compatibility
+        >>> catalog.validate_catalog()
+    """
+
+    default_runtime_patterns: ClassVar = {
+        "{default}": {"type": "kedro.io.SharedMemoryDataset"}
+    }
+
+    def set_manager_datasets(self, manager: SyncManager) -> None:
+        """
+        Associate a multiprocessing manager with all shared memory datasets in the catalog.
+
+        This method iterates through all datasets in the catalog and sets the provided
+        multiprocessing manager for datasets of type `SharedMemoryDataset`. This ensures
+        that these datasets are properly synchronized across threads or processes.
+
+        Args:
+            manager: A multiprocessing manager to be associated with
+                shared memory datasets.
+
+        Example:
+        ::
+
+            >>> from multiprocessing.managers import SyncManager
+            >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
+            >>>
+            >>> catalog = SharedMemoryDataCatalog(
+            ...     datasets={"shared_data": MemoryDataset(data=[1, 2, 3])}
+            ... )
+            >>>
+            >>> manager = SyncManager()
+            >>> manager.start()
+            >>> catalog.set_manager_datasets(manager)
+            >>> print(catalog)
+            # {'shared_data': kedro.io.memory_dataset.MemoryDataset(data='<list>')}
+        """
+        for _, ds in self._datasets.items():
+            if isinstance(ds, SharedMemoryDataset):
+                ds.set_manager(manager)
+
+    def validate_catalog(self) -> None:
+        """
+        Validate the catalog to ensure all datasets are serializable and compatible with multiprocessing.
+
+        This method checks that all datasets in the catalog are serializable and do not
+        include non-proxied memory datasets as outputs. Non-serializable datasets or
+        datasets that rely on single-process memory cannot be used in a multiprocessing
+        context. If any such datasets are found, an exception is raised with details.
+
+        Raises:
+            AttributeError: If any datasets are found to be non-serializable or incompatible
+                with multiprocessing.
+
+        Example:
+        ::
+
+            >>> from kedro.io.data_catalog import SharedMemoryDataCatalog
+            >>>
+            >>> catalog = SharedMemoryDataCatalog(
+            ...     datasets={"shared_data": MemoryDataset(data=[1, 2, 3])}
+            ... )
+            >>>
+            >>> try:
+            ...     catalog.validate_catalog()
+            ... except AttributeError as e:
+            ...     print(f"Validation failed: {e}")
+            # No error
+        """
+        unserialisable = []
+        for name, dataset in self._datasets.items():
+            if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
+                unserialisable.append(name)
+                continue
+            try:
+                ForkingPickler.dumps(dataset)
+            except (AttributeError, PicklingError):
+                unserialisable.append(name)
+
+        if unserialisable:
+            raise AttributeError(
+                f"The following datasets cannot be used with multiprocessing: "
+                f"{sorted(unserialisable)}\nIn order to utilize multiprocessing you "
+                f"need to make sure all datasets are serialisable, i.e. datasets "
+                f"should not make use of lambda functions, nested functions, closures "
+                f"etc.\nIf you are using custom decorators ensure they are correctly "
+                f"decorated using functools.wraps()."
+            )

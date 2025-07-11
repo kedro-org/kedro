@@ -6,6 +6,25 @@ You can define a Data Catalog in two ways. Most use cases can be through a YAML 
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
+This page contains a set of guides for advanced usage of the `DataCatalog` API in Kedro, including how to configure, access, manipulate, and persist datasets programmatically:
+
+- [How to configure the Data Catalog](#how-to-configure-the-data-catalog)
+- [How to access datasets in the catalog](#how-to-access-datasets-in-the-catalog)
+- [How to add datasets to the catalog](#how-to-add-datasets-to-the-catalog)
+- [How to iterate through datasets in the catalog](#how-to-iterate-trough-datasets-in-the-catalog)
+- [How to get the number of datasets in the catalog](#how-to-get-the-number-of-datasets-in-the-catalog)
+- [How to print the full catalog and individual datasets](#how-to-print-the-full-catalog-and-individual-datasets)
+- [How to load datasets programmatically](#how-to-load-datasets-programmatically)
+- [How to save data programmatically](#how-to-save-data-programmatically)
+    - [How to save data to memory](#how-to-save-data-to-memory)
+    - [How to save data to a SQL database for querying](#how-to-save-data-to-a-sql-database-for-querying)
+    - [How to save data in Parquet](#how-to-save-data-in-parquet)
+- [How to access a dataset with credentials](#how-to-access-a-dataset-with-credentials)
+- [How to version a dataset using the Code API](#how-to-version-a-dataset-using-the-code-api)
+- [How to access dataset patterns](#how-to-access-dataset-patterns)
+- [How to save catalog to config](#how-to-save-catalog-to-config)
+- [How to filter catalog datasets](#how-to-filter-catalog-datasets)
+- [How to get dataset type](#how-to-get-dataset-type)
 
 ## How to configure the Data Catalog
 
@@ -22,7 +41,7 @@ from kedro_datasets.pandas import (
     ParquetDataset,
 )
 
-catalog =  DataCatalog(
+catalog = DataCatalog(
     {
         "bikes": CSVDataset(filepath="../data/01_raw/bikes.csv"),
         "cars": CSVDataset(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
@@ -40,12 +59,85 @@ catalog =  DataCatalog(
 
 When using `SQLTableDataset` or `SQLQueryDataset` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` is to put `con` into `load_args` and `save_args` (`SQLTableDataset` only).
 
-## How to view the available data sources
+## How to access datasets in the catalog
 
-To review the `DataCatalog`:
+You can check whether a dataset exists using the `in` operator (`__contains__` method):
 
 ```python
-catalog.keys()
+catalog = DataCatalog(datasets={"example": MemoryDataset()})
+"example" in catalog  # True
+"nonexistent" in catalog  # False
+```
+
+This checks if:
+
+- The dataset is explicitly defined,
+- It matches a dataset_pattern or user_catch_all_pattern.
+
+To retrieve datasets, use standard dictionary-style access or the `.get()` method:
+
+```python
+reviews_ds = catalog["reviews"]
+intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=True)
+```
+
+- Both methods retrieve a dataset by name from the catalog’s internal collection.
+- If the dataset isn’t materialized but matches a configured pattern, it's instantiated and returned.
+- The `.get()` method accepts:
+  - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
+  - `version`: Specify dataset version if versioning is enabled.
+- If no match is found and fallback is disabled, `None` is returned.
+
+## How to add datasets to the catalog
+
+`DataCatalog` API allows you to add datasets as well as raw data directly to the catalog:
+
+```python
+from kedro_datasets.pandas import CSVDataset
+
+bikes_ds = CSVDataset(filepath="../data/01_raw/bikes.csv")
+catalog["bikes"] = bikes_ds  # Add dataset instance
+
+catalog["cars"] = ["Ferrari", "Audi"]  # Add raw data
+```
+When raw data is added, it's automatically wrapped in a `MemoryDataset`.
+
+## How to iterate trough datasets in the catalog
+
+`DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
+
+```python
+for ds_name in catalog:  # Default iteration over keys
+    pass
+
+for ds_name in catalog.keys():  # Iterate over dataset names
+    pass
+
+for ds in catalog.values():  # Iterate over dataset instances
+    pass
+
+for ds_name, ds in catalog.items():  # Iterate over (name, dataset) tuples
+    pass
+```
+
+## How to get the number of datasets in the catalog
+
+Use Python’s built-in `len()` function:
+
+```python
+ds_count = len(catalog)
+```
+
+## How to print the full catalog and individual datasets
+
+To print the catalog or an individual dataset programmatically, use the `print()` function or in an interactive environment like IPython or JupyterLab, simply enter the variable:
+
+```bash
+In [1]: catalog
+Out[1]: {'shuttles': kedro_datasets.pandas.excel_dataset.ExcelDataset(filepath=PurePosixPath('/data/01_raw/shuttles.xlsx'), protocol='file', load_args={'engine': 'openpyxl'}, save_args={'index': False}, writer_args={'engine': 'openpyxl'}), 'preprocessed_companies': kedro_datasets.pandas.parquet_dataset.ParquetDataset(filepath=PurePosixPath('/data/02_intermediate/preprocessed_companies.pq'), protocol='file', load_args={}, save_args={}), 'params:model_options.test_size': kedro.io.memory_dataset.MemoryDataset(data='<float>'), 'params:model_options.features': kedro.io.memory_dataset.MemoryDataset(data='<list>'))}
+
+In [2]: catalog["shuttles"]
+Out[2]: kedro_datasets.pandas.excel_dataset.ExcelDataset(filepath=PurePosixPath('/data/01_raw/shuttles.xlsx'), protocol='file', load_args={'engine': 'openpyxl'}, save_args={'index': False}, writer_args={'engine': 'openpyxl'})
 ```
 
 ## How to load datasets programmatically
@@ -76,8 +168,8 @@ To save data using an API similar to that used to load data:
 ```python
 from kedro.io import MemoryDataset
 
-memory = MemoryDataset(data=None)
-catalog.add("cars_cache", memory)
+memory_ds = MemoryDataset(data=None)
+catalog["cars_cache"] = memory_ds
 catalog.save("cars_cache", "Memory can store anything.")
 catalog.load("cars_cache")
 ```
@@ -113,6 +205,7 @@ catalog.save("ranked", ranked)
     Saving `None` to a dataset is not allowed!
 
 ## How to access a dataset with credentials
+
 Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configure/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
@@ -226,3 +319,71 @@ catalog.save("test_dataset", data1)  # emits a UserWarning due to version incons
 # file does not exist
 reloaded = catalog.load("test_dataset")
 ```
+
+## How to access dataset patterns
+
+The pattern resolution logic in `DataCatalog` is handled by the `config_resolver`, which can be accessed as a property of the catalog:
+
+```python
+config_resolver = catalog.config_resolver
+ds_config = catalog.config_resolver.resolve_pattern(ds_name)  # Resolve specific pattern
+patterns = catalog.config_resolver.list_patterns() # List all patterns
+```
+
+!!! note
+    `DataCatalog` does not support all dictionary methods, such as `pop()`, `popitem()`, or `del`.
+
+## How to save catalog to config
+
+You can serialize a `DataCatalog` into configuration format (e.g., for saving to a YAML file) using `.to_config()`:
+
+```python
+from kedro.io import DataCatalog
+from kedro_datasets.pandas import CSVDataset
+
+cars = CSVDataset(
+     filepath="cars.csv",
+     save_args={"index": False}
+ )
+catalog = DataCatalog(datasets={'cars': cars})
+
+config, credentials, load_versions, save_version = catalog.to_config()
+```
+
+To reconstruct the catalog later:
+```python
+new_catalog = DataCatalog.from_config(config, credentials, load_versions, save_version)
+```
+
+!!! note
+    This method only works for datasets with static, serializable parameters. For example, you can serialize credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`. In-memory datasets are excluded.
+
+## How to filter catalog datasets
+
+Use the `.filter()` method to retrieve dataset names that match specific criteria:
+
+```python
+import re
+from kedro.io import MemoryDataset
+from kedro_datasets.pandas import SQLQueryDataset
+
+catalog.filter(name_regex="raw")  # Names containing 'raw'
+catalog.filter(name_regex=re.compile("^model_"))  # Regex match (precompiled)
+catalog.filter(type_regex="pandas.excel_dataset.ExcelDataset")  # Match by type string
+catalog.filter(name_regex="train", type_regex="CSV")  # Name + type
+catalog.filter(name_regex="data", by_type=SQLQueryDataset)  # Exact type match
+catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])  # Multiple types
+```
+
+## How to get dataset type
+You can check the dataset type without materializing or adding it to the catalog:
+
+```python
+from kedro.io import DataCatalog, MemoryDataset
+
+catalog = DataCatalog(datasets={"example": MemoryDataset()})
+dataset_type = catalog.get_type("example")
+print(dataset_type)  # kedro.io.memory_dataset.MemoryDataset
+```
+
+If the dataset is not present and no patterns match, the method returns `None`.

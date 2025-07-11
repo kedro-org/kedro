@@ -11,15 +11,16 @@ from pandas.testing import assert_frame_equal
 
 from kedro.io import (
     CachedDataset,
+    CatalogConfigResolver,
     DataCatalog,
     DatasetError,
     DatasetNotFoundError,
-    LambdaDataset,
     MemoryDataset,
 )
 from kedro.io.core import (
     _DEFAULT_PACKAGES,
     VERSION_FORMAT,
+    AbstractDataset,
     Version,
     VersionAlreadyExistsError,
     generate_timestamp,
@@ -57,6 +58,20 @@ def data_catalog_from_config(correct_config):
     return DataCatalog.from_config(**correct_config)
 
 
+class NonExistentDataset(AbstractDataset):
+    def __init__(self):
+        pass
+
+    def _load(self):
+        pass
+
+    def _save(self, data):
+        pass
+
+    def _describe(self):
+        return {}
+
+
 class TestDataCatalog:
     def test_save_and_load(self, data_catalog, dummy_dataframe):
         """Test saving and reloading the dataset"""
@@ -77,7 +92,7 @@ class TestDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a dataset
         from nonexistent source"""
-        pattern = r"Failed while loading data from dataset CSVDataset"
+        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.csv_dataset.CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
@@ -111,13 +126,13 @@ class TestDataCatalog:
 
     def test_exists_not_implemented(self, caplog):
         """Test calling `exists` on the dataset, which didn't implement it"""
-        catalog = DataCatalog(datasets={"test": LambdaDataset(None, None)})
+        catalog = DataCatalog(datasets={"test": NonExistentDataset()})
         result = catalog.exists("test")
 
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "'exists()' not implemented for 'LambdaDataset'. "
+            "'exists()' not implemented for 'NonExistentDataset'. "
             "Assuming output does not exist." in log_record.message
         )
         assert result is False
@@ -273,6 +288,33 @@ class TestDataCatalog:
         assert isinstance(catalog["ds"], CSVDataset)
         assert isinstance(catalog["df"], MemoryDataset)
 
+    def test_init_warns_and_removes_conflicting_datasets_from_config(self, caplog):
+        # Prepare conflicting dataset name
+        config_resolver = CatalogConfigResolver(
+            {
+                "existing_ds": {"type": "MemoryDataset", "data": "from_config"},
+                "new_ds": {"type": "MemoryDataset", "data": "new_data"},
+            }
+        )
+
+        datasets = {"existing_ds": MemoryDataset(data="from_datasets")}
+
+        with caplog.at_level(logging.WARNING):
+            catalog = DataCatalog(datasets=datasets, config_resolver=config_resolver)
+
+        # 'existing_ds' should not be added from config
+        assert "Cannot register dataset 'existing_ds' from config" in caplog.text
+        assert "existing_ds" in catalog
+        assert catalog.load("existing_ds") == "from_datasets"
+
+        # 'new_ds' should be added from config
+        assert "new_ds" in catalog
+        assert catalog.load("new_ds") == "new_data"
+
+        # Config should no longer contain the skipped dataset
+        assert "existing_ds" not in config_resolver.config
+        assert "new_ds" in config_resolver.config
+
     def test_repr(self, data_catalog_from_config):
         assert data_catalog_from_config.__repr__() == str(data_catalog_from_config)
 
@@ -290,24 +332,16 @@ class TestDataCatalog:
                 **correct_config, load_versions={"version": "test_version"}
             )
 
-    def test_get_dataset_matching_pattern(self, data_catalog):
-        """Test get_dataset() when dataset is not in the catalog but pattern matches"""
+    def test_get_dataset_matches_runtime_pattern(self, data_catalog):
+        """Test get_dataset() when dataset is not in the catalog but default pattern matches"""
         match_pattern_ds = "match_pattern_ds"
         assert match_pattern_ds not in data_catalog
-        data_catalog.config_resolver.add_runtime_patterns(
-            {"{default}": {"type": "MemoryDataset"}}
-        )
-        ds = data_catalog.get(match_pattern_ds)
+
+        ds = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=False)
+        assert ds is None
+
+        ds = data_catalog.get(match_pattern_ds, fallback_to_runtime_pattern=True)
         assert isinstance(ds, MemoryDataset)
-
-    def test_remove_runtime_pattern(self, data_catalog):
-        runtime_pattern = {"{default}": {"type": "MemoryDataset"}}
-        data_catalog.config_resolver.add_runtime_patterns(runtime_pattern)
-        match_pattern_ds = "match_pattern_ds"
-        assert match_pattern_ds in data_catalog
-
-        data_catalog.config_resolver.remove_runtime_patterns(runtime_pattern)
-        assert match_pattern_ds not in data_catalog
 
     def test_release(self, data_catalog):
         """Test release is called without errors"""
@@ -330,6 +364,19 @@ class TestDataCatalog:
 
         data_catalog_copy = deepcopy(data_catalog_from_config)
         assert not data_catalog_copy == expected_catalog
+
+    def test_get_returns_none_dataset(self):
+        catalog = DataCatalog(datasets={})
+        catalog._datasets["bad_ds"] = None
+        assert catalog.get("bad_ds") is None
+
+    def test_get_missing_dataset(self):
+        catalog = DataCatalog(datasets={})
+        assert catalog.get("missing_ds") is None
+
+    def test_get_type_missing_dataset(self):
+        catalog = DataCatalog(datasets={})
+        assert catalog.get_type("missing_ds") is None
 
     class TestDataCatalogToConfig:
         def test_to_config(self, correct_config_versioned, dataset, filepath):
@@ -837,3 +884,18 @@ class TestDataCatalog:
                 == "test_load_version.csv"
             )
             assert catalog._save_version
+
+        def test_setitem_replaces_dataset_and_clears_state(self):
+            config_resolver = CatalogConfigResolver(
+                {"my_dataset": {"type": "MemoryDataset", "data": "from_config"}}
+            )
+            catalog = DataCatalog(config_resolver=config_resolver)
+            catalog._load_versions = {"my_dataset": "old_version"}
+
+            catalog["my_dataset"] = MemoryDataset(data="new_data")
+
+            assert "my_dataset" in catalog._datasets
+            assert catalog.load("my_dataset") == "new_data"
+            assert "my_dataset" not in catalog._lazy_datasets
+            assert "my_dataset" not in catalog._config_resolver.config
+            assert "my_dataset" not in catalog._load_versions

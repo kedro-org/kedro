@@ -14,6 +14,7 @@ from functools import cached_property
 from graphlib import CycleError, TopologicalSorter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
+from warnings import warn
 
 import kedro
 from kedro.pipeline.node import GroupedNodes, Node, _to_list
@@ -301,6 +302,7 @@ class Pipeline:
         return node_children
 
     def _shortest_path(self, start: Node, end: Node) -> list[Node]:
+        """Find the shortest path between two nodes in the pipeline, if it exists."""
         queue = deque([(start, [start])])
         visited = set([start])
 
@@ -315,27 +317,28 @@ class Pipeline:
         return []  # pragma: no cover
 
     def _validate_namespaces(self) -> None:
-        from warnings import warn
-
         node_parents: dict[Node, set[Node]] = self.node_dependencies
 
-        # Here we keep all visited namespaces for each node
+        # Here we keep all visited namespaces and the nodes that interrupted them for each node
+        # the mapping is as follows:
+        # {node: {namespace: {interrupting_node}}}
         seen_namespaces: dict[Node, dict[str, set[Node]]] = defaultdict(dict)
         for node in self.nodes:
             visited: dict[str, set[Node]] = defaultdict(set)
             for parent in node_parents[node]:
                 last_namespace = parent.namespace or ""
                 curr_namespace = node.namespace or ""
+                seen = seen_namespaces[parent]
                 # If curr_namespace was visited in paths leading to parent
-                if curr_namespace and curr_namespace in seen_namespaces[parent]:
-                    start = next(iter(seen_namespaces[parent][curr_namespace]))
+                if curr_namespace and curr_namespace in seen:
+                    start = next(iter(seen[curr_namespace]))
                     path = [n.name for n in self._shortest_path(start, node)]
                     warn(
                         f"Namespace '{curr_namespace}' is interrupted by nodes {path[:-1]} and thus invalid.",
                         UserWarning,
                     )
                 # All visited namespaces for the current node get updated with the parent's visited namespaces
-                for ns, nodes in seen_namespaces[parent].items():
+                for ns, nodes in seen.items():
                     visited[ns].update(nodes)
                 # If the current namespace is different from the last namespace and isn't a child namespace,
                 # mark the last namespace and all unrelated parent namespaces as visited to detect potential future interruptions

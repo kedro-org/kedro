@@ -105,14 +105,13 @@ class TestCliCommands:
 
         entry_point.load.assert_not_called()
 
-    # [TODO: Revert back once kedro telemetry supports DataCatalog]
-    # def test_info_only_kedro_telemetry_plugin_installed(self):
-    #     result = CliRunner().invoke(cli, ["info"])
-    #     assert result.exit_code == 0
+    def test_info_only_kedro_telemetry_plugin_installed(self):
+        result = CliRunner().invoke(cli, ["info"])
+        assert result.exit_code == 0
 
-    #     split_result = result.output.strip().split("\n")
-    #     assert "Installed plugins" in split_result[-2]
-    #     assert "kedro_telemetry" in split_result[-1]
+        split_result = result.output.strip().split("\n")
+        assert "Installed plugins" in split_result[-2]
+        assert "kedro_telemetry" in split_result[-1]
 
     def test_help(self):
         """Check that `kedro --help` returns a valid help message."""

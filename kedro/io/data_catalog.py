@@ -207,7 +207,6 @@ class DataCatalog(CatalogProtocol):
     def __init__(
         self,
         datasets: dict[str, AbstractDataset] | None = None,
-        raw_data: dict[str, Any] | None = None,
         config_resolver: CatalogConfigResolver | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
@@ -215,8 +214,7 @@ class DataCatalog(CatalogProtocol):
         """Initializes a ``DataCatalog`` to manage datasets with loading, saving, and versioning capabilities.
 
         This catalog combines datasets passed directly via the `datasets` argument and dynamic datasets
-        resolved from config (e.g., from YAML). Additionally, raw in-memory data can be registered via
-        the `raw_data` argument and will automatically be wrapped as `MemoryDataset` instances.
+        resolved from config (e.g., from YAML).
 
         If a dataset name is present in both `datasets` and the resolved config, the dataset from `datasets`
         takes precedence. A warning is logged, and the config-defined dataset is skipped and removed from
@@ -224,8 +222,6 @@ class DataCatalog(CatalogProtocol):
 
         Args:
             datasets: A dictionary of dataset names and dataset instances.
-            raw_data: A dictionary with data to be added in memory as `MemoryDataset`` instances.
-                Keys represent dataset names and the values are raw data.
             config_resolver: An instance of CatalogConfigResolver to resolve dataset factory patterns and configurations.
             load_versions: A mapping between dataset names and versions
                 to load. Has no effect on datasets without enabled versioning.
@@ -247,15 +243,9 @@ class DataCatalog(CatalogProtocol):
             ...     "planes": MemoryDataset(data={"type": "jet", "capacity": 200}),
             ... }
 
-            >>> # Define raw data
-            >>> raw_data = {
-            ...     "raw_numbers": [1, 2, 3, 4, 5],
-            ... }
-
             >>> # Initialize the catalog
             >>> catalog = DataCatalog(
             ...     datasets=datasets,
-            ...     raw_data=raw_data,
             ...     load_versions={"cars": "2023-01-01T00.00.00"},
             ...     save_version="2023-01-02T00.00.00",
             ... )
@@ -282,10 +272,6 @@ class DataCatalog(CatalogProtocol):
                 self._config_resolver.config.pop(ds_name)
             else:
                 self._add_from_config(ds_name, self._config_resolver.config[ds_name])
-
-        raw_data = raw_data or {}
-        for ds_name, data in raw_data.items():
-            self[ds_name] = data  # type: ignore[has-type]
 
     @property
     def config_resolver(self) -> CatalogConfigResolver:

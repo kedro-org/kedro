@@ -225,6 +225,10 @@ nav:
               - kedro.io:
                   - Overview: api/io/kedro.io.md
                   - DataCatalog: api/io/kedro.io.DataCatalog.md
+                  - CatalogProtocol: api/io/kedro.io.CatalogProtocol.md
+                  - SharedMemoryDataCatalog: api/io/kedro.io.SharedMemoryDataCatalog.md
+                  - SharedMemoryCatalogProtocol: api/io/kedro.io.SharedMemoryCatalogProtocol.md
+                  - CatalogConfigResolver: api/io/kedro.io.CatalogConfigResolver.md
                   - AbstractDataset: api/io/kedro.io.AbstractDataset.md
                   - AbstractVersionedDataset: api/io/kedro.io.AbstractVersionedDataset.md
                   - CachedDataset: api/io/kedro.io.CachedDataset.md

@@ -76,7 +76,7 @@ companies:
       layer: raw
 ```
 
-[See the Kedro-Viz documentation for more information](https://docs.kedro.org/projects/kedro-viz/en/stable/kedro-viz_visualisation.html)
+[See the Kedro-Viz documentation for more information](https://docs.kedro.org/projects/kedro-viz/en/stable/)
 
 
 #### For `APIDataset`, the `requests`-specific arguments in `catalog.yml` have moved

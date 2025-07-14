@@ -135,7 +135,7 @@ kedro run
 
 ## Visualise a Kedro project
 
-This section swiftly introduces project visualisation using Kedro-Viz. See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/latest/) for more detail.
+This section swiftly introduces project visualisation using Kedro-Viz. See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/) for more detail.
 
 The Kedro-Viz package needs to be installed into your virtual environment separately as it is not part of the standard Kedro installation:
 

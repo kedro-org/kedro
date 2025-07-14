@@ -318,7 +318,7 @@ To start Kedro-Viz, enter the following in your terminal:
 kedro viz run
 ```
 
-This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the [Kedro-Viz doc](https://docs.kedro.org/projects/kedro-viz/en/stable/kedro-viz_visualisation.html) for more detail.
 
 To exit, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 

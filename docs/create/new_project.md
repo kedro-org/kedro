@@ -151,6 +151,11 @@ kedro viz run
 
 This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
 
+!!! tip
+    Available from Kedro-Viz 12.0.0 onward, the Workflow view helps you visualise and debug your most recent kedro run. You’ll be able to see which nodes succeeded, failed, or were skipped - all in one place.
+
+    ![](../assets/workflow_view.png)
+
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
 ## Where next?

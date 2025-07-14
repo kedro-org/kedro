@@ -278,11 +278,11 @@ class TestDataCatalog:
         with pytest.raises(DatasetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
 
-    def test_init_with_raw_data(self, dummy_dataframe, dataset):
+    def test_adding_raw_data(self, dummy_dataframe, dataset):
         """Test catalog initialisation with raw data"""
-        catalog = DataCatalog(
-            datasets={"ds": dataset}, raw_data={"df": dummy_dataframe}
-        )
+        catalog = DataCatalog(datasets={"ds": dataset})
+        catalog["df"] = dummy_dataframe
+
         assert "ds" in catalog
         assert "df" in catalog
         assert isinstance(catalog["ds"], CSVDataset)

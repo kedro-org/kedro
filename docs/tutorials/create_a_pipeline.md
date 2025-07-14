@@ -327,6 +327,11 @@ To exit, close the browser tab. To regain control of the terminal, enter `^+c` o
 <iframe width="100%" height="460" src="https://www.youtube.com/embed/KWqSzbHgNW4"
 frameborder="0" allowfullscreen></iframe>
 
+!!! tip
+    Available from Kedro-Viz 12.0.0 onward, the Workflow view helps you visualise and debug your most recent kedro run. You’ll be able to see which nodes succeeded, failed, or were skipped - all in one place.
+
+    ![](../assets/workflow_view.png)
+
 ## Checkpoint
 
 This is an excellent place to take a breath and summarise what you have seen in the example so far.

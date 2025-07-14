@@ -221,15 +221,19 @@ By default, Kedro has a `base` and a `local` folder for configuration. The Data 
 In summary, if you need to configure your datasets for different environments, you can create both `conf/base/catalog.yml` and `conf/local/catalog.yml`. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while adding a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets while you are using them for prototyping data pipeline(s).
 
 To illustrate this, consider the following catalog entry for a dataset named `cars` in `conf/base/catalog.yml`, which points to a csv file stored in a bucket on AWS S3:
+
 ```yaml
 cars:
   filepath: s3://my_bucket/cars.csv
   type: pandas.CSVDataset
  ```
+
 You can overwrite this catalog entry in `conf/local/catalog.yml` to point to a locally stored file instead:
+
 ```yaml
 cars:
   filepath: data/01_raw/cars.csv
   type: pandas.CSVDataset
 ```
+
 In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml` and rely on Kedro to detect which definition of `cars` dataset to use in your pipeline.

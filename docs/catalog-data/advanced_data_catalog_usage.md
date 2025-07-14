@@ -30,7 +30,7 @@ This page contains a set of guides for advanced usage of the `DataCatalog` API i
 
 To use the `DataCatalog` API, construct a `DataCatalog` object programmatically in a file like `catalog.py`.
 
-In the following code, we use several pre-built data loaders documented in the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/).
+In the following code, we use several pre-built data loaders documented in the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/).
 
 ```python
 from kedro.io import DataCatalog

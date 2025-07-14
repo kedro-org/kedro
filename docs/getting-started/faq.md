@@ -13,7 +13,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Kedro documentation
 * [Where can I find the documentation about Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/)
-* [Where can I find the documentation for Kedro's datasets](https://docs.kedro.org/projects/kedro-datasets/en/latest/)
+* [Where can I find the documentation for Kedro's datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/)
 
 ## Working with Notebooks
 

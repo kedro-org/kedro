@@ -52,6 +52,15 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How do I load credentials through environment variables](../configure/advanced_configuration.md#how-to-load-credentials-through-environment-variables)?
 * [How do I use Kedro with different project structure?](../tutorials/settings.md#use-kedro-without-the-src-folder)
 
+## Data Catalog
+* [How do I create dataset entries in catalog.yml?](../catalog-data/data_catalog.md)
+* [How do I use the same file with different formats using transcoding?](../catalog-data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding)
+* [How do I use dataset factories?](../catalog-data/kedro_dataset_factories.md)
+* [How do I override the default dataset creation with a default dataset factory pattern?](../catalog-data/kedro_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories)
+* [How do I load and save incremental or partitioned datasets?](../catalog-data/partitioned_and_incremental_datasets.md)
+
+## Advanced topics
+* [How do I use the `DataCatalog` programmatically in code?](../catalog-data/advanced_data_catalog_usage.md)
 
 ## Nodes and pipelines
 

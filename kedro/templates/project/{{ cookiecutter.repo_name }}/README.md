@@ -37,7 +37,7 @@ kedro run
 
 ## How to test your Kedro project
 
-Have a look at the file `src/tests/test_run.py` for instructions on how to write your tests. You can run your tests as follows:
+Have a look at the file `tests/test_run.py` for instructions on how to write your tests. You can run your tests as follows:
 
 ```
 pytest

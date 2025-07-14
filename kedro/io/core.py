@@ -262,34 +262,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    def __str__(self) -> str:
-        # TODO: Replace with __repr__ implementation in 1.0.0 release.
-        def _to_str(obj: Any, is_root: bool = False) -> str:
-            """Returns a string representation where
-            1. The root level (i.e. the Dataset.__init__ arguments) are
-            formatted like Dataset(key=value).
-            2. Dictionaries have the keys alphabetically sorted recursively.
-            3. None values are not shown.
-            """
-
-            fmt = "{}={}" if is_root else "'{}': {}"  # 1
-
-            if isinstance(obj, dict):
-                sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
-
-                text = ", ".join(
-                    fmt.format(key, _to_str(value))  # 2
-                    for key, value in sorted_dict
-                    if value is not None  # 3
-                )
-
-                return text if is_root else "{" + text + "}"  # 1
-
-            # not a dictionary
-            return str(obj)
-
-        return f"{type(self).__name__}({_to_str(self._describe(), True)})"
-
     @classmethod
     def _load_wrapper(cls, load_func: Callable[[Self], _DO]) -> Callable[[Self], _DO]:
         """Decorate `load_func` with logging and error handling code."""

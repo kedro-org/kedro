@@ -226,7 +226,7 @@ To illustrate this, consider the following catalog entry for a dataset named `ca
 cars:
   filepath: s3://my_bucket/cars.csv
   type: pandas.CSVDataset
- ```
+```
 
 You can overwrite this catalog entry in `conf/local/catalog.yml` to point to a locally stored file instead:
 

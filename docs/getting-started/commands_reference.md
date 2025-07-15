@@ -54,7 +54,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
     :module: kedro.framework.cli.cli
     :command: global_commands
     :depth: 2
-    :style: table
+    :style: plain
 
 ## Customise or override project-specific Kedro commands
 
@@ -70,7 +70,7 @@ The commands a project supports are specified on the framework side. If you want
     :module: kedro.framework.cli.cli
     :command: project_commands
     :depth: 2
-    :style: table
+    :style: plain
 
 
 ### Project setup

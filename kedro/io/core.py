@@ -670,36 +670,37 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     abstract class and implement the methods marked as abstract.
 
     Example:
-    ::
+    ``` python
 
-        >>> from pathlib import Path, PurePosixPath
-        >>> import pandas as pd
-        >>> from kedro.io import AbstractVersionedDataset
-        >>>
-        >>>
-        >>> class MyOwnDataset(AbstractVersionedDataset):
-        >>>     def __init__(self, filepath, version, param1, param2=True):
-        >>>         super().__init__(PurePosixPath(filepath), version)
-        >>>         self._param1 = param1
-        >>>         self._param2 = param2
-        >>>
-        >>>     def load(self) -> pd.DataFrame:
-        >>>         load_path = self._get_load_path()
-        >>>         return pd.read_csv(load_path)
-        >>>
-        >>>     def save(self, df: pd.DataFrame) -> None:
-        >>>         save_path = self._get_save_path()
-        >>>         df.to_csv(str(save_path))
-        >>>
-        >>>     def _exists(self) -> bool:
-        >>>         path = self._get_load_path()
-        >>>         return Path(path.as_posix()).exists()
-        >>>
-        >>>     def _describe(self):
-        >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)
+        from pathlib import Path, PurePosixPath
+        import pandas as pd
+        from kedro.io import AbstractVersionedDataset
+
+
+        class MyOwnDataset(AbstractVersionedDataset):
+            def __init__(self, filepath, version, param1, param2=True):
+                super().__init__(PurePosixPath(filepath), version)
+                self._param1 = param1
+                self._param2 = param2
+
+            def load(self) -> pd.DataFrame:
+                load_path = self._get_load_path()
+                return pd.read_csv(load_path)
+
+            def save(self, df: pd.DataFrame) -> None:
+                save_path = self._get_save_path()
+                df.to_csv(str(save_path))
+
+            def _exists(self) -> bool:
+                path = self._get_load_path()
+                return Path(path.as_posix()).exists()
+
+            def _describe(self):
+                return dict(version=self._version, param1=self._param1, param2=self._param2)
+    ```
 
     Example catalog.yml specification:
-    ::
+    ``` yaml
 
         my_dataset:
             type: <path-to-my-own-dataset>.MyOwnDataset
@@ -707,6 +708,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             versioned: true
             param1: <param1-value> # param1 is a required argument
             # param2 will be True by default
+    ```
     """
 
     def __init__(

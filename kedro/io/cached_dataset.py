@@ -17,14 +17,15 @@ class CachedDataset(AbstractDataset):
     so that the user avoids io operations with slow storage media.
 
     You can also specify a ``CachedDataset`` in catalog.yml:
-    ::
+    ```yaml
 
-        >>> test_ds:
-        >>>    type: CachedDataset
-        >>>    versioned: true
-        >>>    dataset:
-        >>>       type: pandas.CSVDataset
-        >>>       filepath: example.csv
+        test_ds:
+           type: CachedDataset
+           versioned: true
+           dataset:
+              type: pandas.CSVDataset
+              filepath: example.csv
+    ```
 
     Please note that if your dataset is versioned, this should be indicated in the wrapper
     class as shown above.

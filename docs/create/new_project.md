@@ -152,7 +152,7 @@ kedro viz run
 This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
 
 !!! tip
-    Available from Kedro-Viz 12.0.0 onward, the Workflow view helps you visualise and debug your most recent kedro run. You’ll be able to see which nodes succeeded, failed, or were skipped - all in one place.
+    Available from Kedro-Viz 12.0.0 onward, the Workflow view helps you visualise and debug your most recent kedro run. You’ll be able to see which nodes succeeded, failed, or were skipped - all in one place. [Read more about Workflow in Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/unreleased/workflow-view/ )
 
     ![](../assets/workflow_view.png)
 

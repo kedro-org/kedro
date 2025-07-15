@@ -135,7 +135,7 @@ kedro run
 
 ## Visualise a Kedro project
 
-This section swiftly introduces project visualisation using Kedro-Viz. See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/latest/) for more detail.
+This section swiftly introduces project visualisation using Kedro-Viz. See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/) for more detail.
 
 The Kedro-Viz package needs to be installed into your virtual environment separately as it is not part of the standard Kedro installation:
 
@@ -150,6 +150,11 @@ kedro viz run
 ```
 
 This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
+
+!!! tip
+    Available from Kedro-Viz 12.0.0 onward, the Workflow view helps you visualise and debug your most recent kedro run. You’ll be able to see which nodes succeeded, failed, or were skipped - all in one place. [Read more about Workflow in Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/unreleased/workflow-view/ )
+
+    ![](../assets/workflow_view.png)
 
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 

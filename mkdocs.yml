@@ -157,7 +157,6 @@ nav:
           - Partitioned and incremental datasets: catalog-data/partitioned_and_incremental_datasets.md
           - Programmatic usage: catalog-data/advanced_data_catalog_usage.md
           - Lazy loading: catalog-data/lazy_loading.md
-          - Test phase: catalog-data/test_phase.md
       - Build:
           - Nodes: build/nodes.md
           - Pipeline object: build/pipeline_introduction.md
@@ -226,6 +225,10 @@ nav:
               - kedro.io:
                   - Overview: api/io/kedro.io.md
                   - DataCatalog: api/io/kedro.io.DataCatalog.md
+                  - CatalogProtocol: api/io/kedro.io.CatalogProtocol.md
+                  - SharedMemoryDataCatalog: api/io/kedro.io.SharedMemoryDataCatalog.md
+                  - SharedMemoryCatalogProtocol: api/io/kedro.io.SharedMemoryCatalogProtocol.md
+                  - CatalogConfigResolver: api/io/kedro.io.CatalogConfigResolver.md
                   - AbstractDataset: api/io/kedro.io.AbstractDataset.md
                   - AbstractVersionedDataset: api/io/kedro.io.AbstractVersionedDataset.md
                   - CachedDataset: api/io/kedro.io.CachedDataset.md

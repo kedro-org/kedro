@@ -65,7 +65,7 @@ OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be sto
 CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
 
 
-@click.group(name="Kedro")
+@click.group(name="kedro")
 def project_group() -> None:  # pragma: no cover
     pass
 

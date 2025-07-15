@@ -20,7 +20,7 @@ def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
     return KedroSession.create(**kwargs)
 
 
-@click.group(name="Kedro")
+@click.group(name="kedro")
 def catalog_cli() -> None:  # pragma: no cover
     pass
 

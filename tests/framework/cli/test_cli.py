@@ -455,8 +455,8 @@ class TestKedroCLI:
         result = CliRunner().invoke(kedro_cli, [])
 
         assert result.exit_code == 0
-        assert "Global commands from Kedro" in result.output
-        assert "Project specific commands from Kedro" not in result.output
+        assert "Global commands from kedro" in result.output
+        assert "Project specific commands from kedro" not in result.output
 
     def test_kedro_run_no_project(self, mocker, tmp_path):
         mocker.patch("kedro.framework.cli.cli.is_kedro_project", return_value=False)
@@ -489,8 +489,8 @@ class TestKedroCLI:
 
         result = CliRunner().invoke(kedro_cli, [])
         assert result.exit_code == 0
-        assert "Global commands from Kedro" in result.output
-        assert "Project specific commands from Kedro" in result.output
+        assert "Global commands from kedro" in result.output
+        assert "Project specific commands from kedro" in result.output
 
     def test_main_hook_exception_handling(self, fake_metadata):
         kedro_cli = KedroCLI(fake_metadata.project_path)

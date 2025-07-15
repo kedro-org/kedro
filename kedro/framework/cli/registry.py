@@ -10,7 +10,7 @@ from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 
 
-@click.group(name="Kedro")
+@click.group(name="kedro")
 def registry_cli() -> None:  # pragma: no cover
     pass
 

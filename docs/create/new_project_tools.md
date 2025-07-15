@@ -79,7 +79,7 @@ A list of available tools can also be accessed by running `kedro new --help`
 
                       Example usage:
 
-                      kedro new --tools=lint,test,log,docs,data,pyspark,viz
+                      kedro new --tools=lint,test,log,docs,data,pyspark
                       (or any subset of these options)
 
                       kedro new --tools=all
@@ -95,7 +95,7 @@ To skip this step and select tools directly, add the tools selection to `kedro n
 uvx kedro new --tools=<your tool selection>
 ```
 
-To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, `pyspark`, and `viz`.
+To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, and `pyspark`.
 
 ### Example code
 In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. If you select `yes`, the example code included depends upon your previous choice of tools, as follows:
@@ -130,7 +130,7 @@ As an alternative to the interactive project creation workflow, you can also sup
     "my project"
 
 "tools":
-    "lint, test, log, docs, data, pyspark, viz"
+    "lint, test, log, docs, data, pyspark"
 
 "example_pipeline":
     "y"
@@ -251,12 +251,6 @@ The `PySpark` tool modifies the project's `requirements.txt` to include PySpark 
 PySpark aligns with Kedro's scalability principle, as it provides data processing capabilities for large datasets.
 See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for more information on setup and usage.
 
-### Kedro Viz
-
-The `viz` tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
-In addition, `viz` will also add setup for experiment tracking and plotting datasets.
-See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/) for more information on using this tool.
-
 ## Flowchart illustration
 
 Here is a flowchart to help illustrate some example choice of tools you can select:
@@ -270,10 +264,10 @@ flowchart TD
     C1 --> D1[Include Example Pipeline?]
     C2 --> D2[Include Example Pipeline?]
     C3 --> D3[Include Example Pipeline?]
-    D1 -- Yes --> E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes]
-    D1 -- No --> E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No]
-    D2 -- Yes --> F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz\nExample: Yes]
-    D2 -- No --> F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz\nExample: No]
-    D3 -- Yes --> G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes]
-    D3 -- No --> G2[New Project Created\nName: Example Project\nTools: None\nExample: No]
+    D1 -- Yes --> E1["New Project Created Name: Example Project Tools: lint, docs, PySpark Example: Yes"]
+    D1 -- No --> E2["New Project Created Name: Example Project Tools: lint, docs, PySpark Example: No"]
+    D2 -- Yes --> F1["New Project Created Name: Example Project Tools: All: lint, test, logging, docs, data, PySpark Example: Yes"]
+    D2 -- No --> F2["New Project Created Name: Example Project Tools: All: lint, test, logging, docs, data, PySpark Example: No"]
+    D3 -- Yes --> G1["New Project Created Name: Example Project Tools: None Example: Yes"]
+    D3 -- No --> G2["New Project Created Name: Example Project Tools: None Example: No"]
 ```

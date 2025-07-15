@@ -110,39 +110,39 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     the ``ParallelRunner``, such user-defined dataset should have the
     attribute `_SINGLE_PROCESS = True`.
     Example:
-    ::
+    ``` python
 
-        >>> from pathlib import Path, PurePosixPath
-        >>> import pandas as pd
-        >>> from kedro.io import AbstractDataset
-        >>>
-        >>>
-        >>> class MyOwnDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
-        >>>     def __init__(self, filepath, param1, param2=True):
-        >>>         self._filepath = PurePosixPath(filepath)
-        >>>         self._param1 = param1
-        >>>         self._param2 = param2
-        >>>
-        >>>     def load(self) -> pd.DataFrame:
-        >>>         return pd.read_csv(self._filepath)
-        >>>
-        >>>     def save(self, df: pd.DataFrame) -> None:
-        >>>         df.to_csv(str(self._filepath))
-        >>>
-        >>>     def _exists(self) -> bool:
-        >>>         return Path(self._filepath.as_posix()).exists()
-        >>>
-        >>>     def _describe(self):
-        >>>         return dict(param1=self._param1, param2=self._param2)
+        from pathlib import Path, PurePosixPath
+        import pandas as pd
+        from kedro.io import AbstractDataset
 
+        class MyOwnDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
+            def __init__(self, filepath, param1, param2=True):
+                self._filepath = PurePosixPath(filepath)
+                self._param1 = param1
+                self._param2 = param2
+
+            def load(self) -> pd.DataFrame:
+                return pd.read_csv(self._filepath)
+
+            def save(self, df: pd.DataFrame) -> None:
+                df.to_csv(str(self._filepath))
+
+            def _exists(self) -> bool:
+                return Path(self._filepath.as_posix()).exists()
+
+            def _describe(self):
+                return dict(param1=self._param1, param2=self._param2)
+    ```
     Example catalog.yml specification:
-    ::
+    ``` yaml
 
         my_dataset:
             type: <path-to-my-own-dataset>.MyOwnDataset
             filepath: data/01_raw/my_data.csv
             param1: <param1-value> # param1 is a required argument
             # param2 will be True by default
+    ```
     """
 
     """

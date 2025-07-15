@@ -76,3 +76,18 @@ Feature: Run Project
     When I execute the kedro command "run"
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run
+
+  Scenario: Run with --only-missing-outputs flag after deleting an intermediate output
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter "default"
+    And I have installed the project dependencies
+    When I execute the kedro command "run"
+    Then I should get a successful exit code
+    And the logs should show that 4 nodes were run
+    When I delete the file "data/06_models/example_model.pkl" from the project
+    And I execute the kedro command "run --only-missing-outputs"
+    Then I should get a successful exit code
+    And the logs should show that 3 nodes were run
+    And the logs should show that "split_data_node" was run
+    And the logs should show that "report_accuracy" was run
+    And the logs should show that "train_model" was run

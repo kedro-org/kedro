@@ -67,7 +67,7 @@ ONLY_MISSING_OUTPUTS_HELP = """Run only nodes with missing outputs.
 If all outputs of a node exist and are persisted, skip the node execution."""
 
 
-@click.group(name="Kedro")
+@click.group(name="kedro")
 def project_group() -> None:  # pragma: no cover
     pass
 

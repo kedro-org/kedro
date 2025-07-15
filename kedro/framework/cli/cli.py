@@ -43,7 +43,7 @@ v{version}
 """
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
+@click.group(context_settings=CONTEXT_SETTINGS, name="kedro")
 @click.version_option(version, "--version", "-V", help="Show version and exit")
 def cli() -> None:  # pragma: no cover
     """Kedro is a CLI for creating and using Kedro projects. For more
@@ -89,7 +89,7 @@ def info() -> None:
 @click.group(
     context_settings=CONTEXT_SETTINGS,
     cls=LazyGroup,
-    name="Kedro",
+    name="kedro",
     lazy_subcommands={
         "registry": "kedro.framework.cli.registry.registry",
         "catalog": "kedro.framework.cli.catalog.catalog",
@@ -106,7 +106,7 @@ def project_commands() -> None:
 
 @click.group(
     context_settings=CONTEXT_SETTINGS,
-    name="Kedro",
+    name="kedro",
     cls=LazyGroup,
     lazy_subcommands={
         "new": "kedro.framework.cli.starters.new",

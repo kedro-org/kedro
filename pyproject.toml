@@ -60,7 +60,7 @@ test = [
     "jupyterlab_server>=2.11.1",
     "jupyterlab>=3,<5",
     "jupyter~=1.0",
-    "kedro-datasets",
+    "kedro-datasets>=8.0.0",
     "mypy~=1.0",
     "pandas~=2.0",
     "pluggy>=1.0",

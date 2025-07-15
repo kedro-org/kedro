@@ -57,17 +57,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
     and overrides this key and any sub-keys.
 
     You can access the different configurations as follows:
-    ::
+    ``` python
 
-        >>> import logging.config
-        >>> from kedro.config import OmegaConfigLoader
-        >>> from kedro.framework.project import settings
-        >>>
-        >>> conf_path = str(project_path / settings.CONF_SOURCE)
-        >>> conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
-        >>>
-        >>> conf_catalog = conf_loader["catalog"]
-        >>> conf_params = conf_loader["parameters"]
+        import logging.config
+        from kedro.config import OmegaConfigLoader
+        from kedro.framework.project import settings
+
+        conf_path = str(project_path / settings.CONF_SOURCE)
+        conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
+
+        conf_catalog = conf_loader["catalog"]
+        conf_params = conf_loader["parameters"]
+    ```
 
     ``OmegaConf`` supports variable interpolation in configuration
     https://omegaconf.readthedocs.io/en/2.2_branch/usage.html#merging-configurations. It is
@@ -80,12 +81,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
     in `settings.py`.
 
     Example:
-    ::
+    ``` python
 
-        >>> # in settings.py
-        >>> from kedro.config import OmegaConfigLoader
-        >>>
-        >>> CONFIG_LOADER_CLASS = OmegaConfigLoader
+        # in settings.py
+        from kedro.config import OmegaConfigLoader
+
+        CONFIG_LOADER_CLASS = OmegaConfigLoader
 
     """
 

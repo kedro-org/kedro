@@ -16,7 +16,7 @@ class MemoryDataset(AbstractDataset):
     indicate MemoryDataset's non-persistence.
 
     Example:
-    ```` python
+    ``` python
         from kedro.io import MemoryDataset
         import pandas as pd
 

@@ -88,7 +88,7 @@ class KedroSession:
 
 
     Example:
-    ````python
+    ``` python
 
         from kedro.framework.session import KedroSession
         from kedro.framework.startup import bootstrap_project

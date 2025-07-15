@@ -44,13 +44,13 @@ def catalog() -> None:
 @click.pass_obj
 def describe_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
     """
-    Describe datasets used in the specified pipelines, grouped by type.
+    Describe datasets used in the specified pipelines, grouped by type.\n
 
     This command provides a structured overview of datasets used in the selected pipelines,
-    categorizing them into three groups:
-    - `datasets`: Datasets explicitly defined in the catalog.
-    - `factories`: Datasets resolved from dataset factory patterns.
-    - `defaults`: Datasets that do not match any pattern or explicit definition.
+    categorizing them into three groups:\n
+    - `datasets`: Datasets explicitly defined in the catalog.\n
+    - `factories`: Datasets resolved from dataset factory patterns.\n
+    - `defaults`: Datasets that do not match any pattern or explicit definition.\n
     """
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()

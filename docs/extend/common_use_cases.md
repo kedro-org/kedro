@@ -12,7 +12,7 @@ This can now achieved by using [Hooks](./hooks/introduction.md), to define the e
 
 ## Use Case 2: How to integrate Kedro with additional data sources
 
-You can use [`DataSets`](https://docs.kedro.org/projects/kedro-datasets/en/stable/) to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](./how_to_create_a_custom_dataset.md).
+You can use [`Datasets`](https://docs.kedro.org/projects/kedro-datasets/en/stable/) to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](./how_to_create_a_custom_dataset.md).
 
 ## Use Case 3: How to add or modify CLI commands
 

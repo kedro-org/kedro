@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, Version
+from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, TCopyMode, Version
 from kedro.io.memory_dataset import MemoryDataset
 
 
@@ -17,14 +17,14 @@ class CachedDataset(AbstractDataset):
     so that the user avoids io operations with slow storage media.
 
     You can also specify a ``CachedDataset`` in catalog.yml:
-    ::
-
-        >>> test_ds:
-        >>>    type: CachedDataset
-        >>>    versioned: true
-        >>>    dataset:
-        >>>       type: pandas.CSVDataset
-        >>>       filepath: example.csv
+    ```yaml
+    test_ds:
+        type: CachedDataset
+        versioned: true
+        dataset:
+            type: pandas.CSVDataset
+            filepath: example.csv
+    ```
 
     Please note that if your dataset is versioned, this should be indicated in the wrapper
     class as shown above.
@@ -39,7 +39,7 @@ class CachedDataset(AbstractDataset):
         self,
         dataset: AbstractDataset | dict,
         version: Version | None = None,
-        copy_mode: str | None = None,
+        copy_mode: TCopyMode | None = None,
         metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``CachedDataset`` pointing to the

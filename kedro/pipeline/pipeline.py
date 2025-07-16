@@ -201,29 +201,33 @@ class Pipeline:
             PipelineError: When inputs, outputs or parameters are incorrectly
                 specified, or they do not exist on the original pipeline.
         Example:
-        ::
+        ``` python
+        from kedro.pipeline import Pipeline
+        from kedro.pipeline import node
 
-            >>> from kedro.pipeline import Pipeline
-            >>> from kedro.pipeline import node
-            >>>
-            >>> # In the following scenario first_ds and second_ds
-            >>> # are datasets provided by io. Pipeline will pass these
-            >>> # datasets to first_node function and provides the result
-            >>> # to the second_node as input.
-            >>>
-            >>> def first_node(first_ds, second_ds):
-            >>>     return dict(third_ds=first_ds+second_ds)
-            >>>
-            >>> def second_node(third_ds):
-            >>>     return third_ds
-            >>>
-            >>> pipeline = Pipeline([
-            >>>     node(first_node, ['first_ds', 'second_ds'], ['third_ds']),
-            >>>     node(second_node, dict(third_ds='third_ds'), 'fourth_ds')])
-            >>>
-            >>> pipeline.describe()
-            >>>
+        # In the following scenario first_ds and second_ds
+        # are datasets provided by io. Pipeline will pass these
+        # datasets to first_node function and provides the result
+        # to the second_node as input.
 
+
+        def first_node(first_ds, second_ds):
+            return dict(third_ds=first_ds + second_ds)
+
+
+        def second_node(third_ds):
+            return third_ds
+
+
+        pipeline = Pipeline(
+            [
+                node(first_node, ["first_ds", "second_ds"], ["third_ds"]),
+                node(second_node, dict(third_ds="third_ds"), "fourth_ds"),
+            ]
+        )
+
+        pipeline.describe()
+        ```
         """
         if isinstance(nodes, Pipeline):
             nodes = nodes.nodes
@@ -446,13 +450,13 @@ class Pipeline:
                 node names.
 
         Example:
-        ::
+        ``` python
+        pipeline = Pipeline([...])
 
-            >>> pipeline = Pipeline([ ... ])
-            >>>
-            >>> logger = logging.getLogger(__name__)
-            >>>
-            >>> logger.info(pipeline.describe())
+        logger = logging.getLogger(__name__)
+
+        logger.info(pipeline.describe())
+        ```
 
         After invocation the following will be printed as an info level log
         statement:
@@ -977,17 +981,17 @@ class Pipeline:
             ValueError: The filtered ``Pipeline`` has no nodes.
 
         Example:
-        ::
-
-            >>> pipeline = Pipeline(
-            >>>     [
-            >>>         node(func, "A", "B", name="node1"),
-            >>>         node(func, "B", "C", name="node2"),
-            >>>         node(func, "C", "D", name="node3"),
-            >>>     ]
-            >>> )
-            >>> pipeline.filter(node_names=["node1", "node3"], from_inputs=["A"])
-            >>> # Gives a new pipeline object containing node1 and node3.
+        ``` python
+        pipeline = Pipeline(
+            [
+                node(func, "A", "B", name="node1"),
+                node(func, "B", "C", name="node2"),
+                node(func, "C", "D", name="node3"),
+            ]
+        )
+        pipeline.filter(node_names=["node1", "node3"], from_inputs=["A"])
+        # Gives a new pipeline object containing node1 and node3.
+        ```
         """
 
         filter_methods = {
@@ -1285,12 +1289,14 @@ def _get_dataset_names_mapping(
         A dictionary that maps the old dataset names to the provided ones.
 
     Examples:
-        >>> _get_dataset_names_mapping("dataset_name")
-        {"dataset_name": "dataset_name"}  # a str name will stay the same
-        >>> _get_dataset_names_mapping(set(["ds_1", "ds_2"]))
-        {"ds_1": "ds_1", "ds_2": "ds_2"}  # a set[str] of names will stay the same
-        >>> _get_dataset_names_mapping({"ds_1": "new_ds_1_name"})
-        {"ds_1": "new_ds_1_name"}  # a dict[str, str] of names will map key to value
+    ``` python
+    _get_dataset_names_mapping("dataset_name")
+    {"dataset_name": "dataset_name"}  # a str name will stay the same
+    _get_dataset_names_mapping(set(["ds_1", "ds_2"]))
+    {"ds_1": "ds_1", "ds_2": "ds_2"}  # a set[str] of names will stay the same
+    _get_dataset_names_mapping({"ds_1": "new_ds_1_name"})
+    {"ds_1": "new_ds_1_name"}  # a dict[str, str] of names will map key to value
+    ```
     """
     if names is None:
         return {}
@@ -1326,14 +1332,16 @@ def _get_param_names_mapping(
         A dictionary that maps the old parameter names to the provided ones.
 
     Examples:
-        >>> _get_param_names_mapping("param_name")
-        {"params:param_name": "params:param_name"}  # a str name will stay the same
-        >>> _get_param_names_mapping(set(["param_1", "param_2"]))
-        # a set[str] of names will stay the same
-        {"params:param_1": "params:param_1", "params:param_2": "params:param_2"}
-        >>> _get_param_names_mapping({"param_1": "new_name_for_param_1"})
-        # a dict[str, str] of names will map key to value
-        {"params:param_1": "params:new_name_for_param_1"}
+    ``` python
+    _get_param_names_mapping("param_name")
+    {"params:param_name": "params:param_name"}  # a str name will stay the same
+    _get_param_names_mapping(set(["param_1", "param_2"]))
+    # a set[str] of names will stay the same
+    {"params:param_1": "params:param_1", "params:param_2": "params:param_2"}
+    _get_param_names_mapping({"param_1": "new_name_for_param_1"})
+    # a dict[str, str] of names will map key to value
+    {"params:param_1": "params:new_name_for_param_1"}
+    ```
     """
     params = {}
     for name, new_name in _get_dataset_names_mapping(names).items():

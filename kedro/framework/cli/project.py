@@ -76,7 +76,18 @@ def project_group() -> None:  # pragma: no cover
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
 def ipython(metadata: ProjectMetadata, /, env: str, args: Any, **kwargs: Any) -> None:
-    """Open IPython with project specific variables loaded."""
+    """Open IPython with project specific variables loaded.\n
+
+    Makes the following variables available in your IPython or Jupyter session:\n
+
+    - `catalog`: catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`.\n
+    - `context`: Kedro project context that provides access to Kedro's library components.\n
+    - `pipelines`: Pipelines defined in your pipeline registry.\n
+    - `session`: Kedro session that orchestrates a pipeline run.\n
+
+    To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic,
+    which can also be used to see the error message if any of the variables above are undefined.
+    """
     _check_module_importable("IPython")
 
     if env:

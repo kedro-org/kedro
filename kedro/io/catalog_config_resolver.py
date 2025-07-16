@@ -89,21 +89,21 @@ class CatalogConfigResolver:
         _resolved_configs (dict): Resolved dataset configurations with credentials applied.
 
     Example:
-    ::
     ``` python
-        from kedro.io.catalog_config_resolver import CatalogConfigResolver
-        config = {
-            "{namespace}.int_{name}": {
-                "type": "pandas.CSVDataset",
-                "filepath": "{name}.csv",
-                "credentials": "db_credentials",
-            }
+    from kedro.io.catalog_config_resolver import CatalogConfigResolver
+
+    config = {
+        "{namespace}.int_{name}": {
+            "type": "pandas.CSVDataset",
+            "filepath": "{name}.csv",
+            "credentials": "db_credentials",
         }
-        credentials = {"db_credentials": {"user": "username", "pass": "pass"}}
-        resolver = CatalogConfigResolver(config=config, credentials=credentials)
-        resolved_config = resolver.resolve_pattern("data.int_customers")
-        print(resolved_config)
-        # {'type': 'pandas.CSVDataset', 'filepath': 'customers.csv', 'credentials': {'user': 'username', 'pass': 'pass'}}
+    }
+    credentials = {"db_credentials": {"user": "username", "pass": "pass"}}
+    resolver = CatalogConfigResolver(config=config, credentials=credentials)
+    resolved_config = resolver.resolve_pattern("data.int_customers")
+    print(resolved_config)
+    # {'type': 'pandas.CSVDataset', 'filepath': 'customers.csv', 'credentials': {'user': 'username', 'pass': 'pass'}}
     ```
     """
 
@@ -122,18 +122,18 @@ class CatalogConfigResolver:
             default_runtime_patterns: Runtime patterns for resolving datasets.
 
         Example:
-        ::
         ``` python
-            from kedro.io.catalog_config_resolver import CatalogConfigResolver
-            config = {
-                "{namespace}.int_{name}": {
-                    "type": "pandas.CSVDataset",
-                    "filepath": "{name}.csv",
-                }
+        from kedro.io.catalog_config_resolver import CatalogConfigResolver
+
+        config = {
+            "{namespace}.int_{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "{name}.csv",
             }
-            resolver = CatalogConfigResolver(config=config)
-            resolver._dataset_patterns
-            # {'{namespace}.int_{name}': {'type': 'pandas.CSVDataset', 'filepath': '{name}.csv'}}
+        }
+        resolver = CatalogConfigResolver(config=config)
+        resolver._dataset_patterns
+        # {'{namespace}.int_{name}': {'type': 'pandas.CSVDataset', 'filepath': '{name}.csv'}}
         ```
         """
         if default_runtime_patterns is None:
@@ -158,21 +158,20 @@ class CatalogConfigResolver:
             Resolved dataset configurations.
 
         Example:
-        ::
-
         ``` python
-            from kedro.io.catalog_config_resolver import CatalogConfigResolver
-            config = {
-                "companies": {
-                    "type": "pandas.CSVDataset",
-                    "filepath": "companies.csv",
-                    "credentials": "db_credentials",
-                }
+        from kedro.io.catalog_config_resolver import CatalogConfigResolver
+
+        config = {
+            "companies": {
+                "type": "pandas.CSVDataset",
+                "filepath": "companies.csv",
+                "credentials": "db_credentials",
             }
-            credentials = {"db_credentials": {"user": "username", "pass": "pass"}}
-            resolver = CatalogConfigResolver(config, credentials)
-            print(resolver.config)
-            # {'companies': {'type': 'pandas.CSVDataset', 'filepath': 'companies.csv', 'credentials': {'user': 'username', 'pass': 'pass'}}}
+        }
+        credentials = {"db_credentials": {"user": "username", "pass": "pass"}}
+        resolver = CatalogConfigResolver(config, credentials)
+        print(resolver.config)
+        # {'companies': {'type': 'pandas.CSVDataset', 'filepath': 'companies.csv', 'credentials': {'user': 'username', 'pass': 'pass'}}}
         ```
         """
         return self._resolved_configs
@@ -193,12 +192,11 @@ class CatalogConfigResolver:
             True if the string is a pattern, False otherwise.
 
         Example:
-        ::
         ``` python
-            CatalogConfigResolver.is_pattern("{namespace}.int_{name}")
-            # True
-            CatalogConfigResolver.is_pattern("example_dataset")
-            # False
+        CatalogConfigResolver.is_pattern("{namespace}.int_{name}")
+        # True
+        CatalogConfigResolver.is_pattern("example_dataset")
+        # False
         ```
         """
         return "{" in pattern
@@ -215,11 +213,9 @@ class CatalogConfigResolver:
             The number of characters outside curly brackets.
 
         Example:
-        ::
-
         ``` python
-            CatalogConfigResolver._pattern_specificity("{namespace}.int_{name}")
-            # 5
+        CatalogConfigResolver._pattern_specificity("{namespace}.int_{name}")
+        # 5
         ```
         """
         # Remove all the placeholders from the pattern and count the number of remaining chars
@@ -245,17 +241,16 @@ class CatalogConfigResolver:
             DatasetError: If multiple catch-all patterns are found.
 
         Example:
-        ::
         ``` python
-            patterns = {
-                "{namespace}.int_{name}{a}": {},
-                "{namespace}.{name}": {},
-                "{name}": {},
-                "{namespace}.ant_{name}{c}": {},
-            }
-            sorted_patterns = CatalogConfigResolver._sort_patterns(patterns)
-            print(sorted_patterns.keys())
-            # dict_keys(['{namespace}.ant_{name}{c}', '{namespace}.int_{name}{a}', '{namespace}.{name}', '{name}'])
+        patterns = {
+            "{namespace}.int_{name}{a}": {},
+            "{namespace}.{name}": {},
+            "{name}": {},
+            "{namespace}.ant_{name}{c}": {},
+        }
+        sorted_patterns = CatalogConfigResolver._sort_patterns(patterns)
+        print(sorted_patterns.keys())
+        # dict_keys(['{namespace}.ant_{name}{c}', '{namespace}.int_{name}{a}', '{namespace}.{name}', '{name}'])
         ```
         """
         sorted_keys = sorted(
@@ -288,17 +283,16 @@ class CatalogConfigResolver:
             DatasetError: when keys used in the configuration do not present in the dataset pattern name.
 
         Example:
-        ::
         ``` python
-            pattern = "{namespace}.int_{name}"
-            config = {"filepath": "{name}.csv"}
-            CatalogConfigResolver._validate_pattern_config(pattern, config)
-            # No error
-            pattern = "{namespace}.int_{name}"
-            config = {"filepath": "{nam}.csv"}
-            CatalogConfigResolver._validate_pattern_config(pattern, config)
-            # DatasetError: Incorrect dataset configuration provided. Keys used in the configuration {'{nam}'} should present in
-            # the dataset pattern name {namespace}.int_{name}.
+        pattern = "{namespace}.int_{name}"
+        config = {"filepath": "{name}.csv"}
+        CatalogConfigResolver._validate_pattern_config(pattern, config)
+        # No error
+        pattern = "{namespace}.int_{name}"
+        config = {"filepath": "{nam}.csv"}
+        CatalogConfigResolver._validate_pattern_config(pattern, config)
+        # DatasetError: Incorrect dataset configuration provided. Keys used in the configuration {'{nam}'} should present in
+        # the dataset pattern name {namespace}.int_{name}.
         ```
         """
         # Find all occurrences of {} in the string including brackets
@@ -344,15 +338,14 @@ class CatalogConfigResolver:
             The resolved dataset configuration.
 
         Example:
-        ::
         ``` python
-            pattern = "{namespace}.int_{name}"
-            config = {"filepath": "{name}.csv"}
-            resolved_config = CatalogConfigResolver._resolve_dataset_config(
-                "data.int_customers", pattern, config
-            )
-            print(resolved_config)
-            # {"filepath": "customers.csv"}
+        pattern = "{namespace}.int_{name}"
+        config = {"filepath": "{name}.csv"}
+        resolved_config = CatalogConfigResolver._resolve_dataset_config(
+            "data.int_customers", pattern, config
+        )
+        print(resolved_config)
+        # {"filepath": "customers.csv"}
         ```
         """
         resolved_vars = parse(pattern, ds_name)
@@ -376,17 +369,16 @@ class CatalogConfigResolver:
             A list of dataset patterns.
 
         Example:
-        ::
         ``` python
-            config = {
-                "{namespace}.int_{name}": {
-                    "type": "pandas.CSVDataset",
-                    "filepath": "{name}.csv",
-                }
+        config = {
+            "{namespace}.int_{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "{name}.csv",
             }
-            resolver = CatalogConfigResolver(config)
-            print(resolver.list_patterns())
-            # ['{namespace}.int_{name}', '{default}']
+        }
+        resolver = CatalogConfigResolver(config)
+        print(resolver.list_patterns())
+        # ['{namespace}.int_{name}', '{default}']
         ```
         """
         # User defined patterns
@@ -417,12 +409,11 @@ class CatalogConfigResolver:
             A generator yielding patterns that match the dataset name.
 
         Example:
-        ::
         ``` python
-            patterns = ["{namespace}.int_{name}", "{name}"]
-            matches = CatalogConfigResolver._get_matches(patterns, "data.int_customers")
-            print(list(matches))
-            # ['{namespace}.int_{name}']
+        patterns = ["{namespace}.int_{name}", "{name}"]
+        matches = CatalogConfigResolver._get_matches(patterns, "data.int_customers")
+        print(list(matches))
+        # ['{namespace}.int_{name}']
         ```
         """
         return (pattern for pattern in pattens if parse(pattern, ds_name))
@@ -442,16 +433,15 @@ class CatalogConfigResolver:
             The first matching pattern, or `None` if no match is found.
 
         Example:
-        ::
         ``` python
-            config = {
-                "{namespace}.int_{name}": {"type": "pandas.CSVDataset"},
-                "{name}": {"type": "MemoryDataset"},
-            }
-            resolver = CatalogConfigResolver(config=config)
-            match = resolver.match_dataset_pattern("data.int_customers")
-            print(match)
-            # {namespace}.int_{name}
+        config = {
+            "{namespace}.int_{name}": {"type": "pandas.CSVDataset"},
+            "{name}": {"type": "MemoryDataset"},
+        }
+        resolver = CatalogConfigResolver(config=config)
+        match = resolver.match_dataset_pattern("data.int_customers")
+        print(match)
+        # {namespace}.int_{name}
         ```
         """
         matches = self._get_matches(self._dataset_patterns.keys(), ds_name)
@@ -471,13 +461,12 @@ class CatalogConfigResolver:
             The first matching pattern, or `None` if no match is found.
 
         Example:
-        ::
         ``` python
-            config = {"{name}": {"type": "MemoryDataset"}}
-            resolver = CatalogConfigResolver(config=config)
-            match = resolver.match_user_catch_all_pattern("example_dataset")
-            print(match)
-            # {name}
+        config = {"{name}": {"type": "MemoryDataset"}}
+        resolver = CatalogConfigResolver(config=config)
+        match = resolver.match_user_catch_all_pattern("example_dataset")
+        print(match)
+        # {name}
         ```
         """
         user_catch_all_pattern = set(self._user_catch_all_pattern.keys())
@@ -498,13 +487,12 @@ class CatalogConfigResolver:
             The first matching runtime pattern.
 
         Example:
-        ::
         ``` python
-            runtime_patterns = {"{default_example}": {"type": "MemoryDataset"}}
-            resolver = CatalogConfigResolver(default_runtime_patterns=runtime_patterns)
-            match = resolver.match_runtime_pattern("example_dataset")
-            print(match)
-            # {default_example}
+        runtime_patterns = {"{default_example}": {"type": "MemoryDataset"}}
+        resolver = CatalogConfigResolver(default_runtime_patterns=runtime_patterns)
+        match = resolver.match_runtime_pattern("example_dataset")
+        print(match)
+        # {default_example}
         ```
         """
         default_patters = set(self._default_runtime_patterns.keys())
@@ -528,13 +516,10 @@ class CatalogConfigResolver:
             or an empty dictionary if the pattern is not found.
 
         Example:
-        ::
         ``` python
-            resolver = CatalogConfigResolver(
-                config={"example": {"type": "MemoryDataset"}}
-            )
-            resolver._get_pattern_config("{default}")
-            # {'type': 'kedro.io.MemoryDataset'}
+        resolver = CatalogConfigResolver(config={"example": {"type": "MemoryDataset"}})
+        resolver._get_pattern_config("{default}")
+        # {'type': 'kedro.io.MemoryDataset'}
         ```
         """
         return (
@@ -567,19 +552,18 @@ class CatalogConfigResolver:
                 - The default pattern (if a catch-all pattern is found).
 
         Example:
-        ::
         ``` python
-            config = {
-                "{namespace}.int_{name}": {"type": "pandas.CSVDataset"},
-                "{name}": {"type": "MemoryDataset"},
-            }
-            sorted_patterns, default_pattern = CatalogConfigResolver._extract_patterns(
-                config, None
-            )
-            print(sorted_patterns.keys())
-            # dict_keys(['{namespace}.int_{name}'])
-            print(default_pattern.keys())
-            # dict_keys(['{name}'])
+        config = {
+            "{namespace}.int_{name}": {"type": "pandas.CSVDataset"},
+            "{name}": {"type": "MemoryDataset"},
+        }
+        sorted_patterns, default_pattern = CatalogConfigResolver._extract_patterns(
+            config, None
+        )
+        print(sorted_patterns.keys())
+        # dict_keys(['{namespace}.int_{name}'])
+        print(default_pattern.keys())
+        # dict_keys(['{name}'])
         ```
         """
         config = config or {}
@@ -624,20 +608,19 @@ class CatalogConfigResolver:
             DatasetError: If a dataset configuration is invalid (e.g., not a dictionary).
 
         Example:
-        ::
         ``` python
-            config = {
-                "example": {
-                    "type": "pandas.CSVDataset",
-                    "credentials": "db_credentials",
-                }
+        config = {
+            "example": {
+                "type": "pandas.CSVDataset",
+                "credentials": "db_credentials",
             }
-            credentials = {"db_credentials": {"user": "username", "pass": "pass"}}
-            resolved_configs = CatalogConfigResolver._resolve_credentials(
-                config, credentials
-            )
-            print(resolved_configs)
-            # {'example': {'type': 'pandas.CSVDataset', 'credentials': {'user': 'username', 'pass': 'pass'}}}
+        }
+        credentials = {"db_credentials": {"user": "username", "pass": "pass"}}
+        resolved_configs = CatalogConfigResolver._resolve_credentials(
+            config, credentials
+        )
+        print(resolved_configs)
+        # {'example': {'type': 'pandas.CSVDataset', 'credentials': {'user': 'username', 'pass': 'pass'}}}
         ```
         """
         config = config or {}
@@ -681,7 +664,6 @@ class CatalogConfigResolver:
                 credentials: A dictionary mapping generated reference keys to the original credentials.
 
         Example:
-        ::
         ``` python
         config = {
             "type": "pandas.CSVDataset",
@@ -730,18 +712,17 @@ class CatalogConfigResolver:
             The resolved dataset configuration.
 
         Example:
-        ::
         ``` python
-            config = {
-                "{namespace}.int_{name}": {
-                    "type": "pandas.CSVDataset",
-                    "filepath": "{name}.csv",
-                }
+        config = {
+            "{namespace}.int_{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "{name}.csv",
             }
-            resolver = CatalogConfigResolver(config=config)
-            resolved_config = resolver.resolve_pattern("data.int_customers")
-            print(resolved_config)
-            # {'type': 'pandas.CSVDataset', 'filepath': 'customers.csv'}
+        }
+        resolver = CatalogConfigResolver(config=config)
+        resolved_config = resolver.resolve_pattern("data.int_customers")
+        print(resolved_config)
+        # {'type': 'pandas.CSVDataset', 'filepath': 'customers.csv'}
         ```
         """
         if ds_name not in self._resolved_configs:

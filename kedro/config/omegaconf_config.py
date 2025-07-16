@@ -81,12 +81,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     Example:
     ``` python
+    # in settings.py
+    from kedro.config import OmegaConfigLoader
 
-        # in settings.py
-        from kedro.config import OmegaConfigLoader
-
-        CONFIG_LOADER_CLASS = OmegaConfigLoader
-
+    CONFIG_LOADER_CLASS = OmegaConfigLoader
+    ```
     """
 
     def __init__(  # noqa: PLR0913

@@ -29,6 +29,7 @@ class CatalogCommandsMixin:
     ``` python
     from kedro.io import DataCatalog
     from kedro.framework.context import CatalogCommandsMixin, compose_classes
+
     # DataCatalog instance without CatalogCommandsMixin
     assert not hasattr(DataCatalog(), "describe_datasets")
 
@@ -59,8 +60,10 @@ class CatalogCommandsMixin:
     from kedro.io import DataCatalog
     from kedro.framework.context import CatalogCommandsMixin
 
+
     class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
         pass
+
 
     catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
     assert hasattr(
@@ -224,6 +227,7 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
     from kedro.io.data_catalog import DataCatalog
     from kedro.io.memory_dataset import MemoryDataset
     from kedro.framework.context.catalog_mixins import _group_ds_by_type
+
     catalog = DataCatalog(datasets={"example": MemoryDataset()})
     datasets = {"example"}
     _group_ds_by_type(datasets, catalog)

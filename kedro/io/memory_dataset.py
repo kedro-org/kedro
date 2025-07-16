@@ -20,14 +20,13 @@ class MemoryDataset(AbstractDataset):
     from kedro.io import MemoryDataset
     import pandas as pd
 
-    data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-                        'col3': [5, 6]})
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
     dataset = MemoryDataset(data=data)
 
     loaded_data = dataset.load()
     assert loaded_data.equals(data)
 
-    new_data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5]})
+    new_data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5]})
     dataset.save(new_data)
     reloaded_data = dataset.load()
     assert reloaded_data.equals(new_data)

@@ -210,15 +210,21 @@ class Pipeline:
         # datasets to first_node function and provides the result
         # to the second_node as input.
 
+
         def first_node(first_ds, second_ds):
-            return dict(third_ds=first_ds+second_ds)
+            return dict(third_ds=first_ds + second_ds)
+
 
         def second_node(third_ds):
             return third_ds
 
-        pipeline = Pipeline([
-            node(first_node, ['first_ds', 'second_ds'], ['third_ds']),
-            node(second_node, dict(third_ds='third_ds'), 'fourth_ds')])
+
+        pipeline = Pipeline(
+            [
+                node(first_node, ["first_ds", "second_ds"], ["third_ds"]),
+                node(second_node, dict(third_ds="third_ds"), "fourth_ds"),
+            ]
+        )
 
         pipeline.describe()
         ```
@@ -445,7 +451,7 @@ class Pipeline:
 
         Example:
         ``` python
-        pipeline = Pipeline([ ... ])
+        pipeline = Pipeline([...])
 
         logger = logging.getLogger(__name__)
 

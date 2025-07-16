@@ -115,6 +115,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     import pandas as pd
     from kedro.io import AbstractDataset
 
+
     class MyOwnDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         def __init__(self, filepath, param1, param2=True):
             self._filepath = PurePosixPath(filepath)

@@ -291,7 +291,8 @@ class Pipeline:
 
         self._toposorted_nodes: list[Node] = []
         self._toposorted_groups: list[list[Node]] = []
-        self._validate_namespaces()
+        if any(n.namespace for n in self._nodes):
+            self._validate_namespaces()
 
     @cached_property
     def _node_children(self) -> dict[Node, set[Node]]:
@@ -329,12 +330,19 @@ class Pipeline:
                 last_namespace = parent.namespace or ""
                 curr_namespace = node.namespace or ""
                 seen = seen_namespaces[parent]
-                # If curr_namespace was visited in paths leading to parent
-                if curr_namespace and curr_namespace in seen:
-                    start = next(iter(seen[curr_namespace]))
+                # If any part of curr_namespace was visited in paths leading to parent
+                interrupted = next(
+                    (ns for ns in node.namespace_prefixes if ns in seen),
+                    None,
+                )
+                # The second condition checks if the interruption was already reported during visiting the parent node
+                if interrupted and not (last_namespace + ".").startswith(
+                    interrupted + "."
+                ):
+                    start = next(iter(seen[interrupted]))
                     path = [n.name for n in self._shortest_path(start, node)]
                     warn(
-                        f"Namespace '{curr_namespace}' is interrupted by nodes {path[:-1]} and thus invalid.",
+                        f"Namespace '{interrupted}' is interrupted by nodes {path[:-1]} and thus invalid.",
                         UserWarning,
                     )
                 # All visited namespaces for the current node get updated with the parent's visited namespaces
@@ -347,13 +355,10 @@ class Pipeline:
                     and curr_namespace != last_namespace
                     and not curr_namespace.startswith(last_namespace + ".")
                 ):
-                    parts = last_namespace.split(".")
-                    prefix = ""
-                    for p in parts:
-                        prefix += p
+                    for prefix in parent.namespace_prefixes:
                         if not curr_namespace.startswith(prefix):
                             visited[prefix].add(node)
-                        prefix += "."
+
             # Now we have created the visited namespaces for the current node
             seen_namespaces[node] = visited
 

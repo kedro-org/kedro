@@ -288,21 +288,21 @@ You can use multiple placeholders in the same pattern. For example, consider the
 entries share `type`, `file_format` and `save_args`:
 
 ```yaml
-processing_factory_data:
+processing-factory_data:
   type: spark.SparkDataset
   filepath: data/processing/factory_data.parquet
   file_format: parquet
   save_args:
     mode: overwrite
 
-processing_process_data:
+processing-process_data:
   type: spark.SparkDataset
   filepath: data/processing/process_data.parquet
   file_format: parquet
   save_args:
     mode: overwrite
 
-modelling_metrics:
+modelling-metrics:
   type: spark.SparkDataset
   filepath: data/modelling/factory_data.parquet
   file_format: parquet
@@ -313,7 +313,7 @@ modelling_metrics:
 This could be generalised to the following pattern:
 
 ```yaml
-"{layer}_{dataset_name}":
+"{layer}-{dataset_name}":
   type: spark.SparkDataset
   filepath: data/{layer}/{dataset_name}.parquet
   file_format: parquet

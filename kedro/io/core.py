@@ -53,6 +53,9 @@ VERSION_KEY = "version"
 PROTOCOL_DELIMITER = "://"
 TYPE_KEY = "type"
 
+# Type alias for copy modes
+TCopyMode = Literal["deepcopy", "copy", "assign"]
+
 
 class DatasetError(Exception):
     """``DatasetError`` raised by ``AbstractDataset`` implementations
@@ -1004,18 +1007,6 @@ class CatalogProtocol(Protocol[_C, _DS]):
     def exists(self, name: str) -> bool:
         """Checks whether registered dataset exists by calling its `exists()` method."""
         ...
-
-    @staticmethod
-    def _validate_versions(
-        datasets: dict[str, AbstractDataset] | None,
-        load_versions: dict[str, str],
-        save_version: str | None,
-    ) -> tuple[dict[str, str], str | None]:
-        """Validates and synchronises dataset versions for loading and saving."""
-        ...
-
-
-TCopyMode = Literal["deepcopy", "copy", "assign"]
 
 
 @runtime_checkable

@@ -174,54 +174,6 @@ The output includes all the nodes in the pipeline. If no pipeline name is provid
 kedro registry list
 ```
 
-#### Data Catalog
-
-##### Lists all datasets used in the specified pipelines
-
-This command lists all datasets used in the specified pipeline(s), grouped by how they are defined.
-
-- datasets: Explicitly defined in catalog.yml
-- factories: Resolved using dataset factory patterns
-- defaults: Handled by user catch-all or default runtime patterns
-
-```bash
-kedro catalog describe-datasets
-```
-
-The command also accepts an optional `--pipeline` argument that allows you to specify the pipeline name(s) (comma-separated values) in order to filter datasets used only by those named pipeline(s). For example:
-
-```bash
-kedro catalog describe-datasets --pipeline=ds,de
-```
-
-!!! note
-    If no pipelines are specified, the `__default__` pipeline is used.
-
-##### Resolve dataset factories in the catalog
-
-This command resolves datasets used in the pipeline against all dataset patterns, returning their full catalog configuration. It includes datasets explicitly defined in the catalog as well as those resolved from dataset factory patterns.
-
-```bash
-kedro catalog resolve-patterns
-```
-
-The command also accepts an optional `--pipeline` argument that allows you to specify the pipeline name(s) (comma-separated values).
-
-```bash
-kedro catalog resolve-patterns --pipeline=ds,de
-```
-
-!!! note
-    If no pipelines are specified, the `__default__` pipeline is used.
-
-##### List all dataset factory patterns defined in the catalog ordered by priority
-
-```bash
-kedro catalog list-patterns
-```
-
-The output includes a list of any [dataset factories](../catalog-data/kedro_dataset_factories.md) in the catalog, ranked by the priority on which they are matched against.
-
 #### Notebooks
 
 To start a Jupyter Notebook:

@@ -37,11 +37,11 @@ The dataset configuration in `catalog.yml` is defined as follows:
 1. The top-level key is the dataset name used as a dataset identifier in the catalog - `shuttles`, `weather` in the example below.
 2. The next level includes multiple keys. The first one is the mandatory key - `type` which defines the type of dataset to use.
 The rest of the keys are dataset parameters and vary depending on the implementation.
-To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/).and navigate to the `__init__` method of the target dataset.
+To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/).and navigate to the `__init__` method of the target dataset.
 3. Some dataset parameters can be further configured depending on the libraries underlying the dataset implementation.
 In the example below, a configuration of the `shuttles` dataset includes the `load_args` parameter which is defined by the `pandas` option for loading CSV files.
 While the `save_args` parameter in a configuration of the `weather` dataset is defined by the `snowpark` `saveAsTable` method.
-To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/). and navigate to the target parameter in the `__init__` definition for the dataset.
+To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/). and navigate to the target parameter in the `__init__` definition for the dataset.
 For those parameters we provide a reference to the underlying library configuration parameters. For example, under the `load_args` parameter section for [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) you can find a reference to the [pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) method defining the full set of the parameters accepted.
 
 !!! note
@@ -73,7 +73,7 @@ weather: # Dataset name
 
 Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet files, Feather files, HDF5 files, JSON documents, pickled objects, SQL tables, SQL queries, and more. They are supported using libraries such as pandas, PySpark, NetworkX, and Matplotlib.
 
-[kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/) contains a comprehensive list of all available file types.
+[kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 
@@ -154,7 +154,7 @@ test_dataset:
 
 !!! note
     Default load, save and filesystem arguments are defined inside the specific dataset implementations as `DEFAULT_LOAD_ARGS`, `DEFAULT_SAVE_ARGS`, and `DEFAULT_FS_ARGS` respectively.
-You can check those in the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/).
+You can check those in the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/).
 
 
 ### Dataset access credentials

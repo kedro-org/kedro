@@ -24,6 +24,7 @@ from typing import (  # noqa: UP035
     Generic,
     Iterator,
     List,
+    Literal,
     Protocol,
     TypeVar,
     runtime_checkable,
@@ -51,6 +52,9 @@ VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
 PROTOCOL_DELIMITER = "://"
 TYPE_KEY = "type"
+
+# Type alias for copy modes
+TCopyMode = Literal["deepcopy", "copy", "assign"]
 
 
 class DatasetError(Exception):

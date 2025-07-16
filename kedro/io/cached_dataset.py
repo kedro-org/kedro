@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, Version
+from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, TCopyMode, Version
 from kedro.io.memory_dataset import MemoryDataset
 
 
@@ -39,7 +39,7 @@ class CachedDataset(AbstractDataset):
         self,
         dataset: AbstractDataset | dict,
         version: Version | None = None,
-        copy_mode: str | None = None,
+        copy_mode: TCopyMode | None = None,
         metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``CachedDataset`` pointing to the

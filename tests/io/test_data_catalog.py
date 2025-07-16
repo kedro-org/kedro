@@ -626,6 +626,7 @@ class TestDataCatalog:
                 )
 
         # TODO: revert commenting when we drop python3.9 support and move to kedro-datasets>=8.0.0
+        # Currently the test is failing because it requires kedro-datasets version compatible with kedro 1.0
         # def test_confirm(self, tmp_path, caplog, mocker):
         #     """Confirm the dataset"""
         #     with caplog.at_level(logging.INFO):

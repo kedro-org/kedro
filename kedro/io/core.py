@@ -111,37 +111,35 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     attribute `_SINGLE_PROCESS = True`.
     Example:
     ``` python
+    from pathlib import Path, PurePosixPath
+    import pandas as pd
+    from kedro.io import AbstractDataset
 
-        from pathlib import Path, PurePosixPath
-        import pandas as pd
-        from kedro.io import AbstractDataset
+    class MyOwnDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
+        def __init__(self, filepath, param1, param2=True):
+            self._filepath = PurePosixPath(filepath)
+            self._param1 = param1
+            self._param2 = param2
 
-        class MyOwnDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
-            def __init__(self, filepath, param1, param2=True):
-                self._filepath = PurePosixPath(filepath)
-                self._param1 = param1
-                self._param2 = param2
+        def load(self) -> pd.DataFrame:
+            return pd.read_csv(self._filepath)
 
-            def load(self) -> pd.DataFrame:
-                return pd.read_csv(self._filepath)
+        def save(self, df: pd.DataFrame) -> None:
+            df.to_csv(str(self._filepath))
 
-            def save(self, df: pd.DataFrame) -> None:
-                df.to_csv(str(self._filepath))
+        def _exists(self) -> bool:
+            return Path(self._filepath.as_posix()).exists()
 
-            def _exists(self) -> bool:
-                return Path(self._filepath.as_posix()).exists()
-
-            def _describe(self):
-                return dict(param1=self._param1, param2=self._param2)
+        def _describe(self):
+            return dict(param1=self._param1, param2=self._param2)
     ```
     Example catalog.yml specification:
     ``` yaml
-
-        my_dataset:
-            type: <path-to-my-own-dataset>.MyOwnDataset
-            filepath: data/01_raw/my_data.csv
-            param1: <param1-value> # param1 is a required argument
-            # param2 will be True by default
+    my_dataset:
+        type: <path-to-my-own-dataset>.MyOwnDataset
+        filepath: data/01_raw/my_data.csv
+        param1: <param1-value> # param1 is a required argument
+        # param2 will be True by default
     ```
     """
 
@@ -671,43 +669,41 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     Example:
     ``` python
+    from pathlib import Path, PurePosixPath
+    import pandas as pd
+    from kedro.io import AbstractVersionedDataset
 
-        from pathlib import Path, PurePosixPath
-        import pandas as pd
-        from kedro.io import AbstractVersionedDataset
 
+    class MyOwnDataset(AbstractVersionedDataset):
+        def __init__(self, filepath, version, param1, param2=True):
+            super().__init__(PurePosixPath(filepath), version)
+            self._param1 = param1
+            self._param2 = param2
 
-        class MyOwnDataset(AbstractVersionedDataset):
-            def __init__(self, filepath, version, param1, param2=True):
-                super().__init__(PurePosixPath(filepath), version)
-                self._param1 = param1
-                self._param2 = param2
+        def load(self) -> pd.DataFrame:
+            load_path = self._get_load_path()
+            return pd.read_csv(load_path)
 
-            def load(self) -> pd.DataFrame:
-                load_path = self._get_load_path()
-                return pd.read_csv(load_path)
+        def save(self, df: pd.DataFrame) -> None:
+            save_path = self._get_save_path()
+            df.to_csv(str(save_path))
 
-            def save(self, df: pd.DataFrame) -> None:
-                save_path = self._get_save_path()
-                df.to_csv(str(save_path))
+        def _exists(self) -> bool:
+            path = self._get_load_path()
+            return Path(path.as_posix()).exists()
 
-            def _exists(self) -> bool:
-                path = self._get_load_path()
-                return Path(path.as_posix()).exists()
-
-            def _describe(self):
-                return dict(version=self._version, param1=self._param1, param2=self._param2)
+        def _describe(self):
+            return dict(version=self._version, param1=self._param1, param2=self._param2)
     ```
 
     Example catalog.yml specification:
     ``` yaml
-
-        my_dataset:
-            type: <path-to-my-own-dataset>.MyOwnDataset
-            filepath: data/01_raw/my_data.csv
-            versioned: true
-            param1: <param1-value> # param1 is a required argument
-            # param2 will be True by default
+    my_dataset:
+        type: <path-to-my-own-dataset>.MyOwnDataset
+        filepath: data/01_raw/my_data.csv
+        versioned: true
+        param1: <param1-value> # param1 is a required argument
+        # param2 will be True by default
     ```
     """
 

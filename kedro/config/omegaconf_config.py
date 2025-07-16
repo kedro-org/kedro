@@ -58,16 +58,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     You can access the different configurations as follows:
     ``` python
+    import logging.config
+    from kedro.config import OmegaConfigLoader
+    from kedro.framework.project import settings
 
-        import logging.config
-        from kedro.config import OmegaConfigLoader
-        from kedro.framework.project import settings
+    conf_path = str(project_path / settings.CONF_SOURCE)
+    conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
 
-        conf_path = str(project_path / settings.CONF_SOURCE)
-        conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
-
-        conf_catalog = conf_loader["catalog"]
-        conf_params = conf_loader["parameters"]
+    conf_catalog = conf_loader["catalog"]
+    conf_params = conf_loader["parameters"]
     ```
 
     ``OmegaConf`` supports variable interpolation in configuration

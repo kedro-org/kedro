@@ -672,29 +672,28 @@ def node(  # noqa: PLR0913
 
     Example:
     ``` python
+    import pandas as pd
+    import numpy as np
 
-        import pandas as pd
-        import numpy as np
+    def clean_data(cars: pd.DataFrame,
+                    boats: pd.DataFrame) -> dict[str, pd.DataFrame]:
+        return dict(cars_df=cars.dropna(), boats_df=boats.dropna())
 
-        def clean_data(cars: pd.DataFrame,
-                       boats: pd.DataFrame) -> dict[str, pd.DataFrame]:
-            return dict(cars_df=cars.dropna(), boats_df=boats.dropna())
+    def halve_dataframe(data: pd.DataFrame) -> List[pd.DataFrame]:
+        return np.array_split(data, 2)
 
-        def halve_dataframe(data: pd.DataFrame) -> List[pd.DataFrame]:
-            return np.array_split(data, 2)
-
-        nodes = [
-            node(clean_data,
-                 inputs=['cars2017', 'boats2017'],
-                 outputs=dict(cars_df='clean_cars2017',
-                              boats_df='clean_boats2017')),
-            node(halve_dataframe,
-                 'clean_cars2017',
-                 ['train_cars2017', 'test_cars2017']),
-            node(halve_dataframe,
-                 dict(data='clean_boats2017'),
-                 ['train_boats2017', 'test_boats2017'])
-        ]
+    nodes = [
+        node(clean_data,
+                inputs=['cars2017', 'boats2017'],
+                outputs=dict(cars_df='clean_cars2017',
+                            boats_df='clean_boats2017')),
+        node(halve_dataframe,
+                'clean_cars2017',
+                ['train_cars2017', 'test_cars2017']),
+        node(halve_dataframe,
+                dict(data='clean_boats2017'),
+                ['train_boats2017', 'test_boats2017'])
+    ]
     ```
     """
     return Node(

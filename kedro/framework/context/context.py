@@ -25,13 +25,13 @@ def _is_relative_path(path_string: str) -> bool:
 
     Example:
     ``` python
-        _is_relative_path("data/01_raw") == True
-        _is_relative_path("info.log") == True
-        _is_relative_path("/tmp/data/01_raw") == False
-        _is_relative_path(r"C:\\info.log") == False
-        _is_relative_path(r"\\'info.log") == False
-        _is_relative_path("c:/info.log") == False
-        _is_relative_path("s3://info.log") == False
+    _is_relative_path("data/01_raw") == True
+    _is_relative_path("info.log") == True
+    _is_relative_path("/tmp/data/01_raw") == False
+    _is_relative_path(r"C:\\info.log") == False
+    _is_relative_path(r"\\'info.log") == False
+    _is_relative_path("c:/info.log") == False
+    _is_relative_path("s3://info.log") == False
 
     Args:
         path_string: The path string to check.
@@ -67,18 +67,18 @@ def _convert_paths_to_absolute_posix(
 
     Example:
     ```` python
-        conf = _convert_paths_to_absolute_posix(
-            project_path=Path("/path/to/my/project"),
-            conf_dictionary={
-                "handlers": {
-                    "info_file_handler": {
-                        "filename": "info.log"
-                    }
+    conf = _convert_paths_to_absolute_posix(
+        project_path=Path("/path/to/my/project"),
+        conf_dictionary={
+            "handlers": {
+                "info_file_handler": {
+                    "filename": "info.log"
                 }
             }
-        )
-        print(conf['handlers']['info_file_handler']['filename'])
-        "/path/to/my/project/info.log"
+        }
+    )
+    print(conf['handlers']['info_file_handler']['filename'])
+    "/path/to/my/project/info.log"
 
     Args:
         project_path: The root directory to prepend to relative path to make absolute path.
@@ -286,12 +286,11 @@ class KedroContext:
 
             Example:
             ``` python
-
-                param_name = "a"
-                param_value = {"b": 1}
-                _add_param_to_params_dict(param_name, param_value)
-                assert params_dict["params:a"] == {"b": 1}
-                assert params_dict["params:a.b"] == 1
+            param_name = "a"
+            param_value = {"b": 1}
+            _add_param_to_params_dict(param_name, param_value)
+            assert params_dict["params:a"] == {"b": 1}
+            assert params_dict["params:a.b"] == 1
             ```
             """
             key = f"params:{param_name}"

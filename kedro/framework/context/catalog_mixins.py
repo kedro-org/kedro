@@ -27,47 +27,47 @@ class CatalogCommandsMixin:
 
     1. Using `compose_classes`:
     ``` python
-        from kedro.io import DataCatalog
-        from kedro.framework.context import CatalogCommandsMixin, compose_classes
-        # DataCatalog instance without CatalogCommandsMixin
-        assert not hasattr(DataCatalog(), "describe_datasets")
+    from kedro.io import DataCatalog
+    from kedro.framework.context import CatalogCommandsMixin, compose_classes
+    # DataCatalog instance without CatalogCommandsMixin
+    assert not hasattr(DataCatalog(), "describe_datasets")
 
-        # Compose a new class combining DataCatalog and CatalogCommandsMixin
-        catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
+    # Compose a new class combining DataCatalog and CatalogCommandsMixin
+    catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
 
-        # Create a catalog instance from configuration
-        catalog = catalog_class.from_config(
-            {
-                "cars": {
-                    "type": "pandas.CSVDataset",
-                    "filepath": "cars.csv",
-                    "save_args": {"index": False},
-                }
+    # Create a catalog instance from configuration
+    catalog = catalog_class.from_config(
+        {
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "cars.csv",
+                "save_args": {"index": False},
             }
-        )
+        }
+    )
 
-        # Assert that the catalog has the `describe_datasets` method
-        assert hasattr(
-            catalog, "describe_datasets"
-        ), "describe_datasets method is not available"
-        print("describe_datasets method is available!")
-        # describe_datasets method is available!
+    # Assert that the catalog has the `describe_datasets` method
+    assert hasattr(
+        catalog, "describe_datasets"
+    ), "describe_datasets method is not available"
+    print("describe_datasets method is available!")
+    # describe_datasets method is available!
     ```
 
     2. Creating a new class with inheritance:
     ``` python
-        from kedro.io import DataCatalog
-        from kedro.framework.context import CatalogCommandsMixin
+    from kedro.io import DataCatalog
+    from kedro.framework.context import CatalogCommandsMixin
 
-        class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
-            pass
+    class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
+        pass
 
-        catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
-        assert hasattr(
-            catalog, "describe_datasets"
-        ), "describe_datasets method is not available"
-        print("describe_datasets method is available!")
-        # describe_datasets method is available!
+    catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
+    assert hasattr(
+        catalog, "describe_datasets"
+    ), "describe_datasets method is not available"
+    print("describe_datasets method is available!")
+    # describe_datasets method is available!
     ```
     """
 
@@ -221,14 +221,13 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
 
     Example:
     ``` python
-
-       from kedro.io.data_catalog import DataCatalog
-       from kedro.io.memory_dataset import MemoryDataset
-       from kedro.framework.context.catalog_mixins import _group_ds_by_type
-       catalog = DataCatalog(datasets={"example": MemoryDataset()})
-       datasets = {"example"}
-       _group_ds_by_type(datasets, catalog)
-        # {'kedro.io.memory_dataset.MemoryDataset': ['example']}
+    from kedro.io.data_catalog import DataCatalog
+    from kedro.io.memory_dataset import MemoryDataset
+    from kedro.framework.context.catalog_mixins import _group_ds_by_type
+    catalog = DataCatalog(datasets={"example": MemoryDataset()})
+    datasets = {"example"}
+    _group_ds_by_type(datasets, catalog)
+    # {'kedro.io.memory_dataset.MemoryDataset': ['example']}
     ```
     """
     mapping: dict[str, list[str]] = {}

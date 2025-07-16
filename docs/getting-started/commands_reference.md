@@ -46,8 +46,10 @@ python -m kedro
 ```
 
 ## Kedro commands
-Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. Project-specific commands are called from within a project directory and apply to that particular project. Global commands can be run anywhere and don't apply to any particular project:
+Kedro provides a set of CLI commands, which are automatically grouped and documented below using their inline docstrings.
 
+- **Global commands** can be run from anywhere and are not tied to any specific Kedro project.
+- **Project commands** must be run from within a Kedro project directory and apply only to that project.
 
 ### Global Kedro commands
 ::: mkdocs-click
@@ -109,9 +111,8 @@ The commands a project supports are specified on the framework side. If you want
     @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
     def cli():
         """Command line tools for manipulating a Kedro project."""
-
-
     @cli.command()
+
     @click.option(
         "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
     )

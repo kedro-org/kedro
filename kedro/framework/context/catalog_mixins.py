@@ -68,7 +68,7 @@ class CatalogCommandsMixin:
         ), "describe_datasets method is not available"
         print("describe_datasets method is available!")
         # describe_datasets method is available!
-    ``` 
+    ```
     """
 
     @property

@@ -684,16 +684,16 @@ class CatalogConfigResolver:
         ::
         ``` python
         config = {
-                "type": "pandas.CSVDataset",
-                "credentials": {"user": "username", "pass": "pass"},
-            }
+            "type": "pandas.CSVDataset",
+            "credentials": {"user": "username", "pass": "pass"},
+        }
         ds_config, creds = CatalogConfigResolver._unresolve_credentials(
-                "example", config
-            )
+            "example", config
+        )
         print(ds_config)
-            # {'type': 'pandas.CSVDataset', 'credentials': 'example_credentials'}
+        # {'type': 'pandas.CSVDataset', 'credentials': 'example_credentials'}
         print(creds)
-            # {'example_credentials': {'user': 'username', 'pass': 'pass'}}
+        # {'example_credentials': {'user': 'username', 'pass': 'pass'}}
         ```
         """
         ds_config_copy = copy.deepcopy(ds_config) or {}

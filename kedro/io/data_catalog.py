@@ -900,7 +900,7 @@ class DataCatalog(CatalogProtocol):
             from kedro.io import MemoryDataset
             catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])
         ```
-        
+
         """
         filtered = self.keys()
 

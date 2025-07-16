@@ -114,33 +114,66 @@ The commands a project supports are specified on the framework side. If you want
     @cli.command()
 
     @click.option(
-        "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
+        "--from-inputs",
+        type=str,
+        default="",
+        help=FROM_INPUTS_HELP,
+        callback=split_string,
     )
     @click.option(
-        "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=split_string
+        "--to-outputs",
+        type=str,
+        default="",
+        help=TO_OUTPUTS_HELP,
+        callback=split_string,
     )
     @click.option(
-        "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_node_names
+        "--from-nodes",
+        type=str,
+        default="",
+        help=FROM_NODES_HELP,
+        callback=split_node_names,
     )
     @click.option(
         "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
     )
-    @click.option("--nodes", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
     @click.option(
-        "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
+        "--nodes",
+        "-n",
+        "node_names",
+        type=str,
+        default="",
+        help=NODE_ARG_HELP,
+        callback=split_node_names,
     )
-    @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
+    @click.option("--runner", "-r", type=str, default=None, help=RUNNER_ARG_HELP)
+    @click.option("--async", "is_async", is_flag=True, help=ASYNC_ARG_HELP)
     @env_option
-    @click.option("--tags", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
+    @click.option(
+        "--tags",
+        "-t",
+        type=str,
+        default="",
+        help=TAG_ARG_HELP,
+        callback=split_string,
+    )
     @click.option(
         "--load-versions",
         "-lv",
         type=str,
-        multiple=True,
+        default="",
         help=LOAD_VERSION_HELP,
         callback=_split_load_versions,
     )
     @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
+    @click.option(
+        "--namespaces",
+        "-ns",
+        type=str,
+        default="",
+        help=NAMESPACES_ARG_HELP,
+        callback=split_node_names,
+    )
     @click.option(
         "--config",
         "-c",
@@ -150,7 +183,7 @@ The commands a project supports are specified on the framework side. If you want
     )
     @click.option(
         "--conf-source",
-        type=click.Path(exists=True, file_okay=False, resolve_path=True),
+        callback=validate_conf_source,
         help=CONF_SOURCE_HELP,
     )
     @click.option(
@@ -160,40 +193,48 @@ The commands a project supports are specified on the framework side. If you want
         help=PARAMS_ARG_HELP,
         callback=_split_params,
     )
+    @click.option(
+        "--only-missing-outputs",
+        is_flag=True,
+        help=ONLY_MISSING_OUTPUTS_HELP,
+    )
     def run(
-        tags,
-        env,
-        runner,
-        is_async,
-        node_names,
-        to_nodes,
-        from_nodes,
-        from_inputs,
-        to_outputs,
-        load_versions,
-        pipeline,
-        config,
-        conf_source,
-        params,
-    ):
+        tags: str,
+        env: str,
+        runner: str,
+        is_async: bool,
+        node_names: str,
+        to_nodes: str,
+        from_nodes: str,
+        from_inputs: str,
+        to_outputs: str,
+        load_versions: dict[str, str] | None,
+        pipeline: str,
+        config: str,
+        conf_source: str,
+        params: dict[str, Any],
+        namespaces: str,
+        only_missing_outputs: bool,
+    ) -> dict[str, Any]:
         """Run the pipeline."""
 
-        runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-        tags = tuple(tags)
-        node_names = tuple(node_names)
+        runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
+        tuple_tags = tuple(tags)
+        tuple_node_names = tuple(node_names)
 
         with KedroSession.create(
-            env=env, conf_source=conf_source, extra_params=params
+            env=env, conf_source=conf_source, runtime_params=params
         ) as session:
-            session.run(
-                tags=tags,
-                runner=runner(is_async=is_async),
-                node_names=node_names,
+            return session.run(
+                tags=tuple_tags,
+                runner=runner_obj(is_async=is_async),
+                node_names=tuple_node_names,
                 from_nodes=from_nodes,
                 to_nodes=to_nodes,
                 from_inputs=from_inputs,
                 to_outputs=to_outputs,
                 load_versions=load_versions,
                 pipeline_name=pipeline,
+                namespaces=namespaces,
+                only_missing_outputs=only_missing_outputs,
             )
-    ```

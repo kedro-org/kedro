@@ -98,7 +98,14 @@ def ipython(metadata: ProjectMetadata, /, env: str, args: Any, **kwargs: Any) ->
 @project_group.command()
 @click.pass_obj  # this will pass the metadata as first argument
 def package(metadata: ProjectMetadata) -> None:
-    """Package the project as a Python wheel."""
+    """Package the Kedro project as a Python wheel and export the configuration.\n
+
+    This command builds a `.whl` file for the project and saves it to the `dist/` directory.
+    It also packages the project's configuration (excluding any `local/*.yml` files)
+    into a separate `tar.gz` archive for deployment or sharing.\n
+
+    Both artifacts will appear in the `dist/` folder, unless an older project layout is detected.
+    """
     # Even if the user decides for the older setup.py on purpose,
     # pyproject.toml is needed for Kedro metadata
     if (metadata.project_path / "pyproject.toml").is_file():

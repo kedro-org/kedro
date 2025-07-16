@@ -1189,8 +1189,8 @@ class SharedMemoryDataCatalog(DataCatalog):
 
         # Create a shared memory catalog
         catalog = SharedMemoryDataCatalog(
-        ...     datasets={"shared_data": MemoryDataset(data=[1, 2, 3])}
-        ... )
+            datasets={"shared_data": MemoryDataset(data=[1, 2, 3])}
+        )
 
         # Set a multiprocessing manager
         manager = SyncManager()

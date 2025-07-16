@@ -69,7 +69,7 @@ Kedro provides a set of CLI commands, which are automatically grouped and docume
 ## Customise or override project-specific Kedro commands
 
 !!! note
-    All project related CLI commands should be run from the project’s root directory.
+    Project-related CLI commands can be run from any subdirectory within a Kedro project.
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 

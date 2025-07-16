@@ -45,6 +45,121 @@ Dataset factories is similar to **regular expression** and you can think of it a
 
 This allows you to use one dataset factory pattern to replace multiple datasets entries. It keeps your catalog concise and you can generalise datasets using similar names, type or namespaces.
 
+## Types of patterns
+
+The catalog supports three types of factory patterns:
+
+1. Dataset patterns
+2. User catch-all pattern
+3. Default runtime patterns
+
+**Dataset patterns**
+
+Dataset patterns are defined explicitly in the `catalog.yml` using placeholders such as `{name}_data`.
+```yaml
+"{name}_data":
+  type: pandas.CSVDataset
+  filepath: data/01_raw/{name}_data.csv
+```
+This allows any dataset named `something_data` to be dynamically resolved using the pattern.
+
+**User catch-all pattern**
+
+A user catch-all pattern acts as a fallback when no dataset patterns match. It also uses a placeholder like `{default_dataset}`.
+```yaml
+"{default_dataset}":
+  type: pandas.CSVDataset
+  filepath: data/{default_dataset}.csv
+```
+
+!!! note
+    Only one user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
+
+**Default runtime patterns**
+
+Default runtime patterns are built-in patterns used by Kedro when datasets are not defined in the catalog, often for intermediate datasets generated during a pipeline run.
+They are defined per catalog type:
+```python
+# For DataCatalog
+default_runtime_patterns: ClassVar = {
+    "{default}": {"type": "kedro.io.MemoryDataset"}
+}
+
+# For SharedMemoryDataCatalog
+default_runtime_patterns: ClassVar = {
+    "{default}": {"type": "kedro.io.SharedMemoryDataset"}
+}
+```
+These patterns enable automatic creation of in-memory or shared-memory datasets during execution.
+
+## Patterns resolution order
+When the `DataCatalog` is initialized, it scans the configuration to extract and validate any dataset patterns and user catch-all pattern.
+
+When resolving a dataset name, Kedro uses the following order of precedence:
+
+1. **Dataset patterns:**
+Specific patterns defined in the `catalog.yml`. These are the most explicit and are matched first.
+
+2. **User catch-all pattern:**
+A general fallback pattern (e.g., `{default_dataset}`) that is matched if no dataset patterns apply. Only one user catch-all pattern is allowed. Multiple will raise a `DatasetError`.
+
+3. **Default runtime patterns:**
+Internal fallback behavior provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (e.g., `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
+
+## How resolution works in practice
+
+By default, runtime patterns are not used when calling `catalog.get()` unless explicitly enabled using the `fallback_to_runtime_pattern=True` flag.
+
+**Case 1: Dataset pattern only**
+
+```yaml
+"{dataset_name}#csv":
+  type: pandas.CSVDataset
+  filepath: data/01_raw/{dataset_name}.csv
+```
+
+```bash
+In [1]: catalog.get("reviews#csv")
+Out[1]: kedro_datasets.pandas.csv_dataset.CSVDataset(filepath=.../data/01_raw/reviews.csv'), protocol='file', load_args={}, save_args={'index': False})
+
+In [2]: catalog.get("nonexistent")
+DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog
+```
+
+Enable fallback to use runtime defaults:
+```bash
+In [3]: catalog.get("nonexistent", fallback_to_runtime_pattern=True)
+Out[3]: kedro.io.memory_dataset.MemoryDataset()
+```
+
+**Case 2: Adding a user catch-all pattern**
+
+```yaml
+"{dataset_name}#csv":
+  type: pandas.CSVDataset
+  filepath: data/01_raw/{dataset_name}.csv
+
+"{default_dataset}":
+  type: pandas.CSVDataset
+  filepath: data/{default_dataset}.csv
+```
+
+```bash
+In [1]: catalog.get("reviews#csv")
+Out[1]: CSVDataset(filepath=.../data/01_raw/reviews.csv)
+
+In [2]: catalog.get("nonexistent")
+WARNING: Config from the dataset pattern '{default_dataset}' in the catalog will be used to override the default dataset creation for 'nonexistent'
+Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
+```
+
+**Default vs runtime behavior**
+
+- Default behavior: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
+- Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
+
+!!! note
+    Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
 
 ## How to generalise datasets of the same type
 
@@ -166,6 +281,7 @@ and `candidate_modelling_pipeline.regressor` as below:
   filepath: data/06_models/regressor_{namespace}.pkl
   versioned: true
 ```
+
 ## How to generalise datasets of the same type in different layers
 
 You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset
@@ -241,149 +357,174 @@ You can use dataset factories to define a catch-all pattern which will overwrite
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
 as `pandas.CSVDataset`.
 
-## CLI commands for dataset factories
+## User facing API
 
-To manage your dataset factories, two new commands have been added to the Kedro CLI: `kedro catalog rank` (0.18.12) and `kedro catalog resolve` (0.18.13).
+The logic behind pattern resolution is handled by the internal `CatalogConfigResolver`, available as a property on the catalog (`catalog.config_resolver`).
 
-### How to use `kedro catalog rank`
+Here are a few APIs might be useful for custom use-cases:
 
-This command outputs a list of all dataset factories in the catalog, ranked in the order by which pipeline datasets are matched against them. The ordering is determined by the following criteria:
+- `catalog_config_resolver.match_dataset_pattern()` - checks if the dataset name matches any dataset pattern
+- `catalog_config_resolver.match_user_catch_all_pattern()` - checks if dataset name matches the user defined catch all pattern
+- `catalog_config_resolver.match_runtime_pattern()` - checks if dataset name matches the default runtime pattern
+- `catalog_config_resolver.resolve_pattern()` -  resolves a dataset name to its configuration based on patterns in the order explained above
+- `catalog_config_resolver.list_patterns()` - lists all patterns available in the catalog
+- `catalog_config_resolver.is_pattern()` - checks if a given string is a pattern
 
-1. The number of non-placeholder characters in the pattern
-2. The number of placeholders in the pattern
-3. Alphabetic ordering
+Refer to the method docstrings for more detailed examples and usage.
 
-Consider a catalog file with the following patterns:
+## Catalog and CLI commands
 
-??? example "View code"
-```yaml
-"{layer}.{dataset_name}":
-  type: pandas.CSVDataset
-  filepath: data/{layer}/{dataset_name}.csv
+The DataCatalog provides three powerful pipeline-based commands, accessible via both the CLI and interactive environment. These tools help inspect how datasets are resolved and managed within your pipeline.
 
-"preprocessed_{dataset_name}":
-  type: pandas.ParquetDataset
-  filepath: data/02_intermediate/preprocessed_{dataset_name}.parquet
+**Describe datasets**
 
-"processed_{dataset_name}":
-  type: pandas.ParquetDataset
-  filepath: data/03_primary/processed_{dataset_name}.parquet
+Describes datasets used in the specified pipeline(s), grouped by how they are defined.
 
-"{dataset_name}_csv":
-  type: pandas.CSVDataset
-  filepath: data/03_primary/{dataset_name}.csv
+- datasets: Explicitly defined in catalog.yml
+- factories: Resolved using dataset factory patterns
+- defaults: Handled by user catch-all or default runtime patterns
 
-"{namespace}.{dataset_name}_pq":
-  type: pandas.ParquetDataset
-  filepath: data/03_primary/{dataset_name}_{namespace}.parquet
-
-"{default_dataset}":
-  type: pickle.PickleDataset
-  filepath: data/01_raw/{default_dataset}.pickle
-```
-
-Running `kedro catalog rank` will result in the following output:
-
-```
-- 'preprocessed_{dataset_name}'
-- 'processed_{dataset_name}'
-- '{namespace}.{dataset_name}_pq'
-- '{dataset_name}_csv'
-- '{layer}.{dataset_name}'
-- '{default_dataset}'
-```
-
-As we can see, the entries are ranked firstly by how many non-placeholders are in the pattern, in descending order. Where two entries have the same number of non-placeholder characters, `{namespace}.{dataset_name}_pq` and `{dataset_name}_csv` with four each, they are then ranked by the number of placeholders, also in decreasing order. `{default_dataset}` is the least specific pattern possible, and will always be matched against last.
-
-### How to use `kedro catalog resolve`
-
-This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.
-This command is runner agnostic and thus won't take into account any default dataset creation defined in the runner.
-
-To illustrate this, consider the following catalog file:
-
-??? example "View code"
-    ```yaml
-    companies:
-      type: pandas.CSVDataset
-      filepath: data/01_raw/companies.csv
-
-    reviews:
-      type: pandas.CSVDataset
-      filepath: data/01_raw/reviews.csv
-
-    shuttles:
-      type: pandas.ExcelDataset
-      filepath: data/01_raw/shuttles.xlsx
-      load_args:
-        engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
-
-    "preprocessed_{name}":
-      type: pandas.ParquetDataset
-      filepath: data/02_intermediate/preprocessed_{name}.parquet
-
-    "{default}":
-      type: pandas.ParquetDataset
-      filepath: data/03_primary/{default}.parquet
-    ```
-
-and the following pipeline in `pipeline.py`:
-
-??? example "View code"
-    ```python
-    def create_pipeline(**kwargs) -> Pipeline:
-        return pipeline(
-            [
-                node(
-                    func=preprocess_companies,
-                    inputs="companies",
-                    outputs="preprocessed_companies",
-                    name="preprocess_companies_node",
-                ),
-                node(
-                    func=preprocess_shuttles,
-                    inputs="shuttles",
-                    outputs="preprocessed_shuttles",
-                    name="preprocess_shuttles_node",
-                ),
-                node(
-                    func=create_model_input_table,
-                    inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-                    outputs="model_input_table",
-                    name="create_model_input_table_node",
-                ),
-            ]
-        )
-    ```
-
-The resolved catalog output by the command will be as follows:
-
-??? example "View code"
-    ```yaml
-    companies:
-      filepath: data/01_raw/companies.csv
-      type: pandas.CSVDataset
-    model_input_table:
-      filepath: data/03_primary/model_input_table.parquet
-      type: pandas.ParquetDataset
-    preprocessed_companies:
-      filepath: data/02_intermediate/preprocessed_companies.parquet
-      type: pandas.ParquetDataset
-    preprocessed_shuttles:
-      filepath: data/02_intermediate/preprocessed_shuttles.parquet
-      type: pandas.ParquetDataset
-    reviews:
-      filepath: data/01_raw/reviews.csv
-      type: pandas.CSVDataset
-    shuttles:
-      filepath: data/01_raw/shuttles.xlsx
-      load_args:
-        engine: openpyxl
-      type: pandas.ExcelDataset
-    ```
-
-By default this is output to the terminal. However, if you wish to output the resolved catalog to a specific file, you can use the redirection operator `>`:
-
+CLI:
 ```bash
-kedro catalog resolve > output_file.yaml
+kedro catalog describe-datasets -p data_processing
 ```
+
+Interactive environment:
+```bash
+In [1]: catalog.describe_datasets(pipelines=["data_processing", "data_science"])
+```
+
+Example output:
+```yaml
+data_processing:
+  datasets:
+    kedro_datasets.pandas.excel_dataset.ExcelDataset:
+    - shuttles
+    kedro_datasets.pandas.parquet_dataset.ParquetDataset:
+    - preprocessed_shuttles
+    - model_input_table
+  defaults:
+    kedro.io.MemoryDataset:
+    - preprocessed_companies
+  factories:
+    kedro_datasets.pandas.csv_dataset.CSVDataset:
+    - companies#csv
+    - reviews-01_raw#csv
+```
+
+!!! note
+    If no pipelines are specified, the `__default__` pipeline is used.
+
+**List patterns**
+
+Lists all dataset factory patterns defined in the catalog, ordered by priority.
+
+CLI:
+```bash
+kedro catalog list-patterns
+```
+
+Interactive environment:
+```bash
+In [1]: catalog.list_patterns()
+```
+
+Example output:
+```yaml
+- '{name}-{folder}#csv'
+- '{name}_data'
+- out-{dataset_name}
+- '{dataset_name}#csv'
+- in-{dataset_name}
+- '{default}'
+```
+
+**Resolve patterns**
+
+Resolves datasets used in the pipeline against all dataset patterns, returning their full catalog configuration. It includes datasets explicitly defined in the catalog as well as those resolved from dataset factory patterns.
+
+CLI command:
+```bash
+kedro catalog resolve-patterns -p data_processing
+```
+
+Interactive environment:
+```bash
+In [1]: catalog.resolve_patterns(pipelines=["data_processing"])
+```
+
+Example output:
+```yaml
+companies#csv:
+  type: pandas.CSVDataset
+  filepath: ...data/01_raw/companies.csv
+  credentials: companies#csv_credentials
+  metadata:
+    kedro-viz:
+      layer: training
+```
+
+!!! note
+    If no pipelines are specified, the `__default__` pipeline is used.
+
+### Implementation details and Python API usage
+
+To ensure a consistent experience across the CLI, interactive environments (like IPython or Jupyter), and the Python API, we introduced pipeline-aware catalog commands using a mixin-based design.
+
+At the core of this implementation is the `CatalogCommandsMixin` - a mixin class that extends the DataCatalog with additional methods for working with dataset factory patterns and pipeline-specific datasets.
+
+**Why use a mixin?**
+
+The goal was to keep pipeline logic decoupled from the core `DataCatalog`, while still providing seamless access to helpful methods utilizing pipelines.
+
+This mixin approach allows these commands to be injected only when needed - avoiding unnecessary overhead in simpler catalog use cases.
+
+**What this means in practice?**
+
+You don't need to do anything if:
+
+- You're using Kedro via CLI, or
+- Working inside an interactive environment (e.g. IPython, Jupyter Notebook).
+
+Kedro automatically composes the catalog with `CatalogCommandsMixin` behind the scenes when initializing the session.
+
+If you're working outside a Kedro session and want to access the extra catalog commands, you have two options:
+
+**Option 1: Compose the catalog class dynamically**
+
+```python
+from kedro.io import DataCatalog
+from kedro.framework.context import CatalogCommandsMixin, compose_classes
+
+# Compose a new catalog class with the mixin
+CatalogWithCommands = compose_classes(DataCatalog, CatalogCommandsMixin)
+
+# Create a catalog instance from config or dictionary
+catalog = CatalogWithCommands.from_config({
+    "cars": {
+        "type": "pandas.CSVDataset",
+        "filepath": "cars.csv",
+        "save_args": {"index": False}
+    }
+})
+
+assert hasattr(catalog, "describe_datasets")
+print("describe_datasets method is available!")
+```
+
+**Option 2: Subclass the catalog with the mixin**
+
+```python
+from kedro.io import DataCatalog, MemoryDataset
+from kedro.framework.context import CatalogCommandsMixin
+
+class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
+    pass
+
+catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
+
+assert hasattr(catalog, "describe_datasets")
+print("describe_datasets method is available!")
+```
+
+This design keeps your project flexible and modular, while offering a powerful set of pipeline-aware catalog inspection tools when you need them.

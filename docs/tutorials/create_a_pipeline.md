@@ -24,10 +24,9 @@ The data processing pipeline prepares the data for model building by combining t
 
 The [hands-on video course](../getting-started/course.md#learn-kedro-with-hands-on-video) walks through data exploration and data processing for the spaceflights data. There are several videos in the playlist that cover the topic starting with the following:
 
-```{eval-rst}
-..  youtube:: bZD8N0yv3Fs
-    :width: 100%
-```
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/bZD8N0yv3Fs"
+frameborder="0" allowfullscreen></iframe>
+
 
 ## Data preprocessing node functions
 
@@ -177,7 +176,7 @@ You should see output similar to the following:
 
 ## Preprocessed data registration
 
-Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format {class}`pandas.ParquetDataset<kedro-datasets:kedro_datasets.pandas.ParquetDataset>` because they are registered within the [Data Catalog](../getting-started/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). Kedro saves these outputs in Parquet format [pandas.ParquetDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.ParquetDataset/) because they are registered within the [Data Catalog](../getting-started/glossary.md#data-catalog) as you can see in `conf/base/catalog.yml`:
 
 
 ??? example "View code"
@@ -319,16 +318,19 @@ To start Kedro-Viz, enter the following in your terminal:
 kedro viz run
 ```
 
-This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the [Kedro-Viz doc](https://docs.kedro.org/projects/kedro-viz/en/stable/) for more detail.
 
 To exit, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
 ### Watch the video
 
-```{eval-rst}
-..  youtube:: KWqSzbHgNW4
-    :width: 100%
-```
+<iframe width="100%" height="460" src="https://www.youtube.com/embed/KWqSzbHgNW4"
+frameborder="0" allowfullscreen></iframe>
+
+!!! tip
+    Available from Kedro-Viz 12.0.0 onward, the Workflow view helps you visualise and debug your most recent kedro run. You’ll be able to see which nodes succeeded, failed, or were skipped - all in one place. [Read more about Workflow in Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/unreleased/workflow-view/ )
+
+    ![](../assets/workflow_view.png)
 
 ## Checkpoint
 

@@ -2,6 +2,8 @@
 
 import json
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 from time import sleep, time
 
@@ -751,3 +753,27 @@ def pip_install_project_and_dev_dependencies(context):
         env=context.env,
         cwd=str(context.root_project_dir),
     )
+
+
+@given("I uninstall the rich module in the virtual environment")
+def step_uninstall_rich(context):
+    result = subprocess.run(  # noqa: S603
+        [sys.executable, "-m", "pip", "uninstall", "-y", "rich"],
+        capture_output=True,
+        text=True,
+        check=False,
+        shell=False,
+    )
+    assert (
+        result.returncode == 0 or "not installed" in result.stdout.lower()
+    ), f"Failed to uninstall rich:\n{result.stdout}\n{result.stderr}"
+
+
+@when('I delete the file "{filepath}" from the project')
+def delete_project_file(context, filepath):
+    """Deletes a specified file within the root_project_dir."""
+    file_to_delete = context.root_project_dir / filepath
+    if file_to_delete.is_file():
+        file_to_delete.unlink()
+    elif file_to_delete.is_dir():
+        shutil.rmtree(file_to_delete)

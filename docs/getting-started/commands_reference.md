@@ -48,78 +48,13 @@ python -m kedro
 ## Kedro commands
 Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. Project-specific commands are called from within a project directory and apply to that particular project. Global commands can be run anywhere and don't apply to any particular project:
 
-* Global Kedro commands
-  * [`kedro --help`](#get-help-on-kedro-commands)
-  * [`kedro --version`](#confirm-the-kedro-version)
-  * [`kedro info`](#confirm-kedro-information)
-  * [`kedro new`](#create-a-new-kedro-project)
 
-* Project-specific Kedro commands
-  * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
-  * [`kedro catalog resolve`](#resolve-dataset-factories-in-the-catalog)
-  * [`kedro catalog rank`](#rank-dataset-factories-in-the-catalog)
-  * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
-  * [`kedro ipython`](#notebooks)
-  * [`kedro jupyter lab`](#notebooks)
-  * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro package`](#deploy-the-project)
-  * [`kedro pipeline create <pipeline_name>`](#create-a-new-modular-pipeline-in-your-project)
-  * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
-  * [`kedro registry describe <pipeline_name>`](#describe-a-registered-pipeline)
-  * [`kedro registry list`](#list-all-registered-pipelines-in-your-project)
-  * [`kedro run`](#run-the-project)
-
-## Global Kedro commands
-
-The following are Kedro commands that apply globally and can be run from any directory location.
-
-!!! note
-    You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
-
-### Get help on Kedro commands
-
-```bash
-kedro
-kedro -h
-kedro --help
-```
-
-### Confirm the Kedro version
-
-```bash
-kedro -V
-kedro --version
-```
-
-### Confirm Kedro information
-
-```bash
-kedro info
-```
-Returns output similar to the following, depending on the version of Kedro used and plugins installed.
-
-```
- _            _
-| | _____  __| |_ __ ___
-| |/ / _ \/ _` | '__/ _ \
-|   <  __/ (_| | | | (_) |
-|_|\_\___|\__,_|_|  \___/
-v0.19.13
-
-Kedro is a Python framework for
-creating reproducible, maintainable
-and modular data science code.
-
-Installed plugins:
-kedro_viz: 10.1.0 (entry points:global,hooks,line_magic)
-
-```
-
-### Create a new Kedro project
-
-```bash
-kedro new
-```
+### Global Kedro commands
+::: mkdocs-click
+    :module: kedro.framework.cli.cli
+    :command: global_commands
+    :depth: 2
+    :style: plain
 
 ## Customise or override project-specific Kedro commands
 
@@ -130,131 +65,13 @@ Kedro's command line interface (CLI) allows you to associate a set of commands a
 
 The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it via the [`plugin` framework](../extend/plugins.md). Find the template for the `cli.py` file below.
 
-??? example "Click to expand"
-    ```
-    """Command line tools for manipulating a Kedro project.
-    Intended to be invoked via `kedro`."""
-    import click
-    from kedro.framework.cli.project import (
-        ASYNC_ARG_HELP,
-        CONFIG_FILE_HELP,
-        CONF_SOURCE_HELP,
-        FROM_INPUTS_HELP,
-        FROM_NODES_HELP,
-        LOAD_VERSION_HELP,
-        NODE_ARG_HELP,
-        PARAMS_ARG_HELP,
-        PIPELINE_ARG_HELP,
-        RUNNER_ARG_HELP,
-        TAG_ARG_HELP,
-        TO_NODES_HELP,
-        TO_OUTPUTS_HELP,
-    )
-    from kedro.framework.cli.utils import (
-        CONTEXT_SETTINGS,
-        _config_file_callback,
-        _split_params,
-        _split_load_versions,
-        env_option,
-        split_string,
-        split_node_names,
-    )
-    from kedro.framework.session import KedroSession
-    from kedro.utils import load_obj
+### Project Kedro commands
+::: mkdocs-click
+    :module: kedro.framework.cli.cli
+    :command: project_commands
+    :depth: 2
+    :style: plain
 
-
-    @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
-    def cli():
-        """Command line tools for manipulating a Kedro project."""
-
-
-    @cli.command()
-    @click.option(
-        "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
-    )
-    @click.option(
-        "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=split_string
-    )
-    @click.option(
-        "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_node_names
-    )
-    @click.option(
-        "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
-    )
-    @click.option("--nodes", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
-    @click.option(
-        "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
-    )
-    @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
-    @env_option
-    @click.option("--tags", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
-    @click.option(
-        "--load-versions",
-        "-lv",
-        type=str,
-        multiple=True,
-        help=LOAD_VERSION_HELP,
-        callback=_split_load_versions,
-    )
-    @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
-    @click.option(
-        "--config",
-        "-c",
-        type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-        help=CONFIG_FILE_HELP,
-        callback=_config_file_callback,
-    )
-    @click.option(
-        "--conf-source",
-        type=click.Path(exists=True, file_okay=False, resolve_path=True),
-        help=CONF_SOURCE_HELP,
-    )
-    @click.option(
-        "--params",
-        type=click.UNPROCESSED,
-        default="",
-        help=PARAMS_ARG_HELP,
-        callback=_split_params,
-    )
-    def run(
-        tags,
-        env,
-        runner,
-        is_async,
-        node_names,
-        to_nodes,
-        from_nodes,
-        from_inputs,
-        to_outputs,
-        load_versions,
-        pipeline,
-        config,
-        conf_source,
-        params,
-    ):
-        """Run the pipeline."""
-
-        runner = load_obj(runner or "SequentialRunner", "kedro.runner")
-        tags = tuple(tags)
-        node_names = tuple(node_names)
-
-        with KedroSession.create(
-            env=env, conf_source=conf_source, extra_params=params
-        ) as session:
-            session.run(
-                tags=tags,
-                runner=runner(is_async=is_async),
-                node_names=node_names,
-                from_nodes=from_nodes,
-                to_nodes=to_nodes,
-                from_inputs=from_inputs,
-                to_outputs=to_outputs,
-                load_versions=load_versions,
-                pipeline_name=pipeline,
-            )
-
-
-    ```
 
 ### Project setup
 
@@ -301,6 +118,7 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
 | `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configure/configuration_basics.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                            |
 | `kedro run --params=<param_key1>=<value1>,<param_key2>=<value2>`    | Does a parametrised run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
+| `kedro run --only-missing-outputs`                                  | Run the nodes required to produce missing persistent outputs. If a node's persistent outputs already exist, the node and its upstream dependencies (if not needed for other missing outputs) will be skipped.                                      |
 
 You can also combine these options together, so the following command runs all the nodes from `split` to `predict` and `report`:
 
@@ -355,51 +173,6 @@ The output includes all the nodes in the pipeline. If no pipeline name is provid
 ```bash
 kedro registry list
 ```
-
-#### Datasets
-
-##### List datasets per pipeline per type
-
-```bash
-kedro catalog list
-```
-The results include datasets that are/aren't used by a specific pipeline.
-
-The command also accepts an optional `--pipeline` argument that allows you to specify the pipeline name(s) (comma-separated values) in order to filter datasets used only by those named pipeline(s). For example:
-
-```bash
-kedro catalog list --pipeline=ds,de
-```
-
-##### Resolve dataset factories in the catalog
-
-```bash
-kedro catalog resolve
-```
-
-This command resolves dataset factories in the catalog file with any explicit entries in the pipeline. The output includes datasets explicitly mentioned in your catalog files and any datasets mentioned in the project's pipelines that match a dataset factory.
-
-##### Rank dataset factories in the catalog
-
-```bash
-kedro catalog rank
-```
-
-The output includes a list of any [dataset factories](../catalog-data/kedro_dataset_factories.md) in the catalog, ranked by the priority on which they are matched against.
-
-#### Data Catalog
-
-##### Create a Data Catalog YAML configuration file
-
-The following command creates a Data Catalog YAML configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
-
-```bash
-kedro catalog create --pipeline=<pipeline_name>
-```
-
-The command also accepts an optional `--env` argument that allows you to specify a configuration environment (defaults to `base`).
-
-The command creates the following file: `<conf_root>/<env>/catalog_<pipeline_name>.yml`
 
 #### Notebooks
 

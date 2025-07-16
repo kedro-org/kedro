@@ -85,3 +85,8 @@ class TestSharedMemoryDataset:
         assert not shared_memory_dataset.exists()
         shared_memory_dataset.save(input_data)
         assert shared_memory_dataset.exists()
+
+    def test_exists_no_manager(self):
+        """Check that exists returns False when no manager is set"""
+        dataset = SharedMemoryDataset(manager=None)
+        assert not dataset.exists()

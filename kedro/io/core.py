@@ -44,9 +44,8 @@ from kedro.utils import (  # noqa: F401
 
 if TYPE_CHECKING:
     import os
-    import re
+    from multiprocessing.managers import SyncManager
 
-    from kedro.io.catalog_config_resolver import CatalogConfigResolver
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
@@ -206,10 +205,12 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from err
         return dataset
 
-    def to_config(self) -> dict[str, Any]:
-        """Converts the dataset instance into a dictionary-based configuration for
-        serialization. Ensures that any subclass-specific details are handled, with
-        additional logic for versioning and caching implemented for `CachedDataset`.
+    def _init_config(self) -> dict[str, Any]:
+        """Internal method to capture the dataset's initial configuration
+        as provided during instantiation.
+
+        This configuration reflects only the arguments supplied at `__init__` time
+        and does not account for any runtime or dynamic changes to the dataset.
 
         Adds a key for the dataset's type using its module and class name and
         includes the initialization arguments.
@@ -232,7 +233,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         }
 
         if self._init_args:  # type: ignore[attr-defined]
-            self._init_args.pop("self", None)  # type: ignore[attr-defined]
             return_config.update(self._init_args)  # type: ignore[attr-defined]
 
         if type(self).__name__ == "CachedDataset":
@@ -241,7 +241,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             if isinstance(cached_ds, dict):
                 cached_ds_return_config = cached_ds
             elif isinstance(cached_ds, AbstractDataset):
-                cached_ds_return_config = cached_ds.to_config()
+                cached_ds_return_config = cached_ds._init_config()
             if VERSIONED_FLAG_KEY in cached_ds_return_config:
                 return_config[VERSIONED_FLAG_KEY] = cached_ds_return_config.pop(
                     VERSIONED_FLAG_KEY
@@ -262,34 +262,6 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
-
-    def __str__(self) -> str:
-        # TODO: Replace with __repr__ implementation in 1.0.0 release.
-        def _to_str(obj: Any, is_root: bool = False) -> str:
-            """Returns a string representation where
-            1. The root level (i.e. the Dataset.__init__ arguments) are
-            formatted like Dataset(key=value).
-            2. Dictionaries have the keys alphabetically sorted recursively.
-            3. None values are not shown.
-            """
-
-            fmt = "{}={}" if is_root else "'{}': {}"  # 1
-
-            if isinstance(obj, dict):
-                sorted_dict = sorted(obj.items(), key=lambda pair: str(pair[0]))  # 2
-
-                text = ", ".join(
-                    fmt.format(key, _to_str(value))  # 2
-                    for key, value in sorted_dict
-                    if value is not None  # 3
-                )
-
-                return text if is_root else "{" + text + "}"  # 1
-
-            # not a dictionary
-            return str(obj)
-
-        return f"{type(self).__name__}({_to_str(self._describe(), True)})"
 
     @classmethod
     def _load_wrapper(cls, load_func: Callable[[Self], _DO]) -> Callable[[Self], _DO]:
@@ -359,6 +331,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             init_func(self, *args, **kwargs)
             # Capture and save the arguments passed to the original __init__
             self._init_args = getcallargs(init_func, self, *args, **kwargs)
+            self._init_args.pop("self", None)  # removed to prevent recursion
 
         # Replace the subclass's __init__ with the new_init
         # A hook for subclasses to capture initialization arguments and save them
@@ -964,18 +937,12 @@ def is_parameter(dataset_name: str) -> bool:
 
 
 _C = TypeVar("_C")
+_DS = TypeVar("_DS")
 
 
 @runtime_checkable
-class CatalogProtocol(Protocol[_C]):
-    """``CatalogProtocol`` is a protocol class for all data catalog implementations"""
-
-    _datasets: dict[str, AbstractDataset]
-
-    @property
-    def config_resolver(self) -> CatalogConfigResolver:
-        """Return a copy of the datasets dictionary."""
-        ...
+class CatalogProtocol(Protocol[_C, _DS]):
+    _datasets: dict[str, _DS]
 
     def __repr__(self) -> str:
         """Returns the canonical string representation of the object."""
@@ -985,19 +952,15 @@ class CatalogProtocol(Protocol[_C]):
         """Check if a dataset is in the catalog."""
         ...
 
-    def __eq__(self, other) -> bool:  # type: ignore[no-untyped-def]
-        """Compares two catalogs based on materialised datasets and datasets patterns."""
-        ...
-
     def keys(self) -> List[str]:  # noqa: UP006
         """List all dataset names registered in the catalog."""
         ...
 
-    def values(self) -> List[AbstractDataset]:  # noqa: UP006
+    def values(self) -> List[_DS]:  # noqa: UP006
         """List all datasets registered in the catalog."""
         ...
 
-    def items(self) -> List[tuple[str, AbstractDataset]]:  # noqa: UP006
+    def items(self) -> List[tuple[str, _DS]]:  # noqa: UP006
         """List all dataset names and datasets registered in the catalog."""
         ...
 
@@ -1005,7 +968,7 @@ class CatalogProtocol(Protocol[_C]):
         """Returns an iterator for the object."""
         ...
 
-    def __getitem__(self, ds_name: str) -> AbstractDataset:
+    def __getitem__(self, ds_name: str) -> _DS:
         """Get a dataset by name from an internal collection of datasets."""
         ...
 
@@ -1013,68 +976,20 @@ class CatalogProtocol(Protocol[_C]):
         """Adds dataset using the given key as a dataset name and the provided data as the value."""
         ...
 
-    def __len__(self) -> int:
-        """Returns the number of datasets registered in the catalog"""
-        ...
-
-    def get(
-        self,
-        key: str,
-        version: Version | None = None,
-        default: AbstractDataset | None = None,
-    ) -> AbstractDataset | None:
-        """Get a dataset by name from an internal collection of datasets."""
-        ...
-
-    def _ipython_key_completions_(self) -> list[str]:
-        """Customizes tab completions for catalog within IPython env."""
-        ...
-
-    @property
-    def _logger(self) -> logging.Logger:
-        """Returns a logger instance for catalog class."""
-        ...
-
     @classmethod
     def from_config(cls, catalog: dict[str, dict[str, Any]] | None) -> _C:
         """Create a catalog instance from configuration."""
         ...
 
-    def to_config(
-        self,
-    ) -> tuple[
-        dict[str, dict[str, Any]],
-        dict[str, dict[str, Any]],
-        dict[str, str | None],
-        str | None,
-    ]:
-        """Converts the `CatalogProtocol` instance into a configuration format suitable for
-        serialization. This includes datasets, credentials, and versioning information."""
-        ...
-
-    @staticmethod
-    def _validate_dataset_config(ds_name: str, ds_config: Any) -> None:
-        """Validates dataset configuration."""
-        ...
-
-    def _add_from_config(self, ds_name: str, ds_config: dict[str, Any]) -> None:
-        """Create a LazyDataset instance and add it to the catalog."""
-        ...
-
-    def filter(
-        self,
-        name_regex: re.Pattern[str] | str | None = None,
-        type_regex: re.Pattern[str] | str | None = None,
-        by_type: type | list[type] | None = None,
-    ) -> List[str]:  # noqa: UP006
-        """Filter dataset names registered in the catalog based on name and/or type."""
+    def get(self, key: str, fallback_to_runtime_pattern: bool = False) -> _DS | None:
+        """Get a dataset by name from an internal collection of datasets."""
         ...
 
     def save(self, name: str, data: Any) -> None:
         """Save data to a registered dataset."""
         ...
 
-    def load(self, ds_name: str, version: str | None = None) -> Any:
+    def load(self, name: str, version: str | None = None) -> Any:
         """Load data from a registered dataset."""
         ...
 
@@ -1101,3 +1016,11 @@ class CatalogProtocol(Protocol[_C]):
 
 
 TCopyMode = Literal["deepcopy", "copy", "assign"]
+
+
+@runtime_checkable
+class SharedMemoryCatalogProtocol(CatalogProtocol, Protocol):
+    def set_manager_datasets(self, manager: SyncManager) -> None: ...
+
+    def validate_catalog(self) -> None: ...
+ 

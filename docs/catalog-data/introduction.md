@@ -3,7 +3,7 @@
 
 In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. The catalog is stored in a YAML file (`catalog.yml`) that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
 
-The [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/) package offers built-in datasets for common file types and file systems.
+The [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) package offers built-in datasets for common file types and file systems.
 
 ## Introduction to the Data Catalog
 
@@ -26,8 +26,9 @@ Once you are familiar with the format of `catalog.yml`, you may find your catalo
 Further pages describe more advanced concepts:
 
 - [Advanced: Access the Data Catalog in code](advanced_data_catalog_usage.md)
+- [Advanced: Lazy loading](lazy_loading.md)
 - [Advanced: Partitioned and incremental datasets](partitioned_and_incremental_datasets.md)
 
 This section on handing data with Kedro concludes with an advanced use case, illustrated with a tutorial that explains how to create your own custom dataset:
 
-- [Advanced: Tutorial to create a custom datase](../extend/how_to_create_a_custom_dataset.md)
+- [Advanced: Tutorial to create a custom dataset](../extend/how_to_create_a_custom_dataset.md)

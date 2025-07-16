@@ -1,11 +1,5 @@
 # Introduction to the Data Catalog
 
-!!! warning
-    `DataCatalog` and all related documentation is currently under development and subject to change. Several APIs currently available,
-    including `datasets`, `get_datasets`, `_get_datasets`, `add`, `list`, `add_feed_dict`, and `shallow_copy`,
-    will be removed or replaced in the v1.0.0 release.
-
-
 In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
 
 This page introduces the basic sections of `catalog.yml`, which is the file Kedro uses to register data sources for a project.
@@ -39,14 +33,15 @@ shuttles:
 ### Configuring dataset parameters in `catalog.yml`
 
 The dataset configuration in `catalog.yml` is defined as follows:
+
 1. The top-level key is the dataset name used as a dataset identifier in the catalog - `shuttles`, `weather` in the example below.
 2. The next level includes multiple keys. The first one is the mandatory key - `type` which defines the type of dataset to use.
 The rest of the keys are dataset parameters and vary depending on the implementation.
-To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/).and navigate to the `__init__` method of the target dataset.
+To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/).and navigate to the `__init__` method of the target dataset.
 3. Some dataset parameters can be further configured depending on the libraries underlying the dataset implementation.
 In the example below, a configuration of the `shuttles` dataset includes the `load_args` parameter which is defined by the `pandas` option for loading CSV files.
 While the `save_args` parameter in a configuration of the `weather` dataset is defined by the `snowpark` `saveAsTable` method.
-To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/). and navigate to the target parameter in the `__init__` definition for the dataset.
+To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/). and navigate to the target parameter in the `__init__` definition for the dataset.
 For those parameters we provide a reference to the underlying library configuration parameters. For example, under the `load_args` parameter section for [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-3.0.1/api/kedro_datasets.pandas.ExcelDataset.html) you can find a reference to the [pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) method defining the full set of the parameters accepted.
 
 !!! note
@@ -78,7 +73,7 @@ weather: # Dataset name
 
 Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet files, Feather files, HDF5 files, JSON documents, pickled objects, SQL tables, SQL queries, and more. They are supported using libraries such as pandas, PySpark, NetworkX, and Matplotlib.
 
-[kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/) contains a comprehensive list of all available file types.
+[kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 
@@ -159,7 +154,7 @@ test_dataset:
 
 !!! note
     Default load, save and filesystem arguments are defined inside the specific dataset implementations as `DEFAULT_LOAD_ARGS`, `DEFAULT_SAVE_ARGS`, and `DEFAULT_FS_ARGS` respectively.
-You can check those in the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/latest/).
+You can check those in the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/).
 
 
 ### Dataset access credentials
@@ -226,15 +221,19 @@ By default, Kedro has a `base` and a `local` folder for configuration. The Data 
 In summary, if you need to configure your datasets for different environments, you can create both `conf/base/catalog.yml` and `conf/local/catalog.yml`. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while adding a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets while you are using them for prototyping data pipeline(s).
 
 To illustrate this, consider the following catalog entry for a dataset named `cars` in `conf/base/catalog.yml`, which points to a csv file stored in a bucket on AWS S3:
+
 ```yaml
 cars:
   filepath: s3://my_bucket/cars.csv
   type: pandas.CSVDataset
- ```
+```
+
 You can overwrite this catalog entry in `conf/local/catalog.yml` to point to a locally stored file instead:
+
 ```yaml
 cars:
   filepath: data/01_raw/cars.csv
   type: pandas.CSVDataset
 ```
+
 In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml` and rely on Kedro to detect which definition of `cars` dataset to use in your pipeline.

@@ -9,11 +9,11 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * **How can I check the version of Kedro installed?**
   To check the version installed, type `kedro -V` in your terminal window.
 * **Do I need Git installed to use Kedro?**
-  Yes, users are expected to have Git installed when working with Kedro. This is a prerequisite for the `kedro new` flow. If Git is not installed, use the following workaround: `uvx kedro new -s https://github.com/kedro-org/kedro-starters/archive/0.18.6.zip --directory=pandas-iris`
+  Yes, users are expected to have Git installed when working with Kedro. This is a prerequisite for the `kedro new` flow. If Git is not installed, use the following workaround: `uvx kedro new -s https://github.com/kedro-org/kedro-starters/archive/1.0.0.zip --directory=spaceflights-pandas`
 
 ## Kedro documentation
 * [Where can I find the documentation about Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/)
-* [Where can I find the documentation for Kedro's datasets](https://docs.kedro.org/projects/kedro-datasets/en/latest/)
+* [Where can I find the documentation for Kedro's datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/)
 
 ## Working with Notebooks
 
@@ -52,6 +52,15 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How do I load credentials through environment variables](../configure/advanced_configuration.md#how-to-load-credentials-through-environment-variables)?
 * [How do I use Kedro with different project structure?](../tutorials/settings.md#use-kedro-without-the-src-folder)
 
+## Data Catalog
+* [How do I create dataset entries in catalog.yml?](../catalog-data/data_catalog.md)
+* [How do I use the same file with different formats using transcoding?](../catalog-data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding)
+* [How do I use dataset factories?](../catalog-data/kedro_dataset_factories.md)
+* [How do I override the default dataset creation with a default dataset factory pattern?](../catalog-data/kedro_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories)
+* [How do I load and save incremental or partitioned datasets?](../catalog-data/partitioned_and_incremental_datasets.md)
+
+## Advanced topics
+* [How do I use the `DataCatalog` programmatically in code?](../catalog-data/advanced_data_catalog_usage.md)
 
 ## Nodes and pipelines
 

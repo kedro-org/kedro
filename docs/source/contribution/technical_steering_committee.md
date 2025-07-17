@@ -11,6 +11,7 @@ On this page we describe:
 - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
 - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
 - [Responsibilities of a committer](#responsibilities-of-a-committer)
+- [Requirements to become a committer](#requirements-to-become-a-committer)
 - [Current maintainers](#current-maintainers)
 - [Past maintainers](#past-maintainers)
 - [Application process for maintainers](#application-process-for-maintainers)
@@ -41,7 +42,7 @@ Maintainers are the voting members of the TSC.
 Just contributing does not make you a maintainer; you need to demonstrate commitment to Kedro's long-term success by
 working with existing maintainers for at least one year.
 
-We look for commitment markers who can do at least some of the following:
+We look for committers who can do at least some of the following:
 
 - Write high-quality code and collaborate with the team and community
 - Make substantial improvements to our documentation, either in terms of content or information architecture
@@ -61,7 +62,7 @@ described in [Adding or removing maintainers](#adding-or-removing-maintainers).
 
 ## Responsibilities of a committer
 
-Committers are observer members of the TSC. They have the same responsibilities as maintainers, but no voting rights.
+Committers are observer (non-voting) members of the TSC. They are active contributors who are responsible for maintaining the health of the project, participating in planning and technical design decisions, and otherwise acting as part of the core Kedro development team.
 
 ## Requirements to become a committer
 

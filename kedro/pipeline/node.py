@@ -5,11 +5,14 @@ of Kedro pipelines.
 from __future__ import annotations
 
 import copy
+import hashlib
 import inspect
 import logging
 import re
+import warnings
 from collections import Counter
-from functools import cached_property
+from dataclasses import dataclass, field
+from functools import cached_property, partial
 from typing import TYPE_CHECKING, Any, Callable
 from warnings import warn
 
@@ -18,7 +21,21 @@ from more_itertools import spy, unzip
 from .transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Generator, Iterable
+
+
+@dataclass
+class GroupedNodes:
+    """Represents a logical group of nodes, typically by namespace
+    or a custom grouping. A group can also consist of a single node.
+    This is used to support deployment—for example, by executing
+    the entire group in a single container run.
+    """
+
+    name: str
+    type: str  # "namespace" or "nodes"
+    nodes: list[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
 
 class Node:
@@ -100,6 +117,7 @@ class Node:
                         f"is '{type(_input)}'."
                     )
                 )
+            _node_dataset_name_validation(_input, namespace)
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
@@ -118,6 +136,7 @@ class Node:
                         f"is '{type(_output)}'."
                     )
                 )
+            _node_dataset_name_validation(_output, namespace)
 
         if not inputs and not outputs:
             raise ValueError(
@@ -279,10 +298,22 @@ class Node:
         Returns:
             Node's name if provided or the name of its function.
         """
-        node_name = self._name or str(self)
+        node_name = self._name or self._set_unique_name()
         if self.namespace:
             return f"{self.namespace}.{node_name}"
         return node_name
+
+    def _set_unique_name(self) -> str:
+        """Set a unique name for the node."""
+        if isinstance(self._func, partial):
+            base = f"partial({self._func.func.__name__})"  # Use the original function's name
+            key = f"{base}|{self.inputs}|{self.outputs}"
+        else:
+            base = self._func_name
+            key = f"{self._func.__module__}.{self._func.__name__}|{self.inputs}|{self.outputs}"
+
+        suffix = hashlib.sha256(key.encode()).hexdigest()[:8]
+        return f"{base}__{suffix}"
 
     @property
     def short_name(self) -> str:
@@ -305,6 +336,25 @@ class Node:
             String representing node's namespace, typically from outer to inner scopes.
         """
         return self._namespace
+
+    @cached_property
+    def namespace_prefixes(self) -> list[str]:
+        """Return all hierarchical prefixes of the node's namespace.
+
+        Returns:
+            A list of namespace prefixes, from shortest to longest.
+            For example, a namespace 'a.b.c' would return ['a', 'a.b', 'a.b.c'].
+            If the node has no namespace, returns an empty list.
+        """
+        return list(self._enumerate_namespaces())
+
+    def _enumerate_namespaces(self) -> Generator[str]:
+        parts = (self._namespace or "").split(".")
+        prefix = ""
+        for p in parts:
+            prefix += p
+            yield prefix
+            prefix += "."
 
     @cached_property
     def inputs(self) -> list[str]:
@@ -571,6 +621,33 @@ def _node_error_message(msg: str) -> str:
         f"Invalid Node definition: {msg}\n"
         f"Format should be: node(function, inputs, outputs)"
     )
+
+
+def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
+    """Validate the dataset name. The node inputs and outputs should not contain
+    '.' characters. This is to ensure that the dot notation is reserved for Kedro's
+    namespaces. If there's a namespace provided, the dataset name
+    should match the top-level namespace.
+
+    Args:
+        name: The name of the dataset to be validated.
+        namespace: The namespace of the node.
+
+    Raises:
+        ValueError: If the dataset name is invalid.
+    """
+
+    if "." in name and not name.startswith("params:"):
+        name_namespace = ".".join(name.split(".")[:-1])
+        if not namespace or not name_namespace.startswith(
+            namespace.split(".")[0]
+        ):  # match with top level namespace
+            warnings.warn(
+                f"Dataset name '{name}' contains '.' characters, which is "
+                f"not recommended as the dot notation is reserved for automatic "
+                f"namespacing in Kedro. Consider using a different naming convention.",
+                UserWarning,
+            )
 
 
 def node(  # noqa: PLR0913

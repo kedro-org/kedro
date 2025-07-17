@@ -2,7 +2,7 @@ install:
 	uv pip install --system -e .
 
 clean:
-	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
+	rm -rf build dist site kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true
@@ -27,16 +27,28 @@ e2e-tests-fast:
 pip-compile:
 	pip-compile -q -o -
 
-build-docs:
+install-docs-requirements:
 	uv pip install -e ".[docs]"
-	./docs/build-docs.sh "docs"
+
+serve-docs: install-docs-requirements
+	mkdocs serve --open
+
+build-docs: install-docs-requirements
+	mkdocs build
 
 show-docs:
-	open docs/build/html/index.html
+	open site/index.html
 
-linkcheck:
-	uv pip install --system "kedro[docs] @ ."
-	./docs/build-docs.sh "linkcheck"
+linkcheck: install-docs-requirements
+	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
+	mkdocs build --strict
+	# lychee checks for broken external links in the built site, with max concurrency set to 32
+	lychee --max-concurrency 32 --exclude "@.lycheeignore" site/
+
+fix-markdownlint:
+	npm install -g markdownlint-cli2
+	# markdownlint rules are defined in .markdownlint.yaml
+	markdownlint-cli2 --config .markdownlint.yaml --fix "docs/**/*.md"
 
 package: clean install
 	python -m pip install build && python -m build

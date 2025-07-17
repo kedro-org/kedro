@@ -5,7 +5,7 @@ of provided nodes.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from kedro.runner.runner import AbstractRunner
 
@@ -25,23 +25,14 @@ class SequentialRunner(AbstractRunner):
     def __init__(
         self,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
-                during the run. This is used to set the default datasets to MemoryDataset
-                for `SequentialRunner`.
-
         """
-        default_dataset_pattern = {"{default}": {"type": "MemoryDataset"}}
-        self._extra_dataset_patterns = extra_dataset_patterns or default_dataset_pattern
-        super().__init__(
-            is_async=is_async, extra_dataset_patterns=self._extra_dataset_patterns
-        )
+        super().__init__(is_async=is_async)
 
     def _get_executor(self, max_workers: int) -> None:
         return None
@@ -51,7 +42,7 @@ class SequentialRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: CatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """The method implementing sequential pipeline running.
 
@@ -59,7 +50,7 @@ class SequentialRunner(AbstractRunner):
             pipeline: The ``Pipeline`` to run.
             catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -73,5 +64,5 @@ class SequentialRunner(AbstractRunner):
             pipeline=pipeline,
             catalog=catalog,
             hook_manager=hook_manager,
-            session_id=session_id,
+            run_id=run_id,
         )

@@ -9,10 +9,12 @@ from __future__ import annotations
 import copy
 import difflib
 import json
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
+from functools import cached_property
 from graphlib import CycleError, TopologicalSorter
 from itertools import chain
 from typing import TYPE_CHECKING, Any
+from warnings import warn
 
 import kedro
 from kedro.pipeline.node import GroupedNodes, Node, _to_list
@@ -277,8 +279,7 @@ class Pipeline:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
         self._nodes = tagged_nodes
-        node_parents = self.node_dependencies
-        self._toposorter = TopologicalSorter(node_parents)
+        self._toposorter = TopologicalSorter(self.node_dependencies)
 
         # test for circular dependencies without executing the toposort for efficiency
         try:
@@ -290,54 +291,76 @@ class Pipeline:
 
         self._toposorted_nodes: list[Node] = []
         self._toposorted_groups: list[list[Node]] = []
-        self._validate_namespaces(node_parents)
+        if any(n.namespace for n in self._nodes):
+            self._validate_namespaces()
 
-    def _validate_namespaces(self, node_parents: dict[Node, set[Node]]) -> None:
-        from warnings import warn
-
-        visited: dict[str, int] = dict()
-        path: list[str] = []
+    @cached_property
+    def _node_children(self) -> dict[Node, set[Node]]:
         node_children = defaultdict(set)
-        for child, parents in node_parents.items():
+        for child, parents in self.node_dependencies.items():
             for parent in parents:
                 node_children[parent].add(child)
+        return node_children
 
-        def dfs(n: Node, last_namespace: str) -> None:
-            curr_namespace = n.namespace or ""
-            if curr_namespace and curr_namespace in visited:
-                warn(
-                    f"Namespace '{curr_namespace}' is interrupted by nodes {path[visited[curr_namespace]:]} and thus invalid.",
-                    UserWarning,
+    def _shortest_path(self, start: Node, end: Node) -> list[Node]:
+        """Find the shortest path between two nodes in the pipeline, if it exists."""
+        queue = deque([(start, [start])])
+        visited = set([start])
+
+        while queue:
+            node, path = queue.popleft()
+            if node == end:
+                return path
+            for child in self._node_children[node]:
+                if child not in visited:
+                    visited.add(child)
+                    queue.append((child, [*path, child]))
+        return []  # pragma: no cover
+
+    def _validate_namespaces(self) -> None:
+        node_parents: dict[Node, set[Node]] = self.node_dependencies
+
+        # Here we keep all visited namespaces and the nodes that interrupted them for each node
+        # the mapping is as follows:
+        # {node: {namespace: {interrupting_node}}}
+        seen_namespaces: dict[Node, dict[str, set[Node]]] = defaultdict(dict)
+        for node in self.nodes:
+            visited: dict[str, set[Node]] = defaultdict(set)
+            for parent in node_parents[node]:
+                last_namespace = parent.namespace or ""
+                curr_namespace = node.namespace or ""
+                seen = seen_namespaces[parent]
+                # If any part of curr_namespace was visited in paths leading to parent
+                interrupted = next(
+                    (ns for ns in node.namespace_prefixes if ns in seen),
+                    None,
                 )
+                # The second condition checks if the interruption was already reported during visiting the parent node
+                if interrupted and not (last_namespace + ".").startswith(
+                    interrupted + "."
+                ):
+                    start = next(iter(seen[interrupted]))
+                    path = [n.name for n in self._shortest_path(start, node)]
+                    warn(
+                        f"Namespace '{interrupted}' is interrupted by nodes {path[:-1]} and thus invalid.",
+                        UserWarning,
+                    )
+                # All visited namespaces for the current node get updated with the parent's visited namespaces
+                for ns, nodes in seen.items():
+                    visited[ns].update(nodes)
+                # If the current namespace is different from the last namespace and isn't a child namespace,
+                # mark the last namespace and all unrelated parent namespaces as visited to detect potential future interruptions
+                if (
+                    last_namespace
+                    and curr_namespace != last_namespace
+                    and not curr_namespace.startswith(last_namespace + ".")
+                ):
+                    for prefix in parent.namespace_prefixes:
+                        if not curr_namespace.startswith(prefix):
+                            visited[prefix].add(node)
 
-            # If the current namespace is different from the last namespace and isn't a child namespace,
-            # mark the last namespace and all unrelated parent namespaces as visited to detect potential future interruptions
-            backtracked: dict[str, int] = dict()
-            if (
-                last_namespace
-                and curr_namespace != last_namespace
-                and not curr_namespace.startswith(last_namespace + ".")
-            ):
-                parts = last_namespace.split(".")
-                prefix = ""
-                for p in parts:
-                    prefix += p
-                    if not curr_namespace.startswith(prefix):
-                        backtracked[prefix] = len(path)
-                    prefix += "."
-
-                visited.update(backtracked)
-
-            path.append(n.name)
-            for child in node_children[n]:
-                dfs(child, n.namespace or "")
-            path.pop()
-            for key in backtracked.keys():
-                visited.pop(key, None)
-
-        start = (n for n in node_parents if not node_parents[n])
-        for n in start:
-            dfs(n, "")
+            # Now we have created the visited namespaces for the current node
+            seen_namespaces[node] = visited
 
     def __repr__(self) -> str:  # pragma: no cover
         """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""
@@ -495,7 +518,7 @@ class Pipeline:
             set_to_string(self.inputs()), nodes_as_string, set_to_string(self.outputs())
         )
 
-    @property
+    @cached_property
     def node_dependencies(self) -> dict[Node, set[Node]]:
         """All dependencies of nodes where the first Node has a direct dependency on
         the second Node.
@@ -512,7 +535,7 @@ class Pipeline:
 
         return dependencies
 
-    @property
+    @cached_property
     def nodes(self) -> list[Node]:
         """Return a list of the pipeline nodes in topological order, i.e. if
         node A needs to be run before node B, it will appear earlier in the
@@ -527,7 +550,7 @@ class Pipeline:
 
         return list(self._toposorted_nodes)
 
-    @property
+    @cached_property
     def grouped_nodes(self) -> list[list[Node]]:
         """Return a list of the pipeline nodes in topologically ordered groups,
         i.e. if node A needs to be run before node B, it will appear in an

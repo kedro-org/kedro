@@ -15,7 +15,8 @@ from kedro.io import (
 )
 from kedro.pipeline import node, pipeline
 from kedro.runner import SequentialRunner
-from tests.runner.conftest import exception_fn, identity, sink, source
+from tests.runner.conftest import exception_fn, identity
+from tests.test_utils import sink, source
 
 
 class TestValidSequentialRunner:

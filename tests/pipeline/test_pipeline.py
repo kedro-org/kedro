@@ -13,6 +13,7 @@ from kedro.pipeline.pipeline import (
     _match_namespaces,
 )
 from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
+from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
 def test_deprecation():
@@ -35,23 +36,6 @@ class TestTranscodeHelpers:
 
     def test_get_transcode_compatible_name(self):
         assert _strip_transcoding("abc@def") == "abc"
-
-
-# Different dummy func based on the number of arguments
-def constant_output():
-    return "output"  # pragma: no cover
-
-
-def identity(input1: str):
-    return input1  # pragma: no cover
-
-
-def biconcat(input1: str, input2: str):
-    return input1 + input2  # pragma: no cover
-
-
-def triconcat(input1: str, input2: str, input3: str):
-    return input1 + input2 + input3  # pragma: no cover
 
 
 @pytest.fixture

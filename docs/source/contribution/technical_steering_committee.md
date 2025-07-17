@@ -135,7 +135,7 @@ Former core team members with significant contributions include
 
 ## Application process for maintainers
 
-Every year, existing maintainers will collect a list of contributors that have shown regular activity on the project over the prior months and want to become maintainers. From this list, maintainer candidates are selected and proposed for a vote.
+At any point, existing maintainers can propose that a contributor who fulfills the [requirements to become a maintainer](#requirements-to-become-a-maintainer) is promoted to maintainer. A TSC [vote](#voting-process) is required.
 
 Following a successful vote, candidates are added to the `kedro-developers` team on the Kedro GitHub organisation,
 the `kedro-tsc` channel on the Kedro Slack organisation, the regular TSC meetings, the `CITATION.cff` file,

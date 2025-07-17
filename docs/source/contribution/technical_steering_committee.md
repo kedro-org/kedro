@@ -44,7 +44,7 @@ working with existing maintainers for at least one year.
 
 On top of the [committer responsibilities](#responsibilities-of-a-committer), we look for people who can do at least some of the following:
 
-- Bring awareness of industry trends to the team, connect the project to complementary initiatives, help steer the direction
+- Steer the direction of the project to ensure it retains relevance, including by bringing awareness of industry trends to the team and connecting the project to complementary initiatives
 - Give talks about the project at conferences and online events, write blog posts, or other forms of advocacy
 - Show excitement about the future of Kedro
 - In case of contributors from the community who haven't been previously appointed as committers,

@@ -1,11 +1,16 @@
 from __future__ import annotations
 
-import asyncio
 import inspect
 import itertools as it
-import logging
 import multiprocessing
 from collections.abc import Iterable, Iterator
+from concurrent.futures import (
+    ALL_COMPLETED,
+    Future,
+    ThreadPoolExecutor,
+    as_completed,
+    wait,
+)
 from typing import TYPE_CHECKING, Any
 
 from more_itertools import interleave
@@ -22,8 +27,6 @@ if TYPE_CHECKING:
 
     from kedro.io import CatalogProtocol
     from kedro.pipeline.node import Node
-
-logger = logging.getLogger(__name__)
 
 
 class TaskError(Exception):
@@ -42,14 +45,14 @@ class Task:
         catalog: CatalogProtocol,
         is_async: bool,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
         parallel: bool = False,
     ):
         self.node = node
         self.catalog = catalog
         self.hook_manager = hook_manager
         self.is_async = is_async
-        self.session_id = session_id
+        self.run_id = run_id
         self.parallel = parallel
 
     def execute(self) -> Node:
@@ -75,22 +78,18 @@ class Task:
             )
             self.hook_manager = hook_manager
         if self.is_async:
-            import asyncio
-
-            node = asyncio.run(
-                self._run_node_async(
-                    self.node,
-                    self.catalog,
-                    self.hook_manager,  # type: ignore[arg-type]
-                    self.session_id,
-                )
+            node = self._run_node_async(
+                self.node,
+                self.catalog,
+                self.hook_manager,  # type: ignore[arg-type]
+                self.run_id,
             )
         else:
             node = self._run_node_sequential(
                 self.node,
                 self.catalog,
                 self.hook_manager,  # type: ignore[arg-type]
-                self.session_id,
+                self.run_id,
             )
 
         for name in node.confirms:
@@ -144,7 +143,7 @@ class Task:
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> Node:
         inputs = {}
 
@@ -158,12 +157,12 @@ class Task:
         is_async = False
 
         additional_inputs = self._collect_inputs_from_hook(
-            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+            node, catalog, inputs, is_async, hook_manager, run_id=run_id
         )
         inputs.update(additional_inputs)
 
         outputs = self._call_node_run(
-            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+            node, catalog, inputs, is_async, hook_manager, run_id=run_id
         )
 
         items: Iterable = outputs.items()
@@ -190,98 +189,67 @@ class Task:
             )
         return node
 
-    async def _run_node_async(
+    def _run_node_async(
         self,
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,  # type: ignore[arg-type]
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> Node:
-        input_tasks: dict[str, asyncio.Task] = {
-            name: asyncio.create_task(
-                self._async_dataset_load(name, node, catalog, hook_manager)
-            )
-            for name in node.inputs
-        }
+        with ThreadPoolExecutor() as pool:
+            inputs: dict[str, Future] = {}
 
-        # Gather results as they complete
-        inputs = {}
-        for name, input_task in input_tasks.items():
-            try:
-                inputs[name] = await input_task
-            except Exception as exc:  # pragma: no cover
-                logger.error(
-                    "Error loading input '%s' for node '%s': %s",
-                    name,
-                    node.name,
-                    exc,
-                    exc_info=True,
+            for name in node.inputs:
+                inputs[name] = pool.submit(
+                    self._synchronous_dataset_load, name, node, catalog, hook_manager
                 )
-                raise
 
-        is_async = True
-        additional_inputs = self._collect_inputs_from_hook(
-            node, catalog, inputs.copy(), is_async, hook_manager, session_id=session_id
-        )
-        inputs.update(additional_inputs)
+            wait(inputs.values(), return_when=ALL_COMPLETED)
+            inputs = {key: value.result() for key, value in inputs.items()}
+            is_async = True
 
-        outputs = self._call_node_run(
-            node, catalog, inputs, is_async, hook_manager, session_id=session_id
-        )
-
-        output_tasks = {
-            name: asyncio.create_task(
-                self._async_dataset_save(name, data, node, catalog, hook_manager)
+            additional_inputs = self._collect_inputs_from_hook(
+                node, catalog, inputs, is_async, hook_manager, run_id=run_id
             )
-            for name, data in outputs.items()
-        }
+            inputs.update(additional_inputs)
 
-        for name, output_task in output_tasks.items():
-            try:
-                await output_task
-            except Exception as exc:
-                logger.error(
-                    "Error saving output '%s' for node '%s': %s",
-                    name,
-                    node.name,
-                    exc,
-                    exc_info=True,
+            outputs = self._call_node_run(
+                node, catalog, inputs, is_async, hook_manager, run_id=run_id
+            )
+
+            future_dataset_mapping = {}
+            for name, data in outputs.items():
+                hook_manager.hook.before_dataset_saved(
+                    dataset_name=name, data=data, node=node
                 )
-                raise
+                future = pool.submit(catalog.save, name, data)
+                future_dataset_mapping[future] = (name, data)
 
+            for future in as_completed(future_dataset_mapping):
+                exception = future.exception()
+                if exception:
+                    raise exception
+                name, data = future_dataset_mapping[future]
+                hook_manager.hook.after_dataset_saved(
+                    dataset_name=name, data=data, node=node
+                )
         return node
 
     @staticmethod
-    async def _async_dataset_load(
+    def _synchronous_dataset_load(
         dataset_name: str,
         node: Node,
         catalog: CatalogProtocol,
         hook_manager: PluginManager,
     ) -> Any:
-        """Asynchronously loads a dataset while ensuring hooks are executed in order."""
+        """Minimal wrapper to ensure Hooks are run synchronously
+        within an asynchronous dataset load."""
         hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)
-        return_ds = await asyncio.to_thread(catalog.load, dataset_name)
+        return_ds = catalog.load(dataset_name)
         hook_manager.hook.after_dataset_loaded(
             dataset_name=dataset_name, data=return_ds, node=node
         )
         return return_ds
-
-    @staticmethod
-    async def _async_dataset_save(
-        dataset_name: str,
-        data: Any,
-        node: Node,
-        catalog: CatalogProtocol,
-        hook_manager: PluginManager,
-    ) -> None:
-        """Asynchronously saves a dataset while ensuring hooks are executed in order."""
-        hook_manager.hook.before_dataset_saved(
-            dataset_name=dataset_name, data=data, node=node
-        )
-        await asyncio.to_thread(catalog.save, dataset_name, data)
-        hook_manager.hook.after_dataset_saved(
-            dataset_name=dataset_name, data=data, node=node
-        )
 
     @staticmethod
     def _collect_inputs_from_hook(  # noqa: PLR0913
@@ -290,7 +258,7 @@ class Task:
         inputs: dict[str, Any],
         is_async: bool,
         hook_manager: PluginManager,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
         inputs = (
             inputs.copy()
@@ -300,7 +268,7 @@ class Task:
             catalog=catalog,
             inputs=inputs,
             is_async=is_async,
-            session_id=session_id,
+            run_id=run_id,
         )
 
         additional_inputs = {}
@@ -325,7 +293,7 @@ class Task:
         inputs: dict[str, Any],
         is_async: bool,
         hook_manager: PluginManager,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
         try:
             outputs = node.run(inputs)
@@ -336,7 +304,7 @@ class Task:
                 catalog=catalog,
                 inputs=inputs,
                 is_async=is_async,
-                session_id=session_id,
+                run_id=run_id,
             )
             raise exc
         hook_manager.hook.after_node_run(
@@ -345,6 +313,6 @@ class Task:
             inputs=inputs,
             outputs=outputs,
             is_async=is_async,
-            session_id=session_id,
+            run_id=run_id,
         )
         return outputs

@@ -1,0 +1,40 @@
+/* -- Primary -- */
+:root {
+    --black-0: #989898;
+    --black-100: #868686;
+    --black-200: #747474;
+    --black-300: #636363;
+    --black-400: #525252;
+    --black-500: #424242;
+    --black-600: #323232;
+    --black-700: #242424;
+    --black-800: #151515;
+    --black-850: #090909;
+    --black-900: #000;
+    --slate-0: #2b2d2f;
+    --slate-100: #27282a;
+    --slate-200: #242526;
+    --slate-300: #212324;
+    --slate-400: #1e1f21;
+    --slate-500: #1c1e1f;
+    --slate-600: #18191b;
+    --slate-700: #141516;
+    --slate-800: #101112;
+    --slate-900: #0f0f11;
+    --white-0: #fff;
+    --white-100: #f9f9fa;
+    --white-200: #f2f3f4;
+    --white-300: #ecedef;
+    --white-400: #e6e7e9;
+    --white-500: #dfe2e4;
+    --white-600: #d9dcde;
+    --white-700: #d3d6d9;
+    --white-800: #ccd0d3;
+    --white-900: #c6cace;
+    --white-600-50:#B2B2B2;
+
+    /* -- Accents -- */
+    --yellow-6: #ffc900;
+    --yellow-900: #7d5c00;
+    --yellow-600:#b28400;
+  }

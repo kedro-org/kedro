@@ -4,11 +4,9 @@ implementations.
 
 from __future__ import annotations
 
-import inspect
 import logging
 import os
 import sys
-import warnings
 from abc import ABC, abstractmethod
 from collections import Counter, deque
 from concurrent.futures import (
@@ -19,13 +17,10 @@ from concurrent.futures import (
     wait,
 )
 from itertools import chain
+from time import perf_counter
 from typing import TYPE_CHECKING, Any
 
-from pluggy import PluginManager
-
-from kedro import KedroDeprecationWarning
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import CatalogProtocol, MemoryDataset, SharedMemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.task import Task
 
@@ -37,6 +32,7 @@ if TYPE_CHECKING:
 
     from pluggy import PluginManager
 
+    from kedro.io import CatalogProtocol, SharedMemoryCatalogProtocol
     from kedro.pipeline.node import Node
 
 
@@ -48,19 +44,14 @@ class AbstractRunner(ABC):
     def __init__(
         self,
         is_async: bool = False,
-        extra_dataset_patterns: dict[str, dict[str, Any]] | None = None,
     ):
         """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            extra_dataset_patterns: Extra dataset factory patterns to be added to the catalog
-                during the run. This is used to set the default datasets on the Runner instances.
-
         """
         self._is_async = is_async
-        self._extra_dataset_patterns = extra_dataset_patterns
 
     @property
     def _logger(self) -> logging.Logger:
@@ -69,90 +60,56 @@ class AbstractRunner(ABC):
     def run(
         self,
         pipeline: Pipeline,
-        catalog: CatalogProtocol,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
 
         Returns:
-            Any node outputs that cannot be processed by the catalog.
-            These are returned in a dictionary, where the keys are defined
-            by the node outputs.
-
+            Dictionary with pipeline outputs, where keys are dataset names
+            and values are dataset object.
         """
-        # Check which datasets used in the pipeline are in the catalog or match
-        # a pattern in the catalog, not including extra dataset patterns
         # Run a warm-up to materialize all datasets in the catalog before run
-        warmed_up_ds = []
         for ds in pipeline.datasets():
-            if ds in catalog:
-                warmed_up_ds.append(ds)
-                _ = catalog._get_dataset(ds)
-
-        # Check if there are any input datasets that aren't in the catalog and
-        # don't match a pattern in the catalog.
-        unsatisfied = pipeline.inputs() - set(warmed_up_ds)
-
-        if unsatisfied:
-            raise ValueError(
-                f"Pipeline input(s) {unsatisfied} not found in the {catalog.__class__.__name__}"
-            )
-
-        # Register the default dataset pattern with the catalog
-        # TODO: replace with catalog.config_resolver.add_runtime_patterns() when removing old catalog
-        catalog = catalog.shallow_copy(
-            extra_dataset_patterns=self._extra_dataset_patterns
-        )
+            _ = catalog.get(ds, fallback_to_runtime_pattern=True)
 
         hook_or_null_manager = hook_manager or _NullPluginManager()
 
-        # Check which datasets used in the pipeline are in the catalog or match
-        # a pattern in the catalog, including added extra_dataset_patterns
-        registered_ds = [ds for ds in pipeline.datasets() if ds in catalog]
-
         if self._is_async:
             self._logger.info(
-                "Asynchronous mode is enabled for loading and saving data"
+                "Asynchronous mode is enabled for loading and saving data."
             )
 
-        self._run(pipeline, catalog, hook_or_null_manager, session_id)  # type: ignore[arg-type]
+        start_time = perf_counter()
+        self._run(pipeline, catalog, hook_or_null_manager, run_id)  # type: ignore[arg-type]
+        end_time = perf_counter()
+        run_duration = end_time - start_time
 
-        self._logger.info("Pipeline execution completed successfully.")
+        self._logger.info(
+            f"Pipeline execution completed successfully in {run_duration:.1f} sec."
+        )
 
-        # Identify MemoryDataset in the catalog
-        memory_datasets = {
-            ds_name
-            for ds_name, ds in catalog._datasets.items()
-            if isinstance(ds, MemoryDataset) or isinstance(ds, SharedMemoryDataset)
-        }
-
-        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
-        # in the catalog and include MemoryDataset.
-        free_outputs = pipeline.outputs() - (set(registered_ds) - memory_datasets)
-
-        run_output = {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
-
-        # Remove runtime patterns after run, so they do not affect further runs
-        if self._extra_dataset_patterns:
-            catalog.config_resolver.remove_runtime_patterns(
-                self._extra_dataset_patterns
-            )
+        # Now we return all pipeline outputs, but we do not load datasets data
+        run_output = {ds_name: catalog[ds_name] for ds_name in pipeline.outputs()}
 
         return run_output
 
     def run_only_missing(
-        self, pipeline: Pipeline, catalog: CatalogProtocol, hook_manager: PluginManager
+        self,
+        pipeline: Pipeline,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+        hook_manager: PluginManager | None = None,
     ) -> dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
         datasets provided by ``catalog``, and save results back to the
@@ -160,7 +117,7 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be
@@ -172,8 +129,8 @@ class AbstractRunner(ABC):
             the keys are defined by the node outputs.
 
         """
-        free_outputs = pipeline.outputs() - set(catalog.list())
-        missing = {ds for ds in catalog.list() if not catalog.exists(ds)}
+        free_outputs = pipeline.outputs() - set(catalog.keys())
+        missing = {ds for ds in catalog if not catalog.exists(ds)}
         to_build = free_outputs | missing
         to_rerun = pipeline.only_nodes_with_outputs(*to_build) + pipeline.from_inputs(
             *to_build
@@ -181,7 +138,7 @@ class AbstractRunner(ABC):
 
         # We also need any missing datasets that are required to run the
         # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.datasets() - set(catalog.list())
+        unregistered_ds = pipeline.datasets() - set(catalog.keys())
         output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
         input_from_unregistered = to_rerun.inputs() & unregistered_ds
         to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)
@@ -197,9 +154,9 @@ class AbstractRunner(ABC):
     def _run(
         self,
         pipeline: Pipeline,
-        catalog: CatalogProtocol,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
         hook_manager: PluginManager | None = None,
-        session_id: str | None = None,
+        run_id: str | None = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
          inputs have already been checked and normalized by run().
@@ -207,16 +164,16 @@ class AbstractRunner(ABC):
 
         Args:
             pipeline: The ``Pipeline`` to run.
-            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.
+            catalog: An implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
-            session_id: The id of the session.
+            run_id: The id of the run.
         """
 
         nodes = pipeline.nodes
 
-        self._validate_catalog(catalog, pipeline)
+        self._validate_catalog(catalog)
         self._validate_nodes(nodes)
-        self._set_manager_datasets(catalog, pipeline)
+        self._set_manager_datasets(catalog)
 
         load_counts = Counter(chain.from_iterable(n.inputs for n in pipeline.nodes))
         node_dependencies = pipeline.node_dependencies
@@ -235,7 +192,7 @@ class AbstractRunner(ABC):
                         catalog=catalog,
                         hook_manager=hook_manager,
                         is_async=self._is_async,
-                        session_id=session_id,
+                        run_id=run_id,
                     ).execute()
                     done_nodes.add(node)
                 except Exception:
@@ -259,7 +216,7 @@ class AbstractRunner(ABC):
                         catalog=catalog,
                         hook_manager=hook_manager,
                         is_async=self._is_async,
-                        session_id=session_id,
+                        run_id=run_id,
                     )
                     if isinstance(executor, ProcessPoolExecutor):
                         task.parallel = True
@@ -305,7 +262,7 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         done_nodes: Iterable[Node],
-        catalog: CatalogProtocol,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
     ) -> None:
         """
         Suggest a command to the user to resume a run after it fails.
@@ -315,7 +272,7 @@ class AbstractRunner(ABC):
         Args:
             pipeline: the ``Pipeline`` of the run.
             done_nodes: the ``Node``s that executed successfully.
-            catalog: an implemented instance of ``CatalogProtocol`` of the run.
+            catalog: an implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` of the run.
 
         """
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
@@ -344,7 +301,10 @@ class AbstractRunner(ABC):
 
     @staticmethod
     def _release_datasets(
-        node: Node, catalog: CatalogProtocol, load_counts: dict, pipeline: Pipeline
+        node: Node,
+        catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
+        load_counts: dict,
+        pipeline: Pipeline,
     ) -> None:
         """Decrement dataset load counts and release any datasets we've finished with"""
         for dataset in node.inputs:
@@ -355,7 +315,9 @@ class AbstractRunner(ABC):
             if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
                 catalog.release(dataset)
 
-    def _validate_catalog(self, catalog: CatalogProtocol, pipeline: Pipeline) -> None:
+    def _validate_catalog(
+        self, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+    ) -> None:
         # Add catalog validation logic here if needed
         pass
 
@@ -364,7 +326,7 @@ class AbstractRunner(ABC):
         pass
 
     def _set_manager_datasets(
-        self, catalog: CatalogProtocol, pipeline: Pipeline
+        self, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
     ) -> None:
         # Set up any necessary manager datasets here
         pass
@@ -398,7 +360,9 @@ class AbstractRunner(ABC):
 
 
 def _find_nodes_to_resume_from(
-    pipeline: Pipeline, unfinished_nodes: Collection[Node], catalog: CatalogProtocol
+    pipeline: Pipeline,
+    unfinished_nodes: Collection[Node],
+    catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
 ) -> set[str]:
     """Given a collection of unfinished nodes in a pipeline using
     a certain catalog, find the node names to pass to pipeline.from_nodes()
@@ -408,7 +372,7 @@ def _find_nodes_to_resume_from(
     Args:
         pipeline: the ``Pipeline`` to find starting nodes for.
         unfinished_nodes: collection of ``Node``s that have not finished yet
-        catalog: an implemented instance of ``CatalogProtocol`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` of the run.
 
     Returns:
         Set of node names to pass to pipeline.from_nodes() to continue
@@ -426,7 +390,9 @@ def _find_nodes_to_resume_from(
 
 
 def _find_all_nodes_for_resumed_pipeline(
-    pipeline: Pipeline, unfinished_nodes: Iterable[Node], catalog: CatalogProtocol
+    pipeline: Pipeline,
+    unfinished_nodes: Iterable[Node],
+    catalog: CatalogProtocol | SharedMemoryCatalogProtocol,
 ) -> set[Node]:
     """Breadth-first search approach to finding the complete set of
     ``Node``s which need to run to cover all unfinished nodes,
@@ -436,7 +402,7 @@ def _find_all_nodes_for_resumed_pipeline(
     Args:
         pipeline: the ``Pipeline`` to analyze.
         unfinished_nodes: the iterable of ``Node``s which have not finished yet.
-        catalog: an implemented instance of ``CatalogProtocol`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` of the run.
 
     Returns:
         A set containing all input unfinished ``Node``s and all remaining
@@ -484,12 +450,14 @@ def _nodes_with_external_inputs(nodes_of_interest: Iterable[Node]) -> set[Node]:
     return set(p_nodes_with_external_inputs.nodes)
 
 
-def _enumerate_non_persistent_inputs(node: Node, catalog: CatalogProtocol) -> set[str]:
+def _enumerate_non_persistent_inputs(
+    node: Node, catalog: CatalogProtocol | SharedMemoryCatalogProtocol
+) -> set[str]:
     """Enumerate non-persistent input datasets of a ``Node``.
 
     Args:
         node: the ``Node`` to check the inputs of.
-        catalog: an implemented instance of ``CatalogProtocol`` of the run.
+        catalog: an implemented instance of ``CatalogProtocol`` or ``SharedMemoryCatalogProtocol`` of the run.
 
     Returns:
         Set of names of non-persistent inputs of given ``Node``.
@@ -550,52 +518,3 @@ def _find_initial_node_group(pipeline: Pipeline, nodes: Iterable[Node]) -> list[
     sub_pipeline = pipeline.only_nodes(*node_names)
     initial_nodes = sub_pipeline.grouped_nodes[0]
     return initial_nodes
-
-
-def run_node(
-    node: Node,
-    catalog: CatalogProtocol,
-    hook_manager: PluginManager,
-    is_async: bool = False,
-    session_id: str | None = None,
-) -> Node:
-    """Run a single `Node` with inputs from and outputs to the `catalog`.
-
-    Args:
-        node: The ``Node`` to run.
-        catalog: An implemented instance of ``CatalogProtocol`` containing the node's inputs and outputs.
-        hook_manager: The ``PluginManager`` to activate hooks.
-        is_async: If True, the node inputs and outputs are loaded and saved
-            asynchronously with threads. Defaults to False.
-        session_id: The session id of the pipeline run.
-
-    Raises:
-        ValueError: Raised if is_async is set to True for nodes wrapping
-            generator functions.
-
-    Returns:
-        The node argument.
-
-    """
-    warnings.warn(
-        "`run_node()` has been deprecated and will be removed in Kedro 1.0.0.",
-        KedroDeprecationWarning,
-    )
-
-    if is_async and inspect.isgeneratorfunction(node.func):
-        raise ValueError(
-            f"Async data loading and saving does not work with "
-            f"nodes wrapping generator functions. Please make "
-            f"sure you don't use `yield` anywhere "
-            f"in node {node!s}."
-        )
-
-    task = Task(
-        node=node,
-        catalog=catalog,
-        hook_manager=hook_manager,
-        is_async=is_async,
-        session_id=session_id,
-    )
-    node = task.execute()
-    return node

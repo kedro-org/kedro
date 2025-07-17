@@ -1,0 +1,128 @@
+/* Import the Inter font */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap");
+
+/* Global font settings */
+html {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: "Inter", sans-serif !important;
+  font-weight: 400;
+  line-height: 2rem;
+}
+
+/* Apply the variables to elements */
+body {
+  background-color: var(--md-default-bg-color);
+  color: var(--text-primary-color);
+  font-size: 16px;
+  line-height: 24px;;
+}
+
+h1,
+.md-typeset h1 {
+  font-family: Inter;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 40px;
+  color: var(--text-primary-color);
+  margin-bottom: 32px;
+}
+
+h2,
+.md-typeset h2 {
+  font-family: Inter;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--text-primary-color);
+  margin: 32px 0 24px 0;
+}
+
+h3,
+.md-typeset h3 {
+  font-family: Inter;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--text-primary-color);
+  margin: 24px 0 12px 0;
+}
+
+p,
+.md-typeset,
+.md-typeset thead ,
+.md-typeset td {
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--text-primary-color);
+}
+
+.md-typeset ol li,
+.md-typeset ul li {
+    margin-bottom: 0;
+}
+
+
+.md-typeset a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+
+  &:hover {
+    color: var(--text-hover-color);
+  }
+}
+
+/* remove underline only for tabbed-labels */
+.tabbed-labels.tabbed-labels--linked a {
+  text-decoration: none;
+}
+
+@media screen and (max-width: 76.2344em) {
+  body {
+      font-size: 14px;
+      line-height: 20px;
+  }
+
+  .md-search__input {
+    font-size: 14px;
+  }
+
+  h1,
+  .md-typeset h1 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  h2,
+  .md-typeset h2 {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  h3,
+  .md-typeset h3 {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  p,
+  .md-typeset p,
+  .md-typeset thead ,
+  .md-typeset td{
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .md-tabs__link {
+    font-size: 14px;
+  }
+}

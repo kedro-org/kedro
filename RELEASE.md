@@ -1,4 +1,59 @@
-# Upcoming Release
+# Upcoming Release 1.0.0
+## Major features and improvements
+## Bug fixes and other changes
+* Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines
+
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 1.0.0
+## Documentation changes
+## Community contributions
+
+# Release 1.0.0rc1
+
+## Major features and improvements
+* Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
+* Added a `prefix_datasets_with_namespace` argument to the `Pipeline` class which allows users to turn on or off the prefixing of the namespace to the node inputs, outputs, and parameters.
+* Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
+* Added an option to select which multiprocessing start method is going to be used on `ParallelRunner` via the `KEDRO_MP_CONTEXT` environment variable.
+
+## Bug fixes and other changes
+* Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
+* Added support for running multiple namespaces within a single session.
+* Updated `kedro registry describe` to return the node name property instead of creating its own name for the node.
+
+## Documentation changes
+* Updated the `DataCatalog` documentation with improved structure and detailed description of new features.
+
+## Community contributions
+
+## Breaking changes to the API
+* Private methods `_is_project` and `_find_kedro_project` are changed to `is_kedro_project` and `find_kedro_project`.
+* Renamed instances of `extra_params` and `_extra_params` to `runtime_params`.
+* Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead.
+* Renamed `ModularPipelineError` to `PipelineError`.
+* `Pipeline.grouped_nodes_by_namespace()` was replaced with `group_nodes_by(group_by)`, which supports multiple strategies and returns a list of `GroupedNodes`, improving type safety and consistency for deployment plugin integrations.
+* The micro-packaging feature and the corresponding `micropkg` CLI command have been removed.
+* Renamed `session_id` parameter to `run_id` in all runner methods and hooks to improve API clarity and prepare for future multi-run session support.
+* Removed the following `DataCatalog` methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
+* Removed the CLI command `kedro catalog create`.
+* Changed the output of `runner.run()` — it now always returns all pipeline outputs, regardless of catalog configuration.
+
+## Migration guide from Kedro 0.19.* to 1.*
+[See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/latest/resources/migration.html).
+
+# Release 0.19.14
+
+## Major features and improvements
+* Added execution time to pipeline completion log.
+
+## Bug fixes and other changes
+* Fixed a recursion error in custom datasets when `_describe()` accessed `self.__dict__`.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Yury Fedotov](https://github.com/yury-fedotov)
+
+# Release 0.19.13
 
 ## Major features and improvements
 * Unified `pipeline()` and `Pipeline` into a single module (`kedro.pipeline`), aligning with the `node()`/`Node` design pattern and improving namespace handling.
@@ -7,14 +62,26 @@
 * Fixed bug where project creation workflow would use the `main` branch version of `kedro-starters` instead of the respective release version.
 * Fixed namespacing for `confirms` during pipeline creation to support `IncrementalDataset`.
 * Fixed bug where `OmegaConf`cause an error during config resolution with runtime parameters.
-## Breaking changes to the API
-
+* Cached `inputs` in `Node` when created from dictionary for better performance.
+* Enabled pluggy tracing only when logging level is set to `DEBUG` to speed up the execution of project runs.
 
 ## Upcoming deprecations for Kedro 1.0.0
+* Added a deprecation warning for catalog CLI commands. The following commands will be replaced with their alternatives - `kedro catalog rank`, `kedro catalog list`, `kedro catalog resolve` and the `kedro catalog create` command will be removed.
+* Added a deprecation warning for `KedroDataCatalog` that will replace `DataCatalog` while adopting the original `DataCatalog` name.
 * Add deprecation warning for `--namespace` option for `kedro run`. It will be replaced with `--namespaces` option which will allow for running multiple namespaces together.
 * The `modular_pipeline` module is deprecated and will be removed in Kedro 1.0.0. Use the `pipeline` module instead.
 
+**Note**: On March 20th, a security vulnerability, CVE-2024-12215, was identified in Kedro. This issue stems from the deprecated micropackaging functionality, which is scheduled for removal in the upcoming Kedro 1.0 release. While we agree with the CVE assigned, this vulnerability only poses a risk if you pull a malicious micropackage from an untrusted source. If you're concerned, we recommend avoiding the micropackaging feature for now and upgrading to Kedro 1.0 once it's released.
+
 ## Documentation changes
+* Updated Dask deployment docs.
+* Added non-jupyter environment integration page (for example Marimo) with dynamic Kedro session loading.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Arnout Verboven](https://github.com/ArnoutVerboven)
+* [gabohc](https://github.com/gabohc)
+* [Luis Chaves Rodriguez](https://github.com/lucharo)
 
 # Release 0.19.12
 
@@ -182,9 +249,11 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Fixed a bug when `OmegaConfigLoader` is printed, there are few missing arguments.
 * Fixed a bug when where iterating `OmegaConfigLoader`'s `keys` return empty dictionary.
 
+
 ## Upcoming deprecations for Kedro 1.0.0
 * The utility method `get_pkg_version()` is deprecated and will be removed in Kedro 1.0.0.
 * `LambdaDataset` is deprecated and will be removed in Kedro 1.0.0.
+* The method `run_node()` is deprecated and will be removed in Kedro 1.0.0.
 
 ## Documentation changes
 * Improved documentation for configuring dataset parameters in the data catalog

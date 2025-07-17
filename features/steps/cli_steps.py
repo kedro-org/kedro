@@ -2,7 +2,8 @@
 
 import json
 import shutil
-import textwrap
+import subprocess
+import sys
 from pathlib import Path
 from time import sleep, time
 
@@ -654,7 +655,7 @@ def check_error_message_printed(context, msg):
 
 @then("there should be an additional cell in the jupyter notebook")
 def check_additional_cell_added(context):
-    """Check that an addiitonal cell has been added compared to notebook
+    """Check that an additional cell has been added compared to notebook
     coded by TEST_JUPYTER_ORG.
     """
     with open(
@@ -728,19 +729,6 @@ def check_dependency_in_reqs(context: behave.runner.Context, dependency: str):
     assert dependency in reqs_path.read_text()
 
 
-@given("I have micro-packaging settings in pyproject.toml")
-def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
-    pyproject_toml_path = context.root_project_dir / "pyproject.toml"
-    project_toml_str = textwrap.dedent(
-        """
-        [tool.kedro.micropkg.package]
-        "pipelines.data_science" = {alias = "ds"}
-        """
-    )
-    with pyproject_toml_path.open(mode="a") as file:
-        file.write(project_toml_str)
-
-
 @given("I have executed the load_node magic command")
 @when("I execute the load_node magic command")
 def exec_magic_command(context):
@@ -765,3 +753,17 @@ def pip_install_project_and_dev_dependencies(context):
         env=context.env,
         cwd=str(context.root_project_dir),
     )
+
+
+@given("I uninstall the rich module in the virtual environment")
+def step_uninstall_rich(context):
+    result = subprocess.run(  # noqa: S603
+        [sys.executable, "-m", "pip", "uninstall", "-y", "rich"],
+        capture_output=True,
+        text=True,
+        check=False,
+        shell=False,
+    )
+    assert (
+        result.returncode == 0 or "not installed" in result.stdout.lower()
+    ), f"Failed to uninstall rich:\n{result.stdout}\n{result.stderr}"

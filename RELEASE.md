@@ -4,6 +4,8 @@
 * Removed the `AbstractRunner.run_only_missing()` method, an older and underused API for partial runs. Please use `--only-missing-outputs` CLI instead.
 
 ## Bug fixes and other changes
+* Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines
+
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 1.0.0
 ## Documentation changes

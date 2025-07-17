@@ -6,43 +6,25 @@ import pytest
 from kedro.io import DataCatalog, MemoryDataset, SharedMemoryDataCatalog
 from kedro.pipeline import node, pipeline
 from tests.conftest import PersistentTestDataset
-
-
-def source():
-    return "stuff"
+from tests.test_utils import (
+    fan_in,
+    first_arg,
+    multi_input_list_output,
+    return_none,
+    sink,
+)
 
 
 def identity(arg):
     return arg
 
 
-def first_arg(*args):
-    return args[0]
-
-
-def sink(arg):
-    pass
-
-
-def fan_in(*args):
-    return args
-
-
 def exception_fn(*args):
     raise Exception("test exception")
 
 
-def return_none(arg):
-    arg = None
-    return arg
-
-
 def return_not_serialisable(arg):
     return lambda x: x
-
-
-def multi_input_list_output(arg1, arg2, arg3=None):
-    return [arg1, arg2]
 
 
 @pytest.fixture

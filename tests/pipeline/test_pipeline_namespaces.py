@@ -3,10 +3,7 @@ import warnings
 import pytest
 
 from kedro.pipeline import Pipeline, node
-
-
-def identity(x):
-    return x
+from tests.test_utils import identity
 
 
 def branching(x):

@@ -39,9 +39,11 @@ class TestTransformPipelineIntegration:
         ) + pipeline(lunch_pipeline, inputs={"food": "NEW_NAME"})
 
         for pipe in [pipeline1, pipeline2, pipeline3]:
-            catalog = DataCatalog({}, feed_dict={"frozen_meat": "frozen_meat_data"})
+            catalog = DataCatalog()
+            catalog["frozen_meat"] = "frozen_meat_data"
             result = SequentialRunner().run(pipe, catalog)
-            assert result == {"output": "frozen_meat_data_defrosted_grilled_done"}
+            output = result["output"].load()
+            assert output == "frozen_meat_data_defrosted_grilled_done"
 
     def test_reuse_same_pipeline(self):
         """
@@ -67,18 +69,25 @@ class TestTransformPipelineIntegration:
                 namespace="breakfast",
             )
             + breakfast_pipeline
-            + pipeline(cook_pipeline, namespace="lunch")
-            + pipeline(lunch_pipeline, inputs={"lunch_food": "lunch.grilled_meat"})
+            + pipeline(
+                cook_pipeline,
+                outputs={"grilled_meat": "lunch_grilled_meat"},
+                namespace="lunch",
+            )
+            + pipeline(lunch_pipeline, inputs={"lunch_food": "lunch_grilled_meat"})
         )
-        catalog = DataCatalog(
-            {},
-            feed_dict={
-                "breakfast.frozen_meat": "breakfast_frozen_meat",
-                "lunch.frozen_meat": "lunch_frozen_meat",
-            },
-        )
+        catalog = DataCatalog()
+        catalog["breakfast.frozen_meat"] = "breakfast_frozen_meat"
+        catalog["lunch.frozen_meat"] = "lunch_frozen_meat"
         result = SequentialRunner().run(pipe, catalog)
-        assert result == {
+        assert "breakfast_output" in result
+        assert "lunch_output" in result
+        outputs = {
+            "breakfast_output": result["breakfast_output"].load(),
+            "lunch_output": result["lunch_output"].load(),
+        }
+
+        assert outputs == {
             "breakfast_output": "breakfast_frozen_meat_defrosted_grilled_done",
             "lunch_output": "lunch_frozen_meat_defrosted_grilled_done",
         }

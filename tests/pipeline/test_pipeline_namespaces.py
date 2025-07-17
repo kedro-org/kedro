@@ -10,12 +10,36 @@ def branching(x):
     return x, x
 
 
+def dummy(*args):
+    return args[0]
+
+
+def create_a_big_pipeline(N=30, M=20) -> Pipeline:
+    layers = []
+    prev = "input_0"
+    for layer in range(M):
+        fanout = [f"w{layer}_{i}" for i in range(N)]
+        workers = [
+            node(
+                dummy, prev, o, name=f"worker_{layer}_{i}"
+            )  # namespace intentionally None
+            for i, o in enumerate(fanout)
+        ]
+        merge = node(dummy, fanout, f"input_{layer + 1}", name=f"merge_{layer}")
+        layers.extend([*workers, merge])
+        prev = f"input_{layer + 1}"
+    return Pipeline(layers)
+
+
 def test_pipeline_with_interrupted_namespace():
     # Create a pipeline with an interrupted namespace
     nodes = [
         node(identity, "A", "B", name="node1", namespace="ns1"),
         node(identity, "B", "C", name="node2"),  # No namespace interrupts the flow
-        node(identity, "C", "D", name="node3", namespace="ns1"),  # Namespace comes back
+        node(
+            identity, "C", "D", name="node3", namespace="ns1.ns2"
+        ),  # Namespace comes back
+        node(identity, "D", "E", name="node4", namespace="ns1"),  # Namespace comes back
     ]
 
     # Capture warnings during pipeline creation
@@ -41,6 +65,15 @@ def test_pipeline_with_continuous_namespace():
     with warnings.catch_warnings():
         warnings.simplefilter("error")  # Convert warnings to exceptions
         Pipeline(nodes)
+
+
+def test_big_pipeline():
+    # Create a big pipeline with many layers of parallel paths
+
+    # No warning should be raised
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")  # Convert warnings to exceptions
+        create_a_big_pipeline()
 
 
 def test_pipeline_with_child_namespace():
@@ -92,10 +125,6 @@ def test_pipeline_with_complex_namespace_interruption():
     # Check that both warning messages are present
     warn_msgs = [str(w.message) for w in warns]
     assert (
-        "Namespace 'ns1.child' is interrupted by nodes ['ns2.node3'] and thus invalid."
-        in warn_msgs
-    )
-    assert (
-        "Namespace 'ns1' is interrupted by nodes ['ns2.node3', 'ns1.child.node4'] and thus invalid."
+        "Namespace 'ns1' is interrupted by nodes ['ns2.node3'] and thus invalid."
         in warn_msgs
     )

@@ -1,7 +1,8 @@
 """Test a set of helper functions being used across kedro components."""
 
-import pytest
 from typing import Any, NoReturn, TypeVar
+
+import pytest
 
 from kedro.utils import load_obj
 
@@ -26,7 +27,7 @@ class TestExtractObject:
             load_obj("InvalidClass", "missing_path")
 
 
-def identity(input1: T) -> T:
+def identity(input1) -> T:
     """Return the input unchanged."""
     return input1  # pragma: no cover
 

@@ -4,15 +4,11 @@ import pytest
 from kedro_datasets.pandas import CSVDataset
 
 from kedro.io import CachedDataset, Version
-from tests.conftest import dummy_dataframe
 
 
 @pytest.fixture
 def dummy_numpy_array():
     return np.array([[1, 4, 5], [2, 5, 6]])
-
-
-dummy_dataframe = pytest.fixture(dummy_dataframe)
 
 
 @pytest.fixture(params=["dummy_dataframe", "dummy_numpy_array"])

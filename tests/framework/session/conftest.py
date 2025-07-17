@@ -20,7 +20,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
-from tests.conftest import dummy_dataframe_simple, identity
+from tests.test_utils import identity
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -104,9 +104,6 @@ def assert_exceptions_equal(e1: Exception, e2: Exception):
     assert isinstance(e1, type(e2)) and str(e1) == str(e2)
 
 
-dummy_dataframe = pytest.fixture(dummy_dataframe_simple)
-
-
 @pytest.fixture
 def mock_pipeline() -> Pipeline:
     return pipeline(
@@ -168,7 +165,7 @@ class LoggingHooks:
         catalog: DataCatalog,
         conf_catalog: dict[str, Any],
         conf_creds: dict[str, Any],
-        feed_dict: dict[str, Any],
+        parameters: dict[str, Any],
         save_version: str,
         load_versions: dict[str, str],
     ):
@@ -178,7 +175,7 @@ class LoggingHooks:
                 "catalog": catalog,
                 "conf_catalog": conf_catalog,
                 "conf_creds": conf_creds,
-                "feed_dict": feed_dict,
+                "parameters": parameters,
                 "save_version": save_version,
                 "load_versions": load_versions,
             },
@@ -191,7 +188,7 @@ class LoggingHooks:
         catalog: DataCatalog,
         inputs: dict[str, Any],
         is_async: str,
-        session_id: str,
+        run_id: str,
     ) -> None:
         logger.info(
             "About to run node",
@@ -200,7 +197,7 @@ class LoggingHooks:
                 "catalog": catalog,
                 "inputs": inputs,
                 "is_async": is_async,
-                "session_id": session_id,
+                "run_id": run_id,
             },
         )
 
@@ -212,7 +209,7 @@ class LoggingHooks:
         inputs: dict[str, Any],
         outputs: dict[str, Any],
         is_async: str,
-        session_id: str,
+        run_id: str,
     ) -> None:
         logger.info(
             "Ran node",
@@ -222,7 +219,7 @@ class LoggingHooks:
                 "inputs": inputs,
                 "outputs": outputs,
                 "is_async": is_async,
-                "session_id": session_id,
+                "run_id": run_id,
             },
         )
 
@@ -234,7 +231,7 @@ class LoggingHooks:
         catalog: DataCatalog,
         inputs: dict[str, Any],
         is_async: bool,
-        session_id: str,
+        run_id: str,
     ):
         logger.info(
             "Node error",
@@ -244,7 +241,7 @@ class LoggingHooks:
                 "catalog": catalog,
                 "inputs": inputs,
                 "is_async": is_async,
-                "session_id": session_id,
+                "run_id": run_id,
             },
         )
 
@@ -368,7 +365,7 @@ def mock_settings(mocker, project_hooks):
 @pytest.fixture
 def mock_session(mock_settings, mock_package_name, tmp_path):
     configure_project(mock_package_name)
-    session = KedroSession.create(tmp_path, extra_params={"params:key": "value"})
+    session = KedroSession.create(tmp_path, runtime_params={"params:key": "value"})
     yield session
     session.close()
 

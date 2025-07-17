@@ -3,27 +3,43 @@ from random import random
 import pandas as pd
 import pytest
 
-from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset, SharedMemoryDataCatalog
 from kedro.pipeline import node, pipeline
+from tests.conftest import PersistentTestDataset
 from tests.test_utils import (
     fan_in,
     first_arg,
-    identity,
     multi_input_list_output,
     return_none,
     sink,
 )
 
 
+def identity(arg):
+    return arg
+
+
+def source():
+    return "stuff"
+
+
+def exception_fn(*args):
+    raise Exception("test exception")
+
+
+def return_not_serialisable(arg):
+    return lambda x: x
+
+
 @pytest.fixture
-def conflicting_feed_dict(pandas_df_feed_dict):
+def conflicting_raw_data(pandas_df_raw_data):
     ds1 = MemoryDataset({"data": 0})
-    ds3 = pandas_df_feed_dict["ds3"]
+    ds3 = pandas_df_raw_data["ds3"]
     return {"ds1": ds1, "ds3": ds3}
 
 
 @pytest.fixture
-def pandas_df_feed_dict():
+def pandas_df_raw_data():
     pandas_df = pd.DataFrame({"Name": ["Alex", "Bob"], "Age": [15, 25]})
     return {"ds3": pandas_df}
 
@@ -31,6 +47,11 @@ def pandas_df_feed_dict():
 @pytest.fixture
 def catalog():
     return DataCatalog()
+
+
+@pytest.fixture
+def shared_memory_catalog():
+    return SharedMemoryDataCatalog()
 
 
 @pytest.fixture
@@ -48,7 +69,7 @@ def persistent_dataset_catalog():
     def _save(arg):
         pass
 
-    persistent_dataset = LambdaDataset(load=_load, save=_save)
+    persistent_dataset = PersistentTestDataset(load=_load, save=_save)
     return DataCatalog(
         {
             "ds0_A": persistent_dataset,

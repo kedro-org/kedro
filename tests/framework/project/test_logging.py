@@ -8,7 +8,7 @@ import pytest
 import yaml
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
-from kedro.io.data_catalog import DataCatalog
+from kedro.io import DataCatalog
 from kedro.logging import RichHandler, _format_rich
 from kedro.utils import _has_rich_handler
 
@@ -202,6 +202,7 @@ def test_logger_without_rich_markup():
 
     data = ("dummy",)
     catalog = DataCatalog.from_config({"dummy": {"type": "MemoryDataset"}})
+    catalog._use_rich_markup = False
 
     # Add a custom handler
     custom_handler = CustomHandler()
@@ -224,3 +225,42 @@ def test_logger_with_invalid_markup_args():
     var = "dummy"
     with pytest.raises(TypeError):
         root_logger.warning("dummy %s", var, extra={"rich_format": "invalid_arg"})
+
+
+def test_rich_format_with_list(capsys, mocker):
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+
+    rich_handler = RichHandler()
+    root_logger.addHandler(rich_handler)
+
+    mock_format_rich = mocker.patch(
+        "kedro.logging._format_rich",
+        side_effect=["[blue]blue[/blue]", "[red]red[/red]"],
+    )
+
+    root_logger.warning(
+        "text in %s, and text in %s",
+        "blue",
+        "red",
+        extra={"rich_format": ["blue", "red"]},
+    )
+
+    captured = capsys.readouterr()
+    stdout = captured.out + captured.err
+
+    assert "text in" in stdout and "blue" in stdout
+    assert mock_format_rich.call_count == 2
+
+
+def test_rich_format_with_invalid_type():
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+
+    rich_handler = RichHandler()
+    root_logger.addHandler(rich_handler)
+
+    with pytest.raises(
+        TypeError, match="rich_format only accept non-empty list as an argument"
+    ):
+        root_logger.warning("value: %s", "val", extra={"rich_format": "red"})

@@ -19,7 +19,7 @@ On this page we describe:
 
 ## Responsibilities of a maintainer
 
-Maintainers are the voting members of the TSC.
+Maintainers are the voting members of the TSC. Beyond contributing to regular development, their primary responsibility is to ensure the long-term success of Kedro.
 
 ### Product development
 

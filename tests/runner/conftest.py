@@ -19,10 +19,6 @@ def identity(arg):
     return arg
 
 
-def source():
-    return "stuff"
-
-
 def exception_fn(*args):
     raise Exception("test exception")
 

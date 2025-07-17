@@ -42,20 +42,14 @@ Maintainers are the voting members of the TSC. Beyond contributing to regular de
 Just contributing does not make you a maintainer; you need to demonstrate commitment to Kedro's long-term success by
 working with existing maintainers for at least one year.
 
-We look for committers who can do at least some of the following:
+On top of the [committer responsibilities](#responsibilities-of-a-committer), we look for people who can do at least some of the following:
 
-- Write high-quality code and collaborate with the team and community
-- Make substantial improvements to our documentation, either in terms of content or information architecture
 - Bring awareness of industry trends to the team, connect the project to complementary initiatives, help steer the direction
 - Give talks about the project at conferences and online events, write blog posts, or other forms of advocacy
-- Improve the aesthetics and usability of the project, including its documentation, website, and user interfaces (graphical and textual)
-- Understand the project's code base and internals
-- Develop valuable plugins that complement the functionality of Kedro
-- Make pull requests from our backlog or roadmap; maintainers need to work towards a common goal
-- Learn how the team works, including processes for testing, quality standards and code review
-- Show evidence of already having started pull requests and code reviews under the guidance of maintainers; including asking
-  for help where needed
 - Show excitement about the future of Kedro
+- In case of contributors from the community who haven't been previously appointed as committers,
+  show evidence of already having started pull requests and code reviews under the guidance of maintainers;
+  including asking for help where needed
 
 Appointing new maintainers requires a vote of the TSC,
 described in [Adding or removing maintainers](#adding-or-removing-maintainers).
@@ -63,6 +57,16 @@ described in [Adding or removing maintainers](#adding-or-removing-maintainers).
 ## Responsibilities of a committer
 
 Committers are observer (non-voting) members of the TSC. They are active contributors who are responsible for maintaining the health of the project, participating in planning and technical design decisions, and otherwise acting as part of the core Kedro development team.
+
+We look for people who can do at least some of the following:
+
+- Write high-quality code and collaborate with the team and community
+- Make substantial improvements to our documentation, either in terms of content or information architecture
+- Improve the aesthetics and usability of the project, including its documentation, website, and user interfaces (graphical and textual)
+- Understand the project's code base and internals
+- Develop valuable plugins that complement the functionality of Kedro
+- Make pull requests from our backlog or roadmap; maintainers need to work towards a common goal
+- Learn how the team works, including processes for testing, quality standards and code review
 
 ## Requirements to become a committer
 

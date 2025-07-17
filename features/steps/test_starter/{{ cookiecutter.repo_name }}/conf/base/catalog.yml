@@ -45,3 +45,11 @@
 example_iris_data:
   type: pandas.CSVDataset
   filepath: data/01_raw/iris.csv
+
+example_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/example_model.pkl
+
+example_predictions:
+  type: pickle.PickleDataset
+  filepath: data/07_model_output/example_predictions.pkl

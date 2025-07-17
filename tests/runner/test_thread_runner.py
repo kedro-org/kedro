@@ -15,7 +15,8 @@ from kedro.io import (
 )
 from kedro.pipeline import node, pipeline
 from kedro.runner import ThreadRunner
-from tests.runner.conftest import exception_fn, identity, return_none, sink, source
+from tests.runner.conftest import exception_fn, identity
+from tests.test_utils import return_none, sink, source
 
 
 class TestValidThreadRunner:

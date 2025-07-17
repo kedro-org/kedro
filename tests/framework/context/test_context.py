@@ -29,7 +29,6 @@ from kedro.framework.project import (
 )
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-from tests.conftest import dummy_dataframe
 
 MOCK_PACKAGE_NAME = "mock_package_name"
 
@@ -155,8 +154,6 @@ def mock_settings(mocker):
     mocker.patch("kedro.framework.session.session.settings", mocked_settings)
     return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
-
-dummy_dataframe = pytest.fixture(dummy_dataframe)
 
 
 expected_message_middle = (

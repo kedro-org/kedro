@@ -20,7 +20,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
-from tests.conftest import dummy_dataframe_simple, identity
+from tests.test_utils import identity
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -103,8 +103,6 @@ def config_dir(tmp_path, local_config):
 def assert_exceptions_equal(e1: Exception, e2: Exception):
     assert isinstance(e1, type(e2)) and str(e1) == str(e2)
 
-
-dummy_dataframe = pytest.fixture(dummy_dataframe_simple)
 
 
 @pytest.fixture

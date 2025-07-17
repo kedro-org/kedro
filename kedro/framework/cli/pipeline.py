@@ -74,7 +74,7 @@ def _check_pipeline_name(ctx: click.Context, param: Any, value: str) -> str:
     return value
 
 
-@click.group(name="Kedro")
+@click.group(name="kedro")
 def pipeline_cli() -> None:  # pragma: no cover
     pass
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from kedro.io.core import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError, TCopyMode
 
 _EMPTY = object()
 
@@ -16,29 +16,27 @@ class MemoryDataset(AbstractDataset):
     indicate MemoryDataset's non-persistence.
 
     Example:
-    ::
+    ``` python
+    from kedro.io import MemoryDataset
+    import pandas as pd
 
-        >>> from kedro.io import MemoryDataset
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
-        >>> dataset = MemoryDataset(data=data)
-        >>>
-        >>> loaded_data = dataset.load()
-        >>> assert loaded_data.equals(data)
-        >>>
-        >>> new_data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5]})
-        >>> dataset.save(new_data)
-        >>> reloaded_data = dataset.load()
-        >>> assert reloaded_data.equals(new_data)
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    dataset = MemoryDataset(data=data)
 
+    loaded_data = dataset.load()
+    assert loaded_data.equals(data)
+
+    new_data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5]})
+    dataset.save(new_data)
+    reloaded_data = dataset.load()
+    assert reloaded_data.equals(new_data)
+    ```
     """
 
     def __init__(
         self,
         data: Any = _EMPTY,
-        copy_mode: str | None = None,
+        copy_mode: TCopyMode | None = None,
         metadata: dict[str, Any] | None = None,
     ):
         """Creates a new instance of ``MemoryDataset`` pointing to the
@@ -85,7 +83,7 @@ class MemoryDataset(AbstractDataset):
         return {"data": None}  # pragma: no cover
 
 
-def _infer_copy_mode(data: Any) -> str:
+def _infer_copy_mode(data: Any) -> TCopyMode:
     """Infers the copy mode to use given the data type.
 
     Args:
@@ -108,15 +106,14 @@ def _infer_copy_mode(data: Any) -> str:
         ibis = None  # type: ignore[assignment] # pragma: no cover
 
     if pd and isinstance(data, pd.DataFrame) or np and isinstance(data, np.ndarray):
-        copy_mode = "copy"
+        return "copy"
     elif type(data).__name__ == "DataFrame" or ibis and isinstance(data, ibis.Table):
-        copy_mode = "assign"
+        return "assign"
     else:
-        copy_mode = "deepcopy"
-    return copy_mode
+        return "deepcopy"
 
 
-def _copy_with_mode(data: Any, copy_mode: str) -> Any:
+def _copy_with_mode(data: Any, copy_mode: TCopyMode) -> Any:
     """Returns the copied data using the copy mode specified.
     If no copy mode is provided, then it is inferred based on the type of the data.
 

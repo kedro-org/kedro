@@ -9,6 +9,7 @@ import os
 import sys
 
 import pytest
+import pandas as pd
 
 
 @pytest.fixture(autouse=True)
@@ -23,3 +24,15 @@ def preserve_system_context():
 
     if os.getcwd() != old_cwd:
         os.chdir(old_cwd)  # pragma: no cover
+
+
+@pytest.fixture
+def dummy_dataframe():
+    """Return a dummy pandas DataFrame for testing."""
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
+@pytest.fixture
+def dummy_dataframe_simple():
+    """Return a simple dummy pandas DataFrame for testing."""
+    return pd.DataFrame({"test": [1, 2]})

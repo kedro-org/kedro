@@ -5,7 +5,7 @@ from typing import Callable
 import pytest
 
 from kedro.pipeline import node
-from tests.testing_utils import biconcat, constant_output, identity, triconcat
+from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
 @pytest.fixture

@@ -12,7 +12,7 @@ from kedro.pipeline.pipeline import (
     OutputNotUniqueError,
 )
 from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
-from tests.testing_utils import biconcat, constant_output, identity, triconcat
+from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
 def test_deprecation():

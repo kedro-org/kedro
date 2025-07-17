@@ -5,7 +5,7 @@ from kedro_datasets.pandas import CSVDataset
 
 from kedro.io import DataCatalog, KedroDataCatalog, MemoryDataset
 from kedro.pipeline import node, pipeline
-from tests.testing_utils import identity
+from tests.test_utils import identity
 
 
 @pytest.fixture

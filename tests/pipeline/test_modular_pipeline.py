@@ -2,7 +2,7 @@ import pytest
 
 from kedro.pipeline import node, pipeline
 from kedro.pipeline.pipeline import ModularPipelineError, Pipeline
-from tests.testing_utils import biconcat, constant_output, identity, triconcat
+from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
 class TestPipelineHelper:

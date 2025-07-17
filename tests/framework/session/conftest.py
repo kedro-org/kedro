@@ -20,7 +20,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
-from tests.testing_utils import dummy_dataframe_simple, identity
+from tests.conftest import dummy_dataframe_simple, identity
 
 if TYPE_CHECKING:
     from pathlib import Path

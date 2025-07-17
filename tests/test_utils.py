@@ -1,9 +1,7 @@
 """Test a set of helper functions being used across kedro components."""
 
 import pytest
-import pandas as pd
 from typing import Any, NoReturn, TypeVar
-
 
 from kedro.utils import load_obj
 
@@ -27,6 +25,7 @@ class TestExtractObject:
         with pytest.raises(ImportError, match=r"No module named 'missing_path'"):
             load_obj("InvalidClass", "missing_path")
 
+
 def identity(input1: T) -> T:
     """Return the input unchanged."""
     return input1  # pragma: no cover
@@ -45,16 +44,6 @@ def triconcat(input1: str, input2: str, input3: str) -> str:
 def constant_output() -> str:
     """Return a constant output string."""
     return "output"  # pragma: no cover
-
-
-def dummy_dataframe():
-    """Return a dummy pandas DataFrame for testing."""
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-
-def dummy_dataframe_simple():
-    """Return a simple dummy pandas DataFrame for testing."""
-    return pd.DataFrame({"test": [1, 2]})
 
 
 # Runner test utilities

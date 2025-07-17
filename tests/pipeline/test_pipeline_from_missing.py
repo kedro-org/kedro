@@ -6,7 +6,7 @@ from kedro.framework.hooks import _create_hook_manager
 from kedro.io import DataCatalog, LambdaDataset
 from kedro.pipeline import node, pipeline
 from kedro.runner import SequentialRunner
-from tests.testing_utils import biconcat, constant_output, identity
+from tests.test_utils import biconcat, constant_output, identity
 
 
 @pytest.fixture

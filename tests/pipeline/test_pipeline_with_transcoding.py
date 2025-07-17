@@ -9,7 +9,7 @@ from kedro.pipeline.pipeline import (
     OutputNotUniqueError,
 )
 from kedro.pipeline.transcoding import _strip_transcoding
-from tests.testing_utils import biconcat, constant_output, identity, triconcat
+from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
 def _get_node_names(pipeline):

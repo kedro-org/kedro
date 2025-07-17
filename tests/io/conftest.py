@@ -4,7 +4,7 @@ import pytest
 from kedro_datasets.pandas import CSVDataset
 
 from kedro.io import CachedDataset, Version
-from tests.testing_utils import dummy_dataframe
+from tests.conftest import dummy_dataframe
 
 
 @pytest.fixture

@@ -5,7 +5,7 @@ import pytest
 
 from kedro.io import DataCatalog, LambdaDataset, MemoryDataset
 from kedro.pipeline import node, pipeline
-from tests.testing_utils import (
+from tests.test_utils import (
     fan_in,
     first_arg,
     identity,

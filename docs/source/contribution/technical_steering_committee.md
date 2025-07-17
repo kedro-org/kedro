@@ -2,7 +2,7 @@
 
 Kedro is an incubating project within [LF AI & Data](https://lfaidata.foundation/).
 
-The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers and committers ("contributors"). We list Kedro's [current](#current-maintainers) and [past](#past-maintainers) maintainers on this page.
+The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers and committers. We list Kedro's [current](#current-maintainers) and [past](#past-maintainers) maintainers on this page.
 
 The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development.
 

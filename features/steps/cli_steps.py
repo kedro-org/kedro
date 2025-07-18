@@ -288,6 +288,11 @@ def create_project_with_starter(context, starter):
 
     if starter == "default":
         starter = Path(__file__).parent / "test_starter"
+    else:
+        # Assume pre-cloned starter from GitHub Actions workflow
+        starter = Path("package") / "starters" / starter
+    
+    print(f"📁 Using local starter path: {starter.resolve()}")
 
     args = [
         context.kedro,
@@ -295,7 +300,7 @@ def create_project_with_starter(context, starter):
         "-c",
         str(context.config_file),
         "--starter",
-        str(starter),
+        str(starter.resolve()),
     ]
 
     res = run(

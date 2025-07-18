@@ -42,6 +42,7 @@ jobs:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
       branch: ${{ inputs.branch }}
+    secrets: inherit
 
   lint:
     strategy:

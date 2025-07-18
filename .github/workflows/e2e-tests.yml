@@ -56,6 +56,15 @@ jobs:
           Move-Item .\winutils.exe C:\hadoop\bin
           echo "HADOOP_HOME=C:\hadoop" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
           echo "PATH=$env:HADOOP_HOME\bin;$env:PATH" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
+      - name: Clone kedro-starters into package/starters
+        env:
+          GH_E2E_AUTH_TOKEN: ${{ secrets.GH_E2E_AUTH_TOKEN }}
+        run: |
+          LATEST_TAG=$(curl -s -H "Authorization: Bearer $GH_E2E_AUTH_TOKEN" https://api.github.com/repos/kedro-org/kedro-starters/releases/latest | jq -r '.tag_name')
+          echo "📦 Using kedro-starters tag: $LATEST_TAG"
+          mkdir -p package/starters
+          git clone --depth 1 --branch "$LATEST_TAG" https://$GH_E2E_AUTH_TOKEN@github.com/kedro-org/kedro-starters.git package/starters
+          echo "✅ Starter cloned to: $(pwd)/package/starters"
       - name: Install dependencies
         run: |
           pip install --upgrade pip

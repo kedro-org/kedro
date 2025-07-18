@@ -1,5 +1,14 @@
 # Upcoming Release 1.0.0
 ## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 1.0.0
+## Documentation changes
+## Community contributions
+
+# Release 1.0.0rc2
+
+## Major features and improvements
 * Added `--only-missing-outputs` CLI flag to `kedro run`. This flag skips nodes when all their persistent outputs exist.
 * Removed the `AbstractRunner.run_only_missing()` method, an older and underused API for partial runs. Please use `--only-missing-outputs` CLI instead.
 

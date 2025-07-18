@@ -65,7 +65,7 @@ We look for people who can do at least some of the following:
 - Improve the aesthetics and usability of the project, including its documentation, website, and user interfaces (graphical and textual)
 - Understand the project's code base and internals
 - Develop valuable plugins that complement the functionality of Kedro
-- Make pull requests from our backlog or roadmap; maintainers need to work towards a common goal
+- Make pull requests from our backlog or roadmap; committers need to work towards a common goal
 - Learn how the team works, including processes for testing, quality standards and code review
 
 ## Requirements to become a committer

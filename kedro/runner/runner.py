@@ -57,6 +57,10 @@ class AbstractRunner(ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(self.__module__)
 
+    @property
+    def _plain_logger(self) -> logging.Logger:
+        return logging.getLogger("kedro.runner.plain")
+
     def run(
         self,
         pipeline: Pipeline,
@@ -340,8 +344,9 @@ class AbstractRunner(ABC):
                 f"There are {len(remaining_nodes)} nodes that have not run.\n"
                 "You can resume the pipeline run from the nearest nodes with "
                 "persisted inputs by adding the following "
-                f"argument to your previous command:\n{postfix}"
+                f"argument to your previous command:"
             )
+            self._plain_logger.warning(postfix)
 
     @staticmethod
     def _release_datasets(

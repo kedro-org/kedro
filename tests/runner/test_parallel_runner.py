@@ -24,11 +24,9 @@ from kedro.runner.runner import _MAX_WINDOWS_WORKERS
 from tests.runner.conftest import (
     exception_fn,
     identity,
-    return_none,
     return_not_serialisable,
-    sink,
-    source,
 )
+from tests.test_utils import return_none, sink, source
 
 
 class SingleProcessDataset(AbstractDataset):

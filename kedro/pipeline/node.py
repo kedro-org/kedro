@@ -21,7 +21,7 @@ from more_itertools import spy, unzip
 from .transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Generator, Iterable
 
 
 @dataclass
@@ -336,6 +336,25 @@ class Node:
             String representing node's namespace, typically from outer to inner scopes.
         """
         return self._namespace
+
+    @cached_property
+    def namespace_prefixes(self) -> list[str]:
+        """Return all hierarchical prefixes of the node's namespace.
+
+        Returns:
+            A list of namespace prefixes, from shortest to longest.
+            For example, a namespace 'a.b.c' would return ['a', 'a.b', 'a.b.c'].
+            If the node has no namespace, returns an empty list.
+        """
+        return list(self._enumerate_namespaces())
+
+    def _enumerate_namespaces(self) -> Generator[str]:
+        parts = (self._namespace or "").split(".")
+        prefix = ""
+        for p in parts:
+            prefix += p
+            yield prefix
+            prefix += "."
 
     @cached_property
     def inputs(self) -> list[str]:
@@ -671,30 +690,33 @@ def node(  # noqa: PLR0913
         A Node object with mapped inputs, outputs and function.
 
     Example:
-    ::
+    ``` python
+    import pandas as pd
+    import numpy as np
 
-        >>> import pandas as pd
-        >>> import numpy as np
-        >>>
-        >>> def clean_data(cars: pd.DataFrame,
-        >>>                boats: pd.DataFrame) -> dict[str, pd.DataFrame]:
-        >>>     return dict(cars_df=cars.dropna(), boats_df=boats.dropna())
-        >>>
-        >>> def halve_dataframe(data: pd.DataFrame) -> List[pd.DataFrame]:
-        >>>     return np.array_split(data, 2)
-        >>>
-        >>> nodes = [
-        >>>     node(clean_data,
-        >>>          inputs=['cars2017', 'boats2017'],
-        >>>          outputs=dict(cars_df='clean_cars2017',
-        >>>                       boats_df='clean_boats2017')),
-        >>>     node(halve_dataframe,
-        >>>          'clean_cars2017',
-        >>>          ['train_cars2017', 'test_cars2017']),
-        >>>     node(halve_dataframe,
-        >>>          dict(data='clean_boats2017'),
-        >>>          ['train_boats2017', 'test_boats2017'])
-        >>> ]
+
+    def clean_data(cars: pd.DataFrame, boats: pd.DataFrame) -> dict[str, pd.DataFrame]:
+        return dict(cars_df=cars.dropna(), boats_df=boats.dropna())
+
+
+    def halve_dataframe(data: pd.DataFrame) -> List[pd.DataFrame]:
+        return np.array_split(data, 2)
+
+
+    nodes = [
+        node(
+            clean_data,
+            inputs=["cars2017", "boats2017"],
+            outputs=dict(cars_df="clean_cars2017", boats_df="clean_boats2017"),
+        ),
+        node(halve_dataframe, "clean_cars2017", ["train_cars2017", "test_cars2017"]),
+        node(
+            halve_dataframe,
+            dict(data="clean_boats2017"),
+            ["train_boats2017", "test_boats2017"],
+        ),
+    ]
+    ```
     """
     return Node(
         func,

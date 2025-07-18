@@ -5,7 +5,6 @@ from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from typing import TYPE_CHECKING, Any
 
-import pandas as pd
 import pytest
 import toml
 import yaml
@@ -21,6 +20,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
+from tests.test_utils import identity
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -100,25 +100,16 @@ def config_dir(tmp_path, local_config):
     _write_toml(pyproject_toml, payload)
 
 
-def identity_node(x: str):
-    return x
-
-
 def assert_exceptions_equal(e1: Exception, e2: Exception):
     assert isinstance(e1, type(e2)) and str(e1) == str(e2)
-
-
-@pytest.fixture
-def dummy_dataframe() -> pd.DataFrame:
-    return pd.DataFrame({"test": [1, 2]})
 
 
 @pytest.fixture
 def mock_pipeline() -> Pipeline:
     return pipeline(
         [
-            node(identity_node, "cars", "planes", name="node1"),
-            node(identity_node, "boats", "ships", name="node2"),
+            node(identity, "cars", "planes", name="node1"),
+            node(identity, "boats", "ships", name="node2"),
         ],
         tags="pipeline",
     )

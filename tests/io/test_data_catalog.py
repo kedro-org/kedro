@@ -625,8 +625,8 @@ class TestDataCatalog:
                     ds_name="bad", ds_config="not_dict"
                 )
 
-        # [TODO: This breaks as kedro_datasets still have old catalog references
-        # https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/kedro_datasets/partitions/incremental_dataset.py#L24]
+        # TODO: revert commenting when we drop python3.9 support and move to kedro-datasets>=8.0.0
+        # Currently the test is failing because it requires kedro-datasets version compatible with kedro 1.0
         # def test_confirm(self, tmp_path, caplog, mocker):
         #     """Confirm the dataset"""
         #     with caplog.at_level(logging.INFO):

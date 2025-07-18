@@ -2,24 +2,7 @@ import pytest
 
 from kedro.pipeline import node, pipeline
 from kedro.pipeline.pipeline import Pipeline, PipelineError
-
-# Different dummy func based on the number of arguments
-
-
-def constant_output():
-    return "output"  # pragma: no cover
-
-
-def identity(input1: str):
-    return input1  # pragma: no cover
-
-
-def biconcat(input1: str, input2: str):
-    return input1 + input2  # pragma: no cover
-
-
-def triconcat(input1: str, input2: str, input3: str):
-    return input1 + input2 + input3  # pragma: no cover
+from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
 class TestPipelineHelper:

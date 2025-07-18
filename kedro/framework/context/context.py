@@ -24,19 +24,20 @@ def _is_relative_path(path_string: str) -> bool:
     """Checks whether a path string is a relative path.
 
     Example:
-    ::
-        >>> _is_relative_path("data/01_raw") == True
-        >>> _is_relative_path("info.log") == True
-        >>> _is_relative_path("/tmp/data/01_raw") == False
-        >>> _is_relative_path(r"C:\\info.log") == False
-        >>> _is_relative_path(r"\\'info.log") == False
-        >>> _is_relative_path("c:/info.log") == False
-        >>> _is_relative_path("s3://info.log") == False
+    ``` python
+    _is_relative_path("data/01_raw") == True
+    _is_relative_path("info.log") == True
+    _is_relative_path("/tmp/data/01_raw") == False
+    _is_relative_path(r"C:\\info.log") == False
+    _is_relative_path(r"\\'info.log") == False
+    _is_relative_path("c:/info.log") == False
+    _is_relative_path("s3://info.log") == False
 
     Args:
         path_string: The path string to check.
     Returns:
         Whether the string is a relative path.
+    ```
     """
     # os.path.splitdrive does not reliably work on non-Windows systems
     # breaking the coverage, using PureWindowsPath instead
@@ -65,19 +66,19 @@ def _convert_paths_to_absolute_posix(
     through `kedro run` or `__main__.py` entrypoints.
 
     Example:
-    ::
-        >>> conf = _convert_paths_to_absolute_posix(
-        >>>     project_path=Path("/path/to/my/project"),
-        >>>     conf_dictionary={
-        >>>         "handlers": {
-        >>>             "info_file_handler": {
-        >>>                 "filename": "info.log"
-        >>>             }
-        >>>         }
-        >>>     }
-        >>> )
-        >>> print(conf['handlers']['info_file_handler']['filename'])
-        "/path/to/my/project/info.log"
+    ```` python
+    conf = _convert_paths_to_absolute_posix(
+        project_path=Path("/path/to/my/project"),
+        conf_dictionary={
+            "handlers": {
+                "info_file_handler": {
+                    "filename": "info.log"
+                }
+            }
+        }
+    )
+    print(conf['handlers']['info_file_handler']['filename'])
+    "/path/to/my/project/info.log"
 
     Args:
         project_path: The root directory to prepend to relative path to make absolute path.
@@ -86,6 +87,7 @@ def _convert_paths_to_absolute_posix(
         A dictionary containing only absolute paths.
     Raises:
         ValueError: If the provided ``project_path`` is not an absolute path.
+    ```
     """
     if not project_path.is_absolute():
         raise ValueError(
@@ -283,12 +285,13 @@ class KedroContext:
             specify specific nested parameters in their node inputs.
 
             Example:
-
-                >>> param_name = "a"
-                >>> param_value = {"b": 1}
-                >>> _add_param_to_params_dict(param_name, param_value)
-                >>> assert params_dict["params:a"] == {"b": 1}
-                >>> assert params_dict["params:a.b"] == 1
+            ``` python
+            param_name = "a"
+            param_value = {"b": 1}
+            _add_param_to_params_dict(param_name, param_value)
+            assert params_dict["params:a"] == {"b": 1}
+            assert params_dict["params:a.b"] == 1
+            ```
             """
             key = f"params:{param_name}"
             params_dict[key] = param_value

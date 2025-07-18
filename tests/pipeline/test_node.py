@@ -5,23 +5,7 @@ from typing import Callable
 import pytest
 
 from kedro.pipeline import node
-
-
-# Different dummy func based on the number of arguments
-def constant_output():
-    return "output"  # pragma: no cover
-
-
-def identity(input1: str):
-    return input1  # pragma: no cover
-
-
-def biconcat(input1: str, input2: str):
-    return input1 + input2  # pragma: no cover
-
-
-def triconcat(input1: str, input2: str, input3: str):
-    return input1 + input2 + input3  # pragma: no cover
+from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
 @pytest.fixture
@@ -422,6 +406,17 @@ class TestNames:
         assert str(n) == "identity([in]) -> [out]"
         assert re.match(r"^namespace\.identity__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
+
+    def test_namespace_prefixes(self):
+        n = node(identity, ["in"], ["out"], namespace="a.b.c.d.e.f")
+        assert n.namespace_prefixes == [
+            "a",
+            "a.b",
+            "a.b.c",
+            "a.b.c.d",
+            "a.b.c.d.e",
+            "a.b.c.d.e.f",
+        ]
 
     def test_named_and_namespaced(self):
         n = node(identity, ["in"], ["out"], name="name", namespace="namespace")

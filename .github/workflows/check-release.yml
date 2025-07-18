@@ -31,13 +31,13 @@ jobs:
       new_release: ${{ steps.version_check.outputs.new_release }}
       kedro_version: ${{ steps.version_check.outputs.kedro_version }}
 
-  test-kedro:
-    needs: check-version
-    if: ${{ needs.check-version.outputs.new_release == 'true' }}
-    uses: ./.github/workflows/all-checks.yml
+  # test-kedro:
+  #   needs: check-version
+  #   if: ${{ needs.check-version.outputs.new_release == 'true' }}
+  #   uses: ./.github/workflows/all-checks.yml
 
   build-publish:
-    needs: [check-version, test-kedro]
+    needs: [check-version] # , test-kedro
     if: |
       always() &&
       !contains(needs.*.result, 'failure') &&

@@ -108,6 +108,9 @@ def _get_latest_starters_version() -> str:
         GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
         headers = {}
         if GITHUB_TOKEN:
+            logging.warning(
+                "Using GITHUB_TOKEN to fetch the latest kedro-starters version. "
+            )
             headers["Authorization"] = f"token {GITHUB_TOKEN}"
 
         try:

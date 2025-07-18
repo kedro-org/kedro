@@ -56,15 +56,28 @@ jobs:
           Move-Item .\winutils.exe C:\hadoop\bin
           echo "HADOOP_HOME=C:\hadoop" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
           echo "PATH=$env:HADOOP_HOME\bin;$env:PATH" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
-      - name: Clone kedro-starters into package/starters
+      - name: Clone latest kedro-starters release into package/starters
         env:
           GH_E2E_AUTH_TOKEN: ${{ secrets.GH_E2E_AUTH_TOKEN }}
         run: |
-          LATEST_TAG=$(curl -s -H "Authorization: Bearer $GH_E2E_AUTH_TOKEN" https://api.github.com/repos/kedro-org/kedro-starters/releases/latest | jq -r '.tag_name')
-          echo "📦 Using kedro-starters tag: $LATEST_TAG"
+          API_RESPONSE=$(curl -s -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_E2E_AUTH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/kedro-org/kedro-starters/releases/latest)
+
+          LATEST_TAG=$(echo "$API_RESPONSE" | jq -r '.tag_name')
+
+          if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" == "null" ]; then
+            echo "Failed to get latest tag"
+            exit 1
+          fi
+
+          echo "Using kedro-starters tag: $LATEST_TAG"
           mkdir -p package/starters
-          git clone --depth 1 --branch "$LATEST_TAG" https://$GH_E2E_AUTH_TOKEN@github.com/kedro-org/kedro-starters.git package/starters
-          echo "✅ Starter cloned to: $(pwd)/package/starters"
+          git clone --depth 1 --branch "$LATEST_TAG" \
+            https://x-access-token:$GH_E2E_AUTH_TOKEN@github.com/kedro-org/kedro-starters.git \
+            package/starters
       - name: Install dependencies
         run: |
           pip install --upgrade pip

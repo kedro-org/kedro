@@ -57,6 +57,7 @@ jobs:
           echo "HADOOP_HOME=C:\hadoop" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
           echo "PATH=$env:HADOOP_HOME\bin;$env:PATH" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
       - name: Clone latest kedro-starters release into package/starters
+        shell: bash
         env:
           GH_E2E_AUTH_TOKEN: ${{ secrets.GH_E2E_AUTH_TOKEN }}
         run: |
@@ -73,11 +74,9 @@ jobs:
             exit 1
           fi
 
-          echo "Using kedro-starters tag: $LATEST_TAG"
           mkdir -p package/starters
           git clone --depth 1 --branch "$LATEST_TAG" \
-            https://x-access-token:$GH_E2E_AUTH_TOKEN@github.com/kedro-org/kedro-starters.git \
-            package/starters
+            https://github.com/kedro-org/kedro-starters.git package/starters
       - name: Install dependencies
         run: |
           pip install --upgrade pip

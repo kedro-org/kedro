@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
 
 
-@click.group(name="Kedro")
+@click.group(name="kedro")
 def jupyter_cli() -> None:  # pragma: no cover
     pass
 

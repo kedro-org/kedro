@@ -318,7 +318,7 @@ To start Kedro-Viz, enter the following in your terminal:
 kedro viz run
 ```
 
-This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the {doc}`Kedro-Viz documentation<kedro-viz:kedro-viz_visualisation>` for more detail.
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the [Kedro-Viz doc](https://docs.kedro.org/projects/kedro-viz/en/stable/) for more detail.
 
 To exit, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
@@ -326,6 +326,11 @@ To exit, close the browser tab. To regain control of the terminal, enter `^+c` o
 
 <iframe width="100%" height="460" src="https://www.youtube.com/embed/KWqSzbHgNW4"
 frameborder="0" allowfullscreen></iframe>
+
+!!! tip
+    Available from Kedro-Viz 12.0.0 onward, the Workflow view helps you visualise and debug your most recent kedro run. You’ll be able to see which nodes succeeded, failed, or were skipped - all in one place. [Read more about Workflow in Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/workflow-view/ )
+
+    ![](../assets/workflow_view.png)
 
 ## Checkpoint
 

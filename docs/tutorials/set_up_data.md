@@ -112,7 +112,7 @@ frameborder="0" allowfullscreen></iframe>
 
 ### Custom data
 
-[Kedro supports numerous datasets](https://docs.kedro.org/projects/kedro-datasets/en/latest/) out of the box, but you can also add support for any proprietary data format or filesystem.
+[Kedro supports numerous datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) out of the box, but you can also add support for any proprietary data format or filesystem.
 
 You can find further information about [how to add support for custom datasets](../extend/how_to_create_a_custom_dataset.md) in specific documentation covering advanced usage.
 

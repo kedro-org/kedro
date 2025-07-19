@@ -10,6 +10,10 @@ on:
       branch:
         type: string
         default: ''
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TAGGING_TOKEN }}
+
 jobs:
   unit-tests:
     runs-on: ${{ inputs.os }}

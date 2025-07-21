@@ -456,19 +456,22 @@ class DataCatalog(CatalogProtocol):
         """
         yield from self.keys()
 
-    def __getitem__(self, ds_name: str) -> AbstractDataset | None:
+    def __getitem__(self, ds_name: str) -> AbstractDataset:
         """
         Get a dataset by name from the catalog.
 
         If a dataset is not materialized but matches dataset_pattern or user_catch_all_pattern
-        by default or runtime_patterns if fallback_to_runtime_pattern is enabled
+        by default or runtime_patterns if fallback_to_runtime_pattern is enabled,
         it is instantiated and added to the catalog first, then returned.
 
         Args:
             ds_name: The name of the dataset.
 
         Returns:
-            The dataset instance if found, otherwise None.
+            The dataset instance.
+
+        Raises:
+            DatasetNotFoundError: If the dataset does not exist.
 
         Example:
         ```python
@@ -478,7 +481,10 @@ class DataCatalog(CatalogProtocol):
             # MemoryDataset()
         ```
         """
-        return self.get(ds_name)
+        dataset = self.get(ds_name)
+        if dataset is None:
+            raise DatasetNotFoundError(f"Dataset '{ds_name}' not found in the catalog")
+        return dataset
 
     def __setitem__(self, key: str, value: Any) -> None:
         """Registers a dataset or raw data into the catalog using the specified name.
@@ -997,10 +1003,6 @@ class DataCatalog(CatalogProtocol):
         """
         dataset = self[ds_name]
 
-        if dataset is None:
-            error_msg = f"Dataset '{ds_name}' not found in the catalog"
-            raise DatasetNotFoundError(error_msg)
-
         self._logger.info(
             "Saving data to %s (%s)...",
             _format_rich(ds_name, "dark_orange") if self._use_rich_markup else ds_name,
@@ -1066,10 +1068,6 @@ class DataCatalog(CatalogProtocol):
         """
         dataset = self[ds_name]
 
-        if dataset is None:
-            error_msg = f"Dataset '{ds_name}' not found in the catalog"
-            raise DatasetNotFoundError(error_msg)
-
         dataset.release()
 
     def confirm(self, ds_name: str) -> None:
@@ -1084,10 +1082,6 @@ class DataCatalog(CatalogProtocol):
         self._logger.info("Confirming dataset '%s'", ds_name)
 
         dataset = self[ds_name]
-
-        if dataset is None:
-            error_msg = f"Dataset '{ds_name}' not found in the catalog"
-            raise DatasetNotFoundError(error_msg)
 
         if hasattr(dataset, "confirm"):
             dataset.confirm()
@@ -1112,7 +1106,7 @@ class DataCatalog(CatalogProtocol):
             True
         ```
         """
-        dataset = self[ds_name]
+        dataset = self.get(ds_name)
         return dataset.exists() if dataset else False
 
     @staticmethod

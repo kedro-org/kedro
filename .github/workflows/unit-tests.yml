@@ -10,6 +10,7 @@ on:
       branch:
         type: string
         default: ''
+
 jobs:
   unit-tests:
     runs-on: ${{ inputs.os }}

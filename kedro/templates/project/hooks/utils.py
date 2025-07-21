@@ -2,8 +2,6 @@ from pathlib import Path
 import shutil
 import toml
 
-from pre_commit_hooks.requirements_txt_fixer import fix_requirements
-
 current_dir = Path.cwd()
 
 # Requirements for linting tools
@@ -216,13 +214,3 @@ def setup_template_tools(
         # Remove requirements used by example pipelines
         _remove_from_file(requirements_file_path, example_pipeline_requirements)
         _remove_extras_from_kedro_datasets(requirements_file_path)
-
-
-def sort_requirements(requirements_file_path: Path) -> None:
-    """Sort entries in `requirements.txt`, writing back changes, if any.
-
-    Args:
-        requirements_file_path (Path): The path to the `requirements.txt` file.
-    """
-    with open(requirements_file_path, "rb+") as file_obj:
-        fix_requirements(file_obj)

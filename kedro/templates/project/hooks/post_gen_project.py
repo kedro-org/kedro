@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from kedro.templates.project.hooks.utils import setup_template_tools, sort_requirements
+from kedro.templates.project.hooks.utils import setup_template_tools
 
 
 def main():
@@ -21,9 +21,6 @@ def main():
         python_package_name,
         example_pipeline,
     )
-
-    # Sort requirements.txt file in alphabetical order
-    sort_requirements(requirements_file_path)
 
 
 if __name__ == "__main__":

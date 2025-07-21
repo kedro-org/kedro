@@ -13,6 +13,8 @@
 * Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines.
 * Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
 * Added an option to select which multiprocessing start method is going to be used on `ParallelRunner` via the `KEDRO_MP_CONTEXT` environment variable.
+* Added `--only-missing-outputs` CLI flag to `kedro run`. This flag skips nodes when all their persistent outputs exist.
+* Removed the `AbstractRunner.run_only_missing()` method, an older and underused API for partial runs. Please use `--only-missing-outputs` CLI instead.
 
 ## Bug fixes and other changes
 * Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.

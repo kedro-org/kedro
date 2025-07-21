@@ -114,8 +114,3 @@ class TimeDataCatalog:
         """Benchmark the time to resolve factory"""
         for i in range(1,1001):
             self.catalog.get(f"dataset_factory_{i}")
-
-    def time_add_runtime_patterns(self):
-        """Benchmark the time to add runtime patterns"""
-        for i in range(1,1001):
-            self.catalog.config_resolver.add_runtime_patterns(runtime_patterns)

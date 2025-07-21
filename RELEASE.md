@@ -6,6 +6,18 @@
 ## Documentation changes
 ## Community contributions
 
+# Release 1.0.0rc3
+
+## Major features and improvements
+Changed `DataCatalog.__getitem__` to raise `DatasetNotFoundError` for missing datasets, aligning with expected dictionary behavior.
+
+## Bug fixes and other changes
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 1.0.0
+## Documentation changes
+## Community contributions
+
+
 # Release 1.0.0rc2
 
 ## Major features and improvements

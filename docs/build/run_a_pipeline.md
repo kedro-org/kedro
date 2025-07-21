@@ -273,8 +273,8 @@ Kedro runners provide a consistent interface for executing pipelines, whether yo
 
 ### Output from `runner.run()`
 
-* The `runner.run()` method **always returns a list of pipeline output dataset names**, regardless of your catalog setup.
-* It **does not return the actual data** — you must explicitly load each dataset from the catalog afterward.
+* The `runner.run()` method **returns a dictionary of pipeline output datasets**, where keys are dataset names and values are the dataset objects (not the data itself).
+* It **does not return raw data** — to retrieve the actual data, call `.load()` on each dataset object or via catalog.
 
 ```python
 from kedro.framework.project import pipelines
@@ -288,11 +288,15 @@ pipeline = pipelines.get("__default__")
 runner = SequentialRunner()
 
 # Run the pipeline
-output_dataset_names = runner.run(pipeline=pipeline, catalog=catalog)
+output_datasets = runner.run(pipeline=pipeline, catalog=catalog)
 
-# Load data for each output
-for ds_name in output_dataset_names:
+# Load data for each output via catalog
+for ds_name in output_datasets:
     data = catalog[ds_name].load()
+
+# Load data for each output via dataset object
+for ds_name, dataset in output_datasets.items():
+    data = dataset.load()
 ```
 
 ### Using `ParallelRunner` with `SharedMemoryDataCatalog`
@@ -317,11 +321,11 @@ pipeline = pipelines.get("__default__")
 runner = ParallelRunner()
 
 # Run the pipeline
-output_dataset_names = runner.run(pipeline=pipeline, catalog=catalog)
+output_datasets = runner.run(pipeline=pipeline, catalog=catalog)
 
 # Load output data
-for ds_name in output_dataset_names:
-    data = catalog[ds_name].load()
+for ds_name, dataset in output_datasets.items():
+    data = dataset.load()
 ```
 
 ### CLI usage
@@ -338,8 +342,8 @@ You don’t need to worry about which catalog to use — Kedro takes care of tha
 
 ### Summary
 
-* `runner.run()` always returns output **dataset names**, not the data itself
-* Use `catalog[ds_name].load()` to get the actual data
-* `ParallelRunner` requires `SharedMemoryDataCatalog` for multiprocessing
-* The Kedro CLI selects the correct catalog automatically
-* When using the Python API, **you must choose the appropriate catalog yourself**
+* `runner.run()` always returns a **dictionary of output dataset names and dataset objects**, not the data itself.
+* Use `catalog[ds_name].load()` or `.load()` on each dataset object to get the actual data.
+* `ParallelRunner` requires `SharedMemoryDataCatalog` for multiprocessing.
+* The Kedro CLI selects the correct catalog automatically.
+* When using the Python API, **you must explicitly choose the appropriate catalog based on the runner you select.**

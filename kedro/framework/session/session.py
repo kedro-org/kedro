@@ -88,19 +88,18 @@ class KedroSession:
 
 
     Example:
-    ::
+    ``` python
+    from kedro.framework.session import KedroSession
+    from kedro.framework.startup import bootstrap_project
+    from pathlib import Path
 
-        >>> from kedro.framework.session import KedroSession
-        >>> from kedro.framework.startup import bootstrap_project
-        >>> from pathlib import Path
-
-        >>> # If you are creating a session outside of a Kedro project (i.e. not using
-        >>> # `kedro run` or `kedro jupyter`), you need to run `bootstrap_project` to
-        >>> # let Kedro find your configuration.
-        >>> bootstrap_project(Path("<project_root>"))
-        >>> with KedroSession.create() as session:
-        >>>     session.run()
-
+    # If you are creating a session outside of a Kedro project (i.e. not using
+    # `kedro run` or `kedro jupyter`), you need to run `bootstrap_project` to
+    # let Kedro find your configuration.
+    bootstrap_project(Path("<project_root>"))
+    with KedroSession.create() as session:
+        session.run()
+    ```
     """
 
     def __init__(
@@ -290,6 +289,7 @@ class KedroSession:
         to_outputs: Iterable[str] | None = None,
         load_versions: dict[str, str] | None = None,
         namespaces: Iterable[str] | None = None,
+        only_missing_outputs: bool = False,
     ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -314,6 +314,7 @@ class KedroSession:
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
             namespaces: The namespaces of the nodes that are being run.
+            only_missing_outputs: Run only nodes with missing outputs.
         Raises:
             ValueError: If the named or `__default__` pipeline is not
                 defined by `register_pipelines`.
@@ -378,6 +379,7 @@ class KedroSession:
             "pipeline_name": pipeline_name,
             "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),
+            "only_missing_outputs": only_missing_outputs,
         }
 
         runner = runner or SequentialRunner()
@@ -406,7 +408,11 @@ class KedroSession:
         )
         try:
             run_result = runner.run(
-                filtered_pipeline, catalog, hook_manager, run_id=session_id
+                filtered_pipeline,
+                catalog,
+                hook_manager,
+                run_id=session_id,
+                only_missing_outputs=only_missing_outputs,
             )
             self._run_called = True
         except Exception as error:

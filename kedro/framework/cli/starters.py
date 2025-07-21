@@ -250,7 +250,7 @@ def _print_selection_and_prompt_info(
         )
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
+@click.group(context_settings=CONTEXT_SETTINGS, name="kedro")
 def create_cli() -> None:  # pragma: no cover
     pass
 

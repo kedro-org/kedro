@@ -471,7 +471,7 @@ class DataCatalog(CatalogProtocol):
             The dataset instance.
 
         Raises:
-            DatasetNotFoundError: If the dataset does not exist.
+            DatasetNotFoundError: If the dataset is not found.
 
         Example:
         ```python

@@ -2,7 +2,7 @@
 ## Major features and improvements
 
 ### DataCatalog
-* Previously experimental `KedroDataCatalog` has now been renamed as `DataCatalog` and has replaced the previous implementation as the default catalog class. It now supports a dict-like interface, lazy dataset initialization, and has improved performance. The users of Kedro as a framework should notice no difference in their workflows, however the new `DataCatalog` offers new API when used programatically. Read more about it in the [Kedro documentation](https://docs.kedro.org/en/unreleased/catalog-data/advanced_data_catalog_usage/).
+* Previously experimental `KedroDataCatalog` has now been renamed as `DataCatalog` and has replaced the previous implementation as the default catalog class. It now supports a dict-like interface, lazy dataset initialisation, and has improved performance. The users of Kedro as a framework should notice no difference in their workflows, however, the new `DataCatalog` offers new API when used programatically. Read more about it in the [Kedro documentation](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/).
 * Removed `kedro catalog create` CLI command.
 * Removed the following `DataCatalog` methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
 
@@ -34,7 +34,7 @@
 
 ## Documentation changes
 * Revamped the look and feel of the Kedro documentation, including a new theme and improved navigation with `mkdocs` as the documentation engine.
-* Updated the `DataCatalog` documentation with improved structure and detailed description of new features. Read the [DataCatalog documentation here](https://docs.kedro.org/en/unreleased/catalog-data/introduction/).
+* Updated the `DataCatalog` documentation with improved structure and detailed description of new features. Read the [DataCatalog documentation here](https://docs.kedro.org/en/stable/catalog-data/introduction/).
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

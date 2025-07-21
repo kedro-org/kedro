@@ -2,7 +2,7 @@
 ## Major features and improvements
 
 ### DataCatalog
-* Previously experimental `KedroDataCatalog` has now been renamed as `DataCatalog` and has replaced the previous implementation as the default catalog class. It now supports a dict-like interface, lazy dataset initialisation, and has improved performance. The users of Kedro as a framework should notice no difference in their workflows, however, the new `DataCatalog` offers new API when used programatically. Read more about it in the [Kedro documentation](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/).
+* Previously experimental `KedroDataCatalog` has now been renamed to `DataCatalog` and has replaced the previous implementation as the default catalog class. It now supports a dict-like interface, lazy dataset initialisation, and improved performance. While users of Kedro as a framework should notice no difference in their workflows, the new `DataCatalog` offers an extended API when used programmatically. This includes support for powerful pipeline-based commands (available via both CLI and interactive environments), simplified usage of dataset factories, centralised pattern resolution through the new `CatalogConfigResolver` property, and the ability to serialise and reconstruct catalogs from configuration.  Read more about it in the [Kedro documentation](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/).
 * Removed `kedro catalog create` CLI command.
 * Removed the following `DataCatalog` methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
 

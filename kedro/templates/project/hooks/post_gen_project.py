@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from kedro.templates.project.hooks.utils import setup_template_tools, sort_requirements
+from kedro.templates.project.hooks.utils import setup_template_tools
 
 
 def main():

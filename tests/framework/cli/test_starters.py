@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import shutil
 from pathlib import Path
 
 import pytest
-import requests
 import toml
 import yaml
 from click.testing import CliRunner
@@ -21,8 +19,6 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
     _convert_tool_short_names_to_numbers,
     _fetch_validate_parse_config_from_user_prompts,
-    _get_latest_starters_version,
-    _kedro_version_equal_or_lower_to_starters,
     _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
@@ -1744,87 +1740,6 @@ class TestTelemetryCLIFlag:
 def mock_env_vars(mocker):
     """Fixture to mock environment variables"""
     mocker.patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}, clear=True)
-
-
-class TestGetLatestStartersVersion:
-    def test_get_latest_starters_version(self, mock_env_vars, requests_mock):
-        """Test _get_latest_starters_version when KEDRO_STARTERS_VERSION is not set"""
-        latest_version = "1.2.3"
-
-        # Mock the GitHub API response
-        requests_mock.get(
-            "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
-            json={"tag_name": latest_version},
-            status_code=200,
-        )
-
-        result = _get_latest_starters_version()
-
-        assert result == latest_version
-        assert os.getenv("KEDRO_STARTERS_VERSION") == latest_version
-
-    def test_get_latest_starters_version_with_env_set(self, mocker):
-        """Test _get_latest_starters_version when KEDRO_STARTERS_VERSION is already set"""
-        expected_version = "1.2.3"
-        mocker.patch.dict(os.environ, {"KEDRO_STARTERS_VERSION": expected_version})
-
-        result = _get_latest_starters_version()
-
-        assert result == expected_version
-
-    def test_get_latest_starters_version_error(
-        self, mock_env_vars, requests_mock, caplog
-    ):
-        """Test _get_latest_starters_version when the request raises an exception"""
-        with caplog.at_level(logging.ERROR):
-            # Mock the request to raise a RequestException
-            requests_mock.get(
-                "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
-                exc=requests.exceptions.RequestException("Request failed"),
-            )
-
-            result = _get_latest_starters_version()
-
-            assert result == ""
-            assert (
-                "Error fetching kedro-starters latest release version: Request failed"
-                in caplog.text
-            )
-
-
-class TestStartersVersionComparison:
-    def test_kedro_version_equal_or_lower_to_starters_equal(self, mocker):
-        """Test when version is equal to starters_version"""
-        mocker.patch(
-            "kedro.framework.cli.starters._get_latest_starters_version",
-            return_value="1.2.3",
-        )
-        version = "1.2.3"
-
-        result = _kedro_version_equal_or_lower_to_starters(version)
-        assert result is True
-
-    def test_kedro_version_equal_or_lower_to_starters_lower(self, mocker):
-        """Test when version is lower than starters_version"""
-        mocker.patch(
-            "kedro.framework.cli.starters._get_latest_starters_version",
-            return_value="1.3.0",
-        )
-        version = "1.2.3"
-
-        result = _kedro_version_equal_or_lower_to_starters(version)
-        assert result is True
-
-    def test_kedro_version_equal_or_lower_to_starters_higher(self, mocker):
-        """Test when version is higher than starters_version"""
-        mocker.patch(
-            "kedro.framework.cli.starters._get_latest_starters_version",
-            return_value="1.2.3",
-        )
-        version = "1.2.4"
-
-        result = _kedro_version_equal_or_lower_to_starters(version)
-        assert result is False
 
 
 class TestFetchCookiecutterArgsWhenKedroVersionDifferentFromStarters:

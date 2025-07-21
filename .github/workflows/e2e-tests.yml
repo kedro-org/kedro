@@ -14,7 +14,6 @@ on:
 env:
   COLUMNS: 120
   LINES: 25
-  GITHUB_TOKEN: ${{ secrets.GH_TAGGING_TOKEN }}
 
 jobs:
   e2e-tests:

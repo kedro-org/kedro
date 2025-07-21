@@ -79,19 +79,19 @@ You can also enter this in a single line as follows:
 uvx kedro new --name=My-Project --tools=none --example=n
 ```
 
-2. To create a spaceflights project called `spaceflights` with Kedro Viz features and example code:
+2. To create a spaceflights project called `spaceflights` with test setup and example code:
 
 ```text
 kedro new ⮐
 spaceflights ⮐
-7 ⮐
+2 ⮐
 yes ⮐
 ```
 
 You can also enter this in a single line as follows:
 
 ```bash
-uvx kedro new --name=spaceflights --tools=lint --example=y
+uvx kedro new --name=spaceflights --tools=test --example=y
 ```
 
 3. To create a project, called `testproject` containing linting, documentation, and PySpark, but no example code:
@@ -135,7 +135,7 @@ kedro run
 
 ## Visualise a Kedro project
 
-This section swiftly introduces project visualisation using Kedro-Viz. See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/latest/) for more detail.
+This section swiftly introduces project visualisation using Kedro-Viz. See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/) for more detail.
 
 The Kedro-Viz package needs to be installed into your virtual environment separately as it is not part of the standard Kedro installation:
 
@@ -150,6 +150,11 @@ kedro viz run
 ```
 
 This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
+
+!!! tip
+    Available from Kedro-Viz 12.0.0 onward, the Workflow view helps you visualise and debug your most recent kedro run. You’ll be able to see which nodes succeeded, failed, or were skipped - all in one place. [Read more about Workflow in Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/workflow-view/ )
+
+    ![](../assets/workflow_view.png)
 
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
@@ -167,12 +172,16 @@ If you've worked through the documentation listed and are unsure where to go nex
 ## Flowchart of general choice of tools
 
 Here is a flowchart to help guide your choice of tools and examples you can select:
-
-![overview diagram for setting up a new Kedro project with tools](../meta/images/new-project-tools.png)
-
-such as the [`kedro-datasets`][kedro-datasets], [`Pipeline`][kedro.pipeline.Pipeline], [`Node`][kedro.pipeline.node.Node] and [`KedroContext`][kedro.framework.context.KedroContext].
-
-[kedro-datasets]: https://docs.kedro.org/projects/kedro-datasets/en/stable/
-[kedro.pipeline.Pipeline]: https://docs.kedro.org/en/stable/kedro.pipeline.html#kedro.pipeline.Pipeline
-[kedro.pipeline.node.Node]: https://docs.kedro.org/en/stable/kedro.pipeline.node.html#kedro.pipeline.node.Node
-[kedro.framework.context.KedroContext]: https://docs.kedro.org/en/stable/kedro.framework.context.html#kedro.framework.context.KedroContext
+```mermaid
+flowchart TD
+    A["Start"] --> B["Enter Project Name"]
+    B --> C["Select Tools"]
+    C -->|None| D["None"]
+    C -->|"Any combination"| E["lint, test, logging, docs, data, PySpark"]
+    C -->|All| F["All"]
+    D --> G["Include Example Pipeline?"]
+    E --> G
+    F --> G
+    G -->|Yes| H["New Project Created"]
+    G -->|No| H
+```

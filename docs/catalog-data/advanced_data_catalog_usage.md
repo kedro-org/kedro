@@ -86,7 +86,8 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 - The `.get()` method accepts:
   - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
   - `version`: Specify dataset version if versioning is enabled.
-- If no match is found and fallback is disabled, `None` is returned.
+- If no match is found and fallback is disabled, `.get()` method returns `None`.
+- Dictionary-style access raises a `DatasetNotFoundError` if the dataset is missing.
 
 ## How to add datasets to the catalog
 

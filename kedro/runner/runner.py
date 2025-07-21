@@ -80,7 +80,7 @@ class AbstractRunner(ABC):
 
         Returns:
             Dictionary with pipeline outputs, where keys are dataset names
-            and values are dataset object.
+            and values are dataset objects.
         """
         # Apply missing outputs filtering if requested
         if only_missing_outputs:

@@ -84,8 +84,8 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 - Both methods retrieve a dataset by name from the catalog’s internal collection.
 - If the dataset isn’t materialized but matches a configured pattern, it's instantiated and returned.
 - The `.get()` method accepts:
-  - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
-  - `version`: Specify dataset version if versioning is enabled.
+    - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
+    - `version`: Specify dataset version if versioning is enabled.
 - If no match is found and fallback is disabled, `.get()` method returns `None`.
 - Dictionary-style access raises a `DatasetNotFoundError` if the dataset is missing.
 

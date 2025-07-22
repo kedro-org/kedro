@@ -16,7 +16,6 @@
 * Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
 * Added an option to select which multiprocessing start method is going to be used on `ParallelRunner` via the `KEDRO_MP_CONTEXT` environment variable.
 * Added `--only-missing-outputs` CLI flag to `kedro run`. This flag skips nodes when all their persistent outputs exist.
-* Removed the `AbstractRunner.run_only_missing()` method, an older and underused API for partial runs. Please use `--only-missing-outputs` CLI instead.
 * Updated `kedro registry describe` to return the node name property instead of creating its own name for the node.
 * Removed `pre-commit-hooks` dependency for new project creation.
 
@@ -37,6 +36,7 @@
 * Renamed `session_id` parameter to `run_id` in all runner methods and hooks to improve API clarity and prepare for future multi-run session support.
 * Removed the following `DataCatalog` methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
 * Changed the output of `runner.run()` and `session.run()` — it now always returns all pipeline outputs, regardless of catalog configuration.
+* Removed the `AbstractRunner.run_only_missing()` method, an older and underused API for partial runs. Please use `--only-missing-outputs` CLI instead.
 
 ## Documentation changes
 * Revamped the look and feel of the Kedro documentation, including a new theme and improved navigation with `mkdocs` as the documentation engine.

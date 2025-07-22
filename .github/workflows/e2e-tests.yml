@@ -45,7 +45,7 @@ jobs:
       - name: Install Microsoft Visual C++ Redistributable
         if: inputs.os == 'windows-latest'
         run: |
-          choco install vcredist-all
+          choco install vcredist-all --ignore-checksums -y
       - name: Setup Hadoop binary
         if: inputs.os == 'windows-latest'
         run: |

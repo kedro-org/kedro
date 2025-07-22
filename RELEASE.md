@@ -2,7 +2,16 @@
 ## Major features and improvements
 
 ### Data Catalog
-* Renamed `KedroDataCatalog` to `DataCatalog`, replacing the previous implementation of the default catalog class. Previously an experimental feature, it supports a dict-like interface, lazy dataset initialisation, and improved performance. While users of Kedro as a framework should notice no difference in their workflows, the new `DataCatalog` offers an extended API when used programmatically. This includes support for powerful pipeline-based commands (available via both CLI and interactive environments), simplified usage of dataset factories, centralised pattern resolution through the new `CatalogConfigResolver` property, and the ability to serialise and reconstruct catalogs from configuration.  Read more about it in the [Kedro documentation](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/).
+* The previously experimental `KedroDataCatalog` has been renamed to `DataCatalog` and is now the default catalog implementation.
+* It retains the dict-like interface, supports lazy dataset initialisation, and delivers improved performance.
+* While this change is seamless for users following standard Kedro workflows, it introduces a richer API for programmatic use:
+  * New pipeline-aware commands, available via both the CLI and interactive environments.
+  * Simplified handling of dataset factories.
+  * Centralised pattern resolution via the `CatalogConfigResolver` property.
+  * Ability to serialise the catalog to configuration and reconstruct it from it.
+
+Read more in the [Kedro documentation](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/).
+
 
 ### Namespaces
 * Added support for running multiple namespaces within a single session with `--namespaces` CLI option and `namespaces` argument in `KedroSession.run()` method.

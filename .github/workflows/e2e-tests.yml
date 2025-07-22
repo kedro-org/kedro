@@ -28,6 +28,7 @@ jobs:
         with:
           version: "latest"
           python-version: ${{ inputs.python-version }}
+          activate-environment: true
       - name: Cache python packages for Linux
         if: inputs.os == 'ubuntu-latest'
         uses: actions/cache@v4

@@ -3,36 +3,40 @@
 
 ### DataCatalog
 * Previously experimental `KedroDataCatalog` has now been renamed to `DataCatalog` and has replaced the previous implementation as the default catalog class. It now supports a dict-like interface, lazy dataset initialisation, and improved performance. While users of Kedro as a framework should notice no difference in their workflows, the new `DataCatalog` offers an extended API when used programmatically. This includes support for powerful pipeline-based commands (available via both CLI and interactive environments), simplified usage of dataset factories, centralised pattern resolution through the new `CatalogConfigResolver` property, and the ability to serialise and reconstruct catalogs from configuration.  Read more about it in the [Kedro documentation](https://docs.kedro.org/en/stable/catalog-data/advanced_data_catalog_usage/).
-* Removed `kedro catalog create` CLI command.
-* Removed the following `DataCatalog` methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
 
-### Other features and improvements
+### Namespaces
+* Added support for running multiple namespaces within a single session with `--namespaces` CLI option and `namespaces` argument in `KedroSession.run()` method.
+* Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines.
 * Added stricter validation to dataset names in the `Node` class, ensuring `.` characters are reserved to be used as part of a namespace.
 * Added a `prefix_datasets_with_namespace` argument to the `Pipeline` class which allows users to turn on or off the prefixing of the namespace to the node inputs, outputs, and parameters.
-* Added support for running multiple namespaces within a single session with `--namespaces` CLI option.
-* Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines.
+* Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
+
+
+### Other features and improvements
 * Changed the default node name to be formed of the function name used in the node suffixed by a secure hash (SHA-256) based on the function, inputs, and outputs, ensuring uniqueness and improved readability.
 * Added an option to select which multiprocessing start method is going to be used on `ParallelRunner` via the `KEDRO_MP_CONTEXT` environment variable.
 * Added `--only-missing-outputs` CLI flag to `kedro run`. This flag skips nodes when all their persistent outputs exist.
 * Removed the `AbstractRunner.run_only_missing()` method, an older and underused API for partial runs. Please use `--only-missing-outputs` CLI instead.
-
-## Bug fixes and other changes
-* Changed pipeline filtering for namespace to return exact namespace matches instead of partial matches.
 * Updated `kedro registry describe` to return the node name property instead of creating its own name for the node.
 * Removed `pre-commit-hooks` dependency for new project creation.
 
 
 ## Breaking changes to the API
+### CLI
+* `kedro catalog create` command has been removed.
+* `kedro catalog list`, `kedro catalog rank`, and `kedro catalog resolve` commands have been replaced with `kedro catalog describe-datasets`, `kedro catalog list-patterns` and `kedro catalog resolve-patterns` commands, respectively.
+* The `kedro run` option `--namespace` has been removed and replaced with `--namespaces`.
+* The `kedro micropkg` CLI command has been removed as part of the micro-packaging feature deprecation.
+
+### API
 * Private methods `_is_project` and `_find_kedro_project` are changed to `is_kedro_project` and `find_kedro_project`.
 * Renamed instances of `extra_params` and `_extra_params` to `runtime_params`.
 * Removed the `modular_pipeline` module and moved functionality to the `pipeline` module instead.
 * Renamed `ModularPipelineError` to `PipelineError`.
 * `Pipeline.grouped_nodes_by_namespace()` was replaced with `group_nodes_by(group_by)`, which supports multiple strategies and returns a list of `GroupedNodes`, improving type safety and consistency for deployment plugin integrations.
-* The micro-packaging feature and the corresponding `micropkg` CLI command have been removed.
 * Renamed `session_id` parameter to `run_id` in all runner methods and hooks to improve API clarity and prepare for future multi-run session support.
 * Removed the following `DataCatalog` methods: `_get_dataset()`, `add_all()`, `add_feed_dict()`, `list()`, and `shallow_copy()`.
-* Removed the CLI command `kedro catalog create`.
-* Changed the output of `runner.run()` — it now always returns all pipeline outputs, regardless of catalog configuration.
+* Changed the output of `runner.run()` and `session.run()` — it now always returns all pipeline outputs, regardless of catalog configuration.
 
 ## Documentation changes
 * Revamped the look and feel of the Kedro documentation, including a new theme and improved navigation with `mkdocs` as the documentation engine.

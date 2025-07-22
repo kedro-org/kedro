@@ -48,7 +48,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Kitsios Konstantinos](https://github.com/kitsiosk)
 
 ## Migration guide from Kedro 0.19.* to 1.*
-[See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/unreleased/about/migration/).
+[See the migration guide for 1.0.0 in the Kedro documentation](https://docs.kedro.org/en/stable/about/migration/).
 
 # Release 0.19.14
 

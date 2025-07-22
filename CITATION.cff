@@ -48,6 +48,6 @@ authors:
 - family-names: Ko
   given-names: Elijah
 title: Kedro
-version: 1.0.0rc3
-date-released: 2025-07-21
+version: 1.0.0
+date-released: 2025-07-22
 url: https://github.com/kedro-org/kedro

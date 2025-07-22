@@ -1,4 +1,9 @@
-# Upcoming Release 1.0.0
+# Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Community contributions
+
+# Release 1.0.0
 ## Major features and improvements
 
 ### Data Catalog

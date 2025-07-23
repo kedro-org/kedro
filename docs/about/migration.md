@@ -98,7 +98,7 @@ Please update your code and workflows accordingly. Where possible, recommended a
 | Deprecated Item           | Type        | Replacement / Notes                                                |
 | ------------------------- | ----------- | ------------------------------------------------------------------ |
 | `catalog._get_dataset()`  | Method      | Internal use only; use `catalog.get()` instead                     |
-| `catalog.add_all()`       | Method      | Prefer explicit catalog construction or use `catalog.add()`        |
+| `catalog.add_all()`       | Method      | Prefer explicit catalog construction or use dict-style assignment  |
 | `catalog.add_feed_dict()` | Method      | Use `catalog["my_dataset"] = ...` (dict-style assignment)          |
 | `catalog.list()`          | Method      | Replaced by `catalog.filter()`                                     |
 | `catalog.shallow_copy()`  | Method      | Removed; no longer needed after internal refactor                  |

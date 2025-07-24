@@ -211,7 +211,7 @@ def pip_install_dependencies(context):
     """Install project dependencies using pip."""
     reqs_path = "requirements.txt"
     res = run(
-        [context.pip, "install", "-r", reqs_path],
+        ["uv", "pip", "install", "-r", reqs_path],
         env=context.env,
         cwd=str(context.root_project_dir),
     )
@@ -234,7 +234,7 @@ def install_project_package_via_pip(context):
 def install_test_plugin(context):
     """Install a python package using pip."""
     plugin_dir = Path(__file__).parent / "test_plugin"
-    res = run([context.pip, "install", "-e", str(plugin_dir)], env=context.env)
+    res = run(["uv", "pip", "install", "-e", str(plugin_dir)], env=context.env)
     assert res.returncode == OK_EXIT_CODE, res
 
 

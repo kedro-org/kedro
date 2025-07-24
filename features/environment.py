@@ -14,8 +14,6 @@ from features.steps.sh_run import run
 _PATHS_TO_REMOVE: set[Path] = set()
 
 FRESH_VENV_TAG = "fresh_venv"
-MINOR_PYTHON_38_VERSION = 8
-
 
 def call(cmd, env):
     res = run(cmd, env=env)
@@ -119,7 +117,9 @@ def _setup_minimal_env(context):
             ],
             env=context.env,
         )
-        call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
+        call ([context.python, "-m", "pip", "install", "uv==0.4.29"], env=context.env)
+        call([context.python, "-m", "uv", "pip", "install", "--system", "kedro[test] @ ."], env=context.env)
+        # call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
         return context
 
 

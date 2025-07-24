@@ -58,10 +58,9 @@ jobs:
           echo "PATH=$env:HADOOP_HOME\bin;$env:PATH" | Out-File -Append -Encoding ascii -FilePath $env:GITHUB_ENV
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install -U .[test]
+          make install-test-requirements
           make install-pre-commit
       - name: pip freeze
-        run: pip freeze
+        run: uv pip freeze --system
       - name: Run e2e tests
         run: make e2e-tests

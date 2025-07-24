@@ -18,11 +18,11 @@ show-coverage:
 	open htmlcov/index.html
 
 e2e-tests:
-	behave --tags=-skip
+	behave
 
 e2e-tests-fast: export BEHAVE_LOCAL_ENV=TRUE
 e2e-tests-fast:
-	behave --tags=-skip --no-capture
+	behave --no-capture
 
 pip-compile:
 	pip-compile -q -o -

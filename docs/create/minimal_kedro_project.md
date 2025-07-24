@@ -80,7 +80,7 @@ Next, create a new file named `pyproject.toml` in the project directory with som
 for example using `uv init`:
 
 ```
-uv init --bare --lib
+uv init --bare --lib --python=">=3.9"
 ```
 
 And add the following contents:
@@ -89,7 +89,7 @@ And add the following contents:
 [tool.kedro]
 package_name = "minikedro"
 project_name = "minikedro"
-kedro_init_version = "0.19.9"
+kedro_init_version = "1.0.0"
 source_dir = "."
 ```
 

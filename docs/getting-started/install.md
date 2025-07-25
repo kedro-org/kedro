@@ -265,7 +265,7 @@ jupyterlab_server>=2.11.1
 jupyterlab~=3.0
 
 # Pytest + useful extensions
-pytest-cov~=3.0
+pytest-cov>=3,<7
 pytest-mock>=1.7.1, <2.0
 pytest~=7.2
 

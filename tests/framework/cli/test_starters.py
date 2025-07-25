@@ -183,7 +183,7 @@ def _assert_requirements_ok(
         assert expected["coverage"] == pyproject_config["tool"]["coverage"]
 
         assert (
-            "pytest-cov~=3.0"
+            "pytest-cov>=3,<7"
             in pyproject_config["project"]["optional-dependencies"]["dev"]
         )
         assert (

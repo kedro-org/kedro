@@ -29,12 +29,6 @@ jobs:
           version: "latest"
           python-version: ${{ inputs.python-version }}
           activate-environment: true
-      - name: Cache python packages for Linux
-        if: inputs.os == 'ubuntu-latest'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{inputs.os}}-python-${{inputs.python-version}}
       - name: Install dependencies
         run: |
           uv pip install -U .[test]

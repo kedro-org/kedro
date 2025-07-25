@@ -10,7 +10,7 @@ lint_pyproject_requirements = ["tool.ruff", "tool.ruff.format", "tool.ruff.lint"
 
 # Requirements and configurations for testing tools and coverage reporting
 test_requirements = (  # For requirements.txt
-    "pytest-cov~=3.0\npytest-mock>=1.7.1, <2.0\npytest~=7.2"
+    "pytest-cov>=3,<7\npytest-mock>=1.7.1, <2.0\npytest~=7.2"
 )
 test_pyproject_requirements = [  # For pyproject.toml
     "tool.pytest.ini_options",

@@ -26,18 +26,6 @@ jobs:
           version: "latest"
           python-version: ${{ inputs.python-version }}
           activate-environment: true
-      - name: Cache python packages for Linux
-        if: inputs.os == 'ubuntu-latest'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{inputs.os}}-python-${{inputs.python-version}}
-      - name: Cache python packages for Windows
-        if: inputs.os == 'windows-latest'
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{inputs.os}}-python-${{inputs.python-version}}
       - name: Install dependencies
         run: |
             make install-test-requirements

@@ -32,7 +32,8 @@ jobs:
           key: ${{inputs.os}}-python-${{inputs.python-version}}
       - name: Install dependencies
         run: |
-            make install-test-requirements
+            uv pip install -U .[test]
+            uv pip install pip
             make install-pre-commit
       - name: pip freeze
         run: uv pip freeze --system

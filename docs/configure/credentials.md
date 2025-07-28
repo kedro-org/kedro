@@ -17,7 +17,7 @@ from pathlib import Path
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
-# Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html#terminology)
+# Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial/#terminology)
 conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
 conf_loader = OmegaConfigLoader(conf_source=conf_path)
 credentials = conf_loader["credentials"]

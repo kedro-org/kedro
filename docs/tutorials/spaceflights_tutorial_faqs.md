@@ -42,7 +42,7 @@ DatasetError: An exception occurred when parsing config for Dataset
 'data_processing.preprocessed_companies':
 Object 'ParquetDataset' cannot be loaded from 'kedro_datasets.pandas'. Please see the
 documentation on how to install relevant dependencies for kedro_datasets.pandas.ParquetDataset:
-https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html
+https://docs.kedro.org/en/stable/develop/dependencies/
 ```
 
 The Kedro Data Catalog is missing [dependencies needed to parse the data](../develop/dependencies.md#install-dependencies-related-to-the-data-catalog). Check that you have [all the project dependencies to `requirements.txt`](./tutorial_template.md#install-project-dependencies) and then call `pip install -r requirements.txt` to install them.

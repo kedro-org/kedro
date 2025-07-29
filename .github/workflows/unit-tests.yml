@@ -28,8 +28,7 @@ jobs:
           activate-environment: true
       - name: Install dependencies
         run: |
-            uv pip install -U .[test]
-            uv pip install pip
+            make install-test-requirements
             make install-pre-commit
       - name: pip freeze
         run: uv pip freeze --system

@@ -32,6 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           make install-test-requirements
+          uv pip install pip
           make install-pre-commit
       - name: pip freeze
         run: pip freeze

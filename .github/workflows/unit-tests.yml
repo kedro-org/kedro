@@ -20,25 +20,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      - name: Set up Python ${{inputs.python-version}}
-        uses: actions/setup-python@v5
+      - name: Install the latest version of uv with Python ${{inputs.python-version}}
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: ${{inputs.python-version}}
-      - name: Cache python packages for Linux
-        if: inputs.os == 'ubuntu-latest'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{inputs.os}}-python-${{inputs.python-version}}
-      - name: Cache python packages for Windows
-        if: inputs.os == 'windows-latest'
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{inputs.os}}-python-${{inputs.python-version}}
-      - name: Add MSBuild to PATH
-        if: inputs.os == 'windows-latest'
-        uses: microsoft/setup-msbuild@v2
+          version: "latest"
+          python-version: ${{ inputs.python-version }}
+          activate-environment: true
       - name: Install dependencies
         run: |
             make install-test-requirements

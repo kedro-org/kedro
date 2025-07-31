@@ -14,7 +14,7 @@ For this example, you will be using a Kedro `spaceflights-pandas` starter projec
 uvx kedro new --starter=spaceflights-pandas --name=space-dvc
 ```
 
-For more information about starter projects, see the [Kedro starters documentation](https://docs.kedro.org/en/stable/starters/starters.html) page.
+For more information about starter projects, see the [Kedro starters documentation](https://docs.kedro.org/en/stable/create/starters/) page.
 
 To use DVC as a Python library, first install it using your tool of choice, for example:
 

@@ -131,7 +131,7 @@ You should now use the following:
 kedro run --params=param_key1=value1,param_key2=2.0
 ```
 
-For more information see ["How to specify parameters at runtime"](https://docs.kedro.org/en/stable/configuration/parameters.html#how-to-specify-parameters-at-runtime).
+For more information see ["How to specify parameters at runtime"](https://docs.kedro.org/en/stable/configure/parameters/#how-to-specify-parameters-at-runtime).
 
 ### `create_default_data_set()` was removed from `Runner`
 Kedro 0.19 removed the `create_default_data_set()` method in the `Runner`. To overwrite the default dataset creation, you need to use the new `Runner` class argument `extra_dataset_patterns` instead.
@@ -270,4 +270,4 @@ If you didn't use `CONFIG_LOADER_ARGS` in your code, this change is not needed b
 
 
 ### Logging
-`logging.yml` is now independent of Kedro's run environment and used only if `KEDRO_LOGGING_CONFIG` is set to point to it. The [documentation on logging](https://docs.kedro.org/en/stable/logging/index.html) describes in detail how logging works in Kedro and how it can be customised.
+`logging.yml` is now independent of Kedro's run environment and used only if `KEDRO_LOGGING_CONFIG` is set to point to it. The [documentation on logging](https://docs.kedro.org/en/stable/develop/logging/) describes in detail how logging works in Kedro and how it can be customised.

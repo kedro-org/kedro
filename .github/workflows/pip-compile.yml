@@ -29,6 +29,5 @@ jobs:
         run: |
           make install-test-requirements
           make install-pre-commit
-          uv pip install "pip-tools>=6.5"
-      - name: Run pip-compile
-        run: make pip-compile
+      - name: Run pip compile
+        run: uv pip compile pyproject.toml -q

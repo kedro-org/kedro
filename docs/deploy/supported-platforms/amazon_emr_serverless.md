@@ -92,8 +92,8 @@ Replace `<PACKAGE_NAME>` with your package name.
 ### Resources
 For more details, see the following resources:
 
-- [Package a Kedro project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#package-a-kedro-project)
-- [Run a packaged project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#run-a-packaged-project)
+- [Package a Kedro project](https://docs.kedro.org/en/stable/deploy/package_a_project/#package-a-kedro-project)
+- [Run a packaged project](https://docs.kedro.org/en/stable/deploy/package_a_project/#run-a-packaged-project)
 - [Customizing an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
 - [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
 

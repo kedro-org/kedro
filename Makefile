@@ -24,9 +24,6 @@ e2e-tests-fast: export BEHAVE_LOCAL_ENV=TRUE
 e2e-tests-fast:
 	behave --tags=-skip --no-capture
 
-pip-compile:
-	pip-compile -q -o -
-
 install-docs-requirements:
 	uv pip install -e ".[docs]"
 
@@ -54,8 +51,7 @@ package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
-	python -m pip install "uv==0.4.29"
-	uv pip install --system "kedro[test] @ ."
+	uv pip install "kedro[test] @ ."
 
 install-pre-commit:
 	pre-commit install --install-hooks

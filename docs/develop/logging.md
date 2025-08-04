@@ -101,7 +101,7 @@ To see `DEBUG` level messages, change the level of logging in your project-speci
         class: kedro.logging.RichHandler
         rich_tracebacks: True
         # Advance options for customisation.
-        # See https://docs.kedro.org/en/stable/logging/index.html#how-to-perform-logging-in-your-kedro-project
+        # See https://docs.kedro.org/en/stable/develop/logging/#how-to-perform-logging-in-your-kedro-project
         # tracebacks_show_locals: False
 
     loggers:

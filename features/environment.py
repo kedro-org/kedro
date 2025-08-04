@@ -116,10 +116,11 @@ def _setup_minimal_env(context):
                 "install",
                 "-U",
                 "pip>=21.2",
+                "uv"
             ],
             env=context.env,
         )
-        call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
+        call([context.python, "-m", "uv","pip", "install", "-e", "."], env=context.env)
         return context
 
 

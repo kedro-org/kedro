@@ -9,13 +9,9 @@ from typing import Any
 from unittest.mock import create_autospec
 
 import pytest
+import tomli_w
 import yaml
 from omegaconf import OmegaConf
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 from kedro import __version__ as kedro_version
 from kedro.config import AbstractConfigLoader, OmegaConfigLoader
@@ -261,8 +257,8 @@ def fake_project(tmp_path, mock_package_name):
             }
         }
     }
-    toml_str = tomllib.dumps(payload)
-    pyproject_toml_path.write_text(toml_str, encoding="utf-8")
+    with pyproject_toml_path.open("wb", encoding="utf-8") as f:
+        tomli_w.dump(payload, f)
 
     (fake_project_dir / "conf" / "base").mkdir(parents=True)
     (fake_project_dir / "conf" / "local").mkdir()

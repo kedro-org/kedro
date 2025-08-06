@@ -2,6 +2,8 @@ import shutil
 import sys
 from pathlib import Path
 
+import tomli_w
+
 if sys.version_info >= (3, 11):
     import tomllib
 else:
@@ -96,8 +98,8 @@ def _remove_from_toml(file_path: Path, sections_to_remove: list) -> None:
     for section in sections_to_remove:
         _remove_nested_section(data, section)
 
-    with open(file_path, "w") as file:
-        tomllib.dump(data, file)
+    with open(file_path, "wb") as file:
+        tomli_w.dump(data, file)
 
 
 def _remove_dir(path: Path) -> None:

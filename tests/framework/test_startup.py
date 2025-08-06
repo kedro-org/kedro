@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import tomli_w
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -306,7 +307,9 @@ class TestBootstrapProject:
             }
         }
         pyproject_toml = tmp_path / "pyproject.toml"
-        pyproject_toml.write_text(tomllib.dumps(pyproject_toml_payload))
+        with open(pyproject_toml, "wb") as f:
+            tomli_w.dump(pyproject_toml_payload, f)
+
         src_dir = tmp_path / "src"
         src_dir.mkdir(exist_ok=True)
 

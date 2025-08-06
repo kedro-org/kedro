@@ -119,7 +119,18 @@ def _setup_minimal_env(context):
             ],
             env=context.env,
         )
-        call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
+        call(
+            [
+                context.python,
+                "-m",
+                "pip",
+                "install",
+                "-e",
+                ".",
+                "toml>=0.10.0",  # TODO(deepyaman): Migrate `kedro-telemetry` off `toml`
+            ],
+            env=context.env,
+        )
         return context
 
 
@@ -131,7 +142,5 @@ def _install_project_requirements(context):
     )
     install_reqs = [req for req in install_reqs if "{" not in req and "#" not in req]
     install_reqs.append("kedro-datasets[pandas-csvdataset]")
-    # TODO(deepyaman): Migrate `kedro-telemetry` or add `toml` to plugin's dependencies.
-    install_reqs.append("toml")
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

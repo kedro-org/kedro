@@ -69,7 +69,8 @@ def _get_project_metadata(project_path: Path) -> ProjectMetadata:
         )
 
     try:
-        metadata_dict = tomllib.load(pyproject_toml)
+        with pyproject_toml.open("rb") as f:
+            metadata_dict = tomllib.load(f)
     except tomllib.TOMLDecodeError as exc:
         raise RuntimeError(f"Failed to parse '{_PYPROJECT}' file.") from exc
 

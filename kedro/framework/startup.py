@@ -7,7 +7,10 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-import toml
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 from kedro import __version__ as kedro_version
 from kedro.framework.project import configure_project
@@ -66,8 +69,8 @@ def _get_project_metadata(project_path: Path) -> ProjectMetadata:
         )
 
     try:
-        metadata_dict = toml.load(pyproject_toml)
-    except Exception as exc:
+        metadata_dict = tomllib.load(pyproject_toml)
+    except tomllib.TOMLDecodeError as exc:
         raise RuntimeError(f"Failed to parse '{_PYPROJECT}' file.") from exc
 
     try:

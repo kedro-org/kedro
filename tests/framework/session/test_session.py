@@ -257,7 +257,7 @@ def fake_project(tmp_path, mock_package_name):
             }
         }
     }
-    with pyproject_toml_path.open("wb", encoding="utf-8") as f:
+    with pyproject_toml_path.open("wb") as f:
         tomli_w.dump(payload, f)
 
     (fake_project_dir / "conf" / "base").mkdir(parents=True)

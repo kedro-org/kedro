@@ -4,7 +4,6 @@ import configparser
 import json
 import logging
 import re
-import sys
 import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any

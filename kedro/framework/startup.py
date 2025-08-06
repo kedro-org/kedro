@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-if sys.version_info >= (3, 11):
+if sys.version_info >= (3, 11):  # pragma: no cover
     import tomllib
 else:  # pragma: no cover
     import tomli as tomllib

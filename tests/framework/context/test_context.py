@@ -4,14 +4,19 @@ import configparser
 import json
 import logging
 import re
+import sys
 import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any
 
 import pytest
-import toml
 import yaml
 from pandas.testing import assert_frame_equal
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 from kedro import __version__ as kedro_version
 from kedro.config import MissingConfigException
@@ -47,7 +52,7 @@ def _write_yaml(filepath: Path, config: dict):
 
 def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    toml_str = toml.dumps(config)
+    toml_str = tomllib.dumps(config)
     filepath.write_text(toml_str)
 
 

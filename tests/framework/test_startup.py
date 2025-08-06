@@ -4,7 +4,11 @@ import sys
 from pathlib import Path
 
 import pytest
-import toml
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 from kedro import __version__ as kedro_version
 from kedro.framework.startup import (
@@ -83,7 +87,7 @@ class TestGetProjectMetadata:
                 }
             }
         }
-        mocker.patch("toml.load", return_value=pyproject_toml_payload)
+        mocker.patch("tomllib.load", return_value=pyproject_toml_payload)
 
         actual = _get_project_metadata(self.project_path)
 
@@ -111,7 +115,7 @@ class TestGetProjectMetadata:
                 }
             }
         }
-        mocker.patch("toml.load", return_value=pyproject_toml_payload)
+        mocker.patch("tomllib.load", return_value=pyproject_toml_payload)
 
         actual = _get_project_metadata(self.project_path)
 
@@ -139,7 +143,7 @@ class TestGetProjectMetadata:
                 }
             }
         }
-        mocker.patch("toml.load", return_value=pyproject_toml_payload)
+        mocker.patch("tomllib.load", return_value=pyproject_toml_payload)
         pattern = (
             "Found unexpected keys in 'pyproject.toml'. Make sure it "
             "only contains the following keys: ['package_name', "
@@ -159,7 +163,7 @@ class TestGetProjectMetadata:
                 }
             }
         }
-        mocker.patch("toml.load", return_value=pyproject_toml_payload)
+        mocker.patch("tomllib.load", return_value=pyproject_toml_payload)
         pattern = (
             "Missing required keys ['package_name', 'project_name'] "
             "from 'pyproject.toml'."
@@ -170,7 +174,7 @@ class TestGetProjectMetadata:
 
     def test_toml_file_without_kedro_section(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
-        mocker.patch("toml.load", return_value={})
+        mocker.patch("tomllib.load", return_value={})
 
         pattern = "There's no '[tool.kedro]' section in the 'pyproject.toml'."
 
@@ -190,7 +194,7 @@ class TestGetProjectMetadata:
                 }
             }
         }
-        mocker.patch("toml.load", return_value=pyproject_toml_payload)
+        mocker.patch("tomllib.load", return_value=pyproject_toml_payload)
 
         project_metadata = _get_project_metadata(self.project_path)
 
@@ -211,7 +215,7 @@ class TestGetProjectMetadata:
                 }
             }
         }
-        mocker.patch("toml.load", return_value=pyproject_toml_payload)
+        mocker.patch("tomllib.load", return_value=pyproject_toml_payload)
 
         pattern = (
             f"Your Kedro project version {invalid_version} does not match "
@@ -236,7 +240,7 @@ class TestGetProjectMetadata:
                 }
             }
         }
-        mocker.patch("toml.load", return_value=pyproject_toml_payload)
+        mocker.patch("tomllib.load", return_value=pyproject_toml_payload)
 
         pattern = (
             f"Your Kedro project version {invalid_version} does not match "
@@ -302,7 +306,7 @@ class TestBootstrapProject:
             }
         }
         pyproject_toml = tmp_path / "pyproject.toml"
-        pyproject_toml.write_text(toml.dumps(pyproject_toml_payload))
+        pyproject_toml.write_text(tomllib.dumps(pyproject_toml_payload))
         src_dir = tmp_path / "src"
         src_dir.mkdir(exist_ok=True)
 

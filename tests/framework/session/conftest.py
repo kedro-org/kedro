@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 import logging
+import sys
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from typing import TYPE_CHECKING, Any
 
 import pytest
-import toml
 import yaml
 from dynaconf.validator import Validator
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 from kedro import __version__ as kedro_version
 from kedro.framework.hooks import hook_impl
@@ -46,7 +51,7 @@ def _write_yaml(filepath: Path, config: dict):
 
 def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    toml_str = toml.dumps(config)
+    toml_str = tomllib.dumps(config)
     filepath.write_text(toml_str)
 
 

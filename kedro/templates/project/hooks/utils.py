@@ -89,7 +89,7 @@ def _remove_from_toml(file_path: Path, sections_to_remove: list) -> None:
         sections_to_remove (list): A list of section keys to remove from the TOML file.
     """
     # Load the TOML file
-    with open(file_path) as file:
+    with open(file_path, "rb") as file:
         data = tomllib.load(file)
 
     # Remove the specified sections

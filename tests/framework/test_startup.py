@@ -9,7 +9,7 @@ import tomli_w
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib  # noqa: F401
+    import tomli as tomllib
 
 from kedro import __version__ as kedro_version
 from kedro.framework.startup import (

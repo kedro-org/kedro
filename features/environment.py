@@ -131,6 +131,7 @@ def _install_project_requirements(context):
     )
     install_reqs = [req for req in install_reqs if "{" not in req and "#" not in req]
     install_reqs.append("kedro-datasets[pandas-csvdataset]")
-    install_reqs.append("toml")  # TODO(deepyaman): Migrate `kedro-telemetry` or add `toml` to the plugin's dependencies
+    # TODO(deepyaman): Migrate `kedro-telemetry` or add `toml` to plugin's dependencies.
+    install_reqs.append("toml")
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

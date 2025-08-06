@@ -9,7 +9,7 @@ from typing import NamedTuple
 
 if sys.version_info >= (3, 11):
     import tomllib
-else:
+else:  # pragma: no cover
     import tomli as tomllib
 
 from kedro import __version__ as kedro_version

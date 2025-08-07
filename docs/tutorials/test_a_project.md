@@ -168,7 +168,7 @@ Consider the data science pipeline as a whole:
 
 The pipeline takes a pandas `DataFrame` and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and evaluate a regression model. With an integration test, we can validate that this sequence of nodes runs as expected.
 
-From earlier in this tutorial we know a successful pipeline run will conclude with the message `Pipeline execution completed successfully.` being logged. To validate this is being logged in our tests we make use of pytest's [`caplog`](https://docs.pytest.org/en/7.1.x/how-to/logging.html#caplog-fixture) feature to capture logs generated during the execution.
+From earlier in this tutorial we know a successful pipeline run will conclude with the message `Pipeline execution completed successfully` being logged. To validate this is being logged in our tests we make use of pytest's [`caplog`](https://docs.pytest.org/en/7.1.x/how-to/logging.html#caplog-fixture) feature to capture logs generated during the execution.
 
 As we did with our unit tests, we break this down into several steps:
 
@@ -370,7 +370,7 @@ After incorporating these testing practices, our test file `test_data_science_pi
         catalog["params:model_options"] = dummy_parameters["model_options"]
 
         caplog.set_level(logging.DEBUG, logger="kedro")
-        successful_run_msg = "Pipeline execution completed successfully."
+        successful_run_msg = "Pipeline execution completed successfully"
 
         SequentialRunner().run(pipeline, catalog)
 

@@ -6,7 +6,7 @@ from multiprocessing import Queue
 from typing import TYPE_CHECKING, Any
 
 import pytest
-import toml
+import tomli_w
 import yaml
 from dynaconf.validator import Validator
 
@@ -46,8 +46,8 @@ def _write_yaml(filepath: Path, config: dict):
 
 def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    toml_str = toml.dumps(config)
-    filepath.write_text(toml_str)
+    with filepath.open("wb") as f:
+        tomli_w.dump(config, f)
 
 
 def _assert_hook_call_record_has_expected_parameters(

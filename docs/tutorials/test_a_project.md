@@ -218,7 +218,7 @@ When we put this together, we get the following test:
 
         # Arrange the log testing setup
         caplog.set_level(logging.DEBUG, logger="kedro") # Ensure all logs produced by Kedro are captured
-        successful_run_msg = "Pipeline execution completed successfully."
+        successful_run_msg = "Pipeline execution completed successfully"
 
         # Act
         SequentialRunner().run(pipeline, catalog)

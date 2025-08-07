@@ -80,7 +80,6 @@ test = [
     "types-PyYAML",
     "types-cachetools",
     "types-requests",
-    "types-toml",
 ]
 docs = [
     "mkdocs>=1.6.1",

@@ -1,6 +1,5 @@
 site_name: ""
 site_url: https://docs.kedro.org/en/stable/
-site_description: "Kedro is a toolbox for production-ready data science. It uses software engineering best practices to help you create data engineering and data science pipelines that are reproducible, maintainable, and modular."
 repo_name: kedro-org/kedro
 repo_url: https://github.com/kedro-org/kedro
 

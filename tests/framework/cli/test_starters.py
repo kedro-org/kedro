@@ -4,13 +4,18 @@ from __future__ import annotations
 
 import os
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
-import toml
 import yaml
 from click.testing import CliRunner
 from cookiecutter.exceptions import RepositoryCloneFailed
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (
@@ -139,11 +144,12 @@ def _assert_requirements_ok(
     assert f"has been created in the directory \n{root_path}" in result.output
 
     pyproject_file_path = root_path / "pyproject.toml"
+    with pyproject_file_path.open("rb") as f:
+        pyproject_config = tomllib.load(f)
 
     tools_list = _parse_tools_input(tools)
 
     if "1" in tools_list:
-        pyproject_config = toml.load(pyproject_file_path)
         expected = {
             "tool": {
                 "ruff": {
@@ -164,7 +170,6 @@ def _assert_requirements_ok(
         )
 
     if "2" in tools_list:
-        pyproject_config = toml.load(pyproject_file_path)
         expected = {
             "pytest": {
                 "ini_options": {
@@ -195,7 +200,6 @@ def _assert_requirements_ok(
         )
 
     if "4" in tools_list:
-        pyproject_config = toml.load(pyproject_file_path)
         expected = {
             "optional-dependencies": {
                 "docs": [

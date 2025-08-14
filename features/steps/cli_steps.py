@@ -9,10 +9,15 @@ from time import sleep, time
 
 import behave
 import requests
-import toml
+import tomli_w
 import yaml
 from behave import given, then, when
 from packaging.requirements import Requirement
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 import kedro
 from features.steps import util
@@ -449,10 +454,12 @@ def move_package(context: behave.runner.Context, new_source_dir):
 def update_pyproject_toml(context: behave.runner.Context, new_source_dir):
     """Update `source_dir` in pyproject.toml file."""
     pyproject_toml_path = context.root_project_dir / "pyproject.toml"
-    content = toml.load(pyproject_toml_path)
+    with pyproject_toml_path.open("rb") as f:
+        content = tomllib.load(f)
+
     content["tool"]["kedro"]["source_dir"] = new_source_dir
-    content_str = toml.dumps(content)
-    pyproject_toml_path.write_text(content_str)
+    with pyproject_toml_path.open("wb") as f:
+        tomli_w.dump(content, f)
 
 
 @given("I have updated kedro requirements")

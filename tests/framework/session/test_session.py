@@ -9,7 +9,7 @@ from typing import Any
 from unittest.mock import create_autospec
 
 import pytest
-import toml
+import tomli_w
 import yaml
 from omegaconf import OmegaConf
 
@@ -257,8 +257,8 @@ def fake_project(tmp_path, mock_package_name):
             }
         }
     }
-    toml_str = toml.dumps(payload)
-    pyproject_toml_path.write_text(toml_str, encoding="utf-8")
+    with pyproject_toml_path.open("wb") as f:
+        tomli_w.dump(payload, f)
 
     (fake_project_dir / "conf" / "base").mkdir(parents=True)
     (fake_project_dir / "conf" / "local").mkdir()

@@ -53,7 +53,7 @@ dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
 test = [
-    "behave==1.2.6",
+    "behave==1.3.0",
     "coverage[toml]",
     "detect-secrets~=1.5.0",
     "import-linter==2.3",
@@ -125,7 +125,7 @@ readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}
 
 [tool.ruff.format]
-exclude = ["**/templates", "features/steps/test_starter"]
+exclude = ["**/templates", "features/test_starter"]
 docstring-code-format = true
 
 [tool.coverage.report]
@@ -255,4 +255,4 @@ known-first-party = ["kedro"]
 [tool.mypy]
 ignore_missing_imports = true
 disable_error_code = ['misc']
-exclude = ['^kedro/templates/', '^docs/', '^features/steps/test_starter/']
+exclude = ['^kedro/templates/', '^docs/', '^features/test_starter/']

@@ -10,11 +10,11 @@ repos:
         - id: ruff
           name: "ruff on kedro/, tests/ and docs/"
           args: ["--fix", "--exit-non-zero-on-fix"]
-          exclude: "^kedro/templates/|^features/steps/test_starter/"
+          exclude: "^kedro/templates/|^features/test_starter/"
         - id: ruff-format
           name: "ruff format on kedro/, features/ and tests/"
           files: "^kedro/|^features/|^tests/"
-          exclude: "^features/steps/test_starter|^kedro/templates/"
+          exclude: "^features/test_starter|^kedro/templates/"
 
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.6.0
@@ -23,15 +23,15 @@ repos:
           - id: end-of-file-fixer
           - id: check-yaml # Checks yaml files for parseable syntax.
             args: [--unsafe] # Allow custom YAML tags (!!python/name) used by MkDocs for extensions
-            exclude: "^kedro/templates/|^features/steps/test_starter/"
+            exclude: "^kedro/templates/|^features/test_starter/"
           - id: check-json # Checks json files for parseable syntax.
           - id: check-added-large-files
           - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
           - id: check-merge-conflict # Check for files that contain merge conflict strings.
           - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
-            exclude: "^kedro/templates/|^features/steps/test_starter/"
+            exclude: "^kedro/templates/|^features/test_starter/"
           - id: requirements-txt-fixer # Sorts entries in requirements.txt
-            exclude: "^kedro/templates/|^features/steps/test_starter/"
+            exclude: "^kedro/templates/|^features/test_starter/"
 
     - repo: local
       hooks:
@@ -46,4 +46,4 @@ repos:
       hooks:
           - id: detect-secrets
             args: ['--baseline', '.secrets.baseline']
-            exclude: ^features/steps/test_starter
+            exclude: ^features/test_starter

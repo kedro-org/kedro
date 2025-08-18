@@ -233,7 +233,7 @@ def install_project_package_via_pip(context):
 @given("I have installed the test plugin")
 def install_test_plugin(context):
     """Install a python package using pip."""
-    plugin_dir = Path(__file__).parent / "test_plugin"
+    plugin_dir = Path(__file__).parents[1] / "test_plugin"
     res = run([context.pip, "install", "-e", str(plugin_dir)], env=context.env)
     assert res.returncode == OK_EXIT_CODE, res
 
@@ -287,8 +287,7 @@ def create_project_with_starter(context, starter):
     """Behave step to run kedro new given the config I previously created."""
 
     if starter == "default":
-        starter = Path(__file__).parent / "test_starter"
-
+        starter = Path(__file__).parents[1] / "test_starter"
     args = [
         context.kedro,
         "new",

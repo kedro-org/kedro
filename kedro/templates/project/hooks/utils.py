@@ -1,6 +1,13 @@
-from pathlib import Path
 import shutil
-import toml
+import sys
+from pathlib import Path
+
+import tomli_w
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 current_dir = Path.cwd()
 
@@ -84,15 +91,15 @@ def _remove_from_toml(file_path: Path, sections_to_remove: list) -> None:
         sections_to_remove (list): A list of section keys to remove from the TOML file.
     """
     # Load the TOML file
-    with open(file_path) as file:
-        data = toml.load(file)
+    with open(file_path, "rb") as file:
+        data = tomllib.load(file)
 
     # Remove the specified sections
     for section in sections_to_remove:
         _remove_nested_section(data, section)
 
-    with open(file_path, "w") as file:
-        toml.dump(data, file)
+    with open(file_path, "wb") as file:
+        tomli_w.dump(data, file)
 
 
 def _remove_dir(path: Path) -> None:

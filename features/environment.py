@@ -119,18 +119,7 @@ def _setup_minimal_env(context):
             ],
             env=context.env,
         )
-        call(
-            [
-                context.python,
-                "-m",
-                "pip",
-                "install",
-                "-e",
-                ".",
-                "toml>=0.10.0",  # TODO(deepyaman): Migrate `kedro-telemetry` off `toml`
-            ],
-            env=context.env,
-        )
+        call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
         return context
 
 

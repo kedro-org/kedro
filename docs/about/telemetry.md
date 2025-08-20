@@ -1,6 +1,5 @@
 # Anonymous Telemetry
 To help the [Kedro Project maintainers](../about/technical_steering_committee.md) improve the software,
-
 Kedro can capture anonymised telemetry.
 This data is collected with the sole purpose of improving Kedro by understanding feature usage.
 Importantly, we do not store personal information about you or sensitive data from your project,
@@ -63,3 +62,25 @@ To withdraw consent, you have a few options:
    ```
 !!! note
     This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
+
+## How do I hide the message that Kedro is collecting telemetry data?
+
+By default, Kedro will display the following message:
+
+```console
+Kedro is sending anonymous usage data with the sole purpose of improving the product. No personal
+data or IP addresses are stored on our side. To opt out, set the `KEDRO_DISABLE_TELEMETRY` or
+`DO_NOT_TRACK` environment variables, or create a `.telemetry` file in the current working directory
+with the contents `consent: false`. To hide this message, explicitly grant or deny consent. Read
+more at https://docs.kedro.org/en/stable/configuration/telemetry.html
+```
+
+You can hide this message by explicitly granting or denying consent. The
+[previous section](#how-do-i-withdraw-consent) explains how to deny consent by setting environment
+variables or updating the `.telemetry` file. You can also grant consent by modifying or creating the
+`.telemetry` file manually. If the `.telemetry` file exists in the root folder of your Kedro
+project, set the `consent` variable to `true`. If the file does not exist, create it with the following content:
+
+```yaml
+consent: true
+```

@@ -83,6 +83,9 @@ plugins:
         - Configuration management for parameters and credentials
         - Extensive deployment options (Airflow, Databricks, Kubeflow, etc.)
 
+        For comprehensive kedro-dataset documentation, see: https://docs.kedro.org/projects/kedro-datasets/en/stable/llms.txt
+        For pipeline visualisation documentation, see: https://docs.kedro.org/projects/kedro-viz/en/stable/llms.txt
+
         Current version: 1.0.0
         Last updated: 22/07/2025
 
@@ -245,11 +248,6 @@ plugins:
           - about/technical_steering_committee.md: Kedro's Technical Steering Committee
           - about/migration.md: Migration guide between Kedro versions
           - about/telemetry.md: Understanding Kedro telemetry
-
-        Related Documentation:
-          - https://docs.kedro.org/projects/kedro-datasets/en/stable/:  kedro-datasets, for comprehensive dataset documentation
-          - https://docs.kedro.org/projects/kedro-viz/en/stable/: kedro-viz, for pipeline visualisation documentation
-
 
 markdown_extensions:
   - attr_list

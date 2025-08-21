@@ -82,7 +82,7 @@ plugins:
         - Pipeline abstraction for creating modular, reusable nodes
         - Configuration management for parameters and credentials
         - Extensive deployment options (Airflow, Databricks, Kubeflow, etc.)
-        
+
         Related Documentation
         -Kedro Datasets: For comprehensive dataset documentation, see: https://docs.kedro.org/projects/kedro-datasets/en/stable/llms.txt
         -Kedro-Viz: For pipeline visualisation documentation, see: https://docs.kedro.org/projects/kedro-viz/en/stable/llms.txt

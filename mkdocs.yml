@@ -82,6 +82,10 @@ plugins:
         - Pipeline abstraction for creating modular, reusable nodes
         - Configuration management for parameters and credentials
         - Extensive deployment options (Airflow, Databricks, Kubeflow, etc.)
+        
+        Related Documentation
+        -Kedro Datasets: For comprehensive dataset documentation, see: https://docs.kedro.org/projects/kedro-datasets/en/stable/llms.txt
+        -Kedro-Viz: For pipeline visualisation documentation, see: https://docs.kedro.org/projects/kedro-viz/en/stable/llms.txt
 
         Current version: 1.0.0
         Last updated: 22/07/2025
@@ -198,8 +202,24 @@ plugins:
           - api/framework/kedro.framework.startup.md: Startup API
           - api/io/kedro.io.md: I/O API overview
           - api/io/kedro.io.DataCatalog.md: DataCatalog API reference
+          - api/io/kedro.io.CatalogProtocol.md: CatalogProtocol interface
+          - api/io/kedro.io.SharedMemoryDataCatalog.md: SharedMemoryDataCatalog for parallel processing
+          - api/io/kedro.io.SharedMemoryCatalogProtocol.md: SharedMemoryCatalogProtocol interface
+          - api/io/kedro.io.CatalogConfigResolver.md: CatalogConfigResolver reference
           - api/io/kedro.io.AbstractDataset.md: AbstractDataset base class
+          - api/io/kedro.io.AbstractVersionedDataset.md: AbstractVersionedDataset for versioning
+          - api/io/kedro.io.CachedDataset.md: CachedDataset for performance
           - api/io/kedro.io.MemoryDataset.md: MemoryDataset reference
+          - api/io/kedro.io.Version.md: Version class reference
+          - api/io/kedro.io.DatasetAlreadyExistsError.md: DatasetAlreadyExistsError exception
+          - api/io/kedro.io.DatasetError.md: DatasetError base exception
+          - api/io/kedro.io.DatasetNotFoundError.md: DatasetNotFoundError exception
+          - api/ipython/kedro.ipython.md: IPython extension API overview
+          - api/ipython/kedro.ipython.load_ipython_extension.md: Loading IPython extension
+          - api/ipython/kedro.ipython.magic_load_node.md: Magic command for loading nodes
+          - api/ipython/kedro.ipython.magic_reload_kedro.md: Magic command for reloading Kedro
+          - api/ipython/kedro.ipython.reload_kedro.md: Reload Kedro function
+          - api/kedro.logging.md: Logging utilities and configuration
           - api/pipeline/kedro.pipeline.md: Pipeline API overview
           - api/pipeline/kedro.pipeline.node.md: Node API reference
           - api/pipeline/kedro.pipeline.Pipeline.md: Pipeline class reference
@@ -208,6 +228,10 @@ plugins:
           - api/runner/kedro.runner.SequentialRunner.md: SequentialRunner reference
           - api/runner/kedro.runner.ParallelRunner.md: ParallelRunner reference
           - api/runner/kedro.runner.ThreadRunner.md: ThreadRunner reference
+          - api/kedro.utils.md: Utility functions and helpers
+          - api/kedro.load_ipython_extension.md: IPython extension loader
+          - api/kedro.KedroDeprecationWarning.md: Deprecation warning class
+          - api/kedro.KedroPythonVersionWarning.md: Python version warning class
 
         Integrations and Tools:
           - integrations-and-plugins/notebooks_and_ipython/index.md: Jupyter integration overview

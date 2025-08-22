@@ -91,7 +91,8 @@ docs = [
     "mkdocstrings>=0.29.1",
     "mkdocstrings-python>=0.29.1",
     "mkdocs-click",
-    "griffe"  # Required by mkdocstrings-python for API documentation generation.
+    "griffe",  # Required by mkdocstrings-python for API documentation generation.
+    "mkdocs-llmstxt" # Required to generate the llm.txt file
 ]
 jupyter = [
     "ipylab>=1.0.0",

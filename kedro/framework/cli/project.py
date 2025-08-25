@@ -17,7 +17,6 @@ from kedro.framework.cli.utils import (
     call,
     env_option,
     forward_command,
-    namespace_deprecation_warning,
     split_node_names,
     split_string,
     validate_conf_source,
@@ -187,7 +186,6 @@ def package(metadata: ProjectMetadata) -> None:
     type=str,
     default=None,
     help=NAMESPACE_ARG_HELP,
-    callback=namespace_deprecation_warning,
 )
 @click.option(
     "--config",

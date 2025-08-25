@@ -18,7 +18,7 @@ from more_itertools import spy, unzip
 from .transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Generator, Iterable
 
 
 class Node:
@@ -305,6 +305,25 @@ class Node:
             String representing node's namespace, typically from outer to inner scopes.
         """
         return self._namespace
+
+    @cached_property
+    def namespace_prefixes(self) -> list[str]:
+        """Return all hierarchical prefixes of the node's namespace.
+
+        Returns:
+            A list of namespace prefixes, from shortest to longest.
+            For example, a namespace 'a.b.c' would return ['a', 'a.b', 'a.b.c'].
+            If the node has no namespace, returns an empty list.
+        """
+        return list(self._enumerate_namespaces())
+
+    def _enumerate_namespaces(self) -> Generator[str]:
+        parts = (self._namespace or "").split(".")
+        prefix = ""
+        for p in parts:
+            prefix += p
+            yield prefix
+            prefix += "."
 
     @cached_property
     def inputs(self) -> list[str]:

@@ -177,7 +177,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def __getitem__(self, key: str) -> dict[str, Any]:
         config = self._getitem_dict_config(key)
-        return self._convert_config_to_dict(config, key)
+        return self._convert_config_to_dict(config)
 
     def _getitem_dict_config(self, key: str) -> dict[str, Any]:
         """Get configuration files by key, load and merge them, and
@@ -203,7 +203,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._register_runtime_params_resolver()
 
         if key in self:
-            config = super().__getitem__(key)  # type: ignore[no-any-return]
+            config = super().__getitem__(key)
             return config  # type: ignore[no-any-return]
 
         if key not in self.config_patterns:
@@ -364,10 +364,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         return OmegaConf.merge(*aggregate_config)
 
-    def _convert_config_to_dict(self, config: DictConfig, key: str) -> DictConfig:
-        if key == "parameters":
-            # Merge with runtime parameters only for "parameters"
-            return OmegaConf.to_container(config, resolve=True)
+    def _convert_config_to_dict(self, config: DictConfig) -> DictConfig:
         try:
             config_container = OmegaConf.to_container(config, resolve=True)
         except UnsupportedInterpolationType as exc:
@@ -404,11 +401,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         # Implementation goes here
 
-        merged_omegaconf_config = self._load_and_merge_dir_config(
+        config = self._load_and_merge_dir_config(
             conf_path, patterns, key, processed_files, read_environment_variables
         )
 
-        return self._convert_config_to_dict(merged_omegaconf_config, key)
+        return self._convert_config_to_dict(config)
 
     @staticmethod
     def _initialise_filesystem_and_protocol(

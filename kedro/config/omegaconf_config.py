@@ -285,7 +285,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return KeysView(self.config_patterns)
 
     @typing.no_type_check
-    def load_and_merge_dir_config(
+    def _load_and_merge_dir_config_as_dictconfig(
         self,
         conf_path: str,
         patterns: Iterable[str],
@@ -364,16 +364,46 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._check_duplicates(key, config_per_file)
 
         if not aggregate_config:
-            return {}
+            return DictConfig({})
 
         if key == "parameters":
             # Merge with runtime parameters only for "parameters"
-            return OmegaConf.to_container(
-                OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
-            )
+            return OmegaConf.merge(*aggregate_config, self.runtime_params)
+
+        return OmegaConf.merge(*aggregate_config)
+
+    def load_and_merge_dir_config(
+        self,
+        conf_path: str,
+        patterns: Iterable[str],
+        key: str,
+        processed_files: set,
+        read_environment_variables: bool | None = False,
+    ) -> dict[str, Any]:
+        """Load and merge configuration files from a directory.
+
+        Args:
+            conf_path: Path to the configuration directory.
+            patterns: List of glob patterns to match configuration files.
+            key: Key of the configuration type to fetch.
+            processed_files: Set of files read for a given configuration type.
+            read_environment_variables: Whether to resolve environment variables.
+
+        Returns:
+            Merged configuration dictionary.
+        """
+        # Implementation goes here
+
+        merged_omegaconf_config = self._load_and_merge_dir_config_as_dictconfig(
+            conf_path, patterns, key, processed_files, read_environment_variables
+        )
+
+        if key == "parameters":
+            # Merge with runtime parameters only for "parameters"
+            return OmegaConf.to_container(merged_omegaconf_config, resolve=True)
 
         merged_config_container = OmegaConf.to_container(
-            OmegaConf.merge(*aggregate_config), resolve=True
+            merged_omegaconf_config, resolve=True
         )
         return {
             k: v for k, v in merged_config_container.items() if not k.startswith("_")

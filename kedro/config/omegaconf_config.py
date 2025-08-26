@@ -263,7 +263,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 )
             else:
                 raise exc
-
         resulting_config = self._merge_configs(config, env_config, key, env_path)
 
         if not processed_files and key != "globals":
@@ -454,7 +453,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         merging_strategy = self.merge_strategy.get(key, "destructive")
         try:
             strategy = MergeStrategies[merging_strategy.upper()]
-
             # Get the corresponding merge function and call it
             merge_function_name = MERGING_IMPLEMENTATIONS[strategy]
             merge_function = getattr(self, merge_function_name)
@@ -603,7 +601,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
     ) -> DictConfig:
         # Destructively merge the two env dirs. The chosen env will override base.
         config_dict = OmegaConf.to_container(config)
-        env_config_dict = OmegaConf.to_container(config)
+        env_config_dict = OmegaConf.to_container(env_config)
         common_keys = config_dict.keys() & env_config_dict.keys()
         if common_keys:
             sorted_keys = ", ".join(sorted(common_keys))

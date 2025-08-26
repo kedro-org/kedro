@@ -372,6 +372,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         return OmegaConf.merge(*aggregate_config)
 
+    @typing.no_type_check
     def load_and_merge_dir_config(
         self,
         conf_path: str,

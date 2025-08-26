@@ -179,7 +179,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         config = self._getitem_dict_config(key)
         return self._convert_config_to_dict(config, key)
 
-    def _getitem_dict_config(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
+    def _getitem_dict_config(self, key: str) -> dict[str, Any]:
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -203,7 +203,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._register_runtime_params_resolver()
 
         if key in self:
-            print(f"{key} key is found")
             config = super().__getitem__(key)  # type: ignore[no-any-return]
             return config  # type: ignore[no-any-return]
 
@@ -228,17 +227,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
             base_path = str(Path(self.conf_source) / self.base_env)
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
-        try:
-            base_config = self._load_and_merge_dir_config(  # type: ignore[no-untyped-call]
-                base_path, patterns, key, processed_files, read_environment_variables
-            )
-        except UnsupportedInterpolationType as exc:
-            if "runtime_params" in str(exc):
-                raise UnsupportedInterpolationType(
-                    "The `runtime_params:` resolver is not supported for globals."
-                )
-            else:
-                raise exc
+
+        base_config = self._load_and_merge_dir_config(  # type: ignore[no-untyped-call]
+            base_path, patterns, key, processed_files, read_environment_variables
+        )
 
         config = base_config
 
@@ -256,17 +248,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env_path = str(Path(self.conf_source) / run_env)
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
-        try:
-            env_config = self._load_and_merge_dir_config(  # type: ignore[no-untyped-call]
-                env_path, patterns, key, processed_files, read_environment_variables
-            )
-        except UnsupportedInterpolationType as exc:
-            if "runtime_params" in str(exc):
-                raise UnsupportedInterpolationType(
-                    "The `runtime_params:` resolver is not supported for globals."
-                )
-            else:
-                raise exc
+
+        env_config = self._load_and_merge_dir_config(  # type: ignore[no-untyped-call]
+            env_path, patterns, key, processed_files, read_environment_variables
+        )
         resulting_config = self._merge_configs(config, env_config, key, env_path)
 
         if not processed_files and key != "globals":
@@ -383,8 +368,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if key == "parameters":
             # Merge with runtime parameters only for "parameters"
             return OmegaConf.to_container(config, resolve=True)
+        try:
+            config_container = OmegaConf.to_container(config, resolve=True)
+        except UnsupportedInterpolationType as exc:
+            if "runtime_params" in str(exc):
+                raise UnsupportedInterpolationType(
+                    "The `runtime_params:` resolver is not supported for globals."
+                )
+            else:
+                raise exc
 
-        config_container = OmegaConf.to_container(config, resolve=True)
         return {k: v for k, v in config_container.items() if not k.startswith("_")}
 
     def load_and_merge_dir_config(

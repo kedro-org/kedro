@@ -173,10 +173,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
             self._globals = value
         super().__setitem__(key, value)
 
-    def _getitem__(self, key: str) -> dict[str, Any]:
-        return self._get_dict_config(key)
+    def __getitem__(self, key: str) -> dict[str, Any]:
+        config = self._getitem_dict_config(key)
+        return self._convert_config_to_dict(config, key)
 
-    def _get_dict_config(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
+    def _getitem_dict_config(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -288,7 +289,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return KeysView(self.config_patterns)
 
     @typing.no_type_check
-    def _load_and_merge_dir_config_as_dictconfig(
+    def _load_and_merge_dir_config(
         self,
         conf_path: str,
         patterns: Iterable[str],
@@ -375,6 +376,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         return OmegaConf.merge(*aggregate_config)
 
+    def _convert_config_to_dict(self, config: DictConfig, key: str) -> DictConfig:
+        if key == "parameters":
+            # Merge with runtime parameters only for "parameters"
+            return OmegaConf.to_container(config, resolve=True)
+
+        config_container = OmegaConf.to_container(config, resolve=True)
+        return {k: v for k, v in config_container.items() if not k.startswith("_")}
+
     def load_and_merge_dir_config(
         self,
         conf_path: str,
@@ -382,7 +391,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         key: str,
         processed_files: set,
         read_environment_variables: bool | None = False,
-    ) -> dict[str, Any]:
+    ) -> dict[
+        str, Any
+    ]:  # TODO: remove this method in a further API polishing, it is kept for retrocompatibility
         """Load and merge configuration files from a directory.
 
         Args:
@@ -397,20 +408,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         # Implementation goes here
 
-        merged_omegaconf_config = self._load_and_merge_dir_config_as_dictconfig(
+        merged_omegaconf_config = self._load_and_merge_dir_config(
             conf_path, patterns, key, processed_files, read_environment_variables
         )
 
-        if key == "parameters":
-            # Merge with runtime parameters only for "parameters"
-            return OmegaConf.to_container(merged_omegaconf_config, resolve=True)
-
-        merged_config_container = OmegaConf.to_container(
-            merged_omegaconf_config, resolve=True
-        )
-        return {
-            k: v for k, v in merged_config_container.items() if not k.startswith("_")
-        }
+        return self._convert_config_to_dict(merged_omegaconf_config, key)
 
     @staticmethod
     def _initialise_filesystem_and_protocol(

@@ -171,7 +171,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if key == "globals":
             # Update the cached value at self._globals since it is used by the globals resolver
             self._globals = value
-        super().__setitem__(key, value)
+        if isinstance(value, dict):
+            configdict_value = OmegaConf.create(value)
+        super().__setitem__(key, configdict_value)
 
     def __getitem__(self, key: str) -> dict[str, Any]:
         config = self._getitem_dict_config(key)

@@ -173,7 +173,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
             self._globals = value
         super().__setitem__(key, value)
 
-    def __getitem__(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
+    def _getitem__(self, key: str) -> dict[str, Any]:
+        return self._get_dict_config(key)
+
+    def _get_dict_config(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -221,7 +224,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
         try:
-            base_config = self.load_and_merge_dir_config(  # type: ignore[no-untyped-call]
+            base_config = self._load_and_merge_dir_config(  # type: ignore[no-untyped-call]
                 base_path, patterns, key, processed_files, read_environment_variables
             )
         except UnsupportedInterpolationType as exc:
@@ -249,7 +252,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
         try:
-            env_config = self.load_and_merge_dir_config(  # type: ignore[no-untyped-call]
+            env_config = self._load_and_merge_dir_config(  # type: ignore[no-untyped-call]
                 env_path, patterns, key, processed_files, read_environment_variables
             )
         except UnsupportedInterpolationType as exc:
@@ -372,7 +375,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         return OmegaConf.merge(*aggregate_config)
 
-    @typing.no_type_check
     def load_and_merge_dir_config(
         self,
         conf_path: str,
@@ -595,10 +597,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     @staticmethod
     def _destructive_merge(
-        config: dict[str, Any], env_config: dict[str, Any], env_path: str
-    ) -> dict[str, Any]:
+        config: DictConfig, env_config: DictConfig, env_path: str
+    ) -> DictConfig:
         # Destructively merge the two env dirs. The chosen env will override base.
-        common_keys = config.keys() & env_config.keys()
+        config_dict = OmegaConf.to_container(config)
+        env_config_dict = OmegaConf.to_container(config)
+        common_keys = config_dict.keys() & env_config_dict.keys()
         if common_keys:
             sorted_keys = ", ".join(sorted(common_keys))
             msg = (
@@ -607,15 +611,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
             )
             _config_logger.debug(msg, env_path, sorted_keys)
 
-        config.update(env_config)
-        return config
+        config_dict.update(env_config_dict)
+        return OmegaConf.create(config_dict)
 
     @staticmethod
     def _soft_merge(
-        config: dict[str, Any], env_config: dict[str, Any], env_path: str | None = None
-    ) -> Any:
+        config: DictConfig, env_config: DictConfig, env_path: str | None = None
+    ) -> DictConfig:
         # Soft merge the two env dirs. The chosen env will override base if keys clash.
-        return OmegaConf.to_container(OmegaConf.merge(config, env_config))
+        return OmegaConf.merge(config, env_config)
+        # return OmegaConf.to_container(OmegaConf.merge(config, env_config))
 
     def _is_hidden(self, path_str: str) -> bool:
         """Check if path contains any hidden directory or is a hidden file"""

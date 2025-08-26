@@ -203,7 +203,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._register_runtime_params_resolver()
 
         if key in self:
-            return super().__getitem__(key)  # type: ignore[no-any-return]
+            print(f"{key} key is found")
+            config = super().__getitem__(key)  # type: ignore[no-any-return]
+            return config  # type: ignore[no-any-return]
 
         if key not in self.config_patterns:
             raise KeyError(

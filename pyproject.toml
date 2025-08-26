@@ -54,7 +54,7 @@ dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
 test = [
-    "behave==1.3.0",
+    "behave==1.3.1",
     "coverage[toml]",
     "detect-secrets~=1.5.0",
     "import-linter==2.4",

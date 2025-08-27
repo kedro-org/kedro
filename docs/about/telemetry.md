@@ -1,4 +1,4 @@
-# Anonymous Telemetry
+# Anonymous telemetry
 To help the [Kedro Project maintainers](../about/technical_steering_committee.md) improve the software,
 Kedro can capture anonymised telemetry.
 This data is collected with the sole purpose of improving Kedro by understanding feature usage.
@@ -15,7 +15,7 @@ which is installed as one of Kedro’s dependencies.
 [the Kedro-Telemetry plugin]: https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry
 [Telemetry Data Collection and Usage Policy]: https://lfprojects.org/policies/telemetry-data-policy/
 
-## Collected data fields:
+## Collected data fields
 
 - **Unique user identifier(UUID):** The UUID is a randomly generated anonymous identifier, stored within an OS-specific configuration folder for Kedro, named `telemetry.toml`. If a UUID does not already exist, the telemetry plugin generates a new one, stores it, and then uses this UUID in subsequent telemetry events.
 - **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy. Example Input: `kedro run --pipeline=ds --env=test` What we receive: `kedro run --pipeline ***** --env *****`
@@ -30,7 +30,7 @@ which is installed as one of Kedro’s dependencies.
 For technical information on how the telemetry collection works, you can browse
 [the source code of `kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry).
 
-## How do I withdraw consent?
+## How to withdraw consent
 
 To withdraw consent, you have a few options:
 
@@ -63,7 +63,7 @@ To withdraw consent, you have a few options:
 !!! note
     This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
 
-## How do I hide the message that Kedro is collecting telemetry data?
+## How to hide the message that Kedro is collecting telemetry data
 
 By default, Kedro will display the following message:
 

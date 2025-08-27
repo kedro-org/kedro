@@ -58,6 +58,9 @@ class TestSessionHookManager:
         self, mocker, request, caplog, project_hooks, num_plugins
     ):
         caplog.set_level(logging.DEBUG, logger="kedro")
+        mocker.patch(
+            "kedro.framework.project.LOGGING.set_project_logging", return_value=None
+        )
         load_setuptools_entrypoints = mocker.patch(
             "pluggy._manager.PluginManager.load_setuptools_entrypoints",
             return_value=num_plugins,

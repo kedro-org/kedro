@@ -281,7 +281,7 @@ class _ProjectLogging(UserDict):
         """Add the project level logging to the loggers upon provision of a package name.
         Checks if project logger already exists to prevent overwriting, if none exists
         it defaults to setting project logs at INFO level."""
-        if not self.data["loggers"]:
+        if self.data["loggers"] is None:
             self.data["loggers"] = {}
 
         if package_name not in self.data["loggers"]:

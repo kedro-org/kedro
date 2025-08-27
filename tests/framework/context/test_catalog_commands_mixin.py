@@ -204,6 +204,18 @@ def mock_pipelines(mocker, fake_pipeline):
     )
     return mock_register_pipelines()
 
+@pytest.fixture()
+def mock_pipelines_empty(mocker):
+    def mock_register_pipelines():
+        return {}
+
+    mocker.patch.object(
+        _ProjectPipelines,
+        "_get_pipelines_registry_callable",
+        return_value=mock_register_pipelines,
+    )
+    return mock_register_pipelines()
+
 
 class TestCatalogCommands:
     def test_describe_datasets(
@@ -261,7 +273,7 @@ class TestCatalogCommands:
         assert "default" in result
         assert "datasets" in result["default"]
 
-    def test_describe_datasets_empty_pipeline(self, DataCatalogWithFactories, mocker):
+    def test_describe_datasets_empty_pipeline(self, DataCatalogWithFactories, mocker, mock_pipelines_empty):
         from kedro.framework import project
 
         mocker.patch.dict(project.pipelines, {})

@@ -189,6 +189,22 @@ def DataCatalogWithOverlappingFactories(fake_catalog_with_overlapping_factories)
     return catalog
 
 
+@pytest.fixture()
+def mock_pipelines(mocker, fake_pipeline):
+    def mock_register_pipelines():
+        return {
+            "__default__": fake_pipeline,
+            "pipe": fake_pipeline,
+        }
+
+    mocker.patch.object(
+        _ProjectPipelines,
+        "_get_pipelines_registry_callable",
+        return_value=mock_register_pipelines,
+    )
+    return mock_register_pipelines()
+
+
 class TestCatalogCommands:
     def test_describe_datasets(
         self,
@@ -221,7 +237,7 @@ class TestCatalogCommands:
             result == expected_fake_config_with_default_pattern_describe_datasets_output
         )
 
-    def test_describe_datasets_default_pipeline(self, DataCatalogWithFactories, mocker):
+    def test_describe_datasets_default_pipeline(self, DataCatalogWithFactories, mocker, mock_pipelines):
         # Simulate _pipelines.keys() returning a default pipeline
         from kedro.framework import project
 
@@ -236,20 +252,7 @@ class TestCatalogCommands:
             ]
         )
 
-        def mock_register_pipelines():
-            return {
-                "__default__": fake_pipeline,
-                "pipe": fake_pipeline,
-            }
-
-        mocker.patch.object(
-            _ProjectPipelines,
-            "_get_pipelines_registry_callable",
-            return_value={
-                "__default__": fake_pipeline,
-                "pipe": fake_pipeline,
-            },
-        )
+        # monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
         mocker.patch.dict(project.pipelines, {"default": fake_pipeline})
 
         catalog = DataCatalogWithFactories

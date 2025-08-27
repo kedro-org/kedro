@@ -11,7 +11,7 @@ lint:
 	pre-commit run -a --hook-stage manual $(hook)
 	mypy kedro --strict --allow-any-generics --no-warn-unused-ignores
 test:
-	pytest --numprocesses 4 --dist loadfile --maxschedchunk=0
+	pytest --numprocesses 4 --dist loadscope
 
 show-coverage:
 	coverage html --show-contexts || true

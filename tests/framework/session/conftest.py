@@ -363,26 +363,7 @@ def mock_settings(mocker, project_hooks):
 
 
 @pytest.fixture
-def mock_session(mock_settings, mock_package_name, tmp_path, mocker):
-    # Mock the LOGGING object to have a proper structure with "loggers" key
-    mock_logging_config = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "loggers": {},
-        "root": {"handlers": ["console"]},
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "stream": "ext://sys.stdout"
-            }
-        }
-    }
-    
-    # Mock the LOGGING object's data to include the required "loggers" key
-    from kedro.framework.project import LOGGING
-    mocker.patch.object(LOGGING, "data", mock_logging_config)
-    
+def mock_session(mock_settings, mock_package_name, tmp_path):
     configure_project(mock_package_name)
     session = KedroSession.create(tmp_path, runtime_params={"params:key": "value"})
     yield session

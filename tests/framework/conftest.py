@@ -13,6 +13,7 @@ def default_logging_config():
         },
         "loggers": {"kedro": {"level": "INFO"}},
         "root": {"handlers": ["rich"]},
+        "fake_logging_config": True
     }
     return logging_config
 

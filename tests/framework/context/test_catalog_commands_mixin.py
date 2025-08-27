@@ -254,7 +254,6 @@ class TestCatalogCommands:
             ]
         )
 
-        # monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
         mocker.patch.dict(project.pipelines, {"default": fake_pipeline})
 
         catalog = DataCatalogWithFactories
@@ -262,7 +261,11 @@ class TestCatalogCommands:
         assert "default" in result
         assert "datasets" in result["default"]
 
-    def test_describe_datasets_empty_pipeline(self, DataCatalogWithFactories):
+    def test_describe_datasets_empty_pipeline(self, DataCatalogWithFactories, mocker):
+        from kedro.framework import project
+
+        mocker.patch.dict(project.pipelines, {})
+
         catalog = DataCatalogWithFactories
         result = catalog.describe_datasets(pipelines=[])
         assert isinstance(result, dict)

@@ -189,22 +189,6 @@ def DataCatalogWithOverlappingFactories(fake_catalog_with_overlapping_factories)
     return catalog
 
 
-@pytest.fixture(autouse=True)
-def mock_pipelines(mocker, fake_pipeline):
-    def mock_register_pipelines():
-        return {
-            "__default__": fake_pipeline,
-            "pipe": fake_pipeline,
-        }
-
-    mocker.patch.object(
-        _ProjectPipelines,
-        "_get_pipelines_registry_callable",
-        return_value=mock_register_pipelines,
-    )
-    return mock_register_pipelines()
-
-
 class TestCatalogCommands:
     def test_describe_datasets(
         self,
@@ -252,7 +236,20 @@ class TestCatalogCommands:
             ]
         )
 
-        # monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
+        def mock_register_pipelines():
+            return {
+                "__default__": fake_pipeline,
+                "pipe": fake_pipeline,
+            }
+
+        mocker.patch.object(
+            _ProjectPipelines,
+            "_get_pipelines_registry_callable",
+            return_value={
+                "__default__": fake_pipeline,
+                "pipe": fake_pipeline,
+            },
+        )
         mocker.patch.dict(project.pipelines, {"default": fake_pipeline})
 
         catalog = DataCatalogWithFactories

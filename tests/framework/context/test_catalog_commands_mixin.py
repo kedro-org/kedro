@@ -189,7 +189,7 @@ def DataCatalogWithOverlappingFactories(fake_catalog_with_overlapping_factories)
     return catalog
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_pipelines(mocker, fake_pipeline):
     def mock_register_pipelines():
         return {
@@ -204,7 +204,7 @@ def mock_pipelines(mocker, fake_pipeline):
     )
     return mock_register_pipelines()
 
-@pytest.fixture()
+@pytest.fixture
 def mock_pipelines_empty(mocker):
     def mock_register_pipelines():
         return {}
@@ -266,7 +266,7 @@ class TestCatalogCommands:
             ]
         )
 
-        mocker.patch.dict(project.pipelines, {"default": fake_pipeline})
+        mocker.patch.dict(project.pipelines, {"default": fake_pipeline}, clear=True)
 
         catalog = DataCatalogWithFactories
         result = catalog.describe_datasets()  # No pipeline arg provided
@@ -276,7 +276,7 @@ class TestCatalogCommands:
     def test_describe_datasets_empty_pipeline(self, DataCatalogWithFactories, mocker, mock_pipelines_empty):
         from kedro.framework import project
 
-        mocker.patch.dict(project.pipelines, {})
+        mocker.patch.dict(project.pipelines, {}, clear=True)
 
         catalog = DataCatalogWithFactories
         result = catalog.describe_datasets(pipelines=[])

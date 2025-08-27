@@ -218,9 +218,7 @@ class TestCatalogCommands:
             result == expected_fake_config_with_default_pattern_describe_datasets_output
         )
 
-    def test_describe_datasets_default_pipeline(
-        self, DataCatalogWithFactories, monkeypatch
-    ):
+    def test_describe_datasets_default_pipeline(self, DataCatalogWithFactories, mocker):
         # Simulate _pipelines.keys() returning a default pipeline
         from kedro.framework import project
 
@@ -235,7 +233,8 @@ class TestCatalogCommands:
             ]
         )
 
-        monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
+        # monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
+        mocker.patch.dict(project.pipelines, {"default": fake_pipeline}, clear=True)
 
         catalog = DataCatalogWithFactories
         result = catalog.describe_datasets()  # No pipeline arg provided

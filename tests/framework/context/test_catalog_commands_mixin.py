@@ -234,7 +234,7 @@ class TestCatalogCommands:
         )
 
         # monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
-        mocker.patch.dict(project.pipelines, {"default": fake_pipeline}, clear=True)
+        mocker.patch.dict(project.pipelines, {"default": fake_pipeline})
 
         catalog = DataCatalogWithFactories
         result = catalog.describe_datasets()  # No pipeline arg provided

@@ -237,7 +237,9 @@ class TestCatalogCommands:
             result == expected_fake_config_with_default_pattern_describe_datasets_output
         )
 
-    def test_describe_datasets_default_pipeline(self, DataCatalogWithFactories, mocker, mock_pipelines):
+    def test_describe_datasets_default_pipeline(
+        self, DataCatalogWithFactories, mocker, mock_pipelines
+    ):
         # Simulate _pipelines.keys() returning a default pipeline
         from kedro.framework import project
 

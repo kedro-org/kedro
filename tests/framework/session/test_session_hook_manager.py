@@ -39,6 +39,9 @@ class TestSessionHookManager:
     @pytest.mark.nologreset
     def test_assert_register_hooks(self, mocker, project_hooks, mock_session):
         mocker.patch(
+            "kedro.framework.project.LOGGING.configure", return_value=None
+        )
+        mocker.patch(
             "kedro.framework.project.LOGGING.set_project_logging", return_value=None
         )
         hook_manager = mock_session._hook_manager

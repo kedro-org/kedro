@@ -5,6 +5,9 @@ from kedro.framework.context.catalog_mixins import (
     _group_ds_by_type,
 )
 from kedro.framework.context.context import compose_classes
+from kedro.framework.project import (
+    _ProjectPipelines,
+)
 from kedro.io import DataCatalog
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.pipeline import Node, Pipeline
@@ -184,6 +187,22 @@ def DataCatalogWithOverlappingFactories(fake_catalog_with_overlapping_factories)
         save_version=None,
     )
     return catalog
+
+
+@pytest.fixture(autouse=True)
+def mock_pipelines(mocker, fake_pipeline):
+    def mock_register_pipelines():
+        return {
+            "__default__": fake_pipeline,
+            "pipe": fake_pipeline,
+        }
+
+    mocker.patch.object(
+        _ProjectPipelines,
+        "_get_pipelines_registry_callable",
+        return_value=mock_register_pipelines,
+    )
+    return mock_register_pipelines()
 
 
 class TestCatalogCommands:

@@ -37,14 +37,20 @@ class TestSessionHookManager:
     """Test the process of registering hooks with the hook manager in a session."""
 
     @pytest.mark.nologreset
-    def test_assert_register_hooks(self, project_hooks, mock_session):
+    def test_assert_register_hooks(self, mocker, project_hooks, mock_session):
+        mocker.patch(
+            "kedro.framework.project.LOGGING.set_project_logging", return_value=None
+        )
         hook_manager = mock_session._hook_manager
         assert hook_manager.is_registered(project_hooks)
 
     @pytest.mark.usefixtures("mock_session")
     @pytest.mark.nologreset
-    def test_calling_register_hooks_twice(self, project_hooks, mock_session):
+    def test_calling_register_hooks_twice(self, mocker, project_hooks, mock_session):
         """Calling hook registration multiple times should not raise"""
+        mocker.patch(
+            "kedro.framework.project.LOGGING.set_project_logging", return_value=None
+        )
         hook_manager = mock_session._hook_manager
 
         assert hook_manager.is_registered(project_hooks)

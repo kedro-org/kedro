@@ -225,7 +225,7 @@ class KedroCLI(CommandCollection):
         project and the plugins, then combines them with the built-in ones.
         Built-in commands can be overridden by plugins, which can be
         overridden by a custom project cli.py.
-        See https://docs.kedro.org/en/stable/extend_kedro/common_use_cases.html#use-case-3-how-to-add-or-modify-cli-commands
+        See https://docs.kedro.org/en/0.19.14/extend_kedro/common_use_cases.html#use-case-3-how-to-add-or-modify-cli-commands
         on how to add this.
         """
         if not self._metadata:

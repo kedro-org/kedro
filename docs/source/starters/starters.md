@@ -51,7 +51,6 @@ The following Kedro starters have been archived and are unavailable in Kedro ver
 * [`standalone-datacatalog`](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog)
 * [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris)
 * [`pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris)
-* [`pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark)
 
 The latest version of Kedro that supports these starters is Kedro 0.18.14.
 

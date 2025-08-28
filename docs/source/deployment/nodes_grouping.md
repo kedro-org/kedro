@@ -22,7 +22,7 @@ If you want to group nodes differently from the existing pipeline structure, you
   ```bash
   kedro run --pipeline=<your_pipeline_name>
   ```
-More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#run-a-pipeline-by-name)
+More information: [Run a pipeline by name](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 
 ---
 
@@ -47,7 +47,7 @@ Please note that nodes with the same tag can exist in different pipelines, makin
   ```bash
   kedro run --tags=<your_tag_name>
   ```
-More information: [How to tag a node](https://docs.kedro.org/en/stable/nodes_and_pipelines/nodes.html#how-to-tag-a-node)
+More information: [How to tag a node](../nodes_and_pipelines/nodes.md#how-to-tag-a-node)
 
 ---
 
@@ -83,7 +83,7 @@ return pipeline(
   ```bash
   kedro run --namespace=<your_namespace_name>
   ```
-More information: [Namespaces](https://docs.kedro.org/en/stable/nodes_and_pipelines/namespaces.html)
+More information: [Namespaces](../nodes_and_pipelines/namespaces.md)
 
 ---
 

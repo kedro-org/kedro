@@ -11,6 +11,7 @@ def runner():
 
 @pytest.fixture
 def mock_session():
+    patch("kedro.framework.project.LOGGING.set_project_logging", return_value=None)
     with patch("kedro.framework.session.KedroSession.create") as mock_create_session:
         mock_context = MagicMock()
         mock_catalog = MagicMock()

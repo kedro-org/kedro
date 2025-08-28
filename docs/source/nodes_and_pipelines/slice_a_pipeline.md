@@ -3,7 +3,7 @@
 Sometimes it is desirable to run a subset, or a 'slice' of a pipeline's nodes. There are two primary ways to achieve this:
 
 
-1. **Visually through Kedro-Viz:** This approach allows you to visually choose and slice pipeline nodes, which then generates a run command for executing the slice within your Kedro project. Detailed steps on how to achieve this are available in the Kedro-Viz documentation: [Slice a Pipeline](https://docs.kedro.org/projects/kedro-viz/en/stable/slice_a_pipeline.html).
+1. **Visually through Kedro-Viz:** This approach allows you to visually choose and slice pipeline nodes, which then generates a run command for executing the slice within your Kedro project. Detailed steps on how to achieve this are available in the Kedro-Viz documentation: [Slice a Pipeline](https://docs.kedro.org/projects/kedro-viz/en/v11.0.0/slice_a_pipeline.html).
 
 ![](../meta/images/slice_pipeline_kedro_viz.gif)
 

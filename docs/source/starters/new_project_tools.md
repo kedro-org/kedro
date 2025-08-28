@@ -243,27 +243,27 @@ To learn more about using logging in your project, or modifying the logging conf
 Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, `conf.py` and `index.rst`, with some added features such as auto generation of HTML documentation.
 The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration by helping you create and maintain guides and API docs.
 
-If you did not initially select `docs` and want to implement it later you can do so by following the [official documentation](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project-if-you-have-not-selected-docs-tool) for guidance on adding documentation to a Kedro project.
+If you did not initially select `docs` and want to implement it later you can do so by following the [official documentation](../tutorial/package_a_project.md#add-documentation-to-a-kedro-project-if-you-have-not-selected-docs-tool) for guidance on adding documentation to a Kedro project.
 
 ### Data structure
 
-The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention).
+The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](../faq/faq.md#what-is-data-engineering-convention).
 This is crucial if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
 Kedro's capabilities extend far beyond local data storage. Kedro seamlessly integrates with Data Lakes and various databases through fsspec URIs, catering to the needs of professional teams that store their data in blob/object storage or databases.
 We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
-You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure).
+You can learn more about Kedro's recommended [project directory structure](../get_started/kedro_concepts.md#kedro-project-directory-structure).
 
 ### PySpark
 
 The `PySpark` tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
 PySpark aligns with Kedro's scalability principle, as it provides data processing capabilities for large datasets.
-See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for more information on setup and usage.
+See the [PySpark integration documentation](../integrations/pyspark_integration.md) for more information on setup and usage.
 
 ### Kedro Viz
 
 The `viz` tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
 In addition, `viz` will also add setup for experiment tracking and plotting datasets.
-See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
+See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/v11.0.0/index.html) for more information on using this tool.
 
 ## Flowchart illustration
 

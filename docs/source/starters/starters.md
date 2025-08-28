@@ -38,7 +38,7 @@ kedro starter list
 The Kedro team maintains the following starters for a range of Kedro projects:
 
 * [`astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
-* [`databricks-iris`](https://github.com/kedro-org/kedro-starters/tree/main/databricks-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a setup for [Databricks](https://docs.kedro.org/en/stable/deployment/databricks/index.html) deployment.
+* [`databricks-iris`](https://github.com/kedro-org/kedro-starters/tree/main/databricks-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a setup for [Databricks](../deployment/databricks/index.md) deployment.
 * [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pandas` datasets.
 * [`spaceflights-pandas-viz`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pandas` datasets and visualisation and experiment tracking `kedro-viz` features.
 * [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code with `pyspark` datasets.
@@ -48,10 +48,10 @@ The Kedro team maintains the following starters for a range of Kedro projects:
 
 The following Kedro starters have been archived and are unavailable in Kedro version 0.19.0 and beyond.
 
-* [`standalone-datacatalog`](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog)
-* [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris)
-* [`pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris)
-* [`pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark)
+* `standalone-datacatalog`
+* `pandas-iris`
+* `pyspark-iris`
+* `pyspark`
 
 The latest version of Kedro that supports these starters is Kedro 0.18.14.
 

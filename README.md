@@ -117,4 +117,5 @@ We appreciate our community and want to stay connected. For that, we offer a pub
 
 Check out the upcoming demo topics and dates at the [Kedro Coffee Chat wiki page](https://github.com/kedro-org/kedro/wiki/Kedro-Coffee-Chat).
 
+
 Follow our Slack [announcement channel](https://kedro-org.slack.com/archives/C03RKAQ0MGQ) to see Kedro Coffee Chat announcements and access demo recordings.

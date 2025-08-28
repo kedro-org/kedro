@@ -263,7 +263,7 @@ See the [PySpark integration documentation](../integrations/pyspark_integration.
 
 The `viz` tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
 In addition, `viz` will also add setup for experiment tracking and plotting datasets.
-See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/index.html) for more information on using this tool.
+See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/v11.0.0/index.html) for more information on using this tool.
 
 ## Flowchart illustration
 

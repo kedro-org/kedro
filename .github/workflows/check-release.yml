@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - base-0.19.14
 
 jobs:
   check-version:

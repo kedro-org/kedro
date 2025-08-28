@@ -247,17 +247,17 @@ If you did not initially select `docs` and want to implement it later you can do
 
 ### Data structure
 
-The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention).
+The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](../faq/faq.md#what-is-data-engineering-convention).
 This is crucial if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
 Kedro's capabilities extend far beyond local data storage. Kedro seamlessly integrates with Data Lakes and various databases through fsspec URIs, catering to the needs of professional teams that store their data in blob/object storage or databases.
 We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
-You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure).
+You can learn more about Kedro's recommended [project directory structure](../get_started/kedro_concepts.md#kedro-project-directory-structure).
 
 ### PySpark
 
 The `PySpark` tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
 PySpark aligns with Kedro's scalability principle, as it provides data processing capabilities for large datasets.
-See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for more information on setup and usage.
+See the [PySpark integration documentation](../integrations/pyspark_integration.md) for more information on setup and usage.
 
 ### Kedro Viz
 

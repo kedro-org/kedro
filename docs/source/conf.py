@@ -272,7 +272,7 @@ linkcheck_retries = 3
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/kedro-org/kedro/tree/main/docs/source",
+    "github_url": "https://github.com/kedro-org/kedro/tree/main/docs",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

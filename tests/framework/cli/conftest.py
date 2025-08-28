@@ -10,6 +10,7 @@ import sys
 import tempfile
 from importlib import import_module
 from pathlib import Path
+from unittest.mock import patch
 
 import click
 import yaml
@@ -140,8 +141,11 @@ def fake_project_cli(
     sys.path = [str(fake_repo_path / "src"), *sys.path]
 
     import_module(PACKAGE_NAME)
-    configure_project(PACKAGE_NAME)
-    yield fake_kedro_cli
+    with patch(
+        "kedro.framework.project.LOGGING.set_project_logging", return_value=None
+    ):
+        configure_project(PACKAGE_NAME)
+        yield fake_kedro_cli
 
     # reset side-effects of configure_project
     pipelines.configure()

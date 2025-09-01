@@ -2,12 +2,16 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
-* Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines
-
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 1.0.0
 ## Documentation changes
 ## Community contributions
+
+# Release 0.19.15
+
+## Bug fixes and other changes
+* Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines
+* Made deprecation warning appear only when the deprecated `--namespace` flag is used
 
 # Release 0.19.14
 

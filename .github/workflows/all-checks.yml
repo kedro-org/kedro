@@ -10,7 +10,7 @@ on:
     branches:
       - main
       - develop
-      - base-0.19.14
+      - base-0.19.15
       - release/0.19.15
     paths-ignore:
       - "docs/**"
@@ -19,7 +19,7 @@ on:
     branches:
       - main
       - develop
-      - base-0.19.14
+      - base-0.19.15
     paths-ignore:
       - "docs/**"
       - '**.md'

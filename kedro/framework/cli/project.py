@@ -17,6 +17,7 @@ from kedro.framework.cli.utils import (
     call,
     env_option,
     forward_command,
+    namespace_deprecation_warning,
     split_node_names,
     split_string,
     validate_conf_source,
@@ -228,6 +229,9 @@ def run(  # noqa: PLR0913
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
+
+    if namespace:
+        namespace_deprecation_warning()
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params

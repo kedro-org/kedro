@@ -5,6 +5,9 @@ from kedro.framework.context.catalog_mixins import (
     _group_ds_by_type,
 )
 from kedro.framework.context.context import compose_classes
+from kedro.framework.project import (
+    _ProjectPipelines,
+)
 from kedro.io import DataCatalog
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.pipeline import Node, Pipeline
@@ -186,6 +189,35 @@ def DataCatalogWithOverlappingFactories(fake_catalog_with_overlapping_factories)
     return catalog
 
 
+@pytest.fixture
+def mock_pipelines(mocker, fake_pipeline):
+    def mock_register_pipelines():
+        return {
+            "__default__": fake_pipeline,
+            "pipe": fake_pipeline,
+        }
+
+    mocker.patch.object(
+        _ProjectPipelines,
+        "_get_pipelines_registry_callable",
+        return_value=mock_register_pipelines,
+    )
+    return mock_register_pipelines()
+
+
+@pytest.fixture
+def mock_pipelines_empty(mocker):
+    def mock_register_pipelines():
+        return {}
+
+    mocker.patch.object(
+        _ProjectPipelines,
+        "_get_pipelines_registry_callable",
+        return_value=mock_register_pipelines,
+    )
+    return mock_register_pipelines()
+
+
 class TestCatalogCommands:
     def test_describe_datasets(
         self,
@@ -219,7 +251,7 @@ class TestCatalogCommands:
         )
 
     def test_describe_datasets_default_pipeline(
-        self, DataCatalogWithFactories, monkeypatch
+        self, DataCatalogWithFactories, mocker, mock_pipelines
     ):
         # Simulate _pipelines.keys() returning a default pipeline
         from kedro.framework import project
@@ -235,14 +267,20 @@ class TestCatalogCommands:
             ]
         )
 
-        monkeypatch.setitem(project.pipelines, "default", fake_pipeline)
+        mocker.patch.dict(project.pipelines, {"default": fake_pipeline}, clear=True)
 
         catalog = DataCatalogWithFactories
         result = catalog.describe_datasets()  # No pipeline arg provided
         assert "default" in result
         assert "datasets" in result["default"]
 
-    def test_describe_datasets_empty_pipeline(self, DataCatalogWithFactories):
+    def test_describe_datasets_empty_pipeline(
+        self, DataCatalogWithFactories, mocker, mock_pipelines_empty
+    ):
+        from kedro.framework import project
+
+        mocker.patch.dict(project.pipelines, {}, clear=True)
+
         catalog = DataCatalogWithFactories
         result = catalog.describe_datasets(pipelines=[])
         assert isinstance(result, dict)

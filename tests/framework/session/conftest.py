@@ -6,7 +6,7 @@ from multiprocessing import Queue
 from typing import TYPE_CHECKING, Any
 
 import pytest
-import toml
+import tomli_w
 import yaml
 from dynaconf.validator import Validator
 
@@ -46,8 +46,8 @@ def _write_yaml(filepath: Path, config: dict):
 
 def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    toml_str = toml.dumps(config)
-    filepath.write_text(toml_str)
+    with filepath.open("wb") as f:
+        tomli_w.dump(config, f)
 
 
 def _assert_hook_call_record_has_expected_parameters(
@@ -363,7 +363,11 @@ def mock_settings(mocker, project_hooks):
 
 
 @pytest.fixture
-def mock_session(mock_settings, mock_package_name, tmp_path):
+def mock_session(mocker, mock_settings, mock_package_name, tmp_path):
+    mocker.patch(
+        "kedro.framework.project.LOGGING.set_project_logging", return_value=None
+    )
+
     configure_project(mock_package_name)
     session = KedroSession.create(tmp_path, runtime_params={"params:key": "value"})
     yield session

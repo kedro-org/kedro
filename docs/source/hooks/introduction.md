@@ -119,7 +119,7 @@ Auto-discovered Hooks will run *first*, followed by the ones specified in `setti
 ```
 
 #### Auto-registered Hook with plugin
-You can auto-register a Hook (pip-installable) by creating a [Kedro plugin](https://docs.kedro.org/en/stable/extend_kedro/plugins.html#hooks). Kedro provides `kedro.hooks` entrypoints to extend this easily.
+You can auto-register a Hook (pip-installable) by creating a [Kedro plugin](../extend_kedro/plugins.md#hooks). Kedro provides `kedro.hooks` entrypoints to extend this easily.
 
 
 #### Disable auto-registered plugins' Hooks

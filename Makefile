@@ -25,7 +25,7 @@ e2e-tests-fast:
 	behave --tags=-skip --no-capture
 
 pip-compile:
-	pip-compile -q -o -
+	pip-compile -q -o - --resolver=backtracking $(realpath pyproject.toml)
 
 build-docs:
 	uv pip install -e ".[docs]"

@@ -1039,7 +1039,7 @@ class TestFlagsNotAllowed:
         )
 
 
-@pytest.mark.usefixtures("chdir_to_tmp", "patch_cookiecutter_args")
+@pytest.mark.usefixtures("chdir_to_tmp")
 class TestToolsAndExampleFromUserPrompts:
     @pytest.mark.parametrize(
         "tools",
@@ -1173,7 +1173,7 @@ class TestToolsAndExampleFromUserPrompts:
         )
 
 
-@pytest.mark.usefixtures("chdir_to_tmp", "patch_cookiecutter_args")
+@pytest.mark.usefixtures("chdir_to_tmp")
 class TestToolsAndExampleFromConfigFile:
     @pytest.mark.parametrize(
         "tools",
@@ -1376,7 +1376,7 @@ class TestToolsAndExampleFromConfigFile:
         )
 
 
-@pytest.mark.usefixtures("chdir_to_tmp", "patch_cookiecutter_args")
+@pytest.mark.usefixtures("chdir_to_tmp")
 class TestToolsAndExampleFromCLI:
     @pytest.mark.parametrize(
         "tools",

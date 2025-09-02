@@ -187,7 +187,6 @@ def package(metadata: ProjectMetadata) -> None:
     type=str,
     default=None,
     help=NAMESPACE_ARG_HELP,
-    callback=namespace_deprecation_warning,
 )
 @click.option(
     "--config",
@@ -230,6 +229,9 @@ def run(  # noqa: PLR0913
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
+
+    if namespace:
+        namespace_deprecation_warning()
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params

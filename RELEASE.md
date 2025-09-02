@@ -7,6 +7,12 @@
 ## Documentation changes
 ## Community contributions
 
+# Release 0.19.15
+
+## Bug fixes and other changes
+* Improved namespace validation efficiency to prevent significant slowdowns when creating large pipelines
+* Made deprecation warning appear only when the deprecated `--namespace` flag is used
+
 # Release 0.19.14
 
 ## Major features and improvements

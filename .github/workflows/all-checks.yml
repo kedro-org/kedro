@@ -1,5 +1,8 @@
 name: Run all checks on Kedro
 
+env:
+  KEDRO_DISABLE_TELEMETRY: "true"
+
 on:
   workflow_call:
     inputs:

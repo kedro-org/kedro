@@ -6,6 +6,8 @@ on:
       - main  # Run benchmarks on every commit to the main branch
   workflow_dispatch:
 
+env:
+  KEDRO_DISABLE_TELEMETRY: "true"
 
 jobs:
 

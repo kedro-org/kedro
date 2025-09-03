@@ -11,6 +11,9 @@ on:
         type: string
         default: ''
 
+env:
+  KEDRO_DISABLE_TELEMETRY: "true"
+
 jobs:
   unit-tests:
     runs-on: ${{ inputs.os }}

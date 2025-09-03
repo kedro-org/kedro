@@ -2,7 +2,7 @@ install:
 	uv pip install --system -e .
 
 clean:
-	rm -rf build dist site kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
+	rm -rf build dist site kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/test_plugin/test_plugin.egg-info
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true
@@ -24,9 +24,6 @@ e2e-tests:
 e2e-tests-fast: export BEHAVE_LOCAL_ENV=TRUE
 e2e-tests-fast:
 	behave --tags=-skip --no-capture
-
-pip-compile:
-	pip-compile -q -o -
 
 install-docs-requirements:
 	uv pip install -e ".[docs]"
@@ -55,8 +52,7 @@ package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
-	python -m pip install "uv==0.4.29"
-	uv pip install --system "kedro[test] @ ."
+	uv pip install "kedro[test] @ ."
 
 install-pre-commit:
 	pre-commit install --install-hooks

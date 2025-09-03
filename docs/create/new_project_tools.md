@@ -40,7 +40,7 @@ Project Tools
 =============
 These optional tools can help you apply software engineering best practices.
 To skip this step in future use --tools
-To find out more: https://docs.kedro.org/en/stable/starters/new_project_tools.html
+To find out more: https://docs.kedro.org/en/stable/create/new_project_tools/
 
 Tools
 1) Lint: Basic linting with Ruff
@@ -79,7 +79,7 @@ A list of available tools can also be accessed by running `kedro new --help`
 
                       Example usage:
 
-                      kedro new --tools=lint,test,log,docs,data,pyspark,viz
+                      kedro new --tools=lint,test,log,docs,data,pyspark
                       (or any subset of these options)
 
                       kedro new --tools=all
@@ -95,7 +95,7 @@ To skip this step and select tools directly, add the tools selection to `kedro n
 uvx kedro new --tools=<your tool selection>
 ```
 
-To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test,viz`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, `pyspark`, and `viz`.
+To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, and `pyspark`.
 
 ### Example code
 In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. If you select `yes`, the example code included depends upon your previous choice of tools, as follows:
@@ -130,7 +130,7 @@ As an alternative to the interactive project creation workflow, you can also sup
     "my project"
 
 "tools":
-    "lint, test, log, docs, data, pyspark, viz"
+    "lint, test, log, docs, data, pyspark"
 
 "example_pipeline":
     "y"
@@ -235,27 +235,21 @@ To learn more about using logging in your project, or modifying the logging conf
 Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, `conf.py` and `index.rst`, with some added features such as auto generation of HTML documentation.
 The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration by helping you create and maintain guides and API docs.
 
-If you did not initially select `docs` and want to implement it later you can do so by following the [official documentation](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#add-documentation-to-a-kedro-project-if-you-have-not-selected-docs-tool) for guidance on adding documentation to a Kedro project.
+If you did not initially select `docs` and want to implement it later you can do so by following the [official documentation](https://docs.kedro.org/en/stable/deploy/package_a_project/#add-documentation-to-a-kedro-project-if-you-have-not-selected-docs-tool for guidance on adding documentation to a Kedro project.
 
 ### Data structure
 
-The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention).
+The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/getting-started/faq/#what-is-data-engineering-convention).
 This is crucial if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
 Kedro's capabilities extend far beyond local data storage. Kedro seamlessly integrates with Data Lakes and various databases through fsspec URIs, catering to the needs of professional teams that store their data in blob/object storage or databases.
 We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
-You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html#kedro-project-directory-structure).
+You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/getting-started/kedro_concepts/#kedro-project-directory-structure).
 
 ### PySpark
 
 The `PySpark` tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
 PySpark aligns with Kedro's scalability principle, as it provides data processing capabilities for large datasets.
-See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations/pyspark_integration.html) for more information on setup and usage.
-
-### Kedro Viz
-
-The `viz` tool will add visualisation to your project by including Kedro-Viz, which creates an interactive web-app to visualise your pipelines allowing for an intuitive understanding of data on your DAG.
-In addition, `viz` will also add setup for experiment tracking and plotting datasets.
-See the [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/latest/index.html) for more information on using this tool.
+See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations-and-plugins/pyspark_integration/) for more information on setup and usage.
 
 ## Flowchart illustration
 
@@ -270,10 +264,10 @@ flowchart TD
     C1 --> D1[Include Example Pipeline?]
     C2 --> D2[Include Example Pipeline?]
     C3 --> D3[Include Example Pipeline?]
-    D1 -- Yes --> E1[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: Yes]
-    D1 -- No --> E2[New Project Created\nName: Example Project\nTools: lint, docs, PySpark\nExample: No]
-    D2 -- Yes --> F1[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz\nExample: Yes]
-    D2 -- No --> F2[New Project Created\nName: Example Project\nTools: All: lint, test, logging, docs, data, PySpark, viz\nExample: No]
-    D3 -- Yes --> G1[New Project Created\nName: Example Project\nTools: None\nExample: Yes]
-    D3 -- No --> G2[New Project Created\nName: Example Project\nTools: None\nExample: No]
+    D1 -- Yes --> E1["New Project Created Name: Example Project Tools: lint, docs, PySpark Example: Yes"]
+    D1 -- No --> E2["New Project Created Name: Example Project Tools: lint, docs, PySpark Example: No"]
+    D2 -- Yes --> F1["New Project Created Name: Example Project Tools: All: lint, test, logging, docs, data, PySpark Example: Yes"]
+    D2 -- No --> F2["New Project Created Name: Example Project Tools: All: lint, test, logging, docs, data, PySpark Example: No"]
+    D3 -- Yes --> G1["New Project Created Name: Example Project Tools: None Example: Yes"]
+    D3 -- No --> G2["New Project Created Name: Example Project Tools: None Example: No"]
 ```

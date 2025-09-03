@@ -220,13 +220,14 @@ us_corn_yield_data:
   type: api.APIDataset
   url: https://quickstats.nass.usda.gov
   credentials: usda_credentials
-  params:
-    key: SOME_TOKEN
-    format: JSON
-    commodity_desc: CORN
-    statisticcat_des: YIELD
-    agg_level_desc: STATE
-    year: 2000
+  load_args:
+    params:
+      key: SOME_TOKEN
+      format: JSON
+      commodity_desc: CORN
+      statisticcat_des: YIELD
+      agg_level_desc: STATE
+      year: 2000
 ```
 
 `usda_credentials` will be passed as the `auth` argument in the `requests` library. Specify the username and password as a list in your `credentials.yml` file as follows:

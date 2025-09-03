@@ -6,7 +6,7 @@ Apache Airflow is a popular open-source workflow management platform. It is a su
 
 The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted to an [Airflow DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html). This approach mirrors the principles of [running Kedro in a distributed environment](../distributed.md).
 
-Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/data/index.html#DataCatalog-experimental-feature) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
+Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/catalog-data/data_catalog/) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
 
 This guide provides instructions on running a Kedro pipeline on different Airflow platforms. You can jump to the specific sections by clicking the links below, how to run a Kedro pipeline on:
 
@@ -16,7 +16,7 @@ This guide provides instructions on running a Kedro pipeline on different Airflo
 
 ## How to run a Kedro pipeline on Apache Airflow with Astronomer
 
-The following tutorial shows how to deploy an example [Spaceflights Kedro project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) on [Apache Airflow](https://airflow.apache.org/) with [Astro CLI](https://docs.astronomer.io/astro/cli/overview), a command-line tool created by [Astronomer](https://www.astronomer.io/) that streamlines the creation of local Airflow projects. You will deploy it locally first, and then transition to Astro Cloud.
+The following tutorial shows how to deploy an example [Spaceflights Kedro project](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial/) on [Apache Airflow](https://airflow.apache.org/) with [Astro CLI](https://docs.astronomer.io/astro/cli/overview), a command-line tool created by [Astronomer](https://www.astronomer.io/) that streamlines the creation of local Airflow projects. You will deploy it locally first, and then transition to Astro Cloud.
 
 [Astronomer](https://www.astronomer.io/) is a managed Airflow platform which allows users to spin up and run an Airflow cluster in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
 
@@ -47,7 +47,7 @@ In this section, you will create a new Kedro project equipped with an example pi
     cp conf/base/catalog.yml conf/airflow/catalog.yml
     ```
 
-3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`. Instead of repeating similar code for each dataset, you can use [Dataset Factories](https://docs.kedro.org/en/stable/data/kedro_dataset_factories.html), a special syntax that allows defining a catch-all pattern to overwrite the default `MemoryDataset` creation. Add this code to the end of the file:
+3. Open `conf/airflow/catalog.yml` to see the list of datasets used in the project. Note that additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) are stored only in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure these datasets are preserved and accessible across different tasks in Airflow, we need to include them in our `DataCatalog`. Instead of repeating similar code for each dataset, you can use [Dataset Factories](https://docs.kedro.org/en/stable/catalog-data/kedro_dataset_factories/), a special syntax that allows defining a catch-all pattern to overwrite the default `MemoryDataset` creation. Add this code to the end of the file:
 
 ```yaml
 "{base_dataset}":
@@ -59,7 +59,7 @@ In the example here we assume that all Airflow tasks share one disk, but for dis
 
 Starting with kedro-airflow release version 0.9.0, you can adopt a different strategy instead of following steps 2-3: group nodes that use intermediate `MemoryDataset`s into larger tasks. This approach allows intermediate data manipulation to occur within a single task, eliminating the need to transfer data between nodes. You can implement this by running `kedro airflow create` with the `--group-in-memory` flag on Step 6.
 
-4. Open `conf/logging.yml` and modify the `root: handlers` section to `[console]` at the end of the file. By default, Kedro uses the [Rich library](https://rich.readthedocs.io/en/stable/index.html) to enhance log output with sophisticated formatting. However, some deployment systems, including Airflow, don't work well with Rich. Therefore, we're adjusting the logging to a simpler console version. For more information on logging in Kedro, you can refer to the [Kedro docs](https://docs.kedro.org/en/stable/logging/index.html).
+4. Open `conf/logging.yml` and modify the `root: handlers` section to `[console]` at the end of the file. By default, Kedro uses the [Rich library](https://rich.readthedocs.io/en/stable/index.html) to enhance log output with sophisticated formatting. However, some deployment systems, including Airflow, don't work well with Rich. Therefore, we're adjusting the logging to a simpler console version. For more information on logging in Kedro, you can refer to the [Kedro docs](https://docs.kedro.org/en/stable/develop/logging/).
 
 > ⚠️ **Note**: This step is optional for Airflow from version `2.11.0` onward, as the compatibility issue has been confirmed fixed at least from this version.
 

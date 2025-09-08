@@ -73,7 +73,7 @@ test = [
     "pytest-xdist[psutil]>=2.2.1,<4.0",
     "pytest>=7.2,<9.0",
     "requests_mock",
-    "s3fs>=2021.4,<2025.8",
+    "s3fs>=2021.4,<2025.10",
     # mypy related dependencies
     "pandas-stubs",
     "types-PyYAML",

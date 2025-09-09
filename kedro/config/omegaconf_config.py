@@ -99,6 +99,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         default_run_env: str | None = None,
         custom_resolvers: dict[str, Callable] | None = None,
         merge_strategy: dict[str, str] | None = None,
+        ignore_hidden: bool = True,
     ):
         if isinstance(conf_source, Path):
             conf_source = str(conf_source)
@@ -127,6 +128,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             merge_strategy: A dictionary that specifies the merging strategy for each configuration type.
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
         """
+        self.ignore_hidden = ignore_hidden
         self.base_env = base_env or ""
         self.default_run_env = default_run_env or ""
         self.merge_strategy = merge_strategy or {}
@@ -332,7 +334,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         paths = []
         for pattern in patterns:
             for each in self._fs.glob(Path(f"{conf_path!s}/{pattern}").as_posix()):
-                if not self._is_hidden(each):
+                if not self.ignore_hidden or not self._is_hidden(each):
                     paths.append(Path(each))
 
         deduplicated_paths = set(paths)

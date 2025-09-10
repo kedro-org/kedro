@@ -166,6 +166,11 @@
         line-height: 32px;
     }
 
+    /* Target the arrow circle on the nav link list */
+    .md-nav__link .md-icon:last-child:hover {
+      background-color: var(--primary-sidebar-bg-color);
+    }
+
     .md-nav__link--active,
     .md-nav__link[href]:hover,
     .md-nav__link[href]:focus,

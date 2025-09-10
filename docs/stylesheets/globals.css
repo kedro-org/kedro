@@ -134,12 +134,15 @@
     .md-nav__item--section > .md-nav__link[for] {
         color: var(--text-primary-color);
         align-items: center;
+
+    /* Apply border-radius to scrollbar container */
+    .md-sidebar__scrollwrap {
+      border-radius: 12px;
     }
 
     .md-sidebar__inner {
       background-color: var(--primary-sidebar-bg-color);
-      padding: 24px 0;
-      border-radius: 12px;
+      padding: 24px 10px;
     }
 
     .md-nav__item--section {

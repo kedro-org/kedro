@@ -130,10 +130,12 @@
     padding: 0;
     padding: 24px 10px;
 
-    /* Colour for the section labels */
+    /* Colour for the section label, which is the header of each section in the left sidebar */
     .md-nav__item--section > .md-nav__link[for] {
         color: var(--text-primary-color);
         align-items: center;
+        margin-left: 20px;
+    }
 
     /* Apply border-radius to scrollbar container */
     .md-sidebar__scrollwrap {
@@ -151,6 +153,11 @@
 
     .md-nav__list {
       padding-left: 8px !important;
+    }
+
+    /* Override padding for level 3 navigation, which is the children of the expanding items */
+    .md-nav[data-md-level="3"] .md-nav__list {
+      padding-left: 0px !important;
     }
 
     .md-nav__link {

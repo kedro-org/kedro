@@ -254,9 +254,14 @@
   background-color: var(--admonition-bg-color);
 }
 
-.md-typeset pre code {
+.md-typeset pre code,
+.md-typeset code {
   background-color: var(--admonition-bg-color);
   color: var(--text-primary-color);
+
+}
+
+.md-typeset pre code {
   margin: 20px; /* this is to ensure there's no overlap with the copy icon */
 }
 

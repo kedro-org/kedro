@@ -155,10 +155,6 @@
       padding-left: 8px !important;
     }
 
-    /* Override padding for level 3 navigation, which is the children of the expanding items */
-    .md-nav[data-md-level="3"] .md-nav__list {
-      padding-left: 0px !important;
-    }
 
     .md-nav__link {
         font-size: 16px;

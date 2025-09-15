@@ -203,6 +203,7 @@
 /* Secondary sidebar styles */
 .md-sidebar--secondary {
   margin-right: 64px;
+  margin-top: 48px;
 
   .md-nav__title {
     background: transparent;
@@ -216,10 +217,6 @@
   .md-nav__item {
     font-size: 16px;
     padding-bottom: 10px;
-  }
-
-  .md-nav {
-    padding-top: 10px;
   }
 
   .md-nav__link {
@@ -242,6 +239,11 @@
 
 .md-main__inner {
   margin: 0;
+}
+
+/* Add margin to the h1 for each page section content */
+.md-content__inner.md-typeset {
+  margin-top: 48px;
 }
 
 /* Code Block Styles */

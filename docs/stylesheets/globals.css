@@ -130,16 +130,21 @@
     padding: 0;
     padding: 24px 10px;
 
-    /* Colour for the section labels */
+    /* Colour for the section label, which is the header of each section in the left sidebar */
     .md-nav__item--section > .md-nav__link[for] {
         color: var(--text-primary-color);
         align-items: center;
+        margin-left: 20px;
+    }
+
+    /* Apply border-radius to scrollbar container */
+    .md-sidebar__scrollwrap {
+      border-radius: 12px;
     }
 
     .md-sidebar__inner {
       background-color: var(--primary-sidebar-bg-color);
-      padding: 24px 0;
-      border-radius: 12px;
+      padding: 24px 10px;
     }
 
     .md-nav__item--section {
@@ -149,6 +154,7 @@
     .md-nav__list {
       padding-left: 8px !important;
     }
+
 
     .md-nav__link {
         font-size: 16px;
@@ -161,6 +167,11 @@
     .md-nav__link span {
         padding: 4px 0 4px 0;
         line-height: 32px;
+    }
+
+    /* Target the arrow circle on the nav link list */
+    .md-nav__link .md-icon:last-child:hover {
+      background-color: var(--primary-sidebar-bg-color);
     }
 
     .md-nav__link--active,
@@ -188,6 +199,7 @@
 /* Secondary sidebar styles */
 .md-sidebar--secondary {
   margin-right: 64px;
+  margin-top: 48px;
 
   .md-nav__title {
     background: transparent;
@@ -201,10 +213,6 @@
   .md-nav__item {
     font-size: 16px;
     padding-bottom: 10px;
-  }
-
-  .md-nav {
-    padding-top: 10px;
   }
 
   .md-nav__link {
@@ -225,12 +233,13 @@
   max-width: none;
 }
 
-.md-content {
-  padding: 48px 64px 48px 64px;
-}
-
 .md-main__inner {
   margin: 0;
+}
+
+/* Add margin to the h1 for each page section content */
+.md-content__inner.md-typeset {
+  margin-top: 48px;
 }
 
 /* Code Block Styles */
@@ -239,9 +248,14 @@
   background-color: var(--admonition-bg-color);
 }
 
-.md-typeset pre code {
+.md-typeset pre code,
+.md-typeset code {
   background-color: var(--admonition-bg-color);
   color: var(--text-primary-color);
+
+}
+
+.md-typeset pre code {
   margin: 20px; /* this is to ensure there's no overlap with the copy icon */
 }
 

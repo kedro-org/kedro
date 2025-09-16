@@ -57,7 +57,7 @@ test = [
     "behave>=1.2.6,<2.0",
     "coverage[toml]",
     "detect-secrets~=1.5.0",
-    "import-linter==2.4",
+    "import-linter==2.5",
     "ipylab>=1.0.0",
     "ipython~=8.10",
     "jupyterlab_server>=2.11.1",
@@ -68,7 +68,7 @@ test = [
     "pandas~=2.0",
     "pluggy>=1.0",
     "pre-commit>=2.9.2,<5.0",  # The hook `mypy` requires pre-commit version 2.9.2.
-    "pytest-cov>=3,<7",
+    "pytest-cov>=3,<8",
     "pytest-mock>=1.7.1,<4.0",
     "pytest-xdist[psutil]>=2.2.1,<4.0",
     "pytest>=7.2,<9.0",

@@ -349,6 +349,7 @@ nav:
           - Automated testing: develop/automated_testing.md
           - Code formatting and linting: develop/linting.md
           - Debugging: develop/debugging.md
+          - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
       - Deploy:
           - Overview: deploy/index.md
           - How to package your project: deploy/package_a_project.md

@@ -93,12 +93,11 @@ kedro_init_version = "0.19.9"
 source_dir = "."
 ```
 
-At this point, your workingn directory should look like this:
+At this point, your working directory should look like this:
 ```bash
 .
 ├── pyproject.toml
 ```
-
 
 !!! note
     Note we define `source_dir = "."`, usually we keep our source code inside a directory called `src`.

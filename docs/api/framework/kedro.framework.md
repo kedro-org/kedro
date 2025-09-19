@@ -4,7 +4,6 @@
       members: false
       show_source: false
 
-
 | Module                          | Description                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
 | [`kedro.framework.cli`](kedro.framework.cli.md) | Implements commands available from Kedro's CLI.                          |

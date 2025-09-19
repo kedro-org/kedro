@@ -11,19 +11,16 @@
 | [`kedro.framework.hooks.specs`](#kedro.framework.hooks.specs)     | Contains specifications for all callable hooks in Kedro's execution timeline. |
 
 
-## kedro.framework.hooks.manager
 ::: kedro.framework.hooks.manager
     options:
       members: true
       show_source: true
 
-## kedro.framework.hooks.markers
 ::: kedro.framework.hooks.markers
     options:
       members: true
       show_source: true
 
-## kedro.framework.hooks.specs
 ::: kedro.framework.hooks.specs
     options:
       members: true

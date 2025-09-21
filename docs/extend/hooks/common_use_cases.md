@@ -210,7 +210,7 @@ class MetadataHook:
         self,
         catalog: DataCatalog,
     ):
-        for dataset_name, dataset in catalog.datasets.__dict__.items():
+        for dataset_name, dataset in catalog.items():
             print(f"{dataset_name} metadata: \n  {str(dataset.metadata)}")
 ```
 

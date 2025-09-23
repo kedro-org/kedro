@@ -389,13 +389,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Check if it's an archive file
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
-            return fsspec.filesystem(protocol="tar", fo=conf_source), "tar"
+            return fsspec.filesystem(protocol="tar", fo=conf_source), "tar"  # codespell:ignore
         elif file_mimetype in (
             "application/zip",
             "application/x-zip-compressed",
             "application/zip-compressed",
         ):
-            return fsspec.filesystem(protocol="zip", fo=conf_source), "zip"
+            return fsspec.filesystem(protocol="zip", fo=conf_source), "zip"  # codespell:ignore
 
         # Parse to check for protocol
         options = _parse_filepath(conf_source)
@@ -407,7 +407,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return fsspec.filesystem(protocol=protocol), protocol
         else:
             # Default to local filesystem
-            return fsspec.filesystem(protocol="file", fo=conf_source), "file"
+            return fsspec.filesystem(protocol="file", fo=conf_source), "file"  # codespell:ignore
 
     def _merge_configs(
         self,

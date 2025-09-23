@@ -256,3 +256,11 @@ known-first-party = ["kedro"]
 ignore_missing_imports = true
 disable_error_code = ['misc']
 exclude = ['^kedro/templates/', '^docs/', '^features/test_starter/']
+
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '.git*,*.pdf,*.svg,*.css'
+check-hidden = true
+# {nam} used in an example as intentional typo
+ignore-regex = '(^\s*"image/\S+": ".*|{nam})'
+ignore-words-list = 'ans'

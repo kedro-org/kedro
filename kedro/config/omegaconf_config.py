@@ -127,6 +127,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
             merge_strategy: A dictionary that specifies the merging strategy for each configuration type.
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
+            ignore_hidden: A boolean flag that determines whether hidden files and directories should be
+                ignored when loading configuration files. If True, ignore hidden files and files in hidden directories.
         """
         self.ignore_hidden = ignore_hidden
         self.base_env = base_env or ""

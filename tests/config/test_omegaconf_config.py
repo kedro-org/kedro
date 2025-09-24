@@ -1684,7 +1684,7 @@ class TestRemotePathHandling:
             match="Given configuration path either does not exist or is not a valid directory.*Error: No such file or bucket",
         ):
             conf["catalog"]
-    
+
     def test_hidden_files_ignored_by_default(self, tmp_path):
         base_dir = tmp_path / "base"
         base_dir.mkdir()
@@ -1701,7 +1701,9 @@ class TestRemotePathHandling:
         base_dir.mkdir()
         (base_dir / ".hidden.yml").write_text("foo: bar")
 
-        config_loader = OmegaConfigLoader(conf_source=str(tmp_path), ignore_hidden=False)
+        config_loader = OmegaConfigLoader(
+            conf_source=str(tmp_path), ignore_hidden=False
+        )
         config_loader.config_patterns = {"catalog": ["**/*.yml"]}
 
         result = config_loader["catalog"]

@@ -8,7 +8,7 @@ Here are the main reasons to use Kubeflow Pipelines:
 
 - It is cloud-agnostic and can run on any Kubernetes cluster
 - Kubeflow is tailored towards machine learning workflows for model deployment, experiment tracking, and hyperparameter tuning
-- You can re-use components and pipelines to create E2E solutions
+- You can reuse components and pipelines to create E2E solutions
 
 
 ## The `kedro-kubeflow` plugin

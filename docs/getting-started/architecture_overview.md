@@ -8,7 +8,7 @@ There are different ways to leverage Kedro in your work, you can:
 
 At a high level, Kedro consists of five main parts:
 
-![Kedro architecture diagram](../meta/images/kedro_architecture.png)
+![Kedro architecture diagram](../meta/images/kedro_architecture.jpg)
 
 
 ## Kedro project

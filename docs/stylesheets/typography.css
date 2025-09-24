@@ -20,6 +20,17 @@ body {
   line-height: 24px;;
 }
 
+/* All headings color */
+h1, h2, h3, h4, h5, h6,
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  color: var(--text-primary-color);
+}
+
 h1,
 .md-typeset h1 {
   font-family: Inter;
@@ -27,7 +38,6 @@ h1,
   font-style: normal;
   font-weight: 400;
   line-height: 40px;
-  color: var(--text-primary-color);
   margin-bottom: 32px;
 }
 
@@ -38,7 +48,6 @@ h2,
   font-style: normal;
   font-weight: 400;
   line-height: 32px;
-  color: var(--text-primary-color);
   margin: 32px 0 24px 0;
 }
 
@@ -49,8 +58,37 @@ h3,
   font-style: normal;
   font-weight: 400;
   line-height: 28px;
-  color: var(--text-primary-color);
   margin: 24px 0 12px 0;
+}
+
+h4,
+.md-typeset h4 {
+  font-family: Inter;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 26px;
+  margin: 20px 0 12px 0;
+}
+
+h5,
+.md-typeset h5 {
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  margin: 16px 0 8px 0;
+}
+
+h6,
+.md-typeset h6 {
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px;
+  margin: 16px 0 8px 0;
 }
 
 p,

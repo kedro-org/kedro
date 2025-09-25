@@ -1,7 +1,13 @@
 # Upcoming Release
+
 ## Major features and improvements
+* Added the `ignore_hidden` parameter to the `OmegaConfigLoader`,  a boolean flag that determines whether hidden files and directories should be ignored when loading configuration files.
+
 ## Bug fixes and other changes
+
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Aseem Sangalay](https://github.com/aseemsangalay)
 
 # Release 1.0.0
 ## Major features and improvements

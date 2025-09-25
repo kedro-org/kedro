@@ -1,7 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
-* Added the `ignore_hidden` parameter to the `OmegaConfigLoader`,  a boolean flag that determines whether hidden files and directories should be ignored when loading configuration files.
+* Added the `ignore_hidden` parameter to the `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
 

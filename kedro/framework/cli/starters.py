@@ -106,6 +106,9 @@ _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
     KedroStarterSpec("spaceflights-pyspark", _STARTERS_REPO, "spaceflights-pyspark"),
     KedroStarterSpec("databricks-iris", _STARTERS_REPO, "databricks-iris"),
+    KedroStarterSpec(
+        "genai-customer-support", _STARTERS_REPO, "genai-customer-support"
+    ),
 ]
 # Set the origin for official starters
 for starter_spec in _OFFICIAL_STARTER_SPECS:
@@ -765,6 +768,7 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path) -> OrderedDic
 
 
 def _select_checkout_branch_for_cookiecutter(checkout: str | None) -> str:
+    return "genai-customer-support"
     if checkout:
         return checkout
     else:

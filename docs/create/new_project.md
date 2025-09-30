@@ -167,7 +167,7 @@ You have completed the section on Kedro project creation for new users. Here are
 
 * How-to guide for notebook users: The documentation section following the tutorial explains [how to combine Kedro with a Jupyter notebook](../integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md).
 
-If you've worked through the documentation listed and are unsure where to go next, review the [Kedro repositories on GitHub](https://github.com/kedro-org) and [Kedro's Slack channels](https://slack.kedro.org).
+If you've worked through the documentation listed and are unsure where to go next, review the [Kedro repositories on GitHub](https://github.com/kedro-org) and [Kedro's Slack channels](https://kedro-org.slack.com/).
 
 ## Flowchart of general choice of tools
 

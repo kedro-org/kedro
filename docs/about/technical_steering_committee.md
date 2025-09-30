@@ -31,7 +31,7 @@ On this page we describe:
 
   - [GitHub issues](https://github.com/kedro-org/kedro/issues) for feature requests and bug reports
   - [GitHub discussions](https://github.com/kedro-org/kedro/discussions) to discuss the future of the Kedro project
-  - [Slack](https://slack.kedro.org) for questions and to support other users
+  - [Slack](https://kedro-org.slack.com/) for questions and to support other users
 
 ## Requirements to become a maintainer
 

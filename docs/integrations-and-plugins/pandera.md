@@ -206,7 +206,7 @@ HOOKS = (PanderaValidationHooks(),)
 
 From this point, when you execute `kedro run` you will see the validation logs:
 
-```bash
+```console
 [10/01/25 11:10:13] INFO     Validating 'companies' for node 'preprocess_companies_node'
                     INFO     ✓ Validation passed for 'companies'
                     INFO     Validating 'shuttles' for node 'preprocess_shuttles_node'
@@ -215,8 +215,9 @@ From this point, when you execute `kedro run` you will see the validation logs:
                     INFO     ✓ Validation passed for 'reviews'
 ```
 
-**What happens when validation fails?**
-Let’s make one schema rule deliberately too strict so you can see Pandera in action.
+### What happens when validation fails?
+
+Let's make one schema rule deliberately too strict so you can see Pandera in action.
 
 In `src/spaceflights_pandera/schemas/raw.py`, change the `total_fleet_count` column check:
 
@@ -231,16 +232,17 @@ Now run the pipeline again:
 kedro run
 ```
 
-You should see Pandera raise a SchemaErrors exception, reporting exactly which rows failed:
+You should see Pandera raise a `SchemaErrors` exception, reporting exactly which rows failed:
 
-```bash
+```console
 SchemaErrors: Column 'total_fleet_count' failed check 'greater_than_or_equal_to(100)'
 failure cases: [1.0, 2.0, 5.0, ...]
 ```
 
-Because the hook uses lazy=True, Pandera collects all errors at once, making it easy to spot every problem.
+Because the hook uses `lazy=True`, Pandera collects all errors at once, making it easy to spot every problem.
 
-Finally, reset the schema back to the correct check (greater_than_or_equal_to(0)) before continuing with the rest of the tutorial.
+!!! note
+    Reset the schema back to the correct check (`greater_than_or_equal_to(0)`) before continuing with the rest of the tutorial.
 
 
 ### Controlling validation behavior with environment variables
@@ -584,8 +586,7 @@ def make_model_input_schema(min_mean: float, max_mean: float) -> DataFrameSchema
 
 In your validation hook, load the parameters at runtime:
 
-```
-python
+```python
 # inside your hook
 params = catalog.load("params:validation")
 schema = make_model_input_schema(
@@ -597,9 +598,7 @@ schema.validate(data, lazy=True)
 
 Now you can adjust validation dynamically at runtime:
 
-```
-bash
-
+```bash
 # Override via Kedro CLI
 kedro run --params="validation.rating_mean_min=45.0,validation.rating_mean_max=90.0"
 ```
@@ -678,13 +677,11 @@ python -m pytest src/spaceflights_pandera/schemas/test_schemas.py -v
 
 ## Further reading
 
-For more information on Pandera features:
-- [Pandera documentation](https://pandera.readthedocs.io/)
-- [Kedro hooks documentation](https://docs.kedro.org/en/stable/hooks/introduction.html)
-- [Lazy validation](https://pandera.readthedocs.io/en/stable/lazy_validation.html)
-- [Type coercion](https://pandera.readthedocs.io/en/stable/dtype_validation.html)
-- [Custom checks](https://pandera.readthedocs.io/en/stable/checks.html)
-- [Multi-backend support](https://pandera.readthedocs.io/en/stable/ecosystem.html): Pandera also validates data in **Dask, Polars, Modin, and PySpark**, if your Kedro project uses them.
-
+* [Pandera documentation](https://pandera.readthedocs.io/)
+* [Kedro hooks documentation](https://docs.kedro.org/en/stable/hooks/introduction.html)
+* [Lazy validation](https://pandera.readthedocs.io/en/stable/lazy_validation.html)
+* [Type coercion](https://pandera.readthedocs.io/en/stable/dtype_validation.html)
+* [Custom checks](https://pandera.readthedocs.io/en/stable/checks.html)
+* [Multi-backend support](https://pandera.readthedocs.io/en/stable/ecosystem.html) - Pandera also validates data in Dask, Polars, Modin, and PySpark
 
 For a declarative approach to validation using catalog metadata, see the community-maintained [kedro-pandera plugin](https://github.com/Galileo-Galilei/kedro-pandera).

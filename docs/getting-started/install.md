@@ -58,7 +58,7 @@ You should see an ASCII art graphic and the Kedro version number. For example:
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive of Slack discussions](https://linen-slack.kedro.org/), or post a new query on the [Slack organisation](https://slack.kedro.org).
+If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive of Slack discussions](https://linen-slack.kedro.org/), or post a new query on the [Slack organisation](https://kedro-org.slack.com/).
 
 ## Alternative methods
 
@@ -352,4 +352,4 @@ kedro --version
 * The simplest way to get started with Kedro is to use create a new project using our starters.
 * `uv` is a great choice for managing Kedro projects, but you can use other tools such as `pip`, `Poetry`, `conda`, and more.
 
-If you encounter any problems as you set up Kedro, ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or review the [searchable archive of Slack discussions](https://linen-slack.kedro.org/).
+If you encounter any problems as you set up Kedro, ask for help on Kedro's [Slack organisation](https://kedro-org.slack.com/) or review the [searchable archive of Slack discussions](https://linen-slack.kedro.org/).

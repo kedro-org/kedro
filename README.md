@@ -10,7 +10,7 @@
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)
-[![Slack Organisation](https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack)](https://slack.kedro.org)
+[![Slack Organisation](https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack)](https://kedro-org.slack.com/)
 [![Slack Archive](https://img.shields.io/badge/slack-archive-blueviolet.svg?label=Kedro%20Slack%20)](https://linen-slack.kedro.org/)
 ![GitHub Actions Workflow Status - Main](https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?label=main)
 ![GitHub Actions Workflow Status - Develop](https://img.shields.io/github/actions/workflow/status/kedro-org/kedro/all-checks.yml?branch=develop&label=develop)
@@ -99,7 +99,7 @@ Yes! We welcome all kinds of contributions. Check out our [guide to contributing
 
 ## Where can I learn more?
 
-There is a growing community around Kedro. We encourage you to ask and answer technical questions on [Slack](https://slack.kedro.org/) and bookmark the [Linen archive of past discussions](https://linen-slack.kedro.org/).
+There is a growing community around Kedro. We encourage you to ask and answer technical questions on [Slack](https://kedro-org.slack.com/) and bookmark the [Linen archive of past discussions](https://linen-slack.kedro.org/).
 
 We keep a list of [technical FAQs in the Kedro documentation](https://docs.kedro.org/en/stable/getting-started/faq/) and you can find a  growing list of blog posts, videos and projects that use Kedro over on the [`awesome-kedro` GitHub repository](https://github.com/kedro-org/awesome-kedro). If you have created anything with Kedro we'd love to include it on the list. Just make a PR to add it!
 

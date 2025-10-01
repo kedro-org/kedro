@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Slack organisation
     about: Come chat with the community!
-    url: https://slack.kedro.org/
+    url: https://kedro-org.slack.com/
   - name: Documentation
     url: https://docs.kedro.org/en/stable/
     about: To learn more about how Kedro works

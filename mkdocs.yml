@@ -446,6 +446,7 @@ nav:
           - DVC: integrations-and-plugins/dvc.md
           - Delta Lake: integrations-and-plugins/deltalake_versioning.md
           - Iceberg: integrations-and-plugins/iceberg_versioning.md
+          - Pandera: integrations-and-plugins/pandera.md
       - IDE Support:
           - Visual Studio Code: ide/set_up_vscode.md
           - PyCharm: ide/set_up_pycharm.md

@@ -326,12 +326,12 @@ First, add namespaces to the modelling component of the data science pipeline to
             ]
         )
         ds_pipeline_1 = pipeline(
-            pipeline_instance,
+            nodes=pipeline_instance,
             inputs="model_input_table",
             namespace="active_modelling_pipeline",
         )
         ds_pipeline_2 = pipeline(
-            pipeline_instance,
+            nodes=pipeline_instance,
             inputs="model_input_table",
             namespace="candidate_modelling_pipeline",
         )
@@ -443,13 +443,13 @@ You can see this snippet as part of the code you added to the example:
     ...
 
     ds_pipeline_1 = pipeline(
-        pipe=pipeline_instance,
+        nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="active_modelling_pipeline",
     )
 
     ds_pipeline_2 = pipeline(
-        pipe=pipeline_instance,
+        nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="candidate_modelling_pipeline",
     )

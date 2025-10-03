@@ -409,10 +409,28 @@ def _prepare_node_inputs(
 def _format_node_inputs_text(input_params_dict: dict[str, str] | None) -> str | None:
     statements = [
         "# Prepare necessary inputs for debugging",
+        "# Missing inputs will be built by running upstream nodes",
         "# All debugging inputs must be defined in your project catalog",
     ]
     if not input_params_dict:
         return None
+
+    # Identify and build any missing inputs before loading
+    required_inputs_literal = ", ".join(
+        f'"{dataset_name}"' for dataset_name in input_params_dict.values()
+    )
+    statements.append(
+        f"__kedro_required_inputs = [{required_inputs_literal}]"
+    )
+    statements.append(
+        "__kedro_missing = [ds for ds in __kedro_required_inputs if (ds not in catalog.list()) or (not catalog.exists(ds))]"
+    )
+    statements.append(
+        "if __kedro_missing:"
+    )
+    statements.append(
+        "    session.run(to_outputs=__kedro_missing, only_missing_outputs=True)"
+    )
 
     for func_param, dataset_name in input_params_dict.items():
         statements.append(f'{func_param} = catalog.load("{dataset_name}")')

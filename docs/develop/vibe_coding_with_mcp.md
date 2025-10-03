@@ -60,11 +60,19 @@ Type `/` to see available MCP prompts.
 When you run this prompt, your assistant will **explicitly call the MCP server** and follow the provided guidance.
 
 What happens step by step:
-1. The assistant will **analyse your Jupyter Notebook** (make sure to provide the notebook content as context, or adjust the prompt to reference its filename).
-2. It will create a **conversion plan (Statement of Work)** and save it into your working directory as a `.md` file.
+
+1. The assistant will **analyse your Jupyter Notebook**
+   (make sure to provide the notebook content as context,
+   or adjust the prompt to reference its filename).
+
+2. It will create a **conversion plan (Statement of Work)**
+   and save it into your working directory as a `.md` file.
+
 3. You’ll be able to **review the plan in chat** and modify it if needed.
+
 4. Once you **approve the plan**, the assistant will:
-   - Check that a **virtual environment (venv)** is active. If not, it will propose creating one.
+   - Check that a **virtual environment (venv)** is active.
+     If not, it will propose creating one.
    - Ensure the **latest version of Kedro** is installed; install it if missing.
    - Scaffold a Kedro project with `kedro new`.
    - Define pipelines with `kedro pipeline create`.

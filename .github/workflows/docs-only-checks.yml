@@ -18,6 +18,8 @@ on:
 
 jobs:
   lint:
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [ ubuntu-latest ]

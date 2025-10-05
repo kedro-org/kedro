@@ -2,10 +2,12 @@
 of kedro package.
 """
 
+import difflib
 import importlib
 import logging
 import os
 import re
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any, Optional, Union
 from urllib.parse import urlsplit
@@ -163,3 +165,36 @@ def _has_rich_handler(logger: Optional[logging.Logger] = None) -> bool:
 def _format_rich(value: str, markup: str) -> str:
     """Format string with rich markup"""
     return f"[{markup}]{value}[/{markup}]"
+
+
+def get_close_matches_with_message(
+    invalid_name: str,
+    valid_names: Iterable[str],
+    max_suggestions: int = 1,
+    cutoff: float = 0.5,
+) -> str:
+    """Generate a suggestion message for close matches to an invalid name.
+
+    Args:
+        invalid_name: The invalid name that was provided.
+        valid_names: Collection of valid names to match against.
+        max_suggestions: Maximum number of suggestions to return.
+        cutoff: Minimum similarity ratio for a match to be considered.
+
+    Returns:
+        A formatted suggestion message, or empty string if no close matches found.
+
+    Example:
+        >>> valid_names = ["data_science", "data_engineering", "feature_engineering"]
+        >>> get_close_matches_with_message("data_scienc", valid_names)
+        'Did you mean "data_science"?'
+    """
+    matches = difflib.get_close_matches(
+        invalid_name, valid_names, max_suggestions, cutoff
+    )
+
+    if not matches:
+        return ""
+
+    else:
+        return f'Did you mean "{matches[0]}"?'

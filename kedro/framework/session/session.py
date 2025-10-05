@@ -26,7 +26,7 @@ from kedro.framework.project import (
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
-from kedro.utils import find_kedro_project
+from kedro.utils import find_kedro_project, get_close_matches_with_message
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -346,11 +346,15 @@ class KedroSession:
         try:
             pipeline = pipelines[name]
         except KeyError as exc:
-            raise ValueError(
+            error_msg = (
                 f"Failed to find the pipeline named '{name}'. "
                 f"It needs to be generated and returned "
                 f"by the 'register_pipelines' function."
-            ) from exc
+            )
+            suggestion = get_close_matches_with_message(name, pipelines.keys())
+            if suggestion:
+                error_msg += f"\n{suggestion}"
+            raise ValueError(error_msg) from exc
 
         filtered_pipeline = pipeline.filter(
             tags=tags,

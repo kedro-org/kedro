@@ -189,6 +189,9 @@ def get_close_matches_with_message(
         >>> get_close_matches_with_message("data_scienc", valid_names)
         'Did you mean "data_science"?'
     """
+    if invalid_name in valid_names:
+        return ""
+
     matches = difflib.get_close_matches(
         invalid_name, valid_names, max_suggestions, cutoff
     )

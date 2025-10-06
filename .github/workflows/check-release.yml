@@ -12,9 +12,9 @@ jobs:
   check-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5.0.0
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6.0.0
         with:
           python-version: '3.11'
       - name: Install uv
@@ -50,9 +50,9 @@ jobs:
       needs.check-version.outputs.new_release == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5.0.0
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6.0.0
         with:
           python-version: '3.11'
       - name: Install uv

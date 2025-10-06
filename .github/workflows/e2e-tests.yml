@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ inputs.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
         with:
           ref: ${{ inputs.branch }}
       - name: Install the latest version of uv with Python ${{inputs.python-version}}

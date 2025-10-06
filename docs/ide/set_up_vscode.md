@@ -215,22 +215,22 @@ Navigate to DataCatalog:
 Clicking on a data node in the flowchart will open the corresponding dataset in the Data Catalog.
 ![navigation to dataset](../meta/images/viz-vsc-nav-data-node.gif)
 
-## Auto Reload Kedro-Viz
+## Auto reload Kedro-Viz
 
 The extension provides an auto reload feature that automatically refreshes Kedro-Viz when you make changes to your Kedro project files.
 
-### What is Auto Reload?
+### What is auto reload?
 
-When enabled, the auto reload feature monitors your Kedro project files for changes. If the Kedro-Viz panel is open and you modify any monitored files, the extension automatically restarts the Kedro server and refreshes the visualization.
+When enabled, the auto reload feature monitors your Kedro project files for changes. If the Kedro-Viz panel is open and you change any monitored files, the extension automatically restarts the Kedro server and refreshes the visualisation.
 
-### Monitored Files
+### Monitored files
 
 The extension watches for changes in:
 - **Configuration files**: `**/conf/**/*.yml` and `**/conf/**/*.yaml`
 - **Pipeline files**: `**/pipelines/**/*.py`
 - **Catalog files**: `**/catalog*.py`
 
-### How to Enable
+### How to enable
 
 **Using VS Code Settings:**
 1. Open Settings: `Cmd` + `,` (macOS) or `Ctrl` + `,` (Windows/Linux)
@@ -244,11 +244,11 @@ The extension watches for changes in:
 }
 ```
 
-**Note:** Auto reload only works when the Kedro-Viz panel is open.
+**Note:** Auto reload works when the Kedro-Viz panel is open.
 
-## Toggle Kedro-Viz Theme
+## Toggle Kedro-Viz theme
 
-The extension allows you to switch between light and dark themes for Kedro-Viz visualization.
+The extension allows you to switch between light and dark themes for Kedro-Viz visualisation.
 
 ### Quick toggle
 

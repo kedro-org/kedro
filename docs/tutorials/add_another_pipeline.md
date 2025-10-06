@@ -297,27 +297,27 @@ First, add namespaces to the modelling component of the data science pipeline to
 
 ??? example "View code"
     ```python
-    from kedro.pipeline import Pipeline, node, pipeline
+    from kedro.pipeline import Node, Pipeline
 
     from .nodes import evaluate_model, split_data, train_model
 
 
     def create_pipeline(**kwargs) -> Pipeline:
-        pipeline_instance = pipeline(
+        pipeline_instance = Pipeline(
             [
-                node(
+                Node(
                     func=split_data,
                     inputs=["model_input_table", "params:model_options"],
                     outputs=["X_train", "X_test", "y_train", "y_test"],
                     name="split_data_node",
                 ),
-                node(
+                Node(
                     func=train_model,
                     inputs=["X_train", "y_train"],
                     outputs="regressor",
                     name="train_model_node",
                 ),
-                node(
+                Node(
                     func=evaluate_model,
                     inputs=["regressor", "X_test", "y_test"],
                     outputs=None,
@@ -325,12 +325,12 @@ First, add namespaces to the modelling component of the data science pipeline to
                 ),
             ]
         )
-        ds_pipeline_1 = pipeline(
+        ds_pipeline_1 = Pipeline(
             nodes=pipeline_instance,
             inputs="model_input_table",
             namespace="active_modelling_pipeline",
         )
-        ds_pipeline_2 = pipeline(
+        ds_pipeline_2 = Pipeline(
             nodes=pipeline_instance,
             inputs="model_input_table",
             namespace="candidate_modelling_pipeline",
@@ -442,13 +442,13 @@ You can see this snippet as part of the code you added to the example:
     ```python
     ...
 
-    ds_pipeline_1 = pipeline(
+    ds_pipeline_1 = Pipeline(
         nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="active_modelling_pipeline",
     )
 
-    ds_pipeline_2 = pipeline(
+    ds_pipeline_2 = Pipeline(
         nodes=pipeline_instance,
         inputs="model_input_table",
         namespace="candidate_modelling_pipeline",

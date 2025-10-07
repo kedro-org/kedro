@@ -6,6 +6,8 @@ on:
 
 jobs:
   performance-test:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
 
     steps:

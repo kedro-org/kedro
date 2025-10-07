@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   check-version:
     runs-on: ubuntu-latest
@@ -37,6 +40,8 @@ jobs:
     uses: ./.github/workflows/all-checks.yml
 
   build-publish:
+    permissions:
+      contents: write
     needs: [check-version, test-kedro]
     if: |
       always() &&

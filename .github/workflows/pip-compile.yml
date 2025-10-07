@@ -13,6 +13,8 @@ on:
 
 jobs:
   pip-compile:
+    permissions:
+      contents: read
     runs-on: ${{ inputs.os }}
     steps:
       - name: Checkout code

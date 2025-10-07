@@ -8,6 +8,9 @@ on:
 
 jobs:
   vale:
+    permissions:
+      contents: read
+      pull-requests: write
     name: runner / vale
     runs-on: ubuntu-latest
     steps:

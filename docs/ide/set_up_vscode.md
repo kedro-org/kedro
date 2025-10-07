@@ -207,15 +207,17 @@ This will launch Kedro-Viz and display your pipeline visually within the extensi
 !!! note
     To update the Kedro-Viz flowchart after making any changes to your Kedro project, please hit `Cmd` + `Shift` + `P` to open the VSCode command and look for `kedro: restart server`.
 
-Navigate to Node Functions:
+- **Navigate to Node Functions**:
 Click on a node in the Kedro-Viz flowchart, and it will automatically navigate to the corresponding node function in your code.
+
 ![navigation to node function](../meta/images/viz-vsc-nav-function-node.gif)
 
-Navigate to DataCatalog:
+- **Navigate to DataCatalog**:
 Clicking on a data node in the flowchart will open the corresponding dataset in the Data Catalog.
+
 ![navigation to dataset](../meta/images/viz-vsc-nav-data-node.gif)
 
-**Auto reload**: The extension can automatically refresh Kedro-Viz when you make changes to configuration files, pipeline files, or catalog files. To enable:
+- **Auto reload**: The extension can automatically refresh Kedro-Viz when you make changes to configuration files, pipeline files, or catalog files. To enable:
 
 1. Open Settings: `Cmd` + `,` (macOS) or `Ctrl` + `,` (Windows/Linux)
 2. Search for "Kedro Auto Reload"
@@ -226,7 +228,7 @@ Clicking on a data node in the flowchart will open the corresponding dataset in 
 !!! note
     Since auto reload restarts the LSP server, the current state in Kedro-Viz (like expanded pipelines or zoom level) will be reset.
 
-**Theme toggle**: Switch between light and dark themes for Kedro-Viz. To toggle:
+- **Theme toggle**: Switch between light and dark themes for Kedro-Viz. To toggle:
 
 1. Open Command Palette: `Cmd` + `Shift` + `P` (macOS) or `Ctrl` + `Shift` + `P` (Windows/Linux)
 2. Type `Kedro: Toggle Kedro Viz Theme` and select it

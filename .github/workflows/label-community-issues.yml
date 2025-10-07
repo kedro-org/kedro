@@ -7,6 +7,8 @@ on:
 
 jobs:
   label:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     steps:
       - name: Check if issue author is a member of Kedro org

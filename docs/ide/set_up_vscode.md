@@ -219,9 +219,9 @@ Clicking on a data node in the flowchart will open the corresponding dataset in 
 
 - **Auto reload**: The extension can automatically refresh Kedro-Viz when you make changes to configuration files, pipeline files, or catalog files. To enable:
 
-1. Open Settings: `Cmd` + `,` (macOS) or `Ctrl` + `,` (Windows/Linux)
-2. Search for "Kedro Auto Reload"
-3. Check the box for `Kedro: Auto Reload Kedro Viz`
+    1. Open Settings: `Cmd` + `,` (macOS) or `Ctrl` + `,` (Windows/Linux)
+    2. Search for "Kedro Auto Reload"
+    3. Check the box for `Kedro: Auto Reload Kedro Viz`
 
 ![Autoreload kedro viz](../meta/images/vscode_autoreload_viz.gif)
 
@@ -230,8 +230,8 @@ Clicking on a data node in the flowchart will open the corresponding dataset in 
 
 - **Theme toggle**: Switch between light and dark themes for Kedro-Viz. To toggle:
 
-1. Open Command Palette: `Cmd` + `Shift` + `P` (macOS) or `Ctrl` + `Shift` + `P` (Windows/Linux)
-2. Type `Kedro: Toggle Kedro Viz Theme` and select it
+    1. Open Command Palette: `Cmd` + `Shift` + `P` (macOS) or `Ctrl` + `Shift` + `P` (Windows/Linux)
+    2. Type `Kedro: Toggle Kedro Viz Theme` and select it
 
 ![Toggle kedro-viz theme](../meta/images/vscode_toggle_viz_theme.gif)
 

@@ -42,8 +42,8 @@ The simplest way to add validation is to define schemas for your datasets and va
 First, create a directory structure for your schemas:
 
 ```bash
-mkdir -p src/spaceflight_pandera/schemas
-touch src/spaceflight_pandera/schemas/__init__.py
+mkdir -p src/spaceflights_pandera/schemas
+touch src/spaceflights_pandera/schemas/__init__.py
 ```
 
 Create `src/spaceflights_pandera/schemas/raw.py` with validation schemas for your raw datasets:
@@ -488,66 +488,6 @@ shuttles_schema = DataFrameSchema(
     Beyond simple rules, Pandera supports **statistical hypothesis tests** (for example two-sample tests) to validate whether two datasets come from the same distribution.
     This is useful for detecting **data drift** between training and serving environments.
     See [Hypothesis Testing](https://pandera.readthedocs.io/en/stable/hypothesis.html).
-
-### Driving validation with Kedro parameters
-
-Instead of hardcoded ranges directly in your schema, you can use **Kedro parameters** to configure validation bounds.
-
-For example, add the following to `conf/base/parameters.yml`:
-
-```yaml
-validation:
-  rating_mean_min: 80.0
-  rating_mean_max: 100.0
-```
-
-You can then define a schema factory that reads those parameters:
-
-```python
-# src/spaceflights_pandera/schemas/final.py
-from pandera.pandas import DataFrameSchema, Column, Check
-import pandas as pd
-
-def make_model_input_schema(min_mean: float, max_mean: float) -> DataFrameSchema:
-    def check_rating_distribution(df: pd.DataFrame) -> bool:
-        if "review_scores_rating" not in df or df.empty:
-            return True
-        return min_mean <= df["review_scores_rating"].mean() <= max_mean
-
-    return DataFrameSchema(
-        {
-            "engines": Column(nullable=True),
-            "passenger_capacity": Column(nullable=False),
-            "price": Column(float, Check.gt(0), nullable=False),
-            "review_scores_rating": Column(float, nullable=True),
-        },
-        checks=[
-            Check(
-                check_rating_distribution,
-                error=f"Rating mean must be within [{min_mean}, {max_mean}]"
-            )
-        ],
-    )
-```
-
-In your validation hook, load the parameters at runtime:
-
-```python
-# inside your hook
-params = catalog.load("params:validation")
-schema = make_model_input_schema(
-    params["rating_mean_min"],
-    params["rating_mean_max"],
-)
-schema.validate(data, lazy=True)
-```
-
-Now you can adjust validation dynamically at runtime:
-
-```bash
-# Override via Kedro CLI
-kedro run --params="validation.rating_mean_min=45.0,validation.rating_mean_max=90.0"
-```
 
 ### Writing tests for your schemas
 

@@ -1,8 +1,8 @@
-# How to add Pandera data validation to your Kedro workflow
+# How to validate data using Pandera in your Kedro workflow
 
-[Pandera](https://pandera.readthedocs.io/) is an open-source data validation library for pandas DataFrames that enables schema validation with expressive and flexible checks. It helps ensure data quality by validating types, ranges, business rules, and statistical properties of your datasets.
+[Pandera](https://pandera.readthedocs.io/) is an open-source data validation library that enables schema validation with expressive and flexible checks. It supports pandas, PySpark, Polars, Dask, Modin, and other dataframe libraries. It helps ensure data quality by validating types, ranges, business rules, and statistical properties of your datasets.
 
-Adding Pandera to a Kedro project enables you to catch data quality issues early in your pipeline. For example, you can validate that CSV columns have the correct types, enforce business rules (like "price must be positive"), and automatically coerce string data to appropriate types. When collaborating with others on a Kedro project, Pandera schemas serve as documentation of your data contracts.
+Adding Pandera to a Kedro project enables you to catch data quality issues early in your pipeline. For example, you can validate that CSV columns have the correct types and enforce business rules (like "price must be positive"). When collaborating with others on a Kedro project, Pandera schemas serve as documentation of your data contracts.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ To set yourself up, create a new Kedro project:
 kedro new --starter=spaceflights-pandas --name spaceflights-pandera
 ```
 
-Navigate to your project directory and add Pandera with pandas support to your requirements.txt:
+Navigate to your project directory and add Pandera with pandas support to your `requirements.txt`:
 
 ```bash
 pandera[pandas]>=0.18.0
@@ -31,12 +31,9 @@ uv pip install -r requirements.txt
 ```
 
 
-!!! note
-    Although Pandera works best when working with tabular data pipelines, you can validate any pandas DataFrame in your Kedro workflow, not just ML/AI pipelines.
-
 ## Simple use cases
 
-This section explains how you can use Pandera to validate your Kedro datasets in a straightforward way.
+This section explains how you can use Pandera to validate your Kedro datasets.
 
 ### Basic validation of Kedro datasets using Pandera schemas
 
@@ -61,13 +58,11 @@ companies_schema = DataFrameSchema(
             int,
             nullable=False,
             unique=True,
-            coerce=True,  # Automatically convert "123" -> 123
         ),
         "total_fleet_count": Column(
             float,
             nullable=True,
             checks=Check.greater_than_or_equal_to(0),
-            coerce=True,
         ),
         "iata_approved": Column(
             str,
@@ -76,49 +71,42 @@ companies_schema = DataFrameSchema(
         ),
     },
     strict=False,  # Allow additional columns not in schema
-    coerce=True,   # Enable automatic type conversion
     name="companies_raw",
 )
 
 shuttles_schema = DataFrameSchema(
     columns={
-        "id": Column(int, nullable=False, unique=True, coerce=True),
+        "id": Column(int, nullable=False, unique=True),
         "passenger_capacity": Column(
             int,
             nullable=False,
             checks=Check.greater_than_or_equal_to(1),
-            coerce=True,
         ),
         "engines": Column(
             float,  # Use float to handle nullable integers (NaN compatibility)
             nullable=True,
             checks=Check.greater_than_or_equal_to(0),
-            coerce=True,
         ),
     },
     strict=False,
-    coerce=True,
     name="shuttles_raw",
 )
 
 reviews_schema = DataFrameSchema(
     columns={
-        "shuttle_id": Column(int, nullable=False, unique=True, coerce=True),
+        "shuttle_id": Column(int, nullable=False, unique=True),
         "review_scores_rating": Column(
             float,
             nullable=True,
             checks=Check.in_range(0, 100),
-            coerce=True,
         ),
         "number_of_reviews": Column(
             int,
             nullable=True,
             checks=Check.greater_than_or_equal_to(0),
-            coerce=True,
         ),
     },
     strict=False,
-    coerce=True,
     name="reviews_raw",
 )
 ```
@@ -130,20 +118,15 @@ reviews_schema = DataFrameSchema(
 
 
 !!! info
-    Use `coerce=True` to automatically convert types during validation. This is essential for CSV data where columns are initially loaded as strings.
-
     For nullable integer columns, use `float` type instead of `int` because pandas represents nullable integers as float64 (since NaN is a float value).
 
-
-
-Next, create a hook to validate datasets. Create `src/spaceflights_pandera/hooks/validation.py`:
+Now create a hook to validate datasets. Create `src/spaceflights_pandera/hooks/validation.py`:
 
 ```python
 """Kedro hooks for Pandera validation integration."""
 import logging
 from typing import Any, Dict
 
-import pandas as pd
 from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
 from pandera.errors import SchemaError, SchemaErrors
@@ -153,8 +136,8 @@ from ..schemas.raw import companies_schema, shuttles_schema, reviews_schema
 logger = logging.getLogger(__name__)
 
 
-class PanderaValidationHooks:
-    """Kedro hooks that integrate Pandera validation."""
+class PanderaValidationHook:
+    """Kedro hook that integrates Pandera validation."""
 
     def __init__(self):
         # Map catalog dataset names to their validation schemas
@@ -172,13 +155,13 @@ class PanderaValidationHooks:
         inputs: Dict[str, Any],
         is_async: bool,
     ) -> Dict[str, Any]:
-        """Validate and coerce input data before node execution."""
+        """Validate input data before node execution."""
         validated_inputs = {}
 
         for input_name, data in inputs.items():
             schema = self.raw_schemas.get(input_name)
 
-            if schema is None or not isinstance(data, pd.DataFrame):
+            if schema is None:
                 validated_inputs[input_name] = data
                 continue
 
@@ -199,9 +182,9 @@ Finally, register the hook in `src/spaceflights_pandera/settings.py`:
 
 ```python
 """Project settings."""
-from spaceflights_pandera.hooks.validation import PanderaValidationHooks
+from spaceflights_pandera.hooks.validation import PanderaValidationHook
 
-HOOKS = (PanderaValidationHooks(),)
+HOOKS = (PanderaValidationHook(),)
 ```
 
 From this point, when you execute `kedro run` you will see the validation logs:
@@ -217,13 +200,13 @@ From this point, when you execute `kedro run` you will see the validation logs:
 
 ### What happens when validation fails?
 
-Let's make one schema rule deliberately too strict so you can see Pandera in action.
+Let's make one schema rule to deliberately fail so you can see Pandera in action.
 
 In `src/spaceflights_pandera/schemas/raw.py`, change the `total_fleet_count` column check:
 
 ```diff
 - checks=Check.greater_than_or_equal_to(0),
-+ checks=Check.greater_than(100),  # intentionally too strict
++ checks=Check.greater_than(100),  # intentionally to fail
 ```
 
 Now run the pipeline again:
@@ -241,9 +224,41 @@ failure cases: [1.0, 2.0, 5.0, ...]
 
 Because the hook uses `lazy=True`, Pandera collects all errors at once, making it easy to spot every problem.
 
-!!! note
-    Reset the schema back to the correct check (`greater_than_or_equal_to(0)`) before continuing with the rest of the tutorial.
+### Validating data before saving with `before_dataset_saved`
 
+So far, we validated datasets when they were loaded into a node (`before_node_run`).
+You can also validate data just before it is written back to the catalog, using `before_dataset_saved`.
+
+The main difference is in what Kedro passes to the hook:
+
+- **`before_node_run`** → gets all **node inputs** as a dictionary `{dataset_name: data}`
+- **`before_dataset_saved`** → gets a single **dataset name and data** being saved
+
+```python
+@hook_impl
+def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    """Validate data before saving to catalog."""
+    schema = self.raw_schemas.get(dataset_name)
+    if schema:
+        schema.validate(data, lazy=True)
+```
+
+!!! info
+    - Use `before_node_run` if you want to **guarantee that downstream nodes always receive valid inputs**.
+    - Use `before_dataset_saved` if you want to **enforce contracts on the data you persist to the catalog** (for example, preventing invalid data from being stored in S3, a database, or parquet files).
+    - You can also combine both hooks to validate at multiple stages of the pipeline.
+
+!!! tip
+    **Function-level validation**
+    Instead of using Kedro hooks, you can validate directly at function boundaries with decorators:
+
+    - `@pa.check_input`
+    - `@pa.check_output`
+    - `@pa.check_io`
+
+    This can be useful for validating node functions in isolation.
+
+## Advanced use cases
 
 ### Controlling validation behavior with environment variables
 
@@ -290,55 +305,67 @@ def get_lazy_flag() -> bool:
 
 Update your hook to use these configuration helpers:
 
-```diff
+```python
+from pandera.errors import SchemaError, SchemaErrors
+from ..schemas import is_validation_enabled, should_fail_on_error, get_lazy_flag
 
- from pandera.errors import SchemaError, SchemaErrors
-+from ..schemas import is_validation_enabled, should_fail_on_error, get_lazy_flag
+class PanderaValidationHook:
+    def __init__(self):
+        self.enabled = is_validation_enabled()
+        self.fail_on_error = should_fail_on_error()
+        self.lazy = get_lazy_flag()
 
- class PanderaValidationHooks:
-     def __init__(self):
-+        self.enabled = is_validation_enabled()
-+        self.fail_on_error = should_fail_on_error()
-+        self.lazy = get_lazy_flag()
-         # ... rest of init
+        self.raw_schemas = {
+            "companies": companies_schema,
+            "shuttles": shuttles_schema,
+            "reviews": reviews_schema,
+        }
 
-     @hook_impl
-     def before_node_run(
-         self,
-         node,
-         catalog: DataCatalog,
-         inputs: Dict[str, Any],
-         is_async: bool,
-     ) -> Dict[str, Any]:
-        """Validate and coerce input data before node execution."""
+    @hook_impl
+    def before_node_run(
+        self,
+        node,
+        catalog: DataCatalog,
+        inputs: Dict[str, Any],
+        is_async: bool,
+    ) -> Dict[str, Any]:
+        """Validate input data before node execution."""
+
+        if not self.enabled:
+            return inputs
+
         validated_inputs = {}
 
-         for input_name, data in inputs.items():
-             schema = self.raw_schemas.get(input_name)
-@@
-             try:
--                validated_data = schema.validate(data, lazy=True)
-+                validated_data = schema.validate(data, lazy=self.lazy)
+        for input_name, data in inputs.items():
+            schema = self.raw_schemas.get(input_name)
+
+            if schema is None:
+                validated_inputs[input_name] = data
+                continue
+
+            logger.info(f"Validating '{input_name}' for node '{node.name}'")
+
+            try:
+                validated_data = schema.validate(data, lazy=self.lazy)
                 logger.info(f"✓ Validation passed for '{input_name}'")
                 validated_inputs[input_name] = validated_data
-             except (SchemaError, SchemaErrors) as e:
+            except (SchemaError, SchemaErrors) as e:
                 logger.error("Validation failed for '%s': %s", input_name, e)
--                raise
-+                if self.fail_on_error:
-+                    raise
-+                else:
-+                    # Exploration mode: continue with original (unvalidated) data
-+                    logger.warning(
-+                        "Continuing despite validation errors because "
-+                        "VALIDATION_FAIL_ON_ERROR=false"
-+                    )
-+                    validated_inputs[input_name] = data
+                if self.fail_on_error:
+                    raise
+                else:
+                    # Exploration mode: continue with original data
+                    logger.warning(
+                        "Continuing despite validation errors because "
+                        "VALIDATION_FAIL_ON_ERROR=false"
+                    )
+                    validated_inputs[input_name] = data
+            except (TypeError, AttributeError):
+                # Not a validatable type, pass through unchanged
+                validated_inputs[input_name] = data
 
--        return validated_inputs
-+        return {**inputs, **validated_inputs}
-
+        return {**inputs, **validated_inputs}
 ```
-
 
 Now you can control validation behavior:
 
@@ -356,117 +383,41 @@ export VALIDATION_LAZY=false
 kedro run
 ```
 
-### Validating intermediate datasets
-
-You can also validate data after preprocessing using the same hook mechanism.
-
-Create `src/spaceflights_pandera/schemas/intermediate.py`:
+**Caching validation results:** To avoid re-validating datasets used by multiple nodes, add caching to your hook:
 
 ```python
-"""Pandera schemas for intermediate data validation."""
-from pandera import Column, DataFrameSchema
-
-preprocessed_shuttles_schema = DataFrameSchema(
-    columns={
-        "id": Column(nullable=False, unique=True),
-        "passenger_capacity": Column(nullable=False),
-    },
-    strict=False,
-    coerce=False,  # Data already cleaned, don't coerce
-    name="preprocessed_shuttles",
-)
-
-preprocessed_companies_schema = DataFrameSchema(
-    columns={
-        "id": Column(nullable=False, unique=True),
-    },
-    strict=False,
-    coerce=False,
-    name="preprocessed_companies",
-)
-```
-
-!!! tip
-    **Bootstrap schemas quickly**
-    You don't always need to write schemas from scratch. Pandera can **infer a draft schema** from a DataFrame (`DataFrameSchema.infer(df)`), and you can then refine it.
-    Schemas can also be **exported to YAML/JSON** for sharing and versioning.
-
-Update your hook to include intermediate schemas:
-
-```diff
-from ..schemas.raw import companies_schema, shuttles_schema, reviews_schema
-+from ..schemas.intermediate import preprocessed_companies_schema, preprocessed_shuttles_schema
-
-class PanderaValidationHooks:
+class PanderaValidationHook:
     def __init__(self):
-        self.raw_schemas = {
-            "companies": companies_schema,
-            "shuttles": shuttles_schema,
-            "reviews": reviews_schema,
-        }
-+        self.intermediate_schemas = {
-+            "preprocessed_companies": preprocessed_companies_schema,
-+            "preprocessed_shuttles": preprocessed_shuttles_schema,
-        }
+        # ... existing init code ...
+        self._validated_datasets = set()  # Add this line
+
+    @hook_impl
+    def after_context_created(self, context) -> None:
+        """Reset cache at pipeline start."""
+        self._validated_datasets.clear()
 
     @hook_impl
     def before_node_run(self, node, catalog, inputs, is_async):
-        # ... existing code
+        # ... existing code ...
+        for input_name, data in inputs.items():
+            # Skip if already validated
+            if input_name in self._validated_datasets:
+                validated_inputs[input_name] = data
+                continue
 
--        schema = self.raw_schemas.get(input_name)
-+        # Check both raw and intermediate schemas
-+        schema = self.raw_schemas.get(input_name) or self.intermediate_schemas.get(input_name)
+            # ... validation logic ...
 
-        # ... rest of validation logic
+            # After successful validation:
+            self._validated_datasets.add(input_name)
 ```
 
-### Validating data before saving with `before_dataset_saved`
-
-
-So far, we validated datasets when they were loaded into a node (`before_node_run`).
-You can also validate data just before it is written back to the catalog, using `before_dataset_saved`.
-
-The main difference is in what Kedro passes to the hook:
-
-- **`before_node_run`** → gets all **node inputs** as a dictionary `{dataset_name: data}`
-- **`before_dataset_saved`** → gets a single **dataset name and data** being saved
-
-```diff
--    @hook_impl
--    def before_node_run(self, node, catalog, inputs, is_async):
--     for input_name, data in inputs.items():
--         schema = self.raw_schemas.get(input_name)
--         if schema:
--             schema.validate(data, lazy=self.lazy)
-+ @hook_impl
-+ def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
-+     schema = self.raw_schemas.get(dataset_name)
-+     if schema:
-+         schema.validate(data, lazy=self.lazy)
-```
-
-!!! info
-    - Use `before_node_run` if you want to **guarantee that downstream nodes always receive valid inputs**.
-    - Use `before_dataset_saved` if you want to **enforce contracts on the data you persist to the catalog** (for example, preventing invalid data from being stored in S3, a database, or parquet files).
-    - You can also combine both hooks to validate at multiple stages of the pipeline.
-
-!!! tip
-    **Function-level validation**
-    Instead of using Kedro hooks, you can validate directly at function boundaries with decorators:
-
-    - `@pa.check_input`
-    - `@pa.check_output`
-    - `@pa.check_io`
-
-    This can be useful for validating node functions in isolation.
-
-## Advanced use cases
+This ensures each dataset is validated only once per pipeline run.
 
 ### Enhanced error reporting for validation failures
 
 By default, Pandera error messages can be verbose. You can improve error reporting by parsing the SchemaError and logging only the most relevant information.
 
-Add this helper method to your `PanderaValidationHooks` class:
+Add this helper method to your `PanderaValidationHook` class:
 
 ```python
 def _handle_validation_error(self, dataset_name: str, error: SchemaError) -> None:
@@ -501,41 +452,36 @@ except SchemaError as e:
 
 ### DataFrame-level checks for business rules
 
-So far, our intermediate schema only checked column types and uniqueness.
-Let's extend it with a **business rule**: "Type F5 shuttles cannot have more than 16 passengers."
+You can add custom business rules that validate relationships across rows or columns. For example, let's add a rule: "Type F5 shuttles cannot have more than 16 passengers."
 
-Open `src/spaceflights_pandera/schemas/intermediate.py` and extend the `preprocessed_shuttles_schema` with a business rule:
+In your schema file, define a custom check function:
 
-```diff
--from pandera.pandas import Column, DataFrameSchema
-+from pandera.pandas import Column, DataFrameSchema, Check
-+import pandas as pd
+```python
+from pandera import Column, DataFrameSchema, Check
+import pandas as pd
 
-+def check_f5_shuttle_capacity(df: pd.DataFrame) -> bool:
-+    """Business rule: Type F5 shuttles cannot have more than 16 passengers."""
-+    is_f5 = df["shuttle_type"] == "Type F5"
-+    has_valid_capacity = df["passenger_capacity"] <= 16
-+    return (~is_f5 | has_valid_capacity).all()
-+
+def check_f5_shuttle_capacity(df: pd.DataFrame) -> bool:
+    """Business rule: Type F5 shuttles cannot have more than 16 passengers."""
+    is_f5 = df["shuttle_type"] == "Type F5"
+    has_valid_capacity = df["passenger_capacity"] <= 16
+    return (~is_f5 | has_valid_capacity).all()
 
-preprocessed_shuttles_schema = DataFrameSchema(
+shuttles_schema = DataFrameSchema(
     columns={
-        "id": Column(nullable=False, unique=True),
-+        "shuttle_type": Column(str, nullable=True),
-        "passenger_capacity": Column(nullable=False),
+        "id": Column(int, nullable=False, unique=True),
+        "shuttle_type": Column(str, nullable=True),
+        "passenger_capacity": Column(int, nullable=False),
     },
-+    checks=[
-+        Check(
-+            check_f5_shuttle_capacity,
-+            error="Type F5 shuttles cannot have more than 16 passengers"
-+        ),
-+    ],
+    checks=[
+        Check(
+            check_f5_shuttle_capacity,
+            error="Type F5 shuttles cannot have more than 16 passengers"
+        ),
+    ],
     strict=False,
-    coerce=False,  # Data already cleaned, don't coerce
-    name="preprocessed_shuttles",
+    name="shuttles_raw",
 )
 ```
-
 
 !!! tip
     **Distribution checks and hypothesis testing**
@@ -636,8 +582,6 @@ class TestRawSchemas:
 
         validated = companies_schema.validate(valid_data)
         assert validated.shape == valid_data.shape
-        # Check coercion worked
-        assert validated["id"].dtype == "int64"
 
     def test_companies_schema_rejects_invalid_iata(self):
         """Test companies schema rejects invalid IATA values."""
@@ -680,8 +624,8 @@ python -m pytest src/spaceflights_pandera/schemas/test_schemas.py -v
 * [Pandera documentation](https://pandera.readthedocs.io/)
 * [Kedro hooks documentation](https://docs.kedro.org/en/stable/hooks/introduction.html)
 * [Lazy validation](https://pandera.readthedocs.io/en/stable/lazy_validation.html)
-* [Type coercion](https://pandera.readthedocs.io/en/stable/dtype_validation.html)
 * [Custom checks](https://pandera.readthedocs.io/en/stable/checks.html)
 * [Multi-backend support](https://pandera.readthedocs.io/en/stable/ecosystem.html) - Pandera also validates data in Dask, Polars, Modin, and PySpark
+* [Ibis backend](https://pandera.readthedocs.io/en/stable/ibis.html) - Validate data with Ibis for cross-database compatibility
 
-For a declarative approach to validation using catalog metadata, see the community-maintained [kedro-pandera plugin](https://github.com/Galileo-Galilei/kedro-pandera).
+For a declarative approach to validation using catalog metadata, see the community-maintained [kedro-pandera plugin](https://github.com/Galileo-Galilei/kedro-pandera) (last updated July 2024).

@@ -31,7 +31,7 @@ uv pip install -r requirements.txt
 ```
 
 
-## Simple use cases
+## Use cases
 
 This section explains how you can use Pandera to validate your Kedro datasets.
 
@@ -178,7 +178,7 @@ class PanderaValidationHook:
         return validated_inputs
 ```
 
-Finally, register the hook in `src/spaceflights_pandera/settings.py`:
+Register the hook in `src/spaceflights_pandera/settings.py`:
 
 ```python
 """Project settings."""
@@ -215,19 +215,19 @@ Now run the pipeline again:
 kedro run
 ```
 
-You should see Pandera raise a `SchemaErrors` exception, reporting exactly which rows failed:
+You should see Pandera raise a `SchemaErrors` exception, reporting which rows failed:
 
 ```console
 SchemaErrors: Column 'total_fleet_count' failed check 'greater_than_or_equal_to(100)'
 failure cases: [1.0, 2.0, 5.0, ...]
 ```
 
-Because the hook uses `lazy=True`, Pandera collects all errors at once, making it easy to spot every problem.
+Because the hook uses `lazy=True`, Pandera collects all errors at one go, making it easier to spot every problem.
 
 ### Validating data before saving with `before_dataset_saved`
 
 So far, we validated datasets when they were loaded into a node (`before_node_run`).
-You can also validate data just before it is written back to the catalog, using `before_dataset_saved`.
+You can also validate data before it is written back to the catalog, using `before_dataset_saved`.
 
 The main difference is in what Kedro passes to the hook:
 
@@ -246,7 +246,7 @@ def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
 !!! info
     - Use `before_node_run` if you want to **guarantee that downstream nodes always receive valid inputs**.
     - Use `before_dataset_saved` if you want to **enforce contracts on the data you persist to the catalog** (for example, preventing invalid data from being stored in S3, a database, or parquet files).
-    - You can also combine both hooks to validate at multiple stages of the pipeline.
+    - You can also combine both hooks to validate at different stages of the pipeline.
 
 !!! tip
     **Function-level validation**
@@ -411,11 +411,11 @@ class PanderaValidationHook:
             self._validated_datasets.add(input_name)
 ```
 
-This ensures each dataset is validated only once per pipeline run.
+This ensures each dataset is validated after each pipeline run.
 
 ### Enhanced error reporting for validation failures
 
-By default, Pandera error messages can be verbose. You can improve error reporting by parsing the SchemaError and logging only the most relevant information.
+By default, Pandera error messages can be verbose. You can improve error reporting by parsing the SchemaError and logging the most relevant information.
 
 Add this helper method to your `PanderaValidationHook` class:
 
@@ -485,13 +485,13 @@ shuttles_schema = DataFrameSchema(
 
 !!! tip
     **Distribution checks and hypothesis testing**
-    Beyond simple rules, Pandera supports **statistical hypothesis tests** (e.g. two-sample tests) to validate whether two datasets come from the same distribution.
-    This is particularly useful for detecting **data drift** between training and serving environments.
+    Beyond simple rules, Pandera supports **statistical hypothesis tests** (for example two-sample tests) to validate whether two datasets come from the same distribution.
+    This is useful for detecting **data drift** between training and serving environments.
     See [Hypothesis Testing](https://pandera.readthedocs.io/en/stable/hypothesis.html).
 
 ### Driving validation with Kedro parameters
 
-Instead of hardcoding ranges directly in your schema, you can use **Kedro parameters** to configure validation bounds.
+Instead of hardcoded ranges directly in your schema, you can use **Kedro parameters** to configure validation bounds.
 
 For example, add the following to `conf/base/parameters.yml`:
 

@@ -49,6 +49,3 @@ Claypot
 ethanknights
 Aneira
 Printify
-Validate
-validate 
-Pandera

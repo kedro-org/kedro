@@ -186,7 +186,7 @@ def get_suggestion_for_invalid_name(
 
     Example:
         >>> valid_names = ["data_science", "data_engineering", "feature_engineering"]
-        >>> get_close_matches_with_message("data_scienc", valid_names)
+        >>> get_suggestion_for_invalid_name("data_scienc", valid_names)
         'Did you mean "data_science"?'
     """
     if invalid_name in valid_names:
@@ -196,7 +196,7 @@ def get_suggestion_for_invalid_name(
         invalid_name, valid_names, max_suggestions, cutoff
     )
 
-if matches:
-    return f'Did you mean "{matches[0]}"?'
+    if matches:
+        return f'Did you mean "{matches[0]}"?'
 
-return ""
+    return ""

@@ -4,7 +4,7 @@ from typing import Any, NoReturn, TypeVar
 
 import pytest
 
-from kedro.utils import get_close_matches_with_message, load_obj
+from kedro.utils import get_suggestion_for_invalid_name, load_obj
 
 T = TypeVar("T")
 
@@ -91,27 +91,27 @@ def multi_input_list_output(arg1: Any, arg2: Any, arg3: Any = None) -> list:
 class TestGetCloseMatchesWithMessage:
     def test_single_close_match(self):
         valid_names = ["data_science", "data_engineering", "feature_engineering"]
-        result = get_close_matches_with_message("data_scienc", valid_names)
+        result = get_suggestion_for_invalid_name("data_scienc", valid_names)
         assert result == 'Did you mean "data_science"?'
 
     def test_no_close_matches(self):
         valid_names = ["data_science", "data_engineering", "feature_engineering"]
-        result = get_close_matches_with_message("xyz", valid_names)
+        result = get_suggestion_for_invalid_name("xyz", valid_names)
         assert result == ""
 
     def test_exact_match_not_suggested(self):
         valid_names = ["data_science", "data_engineering"]
-        result = get_close_matches_with_message("data_science", valid_names)
+        result = get_suggestion_for_invalid_name("data_science", valid_names)
         assert result == ""
 
     def test_empty_valid_names(self):
         valid_names = []
-        result = get_close_matches_with_message("data_science", valid_names)
+        result = get_suggestion_for_invalid_name("data_science", valid_names)
         assert result == ""
 
     def test_custom_parameters(self):
         valid_names = ["abc", "def", "ghi"]
-        result = get_close_matches_with_message(
+        result = get_suggestion_for_invalid_name(
             "ab", valid_names, max_suggestions=1, cutoff=0.1
         )
         assert result == 'Did you mean "abc"?'

@@ -413,3 +413,15 @@ If you run it from the same directory where `parameters.yml` placed it gives the
 ```console
 {'polars_float64': Float64, 'today': datetime.date(2023, 11, 23)}
 ```
+
+### How to ignore hidden files and directories with `OmegaConfigLoader`
+
+The `OmegaConfigLoader` provides an option to ignore hidden files and directories (those starting with a dot, for example, `.hidden_file` or `.hidden_folder`) when loading configuration files. This behaviour is controlled by the `ignore_hidden` parameter, which is set to `True` by default.
+
+If you want to include hidden files and directories in your configuration loading process, you can set `ignore_hidden` to False when instantiating the `OmegaConfigLoader`:
+
+```py
+from kedro.config import OmegaConfigLoader
+
+conf_loader = OmegaConfigLoader(conf_source="conf", ignore_hidden=False)
+```

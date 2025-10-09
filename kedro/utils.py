@@ -167,7 +167,7 @@ def _format_rich(value: str, markup: str) -> str:
     return f"[{markup}]{value}[/{markup}]"
 
 
-def get_close_matches_with_message(
+def get_suggestion_for_invalid_name(
     invalid_name: str,
     valid_names: Iterable[str],
     max_suggestions: int = 1,

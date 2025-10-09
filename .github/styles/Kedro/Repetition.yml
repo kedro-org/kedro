@@ -3,7 +3,7 @@ extends: repetition
 message: "'%s' is repeated!"
 level: error
 # Check all scopes except code
-scope: '~code'
+scope: 'text'
 alpha: true
 tokens:
   - '[^\s]+'

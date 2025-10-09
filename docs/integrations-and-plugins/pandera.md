@@ -411,7 +411,6 @@ class PanderaValidationHook:
             self._validated_datasets.add(input_name)
 ```
 
-This ensures each dataset is validated after each pipeline run.
 
 ### Enhanced error reporting for validation failures
 

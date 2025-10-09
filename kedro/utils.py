@@ -196,8 +196,7 @@ def get_close_matches_with_message(
         invalid_name, valid_names, max_suggestions, cutoff
     )
 
-    if not matches:
-        return ""
+if matches:
+    return f'Did you mean "{matches[0]}"?'
 
-    else:
-        return f'Did you mean "{matches[0]}"?'
+return ""

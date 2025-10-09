@@ -12,6 +12,17 @@ class AgentContext:
     tools: dict[str, Callable] = field(default_factory=dict)
 
 
+def get_tool_name(func: Callable):
+    """Return a readable tool name from callable or tool-like object."""
+    if hasattr(func, "__name__"):
+        return func.__name__
+    if hasattr(func, "name"):
+        return func.name
+    if hasattr(func, "__class__"):
+        return func.__class__.__name__
+    return str(func)
+
+
 def agent_context_node(
     *, outputs, llm, prompts, tools=None, name="agent_context_node"
 ) -> Node:
@@ -34,7 +45,8 @@ def agent_context_node(
         if tools:
             for tool in tools:
                 tool_inputs = {inp: kwargs[inp] for inp in tool.get("inputs", [])}
-                built_tools[tool["func"].__name__] = tool["func"](**tool_inputs)
+                built_tool = tool["func"](**tool_inputs)
+                built_tools[get_tool_name(built_tool)] = built_tool
         return AgentContext(
             agent_id="default_agent", llm=llm, prompts=prompts, tools=built_tools
         )

@@ -118,7 +118,7 @@ reviews_schema = DataFrameSchema(
 
 
 !!! info
-    For nullable integer columns, use `float` type instead of `int` because pandas represents nullable integers as float64 (since NaN is a float value).
+    For nullable integer columns, use `float` type instead of `int` because pandas represents nullable integers as float64 (since NaN is a float value)
 
 Now create a hook to validate datasets. Create `src/spaceflights_pandera/hooks/validation.py`:
 

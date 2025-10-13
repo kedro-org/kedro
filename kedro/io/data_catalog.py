@@ -398,7 +398,7 @@ class DataCatalog(CatalogProtocol):
             # ['example']
         ```
         """
-        return list(self._lazy_datasets.keys()) + list(self.keys())
+        return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """

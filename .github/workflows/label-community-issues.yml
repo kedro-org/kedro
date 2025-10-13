@@ -7,10 +7,12 @@ on:
 
 jobs:
   label:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     steps:
       - name: Check if issue author is a member of Kedro org
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         id: membership
         with:
           github-token: ${{ secrets.GH_TAGGING_TOKEN }}

@@ -6,6 +6,9 @@ on:
     # Run every day at midnight (UTC time)
     - cron: '0 0 * * *'
 
+permissions:
+  contents: read
+
 jobs:
   kedro-main-test:
     uses: ./.github/workflows/all-checks.yml

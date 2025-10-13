@@ -167,7 +167,7 @@ def _format_rich(value: str, markup: str) -> str:
     return f"[{markup}]{value}[/{markup}]"
 
 
-def get_suggestion_for_invalid_name(
+def _get_suggestion_for_invalid_name(
     invalid_name: str,
     valid_names: Iterable[str],
     max_suggestions: int = 1,
@@ -186,7 +186,7 @@ def get_suggestion_for_invalid_name(
 
     Example:
         >>> valid_names = ["data_science", "data_engineering", "feature_engineering"]
-        >>> get_suggestion_for_invalid_name("data_scienc", valid_names)
+        >>> _get_suggestion_for_invalid_name("data_scienc", valid_names)
         'Did you mean "data_science"?'
     """
     if invalid_name in valid_names:

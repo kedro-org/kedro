@@ -26,7 +26,7 @@ from kedro.framework.project import (
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
-from kedro.utils import find_kedro_project, get_suggestion_for_invalid_name
+from kedro.utils import _get_suggestion_for_invalid_name, find_kedro_project
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -351,7 +351,7 @@ class KedroSession:
                 f"It needs to be generated and returned "
                 f"by the 'register_pipelines' function."
             )
-            suggestion = get_suggestion_for_invalid_name(name, pipelines.keys())
+            suggestion = _get_suggestion_for_invalid_name(name, pipelines.keys())
             if suggestion:
                 error_msg += f"\n{suggestion}"
             raise ValueError(error_msg) from exc

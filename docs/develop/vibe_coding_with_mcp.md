@@ -11,7 +11,7 @@ This server plugs directly into **VS Code Copilot** or **Cursor** and provides *
 To enable Kedro MCP tools in your editor, simply **click one of the links below**.
 Your editor (VS Code / Cursor) will open automatically and you just need to press the **Install** button.
 
-- [**Install in Cursor**](https://cursor.com/en/install-mcp?name=Kedro&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJkaW1lZC1tY3BAbGF0ZXN0Il0sImVudiI6eyJGQVNNQ1BfTE9HX0xFVkVMIjoiRVJST1IifSwiZGlzYWJsZWQiOmZhbHNlLCJhdXRvQXBwcm92ZSI6W119)
+- [**Install in Cursor**](https://cursor.com/en/install-mcp?name=Kedro&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJrZWRyby1tY3BAbGF0ZXN0Il0sImVudiI6eyJGQVNNQ1BfTE9HX0xFVkVMIjoiRVJST1IifSwiZGlzYWJsZWQiOmZhbHNlLCJhdXRvQXBwcm92ZSI6W119)
 
 
 - [**Install in VS Code**](https://insiders.vscode.dev/redirect/mcp/install?name=Kedro&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22dimed-mcp%40latest%22%5D%2C%22env%22%3A%7B%22FASTMCP_LOG_LEVEL%22%3A%22ERROR%22%7D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)

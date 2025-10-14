@@ -8,8 +8,8 @@ This server plugs directly into **VS Code Copilot** or **Cursor** and provides *
 
 ## ⚡ Quick Install
 
-To enable Kedro MCP tools in your editor, simply **click one of the links below**.
-Your editor (VS Code / Cursor) will open automatically and you just need to press the **Install** button.
+To enable Kedro MCP tools in your editor, **click one of the links below**.
+Your editor (VS Code / Cursor) will open automatically and you need to press the **Install** button.
 
 - [**Install in Cursor**](https://cursor.com/en/install-mcp?name=Kedro&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJrZWRyby1tY3BAbGF0ZXN0Il0sImVudiI6eyJGQVNNQ1BfTE9HX0xFVkVMIjoiRVJST1IifSwiZGlzYWJsZWQiOmZhbHNlLCJhdXRvQXBwcm92ZSI6W119)
 
@@ -17,7 +17,7 @@ Your editor (VS Code / Cursor) will open automatically and you just need to pres
 - [**Install in VS Code**](https://insiders.vscode.dev/redirect/mcp/install?name=Kedro&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22kedro-mcp%40latest%22%5D%2C%22env%22%3A%7B%22FASTMCP_LOG_LEVEL%22%3A%22ERROR%22%7D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 
 
-Once installed, your AI assistant automatically gains access to Kedro-specific MCP tools.
+Once installed, your AI assistant gains access to Kedro-specific MCP tools.
 
 ---
 
@@ -34,7 +34,7 @@ You can also reuse this configuration in any editor or MCP-compatible assistant 
 ```json
 {
   "command": "uvx",
-  "args": ["dimed-mcp@latest"],
+  "args": ["kedro-mcp@latest"],
   "env": {
     "FASTMCP_LOG_LEVEL": "ERROR"
   },
@@ -47,10 +47,10 @@ You can also reuse this configuration in any editor or MCP-compatible assistant 
 
 ## 🛠️ Examples of Usage
 
-After installing, open **Copilot Chat Agent Mode** (in VS Code) or the **Chat panel** (in Cursor).
+After `kedro-mcp` installation, open **Copilot Chat Agent Mode** (in VS Code) or the **Chat panel** (in Cursor).
 Type `/` to see available MCP prompts.
 
-### Example 1 — Convert a Jupyter Notebook into a Kedro Project
+### Convert a Jupyter Notebook into a Kedro Project
 
 ```text
 /mcp.Kedro.convert_notebook
@@ -86,7 +86,7 @@ What happens step by step:
 
 ---
 
-### Example 2 — Kedro Project Migration
+### Kedro Project Migration
 
 ```text
 /mcp.Kedro.project_migration
@@ -96,15 +96,15 @@ What happens step by step:
 
 When you run this prompt, the assistant will call the MCP server to guide you through **migrating an existing project** to the latest Kedro version.
 
-- **Step 1 — Plan:** It analyses your project and suggests a migration plan (e.g. 0.19 → 1.0). Wait for approval.
-- **Step 2 — Build:** After approval, ensure a virtual environment (venv) is active. If not, create one. The assistant will install Kedro if missing and then follow the plan.
+- **Step 1 — Plan:** It analyses your project and suggests a migration plan (e.g. 0.19 → 1.0). Waits for approval.
+- **Step 2 — Build:** After approval, it ensures a virtual environment (venv) is active. If not, it creates one. The assistant will install `Kedro` if missing and then follows the plan.
 
 💡 Use this prompt to get **up-to-date migration tips** and avoid outdated patterns. If errors appear, ask the assistant in chat how to resolve them.
 
 
 ---
 
-### Example 3 — General Kedro questions
+### General Kedro questions
 ```text
 /mcp.Kedro.general_usage
 ```

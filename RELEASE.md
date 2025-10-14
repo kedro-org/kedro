@@ -5,9 +5,13 @@
 
 ## Bug fixes and other changes
 
+## Documentation changes
+* Added a note on programmatically creating lambdas when lazily saving a `PartionedDataset`.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Aseem Sangalay](https://github.com/aseemsangalay)
+* [Chris Schopp](https://github.com/chrisschopp)
 
 # Release 1.0.0
 ## Major features and improvements

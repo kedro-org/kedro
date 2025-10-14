@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5.0.0
       - name: Set up Python
-        uses: actions/setup-python@v6.0.0
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install uv
@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5.0.0
       - name: Set up Python
-        uses: actions/setup-python@v6.0.0
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install uv
@@ -84,7 +84,7 @@ jobs:
             "Release ${{ needs.check-version.outputs.kedro_version }}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.check-version.outputs.kedro_version }}
           name: ${{ needs.check-version.outputs.kedro_version }}

@@ -80,7 +80,7 @@ What happens step by step:
     - Define pipelines with `kedro pipeline create`.
     - Populate `parameters.yml` and `catalog.yml` according to the plan.
 
-💡 **Tips:**
+**Tips:**
 
 - You can edit the prompt itself if you want to specify a particular virtual environment (e.g. `conda`, `uv`, or `venv`).
 - If any errors occur during conversion, ask the assistant in chat how to resolve them — it will guide you through fixes.
@@ -101,7 +101,7 @@ When you run this prompt, the assistant will call the MCP server to guide you th
 - **Step 1 — Plan:** It analyses your project and suggests a migration plan (e.g. 0.19 → 1.0). Waits for approval.
 - **Step 2 — Build:** After approval, it ensures a virtual environment (venv) is active. If not, it creates one. The assistant will install `Kedro` if missing and then follows the plan.
 
-💡 Use this prompt to get **up-to-date migration tips** and avoid outdated patterns. If errors appear, ask the assistant in chat how to resolve them.
+Use this prompt to get **up-to-date migration tips** and avoid outdated patterns. If errors appear, ask the assistant in chat how to resolve them.
 
 
 ---

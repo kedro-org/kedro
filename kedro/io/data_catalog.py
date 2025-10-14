@@ -487,7 +487,7 @@ class DataCatalog(CatalogProtocol):
         """
         dataset = self.get(ds_name)
         if dataset is None:
-            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            error_msg = f"Dataset '{ds_name}' not found in the catalog. Did you mean 'suggestions'?"
             suggestion = _get_suggestion_for_invalid_name(ds_name, self.keys())
             if suggestion:
                 error_msg += f" - {suggestion.lower()}"
@@ -1048,7 +1048,7 @@ class DataCatalog(CatalogProtocol):
         dataset = self.get(ds_name, version=load_version)
 
         if dataset is None:
-            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            error_msg = f"Dataset '{ds_name}' not found in the catalog . Did you mean 'suggestions'?"
             suggestion = _get_suggestion_for_invalid_name(ds_name, self.keys())
             if suggestion:
                 error_msg += f" - {suggestion.lower()}"

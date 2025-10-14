@@ -197,6 +197,6 @@ def _get_suggestion_for_invalid_name(
     )
 
     if matches:
-        return f'Did you mean "{matches[0]}"?'
+        return f"Did you mean '{matches[0]}'?"
 
     return ""

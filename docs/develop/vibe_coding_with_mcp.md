@@ -1,4 +1,4 @@
-# Vibe Coding with Kedro-MCP 🚀
+# Vibe Coding with Kedro-MCP
 
 If you want to **increase the efficiency of your AI coding assistants when working with Kedro**, we’ve prepared a dedicated **MCP (Model Context Protocol) server**.
 
@@ -6,7 +6,7 @@ This server plugs directly into **VS Code Copilot** or **Cursor** and provides *
 
 ---
 
-## ⚡ Quick Install
+## Quick Install
 
 To enable Kedro MCP tools in your editor, **click one of the links below**.
 Your editor (VS Code / Cursor) will open automatically and you need to press the **Install** button.
@@ -21,13 +21,13 @@ Once installed, your AI assistant gains access to Kedro-specific MCP tools.
 
 ---
 
-### 🔗 Helpful references
+### Helpful references
 - [VS Code Copilot basic setup](https://code.visualstudio.com/docs/copilot/setup)
 - [Cursor quickstart guide](https://cursor.com/docs/get-started/quickstart)
 
 ---
 
-### 🛠️ Universal configuration (JSON)
+### Universal configuration (JSON)
 
 You can also reuse this configuration in any editor or MCP-compatible assistant (e.g. Claude, Cursor, Copilot):
 
@@ -45,7 +45,7 @@ You can also reuse this configuration in any editor or MCP-compatible assistant 
 
 ---
 
-## 🛠️ Examples of Usage
+## Usage
 
 After `kedro-mcp` installation, open **Copilot Chat Agent Mode** (in VS Code) or the **Chat panel** (in Cursor).
 Type `/` to see available MCP prompts.
@@ -72,14 +72,16 @@ What happens step by step:
 3. You’ll be able to **review the plan in chat** and modify it if needed.
 
 4. Once you **approve the plan**, the assistant will:
-   - Check that a **virtual environment (venv)** is active.
-     If not, it will propose creating one.
-   - Ensure the **latest version of Kedro** is installed; install it if missing.
-   - Scaffold a Kedro project with `kedro new`.
-   - Define pipelines with `kedro pipeline create`.
-   - Populate `parameters.yml` and `catalog.yml` according to the plan.
+
+    - Check that a **virtual environment (venv)** is active.
+      If not, it will propose creating one.
+    - Ensure the **latest version of Kedro** is installed; install it if missing.
+    - Scaffold a Kedro project with `kedro new`.
+    - Define pipelines with `kedro pipeline create`.
+    - Populate `parameters.yml` and `catalog.yml` according to the plan.
 
 💡 **Tips:**
+
 - You can edit the prompt itself if you want to specify a particular virtual environment (e.g. `conda`, `uv`, or `venv`).
 - If any errors occur during conversion, ask the assistant in chat how to resolve them — it will guide you through fixes.
 - The assistant will only proceed with implementation after you’ve signed off on the plan.
@@ -114,13 +116,16 @@ When you run this prompt, the assistant will call the MCP server to guide you th
 In this case, you can type any Kedro-related request after the header line.
 The MCP server will then provide the assistant with the **latest Kedro guidance and conventions**, ensuring answers are based on up-to-date best practices.
 
-💡 Tips:
+**Tips:**
+
 - Keep the header line as is (so the MCP server is explicitly called).
-- Replace the placeholder with your actual request (e.g., *“generate me a sample Kedro project for a sales forecasting pipeline”*).
-- The assistant will then use the fresh Kedro instructions (e.g., conventions, workflow, catalog setup, parameters, QA rules) to guide you.
+- Replace the placeholder with your actual request
+  (e.g., *“generate me a sample Kedro project for a sales forecasting pipeline”*).
+- The assistant will then use the fresh Kedro instructions
+  (e.g., conventions, workflow, catalog setup, parameters, QA rules) to guide you.
 
 
 ---
 
 
-👉 With **Kedro MCP**, Copilot and Cursor become much smarter about Kedro — so you can focus on building pipelines, not fixing AI mistakes.
+With **Kedro MCP**, Copilot and Cursor become much smarter about Kedro — so you can focus on building pipelines, not fixing AI mistakes.

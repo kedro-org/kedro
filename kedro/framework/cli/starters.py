@@ -15,7 +15,7 @@ import tempfile
 import warnings
 from itertools import groupby
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import click
 import yaml
@@ -34,7 +34,7 @@ from kedro.framework.cli.utils import (
 
 if TYPE_CHECKING:
     from collections import OrderedDict
-
+    from collections.abc import Callable
     from importlib.metadata import EntryPoints
 
 TOOLS_ARG_HELP = """

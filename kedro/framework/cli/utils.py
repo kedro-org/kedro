@@ -16,14 +16,13 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import IO, Any, Callable
+from typing import IO, Any
 
 import click
-import importlib
 from omegaconf import OmegaConf
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}

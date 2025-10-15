@@ -37,7 +37,7 @@ def mock_package_name_with_pipelines(tmp_path, request):
     if f"{package_name}.pipeline" in sys.modules:
         del sys.modules[f"{package_name}.pipeline"]
 
-    # Make sure that the `importlib_resources.files` in `find_pipelines`
+    # Make sure that the `importlib.resources.files` in `find_pipelines`
     # will point to the correct `test_package.pipelines` not from cache.
     if f"{package_name}.pipelines" in sys.modules:
         del sys.modules[f"{package_name}.pipelines"]

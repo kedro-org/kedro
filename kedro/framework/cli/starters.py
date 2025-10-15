@@ -35,7 +35,7 @@ from kedro.framework.cli.utils import (
 if TYPE_CHECKING:
     from collections import OrderedDict
 
-    from importlib_metadata import EntryPoints
+    from importlib.metadata import EntryPoints
 
 TOOLS_ARG_HELP = """
 Select which tools you'd like to include. By default, none are included.\n

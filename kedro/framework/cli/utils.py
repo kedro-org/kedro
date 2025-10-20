@@ -16,14 +16,13 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import IO, Any, Callable
+from typing import IO, Any
 
 import click
-import importlib_metadata
 from omegaconf import OmegaConf
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
@@ -331,7 +330,7 @@ def _check_module_importable(module_name: str) -> None:
 
 def _get_entry_points(name: str) -> Any:
     """Get all kedro related entry points"""
-    return importlib_metadata.entry_points().select(  # type: ignore[no-untyped-call]
+    return importlib.metadata.entry_points().select(  # type: ignore[no-untyped-call]
         group=ENTRY_POINT_GROUPS[name]
     )
 

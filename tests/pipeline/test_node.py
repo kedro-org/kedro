@@ -1,6 +1,6 @@
 import re
+from collections.abc import Callable
 from functools import partial, update_wrapper, wraps
-from typing import Callable
 
 import pytest
 

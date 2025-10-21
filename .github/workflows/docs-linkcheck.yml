@@ -5,18 +5,10 @@ on:
     branches:
       - main
       - develop
-    paths:
-      - "docs/**"
-      - "**.md"
-      - "mkdocs.yml"
   pull_request:
     branches:
       - main
       - develop
-    paths:
-      - "docs/**"
-      - "**.md"
-      - "mkdocs.yml"
 
 jobs:
   linkcheck:

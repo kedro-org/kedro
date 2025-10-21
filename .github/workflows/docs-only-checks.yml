@@ -5,10 +5,16 @@ on:
     branches:
       - main
       - develop
+    paths:
+      - "docs/**"
+      - '**.md'
   pull_request:
     branches:
       - main
       - develop
+    paths:
+      - "docs/**"
+      - '**.md'
 
 jobs:
   lint:

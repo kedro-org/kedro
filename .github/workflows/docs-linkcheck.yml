@@ -1,4 +1,4 @@
-name: Check links in MkDocs site
+name: Check links in MkDocs
 
 on:
   push:
@@ -20,6 +20,9 @@ on:
 
 jobs:
   linkcheck:
+    permissions:
+      contents: read
+
     runs-on: ubuntu-latest
 
     strategy:

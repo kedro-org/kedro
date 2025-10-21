@@ -1,0 +1,48 @@
+name: Check links in MkDocs site
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "docs/**"
+      - "**.md"
+      - "mkdocs.yml"
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "docs/**"
+      - "**.md"
+      - "mkdocs.yml"
+
+jobs:
+  linkcheck:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [ "3.10", "3.11", "3.12", "3.13" ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install UV (fast Python installer)
+        run: |
+          pip install uv
+
+      - name: Install docs requirements
+        run: |
+          make install-docs-requirements
+
+      - name: Run link check
+        run: |
+          make linkcheck

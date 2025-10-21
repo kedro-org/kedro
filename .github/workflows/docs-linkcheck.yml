@@ -30,9 +30,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install UV (fast Python installer)
-        run: |
-          pip install uv
+      - name: Install the latest version of uv with Python ${{inputs.python-version}}
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+          python-version: ${{ inputs.python-version }}
+          activate-environment: true
 
       - name: Install docs requirements
         run: |

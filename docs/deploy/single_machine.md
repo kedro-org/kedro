@@ -38,7 +38,7 @@ docker pull <DockerID>/<image-name>
 The procedure for using other container registries, like AWS ECR or GitLab Container Registry, will be almost identical to the steps described above. However, authentication will be different for each solution.
 
 ## Package-based
-If you prefer not to use containerisation, you can instead package your Kedro project using [`kedro package`](../getting-started/commands_reference.md#deploy-the-project).
+If you prefer not to use containerisation, you can instead package your Kedro project using [`kedro package`](../getting-started/commands_reference.md#kedro-commands).
 
 Run the following in your project’s root directory:
 

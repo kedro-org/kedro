@@ -189,7 +189,7 @@ kedro run --pipeline=my_pipeline
     If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
 
-Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#run-the-project).
+Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md).
 
 ## Run pipelines with IO
 
@@ -233,7 +233,7 @@ In a simple example, we define a `MemoryDataset` called `xs` to store our inputs
 
 ## Configure `kedro run` arguments
 
-The [Kedro CLI documentation](../getting-started/commands_reference.md#run-the-project) lists the available CLI options for `kedro run`. You can alternatively supply a configuration file that contains the arguments to `kedro run`.
+The [Kedro CLI documentation](../getting-started/commands_reference.md) lists the available CLI options for `kedro run`. You can alternatively supply a configuration file that contains the arguments to `kedro run`.
 
 Here is an example file named `config.yml`, but you can choose any name for the file:
 

@@ -7,7 +7,7 @@ theme:
   name: material
   custom_dir: docs/overrides/
   palette:
-     # Palette toggle for light mode
+    # Palette toggle for light mode
     - scheme: light
       toggle:
         icon: material/white-balance-sunny
@@ -470,3 +470,9 @@ not_in_nav: |
   diagrams/
   readme.md
   integrations-and-plugins/marimo.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn

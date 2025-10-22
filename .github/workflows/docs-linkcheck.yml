@@ -37,6 +37,10 @@ jobs:
           python-version: ${{ inputs.python-version }}
           activate-environment: true
 
+      - name: Install Lychee plugin for link checking
+        run: |
+          snap install lychee
+
       - name: Install docs requirements
         run: |
           make install-docs-requirements

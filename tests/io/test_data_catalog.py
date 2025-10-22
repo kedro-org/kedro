@@ -625,31 +625,29 @@ class TestDataCatalog:
                     ds_name="bad", ds_config="not_dict"
                 )
 
-        # TODO: revert commenting when we drop python3.9 support and move to kedro-datasets>=8.0.0
-        # Currently the test is failing because it requires kedro-datasets version compatible with kedro 1.0
-        # def test_confirm(self, tmp_path, caplog, mocker):
-        #     """Confirm the dataset"""
-        #     with caplog.at_level(logging.INFO):
-        #         mock_confirm = mocker.patch(
-        #             "kedro_datasets.partitions.IncrementalDataset.confirm"
-        #         )
-        #         catalog = {
-        #             "ds_to_confirm": {
-        #                 "type": "kedro_datasets.partitions.IncrementalDataset",
-        #                 "dataset": "pandas.CSVDataset",
-        #                 "path": str(tmp_path),
-        #             }
-        #         }
-        #         data_catalog = DataCatalog.from_config(catalog=catalog)
-        #         data_catalog.confirm("ds_to_confirm")
-        #         assert caplog.record_tuples == [
-        #             (
-        #                 "kedro.io.data_catalog",
-        #                 logging.INFO,
-        #                 "Confirming dataset 'ds_to_confirm'",
-        #             )
-        #         ]
-        #         mock_confirm.assert_called_once_with()
+        def test_confirm(self, tmp_path, caplog, mocker):
+            """Confirm the dataset"""
+            with caplog.at_level(logging.INFO):
+                mock_confirm = mocker.patch(
+                    "kedro_datasets.partitions.IncrementalDataset.confirm"
+                )
+                catalog = {
+                    "ds_to_confirm": {
+                        "type": "kedro_datasets.partitions.IncrementalDataset",
+                        "dataset": "pandas.CSVDataset",
+                        "path": str(tmp_path),
+                    }
+                }
+                data_catalog = DataCatalog.from_config(catalog=catalog)
+                data_catalog.confirm("ds_to_confirm")
+                assert caplog.record_tuples == [
+                    (
+                        "kedro.io.data_catalog",
+                        logging.INFO,
+                        "Confirming dataset 'ds_to_confirm'",
+                    )
+                ]
+                mock_confirm.assert_called_once_with()
 
         @pytest.mark.parametrize(
             "dataset_name,pattern",

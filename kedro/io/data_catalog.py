@@ -352,7 +352,9 @@ class DataCatalog(CatalogProtocol):
             is not None
         )
 
-    def __eq__(self, other: DataCatalog) -> bool:  # type: ignore[no-untyped-def]
+    def __eq__(
+        self, other: Any
+    ) -> bool:  # Any type to silence warning on mkdocs strict mode
         """
         Compare two catalogs based on materialized datasets, lazy datasets and all dataset factory patterns.
 

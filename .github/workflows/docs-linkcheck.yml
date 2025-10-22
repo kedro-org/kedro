@@ -37,9 +37,16 @@ jobs:
           python-version: ${{ inputs.python-version }}
           activate-environment: true
 
-      - name: Install Lychee plugin for link checking
+      - name: Install Rust and Lychee
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Install Lychee
         run: |
-          snap install lychee
+          cargo install lychee
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Install docs requirements
         run: |

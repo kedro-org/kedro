@@ -37,21 +37,10 @@ jobs:
           python-version: ${{ inputs.python-version }}
           activate-environment: true
 
-      - name: Install Rust and Lychee
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Install Lychee
-        run: |
-          cargo install lychee
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
       - name: Install docs requirements
         run: |
           make install-docs-requirements
 
-      - name: Run link check
+      - name: Run MkDocs on strict mode.
         run: |
-          make linkcheck
+          mkdocs build --strict

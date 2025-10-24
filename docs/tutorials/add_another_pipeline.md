@@ -233,7 +233,7 @@ You can 'slice' the pipeline and specify just the portion you want to run by usi
 kedro run --pipeline=data_science
 ```
 
-There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../build/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../getting-started/commands_reference.md#modifying-a-kedro-run).
+There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../build/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../getting-started/commands_reference.md#kedro-run).
 
 ## Modular pipelines
 

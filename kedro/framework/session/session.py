@@ -109,6 +109,7 @@ class KedroSession:
         project_path: Path | str | None = None,
         save_on_close: bool = False,
         conf_source: str | None = None,
+        enable_validation: bool = False,
     ):
         self._project_path = Path(
             project_path or find_kedro_project(Path.cwd()) or Path.cwd()
@@ -122,6 +123,13 @@ class KedroSession:
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+        # Register parameter validation hook only if validation is enabled
+        if enable_validation:
+            from .validator import KedroValidationHook
+
+            hook_manager.register(KedroValidationHook())
+
         self._hook_manager = hook_manager
 
         self._conf_source = conf_source or str(
@@ -136,6 +144,7 @@ class KedroSession:
         env: str | None = None,
         runtime_params: dict[str, Any] | None = None,
         conf_source: str | None = None,
+        enable_validation: bool = False,
     ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
 
@@ -160,6 +169,7 @@ class KedroSession:
             session_id=generate_timestamp(),
             save_on_close=save_on_close,
             conf_source=conf_source,
+            enable_validation=enable_validation,
         )
 
         # have to explicitly type session_data otherwise mypy will complain

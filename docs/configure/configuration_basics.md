@@ -121,7 +121,7 @@ CONF_SOURCE = "new_conf"
 ```
 
 ### How to change the configuration source folder at runtime
-Specify a source folder for the configuration files at runtime using the [`kedro run` CLI command](../getting-started/commands_reference.md#modifying-a-kedro-run) with the `--conf-source` flag as follows:
+Specify a source folder for the configuration files at runtime using the [`kedro run` CLI command](../getting-started/commands_reference.md#kedro-commands) with the `--conf-source` flag as follows:
 
 ```bash
 kedro run --conf-source=<path-to-new-conf-folder>

@@ -38,7 +38,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How do I specify additional configuration environments](../configure/configuration_basics.md#how-to-specify-additional-configuration-environments)?
 * [How do I change the default overriding configuration environment](../configure/configuration_basics.md#how-to-change-the-default-overriding-environment)?
 * [How do I use only one configuration environment](../configure/configuration_basics.md#how-to-use-only-one-configuration-environment)?
-* [How do I use Kedro without the rich library](../configure/configuration_basics.md#how-to-use-kedro-without-the-rich-library)?
+* [How do I use Kedro logging without the Rich library](../develop/logging.md#how-to-use-logging-without-the-rich-library)
 
 ### Advanced topics
 

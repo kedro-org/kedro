@@ -23,8 +23,14 @@ def get_tool_name(func: Callable):
     return str(func)
 
 
-def agent_context_node(
-    *, outputs, llm, prompts, tools=None, name="agent_context_node"
+def agent_context_node(  # noqa: PLR0913
+    *,
+    outputs,
+    llm,
+    prompts,
+    tools=None,
+    name="agent_context_node",
+    agent_id="default_agent",
 ) -> Node:
     """
     1. Kedro validates all datasets (llm, prompts, db_engine, docs, etc.).
@@ -48,7 +54,7 @@ def agent_context_node(
                 built_tool = tool["func"](**tool_inputs)
                 built_tools[get_tool_name(built_tool)] = built_tool
         return AgentContext(
-            agent_id="default_agent", llm=llm, prompts=prompts, tools=built_tools
+            agent_id=agent_id, llm=llm, prompts=prompts, tools=built_tools
         )
 
     return node(func=construct_context, inputs=inputs, outputs=outputs, name=name)

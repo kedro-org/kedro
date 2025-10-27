@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 from .node import Node, node
 
@@ -38,23 +38,36 @@ def agent_context_node(  # noqa: PLR0913
     3. We build them inside the wrapper at execution time
     """
     inputs = {"llm": llm}
+
+    # Add prompts as validated inputs
     for p in prompts:
         inputs[p] = p
+
+    # Add tool inputs (datasets + params)
     if tools:
         for tool in tools:
             for inp in tool.get("inputs", []):
                 inputs[inp] = inp
 
     def construct_context(llm, **kwargs):
-        prompts = {k: v for k, v in kwargs.items() if "prompt" in k}
+        # Collect prompts
+        prompts_dict = {k: v for k, v in kwargs.items() if "prompt" in k}
+
+        # Collect tools
         built_tools = {}
         if tools:
             for tool in tools:
-                tool_inputs = {inp: kwargs[inp] for inp in tool.get("inputs", [])}
+                tool_inputs = {}
+                for inp in tool.get("inputs", []):
+                    val = kwargs[inp]
+                    clean_key = inp.replace("params:", "")
+                    tool_inputs[clean_key] = val
+
                 built_tool = tool["func"](**tool_inputs)
                 built_tools[get_tool_name(built_tool)] = built_tool
+
         return AgentContext(
-            agent_id=agent_id, llm=llm, prompts=prompts, tools=built_tools
+            agent_id=agent_id, llm=llm, prompts=prompts_dict, tools=built_tools
         )
 
     return node(func=construct_context, inputs=inputs, outputs=outputs, name=name)

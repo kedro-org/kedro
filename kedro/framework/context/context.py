@@ -13,6 +13,7 @@ from attrs import define, field
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.context import CatalogCommandsMixin
+from kedro.framework.validation.validators import ParameterValidator
 from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
 
@@ -192,6 +193,8 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
+    _validated_params_cache: dict[str, Any] | None = None
+    _parameter_validator: ParameterValidator | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -205,21 +208,49 @@ class KedroContext:
         """
         return self._get_catalog()
 
+    def _get_validated_params(self) -> dict[str, Any]:
+        """Get validated parameters with caching support.
+
+        Returns:
+            Validated and transformed parameters with model instantiation.
+        """
+        # Return cached result if available
+        if self._validated_params_cache is not None:
+            return self._validated_params_cache
+
+        # Get raw parameters
+        try:
+            config_params = self.config_loader["parameters"]
+        except MissingConfigException as exc:
+            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
+            config_params = {}
+
+        runtime_params = self._runtime_params or {}
+
+        # Initialize parameter validator if needed
+        if self._parameter_validator is None:
+            self._parameter_validator = ParameterValidator()
+
+        # Validate parameters
+        validated_params = self._parameter_validator.validate_raw_params(
+            config_params, runtime_params
+        )
+
+        # Cache the result
+        self._validated_params_cache = validated_params
+
+        return validated_params
+
     @property
     def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
 
         Returns:
             Parameters defined in `parameters.yml` with the addition of any
-                extra parameters passed at initialization.
+                extra parameters passed at initialization. Parameters are validated
+                and transformed according to pipeline node type hints.
         """
-        try:
-            params = self.config_loader["parameters"]
-        except MissingConfigException as exc:
-            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
-            params = {}
-        _update_nested_dict(params, self._runtime_params or {})
-        return params  # type: ignore
+        return self._get_validated_params()
 
     def _get_catalog(
         self,

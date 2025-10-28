@@ -124,11 +124,19 @@ class KedroSession:
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
+        # Always register the parameter hook for before_node_run functionality
+        from .validator import KedroParameterHook
+
+        parameter_hook = KedroParameterHook()
+        hook_manager.register(parameter_hook)
+
         # Register parameter validation hook only if validation is enabled
         if enable_validation:
             from .validator import KedroValidationHook
 
-            hook_manager.register(KedroValidationHook())
+            # Share the validated_models dictionary between hooks
+            validation_hook = KedroValidationHook(parameter_hook)
+            hook_manager.register(validation_hook)
 
         self._hook_manager = hook_manager
 

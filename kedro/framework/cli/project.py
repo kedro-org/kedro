@@ -65,8 +65,6 @@ OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be sto
 CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
 ONLY_MISSING_OUTPUTS_HELP = """Run only nodes with missing outputs.
 If all outputs of a node exist and are persisted, skip the node execution."""
-VALIDATE_HELP = """Validate parameters against type annotations before running pipeline.
-Supports Pydantic models and dataclasses for comprehensive parameter validation."""
 
 
 @click.group(name="kedro")
@@ -234,7 +232,6 @@ def package(metadata: ProjectMetadata) -> None:
     is_flag=True,
     help=ONLY_MISSING_OUTPUTS_HELP,
 )
-@click.option("--validate", is_flag=True, help=VALIDATE_HELP)
 def run(  # noqa: PLR0913
     tags: str,
     env: str,
@@ -252,7 +249,6 @@ def run(  # noqa: PLR0913
     params: dict[str, Any],
     namespaces: str,
     only_missing_outputs: bool,
-    validate: bool,
 ) -> dict[str, Any]:
     """Run the pipeline."""
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
@@ -263,7 +259,6 @@ def run(  # noqa: PLR0913
         env=env,
         conf_source=conf_source,
         runtime_params=params,
-        enable_validation=validate,
     ) as session:
         return session.run(
             tags=tuple_tags,

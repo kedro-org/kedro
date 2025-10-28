@@ -1,13 +1,12 @@
 # Kedro Parameter Validation System
 
-This document describes the parameter validation system integrated into Kedro sessions, which provides automatic validation and instantiation of structured parameter objects from configuration files.
+This document describes the parameter validation system integrated into Kedro sessions, which provides automatic validation and instantiation of structured parameter objects with strict error checking to ensure data integrity.
 
 ## Overview
 
-The parameter validation system consists of two complementary hooks that work together to ensure parameter integrity:
+The parameter validation system consists of a single, efficient hook that automatically transforms parameters:
 
-1. **`KedroParameterHook`** - Always active, handles parameter processing during pipeline execution
-2. **`KedroValidationHook`** - Optional, provides upfront validation when `--validate` flag is used
+**`KedroParameterValidationHook`** - Always active, automatically instantiates typed parameter objects with strict validation. **Fails fast on any validation errors to ensure complete data integrity.**
 
 ## Architecture
 
@@ -20,53 +19,46 @@ kedro/framework/session/
 └── README.md           # This documentation
 ```
 
-### Shared Utilities (`ParameterModelUtils`)
+### Core Validation (`ParameterValidator`)
 
-The `ParameterModelUtils` class provides common functionality used by both hooks:
+The `ParameterValidator` class provides the core functionality:
 
 - **Parameter extraction** from nested configurations
 - **Type hint analysis** from node function signatures
 - **Object instantiation** for Pydantic and dataclass types
-- **Error handling** with optional warning mechanisms
+- **Direct parameter transformation** in context.params
+- **Strict validation** with immediate error reporting on failures
 
 ## How It Works
 
-### 1. Without Validation (`kedro run`)
+### Automatic Parameter Transformation (`kedro run`)
 
-When running without the `--validate` flag:
-
-```python
-# Only KedroParameterHook is registered
-parameter_hook = KedroParameterHook()
-hook_manager.register(parameter_hook)
-```
-
-**Flow:**
-1. `after_context_created` stores context parameters
-2. `before_node_run` analyzes each node's requirements
-3. Attempts to instantiate typed objects from raw parameters
-4. Logs warnings for failed instantiation, falls back to raw dictionaries
-5. Caches successful instantiations for reuse
-
-### 2. With Validation (`kedro run --validate`)
-
-When running with the `--validate` flag:
+The system always runs automatically with every Kedro execution:
 
 ```python
-# Both hooks are registered with shared state
-parameter_hook = KedroParameterHook()
-validation_hook = KedroValidationHook(parameter_hook)
-hook_manager.register(parameter_hook)
+# Single hook registration - always active
+validation_hook = KedroParameterValidationHook()
 hook_manager.register(validation_hook)
 ```
 
 **Flow:**
-1. `KedroValidationHook.after_context_created` runs first:
-   - Validates all parameters across all pipelines
-   - Fails fast if validation errors occur
-   - Shares validated objects with parameter hook
-2. `KedroParameterHook.after_context_created` stores context parameters
-3. `KedroParameterHook.before_node_run` uses pre-validated objects
+1. `KedroParameterValidationHook.after_context_created` runs during context creation
+2. Analyzes all pipeline nodes to identify parameter requirements
+3. Attempts to instantiate typed objects from raw parameter values
+4. **Transforms `context.params` directly** to return instantiated objects
+5. Raises validation errors for failed instantiation - ensures data integrity
+6. **Node functions receive typed objects automatically** - no runtime processing needed!
+
+## ⚠️ Strict Validation Policy
+
+**Data Integrity First**: This system prioritizes data integrity over convenience. If you define typed parameters in your node functions:
+
+- ✅ **All parameters MUST be valid** - No partial validation
+- ⚠️ **Any validation error stops execution** - No fallback to raw dictionaries
+- 🎯 **Fix configuration issues before running** - Clear error messages guide you
+- 🛡️ **Guaranteed type safety** - Node functions always receive correctly typed objects
+
+**Philosophy**: It's better to fail fast with clear errors than to run with invalid data.
 
 ## Examples
 
@@ -199,22 +191,15 @@ node(
 
 ## Session Integration
 
-The `session.py` file has been modified to automatically register the validation hooks:
+The `session.py` file has been modified to automatically register the validation hook:
 
 ```python
 # In KedroSession.__init__()
 
-# Always register the parameter hook for before_node_run functionality
-from .validator import KedroParameterHook
-parameter_hook = KedroParameterHook()
-hook_manager.register(parameter_hook)
-
-# Register parameter validation hook only if validation is enabled
-if enable_validation:
-    from .validator import KedroValidationHook
-    # Share the validated_models dictionary between hooks
-    validation_hook = KedroValidationHook(parameter_hook)
-    hook_manager.register(validation_hook)
+# Always register parameter validation hook for automatic model instantiation
+from .validator import KedroParameterValidationHook
+validation_hook = KedroParameterValidationHook()
+hook_manager.register(validation_hook)
 ```
 
 ## Command Line Usage
@@ -231,65 +216,57 @@ kedro run --pipeline data_processing
 kedro run --tags preprocessing
 ```
 
-### With Validation
-```bash
-# Validate all parameters upfront, fail fast on validation errors
-kedro run --validate
-
-# Validate specific pipeline
-kedro run --validate --pipeline data_processing
-
-# Validate with environment
-kedro run --validate --env production
-```
+**Important**: Parameter validation and model instantiation happens automatically for all Kedro runs. **Any validation failures will immediately stop execution** with detailed error messages to ensure data integrity.
 
 ## Error Handling
 
-### Validation Disabled Behavior
+### Strict Validation Behavior
 
-When validation is disabled, parameter instantiation failures are handled gracefully:
+Parameter instantiation failures cause immediate execution termination with clear error messages:
 
 ```python
 # If DatabaseConfig instantiation fails:
-# 1. Warning is logged: "Parameter validation warning: Failed to instantiate
-#    DatabaseConfig for param 'database': missing required field 'host'.
-#    Falling back to raw dictionary."
-# 2. Node receives raw dictionary instead of typed object
-# 3. Execution continues normally
+# 1. Error is logged: "Parameter validation failed: ..."
+# 2. RuntimeError is raised with detailed validation errors
+# 3. Execution stops immediately - no partial runs with invalid data
 ```
 
-### Validation Enabled Behavior
-
-When validation is enabled, failures cause immediate termination:
+### Example Error Output
 
 ```bash
-$ kedro run --validate
-Parameter validation failed:
-- param=database: Failed to instantiate DatabaseConfig for param 'database': field required
-- param=api.timeout: Failed to instantiate ApiConfig for param 'api': field required
+$ kedro run
+INFO - Successfully instantiated 3 parameter models
+ERROR - Parameter validation failed: Parameter validation failed:
+- Parameter 'database': Failed to instantiate DatabaseConfig for param 'database': field 'host' required
+
+RuntimeError: Parameter validation failed:
+- Parameter 'database': Failed to instantiate DatabaseConfig for param 'database': field 'host' required
 ```
 
 ## Benefits
 
-### Type Safety
-- Functions receive properly typed configuration objects
-- IDE autocompletion and type checking support
-- Runtime validation of parameter structure
+### Data Integrity
+- **Guaranteed valid parameters** - No execution with invalid data
+- **Fail-fast validation** - Catch configuration issues before pipeline runs
+- **Complete type safety** - All typed parameters are validated or execution stops
+- **Consistent behavior** - No mixed states with partially validated parameters
 
 ### Performance
-- Objects instantiated once and reused across nodes
-- No duplicate validation when both hooks are active
-- Efficient caching of validated parameters
+- Objects instantiated once during context creation
+- Zero runtime overhead during pipeline execution
+- Efficient single-pass parameter transformation
 
 ### Developer Experience
-- Clear error messages for configuration issues
-- Graceful fallback when validation disabled
-- Support for both Pydantic and dataclass patterns
+- **Clear, actionable error messages** for configuration issues
+- **Immediate feedback** on parameter validation problems
+- **IDE support** with proper type hints and autocompletion
+- **Predictable behavior** - validation always works the same way
 
-### Flexibility
+### Reliability
 - Works with existing Kedro parameter patterns
-- Optional validation via command-line flag
-- Backward compatible with dictionary-based parameters
+- Automatic operation with no configuration needed
+- Strict validation ensures data integrity
+- Clear error messages help identify configuration issues
 
 ## Advanced Usage
 
@@ -393,10 +370,11 @@ database:
 
 ### Debug Tips
 
-- Use `kedro run --validate` to catch configuration issues early
-- Check log output for parameter validation warnings
+- Check error messages for specific validation failures
 - Verify parameter names match between configuration and node inputs
 - Ensure dataclass/Pydantic definitions match configuration structure
+- Look for "Successfully instantiated X parameter models" info messages
+- Fix validation errors before pipeline execution can proceed
 
 ## Migration Guide
 
@@ -426,9 +404,9 @@ def process_data(db_config: DatabaseConfig, data: pd.DataFrame):
 
 The system is backward compatible - you can migrate nodes incrementally:
 
-1. Start with `kedro run` (validation disabled)
-2. Add type hints to critical nodes
-3. Test with `kedro run --validate`
+1. Add type hints to functions you want to enhance
+2. Run `kedro run` - typed parameters work automatically!
+3. Fix any validation errors that are reported
 4. Gradually convert remaining nodes
 
-This allows for smooth transition without breaking existing pipelines.
+**Important**: Once you add type hints to node parameters, those parameters **must** be valid according to your type definitions, or the pipeline will not run. Existing dictionary-based parameters (without type hints) continue to work normally.

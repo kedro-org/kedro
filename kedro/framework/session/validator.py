@@ -10,11 +10,13 @@ from typing import Any, get_type_hints
 from kedro.framework.hooks import hook_impl
 
 
-class ParameterModelUtils:
-    """Shared utilities for parameter model handling."""
+class ParameterValidator:
+    """Central parameter validation and model instantiation."""
 
-    @staticmethod
-    def get_nested_param(params: dict[str, Any], param_key: str) -> Any:
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+
+    def get_nested_param(self, params: dict[str, Any], param_key: str) -> Any:
         """Get parameter value supporting nested paths"""
         if "." not in param_key:
             return params.get(param_key)
@@ -28,8 +30,47 @@ class ParameterModelUtils:
                 return None
         return value
 
-    @staticmethod
-    def get_node_param_requirements(node) -> dict[str, type]:
+    def set_nested_param(
+        self, params: dict[str, Any], param_key: str, value: Any
+    ) -> None:
+        """Set parameter value supporting nested paths"""
+        if "." not in param_key:
+            params[param_key] = value
+            return
+
+        keys = param_key.split(".")
+        current = params
+
+        # Navigate to the parent dictionary
+        for key in keys[:-1]:
+            if key not in current:
+                current[key] = {}
+            elif not isinstance(current[key], dict):
+                # Can't set nested value if intermediate value is not a dict
+                return
+            current = current[key]
+
+        # Set the final value
+        current[keys[-1]] = value
+
+    def get_all_pipeline_param_requirements(
+        self, pipelines, include_default: bool = True
+    ) -> dict[str, type]:
+        """Extract all parameter requirements from all pipelines."""
+        all_param_requirements = {}
+
+        pipeline_dict = dict(pipelines)
+        for pipeline_name, pipeline in pipeline_dict.items():
+            if not include_default and pipeline_name == "__default__":
+                continue
+
+            for node in getattr(pipeline, "nodes", []):
+                node_requirements = self.get_node_param_requirements(node)
+                all_param_requirements.update(node_requirements)
+
+        return all_param_requirements
+
+    def get_node_param_requirements(self, node) -> dict[str, type]:
         """Extract parameter requirements from node function annotations."""
         func = getattr(node, "func", None)
         if func is None:
@@ -61,32 +102,8 @@ class ParameterModelUtils:
 
         return param_requirements
 
-    @staticmethod
-    def get_all_pipeline_param_requirements(
-        pipelines, include_default: bool = True
-    ) -> dict[str, type]:
-        """Extract all parameter requirements from all pipelines."""
-        all_param_requirements = {}
-
-        pipeline_dict = dict(pipelines)
-        for pipeline_name, pipeline in pipeline_dict.items():
-            if not include_default and pipeline_name == "__default__":
-                continue
-
-            for node in getattr(pipeline, "nodes", []):
-                node_requirements = ParameterModelUtils.get_node_param_requirements(
-                    node
-                )
-                all_param_requirements.update(node_requirements)
-
-        return all_param_requirements
-
-    @staticmethod
     def instantiate_model(
-        param_key: str,
-        raw_value: Any,
-        expected_type: type,
-        warn_on_failure: bool = False,
+        self, param_key: str, raw_value: Any, expected_type: type
     ) -> tuple[Any, str | None]:
         """Instantiate and validate a model from raw parameter value.
 
@@ -101,7 +118,6 @@ class ParameterModelUtils:
         except Exception:
             BaseModel = None
 
-        error_msg = None
         try:
             if (
                 BaseModel
@@ -116,152 +132,122 @@ class ParameterModelUtils:
                     **(raw_value if isinstance(raw_value, dict) else {})
                 ), None
             else:
-                # Not a supported model type
-                return None, f"Unsupported model type: {expected_type}"
+                # Not a supported model type - return raw value
+                return raw_value, None
         except Exception as exc:
             error_msg = f"Failed to instantiate {expected_type.__name__} for param '{param_key}': {exc}"
-            if warn_on_failure:
-                logger = logging.getLogger(__name__)
-                logger.warning(
-                    f"Parameter validation warning: {error_msg}. Falling back to raw dictionary."
-                )
             return None, error_msg
 
+    def validate_and_transform_params(
+        self, params: dict[str, Any], pipelines
+    ) -> dict[str, Any]:
+        """Validate and transform parameters, returning modified params dict.
 
-class KedroParameterHook:
-    """Hook for parameter processing that runs always."""
+        Args:
+            params: Original parameters dictionary
+            pipelines: Available pipelines to analyze
+
+        Returns:
+            Modified parameters dictionary with instantiated models
+
+        Raises:
+            RuntimeError: If any parameter validation fails
+        """
+        # Work on a deep copy to avoid modifying the original
+        import copy
+
+        modified_params = copy.deepcopy(params)
+
+        # Get all parameter requirements
+        param_requirements = self.get_all_pipeline_param_requirements(
+            pipelines, include_default=False
+        )
+
+        problems = []
+        instantiated_count = 0
+
+        # Process each required parameter
+        for param_key, expected_type in param_requirements.items():
+            raw_value = self.get_nested_param(params, param_key)
+
+            if raw_value is None:
+                problems.append(f"Missing parameter: {param_key}")
+                continue
+
+            # Try to instantiate the model
+            validated_instance, error_msg = self.instantiate_model(
+                param_key, raw_value, expected_type
+            )
+
+            if validated_instance is not None and validated_instance is not raw_value:
+                # Replace the raw value with the validated model in the params dict
+                self.set_nested_param(modified_params, param_key, validated_instance)
+                instantiated_count += 1
+                self.logger.debug(
+                    f"Successfully instantiated {expected_type.__name__} for parameter '{param_key}'"
+                )
+            elif error_msg:
+                problems.append(f"Parameter '{param_key}': {error_msg}")
+
+        if instantiated_count > 0:
+            self.logger.info(
+                f"Successfully instantiated {instantiated_count} parameter models"
+            )
+
+        # Always fail on validation errors - no fallback to raw values
+        if problems:
+            error_message = "Parameter validation failed:\n" + "\n".join(
+                f"- {p}" for p in problems
+            )
+            raise RuntimeError(error_message)
+
+        return modified_params
+
+
+class KedroParameterValidationHook:
+    """Hook for parameter validation that modifies context parameters directly."""
 
     def __init__(self):
-        self.validated_models = {}
-        self._context_params = None
+        self.validator = ParameterValidator()
 
     @hook_impl
     def after_context_created(self, context) -> None:
-        """Store context params for later use in before_node_run."""
-        self._context_params = context.params
-
-    @hook_impl
-    def before_node_run(self, node, catalog, inputs, is_async, run_id):
-        """Replace parameter inputs with validated model instances if available."""
-        if (
-            not hasattr(node, "inputs")
-            or not node.inputs
-            or not inputs
-            or not self._context_params
-        ):
-            return inputs
-
-        # Get parameter requirements for this node
-        param_requirements = ParameterModelUtils.get_node_param_requirements(node)
-        if not param_requirements:
-            return inputs
-
-        # Create a copy of inputs to modify
-        modified_inputs = dict(inputs)
-        inputs_changed = False
-
-        # For parameter datasets, instantiate models if needed
-        for input_key, input_value in list(modified_inputs.items()):
-            # Check if this input corresponds to a parameter dataset
-            if isinstance(input_key, str) and input_key.startswith("params:"):
-                param_key = input_key.split(":", 1)[1]
-
-                # Check if we already have a validated model
-                if param_key in self.validated_models:
-                    modified_inputs[input_key] = self.validated_models[param_key]
-                    inputs_changed = True
-                elif param_key in param_requirements:
-                    # Try to instantiate the model from raw parameter value
-                    raw_value = ParameterModelUtils.get_nested_param(
-                        self._context_params, param_key
-                    )
-                    if raw_value is not None:
-                        expected_type = param_requirements[param_key]
-                        validated_instance, error_msg = (
-                            ParameterModelUtils.instantiate_model(
-                                param_key,
-                                raw_value,
-                                expected_type,
-                                warn_on_failure=True,
-                            )
-                        )
-                        if validated_instance is not None:
-                            self.validated_models[param_key] = validated_instance
-                            modified_inputs[input_key] = validated_instance
-                            inputs_changed = True
-                        # If instantiation failed, warning was already logged, continue with raw value
-
-        return modified_inputs if inputs_changed else inputs
-
-
-class KedroValidationHook:
-    """Validate params against dataclasses or Pydantic models referenced by node functions."""
-
-    def __init__(self, parameter_hook: KedroParameterHook | None = None):
-        # Keep our own validated models and reference to parameter hook
-        self.validated_models = {}
-        self._parameter_hook = parameter_hook
-
-    @hook_impl
-    def after_context_created(self, context) -> None:
-        """
-        Runs early — context.params is available.
-        It inspects pipeline nodes, finds inputs of the form "params:<key>"
-        and validates them against function annotations.
-        """
-        params: dict[str, Any] = context.params
+        """Validate and transform parameters directly in the context."""
         try:
             from kedro.framework.project import pipelines
         except Exception:
             pipelines = {}
 
-        problems = []
+        if not pipelines:
+            return
 
-        # Get all parameter requirements from all pipelines
-        all_param_requirements = (
-            ParameterModelUtils.get_all_pipeline_param_requirements(
-                pipelines, include_default=False
-            )
-        )
+        # Get original parameters
+        original_params = dict(context.params)
 
-        # Validate each required parameter
-        for param_key, expected_type in all_param_requirements.items():
-            # support nested lookups like "params:project.database" -> context.params['project']['database']
-            raw_value = ParameterModelUtils.get_nested_param(params, param_key)
-            if raw_value is None:
-                # If param absent, collect problem (could be optional)
-                problems.append(
-                    {
-                        "param_key": param_key,
-                        "error": "missing parameter",
-                    }
-                )
-                continue
-
-            # Try to instantiate and validate the model
-            validated_instance, error_msg = ParameterModelUtils.instantiate_model(
-                param_key, raw_value, expected_type, warn_on_failure=False
+        # Validate and transform parameters - fail fast on validation errors
+        try:
+            transformed_params = self.validator.validate_and_transform_params(
+                original_params, pipelines
             )
 
-            if validated_instance is not None:
-                # Store the validated model instance
-                self.validated_models[param_key] = validated_instance
-            elif error_msg and "Unsupported model type" not in error_msg:
-                # Only report real validation failures, not unsupported types
-                problems.append(
-                    {
-                        "param_key": param_key,
-                        "error": error_msg,
-                    }
-                )
+            # Store transformed params directly on the context instance
+            context._transformed_params = transformed_params
 
-        if problems:
-            # Format a message and raise so Kedro CLI fails fast
-            lines = ["Parameter validation failed:"]
-            for p in problems:
-                lines.append(f"- param={p['param_key']}: {p['error']}")
-            raise RuntimeError("\n".join(lines))
+            # Store reference to original params method
+            if not hasattr(context, "_original_params_method"):
+                context._original_params_method = context.__class__.params.fget
 
-        # Share validated models with parameter hook if it exists
-        if self._parameter_hook is not None:
-            self._parameter_hook.validated_models.update(self.validated_models)
+            # Create a new property that returns transformed params if available
+            def patched_params(self):
+                if hasattr(self, "_transformed_params"):
+                    return self._transformed_params
+                else:
+                    return self._original_params_method(self)
+
+            # Replace the property on the class
+            context.__class__.params = property(patched_params)
+
+        except Exception as exc:
+            # Re-raise validation errors - fail fast
+            self.validator.logger.error(f"Parameter validation failed: {exc}")
+            raise

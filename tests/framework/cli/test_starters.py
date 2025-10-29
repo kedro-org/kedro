@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+import subprocess
 
 import pytest
 import yaml
@@ -968,8 +969,12 @@ class TestNewWithStarterInvalid:
             "cookiecutter.repository.determine_repo_dir",
             side_effect=RepositoryCloneFailed,
         )
-        mock_ls_remote = mocker.patch("git.cmd.Git").return_value.ls_remote
-        mock_ls_remote.return_value = "tag1\ntag2"
+        mock_ls_remote = mocker.patch(
+            "kedro.framework.cli.starters.subprocess.check_output"
+        )
+        mock_ls_remote.return_value = (
+            "abcdef\trefs/tags/tag1\n123456\trefs/tags/tag2\n"
+        )
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "-v", "--starter", starter, "--checkout", "invalid"],
@@ -980,7 +985,11 @@ class TestNewWithStarterInvalid:
             "Specified tag invalid. The following tags are available: tag1, tag2"
             in result.output
         )
-        mock_ls_remote.assert_called_with("--tags", repo)
+        mock_ls_remote.assert_called_with(
+            ["git", "ls-remote", "--tags", repo],
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
 
 
 class TestFlagsNotAllowed:

@@ -497,19 +497,30 @@ def _get_prompts_required_and_clear_from_CLI_provided(
 
 def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
-    import git
+    import subprocess
 
     try:
-        tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
+        output = subprocess.check_output(  # noqa: S603
+            [
+                "git",
+                "ls-remote",
+                "--tags",
+                template_path.replace("git+", ""),
+            ],  # noqa: S607
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
 
         unique_tags = {
-            tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")
+            line.split("\t", 1)[-1].split("/")[-1].replace("^{}", "")
+            for line in output.splitlines()
+            if line.strip()
         }
         # Remove git ref "^{}" and duplicates. For example,
-        # tags: ['/tags/version', '/tags/version^{}']
+        # tags: 'SHA\trefs/tags/version' and 'SHA\trefs/tags/version^{}'
         # unique_tags: {'version'}
 
-    except git.GitCommandError:  # pragma: no cover
+    except (subprocess.CalledProcessError, FileNotFoundError):  # pragma: no cover
         return []
     return sorted(unique_tags)
 

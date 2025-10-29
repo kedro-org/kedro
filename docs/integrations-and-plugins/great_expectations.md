@@ -48,7 +48,7 @@ from spaceflights_great_expectations.hooks import DataValidationHooks
 HOOKS = (DataValidationHooks(),)
 ```
 
-## Further Reading
+## Further reading
 
   - [Kedro Data Catalog](../catalog-data/data_catalog.md)
   - [Kedro Hooks](../extend/hooks/introduction.md)

@@ -968,6 +968,9 @@ class TestNewWithStarterInvalid:
             "cookiecutter.repository.determine_repo_dir",
             side_effect=RepositoryCloneFailed,
         )
+        # Mock shutil.which to return a path to git
+        mocker.patch("shutil.which", return_value="/usr/bin/git")
+        
         # Mock subprocess.run to simulate git ls-remote output
         mock_result = mocker.Mock()
         mock_result.stdout = "refs/tags/tag1\nrefs/tags/tag2"
@@ -986,7 +989,7 @@ class TestNewWithStarterInvalid:
         mock_subprocess_run.assert_called_once()
         # Verify the subprocess.run was called with correct git ls-remote command
         call_args = mock_subprocess_run.call_args
-        assert call_args[0][0] == ["git", "ls-remote", "--tags", repo]
+        assert call_args[0][0] == ["/usr/bin/git", "ls-remote", "--tags", repo]
 
 
 class TestFlagsNotAllowed:

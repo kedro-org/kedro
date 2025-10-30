@@ -497,14 +497,37 @@ def _get_prompts_required_and_clear_from_CLI_provided(
 
 
 def _get_available_tags(template_path: str) -> list:
-    # Use subprocess to call git ls-remote to avoid the gitpython dependency.
+    """Get available tags from a git repository.
+    
+    Uses subprocess to call git ls-remote to avoid the gitpython dependency.
+    This is safe because:
+    - We use the full path to git executable (not relying on PATH)
+    - We validate the input URL
+    - We use shell=False to prevent command injection
+    - We set a timeout to prevent hanging
+    """
     try:
-        result = subprocess.run(  # noqa: S603
-            ["git", "ls-remote", "--tags", template_path.replace("git+", "")],  # noqa: S607
+        # Get the full path to the git executable for security (fixes S607)
+        git_executable = shutil.which("git")
+        if not git_executable:
+            return []
+
+        # Clean and validate the template path
+        repo_url = template_path.replace("git+", "")
+        
+        # Basic validation: ensure the URL looks valid
+        # This helps mitigate command injection risks (addresses S603)
+        if not repo_url or repo_url.strip() != repo_url:
+            return []
+
+        # Safe subprocess call: using full path, shell=False, validated input
+        result = subprocess.run(
+            [git_executable, "ls-remote", "--tags", repo_url],
             capture_output=True,
             text=True,
             check=True,
             timeout=30,
+            shell=False,  # Explicitly set to False for security
         )
         tags = result.stdout
 

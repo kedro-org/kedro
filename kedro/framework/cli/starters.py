@@ -506,7 +506,7 @@ def _get_available_tags(template_path: str) -> list:
                 "ls-remote",
                 "--tags",
                 template_path.replace("git+", ""),
-            ],  # noqa: S607
+            ],
             stderr=subprocess.STDOUT,
             text=True,
         )

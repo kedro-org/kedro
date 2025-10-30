@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
-import subprocess
 
 import pytest
 import yaml
@@ -969,12 +969,8 @@ class TestNewWithStarterInvalid:
             "cookiecutter.repository.determine_repo_dir",
             side_effect=RepositoryCloneFailed,
         )
-        mock_ls_remote = mocker.patch(
-            "kedro.framework.cli.starters.subprocess.check_output"
-        )
-        mock_ls_remote.return_value = (
-            "abcdef\trefs/tags/tag1\n123456\trefs/tags/tag2\n"
-        )
+        mock_ls_remote = mocker.patch("subprocess.check_output")
+        mock_ls_remote.return_value = "abcdef\trefs/tags/tag1\n123456\trefs/tags/tag2\n"
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "-v", "--starter", starter, "--checkout", "invalid"],

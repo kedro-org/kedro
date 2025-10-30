@@ -497,16 +497,16 @@ def _get_prompts_required_and_clear_from_CLI_provided(
 
 def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
+    import shutil
     import subprocess
 
     try:
+        git_executable = shutil.which("git")
+        if not git_executable:
+            return []
+
         output = subprocess.check_output(  # noqa: S603
-            [
-                "git",
-                "ls-remote",
-                "--tags",
-                template_path.replace("git+", ""),
-            ],
+            [git_executable, "ls-remote", "--tags", template_path.replace("git+", "")],
             stderr=subprocess.STDOUT,
             text=True,
         )

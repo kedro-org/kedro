@@ -982,7 +982,7 @@ class TestNewWithStarterInvalid:
             in result.output
         )
         mock_ls_remote.assert_called_with(
-            ["git", "ls-remote", "--tags", repo],
+            [mocker.ANY, "ls-remote", "--tags", repo],
             stderr=subprocess.STDOUT,
             text=True,
         )

@@ -3,6 +3,25 @@
 [Great Expectations](https://docs.greatexpectations.io/docs/home/) (GE) is an open-source data quality framework that helps you validate, document, and profile your data.
 It allows you to define expectations—assertions about your data’s structure and content—and verify that these hold true at runtime.
 
+### The core concept: Expectations
+
+An **Expectation** is a falsifiable, verifiable statement about your data. For example:
+- "This column should never be null"
+- "Values in this column should be between 0 and 100"
+- "This column should only contain these specific categories"
+
+When you run validations, Great Expectations checks if your data meets these expectations and tells you exactly what passed or failed.
+
+### Why validate data?
+
+Data validation helps catch issues early:
+- **Bad data from external sources**: APIs change, file formats shift, upstream systems break
+- **Data drift**: Your production data starts looking different from your training data
+- **Pipeline bugs**: Your transformations accidentally introduce nulls or invalid values
+- **Compliance**: Ensure data meets regulatory or business requirements
+
+In Kedro, you can add these validations at strategic points in your pipeline to catch problems before they propagate downstream.
+
 ## Prerequisites
 
 You will need the following:
@@ -26,15 +45,78 @@ Install the project dependencies:
 
 `uv pip install -r requirements.txt`
 
+
+## Understanding Great Expectations
+
+Great Expectations version 1.0+ introduced a major API change: **everything is now done in Python code** rather than through CLI commands and YAML configuration files.
+
+### Key components
+
+1. **Context**: Your workspace for validation operations
+   ```python
+   context = gx.get_context()
+   ```
+
+2. **Data Source**: Connects to your data (in our case, in-memory pandas DataFrames)
+   ```python
+   source = context.data_sources.add_or_update_pandas("my_source")
+   ```
+
+3. **Data Asset**: A specific dataset within a data source
+   ```python
+   asset = source.add_dataframe_asset("companies")
+   ```
+
+4. **Batch**: A specific instance of data to validate
+   ```python
+   batch_request = asset.build_batch_request(options={"dataframe": df})
+   batch = asset.get_batch(batch_request)
+   ```
+
+5. **Expectation Suite**: A collection of expectations to run
+   ```python
+   suite = gx.ExpectationSuite(name="my_validation")
+   suite.expectations = [...]
+   ```
+
+6. **Validation Result**: The outcome of running expectations against a batch
+   ```python
+   result = batch.validate(suite)
+   if not result.success:
+       # Handle validation failure
+   ```
+
+### The validation workflow
+
+```
+DataFrame → Batch → Apply Expectations → Validation Result
+```
+
+When you validate data, Great Expectations:
+1. Takes a snapshot of your data (the "batch")
+2. Runs each expectation against it
+3. Returns detailed results showing what passed and what failed
+
+
 ## Use cases
 
-- In this section, we're going to use Great Expectations for data validation in two ways:
-    - As a Kedro hook
-    - As part of a pipeline run
+In this section, we're going to use Great Expectations for data validation in two ways:
+- **As a Kedro hook**: Automatic validation whenever data is loaded/saved
+- **As part of a pipeline run**: Explicit validation nodes in your pipeline
 
-### As a Kedro hook
+You can also **combine both approaches**: use hooks for automatic raw data validation, and pipeline nodes for critical checkpoints.
 
-Create or edit a file named hooks.py inside your project’s `src/spaceflights_great_expectations/` directory.
+### Approach 1: As a Kedro hook
+
+Hooks allow you to automatically validate data as it flows through your pipeline, without modifying your existing pipeline code.
+
+Kedro hooks are functions that run automatically at specific points in your pipeline execution:
+- `before_node_run`: Runs before a node executes (useful for validating inputs)
+- `after_node_run`: Runs after a node executes (useful for validating outputs)
+
+By placing validation logic in hooks, you create a "safety net" that catches bad data without cluttering your pipeline definitions.
+
+To implementa hook, create or edit a file named hooks.py inside your project’s `src/spaceflights_great_expectations/` directory.
 
 ```py
 from typing import Any
@@ -107,12 +189,23 @@ class DataValidationHooks:
 
 ```
 
+1. **Configuration**: The `EXPECTATIONS` dictionary maps dataset names to lists of expectations
+2. **Automatic triggering**: Before/after each node runs, the hooks check if any inputs/outputs need validation
+3. **Selective validation**: Only validates datasets you've explicitly configured
+4. **Fail-fast behavior**: If validation fails, the pipeline stops immediately with a clear error message
+
 Register your custom hook in `src/spaceflights_great_expectations/settings.py`:
 
 ```py
 from spaceflights_great_expectations.hooks import DataValidationHooks
 
 HOOKS = (DataValidationHooks(),)
+```
+
+run your pipeline as normal:
+
+```bash
+kedro run
 ```
 
 You will see the data validation in your logs, alongside your regular Kedro logs.
@@ -135,11 +228,19 @@ Calculating Metrics: 100%|██████████████████
                     INFO     ✓ model_input_table passed validation
 ```
 
-### As part of a pipeline run
+### Approach 2: As part of a pipeline run
 
 Another option for data validation is to integrate Great Expectations as explicit nodes in a Kedro pipeline.
 
+Pipeline nodes offer several advantages:
+- **Visibility**: Validation appears as nodes in `kedro viz`, making it clear where quality gates exist
+- **Control**: Easy to run or skip validation using features like [tags](../deploy/nodes_grouping.md#grouping-by-tags) or [running pipelines by name](../getting-started/commands_reference.md#kedro-run).
+- **Flexibility**: Place validation at any point—before preprocessing, after transformations, before modeling, etc.
+- **Data lineage**: Validated datasets appear explicitly in your data catalog
+
 As an example, let's create a data validation node and add it to our `data_processing` pipeline.
+
+Add a new `validate_datasets` node to `src/spaceflights_great_expectations/pipelines/data_processing/nodes.py`:
 
 ```py
 def validate_datasets(companies: pd.DataFrame, reviews: pd.DataFrame, shuttles: pd.DataFrame) -> None:
@@ -188,7 +289,7 @@ def validate_datasets(companies: pd.DataFrame, reviews: pd.DataFrame, shuttles: 
             )
 ```
 
-And add it to our pipeline, so it runs before the actual data processing.
+Update `src/spaceflights_great_expectations/pipelines/data_processing/pipeline.py` to run the new node on our pipeline:
 
 ```py
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles, validate_datasets
@@ -223,7 +324,56 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
         ]
     )
+
 ```
+The pipeline now has an explicit validation gate at the beginning:
+
+```
+[Load data] → validate_datasets → preprocess_companies → ...
+```
+
+If validation fails, the preprocessing nodes never run, saving computation time and preventing bad data from propagating.
+
+### Alternative: Individual validation nodes
+
+Instead of one node that validates everything, you can create separate validation nodes:
+
+```python
+def validate_companies(companies: pd.DataFrame) -> pd.DataFrame:
+    """Validate companies data and pass it through."""
+    # ... validation logic ...
+    return companies  # Pass through if valid
+
+def validate_reviews(reviews: pd.DataFrame) -> pd.DataFrame:
+    """Validate reviews data and pass it through."""
+    # ... validation logic ...
+    return reviews
+```
+
+Then in your pipeline:
+
+```python
+Pipeline([
+    node(
+        func=validate_companies,
+        inputs="companies",
+        outputs="validated_companies",
+        name="validate_companies_node",
+    ),
+    node(
+        func=preprocess_companies,
+        inputs="validated_companies",  # Use validated data
+        outputs="preprocessed_companies",
+        name="preprocess_companies_node",
+    ),
+    # ...
+])
+```
+
+This approach:
+- Creates explicit data lineage (`companies` → `validated_companies`)
+- Allows parallel validation of different datasets
+- Makes it easier to skip validation for specific datasets
 
 ## Further reading
 

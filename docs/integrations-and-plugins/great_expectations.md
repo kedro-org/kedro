@@ -137,6 +137,94 @@ Calculating Metrics: 100%|██████████████████
 
 ### As part of a pipeline run
 
+Another option for data validation is to integrate Great Expectations as explicit nodes in a Kedro pipeline.
+
+As an example, let's create a data validation node and add it to our `data_processing` pipeline.
+
+```py
+def validate_datasets(companies: pd.DataFrame, reviews: pd.DataFrame, shuttles: pd.DataFrame) -> None:
+    """Validates datasets using Great Expectations.
+
+    Args:
+        companies: Data for companies.
+        reviews: Data for reviews.
+        shuttles: Data for shuttles.
+    Raises:
+        great_expectations.exceptions.ValidationError: If validation fails.
+    """
+    import great_expectations as gx
+
+    context = gx.get_context()
+
+    EXPECTATIONS = {
+        "companies": [
+            gx.expectations.ExpectColumnToExist(column="company_rating"),
+        ],
+        "reviews": [
+            gx.expectations.ExpectColumnToExist(column="review_scores_rating"),
+        ],
+        "shuttles": [
+            gx.expectations.ExpectColumnToExist(column="price"),
+        ],
+    }
+
+    datasets = {"companies": companies, "reviews": reviews, "shuttles": shuttles}
+
+    for name, data in datasets.items():
+        source = context.data_sources.add_or_update_pandas(name)
+        asset = source.add_dataframe_asset(name)
+
+        batch_request = asset.build_batch_request(options={"dataframe": data})
+        batch = asset.get_batch(batch_request)
+
+        suite = gx.ExpectationSuite(name=f"{name}_validation")
+        suite.expectations = EXPECTATIONS[name]
+
+        result = batch.validate(suite)
+
+        if not result.success:
+            raise gx.exceptions.ValidationError(
+                f"Validation failed for dataset: {name}"
+            )
+```
+
+And add it to our pipeline, so it runs before the actual data processing.
+
+```py
+from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles, validate_datasets
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    return Pipeline(
+        [
+            Node(
+                func=validate_datasets,
+                inputs=["companies", "reviews", "shuttles"],
+                outputs=None,
+                name="validade_datasets_node",
+            ),
+            Node(
+                func=preprocess_companies,
+                inputs="companies",
+                outputs="preprocessed_companies",
+                name="preprocess_companies_node",
+            ),
+            Node(
+                func=preprocess_shuttles,
+                inputs="shuttles",
+                outputs="preprocessed_shuttles",
+                name="preprocess_shuttles_node",
+            ),
+            Node(
+                func=create_model_input_table,
+                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
+                outputs="model_input_table",
+                name="create_model_input_table_node",
+            ),
+        ]
+    )
+```
+
 ## Further reading
 
   - [Kedro Data Catalog](../catalog-data/data_catalog.md)

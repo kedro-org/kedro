@@ -968,8 +968,11 @@ class TestNewWithStarterInvalid:
             "cookiecutter.repository.determine_repo_dir",
             side_effect=RepositoryCloneFailed,
         )
-        mock_ls_remote = mocker.patch("git.cmd.Git").return_value.ls_remote
-        mock_ls_remote.return_value = "tag1\ntag2"
+        # Mock subprocess.run to simulate git ls-remote output
+        mock_result = mocker.Mock()
+        mock_result.stdout = "refs/tags/tag1\nrefs/tags/tag2"
+        mock_subprocess_run = mocker.patch("subprocess.run", return_value=mock_result)
+
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "-v", "--starter", starter, "--checkout", "invalid"],
@@ -980,7 +983,10 @@ class TestNewWithStarterInvalid:
             "Specified tag invalid. The following tags are available: tag1, tag2"
             in result.output
         )
-        mock_ls_remote.assert_called_with("--tags", repo)
+        mock_subprocess_run.assert_called_once()
+        # Verify the subprocess.run was called with correct git ls-remote command
+        call_args = mock_subprocess_run.call_args
+        assert call_args[0][0] == ["git", "ls-remote", "--tags", repo]
 
 
 class TestFlagsNotAllowed:

@@ -18,7 +18,7 @@ To set yourself up, create a new Kedro project:
 
 `kedro new --starter=spaceflights-pandas --name spaceflights-great-expectations`
 
-Navigate to your project directory and add Pandera with pandas support to your requirements.txt:
+Navigate to your project directory and add Great Expectations to your requirements.txt:
 
 `great-expectations>=1.8.0`
 

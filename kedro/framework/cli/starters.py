@@ -509,7 +509,9 @@ def _get_available_tags(template_path: str) -> list:
         tags = result.stdout
 
         unique_tags = {
-            tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n") if tag
+            tag.split("/")[-1].replace("^{}", "")
+            for tag in tags.split("\n")
+            if tag.strip()
         }
         # Remove git ref "^{}" and duplicates. For example,
         # tags: ['/tags/version', '/tags/version^{}']

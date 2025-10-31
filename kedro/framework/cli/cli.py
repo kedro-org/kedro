@@ -17,6 +17,10 @@ import click
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    import click.core
+
+    MultiCommand = click.core.Group
+
 from kedro import __version__ as version
 from kedro.framework.cli import BRIGHT_BLACK, ORANGE
 from kedro.framework.cli.hooks import get_cli_hook_manager
@@ -211,7 +215,7 @@ class KedroCLI(CommandCollection):
             raise
 
     @property
-    def global_groups(self) -> Sequence[click.MultiCommand]:
+    def global_groups(self) -> Sequence[MultiCommand]:
         """Property which loads all global command groups from plugins and
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
@@ -219,7 +223,7 @@ class KedroCLI(CommandCollection):
         return [cli, *load_entry_points("global"), global_commands]
 
     @property
-    def project_groups(self) -> Sequence[click.MultiCommand]:
+    def project_groups(self) -> Sequence[MultiCommand]:
         """Property which loads all project command groups from the
         project and the plugins, then combines them with the built-in ones.
         Built-in commands can be overridden by plugins, which can be

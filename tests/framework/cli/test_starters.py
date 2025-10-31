@@ -24,6 +24,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
     _convert_tool_short_names_to_numbers,
     _fetch_validate_parse_config_from_user_prompts,
+    _get_available_tags,
     _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
@@ -314,6 +315,40 @@ def test_starter_list_with_invalid_starter_plugin(
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
     assert result.exit_code == 0, result.output
     assert expected in result.output
+
+
+class TestGetAvailableTags:
+    """Tests for _get_available_tags function."""
+
+    def test_git_not_available(self, mocker):
+        """Test that empty list is returned when git executable is not found."""
+        mocker.patch("shutil.which", return_value=None)
+        result = _get_available_tags("https://github.com/kedro-org/kedro-starters.git")
+        assert result == []
+
+    def test_empty_repo_url(self, mocker):
+        """Test that empty list is returned when repo URL is empty after cleaning."""
+        mocker.patch("shutil.which", return_value="/usr/bin/git")
+        # Test with "git+" which becomes empty after replace
+        result = _get_available_tags("git+")
+        assert result == []
+
+    def test_repo_url_with_whitespace(self, mocker):
+        """Test that empty list is returned when repo URL contains leading/trailing whitespace."""
+        mocker.patch("shutil.which", return_value="/usr/bin/git")
+        # Test with URL that has whitespace
+        result = _get_available_tags(" https://github.com/kedro-org/kedro-starters.git ")
+        assert result == []
+
+    def test_successful_tag_fetch(self, mocker):
+        """Test successful fetching of tags."""
+        mocker.patch("shutil.which", return_value="/usr/bin/git")
+        mock_result = mocker.Mock()
+        mock_result.stdout = "refs/tags/v1.0.0\nrefs/tags/v2.0.0"
+        mocker.patch("subprocess.run", return_value=mock_result)
+        
+        result = _get_available_tags("https://github.com/kedro-org/kedro-starters.git")
+        assert result == ["v1.0.0", "v2.0.0"]
 
 
 class TestParseToolsInput:

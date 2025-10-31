@@ -506,7 +506,11 @@ class TestPipelineDeleteCommand:
             f"Are you sure you want to delete pipeline '{PIPELINE_NAME}'"
             in result.output
         )
-        assert "Deletion aborted!" in result.output
+        # Click 8.2+ shows "Aborted!" for invalid input (EOF), "Deletion aborted!" for valid 'no'
+        if input_ == "random":
+            assert "Aborted!" in result.output
+        else:
+            assert "Deletion aborted!" in result.output
 
         assert source_path.is_dir()
         assert tests_path.is_dir()
@@ -546,7 +550,11 @@ class TestPipelineDeleteCommand:
             f"Are you sure you want to delete pipeline '{PIPELINE_NAME}'"
             in result.output
         )
-        assert "Deletion aborted!" in result.output
+        # Click 8.2+ shows "Aborted!" for invalid input (EOF), "Deletion aborted!" for valid 'no'
+        if input_ == "random":
+            assert "Aborted!" in result.output
+        else:
+            assert "Deletion aborted!" in result.output
 
         assert tests_path.is_dir()
         assert params_path.is_file()

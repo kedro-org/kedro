@@ -375,6 +375,107 @@ This approach:
 - Allows parallel validation of different datasets
 - Makes it easier to skip validation for specific datasets
 
+### Alternative: Using a file data context
+
+If you prefer not to hardcode expectations inside your Kedro hooks or nodes, you can maintain your Great Expectations data context externally as a file.
+This approach lets you separate data validation configuration from code and makes it easier to reuse the same expectations across environments or projects.
+
+Start by creating a local Great Expectations workspace. From your project root:
+
+```bash
+mkdir great_expectations
+```
+
+Then, initialize a context in Python:
+
+```py
+import great_expectations as gx
+
+context = gx.get_context(context_root_dir="great_expectations")
+```
+
+This will create a directory structure like:
+
+```
+great_expectations/
+├── checkpoints/
+├── expectations/
+├── plugins/
+├── uncommitted/
+├── validation_definitions
+└── great_expectations.yml
+```
+
+This directory acts as your file data context, storing all configuration, expectation suites, and validation results.
+
+Instead of defining expectations inline, you can, for example, store them in the `expectations/` directory as JSON or YAML files.
+
+For example, create an expectation suite for the companies dataset:
+
+```
+great_expectations/expectations/companies_suite.json
+```
+
+Each suite defines validation rules for a dataset, such as column existence, null checks, or value ranges.
+
+These files can be created manually, generated from profiling code, or exported from the GX Python API:
+
+```py
+import great_expectations as gx
+
+context = gx.get_context(context_root_dir="great_expectations")
+
+suite = gx.ExpectationSuite(name="companies_suite")
+suite.add_expectation(
+    gx.expectations.ExpectColumnToExist(column="company_rating")
+)
+context.suites.add(suite)
+```
+
+You will see your expectation defined in the `companies_suite.json` file:
+
+```json
+{
+  "expectations": [
+    {
+      "id": "b6c459dc-6272-4509-a986-212cc65af82e",
+      "kwargs": {
+        "column": "company_rating"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_to_exist"
+    }
+  ],
+  "id": "b43064bb-e486-401b-b9da-0224961de88b",
+  "meta": {
+    "great_expectations_version": "1.8.0"
+  },
+  "name": "companies_suite",
+  "notes": null
+}
+```
+
+In your Kedro hook or pipeline node, instead of creating an in-memory context with `gx.get_context()`, load the file-based one pointing to your project directory:
+
+```py
+from pathlib import Path
+import great_expectations as gx
+
+context = gx.get_context(context_root_dir=Path.cwd() / "great_expectations")
+suite = context.suites.get("companies_suite")
+
+source = context.data_sources.add_or_update_pandas("companies_source")
+asset = source.add_dataframe_asset("companies")
+
+batch_request = asset.build_batch_request(options={"dataframe": companies})
+batch = asset.get_batch(batch_request)
+result = batch.validate(suite)
+```
+
+And run validation as before.
+
+
 ## Further reading
 
   - [Kedro Data Catalog](../catalog-data/data_catalog.md)
@@ -382,3 +483,4 @@ This approach:
   - [Kedro Pipelines](../build/pipeline_introduction.md)
   - [Learn Great Expectations](https://docs.greatexpectations.io/docs/reference/learn/)
   - [Great Expectations GitHub Repository](https://github.com/great-expectations/great_expectations)
+  - [Expectations Reference Document](https://greatexpectations.io/expectations/)

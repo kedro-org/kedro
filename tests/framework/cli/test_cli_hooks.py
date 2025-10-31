@@ -121,15 +121,17 @@ class TestKedroCLIHooks:
         )
         # 'pipeline list' isn't actually in the click structure and
         # return exit code 2 ('invalid usage of some shell built-in command')
-        # 'starter' can return 0 (click < 8.2) or 2 (click >= 8.2) when invoked without subcommand
+        # 'starter' can return 0 (click < 8.2) or 2 (click >= 8.2)
+        # when invoked without subcommand
         if isinstance(exit_code, tuple):
             # Accept either exit code
             assert any(
-                f"After command `{command}` run for project {fake_metadata} (exit: {code})"
-                in result.output
+                f"After command `{command}` run for project {fake_metadata} "
+                f"(exit: {code})" in result.output
                 for code in exit_code
             )
         else:
             assert (
-                f"After command `{command}` run for project {fake_metadata} (exit: {exit_code})"
+                f"After command `{command}` run for project {fake_metadata} "
+                f"(exit: {exit_code})"
             ) in result.output

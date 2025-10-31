@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added the `ignore_hidden` parameter to the `OmegaConfigLoader`.
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
+* Unpinned `click` dependency to support versions 8.2.0 and above, resolving compatibility issues with other packages.
 
 ## Bug fixes and other changes
 

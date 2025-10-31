@@ -506,9 +506,11 @@ class TestPipelineDeleteCommand:
             f"Are you sure you want to delete pipeline '{PIPELINE_NAME}'"
             in result.output
         )
-        # Click 8.2+ shows "Aborted!" for invalid input (EOF), "Deletion aborted!" for valid 'no'
+        # Click < 8.2: "random" input asks again, gets EOF, uses default (no) -> "Deletion aborted!"
+        # Click >= 8.2: "random" input with EOF immediately aborts -> "Aborted!"
+        # Valid "n" or "N" always shows "Deletion aborted!"
         if input_ == "random":
-            assert "Aborted!" in result.output
+            assert "Aborted!" in result.output or "Deletion aborted!" in result.output
         else:
             assert "Deletion aborted!" in result.output
 
@@ -550,9 +552,11 @@ class TestPipelineDeleteCommand:
             f"Are you sure you want to delete pipeline '{PIPELINE_NAME}'"
             in result.output
         )
-        # Click 8.2+ shows "Aborted!" for invalid input (EOF), "Deletion aborted!" for valid 'no'
+        # Click < 8.2: "random" input asks again, gets EOF, uses default (no) -> "Deletion aborted!"
+        # Click >= 8.2: "random" input with EOF immediately aborts -> "Aborted!"
+        # Valid "n" or "N" always shows "Deletion aborted!"
         if input_ == "random":
-            assert "Aborted!" in result.output
+            assert "Aborted!" in result.output or "Deletion aborted!" in result.output
         else:
             assert "Deletion aborted!" in result.output
 

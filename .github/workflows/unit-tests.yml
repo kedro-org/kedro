@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 56 # equal to max + 3*std over the last ~1000 successful runs
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: Install the latest version of uv with Python ${{inputs.python-version}}
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
           python-version: ${{ inputs.python-version }}

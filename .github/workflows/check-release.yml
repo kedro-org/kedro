@@ -12,7 +12,7 @@ jobs:
   check-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -50,7 +50,7 @@ jobs:
       needs.check-version.outputs.new_release == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5
       - name: Set up Python
         uses: actions/setup-python@v6
         with:

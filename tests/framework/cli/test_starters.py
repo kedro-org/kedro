@@ -342,6 +342,33 @@ class TestGetAvailableTags:
         )
         assert result == []
 
+    def test_url_with_no_netloc(self, mocker):
+        """Test that URLs with scheme but no netloc are rejected (except file://)."""
+        mocker.patch("shutil.which", return_value="/usr/bin/git")
+        # http:// with no netloc should be rejected
+        result = _get_available_tags("http://")
+        assert result == []
+
+    def test_url_with_dangerous_chars(self, mocker):
+        """Test that URLs with dangerous shell characters are rejected."""
+        mocker.patch("shutil.which", return_value="/usr/bin/git")
+        dangerous_urls = [
+            "git@github.com:user/repo.git; rm -rf /",
+            "git@github.com:user/repo.git | cat /etc/passwd",
+            "git@github.com:user/repo.git && malicious_command",
+            "git@github.com:user/repo.git `whoami`",
+            "git@github.com:user/repo.git$(whoami)",
+        ]
+        for url in dangerous_urls:
+            result = _get_available_tags(url)
+            assert result == [], f"Failed to reject dangerous URL: {url}"
+
+    def test_url_with_unknown_scheme(self, mocker):
+        """Test that URLs with unknown schemes are rejected."""
+        mocker.patch("shutil.which", return_value="/usr/bin/git")
+        result = _get_available_tags("ftp://example.com/repo.git")
+        assert result == []
+
     def test_successful_tag_fetch(self, mocker):
         """Test successful fetching of tags."""
         mocker.patch("shutil.which", return_value="/usr/bin/git")

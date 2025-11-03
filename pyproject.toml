@@ -246,6 +246,7 @@ known-first-party = ["kedro"]
 [tool.ruff.lint.per-file-ignores]
 "{tests,docs}/*" = ["PLR2004","PLR0913"]
 "{tests,docs,tools,static,features,docs}/*" = ["T201", "S101", "S108"]  # Check print statement for kedro/ only
+"kedro/framework/cli/starters.py" = ["S603"]  # Subprocess call with validated input - see _is_safe_git_url()
 
 [tool.mypy]
 ignore_missing_imports = true

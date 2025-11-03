@@ -17,6 +17,7 @@ import warnings
 from itertools import groupby
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlparse
 
 import click
 import yaml
@@ -496,13 +497,48 @@ def _get_prompts_required_and_clear_from_CLI_provided(
     return prompts_required
 
 
+def _is_safe_git_url(url: str) -> bool:
+    """Validate that a URL is safe to pass to git ls-remote.
+
+    This function ensures the URL doesn't contain shell metacharacters or
+    other injection risks, making it safe to use with subprocess.
+
+    Args:
+        url: The git repository URL to validate
+
+    Returns:
+        True if the URL is safe to use, False otherwise
+    """
+    if not url or url.strip() != url:
+        return False
+
+    parsed = urlparse(url)
+
+    # Check for valid URL schemes
+    if parsed.scheme in ("http", "https", "git", "ssh", "file"):
+        # Valid URL scheme - must have netloc except for file://
+        if not parsed.netloc and parsed.scheme != "file":
+            return False
+    elif parsed.scheme == "" and not parsed.netloc:
+        # Could be SSH-style (git@github.com:user/repo.git) or file path
+        # Check for dangerous shell metacharacters
+        dangerous_chars = [";", "|", "&", "`", "$", "(", ")", "<", ">", "\n", "\r"]
+        if any(char in url for char in dangerous_chars):
+            return False
+    else:
+        # Unknown or invalid scheme
+        return False
+
+    return True
+
+
 def _get_available_tags(template_path: str) -> list:
     """Get available tags from a git repository.
 
     Uses subprocess to call git ls-remote to avoid the gitpython dependency.
     This is safe because:
     - We use the full path to git executable (not relying on PATH)
-    - We validate the input URL
+    - We validate the input URL using _is_safe_git_url
     - We use shell=False to prevent command injection
     - We set a timeout to prevent hanging
     """
@@ -512,22 +548,25 @@ def _get_available_tags(template_path: str) -> list:
         if not git_executable:
             return []
 
-        # Clean and validate the template path
+        # Clean the template path
         repo_url = template_path.replace("git+", "")
 
-        # Basic validation: ensure the URL looks valid
-        # This helps mitigate command injection risks (addresses S603)
-        if not repo_url or repo_url.strip() != repo_url:
+        # Validate URL to prevent command injection (addresses S603)
+        if not _is_safe_git_url(repo_url):
             return []
 
-        # Safe subprocess call: using full path, shell=False, validated input
+        # Construct command with validated inputs
+        # Using list form with shell=False is safe from injection
+        command = [git_executable, "ls-remote", "--tags", repo_url]
+
+        # Safe subprocess call: validated URL, full path, shell=False
         result = subprocess.run(
-            [git_executable, "ls-remote", "--tags", repo_url],
+            command,
             capture_output=True,
             text=True,
             check=True,
             timeout=30,
-            shell=False,  # Explicitly set to False for security
+            shell=False,
         )
         tags = result.stdout
 

@@ -498,7 +498,7 @@ def _get_prompts_required_and_clear_from_CLI_provided(
 
 def _get_available_tags(template_path: str) -> list:
     """Get available tags from a git repository.
-    
+
     Uses subprocess to call git ls-remote to avoid the gitpython dependency.
     This is safe because:
     - We use the full path to git executable (not relying on PATH)
@@ -514,7 +514,7 @@ def _get_available_tags(template_path: str) -> list:
 
         # Clean and validate the template path
         repo_url = template_path.replace("git+", "")
-        
+
         # Basic validation: ensure the URL looks valid
         # This helps mitigate command injection risks (addresses S603)
         if not repo_url or repo_url.strip() != repo_url:
@@ -540,7 +540,11 @@ def _get_available_tags(template_path: str) -> list:
         # tags: ['/tags/version', '/tags/version^{}']
         # unique_tags: {'version'}
 
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):  # pragma: no cover
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):  # pragma: no cover
         return []
     return sorted(unique_tags)
 

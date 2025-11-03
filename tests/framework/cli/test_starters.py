@@ -337,7 +337,9 @@ class TestGetAvailableTags:
         """Test that empty list is returned when repo URL contains leading/trailing whitespace."""
         mocker.patch("shutil.which", return_value="/usr/bin/git")
         # Test with URL that has whitespace
-        result = _get_available_tags(" https://github.com/kedro-org/kedro-starters.git ")
+        result = _get_available_tags(
+            " https://github.com/kedro-org/kedro-starters.git "
+        )
         assert result == []
 
     def test_successful_tag_fetch(self, mocker):
@@ -346,7 +348,7 @@ class TestGetAvailableTags:
         mock_result = mocker.Mock()
         mock_result.stdout = "refs/tags/v1.0.0\nrefs/tags/v2.0.0"
         mocker.patch("subprocess.run", return_value=mock_result)
-        
+
         result = _get_available_tags("https://github.com/kedro-org/kedro-starters.git")
         assert result == ["v1.0.0", "v2.0.0"]
 
@@ -1005,7 +1007,7 @@ class TestNewWithStarterInvalid:
         )
         # Mock shutil.which to return a path to git
         mocker.patch("shutil.which", return_value="/usr/bin/git")
-        
+
         # Mock subprocess.run to simulate git ls-remote output
         mock_result = mocker.Mock()
         mock_result.stdout = "refs/tags/tag1\nrefs/tags/tag2"

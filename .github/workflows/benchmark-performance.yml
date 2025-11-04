@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5
         with:
           path: "kedro"
 
@@ -42,7 +42,7 @@ jobs:
           git config --global user.name "Kedro"
 
       - name: Checkout target repository
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5
         with:
           repository: kedro-org/kedro-benchmark-results
           token: ${{ secrets.GH_TAGGING_TOKEN }}

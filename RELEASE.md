@@ -5,7 +5,7 @@
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 
 ## Bug fixes and other changes
-* Unpinned `click` dependency to support versions 8.2.0 and above.
+* Bumped `click` dependency to support versions 8.2.0 and above.
 
 ## Documentation changes
 * Added a note on programmatically creating lambdas when lazily saving a `PartionedDataset`.

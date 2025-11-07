@@ -47,3 +47,9 @@ repos:
           - id: detect-secrets
             args: ['--baseline', '.secrets.baseline']
             exclude: ^features/test_starter
+
+    - repo: https://github.com/codespell-project/codespell
+      # Configuration for codespell is in .pre-commit-config.yaml
+      rev: v2.4.1
+      hooks:
+      - id: codespell

@@ -103,7 +103,7 @@ catalog["cars"] = ["Ferrari", "Audi"]  # Add raw data
 ```
 When raw data is added, it's automatically wrapped in a `MemoryDataset`.
 
-## How to iterate trough datasets in the catalog
+## How to iterate through datasets in the catalog
 
 `DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
 

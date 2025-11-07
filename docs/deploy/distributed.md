@@ -40,4 +40,4 @@ We encourage you to play with different ways of parameterising your runs as you 
 
 ## 4. (Optional) Create starters
 
-You may opt to [build your own Kedro starter](../tutorials/settings.md) if you regularly have to deploy in a similar environment or to a similar platform. The starter enables you to re-use any deployment scripts written as part of step 2.
+You may opt to [build your own Kedro starter](../tutorials/settings.md) if you regularly have to deploy in a similar environment or to a similar platform. The starter enables you to reuse any deployment scripts written as part of step 2.

@@ -116,7 +116,7 @@ Kedro hooks are functions that run automatically at specific points in your pipe
 
 By placing validation logic in hooks, you create a "safety net" that catches bad data without cluttering your pipeline definitions.
 
-To implementa hook, create or edit a file named hooks.py inside your project’s `src/spaceflights_great_expectations/` directory.
+To implement a hook, create or edit a file named hooks.py inside your project’s `src/spaceflights_great_expectations/` directory.
 
 ```py
 from typing import Any

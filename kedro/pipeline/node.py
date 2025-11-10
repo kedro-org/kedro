@@ -417,7 +417,7 @@ class Node:
             keys are defined by the node outputs.
 
         """
-        self._logger.info("Running node: %s", str(self))
+        self._logger.info("Running node: %s", str(self), extra={"markup": False})
 
         outputs = None
 
@@ -446,7 +446,7 @@ class Node:
                 "Node %s failed with error: \n%s",
                 str(self),
                 str(exc),
-                extra={"markup": True},
+                extra={"markup": False},
             )
             raise exc
 

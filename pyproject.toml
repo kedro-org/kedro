@@ -67,7 +67,7 @@ test = [
     "pytest-cov>=3,<8",
     "pytest-mock>=1.7.1,<4.0",
     "pytest-xdist[psutil]>=2.2.1,<4.0",
-    "pytest>=7.2,<9.0",
+    "pytest>=7.2,<10.0",
     "requests_mock",
     "s3fs>=2021.4,<2025.11",
     # mypy related dependencies

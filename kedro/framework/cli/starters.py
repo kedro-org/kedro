@@ -23,6 +23,7 @@ from attrs import define, field
 
 import kedro
 from kedro import __version__ as version
+from kedro.framework.cli._ephemeral import ephemeral_if_missing
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     KedroCliError,
@@ -296,6 +297,7 @@ def starter() -> None:
     help=TELEMETRY_ARG_HELP,
     type=click.Choice(["yes", "no", "y", "n"], case_sensitive=False),
 )
+@ephemeral_if_missing(["build", "cookiecutter", "git", "rich"])
 def new(  # noqa: PLR0913
     config_path: str,
     starter_alias: str,
@@ -307,7 +309,11 @@ def new(  # noqa: PLR0913
     telemetry_consent: str,
     **kwargs: Any,
 ) -> None:
-    """Create a new kedro project."""
+    """Create a new kedro project.
+
+    If cookiecutter or gitpython aren't installed, Kedro will automatically
+    use uvx to run project creation ephemerally (no local install needed).
+    """
     flag_inputs = {
         "config": config_path,
         "starter": starter_alias,

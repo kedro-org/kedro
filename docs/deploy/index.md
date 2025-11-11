@@ -31,6 +31,7 @@ This following pages provide information for deployment to, or integration with,
 - [Amazon EMR Serverless](./supported-platforms/amazon_emr_serverless.md)
 - [AWS Step functions](./supported-platforms/aws_step_functions.md)
 - [Azure](./supported-platforms/azure.md)
+- [Dagster](./supported-platforms/dagster.md)
 - [Dask](./supported-platforms/dask.md)
 - [Databricks](./supported-platforms/databricks/index.md)
 - [Kubeflow Pipelines](./supported-platforms/kubeflow.md)

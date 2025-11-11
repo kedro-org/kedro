@@ -9,6 +9,7 @@
 
 ## Documentation changes
 * Added a note on programmatically creating lambdas when lazily saving a `PartionedDataset`.
+* Added Dagster as a supported deployment platform and the `kedro-dagster` plugin to the list of community plugins.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

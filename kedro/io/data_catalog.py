@@ -29,7 +29,11 @@ from kedro.io.core import (
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.io.shared_memory_dataset import SharedMemoryDataset
-from kedro.utils import _format_rich, _has_rich_handler
+from kedro.utils import (
+    _format_rich,
+    _get_suggestion_for_invalid_name,
+    _has_rich_handler,
+)
 
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
@@ -485,7 +489,11 @@ class DataCatalog(CatalogProtocol):
         """
         dataset = self.get(ds_name)
         if dataset is None:
-            raise DatasetNotFoundError(f"Dataset '{ds_name}' not found in the catalog")
+            error_msg = f"Dataset '{ds_name}' not found in the catalog. Did you mean 'suggestions'?"
+            suggestion = _get_suggestion_for_invalid_name(ds_name, self.keys())
+            if suggestion:
+                error_msg += f" - {suggestion.lower()}"
+            raise DatasetNotFoundError(error_msg)
         return dataset
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -1042,7 +1050,10 @@ class DataCatalog(CatalogProtocol):
         dataset = self.get(ds_name, version=load_version)
 
         if dataset is None:
-            error_msg = f"Dataset '{ds_name}' not found in the catalog"
+            error_msg = f"Dataset '{ds_name}' not found in the catalog . Did you mean 'suggestions'?"
+            suggestion = _get_suggestion_for_invalid_name(ds_name, self.keys())
+            if suggestion:
+                error_msg += f" - {suggestion.lower()}"
             raise DatasetNotFoundError(error_msg)
 
         self._logger.info(

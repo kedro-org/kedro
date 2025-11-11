@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 import click
 
 import kedro
+from kedro.framework.cli._ephemeral import ephemeral_if_missing
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
@@ -100,6 +101,7 @@ def pipeline() -> None:
 )
 @env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
 @click.pass_obj  # this will pass the metadata as first argument
+@ephemeral_if_missing(["build", "cookiecutter", "git", "rich"])
 def create_pipeline(
     metadata: ProjectMetadata,
     /,
@@ -109,7 +111,11 @@ def create_pipeline(
     env: str,
     **kwargs: Any,
 ) -> None:
-    """Create a new modular pipeline by providing a name."""
+    """Create a new modular pipeline by providing a name.
+
+    If cookiecutter isn't installed, Kedro will automatically use uvx to run
+    pipeline creation ephemerally (no local install needed).
+    """
     package_dir = metadata.source_dir / metadata.package_name
     project_root = metadata.project_path / metadata.project_name
     conf_source = settings.CONF_SOURCE

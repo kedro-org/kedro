@@ -7,7 +7,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 from urllib.parse import urlsplit
 
 _PYPROJECT = "pyproject.toml"
@@ -111,7 +111,7 @@ def _is_databricks() -> bool:
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
-def is_kedro_project(project_path: Union[str, Path]) -> bool:
+def is_kedro_project(project_path: str | Path) -> bool:
     """Evaluate if a given path is a root directory of a Kedro project or not.
 
     Args:
@@ -149,7 +149,7 @@ def find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
     return None
 
 
-def _has_rich_handler(logger: Optional[logging.Logger] = None) -> bool:
+def _has_rich_handler(logger: logging.Logger | None = None) -> bool:
     """Returns true if the logger has a RichHandler attached."""
     if not logger:
         logger = logging.getLogger()  # User root by default

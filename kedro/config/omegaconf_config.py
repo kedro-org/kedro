@@ -8,10 +8,10 @@ import io
 import logging
 import mimetypes
 import typing
-from collections.abc import Iterable, KeysView
+from collections.abc import Callable, Iterable, KeysView
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import fsspec
 from omegaconf import DictConfig, OmegaConf

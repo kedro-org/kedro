@@ -16,7 +16,7 @@ def create_pipeline(**kwargs) -> Pipeline:
        existing_pipeline, # Name of the existing Pipeline object
        inputs = {"old_input_df_name" : "new_input_df_name"},  # Mapping existing Pipeline input to new input
        outputs = {"old_output_df_name" : "new_output_df_name"},  # Mapping existing Pipeline output to new output
-       parameters = {"params: model_options": "params: new_model_options"},  # Updating parameters
+       parameters = {"params:model_options": "params:new_model_options"},  # Updating parameters
     )
 ```
 

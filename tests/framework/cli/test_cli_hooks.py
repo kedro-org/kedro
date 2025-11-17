@@ -86,7 +86,9 @@ def fake_plugin_distribution(mocker):
 class TestKedroCLIHooks:
     @pytest.mark.parametrize(
         "command, exit_code",
-        [("-V", 0), ("info", 0), ("pipeline list", 2), ("starter", 0)],
+        # Exit code 2: click 8.2+ exits with code 2 when a group is invoked
+        # without a subcommand (applies to 'starter')
+        [("-V", 0), ("info", 0), ("pipeline list", 2), ("starter", 2)],
     )
     def test_kedro_cli_should_invoke_cli_hooks_from_plugin(
         self,
@@ -122,5 +124,6 @@ class TestKedroCLIHooks:
         # 'pipeline list' isn't actually in the click structure and
         # return exit code 2 ('invalid usage of some shell built-in command')
         assert (
-            f"After command `{command}` run for project {fake_metadata} (exit: {exit_code})"
+            f"After command `{command}` run for project {fake_metadata} "
+            f"(exit: {exit_code})"
         ) in result.output

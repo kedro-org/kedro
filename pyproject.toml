@@ -53,7 +53,7 @@ test = [
     "behave>=1.2.6,<2.0",
     "coverage[toml]",
     "detect-secrets~=1.5.0",
-    "import-linter~=2.5.2",
+    "import-linter>=2.5.2,<2.7.0",
     "ipylab>=1.0.0",
     "ipython~=8.10",
     "jupyterlab_server>=2.11.1",
@@ -67,7 +67,7 @@ test = [
     "pytest-cov>=3,<8",
     "pytest-mock>=1.7.1,<4.0",
     "pytest-xdist[psutil]>=2.2.1,<4.0",
-    "pytest>=7.2,<9.0",
+    "pytest>=7.2,<10.0",
     "requests_mock",
     "s3fs>=2021.4,<2025.11",
     # mypy related dependencies

@@ -5,22 +5,13 @@ It allows you to define expectations—assertions about your data's structure an
 
 ### The core concept: Expectations
 
-An **Expectation** is a falsifiable, verifiable statement about your data. For example:
+In Great Expectations, rules for data validation are called an **expectation**.
+An expectation is a falsifiable, verifiable statement about your data. For example:
 - "This column should never be null"
 - "Values in this column should be between 0 and 100"
 - "This column should only contain these specific categories"
 
 When you run validations, Great Expectations checks if your data meets these expectations and tells you exactly what passed or failed.
-
-### Why validate data?
-
-Data validation helps catch issues early:
-- **Bad data from external sources**: APIs change, file formats shift, upstream systems break
-- **Data drift**: Your production data starts looking different from your training data
-- **Pipeline bugs**: Your transformations accidentally introduce nulls or invalid values
-- **Compliance**: Ensure data meets regulatory or business requirements
-
-In Kedro, you can add these validations at strategic points in your pipeline to catch problems before they propagate downstream.
 
 ## Prerequisites
 
@@ -97,14 +88,14 @@ When you validate data, Great Expectations:
 2. Runs each expectation against it
 3. Returns detailed results showing what passed and what failed
 
+- During quick interactive work you may use an ephemeral GX Data Context (no files persisted between runs). This is fine for exploration and iterative expectation creation.
+- For production runs, persist expectation suites and use a file-based Data Context so suites, validation results and histories are reproducible and shareable.
 
 ## Use cases
 
 In this section, we're going to use Great Expectations for data validation in two ways:
-- **As a Kedro hook**: Automatic validation whenever data is loaded/saved
-- **As part of a pipeline run**: Explicit validation nodes in your pipeline
-
-You can also **combine both approaches**: use hooks for automatic raw data validation, and pipeline nodes for critical checkpoints.
+- **As a Kedro hook**: Automatic validation whenever data is loaded/saved, as an initial, low-friction method of integration.
+- **As part of a pipeline run**: Explicit validation nodes in your pipeline when you want visibility in the DAG or to create explicit data lineage.
 
 ### Approach 1: As a Kedro hook
 
@@ -129,22 +120,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# To simplify this example, the validation rules are being defined
+# inside the hook implementation. It'd be preferable to load expectations
+# from a configuration file or separate Python module.
+EXPECTATIONS = {
+    "companies": [
+        gx.expectations.ExpectColumnToExist(column="company_rating"),
+    ],
+    "reviews": [
+        gx.expectations.ExpectColumnToExist(column="review_scores_rating"),
+    ],
+    "model_input_table": [
+        gx.expectations.ExpectColumnToExist(column="price"),
+        gx.expectations.ExpectColumnValuesToNotBeNull(column="price"),
+    ],
+}
+
+
 class DataValidationHooks:
     """Validate datasets using Great Expectations."""
-
-    EXPECTATIONS = {
-        "companies": [
-            gx.expectations.ExpectColumnToExist(column="company_rating"),
-
-        ],
-        "reviews": [
-            gx.expectations.ExpectColumnToExist(column="review_scores_rating"),
-        ],
-        "model_input_table": [
-            gx.expectations.ExpectColumnToExist(column="price"),
-            gx.expectations.ExpectColumnValuesToNotBeNull(column="price"),
-        ],
-    }
 
     def __init__(self):
         self.context = gx.get_context()
@@ -153,14 +147,14 @@ class DataValidationHooks:
     def before_node_run(self, node: Node, inputs: dict[str, Any]) -> None:
         """Validate inputs before node runs."""
         for name, data in inputs.items():
-            if name in self.EXPECTATIONS and isinstance(data, pd.DataFrame):
+            if name in EXPECTATIONS and isinstance(data, pd.DataFrame):
                 self._validate(data, name)
 
     @hook_impl
     def after_node_run(self, node: Node, outputs: dict[str, Any]) -> None:
         """Validate outputs after node runs."""
         for name, data in outputs.items():
-            if name in self.EXPECTATIONS and isinstance(data, pd.DataFrame):
+            if name in EXPECTATIONS and isinstance(data, pd.DataFrame):
                 self._validate(data, name)
 
     def _validate(self, data: pd.DataFrame, name: str) -> None:
@@ -174,7 +168,7 @@ class DataValidationHooks:
         batch = asset.get_batch(batch_request)
 
         suite = gx.ExpectationSuite(name=f"{name}_validation")
-        suite.expectations = self.EXPECTATIONS[name]
+        suite.expectations = EXPECTATIONS[name]
 
         result = batch.validate(suite)
 
@@ -375,6 +369,8 @@ This approach:
 - Allows parallel validation of different datasets
 - Makes it easier to skip validation for specific datasets
 
+It is possible to start with a hook-based approach for minimal changes, and add pipeline nodes when you want explicit visibility in Kedro-Viz or need to control execution order strictly. Also decide whether validations should stop the run immediately or report multiple failures before failing.
+
 ### Alternative: Using a file data context
 
 If you prefer not to hardcode expectations inside your Kedro hooks or nodes, you can maintain your Great Expectations data context externally as a file.
@@ -473,8 +469,10 @@ batch = asset.get_batch(batch_request)
 result = batch.validate(suite)
 ```
 
-And run validation as before.
-
+Using a file-based Data Context makes it straightforward to:
+- Persist expectation suites and validation history
+- Share suites across environments and team members
+- Integrate with GX UI / GX Cloud (optional) for a richer validation history and collaborative review experience
 
 ## Further reading
 

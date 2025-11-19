@@ -86,6 +86,7 @@ docs = [
     "mkdocstrings>=0.29.1",
     "mkdocstrings-python>=0.29.1",
     "mkdocs-click",
+    "mkdocs-redirects",
     "griffe",  # Required by mkdocstrings-python for API documentation generation.
     "mkdocs-llmstxt" # Required to generate the llm.txt file
 ]

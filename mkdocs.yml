@@ -164,6 +164,7 @@ plugins:
           - deploy/supported-platforms/amazon_emr_serverless.md: Amazon EMR Serverless guide
           - deploy/supported-platforms/aws_step_functions.md: AWS Step Functions integration
           - deploy/supported-platforms/azure.md: Azure ML pipelines deployment
+          - deploy/supported-platforms/dagster.md: Dagster deployment
           - deploy/supported-platforms/dask.md: Dask integration for parallel computing
           - deploy/supported-platforms/databricks/index.md: Databricks overview
           - deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md: Databricks notebooks workflow
@@ -362,6 +363,7 @@ nav:
               - Amazon EMR Serverless: deploy/supported-platforms/amazon_emr_serverless.md
               - AWS Step Functions: deploy/supported-platforms/aws_step_functions.md
               - Azure ML pipelines: deploy/supported-platforms/azure.md
+              - Dagster: deploy/supported-platforms/dagster.md
               - Dask: deploy/supported-platforms/dask.md
               - Databricks:
                 - Overview: deploy/supported-platforms/databricks/index.md

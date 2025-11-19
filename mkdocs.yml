@@ -54,7 +54,7 @@ plugins:
   - mermaid2
   - redirects:
       redirects_maps:
-        'configuration/telemetry.md': 'about/telemetry.md'
+        - 'configuration/telemetry.md': 'about/telemetry.md'
   - mkdocstrings:
       handlers:
         python:

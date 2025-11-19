@@ -53,8 +53,8 @@ plugins:
   - autorefs
   - mermaid2
   - redirects:
-      redirects_maps:
-        - 'configuration/telemetry.md': 'about/telemetry.md'
+      redirect_maps:
+        'configuration/telemetry.md': 'about/telemetry.md'
   - mkdocstrings:
       handlers:
         python:

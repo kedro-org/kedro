@@ -97,6 +97,45 @@ In this section, we're going to use Great Expectations for data validation in tw
 - **As a Kedro hook**: Automatic validation whenever data is loaded/saved, as an initial, low-friction method of integration.
 - **As part of a pipeline run**: Explicit validation nodes in your pipeline when you want visibility in the DAG or to create explicit data lineage.
 
+### Defining expectations
+
+To keep the project organized, we can define data expectations in a dedicated Python module.
+
+This separation has a few key advantages:
+
+- **Reusability**: the same expectations can be used in hooks, in dedicated validation nodes, during ad-hoc testing, or even in CI.
+- **Maintainability**: all validation rules live in one place, making them easier to update and review.
+- **Clarity**: pipeline code stays focused on business logic, while validation logic stays focused on data quality.
+- **Consistency**: every place that validates a dataset imports the same suite.
+
+In this example we create a file in `src/spaceflights_great_expectations/expectations.py` and declare a dictionary that maps dataset names to the list of expectations that apply to them.
+
+We also include a convenience function get_suite(), which builds a proper Great Expectations ExpectationSuite object based on the rules defined in the dictionary.
+
+```py
+import great_expectations as gx
+
+
+EXPECTATION_SUITES = {
+    "companies": [
+        gx.expectations.ExpectColumnToExist(column="company_rating"),
+    ],
+    "reviews": [
+        gx.expectations.ExpectColumnToExist(column="review_scores_rating"),
+    ],
+    "model_input_table": [
+        gx.expectations.ExpectColumnToExist(column="price"),
+        gx.expectations.ExpectColumnValuesToNotBeNull(column="price"),
+    ],
+}
+
+
+def get_suite(name: str) -> gx.ExpectationSuite:
+    suite = gx.ExpectationSuite(name=f"{name}_validation")
+    suite.expectations = EXPECTATION_SUITES[name]
+    return suite
+```
+
 ### Approach 1: As a Kedro hook
 
 Hooks allow you to automatically validate data as it flows through your pipeline, without modifying your existing pipeline code.
@@ -117,24 +156,9 @@ import great_expectations as gx
 import pandas as pd
 import logging
 
+from .expectations import get_suite, EXPECTATION_SUITES
+
 logger = logging.getLogger(__name__)
-
-
-# To simplify this example, the validation rules are being defined
-# inside the hook implementation. It'd be preferable to load expectations
-# from a configuration file or separate Python module.
-EXPECTATIONS = {
-    "companies": [
-        gx.expectations.ExpectColumnToExist(column="company_rating"),
-    ],
-    "reviews": [
-        gx.expectations.ExpectColumnToExist(column="review_scores_rating"),
-    ],
-    "model_input_table": [
-        gx.expectations.ExpectColumnToExist(column="price"),
-        gx.expectations.ExpectColumnValuesToNotBeNull(column="price"),
-    ],
-}
 
 
 class DataValidationHooks:
@@ -145,39 +169,34 @@ class DataValidationHooks:
 
     @hook_impl
     def before_node_run(self, node: Node, inputs: dict[str, Any]) -> None:
-        """Validate inputs before node runs."""
         for name, data in inputs.items():
-            if name in EXPECTATIONS and isinstance(data, pd.DataFrame):
+            if name in EXPECTATION_SUITES and isinstance(data, pd.DataFrame):
                 self._validate(data, name)
 
     @hook_impl
     def after_node_run(self, node: Node, outputs: dict[str, Any]) -> None:
-        """Validate outputs after node runs."""
         for name, data in outputs.items():
-            if name in EXPECTATIONS and isinstance(data, pd.DataFrame):
+            if name in EXPECTATION_SUITES and isinstance(data, pd.DataFrame):
                 self._validate(data, name)
 
-    def _validate(self, data: pd.DataFrame, name: str) -> None:
-        """Run validation and raise error if it fails."""
+    def _validate(self, df: pd.DataFrame, name: str) -> None:
         logger.info(f"Validating {name}...")
 
         source = self.context.data_sources.add_or_update_pandas(name)
         asset = source.add_dataframe_asset(name)
 
-        batch_request = asset.build_batch_request(options={"dataframe": data})
+        batch_request = asset.build_batch_request(options={"dataframe": df})
         batch = asset.get_batch(batch_request)
 
-        suite = gx.ExpectationSuite(name=f"{name}_validation")
-        suite.expectations = EXPECTATIONS[name]
-
+        suite = get_suite(name)
         result = batch.validate(suite)
 
         if not result.success:
-            failed = [exp for exp in result.results if not exp.success]
-            error_msg = f"Validation failed for {name}:\n"
-            for exp in failed:
-                error_msg += f"  - {exp.expectation_config.type}\n"
-            raise ValueError(error_msg)
+            errors = [r.expectation_type for r in result.results if not r.success]
+            raise ValueError(
+                f"Validation failed for {name}:\n"
+                + "\n".join(f"  - {e}" for e in errors)
+            )
 
         logger.info(f"✓ {name} passed validation")
 
@@ -237,50 +256,41 @@ As an example, let's create a data validation node and add it to our `data_proce
 Add a new `validate_datasets` node to `src/spaceflights_great_expectations/pipelines/data_processing/nodes.py`:
 
 ```py
-def validate_datasets(companies: pd.DataFrame, reviews: pd.DataFrame, shuttles: pd.DataFrame) -> None:
-    """Validates datasets using Great Expectations.
+import pandas as pd
+import great_expectations as gx
+from spaceflights_great_expectations.expectations import (
+    EXPECTATION_SUITES,
+    get_suite,
+)
 
-    Args:
-        companies: Data for companies.
-        reviews: Data for reviews.
-        shuttles: Data for shuttles.
-    Raises:
-        great_expectations.exceptions.ValidationError: If validation fails.
-    """
-    import great_expectations as gx
+def validate_datasets(
+        companies: pd.DataFrame,
+        reviews: pd.DataFrame,
+        shuttles: pd.DataFrame
+        ) -> None:
 
     context = gx.get_context()
-
-    EXPECTATIONS = {
-        "companies": [
-            gx.expectations.ExpectColumnToExist(column="company_rating"),
-        ],
-        "reviews": [
-            gx.expectations.ExpectColumnToExist(column="review_scores_rating"),
-        ],
-        "shuttles": [
-            gx.expectations.ExpectColumnToExist(column="price"),
-        ],
+    datasets = {
+        "companies": companies,
+        "reviews": reviews,
+        "shuttles": shuttles,
     }
 
-    datasets = {"companies": companies, "reviews": reviews, "shuttles": shuttles}
+    for name, df in datasets.items():
+        if name not in EXPECTATION_SUITES:
+            continue
 
-    for name, data in datasets.items():
         source = context.data_sources.add_or_update_pandas(name)
         asset = source.add_dataframe_asset(name)
 
-        batch_request = asset.build_batch_request(options={"dataframe": data})
+        batch_request = asset.build_batch_request(options={"dataframe": df})
         batch = asset.get_batch(batch_request)
 
-        suite = gx.ExpectationSuite(name=f"{name}_validation")
-        suite.expectations = EXPECTATIONS[name]
-
+        suite = get_suite(name)
         result = batch.validate(suite)
 
         if not result.success:
-            raise gx.exceptions.ValidationError(
-                f"Validation failed for dataset: {name}"
-            )
+            raise gx.exceptions.ValidationError(f"Validation failed for: {name}")
 ```
 
 Update `src/spaceflights_great_expectations/pipelines/data_processing/pipeline.py` to run the new node on our pipeline:

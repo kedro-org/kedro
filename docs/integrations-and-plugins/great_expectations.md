@@ -13,6 +13,8 @@ An expectation is a falsifiable, verifiable statement about your data. For examp
 
 When you run validations, Great Expectations checks if your data meets these expectations and tells you exactly what passed or failed.
 
+All of the types of expectations that are available can be found in the [expectations reference document](https://greatexpectations.io/expectations/).
+
 ## Prerequisites
 
 You will need the following:

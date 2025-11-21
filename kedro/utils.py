@@ -160,6 +160,23 @@ def _has_rich_handler(logger: logging.Logger | None = None) -> bool:
     return any(isinstance(handler, RichHandler) for handler in logger.handlers)
 
 
+def _has_only_rich_handlers(logger: logging.Logger | None = None) -> bool:
+    """Returns true if the logger has only RichHandler attached (no other handler types)."""
+    if not logger:
+        logger = logging.getLogger()  # Use root by default
+    try:
+        from rich.logging import RichHandler
+    except ImportError:
+        # If Rich is not available, no RichHandlers exist
+        return False
+    
+    if not logger.handlers:
+        # If no handlers, return True (safe default)
+        return True
+        
+    return all(isinstance(handler, RichHandler) for handler in logger.handlers)
+
+
 def _format_rich(value: str, markup: str) -> str:
     """Format string with rich markup"""
     return f"[{markup}]{value}[/{markup}]"

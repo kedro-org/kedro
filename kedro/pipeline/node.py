@@ -23,6 +23,8 @@ from .transcoding import _strip_transcoding
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable
 
+    from kedro.pipeline.preview_types import PreviewPayload
+
 
 @dataclass
 class GroupedNodes:
@@ -53,6 +55,7 @@ class Node:
         tags: str | Iterable[str] | None = None,
         confirms: str | list[str] | None = None,
         namespace: str | None = None,
+        preview_fn: Callable[..., PreviewPayload] | None = None,
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -81,6 +84,7 @@ class Node:
                 Specified dataset names do not necessarily need to be present
                 in the node ``inputs`` or ``outputs``.
             namespace: Optional node namespace.
+            preview_fn: A function that corresponds to previewing intermediate compiled objects.
 
         Raises:
             ValueError: Raised in the following cases:
@@ -169,6 +173,7 @@ class Node:
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
         self._confirms = confirms
+        self._preview_fn = preview_fn
 
     def _copy(self, **overwrite_params: Any) -> Node:
         """
@@ -182,6 +187,7 @@ class Node:
             "namespace": self._namespace,
             "tags": self._tags,
             "confirms": self._confirms,
+            "preview_fn": self._preview_fn,
         }
         params.update(overwrite_params)
         return Node(**params)  # type: ignore[arg-type]
@@ -388,6 +394,47 @@ class Node:
             Dataset names to confirm as a list.
         """
         return _to_list(self._confirms)
+
+    @property
+    def has_preview(self) -> bool:
+        """Return whether the node has preview functionality.
+
+        Returns:
+            True if the node has a preview configuration, False otherwise.
+        """
+        return self._preview_fn is not None
+
+    def preview(self, *args: Any, **kwargs: Any) -> PreviewPayload | None:
+        """Generate a preview of the node.
+
+        Args:
+            *args: Positional arguments to pass to the preview function.
+            **kwargs: Keyword arguments to pass to the preview function.
+
+        Returns:
+            Preview payload if preview is configured, None otherwise.
+        """
+        if not self._preview_fn:
+            return None
+
+        # Use signature inspection to call the function intelligently
+        sig = inspect.signature(self._preview_fn)
+        try:
+            # Try to bind the arguments to the function signature
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+            return self._preview_fn(*bound.args, **bound.kwargs)
+        except TypeError:
+            # Fallback to calling with all arguments if binding fails
+            return self._preview_fn(*args, **kwargs)
+        except Exception as exc:
+            self._logger.warning(
+                "No node preview for %s will be returned as fetching preview failed with error: \n%s",
+                str(self),
+                str(exc),
+                extra={"markup": True},
+            )
+            return None
 
     def run(self, inputs: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results
@@ -659,6 +706,7 @@ def node(  # noqa: PLR0913
     tags: str | Iterable[str] | None = None,
     confirms: str | list[str] | None = None,
     namespace: str | None = None,
+    preview_fn: Callable[..., PreviewPayload] | None = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.
@@ -685,6 +733,7 @@ def node(  # noqa: PLR0913
             names do not necessarily need to be present in the node ``inputs``
             or ``outputs``.
         namespace: Optional node namespace.
+        preview_fn: A function that corresponds to previewing intermediate compiled objects.
 
     Returns:
         A Node object with mapped inputs, outputs and function.
@@ -726,6 +775,7 @@ def node(  # noqa: PLR0913
         tags=tags,
         confirms=confirms,
         namespace=namespace,
+        preview_fn=preview_fn,
     )
 
 

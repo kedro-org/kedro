@@ -249,6 +249,7 @@ Calculating Metrics: 100%|██████████████████
 Another option for data validation is to integrate Great Expectations as explicit nodes in a Kedro pipeline.
 
 Pipeline nodes offer several advantages:
+
 - **Visibility**: Validation nodes appear in [Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/), making it clear where quality gates exist
 - **Control**: Easy to run or skip validation using features like [tags](../deploy/nodes_grouping.md#grouping-by-tags) or [running pipelines by name](../getting-started/commands_reference.md#kedro-run).
 - **Flexibility**: Place validation at any point—before preprocessing, after transformations, before modeling, etc.

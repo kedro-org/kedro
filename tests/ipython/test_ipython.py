@@ -313,7 +313,12 @@ class TestLoadNodeMagic:
         mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
 
         node_inputs = """# Prepare necessary inputs for debugging
+# Missing inputs will be built by running upstream nodes
 # All debugging inputs must be defined in your project catalog
+__kedro_required_inputs = ["dummy_input", "extra_input"]
+__kedro_missing = [ds for ds in __kedro_required_inputs if (ds not in catalog.list()) or (not catalog.exists(ds))]
+if __kedro_missing:
+    session.run(to_outputs=__kedro_missing, only_missing_outputs=True)
 dummy_input = catalog.load("dummy_input")
 my_input = catalog.load("extra_input")"""
 
@@ -519,7 +524,12 @@ class TestFormatNodeInputsText:
         input_params_dict = {"input1": "dataset1"}
         expected_output = (
             "# Prepare necessary inputs for debugging\n"
+            "# Missing inputs will be built by running upstream nodes\n"
             "# All debugging inputs must be defined in your project catalog\n"
+            '__kedro_required_inputs = ["dataset1"]\n'
+            "__kedro_missing = [ds for ds in __kedro_required_inputs if (ds not in catalog.list()) or (not catalog.exists(ds))]\n"
+            "if __kedro_missing:\n"
+            "    session.run(to_outputs=__kedro_missing, only_missing_outputs=True)\n"
             'input1 = catalog.load("dataset1")'
         )
         assert _format_node_inputs_text(input_params_dict) == expected_output
@@ -533,7 +543,12 @@ class TestFormatNodeInputsText:
         }
         expected_output = (
             "# Prepare necessary inputs for debugging\n"
+            "# Missing inputs will be built by running upstream nodes\n"
             "# All debugging inputs must be defined in your project catalog\n"
+            '__kedro_required_inputs = ["dataset1", "dataset2", "dataset3"]\n'
+            "__kedro_missing = [ds for ds in __kedro_required_inputs if (ds not in catalog.list()) or (not catalog.exists(ds))]\n"
+            "if __kedro_missing:\n"
+            "    session.run(to_outputs=__kedro_missing, only_missing_outputs=True)\n"
             'input1 = catalog.load("dataset1")\n'
             'input2 = catalog.load("dataset2")\n'
             'input3 = catalog.load("dataset3")'

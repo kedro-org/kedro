@@ -280,11 +280,11 @@ ipylab>=1.0.0
 notebook>=7.0.0
 ```
 
-You can load the contents of a node in your project into a series of cells using the `%load_node` line magic. To use `%load_node`, the node you want to load needs to fulfil two requirements:
+You can load the contents of a node in your project into a series of cells using the `%load_node` line magic. To use `%load_node`, the node you want to load needs to fulfil these requirements:
 - The node needs to have a name
-- The node's inputs need to be persisted
+- The node's inputs must be defined in your project's Data Catalog. If any inputs are not yet materialised or use non-persistent datasets (for example, `MemoryDataset`), `%load_node` will automatically run upstream nodes to build the missing inputs before loading them.
 
-The [section about creating nodes with names](../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../tutorials/create_a_pipeline.md#preprocessed-data-registration).
+The [section about creating nodes with names](../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. Ensure your inputs are declared in the Data Catalog; `%load_node` will attempt to build any missing inputs automatically by running only the necessary upstream nodes.
 
 !!! note
     The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.

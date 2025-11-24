@@ -96,6 +96,7 @@ When you validate data, Great Expectations:
 ## Integration Options
 
 In this section, we're going to use Great Expectations for data validation in two ways:
+
 - **As a Kedro hook**: Automatic validation whenever data is loaded/saved, as an initial, low-friction method of integration.
 - **As part of a pipeline run**: Explicit validation nodes in your pipeline when you want visibility in the DAG or to create explicit data lineage.
 

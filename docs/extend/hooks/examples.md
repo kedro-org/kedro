@@ -387,3 +387,41 @@ Node input overwrites implemented in `before_node_run` affect only a specific no
 
 
 Once you have implemented a new Hook you must register it as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro), and then run Kedro.
+
+## Using stateful hooks to store context
+
+Hooks are stateful objects, which means you can store information in instance variables and access it across different hook methods. This is particularly useful when you need to pass data between hooks that don't receive the same parameters.
+
+### Example: Storing context for later use
+
+In this example, we store the context in the `after_context_created` hook and use it later in a hook that doesn't receive the context parameter:
+
+```python
+from kedro.framework.hooks import hook_impl
+
+class SomeHook:
+    @hook_impl
+    def after_context_created(self, context) -> None:
+        """Store context for use in other hooks."""
+        # Store any configuration or context data you need
+        self.my_azure_config = context.config_loader["azure_config"]
+        
+    @hook_impl
+    def before_pipeline_run(self, pipeline) -> None:
+        """Use the stored context in a different hook."""
+        # Access the stored configuration
+        do_something_with_pipeline(pipeline, self.my_azure_config)
+```
+
+### Why use stateful hooks?
+
+* **Pass data between hooks**: Some hooks don't receive certain parameters (like `context` or `catalog`). By storing data as instance variables, you can access it in any hook method.
+* **Avoid repeated lookups**: Store configuration or computed values once in an early hook and reuse them in later hooks.
+* **Customize pipeline execution**: Access and modify pipeline behavior using data from the context.
+
+This pattern is especially useful when:
+- Migrating projects from older Kedro versions
+- Customizing pipeline execution based on project configuration
+- Implementing cross-cutting concerns that need access to multiple Kedro objects
+
+For more information about available hooks and their parameters, see the [hooks introduction](./introduction.md).

@@ -470,15 +470,19 @@ In your Kedro hook or pipeline node, instead of creating an in-memory context wi
 from pathlib import Path
 import great_expectations as gx
 
-context = gx.get_context(context_root_dir=Path.cwd() / "great_expectations")
-suite = context.suites.get("companies_suite")
+def validate_companies(companies: pd.DataFrame,) -> None:
+    context = gx.get_context(context_root_dir=Path.cwd() / "great_expectations")
+    suite = context.suites.get("companies_suite")
 
-source = context.data_sources.add_or_update_pandas("companies_source")
-asset = source.add_dataframe_asset("companies")
+    source = context.data_sources.add_or_update_pandas("companies_source")
+    asset = source.add_dataframe_asset("companies")
 
-batch_request = asset.build_batch_request(options={"dataframe": companies})
-batch = asset.get_batch(batch_request)
-result = batch.validate(suite)
+    batch_request = asset.build_batch_request(options={"dataframe": companies})
+    batch = asset.get_batch(batch_request)
+    result = batch.validate(suite)
+
+    if not result.success:
+        raise gx.exceptions.ValidationError(f"Validation failed for: 'companies'")
 ```
 
 Using a file-based Data Context makes it straightforward to:

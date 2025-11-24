@@ -93,7 +93,7 @@ When you validate data, Great Expectations:
 - During quick interactive work you may use an ephemeral GX Data Context (no files persisted between runs). This is fine for exploration and iterative expectation creation.
 - For production runs, persist expectation suites and use a file-based Data Context so suites, validation results and histories are reproducible and shareable.
 
-## Use cases
+## Integration Options
 
 In this section, we're going to use Great Expectations for data validation in two ways:
 - **As a Kedro hook**: Automatic validation whenever data is loaded/saved, as an initial, low-friction method of integration.
@@ -112,7 +112,7 @@ This separation has a few key advantages:
 
 In this example we create a file in `src/spaceflights_great_expectations/expectations.py` and declare a dictionary that maps dataset names to the list of expectations that apply to them.
 
-We also include a convenience function get_suite(), which builds a proper Great Expectations ExpectationSuite object based on the rules defined in the dictionary.
+We also include a convenience function get_suite(), which builds a Great Expectations ExpectationSuite object based on the rules defined in the dictionary.
 
 ```py
 import great_expectations as gx
@@ -140,7 +140,7 @@ def get_suite(name: str) -> gx.ExpectationSuite:
 
 ### Approach 1: As a Kedro hook
 
-Hooks allow you to automatically validate data as it flows through your pipeline, without modifying your existing pipeline code.
+[Hooks](../extend/hooks/introduction.md) allow you to automatically validate data as it flows through your pipeline, without modifying your existing pipeline code.
 
 Kedro hooks are functions that run automatically at specific points in your pipeline execution:
 - `before_node_run`: Runs before a node executes (useful for validating inputs)
@@ -248,7 +248,7 @@ Calculating Metrics: 100%|██████████████████
 Another option for data validation is to integrate Great Expectations as explicit nodes in a Kedro pipeline.
 
 Pipeline nodes offer several advantages:
-- **Visibility**: Validation appears as nodes in `kedro viz`, making it clear where quality gates exist
+- **Visibility**: Validation nodes appear in [Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/), making it clear where quality gates exist
 - **Control**: Easy to run or skip validation using features like [tags](../deploy/nodes_grouping.md#grouping-by-tags) or [running pipelines by name](../getting-started/commands_reference.md#kedro-run).
 - **Flexibility**: Place validation at any point—before preprocessing, after transformations, before modeling, etc.
 - **Data lineage**: Validated datasets appear explicitly in your data catalog
@@ -402,7 +402,7 @@ import great_expectations as gx
 context = gx.get_context(context_root_dir="great_expectations")
 ```
 
-This will create a directory structure like:
+This will create a Great Expectations context directory structure in the selected path:
 
 ```
 great_expectations/

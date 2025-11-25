@@ -255,6 +255,65 @@ def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
 
     This can be useful for validating node functions in isolation.
 
+### Validating inside a Kedro node
+
+If you prefer the validation step to be an explicit node in the pipeline, you can create a validation node that uses your Pandera schemas and fails the run when validation does not pass.
+
+Add a node to `src/spaceflights_pandera/pipelines/data_processing/nodes.py`:
+
+```python
+import pandas as pd
+from pandera.errors import SchemaErrors
+from schemas.raw import companies_schema, shuttles_schema, reviews_schema
+
+def validate_datasets(companies: pd.DataFrame, shuttles: pd.DataFrame, reviews: pd.DataFrame) -> None:
+    """Validate multiple datasets using Pandera schemas and raise on failure.
+
+    Args:
+        companies: Companies dataframe.
+        shuttles: Shuttles dataframe.
+        reviews: Reviews dataframe.
+
+    Raises:
+        pandera.errors.SchemaErrors: If any validation fails.
+    """
+
+    EXPECTED = {
+        "companies": (companies_schema, companies),
+        "shuttles": (shuttles_schema, shuttles),
+        "reviews": (reviews_schema, reviews),
+    }
+
+    for name, (schema, df) in EXPECTED.items():
+        try:
+            schema.validate(df, lazy=True)
+        except SchemaErrors:
+            # Re-raise so Kedro stops the pipeline; you can customize logging or
+            # aggregate results before raising if you prefer non-eager behavior.
+            raise
+```
+
+Then add the node to your pipeline (example pipeline change):
+
+```python
+def create_pipeline(**kwargs) -> Pipeline:
+    return Pipeline(
+        [
+            Node(
+                func=validate_datasets,
+                inputs=["companies", "shuttles", "reviews"],
+                outputs=None,
+                name="validate_datasets_node",
+            ),
+            # ...existing nodes...
+        ]
+    )
+```
+
+- Use a validation node when you want the validation step visible in the DAG and to create explicit validated outputs (you can also make validation nodes pass data through by returning validated data).
+- Prefer loading schemas from the `schemas` module (as shown) or from config; avoid hardcoding rules inside hook/node bodies.
+- Decide on eager vs. lazy behavior: this example uses `lazy=True` to collect all errors; you can switch to `lazy=False` for fail-fast behavior.
+
 ## Advanced use cases
 
 ### Controlling validation behavior with environment variables

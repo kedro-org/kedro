@@ -55,7 +55,7 @@ The `settings.py` file is an important configuration file in a Kedro project tha
 Even if you do not have any settings, an empty `settings.py` is still required. Typically, they are stored at `src/<package_name>/settings.py`.
 
 #### `pipeline_registry.py`
-The `pipeline_registry.py` file is essential for managing the pipelines within your Kedro project. It provides a centralized way to register and access all pipelines defined in the project. Here are its key features:
+The `pipeline_registry.py` file is essential for managing the pipelines within your Kedro project. It provides a centralised way to register and access all pipelines defined in the project. Here are its key features:
 - Pipeline Registration: The file must contain a top-level function called `register_pipelines()` that returns a mapping from pipeline names to Pipeline objects. This function is crucial because it enables the Kedro CLI and other tools to discover and run the defined pipelines.
 - Autodiscovery of Pipelines: Since Kedro 0.18.3, you can use the [`find_pipeline`](../build/pipeline_registry.md#pipeline-autodiscovery) function to automatically discover pipelines defined in your project without manually updating the registry each time you create a new pipeline.
 

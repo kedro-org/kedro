@@ -11,7 +11,7 @@ This page contains a set of guides for advanced usage of the `DataCatalog` API i
 - [How to configure the Data Catalog](#how-to-configure-the-data-catalog)
 - [How to access datasets in the catalog](#how-to-access-datasets-in-the-catalog)
 - [How to add datasets to the catalog](#how-to-add-datasets-to-the-catalog)
-- [How to iterate through datasets in the catalog](#how-to-iterate-trough-datasets-in-the-catalog)
+- [How to iterate through datasets in the catalog](#how-to-iterate-through-datasets-in-the-catalog)
 - [How to get the number of datasets in the catalog](#how-to-get-the-number-of-datasets-in-the-catalog)
 - [How to print the full catalog and individual datasets](#how-to-print-the-full-catalog-and-individual-datasets)
 - [How to load datasets programmatically](#how-to-load-datasets-programmatically)
@@ -83,6 +83,7 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 
 - Both methods retrieve a dataset by name from the catalog’s internal collection.
 - If the dataset isn’t materialised but matches a configured pattern, it is instantiated and returned.
+
 - The `.get()` method accepts:
     - `fallback_to_runtime_pattern` (`bool`): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
     - `version`: Specify dataset version if versioning is enabled.
@@ -103,7 +104,7 @@ catalog["cars"] = ["Ferrari", "Audi"]  # Add raw data
 ```
 When raw data is added, it's automatically wrapped in a `MemoryDataset`.
 
-## How to iterate trough datasets in the catalog
+## How to iterate through datasets in the catalog
 
 `DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, just as in standard Python dictionaries:
 

@@ -20,6 +20,7 @@ Globals
 globals
 ipdb
 IPython
+Jupyter
 Kaggle
 Kedro
 Kedro's
@@ -50,6 +51,7 @@ repo
 SQLAlchemy
 Serverless
 serverless
+show_source
 Streamlit
 Templated
 templated
@@ -59,3 +61,4 @@ transcoding
 VSCode
 Xebia
 yaml
+

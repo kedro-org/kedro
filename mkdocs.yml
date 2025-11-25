@@ -453,6 +453,7 @@ nav:
           - DVC: integrations-and-plugins/dvc.md
           - Delta Lake: integrations-and-plugins/deltalake_versioning.md
           - Iceberg: integrations-and-plugins/iceberg_versioning.md
+          - Great Expectations: integrations-and-plugins/great_expectations.md
           - Pandera: integrations-and-plugins/pandera.md
       - IDE Support:
           - Visual Studio Code: ide/set_up_vscode.md

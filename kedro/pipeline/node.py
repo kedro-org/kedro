@@ -40,6 +40,34 @@ class GroupedNodes:
     dependencies: list[str] = field(default_factory=list)
 
 
+# Decorator to attach preview to function
+def with_node_preview(preview_fn: Callable[..., PreviewPayload]):
+    """Decorator to attach a preview function to a node function.
+
+    Args:
+        preview_fn: A function that returns a PreviewPayload instance.
+
+    Example:
+        # Preview function with no arguments
+        def preview_graph() -> PreviewPayload:
+            return PreviewPayload(kind="mermaid", content="graph TD; A-->B")
+
+        # Preview function with arguments
+        def preview_with_args(data) -> PreviewPayload:
+            return PreviewPayload(kind="text", content=f"Preview: {data}")
+
+        @with_node_preview(preview_graph)
+        def compile_graph(config):
+            return build_graph(config)
+    """
+
+    def decorator(func):
+        func.__kedro_node_preview_fn__ = preview_fn
+        return func
+
+    return decorator
+
+
 class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
     run user-provided functions as part of Kedro pipelines.
@@ -55,7 +83,6 @@ class Node:
         tags: str | Iterable[str] | None = None,
         confirms: str | list[str] | None = None,
         namespace: str | None = None,
-        preview_fn: Callable[..., PreviewPayload] | None = None,
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -84,7 +111,6 @@ class Node:
                 Specified dataset names do not necessarily need to be present
                 in the node ``inputs`` or ``outputs``.
             namespace: Optional node namespace.
-            preview_fn: A function that corresponds to previewing intermediate compiled objects.
 
         Raises:
             ValueError: Raised in the following cases:
@@ -173,7 +199,6 @@ class Node:
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
         self._confirms = confirms
-        self._preview_fn = preview_fn
 
     def _copy(self, **overwrite_params: Any) -> Node:
         """
@@ -187,7 +212,6 @@ class Node:
             "namespace": self._namespace,
             "tags": self._tags,
             "confirms": self._confirms,
-            "preview_fn": self._preview_fn,
         }
         params.update(overwrite_params)
         return Node(**params)  # type: ignore[arg-type]
@@ -400,9 +424,9 @@ class Node:
         """Return whether the node has preview functionality.
 
         Returns:
-            True if the node has a preview configuration, False otherwise.
+            True if the node function has a preview function attached, False otherwise.
         """
-        return self._preview_fn is not None
+        return hasattr(self.func, "__kedro_node_preview_fn__")
 
     def preview(self, *args: Any, **kwargs: Any) -> PreviewPayload | None:
         """Generate a preview of the node.
@@ -414,27 +438,25 @@ class Node:
         Returns:
             Preview payload if preview is configured, None otherwise.
         """
-        if not self._preview_fn:
+        preview_fn = getattr(self.func, "__kedro_node_preview_fn__", None)
+        if not preview_fn:
             return None
 
         # Use signature inspection to call the function intelligently
-        sig = inspect.signature(self._preview_fn)
+        sig = inspect.signature(preview_fn)
         try:
             # Try to bind the arguments to the function signature
             bound = sig.bind(*args, **kwargs)
             bound.apply_defaults()
-            return self._preview_fn(*bound.args, **bound.kwargs)
+            return preview_fn(*bound.args, **bound.kwargs)
         except TypeError:
-            # Fallback to calling with all arguments if binding fails
-            return self._preview_fn(*args, **kwargs)
-        except Exception as exc:
-            self._logger.warning(
-                "No node preview for %s will be returned as fetching preview failed with error: \n%s",
-                str(self),
-                str(exc),
-                extra={"markup": True},
-            )
-            return None
+            # If binding fails (e.g., function takes no args but args were provided),
+            # try calling with no arguments
+            try:
+                return preview_fn()
+            except TypeError:
+                # If that also fails, try calling with all provided arguments
+                return preview_fn(*args, **kwargs)
 
     def run(self, inputs: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results
@@ -706,7 +728,6 @@ def node(  # noqa: PLR0913
     tags: str | Iterable[str] | None = None,
     confirms: str | list[str] | None = None,
     namespace: str | None = None,
-    preview_fn: Callable[..., PreviewPayload] | None = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.
@@ -733,7 +754,6 @@ def node(  # noqa: PLR0913
             names do not necessarily need to be present in the node ``inputs``
             or ``outputs``.
         namespace: Optional node namespace.
-        preview_fn: A function that corresponds to previewing intermediate compiled objects.
 
     Returns:
         A Node object with mapped inputs, outputs and function.
@@ -775,7 +795,6 @@ def node(  # noqa: PLR0913
         tags=tags,
         confirms=confirms,
         namespace=namespace,
-        preview_fn=preview_fn,
     )
 
 

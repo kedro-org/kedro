@@ -46,7 +46,7 @@ The function takes a pandas `DataFrame` and dictionary of parameters as input, a
 2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
 3. Assert: Ensure that the length of the outputs are the same as the expected lengths
 
-The cleanup step becomes necessary in a test when any of the previous steps make modifications that may influence other tests - e.g. by modifying a file used as input for several tests. This is not the case for the example tests below, and so the cleanup step is omitted.
+The cleanup step becomes necessary in a test when any of the previous steps make modifications that may influence other tests - for example, by modifying a file used as input for several tests. This is not the case for the example tests below, and so the cleanup step is omitted.
 
 Remember to import the function being tested and any necessary modules at the top of the file.
 
@@ -131,7 +131,7 @@ Using the same steps as above, we can write the following test to validate an er
 
 ## Writing tests for Kedro pipelines: Integration testing
 
-Writing tests for each node ensures each node will behave as expected when run individually. However, we must also consider how nodes in a pipeline interact with each other - this is called integration testing. Integration testing combines individual units as a group and checks whether they communicate, share data, and work together as expected. Let us look at this in practice.
+Writing tests for each node ensures each node will behave as expected when run individually. Though, we must also consider how nodes in a pipeline interact with each other - this is called integration testing. Integration testing combines individual units as a group and checks whether they communicate, share data, and work together as expected. Let us look at this in practice.
 
 Consider the data science pipeline as a whole:
 
@@ -292,7 +292,7 @@ def test_split_data(dummy_data, dummy_parameters):
 
 ### Pipeline slicing
 
-In the test `test_data_science_pipeline` we test the data science pipeline, as currently defined, can be run successfully. However, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../build/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
+In the test `test_data_science_pipeline` we test the data science pipeline, as currently defined, can be run successfully. Though, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../build/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
 
 ```python
 def test_data_science_pipeline(self):

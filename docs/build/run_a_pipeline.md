@@ -12,7 +12,7 @@ We recommend using `SequentialRunner` in cases where:
 
 - the pipeline has limited branching
 - the pipeline is fast
-- the resource-consuming steps require most of a scarce resource (e.g., significant RAM, disk memory or CPU)
+- the resource-consuming steps require most of a scarce resource (for example, significant RAM, disk memory or CPU)
 
 Kedro uses `SequentialRunner` by default, so to execute the pipeline sequentially:
 
@@ -143,7 +143,7 @@ When processing a node, both `SequentialRunner` and `ParallelRunner` perform the
 2. Execute node function with the input(s)
 3. Save the output(s)
 
-If a node has multiple inputs or outputs (e.g., `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
+If a node has multiple inputs or outputs (for example, `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
 
 ```bash
 $ kedro run --async
@@ -281,7 +281,7 @@ from kedro.framework.project import pipelines
 from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 
-# Load your catalog configuration (e.g., from YAML)
+# Load your catalog configuration (for example, from YAML)
 catalog = DataCatalog.from_config(catalog_config)
 
 pipeline = pipelines.get("__default__")

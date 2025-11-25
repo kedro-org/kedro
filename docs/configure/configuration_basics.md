@@ -54,15 +54,15 @@ The `base` folder contains the default settings that are used across your pipeli
     Do not put private access credentials in the base configuration folder or any other configuration environment folder that is stored in version control.
 
 ### Local
-The `local` configuration environment folder should be used for configuration that is either user-specific (e.g. IDE configuration) or protected (e.g. security keys).
+The `local` configuration environment folder should be used for configuration that is either user-specific (for example, IDE configuration) or protected (for example, security keys).
 
 !!! warning
     Do not add any local configuration to version control.
 
 
 ## Configuration loading
-Kedro-specific configuration (e.g., [kedro.io.DataCatalog][] configuration for I/O) is loaded using a configuration loader class, by default, this is [kedro.config.OmegaConfigLoader][].
-When you interact with Kedro through the command line, e.g. by running `kedro run`, Kedro loads all project configuration in the configuration source through this configuration loader.
+Kedro-specific configuration (for example, [kedro.io.DataCatalog][] configuration for I/O) is loaded using a configuration loader class, by default, this is [kedro.config.OmegaConfigLoader][].
+When you interact with Kedro through the command line, for example, by running `kedro run`, Kedro loads all project configuration in the configuration source through this configuration loader.
 
 The loader recursively scans for configuration files inside the `conf` folder, firstly in `conf/base` (`base` being the default environment) and then in `conf/local` (`local` being the designated overriding environment).
 
@@ -226,7 +226,7 @@ s3://my-bucket/configs/
 ```
 
 !!! note
-    While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not currently support reading compressed files directly from cloud storage (e.g., s3://my-bucket/configs.tar.gz).
+    While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not currently support reading compressed files directly from cloud storage (for example, s3://my-bucket/configs.tar.gz).
 
 ### How to access configuration in code
 To directly access configuration in code, for example to debug, you can do so as follows:

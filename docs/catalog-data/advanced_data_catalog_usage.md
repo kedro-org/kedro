@@ -341,7 +341,7 @@ patterns = catalog.config_resolver.list_patterns() # List all patterns
 
 ## How to save catalog to config
 
-You can serialize a `DataCatalog` into configuration format (e.g., for saving to a YAML file) using `.to_config()`:
+You can serialize a `DataCatalog` into configuration format (for example, for saving to a YAML file) using `.to_config()`:
 
 ```python
 from kedro.io import DataCatalog

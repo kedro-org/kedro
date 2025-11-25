@@ -101,10 +101,10 @@ When resolving a dataset name, Kedro uses the following order of precedence:
 Specific patterns defined in the `catalog.yml`. These are the most explicit and are matched first.
 
 2. **User catch-all pattern:**
-A general fallback pattern (e.g., `{default_dataset}`) that is matched if no dataset patterns apply. Only one user catch-all pattern is allowed. Multiple will raise a `DatasetError`.
+A general fallback pattern (for example, `{default_dataset}`) that is matched if no dataset patterns apply. Only one user catch-all pattern is allowed. Multiple will raise a `DatasetError`.
 
 3. **Default runtime patterns:**
-Internal fallback behavior provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (e.g., `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
+Internal fallback behavior provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (for example, `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
 
 ## How resolution works in practice
 
@@ -156,7 +156,7 @@ Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
 **Default vs runtime behavior**
 
 - Default behavior: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
-- Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
+- Runtime behavior (for example, during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
 
 !!! note
     Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
@@ -484,7 +484,7 @@ This mixin approach allows these commands to be injected only when needed - avoi
 You don't need to do anything if:
 
 - You're using Kedro via CLI, or
-- Working inside an interactive environment (e.g. IPython, Jupyter Notebook).
+- Working inside an interactive environment (for example, IPython, Jupyter Notebook).
 
 Kedro automatically composes the catalog with `CatalogCommandsMixin` behind the scenes when initializing the session.
 

@@ -47,7 +47,7 @@ class SparkHooks:
         _spark_session.sparkContext.setLogLevel("WARN")
 ```
 
-You should modify this code to adapt it to your cluster's setup, e.g. setting master to `yarn` if you are running Spark on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
+You should modify this code to adapt it to your cluster's setup, for example, setting master to `yarn` if you are running Spark on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
 
 Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere in your pipeline. `SparkSession.builder.getOrCreate()` is a global [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html).
 
@@ -193,7 +193,7 @@ The `assign` copy mode ensures that the `MemoryDataset` will be assigned the Spa
 
 ## Tips for maximising concurrency using `ThreadRunner`
 
-Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the [kedro.runner.ThreadRunner][]:
+Under the hood, every Kedro node that performs a Spark action (for example, `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the [kedro.runner.ThreadRunner][]:
 
 ```bash
 kedro run --runner=ThreadRunner

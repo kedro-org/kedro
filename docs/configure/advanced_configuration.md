@@ -48,7 +48,7 @@ CONFIG_LOADER_CLASS = CustomConfigLoader
 
 ### How to change which configuration files are loaded
 If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md).
-For example, if your `parameters` files are using a `params` naming convention instead of `parameters` (e.g. `params.yml`) you need to update `CONFIG_LOADER_ARGS` as follows:
+For example, if your `parameters` files are using a `params` naming convention instead of `parameters` (for example, `params.yml`) you need to update `CONFIG_LOADER_ARGS` as follows:
 
 ```python
 CONFIG_LOADER_ARGS = {

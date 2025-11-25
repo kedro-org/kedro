@@ -117,7 +117,7 @@ Outputs: None
 
 ## How to receive information about the nodes in a pipeline
 
-Pipelines provide access to their nodes in a topological order to enable custom functionality, e.g. pipeline visualisation. Each node has information about its inputs and outputs:
+Pipelines provide access to their nodes in a topological order to enable custom functionality, for example, pipeline visualisation. Each node has information about its inputs and outputs:
 
 ```python
 nodes = variance_pipeline.nodes

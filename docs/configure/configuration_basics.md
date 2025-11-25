@@ -2,12 +2,14 @@
 
 This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters.md), [credentials](./credentials.md), the [data catalog](../catalog-data/data_catalog.md), and [logging information](../develop/logging.md).
 
-Kedro makes use of a configuration loader to load any project configuration files, which you can use via [kedro.config.OmegaConfigLoader][].
+Kedro makes use of a configuration loader to load any project configuration files, which you can access through [kedro.config.OmegaConfigLoader][].
 
 !!! note
     `ConfigLoader` and `TemplatedConfigLoader` have been removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
 
+<!-- vale Kedro.headings = NO -->
 ## OmegaConfigLoader
+<!-- vale Kedro.headings = YES -->
 
 [OmegaConf](https://omegaconf.readthedocs.io/) is a Python library designed to handle and manage settings. It serves as a YAML-based hierarchical system to organise configurations, which can be structured to accommodate various sources, allowing you to merge settings from multiple locations.
 
@@ -25,7 +27,7 @@ When you need to load configurations manually, such as for exploration in a note
 1. Use the `OmegaConfigLoader` class provided by Kedro.
 2. Directly use the `OmegaConf` library.
 
-Kedro's `OmegaConfigLoader` is designed to handle complex project environments. If your use case involves loading only one configuration file and is straightforward, it may be simpler to use `OmegaConf` directly.
+Kedro's `OmegaConfigLoader` is designed to handle complex project environments. If your use case involves loading a single configuration file and is straightforward, it may be simpler to use `OmegaConf` directly.
 
 ```python
 from omegaconf import OmegaConf
@@ -72,7 +74,7 @@ Kedro merges configuration information and returns a configuration dictionary ac
 * If two configuration files contain the same top-level key but are in **different** environment paths (for example, one in `conf/base/`, another in `conf/local/`) then the last loaded path (`conf/local/`) takes precedence as the key value. `OmegaConfigLoader.__getitem__` does not raise any errors but a `DEBUG` level log message is emitted with information on the overridden keys.
 * If any two parameter configuration files contain the same top-level key, the configuration loader checks the sub-keys for duplicates. If there are any, it raises a `ValueError` indicating that duplicates are not allowed.
 
-When using any of the configuration loaders, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet)
+When using any of the configuration loaders, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. You can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet)
 or [to enable templating in the catalog when using the `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader).
 
 ### Configuration file names
@@ -80,7 +82,7 @@ Configuration files will be matched according to file name and type rules. Suppo
 
 * *Either* of the following is true:
   * filename starts with `catalog`
-  * file is located in a subfolder whose name is prefixed with `catalog`
+  * file is located in a subdirectory whose name is prefixed with `catalog`
 * *And* file extension is one of the following: `yaml`, `yml`, or `json`
 
 ### Configuration patterns
@@ -111,7 +113,7 @@ This section contains a set of guidance for the most common configuration requir
 * [How to load a data catalog with credentials in code?](#how-to-load-a-data-catalog-with-credentials-in-code)
 * [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
 * [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
-* [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
+* [How to use a single configuration environment](#how-to-use-a-single-configuration-environment)
 
 ### How to change the setting for a configuration source folder
 To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md) as follows:
@@ -144,7 +146,7 @@ kedro run --conf-source=<path-to-compressed-file>.zip
 
 To compress your configuration you can use Kedro's `kedro package` command which builds the package into the `dist/` folder of your project, and creates a `.whl` file, as well as a `tar.gz` file containing the project configuration. The compressed version of the config files excludes any files inside your `local` folder.
 
-Alternatively you can run the command below to create a `tar.gz` file:
+You can also run the command below to create a `tar.gz` file:
 
 ```bash
 tar --exclude=local/*.yml -czf <my_conf_name>.tar.gz --directory=<path-to-conf-dir> <conf-dir>
@@ -212,7 +214,7 @@ export AZURE_STORAGE_ACCOUNT=your_account_name
 export AZURE_STORAGE_KEY=your_account_key
 kedro run --conf-source=abfs://container@account/configs/
 ```
-For more detailed authentication instructions, refer to the documentation of your cloud provider.
+For more detailed authentication instructions, see the documentation of your cloud provider.
 
 The remote storage should maintain the same configuration structure as local configuration, with appropriate `base` and environment folders:
 
@@ -226,7 +228,7 @@ s3://my-bucket/configs/
 ```
 
 !!! note
-    While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not currently support reading compressed files directly from cloud storage (for example, s3://my-bucket/configs.tar.gz).
+    While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not support reading compressed files directly from cloud storage (for example, s3://my-bucket/configs.tar.gz).
 
 ### How to access configuration in code
 To directly access configuration in code, for example to debug, you can do so as follows:
@@ -268,7 +270,7 @@ catalog = DataCatalog.from_config(catalog=conf_catalog, credentials=conf_credent
 ```
 
 ### How to specify additional configuration environments
-In addition to the two built-in `local` and `base` configuration environments, you can create your own. Your project loads `conf/base/` as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create, such as `conf/server/` or `conf/test/`. To use additional configuration environments, run the following command:
+Besides the two built-in `local` and `base` configuration environments, you can create your own. Your project loads `conf/base/` as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create, such as `conf/server/` or `conf/test/`. To use additional configuration environments, run the following command:
 
 ```bash
 kedro run --env=<your-environment>
@@ -294,8 +296,8 @@ For example, if you want to override `base` with configuration in a custom envir
 CONFIG_LOADER_ARGS = {"default_run_env": "prod"}
 ```
 
-### How to use only one configuration environment
-Customise the configuration loader arguments in `settings.py` as follows if your project does not have any other environments apart from `base` (i.e. no `local` environment to default to):
+### How to use a single configuration environment
+Customise the configuration loader arguments in `settings.py` as follows if your project does not have any other environments apart from `base` (that is, no `local` environment to default to):
 
 ```python
 CONFIG_LOADER_ARGS = {"default_run_env": "base"}

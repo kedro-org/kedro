@@ -7,6 +7,7 @@ config
 conda
 Cookiecutter
 Databricks
+Dask
 dbx
 Dockerfile
 doxenix
@@ -24,11 +25,14 @@ matplotlib
 Matplotlib
 Marimo
 MLflow
+Modin
 namespace
 namespaced
 namespaces
 networkx
+Pandera
 Plotly
+Polars
 Printify
 Pylint
 pyenv

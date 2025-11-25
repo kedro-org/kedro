@@ -257,7 +257,7 @@ def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
 
 ### Validating inside a Kedro node
 
-If you prefer the validation step to be an explicit node in the pipeline, you can create a validation node that uses your Pandera schemas and fails the run when validation does not pass.
+If you prefer the validation step to be an explicit node in the pipeline, you can create a validation node that uses your Pandera schemas. It will fail the run when validation does not pass.
 
 Add a node to `src/spaceflights_pandera/pipelines/data_processing/nodes.py`:
 

@@ -82,7 +82,7 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 ```
 
 - Both methods retrieve a dataset by name from the catalog’s internal collection.
-- If the dataset isn’t materialized but matches a configured pattern, it's instantiated and returned.
+- If the dataset isn’t materialised but matches a configured pattern, it's instantiated and returned.
 - The `.get()` method accepts:
     - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
     - `version`: Specify dataset version if versioning is enabled.
@@ -341,7 +341,7 @@ patterns = catalog.config_resolver.list_patterns() # List all patterns
 
 ## How to save catalog to config
 
-You can serialize a `DataCatalog` into configuration format (e.g., for saving to a YAML file) using `.to_config()`:
+You can serialise a `DataCatalog` into configuration format (e.g., for saving to a YAML file) using `.to_config()`:
 
 ```python
 from kedro.io import DataCatalog
@@ -362,7 +362,7 @@ new_catalog = DataCatalog.from_config(config, credentials, load_versions, save_v
 ```
 
 !!! note
-    This method only works for datasets with static, serializable parameters. For example, you can serialize credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`. In-memory datasets are excluded.
+    This method only works for datasets with static, serialisable parameters. For example, you can serialise credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`. In-memory datasets are excluded.
 
 ## How to filter catalog datasets
 
@@ -382,7 +382,7 @@ catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])  # M
 ```
 
 ## How to get dataset type
-You can check the dataset type without materializing or adding it to the catalog:
+You can check the dataset type without materialising or adding it to the catalog:
 
 ```python
 from kedro.io import DataCatalog, MemoryDataset

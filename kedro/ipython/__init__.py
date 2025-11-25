@@ -14,10 +14,11 @@ import typing
 import warnings
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Callable, Final
+from typing import TYPE_CHECKING, Any, Final
 
 if TYPE_CHECKING:
     from collections import OrderedDict
+    from collections.abc import Callable
 
     from IPython.core.interactiveshell import InteractiveShell
 

@@ -7,7 +7,7 @@ theme:
   name: material
   custom_dir: docs/overrides/
   palette:
-     # Palette toggle for light mode
+    # Palette toggle for light mode
     - scheme: light
       toggle:
         icon: material/white-balance-sunny
@@ -52,6 +52,9 @@ plugins:
   - search
   - autorefs
   - mermaid2
+  - redirects:
+      redirect_maps:
+        'configuration/telemetry.md': 'about/telemetry.md'
   - mkdocstrings:
       handlers:
         python:
@@ -151,6 +154,7 @@ plugins:
           - develop/automated_testing.md: Writing tests for Kedro projects
           - develop/linting.md: Code formatting and linting setup
           - develop/debugging.md: Debugging Kedro pipelines
+          - develop/vibe_coding_with_mcp.md: Vibe coding with MCP
 
         Deployment:
           - deploy/index.md: Deployment overview and strategies
@@ -163,6 +167,7 @@ plugins:
           - deploy/supported-platforms/amazon_emr_serverless.md: Amazon EMR Serverless guide
           - deploy/supported-platforms/aws_step_functions.md: AWS Step Functions integration
           - deploy/supported-platforms/azure.md: Azure ML pipelines deployment
+          - deploy/supported-platforms/dagster.md: Dagster deployment
           - deploy/supported-platforms/dask.md: Dask integration for parallel computing
           - deploy/supported-platforms/databricks/index.md: Databricks overview
           - deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md: Databricks notebooks workflow
@@ -348,6 +353,7 @@ nav:
           - Automated testing: develop/automated_testing.md
           - Code formatting and linting: develop/linting.md
           - Debugging: develop/debugging.md
+          - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
       - Deploy:
           - Overview: deploy/index.md
           - How to package your project: deploy/package_a_project.md
@@ -360,6 +366,7 @@ nav:
               - Amazon EMR Serverless: deploy/supported-platforms/amazon_emr_serverless.md
               - AWS Step Functions: deploy/supported-platforms/aws_step_functions.md
               - Azure ML pipelines: deploy/supported-platforms/azure.md
+              - Dagster: deploy/supported-platforms/dagster.md
               - Dask: deploy/supported-platforms/dask.md
               - Databricks:
                 - Overview: deploy/supported-platforms/databricks/index.md
@@ -463,3 +470,14 @@ nav:
           - Kedro telemetry: about/telemetry.md
   - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/stable/
+
+not_in_nav: |
+  diagrams/
+  readme.md
+  integrations-and-plugins/marimo.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn

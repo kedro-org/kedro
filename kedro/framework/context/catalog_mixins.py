@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Iterable
-from typing import Any, Union
+from typing import Any
 
 from kedro.framework.project import pipelines as _pipelines
 from kedro.io import DataCatalog
@@ -78,7 +78,7 @@ class CatalogCommandsMixin:
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
     def describe_datasets(
-        self: DataCatalog, pipelines: Union[list[str], list[Pipeline], None] = None
+        self: DataCatalog, pipelines: list[str] | list[Pipeline] | None = None
     ) -> dict:
         """
         Describe datasets used in the specified pipelines, grouped by type.
@@ -160,7 +160,7 @@ class CatalogCommandsMixin:
 
     def resolve_patterns(
         self: DataCatalog,
-        pipelines: Union[list[Pipeline], None] = None,
+        pipelines: list[Pipeline] | None = None,
     ) -> dict[str, Any]:
         """
         Resolve dataset factory patterns against pipeline datasets.

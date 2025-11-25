@@ -292,6 +292,7 @@ extra_css:
 
 extra_javascript:
   - javascript/readthedocs.js
+  - javascript/deindex-old-docs.js
 
 
 nav:

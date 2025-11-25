@@ -76,7 +76,7 @@ more at https://docs.kedro.org/en/stable/configuration/telemetry.html
 ```
 
 You can hide this message by explicitly granting or denying consent. The
-[previous section](#how-do-i-withdraw-consent) explains how to deny consent by setting environment
+[previous section](#how-to-withdraw-consent) explains how to deny consent by setting environment
 variables or updating the `.telemetry` file. You can also grant consent by modifying or creating the
 `.telemetry` file manually. If the `.telemetry` file exists in the root folder of your Kedro
 project, set the `consent` variable to `true`. If the file does not exist, create it with the following content:

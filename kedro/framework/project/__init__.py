@@ -3,7 +3,7 @@ configure a Kedro project and access its settings."""
 
 from __future__ import annotations
 
-import importlib
+import importlib.resources
 import logging.config
 import operator
 import os
@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import dynaconf
-import importlib_resources
 import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -425,7 +424,7 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
 
     # Handle the case that a project doesn't have a pipelines directory.
     try:
-        pipelines_package = importlib_resources.files(f"{PACKAGE_NAME}.pipelines")
+        pipelines_package = importlib.resources.files(f"{PACKAGE_NAME}.pipelines")
     except ModuleNotFoundError as exc:
         if str(exc) == f"No module named '{PACKAGE_NAME}.pipelines'":
             return pipelines_dict

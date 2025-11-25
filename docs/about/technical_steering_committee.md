@@ -62,7 +62,7 @@ We look for commitment markers who can do the following:
 | [Ivan Danov](https://github.com/idanov)                  | [Palantir](https://www.palantir.com/)                                                   |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Joel Schwarzmann](https://github.com/datajoely)         | [Aneira Health](https://www.aneira.health)                                              |
-| [Juan Luis Cano](https://github.com/astrojuanlu)         | [Canonical](www.canonical.com )                                                         |
+| [Juan Luis Cano](https://github.com/astrojuanlu)         | [Canonical](https://www.canonical.com )                                                         |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [Printify, Inc.](https://printify.com/)                                                 |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |

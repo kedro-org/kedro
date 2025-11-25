@@ -6,10 +6,10 @@ import os
 import re
 from contextlib import contextmanager
 from time import sleep, time
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
     from pathlib import Path
 
 

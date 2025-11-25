@@ -5,13 +5,16 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   check-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install uv
@@ -37,6 +40,8 @@ jobs:
     uses: ./.github/workflows/all-checks.yml
 
   build-publish:
+    permissions:
+      contents: write
     needs: [check-version, test-kedro]
     if: |
       always() &&
@@ -45,9 +50,9 @@ jobs:
       needs.check-version.outputs.new_release == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install uv
@@ -79,7 +84,7 @@ jobs:
             "Release ${{ needs.check-version.outputs.kedro_version }}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.check-version.outputs.kedro_version }}
           name: ${{ needs.check-version.outputs.kedro_version }}

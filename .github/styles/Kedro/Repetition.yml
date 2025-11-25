@@ -1,0 +1,9 @@
+# Override Vale.Repetition to exclude code blocks and inline code
+extends: repetition
+message: "'%s' is repeated!"
+level: error
+# Check all scopes except code
+scope: 'text'
+alpha: true
+tokens:
+  - '[^\s]+'

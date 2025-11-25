@@ -16,14 +16,14 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
+
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import IO, Any, Callable
+from typing import IO, Any
 
 import click
-import importlib_metadata
 from omegaconf import OmegaConf
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
@@ -132,7 +132,7 @@ def validate_conf_source(ctx: click.Context, param: Any, value: str) -> str | No
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: tuple[str, Sequence[click.MultiCommand]]):
+    def __init__(self, *groups: tuple[str, Sequence[click.Group]]):
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
             for title, cli_list in groups
@@ -154,9 +154,9 @@ class CommandCollection(click.CommandCollection):
 
     @staticmethod
     def _merge_same_name_collections(
-        groups: Sequence[click.MultiCommand],
+        groups: Sequence[click.Group],
     ) -> list[click.CommandCollection]:
-        named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
+        named_groups: defaultdict[str, list[click.Group]] = defaultdict(list)
         helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
             named_groups[group.name].append(group)  # type: ignore[index]
@@ -331,7 +331,7 @@ def _check_module_importable(module_name: str) -> None:
 
 def _get_entry_points(name: str) -> Any:
     """Get all kedro related entry points"""
-    return importlib_metadata.entry_points().select(  # type: ignore[no-untyped-call]
+    return importlib.metadata.entry_points().select(  # type: ignore[no-untyped-call]
         group=ENTRY_POINT_GROUPS[name]
     )
 
@@ -352,7 +352,7 @@ def _safe_load_entry_point(
         return
 
 
-def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
+def load_entry_points(name: str) -> Sequence[click.Group]:
     """Load package entry point commands.
 
     Args:
@@ -530,12 +530,12 @@ class LazyGroup(click.Group):
 
     def get_command(  # type: ignore[override]
         self, ctx: click.Context, cmd_name: str
-    ) -> click.BaseCommand | click.Command | None:
+    ) -> click.Command | None:
         if cmd_name in self.lazy_subcommands:
             return self._lazy_load(cmd_name)
         return super().get_command(ctx, cmd_name)
 
-    def _lazy_load(self, cmd_name: str) -> click.BaseCommand:
+    def _lazy_load(self, cmd_name: str) -> click.Command:
         # lazily loading a command, first get the module name and attribute name
         import_path = self.lazy_subcommands[cmd_name]
         modname, cmd_object_name = import_path.rsplit(".", 1)

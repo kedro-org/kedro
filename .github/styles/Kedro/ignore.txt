@@ -8,6 +8,7 @@ conda
 Cookiecutter
 Dagster
 Databricks
+Dask
 dataframe
 dataframes
 dbx
@@ -28,14 +29,17 @@ matplotlib
 Matplotlib
 Marimo
 MLflow
+Modin
 namespace
 namespaced
 namespaces
 networkx
 numpy
+Pandera
 Palantir
 parameterising
 Plotly
+Polars
 Printify
 Pylint
 pyenv

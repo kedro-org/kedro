@@ -11,7 +11,7 @@ This page contains a set of guides for advanced usage of the `DataCatalog` API i
 - [How to configure the Data Catalog](#how-to-configure-the-data-catalog)
 - [How to access datasets in the catalog](#how-to-access-datasets-in-the-catalog)
 - [How to add datasets to the catalog](#how-to-add-datasets-to-the-catalog)
-- [How to iterate through datasets in the catalog](#how-to-iterate-trough-datasets-in-the-catalog)
+- [How to iterate through datasets in the catalog](#how-to-iterate-through-datasets-in-the-catalog)
 - [How to get the number of datasets in the catalog](#how-to-get-the-number-of-datasets-in-the-catalog)
 - [How to print the full catalog and individual datasets](#how-to-print-the-full-catalog-and-individual-datasets)
 - [How to load datasets programmatically](#how-to-load-datasets-programmatically)

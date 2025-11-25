@@ -46,7 +46,7 @@ The `kedro jupyter notebook` command launches a notebook with a customised kerne
 * `catalog` (type [kedro.io.DataCatalog][]): [Data Catalog](../../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type [kedro.framework.context.KedroContext][]): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../../build/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type [kedro.framework.session.KedroSession][]): [Kedro session](../../extend/session.md) that orchestrates a pipeline run
+* `session` (type [kedro.framework.session.session.KedroSession][]): [Kedro session](../../extend/session.md) that orchestrates a pipeline run
 
 In addition, it also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
 

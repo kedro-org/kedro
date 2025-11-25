@@ -2,7 +2,7 @@
 
 In this section, we introduce the concept of a node, for which the relevant API documentation is [`node`][kedro.pipeline.node].
 
-Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end (E2E) production workflows.
+Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from basic machine learning workflows to end-to-end (E2E) production workflows.
 
 You must first import libraries from Kedro and other standard tools to run the code snippets below.
 
@@ -17,7 +17,7 @@ import os
 
 ## How to create a node
 
-A node is created by specifying a function, input variable names and output variable names. Let's consider a simple function that adds two numbers:
+A node is created by specifying a function, input variable names and output variable names. Let's consider a function that adds two numbers:
 
 ```python
 def add(x, y):
@@ -89,7 +89,7 @@ A syntax describes function inputs and outputs. This syntax allows different Pyt
 Any combinations of the above are possible, except nodes of the form `Node(f, None, None)` (at least a single input or output must be provided).
 
 ## `*args` node functions
-It is common to have functions that take an arbitrary number of inputs, like a function that combines multiple dataframes. You can use the `*args` argument in the node function, while simply declaring the names of the datasets in the node's inputs.
+It is common to have functions that take an arbitrary number of inputs, like a function that combines multiple dataframes. You can use the `*args` argument in the node function, while declaring the names of the datasets in the node's inputs.
 
 ## `**kwargs`-only node functions
 
@@ -104,7 +104,7 @@ def reporting(**kwargs):
     return combined_report(result)
 ```
 
-Then, when it comes to constructing the `Node`, simply pass a dictionary to the node inputs:
+Then, when it comes to constructing the `Node`, pass a dictionary to the node inputs:
 
 ```python
 from kedro.pipeline import Node
@@ -151,7 +151,7 @@ Alternatively, you can also make use of a helper function that creates the mappi
 
 Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tags=ds` will only run nodes that have a `ds` tag attached.
 
-To tag a node, you can simply specify the `tags` argument:
+To tag a node, you can specify the `tags` argument:
 
 ```python
 Node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tags="node_tag")
@@ -168,7 +168,7 @@ kedro run --tags=pipeline_tag
 This will run only the nodes found within the pipeline tagged with `pipeline_tag`.
 
 !!! note
-    Node or tag names must ONLY contain letters, digits, hyphens, underscores and/or periods. Other symbols are not permitted.
+    Node or tag names must ONLY contain letters, digits, hyphens, underscores and periods. Other symbols are not permitted.
 
 
 ## How to run a node

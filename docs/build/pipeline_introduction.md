@@ -249,11 +249,11 @@ Pipeline([Node(lambda x: x, inputs="input1kedro", outputs="output1.kedro")])
 
 Nodes that are created with input or output names that contain `.` risk a disconnected pipeline or improperly-formatted Kedro structure.
 
-This is because `.` has a special meaning internally and indicates a namespace pipeline. In the example, the outputs segment should be disconnected as the name implies there is an "output1" namespace pipeline. The input is not namespaced, but the output is via its dot notation. This leads to Kedro processing each separately. For this example, a better approach would've been writing both as `input1_kedro` and `output1_kedro`.
+This is because `.` has a special meaning internally and indicates a namespace pipeline. In the example, the outputs segment should be disconnected as the name implies there is an "output1" namespace pipeline. The input is not namespaced, but the output is through its dot notation. This leads to Kedro processing each separately. For this example, a better approach would've been writing both as `input1_kedro` and `output1_kedro`.
 
 We recommend use of characters like `_` instead of `.` as name separators.
 
 
-## How to store pipeline code in a kedro project
+## How to store pipeline code in a Kedro project
 
-When managing your Kedro project, we recommend grouping related tasks into individual pipelines to achieve modularity. A project typically contains many tasks, and organising frequently executed tasks together into separate pipelines helps maintain order and efficiency. Each pipeline should ideally be organised in its own folder, promoting easy copying and reuse within project. Simply put: one pipeline, one folder. To assist with this, Kedro introduces the concept of [Modular Pipelines](modular_pipelines.md), which are described in the next section.
+When managing your Kedro project, we recommend grouping related tasks into individual pipelines to achieve modularity. A project typically contains many tasks, and organising frequently executed tasks together into separate pipelines helps maintain order and efficiency. Each pipeline should ideally be organised in its own folder, promoting copying and reuse within the project. In short: one pipeline, one folder. To assist with this, Kedro introduces the concept of [Modular Pipelines](modular_pipelines.md), which are described in the next section.

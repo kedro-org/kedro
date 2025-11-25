@@ -6,7 +6,10 @@ Conda
 config
 conda
 Cookiecutter
+Dagster
 Databricks
+dataframe
+dataframes
 dbx
 Dockerfile
 doxenix
@@ -14,6 +17,7 @@ ethanknights
 fsspec
 Globals
 globals
+ipdb
 IPython
 Kaggle
 Kedro
@@ -28,6 +32,9 @@ namespace
 namespaced
 namespaces
 networkx
+numpy
+Palantir
+parameterising
 Plotly
 Printify
 Pylint

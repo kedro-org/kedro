@@ -1,4 +1,10 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+
+# Release 1.1.0
 
 ## Major features and improvements
 * Added the `ignore_hidden` parameter to the `OmegaConfigLoader`.

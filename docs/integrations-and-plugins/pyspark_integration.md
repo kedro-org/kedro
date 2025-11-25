@@ -47,7 +47,7 @@ class SparkHooks:
         _spark_session.sparkContext.setLogLevel("WARN")
 ```
 
-You should modify this code to adapt it to your cluster's setup, for example, setting master to `yarn` if you are running Spark on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
+You should modify this code to adapt it to your cluster's setup, for example by configuring the `spark.master` setting to `yarn` when you run Spark on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
 
 Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere in your pipeline. `SparkSession.builder.getOrCreate()` is a global [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html).
 

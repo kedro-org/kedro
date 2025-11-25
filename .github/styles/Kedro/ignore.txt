@@ -12,6 +12,10 @@ doxenix
 fsspec
 globals
 Globals
+iPython
+ipython
+jupyter
+Jupyter
 Kaggle
 namespace
 namespaces
@@ -49,6 +53,7 @@ Claypot
 ethanknights
 Aneira
 Printify
+show_source
 Pandera
 Dask
 Polars

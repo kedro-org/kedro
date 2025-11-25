@@ -195,7 +195,7 @@ This simplifies fixing dataset errors caused by things such as typos in your dat
 
 ## Visualise the pipeline with Kedro-Viz
 
-To visualize your Kedro project using Kedro-Viz in Visual Studio Code, follow these steps:
+To visualise your Kedro project using Kedro-Viz in Visual Studio Code, follow these steps:
 
 1. **Open the Command Palette**:
 Press `Cmd` + `Shift` + `P` (on macOS) or `Ctrl` + `Shift` + `P` (on Windows/Linux).

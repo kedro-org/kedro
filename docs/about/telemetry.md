@@ -3,7 +3,7 @@ To help the [Kedro Project maintainers](../about/technical_steering_committee.md
 Kedro can capture anonymised telemetry.
 This data is collected with the sole purpose of improving Kedro by understanding feature usage.
 Importantly, we do not store personal information about you or sensitive data from your project,
-and this process is never utilized for marketing or promotional purposes.
+and this process is never utilised for marketing or promotional purposes.
 Participation in this program is optional, and it is enabled by default. Kedro will continue working as normal if you opt-out.
 
 The Kedro Project's telemetry has been reviewed and approved under the

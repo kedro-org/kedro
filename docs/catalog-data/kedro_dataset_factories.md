@@ -93,7 +93,7 @@ default_runtime_patterns: ClassVar = {
 These patterns enable automatic creation of in-memory or shared-memory datasets during execution.
 
 ## Patterns resolution order
-When the `DataCatalog` is initialized, it scans the configuration to extract and validate any dataset patterns and user catch-all pattern.
+When the `DataCatalog` is initialised, it scans the configuration to extract and validate any dataset patterns and user catch-all pattern.
 
 When resolving a dataset name, Kedro uses the following order of precedence:
 
@@ -104,7 +104,7 @@ Specific patterns defined in the `catalog.yml`. These are the most explicit and 
 A general fallback pattern (e.g., `{default_dataset}`) that is matched if no dataset patterns apply. Only one user catch-all pattern is allowed. Multiple will raise a `DatasetError`.
 
 3. **Default runtime patterns:**
-Internal fallback behavior provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (e.g., `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
+Internal fallback behaviour provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (e.g., `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
 
 ## How resolution works in practice
 
@@ -153,10 +153,10 @@ WARNING: Config from the dataset pattern '{default_dataset}' in the catalog will
 Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
 ```
 
-**Default vs runtime behavior**
+**Default vs runtime behaviour**
 
-- Default behavior: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
-- Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
+- Default behaviour: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
+- Runtime behaviour (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
 
 !!! note
     Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
@@ -475,7 +475,7 @@ At the core of this implementation is the `CatalogCommandsMixin` - a mixin class
 
 **Why use a mixin?**
 
-The goal was to keep pipeline logic decoupled from the core `DataCatalog`, while still providing seamless access to helpful methods utilizing pipelines.
+The goal was to keep pipeline logic decoupled from the core `DataCatalog`, while still providing seamless access to helpful methods utilising pipelines.
 
 This mixin approach allows these commands to be injected only when needed - avoiding unnecessary overhead in simpler catalog use cases.
 
@@ -486,7 +486,7 @@ You don't need to do anything if:
 - You're using Kedro via CLI, or
 - Working inside an interactive environment (e.g. IPython, Jupyter Notebook).
 
-Kedro automatically composes the catalog with `CatalogCommandsMixin` behind the scenes when initializing the session.
+Kedro automatically composes the catalog with `CatalogCommandsMixin` behind the scenes when initialising the session.
 
 If you're working outside a Kedro session and want to access the extra catalog commands, you have two options:
 

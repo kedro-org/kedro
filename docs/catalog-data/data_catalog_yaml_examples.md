@@ -123,7 +123,7 @@ trains:
 
 ```yaml
 results_plot:
-  type: matplotlib.MatplotlibWriter
+  type: matplotlib.MatplotlibDataset
   filepath: gcs://your_bucket/data/08_results/plots/output_1.jpeg
   fs_args:
     project: my-project

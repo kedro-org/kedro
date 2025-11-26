@@ -12,7 +12,7 @@ This page introduces the basic sections of `catalog.yml`, which is the file Kedr
 ## The basics of `catalog.yml`
 A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorials/set_up_data.md).
 
-The example below registers two `csv` datasets and one `xlsx` dataset. To load or save a file within the local file system you must provide the dataset name (`key`), specify the dataset class via `type`, and set the file location using `filepath`.
+The example below registers two `csv` datasets and one `xlsx` dataset. To load or save a file within the local file system you must provide the dataset name (`key`), specify the dataset class through `type`, and set the file location using `filepath`.
 
 ```yaml
 companies:

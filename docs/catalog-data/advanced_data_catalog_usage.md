@@ -106,7 +106,7 @@ When raw data is added, it's automatically wrapped in a `MemoryDataset`.
 
 ## How to iterate through datasets in the catalog
 
-`DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, just as in standard Python dictionaries:
+`DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, mirroring standard Python dictionaries:
 
 ```python
 for ds_name in catalog:  # Default iteration over keys

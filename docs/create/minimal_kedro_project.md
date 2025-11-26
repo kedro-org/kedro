@@ -50,7 +50,7 @@ This informs Kedro where to look for the source code, `settings.py` and `pipelin
 The `settings.py` file is an important configuration file in a Kedro project that allows you to define various settings and hooks for your project. Here’s a breakdown of its purpose and functionality:
 - Project Settings: This file is where you can configure project-wide settings, such as defining the logging level, setting environment variables, or specifying paths for data and outputs.
 - Hooks Registration: You can register custom hooks in `settings.py`, which are functions that can be executed at specific points in the Kedro pipeline lifecycle (for example, before or after a node runs). This is useful for adding additional functionality, such as logging or monitoring.
-- Integration with Plugins: If you are using Kedro plugins, `settings.py` can also be utilized to configure them appropriately.
+- Integration with Plugins: If you are using Kedro plugins, `settings.py` can also be utilised to configure them appropriately.
 
 Even if you do not have any settings, an empty `settings.py` is still required. Typically, they are stored at `src/<package_name>/settings.py`.
 

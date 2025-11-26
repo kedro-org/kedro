@@ -42,7 +42,7 @@ Out[3]: {
 ```
 
 ## When is this useful?
-This lazy loading mechanism is particularly useful before runtime, during the warm-up phase of a pipeline. You can force materialisation of all datasets early on to:
+This lazy loading mechanism is useful before runtime, during the warm-up phase of a pipeline. You can force materialisation of all datasets early on to:
 
 - Catch configuration or import errors
 - Validate external dependencies

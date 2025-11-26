@@ -4,6 +4,10 @@
 ## Documentation changes
 ## Community contributions
 
+# Release 1.1.1
+## Bug fixes and other changes
+* Fixed project version mismatch error. The error is now only raised when the **major version** of the project and Kedro package differ, allowing minor and patch version differences without unnecessary failures.
+
 # Release 1.1.0
 
 ## Major features and improvements

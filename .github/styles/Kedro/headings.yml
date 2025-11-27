@@ -10,6 +10,7 @@ exceptions:
   - Amazon
   - Amazon Web Services
   - API
+  - Astro Cloud
   - AWS Step Functions
   - AWS Systems Manager
   - Azure
@@ -52,6 +53,7 @@ exceptions:
   - Kubernetes Service
   - Lambda
   - Linux
+  - MWAA
   - MySQL
   - Python
   - PySpark

@@ -107,7 +107,7 @@ _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("spaceflights-pyspark", _STARTERS_REPO, "spaceflights-pyspark"),
     KedroStarterSpec("databricks-iris", _STARTERS_REPO, "databricks-iris"),
     KedroStarterSpec(
-        "genai-customer-support", _STARTERS_REPO, "genai-customer-support"
+        "support-agent-langgraph", _STARTERS_REPO, "support-agent-langgraph"
     ),
 ]
 # Set the origin for official starters

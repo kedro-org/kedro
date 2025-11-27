@@ -1,6 +1,7 @@
 Aneira
 APIs
 Astro
+autodiscovery
 Claypot
 Conda
 config
@@ -30,15 +31,18 @@ Kubeflow
 matplotlib
 Matplotlib
 Marimo
+mixin
 MLflow
 Modin
 namespace
 namespaced
 namespaces
+namespacing
 networkx
 numpy
 Pandera
 Palantir
+Paramiko
 parameterising
 Plotly
 Polars
@@ -58,6 +62,7 @@ Templated
 templated
 tracebacks
 transcode
+transcoded
 transcoding
 VSCode
 Xebia

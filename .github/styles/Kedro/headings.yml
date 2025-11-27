@@ -25,12 +25,14 @@ exceptions:
   - Docker Compose
   - Docker Swarm
   - Dockerfile
+  - Excel
   - GitHub
   - GitHub Actions
   - Google
   - Google Analytics
   - Google Cloud
   - Google Cloud Functions
+  - Google Cloud Storage
   - GraphQL
   - Hook
   - Hooks
@@ -59,3 +61,4 @@ exceptions:
   - Ubuntu
   - Unix
   - URLs
+  - YAML

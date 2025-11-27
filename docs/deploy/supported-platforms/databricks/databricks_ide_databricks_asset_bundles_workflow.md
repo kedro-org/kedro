@@ -25,7 +25,7 @@ The main steps in this tutorial are as follows:
 - [Prerequisites](#prerequisites)
 - [Set up your project](#set-up-your-project)
 - [Create the Databricks Asset Bundles](#create-the-databricks-asset-bundles-using-kedro-databricks)
-- [Deploy Databricks Job](#deploy-databricks-job-using-databricks-asset-bundles)
+- [Deploy Databricks Job](#deploy-a-databricks-job-using-asset-bundles)
 - [Run Databricks Job](#how-to-run-the-deployed-job)
 
 ## Prerequisites
@@ -155,7 +155,7 @@ Updating deployment state...
 Deployment complete!
 ```
 
-## Run the deployed job
+## How to run the deployed job?
 
 There are two options to run Databricks Jobs:
 

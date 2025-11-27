@@ -24,6 +24,7 @@ Jupyter
 Kaggle
 Kedro
 Kedro's
+Kedroid
 Kedroids
 Kubeflow
 matplotlib

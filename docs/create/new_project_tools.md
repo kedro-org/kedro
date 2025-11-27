@@ -18,7 +18,7 @@ uvx kedro new
 This will start the new project creation workflow.
 
 !!! note
-    You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow to skip queries about how you want to customise the project. The flags are described below.
+    You can also add flags to `kedro new` to skip parts of the project creation workflow. This avoids the queries about how you want to customise the project. The flags are described below.
 
 ### Project name
 The first prompt asks you to input a project name.
@@ -103,7 +103,7 @@ In the final step you are asked whether you want to populate the project with an
 * [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark
 * [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools.
 
-Each starter example is tailored to demonstrate the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
+Each starter example is tailored to show the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
 
 ### Shortcut
 
@@ -220,7 +220,7 @@ Kedro promotes the use of unit tests to achieve high code quality and maintainab
 
 ### Custom logging
 
-Selecting the custom logging tool introduces the file `logging.yml` to your project's `conf` directory. This tool allows you to customise your logging configuration instead of using [Kedro's default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). The populated `conf/logging.yml` provides two additional logging handlers: `console` and `info_file_handler`, as well as `rich` that is available in the default configuration, though only `info_file_handler` and `rich` are used.
+Selecting the custom logging tool introduces the file `logging.yml` to your project's `conf` directory. This tool allows you to customise your logging configuration instead of using [Kedro's default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). The populated `conf/logging.yml` provides two additional logging handlers: `console` and `info_file_handler`, as well as `rich` that is available in the default configuration, though the configuration uses `info_file_handler` and `rich`.
 
 To use this provided logging configuration, remember to set the `KEDRO_LOGGING_CONFIG` environment variable to point to `logging.yml` by navigating to your project root and running the following command:
 
@@ -235,20 +235,20 @@ To learn more about using logging in your project, or modifying the logging conf
 Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, `conf.py` and `index.rst`, with some added features such as auto generation of HTML documentation.
 The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration by helping you create and maintain guides and API docs.
 
-If you did not initially select `docs` and want to implement it later you can do so by following the [official documentation](https://docs.kedro.org/en/stable/deploy/package_a_project/#add-documentation-to-a-kedro-project-if-you-have-not-selected-docs-tool for guidance on adding documentation to a Kedro project.
+If you did not initially select `docs` and want to add it later, follow the [official documentation](https://docs.kedro.org/en/stable/deploy/package_a_project/#add-documentation-to-a-kedro-project-if-you-have-not-selected-docs-tool) for guidance on adding documentation to a Kedro project.
 
 ### Data structure
 
-The Data Structure tool provides a local standardised folder hierarchy for your project data, which includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/getting-started/faq/#what-is-data-engineering-convention).
-This is crucial if you want to include example pipelines during the creation of your project as it can not be omitted from the tool selections.
-Kedro's capabilities extend far beyond local data storage. Kedro seamlessly integrates with Data Lakes and various databases through fsspec URIs, catering to the needs of professional teams that store their data in blob/object storage or databases.
+The Data Structure tool provides a local standardised folder hierarchy for your project data. It includes predefined folders such as raw, intermediate, and processed data, as determined by [data engineering convention](https://docs.kedro.org/en/stable/getting-started/faq/#what-is-data-engineering-convention).
+This selection is crucial if you want to include example pipelines during project creation because you cannot omit it from the tool choices.
+Kedro's capabilities extend far beyond local data storage. Kedro seamlessly integrates with data lakes and various databases through fsspec-compatible paths, catering to the needs of professional teams that store their data in blob/object storage or databases.
 We believe a well-organised data structure is key to efficient data management, allowing for scalable and maintainable data pipelines.
 You can learn more about Kedro's recommended [project directory structure](https://docs.kedro.org/en/stable/getting-started/kedro_concepts/#kedro-project-directory-structure).
 
 ### PySpark
 
-The `PySpark` tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs, this will allow you to process datasets using Apache Spark for scalable data processing.
-PySpark aligns with Kedro's scalability principle, as it provides data processing capabilities for large datasets.
+The `PySpark` tool modifies the project's `requirements.txt` to include PySpark dependencies and adjusts the project setup for Spark jobs. This enables you to process datasets using Apache Spark for scalable data processing.
+PySpark aligns with Kedro's scalability principle because it provides data processing capabilities for large datasets.
 See the [PySpark integration documentation](https://docs.kedro.org/en/stable/integrations-and-plugins/pyspark_integration/) for more information on setup and usage.
 
 ## Flowchart illustration

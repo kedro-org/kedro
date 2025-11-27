@@ -52,6 +52,7 @@ exceptions:
   - Linux
   - MySQL
   - Python
+  - PySpark
   - QuantumBlack
   - QuantumBlack Labs
   - Red Hat

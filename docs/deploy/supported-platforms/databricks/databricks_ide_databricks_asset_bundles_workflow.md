@@ -44,7 +44,7 @@ Find your Databricks username in the top right of the workspace UI and the host 
 ![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 
 !!! note
-    Your databricks host must include the protocol (`https://`).
+    Your Databricks host must include the protocol (`https://`).
 
 ### Install Kedro and Databricks CLI in a new virtual environment
 In your local development environment, create a virtual environment for this tutorial using Conda:

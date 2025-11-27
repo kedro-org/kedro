@@ -52,6 +52,7 @@ pyenv
 pytest
 regressors
 Repo
+Repos
 repo
 SQLAlchemy
 Serverless

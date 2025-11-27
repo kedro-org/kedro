@@ -21,6 +21,8 @@ exceptions:
   - CLI
   - DataCatalog
   - Data Catalog
+  - Databricks
+  - Databricks Repo
   - Docker
   - Docker Compose
   - Docker Swarm

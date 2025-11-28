@@ -4,7 +4,7 @@ There are different ways to leverage Kedro in your work, you can:
 
  - Commit to using all of Kedro (framework, project, starters and library); which is preferable to take advantage of the full value proposition of Kedro
  - You can use parts of Kedro, like the DataCatalog (I/O), OmegaConfigLoader, Pipelines and Runner, by using it as a Python library; this best supports a workflow where you don't want to adopt the Kedro project template
- - Or, you can develop extensions for Kedro e.g. custom starters, plugins, Hooks and more
+- Or, you can develop extensions for Kedro, for example, custom starters, plugins, Hooks and more
 
 At a high level, Kedro consists of five main parts:
 

@@ -71,7 +71,7 @@ You may also select **Run** from the toolbar and execute from there. <br />
 
 ![](../meta/images/pycharm_conf_run_dropdown.png)
 
-For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (e.g., `jupyter`, `package`, `registry` etc.).
+For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (for example, `jupyter`, `package`, `registry` etc.).
 
 
 ## Debugging

@@ -1,6 +1,6 @@
-# Contributor Covenant Code of Conduct
+# Contributor covenant code of conduct
 
-## Our Pledge
+## Our pledge
 
 In the interest of fostering an open and welcoming environment, we as
 contributors and maintainers pledge to making participation in our project and
@@ -9,7 +9,7 @@ size, disability, ethnicity, sex characteristics, gender identity and expression
 level of experience, education, socio-economic status, nationality, personal
 appearance, race, religion, or sexual identity and orientation.
 
-## Our Standards
+## Our standards
 
 Examples of behaviour that contributes to creating a positive environment
 include:
@@ -31,7 +31,7 @@ Examples of unacceptable behaviour by participants include:
 * Other conduct which could reasonably be considered inappropriate in a
  professional setting
 
-## Our Responsibilities
+## Our responsibilities
 
 Project maintainers are responsible for clarifying the standards of acceptable
 behaviour and are expected to take appropriate and fair corrective action in
@@ -48,7 +48,7 @@ threatening, offensive, or harmful.
 This Code of Conduct applies both within project spaces and in public spaces
 when an individual is representing the project or its community. Examples of
 representing a project or community include using an official project e-mail
-address, posting via an official social media account, or acting as an appointed
+address, posting through an official social media account, or acting as an appointed
 representative at an online or offline event. Representation of a project may be
 further defined and clarified by project maintainers.
 

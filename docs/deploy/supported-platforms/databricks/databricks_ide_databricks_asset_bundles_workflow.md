@@ -39,7 +39,7 @@ The main steps in this tutorial are as follows:
 ### Note your Databricks username and host
 Note your Databricks **username** and **host** as you will need it for the remainder of this guide.
 
-Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
+Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (for example, `https://adb-123456789123456.1.azuredatabricks.net/`):
 
 ![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 

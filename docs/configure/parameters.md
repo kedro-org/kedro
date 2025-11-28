@@ -4,7 +4,7 @@ By default, in a new Kedro project, parameters are defined in the `parameters.ym
 These parameters can serve as input to nodes and are used when running the pipeline. By using parameters, you can make your Kedro pipelines more flexible and easier to configure, since you can change the behaviour of your nodes by modifying the `parameters.yml` file.
 
 ## How to use parameters
-If you have a group of parameters that determine the hyperparameters of your model, you can define them in a single location such as `conf/base/parameters.yml`. This way, you can keep all your modifications in a centralised location and avoid making changes across multiple parts of your code.
+If you have a group of parameters that control the tuning of your model, define them in a single location such as `conf/base/parameters.yml`. Keeping everything together reduces the chances of missing an update elsewhere in the codebase.
 
 ```yaml
 step_size: 1
@@ -52,7 +52,7 @@ Node(
 )
 ```
 
-Alternatively, you can also pass `parameters` to the node inputs and get access to the entire collection of values inside the node function.
+You can also pass `parameters` to the node inputs and access the entire collection of values inside the node function.
 
 ```python
 def increase_volume(volume, params):
@@ -66,7 +66,7 @@ Node(
 )
 ```
 
-In both cases, under the hood parameters are added to the Data Catalog as `MemoryDataset`s.
+In both cases, Kedro adds the parameters to the Data Catalog as `MemoryDataset`s.
 
 
 ## How to load parameters in code
@@ -106,14 +106,14 @@ except MissingConfigException:
 
 ## How to specify parameters at runtime
 
-Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [kedro.framework.context.KedroContext][] parameters and made available to pipeline nodes.
+Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and provide a comma-separated list of key-value pairs. Kedro adds these values to [kedro.framework.context.KedroContext][] parameters and makes them available to pipeline nodes.
 
 Each key-value pair is split on the first equals sign. The following example is a valid command:
 
 ```bash
 kedro run --params=param_key1=value1,param_key2=2.0
 ```
-Values provided in the CLI take precedence and overwrite parameters specified in configuration files. By default, runtime parameters get merged destructively, meaning that any configuration for that key **besides that given in the runtime parameters** is discarded.
+Values provided in the CLI take precedence and overwrite parameters specified in configuration files. By default, runtime parameters merge destructively, meaning that any configuration for that key **besides the runtime value** is discarded.
 [This section describes how to change the merging strategy](advanced_configuration.md#how-to-change-the-merge-strategy-used-by-omegaconfigloader).
 
 For example, if you have the following parameters in your `base` and `local` environments:
@@ -168,4 +168,4 @@ Since key-value pairs are split on the first equals sign, values can contain equ
 
 
 !!! note
-    To **override not just parameters but other configurations**, such as catalog entries or file paths, or to specify upfront that certain parameters must be set at runtime, use `$runtime_params` with the `OmegaConfigLoader`. Introduced in Kedro `0.18.14`, this feature allows dynamic overrides of various configuration types using the `--params` CLI option.  It’s particularly useful for scenarios like switching data sources or fine-tuning runtime settings. [Learn more about `$runtime_params`.](advanced_configuration.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
+    To **override parameters and other configurations**, such as catalog entries or file paths, or to specify upfront that certain parameters must be set at runtime, use `$runtime_params` with the `OmegaConfigLoader`. Introduced in Kedro `0.18.14`, this feature allows dynamic overrides of various configuration types using the `--params` CLI option. Use it when you need to switch data sources or adjust runtime settings. [Learn more about `$runtime_params`.](advanced_configuration.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)

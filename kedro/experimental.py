@@ -1,3 +1,17 @@
+"""
+Experimental API utilities for Kedro.
+
+This module provides the ``@experimental`` decorator and the
+``KedroExperimentalWarning`` warning class, enabling the Kedro team to
+introduce new features to the codebase while clearly signalling to users
+that the API surface is not yet stable.
+
+Any function or class marked with ``@experimental`` will emit a
+``KedroExperimentalWarning`` when invoked or instantiated. This mechanism
+helps the team gather feedback, iterate quickly, and make informed
+decisions about promoting features into the stable API.
+"""
+
 import warnings
 from collections.abc import Callable
 from functools import wraps

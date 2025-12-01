@@ -3,7 +3,7 @@ To help the [Kedro Project maintainers](../about/technical_steering_committee.md
 Kedro can capture anonymised telemetry.
 This data is collected with the sole purpose of improving Kedro by understanding feature usage.
 Importantly, we do not store personal information about you or sensitive data from your project,
-and this process is never utilized for marketing or promotional purposes.
+and this process is never utilised for marketing or promotional purposes.
 Participation in this program is optional, and it is enabled by default. Kedro will continue working as normal if you opt-out.
 
 The Kedro Project's telemetry has been reviewed and approved under the
@@ -25,7 +25,9 @@ which is installed as one of Kedro’s dependencies.
 - **Python Version:** The version of Python in use.
 - **Operating System:** The operating system on which Kedro is running.
 - **Tools Selected and Example Pipeline:** The tools chosen and example pipeline inclusion during the `kedro new` command execution, if applicable.
+- **Starter:** The starter template used when creating the project. This is only visible if the project was created using one of [the official Kedro starters](https://github.com/kedro-org/kedro-starters).
 - **Number of Datasets, Nodes, and Pipelines:** Quantitative data about the project structure.
+- **Dataset Types:** The types of datasets used in the project. The dataset names are only visible if they belong to `kedro.io` or [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets).
 
 For technical information on how the telemetry collection works, you can browse
 [the source code of `kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry).

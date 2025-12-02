@@ -46,9 +46,7 @@ def experimental(obj: Callable | type) -> Callable | type:
         self.x = x
     ```
     """
-    warning_message = (
-        f"{obj.__name__} is experimental and may change in future Kedro releases."
-    )
+    warning_message = " is experimental and may change in future Kedro releases."
 
     # Function or method
     if callable(obj) and not isinstance(obj, type):
@@ -56,7 +54,9 @@ def experimental(obj: Callable | type) -> Callable | type:
         @wraps(obj)
         def wrapper(*args, **kwargs):  # type: ignore[no-untyped-def]
             warnings.warn(
-                warning_message, category=KedroExperimentalWarning, stacklevel=2
+                f"{obj.__name__}{warning_message}",
+                category=KedroExperimentalWarning,
+                stacklevel=2,
             )
             return obj(*args, **kwargs)
 
@@ -64,7 +64,6 @@ def experimental(obj: Callable | type) -> Callable | type:
         setattr(wrapper, "__wrapped__", obj)
 
         return wrapper
-
     # Class
     if isinstance(obj, type):
         original_init = obj.__init__
@@ -72,7 +71,9 @@ def experimental(obj: Callable | type) -> Callable | type:
         @wraps(original_init)
         def new_init(self, *args, **kwargs):  # type: ignore[no-untyped-def]
             warnings.warn(
-                warning_message, category=KedroExperimentalWarning, stacklevel=2
+                f"{obj.__name__}{warning_message}",
+                category=KedroExperimentalWarning,
+                stacklevel=2,
             )
             return original_init(self, *args, **kwargs)
 

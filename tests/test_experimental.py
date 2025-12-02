@@ -50,3 +50,15 @@ def test_silencing_warnings():
         # Should not raise
         sample_func(1, 2)
         SampleClass(3)
+
+
+def test_experimental_non_callable_passthrough():
+    """Non-callable objects should be returned unchanged with no warnings emitted."""
+    original = {"a": 1, "b": 2}
+
+    with warnings.catch_warnings(record=True) as w:
+        result = experimental(original)
+
+    assert result is original
+    assert len(w) == 0
+    assert not hasattr(result, "__kedro_experimental__")

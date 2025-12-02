@@ -8,6 +8,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 * **How can I check the version of Kedro installed?**
   To check the version installed, type `kedro -V` in your terminal window.
+
 * **Do I need Git installed to use Kedro?**
   Yes, users are expected to have Git installed when working with Kedro. This is a prerequisite for the `kedro new` flow. If Git is not installed, use the following workaround: `uvx kedro new -s https://github.com/kedro-org/kedro-starters/archive/1.0.0.zip --directory=spaceflights-pandas`
 

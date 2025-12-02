@@ -12,6 +12,9 @@ To create a basic Kedro project containing the default code needed to set up you
 uvx kedro new
 ```
 
+!!! note
+    `uvx` runs commands in temporary isolated environments without requiring permanent installation. For other installation methods, see the [installation guide](../getting-started/install.md#alternative-methods).
+
 ### Project name
 
 The command line interface (CLI) first asks for a name for the project. This is the human-readable name, and it may contain alphanumeric symbols, spaces, underscores, and hyphens. It must be at least two characters long.

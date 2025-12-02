@@ -10,6 +10,9 @@ Navigate to the folder you want to store the project. Type the following to gene
 uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```
 
+!!! note
+    `uvx` runs commands in temporary isolated environments without requiring permanent installation. For other installation methods, see the [installation guide](../getting-started/install.md#alternative-methods).
+
 After Kedro has created the project, navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 
 ```bash

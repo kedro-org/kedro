@@ -16,11 +16,14 @@ for example our Spaceflights starter.
 To do that, we recommend using [`uv`](https://docs.astral.sh/uv/),
 a fast, modern Python package and project manager.
 
-First, use `uvx` to seamlessly run `kedro new`:
+First, use `uvx` to run `kedro new`:
 
 ```bash
 uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```
+
+!!! note
+    `uvx` runs commands in temporary isolated environments without requiring permanent installation. For other installation methods, see [Alternative methods](#alternative-methods) below.
 
 The command will create a directory with the contents of your project.
 Navigate to it:
@@ -71,9 +74,10 @@ There are several ways to do it:
 
 === "uv"
 
-    `uvx` is an alias for `uv tool`, a uv feature that allows you to work with "tools"
-    or globally-installed Python packages. After installing `uv`,
-    you can use it to run `kedro new` as follows:
+    `uvx` is an alias for `uv tool run`. It runs commands in temporary, isolated environments,
+    with dependencies handled automatically.
+
+    After installing `uv`, you can use it to run `kedro new` as follows:
 
     ```bash
     uvx kedro new
@@ -82,7 +86,7 @@ There are several ways to do it:
 === "Other native tools"
 
     `pipx` is a tool that allows you to install and run Python applications and tools
-    in isolated environments. After installing it,
+    in isolated environments, with dependencies handled automatically. After installing it,
     you can use it to run `kedro new` as follows:
 
     ```bash

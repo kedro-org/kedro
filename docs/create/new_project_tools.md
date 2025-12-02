@@ -18,6 +18,9 @@ uvx kedro new
 This will start the new project creation workflow.
 
 !!! note
+    `uvx` runs commands in temporary isolated environments without requiring permanent installation. For other installation methods, see the [installation guide](../getting-started/install.md#alternative-methods).
+
+!!! note
     You can also add flags to `kedro new` to skip some or all of the steps in the project creation workflow to skip queries about how you want to customise the project. The flags are described below.
 
 ### Project name

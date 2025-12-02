@@ -10,6 +10,7 @@ exceptions:
   - Amazon
   - Amazon Web Services
   - API
+  - Argo Workflows
   - Astro Cloud
   - AWS Batch
   - AWS Step Functions

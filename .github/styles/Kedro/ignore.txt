@@ -12,6 +12,7 @@ Databricks
 Dask
 dataframe
 dataframes
+dbt
 dbx
 Dockerfile
 doxenix

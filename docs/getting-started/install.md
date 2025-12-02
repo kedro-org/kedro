@@ -32,6 +32,9 @@ Navigate to it:
 cd spaceflights
 ```
 
+!!! note
+    Now that the project exists, you'll work within it using its own virtual environment. The commands below (`uv sync` and `uv run`) create and use the project's environment, rather than the temporary environment that `uvx` used.
+
 And finally, verify that everything works:
 
 ```bash

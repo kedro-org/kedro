@@ -6,7 +6,7 @@
 ## Why use AWS Batch
 [AWS Batch](https://aws.amazon.com/batch/) is optimised for batch computing and applications that scale with the number of jobs running in parallel. It manages job execution and compute resources, and dynamically provisions the optimal quantity and type. AWS Batch can assist with planning, scheduling, and executing your batch computing workloads, using [Amazon EC2](https://aws.amazon.com/ec2/) On-Demand and [Spot Instances](https://aws.amazon.com/ec2/spot/), and it has native integration with [CloudWatch](https://aws.amazon.com/cloudwatch/) for log collection.
 
-AWS Batch helps you run massively parallel Kedro pipelines in a cost-effective way, and allows you to parallelise the pipeline execution across multiple compute instances. Each Batch job is run in an isolated Docker container environment.
+AWS Batch helps you run massively parallel Kedro pipelines in a cost-effective way. It also allows you to parallelise the pipeline execution across multiple compute instances. Each Batch job is run in an isolated Docker container environment.
 
 The following sections are a guide on how to deploy a Kedro project to AWS Batch, and uses the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) as primary example. The guide assumes that you have already completed the tutorial, and that the project was created with the project name **Kedro Tutorial**.
 

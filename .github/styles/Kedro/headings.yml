@@ -30,6 +30,7 @@ exceptions:
   - Docker Compose
   - Docker Swarm
   - Dockerfile
+  - EMR Serverless
   - Excel
   - GitHub
   - GitHub Actions
@@ -50,6 +51,8 @@ exceptions:
   - JFrog Artifactory
   - Jira
   - Kafka
+  - Kubeflow
+  - Kubeflow Pipelines
   - Kubernetes
   - Kubernetes Engine
   - Kubernetes Pod

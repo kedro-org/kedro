@@ -210,7 +210,7 @@ You can use the following command to encode AWS keys to base64:
 $ echo -n <original_key> | base64
 ```
 
-Run the following commands to deploy the Kubernetes Secrets to the `default` namespace and check that it was created:
+Run the following commands to deploy the Kubernetes Secrets to the `default` namespace and check that it is created:
 
 ```console
 $ kubectl create -f secret.yml

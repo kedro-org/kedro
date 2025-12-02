@@ -9,6 +9,7 @@ exceptions:
   - Airflow
   - Amazon
   - Amazon Web Services
+  - API
   - AWS Step Functions
   - AWS Systems Manager
   - Azure
@@ -17,6 +18,7 @@ exceptions:
   - Azure Blob Storage
   - Azure Event Hub
   - CI/CD
+  - CLI
   - DataCatalog
   - Data Catalog
   - Docker
@@ -32,7 +34,9 @@ exceptions:
   - GraphQL
   - Hook
   - Hooks
+  - Iceberg
   - IDs
+  - IO
   - Jenkins
   - JFrog
   - JFrog Artifactory
@@ -51,6 +55,7 @@ exceptions:
   - Red Hat
   - Redis
   - Slack
+  - Technical Steering Committee
   - Ubuntu
   - Unix
   - URLs

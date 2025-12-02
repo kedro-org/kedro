@@ -11,7 +11,7 @@ uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```
 
 !!! note
-    `uvx` runs commands in temporary isolated environments without requiring permanent installation. This is useful for one-off commands like `kedro new`. Once your project is created, you'll switch to working within the project's own virtual environment (using `uv sync` and `uv run` below) which manages the project's specific dependencies. For other installation methods, see the [installation guide](../getting-started/install.md#alternative-methods).
+    Using `uvx` lets you run Kedro without installing it into your system or virtual environment. It downloads and runs Kedro in a clean temporary environment each time. If you prefer a standard installation (e.g. pip + virtual environment), see the [installation guide](../getting-started/install.md).
 
 After Kedro has created the project, navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 

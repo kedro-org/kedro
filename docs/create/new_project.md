@@ -13,7 +13,7 @@ uvx kedro new
 ```
 
 !!! note
-    `uvx` runs commands in temporary isolated environments without requiring permanent installation. For other installation methods, see the [installation guide](../getting-started/install.md#alternative-methods).
+    Using `uvx` lets you run Kedro without installing it into your system or virtual environment. It downloads and runs Kedro in a clean temporary environment each time. If you prefer a standard installation (e.g. pip + virtual environment), see the [installation guide](../getting-started/install.md).
 
 ### Project name
 

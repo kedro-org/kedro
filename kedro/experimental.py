@@ -24,9 +24,28 @@ class KedroExperimentalWarning(UserWarning):
 def experimental(obj: Callable | type):
     """Mark a function or class as experimental.
 
-    Emits a KedroExperimentalWarning when used/instantiated.
-    """
+    Emits a ``KedroExperimentalWarning`` when invoked (for functions) or
+    instantiated (for classes). The original API remains fully usable.
 
+    Args:
+        obj: The function or class to wrap.
+
+    Returns:
+        A wrapped version of the object that emits warnings on use.
+
+    Example:
+    ```python
+
+    @experimental
+    def sample_func(a, b):
+        return a + b
+
+    @experimental
+    class SampleClass:
+    def __init__(self, x):
+        self.x = x
+    ```
+    """
     warning_message = (
         f"{obj.__name__} is experimental and may change in future Kedro releases."
     )

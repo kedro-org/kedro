@@ -41,6 +41,7 @@ The Kedro team maintains the following starters for a range of Kedro projects:
 * [`databricks-iris`](https://github.com/kedro-org/kedro-starters/tree/main/databricks-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a setup for [Databricks](https://docs.kedro.org/en/stable/deploy/supported-platforms/databricks/) deployment.
 * [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pandas` datasets.
 * [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pyspark` datasets.
+* [`support-agent-langgraph`](https://github.com/kedro-org/kedro-starters/tree/main/support-agent-langgraph): An example project demonstrating pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
 ### Archived starters
 

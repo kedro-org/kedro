@@ -443,6 +443,7 @@ nav:
                   - ThreadRunner: api/runner/kedro.runner.ThreadRunner.md
               - kedro.utils: api/kedro.utils.md
               - kedro.load_ipython_extension: api/kedro.load_ipython_extension.md
+              - kedro.experimental: api/kedro.experimental.md
               - kedro.KedroDeprecationWarning: api/kedro.KedroDeprecationWarning.md
               - kedro.KedroPythonVersionWarning: api/kedro.KedroPythonVersionWarning.md
           - Kedro CLI: getting-started/commands_reference.md

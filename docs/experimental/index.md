@@ -15,8 +15,9 @@ Experimental features allow us to:
 - Make experimental status obvious, so users know what to expect.
 - Gather usage signals before promoting features to stable APIs.
 - Provide a foundation for the hybrid strategy adopted by the Kedro team:
-  - **Lightweight** experiments: via `@experimental`
-  - **Large or dependency-heavy** features: via external plugins
+
+    - **Lightweight** experiments: via `@experimental`
+    - **Large or dependency-heavy** features: via external plugins
 
 ## The `@experimental` decorator
 
@@ -31,6 +32,7 @@ It marks the object as experimental and triggers a `KedroExperimentalWarning` on
 See the implementation and usage examples in `kedro/experimental.py`.
 
 The decorator **does not**:
+
 - restrict usage
 - modify runtime behavior
 - introduce additional dependencies
@@ -40,6 +42,7 @@ Experimental APIs behave like normal APIs, with additional visibility only.
 ### When to use @experimental
 
 Use the decorator when adding:
+
 - Small additions to core Kedro
 - Features likely to stabilize soon
 - APIs requiring user feedback
@@ -47,6 +50,7 @@ Use the decorator when adding:
 ### When NOT to use it
 
 Use a plugin instead of the decorator when:
+
 - the feature requires heavy external dependencies (ML, AI, visualisation libraries)
 - the experimentation affects installation size or startup performance
 - the feature is large enough to evolve independently
@@ -54,6 +58,7 @@ Use a plugin instead of the decorator when:
 ## Migration expectations
 
 Experimental APIs:
+
 - may change signature
 - may be replaced
 - may be promoted to stable API (and documented officially)

@@ -9,7 +9,7 @@
 | Name                                                                       | Type     | Description                                              |
 |----------------------------------------------------------------------------|----------|----------------------------------------------------------|
 | [`KedroExperimentalWarning`](#kedro.experimental.KedroExperimentalWarning) | Function | Warning raised when using an experimental Kedro feature. |
-| [`is_kedro_project`](#kedro.experimental.experimental)                     | Function | Decorator to mark a function or class as experimental.   |
+| [`experimental`](#kedro.experimental.experimental)                         | Function | Decorator to mark a function or class as experimental.   |
 
 ::: kedro.experimental.KedroExperimentalWarning
     options:

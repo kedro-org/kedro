@@ -19,6 +19,7 @@ exceptions:
     - catalog
     - Catalog
     - DataCatalog
+    - data_catalog
     - dialog
     - log
     - maize

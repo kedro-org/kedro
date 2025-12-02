@@ -58,6 +58,10 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          inventories:
+            - https://docs.kedro.org/en/stable/objects.inv
+            - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
+          paths: [src]
           options:
             show_root_toc_entry: true
             show_source: false #currently doesn't show source at correct level, and not for pydantic models
@@ -70,10 +74,6 @@ plugins:
               ignore_init_summary: true
               warn_unknown_params: false
               returns_named_value: false
-            paths: [src]
-            import:
-              - https://docs.kedro.org/en/stable/objects.inv
-              - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
   - llmstxt:
       markdown_description: |
         Kedro is an open-source Python framework for creating reproducible, maintainable, and modular data science code.
@@ -453,6 +453,7 @@ nav:
           - DVC: integrations-and-plugins/dvc.md
           - Delta Lake: integrations-and-plugins/deltalake_versioning.md
           - Iceberg: integrations-and-plugins/iceberg_versioning.md
+          - Great Expectations: integrations-and-plugins/great_expectations.md
           - Pandera: integrations-and-plugins/pandera.md
       - IDE Support:
           - Visual Studio Code: ide/set_up_vscode.md

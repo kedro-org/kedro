@@ -18,8 +18,9 @@ function _handleReadTheDocsData(data) {
 
     // Ensure the version is updated after each release of kedro-datasets
     if (
-        (projectSlug === "kedro-datasets" && versionSlug !== "kedro-datasets-6.0.0") ||
-        (projectSlug !== "kedro-datasets" && versionSlug !== "stable")
+        (projectSlug === "kedro" && versionSlug !== "stable") ||
+        (projectSlug === "kedro-viz" && versionSlug !== "stable") ||
+        (projectSlug === "kedro-datasets" && versionSlug !== "kedro-datasets-9.0.0")
     ) {
         console.log("Non-indexable version detected, injecting meta tag");
         const meta = document.createElement("meta");

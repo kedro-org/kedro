@@ -1,4 +1,14 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+
+# Release 1.1.1
+## Bug fixes and other changes
+* Fixed project version mismatch error. The error is now only raised when the **major version** of the project and Kedro package differ, allowing minor and patch version differences without unnecessary failures.
+
+# Release 1.1.0
 
 ## Major features and improvements
 * Added the `ignore_hidden` parameter to the `OmegaConfigLoader`.
@@ -6,15 +16,19 @@
 
 ## Bug fixes and other changes
 * Bumped `click` dependency to support versions 8.2.0 and above.
+* Fixed typos in docs and docstrings.
+* Fixed duplicate execution of the `deindex-old-docs.js` script on Kedro documentation pages, preventing double injection of `noindex` meta tags after the MkDocs migration.
 
 ## Documentation changes
 * Added a note on programmatically creating lambdas when lazily saving a `PartionedDataset`.
 * Added Dagster as a supported deployment platform and the `kedro-dagster` plugin to the list of community plugins.
+* Added new data-validation documentation covering how to use Pandera and Great Expectations with Kedro.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Aseem Sangalay](https://github.com/aseemsangalay)
 * [Chris Schopp](https://github.com/chrisschopp)
+* [Yaroslav Halchenko](https://github.com/yarikoptic)
 
 # Release 1.0.0
 ## Major features and improvements

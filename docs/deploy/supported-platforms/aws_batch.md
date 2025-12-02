@@ -1,9 +1,9 @@
 # AWS Batch (outdated documentation that needs review)
 
 !!! warning
-    This page contains outdated documentation that has not been tested against recent Kedro releases. If you successfully use AWS Batch with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
+    This page contains outdated documentation that has not been tested against recent Kedro releases. If you manage to use AWS Batch with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
 
-## Why would you use AWS Batch?
+## Why use AWS Batch
 [AWS Batch](https://aws.amazon.com/batch/) is optimised for batch computing and applications that scale with the number of jobs running in parallel. It manages job execution and compute resources, and dynamically provisions the optimal quantity and type. AWS Batch can assist with planning, scheduling, and executing your batch computing workloads, using [Amazon EC2](https://aws.amazon.com/ec2/) On-Demand and [Spot Instances](https://aws.amazon.com/ec2/spot/), and it has native integration with [CloudWatch](https://aws.amazon.com/cloudwatch/) for log collection.
 
 AWS Batch helps you run massively parallel Kedro pipelines in a cost-effective way, and allows you to parallelise the pipeline execution across multiple compute instances. Each Batch job is run in an isolated Docker container environment.
@@ -16,7 +16,7 @@ To use AWS Batch, ensure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
 - A `name` attribute is set for each Kedro [Node][kedro.pipeline.node]. Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --nodes=<node_name>`.
-- [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and refer to an external location (for example, AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
+- [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and point to an external location (for example, AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
 ??? example "View code"
     ```yaml
@@ -66,36 +66,34 @@ To use AWS Batch, ensure you have the following prerequisites in place:
     filepath: s3://<your-bucket>/y_test.pickle
     ```
 
-## How to run a Kedro pipeline using AWS Batch
+## Run a Kedro pipeline with  AWS Batch
 
 ### Containerise your Kedro project
 
-First, you need to containerise your Kedro project, using any preferred container solution (for example, [Docker](https://www.docker.com/)), to build an image to use in AWS Batch.
+Containerise your Kedro project with a preferred container solution (for example, [Docker](https://www.docker.com/)) to build an image for AWS Batch.
 
-For the purpose of this walk-through, we are going to assume a Docker workflow. We recommend using the [Kedro-Docker plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to streamline the process.  [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
+This walk-through assumes a Docker workflow. Use the [Kedro-Docker plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to streamline the build. [Instructions are in the plugin README](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](../single_machine.md#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
-
-Alternatively, once you've created a container repository, click the `View Push Commands` button in the top-right corner of the [ECR dashboard](https://console.aws.amazon.com/ecr).
+After you build the Docker image locally, [transfer the image to a container registry](../single_machine.md#how-to-use-container-registry), such as [AWS ECR](https://aws.amazon.com/ecr/). You can follow Amazon's [ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html) or open the repository in the [ECR dashboard](https://console.aws.amazon.com/ecr) and click `View push commands` for tailored steps.
 
 ### Provision resources
 
-In order to be able to deploy your pipeline to Batch, you need to provision the following four resources in advance:
+Provision the following resources before deploying your pipeline to AWS Batch:
 
-#### Create IAM Role
+#### Create the IAM role
 
-If you are storing your datasets to S3, you first need to create an IAM role to be able to grant Batch access to read and write to the respective locations. Follow the instructions [from the AWS tutorial](https://aws.amazon.com/blogs/compute/creating-a-simple-fetch-and-run-aws-batch-job/) on how to do so, but note that the policy (step 3) should be `AmazonS3FullAccess`. Name the newly-created IAM role `batchJobRole`.
+If you store datasets in S3, create an IAM role so Batch can read and write to the relevant locations. Follow the AWS tutorial on [creating a fetch and run job](https://aws.amazon.com/blogs/compute/creating-a-simple-fetch-and-run-aws-batch-job/) and set the policy in step 3 to `AmazonS3FullAccess`. Name the role `batchJobRole`.
 
 #### Create AWS Batch job definition
 
-Job definitions provide the template for resources needed for running a job. Create a job definition named `kedro_run`, assign it the newly created `batchJobRole` IAM role, the container image you've packaged above, execution timeout of 300s and 2000MB of memory. You can leave the `Command` field empty and all the defaults in place.
+Job definitions specify the resources needed to run a job. Create a job definition named `kedro_run`, assign it the `batchJobRole` IAM role, select the container image you built earlier, set the execution timeout to 300 seconds, and allocate 2000 MB of memory. Leave `Command` blank and keep the defaults.
 
 #### Create AWS Batch compute environment
 
-Next you need a compute environment where the work will be executed. Create a _managed_, on-demand one named `spaceflights_env` and let it choose to create new service and instance roles if you don't have any yet. Having a managed environment means that AWS will automatically handle the scaling of your instances.
+Create a managed, on-demand compute environment named `spaceflights_env`. Let AWS create service and instance roles if none exist. A managed environment lets AWS scale instances automatically.
 
 !!! note
-    This compute environment won't contain any instances until you trigger the pipeline run. Therefore, creating it does not incur any immediate costs.
+    The compute environment does not contain instances until you trigger the pipeline run, so creating it does not incur immediate cost.
 
 #### Create AWS Batch job queue
 
@@ -103,19 +101,18 @@ A job queue is the bridge between the submitted jobs and the compute environment
 
 ### Configure the credentials
 
-Ensure you have the necessary AWS credentials in place before moving on, so that your pipeline can access and interact with the AWS services. Check out [the AWS CLI documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for instructions on how to set this up.
+Ensure you have AWS credentials configured so the pipeline can access the relevant services. See the [AWS CLI documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for setup instructions.
 
 !!! note
-    You should configure the default region to match the region where you've created the Batch resources.
-
+    Configure the default region to match the region where you created the Batch resources.
 
 ### Submit AWS Batch jobs
 
-Now that all the resources are in place, it's time to submit jobs to Batch programmatically, using the newly-created job definition and job queue. Each job will correspond to running one node, and in order to maintain the correct order of execution, you'll need to specify the dependencies (job IDs) of each submitted job. You can leverage a custom runner for this step.
+With the resources in place, submit jobs to Batch programmatically by using the job definition and queue. Each job runs one node. To keep the correct execution order, specify the dependencies (job IDs) of each submitted job. You can use a custom runner for this step.
 
 #### Create a custom runner
 
-Create a new Python package `runner` in your `src` folder, i.e. `kedro_tutorial/src/kedro_tutorial/runner/`. Make sure there is an `__init__.py` file at this location, and add another file named `batch_runner.py`, which will contain the implementation of your custom runner, `AWSBatchRunner`. The `AWSBatchRunner` will submit and monitor jobs asynchronously, surfacing any errors that occur on Batch.
+Create a new Python package `runner` in your `src` folder (for example, `kedro_tutorial/src/kedro_tutorial/runner/`). Make sure there is an `__init__.py` file at this location, and add another file named `batch_runner.py`, which will contain the implementation of your custom runner, `AWSBatchRunner`. The `AWSBatchRunner` will submit and track jobs asynchronously, surfacing any errors that occur on Batch.
 
 Make sure the `__init__.py` file in the `runner` folder includes the following import and declaration:
 
@@ -179,7 +176,7 @@ class AWSBatchRunner(ThreadRunner):
         self._logger.info("Max workers: %d", max_workers)
         with ThreadPoolExecutor(max_workers=max_workers) as pool:
             while True:
-                # Process the nodes that have completed, i.e. jobs that reached
+                # Process the nodes that have completed, meaning jobs that reached
                 # FAILED or SUCCEEDED state
                 done = {fut for fut in futures if fut.done()}
                 futures -= done
@@ -195,7 +192,7 @@ class AWSBatchRunner(ThreadRunner):
                     )
 
                 # A node is ready to be run if all its upstream dependencies have been
-                # submitted to Batch, i.e. all node dependencies were assigned a job ID
+                # submitted to Batch, meaning all node dependencies were assigned a job ID
                 ready = {
                     n for n in todo_nodes if node_dependencies[n] <= node_to_job.keys()
                 }
@@ -300,7 +297,7 @@ aws_batch:
 
 #### Update CLI implementation
 
-You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before you can use the new runner, add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the new `cli.py` file so that the runner class is instantiated with the right configuration:
 
 ```python
 def run(tag, env, ...):

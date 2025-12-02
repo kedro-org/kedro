@@ -52,9 +52,16 @@ plugins:
   - search
   - autorefs
   - mermaid2
+  - redirects:
+      redirect_maps:
+        'configuration/telemetry.md': 'about/telemetry.md'
   - mkdocstrings:
       handlers:
         python:
+          inventories:
+            - https://docs.kedro.org/en/stable/objects.inv
+            - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
+          paths: [src]
           options:
             show_root_toc_entry: true
             show_source: false #currently doesn't show source at correct level, and not for pydantic models
@@ -67,10 +74,6 @@ plugins:
               ignore_init_summary: true
               warn_unknown_params: false
               returns_named_value: false
-            paths: [src]
-            import:
-              - https://docs.kedro.org/en/stable/objects.inv
-              - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
   - llmstxt:
       markdown_description: |
         Kedro is an open-source Python framework for creating reproducible, maintainable, and modular data science code.
@@ -164,6 +167,7 @@ plugins:
           - deploy/supported-platforms/amazon_emr_serverless.md: Amazon EMR Serverless guide
           - deploy/supported-platforms/aws_step_functions.md: AWS Step Functions integration
           - deploy/supported-platforms/azure.md: Azure ML pipelines deployment
+          - deploy/supported-platforms/dagster.md: Dagster deployment
           - deploy/supported-platforms/dask.md: Dask integration for parallel computing
           - deploy/supported-platforms/databricks/index.md: Databricks overview
           - deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md: Databricks notebooks workflow
@@ -362,6 +366,7 @@ nav:
               - Amazon EMR Serverless: deploy/supported-platforms/amazon_emr_serverless.md
               - AWS Step Functions: deploy/supported-platforms/aws_step_functions.md
               - Azure ML pipelines: deploy/supported-platforms/azure.md
+              - Dagster: deploy/supported-platforms/dagster.md
               - Dask: deploy/supported-platforms/dask.md
               - Databricks:
                 - Overview: deploy/supported-platforms/databricks/index.md
@@ -448,6 +453,8 @@ nav:
           - DVC: integrations-and-plugins/dvc.md
           - Delta Lake: integrations-and-plugins/deltalake_versioning.md
           - Iceberg: integrations-and-plugins/iceberg_versioning.md
+          - Great Expectations: integrations-and-plugins/great_expectations.md
+          - Pandera: integrations-and-plugins/pandera.md
       - IDE Support:
           - Visual Studio Code: ide/set_up_vscode.md
           - PyCharm: ide/set_up_pycharm.md

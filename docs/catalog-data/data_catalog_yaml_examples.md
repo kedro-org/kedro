@@ -20,7 +20,7 @@ test_dataset:
       encoding: "utf-8"
 ```
 
-`load_args` and `save_args` configure how a third-party library (e.g. `pandas` for `CSVDataset`) loads/saves data from/to a file.
+`load_args` and `save_args` configure how a third-party library (for example, `pandas` for `CSVDataset`) loads/saves data from/to a file.
 
 ## Save data to a CSV file without row names (index) using `utf-8` encoding
 
@@ -123,7 +123,7 @@ trains:
 
 ```yaml
 results_plot:
-  type: matplotlib.MatplotlibWriter
+  type: matplotlib.MatplotlibDataset
   filepath: gcs://your_bucket/data/08_results/plots/output_1.jpeg
   fs_args:
     project: my-project

@@ -23,7 +23,7 @@ To use Argo Workflows, ensure you have the following prerequisites in place:
 - [Argo Workflows is installed](https://github.com/argoproj/argo/blob/master/README.md#quickstart) on your Kubernetes cluster
 - [Argo CLI is installed](https://github.com/argoproj/argo/releases) on your machine
 - A `name` attribute is set for each Kedro [kedro.pipeline.node][] since it is used to build a DAG
-- [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and refer to an external location (e.g. AWS S3); you cannot use the `MemoryDataset` in your workflow
+- [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and refer to an external location (for example, AWS S3); you cannot use the `MemoryDataset` in your workflow
 
 !!! note
     Each node will run in its own container.
@@ -32,7 +32,7 @@ To use Argo Workflows, ensure you have the following prerequisites in place:
 
 ### Containerise your Kedro project
 
-First, you need to containerise your Kedro project, using any preferred container solution (e.g. [`Docker`](https://www.docker.com/)), to build an image to use in Argo Workflows.
+First, you need to containerise your Kedro project, using any preferred container solution (for example, [`Docker`](https://www.docker.com/)), to build an image to use in Argo Workflows.
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process. [Instructions for Kedro-Docker are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
 

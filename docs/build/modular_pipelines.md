@@ -1,6 +1,6 @@
 # Modular pipelines
 
-In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend you **separate your code into different pipelines (modules)** that are logically isolated and can be reused. Each pipeline should ideally be organised in its own folder, promoting easy copying and reuse within and between projects. Simply put: one pipeline, one folder.
+In most typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend you **separate your code into different pipelines (modules)** that are logically isolated and can be reused. Each pipeline should ideally be organised in its own folder, promoting copying and reuse within and between projects. In short: one pipeline, one folder.
 
 Kedro supports this concept of modular pipelines with the following tools:
 - [How to create a new blank pipeline using the `kedro pipeline create` command](#how-to-create-a-new-blank-pipeline-using-the-kedro-pipeline-create-command)
@@ -57,7 +57,7 @@ from kedro.pipeline import Pipeline
 def create_pipeline(**kwargs) -> Pipeline:
     return Pipeline([])
 ```
-Here, you are creating a `create_pipeline()` function that returns a `Pipeline` class instance. You should keep the function name as `create_pipeline()` because this allows kedro to [automatically discover the pipeline](pipeline_registry.md#pipeline-autodiscovery). Otherwise, the pipeline would need to be [registered manually](pipeline_registry.md#the-pipeline-registry).
+Here, you are creating a `create_pipeline()` function that returns a `Pipeline` class instance. You should keep the function name as `create_pipeline()` because this allows Kedro to [automatically discover the pipeline](pipeline_registry.md#pipeline-autodiscovery). Otherwise, the pipeline would need to be [registered manually](pipeline_registry.md#the-pipeline-registry).
 
 Before filling `pipeline.py` with nodes, we recommend storing all node functions in `nodes.py`. From our previous example, we should add the functions `mean()`, `mean_sos()` and `variance()` into `nodes.py`:
 
@@ -97,7 +97,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         parameters={},  # Optional
     )
 ```
-Here it was shown that pipeline creation function have few optional parameters, you can use:
+This shows that the pipeline creation function has optional parameters, you can use:
 - tags on a pipeline level to apply them for all nodes inside of pipeline
 - namespace, inputs, outputs and parameters to reuse pipelines. More about that you can find at [Reuse pipelines with namespaces](namespaces.md)
 

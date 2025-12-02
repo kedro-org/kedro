@@ -49,13 +49,13 @@ This informs Kedro where to look for the source code, `settings.py` and `pipelin
 #### `settings.py`
 The `settings.py` file is an important configuration file in a Kedro project that allows you to define various settings and hooks for your project. Here’s a breakdown of its purpose and functionality:
 - Project Settings: This file is where you can configure project-wide settings, such as defining the logging level, setting environment variables, or specifying paths for data and outputs.
-- Hooks Registration: You can register custom hooks in `settings.py`, which are functions that can be executed at specific points in the Kedro pipeline lifecycle (e.g., before or after a node runs). This is useful for adding additional functionality, such as logging or monitoring.
-- Integration with Plugins: If you are using Kedro plugins, `settings.py` can also be utilized to configure them appropriately.
+- Hooks Registration: You can register custom hooks in `settings.py`, which are functions that can be executed at specific points in the Kedro pipeline lifecycle (for example, before or after a node runs). This is useful for adding additional functionality, such as logging or monitoring.
+- Integration with Plugins: If you are using Kedro plugins, `settings.py` can also be utilised to configure them appropriately.
 
 Even if you do not have any settings, an empty `settings.py` is still required. Typically, they are stored at `src/<package_name>/settings.py`.
 
 #### `pipeline_registry.py`
-The `pipeline_registry.py` file is essential for managing the pipelines within your Kedro project. It provides a centralized way to register and access all pipelines defined in the project. Here are its key features:
+The `pipeline_registry.py` file is essential for managing the pipelines within your Kedro project. It provides a centralised way to register and access all pipelines defined in the project. Here are its key features:
 - Pipeline Registration: The file must contain a top-level function called `register_pipelines()` that returns a mapping from pipeline names to Pipeline objects. This function is crucial because it enables the Kedro CLI and other tools to discover and run the defined pipelines.
 - Autodiscovery of Pipelines: Since Kedro 0.18.3, you can use the [`find_pipeline`](../build/pipeline_registry.md#pipeline-autodiscovery) function to automatically discover pipelines defined in your project without manually updating the registry each time you create a new pipeline.
 

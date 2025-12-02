@@ -92,7 +92,7 @@ There are several ways to do it:
 === "conda"
 
     `conda` provides package, dependency, and environment management for any language.
-    Since it uses centralized environments, it is a good option for managing applications and tools.
+    Since it uses centralised environments, it is a good option for managing applications and tools.
     After installing it,
     you can use it to run `kedro new` as follows:
 
@@ -275,7 +275,7 @@ kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset]>=3
 kedro-telemetry>=0.3.1
 kedro-viz~=6.0 # Visualise pipelines
 
-# For modeling in the data science pipeline
+# For modelling in the data science pipeline
 scikit-learn~=1.0
 ```
 

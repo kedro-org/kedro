@@ -55,7 +55,7 @@ The following Kedro starters have been archived and are unavailable in Kedro ver
 The latest version of Kedro that supports these starters is Kedro 0.18.14.
 
 * To check the version of Kedro you have installed, type `kedro -V` in your terminal window.
-* To install a specific version of Kedro, e.g. 0.18.14, type `pip install kedro==0.18.14`.
+* To install a specific version of Kedro, for example, 0.18.14, type `pip install kedro==0.18.14`.
 * To create a project with one of these starters using `kedro new`,  type the following (assuming Kedro version 0.18.14) `kedro new --starter=pandas-iris --checkout=0.18.14` (for example, to use the `pandas-iris` starter).
 
 

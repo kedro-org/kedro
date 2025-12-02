@@ -249,6 +249,9 @@ plugins:
           - ide/set_up_vscode.md: Visual Studio Code setup for Kedro
           - ide/set_up_pycharm.md: PyCharm setup for Kedro
 
+        Experimental APIs:
+          - experimental/index.md: Experimental APIs
+
         About Kedro:
           - about/technical_steering_committee.md: Kedro's Technical Steering Committee
           - about/migration.md: Migration guide between Kedro versions

@@ -21,7 +21,7 @@ class KedroExperimentalWarning(UserWarning):
     """Warning raised when using an experimental Kedro feature."""
 
 
-def experimental(obj: Callable | type):
+def experimental(obj: Callable | type) -> Callable | type:
     """Mark a function or class as experimental.
 
     Emits a ``KedroExperimentalWarning`` when invoked (for functions) or
@@ -54,7 +54,7 @@ def experimental(obj: Callable | type):
     if callable(obj) and not isinstance(obj, type):
 
         @wraps(obj)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs):  # type: ignore[no-untyped-def]
             warnings.warn(
                 warning_message, category=KedroExperimentalWarning, stacklevel=2
             )
@@ -70,7 +70,7 @@ def experimental(obj: Callable | type):
         original_init = obj.__init__
 
         @wraps(original_init)
-        def new_init(self, *args, **kwargs):
+        def new_init(self, *args, **kwargs):  # type: ignore[no-untyped-def]
             warnings.warn(
                 warning_message, category=KedroExperimentalWarning, stacklevel=2
             )

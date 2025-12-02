@@ -40,6 +40,7 @@ exceptions:
   - GraphQL
   - Hook
   - Hooks
+  - IAM
   - Iceberg
   - IDs
   - IO
@@ -56,6 +57,7 @@ exceptions:
   - Linux
   - MWAA
   - MySQL
+  - Prefect
   - Python
   - PySpark
   - QuantumBlack
@@ -67,4 +69,5 @@ exceptions:
   - Ubuntu
   - Unix
   - URLs
+  - VertexAI
   - YAML

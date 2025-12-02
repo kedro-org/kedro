@@ -16,9 +16,11 @@ dbx
 Dockerfile
 doxenix
 ethanknights
+filepath
 fsspec
 Globals
 globals
+hyperparameter
 ipdb
 IPython
 Jupyter

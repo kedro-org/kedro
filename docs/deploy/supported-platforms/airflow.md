@@ -180,7 +180,7 @@ astro deploy
 MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it easier to set up, operate, and scale Apache Airflow in the cloud. Deploying a Kedro pipeline to MWAA shares several steps with Astronomer. There are key differences: you need to store your project data in an AWS S3 bucket and update the `DataCatalog`. You must also plan how you upload your Kedro configuration, install your Kedro package, and set the required environment variables.
 1. Complete steps 1-4 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section.
 2. Your project's data should not sit in the working directory of the Airflow container. Instead, [create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html) and [upload your data folder from the new-kedro-project folder to your S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html).
-3. Update the `DataCatalog` to reference data in your S3 bucket by adjusting the file path and adding a credentials entry for each dataset in `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the file path, as shown below:
+3. Update the `DataCatalog` to reference data in your S3 bucket by adjusting the filepath and adding a credentials entry for each dataset in `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the filepath, as shown below:
 ```shell
 companies:
   type: pandas.CSVDataset
@@ -244,7 +244,7 @@ On the next page, set the `Public network (Internet accessible)` option in the `
 
 6. Once the environment is created, use the `Open Airflow UI` button to access the standard Airflow interface, where you can manage your DAG.
 
-## Run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
+## How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
 
 If you want to execute your DAG in an isolated environment on Airflow using a Kubernetes cluster, you can use a combination of the [`kedro-airflow`](https://pypi.org/project/kedro-airflow/) and [`kedro-docker`](https://pypi.org/project/kedro-docker/) plugins.
 

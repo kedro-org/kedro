@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Added `@experimental` decorator to mark unstable or early-stage public APIs.
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions

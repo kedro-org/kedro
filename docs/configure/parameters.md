@@ -4,7 +4,7 @@ By default, in a new Kedro project, parameters are defined in the `parameters.ym
 These parameters can serve as input to nodes and are used when running the pipeline. By using parameters, you can make your Kedro pipelines more flexible and easier to configure, since you can change the behaviour of your nodes by modifying the `parameters.yml` file.
 
 ## How to use parameters
-If you have a group of parameters that control the tuning of your model, define them in a single location such as `conf/base/parameters.yml`. Keeping everything together reduces the chances of missing an update elsewhere in the codebase.
+If you have a group of parameters that determine the hyperparameters of your model, define them in a single location such as `conf/base/parameters.yml`. Keeping everything together reduces the chances of missing an update elsewhere in the codebase.
 
 ```yaml
 step_size: 1

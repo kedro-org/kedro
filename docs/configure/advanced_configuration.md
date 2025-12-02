@@ -225,7 +225,7 @@ If the `folder` parameter is not passed through the CLI `--params` option with `
 
 As mentioned above, `runtime_params` are not designed to override `globals` configuration. This is done to avoid unexplicit overrides and to simplify parameter resolutions. Thus, `globals` has a single entry point - the `yaml` file.
 
-You can still combine `globals` and `runtime_params` by specifying `globals` as a default value to be used in case the runtime parameter is not passed.
+You can still use `globals` and `runtime_params` by specifying `globals` as a default value to be used in case the runtime parameter is not passed.
 
 Consider this `parameters.yml`:
 ```yaml

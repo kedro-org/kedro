@@ -168,7 +168,7 @@ kedro run --tags=pipeline_tag
 This will run only the nodes found within the pipeline tagged with `pipeline_tag`.
 
 !!! note
-    Node or tag names must ONLY contain letters, digits, hyphens, underscores and periods. Other symbols are not permitted.
+    Node or tag names must ONLY contain letters, digits, hyphens, underscores, and periods. Other symbols are not permitted.
 
 
 ## How to run a node

@@ -9,9 +9,9 @@ exceptions:
   - Airflow
   - Amazon
   - Amazon Web Services
-  - AWS Batch
   - API
   - Astro Cloud
+  - AWS Batch
   - AWS Step Functions
   - AWS Systems Manager
   - Azure

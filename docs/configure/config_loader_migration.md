@@ -38,7 +38,7 @@ Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoa
 ```
 
 ### 4. File format support
-`OmegaConfigLoader` supports `yaml` and `json` file formats. Make sure that all your configuration files use one of these formats. If you relied on other formats with `ConfigLoader`, convert them before upgrading.
+`OmegaConfigLoader` supports `yaml` and `json` file formats. Make sure that all your configuration files use one of these formats. If you relied on other formats with `ConfigLoader`, convert them to `yaml` or `json`.
 
 ### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `ConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.

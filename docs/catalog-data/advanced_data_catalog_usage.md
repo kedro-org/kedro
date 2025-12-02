@@ -1,6 +1,6 @@
 # Advanced: Access the Data Catalog in code
 
-You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through [kedro.io.DataCatalog][] using an API that allows you to configure data sources in code and use the IO module within notebooks.
+You can define a Data Catalog in two ways. Most projects rely on a YAML configuration file as [illustrated earlier](./data_catalog.md). You can also access the Data Catalog programmatically through [kedro.io.DataCatalog][] using an API that allows you to configure data sources in code and use the IO module within notebooks.
 
 !!! Warning
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
@@ -57,7 +57,7 @@ catalog = DataCatalog(
 )
 ```
 
-When using `SQLTableDataset` or `SQLQueryDataset` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` is to put `con` into `load_args` and `save_args` (`SQLTableDataset` only).
+When using `SQLTableDataset` or `SQLQueryDataset` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of the `credentials` argument. You can instead place `con` inside `load_args` and `save_args` (supported for `SQLTableDataset`).
 
 ## How to access datasets in the catalog
 
@@ -72,7 +72,7 @@ catalog = DataCatalog(datasets={"example": MemoryDataset()})
 This checks if:
 
 - The dataset is explicitly defined,
-- It matches a dataset_pattern or user_catch_all_pattern.
+- It matches a `dataset_pattern` or `user_catch_all_pattern`.
 
 To retrieve datasets, use standard dictionary-style access or the `.get()` method:
 
@@ -82,9 +82,10 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 ```
 
 - Both methods retrieve a dataset by name from the catalog’s internal collection.
-- If the dataset isn’t materialised but matches a configured pattern, it's instantiated and returned.
+- If the dataset isn’t materialised but matches a configured pattern, it is instantiated and returned.
+
 - The `.get()` method accepts:
-    - `fallback_to_runtime_pattern` (bool): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
+    - `fallback_to_runtime_pattern` (`bool`): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
     - `version`: Specify dataset version if versioning is enabled.
 - If no match is found and fallback is disabled, `.get()` method returns `None`.
 - Dictionary-style access raises a `DatasetNotFoundError` if the dataset is missing.
@@ -105,7 +106,7 @@ When raw data is added, it's automatically wrapped in a `MemoryDataset`.
 
 ## How to iterate through datasets in the catalog
 
-`DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, similar to standard Python dictionaries:
+`DataCatalog` supports iteration over dataset names (keys), datasets (values), and both (items). Iteration defaults to dataset names, mirroring standard Python dictionaries:
 
 ```python
 for ds_name in catalog:  # Default iteration over keys
@@ -131,7 +132,7 @@ ds_count = len(catalog)
 
 ## How to print the full catalog and individual datasets
 
-To print the catalog or an individual dataset programmatically, use the `print()` function or in an interactive environment like IPython or JupyterLab, simply enter the variable:
+To print the catalog or an individual dataset programmatically, use the `print()` function or, in an interactive environment like IPython or JupyterLab, enter the variable name:
 
 ```bash
 In [1]: catalog
@@ -165,11 +166,11 @@ The following steps happened behind the scenes when `load` was called:
 ## How to save data programmatically
 
 !!! warning "Memory Dataset Warning"
-    This pattern is not recommended unless you are using platform notebook environments (Sagemaker, Databricks etc) or writing unit/integration tests for your Kedro pipeline. Use the YAML approach in preference.
+    This pattern is not recommended unless you are using a hosted notebook environment such as SageMaker or Databricks, or writing unit or integration tests for your Kedro pipeline. Use the YAML approach in preference.
 
 ### How to save data to memory
 
-To save data using an API similar to that used to load data:
+To save data using an API that mirrors the load process:
 
 ```python
 from kedro.io import MemoryDataset
@@ -341,7 +342,7 @@ patterns = catalog.config_resolver.list_patterns() # List all patterns
 
 ## How to save catalog to config
 
-You can serialise a `DataCatalog` into configuration format (e.g., for saving to a YAML file) using `.to_config()`:
+You can serialise a `DataCatalog` into configuration format (for example, for saving to a YAML file) using `.to_config()`:
 
 ```python
 from kedro.io import DataCatalog
@@ -362,7 +363,7 @@ new_catalog = DataCatalog.from_config(config, credentials, load_versions, save_v
 ```
 
 !!! note
-    This method only works for datasets with static, serialisable parameters. For example, you can serialise credentials passed as dictionaries, but not as actual credential objects (like `google.auth.credentials.Credentials)`. In-memory datasets are excluded.
+    This method works for datasets with static, serialisable parameters. For example, you can serialise credentials passed as dictionaries, but not actual credential objects (such as `google.auth.credentials.Credentials)`. In-memory datasets are excluded.
 
 ## How to filter catalog datasets
 

@@ -29,7 +29,7 @@ Once installed, your AI assistant gains access to Kedro-specific MCP tools.
 
 ### Universal configuration (JSON)
 
-You can also reuse this configuration in any editor or MCP-compatible assistant (e.g. Claude, Cursor, Copilot):
+You can also reuse this configuration in any editor or MCP-compatible assistant (for example, Claude, Cursor, Copilot):
 
 ```json
 {
@@ -82,7 +82,7 @@ What happens step by step:
 
 **Tips:**
 
-- You can edit the prompt itself if you want to specify a particular virtual environment (e.g. `conda`, `uv`, or `venv`).
+- You can edit the prompt itself if you want to specify a particular virtual environment (for example, `conda`, `uv`, or `venv`).
 - If any errors occur during conversion, ask the assistant in chat how to resolve them — it will guide you through fixes.
 - The assistant will only proceed with implementation after you’ve signed off on the plan.
 
@@ -98,7 +98,7 @@ What happens step by step:
 
 When you run this prompt, the assistant will call the MCP server to guide you through migrating an existing project to the latest Kedro version.
 
-- **Step 1 — Plan:** It analyses your project and suggests a migration plan (e.g. 0.19 → 1.0). Waits for approval.
+- **Step 1 — Plan:** It analyses your project and suggests a migration plan (for example, 0.19 → 1.0). Waits for approval.
 - **Step 2 — Build:** After approval, it ensures a virtual environment (venv) is active. If not, it creates one. The assistant will install `Kedro` if missing and then follows the plan.
 
 Use this prompt to get up-to-date migration tips and avoid outdated patterns. If errors appear, ask the assistant in chat how to resolve them.
@@ -120,12 +120,12 @@ The MCP server will then provide the assistant with the latest Kedro guidance an
 
 - Keep the header line as is (so the MCP server is explicitly called).
 - Replace the placeholder with your actual request
-  (e.g., *“generate me a sample Kedro project for a sales forecasting pipeline”*).
+  (for example, *“generate me a sample Kedro project for a sales forecasting pipeline”*).
 - The assistant will then use the fresh Kedro instructions
-  (e.g., conventions, workflow, catalog setup, parameters, QA rules) to guide you.
+  (for example, conventions, workflow, catalog setup, parameters, QA rules) to guide you.
 
 
 ---
 
 
-With Kedro MCP, Copilot and Cursor become much smarter about Kedro — so you can focus on building pipelines, not fixing AI mistakes.
+With Kedro MCP, Copilot, and Cursor become much smarter about Kedro — so you can focus on building pipelines, not fixing AI mistakes.

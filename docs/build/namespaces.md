@@ -4,7 +4,7 @@ In this section, we introduce namespaces - a powerful tool for grouping and isol
 
 - **Reusing a Kedro pipeline:** If you need to reuse a pipeline with some modifications of inputs, outputs or parameters, Kedro does not allow direct duplication because all nodes within a project must have unique names. Using namespaces helps resolve this issue by isolating identical pipelines while also enhancing visualisation in Kedro-Viz.
 
-- **Grouping specific nodes:**  Namespaces provide a simple way to group selected nodes, making it possible to execute them together in deployment while also improving their visual representation in Kedro-Viz.
+- **Grouping specific nodes:**  Namespaces provide a way to group selected nodes, making it possible to execute them together in deployment while also improving their visual representation in Kedro-Viz.
 
 ## How to reuse your pipelines
 

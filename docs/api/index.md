@@ -11,8 +11,7 @@ Kedro is a framework that makes it easy to build robust and scalable data pipeli
 | [`kedro.logging`](kedro.logging.md)               |                                                                                                          |
 | [`kedro.pipeline`](pipeline/kedro.pipeline.md)    | provides functionality to define and execute data-driven pipelines.                                      |
 | [`kedro.runner`](runner/kedro.runner.md)          | provides runners that are able to execute Pipeline instances.                                            |
-| [`kedro.utils`](kedro.utils.md)                   | This module provides a set of helper functions being used across different components of kedro package.  |
-| [`kedro.experimental`](kedro.experimental.md)     | This module provides the ``@experimental`` decorator and the ``KedroExperimentalWarning`` warning class. |
+| [`kedro.utils`](kedro.utils.md)                   | This module provides a set of helper functions being used across different components of Kedro package.  |
 
 ## Functions
 | Name                                   | Description                                      |

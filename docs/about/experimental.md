@@ -34,17 +34,15 @@ See the implementation and usage examples in `kedro/experimental.py`.
 The decorator **does not**:
 
 - restrict usage
-- modify runtime behavior
+- modify runtime behaviour
 - introduce additional dependencies
-
-Experimental APIs behave like normal APIs, with additional visibility only.
 
 ### When to use @experimental
 
 Use the decorator when adding:
 
 - Small additions to core Kedro
-- Features likely to stabilize soon
+- Features likely to stabilise soon
 - APIs requiring user feedback
 
 ### When NOT to use it

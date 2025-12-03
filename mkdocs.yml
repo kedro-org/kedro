@@ -459,8 +459,6 @@ nav:
       - IDE Support:
           - Visual Studio Code: ide/set_up_vscode.md
           - PyCharm: ide/set_up_pycharm.md
-      - Experimental:
-          - Experimental APIs: experimental/index.md
       - About:
         #   - Community:
             #   - Kedro Slack: about/community/slack.md

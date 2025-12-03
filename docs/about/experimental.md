@@ -37,21 +37,16 @@ The decorator **does not**:
 - modify runtime behaviour
 - introduce additional dependencies
 
-### When to use @experimental
+### Disabling experimental warnings
 
-Use the decorator when adding:
+You can suppress `KedroExperimentalWarning` if you choose to adopt a feature without warning noise:
 
-- Small additions to core Kedro
-- Features likely to stabilise soon
-- APIs requiring user feedback
+```python
+import warnings
+from kedro.utils import KedroExperimentalWarning
 
-### When NOT to use it
-
-Use a plugin instead of the decorator when:
-
-- the feature requires heavy external dependencies (ML, AI, visualisation libraries)
-- the experimentation affects installation size or startup performance
-- the feature is large enough to evolve independently
+warnings.filterwarnings("ignore", category=KedroExperimentalWarning)
+```
 
 ## Migration expectations
 

@@ -465,8 +465,7 @@ nav:
             #   - Kedro Wizard: about/community/wizard.md
           - Contributing:
               - Kedro's Technical Steering Committee: about/technical_steering_committee.md
-          - Experimental:
-              - Experimental APIs in Kedro: about/experimental.md
+          - Experimental APIs in Kedro: about/experimental.md
             #   - Kedro Maintainer: about/contributing/maintainer.md
             #   - Contributing on GitHub: about/contributing/github.md
             #   - Contributing documentation: about/contributing/documentation.md

@@ -29,7 +29,7 @@ Kedro exposes an `@experimental` decorator that can be applied to:
 
 It marks the object as experimental and triggers a `KedroExperimentalWarning` on first use (function calling or class instantiation).
 
-See the implementation and usage examples in `kedro/experimental.py`.
+See the implementation and usage examples in `kedro/utils.py`.
 
 The decorator **does not**:
 

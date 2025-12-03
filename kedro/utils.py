@@ -6,6 +6,9 @@ import importlib
 import logging
 import os
 import re
+import warnings
+from collections.abc import Callable
+from functools import wraps
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -163,3 +166,71 @@ def _has_rich_handler(logger: logging.Logger | None = None) -> bool:
 def _format_rich(value: str, markup: str) -> str:
     """Format string with rich markup"""
     return f"[{markup}]{value}[/{markup}]"
+
+
+class KedroExperimentalWarning(UserWarning):
+    """Warning raised when using an experimental Kedro feature."""
+
+
+def experimental(obj: Callable | type) -> Callable | type:
+    """Mark a function or class as experimental.
+
+    Emits a ``KedroExperimentalWarning`` when invoked (for functions) or
+    instantiated (for classes). The original API remains fully usable.
+
+    Args:
+        obj: The function or class to wrap.
+
+    Returns:
+        A wrapped version of the object that emits warnings on use.
+
+    Example:
+    ```python
+
+    @experimental
+    def sample_func(a, b):
+        return a + b
+
+    @experimental
+    class SampleClass:
+    def __init__(self, x):
+        self.x = x
+    ```
+    """
+    warning_message = " is experimental and may change in future Kedro releases."
+
+    # Function or method
+    if callable(obj) and not isinstance(obj, type):
+
+        @wraps(obj)
+        def wrapper(*args, **kwargs):  # type: ignore[no-untyped-def]
+            warnings.warn(
+                f"{obj.__name__}{warning_message}",
+                category=KedroExperimentalWarning,
+                stacklevel=2,
+            )
+            return obj(*args, **kwargs)
+
+        setattr(wrapper, "__kedro_experimental__", True)
+        setattr(wrapper, "__wrapped__", obj)
+
+        return wrapper
+    # Class
+    if isinstance(obj, type):
+        original_init = obj.__init__
+
+        @wraps(original_init)
+        def new_init(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+            warnings.warn(
+                f"{obj.__name__}{warning_message}",
+                category=KedroExperimentalWarning,
+                stacklevel=2,
+            )
+            return original_init(self, *args, **kwargs)
+
+        obj.__init__ = new_init
+        setattr(obj, "__kedro_experimental__", True)
+
+        return obj
+
+    return obj

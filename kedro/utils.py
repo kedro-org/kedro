@@ -181,7 +181,7 @@ _EXPERIMENTAL_NOTE_MD = """
 def _inject_experimental_doc(obj: Any) -> None:
     """Inject experimental warning into docstring for MkDocs generation."""
     doc = obj.__doc__ or ""
-    # Avoid duplicate insertion if user manually labelled it
+    # Avoid duplicate insertion if it was labelled manually
     if "experimental" not in doc.lower():
         obj.__doc__ = f"{_EXPERIMENTAL_NOTE_MD}\n\n{doc}".strip()
 
@@ -212,43 +212,47 @@ def experimental(obj: Callable | type) -> Callable | type:
     ```
     """
     warning_message = " is experimental and may change in future Kedro releases."
+    warned_flag = "__kedro_experimental_warned__"
 
     # Function or method
     if callable(obj) and not isinstance(obj, type):
 
         @wraps(obj)
         def wrapper(*args, **kwargs):  # type: ignore[no-untyped-def]
-            warnings.warn(
-                f"{obj.__name__}{warning_message}",
-                category=KedroExperimentalWarning,
-                stacklevel=2,
-            )
+            if not getattr(wrapper, warned_flag, False):
+                warnings.warn(
+                    f"{obj.__name__}{warning_message}",
+                    category=KedroExperimentalWarning,
+                    stacklevel=2,
+                )
+                setattr(wrapper, warned_flag, True)
             return obj(*args, **kwargs)
 
         setattr(wrapper, "__kedro_experimental__", True)
         setattr(wrapper, "__wrapped__", obj)
 
         _inject_experimental_doc(wrapper)
-
         return wrapper
+
     # Class
     if isinstance(obj, type):
         original_init = obj.__init__
 
         @wraps(original_init)
         def new_init(self, *args, **kwargs):  # type: ignore[no-untyped-def]
-            warnings.warn(
-                f"{obj.__name__}{warning_message}",
-                category=KedroExperimentalWarning,
-                stacklevel=2,
-            )
+            if not getattr(obj, warned_flag, False):
+                warnings.warn(
+                    f"{obj.__name__}{warning_message}",
+                    category=KedroExperimentalWarning,
+                    stacklevel=2,
+                )
+                setattr(obj, warned_flag, True)
             return original_init(self, *args, **kwargs)
 
         obj.__init__ = new_init
         setattr(obj, "__kedro_experimental__", True)
 
         _inject_experimental_doc(obj)
-
         return obj
 
     return obj

@@ -172,6 +172,20 @@ class KedroExperimentalWarning(UserWarning):
     """Warning raised when using an experimental Kedro feature."""
 
 
+_EXPERIMENTAL_NOTE_MD = """
+!!! warning "Experimental"
+    This feature is **experimental** and may change or be removed in a future release.
+"""
+
+
+def _inject_experimental_doc(obj: Any) -> None:
+    """Inject experimental warning into docstring for MkDocs generation."""
+    doc = obj.__doc__ or ""
+    # Avoid duplicate insertion if user manually labelled it
+    if "experimental" not in doc.lower():
+        obj.__doc__ = f"{_EXPERIMENTAL_NOTE_MD}\n\n{doc}".strip()
+
+
 def experimental(obj: Callable | type) -> Callable | type:
     """Mark a function or class as experimental.
 
@@ -214,6 +228,8 @@ def experimental(obj: Callable | type) -> Callable | type:
         setattr(wrapper, "__kedro_experimental__", True)
         setattr(wrapper, "__wrapped__", obj)
 
+        _inject_experimental_doc(wrapper)
+
         return wrapper
     # Class
     if isinstance(obj, type):
@@ -230,6 +246,8 @@ def experimental(obj: Callable | type) -> Callable | type:
 
         obj.__init__ = new_init
         setattr(obj, "__kedro_experimental__", True)
+
+        _inject_experimental_doc(obj)
 
         return obj
 

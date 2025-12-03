@@ -146,3 +146,46 @@ def test_experimental_non_callable_passthrough():
     assert result is original
     assert len(w) == 0
     assert not hasattr(result, "__kedro_experimental__")
+
+
+def test_experimental_injects_docstring_function():
+    @experimental
+    def sample():
+        """Original function docs."""
+        return 42
+
+    assert sample.__doc__.startswith('!!! warning "Experimental"')
+    assert "Original function docs." in sample.__doc__
+    assert "experimental" in sample.__doc__.lower()
+
+
+def test_experimental_injects_docstring_class():
+    @experimental
+    class Foo:
+        """Test class documentation."""
+
+        pass
+
+    assert Foo.__doc__.startswith('!!! warning "Experimental"')
+    assert "Test class documentation." in Foo.__doc__
+
+
+def test_experimental_docstring_not_duplicated():
+    @experimental
+    @experimental
+    def func():
+        """Docs."""
+        return True
+
+    assert func.__doc__.count('!!! warning "Experimental"') == 1
+
+
+def test_experimental_warning_and_docstring_together():
+    @experimental
+    def fn(x):
+        return x * 2
+
+    with pytest.warns(KedroExperimentalWarning):
+        fn(10)
+
+    assert fn.__doc__.startswith('!!! warning "Experimental"')

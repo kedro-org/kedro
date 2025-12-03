@@ -1,7 +1,7 @@
 # Experimental APIs in Kedro
 
 Kedro provides an `@experimental` decorator that allows the core team and plugin authors to introduce new,
-early-stage, or unstable APIs without committing to long-term stability immediately.
+early-stage, or unstable APIs without committing to long-term stability.
 
 This mechanism helps Kedro evolve faster while giving users explicit visibility into which parts of the
 public API are still undergoing refinement.
@@ -11,13 +11,13 @@ public API are still undergoing refinement.
 Experimental features allow us to:
 
 - Introduce new APIs earlier and validate them with real usage.
-- Iterate quickly without strict backwards-compatibility constraints.
-- Make experimental status obvious, so users know what to expect.
+- Iterate fast without strict backwards-compatibility constraints.
+- Make experimental status clear, so users know what to expect.
 - Gather usage signals before promoting features to stable APIs.
 - Provide a foundation for the hybrid strategy adopted by the Kedro team:
 
-    - **Lightweight** experiments: via `@experimental`
-    - **Large or dependency-heavy** features: via external plugins
+    - **Lightweight** experiments: `@experimental`
+    - **Large or dependency-heavy** features: external plugins
 
 ## The `@experimental` decorator
 
@@ -34,7 +34,7 @@ See the implementation and usage examples in `kedro/experimental.py`.
 The decorator **does not**:
 
 - restrict usage
-- modify runtime behaviour
+- change runtime behaviour
 - introduce additional dependencies
 
 ### Disabling experimental warnings
@@ -57,4 +57,4 @@ Experimental APIs:
 - may be promoted to stable API (and documented officially)
 - may be removed based on lack of adoption
 
-These changes will be communicated during minor version releases, and migration guides will accompany any major revisions.
+These changes will be communicated during minor version releases, and migration guides will be provided for any major revisions.

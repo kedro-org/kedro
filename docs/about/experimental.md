@@ -27,7 +27,7 @@ Kedro exposes an `@experimental` decorator that can be applied to:
 - classes
 - other callables
 
-It marks the object as experimental and triggers a `KedroExperimentalWarning` on first use.
+It marks the object as experimental and triggers a `KedroExperimentalWarning` on first use (function calling or class instantiation).
 
 See the implementation and usage examples in `kedro/experimental.py`.
 

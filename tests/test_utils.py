@@ -189,3 +189,32 @@ def test_experimental_warning_and_docstring_together():
         fn(10)
 
     assert fn.__doc__.startswith('!!! warning "Experimental"')
+
+
+def test_experimental_function_warns_once():
+    @experimental
+    def foo(x):
+        return x + 1
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        foo(1)  # warns
+        foo(2)  # no warning
+        foo(3)  # no warning
+
+    assert len([x for x in w if issubclass(x.category, KedroExperimentalWarning)]) == 1
+
+
+def test_experimental_class_warns_once():
+    @experimental
+    class A:
+        def __init__(self, x):
+            self.x = x
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        A(1)  # warns
+        A(2)  # no warning
+        A(3)  # no warning
+
+    assert len([x for x in w if issubclass(x.category, KedroExperimentalWarning)]) == 1

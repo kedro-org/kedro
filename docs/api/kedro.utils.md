@@ -11,6 +11,7 @@
 | [`find_kedro_project`](#kedro.utils.find_kedro_project) | Function | Given a path, find a Kedro project associated with it.                  |
 | [`is_kedro_project`](#kedro.utils.is_kedro_project)     | Function | Evaluate if a given path is a root directory of a Kedro project or not. |
 | [`load_obj`](#kedro.utils.load_obj)                     | Function | Extract an object from a given path.                                    |
+| [`experimental`](#kedro.experimental.experimental)      | Function | Decorator to mark a function or class as experimental.   |
 
 ::: kedro.utils.find_kedro_project
     options:
@@ -21,5 +22,13 @@
       show_source: true
 
 ::: kedro.utils.load_obj
+    options:
+      show_source: true
+
+::: kedro.experimental.KedroExperimentalWarning
+    options:
+      show_source: true
+
+::: kedro.experimental.experimental
     options:
       show_source: true

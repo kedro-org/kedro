@@ -16,11 +16,14 @@ for example our Spaceflights starter.
 To do that, we recommend using [`uv`](https://docs.astral.sh/uv/),
 a fast, modern Python package and project manager.
 
-First, use `uvx` to seamlessly run `kedro new`:
+First, use `uvx` to run `kedro new`:
 
 ```bash
 uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```
+
+!!! note
+    Using `uvx` lets you run Kedro without installing it into your system or virtual environment. It downloads and runs Kedro in a clean temporary environment each time. If you prefer a standard installation (for example pip + virtual environment), see the [installation guide](#alternative-methods).
 
 The command will create a directory with the contents of your project.
 Navigate to it:
@@ -28,6 +31,9 @@ Navigate to it:
 ```bash
 cd spaceflights
 ```
+
+!!! note
+    Now that the project exists, you'll work within it using its own virtual environment. The commands below (`uv sync` and `uv run`) create and use the project's environment, rather than the temporary environment that `uvx` used.
 
 And finally, verify that everything works:
 
@@ -71,9 +77,10 @@ There are several ways to do it:
 
 === "uv"
 
-    `uvx` is an alias for `uv tool`, a uv feature that allows you to work with "tools"
-    or globally-installed Python packages. After installing `uv`,
-    you can use it to run `kedro new` as follows:
+    `uvx` is an alias for `uv tool run`. It runs commands in temporary, isolated environments,
+    with dependencies handled automatically.
+
+    After installing `uv`, you can use it to run `kedro new` as follows:
 
     ```bash
     uvx kedro new
@@ -82,7 +89,7 @@ There are several ways to do it:
 === "Other native tools"
 
     `pipx` is a tool that allows you to install and run Python applications and tools
-    in isolated environments. After installing it,
+    in isolated environments, with dependencies handled automatically. After installing it,
     you can use it to run `kedro new` as follows:
 
     ```bash

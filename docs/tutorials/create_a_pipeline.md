@@ -30,8 +30,9 @@ frameborder="0" allowfullscreen></iframe>
 
 ## Data preprocessing node functions
 
-The first step is to preprocess two of the datasets, `companies.csv`, and `shuttles.xlsx`. The preprocessing code for the nodes is in `src/spaceflights/pipelines/data_processing/nodes.py` as a pair of functions (`preprocess_companies` and `preprocess_shuttles`). Each takes a raw DataFrame as input, converts the data in several columns to different types, and outputs a DataFrame containing the preprocessed data:
+The first step prepares two of the datasets, `companies.csv` and `shuttles.xlsx`. The preprocessing code for the nodes is in `src/spaceflights/pipelines/data_processing/nodes.py` as a pair of functions (`preprocess_companies` and `preprocess_shuttles`). Each takes a raw DataFrame as input, converts the data in several columns to different types, and outputs a DataFrame containing the preprocessed data:
 
+<!-- vale off -->
 ??? example "View code"
     ```python
     import pandas as pd
@@ -117,9 +118,10 @@ Next, take a look at `src/spaceflights/pipelines/data_processing/pipeline.py` wh
     ```
 
 
-Note that the `inputs` statements for `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. They are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. Kedro uses the named node inputs (and outputs) to determine interdependencies between the nodes, and their execution order.
+**Note**: The `inputs` statements for `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. They are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. Kedro uses the named node inputs (and outputs) to determine how nodes depend on one another and their execution order.
 
 
+<!-- vale off -->
 ## Test the example
 
 Run the following command in your terminal window to test the node named `preprocess_companies_node`:
@@ -128,7 +130,7 @@ Run the following command in your terminal window to test the node named `prepro
 kedro run --nodes=preprocess_companies_node
 ```
 
-You should see output similar to the below:
+You should see output such as the following:
 
 ??? example "View code"
     ```bash
@@ -141,7 +143,6 @@ You should see output similar to the below:
                         INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
 
     ```
-
 You can run the `preprocess_shuttles` node similarly. To test both nodes together as the complete data processing pipeline:
 
 ```bash
@@ -154,7 +155,7 @@ You can also run both nodes by naming each in turn, as follows:
 kedro run --nodes=preprocess_companies_node,preprocess_shuttles_node
 ```
 
-You should see output similar to the following:
+You should see output such as the following:
 
 ??? example "View code"
     ```bash
@@ -190,7 +191,7 @@ Each of the nodes outputs a new dataset (`preprocessed_companies` and `preproces
     filepath: data/02_intermediate/preprocessed_shuttles.parquet
     ```
 
-If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the [kedro.io.MemoryDataset][] class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
+If you remove these lines from `catalog.yml`, Kedro still runs the pipeline and automatically stores the preprocessed data, in memory, as temporary Python objects of the [kedro.io.MemoryDataset][] class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
 
 
 ## Create a table for model input
@@ -276,7 +277,7 @@ To test the progress of the example:
 kedro run
 ```
 
-You should see output similar to the following:
+You should see output such as the following:
 
 ??? example "View code"
     ```bash
@@ -303,6 +304,7 @@ You should see output similar to the following:
                         INFO     Pipeline execution completed successfully.                             runner.py:89
                         INFO     Loading data from 'model_input_table' (MemoryDataset)...        data_catalog.py:343
     ```
+<!-- vale on -->
 
 ## Visualise the project
 
@@ -338,7 +340,9 @@ This is an excellent place to take a breath and summarise what you have seen in 
 
 ![](../meta/images/coffee-cup.png)
 
+<!-- vale off -->
 Photo by <a href="https://unsplash.com/@maltehelmhold">Malte Helmhold</a> on <a href="https://unsplash.com">Unsplash</a>
+<!-- vale on -->
 
 
 * How to create a new Kedro project from a starter and install its dependencies

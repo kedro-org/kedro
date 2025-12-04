@@ -3,7 +3,7 @@
 This section explains the following:
 
 * How to add a second Kedro pipeline for data science code that extends the default project pipeline
-* How to 'slice' the project to run just part of the entire pipeline
+* How to 'slice' the project to run part of the entire pipeline
 * (Optional) How to make a [modular pipeline](../build/modular_pipelines.md)
 * (Optional) How to specify the way the pipeline nodes are run: sequentially or in parallel
 
@@ -25,6 +25,8 @@ First, take a look at the functions for the data science nodes in `src/spaceflig
 
 
 
+<!-- vale off -->
+<!-- vale off -->
 ??? example "View code"
     ```python
     import logging
@@ -219,15 +221,16 @@ You should see output similar to the following:
                         INFO     Completed 6 out of 6 tasks                                  sequential_runner.py:85
                         INFO     Pipeline execution completed successfully.                             runner.py:89
     ```
+<!-- vale on -->
 
-As you can see, the `data_processing` and `data_science` pipelines ran successfully, generated a model and evaluated it.
+As you can see, the `data_processing` and `data_science` pipelines ran without errors, generated a model, and evaluated it.
 
 
 ### Slice a pipeline
 
-There may be occasions when you want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
+There may be occasions when you want to run part of the default pipeline. For example, you could skip `data_processing` execution and run the `data_science` pipeline to tune the hyperparameters of the price prediction model.
 
-You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
+You can 'slice' the pipeline and specify the part you want to run by using the `--pipeline` option. For example, to run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
 ```bash
 kedro run --pipeline=data_science
@@ -237,12 +240,13 @@ There are a range of options to run sections of the default pipeline as describe
 
 ## Modular pipelines
 
-In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../build/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs/outputs/parameters.
+In a typical Kedro project, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../build/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs, outputs, and parameters.
 
 
 ### Optional: Extend the project with namespacing and a modular pipeline
 This is optional code so is **not** provided in the spaceflights starter. If you want to see this in action, you need to copy and paste the code as instructed.
 
+<!-- vale off -->
 First, add namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline` to test the model using different combinations of features.
 
 
@@ -291,6 +295,7 @@ First, add namespaces to the modelling component of the data science pipeline to
                 - crew
                 - review_scores_rating
     ```
+<!-- vale on -->
 
 3. Replace the code in `pipelines/data_science/pipeline.py` with the snippet below:
 
@@ -455,7 +460,7 @@ You can see this snippet as part of the code you added to the example:
     )
     ```
 
-The code instantiates the template_pipeline twice but passes in different parameters. The `pipeline_instance` variable is the template pipeline, and `ds_pipeline_1` and `ds_pipeline_2` are the two separately parameterised instantiations.
+The code instantiates the `template_pipeline` twice but passes in different parameters. The `pipeline_instance` variable is the template pipeline, and `ds_pipeline_1` and `ds_pipeline_2` are the two separately parameterised instantiations.
 
 #### How do namespaces affect parameters?
 
@@ -471,17 +476,18 @@ There are a separate set of parameters for `ds_pipeline_2` with the `candidate_m
 - `X_train` turns into `candidate_modelling_pipeline.X_train`
 - `X_test` turns into `candidate_modelling_pipeline.X_test`, and so on
 
-However, `model_input_table` does not get parameterised as it needs to be shared between instances, so is frozen outside the scope of the namespace wrappers.
+In this setup, `model_input_table` does not get parameterised because it needs to be shared between instances, so it is frozen outside the scope of the namespace wrappers.
 
-This renders as follows using `kedro viz run` (hover over the datasets to see their full path) :
+The graph renders as follows when you run `kedro viz run` (hover over the datasets to see their full path):
 
 ![modular_ds](../meta/images/modular_ds.gif)
 
 ## Optional: Kedro runners
+<!-- vale on -->
 
 There are three different Kedro runners that can run the pipeline:
 
-* `SequentialRunner` - runs nodes sequentially; once a node has completed its task then the next one starts.
+* `SequentialRunner` - runs nodes sequentially; after a node has completed its task, the next one starts.
 * `ParallelRunner` - runs nodes in parallel; independent nodes are able to run at the same time, which is more efficient when there are independent branches in your pipeline and enables you to take advantage of multiple CPU cores.
 * `ThreadRunner` - runs nodes in parallel, similarly to `ParallelRunner`, but uses multithreading instead of multiprocessing.
 
@@ -493,6 +499,6 @@ kedro run --runner=ThreadRunner
 kedro run --runner=module.path.to.my.runner
 ```
 
-`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations-and-plugins/pyspark_integration.md) and [Dask](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/dask.ParquetDataset/).
+`ParallelRunner` performs task parallelisation through multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations-and-plugins/pyspark_integration.md) and [Dask](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/dask.ParquetDataset/).
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../build/run_a_pipeline.md).

@@ -13,7 +13,7 @@ The following sections explain how to create and use Kedro pipelines:
 - [How to receive information about pipeline inputs and outputs](#how-to-receive-information-about-pipeline-inputs-and-outputs)
 - [How to tag a pipeline](#how-to-tag-a-pipeline)
 - [How to avoid creating bad pipelines](#how-to-avoid-creating-bad-pipelines)
-- [How to store pipeline code in a kedro project](#how-to-store-pipeline-code-in-a-kedro-project)
+- [How to store pipeline code in a Kedro project](#how-to-store-pipeline-code-in-a-kedro-project)
 
 
 

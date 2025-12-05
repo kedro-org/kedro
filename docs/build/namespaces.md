@@ -77,7 +77,7 @@ model_options_1:
 !!! note
     In Kedro, you cannot run pipelines with the same node names. In this example, both pipelines have nodes with the same names, so it's impossible to execute them together. However, `base_data_science` is not registered and will not be executed with the `kedro run` command. The `data_science` pipeline, on the other hand, will be executed during `kedro run` because it will be autodiscovered by Kedro, as it was created inside the `create_pipeline()` function.
 
-If you want to execute `base_data_science` and `data_science` pipelines together or reuse `base_data_science` a few more times, you need to modify the node names. The easiest way to do this is by using namespaces.
+If you want to execute `base_data_science` and `data_science` pipelines together or reuse `base_data_science` a few more times, you need to change the node names. The easiest way to do this is by using namespaces.
 
 ## What is a namespace
 
@@ -111,7 +111,7 @@ Let's extend our previous example and try to reuse the `base_data_science` pipel
 kedro pipeline create data_science_2
 ```
 
-Then, we need to modify the `src/project_name/pipelines/data_science_2/pipeline.py` file to create a pipeline in a similar way to the example above. We will import `base_data_science` from the code above and use a namespace to isolate our nodes:
+Then, we need to change the `src/project_name/pipelines/data_science_2/pipeline.py` file to create a pipeline in a similar way to the example above. We will import `base_data_science` from the code above and use a namespace to isolate our nodes:
 
 ```python
 #src/project_name/pipelines/data_science_2/pipeline.py
@@ -127,7 +127,7 @@ def create_pipeline() -> Pipeline:
     )
 ```
 
-To use a new set of parameters, copy `model_options` from `conf/base/parameters_data_science.yml` to `conf/base/parameters_data_science_2.yml` and modify it slightly to try new model training parameters, such as test size and a different feature set. Call it `model_options_2`:
+To use a new set of parameters, copy `model_options` from `conf/base/parameters_data_science.yml` to `conf/base/parameters_data_science_2.yml` and change it slightly to try new model training parameters, such as test size and a different feature set. Call it `model_options_2`:
 
 ```python
 #conf/base/parameters.yml
@@ -171,13 +171,13 @@ We can collapse all namespaced pipelines (in our case, it's only `data_science_2
 
 If we want to make all pipelines in this example fully namespaced, we should:
 
-Modify the `data_processing` pipeline by adding to the `Pipeline` class in `src/project_name/pipelines/data_processing/pipeline.py` with the following code:
+Change the `data_processing` pipeline by adding to the `Pipeline` class in `src/project_name/pipelines/data_processing/pipeline.py` with the following code:
 ```python
         namespace="data_processing",
         inputs={"companies", "shuttles", "reviews"},  # Inputs remain the same, without namespace prefix
         outputs={"model_input_table"},  # Outputs remain the same, without namespace prefix
 ```
-Modify the `data_science` pipeline by adding namespace and inputs in the same way as it was done in `data_science_2` pipeline:
+Change the `data_science` pipeline by adding namespace and inputs in the same way as it was done in `data_science_2` pipeline:
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:

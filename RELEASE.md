@@ -2,7 +2,11 @@
 ## Major features and improvements
 * Added `@experimental` decorator to mark unstable or early-stage public APIs.
 ## Bug fixes and other changes
+
 ## Documentation changes
+* Added beginner-friendly notes on `uvx` installation.
+
+
 ## Community contributions
 
 # Release 1.1.1

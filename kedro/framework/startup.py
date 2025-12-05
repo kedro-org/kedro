@@ -88,11 +88,8 @@ def _get_project_metadata(project_path: Path) -> ProjectMetadata:
     if missing_keys:
         raise RuntimeError(f"Missing required keys {missing_keys} from '{_PYPROJECT}'.")
 
-    # check the match for major and minor version (skip patch version)
-    if (
-        metadata_dict["kedro_init_version"].split(".")[:2]
-        != kedro_version.split(".")[:2]
-    ):
+    # check the match for major (skip patch and minor version)
+    if metadata_dict["kedro_init_version"].split(".")[0] != kedro_version.split(".")[0]:
         raise ValueError(_version_mismatch_error(metadata_dict["kedro_init_version"]))
 
     # Default settings

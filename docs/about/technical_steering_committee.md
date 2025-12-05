@@ -118,7 +118,7 @@ and the `kedro-team` channel on the Kedro Slack organisation, and listed as [Ked
 
 ## Voting process
 
-Voting can change project maintainers and decide on the future of Kedro. The TSC leads the process as voting maintainers of Kedro. The voting period is one week and via a GitHub discussion or through a pull request.
+Voting can change project maintainers and decide on the future of Kedro. The TSC leads the process as voting maintainers of Kedro. The voting period is one week and through a GitHub discussion or through a pull request.
 
 ### Other issues or proposals
 

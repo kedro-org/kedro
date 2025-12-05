@@ -12,7 +12,7 @@ We recommend using `SequentialRunner` in cases where:
 
 - the pipeline has limited branching
 - the pipeline is fast
-- the resource-consuming steps require most of a scarce resource (e.g., significant RAM, disk memory or CPU)
+- the resource-consuming steps require most of a scarce resource (for example, significant RAM, disk memory or CPU)
 
 Kedro uses `SequentialRunner` by default, so to execute the pipeline sequentially:
 
@@ -143,7 +143,7 @@ When processing a node, both `SequentialRunner` and `ParallelRunner` perform the
 2. Execute node function with the input(s)
 3. Save the output(s)
 
-If a node has multiple inputs or outputs (e.g., `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
+If a node has multiple inputs or outputs (for example, `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
 
 ```bash
 $ kedro run --async
@@ -193,13 +193,13 @@ Further information about `kedro run` can be found in the [Kedro CLI documentati
 
 ## Run pipelines with IO
 
-The above definition of pipelines only applies for non-stateful or "pure" pipelines that do not interact with the outside world. In practice, we would like to interact with APIs, databases, files and other sources of data. By combining IO and pipelines, we can tackle these more complex use cases.
+The above definition of pipelines only applies for non-stateful or "pure" pipelines that do not interact with the outside world. In practice, we would like to interact with APIs, databases, files, and other sources of data. By combining IO and pipelines, we can tackle these more complex use cases.
 
 By using `DataCatalog` from the IO module we are still able to write pure functions that work with our data and outsource file saving and loading to `DataCatalog`.
 
 Through `DataCatalog`, we can control where inputs are loaded from, where intermediate variables get persisted and ultimately the location to which output variables are written.
 
-In a simple example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, then instantiate `SequentialRunner` and call its `run` method with the pipeline and data catalog instances:
+In the below example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, instantiate `SequentialRunner`, and call its `run` method with the pipeline and data catalog instances:
 
 ??? example "View code"
     ```python
@@ -274,14 +274,14 @@ Kedro runners provide a consistent interface for executing pipelines, whether yo
 ### Output from `runner.run()`
 
 * The `runner.run()` method **returns a dictionary of pipeline output datasets**, where keys are dataset names and values are the dataset objects (not the data itself).
-* It **does not return raw data** — to retrieve the actual data, call `.load()` on each dataset object or via catalog.
+* It **does not return raw data** — to retrieve the actual data, call `.load()` on each dataset object or through the catalog.
 
 ```python
 from kedro.framework.project import pipelines
 from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 
-# Load your catalog configuration (e.g., from YAML)
+# Load your catalog configuration (for example, from YAML)
 catalog = DataCatalog.from_config(catalog_config)
 
 pipeline = pipelines.get("__default__")

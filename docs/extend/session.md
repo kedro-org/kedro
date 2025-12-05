@@ -56,7 +56,7 @@ graph LR
   subgraph Kedro_Startup_Flowchart
     A[bootstrap_project] -->|Read pyproject.toml| B
     A -->|Add project root to sys.path| B[configure_project]
-    C[Initialize KedroSession]
+    C[Initialise KedroSession]
     B --> |Read settings.py| C
     B --> |Read pipeline_registry.py| C
   end

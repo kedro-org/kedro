@@ -101,18 +101,18 @@ Use of this dataset has the advantage that the preview capabilities of the MLflo
     This will work for datasets that are outputs of a node,
     and will have no effect for datasets that are free inputs (hence are only loaded).
 
-For example, if you modify the a `matplotlib.MatplotlibWriter` dataset like this:
+For example, if you modify the a `matplotlib.MatplotlibDataset` dataset like this:
 
 ```diff
  # conf/base/catalog.yml
 
  dummy_confusion_matrix:
--  type: matplotlib.MatplotlibWriter
+-  type: matplotlib.MatplotlibDataset
 -  filepath: data/08_reporting/dummy_confusion_matrix.png
 -  versioned: true
 +  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
 +  dataset:
-+    type: matplotlib.MatplotlibWriter
++    type: matplotlib.MatplotlibDataset
 +    filepath: data/08_reporting/dummy_confusion_matrix.png
 ```
 
@@ -122,7 +122,7 @@ and you would be able to preview it in the MLflow web UI:
 ![MLflow image preview thanks to the artifact tracking capabilities of kedro-mlflow](../meta/images/mlflow-artifact-preview-image.png)
 
 !!! warning
-    If you get a `Failed while saving data to dataset MlflowMatplotlibWriter` error,
+    If you get a `Failed while saving data to dataset MlflowArtifactDataset` error,
     it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.
     The solution is to clean up the old `data/08_reporting/dummy_confusion_matrix.png` directory.
 

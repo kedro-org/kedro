@@ -74,7 +74,7 @@ Here is an exhaustive list of the arguments supported by `PartitionedDataset`:
 
 | Argument          | Required                       | Supported types                                  | Description                                                                                                                                                                                                                                   |
 | ----------------- | ------------------------------ | ------------------------------------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `path`            | Yes                            | `str`                                            | Path to the folder containing partitioned data. If path starts with the protocol (e.g., `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
+| `path`            | Yes                            | `str`                                            | Path to the folder containing partitioned data. If path starts with the protocol (for example, `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
 | `dataset`         | Yes                            | `str`, `Type[AbstractDataset]`, `Dict[str, Any]` | Underlying dataset definition, for more details see the section below                                                                                                                                                                         |
 | `credentials`     | No                             | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystemcall`, for more details see the section below                                                                                                                              |
 | `load_args`       | No                             | `Dict[str, Any]`                                 | Keyword arguments to be passed into `find()` method of the corresponding filesystem implementation                                                                                                                                            |
@@ -87,7 +87,7 @@ The dataset definition should be passed into the `dataset` argument of the `Part
 
 #### Shorthand notation
 
-Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [kedro.io.AbstractDataset][].
+Requires you only to specify a class of the underlying dataset either as a string (for example, `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [kedro.io.AbstractDataset][].
 
 #### Full notation
 
@@ -238,7 +238,7 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 !!! note
     Lazy saving is the default behaviour, meaning that if a `Callable` type is provided, the dataset will be written _after_ the `after_node_run` hook is executed.
 
-In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (e.g., a TensorFlow model) and you do not intend to save it lazily.
+In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (for example, a TensorFlow model) and you do not intend to save it lazily.
 To disable the lazy saving set `save_lazily` parameter to `False`:
 
 ```yaml

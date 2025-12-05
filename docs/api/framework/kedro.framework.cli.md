@@ -8,7 +8,7 @@
 |------------------------------------|-----------------------------------------------------------------------------|
 | [`kedro.framework.cli.catalog`](#kedro.framework.cli.catalog) | A collection of CLI commands for working with Kedro catalog.               |
 | [`kedro.framework.cli.cli`](#kedro.framework.cli.cli)         | `kedro` is a CLI for managing Kedro projects.                               |
-| [`kedro.framework.cli.hooks`](#kedro.framework.cli.hooks)     | Provides primitives to use hooks to extend KedroCLI's behavior.            |
+| [`kedro.framework.cli.hooks`](#kedro.framework.cli.hooks)     | Provides primitives to use hooks to extend KedroCLI's behaviour.            |
 | [`kedro.framework.cli.jupyter`](#kedro.framework.cli.jupyter) | A collection of helper functions to integrate with Jupyter/IPython.        |
 | [`kedro.framework.cli.pipeline`](#kedro.framework.cli.pipeline) | A collection of CLI commands for working with Kedro pipelines.             |
 | [`kedro.framework.cli.project`](#kedro.framework.cli.project) | A collection of CLI commands for working with Kedro projects.              |

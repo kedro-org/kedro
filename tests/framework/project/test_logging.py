@@ -113,7 +113,7 @@ def test_rich_traceback_configuration(mocker, default_logging_config):
 
 
 def test_rich_traceback_configuration_extend_suppress(mocker, default_logging_config):
-    """Test the configuration is not overrided but extend for `suppress`"""
+    """Test the configuration is not overridden but extend for `suppress`"""
     import click
 
     rich_traceback_install = mocker.patch("rich.traceback.install")

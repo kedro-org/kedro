@@ -23,7 +23,7 @@ The [Data Catalog](../catalog-data/data_catalog.md) is your way of interacting w
 
 #### Install dependencies at a group-level
 
-Data types are broken into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of data types e.g.`pandas.CSVDataset`, `pandas.ParquetDataset` and more. You can install dependencies for an entire group of dependencies as follows:
+Data types are broken into groups, for example, `pandas`, `spark` and `pickle`. Each group has a collection of data types, for example, `pandas.CSVDataset`, `pandas.ParquetDataset` and more. You can install dependencies for an entire group of dependencies as follows:
 
 ```bash
 pip install "kedro-datasets[<group>]"

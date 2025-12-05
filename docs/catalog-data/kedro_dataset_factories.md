@@ -40,10 +40,9 @@ Node(
 !!! note
     The factory pattern must always be enclosed in quotes to avoid YAML parsing errors.
 
-Dataset factories is similar to **regular expression** and you can think of it as reversed `f-string`. In this case, the name of the input dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`. Similarly, it resolves `name` to `process` for the output dataset `process_data`.
+Dataset factories behave like a **regular expression** and you can think of the syntax as a reversed `f-string`. In this case, the name of the input dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`. Likewise, it resolves `name` to `process` for the output dataset `process_data`.
 
-
-This allows you to use one dataset factory pattern to replace multiple datasets entries. It keeps your catalog concise and you can generalise datasets using similar names, type or namespaces.
+This allows you to use one dataset factory pattern to replace multiple dataset entries. It keeps your catalog concise and lets you generalise datasets by name, type, or namespace.
 
 ## Types of patterns
 
@@ -73,7 +72,7 @@ A user catch-all pattern acts as a fallback when no dataset patterns match. It a
 ```
 
 !!! note
-    Only one user catch-all pattern is allowed per catalog. If more are specified, a `DatasetError` will be raised.
+    A single user catch-all pattern is allowed per catalog. If more are specified, Kedro raises a `DatasetError`.
 
 **Default runtime patterns**
 
@@ -93,7 +92,7 @@ default_runtime_patterns: ClassVar = {
 These patterns enable automatic creation of in-memory or shared-memory datasets during execution.
 
 ## Patterns resolution order
-When the `DataCatalog` is initialized, it scans the configuration to extract and validate any dataset patterns and user catch-all pattern.
+When the `DataCatalog` is initialised, it scans the configuration to extract and validate any dataset patterns and the user catch-all pattern.
 
 When resolving a dataset name, Kedro uses the following order of precedence:
 
@@ -101,10 +100,10 @@ When resolving a dataset name, Kedro uses the following order of precedence:
 Specific patterns defined in the `catalog.yml`. These are the most explicit and are matched first.
 
 2. **User catch-all pattern:**
-A general fallback pattern (e.g., `{default_dataset}`) that is matched if no dataset patterns apply. Only one user catch-all pattern is allowed. Multiple will raise a `DatasetError`.
+A general fallback pattern (for example, `{default_dataset}`) that is matched if no dataset patterns apply. A single user catch-all pattern is allowed. Multiple patterns raise a `DatasetError`.
 
 3. **Default runtime patterns:**
-Internal fallback behavior provided by Kedro. These patterns are built-in to catalog and automatically used at runtime to create datasets (e.g., `MemoryDatase`t or `SharedMemoryDataset`) when none of the above match.
+Internal fallback behaviour provided by Kedro. These patterns are built into the catalog and automatically used at runtime to create datasets (for example, `MemoryDataset` or `SharedMemoryDataset`) when none of the above match.
 
 ## How resolution works in practice
 
@@ -153,13 +152,13 @@ WARNING: Config from the dataset pattern '{default_dataset}' in the catalog will
 Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
 ```
 
-**Default vs runtime behavior**
+**Default vs runtime behaviour**
 
-- Default behavior: `DataCatalog` resolves dataset patterns and user catch-all patterns only.
-- Runtime behavior (e.g. during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
+- Default behaviour: `DataCatalog` resolves dataset patterns and user catch-all patterns.
+- Runtime behaviour (for example, during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
 
 !!! note
-    Enabling `fallback_to_runtime_pattern=True` is recommended only for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
+    Enabling `fallback_to_runtime_pattern=True` is recommended for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
 
 ## How to generalise datasets of the same type
 
@@ -188,7 +187,7 @@ These datasets can be combined into the following dataset factory:
   filepath: data/01_raw/{dataset_name}.csv
 ```
 
-You will then have to update the pipelines in your project located at `src/<project_name>/<pipeline_name>/pipeline.py` to refer to these datasets as `boats#csv`,
+You will then have to update the pipelines in your project located at `src/<project_name>/<pipeline_name>/pipeline.py` to reference these datasets as `boats#csv`,
 `cars#csv` and `planes#csv`. Adding a suffix or a prefix to the dataset names and the dataset factory patterns, like `#csv` here, ensures that the dataset
 names are matched with the intended pattern.
 
@@ -361,7 +360,7 @@ as `pandas.CSVDataset`.
 
 The logic behind pattern resolution is handled by the internal `CatalogConfigResolver`, available as a property on the catalog (`catalog.config_resolver`).
 
-Here are a few APIs might be useful for custom use-cases:
+Here are several APIs that might be useful for custom use cases:
 
 - `catalog_config_resolver.match_dataset_pattern()` - checks if the dataset name matches any dataset pattern
 - `catalog_config_resolver.match_user_catch_all_pattern()` - checks if dataset name matches the user defined catch all pattern
@@ -374,7 +373,7 @@ Refer to the method docstrings for more detailed examples and usage.
 
 ## Catalog and CLI commands
 
-The DataCatalog provides three powerful pipeline-based commands, accessible via both the CLI and interactive environment. These tools help inspect how datasets are resolved and managed within your pipeline.
+The DataCatalog provides three powerful pipeline-based commands, accessible through both the CLI and interactive environments. These tools help inspect how datasets are resolved and managed within your pipeline.
 
 **Describe datasets**
 
@@ -475,18 +474,18 @@ At the core of this implementation is the `CatalogCommandsMixin` - a mixin class
 
 **Why use a mixin?**
 
-The goal was to keep pipeline logic decoupled from the core `DataCatalog`, while still providing seamless access to helpful methods utilizing pipelines.
+The goal was to keep pipeline logic decoupled from the core `DataCatalog`, while still providing seamless access to helpful methods utilising pipelines.
 
-This mixin approach allows these commands to be injected only when needed - avoiding unnecessary overhead in simpler catalog use cases.
+This `mixin` approach injects these commands when they are needed, which avoids unnecessary overhead in simpler catalog use cases.
 
 **What this means in practice?**
 
 You don't need to do anything if:
 
-- You're using Kedro via CLI, or
-- Working inside an interactive environment (e.g. IPython, Jupyter Notebook).
+- You're using Kedro through the CLI, or
+- Working inside an interactive environment (for example, IPython, Jupyter Notebook).
 
-Kedro automatically composes the catalog with `CatalogCommandsMixin` behind the scenes when initializing the session.
+Kedro automatically composes the catalog with `CatalogCommandsMixin` behind the scenes when initialising the session.
 
 If you're working outside a Kedro session and want to access the extra catalog commands, you have two options:
 

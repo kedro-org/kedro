@@ -10,6 +10,7 @@ Antony
 Ankita
 Batori
 Braccialli
+Brugman
 Brummitt
 Cano
 Carvalho
@@ -60,6 +61,7 @@ Khan
 Kirilenko
 Kiyohito
 Klein
+Koh
 Kunii
 Kumar
 Lais

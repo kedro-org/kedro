@@ -118,7 +118,7 @@ def my_flow(pipeline_name: str, env: str):
     metadata = bootstrap_project(project_path)
     logger.info("Project name: %s", metadata.project_name)
 
-    logger.info("Initializing Kedro...")
+    logger.info("Initialising Kedro...")
     execution_config = kedro_init(
         pipeline_name=pipeline_name, project_path=project_path, env=env
     )
@@ -142,7 +142,7 @@ def kedro_init(
     env: str,
 ):
     """
-    Initializes a Kedro session and returns the DataCatalog and
+    Initialises a Kedro session and returns the DataCatalog and
     KedroSession
     """
     # bootstrap project within task / flow scope

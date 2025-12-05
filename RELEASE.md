@@ -1,7 +1,11 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+
 ## Documentation changes
+* Added beginner-friendly notes on `uvx` installation.
+
+
 ## Community contributions
 
 # Release 1.1.1

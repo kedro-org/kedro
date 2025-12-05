@@ -1,5 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
+* Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
+
 ## Bug fixes and other changes
 
 ## Documentation changes

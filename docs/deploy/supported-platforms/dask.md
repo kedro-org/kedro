@@ -6,17 +6,17 @@ Dask offers both a default, single-machine scheduler and a more sophisticated, d
 
 ## Why would you use Dask?
 
-`Dask.distributed` is a lightweight library for distributed computing in Python. It complements the existing PyData analysis stack, which forms the basis of many Kedro pipelines. It's also pure Python, which eases installation and simplifies debugging. For further motivation on why people choose to adopt Dask, and, more specifically, `dask.distributed`, see [Why Dask?](https://docs.dask.org/en/stable/why.html) and [the `dask.distributed` documentation](http://distributed.dask.org/en/stable/#motivation), respectively.
+`Dask.distributed` is a lightweight library for distributed computing in Python. It complements the existing PyData analysis stack, which forms the basis of several Kedro pipelines. It's also pure Python, which eases installation and simplifies debugging. For further motivation on why people choose to adopt Dask, and, more specifically, `dask.distributed`, see [Why Dask?](https://docs.dask.org/en/stable/why.html) and [the `dask.distributed` documentation](http://distributed.dask.org/en/stable/#motivation), respectively.
 
 ## Prerequisites
 
-The only additional requirement, beyond what was already required by your Kedro pipeline, is to [install `dask.distributed`](http://distributed.dask.org/en/stable/install.html). To review the full installation instructions, including how to set up Python virtual environments, see our [Get Started guide](../../getting-started/install.md#installation-prerequisites).
+The additional setup, beyond what your Kedro pipeline already needs, is to [install `dask.distributed`](http://distributed.dask.org/en/stable/install.html). To review the full installation instructions, including how to set up Python virtual environments, see our [Get Started guide](../../getting-started/install.md#installation-prerequisites).
 
 ## How to distribute your Kedro pipeline using Dask
 
 ### Create a custom runner
 
-Create a new Python package `runner` in your `src` folder, i.e. `kedro_tutorial/src/kedro_tutorial/runner/`. Make sure there is an `__init__.py` file at this location, and add another file named `dask_runner.py`, which will contain the implementation of your custom runner, `DaskRunner`. The `DaskRunner` will submit and monitor tasks asynchronously, surfacing any errors that occur during execution.
+Create a new Python package `runner` in your `src` folder, that is, `kedro_tutorial/src/kedro_tutorial/runner/`. Make sure there is an `__init__.py` file at this location, and add another file named `dask_runner.py`, which will contain the implementation of your custom runner, `DaskRunner`. The `DaskRunner` will submit and track tasks asynchronously, surfacing any errors that occur during execution.
 
 Make sure the `__init__.py` file in the `runner` folder includes the following import and declaration:
 
@@ -262,7 +262,7 @@ class DaskRunner(AbstractRunner):
 
 ### Update CLI implementation
 
-You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before you can use the new runner, add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to ensure the runner class instantiates as expected:
 
 ```python
 def run(tag, env, ...):
@@ -339,12 +339,12 @@ If you're using `pip`, you might need to install your Kedro project with:
 pip install -e .
 ```
 
-You're once again ready to trigger the run. Execute the following command:
+You are again ready to trigger the run. Execute the following command:
 
 ```bash
 kedro run --runner=kedro_tutorial.runner.DaskRunner
 ```
 
-You should start seeing tasks appearing on [Dask's diagnostics dashboard](http://127.0.0.1:8787/status):
+You should start seeing tasks appearing on [the Dask diagnostics dashboard](http://127.0.0.1:8787/status):
 
-![Dask's diagnostics dashboard](../../meta/images/dask_diagnostics_dashboard.png)
+![Dask diagnostics dashboard](../../meta/images/dask_diagnostics_dashboard.png)

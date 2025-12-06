@@ -3,7 +3,7 @@ This topic explains how to deploy Kedro in a distributed system.
 
 Distributed applications refer to software that runs on multiple computers within a network at the same time and can be stored on servers or with cloud computing. Unlike traditional applications that run on a single machine, distributed applications run on multiple systems simultaneously for a single task or job.
 
-You may select a distributed system if your Kedro pipelines require significant compute so you can benefit from the cloud's elasticity and scalability.
+You may select a distributed system if your Kedro pipelines require significant compute so you can take advantage of the cloud's elasticity and scalability.
 
 As a distributed deployment strategy, we recommend the following series of steps:
 
@@ -20,7 +20,7 @@ pip-compile --output-file=<project_root>/requirements.txt --input-file=<project_
 We recommend the [`kedro-docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process of building the image. [Instructions for using this are in the plugin README](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
 
 
-After you build the Docker image for your project locally, transfer the image to a container registry, such as Docker Hub or AWS Elastic Container Registry, so you can pull it on your remote servers. You can find instructions on how to do so [in our guide for single-machine deployment](./single_machine.md#how-to-use-container-registry).
+After you build the Docker image for your project locally, transfer the image to a container registry such as Docker Hub or AWS Elastic Container Registry. You can find instructions on how to pull the image on remote servers [in our guide for single-machine deployment](./single_machine.md#how-to-use-container-registry).
 
 ## 2. Convert your Kedro pipeline into targeted platform primitives
 
@@ -38,6 +38,6 @@ kedro run --nodes=<node_name>
 
 We encourage you to experiment with different ways of parameterising your runs. Use names, tags, and custom flags in preference to making a code change to execute different behaviour. All your jobs, tasks, and operators should have the same version of the code, that is, the same Docker image.
 
-## 4. (Optional) Create starters
+## 4. (Optional) create starters
 
 You may opt to [build your own Kedro starter](../tutorials/settings.md) if you often have to deploy in a similar environment or to a similar platform. The starter enables you to reuse any deployment scripts written as part of step 2.

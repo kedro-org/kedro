@@ -10,6 +10,7 @@ exceptions:
   - Amazon
   - Amazon Web Services
   - API
+  - Argo Workflows
   - Astro Cloud
   - AWS Batch
   - AWS Step Functions
@@ -29,6 +30,7 @@ exceptions:
   - Docker Compose
   - Docker Swarm
   - Dockerfile
+  - EMR Serverless
   - Excel
   - GitHub
   - GitHub Actions
@@ -49,6 +51,8 @@ exceptions:
   - JFrog Artifactory
   - Jira
   - Kafka
+  - Kubeflow
+  - Kubeflow Pipelines
   - Kubernetes
   - Kubernetes Engine
   - Kubernetes Pod

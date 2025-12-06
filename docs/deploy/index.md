@@ -46,6 +46,6 @@ The following pages provide information for deployment to, or integration with, 
 
 ## Effective node grouping for deployment
 
-Effectively grouping nodes in deployment makes pipelines easier to manage and update, improves performance by using resources more efficiently, and enables them to handle larger datasets as they scale across different deployment environments. To learn more about the best ways to group nodes using Pipelines, Tags, and Namespaces, follow our detailed guide:
+Effective node grouping makes deployments easier to manage and update. It also improves performance by using resources more efficiently and enables pipelines to handle larger datasets as they scale across different environments. To learn more about grouping nodes using pipelines, tags, and namespaces, follow our detailed guide:
 
 - [Node Grouping in Kedro](nodes_grouping.md)

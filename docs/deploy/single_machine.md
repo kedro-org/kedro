@@ -65,7 +65,7 @@ python -m project_name
 ```
 
 ## CLI-based
-If neither containers nor packages are viable options for your project, you can also run it on a production server by cloning your project codebase to the server using the [Kedro CLI](../getting-started/commands_reference.md).
+If neither containers nor packages suit your project, clone the codebase to a production server with the [Kedro CLI](../getting-started/commands_reference.md).
 
 You will need to follow these steps to get your project running:
 
@@ -74,7 +74,7 @@ This workflow assumes that development of the Kedro project is done on a local e
 
 Deployment of the (latest) code on a production server is accomplished through cloning and the periodic pulling of changes from the Git remote. The pipeline is then executed on the server.
 
-Install Git on the server, how to do this depends on the type of server you're using. You can verify if the installation was successful by running:
+Install Git on the server. The exact steps depend on the server you use. You can verify if the installation was successful by running:
 
 ```console
 git --version
@@ -89,7 +89,7 @@ git config --global user.email "server@server.com"
 
 [Generate a new SSH key for the server](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) and [add this new key to your GitHub account](https://docs.github.com/en/github/authenticating-to-github/adding-a-new-ssh-key-to-your-github-account).
 
-Finally clone the project to the server:
+Then clone the project to the server:
 
 ```console
 git clone <repository>

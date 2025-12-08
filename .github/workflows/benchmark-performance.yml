@@ -48,16 +48,16 @@ jobs:
         with:
           repository: kedro-org/kedro-benchmark-results
           token: ${{ secrets.GH_TAGGING_TOKEN }}
-          ref: 'main'
+          ref: 'fix/broken_links'
           path: "kedro-benchmark-results"
 
       - name: Copy files to target repository
         run: |
           cp -r /home/runner/work/kedro/kedro/kedro/.asv /home/runner/work/kedro/kedro/kedro-benchmark-results/
 
-      - name: Commit and Push changes to kedro-org/kedro-benchmark-results
-        run: |
-          cd kedro-benchmark-results
-          git add .
-          git commit -m "Add results"
-          git push
+      # - name: Commit and Push changes to kedro-org/kedro-benchmark-results
+      #   run: |
+      #     cd kedro-benchmark-results
+      #     git add .
+      #     git commit -m "Add results"
+      #     git push

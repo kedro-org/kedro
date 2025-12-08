@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Run benchmarks on every commit to the main branch
+      - fix/broken_links # testing [TODO: Revert]
   workflow_dispatch:
 
 

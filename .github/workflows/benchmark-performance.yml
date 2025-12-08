@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main  # Run benchmarks on every commit to the main branch
-      - fix/broken_links # testing [TODO: Revert]
   workflow_dispatch:
 
 
@@ -20,7 +19,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           path: "kedro"
-          fetch-depth: 0  # Fetch full history for ASV to access main branch
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -48,16 +46,16 @@ jobs:
         with:
           repository: kedro-org/kedro-benchmark-results
           token: ${{ secrets.GH_TAGGING_TOKEN }}
-          ref: 'fix/broken_links'
+          ref: 'main'
           path: "kedro-benchmark-results"
 
       - name: Copy files to target repository
         run: |
           cp -r /home/runner/work/kedro/kedro/kedro/.asv /home/runner/work/kedro/kedro/kedro-benchmark-results/
 
-      # - name: Commit and Push changes to kedro-org/kedro-benchmark-results
-      #   run: |
-      #     cd kedro-benchmark-results
-      #     git add .
-      #     git commit -m "Add results"
-      #     git push
+      - name: Commit and Push changes to kedro-org/kedro-benchmark-results
+        run: |
+          cd kedro-benchmark-results
+          git add .
+          git commit -m "Add results"
+          git push

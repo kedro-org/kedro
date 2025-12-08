@@ -430,7 +430,7 @@ nav:
               - kedro.logging: api/kedro.logging.md
               - kedro.pipeline:
                   - Overview: api/pipeline/kedro.pipeline.md
-                  - node: api/pipeline/kedro.pipeline.node.md
+                  - Node: api/pipeline/kedro.pipeline.node.md
                   - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
               - kedro.runner:
                   - Overview: api/runner/kedro.runner.md

@@ -1,6 +1,7 @@
 Aneira
 APIs
 Astro
+autodiscovery
 Claypot
 Conda
 config
@@ -15,9 +16,11 @@ dbx
 Dockerfile
 doxenix
 ethanknights
+filepath
 fsspec
 Globals
 globals
+hyperparameter
 ipdb
 IPython
 Jupyter
@@ -30,15 +33,18 @@ Kubeflow
 matplotlib
 Matplotlib
 Marimo
+mixin
 MLflow
 Modin
 namespace
 namespaced
 namespaces
+namespacing
 networkx
 numpy
 Pandera
 Palantir
+Paramiko
 parameterising
 Plotly
 Polars
@@ -48,6 +54,7 @@ pyenv
 pytest
 regressors
 Repo
+Repos
 repo
 SQLAlchemy
 Serverless
@@ -58,6 +65,7 @@ Templated
 templated
 tracebacks
 transcode
+transcoded
 transcoding
 VSCode
 Xebia

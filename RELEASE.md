@@ -3,7 +3,11 @@
 * Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
 ## Bug fixes and other changes
+
 ## Documentation changes
+* Added beginner-friendly notes on `uvx` installation.
+
+
 ## Community contributions
 
 # Release 1.1.1

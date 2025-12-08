@@ -2,7 +2,7 @@
 
 We previously introduced [Nodes](./nodes.md) as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.
 
-To benefit from Kedro's automatic dependency resolution, you can chain your nodes into a [kedro.pipeline.Pipeline][] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [kedro.pipeline.Pipeline][] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
+To benefit from Kedro's automatic dependency resolution, you can chain your nodes into a [`Pipeline`][kedro.pipeline.pipeline.Pipeline] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [`Pipeline`][kedro.pipeline.pipeline.Pipeline] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
 
 The following sections explain how to create and use Kedro pipelines:
 
@@ -13,7 +13,7 @@ The following sections explain how to create and use Kedro pipelines:
 - [How to receive information about pipeline inputs and outputs](#how-to-receive-information-about-pipeline-inputs-and-outputs)
 - [How to tag a pipeline](#how-to-tag-a-pipeline)
 - [How to avoid creating bad pipelines](#how-to-avoid-creating-bad-pipelines)
-- [How to store pipeline code in a kedro project](#how-to-store-pipeline-code-in-a-kedro-project)
+- [How to store pipeline code in a Kedro project](#how-to-store-pipeline-code-in-a-kedro-project)
 
 
 

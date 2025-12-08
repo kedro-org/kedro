@@ -12,6 +12,7 @@ tokens:
   - '(?:\w+)log'
   - '(?:\w+)lor'
   - '(?:\w+)lyze'
+  - 'behavior'
 exceptions:
     - backlog
     - blog

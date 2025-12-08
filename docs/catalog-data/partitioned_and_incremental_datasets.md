@@ -7,7 +7,7 @@ Distributed systems play an increasingly important role in ETL data pipelines. T
 This is why Kedro provides [PartitionedDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.PartitionedDataset/) with the following features:
 
 * `PartitionedDataset` can recursively load/save all or specific files from a given location.
-* It is platform agnostic, and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and many more.
+* It is platform agnostic, and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and others.
 * It implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach, and does not attempt to load any partition data until a processing node explicitly requests it.
 * It supports lazy saving by using `Callable`s.
 
@@ -74,7 +74,7 @@ Here is an exhaustive list of the arguments supported by `PartitionedDataset`:
 
 | Argument          | Required                       | Supported types                                  | Description                                                                                                                                                                                                                                   |
 | ----------------- | ------------------------------ | ------------------------------------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `path`            | Yes                            | `str`                                            | Path to the folder containing partitioned data. If path starts with the protocol (e.g., `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
+| `path`            | Yes                            | `str`                                            | Path to the folder containing partitioned data. If path starts with the protocol (for example, `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
 | `dataset`         | Yes                            | `str`, `Type[AbstractDataset]`, `Dict[str, Any]` | Underlying dataset definition, for more details see the section below                                                                                                                                                                         |
 | `credentials`     | No                             | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystemcall`, for more details see the section below                                                                                                                              |
 | `load_args`       | No                             | `Dict[str, Any]`                                 | Keyword arguments to be passed into `find()` method of the corresponding filesystem implementation                                                                                                                                            |
@@ -87,7 +87,7 @@ The dataset definition should be passed into the `dataset` argument of the `Part
 
 #### Shorthand notation
 
-Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [kedro.io.AbstractDataset][].
+Requires you only to specify a class of the underlying dataset either as a string (for example, `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [kedro.io.AbstractDataset][].
 
 #### Full notation
 
@@ -159,7 +159,7 @@ Partition ID _does not_ represent the whole partition path, but only a part of i
 
 * Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, then its Partition ID is `2019-12-04/data`.
 
-`PartitionedDataset` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataset`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done deliberately to guarantee the consistency of load operations between the nodes and avoid race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
+`PartitionedDataset` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataset`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done on purpose to guarantee the consistency of load operations between the nodes and avoid race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
 
 ### Partitioned dataset save
 
@@ -211,7 +211,7 @@ def create_partitions() -> Dict[str, Any]:
 ### Partitioned dataset lazy saving
 `PartitionedDataset` also supports lazy saving, where the partition's data is not materialised until it is time to write.
 
-To use this, simply return `Callable` types in the dictionary:
+To use this, return `Callable` types in the dictionary like this:
 
 ```python
 from typing import Any, Dict, Callable
@@ -238,7 +238,7 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 !!! note
     Lazy saving is the default behaviour, meaning that if a `Callable` type is provided, the dataset will be written _after_ the `after_node_run` hook is executed.
 
-In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (e.g., a TensorFlow model) and you do not intend to save it lazily.
+In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (for example, a TensorFlow model) and you do not intend to save it lazily.
 To disable the lazy saving set `save_lazily` parameter to `False`:
 
 ```yaml
@@ -252,9 +252,12 @@ new_partitioned_dataset:
   save_lazily: False
 ```
 
+!!! note
+    If creating lambdas in a list/dictionary comprehension or a for loop, be cautious when referencing variables defined outside the scope of the lambdas. See the [Python Programming FAQ](https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result) for an explanation of how this can result in unexpected values being returned from the lambdas.
+
 ## Incremental datasets
 
-[IncrementalDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.IncrementalDataset/) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, that is, each subsequent pipeline run should process just the partitions which were not processed by the previous runs.
+[IncrementalDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.IncrementalDataset/) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, that is, each following pipeline run should process the partitions which were not processed by the previous runs.
 
 This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
 
@@ -322,7 +325,7 @@ Pipeline(
 
 Important notes about the confirmation operation:
 
-* Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the `release()` method is called on the dataset object.
+* Confirming a partitioned dataset does not affect any following loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the `release()` method is called on the dataset object.
 * A pipeline cannot contain more than one node confirming the same dataset.
 
 
@@ -368,7 +371,7 @@ my_partitioned_dataset:
 ```
 
 !!! note
-    Specification of `force_checkpoint` is also supported via the shorthand notation, as follows:
+    Specification of `force_checkpoint` is also supported through the shorthand notation, as follows:
     ```yaml
     my_partitioned_dataset:
     type: partitions.IncrementalDataset

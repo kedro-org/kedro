@@ -12,7 +12,7 @@ We recommend using `SequentialRunner` in cases where:
 
 - the pipeline has limited branching
 - the pipeline is fast
-- the resource-consuming steps require most of a scarce resource (e.g., significant RAM, disk memory or CPU)
+- the resource-consuming steps require most of a scarce resource (for example, significant RAM, disk memory or CPU)
 
 Kedro uses `SequentialRunner` by default, so to execute the pipeline sequentially:
 
@@ -143,7 +143,7 @@ When processing a node, both `SequentialRunner` and `ParallelRunner` perform the
 2. Execute node function with the input(s)
 3. Save the output(s)
 
-If a node has multiple inputs or outputs (e.g., `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
+If a node has multiple inputs or outputs (for example, `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
 
 ```bash
 $ kedro run --async
@@ -189,17 +189,17 @@ kedro run --pipeline=my_pipeline
     If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
 
-Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#run-the-project).
+Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run).
 
 ## Run pipelines with IO
 
-The above definition of pipelines only applies for non-stateful or "pure" pipelines that do not interact with the outside world. In practice, we would like to interact with APIs, databases, files and other sources of data. By combining IO and pipelines, we can tackle these more complex use cases.
+The above definition of pipelines only applies for non-stateful or "pure" pipelines that do not interact with the outside world. In practice, we would like to interact with APIs, databases, files, and other sources of data. By combining IO and pipelines, we can tackle these more complex use cases.
 
 By using `DataCatalog` from the IO module we are still able to write pure functions that work with our data and outsource file saving and loading to `DataCatalog`.
 
 Through `DataCatalog`, we can control where inputs are loaded from, where intermediate variables get persisted and ultimately the location to which output variables are written.
 
-In a simple example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, then instantiate `SequentialRunner` and call its `run` method with the pipeline and data catalog instances:
+In the below example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, instantiate `SequentialRunner`, and call its `run` method with the pipeline and data catalog instances:
 
 ??? example "View code"
     ```python
@@ -233,7 +233,7 @@ In a simple example, we define a `MemoryDataset` called `xs` to store our inputs
 
 ## Configure `kedro run` arguments
 
-The [Kedro CLI documentation](../getting-started/commands_reference.md#run-the-project) lists the available CLI options for `kedro run`. You can alternatively supply a configuration file that contains the arguments to `kedro run`.
+The [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run) lists the available CLI options for `kedro run`. You can alternatively supply a configuration file that contains the arguments to `kedro run`.
 
 Here is an example file named `config.yml`, but you can choose any name for the file:
 
@@ -273,26 +273,30 @@ Kedro runners provide a consistent interface for executing pipelines, whether yo
 
 ### Output from `runner.run()`
 
-* The `runner.run()` method **always returns a list of pipeline output dataset names**, regardless of your catalog setup.
-* It **does not return the actual data** — you must explicitly load each dataset from the catalog afterward.
+* The `runner.run()` method **returns a dictionary of pipeline output datasets**, where keys are dataset names and values are the dataset objects (not the data itself).
+* It **does not return raw data** — to retrieve the actual data, call `.load()` on each dataset object or through the catalog.
 
 ```python
 from kedro.framework.project import pipelines
 from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 
-# Load your catalog configuration (e.g., from YAML)
+# Load your catalog configuration (for example, from YAML)
 catalog = DataCatalog.from_config(catalog_config)
 
 pipeline = pipelines.get("__default__")
 runner = SequentialRunner()
 
 # Run the pipeline
-output_dataset_names = runner.run(pipeline=pipeline, catalog=catalog)
+output_datasets = runner.run(pipeline=pipeline, catalog=catalog)
 
-# Load data for each output
-for ds_name in output_dataset_names:
+# Load data for each output via catalog
+for ds_name in output_datasets:
     data = catalog[ds_name].load()
+
+# Load data for each output via dataset object
+for ds_name, dataset in output_datasets.items():
+    data = dataset.load()
 ```
 
 ### Using `ParallelRunner` with `SharedMemoryDataCatalog`
@@ -317,11 +321,11 @@ pipeline = pipelines.get("__default__")
 runner = ParallelRunner()
 
 # Run the pipeline
-output_dataset_names = runner.run(pipeline=pipeline, catalog=catalog)
+output_datasets = runner.run(pipeline=pipeline, catalog=catalog)
 
 # Load output data
-for ds_name in output_dataset_names:
-    data = catalog[ds_name].load()
+for ds_name, dataset in output_datasets.items():
+    data = dataset.load()
 ```
 
 ### CLI usage
@@ -338,8 +342,8 @@ You don’t need to worry about which catalog to use — Kedro takes care of tha
 
 ### Summary
 
-* `runner.run()` always returns output **dataset names**, not the data itself
-* Use `catalog[ds_name].load()` to get the actual data
-* `ParallelRunner` requires `SharedMemoryDataCatalog` for multiprocessing
-* The Kedro CLI selects the correct catalog automatically
-* When using the Python API, **you must choose the appropriate catalog yourself**
+* `runner.run()` always returns a **dictionary of output dataset names and dataset objects**, not the data itself.
+* Use `catalog[ds_name].load()` or `.load()` on each dataset object to get the actual data.
+* `ParallelRunner` requires `SharedMemoryDataCatalog` for multiprocessing.
+* The Kedro CLI selects the correct catalog automatically.
+* When using the Python API, **you must explicitly choose the appropriate catalog based on the runner you select.**

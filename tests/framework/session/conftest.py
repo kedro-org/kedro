@@ -5,9 +5,8 @@ from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from typing import TYPE_CHECKING, Any
 
-import pandas as pd
 import pytest
-import toml
+import tomli_w
 import yaml
 from dynaconf.validator import Validator
 
@@ -21,6 +20,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
+from tests.test_utils import identity
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -46,8 +46,8 @@ def _write_yaml(filepath: Path, config: dict):
 
 def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    toml_str = toml.dumps(config)
-    filepath.write_text(toml_str)
+    with filepath.open("wb") as f:
+        tomli_w.dump(config, f)
 
 
 def _assert_hook_call_record_has_expected_parameters(
@@ -100,25 +100,16 @@ def config_dir(tmp_path, local_config):
     _write_toml(pyproject_toml, payload)
 
 
-def identity_node(x: str):
-    return x
-
-
 def assert_exceptions_equal(e1: Exception, e2: Exception):
     assert isinstance(e1, type(e2)) and str(e1) == str(e2)
-
-
-@pytest.fixture
-def dummy_dataframe() -> pd.DataFrame:
-    return pd.DataFrame({"test": [1, 2]})
 
 
 @pytest.fixture
 def mock_pipeline() -> Pipeline:
     return pipeline(
         [
-            node(identity_node, "cars", "planes", name="node1"),
-            node(identity_node, "boats", "ships", name="node2"),
+            node(identity, "cars", "planes", name="node1"),
+            node(identity, "boats", "ships", name="node2"),
         ],
         tags="pipeline",
     )
@@ -372,7 +363,11 @@ def mock_settings(mocker, project_hooks):
 
 
 @pytest.fixture
-def mock_session(mock_settings, mock_package_name, tmp_path):
+def mock_session(mocker, mock_settings, mock_package_name, tmp_path):
+    mocker.patch(
+        "kedro.framework.project.LOGGING.set_project_logging", return_value=None
+    )
+
     configure_project(mock_package_name)
     session = KedroSession.create(tmp_path, runtime_params={"params:key": "value"})
     yield session

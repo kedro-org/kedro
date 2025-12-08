@@ -1,8 +1,13 @@
-from pathlib import Path
 import shutil
-import toml
+import sys
+from pathlib import Path
 
-from pre_commit_hooks.requirements_txt_fixer import fix_requirements
+import tomli_w
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 current_dir = Path.cwd()
 
@@ -12,7 +17,7 @@ lint_pyproject_requirements = ["tool.ruff", "tool.ruff.format", "tool.ruff.lint"
 
 # Requirements and configurations for testing tools and coverage reporting
 test_requirements = (  # For requirements.txt
-    "pytest-cov~=3.0\npytest-mock>=1.7.1, <2.0\npytest~=7.2"
+    "pytest-cov>=3,<7\npytest-mock>=1.7.1, <2.0\npytest~=7.2"
 )
 test_pyproject_requirements = [  # For pyproject.toml
     "tool.pytest.ini_options",
@@ -86,15 +91,15 @@ def _remove_from_toml(file_path: Path, sections_to_remove: list) -> None:
         sections_to_remove (list): A list of section keys to remove from the TOML file.
     """
     # Load the TOML file
-    with open(file_path) as file:
-        data = toml.load(file)
+    with open(file_path, "rb") as file:
+        data = tomllib.load(file)
 
     # Remove the specified sections
     for section in sections_to_remove:
         _remove_nested_section(data, section)
 
-    with open(file_path, "w") as file:
-        toml.dump(data, file)
+    with open(file_path, "wb") as file:
+        tomli_w.dump(data, file)
 
 
 def _remove_dir(path: Path) -> None:
@@ -216,13 +221,3 @@ def setup_template_tools(
         # Remove requirements used by example pipelines
         _remove_from_file(requirements_file_path, example_pipeline_requirements)
         _remove_extras_from_kedro_datasets(requirements_file_path)
-
-
-def sort_requirements(requirements_file_path: Path) -> None:
-    """Sort entries in `requirements.txt`, writing back changes, if any.
-
-    Args:
-        requirements_file_path (Path): The path to the `requirements.txt` file.
-    """
-    with open(requirements_file_path, "rb+") as file_obj:
-        fix_requirements(file_obj)

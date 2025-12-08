@@ -1,10 +1,10 @@
 # Credentials
 
 For security reasons, we strongly recommend that you *do not* commit any credentials or other secrets to version control.
-Kedro is set up so that, by default, if a file inside the `conf` folder (and its subfolders) contains `credentials` in its name, it will be ignored by git.
+Kedro is set up so that, by default, if a file inside the `conf` folder (and its subdirectories) contains `credentials` in its name, it is ignored by git.
 
 Credentials configuration can be used on its own directly in code or [fed into the `DataCatalog`](../catalog-data/data_catalog.md).
-If you would rather store your credentials in environment variables instead of a file, you can use the `OmegaConfigLoader` [to load credentials from environment variables](advanced_configuration.md#how-to-load-credentials-through-environment-variables) as described in the advanced configuration chapter.
+If you prefer to store credentials in environment variables rather than a file, use the `OmegaConfigLoader` [to load credentials from environment variables](advanced_configuration.md#how-to-load-credentials-through-environment-variables) as described in the advanced configuration chapter.
 
 ## How to load credentials in code
 
@@ -17,7 +17,7 @@ from pathlib import Path
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
-# Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html#terminology)
+# Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial/#terminology)
 conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
 conf_loader = OmegaConfigLoader(conf_source=conf_path)
 credentials = conf_loader["credentials"]

@@ -3,11 +3,11 @@
 Sometimes it is desirable to run a subset, or a 'slice' of a pipeline's nodes. There are two primary ways to achieve this:
 
 
-1. **Visually through Kedro-Viz:** This approach allows you to visually choose and slice pipeline nodes, which then generates a run command for executing the slice within your Kedro project. Detailed steps on how to achieve this are available in the Kedro-Viz documentation: [Slice a Pipeline](https://docs.kedro.org/projects/kedro-viz/en/latest/slice_a_pipeline.html).
+1. **Visually through Kedro-Viz:** This approach allows you to visually choose and slice pipeline nodes, which then generates a run command for executing the slice within your Kedro project. Detailed steps on how to achieve this are available in the Kedro-Viz documentation: [Slice a Pipeline](https://docs.kedro.org/projects/kedro-viz/en/stable/slice_a_pipeline/).
 
 ![](../meta/images/slice_pipeline_kedro_viz.gif)
 
-2. **Programmatically with the Kedro CLI.** You can also use the [Kedro CLI to pass parameters to `kedro run`](../getting-started/commands_reference.md#run-the-project) command and slice a pipeline. In this page, we illustrate the programmatic options that Kedro provides.
+2. **Programmatically with the Kedro CLI.** You can also use the [Kedro CLI to pass parameters to `kedro run`](../getting-started/commands_reference.md#kedro-run) command and slice a pipeline. In this page, we illustrate the programmatic options that Kedro provides.
 
 Let's look again at the example pipeline from the [pipeline introduction documentation](./pipeline_introduction.md#how-to-build-a-pipeline), which computes the variance of a set of numbers:
 
@@ -53,7 +53,7 @@ The `Pipeline.describe()` method returns the following output:
     ```
 
 ## Slice a pipeline by providing inputs
-One way to slice a pipeline is to provide a set of pre-calculated inputs which should serve as a start of the pipeline. For example, in order to slice the pipeline to run from input `m2` downstream you can specify it like this:
+One way to slice a pipeline is to provide a set of pre-calculated inputs which should serve as a start of the pipeline. For example, to slice the pipeline to run from input `m2` downstream you can specify it like this:
 
 ??? example "View code"
     ```python
@@ -238,7 +238,7 @@ Sometimes you might need to run only some of the nodes in a pipeline, as follows
 This will create a sliced pipeline, comprised of the nodes you specify in the method call.
 
 !!! note
-    All the inputs required by the specified nodes must exist, i.e. already produced or present in the data catalog.
+    All the inputs required by the specified nodes must exist, that is, already produced or present in the data catalog.
 
 
 ## How to recreate missing outputs

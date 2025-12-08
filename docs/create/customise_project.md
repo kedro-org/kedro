@@ -1,5 +1,5 @@
 # Customise a new project
-As you saw from the [First steps](./new_project.md) section, once you have [set up Kedro](../getting-started/install.md), you can create a new project with `kedro new` and customise the code added to that project for its tooling and example code requirements.
+As you saw from the [First steps](./new_project.md) section, after you have [set up Kedro](../getting-started/install.md), you can create a new project with `kedro new`. You can then customise the code added to that project for its tooling and example code requirements.
 
 The pages in this section describe in detail the various options available.
 
@@ -10,10 +10,10 @@ The pages in this section describe in detail the various options available.
 
 
 **Use `kedro new` to create a basic project** <br />
-In the simplest instance, you can create a project using `kedro new` and select from a range of [tools and example code options](./new_project_tools.md) to extend the basic project.
+Run `kedro new` to create a project and choose from [tools and example code options](./new_project_tools.md) to extend the basic project.
 
 **Use `kedro new` with `--config`** <br />
-Similarly, you can use `kedro new` but additionally pass in a configuration file, for example:
+Similarly, you can use `kedro new` and also pass in a configuration file, for example:
 
 ```bash
 kedro new --config=config.yml
@@ -28,10 +28,10 @@ The configuration file must contain:
 - `repo_name`
 - `python_package`
 
-Additionally, the configuration file may contain:
+The configuration file may also contain:
 
 - `tools`: The tools to customise your project setup with. Select from comma-separated values `lint, test, log, docs, data, pyspark, viz` or `all/none`. Omitting this from your configuration file will result in the default selection of `none`.
-- `example_pipeline`: Indicate `yes` or `no` to select whether you would like your project to be populated with example code. Omitting this from your configuration file will result in the default selection of `no`.
+- `example_pipeline`: Set to `yes` or `no` to choose whether you would like your project to be populated with example code. Omitting this from your configuration file will result in the default selection of `no`.
 
 The `output_dir` can be specified as `~` for the home directory or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 

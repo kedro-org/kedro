@@ -13,7 +13,7 @@ import warnings
 from collections import Counter
 from dataclasses import dataclass, field
 from functools import cached_property, partial
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 from more_itertools import spy, unzip
@@ -21,7 +21,7 @@ from more_itertools import spy, unzip
 from .transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable
+    from collections.abc import Callable, Generator, Iterable
 
 
 @dataclass
@@ -100,7 +100,7 @@ class Node:
                 )
             )
 
-        if inputs and not isinstance(inputs, (list, dict, str)):
+        if inputs and not isinstance(inputs, (list | dict | str)):
             raise ValueError(
                 _node_error_message(
                     f"'inputs' type must be one of [String, List, Dict, None], "
@@ -119,7 +119,7 @@ class Node:
                 )
             _node_dataset_name_validation(_input, namespace)
 
-        if outputs and not isinstance(outputs, (list, dict, str)):
+        if outputs and not isinstance(outputs, (list | dict | str)):
             raise ValueError(
                 _node_error_message(
                     f"'outputs' type must be one of [String, List, Dict, None], "
@@ -532,7 +532,7 @@ class Node:
             if inspect.isgenerator(outputs):
                 (result,), iterator = spy(outputs)
 
-            if not isinstance(result, (list, tuple)):
+            if not isinstance(result, (list | tuple)):
                 raise ValueError(
                     f"Failed to save outputs of node {self!s}.\n"
                     f"The node definition contains a list of "
@@ -690,30 +690,33 @@ def node(  # noqa: PLR0913
         A Node object with mapped inputs, outputs and function.
 
     Example:
-    ::
+    ``` python
+    import pandas as pd
+    import numpy as np
 
-        >>> import pandas as pd
-        >>> import numpy as np
-        >>>
-        >>> def clean_data(cars: pd.DataFrame,
-        >>>                boats: pd.DataFrame) -> dict[str, pd.DataFrame]:
-        >>>     return dict(cars_df=cars.dropna(), boats_df=boats.dropna())
-        >>>
-        >>> def halve_dataframe(data: pd.DataFrame) -> List[pd.DataFrame]:
-        >>>     return np.array_split(data, 2)
-        >>>
-        >>> nodes = [
-        >>>     node(clean_data,
-        >>>          inputs=['cars2017', 'boats2017'],
-        >>>          outputs=dict(cars_df='clean_cars2017',
-        >>>                       boats_df='clean_boats2017')),
-        >>>     node(halve_dataframe,
-        >>>          'clean_cars2017',
-        >>>          ['train_cars2017', 'test_cars2017']),
-        >>>     node(halve_dataframe,
-        >>>          dict(data='clean_boats2017'),
-        >>>          ['train_boats2017', 'test_boats2017'])
-        >>> ]
+
+    def clean_data(cars: pd.DataFrame, boats: pd.DataFrame) -> dict[str, pd.DataFrame]:
+        return dict(cars_df=cars.dropna(), boats_df=boats.dropna())
+
+
+    def halve_dataframe(data: pd.DataFrame) -> List[pd.DataFrame]:
+        return np.array_split(data, 2)
+
+
+    nodes = [
+        node(
+            clean_data,
+            inputs=["cars2017", "boats2017"],
+            outputs=dict(cars_df="clean_cars2017", boats_df="clean_boats2017"),
+        ),
+        node(halve_dataframe, "clean_cars2017", ["train_cars2017", "test_cars2017"]),
+        node(
+            halve_dataframe,
+            dict(data="clean_boats2017"),
+            ["train_boats2017", "test_boats2017"],
+        ),
+    ]
+    ```
     """
     return Node(
         func,

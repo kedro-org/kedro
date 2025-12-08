@@ -1,19 +1,19 @@
 # Use a Databricks workspace to develop a Kedro project
 
-This guide demonstrates a workflow for developing Kedro projects on Databricks using only a Databricks Repo and a Databricks notebook. You will learn how to develop and test your Kedro projects entirely within the Databricks workspace.
+This guide demonstrates a workflow for developing Kedro projects on Databricks using a Databricks Repo and a Databricks notebook. You will learn how to develop and test your Kedro projects entirely within the Databricks workspace.
 
-This method of developing a Kedro project for use on Databricks is ideal for developers who prefer developing their projects in notebooks rather than an in an IDE. It also avoids the overhead of setting up and syncing a local environment with Databricks. If you want to take advantage of the powerful features of an IDE to develop your project, consider following the [guide for developing a Kedro project for Databricks using your local environment](./databricks_ide_databricks_asset_bundles_workflow.md).
+This method of developing a Kedro project for use on Databricks is ideal for developers who prefer to work in notebooks rather than in an IDE. It also avoids the overhead of setting up and syncing a local environment with Databricks. If you want to take advantage of the powerful features of an IDE, consider following the [guide for developing a Kedro project for Databricks using your local environment](./databricks_ide_databricks_asset_bundles_workflow.md).
 
-In this guide, you will store your project's code in a repository on [GitHub](https://github.com/). Databricks integrates with many [Git providers](https://docs.databricks.com/repos/index.html#supported-git-providers), including GitLab and Azure DevOps. The steps  to create a Git repository and sync it with Databricks also generally apply to these Git providers, though the exact details may vary.
+In this guide, you will store your project's code in a repository on [GitHub](https://github.com/). Databricks integrates with several [Git providers](https://docs.databricks.com/repos/index.html#supported-git-providers), including GitLab and Azure DevOps. The steps to create a Git repository and sync it with Databricks also generally apply to these Git providers, though the exact details may vary.
 
 ## What this page covers
 
-This tutorial introduces a Kedro project development workflow using only the Databricks workspace. The main steps in this workflow are:
+This tutorial introduces a Kedro project development workflow that relies on the Databricks workspace. The main steps in this workflow are:
 
 - [Create a new Kedro project using the `databricks-iris` starter.](#create-a-new-kedro-project)
 - [Create a Databricks notebook to run your project.](#create-a-new-databricks-notebook)
-- [Copy project data to DBFS.](#copy-project-data-to-dbfs-using-dbutils)
-- [Modify your project in the Databricks workspace](#modify-your-project-and-test-the-changes)
+- [Copy project data to DBFS.](#copy-project-data-to-dbfs-with-dbutils)
+- [Update your project in the Databricks workspace](#update-your-project-and-test-the-changes)
 
 ## Prerequisites
 
@@ -22,7 +22,7 @@ This tutorial introduces a Kedro project development workflow using only the Dat
 - Python >= 3.9 installed.
 - Git installed.
 - A [GitHub](https://github.com/) account.
-- A Python environment management system installed, [venv](https://docs.python.org/3/library/venv.html), [virtualenv](https://virtualenv.pypa.io/en/latest/) or [Conda](https://docs.conda.io/en/latest/) are popular choices.
+- A Python environment management system installed; [`venv`](https://docs.python.org/3/library/venv.html), [`virtualenv`](https://virtualenv.pypa.io/en/latest/), or [Conda](https://docs.conda.io/en/latest/) are popular choices.
 
 ## Set up your project
 
@@ -71,7 +71,7 @@ The main steps are:
 
 - Verify your email and navigate to "Settings" under your profile photo.
 - Select "Developer settings" then "Fine-grained tokens" and click on "Generate new token".
-- Select a name and expiration time for your token, choose an expiration time.
+- Select a name and expiry period for your token.
 - Select which repositories your token will allow access to and define the token permissions.
 
 ### Push your Kedro project to the GitHub repository
@@ -154,11 +154,11 @@ To run the Python code from your Databricks repo, [create a new Python notebook]
 
 ![Create a new notebook on Databricks](../../../meta/images/databricks_notebook_creation.png)
 
-### Copy project data to DBFS using dbutils
+### Copy project data to DBFS with `dbutils`
 
 On Databricks, Kedro cannot access data stored directly in your project's directory. As a result, you'll need to move your project's data to a location accessible by Databricks. You can store your project's data in the Databricks File System (DBFS), where it is accessible.
 
-A number of methods exist for moving data to DBFS. However, in this guide, you will use your new notebook and `dbutils`.
+Several methods exist for moving data to DBFS. In this guide, you will use your new notebook and `dbutils`.
 
 To move your locally stored data to DBFS, open your `iris-databricks` notebook and in the first cell enter the following python code:
 
@@ -172,7 +172,7 @@ dbutils.fs.cp(
 
 Run this cell to copy the complete directory and its contents from your Repo to DBFS.
 
-To ensure that your data was copied correctly, you can list the contents of the destination directory in DBFS. Create a new cell underneath the first cell and enter the following code:
+To confirm that your data was copied, list the contents of the destination directory in DBFS. Create a new cell underneath the first cell and enter the following code:
 
 ```python
 dbutils.fs.ls("dbfs:/FileStore/iris-databricks/data")
@@ -191,7 +191,7 @@ Run this command to displays the contents of your project's `data/` directory. Y
  FileInfo(path='dbfs:/FileStore/iris-databricks/data/08_reporting', name='08_reporting', size=...)]
 ```
 
-After these cells have successfully run, you should comment the code inside them so their operations are not unnecessarily performed during notebook runs. The cells should appear as below:
+After these cells run, comment the code inside them so their operations are not unnecessarily performed during notebook runs. The cells should appear as below:
 
 **Cell 1:**
 
@@ -211,7 +211,7 @@ After these cells have successfully run, you should comment the code inside them
 
 ### Run your project
 
-Create **four new cells** inside your notebook. You will fill these cells with code that runs your project. When copying the following code snippets, remember to replace `<databricks_username>` with your username on Databricks such that `project_root` correctly points to your project's location.
+Create **four new cells** inside your notebook. You will fill these cells with code that runs your project. When copying the following code snippets, remember to replace `<databricks_username>` with your username on Databricks so that `project_root` points to your project's location.
 
 1. Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. Add the following code to the first new cell to install the dependencies:
 
@@ -249,7 +249,7 @@ On the first run of your Kedro project, you will be prompted to consent to analy
 
 ![Databricks notebook telemetry consent](../../../meta/images/databricks_telemetry_consent.png)
 
-You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
+You should see logging output while the cell is running. After execution finishes, the notebook prints output such as:
 
 ```bash
 ...
@@ -258,11 +258,11 @@ You should see logging output while the cell is running. After execution finishe
 2023-06-06 12:55:22,709 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
-## Modify your project and test the changes
+## Update your project and test the changes
 
-Now that your project has run successfully once, you can make changes using the Databricks UI. In this section, you will modify the project to use a different ratio of training data to test data and check the effect of this change.
+After the first run of your project, you can make changes using the Databricks UI. In this section, you will update the project to use a different ratio of training data to test data and check the effect of this change.
 
-### Modify the training / test split ratio
+### Update the training and test split ratio
 
 The `databricks-iris` starter uses a default 80-20 ratio of training data to test data when training the classifier. You will edit this ratio to 70-30 and re-run your project to view the different result.
 
@@ -272,7 +272,7 @@ In the Databricks workspace, click on the `Repos` tab in the side bar and naviga
 
 ### Re-run your project
 
-Return to your Databricks notebook. Re-run the third and fourth cells in your notebook (containing the code `%reload_kedro ...` and `session.run()`). The project will now run again, producing output similar to the following:
+Return to your Databricks notebook. Re-run the third and fourth cells in your notebook (containing the code `%reload_kedro ...` and `session.run()`). The project will now run again, producing output such as:
 
 ```bash
 ...
@@ -284,11 +284,11 @@ Return to your Databricks notebook. Re-run the third and fourth cells in your no
 You can see that your model's accuracy has changed now that you are using a different classifier to produce the result.
 
 !!! note
-    If your cluster terminates, you must re-run your entire notebook, as libraries installed using `%pip install ...` are ephemeral. If not, repeating this step is only necessary if your project's dependencies change.
+    If your cluster terminates, you must re-run your entire notebook, as libraries installed using `%pip install ...` are ephemeral. Otherwise, repeat this step when your project's dependencies change.
 
 ### Managing your Databricks Repo
 
-Your Databricks Repo now has untracked changes that are not synced with your GitHub repository. To track your changes and sync your Repo, you can use the corresponding [Git operations in Databricks Repos](https://docs.databricks.com/repos/git-operations-with-repos.html). A basic overview of the steps to achieve this is:
+Your Databricks Repo now has `untracked` changes that are not synced with your GitHub repository. To track your changes and sync your Repo, you can use the corresponding [Git operations in Databricks Repos](https://docs.databricks.com/repos/git-operations-with-repos.html). A basic overview of the steps to achieve this is:
 
 - Commit your changes in your Databricks Repo.
 - Push the changes to the GitHub repository linked to your Databricks Repo.
@@ -296,4 +296,4 @@ Your Databricks Repo now has untracked changes that are not synced with your Git
 
 ## Summary
 
-This guide demonstrated a development workflow on Databricks using only the Databricks workspace. This approach is ideal for users who prefer to develop using notebooks and avoids having to set up and sync a local environment with Databricks.
+This guide demonstrated a development workflow on Databricks that relies on the Databricks workspace. This approach is ideal for users who prefer to develop using notebooks and avoids having to set up and sync a local environment with Databricks.

@@ -9,7 +9,7 @@ By default, Python only shows logging messages at level `WARNING` and above. Ked
 Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io) to format messages. We also use the Rich traceback handler to render exceptions.
 
 ## How to perform logging in your Kedro project
-To add logging to your own code (e.g. in a node):
+To add logging to your own code (for example, in a node):
 
 ```python
 import logging
@@ -101,7 +101,7 @@ To see `DEBUG` level messages, change the level of logging in your project-speci
         class: kedro.logging.RichHandler
         rich_tracebacks: True
         # Advance options for customisation.
-        # See https://docs.kedro.org/en/stable/logging/index.html#how-to-perform-logging-in-your-kedro-project
+        # See https://docs.kedro.org/en/stable/develop/logging/#how-to-perform-logging-in-your-kedro-project
         # tracebacks_show_locals: False
 
     loggers:
@@ -127,9 +127,9 @@ loggers:
 ```
 
 !!! note
-    The name of a logger corresponds to a key in the `loggers` section of the logging configuration file (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
+    The name of a logger corresponds to a key in the `loggers` section of the logging configuration file (for example, `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
 
-By changing the level value to `DEBUG` for the desired logger (e.g. `<your_python_package>`), you will start seeing `DEBUG` level messages in the log output.
+By changing the level value to `DEBUG` for the desired logger (for example, `<your_python_package>`), you will start seeing `DEBUG` level messages in the log output.
 
 ```{note}
 When your project's logging level is set to `DEBUG` and you have [hooks enabled in your project](../hooks/index.md), the hooks will use `pluggy`'s tracing feature to log the execution of each hook. This is useful for debugging purposes but can be noisy and slow down the execution of your pipeline. You can disable this feature by setting the logging level to `INFO` or higher.
@@ -190,7 +190,7 @@ To use plain rather than rich logging, swap the `rich` handler for the `console`
 
 ## How to enable rich logging in a dumb terminal
 
-Rich [detects whether your terminal is capable](https://rich.readthedocs.io/en/stable/console.html#terminal-detection) of displaying richly formatted messages. If your terminal is "dumb" then formatting is automatically stripped out so that the logs are just plain text. This is likely to happen if you perform `kedro run` on CI (e.g. GitHub Actions or CircleCI).
+Rich [detects whether your terminal is capable](https://rich.readthedocs.io/en/stable/console.html#terminal-detection) of displaying richly formatted messages. If your terminal is "dumb" then formatting is automatically stripped out so that the logs are just plain text. This is likely to happen if you perform `kedro run` on CI (for example, GitHub Actions or CircleCI).
 
 If you find that the default wrapping of the log messages is too narrow but do not wish to switch to using the `console` logger on CI then the simplest way to control the log message wrapping is through altering the `COLUMNS` and `LINES` environment variables. For example:
 

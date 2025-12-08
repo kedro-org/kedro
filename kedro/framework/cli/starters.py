@@ -6,7 +6,6 @@ projects.
 
 from __future__ import annotations
 
-import logging
 import os
 import re
 import shutil
@@ -16,13 +15,11 @@ import tempfile
 import warnings
 from itertools import groupby
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import click
-import requests
 import yaml
 from attrs import define, field
-from packaging.version import parse
 
 import kedro
 from kedro import __version__ as version
@@ -37,8 +34,8 @@ from kedro.framework.cli.utils import (
 
 if TYPE_CHECKING:
     from collections import OrderedDict
-
-    from importlib_metadata import EntryPoints
+    from collections.abc import Callable
+    from importlib.metadata import EntryPoints
 
 TOOLS_ARG_HELP = """
 Select which tools you'd like to include. By default, none are included.\n
@@ -101,38 +98,6 @@ class KedroStarterSpec:
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
-
-
-def _get_latest_starters_version() -> str:
-    if "KEDRO_STARTERS_VERSION" not in os.environ:
-        GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-        headers = {}
-        if GITHUB_TOKEN:
-            headers["Authorization"] = f"token {GITHUB_TOKEN}"
-
-        try:
-            response = requests.get(
-                "https://api.github.com/repos/kedro-org/kedro-starters/releases/latest",
-                headers=headers,
-                timeout=10,
-            )
-            response.raise_for_status()  # Raise an HTTPError for bad status codes
-            latest_release = response.json()
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Error fetching kedro-starters latest release version: {e}")
-            return ""
-
-        os.environ["KEDRO_STARTERS_VERSION"] = latest_release["tag_name"]
-        return str(latest_release["tag_name"])
-    else:
-        return str(os.getenv("KEDRO_STARTERS_VERSION"))
-
-
-def _kedro_version_equal_or_lower_to_starters(version: str) -> bool:
-    starters_version = _get_latest_starters_version()
-    return parse(version) <= parse(starters_version)
-
-
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 
 
@@ -141,6 +106,9 @@ _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("spaceflights-pandas", _STARTERS_REPO, "spaceflights-pandas"),
     KedroStarterSpec("spaceflights-pyspark", _STARTERS_REPO, "spaceflights-pyspark"),
     KedroStarterSpec("databricks-iris", _STARTERS_REPO, "databricks-iris"),
+    KedroStarterSpec(
+        "support-agent-langgraph", _STARTERS_REPO, "support-agent-langgraph"
+    ),
 ]
 # Set the origin for official starters
 for starter_spec in _OFFICIAL_STARTER_SPECS:
@@ -285,7 +253,7 @@ def _print_selection_and_prompt_info(
         )
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
+@click.group(context_settings=CONTEXT_SETTINGS, name="kedro")
 def create_cli() -> None:  # pragma: no cover
     pass
 
@@ -802,10 +770,8 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path) -> OrderedDic
 def _select_checkout_branch_for_cookiecutter(checkout: str | None) -> str:
     if checkout:
         return checkout
-    elif _kedro_version_equal_or_lower_to_starters(version):
-        return version
     else:
-        return "main"
+        return version
 
 
 def _make_cookiecutter_args_and_fetch_template(

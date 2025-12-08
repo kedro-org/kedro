@@ -7,7 +7,10 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-import toml
+if sys.version_info >= (3, 11):  # pragma: no cover
+    import tomllib
+else:  # pragma: no cover
+    import tomli as tomllib
 
 from kedro import __version__ as kedro_version
 from kedro.framework.project import configure_project
@@ -66,8 +69,9 @@ def _get_project_metadata(project_path: Path) -> ProjectMetadata:
         )
 
     try:
-        metadata_dict = toml.load(pyproject_toml)
-    except Exception as exc:
+        with pyproject_toml.open("rb") as f:
+            metadata_dict = tomllib.load(f)
+    except tomllib.TOMLDecodeError as exc:
         raise RuntimeError(f"Failed to parse '{_PYPROJECT}' file.") from exc
 
     try:
@@ -84,11 +88,8 @@ def _get_project_metadata(project_path: Path) -> ProjectMetadata:
     if missing_keys:
         raise RuntimeError(f"Missing required keys {missing_keys} from '{_PYPROJECT}'.")
 
-    # check the match for major and minor version (skip patch version)
-    if (
-        metadata_dict["kedro_init_version"].split(".")[:2]
-        != kedro_version.split(".")[:2]
-    ):
+    # check the match for major (skip patch and minor version)
+    if metadata_dict["kedro_init_version"].split(".")[0] != kedro_version.split(".")[0]:
         raise ValueError(_version_mismatch_error(metadata_dict["kedro_init_version"]))
 
     # Default settings

@@ -14,10 +14,11 @@ import typing
 import warnings
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Final
 
 if TYPE_CHECKING:
     from collections import OrderedDict
+    from collections.abc import Callable
 
     from IPython.core.interactiveshell import InteractiveShell
 
@@ -49,7 +50,7 @@ logger = logging.getLogger(__name__)
 
 FunctionParameters = MappingProxyType
 
-RICH_INSTALLED = True if importlib.util.find_spec("rich") is not None else False
+RICH_INSTALLED: Final = importlib.util.find_spec("rich") is not None
 
 
 def load_ipython_extension(ipython: InteractiveShell) -> None:
@@ -287,7 +288,7 @@ def _create_cell_with_text(text: str) -> None:
 
 def _print_cells(cells: list[str]) -> None:
     for cell in cells:
-        if RICH_INSTALLED is True:
+        if RICH_INSTALLED:
             rich_console.Console().print("")
             rich_console.Console().print(
                 rich_syntax.Syntax(cell, "python", theme="monokai", line_numbers=False)

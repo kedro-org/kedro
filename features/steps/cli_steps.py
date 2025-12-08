@@ -9,10 +9,15 @@ from time import sleep, time
 
 import behave
 import requests
-import toml
+import tomli_w
 import yaml
 from behave import given, then, when
 from packaging.requirements import Requirement
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 import kedro
 from features.steps import util
@@ -233,7 +238,7 @@ def install_project_package_via_pip(context):
 @given("I have installed the test plugin")
 def install_test_plugin(context):
     """Install a python package using pip."""
-    plugin_dir = Path(__file__).parent / "test_plugin"
+    plugin_dir = Path(__file__).parents[1] / "test_plugin"
     res = run([context.pip, "install", "-e", str(plugin_dir)], env=context.env)
     assert res.returncode == OK_EXIT_CODE, res
 
@@ -287,8 +292,7 @@ def create_project_with_starter(context, starter):
     """Behave step to run kedro new given the config I previously created."""
 
     if starter == "default":
-        starter = Path(__file__).parent / "test_starter"
-
+        starter = Path(__file__).parents[1] / "test_starter"
     args = [
         context.kedro,
         "new",
@@ -450,10 +454,12 @@ def move_package(context: behave.runner.Context, new_source_dir):
 def update_pyproject_toml(context: behave.runner.Context, new_source_dir):
     """Update `source_dir` in pyproject.toml file."""
     pyproject_toml_path = context.root_project_dir / "pyproject.toml"
-    content = toml.load(pyproject_toml_path)
+    with pyproject_toml_path.open("rb") as f:
+        content = tomllib.load(f)
+
     content["tool"]["kedro"]["source_dir"] = new_source_dir
-    content_str = toml.dumps(content)
-    pyproject_toml_path.write_text(content_str)
+    with pyproject_toml_path.open("wb") as f:
+        tomli_w.dump(content, f)
 
 
 @given("I have updated kedro requirements")
@@ -767,3 +773,13 @@ def step_uninstall_rich(context):
     assert (
         result.returncode == 0 or "not installed" in result.stdout.lower()
     ), f"Failed to uninstall rich:\n{result.stdout}\n{result.stderr}"
+
+
+@when('I delete the file "{filepath}" from the project')
+def delete_project_file(context, filepath):
+    """Deletes a specified file within the root_project_dir."""
+    file_to_delete = context.root_project_dir / filepath
+    if file_to_delete.is_file():
+        file_to_delete.unlink()
+    elif file_to_delete.is_dir():
+        shutil.rmtree(file_to_delete)

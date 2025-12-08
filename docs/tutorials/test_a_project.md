@@ -46,7 +46,7 @@ The function takes a pandas `DataFrame` and dictionary of parameters as input, a
 2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
 3. Assert: Ensure that the length of the outputs are the same as the expected lengths
 
-The cleanup step becomes necessary in a test when any of the previous steps make modifications that may influence other tests - e.g. by modifying a file used as input for several tests. This is not the case for the example tests below, and so the cleanup step is omitted.
+The cleanup step becomes necessary in a test when any of the previous steps make modifications that may influence other tests - for example, by modifying a file used as input for several tests. This is not the case for the example tests below, and so the cleanup step is omitted.
 
 Remember to import the function being tested and any necessary modules at the top of the file.
 
@@ -131,32 +131,32 @@ Using the same steps as above, we can write the following test to validate an er
 
 ## Writing tests for Kedro pipelines: Integration testing
 
-Writing tests for each node ensures each node will behave as expected when run individually. However, we must also consider how nodes in a pipeline interact with each other - this is called integration testing. Integration testing combines individual units as a group and checks whether they communicate, share data, and work together as expected. Let us look at this in practice.
+Writing tests for each node ensures each node will behave as expected when run individually. Though, we must also consider how nodes in a pipeline interact with each other - this is called integration testing. Integration testing combines individual units as a group and checks whether they communicate, share data, and work together as expected. Let us look at this in practice.
 
 Consider the data science pipeline as a whole:
 
 ??? example "View code"
     ```python
-    from kedro.pipeline import Pipeline, node, pipeline
+    from kedro.pipeline import Node, Pipeline
     from .nodes import evaluate_model, split_data, train_model
 
 
     def create_pipeline(**kwargs) -> Pipeline:
-        return pipeline(
+        return Pipeline(
             [
-                node(
+                Node(
                     func=split_data,
                     inputs=["model_input_table", "params:model_options"],
                     outputs=["X_train", "X_test", "y_train", "y_test"],
                     name="split_data_node",
                 ),
-                node(
+                Node(
                     func=train_model,
                     inputs=["X_train", "y_train"],
                     outputs="regressor",
                     name="train_model_node",
                 ),
-                node(
+                Node(
                     func=evaluate_model,
                     inputs=["regressor", "X_test", "y_test"],
                     outputs=None,
@@ -168,7 +168,7 @@ Consider the data science pipeline as a whole:
 
 The pipeline takes a pandas `DataFrame` and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and evaluate a regression model. With an integration test, we can validate that this sequence of nodes runs as expected.
 
-From earlier in this tutorial we know a successful pipeline run will conclude with the message `Pipeline execution completed successfully.` being logged. To validate this is being logged in our tests we make use of pytest's [`caplog`](https://docs.pytest.org/en/7.1.x/how-to/logging.html#caplog-fixture) feature to capture logs generated during the execution.
+From earlier in this tutorial we know a successful pipeline run will conclude with the message `Pipeline execution completed successfully` being logged. To validate this is being logged in our tests we make use of pytest's [`caplog`](https://docs.pytest.org/en/7.1.x/how-to/logging.html#caplog-fixture) feature to capture logs generated during the execution.
 
 As we did with our unit tests, we break this down into several steps:
 
@@ -218,7 +218,7 @@ When we put this together, we get the following test:
 
         # Arrange the log testing setup
         caplog.set_level(logging.DEBUG, logger="kedro") # Ensure all logs produced by Kedro are captured
-        successful_run_msg = "Pipeline execution completed successfully."
+        successful_run_msg = "Pipeline execution completed successfully"
 
         # Act
         SequentialRunner().run(pipeline, catalog)
@@ -292,7 +292,7 @@ def test_split_data(dummy_data, dummy_parameters):
 
 ### Pipeline slicing
 
-In the test `test_data_science_pipeline` we test the data science pipeline, as currently defined, can be run successfully. However, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../build/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
+In the test `test_data_science_pipeline` we test the data science pipeline, as currently defined, can be run successfully. Though, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../build/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
 
 ```python
 def test_data_science_pipeline(self):
@@ -370,7 +370,7 @@ After incorporating these testing practices, our test file `test_data_science_pi
         catalog["params:model_options"] = dummy_parameters["model_options"]
 
         caplog.set_level(logging.DEBUG, logger="kedro")
-        successful_run_msg = "Pipeline execution completed successfully."
+        successful_run_msg = "Pipeline execution completed successfully"
 
         SequentialRunner().run(pipeline, catalog)
 

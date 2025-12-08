@@ -8,9 +8,8 @@ import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any
 
-import pandas as pd
 import pytest
-import toml
+import tomli_w
 import yaml
 from pandas.testing import assert_frame_equal
 
@@ -48,8 +47,8 @@ def _write_yaml(filepath: Path, config: dict):
 
 def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    toml_str = toml.dumps(config)
-    filepath.write_text(toml_str)
+    with filepath.open("wb") as f:
+        tomli_w.dump(config, f)
 
 
 def _write_json(filepath: Path, config: dict):
@@ -154,11 +153,6 @@ def mock_settings(mocker):
     mocked_settings = _ProjectSettings()
     mocker.patch("kedro.framework.session.session.settings", mocked_settings)
     return mocker.patch("kedro.framework.project.settings", mocked_settings)
-
-
-@pytest.fixture
-def dummy_dataframe():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 expected_message_middle = (

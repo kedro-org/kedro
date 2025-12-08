@@ -23,7 +23,7 @@ If you want to group nodes differently from the existing pipeline structure, you
   kedro run --pipeline=<your_pipeline_name>
 ```
 
-More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#run-a-pipeline-by-name)
+More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/build/run_a_pipeline/#run-a-pipeline-by-name)
 
 ---
 
@@ -49,7 +49,7 @@ Please note that nodes with the same tag can exist in different pipelines, makin
   kedro run --tags=<your_tag_name>
 ```
 
-More information: [How to tag a node](https://docs.kedro.org/en/stable/nodes_and_pipelines/nodes.html#how-to-tag-a-node)
+More information: [How to tag a node](https://docs.kedro.org/en/stable/build/nodes/#how-to-tag-a-node)
 
 ---
 
@@ -59,7 +59,7 @@ Namespaces allow you to group nodes, ensuring clear dependencies and separation 
 <br>
 ![Switching expanding namespaced pipeline in Kedro Viz](../meta/images/kedro_viz_expanding_namespace.gif)
 
-Using namespaces comes with a few challenges:
+Using namespaces comes with some challenges:
 - **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly. If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `Pipeline` class. For example:
 
 ```
@@ -78,7 +78,7 @@ return Pipeline(
 - Your pipeline structure is well-defined, and using namespaces improves visualisation in Kedro-Viz.
 
 **Not to use when**
-- In small and simple projects, using namespaces can introduce unnecessary complexity, making pipeline grouping a more suitable choice.
+- In small projects with straightforward pipelines, using namespaces can introduce unnecessary complexity, making pipeline grouping a more suitable choice.
 - Namespaces require additional effort, such as updating catalog names, since namespace prefixes are automatically applied to all the elements unless explicitly overridden in the namespaced pipeline parameters.
 
 **How to use**
@@ -86,7 +86,7 @@ return Pipeline(
   ```bash
   kedro run --namespaces=< namespace1,namespace2 >
   ```
-More information: [Namespaces](https://docs.kedro.org/en/stable/nodes_and_pipelines/namespaces.html)
+More information: [Namespaces](https://docs.kedro.org/en/stable/build/namespaces/)
 
 ---
 

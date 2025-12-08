@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Iterable
-from typing import Any, Union
+from typing import Any
 
 from kedro.framework.project import pipelines as _pipelines
 from kedro.io import DataCatalog
@@ -24,55 +24,61 @@ class CatalogCommandsMixin:
     Usage:
 
     You can integrate this mixin with the `DataCatalog` in two ways:
-    ::
 
     1. Using `compose_classes`:
-        >>> from kedro.io import DataCatalog
-        >>> from kedro.framework.context import CatalogCommandsMixin, compose_classes
-        >>> # DataCatalog instance without CatalogCommandsMixin
-        >>> assert not hasattr(DataCatalog(), "describe_datasets")
-        >>>
-        >>> # Compose a new class combining DataCatalog and CatalogCommandsMixin
-        >>> catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
-        >>>
-        >>> # Create a catalog instance from configuration
-        >>> catalog = catalog_class.from_config(
-        ...     {
-        ...         "cars": {
-        ...             "type": "pandas.CSVDataset",
-        ...             "filepath": "cars.csv",
-        ...             "save_args": {"index": False},
-        ...         }
-        ...     }
-        ... )
-        >>>
-        >>> # Assert that the catalog has the `describe_datasets` method
-        >>> assert hasattr(
-        ...     catalog, "describe_datasets"
-        ... ), "describe_datasets method is not available"
-        >>> print("describe_datasets method is available!")
-        # describe_datasets method is available!
+    ``` python
+    from kedro.io import DataCatalog
+    from kedro.framework.context import CatalogCommandsMixin, compose_classes
+
+    # DataCatalog instance without CatalogCommandsMixin
+    assert not hasattr(DataCatalog(), "describe_datasets")
+
+    # Compose a new class combining DataCatalog and CatalogCommandsMixin
+    catalog_class = compose_classes(DataCatalog, CatalogCommandsMixin)
+
+    # Create a catalog instance from configuration
+    catalog = catalog_class.from_config(
+        {
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "cars.csv",
+                "save_args": {"index": False},
+            }
+        }
+    )
+
+    # Assert that the catalog has the `describe_datasets` method
+    assert hasattr(
+        catalog, "describe_datasets"
+    ), "describe_datasets method is not available"
+    print("describe_datasets method is available!")
+    # describe_datasets method is available!
+    ```
 
     2. Creating a new class with inheritance:
-        >>> from kedro.io import DataCatalog
-        >>> from kedro.framework.context import CatalogCommandsMixin
-        >>>
-        >>> class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
-        ...     pass
-        >>>
-        >>> catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
-        >>> assert hasattr(
-        ...     catalog, "describe_datasets"
-        ... ), "describe_datasets method is not available"
-        >>> print("describe_datasets method is available!")
-        # describe_datasets method is available!
+    ``` python
+    from kedro.io import DataCatalog
+    from kedro.framework.context import CatalogCommandsMixin
+
+
+    class DataCatalogWithMixins(DataCatalog, CatalogCommandsMixin):
+        pass
+
+
+    catalog = DataCatalogWithMixins(datasets={"example": MemoryDataset()})
+    assert hasattr(
+        catalog, "describe_datasets"
+    ), "describe_datasets method is not available"
+    print("describe_datasets method is available!")
+    # describe_datasets method is available!
+    ```
     """
 
     @property
     def _logger(self) -> logging.Logger: ...  # type: ignore[empty-body]
 
     def describe_datasets(
-        self: DataCatalog, pipelines: Union[list[str], list[Pipeline], None] = None
+        self: DataCatalog, pipelines: list[str] | list[Pipeline] | None = None
     ) -> dict:
         """
         Describe datasets used in the specified pipelines, grouped by type.
@@ -154,7 +160,7 @@ class CatalogCommandsMixin:
 
     def resolve_patterns(
         self: DataCatalog,
-        pipelines: Union[list[Pipeline], None] = None,
+        pipelines: list[Pipeline] | None = None,
     ) -> dict[str, Any]:
         """
         Resolve dataset factory patterns against pipeline datasets.
@@ -217,15 +223,16 @@ def _group_ds_by_type(datasets: set[str], catalog: DataCatalog) -> dict[str, lis
         A dictionary mapping dataset types to lists of dataset names.
 
     Example:
-    ::
+    ``` python
+    from kedro.io.data_catalog import DataCatalog
+    from kedro.io.memory_dataset import MemoryDataset
+    from kedro.framework.context.catalog_mixins import _group_ds_by_type
 
-        >>> from kedro.io.data_catalog import DataCatalog
-        >>> from kedro.io.memory_dataset import MemoryDataset
-        >>> from kedro.framework.context.catalog_mixins import _group_ds_by_type
-        >>> catalog = DataCatalog(datasets={"example": MemoryDataset()})
-        >>> datasets = {"example"}
-        >>> _group_ds_by_type(datasets, catalog)
-        # {'kedro.io.memory_dataset.MemoryDataset': ['example']}
+    catalog = DataCatalog(datasets={"example": MemoryDataset()})
+    datasets = {"example"}
+    _group_ds_by_type(datasets, catalog)
+    # {'kedro.io.memory_dataset.MemoryDataset': ['example']}
+    ```
     """
     mapping: dict[str, list[str]] = {}
     for ds_name in datasets:

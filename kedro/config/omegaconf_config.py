@@ -8,10 +8,10 @@ import io
 import logging
 import mimetypes
 import typing
-from collections.abc import Iterable, KeysView
+from collections.abc import Callable, Iterable, KeysView
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import fsspec
 from omegaconf import DictConfig, OmegaConf
@@ -57,17 +57,17 @@ class OmegaConfigLoader(AbstractConfigLoader):
     and overrides this key and any sub-keys.
 
     You can access the different configurations as follows:
-    ::
+    ``` python
+    import logging.config
+    from kedro.config import OmegaConfigLoader
+    from kedro.framework.project import settings
 
-        >>> import logging.config
-        >>> from kedro.config import OmegaConfigLoader
-        >>> from kedro.framework.project import settings
-        >>>
-        >>> conf_path = str(project_path / settings.CONF_SOURCE)
-        >>> conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
-        >>>
-        >>> conf_catalog = conf_loader["catalog"]
-        >>> conf_params = conf_loader["parameters"]
+    conf_path = str(project_path / settings.CONF_SOURCE)
+    conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
+
+    conf_catalog = conf_loader["catalog"]
+    conf_params = conf_loader["parameters"]
+    ```
 
     ``OmegaConf`` supports variable interpolation in configuration
     https://omegaconf.readthedocs.io/en/2.2_branch/usage.html#merging-configurations. It is
@@ -80,13 +80,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
     in `settings.py`.
 
     Example:
-    ::
+    ``` python
+    # in settings.py
+    from kedro.config import OmegaConfigLoader
 
-        >>> # in settings.py
-        >>> from kedro.config import OmegaConfigLoader
-        >>>
-        >>> CONFIG_LOADER_CLASS = OmegaConfigLoader
-
+    CONFIG_LOADER_CLASS = OmegaConfigLoader
+    ```
     """
 
     def __init__(  # noqa: PLR0913
@@ -100,6 +99,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         default_run_env: str | None = None,
         custom_resolvers: dict[str, Callable] | None = None,
         merge_strategy: dict[str, str] | None = None,
+        ignore_hidden: bool = True,
     ):
         if isinstance(conf_source, Path):
             conf_source = str(conf_source)
@@ -127,7 +127,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
             merge_strategy: A dictionary that specifies the merging strategy for each configuration type.
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
+            ignore_hidden: A boolean flag that determines whether hidden files and directories should be
+                ignored when loading configuration files. If True, ignore hidden files and files in hidden directories.
         """
+        self.ignore_hidden = ignore_hidden
         self.base_env = base_env or ""
         self.default_run_env = default_run_env or ""
         self.merge_strategy = merge_strategy or {}
@@ -333,7 +336,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         paths = []
         for pattern in patterns:
             for each in self._fs.glob(Path(f"{conf_path!s}/{pattern}").as_posix()):
-                if not self._is_hidden(each):
+                if not self.ignore_hidden or not self._is_hidden(each):
                     paths.append(Path(each))
 
         deduplicated_paths = set(paths)

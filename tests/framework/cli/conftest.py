@@ -10,6 +10,7 @@ import sys
 import tempfile
 from importlib import import_module
 from pathlib import Path
+from unittest.mock import patch
 
 import click
 import yaml
@@ -33,12 +34,12 @@ PACKAGE_NAME = "dummy_package"
 
 @fixture
 def entry_points(mocker):
-    return mocker.patch("importlib_metadata.entry_points", spec=True)
+    return mocker.patch("importlib.metadata.entry_points", spec=True)
 
 
 @fixture
 def entry_point(mocker, entry_points):
-    ep = mocker.patch("importlib_metadata.EntryPoint", spec=True)
+    ep = mocker.patch("importlib.metadata.EntryPoint", spec=True)
     entry_points.return_value.select.return_value = [ep]
     return ep
 
@@ -120,7 +121,7 @@ def fake_project_cli(
 ):
     old_settings = settings.as_dict()
     starter_path = Path(__file__).resolve().parents[3]
-    starter_path = starter_path / "features" / "steps" / "test_starter"
+    starter_path = starter_path / "features" / "test_starter"
     modules_before = sys.modules.copy()
     CliRunner().invoke(
         fake_kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)]
@@ -140,8 +141,11 @@ def fake_project_cli(
     sys.path = [str(fake_repo_path / "src"), *sys.path]
 
     import_module(PACKAGE_NAME)
-    configure_project(PACKAGE_NAME)
-    yield fake_kedro_cli
+    with patch(
+        "kedro.framework.project.LOGGING.set_project_logging", return_value=None
+    ):
+        configure_project(PACKAGE_NAME)
+        yield fake_kedro_cli
 
     # reset side-effects of configure_project
     pipelines.configure()

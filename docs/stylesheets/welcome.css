@@ -164,7 +164,7 @@
 .cards-section-wrapper {
   background-color: var(--cards-section-bg-color);
   width: 100%;
-  padding-top: 48px;
+  padding: 48px 0;
 }
 
 .cards-section-wrapper section {

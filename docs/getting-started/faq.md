@@ -9,11 +9,11 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * **How can I check the version of Kedro installed?**
   To check the version installed, type `kedro -V` in your terminal window.
 * **Do I need Git installed to use Kedro?**
-  Yes, users are expected to have Git installed when working with Kedro. This is a prerequisite for the `kedro new` flow. If Git is not installed, use the following workaround: `uvx kedro new -s https://github.com/kedro-org/kedro-starters/archive/0.18.6.zip --directory=pandas-iris`
+  Yes, users are expected to have Git installed when working with Kedro. This is a prerequisite for the `kedro new` flow. If Git is not installed, use the following workaround: `uvx kedro new -s https://github.com/kedro-org/kedro-starters/archive/1.0.0.zip --directory=spaceflights-pandas`
 
 ## Kedro documentation
-* [Where can I find the documentation about Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/latest/)
-* [Where can I find the documentation for Kedro's datasets](https://docs.kedro.org/projects/kedro-datasets/en/latest/)
+* [Where can I find the documentation about Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/)
+* [Where can I find the documentation for Kedro's datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/)
 
 ## Working with Notebooks
 
@@ -37,8 +37,8 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How do I load parameters in code](../configure/parameters.md#how-to-load-parameters-in-code)?
 * [How do I specify additional configuration environments](../configure/configuration_basics.md#how-to-specify-additional-configuration-environments)?
 * [How do I change the default overriding configuration environment](../configure/configuration_basics.md#how-to-change-the-default-overriding-environment)?
-* [How do I use only one configuration environment](../configure/configuration_basics.md#how-to-use-only-one-configuration-environment)?
-* [How do I use Kedro without the rich library](../configure/configuration_basics.md#how-to-use-kedro-without-the-rich-library)?
+* [How do I use a single configuration environment](../configure/configuration_basics.md#how-to-use-a-single-configuration-environment)?
+* [How do I use Kedro logging without the Rich library](../develop/logging.md#how-to-use-logging-without-the-rich-library)
 
 ### Advanced topics
 
@@ -82,8 +82,8 @@ Refer to the following table below for a high level guide to each layer's purpos
 
 | Folder in data | Description                                                                                                                                                                                                                                                                                                                                                       |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Raw            | Initial start of the pipeline, containing the sourced data model(s) that should never be changed, it forms your single source of truth to work from. These data models are typically un-typed in most cases e.g. csv, but this will vary from case to case                                                                                                        |
-| Intermediate   | Optional data model(s), which are introduced to type your `raw` data model(s), e.g. converting string based values into their current typed representation                                                                                                                                                                                                  |
+| Raw            | Initial start of the pipeline, containing the sourced data model(s) that should never be changed, it forms your single source of truth to work from. These data models are typically un-typed in most cases, for example, csv, but this will vary from case to case                                                                                                        |
+| Intermediate   | Optional data model(s), which are introduced to type your `raw` data model(s), for example, converting string based values into their current typed representation                                                                                                                                                                                                  |
 | Primary        | Domain specific data model(s) containing cleansed, transformed and wrangled data from either `raw` or `intermediate`, which forms your layer that you input into your feature engineering                                                                                                                                                                         |
 | Feature        | Analytics specific data model(s) containing a set of features defined against the `primary` data, which are grouped by feature area of analysis and stored against a common dimension                                                                                                                                                                             |
 | Model input    | Analytics specific data model(s) containing all `feature` data against a common dimension and in the case of live projects against an analytics run date to ensure that you track the historical changes of the features over time                                                                                                                          |

@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 name = "{{ cookiecutter.python_package }}"
 readme = "README.md"
 dynamic = ["version"]
@@ -32,7 +32,7 @@ docs = [
     "myst-parser>=1.0,<2.1"
 ]
 dev = [
-    "pytest-cov~=3.0",
+    "pytest-cov>=3,<7",
     "pytest-mock>=1.7.1, <2.0",
     "pytest~=7.2",
     "ruff~=0.12.0"

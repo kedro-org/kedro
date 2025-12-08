@@ -14,6 +14,7 @@ authors:
   given-names: Ivan
 - family-names: Datta
   given-names: Deepyaman
+  orcid: https://orcid.org/0009-0006-7814-1446
 - family-names: DeBold
   given-names: Tynan
 - family-names: Gundaniya
@@ -43,7 +44,11 @@ authors:
   given-names: Marcin
 - family-names: Brugman
   given-names: Simon
+- family-names: Khaustova
+  given-names: Elena
+- family-names: Ko
+  given-names: Elijah
 title: Kedro
-version: 1.0.0rc1
-date-released: 2025-06-20
+version: 1.1.1
+date-released: 2025-11-26
 url: https://github.com/kedro-org/kedro

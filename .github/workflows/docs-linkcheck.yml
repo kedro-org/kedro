@@ -1,0 +1,46 @@
+name: Check links in MkDocs
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  linkcheck:
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [ "3.11" ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the latest version of uv with Python ${{inputs.python-version}}
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          python-version: ${{ inputs.python-version }}
+          activate-environment: true
+
+      - name: Install docs requirements
+        run: |
+          make install-docs-requirements
+
+      - name: Run MkDocs on strict mode.
+        run: |
+          mkdocs build --strict

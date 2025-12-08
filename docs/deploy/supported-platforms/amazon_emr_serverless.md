@@ -5,7 +5,7 @@ can be used to manage and execute distributed computing workloads using Apache S
 independently allocates the resources needed for each job and releases them at completion.
 
 EMR Serverless is typically used for pipelines that are either fully or partially dependent on PySpark.
-For other parts of the pipeline such as modeling, where a non-distributed computing approach may be suitable, EMR Serverless might not be needed.
+For other parts of the pipeline such as modelling, where a non-distributed computing approach may be suitable, EMR Serverless might not be needed.
 
 
 ## Context
@@ -58,7 +58,7 @@ ENV PYENV_ROOT /usr/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 ENV PYTHON_VERSION=3.9.16
 
-# Install pyenv, initialize it, install desired Python version and set as global
+# Install pyenv, initialise it, install desired Python version and set as global
 RUN curl https://pyenv.run | bash
 RUN eval "$(pyenv init -)"
 RUN pyenv install ${PYTHON_VERSION} && pyenv global ${PYTHON_VERSION}
@@ -92,9 +92,9 @@ Replace `<PACKAGE_NAME>` with your package name.
 ### Resources
 For more details, see the following resources:
 
-- [Package a Kedro project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#package-a-kedro-project)
-- [Run a packaged project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#run-a-packaged-project)
-- [Customizing an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
+- [Package a Kedro project](https://docs.kedro.org/en/stable/deploy/package_a_project/#package-a-kedro-project)
+- [Run a packaged project](https://docs.kedro.org/en/stable/deploy/package_a_project/#run-a-packaged-project)
+- [Customising an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
 - [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
 
 ## Setup
@@ -154,7 +154,7 @@ for more details.
 !!! note
     On making changes to the custom image, and rebuilding and pushing to ECR, be sure to restart the EMR Serverless application before submitting a job if your application is **already started**. Otherwise, new changes may not be reflected in the job run.
 
-    This may be due to the fact that when the application has started, EMR Serverless keeps a pool of warm resources (also referred to as [pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/pre-init-capacity.html)) ready to run a job, and the nodes may have already used the previous version of the ECR image.
+    This may be due to the fact that when the application has started, EMR Serverless keeps a pool of warm resources (also referred to as [pre-initialised capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/pre-init-capacity.html)) ready to run a job, and the nodes may have already used the previous version of the ECR image.
 
 See details on [how to run a Spark job on EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html).
 

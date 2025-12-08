@@ -1,6 +1,6 @@
 # Advanced: Tutorial to create a custom dataset
 
-[Kedro supports many datasets](https://docs.kedro.org/projects/kedro-datasets/en/latest/) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
+[Kedro supports many datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## AbstractDataset
 
@@ -9,7 +9,7 @@ If you are a contributor and would like to submit a new dataset, you must extend
 
 ## Scenario
 
-In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types/) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
+In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types/) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), for example, Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
 
 ## Project setup
 
@@ -122,7 +122,7 @@ Here is the implementation of the `load` method using `fsspec` and `Pillow` to r
             Args:
                 filepath: The location of the image file to load / save data.
             """
-            # parse the path and protocol (e.g. file, http, s3, etc.)
+            # parse the path and protocol (for example, file, http, s3, etc.)
             protocol, path = get_protocol_and_path(filepath)
             self._protocol = protocol
             self._filepath = PurePosixPath(path)
@@ -465,7 +465,7 @@ pikachu:
 !!! note
     Using an HTTP(S)-based `filepath` with `versioned: true` is NOT supported.
 
-Create an initial version of the data by creating an example first version (e.g. `2020-02-22T00.00.00.000Z`):
+Create an initial version of the data by creating an example first version (for example, `2020-02-22T00.00.00.000Z`):
 
 ```console
 $ mv data/01_raw/pokemon-images-and-types/images/images/pikachu.png data/01_raw/pokemon-images-and-types/images/images/pikachu.png.backup
@@ -544,9 +544,9 @@ class ImageDataset(AbstractVersionedDataset):
             filepath: The location of the image file to load / save data.
             version: The version of the dataset being saved and loaded.
             credentials: Credentials required to get access to the underlying filesystem.
-                E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
+                For example, for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
-                E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
+                For example, for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
         """
         protocol, path = get_protocol_and_path(filepath)
         self._protocol = protocol

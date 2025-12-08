@@ -6,7 +6,7 @@
   </picture>
 </p>
 
-[![Python version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://pypi.org/project/kedro/)
+[![Python version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)
@@ -41,7 +41,7 @@ It is also possible to install Kedro using `conda`:
 conda install -c conda-forge kedro
 ```
 
-Our [Get Started guide](https://docs.kedro.org/en/stable/get_started/install.html) contains full installation instructions, and includes how to set up Python virtual environments.
+Our [Get Started guide](https://docs.kedro.org/en/stable/getting-started/install/) contains full installation instructions, and includes how to set up Python virtual environments.
 
 ### Installation from source
 To access the latest Kedro version before its official release, install it from the `main` branch.
@@ -61,11 +61,12 @@ uv pip install git+https://github.com/kedro-org/kedro@main
 
 ## How do I use Kedro?
 
-The [Kedro documentation](https://docs.kedro.org/en/stable/) first explains [how to install Kedro](https://docs.kedro.org/en/stable/get_started/install.html) and then introduces [key Kedro concepts](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html).
+The [Kedro documentation](https://docs.kedro.org/en/stable/) first explains [how to install Kedro](https://docs.kedro.org/en/stable/getting-started/install/) and then introduces [key Kedro concepts](https://docs.kedro.org/en/stable/getting-started/kedro_concepts/
+).
 
-You can then review the [spaceflights tutorial](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) to build a Kedro project for hands-on experience.
+You can then review the [spaceflights tutorial](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial/) to build a Kedro project for hands-on experience.
 
-For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://docs.kedro.org/en/stable/visualisation/index.html).
+For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/).
 
 
 <p align="center">
@@ -73,7 +74,7 @@ For new and intermediate Kedro users, there's a comprehensive section on [how to
     <em>A pipeline visualisation generated using Kedro-Viz</em>
 </p>
 
-Additional documentation explains [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/notebooks_and_ipython/index.html), and there are a set of advanced user guides for advanced for key Kedro features. We also recommend the [API reference documentation](/kedro) for further information.
+Additional documentation explains [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/), and there are a set of advanced user guides for advanced for key Kedro features. We also recommend the [API reference documentation](/kedro) for further information.
 
 
 ## Why does Kedro exist?
@@ -90,7 +91,7 @@ Find out more about how Kedro can answer your use cases from the [product FAQs o
 
 ## The humans behind Kedro
 
-The [Kedro product team](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html#kedro-maintainers) and a number of [open source contributors from across the world](https://github.com/kedro-org/kedro/releases) maintain Kedro.
+The [Kedro product team](https://docs.kedro.org/en/stable/about/technical_steering_committee/#current-maintainers) and a number of [open source contributors from across the world](https://github.com/kedro-org/kedro/releases) maintain Kedro.
 
 ## Can I contribute?
 
@@ -100,7 +101,7 @@ Yes! We welcome all kinds of contributions. Check out our [guide to contributing
 
 There is a growing community around Kedro. We encourage you to ask and answer technical questions on [Slack](https://slack.kedro.org/) and bookmark the [Linen archive of past discussions](https://linen-slack.kedro.org/).
 
-We keep a list of [technical FAQs in the Kedro documentation](https://docs.kedro.org/en/stable/faq/faq.html) and you can find a  growing list of blog posts, videos and projects that use Kedro over on the [`awesome-kedro` GitHub repository](https://github.com/kedro-org/awesome-kedro). If you have created anything with Kedro we'd love to include it on the list. Just make a PR to add it!
+We keep a list of [technical FAQs in the Kedro documentation](https://docs.kedro.org/en/stable/getting-started/faq/) and you can find a  growing list of blog posts, videos and projects that use Kedro over on the [`awesome-kedro` GitHub repository](https://github.com/kedro-org/awesome-kedro). If you have created anything with Kedro we'd love to include it on the list. Just make a PR to add it!
 
 ## How can I cite Kedro?
 

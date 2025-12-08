@@ -22,15 +22,16 @@ flowchart TD
     F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Amazon SageMaker</li><li>AWS Step functions</li><li>Azure</li><li>Dask</li><li>Databricks</li><li>Kubeflow Pipelines</li><li>Prefect</li><li>Vertex AI</li>"]
 ```
 
-## Deployment Methods
+## Deployment methods
 
-This following pages provide information for deployment to, or integration with, the following:
+The following pages provide information for deployment to, or integration with, the following:
 
 - [Airflow](./supported-platforms/airflow.md)
 - [Amazon SageMaker](./supported-platforms/amazon_sagemaker.md)
 - [Amazon EMR Serverless](./supported-platforms/amazon_emr_serverless.md)
 - [AWS Step functions](./supported-platforms/aws_step_functions.md)
 - [Azure](./supported-platforms/azure.md)
+- [Dagster](./supported-platforms/dagster.md)
 - [Dask](./supported-platforms/dask.md)
 - [Databricks](./supported-platforms/databricks/index.md)
 - [Kubeflow Pipelines](./supported-platforms/kubeflow.md)

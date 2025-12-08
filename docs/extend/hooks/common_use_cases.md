@@ -2,7 +2,7 @@
 
 ## Use Hooks to extend a node's behaviour
 
-You can use the [`before_node_run` and `after_node_run` Hooks](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) to add extra behavior before and after a node's execution. Furthermore, you can apply extra behavior to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes, based on their tags or namespaces: for example, suppose we want to add the following extra behavior to a node:
+You can use the [`before_node_run` and `after_node_run` Hooks](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) to add extra behaviour before and after a node's execution. Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes, based on their tags or namespaces: for example, suppose we want to add the following extra behaviour to a node:
 
 ```python
 from kedro.pipeline.node import Node
@@ -210,7 +210,7 @@ class MetadataHook:
         self,
         catalog: DataCatalog,
     ):
-        for dataset_name, dataset in catalog.datasets.__dict__.items():
+        for dataset_name, dataset in catalog.items():
             print(f"{dataset_name} metadata: \n  {str(dataset.metadata)}")
 ```
 

@@ -2,7 +2,7 @@
 
 We previously introduced [Nodes](./nodes.md) as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.
 
-To benefit from Kedro's automatic dependency resolution, you can chain your nodes into a [kedro.pipeline.Pipeline][] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [kedro.pipeline.Pipeline][] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
+To benefit from Kedro's automatic dependency resolution, you can chain your nodes into a [`Pipeline`][kedro.pipeline.pipeline.Pipeline] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [`Pipeline`][kedro.pipeline.pipeline.Pipeline] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
 
 The following sections explain how to create and use Kedro pipelines:
 
@@ -13,7 +13,7 @@ The following sections explain how to create and use Kedro pipelines:
 - [How to receive information about pipeline inputs and outputs](#how-to-receive-information-about-pipeline-inputs-and-outputs)
 - [How to tag a pipeline](#how-to-tag-a-pipeline)
 - [How to avoid creating bad pipelines](#how-to-avoid-creating-bad-pipelines)
-- [How to store pipeline code in a kedro project](#how-to-store-pipeline-code-in-a-kedro-project)
+- [How to store pipeline code in a Kedro project](#how-to-store-pipeline-code-in-a-kedro-project)
 
 
 
@@ -117,7 +117,7 @@ Outputs: None
 
 ## How to receive information about the nodes in a pipeline
 
-Pipelines provide access to their nodes in a topological order to enable custom functionality, e.g. pipeline visualisation. Each node has information about its inputs and outputs:
+Pipelines provide access to their nodes in a topological order to enable custom functionality, for example, pipeline visualisation. Each node has information about its inputs and outputs:
 
 ```python
 nodes = variance_pipeline.nodes
@@ -249,11 +249,11 @@ Pipeline([Node(lambda x: x, inputs="input1kedro", outputs="output1.kedro")])
 
 Nodes that are created with input or output names that contain `.` risk a disconnected pipeline or improperly-formatted Kedro structure.
 
-This is because `.` has a special meaning internally and indicates a namespace pipeline. In the example, the outputs segment should be disconnected as the name implies there is an "output1" namespace pipeline. The input is not namespaced, but the output is via its dot notation. This leads to Kedro processing each separately. For this example, a better approach would've been writing both as `input1_kedro` and `output1_kedro`.
+This is because `.` has a special meaning internally and indicates a namespace pipeline. In the example, the outputs segment should be disconnected as the name implies there is an "output1" namespace pipeline. The input is not namespaced, but the output is through its dot notation. This leads to Kedro processing each separately. For this example, a better approach would've been writing both as `input1_kedro` and `output1_kedro`.
 
 We recommend use of characters like `_` instead of `.` as name separators.
 
 
-## How to store pipeline code in a kedro project
+## How to store pipeline code in a Kedro project
 
-When managing your Kedro project, we recommend grouping related tasks into individual pipelines to achieve modularity. A project typically contains many tasks, and organising frequently executed tasks together into separate pipelines helps maintain order and efficiency. Each pipeline should ideally be organised in its own folder, promoting easy copying and reuse within project. Simply put: one pipeline, one folder. To assist with this, Kedro introduces the concept of [Modular Pipelines](modular_pipelines.md), which are described in the next section.
+When managing your Kedro project, we recommend grouping related tasks into individual pipelines to achieve modularity. A project typically contains several tasks, and organising frequently executed tasks together into separate pipelines helps maintain order and efficiency. Each pipeline should ideally be organised in its own folder, promoting copying and reuse within the project. In short: one pipeline, one folder. To assist with this, Kedro introduces the concept of [Modular Pipelines](modular_pipelines.md), which are described in the next section.

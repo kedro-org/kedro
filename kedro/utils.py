@@ -251,6 +251,7 @@ def experimental(obj: Callable | type) -> Callable | type:
 
         obj.__init__ = new_init
         setattr(obj, "__kedro_experimental__", True)
+        setattr(new_init, "_ wrapped _", original_init)
 
         _inject_experimental_doc(obj)
         return obj

@@ -124,8 +124,23 @@ def test_class_emits_warning_on_instantiation():
     assert "SampleClass is experimental" in str(record[0].message)
 
 
-def test_class_has_marker():
+def test_class_has_marker_and_wrapped_init():
     assert getattr(SampleClass, "__kedro_experimental__", False) is True
+    assert hasattr(SampleClass.__init__, "__wrapped__")
+
+    # unwrap recovers the original __init__
+    original = SampleClass.__init__.__wrapped__
+    assert callable(original)
+    assert original.__name__ in (
+        "__init__",
+        "SampleClass",
+    )  # depending on inline definition style
+
+
+def test_class_unwrap_recovers_original_init():
+    import inspect
+
+    assert inspect.unwrap(SampleClass.__init__).__name__ == "__init__"
 
 
 def test_silencing_warnings():

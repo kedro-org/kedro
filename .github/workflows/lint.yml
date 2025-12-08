@@ -44,7 +44,7 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           args: >
-            --extensions py
+            --extensions py,yml
             --verbose
             --no-progress
             .

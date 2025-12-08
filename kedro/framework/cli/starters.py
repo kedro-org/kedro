@@ -768,7 +768,6 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path) -> OrderedDic
 
 
 def _select_checkout_branch_for_cookiecutter(checkout: str | None) -> str:
-    return "genai-customer-support"
     if checkout:
         return checkout
     else:

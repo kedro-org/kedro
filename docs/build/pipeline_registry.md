@@ -73,7 +73,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
 !!! note
     In the case above, `kedro run --tags data_engineering` will not run the data engineering pipeline, as it is not part of the default pipeline. To run the data engineering pipeline, you need to specify `kedro run --pipeline data_engineering --tags data_engineering`.
 
-On the other hand, you can also modify pipelines *before* assigning `pipelines["__default__"] = sum(pipelines.values())` which includes it in the default pipeline. For example, you can update the `data_processing` pipeline with the `data_engineering` tag in the `pipeline_registry.py` and also include this change in the default pipeline:
+On the other hand, you can also change pipelines *before* assigning `pipelines["__default__"] = sum(pipelines.values())` which includes it in the default pipeline. For example, you can update the `data_processing` pipeline with the `data_engineering` tag in the `pipeline_registry.py` and also include this change in the default pipeline:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:

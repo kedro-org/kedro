@@ -47,3 +47,4 @@ jobs:
             --extensions py
             --verbose
             --no-progress
+            .

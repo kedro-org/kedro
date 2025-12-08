@@ -9,11 +9,11 @@ By working in your local environment, you can take advantage of features within 
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
 - Linters like [Ruff](https://docs.astral.sh/ruff) can be integrated to catch potential issues in your code.
-- Static type checkers like Mypy can check types in your code, helping to identify potential type-related issues early in the development process.
+- Static type checkers such as `mypy` can check types in your code, helping to identify potential type-related issues early in the development process.
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
 
-If you prefer to develop a projects in notebooks rather than an in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
+If you prefer to develop projects in notebooks rather than in an IDE, follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
 
 !!! note
     [Databricks now recommends](https://docs.databricks.com/en/archive/dev-tools/dbx/index.html) that you use now use Databricks asset bundles instead of dbx. This Kedro deployment documentation has not yet been updated but you may wish to consult [What are Databricks Asset Bundles?](https://docs.databricks.com/en/dev-tools/bundles/index.html) and [Migrate from dbx to bundles](https://docs.databricks.com/en/archive/dev-tools/dbx/dbx-migrate.html) for further information.
@@ -27,26 +27,26 @@ The main steps in this tutorial are as follows:
 - [Create a Repo on Databricks and sync your project using dbx.](#create-a-repo-on-databricks)
 - [Upload project data to a location accessible by Kedro when run on Databricks (such as DBFS).](#upload-project-data-to-dbfs)
 - [Create a Databricks notebook to run your project.](#create-a-new-databricks-notebook)
-- [Modify your project in your local environment and test the changes on Databricks in an iterative loop.](#modify-your-project-and-test-the-changes)
+- [Update your project in your local environment and test the changes on Databricks in an iterative loop.](#update-your-project-and-test-the-changes)
 
 ## Prerequisites
 
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
-- [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine in order to create a virtual environment with a specific version of Python (>= 3.9 is required). If you have Python >= 3.9 installed, you can use other software to create a virtual environment.
+- [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine so you can create a virtual environment with a specific version of Python (>= 3.9 is required). If you have Python >= 3.9 installed, you can use other software to create a virtual environment.
 
 ## Set up your project
 
 ### Note your Databricks username and host
 
-Note your Databricks **username** and **host** as you will need it for the remainder of this guide.
+Note your Databricks **username** and **host** because you will reference them throughout this guide.
 
 Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (for example, `https://adb-123456789123456.1.azuredatabricks.net/`):
 
 ![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 
 !!! note
-    Your databricks host must include the protocol (`https://`).
+    Your Databricks host must include the protocol (`https://`).
 
 ### Install Kedro and dbx in a new virtual environment
 
@@ -80,7 +80,7 @@ pip install kedro dbx --upgrade
 4. Run `databricks fs ls dbfs:/` at the command line to verify your authentication.
 
 !!! note
-    dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks Repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
+    dbx extends the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks Repos, dbx is preferred for development because it avoids creating new commits for every change, even if those changes do not work.
 
 ### Create a new Kedro project
 
@@ -115,7 +115,7 @@ cd <project_root>
 dbx sync repo --dest-repo iris-databricks --source .
 ```
 
-This command will sync your local directory (`--source .`) with your Repo (`--dest-repo iris-databricks`) on Databricks. When started for the first time, `dbx sync` will write output similar to the following to your terminal:
+This command syncs your local directory (`--source .`) with your Repo (`--dest-repo iris-databricks`) on Databricks. When started for the first time, `dbx sync` writes output such as the following to your terminal:
 
 ```bash
 ...
@@ -127,14 +127,14 @@ This command will sync your local directory (`--source .`) with your Repo (`--de
 
 **Keep the second terminal (running dbx sync) alive during development; closing it stops syncing new changes.**
 
-`dbx sync` will automatically sync any further changes made in your local project directory with your Databricks Repo while it runs.
+`dbx sync` automatically syncs further changes that you make in your local project directory with your Databricks Repo while it runs.
 
 !!! note
-    Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing, not in the editor that Databricks Repos provides.
+    Syncing with dbx is one way: changes you make using the Databricks Repos code editor do not flow back to your local environment. Make changes in your local environment while syncing, not in the editor that Databricks Repos provides.
 
 ### Create a `conf/local` directory in your Databricks Repo
 
-Kedro requires your project to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks Repo, so you must create it manually.
+Kedro requires your project to include a `conf/local` directory, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks Repo, so you must create it manually.
 
 Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> Folder` as in the image below:
 
@@ -146,7 +146,7 @@ Name the new folder `local`. In this guide, we have no local credentials to stor
 
 ### Upload project data to DBFS
 
-When run on Databricks, Kedro cannot access data stored in your project's directory. Therefore, you will need to upload your project's data to an accessible location. In this guide, we will store the data on the Databricks File System (DBFS).
+When run on Databricks, Kedro cannot access data stored in your project's directory. Upload your project's data to an accessible location. In this guide, we store the data on the Databricks File System (DBFS).
 
 The `databricks-iris` starter contains a [catalog](../../../catalog-data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
@@ -162,7 +162,7 @@ The `--recursive` flag ensures that the entire folder and its contents are uploa
 databricks fs ls dbfs:/FileStore/iris-databricks/data
 ```
 
-You should see the contents of the project's `data/` directory printed to your terminal:
+The command prints the contents of the project's `data/` directory to your terminal:
 
 ```bash
 01_raw
@@ -185,7 +185,7 @@ To run the Python code from your Databricks Repo, [create a new Python notebook]
 
 ### Run your project
 
-Open your newly-created notebook and create **four new cells** inside it. You will fill these cells with code that runs your project. When copying the following code snippets, remember to replace `<databricks_username>` with your username on Databricks such that `project_root` correctly points to your project's location.
+Open your newly created notebook and create **four new cells** inside it. You will fill these cells with code that runs your project. When copying the following code snippets, remember to replace `<databricks_username>` with your username on Databricks so that `project_root` points to your project's location.
 
 1. Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. Add the following code to the first new cell to install the dependencies:
 
@@ -223,7 +223,7 @@ On your first run, you will be prompted to consent to analytics, type `y` or `N`
 
 ![Databricks notebook telemetry consent](../../../meta/images/databricks_telemetry_consent.png)
 
-You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
+You should see logging output while the cell is running. After execution finishes, the notebook prints output such as:
 
 ```bash
 ...
@@ -232,13 +232,13 @@ You should see logging output while the cell is running. After execution finishe
 2023-06-06 17:21:53,224 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
-## Modify your project and test the changes
+## Update your project and test the changes
 
-Now that your project has run successfully once, you can make changes using the convenience and power of your local development environment. In this section, you will modify the project to use a different ratio of training data to test data and check the effect of this change on Databricks.
+After the first run of your project, you can make changes using the convenience and power of your local development environment. In this section, you will update the project to use a different ratio of training data to test data and check the effect of this change on Databricks.
 
-### Modify the training / test split ratio
+### Update the training and test split ratio
 
-The `databricks-iris` starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by editing your project in your local environment, then sync it with the Databricks Repo using `dbx`, and then run the modified project on Databricks to observe the different result.
+The `databricks-iris` starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change the ratio to 70-30. Edit the project in your local environment, sync it with the Databricks Repo using `dbx`, and run the updated project on Databricks to observe the different result.
 
 Open the file `<project_root>/conf/base/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks Repo:
 
@@ -250,7 +250,7 @@ Open the file `<project_root>/conf/base/parameters.yml` in your local environmen
 
 ### Re-run your project
 
-Return to your Databricks notebook. Re-run the third and fourth cells in your notebook (containing the code `%reload_kedro ...` and `session.run()`). The project will now run again, producing output similar to the following:
+Return to your Databricks notebook. Re-run the third and fourth cells in your notebook (containing the code `%reload_kedro ...` and `session.run()`). The project will now run again, producing output such as:
 
 ```bash
 ...
@@ -262,8 +262,8 @@ Return to your Databricks notebook. Re-run the third and fourth cells in your no
 You can see that your model's accuracy has changed now that you are using a different classifier to produce the result.
 
 !!! note
-    If your cluster terminates, you must re-run your entire notebook, as libraries installed using `%pip install ...` are ephemeral. If not, repeating this step is only necessary if your project's requirements change.
+    If your cluster terminates, you must re-run your entire notebook, as libraries installed using `%pip install ...` are ephemeral. Otherwise, repeat this step when your project's requirements change.
 
 ## Summary
 
-This guide demonstrated a development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. This approach improves development efficiency and provides access to powerful development features, such as auto-completion, linting, and static type checking, that are not available when working exclusively with Databricks notebooks.
+This guide demonstrated a development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. The approach improves development efficiency and keeps features such as auto-completion, linting, and static type checking that Databricks notebooks lack.

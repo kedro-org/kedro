@@ -40,3 +40,10 @@ jobs:
         run: uv pip freeze --system
       - name: Run linter
         run: make lint
+      - name: Check docs.kedro.org links in Python files
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >
+            --extensions py
+            --verbose
+            --no-progress

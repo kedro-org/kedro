@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Run benchmarks on every commit to the main branch
+      - test/asv_fail # testing [TODO: Revert]
   workflow_dispatch:
 
 
@@ -46,7 +47,7 @@ jobs:
         with:
           repository: kedro-org/kedro-benchmark-results
           token: ${{ secrets.GH_TAGGING_TOKEN }}
-          ref: 'main'
+          ref: 'test/asv_fail'
           path: "kedro-benchmark-results"
 
       - name: Copy files to target repository

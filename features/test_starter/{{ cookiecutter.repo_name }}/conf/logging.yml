@@ -27,7 +27,7 @@ handlers:
     class: kedro.logging.RichHandler
     rich_tracebacks: True
     # Advance options for customisation.
-    # See https://docs.kedro.org/en/stable/logging/logging.html#project-side-logging-configuration
+    # See https://docs.kedro.org/en/stable/develop/logging/#advanced-logging
     # tracebacks_show_locals: False
 
 loggers:

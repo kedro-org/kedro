@@ -4,7 +4,7 @@ Databricks jobs are a way to execute code on Databricks clusters, allowing you t
 
 ## What are the advantages of packaging a Kedro project to run on Databricks?
 
-Packaging your Kedro project and running it on Databricks enables you to execute your pipeline without a notebook. This approach is particularly well-suited for production, as it provides a structured and reproducible way to run your code.
+Packaging your Kedro project and running it on Databricks enables you to execute your pipeline without a notebook. This approach suits production deployments because it provides a structured and reproducible way to run your code.
 
 Here are some typical use cases for running a packaged Kedro project as a Databricks job:
 
@@ -13,7 +13,7 @@ Here are some typical use cases for running a packaged Kedro project as a Databr
 - **Automated and scheduled runs**: your Kedro project should be [run on Databricks automatically](https://docs.databricks.com/en/jobs/scheduled.html#add-a-job-schedule).
 - **CI/CD integration**: you have a CI/CD pipeline that produces a packaged Kedro project.
 
-Running your packaged project as a Databricks job is very different from running it from a Databricks notebook. The Databricks job cluster has to be provisioned and started for each run, which is significantly slower than running it as a notebook on a cluster that has already been started. In addition, there is no way to change your project's code once it has been packaged. Instead, you must change your code, create a new package, and then upload it to Databricks again.
+Running your packaged project as a Databricks job differs from running it in a Databricks notebook. Each job run provisions and starts a fresh job cluster, which takes more time than reusing an interactive cluster. After you package your project, you cannot change its code in place; rebuild the package with your updates and upload the new Wheel to Databricks.
 
 For those reasons, the packaging approach is unsuitable for development projects where rapid iteration is necessary. For guidance on developing a Kedro project for Databricks in a rapid build-test loop, see the [development workflow guide](./databricks_ide_databricks_asset_bundles_workflow.md).
 
@@ -26,7 +26,7 @@ For those reasons, the packaging approach is unsuitable for development projects
 ## Prerequisites
 
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
-- [`conda` installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine in order to create a virtual environment with a specific version of Python (>= 3.7 is required). If you have Python >= 3.7 installed, you can use other software to create a virtual environment.
+- [`conda` installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine so you can create a virtual environment with a specific version of Python (>= 3.7 is required). If you have Python >= 3.7 installed, you can use other software to create a virtual environment.
 
 ## Set up your project for deployment to Databricks
 
@@ -41,9 +41,9 @@ The sequence of steps described in this section is as follows:
 
 ### Note your Databricks username and host
 
-Note your Databricks **username** and **host** as you will need it for the remainder of this guide.
+Note your Databricks **username** and **host** because you will reference them throughout this guide.
 
-Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
+Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (for example, `https://adb-123456789123456.1.azuredatabricks.net/`):
 
 ![Find Databricks host and username](../../../meta/images/find_databricks_host_and_username.png)
 
@@ -111,7 +111,7 @@ This command generates a `.whl` file in the `dist` directory within your project
 !!! note
     A Kedro project's configuration and data do not get included when it is packaged. They must be stored somewhere accessible to allow your packaged project to run.
 
-Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data and configuration to a location accessible to Databricks. In this guide, we will store the data on the Databricks File System (DBFS).
+Your packaged Kedro project needs access to data and configuration to run. Upload your project's data and configuration to a location that Databricks can reach. In this guide, we store the data on the Databricks File System (DBFS).
 
 The `databricks-iris` starter contains a [catalog](../../../catalog-data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
@@ -210,7 +210,7 @@ Click `Run now` in the top-right corner of your new job's page to start a run of
 
 ![Databricks job status](../../../meta/images/databricks_job_status.png)
 
-This page also shows an overview of all past runs of your job. As you only just started your job run, it's status will be `Pending`. A status of `Pending` indicates that the cluster is being started and your code is waiting to run.
+This page also shows an overview of all past runs of your job. Because the run is at its initial stage, its status will be `Pending`. A status of `Pending` indicates that the cluster is starting and your code is waiting to run.
 
 The following things happen when you run your job:
 
@@ -219,9 +219,9 @@ The following things happen when you run your job:
 - The packaged Kedro project is run from the specified `iris-databricks` entry point (job status: `In Progress`).
 - The packaged code finishes executing and the job cluster is stopped (job status: `Succeeded`).
 
-A run will take roughly six to seven minutes.
+Expect each run to take about six to seven minutes.
 
-When the status of your run is `Succeeded`, your job has successfully finished executing. You can view the logging output created by the run by clicking on the link with the text `Go to the latest successful run` to take you to the `main run` view. You should see logs similar to the following:
+When the status of your run is `Succeeded`, your job has finished executing. View the logging output created by the run by clicking the link titled `Go to the latest successful run`, which opens the `main run` view. The logs include entries such as:
 
 ```bash
 ...
@@ -239,7 +239,7 @@ Up to this point, this page has described a manual workflow for deploying and ru
 - [Use the Databricks API](#how-to-use-the-databricks-api-to-automatically-deploy-a-kedro-project).
 - [Use the Databricks CLI](#how-to-use-the-databricks-cli-to-automatically-deploy-a-kedro-project).
 
-Both of these methods enable you to store information about your job declaratively in the same version control system as the rest of your project. For each method, the information stored declaratively is the same as what is entered manually in the [above section on creating and running a job in Databricks](#deploy-and-run-your-kedro-project-using-the-workspace-ui).
+Both of these methods let you store the job definition alongside the rest of your project in version control. Each method uses the same information that you entered manually in the [section on creating and running a job in Databricks](#deploy-and-run-your-kedro-project-using-the-workspace-ui).
 
 These methods can be integrated into a CI/CD pipeline to automatically deploy a packaged Kedro project to Databricks as a job.
 
@@ -249,8 +249,8 @@ The Databricks API enables you to programmatically interact with Databricks serv
 
 1. [Set up your Kedro project for deployment on Databricks](#set-up-your-project-for-deployment-to-databricks)
 2. Create a JSON file containing your job's configuration.
-3. Use the Jobs API's [`/create` endpoint](https://docs.databricks.com/en/reference/jobs-2.0-api.html#create) to create a new job.
-4. Use the Jobs API's [`/runs/submit` endpoint](https://docs.databricks.com/en/reference/jobs-2.0-api.html#runs-submit) to run your newly created job.
+3. Use the Jobs API [`/create` endpoint](https://docs.databricks.com/en/reference/jobs-2.0-api.html#create) to create a new job.
+4. Use the Jobs API [`/runs/submit` endpoint](https://docs.databricks.com/en/reference/jobs-2.0-api.html#runs-submit) to run your newly created job.
 
 ### How to use the Databricks CLI to automatically deploy a Kedro project
 

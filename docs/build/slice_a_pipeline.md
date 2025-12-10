@@ -53,7 +53,7 @@ The `Pipeline.describe()` method returns the following output:
     ```
 
 ## Slice a pipeline by providing inputs
-One way to slice a pipeline is to provide a set of pre-calculated inputs which should serve as a start of the pipeline. For example, in order to slice the pipeline to run from input `m2` downstream you can specify it like this:
+One way to slice a pipeline is to provide a set of pre-calculated inputs which should serve as a start of the pipeline. For example, to slice the pipeline to run from input `m2` downstream you can specify it like this:
 
 ??? example "View code"
     ```python
@@ -238,7 +238,7 @@ Sometimes you might need to run only some of the nodes in a pipeline, as follows
 This will create a sliced pipeline, comprised of the nodes you specify in the method call.
 
 !!! note
-    All the inputs required by the specified nodes must exist, i.e. already produced or present in the data catalog.
+    All the inputs required by the specified nodes must exist, that is, already produced or present in the data catalog.
 
 
 ## How to recreate missing outputs

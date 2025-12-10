@@ -1,4 +1,3 @@
-::: kedro.pipeline.Pipeline
+::: kedro.pipeline.pipeline
     options:
-      members: true
       show_source: true

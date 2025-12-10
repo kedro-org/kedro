@@ -289,7 +289,7 @@ def validate_datasets(companies: pd.DataFrame, shuttles: pd.DataFrame, reviews: 
             schema.validate(df, lazy=True)
         except SchemaErrors:
             # Re-raise so Kedro stops the pipeline; you can customize logging or
-            # aggregate results before raising if you prefer non-eager behavior.
+            # aggregate results before raising if you prefer non-eager behaviour.
             raise
 ```
 
@@ -312,18 +312,18 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 - Use a validation node when you want the validation step visible in the DAG and to create explicit validated outputs (you can also make validation nodes pass data through by returning validated data).
 - Prefer loading schemas from the `schemas` module (as shown) or from config; avoid hardcoding rules inside hook/node bodies.
-- Decide on eager vs. lazy behavior: this example uses `lazy=True` to collect all errors; you can switch to `lazy=False` for fail-fast behavior.
+- Decide on eager vs. lazy behaviour: this example uses `lazy=True` to collect all errors; you can switch to `lazy=False` for fail-fast behaviour.
 
 ## Advanced use cases
 
-### Controlling validation behavior with environment variables
+### Controlling validation behaviour with environment variables
 
-You can control validation behavior without modifying code by using environment variables.
+You can control validation behaviour without modifying code by using environment variables.
 
 Create configuration helpers in `src/spaceflights_pandera/schemas/__init__.py`:
 
 ```python
-"""Configuration helpers for validation behavior."""
+"""Configuration helpers for validation behaviour."""
 import os
 
 
@@ -423,7 +423,7 @@ class PanderaValidationHook:
         return {**inputs, **validated_inputs}
 ```
 
-Now you can control validation behavior:
+Now you can control validation behaviour:
 
 ```bash
 # Disable validation entirely (for quick debugging)

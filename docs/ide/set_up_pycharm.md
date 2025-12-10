@@ -71,7 +71,7 @@ You may also select **Run** from the toolbar and execute from there. <br />
 
 ![](../meta/images/pycharm_conf_run_dropdown.png)
 
-For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (e.g., `jupyter`, `package`, `registry` etc.).
+For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (for example, `jupyter`, `package`, `registry` etc.).
 
 
 ## Debugging
@@ -162,7 +162,7 @@ You can enable the Kedro catalog validation schema in your PyCharm IDE to enable
 
 Add a new mapping using the "+" button in the top left of the window and select the name you want for it. Enter this URL `https://raw.githubusercontent.com/kedro-org/kedro-plugins/main/kedro-datasets/static/jsonschema/kedro-catalog-0.19.json` in the "Schema URL" field and select "JSON Schema Version 7" in the "Schema version" field.
 
-Add the following file path pattern to the mapping: `conf/**/*catalog*`.
+Add the following filepath pattern to the mapping: `conf/**/*catalog*`.
 
 ![](../meta/images/pycharm_catalog_schema_mapping.png)
 

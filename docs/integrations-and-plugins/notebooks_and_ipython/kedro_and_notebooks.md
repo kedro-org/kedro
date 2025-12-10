@@ -172,7 +172,7 @@ INFO     Loading data from 'parameters' (MemoryDataset)...
 ```
 
 !!! note
-    If you enable [versioning](../../catalog-data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, e.g. `catalog.load("preprocessed_shuttles", version="2024-06-05T15.08.09.255Z")`.
+    If you enable [versioning](../../catalog-data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, for example, `catalog.load("preprocessed_shuttles", version="2024-06-05T15.08.09.255Z")`.
 
 ### `context`
 

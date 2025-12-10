@@ -1,8 +1,19 @@
 # Upcoming Release
 ## Major features and improvements
+* Added `@experimental` decorator to mark unstable or early-stage public APIs.
+* Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
+
 ## Bug fixes and other changes
+
 ## Documentation changes
+* Added beginner-friendly notes on `uvx` installation.
+
+
 ## Community contributions
+
+# Release 1.1.1
+## Bug fixes and other changes
+* Fixed project version mismatch error. The error is now only raised when the **major version** of the project and Kedro package differ, allowing minor and patch version differences without unnecessary failures.
 
 # Release 1.1.0
 

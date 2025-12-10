@@ -1,7 +1,7 @@
 # Here you can define all your datasets by using simple YAML syntax.
 #
 # Documentation for this file format can be found in "The Data Catalog"
-# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+# Link: https://docs.kedro.org/en/stable/catalog-data/introduction/#data-catalog
 #
 # We support interacting with a variety of data stores including local file systems, cloud, network and HDFS
 #
@@ -37,7 +37,7 @@
 #
 # The Data Catalog supports being able to reference the same file using two different dataset implementations
 # (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
-# https://docs.kedro.org/en/stable/data/data_catalog.html
+# https://docs.kedro.org/en/stable/catalog-data/introduction/#data-catalog
 #
 # This is a dataset used by the "Hello World" example pipeline provided with the project
 # template. Please feel free to remove it once you remove the example pipeline.

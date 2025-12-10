@@ -41,7 +41,6 @@ file://*
 github.com/*
 pypi.org/*
 http://localhost/
-http://localhost/*
 http://127.0.0.1/
 http://127.0.0.1/*
 example.com/*

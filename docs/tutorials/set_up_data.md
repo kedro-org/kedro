@@ -18,7 +18,7 @@ The following information about a dataset must be registered before Kedro can lo
 
 * File location (path)
 * Parameters for the given dataset
-* Type of data
+* Dataset type
 * Versioning
 
 Open `conf/base/catalog.yml` for the spaceflights project to inspect the contents. The two `csv` datasets are registered as follows:

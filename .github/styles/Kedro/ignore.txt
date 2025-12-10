@@ -3,6 +3,7 @@ APIs
 Astro
 autodiscovery
 Claypot
+Colab
 Conda
 config
 conda
@@ -22,6 +23,7 @@ fsspec
 Globals
 globals
 hyperparameter
+hyperparameters
 ipdb
 IPython
 Jupyter
@@ -37,6 +39,7 @@ Marimo
 mixin
 MLflow
 Modin
+multithreading
 namespace
 namespaced
 namespaces
@@ -45,6 +48,7 @@ networkx
 numpy
 Pandera
 Palantir
+parallelisation
 Paramiko
 parameterising
 Plotly

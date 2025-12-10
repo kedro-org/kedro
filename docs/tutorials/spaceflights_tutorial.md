@@ -1,4 +1,4 @@
-# Next steps: Tutorial
+# Next steps: spaceflights tutorial
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 

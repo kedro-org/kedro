@@ -5,14 +5,14 @@ from .node import Node, node
 
 
 @dataclass
-class AgentContext:
+class LLMContext:
     agent_id: str
     llm: object
     prompts: dict[str, object] = field(default_factory=dict)
     tools: dict[str, Callable] = field(default_factory=dict)
 
 
-def get_tool_name(func: Callable):
+def _get_tool_name(func: Callable):
     """Return a readable tool name from callable or tool-like object."""
     if hasattr(func, "__name__"):
         return func.__name__
@@ -23,7 +23,7 @@ def get_tool_name(func: Callable):
     return str(func)
 
 
-def agent_context_node(  # noqa: PLR0913
+def llm_context_node(  # noqa: PLR0913
     *,
     outputs,
     llm,
@@ -51,7 +51,7 @@ def agent_context_node(  # noqa: PLR0913
 
     def construct_context(llm, **kwargs):
         # Collect prompts
-        prompts_dict = {k: v for k, v in kwargs.items() if "prompt" in k}
+        prompts_dict = {prompt: kwargs[p] for prompt in prompts}
 
         # Collect tools
         built_tools = {}
@@ -64,9 +64,9 @@ def agent_context_node(  # noqa: PLR0913
                     tool_inputs[clean_key] = val
 
                 built_tool = tool["func"](**tool_inputs)
-                built_tools[get_tool_name(built_tool)] = built_tool
+                built_tools[_get_tool_name(built_tool)] = built_tool
 
-        return AgentContext(
+        return LLMContext(
             agent_id=agent_id, llm=llm, prompts=prompts_dict, tools=built_tools
         )
 

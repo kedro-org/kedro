@@ -2,7 +2,7 @@
 data-driven pipelines.
 """
 
-from .agent_context import AgentContext, agent_context_node
+from .agent_context import LLMContext, llm_context_node
 from .node import GroupedNodes, Node, node
 from .pipeline import Pipeline, pipeline
 
@@ -12,6 +12,6 @@ __all__ = [
     "Node",
     "Pipeline",
     "GroupedNodes",
-    "agent_context_node",
-    "AgentContext",
+    "llm_context_node",
+    "LLMContext",
 ]

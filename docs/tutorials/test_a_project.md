@@ -21,7 +21,6 @@ Kedro expects node functions to be [pure functions](https://realpython.com/pytho
 
 Let us explore what this looks like in practice. Consider the node function `split_data` defined in the data science pipeline:
 
-<!-- vale off -->
 ??? example "View code"
     ```python
     def split_data(data: pd.DataFrame, parameters: dict[str, Any]) -> Tuple:
@@ -41,13 +40,13 @@ Let us explore what this looks like in practice. Consider the node function `spl
         return X_train, X_test, y_train, y_test
     ```
 
-The function takes a pandas `DataFrame` and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [pytest's anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
+The function takes a pandas `DataFrame` and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [the pytest anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
 
 1. Arrange: Prepare the inputs `data` and `parameters`.
 2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
 3. Assert: Ensure that the length of the outputs are the same as the expected lengths
 
-Use a cleanup step when earlier steps modify shared resources, such as input files reused in other tests. The example tests below do not require cleanup, so that step is omitted.
+Use a cleanup step when earlier steps update shared resources, such as input files reused in other tests. The example tests below do not require cleanup, so that step is omitted.
 
 Remember to import the function being tested and any necessary modules at the top of the file.
 
@@ -91,7 +90,7 @@ When we put these steps together, we have the following test:
     ```
 
 
-This test is an example of positive testing - it confirms that a valid input produces the expected output. The inverse, testing that an invalid input is rejected, is called negative testing and is just as important.
+This test is an example of positive testing - it confirms that a valid input produces the expected output. The inverse, testing that an invalid input is rejected, is called negative testing and is as important.
 
 Using the same steps as above, we can write the following test to validate an error is thrown when price data is not available:
 
@@ -136,6 +135,7 @@ Writing tests for each node ensures each node will behave as expected when run i
 
 Consider the data science pipeline as a whole:
 
+<!-- vale off -->
 ??? example "View code"
     ```python
     from kedro.pipeline import Node, Pipeline

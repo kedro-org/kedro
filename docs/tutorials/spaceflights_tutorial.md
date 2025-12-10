@@ -20,9 +20,7 @@ The tutorial takes about **30 minutes** to complete. You will work in the termin
 
 ![](../meta/images/moon-rocket.png)
 
-<!-- vale off -->
 Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="https://unsplash.com/s/photos/spaceship">Unsplash</a>
-<!-- vale on -->
 
 ## Watch the video
 

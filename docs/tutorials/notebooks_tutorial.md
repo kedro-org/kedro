@@ -60,7 +60,7 @@ It also runs `%load_ext kedro.ipython` automatically when you launch the noteboo
 
 You can use the `kedro.ipython` extension to explore the `catalog`, `context`, `pipelines`, and `session` variables in your project within a IPython compatible environment, such as Databricks notebooks, Google Colab, and more.
 This is tool-independent and useful in situations where launching a Jupyter interactive environment is not possible. You can use the [`%load_ext` line magic](https://ipython.readthedocs.io/en/stable/config/extensions/index.html#using-extensions) to explicitly load the Kedro IPython extension:
-<!-- vale on -->
+
 ```ipython
 In [1]: %load_ext kedro.ipython
 ```

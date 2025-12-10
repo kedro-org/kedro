@@ -26,7 +26,6 @@ First, take a look at the functions for the data science nodes in `src/spaceflig
 
 
 <!-- vale off -->
-<!-- vale off -->
 ??? example "View code"
     ```python
     import logging
@@ -295,7 +294,6 @@ First, add namespaces to the modelling component of the data science pipeline to
                 - crew
                 - review_scores_rating
     ```
-<!-- vale on -->
 
 3. Replace the code in `pipelines/data_science/pipeline.py` with the snippet below:
 
@@ -459,6 +457,7 @@ You can see this snippet as part of the code you added to the example:
         namespace="candidate_modelling_pipeline",
     )
     ```
+<!-- vale on -->
 
 The code instantiates the `template_pipeline` twice but passes in different parameters. The `pipeline_instance` variable is the template pipeline, and `ds_pipeline_1` and `ds_pipeline_2` are the two separately parameterised instantiations.
 
@@ -483,7 +482,6 @@ The graph renders as follows when you run `kedro viz run` (hover over the datase
 ![modular_ds](../meta/images/modular_ds.gif)
 
 ## Optional: Kedro runners
-<!-- vale on -->
 
 There are three different Kedro runners that can run the pipeline:
 

@@ -24,7 +24,6 @@ The following information about a dataset must be registered before Kedro can lo
 Open `conf/base/catalog.yml` for the spaceflights project to inspect the contents. The two `csv` datasets are registered as follows:
 
 <!-- vale off -->
-<!-- vale off -->
 ??? example "View code"
     ```yaml
     companies:
@@ -35,11 +34,9 @@ Open `conf/base/catalog.yml` for the spaceflights project to inspect the content
       type: pandas.CSVDataset
       filepath: data/01_raw/reviews.csv
     ```
-<!-- vale on -->
 
 Likewise for the `xlsx` dataset:
 
-<!-- vale off -->
 ??? example "View code"
     ```yaml
     shuttles:
@@ -83,7 +80,6 @@ companies.head()
     4  30342            NaN  Sao Tome and Principe                2.0             t
 
     ```
-<!-- vale on -->
 
 Similarly, to test that the `xlsx` data is loaded as expected:
 

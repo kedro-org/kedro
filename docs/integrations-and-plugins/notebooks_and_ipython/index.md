@@ -10,9 +10,9 @@ There is flexibility in the ways you can combine notebooks and Kedro. For exampl
 
 ## Add Kedro features to a notebook
 **How to add Kedro to your existing notebook project**
-The page titled [Add Kedro features to a notebook](./notebook-example/add_kedro_to_a_notebook.md) describes how to convert your notebook project to use Kedro in increments. It starts with the basics of configuration loading, then adds Kedro's data management approach, and finally introduces nodes and pipelines.
+The page titled [Add Kedro features to a notebook](./notebook-example/add_kedro_to_a_notebook.md) describes how to convert your notebook project to use Kedro in increments. It starts with the basics of configuration loading, then adds Kedro's data management approach, and introduces nodes and pipelines.
 
 
 ## Use a Jupyter notebook for Kedro project experiments
 **How to add a notebook to your existing Kedro project**
-The page titled [Use a Jupyter notebook for Kedro project experiments](./kedro_and_notebooks.md) describes how to set up a notebook to access the elements of a Kedro project for experimentation. If you have an existing Kedro project but want to use notebook features to explore your data and experiment with pipelines, this is the page to start.
+The page titled [Use a Jupyter notebook for Kedro project experiments](./kedro_and_notebooks.md) explains how to set up a notebook to access the elements of a Kedro project for experimentation. Use it when you have an existing Kedro project but want notebook features to explore your data and experiment with pipelines.

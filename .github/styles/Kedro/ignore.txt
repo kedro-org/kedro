@@ -2,6 +2,7 @@ Aneira
 APIs
 Astro
 autodiscovery
+chonky
 Claypot
 Colab
 Conda
@@ -67,6 +68,8 @@ Serverless
 serverless
 show_source
 Streamlit
+subfolder
+subfolders
 subprocess
 Templated
 templated
@@ -75,6 +78,7 @@ transcode
 transcoded
 transcoding
 Unsplash
+uv
 VSCode
 Xebia
 yaml

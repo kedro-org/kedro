@@ -6,7 +6,7 @@ from .node import Node, node
 
 @dataclass
 class LLMContext:
-    agent_id: str
+    context_id: str
     llm: object
     prompts: dict[str, object] = field(default_factory=dict)
     tools: dict[str, Callable] = field(default_factory=dict)
@@ -23,14 +23,13 @@ def _get_tool_name(func: Callable):
     return str(func)
 
 
-def llm_context_node(  # noqa: PLR0913
+def llm_context_node(
     *,
     outputs,
     llm,
     prompts,
     tools=None,
-    name="agent_context_node",
-    agent_id="default_agent",
+    name="llm_context_node",
 ) -> Node:
     """
     1. Kedro validates all datasets (llm, prompts, db_engine, docs, etc.).
@@ -67,7 +66,7 @@ def llm_context_node(  # noqa: PLR0913
                 built_tools[_get_tool_name(built_tool)] = built_tool
 
         return LLMContext(
-            agent_id=agent_id, llm=llm, prompts=prompts_dict, tools=built_tools
+            context_id=name, llm=llm, prompts=prompts_dict, tools=built_tools
         )
 
     return node(func=construct_context, inputs=inputs, outputs=outputs, name=name)

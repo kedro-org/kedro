@@ -2,7 +2,7 @@
 data-driven pipelines.
 """
 
-from .agent_context import LLMContext, llm_context_node
+from .llm_context import LLMContext, llm_context_node
 from .node import GroupedNodes, Node, node
 from .pipeline import Pipeline, pipeline
 

@@ -20,6 +20,7 @@ exceptions:
   - Azure App Service Plan
   - Azure Blob Storage
   - Azure Event Hub
+  - Azure ML
   - CI/CD
   - CLI
   - DataCatalog
@@ -79,6 +80,7 @@ exceptions:
   - Redis
   - SageMaker
   - Slack
+  - SSH
   - Spark
   - Technical Steering Committee
   - Ubuntu

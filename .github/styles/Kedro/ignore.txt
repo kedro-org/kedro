@@ -19,6 +19,7 @@ dbt
 dbx
 Dockerfile
 docstring
+docstrings
 doxenix
 ethanknights
 filepath
@@ -72,6 +73,7 @@ Repos
 repo
 reusability
 SQLAlchemy
+serialisable
 Serverless
 serverless
 show_source

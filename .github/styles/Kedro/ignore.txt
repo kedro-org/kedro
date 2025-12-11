@@ -22,6 +22,7 @@ doxenix
 ethanknights
 filepath
 fsspec
+gif
 Globals
 globals
 hyperparameter

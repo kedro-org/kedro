@@ -70,6 +70,7 @@ exceptions:
   - MySQL
   - Notebooks
   - Prefect
+  - PyCharm
   - Python
   - PySpark
   - QuantumBlack
@@ -85,3 +86,5 @@ exceptions:
   - URLs
   - VertexAI
   - YAML
+  - VS Code
+  - Visual Studio Code

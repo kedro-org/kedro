@@ -87,7 +87,7 @@ The following protocols are available:
   using the library s3fs.
 - **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - for example, MinIO, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
-  resource using gcsfs (in development).
+  resource using `gcsfs` (in development).
 - **Azure Blob Storage / Azure Data Lake Storage Gen2**: `abfs://` - Azure Blob Storage, typically used when working on an Azure environment.
 - **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
 

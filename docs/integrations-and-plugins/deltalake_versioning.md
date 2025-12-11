@@ -2,7 +2,7 @@
 
 [Delta Lake](https://delta.io/) is an open-source storage layer that brings reliability to data lakes by adding a transactional storage layer on top of the data stored in cloud storage. It allows for ACID transactions, data versioning, and rollback capabilities. Delta table is the default table format in Databricks, and it can be used outside of it as well. It is typically used for data lakes, where data is ingested either incrementally or in batch.
 
-This tutorial explores how to use Delta tables in your Kedro workflow and how to leverage the data versioning capabilities of Delta Lake.
+This tutorial explores how to use Delta tables in your Kedro workflow and how to use the data versioning capabilities of Delta Lake.
 
 ## Prerequisites
 
@@ -12,7 +12,7 @@ In this example, you will use the `spaceflights-pandas` starter project which ha
 kedro new --starter spaceflights-pandas
 ```
 
-Kedro offers various connectors in the `kedro-datasets` package to interact with Delta tables: [`pandas.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.DeltaTableDataset/), [`spark.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.DeltaTableDataset/), [`spark.SparkDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.SparkDataset/), [`databricks.ManagedTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/databricks.ManagedTableDataset/), and [`ibis.FileDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/ibis.FileDataset/) support the delta table format. In this tutorial, we will use the `pandas.DeltaTableDataset` connector to interact with Delta tables using Pandas DataFrames. To install `kedro-datasets` alongwith dependencies required for Delta Lake, add the following line to your `requirements.txt`:
+Kedro offers various connectors in the `kedro-datasets` package to interact with Delta tables: [`pandas.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.DeltaTableDataset/), [`spark.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.DeltaTableDataset/), [`spark.SparkDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.SparkDataset/), [`databricks.ManagedTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/databricks.ManagedTableDataset/), and [`ibis.FileDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/ibis.FileDataset/) support the delta table format. In this tutorial, we will use the `pandas.DeltaTableDataset` connector to interact with Delta tables using Pandas DataFrames. To install `kedro-datasets` along with dependencies required for Delta Lake, add the following line to your `requirements.txt`:
 
 ```bash
 kedro-datasets[pandas-deltatabledataset]
@@ -137,7 +137,7 @@ You can also use [`PySpark`](https://spark.apache.org/docs/latest/api/python/ind
 
 We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../catalog-data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding):
 
-* To create a Delta table, use a `spark.SparkDataset` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table or overwrite it.
+* To create a Delta table, use a `spark.SparkDataset` with `file_format="delta"`. You can also use this dataset type to read from a Delta table or overwrite it.
 * To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataset` and perform the write operations within the node function.
 
 As a result, we end up with a catalog that looks like this:
@@ -172,7 +172,7 @@ weather@delta:
 
 
 !!! note
-    If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, via the DeltaTable API.
+    If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, through the DeltaTable API.
 
 
 ```python
@@ -195,7 +195,7 @@ Pipeline(
 )
 ```
 
-`first_operation_complete` is a `MemoryDataset` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node can simply not return anything:
+`first_operation_complete` is a `MemoryDataset` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node does not need to return anything:
 
 ```python
 Pipeline(

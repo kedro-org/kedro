@@ -4,7 +4,7 @@ This page outlines some best practices when building a Kedro pipeline with [`PyS
 
 ## Centralise Spark configuration in `conf/base/spark.yml`
 
-Spark allows you to specify many different [configuration options](https://spark.apache.org/docs/latest/configuration.html). We recommend storing all of these options in a file located at `conf/base/spark.yml`. Below is an example of the content of the file to specify the `maxResultSize` of the Spark's driver and to use the `FAIR` scheduler:
+Spark allows you to specify various [configuration options](https://spark.apache.org/docs/latest/configuration.html). We recommend storing all these options in a file located at `conf/base/spark.yml`. Below is an example of the content of the file to specify the `maxResultSize` of the Spark driver and to use the `FAIR` scheduler:
 
 ```yaml
 spark.driver.maxResultSize: 3g
@@ -47,11 +47,11 @@ class SparkHooks:
         _spark_session.sparkContext.setLogLevel("WARN")
 ```
 
-You should modify this code to match your cluster configuration, for example, by setting the master to `yarn` if your Spark cluster runs on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
+You should update this code to match your cluster configuration, for example, by setting the master to `yarn` if your Spark cluster runs on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
 
-Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere in your pipeline. `SparkSession.builder.getOrCreate()` is a global [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html).
+Call `SparkSession.builder.getOrCreate()` to get the `SparkSession` anywhere in your pipeline. `SparkSession.builder.getOrCreate()` is a global [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html).
 
-We don't recommend storing Spark session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
+We don't recommend storing the Spark session on the context object, as it cannot be serialised and so prevents the context from being initialised for some plugins.
 
 You will also need to register `SparkHooks` by updating the `HOOKS` variable in `src/<package_name>/settings.py` as follows:
 
@@ -63,7 +63,7 @@ HOOKS = (SparkHooks(),)
 
 ## Use Kedro's built-in Spark datasets to load and save raw data
 
-We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
+We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html) and to write it back to storage. Some of our built-in Spark datasets include:
 
 - [spark.DeltaTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.DeltaTableDataset/)
 - [spark.SparkDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkDataset/)
@@ -107,8 +107,8 @@ assert isinstance(df, pyspark.sql.DataFrame)
 
 ## Spark and Delta Lake interaction
 
-[Delta Lake](https://delta.io/) is an open-source project that enables building a Lakehouse architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
-To setup PySpark with Delta Lake, have a look at [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python). You may have to update the `SparkHooks` in your `src/<package_name>/hooks.py` to set up the `SparkSession` with Delta Lake support:
+[Delta Lake](https://delta.io/) is an open-source project that enables building a lake house architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
+To set up PySpark with Delta Lake, review [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python). You may have to update the `SparkHooks` in your `src/<package_name>/hooks.py` to set up the `SparkSession` with Delta Lake support:
 
 ```diff
 from kedro.framework.hooks import hook_impl
@@ -146,7 +146,7 @@ For nodes operating on `DataFrame` that doesn't need to perform Spark actions su
 
 ## Use `MemoryDataset` with `copy_mode="assign"` for non-`DataFrame` Spark objects
 
-Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs and outputs in your pipeline. For example, suppose you have a `train_model` node to train a classifier using Spark ML's [`RandomForrestClassifier`](https://spark.apache.org/docs/latest/ml-classification-regression.html#random-forest-classifier) and a `predict` node to make predictions using this classifier. In this scenario, the `train_model` node will output a `RandomForestClassifier` object, which then becomes the input for the `predict` node. Below is the code for this pipeline:
+Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs and outputs in your pipeline. For example, suppose you have a `train_model` node to train a classifier using the Spark ML [`RandomForestClassifier`](https://spark.apache.org/docs/latest/ml-classification-regression.html#random-forest-classifier) and a `predict` node to make predictions using this classifier. In this scenario, the `train_model` node will output a `RandomForestClassifier` object, which then becomes the input for the `predict` node. Below is the code for this pipeline:
 
 ```python
 from typing import Any, Dict
@@ -193,13 +193,13 @@ The `assign` copy mode ensures that the `MemoryDataset` will be assigned the Spa
 
 ## Tips for maximising concurrency using `ThreadRunner`
 
-Under the hood, every Kedro node that performs a Spark action (for example, `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the [kedro.runner.ThreadRunner][]:
+Under the hood, every Kedro node that performs a Spark action (for example, `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. To do that, you will need to run your Kedro pipeline with the [kedro.runner.ThreadRunner][]:
 
 ```bash
 kedro run --runner=ThreadRunner
 ```
 
-To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-using-a-hook) section:
+To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node an equal share of the Spark cluster by turning on fair sharing. This setting gives nodes a better chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job uses excessive resources, it could hold up the execution of other jobs. To turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-using-a-hook) section:
 
 ```yaml
 spark.scheduler.mode: FAIR

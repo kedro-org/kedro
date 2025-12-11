@@ -10,7 +10,7 @@ This example illustrates how to track memory consumption using `memory_profiler`
 pip install memory_profiler
 ```
 
-* Implement `before_dataset_loaded` and `after_dataset_loaded`
+* Define `before_dataset_loaded` and `after_dataset_loaded` hooks:
 
 ```python
 # src/<package_name>/hooks.py
@@ -82,7 +82,7 @@ This example adds data validation to node inputs and outputs using [Great Expect
 pip install great-expectations
 ```
 
-* Implement `before_node_run` and `after_node_run` hooks to validate inputs and outputs with `Great Expectations`:
+* Add `before_node_run` and `after_node_run` hooks to validate inputs and outputs with `Great Expectations`:
 
 ### V2 API
 ```python
@@ -242,7 +242,7 @@ This example adds observability to your pipeline using [statsd](https://statsd.r
 pip install statsd
 ```
 
-* Implement `before_node_run` and `after_node_run` hooks to collect metrics (dataset size and node execution time):
+* Add `before_node_run` and `after_node_run` hooks to collect metrics (dataset size and node execution time):
 
 ```python
 # src/<package_name>/hooks.py
@@ -284,7 +284,7 @@ class PipelineMonitoringHooks:
 
 ## Add metrics tracking to your model
 
-This examples adds metrics tracking using [MLflow](https://mlflow.org/).
+This example adds metrics tracking using [MLflow](https://mlflow.org/).
 
 * Install dependencies:
 
@@ -292,7 +292,7 @@ This examples adds metrics tracking using [MLflow](https://mlflow.org/).
 pip install mlflow
 ```
 
-* Implement `before_pipeline_run`, `after_pipeline_run`, and `after_node_run` hooks to collect metrics using `MLflow`:
+* Add `before_pipeline_run`, `after_pipeline_run`, and `after_node_run` hooks to collect metrics using `MLflow`:
 
 ```python
 # src/<package_name>/hooks.py

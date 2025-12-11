@@ -1,6 +1,6 @@
 # Advanced: Tutorial to create a custom dataset
 
-[Kedro supports many datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
+[Kedro supports several datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## Understand `AbstractDataset`
 
@@ -147,7 +147,7 @@ Here is the implementation of the `load` method using `fsspec` and `Pillow` to r
     ```
 <!-- vale on -->
 
-To test this out, let's add a dataset to the data catalog to load Pikachu's image.
+To test this out, add a dataset to the data catalog to load the image of Pikachu.
 
 <!-- vale off -->
 ```yaml
@@ -173,7 +173,7 @@ In [3]: Image.fromarray(image).show()
 
 ## Implement the `save` method with `fsspec`
 
-Similarly, we can implement the `_save` method as follows:
+Similarly, define the `_save` method as follows:
 
 
 ```python

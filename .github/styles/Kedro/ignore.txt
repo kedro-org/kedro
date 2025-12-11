@@ -2,6 +2,7 @@ Aneira
 APIs
 Astro
 autodiscovery
+breakpoint
 chonky
 Claypot
 Colab
@@ -47,12 +48,15 @@ namespaces
 namespacing
 networkx
 numpy
+np
 Pandera
 Palantir
 parallelisation
 Paramiko
 parameterising
+pickleable
 Plotly
+pluggy
 Polars
 Printify
 Pylint

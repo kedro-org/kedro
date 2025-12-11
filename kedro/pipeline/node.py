@@ -23,6 +23,8 @@ from .transcoding import _strip_transcoding
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable
 
+    from kedro.pipeline.preview_types import PreviewPayload
+
 
 @dataclass
 class GroupedNodes:
@@ -36,6 +38,34 @@ class GroupedNodes:
     type: str  # "namespace" or "nodes"
     nodes: list[str] = field(default_factory=list)
     dependencies: list[str] = field(default_factory=list)
+
+
+# Decorator to attach preview to function
+def with_node_preview(preview_fn: Callable[..., PreviewPayload]):
+    """Decorator to attach a preview function to a node function.
+
+    Args:
+        preview_fn: A function that returns a PreviewPayload instance.
+
+    Example:
+        # Preview function with no arguments
+        def preview_graph() -> PreviewPayload:
+            return PreviewPayload(kind="mermaid", content="graph TD; A-->B")
+
+        # Preview function with arguments
+        def preview_with_args(data) -> PreviewPayload:
+            return PreviewPayload(kind="text", content=f"Preview: {data}")
+
+        @with_node_preview(preview_graph)
+        def compile_graph(config):
+            return build_graph(config)
+    """
+
+    def decorator(func):
+        func.__kedro_node_preview_fn__ = preview_fn
+        return func
+
+    return decorator
 
 
 class Node:
@@ -388,6 +418,45 @@ class Node:
             Dataset names to confirm as a list.
         """
         return _to_list(self._confirms)
+
+    @property
+    def has_preview(self) -> bool:
+        """Return whether the node has preview functionality.
+
+        Returns:
+            True if the node function has a preview function attached, False otherwise.
+        """
+        return hasattr(self.func, "__kedro_node_preview_fn__")
+
+    def preview(self, *args: Any, **kwargs: Any) -> PreviewPayload | None:
+        """Generate a preview of the node.
+
+        Args:
+            *args: Positional arguments to pass to the preview function.
+            **kwargs: Keyword arguments to pass to the preview function.
+
+        Returns:
+            Preview payload if preview is configured, None otherwise.
+        """
+        preview_fn = getattr(self.func, "__kedro_node_preview_fn__", None)
+        if not preview_fn:
+            return None
+
+        # Use signature inspection to call the function intelligently
+        sig = inspect.signature(preview_fn)
+        try:
+            # Try to bind the arguments to the function signature
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+            return preview_fn(*bound.args, **bound.kwargs)
+        except TypeError:
+            # If binding fails (e.g., function takes no args but args were provided),
+            # try calling with no arguments
+            try:
+                return preview_fn()
+            except TypeError:
+                # If that also fails, try calling with all provided arguments
+                return preview_fn(*args, **kwargs)
 
     def run(self, inputs: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results

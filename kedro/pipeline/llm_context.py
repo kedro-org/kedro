@@ -1,22 +1,67 @@
+"""
+Utilities for constructing an `LLMContext` inside a Kedro pipeline.
+
+This module provides:
+
+- A `tool()` builder for declaring tool constructors and their Kedro inputs.
+- An `llm_context_node()` helper that creates a Kedro node which assembles:
+  - an LLM instance,
+  - prompt datasets,
+  - dynamically built tool objects.
+
+All datasets required by the context (LLM, prompts, tool inputs) are validated
+and loaded by Kedro before the node runs. Tools are instantiated at execution
+time and automatically assigned readable names based on the returned objects.
+"""
+
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import NamedTuple
+from typing import Any, Generic, NamedTuple, TypeVar
 
 from .node import Node, node
 
+T = TypeVar("T")
 
-class _ToolConfig(NamedTuple):
-    func: Callable[..., object]
+
+class _ToolConfig(Generic[T], NamedTuple):
+    """Configuration for a tool builder.
+
+    This stores:
+    - the builder function (`func`) that constructs a tool object
+    - the Kedro inputs (`inputs`) required by that builder
+    """
+
+    func: Callable[..., T]
     inputs: Sequence[str]
 
 
-def tool(func: Callable[..., object], *inputs: str) -> _ToolConfig:
-    """Builder function for a tool (name derived from built object)."""
+def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig[T]:
+    """Create a `_ToolConfig` definition for a tool builder.
+
+    Args:
+        func: A callable that constructs and returns a tool object.
+            Its name will *not* define the tool name; the name is derived from
+            the returned object when the tool is instantiated.
+        *inputs: Kedro dataset names (including params:* entries) required by `func`.
+
+    Returns:
+        A typed configuration object used by `llm_context_node`.
+    """
     return _ToolConfig(func=func, inputs=list(inputs))
 
 
 @dataclass
 class LLMContext:
+    """Runtime context passed to an LLM execution step.
+
+    Args:
+        context_id: Logical identifier for the context (usually the node name).
+        llm: The LLM or LLM wrapper loaded by Kedro.
+        prompts: A mapping of prompt dataset names → prompt content.
+        tools: A mapping of tool names to instantiated tool objects.
+            Tool names are automatically derived from each built tool object.
+    """
+
     context_id: str
     llm: object
     prompts: dict[str, object] = field(default_factory=dict)
@@ -24,7 +69,14 @@ class LLMContext:
 
 
 def _get_tool_name(obj: object) -> str:
-    """Return a readable name for a tool object."""
+    """Return a human-friendly default name for a built tool object.
+
+    Name resolution priority:
+    1. `obj.__name__` (functions, classes)
+    2. `obj.name` attribute
+    3. class name (`obj.__class__.__name__`)
+    4. string representation `str(obj)`
+    """
     if hasattr(obj, "__name__"):
         return obj.__name__
     if hasattr(obj, "name"):
@@ -32,6 +84,9 @@ def _get_tool_name(obj: object) -> str:
     if hasattr(obj, "__class__"):
         return obj.__class__.__name__
     return str(obj)
+
+
+Kwargs = dict[str, Any]
 
 
 def llm_context_node(
@@ -42,10 +97,34 @@ def llm_context_node(
     tools: list[_ToolConfig] | None = None,
     name: str = "llm_context_node",
 ) -> Node:
-    """
-    1. Kedro validates all datasets (llm, prompts, db_engine, docs, etc.).
-    2. Tools stay as plain Python functions, passed at node construction.
-    3. We build them inside the wrapper at execution time
+    """Create a Kedro node that builds an `LLMContext` at runtime.
+
+    Args:
+        outputs: Name of the output dataset that will receive the `LLMContext`.
+        llm: Name of the Kedro dataset containing the LLM instance.
+        prompts: List of dataset names containing prompt content.
+        tools: Optional list of tool configurations created via `tool(...)`.
+            Each tool declares the Kedro inputs required to construct it.
+        name: Optional name for the node and for the created context.
+
+    Returns:
+        A Kedro Node that loads all declared datasets, instantiates tools,
+        collects prompt values, and returns an `LLMContext`.
+
+    Example:
+    ```python
+    llm_context_node(
+        name="response_agent_context_node",
+        outputs="response_generation_context",
+        llm="llm",
+        prompts=["tool_prompt", "response_prompt"],
+        tools=[
+            tool(build_get_user_claims, "db_engine"),
+            tool(build_lookup_docs, "docs", "params:docs_matches"),
+            tool(build_create_claim, "db_engine"),
+        ],
+    )
+    ```
     """
     inputs = {"llm": llm}
 
@@ -59,7 +138,8 @@ def llm_context_node(
             for inp in t.inputs:
                 inputs[inp] = inp
 
-    def construct_context(llm, **kwargs):
+    def construct_context(llm: object, **kwargs: Kwargs) -> LLMContext:
+        """Node execution: build an LLMContext using loaded datasets."""
         # Collect prompts
         prompts_dict = {p: kwargs[p] for p in prompts}
 

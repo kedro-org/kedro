@@ -51,7 +51,7 @@ def llm_context_node(  # noqa: PLR0913
 
     def construct_context(llm, **kwargs):
         # Collect prompts
-        prompts_dict = {prompt: kwargs[p] for prompt in prompts}
+        prompts_dict = {k: v for k, v in kwargs.items() if "prompt" in k}
 
         # Collect tools
         built_tools = {}

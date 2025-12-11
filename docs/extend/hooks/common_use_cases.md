@@ -2,7 +2,7 @@
 
 ## Use Hooks to extend a node's behaviour
 
-You can use the [`before_node_run` and `after_node_run` Hooks](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) to add extra behaviour before and after a node's execution. Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes, based on their tags or namespaces: for example, suppose we want to add the following extra behaviour to a node:
+You can use the [`before_node_run` and `after_node_run` Hooks](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) to add extra behaviour before and after a node's execution. The hook can target a single node, the entire Kedro pipeline, or a subset of nodes based on their tags or namespaces. Suppose we want to add the following extra behaviour to a node:
 
 ```python
 from kedro.pipeline.node import Node
@@ -47,7 +47,7 @@ class ProjectHooks:
             say_hello(node)
 ```
 
-Or add it to all nodes in the entire pipeline:
+Or add it to all nodes in the pipeline:
 
 ```python
 # src/<package_name>/hooks.py
@@ -63,7 +63,7 @@ class ProjectHooks:
         say_hello(node)
 ```
 
-If your use case takes advantage of a decorator, for example to retry a node's execution using a library such as [tenacity](https://tenacity.readthedocs.io/en/latest/), you can still decorate the node's function directly:
+If your use case needs a decorator, you can still decorate the node's function directly. For example, you can retry a node's execution using [tenacity](https://tenacity.readthedocs.io/en/latest/):
 
 ```python
 from tenacity import retry
@@ -189,7 +189,7 @@ class AzureSecretsHook:
         }
 ```
 
-Finally, [register the Hook](./introduction.md#registering-the-hook-implementation-with-kedro) in `settings.py`:
+Then [register the Hook](./introduction.md#registering-the-hook-implementation-with-kedro) in `settings.py`:
 
 ```python
 from my_project.hooks import AzureSecretsHook
@@ -198,7 +198,7 @@ HOOKS = (AzureSecretsHook(),)
 ```
 
 !!! note
-    Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
+    `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorise access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
 
 ## Use Hooks to read `metadata` from `DataCatalog`
 Use the `after_catalog_created` Hook to access `metadata` to extend Kedro.
@@ -215,11 +215,11 @@ class MetadataHook:
 ```
 
 ## Use Hooks to debug your pipeline
-You can use Hooks to launch a [post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](./introduction.md) when an error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
+You can use Hooks to launch a [post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](./introduction.md) when an error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) can be integrated in the same manner.
 
 ### Debugging a node
 
-To start a debugging session when an error is raised within your `node` that is not caught, implement the `on_node_error` [Hook specification](../../api/framework/kedro.framework.hooks.md):
+To start a debugging session when an error is raised within your `node` that is not caught, add the `on_node_error` [Hook specification](../../api/framework/kedro.framework.hooks.md):
 
 ```python
 import pdb
@@ -254,7 +254,7 @@ HOOKS = (PDBNodeDebugHook(),)
 
 ### Debugging a pipeline
 
-To start a debugging session when an error is raised within your `pipeline` that is not caught, implement the `on_pipeline_error` [Hook specification](../../api/framework/kedro.framework.hooks.md):
+To start a debugging session when an error is raised within your `pipeline` that is not caught, add the `on_pipeline_error` [Hook specification](../../api/framework/kedro.framework.hooks.md):
 
 ```python
 import pdb

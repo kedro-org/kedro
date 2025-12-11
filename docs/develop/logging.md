@@ -3,10 +3,10 @@
 
 Kedro uses [Python's `logging` library](https://docs.python.org/3/library/logging.html). Configuration is provided as a dictionary according to the [Python logging configuration schema](https://docs.python.org/3/library/logging.config.html#logging-config-dictschema) in Kedro's default logging configuration, as described below.
 
-By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`.
+By default, Python shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`.
 
 ## Default logging configuration
-Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io) to format messages. We also use the Rich traceback handler to render exceptions.
+Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io) to format messages and render exceptions.
 
 ## How to perform logging in your Kedro project
 To add logging to your own code (for example, in a node):
@@ -36,14 +36,14 @@ For example, you can set `KEDRO_LOGGING_CONFIG` by typing the following into you
 export KEDRO_LOGGING_CONFIG=<project_root>/conf/logging.yml
 ```
 
-After setting the environment variable, any subsequent Kedro commands use the logging configuration file at the specified path.
+After setting the environment variable, any later Kedro commands use the logging configuration file at the specified path.
 
 !!! note
     If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will use the [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml).
 
 ### Change the verbosity of specific parts of Kedro
 
-You can also customise logging at runtime and redefine the logging configuration provided in the `logging.yml` when using jupyter notebook.
+You can also customise logging at runtime and redefine the logging configuration provided in the `logging.yml` when using Jupyter Notebook.
 The example below demonstrates how you can change the logging level from default `INFO` to `WARNING` for the `kedro.io.data_catalog` component logger specifically, the logging for the rest of the components will remain unchanged.
 The same can be done for higher/lower-level components without affecting the top-level.
 
@@ -58,14 +58,14 @@ logging.getLogger("kedro.io.data_catalog").setLevel(logging.WARNING)
 
 ## Custom `CONF_SOURCE` with logging
 
-When you customise the [`CONF_SOURCE`](../configure/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project, it determines where Kedro looks for configuration files, including the logging configuration file. However, changing `CONF_SOURCE` does not automatically update the path to `logging.yml`. To use a custom location or filename for the logging configuration, you must explicitly set the `KEDRO_LOGGING_CONFIG` environment variable.
+When you customise the [`CONF_SOURCE`](../configure/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project, it determines where Kedro looks for configuration files, including the logging configuration file. Changing `CONF_SOURCE` does not automatically update the path to `logging.yml`. To use a custom location or filename for the logging configuration, you must explicitly set the `KEDRO_LOGGING_CONFIG` environment variable.
 
 By default, Kedro looks for a file named `logging.yml` in the `conf` directory. If you move or rename your logging configuration file after changing `CONF_SOURCE`, specify the new path using the `KEDRO_LOGGING_CONFIG` environment variable:
 ```bash
 export KEDRO_LOGGING_CONFIG=<project_root>/custom_config_folder/custom_logging_name.yml
 ```
 
-Please note that adjusting `CONF_SOURCE` or renaming `logging.yml` without updating the logging configuration accordingly can lead to Kedro not locating the file, which will result in the default logging settings being used instead.
+Please note that adjusting `CONF_SOURCE` or renaming `logging.yml` without updating the logging configuration can lead to Kedro not locating the file. In that case, the default logging settings are used instead.
 
 ### How to show DEBUG level messages
 To see `DEBUG` level messages, change the level of logging in your project-specific logging configuration file (`logging.yml`). We provide a `logging.yml` template:
@@ -137,7 +137,7 @@ When your project's logging level is set to `DEBUG` and you have [hooks enabled 
 
 ## Advanced logging
 
-In addition to the `rich` handler defined in Kedro's framework, we provide two additional handlers in the template.
+Besides the `rich` handler defined in Kedro's framework, we provide two additional handlers in the template.
 
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting
 * `info_file_handler`: write logs of level `INFO` and above to `info.log`
@@ -146,12 +146,12 @@ The following section illustrates some common examples of how to change your pro
 
 ## How to customise the `rich` handler
 
-Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
+Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. You can disable it by setting `rich_tracebacks: False`.
 
 !!! note
-    If you want to disable `rich`'s tracebacks, you must set `KEDRO_LOGGING_CONFIG` to point to your local config i.e. `conf/logging.yml`.
+    If you want to disable tracebacks rendered by `rich`, you must set `KEDRO_LOGGING_CONFIG` to point to your local config, that is, `conf/logging.yml`.
 
-When `rich_tracebacks` is set to `True`, the configuration is propagated to [`rich.traceback.install`](https://rich.readthedocs.io/en/stable/reference/traceback.html#rich.traceback.install). If an argument is compatible with `rich.traceback.install`, it will be passed to the traceback's settings.
+When `rich_tracebacks` is set to `True`, the configuration is propagated to [`rich.traceback.install`](https://rich.readthedocs.io/en/stable/reference/traceback.html#rich.traceback.install). If an argument is compatible with `rich.traceback.install`, it will be passed to the settings for tracebacks.
 
 For instance, you can enable the display of local variables inside `logging.yml` to aid with debugging.
 
@@ -166,9 +166,9 @@ A comprehensive list of available options can be found in the [RichHandler docum
 
 ## How to enable file-based logging
 
-File-based logging in Python projects aids troubleshooting and debugging. It offers better visibility into application's behaviour and it's easy to search. However, it does not work well with read-only systems such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
+File-based logging in Python projects aids troubleshooting and debugging. It offers better visibility into the application's behaviour and keeps the logs searchable. It does not work well with read-only systems such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
 
-To enable file-based logging,  add `info_file_handler` in your `root` logger as follows in your `conf/logging.yml` as follows:
+To enable file-based logging, add `info_file_handler` in your `root` logger in your `conf/logging.yml` as follows:
 
 ```diff
  root:
@@ -176,7 +176,7 @@ To enable file-based logging,  add `info_file_handler` in your `root` logger as 
 +  handlers: [rich, info_file_handler]
 ```
 
-By default it only tracks `INFO` level messages, but it can be configured to capture any level of logs.
+By default it tracks `INFO` level messages, but it can be configured to capture any level of logs.
 
 ## How to use plain console logging
 
@@ -190,9 +190,9 @@ To use plain rather than rich logging, swap the `rich` handler for the `console`
 
 ## How to enable rich logging in a dumb terminal
 
-Rich [detects whether your terminal is capable](https://rich.readthedocs.io/en/stable/console.html#terminal-detection) of displaying richly formatted messages. If your terminal is "dumb" then formatting is automatically stripped out so that the logs are just plain text. This is likely to happen if you perform `kedro run` on CI (for example, GitHub Actions or CircleCI).
+Rich [detects whether your terminal is capable](https://rich.readthedocs.io/en/stable/console.html#terminal-detection) of displaying richly formatted messages. If your terminal is "dumb" then formatting is automatically stripped out so that the logs are plain text. This situation occurs when you perform `kedro run` on CI (for example, GitHub Actions or CircleCI).
 
-If you find that the default wrapping of the log messages is too narrow but do not wish to switch to using the `console` logger on CI then the simplest way to control the log message wrapping is through altering the `COLUMNS` and `LINES` environment variables. For example:
+If the default wrapping of the log messages is too narrow and you want to keep the `console` logger on CI, adjust the `COLUMNS` and `LINES` environment variables. For example:
 
 ```bash
 export COLUMNS=120 LINES=25
@@ -207,7 +207,7 @@ Rich also formats the logs in JupyterLab and Jupyter Notebook. The size of the o
 
 ### How to use logging without the rich library
 
-If you prefer not to have the `rich` library in your Kedro project, you have the option to uninstall it. However, it's important to note that versions of the `cookiecutter` library above 2.3 have a dependency on rich. You will need to downgrade `cookiecutter` to a version below 2.3 to have Kedro work without `rich`.
+If you prefer not to have the `rich` library in your Kedro project, you have the option to uninstall it. Keep in mind that versions of the Cookiecutter library above 2.3 have a dependency on rich. You will need to downgrade Cookiecutter to a version below 2.3 to have Kedro work without `rich`.
 
 To uninstall the rich library, run:
 
@@ -215,10 +215,10 @@ To uninstall the rich library, run:
 pip uninstall rich
 ```
 
-To downgrade cookiecutter to a version that does not require rich, you can specify a version below 2.3. For example:
+To downgrade Cookiecutter to a version that does not require rich, you can specify a version below 2.3. For example:
 
 ```bash
 pip install cookiecutter==2.2.0
 ```
 
-These changes will affect the visual appearance and formatting of Kedro's logging, prompts, and the output of the `kedro ipython` command. While using a version of `cookiecutter` below 2.3, the appearance of the prompts will be plain even with `rich` installed.
+These changes will affect the visual appearance and formatting of Kedro's logging, prompts, and the output of the `kedro ipython` command. While using a version of Cookiecutter below 2.3, the appearance of the prompts will be plain even with `rich` installed.

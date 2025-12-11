@@ -2,11 +2,11 @@
 
 ## Introduction
 
-Code formatting guidelines set a standard for the layout of your code, for stylistic elements such as use of line breaks and whitespace. Format doesn't have any impact on how the code works, but using a consistent style makes your code more readable, and makes it more likely to be reused.
+Code formatting guidelines set a standard for the layout of your code, for stylistic elements such as use of line breaks and whitespace. Format doesn't have any impact on how the code works, but using a consistent style makes your code more readable and increases the chance it will be reused.
 
 Linting tools check your code for errors such as a missing bracket or line indent. This can save time and frustration because you can catch errors in advance of running the code.
 
-As a project grows and goes through various stages of development it becomes important to maintain code quality. Using a consistent format and linting your code ensures that it is consistent, readable, and easy to debug and maintain.
+As a project grows and goes through various stages of development it becomes important to maintain code quality. Using a consistent format and linting your code ensures that it is consistent, readable, and straightforward to debug and maintain.
 
 ## Set up Python tools
 
@@ -31,7 +31,7 @@ project and run:
 pip install ."[dev]"
 ```
 
-Alternatively, you can individually install the linting tools using the following shell commands:
+You can instead install the linting tools individually using the following shell commands:
 
 ```bash
 pip install ruff
@@ -39,9 +39,9 @@ pip install ruff
 
 #### Configure `ruff`
 
-`ruff` read configurations from `pyproject.toml` within your project root. You can enable different rule sets within the `[tool.ruff]` section. For example, the rule set `F` is equivalent to `Pyflakes`.
+`ruff` read configurations from `pyproject.toml` within your project root. You can enable different rule sets within the `[tool.ruff]` section. For example, the rule set `F` matches `Pyflakes`.
 
-To start with `ruff`, we recommend adding this section to enable a few basic rules sets.
+To start with `ruff`, we recommend adding this section to enable the following basic rule sets.
 ```toml
 [tool.ruff]
 select = [
@@ -55,7 +55,7 @@ select = [
 ```
 
 !!! note
-    It is a good practice to [split your line when it is too long](https://beta.ruff.rs/docs/rules/line-too-long/), so it can be read easily even in a small screen. `ruff` treats this slightly different from `black`, when using together we recommend to disable this rule, i.e. `E501` to avoid conflicts.
+    It is a good practice to [split your line when it is too long](https://beta.ruff.rs/docs/rules/line-too-long/), so it remains readable even on a small screen. `ruff` treats this rule slightly differently from `black`, so when using them together we recommend disabling rule `E501` to avoid conflicts.
 
 ### Run the tools
 

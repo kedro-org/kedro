@@ -42,10 +42,10 @@ with KedroSession.create(project_path=project_root) as session:
 You can provide the following optional arguments in `KedroSession.create()`:
 
 - `project_path`: Path to the project root directory
-- `save_on_close`: A boolean value to indicate whether or not to save the session to disk when it's closed
+- `save_on_close`: A Boolean value that indicates whether to save the session to disk when it closes
 - `env`: Environment for the `KedroContext`
 - `extra_params`: Optional dictionary containing extra project parameters
-for the underlying **`KedroContext`**; if specified, this will update (and therefore take precedence over) parameters retrieved from the project configuration
+for the underlying **`KedroContext`**; if specified, this updates (and takes precedence over) parameters retrieved from the project configuration
 
 ## `bootstrap_project` and `configure_project`
 
@@ -68,14 +68,14 @@ Kedro's CLI runs the functions at startup as part of `kedro run` so in most case
 
 ### `bootstrap_project`
 
-This function uses `configure_project`, and additionally reads metadata from `pyproject.toml` and adds the project root to `sys.path` so the project can be imported as a Python package. It is typically used to work directly with the source code of a Kedro project.
+This function uses `configure_project`, and also reads metadata from `pyproject.toml` and adds the project root to `sys.path` so the project can be imported as a Python package. It is typically used to work directly with the source code of a Kedro project.
 
 ### `configure_project`
 
-This function reads `settings.py` and `pipeline_registry.py` and registers the configuration before Kedro's run starts. If you have a packaged Kedro project, you only need to run `configure_project` before executing your pipeline.
+This function reads `settings.py` and `pipeline_registry.py` and registers the configuration before Kedro's run starts. If you have a packaged Kedro project, run `configure_project` before executing your pipeline.
 
-#### ValueError: Package name not found
-> ValueError: Package name not found. Make sure you have configured the project using 'bootstrap_project'. This should happen automatically if you are using Kedro command line interface.
+#### `ValueError`: package name not found
+> ValueError: Package name not found. Make sure you have configured the project using `bootstrap_project`. This should happen automatically if you are using Kedro command line interface.
 
 If you are using `multiprocessing`, you need to be careful about this. Depending on your Operating System, you may have [different default](https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods). If the processes are `spawn`, Python will re-import all the modules in each process and thus you need to run `configure_project` again at the start of the new process. For example, this is how Kedro handles this in `ParallelRunner`:
 ```python

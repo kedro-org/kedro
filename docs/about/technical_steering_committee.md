@@ -1,6 +1,6 @@
 # Kedro's Technical Steering Committee
 
-Kedro is a graduated project within [LF AI & Data](https://lfaidata.foundation/).
+Kedro is a graduate-stage project within [LF AI & Data](https://lfaidata.foundation/).
 
 The term "Technical Steering Committee" (TSC) describes the group of Kedro voting members, maintainers, and advisors. We list Kedro's [current](#current-kedro-tsc-members) and [past](#past-kedro-tsc-members-and-maintainers) TSC members and maintainers on this page.
 

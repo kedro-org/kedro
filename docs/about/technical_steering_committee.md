@@ -2,7 +2,7 @@
 
 Kedro is a graduate-stage project within [LF AI & Data](https://lfaidata.foundation/).
 
-The term "Technical Steering Committee" (TSC) describes the group of Kedro voting members, maintainers, and advisors. We list Kedro's [current](#current-kedro-tsc-members) and [past](#past-kedro-tsc-members-and-maintainers) TSC members and maintainers on this page.
+The term "Technical Steering Committee" (TSC) describes the group of Kedro voting members, maintainers, and advisors. We list Kedro's [current](#current-tsc-members) and [past](#past-tsc-members) TSC members and maintainers on this page.
 
 The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development.
 
@@ -102,7 +102,7 @@ The new maintainer should then be added to the `kedro-developers` team on the Ke
 the `kedro-tsc` channel on the Kedro Slack organisation, the regular TSC meetings, and the `CITATION.cff` file.
 
 ### Inactivity and removal
-Maintainers who do not contribute code, documentation, or attend regular meetings for 6 months will be automatically removed from the [current TSC members](#current-kedro-tsc-members) list, `kedro-developers` team, and `CITATION.cff` file. They may be invited to join the [advisor](#advisors) role if they are interested in continuing to support and contribute to the project in a different capacity.
+Maintainers who do not contribute code, documentation, or attend regular meetings for 6 months will be automatically removed from the [current TSC members](#current-tsc-members) list, `kedro-developers` team, and `CITATION.cff` file. They may be invited to join the [advisor](#advisors) role if they are interested in continuing to support and contribute to the project in a different capacity.
 
 
 ## Responsibilities of an advisor

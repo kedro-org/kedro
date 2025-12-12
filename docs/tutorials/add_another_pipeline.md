@@ -479,7 +479,7 @@ In this setup, `model_input_table` does not get parameterised because it needs t
 
 The graph renders as follows when you run `kedro viz run` (hover over the datasets to see their full path):
 
-![modular_ds](../meta/images/modular_ds.gif)
+![Modular data science pipeline](../meta/images/modular_ds.gif)
 
 ## Optional: Kedro runners
 

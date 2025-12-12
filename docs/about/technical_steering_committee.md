@@ -188,7 +188,11 @@ Voting can change TSC members and decide on the future of Kedro. The [voting mem
 
 ### Other issues or proposals
 
-[Kedro's GitHub discussions](https://github.com/kedro-org/kedro/discussions) section is used to host votes on issues, proposals and changes affecting the future of Kedro, including amendments to our ways of working described on this page. These follow the [KEP voting process](https://github.com/kedro-org/kedro/discussions/5150).
+[Kedro's GitHub discussions](https://github.com/kedro-org/kedro/discussions) section is used to host votes on issues, proposals and changes affecting the future of Kedro. This includes amendments to our ways of working described on this page. These follow the [KEP voting process](https://github.com/kedro-org/kedro/discussions/5150).
+
+### Adding or removing core datasets
+
+The addition or removal of core datasets is done through a vote by the TSC. The voting process is described in the [kedro-datasets contribution guide](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/CONTRIBUTING.md).
 
 ## Adding or removing TSC members
 
@@ -199,7 +203,7 @@ Any member may choose to step out of their current role at any time by communica
 Any member may request to step down to a non voting category at any time if they believe they can contribute more effectively in that role. This change does not require a vote.
 
 ### Step-up procedure
-Members who wish to move up to a category that requires a higher commitment (advisor to voting member or maintainer, or maintainer to voting member) must receive formal approval through a TSC vote. Additionally, the member must have an active TSC [voting member](#voting-members) advocate to support their nomination.
+Members who wish to move up to a category that requires a higher commitment (advisor to voting member or maintainer, or maintainer to voting member) must receive formal approval through a TSC vote. The member must also have an active TSC [voting member](#voting-members) advocate to support their nomination.
 
 ### Automatic removal and transition option
-If a member is automatically removed from their current category (for example, due to inactivity), they will have the option to request placement in the next lower level within two weeks of their removal. If no request is made within that time frame, the member will be removed from the TSC entirely.
+If a member is automatically removed from their current category (due to inactivity), they can request placement in the next lower level within two weeks of their removal. If no request is made within that time frame, the member will be removed from the TSC entirely.

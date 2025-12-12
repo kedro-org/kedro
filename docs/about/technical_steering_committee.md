@@ -46,10 +46,11 @@ Advisors are individuals who are not actively contributing to the codebase or at
 - Attend regular team meetings to discuss the project plans and roadmap
 
 ### Voting rights
-Voting members take part in two types of votes:
+Voting members take part in three types of votes:
 
-- Code modifications – follows the [KEP process](https://github.com/kedro-org/kedro/discussions/5150)
 - Membership additions – new voting members must receive majority approval (≥50%) from existing voting members (see more details below)
+- Code modifications – follows the [KEP process](https://github.com/kedro-org/kedro/discussions/5150)
+- Core dataset additions or removals – follows the [kedro-datasets contribution guide](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/CONTRIBUTING.md)
 
 
 ## Process to become a voting member

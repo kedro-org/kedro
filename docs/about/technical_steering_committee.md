@@ -15,8 +15,8 @@ On this page we describe:
 - [Process to become a maintainer](#process-to-become-a-maintainer)
 - [Responsibilities of an advisor](#responsibilities-of-an-advisor)
 - [Process to become an advisor](#process-to-become-an-advisor)
-- [Current Kedro TSC members](#current-kedro-tsc-members)
-- [Past Kedro TSC members & maintainers](#past-kedro-tsc-members-and-maintainers)
+- [Current TSC members](#current-tsc-members)
+- [Past TSC members](#past-tsc-members)
 - [Voting process](#voting-process)
 - [Adding or removing TSC members](#adding-or-removing-tsc-members)
 
@@ -120,7 +120,7 @@ The voting period should remain open for at least two weeks, and the proposal wi
 Advisors may be automatically removed after 12 months of inactivity. Inactivity is defined as a lack of any engagement with Kedro during this period.
 
 
-## Current Kedro TSC members
+## Current TSC members
 
 <!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT A VOTE TO SIGN OFF ANY CHANGES -->
 
@@ -148,7 +148,7 @@ Advisors may be automatically removed after 12 months of inactivity. Inactivity 
 | [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) |
 
 
-## Past Kedro TSC members and maintainers
+## Past TSC members
 
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at [QuantumBlack](https://www.mckinsey.com/capabilities/quantumblack) to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 

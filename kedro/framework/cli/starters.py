@@ -53,7 +53,7 @@ kedro new --tools=lint,test,log,docs,data,pyspark (or any subset of these option
 kedro new --tools=all\n
 kedro new --tools=none
 
-For more information on using tools, see https://docs.kedro.org/en/stable/starters/new_project_tools.html
+For more information on using tools, see https://docs.kedro.org/en/stable/create/new_project_tools/#tools-to-customise-a-new-kedro-project
 """
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,

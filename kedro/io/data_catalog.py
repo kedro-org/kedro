@@ -29,7 +29,7 @@ from kedro.io.core import (
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.io.shared_memory_dataset import SharedMemoryDataset
-from kedro.utils import _format_rich, _has_rich_handler
+from kedro.utils import _format_rich, _has_rich_handler, _has_only_rich_handlers
 
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
@@ -266,7 +266,9 @@ class DataCatalog(CatalogProtocol):
             datasets, load_versions or {}, save_version
         )
 
-        self._use_rich_markup = _has_rich_handler()
+        # Only enable rich markup if ALL handlers are RichHandlers to prevent markup leakage
+        # This avoids leaking rich markup tags to file handlers when mixed handlers are present
+        self._use_rich_markup = _has_only_rich_handlers()
 
         for ds_name in list(self._config_resolver.config):
             if ds_name in self._datasets:

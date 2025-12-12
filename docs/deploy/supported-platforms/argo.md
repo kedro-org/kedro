@@ -6,14 +6,14 @@
 This page explains how to convert your Kedro pipeline to use [Argo Workflows](https://github.com/argoproj/argo-workflows), an open-source container-native workflow engine for orchestrating parallel jobs on [Kubernetes](https://kubernetes.io/).
 
 
-## Why would you use Argo Workflows?
+## Reasons to use Argo Workflows
 
 We are interested in Argo Workflows, one of the 4 components of the Argo project. Argo Workflows is an open-source container-native workflow engine for orchestrating parallel jobs on Kubernetes.
 
 Here are the main reasons to use Argo Workflows:
 
 - It is cloud-agnostic and can run on any Kubernetes cluster
-- It allows you to easily run and orchestrate compute intensive jobs in parallel on Kubernetes
+- It enables you to run and orchestrate compute-intensive jobs in parallel on Kubernetes
 - It manages the dependencies between tasks using a directed acyclic graph (DAG)
 
 ## Prerequisites
@@ -23,7 +23,7 @@ To use Argo Workflows, ensure you have the following prerequisites in place:
 - [Argo Workflows is installed](https://github.com/argoproj/argo/blob/master/README.md#quickstart) on your Kubernetes cluster
 - [Argo CLI is installed](https://github.com/argoproj/argo/releases) on your machine
 - A `name` attribute is set for each Kedro [kedro.pipeline.node][] since it is used to build a DAG
-- [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and refer to an external location (for example, AWS S3); you cannot use the `MemoryDataset` in your workflow
+- [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and point to an external location (for example, AWS S3); you cannot use the `MemoryDataset` in your workflow
 
 !!! note
     Each node will run in its own container.
@@ -34,13 +34,13 @@ To use Argo Workflows, ensure you have the following prerequisites in place:
 
 First, you need to containerise your Kedro project, using any preferred container solution (for example, [`Docker`](https://www.docker.com/)), to build an image to use in Argo Workflows.
 
-For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process. [Instructions for Kedro-Docker are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
+For this walk-through, we assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process. [Instructions for Kedro-Docker are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
 
 After you’ve built the Docker image for your project locally, [transfer the image to a container registry](../single_machine.md#how-to-use-container-registry).
 
-### Create Argo Workflows spec
+### Create an Argo Workflows spec
 
-In order to build an Argo Workflows spec for your Kedro pipeline programmatically you can use the following Python script that should be stored in your project’s root directory:
+To build an Argo Workflows spec for your Kedro pipeline programmatically you can use the following Python script that should be stored in your project’s root directory:
 
 ```python
 # <project_root>/build_argo_spec.py
@@ -171,7 +171,7 @@ spec:
 !!! note
     The Argo Workflows is defined as the dependencies between tasks using a directed-acyclic graph (DAG).
 
-For the purpose of this walk-through, we will use an AWS S3 bucket for datasets; therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example [Kubernetes Secrets spec is given below](#submit-argo-workflows-spec-to-kubernetes)).
+In this walk-through, we use an AWS S3 bucket for datasets. Set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables so the workflow can communicate with S3. Store both values in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/); an example [Kubernetes Secrets spec is given below](#submit-the-argo-workflows-spec-to-kubernetes).
 
 The spec template is written with the [Jinja templating language](https://jinja.palletsprojects.com/en/2.11.x/), so you must install the Jinja Python package:
 
@@ -179,16 +179,16 @@ The spec template is written with the [Jinja templating language](https://jinja.
 $ pip install Jinja2
 ```
 
-Finally, run the helper script from project's directory to build the Argo Workflows spec (the spec will be saved to `<project_root>/templates/argo-<package_name>.yml` file).
+Run the helper script from the project directory to build the Argo Workflows spec (the spec will be saved to `<project_root>/templates/argo-<package_name>.yml` file).
 
 ```console
 $ cd <project_root>
 $ python build_argo_spec.py <project_image>
 ```
 
-### Submit Argo Workflows spec to Kubernetes
+### Submit the Argo Workflows spec to Kubernetes
 
-Before submitting the Argo Workflows spec you need to deploy a Kubernetes Secrets.
+Before submitting the Argo Workflows spec you need to deploy a Kubernetes Secret.
 
 Here's an example Secrets spec:
 
@@ -210,7 +210,7 @@ You can use the following command to encode AWS keys to base64:
 $ echo -n <original_key> | base64
 ```
 
-Run the following commands to deploy the Kubernetes Secrets to the `default` namespace and check that it was created:
+Run the following commands to deploy the Kubernetes Secrets to the `default` namespace and check that it is created:
 
 ```console
 $ kubectl create -f secret.yml
@@ -225,16 +225,16 @@ $ argo submit --watch templates/argo-<package_name>.yml
 ```
 
 !!! note
-    The Argo Workflows should be submitted to the same namespace as the Kubernetes Secrets. Please refer to the Argo CLI help to get more details about the usage.
+    The Argo Workflows should be submitted to the same namespace as the Kubernetes Secrets. See the Argo CLI help to get more details about the usage.
 
-In order to clean up your Kubernetes cluster you can use the following commands:
+To clean up your Kubernetes cluster you can use the following commands:
 
 ```console
 $ kubectl delete pods --selector app=kedro-argo
 $ kubectl delete -f secret.yml
 ```
 
-### Kedro-Argo plugin
+### Use the Kedro-Argo plugin
 
 As an alternative, you can use [Kedro-Argo plugin](https://pypi.org/project/kedro-argo/) to convert a Kedro project to Argo Workflows.
 

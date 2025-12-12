@@ -1,5 +1,5 @@
 """
-Utilities for constructing an `LLMContext` inside a Kedro pipeline.
+Experimental utilities for constructing an ``LLMContext`` inside a Kedro pipeline.
 
 This module provides:
 
@@ -18,6 +18,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Generic, NamedTuple, TypeVar
 
+from ..utils import experimental
 from .node import Node, node
 
 T = TypeVar("T")
@@ -35,6 +36,7 @@ class _ToolConfig(Generic[T], NamedTuple):
     inputs: Sequence[str]
 
 
+@experimental
 def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig[T]:
     """Create a `_ToolConfig` definition for a tool builder.
 
@@ -50,6 +52,7 @@ def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig[T]:
     return _ToolConfig(func=func, inputs=list(inputs))
 
 
+@experimental
 @dataclass
 class LLMContext:
     """Runtime context passed to an LLM execution step.
@@ -89,6 +92,7 @@ def _get_tool_name(obj: object) -> str:
 Kwargs = dict[str, Any]
 
 
+@experimental
 def llm_context_node(
     *,
     outputs: str,

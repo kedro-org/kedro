@@ -50,6 +50,7 @@ exceptions:
   - JFrog
   - JFrog Artifactory
   - Jira
+  - Jupyter Notebook
   - Kafka
   - Kubeflow
   - Kubeflow Pipelines

@@ -43,7 +43,7 @@ def _fetch_credentials(credentials_name: str, credentials: dict[str, Any]) -> An
         raise KeyError(
             f"Unable to find credentials '{credentials_name}': check your data "
             "catalog and credentials configuration. See "
-            "https://docs.kedro.org/en/stable/data/index.html#DataCatalog "
+            "https://docs.kedro.org/en/stable/catalog-data/data_catalog/ "
             "for an example."
         ) from exc
 

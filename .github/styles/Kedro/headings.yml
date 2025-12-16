@@ -24,8 +24,11 @@ exceptions:
   - CLI
   - DataCatalog
   - Data Catalog
+  - DataFrame
   - Databricks
   - Databricks Repo
+  - Delta Lake
+  - Delta tables
   - Docker
   - Docker Compose
   - Docker Swarm
@@ -39,17 +42,20 @@ exceptions:
   - Google Cloud
   - Google Cloud Functions
   - Google Cloud Storage
-  - GraphQL
+  - Great Expectations
   - Hook
   - Hooks
   - IAM
   - Iceberg
   - IDs
   - IO
+  - IPython
   - Jenkins
   - JFrog
   - JFrog Artifactory
   - Jira
+  - Jupyter Notebook
+  - JupyterLab
   - Kafka
   - Kubeflow
   - Kubeflow Pipelines
@@ -59,6 +65,7 @@ exceptions:
   - Kubernetes Service
   - Lambda
   - Linux
+  - Marimo
   - MWAA
   - MySQL
   - Prefect
@@ -70,6 +77,7 @@ exceptions:
   - Redis
   - SageMaker
   - Slack
+  - Spark
   - Technical Steering Committee
   - TSC
   - Ubuntu

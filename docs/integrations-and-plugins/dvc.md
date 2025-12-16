@@ -50,7 +50,7 @@ You can now commit the changes to git.
 +---------------------------------------------------------------------+
 ```
 
-Since you initialised a new Git repository with `git init` on the previous step, you can now make an initial commit containing all of the files in the project:
+Since you initialised a new Git repository with `git init` on the previous step, you can now make an initial commit containing every file in the project:
 
 ```bash
 git add .
@@ -237,7 +237,7 @@ dvc repro
 
 ### How to update a dataset
 
-If one of the datasets is updated, you can rerun only the pipelines affected by the change.
+If one of the datasets is updated, you can rerun the pipelines affected by the change.
 
 The command `dvc repro` executes pipelines where outputs or dependencies have changed.
 

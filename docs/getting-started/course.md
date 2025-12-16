@@ -26,7 +26,7 @@ Please note that we do expect users to have Git installed, as it is a prerequisi
 In short, you'll learn answers to the following:
 
 - Introduction to Kedro
-- What is Kedro? How does it help you create maintainable, reusable data science code?
+- What is Kedro? How does it help you create maintainable, reusable data engineering and data science code?
 - How does Kedro fit into the data science ecosystem?
 - What do you need to do to create a Kedro project?
 - How can you refactor a Jupyter notebook to a Kedro project?

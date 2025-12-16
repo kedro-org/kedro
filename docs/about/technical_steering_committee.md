@@ -55,7 +55,7 @@ Maintainers take part in three types of votes:
 
 
 ## Process to become a maintainer
-Just contributing does not make you a maintainer. You need to show commitment to Kedro's long-term success by working with existing TSC members for at least one year.
+Just contributing does not make you a maintainer. You need to show commitment to Kedro's long-term success by being an advisor or committer on the TSC for at least six months.
 
 We look for people who can do at least some of the following on top of the responsibility of a maintainer:
 
@@ -119,7 +119,7 @@ The voting period should remain open for at least two weeks, and the proposal wi
 
 
 ### Inactivity and removal
-Advisors may be automatically removed after 12 months of inactivity. Inactivity is defined as a lack of any engagement with Kedro during this period.
+Advisors may be automatically removed after 6 months of inactivity. Inactivity is defined as a lack of any engagement with Kedro during this period.
 
 
 ## Current TSC members

@@ -46,11 +46,13 @@ exceptions:
   - Iceberg
   - IDs
   - IO
+  - IPython
   - Jenkins
   - JFrog
   - JFrog Artifactory
   - Jira
   - Jupyter Notebook
+  - JupyterLab
   - Kafka
   - Kubeflow
   - Kubeflow Pipelines

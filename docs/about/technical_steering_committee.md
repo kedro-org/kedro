@@ -2,17 +2,17 @@
 
 Kedro is a graduate-stage project within [LF AI & Data](https://lfaidata.foundation/).
 
-The term "Technical Steering Committee" (TSC) describes the group of Kedro voting members, maintainers, and advisors. We list Kedro's [current](#current-tsc-members) and [past](#past-tsc-members) TSC members and maintainers on this page.
+The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers, committers, and advisors. We list Kedro's [current](#current-tsc-members) and [past](#past-tsc-members) TSC members on this page.
 
 The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development.
 
 On this page we describe:
 
 - [Kedro TSC roles](#kedro-tsc-roles)
-- [Responsibilities of a voting member](#responsibilities-of-a-voting-member)
-- [Process to become a voting member](#process-to-become-a-voting-member)
 - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
 - [Process to become a maintainer](#process-to-become-a-maintainer)
+- [Responsibilities of a committer](#responsibilities-of-a-committer)
+- [Process to become a committer](#process-to-become-a-committer)
 - [Responsibilities of an advisor](#responsibilities-of-an-advisor)
 - [Process to become an advisor](#process-to-become-an-advisor)
 - [Current TSC members](#current-tsc-members)
@@ -24,19 +24,19 @@ On this page we describe:
 
 The Kedro TSC is responsible for the project's future development. The TSC is made up of the following roles:
 
-### Voting members
-
-Voting Members form the core of the TSC and hold the right to vote on both code modifications and membership additions. They are expected to make significant contributions to the strategy, direction, and governance of the project. Their primary responsibility is to ensure the long-term success of Kedro.
-
 ### Maintainers
 
-Maintainers have repository access and full participation rights in discussions but do not hold voting privileges. They are active contributors who focus on different areas of the project. Maintainers are responsible for maintaining the health of the project, participating in planning and (technical) design decisions, and otherwise acting as part of the core Kedro development team.
+Maintainers form the core of the TSC and hold the right to vote on both code modifications and membership additions. They are expected to make significant contributions to the strategy, direction, and governance of the project. Their primary responsibility is to ensure the long-term success of Kedro.
+
+### Committers
+
+Committers have repository access and full participation rights in discussions but do not hold voting privileges. They are active contributors who focus on different areas of the project. Committers are responsible for maintaining the health of the project, participating in planning and (technical) design decisions, and otherwise acting as part of the core Kedro development team.
 
 ### Advisors
 
 Advisors are individuals who are not actively contributing to the codebase or attending regular meetings but provide valuable expertise, feedback, and strategic guidance to the Kedro project.
 
-## Responsibilities of a voting member
+## Responsibilities of a maintainer
 
 - Defining and maintaining the product vision and roadmap
 - Supporting key technical and strategic initiatives
@@ -46,36 +46,37 @@ Advisors are individuals who are not actively contributing to the codebase or at
 - Attend regular team meetings to discuss the project plans and roadmap
 
 ### Voting rights
-Voting members take part in three types of votes:
+Maintainers take part in three types of votes:
 
-- Membership additions – new voting members must receive majority approval (≥50%) from existing voting members (see more details below)
+- Membership additions – new maintainers must receive majority approval (≥50%) from existing maintainers (see more details below)
+- Membership removals – existing maintainers can be removed by a majority vote of the TSC
 - Code modifications – follows the [KEP process](https://github.com/kedro-org/kedro/discussions/5150)
 - Core dataset additions or removals – follows the [kedro-datasets contribution guide](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/CONTRIBUTING.md)
 
 
-## Process to become a voting member
-Just contributing does not make you a voting member. You need to show commitment to Kedro's long-term success by working with existing TSC members for at least one year.
+## Process to become a maintainer
+Just contributing does not make you a maintainer. You need to show commitment to Kedro's long-term success by working with existing TSC members for at least one year.
 
-We look for people who can do at least some of the following:
+We look for people who can do at least some of the following on top of the responsibility of a maintainer:
 
 - Steer the direction of the project to ensure it retains relevance, including by bringing awareness of industry trends to the team and connecting the project to complementary initiatives
 - Give talks about the project at conferences and online events, write blog posts, or other forms of advocacy
 - Show excitement about the future of Kedro
 
-Any current voting member may nominate a new candidate and will serve as their advocate, responsible for initiating and managing the voting process. The nominating member should open a pull request and formally call for a vote on the candidate, posting the announcement in the #kedro-tsc channel on the Kedro Slack organisation.
+Any current maintainer may nominate a new candidate and will serve as their advocate, responsible for initiating and managing the voting process. The nominating member should open a pull request and formally call for a vote on the candidate, posting the announcement in the #kedro-tsc channel on the Kedro Slack organisation.
 
 The voting period should remain open for at least two weeks, and the proposal will pass with a majority approval. Once voting concludes, the #kedro-tsc channel should be updated with the final results.
 
 ### Inactivity and removal
-Voting members may be automatically removed after 6 months of inactivity, without requiring a formal vote. Inactivity is defined as:
+Maintainers may be automatically removed after 6 months of inactivity, without requiring a formal vote. Inactivity is defined as:
 
 - Not participating in any votes for 6 consecutive months (if any votes were required)
 - Not joining regular technical design meetings or roadmap discussions for more than 6 months
 
-A former voting member may rejoin in the future, provided they secure an advocate among current voting members who will sponsor their nomination for a new vote.
+A former maintainer may rejoin in the future, provided they secure an advocate among current maintainers who will sponsor their nomination for a new vote.
 
-## Responsibilities of a maintainer
-Depending on the maintainer role in the team, they are responsible for some of the following:
+## Responsibilities of a committer
+Depending on the role of the committer in the team, they are responsible for some of the following:
 
 - Driving implementation, technical quality, and code excellence
 - Be proactive about project maintenance including security, updates, CI/CD, builds and infrastructure
@@ -93,16 +94,16 @@ Depending on the maintainer role in the team, they are responsible for some of t
     - [Slack](https://slack.kedro.org) for questions and to support other users
 
 
-## Process to become a maintainer
-Any current voting member may nominate a new candidate and will serve as their advocate, responsible for initiating and managing the voting process. The nominating member should open a pull request and formally call for a vote on the candidate, posting the announcement in the #kedro-tsc channel on the Kedro Slack organisation.
+## Process to become a committer
+Any current maintainer may nominate a new candidate and will serve as their advocate, responsible for initiating and managing the voting process. The nominating member should open a pull request and formally call for a vote on the candidate, posting the announcement in the #kedro-tsc channel on the Kedro Slack organisation.
 
 The voting period should remain open for at least two weeks, and the proposal will pass with a majority approval. Once voting concludes, the #kedro-tsc channel should be updated with the final results.
 
-The new maintainer should then be added to the `kedro-developers` team on the Kedro GitHub organisation,
+The new committer should then be added to the `kedro-developers` team on the Kedro GitHub organisation,
 the `kedro-tsc` channel on the Kedro Slack organisation, the regular TSC meetings, and the `CITATION.cff` file.
 
 ### Inactivity and removal
-Maintainers who do not contribute code, documentation, or attend regular meetings for 6 months will be automatically removed from the [current TSC members](#current-tsc-members) list, `kedro-developers` team, and `CITATION.cff` file. They may be invited to join the [advisor](#advisors) role if they are interested in continuing to support and contribute to the project in a different capacity.
+Committers who do not contribute code, documentation, or attend regular meetings for 6 months will be automatically removed from the [current TSC members](#current-tsc-members) list, `kedro-developers` team, and `CITATION.cff` file. They may be invited to join the [advisor](#advisors) role if they are interested in continuing to support and contribute to the project in a different capacity.
 
 
 ## Responsibilities of an advisor
@@ -112,7 +113,7 @@ Maintainers who do not contribute code, documentation, or attend regular meeting
 - Sharing lessons learned and best practices from adjacent domains
 
 ## Process to become an advisor
-Any current voting member may nominate a new candidate and will serve as their advocate, responsible for initiating and managing the voting process. The nominating member should open a pull request and formally call for a vote on the candidate, posting the announcement in the #kedro-tsc channel on the Kedro Slack organisation.
+Any current maintainer may nominate a new candidate and will serve as their advocate, responsible for initiating and managing the voting process. The nominating member should open a pull request and formally call for a vote on the candidate, posting the announcement in the #kedro-tsc channel on the Kedro Slack organisation.
 
 The voting period should remain open for at least two weeks, and the proposal will pass with a majority approval. Once voting concludes, the #kedro-tsc channel should be updated with the final results.
 
@@ -185,7 +186,7 @@ Former core team members with significant contributions include
 
 ## Voting process
 
-Voting can change TSC members and decide on the future of Kedro. The [voting members](#voting-members) of the TSC lead the process. The voting period is two week and through a GitHub discussion or through a pull request.
+Voting can change TSC members and decide on the future of Kedro. The [maintainers](#voting-members) of the TSC lead the process. The voting period is two weeks and through a GitHub discussion or through a pull request.
 
 ### Other issues or proposals
 
@@ -204,7 +205,7 @@ Any member may choose to step out of their current role at any time by communica
 Any member may request to step down to a non voting category at any time if they believe they can contribute more effectively in that role. This change does not require a vote.
 
 ### Step-up procedure
-Members who wish to move up to a category that requires a higher commitment (advisor to voting member or maintainer, or maintainer to voting member) must receive formal approval through a TSC vote. The member must also have an active TSC [voting member](#voting-members) advocate to support their nomination.
+Members who wish to move up to a category that requires a higher commitment (advisor to maintainer or committer, or committer to maintainer) must receive formal approval through a TSC vote. The member must also have an active TSC [maintainer](#voting-members) advocate to support their nomination.
 
 ### Automatic removal and transition option
 If a member is automatically removed from their current category (due to inactivity), they can request placement in the next lower level within two weeks of their removal. If no request is made within that time frame, the member will be removed from the TSC entirely.

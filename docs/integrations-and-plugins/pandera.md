@@ -312,7 +312,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 - Use a validation node when you want the validation step visible in the DAG and to create explicit validated outputs (you can also make validation nodes pass data through by returning validated data).
 - Prefer loading schemas from the `schemas` module (as shown) or from config; avoid hard-coding rules inside hook/node bodies.
-- Decide on eager vs. lazy behavior: this example uses `lazy=True` to collect all errors; you can switch to `lazy=False` for fail-fast behavior.
+- Decide on eager vs. lazy behaviour: this example uses `lazy=True` to collect all errors; you can switch to `lazy=False` for fail-fast behaviour.
 
 ## Advanced use cases
 

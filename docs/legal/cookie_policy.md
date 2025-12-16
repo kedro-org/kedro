@@ -65,5 +65,3 @@ For more information about managing cookies, visit:
 ## Changes to this policy
 
 We may update this Cookie Policy from time to time to reflect changes in our practices or legal requirements. Any updates will be posted on this page with an updated "Last updated" date.
-
-

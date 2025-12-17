@@ -2,7 +2,6 @@
 
 [Great Expectations](https://docs.greatexpectations.io/docs/home/) (GE) is an open-source data quality framework that helps you validate, document, and profile your data.
 It allows you to define expectations—assertions about the structure and content of your data—and verify that these hold true at runtime.
-It allows you to define expectations—assertions about the structure and content of your data—and verify that these hold true at runtime.
 
 ### The core concept: expectations
 

@@ -26,7 +26,7 @@ The Kedro TSC is responsible for the project's future development. The TSC is ma
 
 ### Maintainers
 
-Maintainers form the core of the TSC and hold the right to vote on both code modifications and membership additions. They are expected to make significant contributions to the strategy, direction, and governance of the project. Their primary responsibility is to ensure the long-term success of Kedro.
+Maintainers form the core of the TSC and hold the right to vote on both code modifications and TSC membership changes. They are expected to make significant contributions to the strategy, direction, and governance of the project. Their primary responsibility is to ensure the long-term success of Kedro.
 
 ### Committers
 
@@ -46,7 +46,7 @@ Advisors are individuals who are not actively contributing to the codebase or at
 - Attend regular team meetings to discuss the project plans and roadmap
 
 ### Voting rights
-Maintainers take part in three types of votes:
+Maintainers take part in four types of votes:
 
 - Membership additions – new maintainers must receive majority approval (≥50%) from existing maintainers (see more details below)
 - Membership removals – existing maintainers can be removed by a majority vote of the TSC
@@ -186,7 +186,7 @@ Former core team members with significant contributions include
 
 ## Voting process
 
-Voting can change TSC members and decide on the future of Kedro. The [maintainers](#voting-members) of the TSC lead the process. The voting period is two weeks and through a GitHub discussion or through a pull request.
+Voting can change TSC members and decide on the future of Kedro. The [maintainers](#maintainers) of the TSC lead the process. The voting period is two weeks and through a GitHub discussion or through a pull request.
 
 ### Other issues or proposals
 
@@ -205,7 +205,7 @@ Any member may choose to step out of their current role at any time by communica
 Any member may request to step down to a non voting category at any time if they believe they can contribute more effectively in that role. This change does not require a vote.
 
 ### Step-up procedure
-Members who wish to move up to a category that requires a higher commitment (advisor to maintainer or committer, or committer to maintainer) must receive formal approval through a TSC vote. The member must also have an active TSC [maintainer](#voting-members) advocate to support their nomination.
+Members who wish to move up to a category that requires a higher commitment (advisor to maintainer or committer, or committer to maintainer) must receive formal approval through a TSC vote. The member must also have an active TSC [maintainer](#maintainers) advocate to support their nomination.
 
 ### Automatic removal and transition option
 If a member is automatically removed from their current category (due to inactivity), they can request placement in the next lower level within two weeks of their removal. If no request is made within that time frame, the member will be removed from the TSC entirely.

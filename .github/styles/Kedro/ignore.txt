@@ -3,7 +3,9 @@ APIs
 Astro
 autodiscovery
 chonky
+autodiscovery
 Claypot
+Colab
 Colab
 Conda
 config
@@ -14,6 +16,7 @@ Databricks
 Dask
 dataframe
 dataframes
+dbt
 dbt
 dbx
 Dockerfile
@@ -71,14 +74,17 @@ Streamlit
 subfolder
 subfolders
 subprocess
+subprocess
 Templated
 templated
 tracebacks
 transcode
 transcoded
+transcoded
 transcoding
 Unsplash
 uv
+Unsplash
 VSCode
 Xebia
 yaml

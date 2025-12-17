@@ -2,7 +2,9 @@
 
 [Great Expectations](https://docs.greatexpectations.io/docs/home/) (GE) is an open-source data quality framework that helps you validate, document, and profile your data.
 It allows you to define expectations—assertions about the structure and content of your data—and verify that these hold true at runtime.
+It allows you to define expectations—assertions about the structure and content of your data—and verify that these hold true at runtime.
 
+### The core concept: expectations
 ### The core concept: expectations
 
 In Great Expectations, rules for data validation are called an **expectation**.
@@ -208,7 +210,7 @@ class DataValidationHooks:
 1. **Configuration**: The `EXPECTATIONS` dictionary maps dataset names to lists of expectations
 2. **Automatic triggering**: Before/after each node runs, the hooks check if any inputs/outputs need validation
 3. **Selective validation**: Validates datasets you've explicitly configured.
-4. **Fail-fast behavior**: If validation fails, the pipeline stops before running downstream nodes and provides a clear error message.
+4. **Fail-fast behaviour**: If validation fails, the pipeline stops before running downstream nodes and provides a clear error message.
 
 Register your custom hook in `src/spaceflights_great_expectations/settings.py`:
 

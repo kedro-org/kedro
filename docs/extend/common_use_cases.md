@@ -1,10 +1,11 @@
 # Common use cases
 
 Kedro provides several built-in mechanisms that let you extend its behaviour. This document explains how to choose which mechanism to use for common scenarios.
+Kedro provides several built-in mechanisms that let you extend its behaviour. This document explains how to choose which mechanism to use for common scenarios.
 
 ## Use Case 1: How to add extra behaviour to Kedro's execution timeline
 
-The execution timeline of a Kedro pipeline is a sequence of actions performed by various Kedro library components. Examples include the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/), [kedro.io.DataCatalog][], [kedro.pipeline.Pipeline][], [kedro.pipeline.node.Node][], and [kedro.framework.context.KedroContext][].
+The execution timeline of a Kedro pipeline is a sequence of actions performed by various Kedro library components. Examples include the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/), [kedro.io.DataCatalog][], [kedro.pipeline.pipeline.Pipeline][], [kedro.pipeline.node.Node][], and [kedro.framework.context.KedroContext][].
 
 At different points in the lifecycle of these components, you might want to add extra behaviour. For example, you could add extra computation for profiling purposes _before_ and _after_ a node runs. You might also insert behaviour around the I/O actions of a dataset, namely the `load` and `save` actions.
 

@@ -149,7 +149,7 @@ class ParallelRunner(AbstractRunner):
         if not self._is_async:
             self._logger.info(
                 "Using synchronous mode for loading and saving data. Use the --async flag "
-                "for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously"
+                "for potential performance gains. https://docs.kedro.org/en/stable/build/run_a_pipeline/#load-and-save-asynchronously"
             )
 
         super()._run(

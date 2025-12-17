@@ -208,7 +208,7 @@ class DataValidationHooks:
 1. **Configuration**: The `EXPECTATIONS` dictionary maps dataset names to lists of expectations
 2. **Automatic triggering**: Before/after each node runs, the hooks check if any inputs/outputs need validation
 3. **Selective validation**: Validates datasets you've explicitly configured.
-4. **Fail-fast behavior**: If validation fails, the pipeline stops before running downstream nodes and provides a clear error message.
+4. **Fail-fast behaviour**: If validation fails, the pipeline stops before running downstream nodes and provides a clear error message.
 
 Register your custom hook in `src/spaceflights_great_expectations/settings.py`:
 

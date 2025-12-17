@@ -1,7 +1,6 @@
 # Common use cases
 
 Kedro provides several built-in mechanisms that let you extend its behaviour. This document explains how to choose which mechanism to use for common scenarios.
-Kedro provides several built-in mechanisms that let you extend its behaviour. This document explains how to choose which mechanism to use for common scenarios.
 
 ## Use Case 1: How to add extra behaviour to Kedro's execution timeline
 

@@ -198,7 +198,6 @@ From this point, when you execute `kedro run` you will see the validation logs:
 ### What happens when validation fails?
 
 Let's make one schema rule fail on purpose so you can see Pandera in action.
-Let's make one schema rule fail on purpose so you can see Pandera in action.
 
 In `src/spaceflights_pandera/schemas/raw.py`, change the `total_fleet_count` column check:
 

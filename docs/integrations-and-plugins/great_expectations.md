@@ -5,7 +5,6 @@ It allows you to define expectations—assertions about the structure and conten
 It allows you to define expectations—assertions about the structure and content of your data—and verify that these hold true at runtime.
 
 ### The core concept: expectations
-### The core concept: expectations
 
 In Great Expectations, rules for data validation are called an **expectation**.
 An expectation is a falsifiable, verifiable statement about your data. For example:

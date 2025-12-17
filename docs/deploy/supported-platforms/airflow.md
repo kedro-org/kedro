@@ -31,7 +31,7 @@ To follow this tutorial, ensure you have the following:
 
 ### Create, prepare and package example Kedro project
 
-In this section, you will create a new Kedro project equipped with an example pipeline designed to solve a typical data science task: predicting spaceflights prices. You will customise the project for Airflow by registering datasets that were stored in memory and by simplifying logging with custom settings. After making these changes, package the project for installation in an Airflow Docker container and generate an Airflow DAG that mirrors the Kedro pipeline.
+In this section, you will create a new Kedro project equipped with an example pipeline designed to solve a typical data engineering and data science task: predicting spaceflights prices. You will customise the project for Airflow by registering datasets that were stored in memory and by simplifying logging with custom settings. After making these changes, package the project for installation in an Airflow Docker container and generate an Airflow DAG that mirrors the Kedro pipeline.
 
 1. To create a new Kedro project, select the `example=yes` option to include example code. To enable custom logging, add `tools=log`. Proceed with the default project name, and add any other tools as needed:
 

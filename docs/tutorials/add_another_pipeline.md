@@ -1,18 +1,18 @@
-# Create a data science pipeline
+# Create a data engineering and data science pipeline
 
 This section explains the following:
 
-* How to add a second Kedro pipeline for data science code that extends the default project pipeline
+* How to add a second Kedro pipeline for data engineering and data science code that extends the default project pipeline
 * How to 'slice' the project to run part of the entire pipeline
 * (Optional) How to make a [modular pipeline](../build/modular_pipelines.md)
 * (Optional) How to specify the way the pipeline nodes are run: sequentially or in parallel
 
 
-## Data science nodes
+## Data engineering and data science nodes
 
-The data science pipeline uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
+The data engineering and data science pipeline uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
-The data science pipeline is made up of the following:
+The data engineering and data science pipeline is made up of the following:
 
 * Two python files within `src/spaceflights/pipelines/data_science`
     * `nodes.py` (for the node functions that form the data processing)
@@ -21,7 +21,7 @@ The data science pipeline is made up of the following:
 * `__init__.py` files in the required folders to ensure that Python can import the pipeline
 
 
-First, take a look at the functions for the data science nodes in `src/spaceflights/pipelines/data_science/nodes.py`:
+First, take a look at the functions for the data engineering and data science nodes in `src/spaceflights/pipelines/data_science/nodes.py`:
 
 
 
@@ -124,9 +124,9 @@ regressor:
 By setting `versioned` to `true`, versioning is enabled for `regressor`. This means that the pickled output of the `regressor` is saved every time the pipeline runs, which stores the history of the models built using this pipeline. You can learn more in the [later section about dataset and ML model versioning](../catalog-data/data_catalog.md#dataset-versioning).
 
 
-## Data science pipeline
+## Data engineering and data science pipeline
 
-The data science pipeline is defined in `src/spaceflights/pipelines/data_science/pipeline.py`:
+The data engineering and data science pipeline is defined in `src/spaceflights/pipelines/data_science/pipeline.py`:
 
 
 ??? example "View code"
@@ -166,7 +166,7 @@ The data science pipeline is defined in `src/spaceflights/pipelines/data_science
 
 When you created your project with `kedro new`, one of the files generated was `src/<package_name>/pipeline_registry.py` which constructs a `__default__` pipeline that includes every pipeline in the project.
 
-This means that you do not need to manually instruct Kedro to run each pipeline, but can execute the default pipeline, which consists of the data processing and then data science pipeline in turn.
+This means that you do not need to manually instruct Kedro to run each pipeline, but can execute the default pipeline, which consists of the data processing and then data engineering and data science pipeline in turn.
 
 ```bash
 kedro run
@@ -246,7 +246,7 @@ In a typical Kedro project, a single (“main”) pipeline increases in complexi
 This is optional code so is **not** provided in the spaceflights starter. If you want to see this in action, you need to copy and paste the code as instructed.
 
 <!-- vale off -->
-First, add namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline` to test the model using different combinations of features.
+First, add namespaces to the modelling component of the data engineering and data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline` to test the model using different combinations of features.
 
 
 1. Update your catalog to add namespaces to the outputs of each instance. Replace the `regressor` key with the following two new dataset keys in the `conf/base/catalog.yml` file:
@@ -265,7 +265,7 @@ First, add namespaces to the modelling component of the data science pipeline to
     versioned: true
     ```
 
-2. Update the parameters file for the data science pipeline in `conf/base/parameters_data_science.yml` to replace the existing contents for `model_options` with the following for the two instances of the template pipeline:
+2. Update the parameters file for the data engineering and data science pipeline in `conf/base/parameters_data_science.yml` to replace the existing contents for `model_options` with the following for the two instances of the template pipeline:
 
 
 ??? example "View code"
@@ -479,7 +479,7 @@ In this setup, `model_input_table` does not get parameterised because it needs t
 
 The graph renders as follows when you run `kedro viz run` (hover over the datasets to see their full path):
 
-![Modular data science pipeline](../meta/images/modular_ds.gif)
+![Modular data engineering and data science pipeline](../meta/images/modular_ds.gif)
 
 ## Optional: Kedro runners
 

@@ -30,8 +30,8 @@ Please note that we do expect users to have Git installed, as it is a prerequisi
 In short, you'll learn answers to the following:
 
 - Introduction to Kedro
-- What is Kedro? How does it help you create maintainable, reusable data science code?
-- How does Kedro fit into the data science ecosystem?
+- What is Kedro? How does it help you create maintainable, reusable data engineering and data science code?
+- How does Kedro fit into the data engineering and data science ecosystem?
 - What do you need to do to create a Kedro project?
 - How can you refactor a Jupyter notebook to a Kedro project?
 - How do you package Python code as a library?
@@ -49,10 +49,10 @@ You do not need to register for the course. Skip to the sections that help with 
 
 ### Part 0: introduction
 
-1. <a href="https://www.youtube.com/watch?v=DD7JuYKp6BA" target="_blank" rel="noopener">Data science in production: the good, the bad and the ugly</a>
+1. <a href="https://www.youtube.com/watch?v=DD7JuYKp6BA" target="_blank" rel="noopener">Data engineering and data science in production: the good, the bad and the ugly</a>
 1. <a href="https://www.youtube.com/watch?v=PdNkECqvI58" target="_blank" rel="noopener">What is Kedro?</a>
 1. <a href="https://www.youtube.com/watch?v=_HH8SCmCP_Q" target="_blank" rel="noopener">Kedro and data orchestrators</a>
-1. <a href="https://www.youtube.com/watch?v=nAyUqORd9R8" target="_blank" rel="noopener">How does Kedro fit into the data science ecosystem?</a>
+1. <a href="https://www.youtube.com/watch?v=nAyUqORd9R8" target="_blank" rel="noopener">How does Kedro fit into the data engineering and data science ecosystem?</a>
 
 ### Part 1: get started with Kedro
 
@@ -71,7 +71,7 @@ You do not need to register for the course. Skip to the sections that help with 
 
 1. <a href="https://www.youtube.com/watch?v=ctTFAeL4JgU" target="_blank" rel="noopener">Merge different dataframes in Kedro</a>
 1. <a href="https://www.youtube.com/watch?v=Y4JvVO2DOJA" target="_blank" rel="noopener">Predict prices using machine learning</a>
-1. <a href="https://www.youtube.com/watch?v=zvAnE05-agw" target="_blank" rel="noopener">Refactor your data science code into functions</a>
+1. <a href="https://www.youtube.com/watch?v=zvAnE05-agw" target="_blank" rel="noopener">Refactor your data engineering and data science code into functions</a>
 1. <a href="https://www.youtube.com/watch?v=eIA12RQMlFY" target="_blank" rel="noopener">How to work with parameters in Kedro</a>
 1. <a href="https://www.youtube.com/watch?v=iRwy-IStfPo" target="_blank" rel="noopener">Create a Kedro pipeline with parameters</a>
 1. <a href="https://www.youtube.com/watch?v=cYHHVAoWZ2E" target="_blank" rel="noopener">Reuse your Kedro pipeline using namespaces</a>

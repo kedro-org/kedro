@@ -355,4 +355,4 @@ Photo by <a href="https://unsplash.com/@maltehelmhold">Malte Helmhold</a> on <a 
 * How to persist the output from a pipeline by registering those datasets to the Data Catalog
 * How to visualise the project
 
-The next step is to create the data science pipeline for spaceflight price prediction.
+The next step is to create the data engineering and data science pipeline for spaceflight price prediction.

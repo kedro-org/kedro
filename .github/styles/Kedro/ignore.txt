@@ -1,3 +1,4 @@
+agentic
 Aneira
 APIs
 Astro
@@ -39,6 +40,7 @@ Kedro's
 Kedroid
 Kedroids
 Kubeflow
+Langfuse
 matplotlib
 Matplotlib
 Marimo
@@ -53,6 +55,7 @@ namespacing
 networkx
 numpy
 np
+Opik
 Pandera
 Palantir
 parallelisation

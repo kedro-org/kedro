@@ -37,9 +37,9 @@ custom_prompt:
       information they should provide.
 ```
 
-At the very least, the prompt `title` must be defined for the prompt to be valid. After Kedro receives the user's input for each prompt, it passes the value to Cookiecutter, so every key in `prompts.yml` must have a corresponding key in [`cookiecutter.json`](https://cookiecutter.readthedocs.io/en/stable/tutorials/tutorial1.html#cookiecutter-json).
+At minimum, the prompt `title` must be defined for the prompt to be valid. After Kedro receives the user's input for each prompt, it passes the value to Cookiecutter, so every key in `prompts.yml` must have a corresponding key in [`cookiecutter.json`](https://cookiecutter.readthedocs.io/en/stable/tutorials/tutorial1.html#cookiecutter-json).
 
-If the input to the prompts needs to be validated, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. Consider using [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/stable/advanced/hooks.html) for more complex validation.
+If the input to the prompts needs validation, for example to ensure it contains alphanumeric characters, you can add regex validation rules by using the `regex_validator` key. Consider using [Cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/stable/advanced/hooks.html) for more complex validation.
 
 If you want `cookiecutter` to provide sensible default values, in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See [the default starter `cookiecutter.json`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/cookiecutter.json) as example.
 
@@ -61,7 +61,7 @@ The top-level folder labelled [`{{ cookiecutter.repo_name }}`](https://github.co
 
 ### `python_package`
 
-Within the parent folder, inside the `src` subfolder, is another configurable variable [{{ cookiecutter.python_package }}](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D) which contains the source code for the example pipelines. The variable is also used within [`__main__.py`](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/__main__.py).
+Within the parent folder, inside the `src` subdirectory, is another configurable variable [{{ cookiecutter.python_package }}](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D) which contains the source code for the example pipelines. The variable is also used within [`__main__.py`](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/__main__.py).
 
 Here is the layout of the project as a Cookiecutter template:
 
@@ -118,7 +118,7 @@ starters = [
 ]
 ```
 
-The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template.
+The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). When a repository contains a single template, the top-level directory is treated as the template.
 
 In your `pyproject.toml`, you need to register the specifications to `kedro.starters`:
 
